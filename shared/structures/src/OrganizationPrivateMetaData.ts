@@ -106,7 +106,7 @@ export class BuckarooSettings extends AutoEncoder {
 
 export class BalanceNotificationSettings extends AutoEncoder {
     @field({ decoder: BooleanDecoder })
-    @field({ decoder: BooleanDecoder, ...NextVersion, upgrade: () => (false) }) // Force reset to false
+    @field({ decoder: BooleanDecoder, version: 363, upgrade: () => (false) }) // Force reset to false
     enabled = false;
 
     @field({ decoder: StringDecoder, nullable: true })
@@ -124,7 +124,7 @@ export class BalanceNotificationSettings extends AutoEncoder {
     /**
      * Which contacts to use for balances from other organizations
      */
-    @field({ decoder: StamhoofdFilterDecoder, ...NextVersion, nullable: true })
+    @field({ decoder: StamhoofdFilterDecoder, version: 363, nullable: true })
     organizationContactsFilter = {};
 
     getOrganizationContactsFilterResponsibilityIds(): string[] {
