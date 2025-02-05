@@ -563,13 +563,7 @@ export class OrdersExcelExport {
     static export(orders: PrivateOrder[]) {
         const wb = XLSX.utils.book_new();
 
-        let shouldIncludeSettements = false;
-
-        for (const order of orders) {
-            if (((order.payment?.method === PaymentMethod.Bancontact || order.payment?.method === PaymentMethod.iDEAL || order.payment?.method === PaymentMethod.CreditCard) && (order.payment?.provider === PaymentProvider.Mollie || order.payment?.provider === PaymentProvider.Stripe)) || order.payment?.settlement) {
-                shouldIncludeSettements = true;
-            }
-        }
+        const shouldIncludeSettements = false;
 
         /* Add the worksheet to the workbook */
         XLSX.utils.book_append_sheet(wb, this.createOrderLines(orders), 'Artikel per lijn');
