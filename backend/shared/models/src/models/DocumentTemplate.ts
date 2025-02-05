@@ -276,25 +276,20 @@ export class DocumentTemplate extends Model {
         // Check group and cycle
         for (const groupDefinition of this.privateSettings.groups) {
             if (groupDefinition.groupId === registration.groupId && groupDefinition.cycle === registration.cycle) {
-                const document = await this.generateForRegistration(registration)
-                if (document) {
+                const documents = await this.generateForRegistration(registration)
+                for (const document of documents) {
                     await document.save()
                 }
             }
         }
     }
 
-    private async generateForRegistration(registration: RegistrationWithMember) {
+    private async generateForRegistration(registration: RegistrationWithMember): Promise<Document[]> {
         const {fieldAnswers, missingData} = await this.buildAnswers(registration)
-        const existingDocuments = await Document.where({ templateId: this.id, registrationId: registration.id }, {limit: 1})
+        const existingDocuments = await Document.where({ templateId: this.id, registrationId: registration.id })
 
         if (!this.checkIncluded(registration, fieldAnswers)) {
-            if (existingDocuments.length > 0) {
-                for (const document of existingDocuments) {
-                    await document.delete()
-                }
-            }
-            return null
+            return []
         }
 
         const fieldId = 'registration.startDate';
@@ -315,10 +310,12 @@ export class DocumentTemplate extends Model {
         if (existingDocuments.length > 0) {
             for (const document of existingDocuments) {
                 await this.updateDocumentFor(document, registration)
-                document.data.description = description
+                if (existingDocuments.length === 1) {
+                    document.data.description = description;
+                }
                 await document.save()
-                return document;
             }
+            return existingDocuments;
         } else {
             const document = new Document()
             document.organizationId = this.organizationId
@@ -332,11 +329,11 @@ export class DocumentTemplate extends Model {
             document.memberId = registration.member.id
             document.registrationId = registration.id
             await document.save()
-            return document;
+            return [document];
         }
     }
 
-    async updateManualDocument(document: Document) {
+     updateManualDocument(document: Document) {
         // Update general answers
         // Add global answers (same for each document)
         for (const anwer of this.settings.fieldAnswers) {
@@ -453,8 +450,8 @@ export class DocumentTemplate extends Model {
                 const registrations = await Member.getRegistrationWithMembersForGroup(groupDefinition.groupId, groupDefinition.cycle)
 
                 for (const registration of registrations) {
-                    const document = await this.generateForRegistration(registration)
-                    if (document) {
+                    const documents = await this.generateForRegistration(registration)
+                    for (const document of documents) {
                         documentSet.set(document.id, document)
                     }
                 }
@@ -466,7 +463,7 @@ export class DocumentTemplate extends Model {
                 if (document.registrationId === null && document.memberId === null) {
                     // skipped: manual document
                     documentSet.set(document.id, document)
-                    await this.updateManualDocument(document)
+                    this.updateManualDocument(document)
                     await document.save()
                     continue;
                 }

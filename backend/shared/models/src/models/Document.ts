@@ -112,7 +112,7 @@ export class Document extends Model {
         }
 
         if (!this.registrationId) {
-            await template.updateManualDocument(this)
+            template.updateManualDocument(this)
             return
         }
 
