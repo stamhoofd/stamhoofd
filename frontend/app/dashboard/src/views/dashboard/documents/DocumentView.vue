@@ -10,9 +10,13 @@
         <main>
             <h1>
                 Document
-            </h1>           
+            </h1>
+            
+            <p v-if="!document.memberId && !document.registrationId" class="info-box">
+                Dit document werd los aangemaakt en is niet gekoppeld aan een specifiek lid of inschrijving. Het verschijnt niet in het ledenportaal en wordt ook niet automatisch aangepast als de gegevens van het bijhorende lid gewijzigd worden.
+            </p>
 
-            <p v-if="unlinkedAnswers.length" class="info-box">
+            <p v-else-if="unlinkedAnswers.length" class="info-box">
                 De velden {{ unlinkedAnswersText }} werden manueel aangepast en zijn niet meer automatisch gelinkt met de waarden in Stamhoofd.
                 <button class="button text" type="button" @click="resetDocument">
                     Reset

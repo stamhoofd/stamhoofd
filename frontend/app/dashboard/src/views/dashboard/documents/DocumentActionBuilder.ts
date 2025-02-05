@@ -60,6 +60,19 @@ export class DocumentActionBuilder {
             }),
 
             new TableAction({
+                name: "Nieuw",
+                icon: "add",
+                priority: 0,
+                groupIndex: 1,
+                needsSelection: false,
+                handler: async () => {
+                    await this.newDocument(Document.create({
+                        templateId: this.template.id,
+                    }))
+                }
+            }),
+
+            new TableAction({
                 name: "Verwijderen",
                 icon: "trash",
                 priority: 1,
@@ -90,6 +103,18 @@ export class DocumentActionBuilder {
             document,
             template: this.template,
             isNew: false
+        });
+        this.component.present(displayedComponent.setDisplayStyle("popup"));
+    }
+
+    async newDocument(document: Document) {
+        const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "EditDocumentView" */ "./EditDocumentView.vue"), {
+            document,
+            template: this.template,
+            isNew: true,
+            saveCallback: (document: Document) => {
+                this.addDocument?.(document)
+            }
         });
         this.component.present(displayedComponent.setDisplayStyle("popup"));
     }

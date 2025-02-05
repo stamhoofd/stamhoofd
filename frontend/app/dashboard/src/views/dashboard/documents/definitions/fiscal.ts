@@ -134,7 +134,7 @@ export const fiscal = DocumentTemplateDefinition.create({
     groupFieldCategories: [
         RecordCategory.create({
             name: "Periode",
-            description: "Vul de exacte begin en einddatum van deze activiteit in. Voor de aangifte in 2023 mag je alleen activiteiten uit 2022 opnemen.",
+            description: "Vul de exacte begin en einddatum van deze activiteit in. Voor de aangifte in 2025 mag je alleen activiteiten uit 2024 opnemen.",
             records: [
                 RecordSettings.create({
                     id: "registration.startDate",

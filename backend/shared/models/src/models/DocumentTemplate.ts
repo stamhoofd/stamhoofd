@@ -315,11 +315,7 @@ export class DocumentTemplate extends Model {
         if (existingDocuments.length > 0) {
             for (const document of existingDocuments) {
                 await this.updateDocumentFor(document, registration)
-                document.data.name = this.settings.name
                 document.data.description = description
-                if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
-                    document.status = this.status;
-                }
                 await document.save()
                 return document;
             }
@@ -337,6 +333,34 @@ export class DocumentTemplate extends Model {
             document.registrationId = registration.id
             await document.save()
             return document;
+        }
+    }
+
+    async updateManualDocument(document: Document) {
+        // Update general answers
+        // Add global answers (same for each document)
+        for (const anwer of this.settings.fieldAnswers) {
+            anwer.reviewedAt = null
+            // Remove existing answer
+            document.data.fieldAnswers = document.data.fieldAnswers.filter(a => a.settings.id !== anwer.settings.id)
+            document.data.fieldAnswers.push(anwer)
+        }
+
+        const complete = this.areAnswersComplete(document.data.fieldAnswers)
+
+        if (document.status !== DocumentStatus.Deleted) {
+            if (!complete) {
+                document.status = DocumentStatus.MissingData
+            } else {
+                if (document.status === DocumentStatus.MissingData) {
+                    document.status = this.status
+                }
+            }
+        }
+
+        document.data.name = this.settings.name
+        if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
+            document.status = this.status;
         }
     }
 
@@ -439,6 +463,13 @@ export class DocumentTemplate extends Model {
             // Delete documents that no longer match and don't have a number yet
             const documents = await Document.where({ templateId: this.id })
             for (const document of documents) {
+                if (document.registrationId === null && document.memberId === null) {
+                    // skipped: manual document
+                    documentSet.set(document.id, document)
+                    await this.updateManualDocument(document)
+                    await document.save()
+                    continue;
+                }
                 if (!documentSet.has(document.id)) {
                     if (document.number === null) {
                         await document.delete()
@@ -532,7 +563,7 @@ export class DocumentTemplate extends Model {
     }
 
     areAnswersComplete(answers: RecordAnswer[]) {
-        for (const field of this.privateSettings.templateDefinition.documentFieldCategories.flatMap(c => c.getAllRecords())) {
+        for (const field of [...this.privateSettings.templateDefinition.documentFieldCategories, ...this.privateSettings.templateDefinition.groupFieldCategories].flatMap(c => c.getAllRecords())) {
             const answer = answers.find(a => a.settings.id === field.id)
             if (!answer) {
                 return false;
@@ -579,6 +610,11 @@ export class DocumentTemplate extends Model {
                     document.status = this.status
                 }
             }
+        }
+
+        document.data.name = this.settings.name
+        if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
+            document.status = this.status;
         }
     }
 }

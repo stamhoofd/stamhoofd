@@ -4,8 +4,12 @@
             {{ title }}
         </h1>
 
-        <p class="warning-box">
+        <p class="warning-box" v-if="!isNew && document.registrationId">
             Als je hier gegevens wijzigt, zullen die gegevens van dit document niet meer automatisch gekoppeld zijn aan de gegevens van de bijhorende leden en inschrijvingen. Meestal is het beter om de gegevens rechtstreeks bij het lid of de inschrijving te wijzigen.
+        </p>
+
+        <p v-if="isNew && !document.memberId && !document.registrationId" class="info-box">
+            Dit document is niet gekoppeld aan een specifiek lid of inschrijving. Het verschijnt niet in het ledenportaal en wordt ook niet automatisch aangepast als de gegevens van het bijhorende lid gewijzigd worden.
         </p>
 
         <STErrorsDefault :error-box="errorBox" />
@@ -57,6 +61,9 @@ export default class EditDocumentView extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
         template!: DocumentTemplatePrivate
+
+    @Prop({ required: false, default: null })
+        saveCallback!: ((document: Document) => Promise<void>)|null
 
     patchDocument = Document.patch({})
     validator = new Validator()
@@ -167,6 +174,10 @@ export default class EditDocumentView extends Mixins(NavigationMixin) {
                 this.editingAnswers = this.document.data.fieldAnswers.map(a => a.clone())
                 this.patchDocument = Document.patch({})
                 this.document.set(updatedDocument)
+
+                if (this.saveCallback) {
+                    await this.saveCallback(this.document)
+                }
             }
             
             this.dismiss({ force: true })

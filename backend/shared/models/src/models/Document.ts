@@ -2,6 +2,7 @@
 import { column, Model } from "@simonbackx/simple-database";
 import { Document as DocumentStruct, DocumentData, DocumentStatus } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
+
 import { render } from "../helpers/Handlebars";
 import { RegistrationWithMember } from "./Member";
 import { Organization } from "./Organization";
@@ -97,10 +98,7 @@ export class Document extends Model {
     }
 
     async updateData(): Promise<void> {
-        if (!this.registrationId) {
-            console.log('No registration id, skipping update')
-            return
-        }
+       
         const DocumentTemplate = (await import("./DocumentTemplate")).DocumentTemplate
         const template = await DocumentTemplate.getByID(this.templateId)
         if (!template) {
@@ -113,10 +111,15 @@ export class Document extends Model {
             return
         }
 
+        if (!this.registrationId) {
+            await template.updateManualDocument(this)
+            return
+        }
+
         const Member = (await import("./Member")).Member
         const [registration] = await Member.getRegistrationWithMembersByIDs([this.registrationId])
         if (!registration) {
-            console.log('No registration, skipping update')
+            console.error('Registration not found for document ', this.id, this.registrationId)
             return
         }
 
