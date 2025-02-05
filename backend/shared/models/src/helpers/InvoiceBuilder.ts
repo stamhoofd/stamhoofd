@@ -402,31 +402,40 @@ export class InvoiceBuilder {
         this.document.font('Metropolis-SemiBold')
 
 
-        this.document.text("Totaal excl. BTW", x4 - 40*MM, y, { align: 'right', width: 40*MM })
+        this.document.text("Totaal excl. btw", x4 - 40*MM, y, { align: 'right', width: 40*MM })
         this.document.font('Metropolis-Medium')
         // eslint-disable-next-line no-irregular-whitespace
         this.document.text(Formatter.price(this.invoice.meta.priceWithoutVAT).replace(/ /g, " ").replace(/,00/g, ""), x4, y, { align: 'right', width: PAGE_WIDTH - x4 - PAGE_MARGIN })
 
         y = this.document.y + 5*MM
         this.document.font('Metropolis-SemiBold')
-        this.document.text("BTW ("+this.invoice.meta.VATPercentage+"%)", x4 - 40*MM, y, { align: 'right', width: 40*MM })
+        this.document.text("Btw ("+this.invoice.meta.VATPercentage+"%)", x4 - 40*MM, y, { align: 'right', width: 40*MM })
         this.document.font('Metropolis-Medium')
         // eslint-disable-next-line no-irregular-whitespace
         this.document.text(Formatter.price(this.invoice.meta.VAT).replace(/ /g, " ").replace(/,00/g, ""), x4, y, { align: 'right', width: PAGE_WIDTH - x4 - PAGE_MARGIN })
+        
+        if (this.invoice.meta.VATPercentage == 0) {
+            y = this.document.y + 1.5 * MM
+            this.document.fillColor(COLOR_GRAY);
+            this.document.fontSize(2.5 * MM);
+            this.document.text("Btw verlegd", x4 - 40*MM, y, { align: 'right', width: 40*MM })
+            this.document.fillColor(COLOR_DARK);
+        }
 
         // Keep semibold
         this.document.font('Metropolis-SemiBold')
         y = this.document.y + 5*MM
         this.document.fontSize(4 * MM);
-        this.document.text("Totaal incl. BTW", x4 - 40*MM, y, { align: 'right', width: 40*MM })
+        this.document.text("Totaal incl. btw", x4 - 40*MM, y, { align: 'right', width: 40*MM })
         this.document.fontSize(3.5 * MM);
         // eslint-disable-next-line no-irregular-whitespace
         this.document.text(Formatter.price(this.invoice.meta.priceWithVAT).replace(/ /g, " ").replace(/,00/g, ""), x4, y, { align: 'right', width: PAGE_WIDTH - x4 - PAGE_MARGIN })
 
-        y = this.document.y - 12
+        y = this.document.y
+        y -= 12
         this.document.fillColor(COLOR_GRAY_DARK)
         this.document.translate(PAGE_MARGIN, y).path("M3.67327 2.52862C1.50134 4.01571 1.21296 6.95436 2.11388 8.30055C4.78725 6.67111 6.69703 5.33679 8.70409 3.72095C8.46387 4.06251 8.14127 4.46052 7.74941 4.90029C7.12008 5.60656 6.34856 6.38067 5.54204 7.14116C3.92626 8.66473 2.20363 10.1022 1.26444 10.7931C0.967076 11.0118 0.903352 11.4303 1.12211 11.7276C1.34087 12.025 1.75928 12.0887 2.05665 11.87C2.70394 11.3938 3.67804 10.6022 4.73273 9.68002C9.48876 10.8971 12.1197 6.08032 11.5772 0.148376C9.9992 0.814142 8.7907 0.987292 7.69217 1.14468C6.34654 1.33748 5.16591 1.50664 3.67327 2.52862Z").fill('even-odd')
-        
+
         let text = "Hou deze factuur bij voorkeur digitaal bij"
         if (!this.invoice.number) {
             text = "Druk dit document niet af. Dit is nog geen officiële factuur"
@@ -438,6 +447,7 @@ export class InvoiceBuilder {
         this.document.translate(-PAGE_MARGIN, -y)
         const hh = this.document.heightOfString(text, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 })
         this.document.text(text, PAGE_MARGIN + 8*MM, y + 12/2 - hh/2, { align: 'left' })
+
 
         if (this.invoice.meta.priceWithVAT < 0) {
             // Don't mention something atm
@@ -498,10 +508,6 @@ export class InvoiceBuilder {
         this.document.fillColor(COLOR_GRAY)
         this.document.font('Metropolis-Medium')
         this.document.fontSize(3 * MM);
-        let suffix = ''
-        if (this.invoice.meta.VATPercentage == 0) {
-            suffix = ' - BTW verlegd'
-        }
         this.document.text(this.invoice.id+"", PAGE_MARGIN, PAGE_HEIGHT - PAGE_MARGIN, { align: 'left', baseline: "bottom", lineBreak: false, width: (PAGE_WIDTH - PAGE_MARGIN*2)/2, height: 10*MM })
         this.document.text("Pagina "+this.page, PAGE_WIDTH - PAGE_MARGIN - 31*MM, PAGE_HEIGHT - PAGE_MARGIN, { align: 'right', baseline: "bottom", width: 30*MM, lineBreak: false, height: 10*MM })
     }

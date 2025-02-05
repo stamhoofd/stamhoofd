@@ -105,6 +105,10 @@ export class STInvoice extends Model {
         return invoice
     }
 
+    updateVATPercentage() {
+        this.meta.VATPercentage = calculateVATPercentage(this.meta.companyAddress, this.meta.companyVATNumber)
+    }
+
     async getStructure() {
         let payment: Payment | undefined
         if (this.paymentId) {
