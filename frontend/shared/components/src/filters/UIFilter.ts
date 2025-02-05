@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { isEmptyFilter, PropertyFilter, StamhoofdFilter, StamhoofdNotFilter, unwrapFilter, WrapperFilter } from '@stamhoofd/structures';
+import { isEmptyFilter, PropertyFilter, StamhoofdFilter, StamhoofdNotFilter, unwrapFilter, wrapFilter, WrapperFilter } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 export type UIFilterWrapper = ((value: StamhoofdFilter) => StamhoofdFilter);
