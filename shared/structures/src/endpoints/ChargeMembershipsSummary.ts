@@ -34,5 +34,5 @@ export class ChargeMembershipsSummary extends AutoEncoder {
     membershipsPerType = new Map<string, ChargeMembershipsTypeSummary>();
 
     @field({ decoder: ChargeMembershipsTypeSummary, version: 355 })
-    trials: ChargeMembershipsTypeSummary;
+    trials: ChargeMembershipsTypeSummary = ChargeMembershipsTypeSummary.create({});
 }
