@@ -10,7 +10,7 @@ const defaultGenerator = getDefaultGenerator({
 });
 
 export const MemberPlatformMembershipLogger = new ModelLogger(MemberPlatformMembership, {
-    skipKeys: ['balanceItemId'],
+    skipKeys: ['balanceItemId', 'priceWithoutDiscount', 'maximumFreeAmount', 'generated'],
     async optionsGenerator(event) {
         const result = await defaultGenerator(event);
 
