@@ -12,7 +12,7 @@
             <p>{{ $t("31e91d3b-16e5-4608-9390-75e61d4d090d") }}</p>
 
             <ul class="style-list">
-                <li>{{ ('Alle groepen worden overgezet op dit nieuwe werkjaar. Hoofdbeheerders kunnen het vorige werkjaar nog bekijken.') }}</li>
+                <li>{{ $t('Alle groepen worden overgezet op dit nieuwe werkjaar. Hoofdbeheerders kunnen het vorige werkjaar nog bekijken.') }}</li>
                 <li>{{ $t('b78d9c9e-9099-4fb6-93e1-6bf58e39165f') }}</li>
                 <li>{{ $t('c95eb07d-15e3-45da-b2c2-7754c134ae65') }}</li>
                 <li>{{ $t('865bfcae-44c2-49a5-a887-c70725d53d8b') }}</li>
