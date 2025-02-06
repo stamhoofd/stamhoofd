@@ -186,8 +186,7 @@ export class PlatformMembershipService {
                                 if (!silent) {
                                     console.log('Removing membership because no longer registered member and not yet invoiced for: ' + me.id + ' - membership ' + membership.id);
                                 }
-                                membership.deletedAt = new Date();
-                                await membership.save();
+                                await membership.doDelete();
                             }
                         }
 
@@ -240,9 +239,9 @@ export class PlatformMembershipService {
                     }
 
                     // Check if already have the same membership
+                    let didFind = false;
                     for (const m of activeMemberships) {
-                        let didFind = false;
-                        if (m.membershipTypeId === cheapestMembership.membership.id) {
+                        if (m.membershipTypeId === cheapestMembership.membership.id && m.organizationId === cheapestMembership.registration.organizationId) {
                             // Update the price of this active membership (could have changed)
                             try {
                                 await m.calculatePrice(me, cheapestMembership.registration);
@@ -257,10 +256,10 @@ export class PlatformMembershipService {
                             didFind = true;
                             break;
                         }
+                    }
 
-                        if (didFind) {
-                            continue;
-                        }
+                    if (didFind) {
+                        continue;
                     }
 
                     const periodConfig = cheapestMembership.membership.periods.get(period.id);
@@ -303,8 +302,7 @@ export class PlatformMembershipService {
                             if (!silent) {
                                 console.log('Removing membership because cheaper membership found for: ' + me.id + ' - membership ' + toDelete.id);
                             }
-                            toDelete.deletedAt = new Date();
-                            await toDelete.save();
+                            await toDelete.doDelete();
                         }
                     }
                 }
