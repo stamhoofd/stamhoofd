@@ -102,7 +102,7 @@ function runReplacements(json) {
                 return value;
             }
             for (const r of Object.keys(replacements)) {
-                value = value.replaceAll(r, replacements[r]);
+                value = value.replaceAll(new RegExp(`${r}+(?![^{]*})`, 'g'), replacements[r]);
             }
 
             return value;
