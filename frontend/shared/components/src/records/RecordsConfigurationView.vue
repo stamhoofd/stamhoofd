@@ -18,7 +18,7 @@
             {{ $t('44bb1bad-d516-4694-939b-748bf534352b') }}
         </p>
         <p v-if="app === 'admin'" class="style-description-block">
-            {{ $t(`Dit kan op meerdere niveau's worden uitgebreid: per standaard leeftijdsgroep van de koepel, op lokaal niveau van een lokale groep en per leeftijdsgroep, wachtlijst of activiteit van een lokale groep (of activiteit op nationaal niveau).`) }}
+            {{ $t(`b422c6f2-be24-4edd-aa99-a2d72d59c496`) }}
         </p>
 
         <p v-if="app === 'dashboard'">
@@ -50,7 +50,7 @@
         </p>
 
         <p class="info-box">
-            {{ $t(`Gebruik vragenlijsten niet om tijdelijke gegevens te verzamelen. Voeg daarvoor keuzemenu's toe aan je inschrijvingsgroepen of activiteiten.`) }}
+            {{ $t(`b4cd468d-e3fd-47d2-b59c-cf19b1d3aee0`) }}
         </p>
 
         <EditRecordCategoriesBox :categories="patched.recordCategories" :settings="settings" @patch:categories="addCategoriesPatch" />

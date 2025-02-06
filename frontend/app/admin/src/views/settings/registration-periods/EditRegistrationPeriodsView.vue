@@ -9,7 +9,7 @@
         <template v-if="sortedPeriods.length && patchedPlatform.period.id !== sortedPeriods[0].id">
             <hr>
             <h2>Overschakelen naar {{ sortedPeriods[0].nameShort }}</h2>
-            <p>{{ $t("Je kan het huidig werkjaar hier wijzigen. Zorg dat je voor dit werkjaar alle aansluitingen hebt ingesteld. Ga daarvoor naar 'aansluitingen en verzekeringen' en voeg het werkjaar toe en stel de nieuwe prijzen en periodes correct in.") }}</p>
+            <p>{{ $t("31e91d3b-16e5-4608-9390-75e61d4d090d") }}</p>
 
             <ul class="style-list">
                 <li>{{ ('Alle groepen worden overgezet op dit nieuwe werkjaar. Hoofdbeheerders kunnen het vorige werkjaar nog bekijken.') }}</li>

@@ -428,7 +428,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid period',
-                            human: Context.i18n.$t(`Je kan geen aansluitingen meer toevoegen in dit werkjaar`),
+                            human: Context.i18n.$t(`62103514-05f5-4dc0-a5cc-c9321f21c63d`),
                             field: 'periodId',
                         });
                     }
@@ -437,7 +437,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid period',
-                            human: Context.i18n.$t(`Je kan geen aansluitingen meer toevoegen in {period} (vergrendeld)`, { period: period?.getBaseStructure().name }),
+                            human: Context.i18n.$t(`745f5355-3398-406d-842e-5c9f7a700e91`, { period: period?.getBaseStructure().name }),
                             field: 'periodId',
                         });
                     }
@@ -563,7 +563,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid period',
-                            human: Context.i18n.$t(`Je kan geen aansluitingen meer verwijderen in dit werkjaar`),
+                            human: Context.i18n.$t(`1f1d657d-bc73-4cae-9025-b3ec67a705e7`),
                             field: 'periodId',
                         });
                     }
@@ -572,7 +572,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid period',
-                            human: Context.i18n.$t(`Je kan geen aansluitingen meer verwijderen in {period} (vergrendeld)`, { period: period?.getBaseStructure().name }),
+                            human: Context.i18n.$t(`2e615670-813a-414f-b06c-f76136891bf8`, { period: period?.getBaseStructure().name }),
                             field: 'periodId',
                         });
                     }
