@@ -1,56 +1,56 @@
 <template>
     <SaveView :loading="saving" title="Persoonsgegevens van leden" :disabled="!hasChanges" @save="save">
         <h1>
-            Persoonsgegevens van leden
+            {{ $t('69a7751b-c316-42cd-a766-98e7e11fe3d6') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <hr>
         <h2 v-if="app === 'admin'">
-            Minimale gegevens voor alle leden in het systeem
+            {{ $t('0581e6ae-5695-4132-89d3-7f1c542d44f4') }}
         </h2>
         <h2 v-else>
-            Ingebouwde gegevens (alle leden behalve wachtlijst)
+            {{ $t('34b986e3-111d-493c-ba71-7dbcf403a9ba') }}
         </h2>
 
         <p v-if="app === 'admin'">
-            Deze minimale gegevens zijn essentieel voor een goede werking van het systeem en worden gevraagd voor elk lid - ook leden op de wachtlijst en leden die inschrijven bij niet-standaard leeftijdsgroepen.
+            {{ $t('44bb1bad-d516-4694-939b-748bf534352b') }}
         </p>
         <p v-if="app === 'admin'" class="style-description-block">
-            Dit kan op meerdere niveau's worden uitgebreid: per standaard leeftijdsgroep van de koepel, op lokaal niveau van een lokale groep en per leeftijdsgroep, wachtlijst of activiteit van een lokale groep (of activiteit op nationaal niveau).
+            {{ $t(`Dit kan op meerdere niveau's worden uitgebreid: per standaard leeftijdsgroep van de koepel, op lokaal niveau van een lokale groep en per leeftijdsgroep, wachtlijst of activiteit van een lokale groep (of activiteit op nationaal niveau).`) }}
         </p>
 
         <p v-if="app === 'dashboard'">
-            Bepaal welke gegevens je voor alle leden wilt verzamelen (behalve leden die enkel inschrijven op een wachtlijst - dat kan via de instellingen van die wachtlijst aangepast worden). Je kan dit ook per leeftijdsgroep instellen, voor maximale flexibiliteit (via de instellingen van elke leeftijdsgroep).
+            {{ $t('b291402c-fd6a-4a9f-bfa6-78bca95ff48f') }}
         </p>
 
         <p v-if="!getFilterConfiguration('emailAddress') && !getFilterConfiguration('parents')" class="error-box">
-            Je moet minstens het e-mailadres van een lid of de gegevens van ouders verzamelen. Je kan niet beide uitschakelen.
+            {{ $t('0ad0ab12-37bf-425e-871c-b91161ee45f8') }}
         </p>
 
         <InheritedRecordsConfigurationBox :inherited-records-configuration="props.inheritedRecordsConfiguration" :records-configuration="patched" @patch:records-configuration="addPatch" />
 
         <hr>
         <h2 v-if="app === 'admin'">
-            Ingebouwde persoonsgegevens uitbreiden
+            {{ $t('4e842082-57fa-49ed-a806-6861cc913d12') }}
         </h2>
         <h2 v-else>
-            Extra persoonsgegevens
+            {{ $t('09eb3057-c765-4909-b821-e75877b44135') }}
         </h2>
 
         <p v-if="app === 'dashboard'">
-            Breid het aantal persoonsgegevens zelf nog uit. Vervolgens kan je per inschrijvingsgroep (of gewoon voor alle leden) de persoonsgegevens inschakelen.
+            {{ $t('a72d08ad-b23c-4079-b375-1dd569da140a') }}
         </p>
         <p v-if="app === 'admin'">
-            Voeg zelf nog persoonsgegevens toe die voor alle lokale groepen beschikbaar zijn. Je kan deze vervolgens verplichten voor alle leden die inschrijven bij gelijk welke standaard-leeftijdsgroep, of deze verplichten per standaard-leeftijdsgroep (via de instellingen van elke standaard-leeftijdsgroep). Indien niet ingeschakeld kunnen lokale groepen kunnen deze ook nog inschakelen volgens hun wensen.
+            {{ $t('07d18e1b-2935-4945-9595-50e16a929b19') }}
         </p>
         <p class="style-description-block">
             Lees <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
         </p>
 
         <p class="info-box">
-            Gebruik vragenlijsten niet om tijdelijke gegevens te verzamelen. Voeg daarvoor keuzemenu's toe aan je inschrijvingsgroepen of activiteiten.
+            {{ $t(`Gebruik vragenlijsten niet om tijdelijke gegevens te verzamelen. Voeg daarvoor keuzemenu's toe aan je inschrijvingsgroepen of activiteiten.`) }}
         </p>
 
         <EditRecordCategoriesBox :categories="patched.recordCategories" :settings="settings" @patch:categories="addCategoriesPatch" />
@@ -61,6 +61,7 @@
 import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, memberWithRegistrationsBlobUIFilterBuilders, useAppContext, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { RecordEditorSettings, RecordEditorType } from './RecordEditorSettings';
@@ -84,6 +85,7 @@ const errors = useErrors();
 const saving = ref(false);
 const pop = usePop();
 const { patch, patched, addPatch, hasChanges } = usePatch(props.recordsConfiguration);
+const $t = useTranslate();
 
 const organization = useOrganization();
 const app = useAppContext();
@@ -104,8 +106,8 @@ const settings = computed(() => {
         exampleValue: new PlatformMember({
             member: MemberWithRegistrationsBlob.create({
                 details: MemberDetails.create({
-                    firstName: 'Voorbeeld',
-                    lastName: 'Lid',
+                    firstName: $t('a9c8e948-2bf2-4915-90a0-1513397d747c'),
+                    lastName: $t('e9a2ed45-f158-4e88-9a3c-75ee502f0e7a'),
                     dataPermissions: BooleanStatus.create({ value: true }),
                     birthDay: new Date('2020-01-01'),
                 }),
@@ -157,7 +159,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('9bd792a4-fb4a-4275-8308-e316285be890'));
 };
 
 defineExpose({

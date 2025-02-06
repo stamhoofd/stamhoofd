@@ -3,7 +3,7 @@
         <h1>
             {{ title }}
         </h1>
-        <p>Je kan een leeftijdsgroep meerdere namen geven. Het is niet nodig om dus zelf een opsomming te voorzien, dat gebeurt automatisch.</p>
+        <p>{{ $t('aa80abe5-2f1a-448d-b98c-0c38ece581d6') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -35,17 +35,17 @@
             />
         </STInputBox>
         <p class="style-description-small">
-            Enkel zichtbaar voor leiding of beheerders
+            {{ $t('4f96c821-c032-4772-8d6a-55cf0c8354d1') }}
         </p>
 
         <hr>
-        <h2>Automatische aansluiting</h2>
-        <p>Leden die in deze leeftijdsgroep inschrijven, kan je automatisch laten aansluiten bij de koepel. Op die manier is de verzekering meteen in orde en hoeft de leiding dit niet per lid individueel te doen.</p>
+        <h2>{{ $t('bb2ff811-dae0-4322-975f-793de13d471a') }}</h2>
+        <p>{{ $t('6af3e1d3-802c-4cf3-923e-33faacfd2e16') }}</p>
 
         <STInputBox :title="$t('61f434a9-49e6-4a92-b613-965dfd807dca')" error-fields="defaultMembershipTypeId" :error-box="errors.errorBox">
             <Dropdown v-model="defaultMembershipTypeId">
                 <option :value="null">
-                    Geen automatische aansluiting
+                    {{ $t('10df6cbf-4609-4677-8791-4ffa38e31699') }}
                 </option>
                 <option v-for="membershipType of membershipTypes" :key="membershipType.id" :value="membershipType.id">
                     {{ membershipType.name }}
@@ -54,8 +54,8 @@
         </STInputBox>
 
         <hr>
-        <h2>Leeftijd</h2>
-        <p>Dit is een standaardinstelling. Een lokale groep kan deze instellingen nog aanpassen. Deze instelling dient dus vooral als standaardinstelling en om te communiceren richting groepen.</p>
+        <h2>{{ $t('8c1f264f-3b0b-49b9-8a29-9ceb2dfd7754') }}</h2>
+        <p>{{ $t('4be45e47-0ee2-43cd-b719-8a60513f0965') }}</p>
 
         <div class="split-inputs">
             <STInputBox title="Minimum leeftijd* (optioneel)" error-fields="minAge" :error-box="errors.errorBox">
@@ -67,11 +67,11 @@
             </STInputBox>
         </div>
         <p class="st-list-description">
-            *Hoe oud het lid wordt in het kalenderjaar van de start van een werkjaar (dus leeftijd op 31/12/{{ startYear }}). Ter referentie: leden uit het eerste leerjaar zijn 6 jaar op 31 december. Leden uit het eerste secundair zijn 12 jaar op 31 december.
+            {{ $t('ea927f14-835b-43f6-bf6e-3e689b5a0824', {startYear: startYear.toString()}) }}
         </p>
 
         <hr>
-        <h2>Vereisten</h2>
+        <h2>{{ $t('c6c8e406-3d1f-41c4-b3df-d0b1e8661040') }}</h2>
 
         <div class="split-inputs">
             <STInputBox title="Minimum aantal leden" error-fields="minimumRequiredMembers" :error-box="errors.errorBox">
@@ -89,25 +89,25 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        Beperk tot bepaalde lokale groepen (tags)
+                        {{ $t('18a41eda-92fd-46a6-acc1-fc35536b86b4') }}
                     </h3>
                 </STListItem>
             </STList>
             <template v-else>
                 <h2 class="style-with-button">
-                    <div>Groepen</div>
+                    <div>{{ $t('348c29be-b166-497b-be15-d9522a2dc2fb') }}</div>
                     <div>
                         <button type="button" class="button icon trash" @click="organizationTagIds = null" />
                     </div>
                 </h2>
-                <p>Kies voor welke lokale groepen deze standaard leeftijdsgroep beschikbaar is.</p>
+                <p>{{ $t('5d1da89a-aa00-4953-aa59-53c0342c5c1a') }}</p>
                 <TagIdsInput v-model="organizationTagIds" :validator="errors.validator" />
             </template>
         </div>
 
         <hr>
-        <h2>Gegevensverzameling</h2>
-        <p>Deze gegevens worden verzameld en gekoppeld aan leden die inschrijven bij deze standaard leeftijdsgroep. Let erop dat deze gegevens gedeeld zijn met andere inschrijvingen. Als dezelfde gegevens dus voor meerdere inschrijvingen verzameld worden, dan worden ze maar één keer gevraagd (anders kunnen leden de gegevens wel nog nakijken als het al even geleden werd ingevuld) en kan je niet per inschrijving andere gegevens invullen. Gebruik ze dus niet voor tijdelijke vragen.</p>
+        <h2>{{ $t('070cf05d-b582-4f6a-b153-48f5f3ecc9fe') }}</h2>
+        <p>{{ $t('f9c9433c-24fd-4645-b5df-966f9d076b1b') }}</p>
 
         <InheritedRecordsConfigurationBox :group-level="true" :inherited-records-configuration="inheritedRecordsConfiguration" :records-configuration="recordsConfiguration" @patch:records-configuration="patchRecordsConfiguration" />
     </SaveView>
@@ -155,7 +155,7 @@ const save = async () => {
         if (names.value.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Gelieve een naam in te vullen',
+                message: $t('ea9baa7a-c2c8-4207-a300-9de4b145f6ca'),
                 field: 'name',
             });
         }
@@ -163,7 +163,7 @@ const save = async () => {
         if (names.value[0].length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Gelieve een naam in te vullen',
+                message: $t('ea9baa7a-c2c8-4207-a300-9de4b145f6ca'),
                 field: 'name',
             });
         }
@@ -185,7 +185,11 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm('Ben je zeker dat je deze standaard leeftijdsgroep wilt verwijderen?', 'Verwijderen', 'Je kan dit niet ongedaan maken. Er gaat mogelijks informatie verloren over alle gekoppelde inschrijvingsgroepen.')) {
+    if (!await CenteredMessage.confirm(
+        $t('e5ca0b55-20c6-4523-89b6-1ecba10d95b7'),
+        $t('6e3da050-6679-4475-a858-77b5b02b6fa4'),
+        $t('8997d560-a0c6-422b-a988-6186e8ed64be'),
+    )) {
         return;
     }
 

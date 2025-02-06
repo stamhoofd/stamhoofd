@@ -10,7 +10,7 @@ export function useAppContext(): AppType | 'auto' {
 
 export const getAppName = (app: AppType, $t: ReturnType<typeof useTranslate>) => {
     switch (app) {
-        case 'dashboard': return 'Mijn groep';
+        case 'dashboard': return $t('d5d2e25f-588e-496e-925f-f7e375c3888a');
         case 'registration': return $t('f02ad9a5-f0b4-483e-961c-491ddf7d6f6a');
         case 'admin': return 'Administratieportaal';
         case 'webshop': return 'Webshop';

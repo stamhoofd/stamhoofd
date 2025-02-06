@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading-view="loading" :title="viewTitle" :loading="saving" :save-text="onSelect ? 'Sluiten' : 'Opslaan'" @save="save">
+    <SaveView :loading-view="loading" :title="viewTitle" :loading="saving" :save-text="onSelect ? $t('83db2c73-38a3-4d13-9984-2f19f95e1329') : $t('5d9d5777-5ecb-4223-8dc2-973ee3fee4bb')" @save="save">
         <h1>{{ viewTitle }}</h1>
         <SegmentedControl v-if="tabItems.length > 1" v-model="tab" :items="tabItems.map(i => i.id)" :labels="tabItems.map(i => i.label)" />
 
@@ -18,9 +18,9 @@
                                 <span class="icon email" />
                             </figure>
                             <aside>
-                                <span v-if="!emailTemplate.id && !emailTemplate.html" v-tooltip="'Er wordt geen e-mail verzonden'" class="icon disabled error small stroke" />
-                                <span v-else-if="!emailTemplate.id" v-tooltip="'Het standaard sjabloon wordt gebruikt'" class="icon lightning small stroke" />
-                                <span v-else v-tooltip="'De standaard e-mail werd aangepast'" class="icon lightning primary small stroke " />
+                                <span v-if="!emailTemplate.id && !emailTemplate.html" v-tooltip="$t('5069c440-c7db-4abc-9f1e-148d47d3650f')" class="icon disabled error small stroke" />
+                                <span v-else-if="!emailTemplate.id" v-tooltip="$t('d79ef7e9-5399-4aae-804b-cb34fac5583d')" class="icon lightning small stroke" />
+                                <span v-else v-tooltip="$t('926212f4-c606-46e7-a43e-2f1ca3bfbf33')" class="icon lightning primary small stroke " />
                             </aside>
                         </figure>
                     </template>
@@ -38,14 +38,14 @@
                     </p>
 
                     <p v-if="!organization && EmailTemplate.allowOrganizationLevel(emailTemplate.type) && !emailTemplate.groupId && !emailTemplate.organizationId" class="style-description-small">
-                        Een lokale groep kan deze template aanpassen. Deze template wordt gebruikt als er geen lokale template is.
+                        {{ $t('8ecaf93e-e872-4556-9067-f89b3f81332e') }}
                     </p>
 
                     <p v-if="emailTemplate.id" class="style-description-small">
-                        Laatst gewijzigd op {{ formatDateTime(emailTemplate.updatedAt) }}
+                        {{ $t('665781fd-c032-4083-900d-fd0356334752', {date: formatDateTime(emailTemplate.updatedAt)}) }}
                     </p>
                     <p v-else-if="!emailTemplate.id && emailTemplate.html" class="style-description-small">
-                        Standaard sjabloon wordt gebruikt
+                        {{ $t('6235923a-a1bc-433e-b2a3-639b37627f27') }}
                     </p>
 
                     <template #right>
@@ -57,7 +57,7 @@
         </div>
 
         <p v-if="groupedList.length === 0" class="info-box">
-            Geen emailtemplates gevonden
+            {{ $t('68b462bf-9ed9-4509-9b1b-0f1800e0e9ad') }}
         </p>
 
         <hr v-if="tab === 'userGenerated'">
@@ -65,19 +65,19 @@
         <p v-if="tab === 'userGenerated' && createOption">
             <button class="button text" type="button" @click="addCreateOption">
                 <span class="icon download" />
-                <span>Huidige e-mail opslaan</span>
+                <span>{{ $t('0f0113ca-2269-49c3-b5f2-423005f71afc') }}</span>
             </button>
         </p>
 
         <p v-if="tab === 'userGenerated'">
             <button v-if="types.includes(EmailTemplateType.SavedMembersEmail)" class="button text" type="button" @click="addTemplate(EmailTemplateType.SavedMembersEmail)">
                 <span class="icon add" />
-                <span>Nieuw sjabloon naar leden</span>
+                <span>{{ $t('6ecc6d7f-35dd-4459-b8d0-ce5b780b8012') }}</span>
             </button>
 
             <button v-if="cachedOutstandingBalancesEnabled && types.includes(EmailTemplateType.SavedReceivableBalancesEmail)" class="button text" type="button" @click="addTemplate(EmailTemplateType.SavedReceivableBalancesEmail)">
                 <span class="icon add" />
-                <span>Nieuw sjabloon naar openstaande bedragen</span>
+                <span>{{ $t('c88003a3-8582-4e59-a8d3-b3e77b4f01ed') }}</span>
             </button>
         </p>
     </SaveView>
@@ -111,7 +111,7 @@ const props = withDefaults(
             const platform = usePlatform();
 
             return [...Object.values(EmailTemplateType)].filter((type) => {
-                if (!platform.value.config.featureFlags.includes('balance-emails') 
+                if (!platform.value.config.featureFlags.includes('balance-emails')
                     && [EmailTemplateType.UserBalanceIncreaseNotification, EmailTemplateType.UserBalanceReminder].includes(type)) {
                     return false;
                 }
@@ -127,7 +127,7 @@ const props = withDefaults(
         allowEditGenerated: true,
     });
 
-const viewTitle = computed(() => props.onSelect ? 'Kies een e-mailsjabloon' : 'Wijzig e-mailsjablonen');
+const viewTitle = computed(() => props.onSelect ? $t('27eb0afb-0411-4036-894c-4c214fdf946c') : $t('922729ac-2079-48eb-aadf-fdee5bbfd21c'));
 const templates = ref([]) as Ref<EmailTemplate[]>;
 const errors = useErrors();
 const { patched, addPatch, addPut, addDelete, patch, hasChanges } = usePatchArray(templates);
@@ -147,7 +147,7 @@ const tabItems = props.onSelect
     ? [
             {
                 id: 'userGenerated',
-                label: 'Opgeslagen',
+                label: $t('d8d27ace-5ed7-47cf-bf94-955ed8824bd3'),
             },
         ]
     : (
@@ -155,17 +155,17 @@ const tabItems = props.onSelect
                 ? [
                         {
                             id: 'auto',
-                            label: 'Automatische',
+                            label: $t('1c12b46c-804b-4ec9-a524-5c74d5cd8a1b'),
                         },
                         {
                             id: 'userGenerated',
-                            label: 'Opgeslagen',
+                            label: $t('d8d27ace-5ed7-47cf-bf94-955ed8824bd3'),
                         },
                     ]
                 : [
                         {
                             id: 'auto',
-                            label: 'Automatische',
+                            label: $t('1c12b46c-804b-4ec9-a524-5c74d5cd8a1b'),
                         },
                     ]
         );
@@ -299,7 +299,7 @@ async function addCreateOption() {
 
 async function deleteEmail(emailTemplate: EmailTemplate) {
     if (emailTemplate.id) {
-        if (!await CenteredMessage.confirm('Weet je zeker dat je dit sjabloon wilt verwijderen?', 'Verwijderen')) {
+        if (!await CenteredMessage.confirm($t('9b7756f6-8097-430d-bcee-7248a4bb1c3c'), $t('6e3da050-6679-4475-a858-77b5b02b6fa4'))) {
             return;
         }
         addDelete(emailTemplate.id);
