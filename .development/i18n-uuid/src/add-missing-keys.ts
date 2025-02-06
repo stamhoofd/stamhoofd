@@ -62,9 +62,15 @@ function getMissingKeys(translations: Record<string, string>): {
 } {
     // todo: use cache or pass with argument?
     const filesToSearch = getFilesToSearch();
-
-    // Regex to match $t('value') or $t("value")
-    const regex = /\$t\(['"]([^'"]+)['"](,.+)?\)/g;
+    
+    const regexes = [
+        // Regex to match $t('value')
+         /\$t\([']([^']+)['](,.+)?\)/g,
+         // Regex to match $t("value")
+          /\$t\(["]([^"]+)["](,.+)?\)/g,
+          // Regex to match $t(`value`)
+           /\$t\([`]([^`]+)[`](,.+)?\)/g
+    ]
 
     const missingKeys = new Set<string>();
     const filesWithMissingKeys = new Set<string>();
@@ -76,12 +82,14 @@ function getMissingKeys(translations: Record<string, string>): {
         let hasMissingKey = false;
 
         // Extract all matches
-        while ((matches = regex.exec(fileContent)) !== null) {
-            const key = matches[1];
-
-            if (!translations[key]) {
-                missingKeys.add(key);
-                hasMissingKey = true;
+        for(const regex of regexes) {
+            while ((matches = regex.exec(fileContent)) !== null) {
+                const key = matches[1];
+    
+                if (!translations[key]) {
+                    missingKeys.add(key);
+                    hasMissingKey = true;
+                }
             }
         }
 
