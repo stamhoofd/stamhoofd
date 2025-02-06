@@ -6,13 +6,17 @@
             </p>
             <h1>Inschrijven voor {{ group.settings.name }}</h1>
 
+            <p v-if="hasNoMembers" class="info-box">
+                {{ $t('d5e39906-8c0b-4006-bab5-96827f8daa53') }}
+            </p>
+
             <STList>
                 <RegisterItemCheckboxRow
-                    v-for="member in family.members" 
-                    :key="member.id" 
-                    :member="member" 
-                    :group="group" 
-                    :group-organization="groupOrganization" 
+                    v-for="member in family.members"
+                    :key="member.id"
+                    :member="member"
+                    :group="group"
+                    :group-organization="groupOrganization"
                 />
             </STList>
         </SaveView>
@@ -27,22 +31,24 @@ import { computed } from 'vue';
 import RegisterItemCheckboxRow from './components/group/RegisterItemCheckboxRow.vue';
 
 const props = defineProps<{
-    family: PlatformFamily,
-    group: Group
+    family: PlatformFamily;
+    group: Group;
 }>();
 
-const checkout = computed(() => props.family.checkout)
+const hasNoMembers = computed(() => props.family.members.length === 0);
+
+const checkout = computed(() => props.family.checkout);
 const dismiss = useDismiss();
 
 function setOrganization(groupOrganization: Organization) {
-    checkout.value.setDefaultOrganization(groupOrganization)
+    checkout.value.setDefaultOrganization(groupOrganization);
 }
 
 async function goNext() {
-    await dismiss()
+    await dismiss();
 
     if (!checkout.value.cart.isEmpty) {
-        await GlobalEventBus.sendEvent('selectTabByName', 'mandje')
+        await GlobalEventBus.sendEvent('selectTabByName', 'mandje');
     }
 }
 
