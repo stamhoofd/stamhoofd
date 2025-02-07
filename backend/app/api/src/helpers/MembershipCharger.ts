@@ -154,7 +154,8 @@ export const MembershipCharger = {
             const q = MemberPlatformMembership.select()
                 .where('id', SQLWhereSign.Greater, lastId)
                 .where('balanceItemId', null)
-                .where('deletedAt', null);
+                .where('deletedAt', null)
+                .where('locked', false);
 
             if (organizationId) {
                 q.where('organizationId', organizationId);

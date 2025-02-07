@@ -532,6 +532,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 membership.startDate = new Date(Math.max(Date.now(), put.startDate.getTime()));
                 membership.endDate = put.endDate;
                 membership.expireDate = put.expireDate;
+                membership.locked = put.locked;
 
                 await membership.calculatePrice(member);
                 await membership.save();
@@ -578,7 +579,15 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     }
                 }
 
-                if (!membership.canDelete() && !Context.auth.hasPlatformFullAccess()) {
+                if (!membership.canDelete(Context.auth.hasPlatformFullAccess())) {
+                    if (membership.locked) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'Invalid invoice',
+                            human: 'Je kan geen aansluiting verwijderen die vergrendeld is',
+                        });
+                    }
+
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid invoice',

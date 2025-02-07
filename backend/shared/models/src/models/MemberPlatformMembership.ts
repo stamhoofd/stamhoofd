@@ -108,8 +108,12 @@ export class MemberPlatformMembership extends QueryableModel {
     @column({ type: 'boolean' })
     locked = false;
 
-    canDelete() {
-        if (this.balanceItemId) {
+    canDelete(hasPlatformFullAccess = false) {
+        if (this.locked) {
+            return false;
+        }
+
+        if (this.balanceItemId && !hasPlatformFullAccess) {
             return false;
         }
         return true;
@@ -150,6 +154,11 @@ export class MemberPlatformMembership extends QueryableModel {
     }
 
     async calculatePrice(member: Member, registration?: Registration) {
+        if (this.locked) {
+            // price of locked membership cannot be changed
+            return;
+        }
+
         const platform = await Platform.getSharedPrivateStruct();
         const membershipType = platform.config.membershipTypes.find(m => m.id === this.membershipTypeId);
 
