@@ -51,7 +51,7 @@ export class MemberPlatformMembership extends AutoEncoder {
     updatedAt = new Date();
 
     // prevent deleting or changing price if true
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 364 })
     locked = false;
 
     isActive(date: Date = new Date()) {
