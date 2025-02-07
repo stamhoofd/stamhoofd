@@ -732,8 +732,12 @@ export class Order extends Model {
         const organization = this.webshop.organization
         const { from, replyTo } = organization.getEmail(this.webshop.privateMeta.defaultEmailId, true)
 
+        // For a tickets webshop, where the order was marked as paid / non-paid, we should still send the tickets email 
+        // - because the normal email is not editable
+        const hasTickets = this.webshop.meta.hasTickets
+
         await this.sendEmailTemplate({
-            type: EmailTemplateType.OrderReceivedTransfer,
+            type: hasTickets ? EmailTemplateType.TicketsReceivedTransfer : EmailTemplateType.OrderReceivedTransfer,
             from,
             replyTo
         })
