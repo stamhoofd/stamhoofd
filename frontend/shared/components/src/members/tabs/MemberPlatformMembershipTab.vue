@@ -63,16 +63,20 @@
                                 {{ $t('8e515034-5d58-4042-84e6-7e32943dbdec') }}
                             </p>
 
-                            <template v-if="hasFull && !period.locked && (!organization || membership.organizationId === organization.id)" #right>
-                                <span v-if="membership.price === membership.priceWithoutDiscount || membership.priceWithoutDiscount === 0" class="style-price-base">{{ formatPrice(membership.price) }}</span>
-                                <template v-else>
-                                    <span class="style-discount-old-price">{{ formatPrice(membership.priceWithoutDiscount) }}</span>
-                                    <span class="style-discount-price">{{ formatPrice(membership.price) }}</span>
+                            <template v-if="hasFull && (!organization || membership.organizationId === organization.id)" #right>
+                                <template v-if="!period.locked">
+                                    <span v-if="membership.price === membership.priceWithoutDiscount || membership.priceWithoutDiscount === 0" class="style-price-base">{{ formatPrice(membership.price) }}</span>
+                                    <template v-else>
+                                        <span class="style-discount-old-price">{{ formatPrice(membership.priceWithoutDiscount) }}</span>
+                                        <span class="style-discount-price">{{ formatPrice(membership.price) }}</span>
+                                    </template>
+
+                                    <LoadingButton v-if="!membership.locked && (!membership.generated || !isRegisteredAt(period.id, membership.organizationId)) && (!membership.balanceItemId || auth.hasPlatformFullAccess())" :loading="deletingMemberships.has(membership.id)">
+                                        <button class="button icon trash" type="button" @click="deleteMembership(membership)" />
+                                    </LoadingButton>
                                 </template>
 
-                                <LoadingButton v-if="(!membership.generated || !isRegisteredAt(period.id, membership.organizationId)) && (!membership.balanceItemId || auth.hasPlatformFullAccess())" :loading="deletingMemberships.has(membership.id)">
-                                    <button class="button icon trash" type="button" @click="deleteMembership(membership)" />
-                                </LoadingButton>
+                                <span v-if="membership.locked && (auth.hasPlatformFullAccess())" v-tooltip="$t('Deze aansluiting is vergrendeld. Hierdoor kan de prijs niet aangepast worden en kan deze niet verwijderd worden.')" class="icon lock" />
                             </template>
                         </STListItem>
                     </STList>
