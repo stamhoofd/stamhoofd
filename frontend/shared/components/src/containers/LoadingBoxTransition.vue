@@ -46,7 +46,7 @@ function isValidVnodes(vnodes: any) {
 @use '@stamhoofd/scss/base/text-styles';
 
 .loading-box-container {
-    position: relative;
+    //position: relative;
 }
 
 .loading-box-transition {

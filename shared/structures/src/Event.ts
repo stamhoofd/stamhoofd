@@ -1,10 +1,11 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
+import { Address } from './addresses/Address.js';
 import { Image } from './files/Image.js';
 import { Group } from './Group.js';
+import { Platform } from './Platform.js';
 import { RichText } from './RichText.js';
-import { Address } from './addresses/Address.js';
-import { Formatter } from '@stamhoofd/utility';
 
 export class EventLocation extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -128,5 +129,9 @@ export class Event extends AutoEncoder {
             }
         }
         return queue;
+    }
+
+    get eventNotificationTypes() {
+        return Platform.shared.config.eventNotificationTypes.filter(t => t.eventTypeIds.includes(this.typeId));
     }
 }

@@ -51,6 +51,7 @@ export * from './MemberPlatformMembership';
 export * from './Email';
 export * from './EmailRecipient';
 export * from './Event';
+export * from './EventNotification';
 export * from './CachedBalance';
 export * from './AuditLog';
 export * from './MemberUser';

@@ -55,7 +55,7 @@
                     </template>
                 </EventInfoTable>
 
-                <template v-if="canWriteEvent">
+                <div v-if="canWriteEvent" class="container">
                     <hr>
                     <h2>
                         Instellingen
@@ -106,9 +106,10 @@
                                 <span class="icon arrow-right-small gray" />
                             </template>
                         </STListItem>
-                    </STList>
-                </template>
 
+                        <EventNotificationRow v-for="type of event.eventNotificationTypes" :key="type.id" class="container" :type="type" :event="event" />
+                    </STList>
+                </div>
                 <hr>
                 <h2>Link kopiëren</h2>
                 <p>{{ $t("40b31f32-5a02-488d-beb3-d987ea5c9315") }}</p>
@@ -167,6 +168,7 @@ import { Toast } from '../overlays/Toast';
 import ImageComponent from '../views/ImageComponent.vue';
 import EditEventView from './EditEventView.vue';
 import EventInfoTable from './components/EventInfoTable.vue';
+import EventNotificationRow from './components/EventNotificationRow.vue';
 
 const props = defineProps<{
     event: Event;

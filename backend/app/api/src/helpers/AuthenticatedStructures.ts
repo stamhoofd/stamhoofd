@@ -1,9 +1,10 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { AuditLog, BalanceItem, CachedBalance, Document, Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, DetailedReceivableBalance, Document as DocumentStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { AuditLog, BalanceItem, CachedBalance, Document, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
+import { EventNotification as EventNotificationStruct, AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, DetailedReceivableBalance, Document as DocumentStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from './Context';
+import { SQL } from '@stamhoofd/sql';
 
 /**
  * Builds authenticated structures for the current user
@@ -471,6 +472,66 @@ export class AuthenticatedStructures {
             const struct = EventStruct.create({
                 ...event,
                 group,
+            });
+
+            result.push(struct);
+        }
+
+        return result;
+    }
+
+    static async eventNotifications(eventNotifications: EventNotification[]): Promise<EventNotificationStruct[]> {
+        if (eventNotifications.length === 0) {
+            return [];
+        }
+
+        // Load events
+        const rows = await SQL.select()
+            .from('_event_notifications_events')
+            .where('_event_notifications_events.eventNotificationsId', eventNotifications.map(n => n.id))
+            .fetch();
+
+        const eventIdsMapping = new Map<string, string[]>();
+        const allEvents = new Set<string>();
+
+        for (const row of rows) {
+            const notificationId = row['_event_notifications_events']['eventNotificationsId'];
+            const eventId = row['_event_notifications_events']['eventsId'];
+
+            if (typeof eventId !== 'string') {
+                console.error('Invalid event id', eventId);
+                continue;
+            }
+
+            if (typeof notificationId !== 'string') {
+                console.error('Invalid notification id', notificationId);
+                continue;
+            }
+
+            const array = eventIdsMapping.get(notificationId);
+            if (array) {
+                array.push(eventId);
+            }
+            else {
+                eventIdsMapping.set(notificationId, [eventId]);
+            }
+
+            allEvents.add(eventId);
+        }
+
+        const events = allEvents.size > 0 ? await Event.getByIDs(...Array.from(allEvents)) : [];
+        const eventStructs = await this.events(events);
+
+        const result: EventNotificationStruct[] = [];
+
+        for (const notification of eventNotifications) {
+            const thisEventStructs = eventIdsMapping.get(notification.id)?.map(id => eventStructs.find(e => e.id === id)).filter(e => !!e) ?? [];
+
+            const struct = EventNotificationStruct.create({
+                ...notification,
+                createdBy: null,
+                submittedBy: null,
+                events: eventStructs,
             });
 
             result.push(struct);

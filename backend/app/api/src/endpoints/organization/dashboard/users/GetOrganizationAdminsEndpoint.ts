@@ -33,7 +33,7 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
         }
 
         // Get all admins
-        const admins = await User.getAdmins([organization.id]);
+        const admins = await User.getAdmins(organization.id);
 
         return new Response(OrganizationAdmins.create({
             users: await AuthenticatedStructures.usersWithMembers(admins),

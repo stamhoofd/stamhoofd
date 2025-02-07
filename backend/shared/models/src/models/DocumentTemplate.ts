@@ -432,7 +432,9 @@ export class DocumentTemplate extends QueryableModel {
             for (const document of existingDocuments) {
                 await this.updateDocumentWithAnswers(document, fieldAnswers);
                 document.data.name = this.settings.name;
-                document.data.description = description;
+                if (existingDocuments.length === 1) {
+                    document.data.description = description;
+                }
                 if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
                     document.status = this.status;
                 }

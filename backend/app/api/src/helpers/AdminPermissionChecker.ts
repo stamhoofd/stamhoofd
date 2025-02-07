@@ -1,5 +1,5 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, CachedBalance, Document, EmailTemplate, Event, Group, Member, MemberPlatformMembership, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
 import { AccessRight, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -204,6 +204,19 @@ export class AdminPermissionChecker {
             platform: this.platform,
             getOrganization: async (id: string) => await this.getOrganization(id),
         });
+    }
+
+    async canAccessEvent(event: Event): Promise<boolean> {
+        try {
+            await this.checkEventAccess(event);
+            return true;
+        }
+        catch (e) {
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                return false;
+            }
+            throw e;
+        }
     }
 
     async canAccessArchivedGroups(organizationId: string) {
@@ -783,6 +796,19 @@ export class AdminPermissionChecker {
 
     async canManageAdmins(organizationId: string) {
         return !this.user.isApiUser && (await this.hasFullAccess(organizationId));
+    }
+
+    async canReviewEventNotification(eventNotification: { organizationId: string }) {
+        const organizationPermissions = await this.getOrganizationPermissions(eventNotification.organizationId);
+
+        if (!organizationPermissions) {
+            return false;
+        }
+
+        if (organizationPermissions.hasAccessRight(AccessRight.OrganizationEventNotificationReviewer)) {
+            return true;
+        }
+        return false;
     }
 
     async hasFullAccess(organizationId: string, level = PermissionLevel.Full): Promise<boolean> {

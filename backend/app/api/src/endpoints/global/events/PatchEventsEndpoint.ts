@@ -11,7 +11,7 @@ import { Context } from '../../../helpers/Context';
 import { AuditLogService } from '../../../services/AuditLogService';
 import { PatchOrganizationRegistrationPeriodsEndpoint } from '../../organization/dashboard/registration-periods/PatchOrganizationRegistrationPeriodsEndpoint';
 
-type Params = { id: string };
+type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<EventStruct>;
 type ResponseBody = EventStruct[];
@@ -24,7 +24,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/events', { id: String });
+        const params = Endpoint.parseParameters(request.url, '/events', {});
 
         if (params) {
             return [true, params as Params];

@@ -15,6 +15,7 @@ export * from './src/Company.js';
 export * from './src/DefaultAgeGroup.js';
 export * from './src/Document.js';
 export * from './src/Event.js';
+export * from './src/EventNotification.js';
 export * from './src/EventNotificationType.js';
 export * from './src/GenericBalance.js';
 export * from './src/Group.js';
@@ -23,6 +24,7 @@ export * from './src/GroupGenderType.js';
 export * from './src/GroupPrivateSettings.js';
 export * from './src/GroupSettings.js';
 export * from './src/GroupType.js';
+export * from './src/LoginMethod.js';
 export * from './src/MemberResponsibility.js';
 export * from './src/members/MemberPlatformMembership.js';
 export * from './src/members/MemberResponsibilityRecord.js';
@@ -66,7 +68,6 @@ export * from './src/StripeAccount.js';
 export * from './src/Token.js';
 export * from './src/UmbrellaOrganization.js';
 export * from './src/User.js';
-export * from './src/LoginMethod.js';
 
 export * from './src/LoadedPermissions.js';
 
