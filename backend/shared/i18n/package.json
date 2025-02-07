@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/backend-i18n",
-    "version": "2.73.3",
+    "version": "2.74.0",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "license": "UNLICENCED",
