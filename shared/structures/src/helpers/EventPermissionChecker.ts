@@ -51,7 +51,7 @@ export class EventPermissionChecker {
             catch (error) {
                 throw new SimpleError({
                     code: 'not_found',
-                    message: 'Event not found',
+                    message: 'Organization not found',
                     human: 'De activiteit werd niet gevonden',
                 });
             }
