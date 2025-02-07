@@ -1,6 +1,6 @@
 import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
 import { EmailInterfaceRecipient } from '@stamhoofd/email';
-import { QueryableModel } from '@stamhoofd/sql';
+import { QueryableModel, SQL, SQLExpression, SQLJsonExtract } from '@stamhoofd/sql';
 import { LoginProviderType, NewUser, Permissions, Recipient, Replacement, UserMeta, UserPermissions, User as UserStruct } from '@stamhoofd/structures';
 import argon2 from 'argon2';
 import { v4 as uuidv4 } from 'uuid';
@@ -117,15 +117,28 @@ export class User extends QueryableModel {
         });
     }
 
-    static async getAdmins(organizationIds: string[], options?: { verified?: boolean }) {
-        if (organizationIds.length == 0) {
-            return [];
-        }
-
+    static async getAdmins(organizationId: string, options?: { verified?: boolean }) {
         if (STAMHOOFD.userMode === 'platform') {
             // Custom implementation
-            let global = (await User.where({ organizationId: null, permissions: { sign: '!=', value: null } }));
-            global = global.filter(u => organizationIds.find(organizationId => u.permissions?.organizationPermissions.has(organizationId)));
+            const q = User.select()
+                .where('organizationId', null)
+                .where('permissions', '!=', null)
+                .where(
+                    SQL.jsonValue(
+                        SQL.jsonValue(SQL.column('permissions'), '$.value.organizationPermissions'),
+                        '$."' + organizationId + '"',
+                        true,
+                    ),
+                    '!=',
+                    null,
+                )
+            ;
+
+            if (options?.verified !== undefined) {
+                q.where('verified', options.verified);
+            }
+
+            let global = await q.fetch();
 
             // Hide api accounts
             global = global.filter(a => !a.isApiUser);
@@ -133,19 +146,21 @@ export class User extends QueryableModel {
             return global;
         }
 
-        const query: any = {
-            permissions: { sign: '!=', value: null },
-            organizationId: { sign: 'IN', value: organizationIds },
-        };
+        const q = User.select()
+            .where('organizationId', organizationId)
+            .where('permissions', '!=', null)
+        ;
 
         if (options?.verified !== undefined) {
-            query.verified = options.verified;
+            q.where('verified', options.verified);
         }
 
-        return (
+        let global = await q.fetch();
 
-            await User.where(query)
-        ).filter(a => !a.isApiUser);
+        // Hide api accounts
+        global = global.filter(a => !a.isApiUser);
+
+        return global;
     }
 
     static async getApiUsers(organizationIds: string[]) {

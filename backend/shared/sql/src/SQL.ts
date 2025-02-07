@@ -18,8 +18,8 @@ class StaticSQL {
         return new SQLColumnExpression(...args);
     }
 
-    jsonValue(column: SQLExpression, path: string): SQLJsonExtract {
-        return new SQLJsonExtract(column, new SQLSafeValue(path));
+    jsonValue(column: SQLExpression, path: string, asScalar = false): SQLJsonExtract {
+        return new SQLJsonExtract(column, asScalar ? new SQLScalar(path) : new SQLSafeValue(path));
     }
 
     lpad(column: SQLExpression, length: number, value: string): SQLLpad {
