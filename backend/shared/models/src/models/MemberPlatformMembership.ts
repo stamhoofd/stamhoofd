@@ -104,6 +104,10 @@ export class MemberPlatformMembership extends QueryableModel {
     })
     updatedAt: Date;
 
+    // prevent deleting or changing price if true
+    @column({ type: 'boolean' })
+    locked = false;
+
     canDelete() {
         if (this.balanceItemId) {
             return false;
