@@ -15,14 +15,19 @@ export class PlatformMembershipService {
         }
 
         // Listen for group changes
-        Model.modelEventBus.addListener(this, (event) => {
-            if (!(event.model instanceof Group)) {
+        Model.modelEventBus.addListener(this, async (event) => {
+            if (event.model instanceof Group) {
+                // Check if group has been deleted
+                if (event.type === 'deleted' || (event.type === 'updated' && (event.changedFields['deletedAt'] !== undefined || event.changedFields['defaultAgeGroupId'] !== undefined))) {
+                    PlatformMembershipService.updateMembershipsForGroupId(event.model.id);
+                }
                 return;
             }
 
-            // Check if group has been deleted
-            if (event.type === 'deleted' || (event.type === 'updated' && (event.changedFields['deletedAt'] !== undefined || event.changedFields['defaultAgeGroupId'] !== undefined))) {
-                PlatformMembershipService.updateMembershipsForGroupId(event.model.id);
+            if (event.model instanceof RegistrationPeriod) {
+                if (event.type === 'updated' && event.changedFields['locked'] !== undefined && event.model.locked === true) {
+                    PlatformMembershipService.setMembershipsLockedForRegistrationPeriodId(event.model.id);
+                }
             }
         });
     }
@@ -77,6 +82,25 @@ export class PlatformMembershipService {
                     }
                 }
             });
+        });
+    }
+
+    static setMembershipsLockedForRegistrationPeriodId(periodId: string) {
+        if (STAMHOOFD.userMode === 'organization') {
+            return;
+        }
+
+        QueueHandler.schedule('bulk-lock-memberships', async () => {
+            console.log('Bulk locking memberships for period id ', periodId);
+
+            await MemberPlatformMembership.update()
+                .set('locked', true)
+                .where('periodId', periodId)
+                .update();
+
+            console.log(`Locked memberships for period id ${periodId}`);
+        }).catch((e) => {
+            console.error('Failed to lock memberships for period id ', periodId, e);
         });
     }
 
@@ -233,6 +257,7 @@ export class PlatformMembershipService {
                         }
                         return diff;
                     })[0];
+
                     if (!cheapestMembership) {
                         console.error('No membership found');
                         continue;
@@ -272,6 +297,7 @@ export class PlatformMembershipService {
                     if (!silent) {
                         console.log('Creating automatic membership for: ' + me.id + ' - membership type ' + cheapestMembership.membership.id);
                     }
+
                     const membership = new MemberPlatformMembership();
                     membership.memberId = me.id;
                     membership.membershipTypeId = cheapestMembership.membership.id;
