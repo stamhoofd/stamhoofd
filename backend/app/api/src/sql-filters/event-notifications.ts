@@ -5,6 +5,7 @@ import { eventFilterCompilers } from './events';
 export const eventNotificationsFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
     id: createSQLColumnFilterCompiler('id'),
+    typeId: createSQLColumnFilterCompiler('typeId'),
     organizationId: createSQLColumnFilterCompiler('organizationId'),
     startDate: createSQLColumnFilterCompiler('startDate'),
     endDate: createSQLColumnFilterCompiler('endDate'),
@@ -21,10 +22,10 @@ export const eventNotificationsFilterCompilers: SQLFilterDefinitions = {
     events: createSQLRelationFilterCompiler(
         SQL.select()
             .from(
-                SQL.table('_event_notifications_events'),
+                SQL.table('events'),
             ).join(
                 SQL.join(
-                    SQL.table('events'),
+                    SQL.table('_event_notifications_events'),
                 ).where(
                     SQL.column('_event_notifications_events', 'eventsId'),
                     SQL.column('events', 'id'),

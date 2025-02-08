@@ -212,6 +212,7 @@ export class VueGlobalHelper {
             methods: {
                 formatPrice: Formatter.price.bind(Formatter),
                 formatDate: Formatter.date.bind(Formatter),
+                formatDateRange: Formatter.dateRange.bind(Formatter),
                 formatStartDate: Formatter.startDate.bind(Formatter),
                 formatEndDate: Formatter.endDate.bind(Formatter),
                 formatDateTime: Formatter.dateTime.bind(Formatter),

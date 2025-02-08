@@ -25,6 +25,10 @@ export class EventNotification extends QueryableModel {
     @column({ type: 'string' })
     status = EventNotificationStatus.Draft;
 
+    /**
+     * Feedback on a review, e.g. when it is declined (explains which changes need to be made).
+     * It is only visible when the status is not 'accepted' or 'pending'.
+     */
     @column({ type: 'string', nullable: true })
     feedbackText: string | null = null;
 
@@ -34,8 +38,8 @@ export class EventNotification extends QueryableModel {
     @column({ type: 'json', decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder) })
     recordAnswers: Map<string, RecordAnswer> = new Map();
 
-    @column({ type: 'string' })
-    createdBy: string;
+    @column({ type: 'string', nullable: true })
+    createdBy: string | null = null;
 
     @column({ type: 'string', nullable: true })
     submittedBy: string | null = null;

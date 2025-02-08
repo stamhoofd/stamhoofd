@@ -3,7 +3,7 @@ import { CountFilteredRequest, LimitedFilteredRequest, SortList, StamhoofdFilter
 export interface ObjectFetcher<O> {
     extendSort?(list: SortList): SortList;
     requiredFilter?: StamhoofdFilter | null | undefined;
-    fetch(data: LimitedFilteredRequest): Promise<{ results: O[]; next?: LimitedFilteredRequest }>;
+    fetch(data: LimitedFilteredRequest, options?: { shouldRetry?: boolean }): Promise<{ results: O[]; next?: LimitedFilteredRequest }>;
 
     fetchCount(data: CountFilteredRequest): Promise<number>;
 

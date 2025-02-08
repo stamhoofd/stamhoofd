@@ -42,6 +42,10 @@ export class ViewStepsManager {
         }
     }
 
+    start(navigate: NavigationActions) {
+        return this.saveHandler(null, navigate);
+    }
+
     getNextStep(step: ViewStep | null): ViewStep | null {
         let found = step === null;
         for (const s of this.steps) {

@@ -154,7 +154,9 @@ const editorSettings = computed(() => {
         filterBuilder: (_categories: RecordCategory[]) => {
             return getEventNotificationUIFilterBuilders(platform.value)[0];
         },
-        exampleValue: EventNotification.create({}),
+        exampleValue: EventNotification.create({
+            typeId: patched.value.id,
+        }),
         patchExampleValue(value: EventNotification, patch: PatchAnswers) {
             const cloned = value.clone();
 

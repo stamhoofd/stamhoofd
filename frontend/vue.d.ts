@@ -56,6 +56,7 @@ declare module 'vue' {
         // Formatters
         formatPrice: typeof Formatter.price;
         formatDate: typeof Formatter.date;
+        formatDateRange: typeof Formatter.dateRange;
         formatStartDate: typeof Formatter.startDate;
         formatEndDate: typeof Formatter.endDate;
         formatDateTime: typeof Formatter.dateTime;
