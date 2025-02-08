@@ -76,7 +76,7 @@
                                     </LoadingButton>
                                 </template>
 
-                                <span v-if="membership.locked && (auth.hasPlatformFullAccess())" v-tooltip="$t('Deze aansluiting is vergrendeld. Hierdoor kan de prijs niet aangepast worden en kan deze niet verwijderd worden.')" class="icon lock" />
+                                <span v-if="membership.locked && (auth.hasPlatformFullAccess())" v-tooltip="$t('b1c11fd1-81dc-46f2-8cfb-0ba02d260f19')" class="icon lock" />
                             </template>
                         </STListItem>
                     </STList>
