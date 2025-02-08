@@ -154,6 +154,13 @@ export class PatchPlatformEndpoint extends Endpoint<
                     message: 'Invalid period',
                 });
             }
+            if (period.locked) {
+                throw new SimpleError({
+                    code: 'cannot_set_locked_period',
+                    message: 'Platform period cannot be set to a locked period',
+                    human: 'Er kan niet overgeschakeld worden naar een vergrendeld werkjaar',
+                });
+            }
             platform.periodId = period.id;
             shouldUpdateSetupSteps = true;
             shouldMoveToPeriod = period;

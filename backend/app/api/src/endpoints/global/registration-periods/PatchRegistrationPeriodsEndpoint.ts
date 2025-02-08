@@ -1,9 +1,9 @@
 import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder, patchObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { AuditLogSource, AuditLogType, RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
+import { AuditLogSource, RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Platform, RegistrationPeriod } from '@stamhoofd/models';
+import { Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { Context } from '../../../helpers/Context';
 import { PeriodHelper } from '../../../helpers/PeriodHelper';
 import { AuditLogService } from '../../../services/AuditLogService';
@@ -34,6 +34,24 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
         return [false];
     }
 
+    static async isCurrentRegistrationPeriod(organizationId: string | null, periodId: string) {
+        if (organizationId === null) {
+            const platform = await Platform.getSharedStruct();
+            return platform.period.id === periodId;
+        }
+
+        const organization = await Organization.getByID(organizationId);
+        if (!organization) {
+            throw new SimpleError({
+                code: 'not_found',
+                statusCode: 404,
+                message: 'Organization not found',
+            });
+        }
+
+        return organization.periodId === periodId;
+    }
+
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setUserOrganizationScope();
         await Context.authenticate();
@@ -60,6 +78,20 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
             period.locked = put.locked;
             period.settings = put.settings;
             period.organizationId = organization?.id ?? null;
+
+            if (put.locked === true) {
+                // current period cannot be locked
+                const isCurrentRegistrationPeriod = await PatchRegistrationPeriodsEndpoint.isCurrentRegistrationPeriod(period.organizationId, period.id);
+
+                if (isCurrentRegistrationPeriod) {
+                    throw new SimpleError({
+                        code: 'cannot_lock_current_period',
+                        message: 'Current registration period cannot be locked',
+                        human: 'Het huidige werkjaar kan niet vergrendeld worden',
+                    });
+                }
+            }
+
             await period.setPreviousPeriodId();
 
             await period.save();
@@ -76,6 +108,20 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
                     message: 'Registration period not found',
                 });
             }
+
+            if (patch.locked === true) {
+                // current period cannot be locked
+                const isCurrentRegistrationPeriod = await PatchRegistrationPeriodsEndpoint.isCurrentRegistrationPeriod(model.organizationId, model.id);
+
+                if (isCurrentRegistrationPeriod) {
+                    throw new SimpleError({
+                        code: 'cannot_lock_current_period',
+                        message: 'Current registration period cannot be locked',
+                        human: 'Het huidige werkjaar kan niet vergrendeld worden',
+                    });
+                }
+            }
+
             if (patch.startDate !== undefined) {
                 model.startDate = patch.startDate;
             }
