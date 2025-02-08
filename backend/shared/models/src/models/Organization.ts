@@ -806,7 +806,7 @@ export class Organization extends QueryableModel {
     async getAdmins() {
         // Circular reference fix
         const User = (await import('./User')).User;
-        return await User.getAdmins([this.id], { verified: true });
+        return await User.getAdmins(this.id, { verified: true });
     }
 
     /**
