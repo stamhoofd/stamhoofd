@@ -8,7 +8,8 @@
     "#lokale-groepen": "lokale groepen",
     "#Lokale-groepen": "Lokale groepen",
     "#lokale-groep": "lokale groep",
-    "#Lokale-groep": "Lokale groep"
+    "#Lokale-groep": "Lokale groep",
+    "#platform": "het platform"
   },
   "90d26048-d9a4-429b-a39f-d549ab059915": "Acties",
   "ac3b2a14-e029-404c-9fe1-2aab4279a3ac": "Beheer hier alle personen die toegang hebben tot Stamhoofd, en wijzig hun toegangsrechten.",
@@ -158,7 +159,7 @@
   "96c10e6b-3974-40d4-8844-70b0b2fa110e": "Bevestig dat iedereen de juiste functies heeft gekregen.",
   "1d0d59b8-d7bf-4f04-846f-5025d7de7b4e": "Bevestig dat alle functies zijn toegekend",
   "1ee738ae-a91d-474e-a495-996bf431126a": "Bevestig dat alle functies zijn toegekend",
-  "f3236c83-b7ba-453f-981a-3e06925c9b7a": "Geef iedereen toegang tot Ravot door ze de juiste functies te geven.",
+  "f3236c83-b7ba-453f-981a-3e06925c9b7a": "Geef iedereen toegang tot #platform door ze de juiste functies te geven.",
   "268546f2-5dd0-492c-8680-e93b5d40807d": "Ken alle verplichte functies toe aan je leidingsploeg",
   "f0f98f5d-83bc-45fe-a5f1-1b8f2decbdf0": "Ik heb alle leeftijdsgroepen nagekeken",
   "c965f4a7-4dc3-4201-961e-65f1a9eb7f89": "Kijk of de prijzen, de leeftijd en de beschrijving correct zijn ingesteld.",
@@ -174,7 +175,7 @@
   "c136101a-cd7e-4b04-9c81-e17f03a511d1": "Bevestig dat de e-mailadressen juist zijn",
   "9ef3cbb3-93bb-4f77-93af-3752ff869894": "Voeg minstens één standaard e-mailadres toe.",
   "da415fb3-06f2-45eb-9230-ef56bcd52970": "Voeg een standaard e-mailadres toe",
-  "70894bb8-da5a-4f1a-929d-08f4479c4de3": "Bevestig dat de betaalmethodes correct zijn ingesteld. Deze betaalmethodes worden gebruikt als leden inschrijven via Ravot.",
+  "70894bb8-da5a-4f1a-929d-08f4479c4de3": "Bevestig dat de betaalmethodes correct zijn ingesteld. Deze betaalmethodes worden gebruikt als leden inschrijven via #platform.",
   "db69887c-b23a-4779-b945-cbe5d02856a7": "Bevestig de betaalmethodes voor inschrijvingen",
   "b831d108-6aa9-4e6e-97ce-9f50a1cab9e1": "Bevestig dat de betaalmethodes correct zijn ingesteld",
   "953003c6-6653-4cef-a2ca-09723658b828": "Voeg minstens één betaalmethode toe.",
@@ -373,7 +374,7 @@
   "28c2bc66-231f-44f3-9249-c1981b871a1f": "Openstaand bedrag",
   "0637e394-fbd7-42ea-9a1b-5acdcc86419a": "Er zijn geen openstaande bedragen",
   "e09c97db-85d7-40b0-8043-65fa24a09a01": "Te ontvangen bedragen",
-  "a654551b-6dcd-48a9-a5c5-4609fdcba5f3": "Ravot is in orde",
+  "a654551b-6dcd-48a9-a5c5-4609fdcba5f3": "#platform is in orde",
   "8e77d1c1-87dc-4fdb-ad6e-13145bc96f78": "Breng Stamhoofd in orde",
   "ab0c7981-0d5f-4c36-bd3f-07ddc2a63759": "Jouw #groep bevindt zich in een ander werkjaar dan KSA Nationaal.",
   "b66501e0-f6de-4259-95ef-13590b24182b": "vereniging",
@@ -434,7 +435,7 @@
   "528545c4-028b-4711-9b16-f6fa990c3130": "Aansluiting/verzekering Stamhoofd*",
   "e99c7d31-f9fe-4e0f-8947-bdc30784de5b": "* Voor de aansluiting bij Stamhoofd moet je nog een correcte standaard inschrijvingsgroep selecteren zodat de benaming die jouw #groep gebruikt gekoppeld kan worden aan de benaming van Stamhoofd.",
   "61f434a9-49e6-4a92-b613-965dfd807dca": "Aansluiting KSA Nationaal",
-  "f5229cc1-c908-4409-855a-1dba40371815": "Jouw leiding kan in Ravot jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf leiding, vraag het dan aan jouw medeleiding of KSA Nationaal.",
+  "f5229cc1-c908-4409-855a-1dba40371815": "Jouw leiding kan in #platform jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf leiding, vraag het dan aan jouw medeleiding of KSA Nationaal.",
   "525747e4-48df-4f20-979e-3c18142e64a5": "Het bedrag zal achteraf door KSA Nationaal aan {name} worden gefactureerd",
   "237be7e0-4534-4008-b7bc-3e6db776a72a": "Leden die je inschrijft in een leeftijdsgroep die je koppelt aan een standaard leeftijdsgroep van KSA Nationaal worden automatisch aangesloten. Voor andere leden kan je hier een aansluiting manueel aanvragen.",
   "c4cc8f8b-d490-4182-ba92-7fce435945e7": "Ledenportaal",
@@ -640,5 +641,7 @@
   "9c916015-e69c-44b3-a568-d0af15854787": "Alle groepen worden overgezet op dit nieuwe werkjaar. Hoofdbeheerders kunnen het vorige werkjaar nog bekijken.",
   "d5e39906-8c0b-4006-bab5-96827f8daa53": "Er zijn geen leden die kunnen inschrijven.",
   "cd60d49f-9fc8-4fb7-b574-1231874c1d43": "Overloop alle stappen en bevestig dat je alles hebt nagekeken bij elke stap. Zorg dat alles ten laatste tegen 15 oktober is nagekeken.",
-  "b1c11fd1-81dc-46f2-8cfb-0ba02d260f19": "Deze aansluiting is vergrendeld. Hierdoor kan de prijs niet aangepast worden en kan deze niet verwijderd worden."
+  "b1c11fd1-81dc-46f2-8cfb-0ba02d260f19": "Deze aansluiting is vergrendeld. Hierdoor kan de prijs niet aangepast worden en kan deze niet verwijderd worden.",
+  "ced29068-facb-4692-9fd7-d9ac74e35359": "Kijk na of alle instellingen van de groepen correct zijn. Als alles goed staat ingesteld kan je ervoor zorgen dat alle leden via #platform kunnen inschrijven én betalen. Let dus goed op welke tarieven je instelt, en welke leeftijdsrestricties je gebruikt. Als je klaar bent kan je een leeftijdsgroep openen zodat leden via #platform kunnen inschrijven.",
+  "03447d19-17e4-41b0-aa2c-cec5c9567354": "Alle groepen zijn gesloten."
 }

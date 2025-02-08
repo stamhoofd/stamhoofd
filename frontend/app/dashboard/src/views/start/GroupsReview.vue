@@ -1,11 +1,11 @@
 <template>
     <ReviewSetupStepView :type="SetupStepType.Groups">
         <template #top>
-            <p>Kijk na of alle instellingen van de groepen correct zijn. Als alles goed staat ingesteld kan je ervoor zorgen dat alle leden via Ravot kunnen inschrijven én betalen. Let dus goed op welke tarieven je instelt, en welke leeftijdsrestricties je gebruikt. Als je klaar bent kan je een leeftijdsgroep openen zodat leden via Ravot kunnen inschrijven.</p>
+            <p>{{ $t('ced29068-facb-4692-9fd7-d9ac74e35359') }}</p>
         </template>
 
         <p v-if="areAllGroupsClosed" class="warning-box">
-            Alle groepen zijn gesloten.
+            {{ $t('03447d19-17e4-41b0-aa2c-cec5c9567354') }}
         </p>
 
         <div v-for="category in tree.categories" :key="category.id" class="container">
