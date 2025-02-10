@@ -64,7 +64,7 @@ export function useContextOptions() {
         const opts: Option[] = [];
 
         if ($user.value && $user.value.organizationId === null && $user.value.permissions && $user.value.permissions.globalPermissions !== null) {
-            if ($user.value.permissions?.forPlatform(platform.value)?.isEmpty !== false) {
+            if ($user.value.permissions?.forPlatform(platform.value)?.isEmpty === false) {
                 const context = new SessionContext(null);
                 await context.loadFromStorage();
 
