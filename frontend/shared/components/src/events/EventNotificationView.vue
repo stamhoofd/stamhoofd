@@ -13,23 +13,16 @@
             <STList class="info">
                 <STListItem :selectable="true">
                     <h3 class="style-definition-label">
-                        Activiteiten
+                        {{ notification.events.length === 1 ? 'Naam' : 'Activiteiten' }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ notification.events.map(e => e.name).join(', ') }}</span>
                     </p>
-                    <p class="style-description-small">
-                        Je kan een melding koppelen aan één of meerdere activiteiten uit jullie kalender van Stamhoofd op voorwaarde dat ze plaatsvinden op dezelfde locatie en tijdstip.
-                    </p>
-
-                    <template #right>
-                        <span class="icon edit gray" />
-                    </template>
                 </STListItem>
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        Datum
+                        Wanneer
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ capitalizeFirstLetter(formatDateRange(notification.startDate, notification.endDate)) }}</span>
