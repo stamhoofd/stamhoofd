@@ -96,8 +96,8 @@
 
         <STToolbar>
             <template #right>
-                <LoadingButton :loading="loading">
-                    <button class="button primary" :disabled="true" type="submit">
+                <LoadingButton v-if="notification.status === EventNotificationStatus.Draft" :loading="isSaving">
+                    <button class="button primary" :disabled="!isComplete" type="button" @click="doSubmit">
                         <span class="icon success" />
                         <span>Indienen</span>
                     </button>
@@ -108,13 +108,13 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { RecordCategory } from '@stamhoofd/structures';
-import { computed, ref } from 'vue';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, ErrorBox, IconContainer, ProgressIcon } from '@stamhoofd/components';
+import { EventNotification, EventNotificationStatus, RecordCategory } from '@stamhoofd/structures';
+import { computed } from 'vue';
 import { useErrors } from '../errors/useErrors';
 import { EventNotificationViewModel } from './event-notifications/classes/EventNotificationViewModel';
 import EditEventNotificationRecordCategoryView from './event-notifications/EditEventNotificationRecordCategoryView.vue';
-import { ProgressIcon, IconContainer } from '@stamhoofd/components';
 
 const props = withDefaults(
     defineProps<{
@@ -126,10 +126,12 @@ const props = withDefaults(
 
 const notification = props.viewModel.useNotification();
 const errors = useErrors(); ;
-const loading = ref(false);
-const pop = usePop();
 const type = props.viewModel.useType();
 const present = usePresent();
+const isComplete = computed(() => {
+    return recordCategories.value.every(c => c.isComplete(notification.value));
+});
+const { save, isSaving } = props.viewModel.useSave();
 
 const title = computed(() => {
     return type.value.title;
@@ -174,6 +176,20 @@ function getRecordCategoryProgress(category: RecordCategory) {
         return 0;
     }
     return (completed / total);
+}
+
+async function doSubmit() {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je wilt indienen?', 'Ja, indienen', 'Je kan je melding niet meer aanpassen na het indienen.', undefined, false)) {
+        return;
+    }
+    try {
+        await save(EventNotification.patch({
+            status: EventNotificationStatus.Pending,
+        }));
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
 }
 
 </script>

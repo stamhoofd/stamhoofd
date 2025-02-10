@@ -33,11 +33,10 @@ const props = withDefaults(
 
 const errors = useErrors();
 const { hasChanges, patched, addPatch, patch } = props.viewModel.usePatch();
-const title = computed(() => props.viewModel.isNew ? 'x toevoegen' : 'x bewerken');
 const saving = ref(false);
 const $t = useTranslate();
 const pop = usePop();
-const saveModel = props.viewModel.useSave();
+const { save: saveModel } = props.viewModel.useSave();
 const navigationActions = useNavigationActions();
 
 async function save() {

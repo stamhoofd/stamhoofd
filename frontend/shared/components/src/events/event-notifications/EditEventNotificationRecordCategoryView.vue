@@ -8,7 +8,9 @@
             :all-optional="false"
             :force-mark-reviewed="true"
             @patch="addPatch({recordAnswers: $event})"
-        />
+        >
+            <STErrorsDefault :error-box="errors.errorBox" />
+        </FillRecordCategoryBox>
 
         <template v-if="canSaveDraft" #toolbar>
             <button class="button secundary" type="button" @click="saveDraft">
@@ -44,7 +46,7 @@ const title = computed(() => props.category.name);
 const saving = ref(false);
 const $t = useTranslate();
 const pop = usePop();
-const saveModel = props.viewModel.useSave();
+const { save: saveModel } = props.viewModel.useSave();
 const navigationActions = useNavigationActions();
 const dismiss = useDismiss();
 const canSaveDraft = ref(false);

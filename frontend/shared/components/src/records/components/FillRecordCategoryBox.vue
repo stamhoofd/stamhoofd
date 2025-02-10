@@ -9,6 +9,7 @@
         <p v-if="category.description" class="style-description-block pre-wrap" v-text="category.description" />
 
         <STErrorsDefault :error-box="errors.errorBox" />
+        <slot />
 
         <RecordAnswerInput v-for="record of filteredWriteableRecords" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
         <div v-for="childCategory of childCategories" :key="childCategory.id" class="container">

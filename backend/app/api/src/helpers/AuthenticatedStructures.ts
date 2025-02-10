@@ -1,10 +1,10 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuditLog, BalanceItem, CachedBalance, Document, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
-import { EventNotification as EventNotificationStruct, AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, DetailedReceivableBalance, Document as DocumentStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
+import { SQL } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from './Context';
-import { SQL } from '@stamhoofd/sql';
 
 /**
  * Builds authenticated structures for the current user
@@ -523,6 +523,14 @@ export class AuthenticatedStructures {
         const eventStructs = await this.events(events);
         const organizationIds = Formatter.uniqueArray(eventNotifications.map(n => n.organizationId));
         const organizationModels = organizationIds.length > 0 ? await Organization.getByIDs(...organizationIds) : [];
+        const userIds = Formatter.uniqueArray(eventNotifications.flatMap(n => [n.createdBy, n.submittedBy]).filter(id => id !== null));
+        const users = userIds.length > 0 ? await User.getByIDs(...userIds) : [];
+        const userStructs = users.map((user) => {
+            return NamedObject.create({
+                id: user.id,
+                name: user.name ?? user.email,
+            });
+        });
 
         const result: EventNotificationStruct[] = [];
 
@@ -542,8 +550,8 @@ export class AuthenticatedStructures {
             const struct = EventNotificationStruct.create({
                 ...notification,
                 organization: organizationStruct,
-                createdBy: null,
-                submittedBy: null,
+                createdBy: notification.createdBy ? userStructs.find(u => u.id === notification.createdBy) : null,
+                submittedBy: notification.submittedBy ? userStructs.find(u => u.id === notification.submittedBy) : null,
                 events: thisEventStructs,
             });
 

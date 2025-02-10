@@ -127,6 +127,12 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             ) {
                 // Requires `OrganizationEventNotificationReviewer` access right for the organization
                 if (!await Context.auth.canReviewEventNotification(notification)) {
+                    if (notification.status === EventNotificationStatus.Pending) {
+                        throw Context.auth.error('Je kan deze melding niet meer bewerken omdat deze al is ingediend');
+                    }
+                    if (notification.status === EventNotificationStatus.Accepted) {
+                        throw Context.auth.error('Je kan deze melding niet meer bewerken omdat deze al is goedgekeurd');
+                    }
                     throw Context.auth.error('Je hebt geen toegang om deze melding te bewerken');
                 }
             }
@@ -135,7 +141,10 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             notification.recordAnswers = patchObject(notification.recordAnswers, patch.recordAnswers);
 
             if (patch.status) {
-                // todo: email notifications etc
+                notification.status = patch.status; // checks already happened
+                if (patch.status === EventNotificationStatus.Pending && !notification.submittedBy) {
+                    notification.submittedBy = user.id;
+                }
             }
 
             await notification.save();
