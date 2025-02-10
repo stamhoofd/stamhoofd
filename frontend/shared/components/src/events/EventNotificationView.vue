@@ -1,6 +1,10 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="title" />
+        <STNavigationBar :title="title">
+            <template #right>
+                <button v-if="isReviewer" v-long-press="(e) => showContextMenu(e)" class="button icon navigation more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
+            </template>
+        </STNavigationBar>
 
         <main>
             <h1>
@@ -88,19 +92,72 @@
                 </STList>
             </template>
 
-            <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="notification">
-                <template v-if="isReviewer" #buttons>
-                    <button type="button" class="button icon edit" @click="editRecordCategory(category)" />
-                </template>
-            </ViewRecordCategoryAnswersBox>
+            <template v-else>
+                <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="notification">
+                    <template v-if="isReviewer" #buttons>
+                        <button type="button" class="button icon edit" @click="editRecordCategory(category)" />
+                    </template>
+                </ViewRecordCategoryAnswersBox>
+            </template>
+
+            <div v-if="notification.status === EventNotificationStatus.Pending && isComplete && isReviewer" class="container">
+                <hr>
+                <h2>Beslissing</h2>
+
+                <STList>
+                    <STListItem :selectable="true" element-name="button" @click="doAccept">
+                        <template #left>
+                            <IconContainer icon="notification" class="success">
+                                <template #aside>
+                                    <span class="icon success small" />
+                                </template>
+                            </IconContainer>
+                        </template>
+                        <h3 class="style-title-list">
+                            Goedkeuren
+                        </h3>
+                        <p class="style-description-small">
+                            Keur deze melding goed.
+                        </p>
+
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem :selectable="true" element-name="button" @click="doReject">
+                        <template #left>
+                            <IconContainer icon="notification" class="error">
+                                <template #aside>
+                                    <span class="icon canceled small" />
+                                </template>
+                            </IconContainer>
+                        </template>
+
+                        <h3 class="style-title-list">
+                            Afkeuren
+                        </h3>
+                        <p class="style-description-small">
+                            Hierna zijn er terug wijzigingen mogelijk. Laat eventueel een opmerking achter.
+                        </p>
+
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+                </STList>
+            </div>
         </main>
 
-        <STToolbar v-if="notification.status === EventNotificationStatus.Draft">
+        <STToolbar v-if="notification.status === EventNotificationStatus.Draft || notification.status === EventNotificationStatus.Rejected">
             <template #right>
                 <LoadingButton :loading="isSaving">
                     <button class="button primary" :disabled="!isComplete" type="button" @click="doSubmit">
-                        <span class="icon success" />
-                        <span>Indienen</span>
+                        <span v-if="notification.status === EventNotificationStatus.Rejected" class="icon retry" />
+                        <span v-else class="icon success" />
+
+                        <span v-if="notification.status === EventNotificationStatus.Rejected">Opnieuw indienen</span>
+                        <span v-else>Indienen</span>
                     </button>
                 </LoadingButton>
             </template>
@@ -110,7 +167,7 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, IconContainer, ProgressIcon, useAppContext, useAuth, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, IconContainer, ProgressIcon, useAuth, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
 import { AccessRight, EventNotification, EventNotificationStatus, RecordCategory } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useErrors } from '../errors/useErrors';
@@ -132,7 +189,6 @@ const present = usePresent();
 const auth = useAuth();
 const isReviewer = computed(() => {
     const p = auth.getPermissionsForOrganization(props.viewModel.eventNotification.organization);
-    console.log('permissions', p);
     return p?.hasAccessRight(AccessRight.OrganizationEventNotificationReviewer) ?? false;
 });
 const isComplete = computed(() => {
@@ -197,6 +253,112 @@ async function doSubmit() {
     catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
+}
+
+async function doAccept() {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je wilt goedkeuren?', 'Ja, goedkeuren', 'Je kan je melding niet meer aanpassen na het indienen.', undefined, false)) {
+        return;
+    }
+    try {
+        await save(EventNotification.patch({
+            status: EventNotificationStatus.Accepted,
+        }));
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+}
+
+async function doReject() {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je wilt afkeuren?', 'Ja, afkeuren', undefined)) {
+        return;
+    }
+    try {
+        await save(EventNotification.patch({
+            status: EventNotificationStatus.Rejected,
+        }));
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+}
+
+async function doDelete() {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je deze melding wilt verwijderen?', 'Ja, verwijderen', 'Je kan dit niet ongedaan maken')) {
+        return;
+    }
+    try {
+        await save(EventNotification.patch({
+            status: EventNotificationStatus.Rejected,
+        }));
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+}
+
+async function doDraft() {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je deze melding terug naar klad wilt verplaatsen?', 'Ja, naar klad')) {
+        return;
+    }
+    try {
+        await save(EventNotification.patch({
+            status: EventNotificationStatus.Draft,
+        }));
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+}
+
+async function showContextMenu(event: MouseEvent) {
+    const menu = new ContextMenu([
+        [
+            new ContextMenuItem({
+                name: 'Wijzig status',
+                childMenu: new ContextMenu([
+                    [
+                        new ContextMenuItem({
+                            name: 'Klad',
+                            action: async () => {
+                                await doDraft();
+                            },
+                        }),
+                        new ContextMenuItem({
+                            name: 'Wacht op goedkeuring',
+                            icon: 'clock',
+                            action: async () => {
+                                await doSubmit();
+                            },
+                        }),
+                        new ContextMenuItem({
+                            name: 'Goedgekeurd',
+                            icon: 'success',
+                            action: async () => {
+                                await doAccept();
+                            },
+                        }),
+                        new ContextMenuItem({
+                            name: 'Afgekeurd',
+                            icon: 'canceled',
+                            action: async () => {
+                                await doReject();
+                            },
+                        }),
+                    ],
+                ]),
+            }),
+            new ContextMenuItem({
+                name: 'Verwijderen',
+                icon: 'trash',
+                action: async () => {
+                    await doDelete();
+                },
+            }),
+        ],
+    ]);
+
+    await menu.show({ button: event.target as HTMLElement });
 }
 
 </script>
