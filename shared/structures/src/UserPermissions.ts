@@ -182,7 +182,21 @@ export class UserPermissions extends AutoEncoder {
             if (patch.organizationPermissions.get(organizationId) !== undefined) {
                 const clonedPatch = UserPermissions.patch({});
                 clonedPatch.organizationPermissions.set(organizationId, patch.organizationPermissions.get(organizationId));
+
                 const updated = old ? old.patch(clonedPatch) : UserPermissions.create({}).patch(clonedPatch);
+
+                // Maintain responsibilities (not editable with a limited patch)
+                const n = updated.organizationPermissions.get(organizationId);
+                const o = old?.organizationPermissions.get(organizationId)?.responsibilities;
+                if (n) {
+                    n.responsibilities = o ?? [];
+                }
+                else {
+                    if (o && o.length) {
+                        // Not allowed to delete
+                        return old;
+                    }
+                }
 
                 if (updated.isEmpty) {
                     return null;
@@ -196,6 +210,19 @@ export class UserPermissions extends AutoEncoder {
                 const clonedPatch = UserPermissions.patch({});
                 clonedPatch.organizationPermissions.set(organizationId, patch.organizationPermissions.get(organizationId));
                 const updated = old ? old.patch(clonedPatch) : UserPermissions.create({}).patch(clonedPatch);
+
+                // Maintain responsibilities (not editable with a limited patch)
+                const n = updated.organizationPermissions.get(organizationId);
+                const o = old?.organizationPermissions.get(organizationId)?.responsibilities;
+                if (n) {
+                    n.responsibilities = o ?? [];
+                }
+                else {
+                    if (o && o.length) {
+                        // Not allowed to delete
+                        return old;
+                    }
+                }
 
                 if (updated.isEmpty) {
                     return null;
@@ -222,5 +249,29 @@ export class UserPermissions extends AutoEncoder {
             return cloned;
         }
         return old;
+    }
+
+    static add(old: UserPermissions | null, add: UserPermissions): UserPermissions | null {
+        const cloned = old ? old.clone() : UserPermissions.create({});
+
+        if (add.globalPermissions) {
+            if (cloned.globalPermissions) {
+                cloned.globalPermissions.add(add.globalPermissions);
+            }
+            else {
+                cloned.globalPermissions = add.globalPermissions;
+            }
+        }
+
+        for (const [organizationId, permissions] of add.organizationPermissions) {
+            if (cloned.organizationPermissions.get(organizationId)) {
+                cloned.organizationPermissions.get(organizationId)!.add(permissions);
+            }
+            else {
+                cloned.organizationPermissions.set(organizationId, permissions);
+            }
+        }
+
+        return cloned;
     }
 }

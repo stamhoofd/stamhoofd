@@ -77,12 +77,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
             admin.permissions = UserPermissions.limitedPatch(admin.permissions, request.body.permissions, organization.id);
         }
         else {
-            if (admin.permissions) {
-                admin.permissions.patchOrPut(request.body.permissions);
-            }
-            else {
-                admin.permissions = request.body.permissions.isPut() ? request.body.permissions : null;
-            }
+            admin.permissions = UserPermissions.add(admin.permissions, request.body.permissions);
         }
 
         if (!admin.firstName && request.body.firstName) {
