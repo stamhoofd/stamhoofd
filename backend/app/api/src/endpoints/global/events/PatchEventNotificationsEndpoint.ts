@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Event, EventNotification } from '@stamhoofd/models';
-import { EventNotificationStatus, EventNotification as EventNotificationStruct } from '@stamhoofd/structures';
+import { EventNotificationStatus, EventNotification as EventNotificationStruct, PermissionLevel } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -112,29 +112,25 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 });
             }
 
-            // todo: check if user has access to this notification
-            const events = await EventNotification.events.load(notification);
-            for (const event of events) {
-                if (!await Context.auth.canAccessEvent(event)) {
-                    throw Context.auth.error('Je hebt geen toegang tot deze melding');
-                }
-            }
+            let requiredPermissionLevel = PermissionLevel.Write;
 
             if (
                 notification.status === EventNotificationStatus.Pending
                 || notification.status === EventNotificationStatus.Accepted
                 || (patch.status && patch.status !== EventNotificationStatus.Pending)
             ) {
+                requiredPermissionLevel = PermissionLevel.Full;
+            }
+
+            if (!await Context.auth.canAccessEventNotification(notification, requiredPermissionLevel)) {
                 // Requires `OrganizationEventNotificationReviewer` access right for the organization
-                if (!await Context.auth.canReviewEventNotification(notification)) {
-                    if (notification.status === EventNotificationStatus.Pending) {
-                        throw Context.auth.error('Je kan deze melding niet meer bewerken omdat deze al is ingediend');
-                    }
-                    if (notification.status === EventNotificationStatus.Accepted) {
-                        throw Context.auth.error('Je kan deze melding niet meer bewerken omdat deze al is goedgekeurd');
-                    }
-                    throw Context.auth.error('Je hebt geen toegang om deze melding te bewerken');
+                if (notification.status === EventNotificationStatus.Pending) {
+                    throw Context.auth.error('Je kan deze melding niet meer bewerken omdat deze al is ingediend');
                 }
+                if (notification.status === EventNotificationStatus.Accepted) {
+                    throw Context.auth.error('Je kan deze melding niet meer bewerken omdat deze al is goedgekeurd');
+                }
+                throw Context.auth.error('Je hebt geen toegang om deze melding te bewerken');
             }
 
             // Save answers

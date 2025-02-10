@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, CachedBalance, Document, EmailTemplate, Event, Group, Member, MemberPlatformMembership, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
+import { BalanceItem, CachedBalance, Document, EmailTemplate, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
 import { AccessRight, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryMemberAccess';
@@ -217,6 +217,25 @@ export class AdminPermissionChecker {
             }
             throw e;
         }
+    }
+
+    async canAccessEventNotification(notification: EventNotification, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+        // todo: check if user has access to this notification
+        const events = EventNotification.events.isLoaded(notification) ? notification.events : await EventNotification.events.load(notification);
+        for (const event of events) {
+            if (!await this.canAccessEvent(event)) {
+                return false;
+            }
+        }
+
+        if (events.length === 0 || permissionLevel === PermissionLevel.Full) {
+            // Requires `OrganizationEventNotificationReviewer` access right for the organization
+            if (!await this.canReviewEventNotification(notification)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     async canAccessArchivedGroups(organizationId: string) {
@@ -1355,6 +1374,35 @@ export class AdminPermissionChecker {
 
         for (const tag of allTags) {
             if (this.platformPermissions?.hasResourceAccess(PermissionsResourceType.OrganizationTags, tag.id, level)) {
+                tags.push(tag.id);
+            }
+        }
+
+        if (tags.length === allTags.length) {
+            return 'all';
+        }
+
+        return tags;
+    }
+
+    getOrganizationTagsWithAccessRight(right: AccessRight): string[] | 'all' {
+        if (!this.hasSomePlatformAccess()) {
+            return [];
+        }
+
+        if (this.hasPlatformFullAccess()) {
+            return 'all';
+        }
+
+        if (this.platformPermissions?.hasResourceAccessRight(PermissionsResourceType.OrganizationTags, '', right)) {
+            return 'all';
+        }
+
+        const allTags = this.platform.config.tags;
+        const tags: string[] = [];
+
+        for (const tag of allTags) {
+            if (this.platformPermissions?.hasResourceAccessRight(PermissionsResourceType.OrganizationTags, tag.id, right)) {
                 tags.push(tag.id);
             }
         }

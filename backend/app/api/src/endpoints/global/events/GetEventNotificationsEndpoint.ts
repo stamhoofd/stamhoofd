@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EventNotification } from '@stamhoofd/models';
 import { SQL, SQLFilterDefinitions, SQLSortDefinitions, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import { CountFilteredRequest, EventNotification as EventNotificationStruct, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
+import { AccessRight, CountFilteredRequest, EventNotification as EventNotificationStruct, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
@@ -44,6 +44,27 @@ export class GetEventNotificationsEndpoint extends Endpoint<Params, Query, Body,
             scopeFilter = {
                 organizationId: organization.id,
             };
+        }
+
+        if (!organization) {
+            // Get all tags
+            const tags = Context.auth.getOrganizationTagsWithAccessRight(AccessRight.OrganizationEventNotificationReviewer);
+
+            if (tags !== 'all') {
+                if (tags.length === 0) {
+                    throw Context.auth.error();
+                }
+
+                scopeFilter = {
+                    organization: {
+                        $elemMatch: {
+                            tags: {
+                                $in: tags,
+                            },
+                        },
+                    },
+                };
+            }
         }
 
         const query = SQL
@@ -116,6 +137,12 @@ export class GetEventNotificationsEndpoint extends Endpoint<Params, Query, Body,
             if (JSON.stringify(nextFilter) === JSON.stringify(requestQuery.pageFilter)) {
                 console.error('Found infinite loading loop for', requestQuery);
                 next = undefined;
+            }
+        }
+
+        for (const notification of notifications) {
+            if (!await Context.auth.canAccessEventNotification(notification)) {
+                throw Context.auth.error('Je hebt geen toegang om deze melding te bekijken');
             }
         }
 
