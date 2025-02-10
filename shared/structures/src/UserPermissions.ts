@@ -57,17 +57,19 @@ export class UserPermissions extends AutoEncoder {
 
             if (platformPermissions) {
                 if (platformPermissions.hasFullAccess()) {
+                    const role = PermissionRoleDetailed.create({
+                        id: 'platform-admin',
+                        name: 'Platform hoofdbeheerder',
+                        accessRights: [...AccessRightHelper.prohibitedOrganizationLevelAccessRights()],
+                    });
+
                     // Special case: if you have full access to the platform, you'll also get all access rights that aren't automatically granted for full level access
                     // this isn't automatically granted if you give full access to a tag
                     const pp = Permissions.create({
                         level: PermissionLevel.Full,
-                        roles: [PermissionRoleDetailed.create({
-                            id: 'platform-admin',
-                            name: 'Platform hoofdbeheerder',
-                            accessRights: [...AccessRightHelper.prohibitedOrganizationLevelAccessRights()],
-                        })],
+                        roles: [role],
                     });
-                    return LoadedPermissions.from(pp, [], [], []);
+                    return LoadedPermissions.from(pp, [role], [], []);
                 }
 
                 const tags = organization.meta.tags.length === 0 ? [''] : organization.meta.tags;
