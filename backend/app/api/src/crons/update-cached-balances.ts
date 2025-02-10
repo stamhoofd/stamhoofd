@@ -5,8 +5,7 @@ registerCron('updateCachedBalances', updateCachedBalances);
 
 async function updateCachedBalances() {
     // Check if between 3 - 6 AM
-    if ((new Date().getHours() > 6 || new Date().getHours() < 3) && STAMHOOFD.environment !== 'development') {
-        console.log('Not between 3 and 6 AM, skipping.');
+    if ((new Date().getHours() > 6 || new Date().getHours() < 3)) {
         return;
     }
 
