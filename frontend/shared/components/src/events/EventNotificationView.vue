@@ -88,7 +88,11 @@
                 </STList>
             </template>
 
-            <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="notification" />
+            <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="notification">
+                <template v-if="isReviewer" #buttons>
+                    <button type="button" class="button icon edit" @click="editRecordCategory(category)" />
+                </template>
+            </ViewRecordCategoryAnswersBox>
         </main>
 
         <STToolbar v-if="notification.status === EventNotificationStatus.Draft">
@@ -106,8 +110,8 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, IconContainer, ProgressIcon, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
-import { EventNotification, EventNotificationStatus, RecordCategory } from '@stamhoofd/structures';
+import { CenteredMessage, ErrorBox, IconContainer, ProgressIcon, useAppContext, useAuth, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import { AccessRight, EventNotification, EventNotificationStatus, RecordCategory } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useErrors } from '../errors/useErrors';
 import { EventNotificationViewModel } from './event-notifications/classes/EventNotificationViewModel';
@@ -125,6 +129,12 @@ const notification = props.viewModel.useNotification();
 const errors = useErrors(); ;
 const type = props.viewModel.useType();
 const present = usePresent();
+const auth = useAuth();
+const isReviewer = computed(() => {
+    const p = auth.getPermissionsForOrganization(props.viewModel.eventNotification.organization);
+    console.log('permissions', p);
+    return p?.hasAccessRight(AccessRight.OrganizationEventNotificationReviewer) ?? false;
+});
 const isComplete = computed(() => {
     return recordCategories.value.every(c => c.isComplete(notification.value));
 });

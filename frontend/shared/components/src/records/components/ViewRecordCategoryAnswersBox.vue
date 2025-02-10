@@ -1,9 +1,14 @@
 <template>
     <div class="container">
         <hr>
-        <h2>
-            {{ category.name }}
-            <slot name="title-suffix" />
+        <h2 class="style-with-button">
+            <div>
+                {{ category.name }}
+                <slot name="title-suffix" />
+            </div>
+            <div>
+                <slot name="buttons" />
+            </div>
         </h2>
         <dl class="details-grid hover">
             <template v-for="{record, answer, recordCheckboxAnswer} of recordsWithAnswers" :key="record.id">

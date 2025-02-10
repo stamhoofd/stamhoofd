@@ -1,4 +1,4 @@
-import { AccessRight, Event, EventPermissionChecker, Group, GroupCategory, Organization, OrganizationTag, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, Registration, User, UserWithMembers } from '@stamhoofd/structures';
+import { AccessRight, Event, EventPermissionChecker, Group, GroupCategory, Organization, OrganizationForPermissionCalculation, OrganizationTag, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, Registration, User, UserWithMembers } from '@stamhoofd/structures';
 import { Ref, unref } from 'vue';
 
 export class ContextPermissions {
@@ -53,7 +53,7 @@ export class ContextPermissions {
         return unref(this.userPermissions)?.forOrganization(this.organization, this.allowInheritingPermissions ? Platform.shared : null) ?? null;
     }
 
-    getPermissionsForOrganization(organization: Organization) {
+    getPermissionsForOrganization(organization: OrganizationForPermissionCalculation) {
         return unref(this.userPermissions)?.forOrganization(organization, this.allowInheritingPermissions ? Platform.shared : null) ?? null;
     }
 
