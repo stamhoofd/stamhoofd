@@ -259,7 +259,7 @@ async function exportToExcel(selection: TableActionSelection<ObjectType>) {
                     type: ExcelExportType.Organizations,
                     filter: selection.filter,
                     workbook: getSelectableWorkbook(platform.value),
-                    configurationId: 'members',
+                    configurationId: configurationId.value,
                 }),
             }),
         ],

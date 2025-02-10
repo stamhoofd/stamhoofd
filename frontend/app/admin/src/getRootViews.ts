@@ -6,6 +6,7 @@ import { SessionContext, SessionManager } from '@stamhoofd/networking';
 import { computed } from 'vue';
 import ChargeMembershipsView from './views/finances/ChargeMembershipsView.vue';
 import OrganizationsMenu from './views/organizations/OrganizationsMenu.vue';
+import EventNotificationsTableView from './views/event-notifications/EventNotificationsTableView.vue';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
     return new ComponentWithProperties(ModalStackComponent, { root: component, initialPresents });
@@ -88,6 +89,14 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
         }),
     });
 
+    const eventNotificationsTab = new TabBarItem({
+        icon: 'notification',
+        name: 'Kampmeldingen',
+        component: new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(EventNotificationsTableView, {}),
+        }),
+    });
+
     const auditLogsTab = new TabBarItem({
         icon: 'history',
         name: 'Logboek',
@@ -127,8 +136,14 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
                         if (!added && manualFeatureFlag('audit-logs', reactiveSession)) {
                             // Feature is still in development so not visible for everyone
                             moreTab.items.push(auditLogsTab);
-                            added = true;
                         }
+
+                        if (!added && manualFeatureFlag('event-notifications', reactiveSession)) {
+                            // Feature is still in development so not visible for everyone
+                            moreTab.items.push(eventNotificationsTab);
+                        }
+
+                        added = true;
 
                         if (reactiveSession.auth.hasPlatformFullAccess()) {
                             tabs.push(moreTab);

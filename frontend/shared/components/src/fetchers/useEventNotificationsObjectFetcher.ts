@@ -1,5 +1,5 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { assertSort, EventNotification, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, SortList } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, CountResponse, EventNotification, LimitedFilteredRequest, PaginatedResponseDecoder, SortList } from '@stamhoofd/structures';
 import { useContext } from '../hooks';
 import { ObjectFetcher } from '../tables';
 
@@ -26,14 +26,28 @@ export function useEventNotificationsObjectFetcher(overrides?: Partial<ObjectFet
                 query: data,
                 shouldRetry: options?.shouldRetry ?? false,
                 owner: this,
+                timeout: 30 * 1000,
             });
 
             console.log('[Done] EventNotifications.fetch', data, response.data);
             return response.data;
         },
 
-        async fetchCount(): Promise<number> {
-            throw new Error('Method not implemented.');
+        async fetchCount(data: CountFilteredRequest): Promise<number> {
+            console.log('EventNotifications.fetchCount', data);
+
+            const response = await context.value.authenticatedServer.request({
+                method: 'GET',
+                path: '/event-notifications/count',
+                decoder: CountResponse as Decoder<CountResponse>,
+                query: data,
+                shouldRetry: false,
+                owner: this,
+                timeout: 30 * 1000,
+            });
+
+            console.log('[Done] EventNotifications.fetchCount', data, response.data.count);
+            return response.data.count;
         },
 
         ...overrides,

@@ -27,6 +27,7 @@ export function useEventsObjectFetcher(overrides?: Partial<ObjectFetcher<ObjectT
                 query: data,
                 shouldRetry: false,
                 owner: this,
+                timeout: 30 * 1000,
             });
 
             console.log('[Done] Events.fetch', data, response.data);
