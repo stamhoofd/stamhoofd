@@ -103,6 +103,34 @@ export class RecordCategory extends AutoEncoder {
         return true;
     }
 
+    getTotalRecords<T extends ObjectWithRecords>(value: T): number {
+        return this.getAllFilteredRecords(value).length;
+    }
+
+    getTotalCompleteRecords<T extends ObjectWithRecords>(value: T): number {
+        // check if everything has been answered already + check out of date
+        const records = this.getAllFilteredRecords(value);
+        let count = 0;
+
+        // Check all the properties in this category and check their last review times
+        for (const record of records) {
+            const answer = value.getRecordAnswers().get(record.id);
+            if (!answer) {
+                // This was never answered
+                continue;
+            }
+
+            try {
+                answer.validate();
+                count += 1;
+            }
+            catch (e) {
+                // This answer is not valid anymore
+            }
+        }
+        return count;
+    }
+
     isEnabled<T extends ObjectWithRecords>(filterValue: T, ignoreFilter = false) {
         if (!ignoreFilter) {
             if (!this.defaultEnabled) {

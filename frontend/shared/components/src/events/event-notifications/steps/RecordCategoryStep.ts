@@ -21,6 +21,9 @@ export class RecordCategoryStep implements ViewStep {
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);
             },
+            skipHandler: async (navigate: NavigationActions) => {
+                await manager.saveHandler(this, navigate, true);
+            },
         });
     }
 

@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="viewModel.type.title" :disabled="!hasChanges && !viewModel.isNew" :loading="saving" :save-text="viewModel.isNew ? 'Toevoegen' : 'Opslaan'" @save="save">
+    <SaveView :title="viewModel.type.title" :prefer-large-button="true" :loading="saving" :save-text="viewModel.isNew ? 'Beginnen' : 'Opslaan'" save-icon-right="arrow-right" @save="save">
         <h1>
             {{ viewModel.type.title }}
         </h1>

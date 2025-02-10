@@ -69,6 +69,7 @@ export class EventNotificationViewModel {
         //
         return async (patch: AutoEncoderPatchType<EventNotification>) => {
             this.eventNotification = this.eventNotification.patch(patch);
+            this.isNew = false;
 
             // save the event notification to the database
             if (this.saveHandler) {

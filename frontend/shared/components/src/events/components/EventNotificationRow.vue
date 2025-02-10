@@ -69,7 +69,7 @@ defineRoutes([
                         components: [
                             new ComponentWithProperties(EventNotificationView, options.componentProperties),
                         ],
-                        replace: 100,
+                        replace: 1000,
                         force: true,
                     });
                 }, {

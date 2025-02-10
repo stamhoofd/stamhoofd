@@ -16,8 +16,15 @@ export class ViewStepsManager {
         this.displayOptions = displayOptions;
     }
 
-    async saveHandler(currentStep: ViewStep | null, navigate: NavigationActions) {
-        const nextStep = this.getNextStep(currentStep);
+    /**
+     *
+     * @param currentStep
+     * @param navigate
+     * @param skipping Continue until the last step
+     * @returns
+     */
+    async saveHandler(currentStep: ViewStep | null, navigate: NavigationActions, skipping = false) {
+        const nextStep = skipping ? null : this.getNextStep(currentStep);
         if (nextStep) {
             if (currentStep === null) {
                 return await runDisplayOptions({

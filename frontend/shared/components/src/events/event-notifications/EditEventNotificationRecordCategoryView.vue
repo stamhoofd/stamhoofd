@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :disabled="!hasChanges" :loading="saving" @save="save">
+    <SaveView :title="title" :loading="saving" :prefer-large-button="true" @save="save">
         <FillRecordCategoryBox
             :category="category"
             :value="patched"
@@ -9,12 +9,18 @@
             :force-mark-reviewed="true"
             @patch="addPatch({recordAnswers: $event})"
         />
+
+        <template v-if="canSaveDraft" #toolbar>
+            <button class="button secundary" type="button" @click="saveDraft">
+                Opslaan als klad
+            </button>
+        </template>
     </SaveView>
 </template>
 
 <script setup lang="ts">
-import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, FillRecordCategoryBox, NavigationActions, useErrors, useNavigationActions } from '@stamhoofd/components';
+import { useDismiss, usePop } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, ErrorBox, FillRecordCategoryBox, NavigationActions, Toast, ToastButton, useErrors, useNavigationActions } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
@@ -25,8 +31,10 @@ const props = withDefaults(
         viewModel: EventNotificationViewModel;
         category: RecordCategory;
         saveHandler?: ((navigate: NavigationActions) => Promise<void> | void) | null;
+        skipHandler?: ((navigate: NavigationActions) => Promise<void> | void) | null;
     }>(), {
         saveHandler: null,
+        skipHandler: null,
     },
 );
 
@@ -38,6 +46,28 @@ const $t = useTranslate();
 const pop = usePop();
 const saveModel = props.viewModel.useSave();
 const navigationActions = useNavigationActions();
+const dismiss = useDismiss();
+const canSaveDraft = ref(false);
+
+async function saveDraft() {
+    if (saving.value) {
+        return;
+    }
+
+    errors.errorBox = null;
+    saving.value = true;
+
+    await saveModel(patch.value);
+
+    if (props.skipHandler) {
+        await props.skipHandler(navigationActions);
+    }
+    else {
+        await dismiss({ force: true });
+    }
+
+    saving.value = false;
+}
 
 async function save() {
     if (saving.value) {
@@ -49,6 +79,9 @@ async function save() {
     saving.value = true;
 
     if (!await errors.validator.validate()) {
+        // Save as draft
+        canSaveDraft.value = true;
+
         saving.value = false;
         return;
     }
