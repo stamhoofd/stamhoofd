@@ -693,7 +693,7 @@
         text-align: left;
     }
 
-    &> *:last-child {
+    &> *:last-child:not(:first-child) {
         flex-shrink: 0;
         margin-top: -13px;
 
