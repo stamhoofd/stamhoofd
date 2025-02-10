@@ -13,16 +13,16 @@ export class Address extends AutoEncoder {
     }
 
     @field({ decoder: StringDecoder })
-    street: string;
+    street = '';
 
     @field({ decoder: StringDecoder })
-    number: string;
+    number = '';
 
     @field({ decoder: StringDecoder })
-    postalCode: string;
+    postalCode = '';
 
     @field({ decoder: StringDecoder })
-    city: string;
+    city = '';
 
     @field({ decoder: CountryDecoder })
     country: Country;

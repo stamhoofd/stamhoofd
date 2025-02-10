@@ -59,7 +59,7 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, EditRecordCategoriesBox, ErrorBox, EventTypeIdsInput, getEventNotificationUIFilterBuilders, RecordEditorSettings, RecordEditorType, SaveView, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, EditRecordCategoriesBox, ErrorBox, EventTypeIdsInput, getEventNotificationUIFilterBuilders, RecordEditorSettings, RecordEditorType, SaveView, useCountry, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Address, BaseOrganization, EventNotification, EventNotificationDeadline, EventNotificationType, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
@@ -81,7 +81,7 @@ const viewTitle = computed(() => props.isNew ? $t('4f83e88b-bf47-43fe-96ca-b24d1
 const pop = usePop();
 const platform = usePlatform();
 const present = usePresent();
-
+const country = useCountry();
 const { patched, addPatch, hasChanges, patch } = usePatch(props.type);
 
 const save = async () => {
@@ -157,7 +157,9 @@ const editorSettings = computed(() => {
         exampleValue: EventNotification.create({
             typeId: patched.value.id,
             organization: BaseOrganization.create({
-                address: Address.create({}),
+                address: Address.create({
+                    country: country.value,
+                }),
             }),
         }),
         patchExampleValue(value: EventNotification, patch: PatchAnswers) {
