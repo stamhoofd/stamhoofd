@@ -3,7 +3,7 @@
         <STList>
             <STListItem element-name="label" :selectable="true" class="right-description smartphone-wrap">
                 <template #left>
-                    <Checkbox v-model="fullAccess" />
+                    <Checkbox v-model="fullAccess" :disabled="lockedFullAccess" />
                 </template>
                 Hoofdbeheerder
 
@@ -43,49 +43,56 @@ import RolesView from '../RolesView.vue';
 import { useAdmins } from '../hooks/useAdmins';
 import { useRoles } from '../hooks/useRoles';
 
-const props = defineProps(['user'])
-const emit = defineEmits(['patch:user'])
-const {patched, addPatch} = useEmitPatch<User>(props, emit, 'user')
+const props = defineProps<{
+    user: User;
+}>();
+const emit = defineEmits(['patch:user']);
+const { patched, addPatch } = useEmitPatch<User>(props, emit, 'user');
 
 const roles = useRoles();
 const present = usePresent();
-const {getPermissionsPatch, getPermissions} = useAdmins()
+const { getPermissions, getPermissionsPatch, getUnloadedPermissions } = useAdmins();
 
 const addPermissionsPatch = (patch: PartialWithoutMethods<AutoEncoderPatchType<Permissions>>) => {
     addPatch({
-        permissions: getPermissionsPatch(props.user, Permissions.patch(patch))
-    })
-}
+        permissions: getPermissionsPatch(props.user, Permissions.patch(patch)),
+    });
+};
 
 const fullAccess = computed({
     get: () => getPermissions(patched.value)?.hasFullAccess() ?? false,
-    set: (value: boolean) => addPermissionsPatch({level: value ? PermissionLevel.Full : PermissionLevel.None})
-})
+    set: (value: boolean) => addPermissionsPatch({ level: value ? PermissionLevel.Full : PermissionLevel.None }),
+});
+
+const lockedFullAccess = computed(() => {
+    return getPermissions(patched.value)?.level === PermissionLevel.Full && getUnloadedPermissions(patched.value)?.level !== PermissionLevel.Full;
+});
 
 const getRole = (role: PermissionRole) => {
-    return !!getPermissions(patched.value)?.roles.find(r => r.id === role.id)
-}
+    return !!getUnloadedPermissions(patched.value)?.roles.find(r => r.id === role.id);
+};
 
 const setRole = (role: PermissionRole, enable: boolean) => {
-    const p = Permissions.patch({})
+    const p = Permissions.patch({});
     if (enable) {
         if (getRole(role)) {
-            return
+            return;
         }
-        p.roles.addPut(role)
-    } else {
-        p.roles.addDelete(role.id)
+        p.roles.addPut(role);
     }
-    addPermissionsPatch(p)
-}
+    else {
+        p.roles.addDelete(role.id);
+    }
+    addPermissionsPatch(p);
+};
 
 const editRoles = async () => {
     await present({
         components: [new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(RolesView)
+            root: new ComponentWithProperties(RolesView),
         })],
-        modalDisplayStyle: "popup"
-    })
-}
+        modalDisplayStyle: 'popup',
+    });
+};
 
 </script>

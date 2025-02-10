@@ -1,5 +1,5 @@
 import { Factory } from '@simonbackx/simple-database';
-import { GroupPrice, GroupSettings, OldGroupPrice, OldGroupPrices, PermissionsByRole, ReduceablePrice } from '@stamhoofd/structures';
+import { GroupPrice, GroupSettings, OldGroupPrice, OldGroupPrices, ReduceablePrice } from '@stamhoofd/structures';
 
 import { Group } from '../models/Group';
 import { Organization } from '../models/Organization';
@@ -15,7 +15,6 @@ class Options {
     delayPrice?: number;
     delayReducedPrice?: number;
     skipCategory?: boolean;
-    permissions?: PermissionsByRole;
     maxMembers?: number | null;
 }
 
@@ -60,10 +59,6 @@ export class GroupFactory extends Factory<Options, Group> {
                     reducedPrice: this.options.delayReducedPrice ?? null,
                 })],
             }));
-        }
-
-        if (this.options.permissions) {
-            group.privateSettings.permissions = this.options.permissions;
         }
 
         await group.save();

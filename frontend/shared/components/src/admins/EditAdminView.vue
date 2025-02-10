@@ -48,8 +48,8 @@
 
         <EmailInput v-model="email" title="E-mailadres" :validator="$errors.validator" placeholder="E-mailadres" :required="true" :disabled="!canEditDetails" />
 
-        <template v-if="getPermissions(user)">
-            <div v-if="!user.memberId || getPermissions(user)" class="container">
+        <template v-if="getUnloadedPermissions(user)">
+            <div v-if="!user.memberId || getUnloadedPermissions(user)" class="container">
                 <hr>
                 <h2>Externe beheerdersrollen</h2>
                 <p>Je kan externe beheerders verschillende rollen toekennen (alternatief voor functies die je aan leden kan koppelen). Een externe beheerder zonder rollen heeft geen enkele toegang.</p>
@@ -66,7 +66,7 @@
                     <ResourcePermissionRow
                         v-for="resource in resources"
                         :key="resource.id"
-                        :role="permissions.unloadedPermissions"
+                        :role="permissions.unloadedPermissions!"
                         :resource="resource"
                         :configurable-access-rights="[]"
                         type="resource"
@@ -78,8 +78,9 @@
         <p v-else class="style-description-small">
             Dit account is geen beheerder.
         </p>
+        <code v-if="STAMHOOFD.environment === 'development'" class="style-code">{{ JSON.stringify(getUnloadedPermissions(user)?.encode({version: 1000}), undefined, '    ') }}</code>
 
-        <template v-if="!isNew && getPermissions(user)">
+        <template v-if="!isNew && getUnloadedPermissions(user)">
             <hr v-if="!isNew">
             <h2>
                 Verwijderen
@@ -119,7 +120,7 @@ const props = defineProps<{
 }>();
 
 const { patch, patched, addPatch, hasChanges } = usePatch(props.user);
-const { pushInMemory, dropFromMemory, getPermissionsPatch, getPermissions } = useAdmins();
+const { pushInMemory, dropFromMemory, getPermissionsPatch, getPermissions, getUnloadedPermissions } = useAdmins();
 const permissions = useUninheritedPermissions({ patchedUser: patched });
 const resources = computed(() => {
     const raw = permissions.unloadedPermissions;
@@ -136,7 +137,7 @@ const resources = computed(() => {
 });
 
 const canEditDetails = computed(() => {
-    return !patched.value?.permissions?.globalPermissions || $context.value.auth.hasFullPlatformAccess() || (patched.value.id === $context.value?.user?.id);
+    return patched.value.id === $context.value?.user?.id || (!patched.value.hasAccount && (!patched.value?.permissions?.globalPermissions || $context.value.auth.hasPlatformFullAccess()));
 });
 
 const addPermissionPatch = (patch: AutoEncoderPatchType<Permissions>) => {
@@ -250,12 +251,15 @@ const doDelete = async () => {
                 id: props.user.id,
                 permissions: getPermissionsPatch(props.user, null),
             }),
-            decoder: User as Decoder<User>,
+            decoder: UserWithMembers as Decoder<UserWithMembers>,
         });
 
         // Copy all data
         props.user.deepSet(response.data);
-        dropFromMemory(props.user);
+
+        if (getPermissions(props.user)?.isEmpty ?? true) {
+            dropFromMemory(props.user);
+        }
 
         await pop({ force: true });
 

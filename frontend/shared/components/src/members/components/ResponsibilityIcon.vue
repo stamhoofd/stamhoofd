@@ -16,16 +16,16 @@ import { Group, LoadedPermissions, MemberResponsibility, Organization, Permissio
 const props = withDefaults(
     defineProps<{
         responsibility: MemberResponsibility;
-        group?: Group|null,
-        organization?: Organization|null
+        group?: Group | null;
+        organization?: Organization | null;
     }>(), {
         group: null,
-        organization: null
-    }
+        organization: null,
+    },
 );
 
-function getResponsibilityMergedRole(responsibility: MemberResponsibility, groupId: string|null|undefined) {
-    return LoadedPermissions.buildRoleForResponsibility(groupId ?? null, responsibility, props.organization?.privateMeta?.inheritedResponsibilityRoles ?? []);
+function getResponsibilityMergedRole(responsibility: MemberResponsibility, groupId: string | null | undefined) {
+    return LoadedPermissions.fromResponsibility(responsibility, groupId ?? null, props.organization?.privateMeta?.inheritedResponsibilityRoles ?? []);
 }
 
 </script>

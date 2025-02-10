@@ -57,7 +57,7 @@ const isMe = computed(() => {
         return false;
     }
     const realRole = role.value;
-    return !!auth.permissions?.roles.find(r => r.id === realRole.id);
+    return !!auth.unloadedPermissions?.roles.find(r => r.id === realRole.id);
 });
 
 const resourcePermissions = computed(() => role.value.resources.get(props.resource.type)?.get(props.resource.id));
@@ -313,36 +313,38 @@ const choosePermissions = async (event: MouseEvent) => {
             }),
         ],
         // Access rights
-        ...(showAccessRights.length > 0 ? [
-            showAccessRights.map((accessRight) => {
-                const baseLevel = AccessRightHelper.autoGrantRightForLevel(accessRight);
-                const isLocked = lockedAccessRights.value.includes(accessRight);
-                const included = !!baseLevel && getPermissionLevelNumber(permissionLevel.value) >= getPermissionLevelNumber(baseLevel);
+        ...(showAccessRights.length > 0
+            ? [
+                    showAccessRights.map((accessRight) => {
+                        const baseLevel = AccessRightHelper.autoGrantRightForLevel(accessRight);
+                        const isLocked = lockedAccessRights.value.includes(accessRight);
+                        const included = !!baseLevel && getPermissionLevelNumber(permissionLevel.value) >= getPermissionLevelNumber(baseLevel);
 
-                // #region description
-                let description = undefined;
+                        // #region description
+                        let description = undefined;
 
-                if (!isLocked) {
-                    if (included) {
-                        description = ('Inbegrepen bij ' + getPermissionLevelName(baseLevel));
-                    }
-                    else {
-                        description = ('Niet inbegrepen bij ' + getPermissionLevelName(permissionLevel.value));
-                    }
-                }
-                // #endregion
+                        if (!isLocked) {
+                            if (included) {
+                                description = ('Inbegrepen bij ' + getPermissionLevelName(baseLevel));
+                            }
+                            else {
+                                description = ('Niet inbegrepen bij ' + getPermissionLevelName(permissionLevel.value));
+                            }
+                        }
+                        // #endregion
 
-                return new ContextMenuItem({
-                    selected: isLocked || included || accessRightsMap.get(accessRight)!.value,
-                    name: AccessRightHelper.getName(accessRight),
-                    disabled: isLocked || included,
-                    description,
-                    action: () => {
-                        accessRightsMap.get(accessRight)!.value = !accessRightsMap.get(accessRight)!.value;
-                    },
-                });
-            }),
-        ] : []),
+                        return new ContextMenuItem({
+                            selected: isLocked || included || accessRightsMap.get(accessRight)!.value,
+                            name: AccessRightHelper.getName(accessRight),
+                            disabled: isLocked || included,
+                            description,
+                            action: () => {
+                                accessRightsMap.get(accessRight)!.value = !accessRightsMap.get(accessRight)!.value;
+                            },
+                        });
+                    }),
+                ]
+            : []),
     ]);
 
     await contextMenu.show({

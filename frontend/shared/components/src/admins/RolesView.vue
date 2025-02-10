@@ -1,9 +1,9 @@
 <template>
-    <SaveView :loadingView="loading" :error-box="errors.errorBox" class="st-view background" title="Rollen" :loading="saving" :disabled="!hasChanges" @save="save">
+    <SaveView :loading-view="loading" :error-box="errors.errorBox" class="st-view background" title="Rollen" :loading="saving" :disabled="!hasChanges" @save="save">
         <template #buttons>
             <button class="button icon add navigation" aria-label="Nieuwe beheerder" type="button" @click="addRole" />
         </template>
-    
+
         <h1>Externe beheerdersrollen</h1>
         <p>{{ $t('9021f6b0-d1ae-422b-9651-48c7f5383b0b') }}</p>
 
@@ -69,10 +69,10 @@
 
 <script lang="ts" setup>
 import { type AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, defineRoutes, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, SaveView, Toast, useDraggableArray, useOrganization, usePlatform } from '@stamhoofd/components';
-import { Group, MemberResponsibility, PermissionRoleDetailed, PermissionRoleForResponsibility } from '@stamhoofd/structures';
-import { ComponentOptions, computed } from 'vue';
+import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, SaveView, Toast, useDraggableArray } from '@stamhoofd/components';
+import { PermissionRoleDetailed, PermissionRoleForResponsibility } from '@stamhoofd/structures';
+import { ComponentOptions } from 'vue';
 import STList from '../layout/STList.vue';
 import EditRoleView from './EditRoleView.vue';
 import { useAdmins } from './hooks/useAdmins';
@@ -85,7 +85,7 @@ defineRoutes([
         component: EditRoleView as ComponentOptions,
         present: 'popup',
         paramsToProps: () => {
-            const role = PermissionRoleDetailed.create({})
+            const role = PermissionRoleDetailed.create({});
 
             return {
                 role,
@@ -93,53 +93,12 @@ defineRoutes([
                 saveHandler: (patch: AutoEncoderPatchType<PermissionRoleDetailed>) => {
                     const patched = role.patch(patch);
                     const arr = createRolePatchArray();
-                    arr.addPut(patched)
+                    arr.addPut(patched);
                     patchRoles(arr);
                 },
-                deleteHandler: null
-            }
-        }
-    },
-    {
-        url: 'functie/@roleId',
-        name: 'editResponsibilityRole',
-        component: EditRoleView as ComponentOptions,
-        present: 'popup',
-        params: {
-            roleId: String
+                deleteHandler: null,
+            };
         },
-        paramsToProps: async (params: {roleId: string}) => {
-            const role = inheritedResponsibilityRoles.value.find(u => u.id === params.roleId)
-            if (!role) {
-                throw new Error('Role not found')
-            }
-
-            return {
-                role,
-                isNew: false,
-                saveHandler: (patch: AutoEncoderPatchType<PermissionRoleForResponsibility>) => {
-                    patch.id = role.id
-                    const arr = createResponsibilityRolePatchArray();
-                    arr.addPatch(patch)
-                    patchResponsibilityRoles(arr);
-                },
-                deleteHandler: () => {
-                    const arr = createResponsibilityRolePatchArray();
-                    arr.addDelete(role.id)
-                    patchResponsibilityRoles(arr);
-                },
-            }
-        },
-        propsToParams(props) {
-            if (!("role" in props)) {
-                throw new Error('Missing role')
-            }
-            return {
-                params: {
-                    roleId: (props.role as PermissionRoleDetailed).id
-                }
-            }
-        }
     },
     {
         url: '@roleId',
@@ -147,165 +106,91 @@ defineRoutes([
         component: EditRoleView as ComponentOptions,
         present: 'popup',
         params: {
-            roleId: String
+            roleId: String,
         },
-        paramsToProps: async (params: {roleId: string}) => {
-            const role = roles.value.find(u => u.id === params.roleId)
+        paramsToProps: async (params: { roleId: string }) => {
+            const role = roles.value.find(u => u.id === params.roleId);
             if (!role) {
-                throw new Error('Role not found')
+                throw new Error('Role not found');
             }
 
             return {
                 role,
                 isNew: false,
                 saveHandler: (patch: AutoEncoderPatchType<PermissionRoleDetailed>) => {
-                    patch.id = role.id
+                    patch.id = role.id;
                     const arr = createRolePatchArray();
-                    arr.addPatch(patch)
+                    arr.addPatch(patch);
                     patchRoles(arr);
                 },
                 deleteHandler: () => {
                     const arr = createRolePatchArray();
-                    arr.addDelete(role.id)
+                    arr.addDelete(role.id);
                     patchRoles(arr);
                 },
-            }
+            };
         },
         propsToParams(props) {
-            if (!("role" in props)) {
-                throw new Error('Missing role')
+            if (!('role' in props)) {
+                throw new Error('Missing role');
             }
             return {
                 params: {
-                    roleId: (props.role as PermissionRoleDetailed).id
-                }
-            }
-        }
-    }
+                    roleId: (props.role as PermissionRoleDetailed).id,
+                },
+            };
+        },
+    },
 ]);
 
 const $navigate = useNavigate();
 
-const {getPermissions, loading, admins} = useAdmins()
-const {createRolePatchArray, errors, hasChanges, patchRoles, roles, inheritedResponsibilityRoles, patchResponsibilityRoles, createResponsibilityRolePatchArray, saving, save: rawSave} = usePatchRoles()
-const platform = usePlatform();
-const organization = useOrganization()
-const present = usePresent()
+const { getPermissions, getUnloadedPermissions, loading, admins } = useAdmins();
+const { createRolePatchArray, errors, hasChanges, patchRoles, roles, saving, save: rawSave } = usePatchRoles();
 
-const responsibilities = computed(() => {
-    if (!organization.value) {
-        return []
-    }
-    return platform.value.config.responsibilities
-});
-
-const responsibilitiesWithGroup = computed(() => {
-    const list: {responsibility: MemberResponsibility, group: Group|null}[] = []
-
-    for (const responsibility of responsibilities.value) {
-        if (responsibility.organizationTagIds !== null) {
-            if (!organization.value || !organization.value.meta.matchTags(responsibility.organizationTagIds)) {
-                continue
-            }
-        }
-
-        if (responsibility.defaultAgeGroupIds !== null) {
-            // For each matching group
-            for (const group of organization.value?.adminAvailableGroups ?? []) {
-                if (group.defaultAgeGroupId && responsibility.defaultAgeGroupIds.includes(group.defaultAgeGroupId)) {
-                    list.push({responsibility, group})
-                }
-            }
-        } else {
-            list.push({responsibility, group: null})
-        }
-    }
-    return list
-});
-
-const pop = usePop()
+const pop = usePop();
 
 const draggableRoles = useDraggableArray(() => {
-    return roles.value
+    return roles.value;
 }, (roles) => {
-    patchRoles(roles)
+    patchRoles(roles);
 });
 
 const getAdminsForRole = (role: PermissionRoleDetailed): number => {
-    return admins.value.reduce((acc, admin) => acc + (getPermissions(admin)?.roles.find(r => r.id === role.id) ? 1 : 0), 0)
-}
-
-const getAdminsForResponsibility = (responsibility: MemberResponsibility, group: Group|null): number => {
-    return admins.value.reduce((acc, admin) => acc + (getPermissions(admin)?.roles.find(r => {
-        return (r instanceof PermissionRoleForResponsibility) && r.responsibilityId === responsibility.id && r.responsibilityGroupId === (group ? group.id : null)
-    }) ? 1 : 0), 0)
-}
+    return admins.value.reduce((acc, admin) => acc + (getUnloadedPermissions(admin)?.roles.find(r => r.id === role.id) ? 1 : 0), 0);
+};
 
 const getMainAdmins = (): number => {
-    return admins.value.reduce((acc, admin) => acc + (getPermissions(admin)?.hasFullAccess() ? 1 : 0), 0)
-}
-
-function roleForResponsibility(responsibility: MemberResponsibility, group: Group|null): PermissionRoleForResponsibility|null {
-    return inheritedResponsibilityRoles.value.find(r => r.responsibilityId === responsibility.id && r.responsibilityGroupId === (group ? group.id : null)) ?? null
-}
+    return admins.value.reduce((acc, admin) => acc + (getPermissions(admin)?.hasFullAccess() ? 1 : 0), 0);
+};
 
 const roleDescription = (role: PermissionRoleDetailed): string => {
-    return role.getDescription()
-}
+    return role.getDescription();
+};
 
 const addRole = async () => {
-    await $navigate('createRole')
-}
+    await $navigate('createRole');
+};
 
-const editRole = async (role: PermissionRoleDetailed|PermissionRoleForResponsibility) => {
-    await $navigate('editRole', {params: {roleId: role.id}}) // not using properties because the saveHandler is set in the route
-}
-
-async function editRoleForResponsibility(responsibility: MemberResponsibility, group: Group|null) {
-    const existingRole = roleForResponsibility(responsibility, group)
-
-    if (existingRole) {
-        return await $navigate('editResponsibilityRole', {params: {roleId: existingRole.id}}) // not using properties because the saveHandler is set in the route
-    }
-
-    // Create a new one
-    const role = PermissionRoleForResponsibility.create({
-        responsibilityId: responsibility.id,
-        responsibilityGroupId: group ? group.id : null
-    })
-
-    await present({
-        modalDisplayStyle: 'popup',
-        components: [
-            new ComponentWithProperties(EditRoleView, {
-                role,
-                isNew: true,
-                saveHandler: (patch: AutoEncoderPatchType<PermissionRoleForResponsibility>) => {
-                    const patched = role.patch(patch);
-                    const arr = createResponsibilityRolePatchArray();
-                    arr.addPut(patched)
-                    patchResponsibilityRoles(arr);
-                }
-            })
-        ]
-    })
-}
+const editRole = async (role: PermissionRoleDetailed | PermissionRoleForResponsibility) => {
+    await $navigate('editRole', { params: { roleId: role.id } }); // not using properties because the saveHandler is set in the route
+};
 
 const save = async () => {
     await rawSave(() => {
-        new Toast('De wijzigingen zijn opgeslagen', "success green").show()
+        new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
         void pop({ force: true });
     });
-}
+};
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
-}
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+};
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 </script>

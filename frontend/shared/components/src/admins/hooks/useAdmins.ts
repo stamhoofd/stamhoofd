@@ -43,6 +43,10 @@ export function useAdmins() {
         return new ContextPermissions(user, organization, platformManager.value.$platform, { allowInheritingPermissions: false }).permissions;
     };
 
+    const getUnloadedPermissions = (user: User) => {
+        return new ContextPermissions(user, organization, platformManager.value.$platform, { allowInheritingPermissions: false }).unloadedPermissions;
+    };
+
     const getPermissionsPatch = (user: User, patch: AutoEncoderPatchType<Permissions> | null): AutoEncoderPatchType<UserPermissions> | UserPermissions => {
         if (organization.value) {
             if (!user.permissions) {
@@ -58,7 +62,7 @@ export function useAdmins() {
     const sortedAdmins = computed(() => {
         return admins.value
             .filter(a => !a.memberId
-                || (getPermissions(a) && (!!getPermissions(a)?.roles.find(r => !(r instanceof PermissionRoleForResponsibility)) || (getPermissions(a)?.level ?? PermissionLevel.None) !== PermissionLevel.None)),
+                || (getUnloadedPermissions(a) && (!!getUnloadedPermissions(a)?.roles.find(r => !(r instanceof PermissionRoleForResponsibility)) || (getUnloadedPermissions(a)?.level ?? PermissionLevel.None) !== PermissionLevel.None)),
             )
             .sort((a, b) => Sorter.stack(
                 Sorter.byBooleanValue(getPermissions(a)?.hasFullAccess() ?? false, getPermissions(b)?.hasFullAccess() ?? false),
@@ -118,5 +122,5 @@ export function useAdmins() {
         }
     };
 
-    return { loading, admins, reloadPromise, sortedAdmins, sortedMembers, getPermissions, getPermissionsPatch, pushInMemory, dropFromMemory };
+    return { loading, admins, reloadPromise, sortedAdmins, sortedMembers, getPermissions, getUnloadedPermissions, getPermissionsPatch, pushInMemory, dropFromMemory };
 }

@@ -31,11 +31,13 @@
         <p v-if="responsibility.minimumMembers" class="style-description">
             Minimum {{ responsibility.minimumMembers }} vereist
         </p>
-        
+
         <p v-if="responsibility.maximumMembers" class="style-description">
             Maximum {{ responsibility.maximumMembers }}
         </p>
-        <p class="style-description-small">Rechten: {{ capitalizeFirstLetter(roleDescription) }}</p>
+        <p class="style-description-small">
+            Rechten: {{ capitalizeFirstLetter(roleDescription) }}
+        </p>
 
         <template #right>
             <span class="button icon drag gray" @click.stop @contextmenu.stop />
@@ -60,24 +62,24 @@ function showContextMenu() {
 
 const organizationTagIdsDescription = computed(() => {
     if (props.responsibility.organizationTagIds === null) {
-        return ''
+        return '';
     }
-    return props.responsibility.organizationTagIds.map(id => platform.value.config.tags.find(t => t.id === id)?.name ?? '?').join(', ')
+    return props.responsibility.organizationTagIds.map(id => platform.value.config.tags.find(t => t.id === id)?.name ?? '?').join(', ');
 });
 
 const defaultAgeGroupIdsDescription = computed(() => {
     if (props.responsibility.defaultAgeGroupIds === null) {
-        return ''
+        return '';
     }
-    return 'Moet gekoppeld worden aan specifieke lokale leeftijdsgroepen'
+    return 'Moet gekoppeld worden aan specifieke lokale leeftijdsgroepen';
 });
 
 const mergedRole = computed(() => {
-    return LoadedPermissions.buildRoleForResponsibility(props.responsibility.defaultAgeGroupIds !== null ? 'add-fake-group' : null, props.responsibility, []);
+    return LoadedPermissions.fromResponsibility(props.responsibility, props.responsibility.defaultAgeGroupIds !== null ? 'add-fake-group' : null, []);
 });
 
 const roleDescription = computed(() => {
-    return mergedRole.value.getDescription()
+    return mergedRole.value.getDescription();
 });
 
 </script>

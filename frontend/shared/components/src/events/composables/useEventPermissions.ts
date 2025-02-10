@@ -61,20 +61,18 @@ export function useEventPermissions() {
         if (!permissions) {
             return null;
         }
-        
-        if(permissions.hasAccessRightForAllResourcesOfType(type, AccessRight.EventWrite)) {
+
+        if (permissions.hasAccessRightForAllResourcesOfType(type, AccessRight.EventWrite)) {
             return null;
         }
 
         const result = new Set<string>();
 
-        for (const ressourceMap of [permissions.resources, ...permissions.roles.map(r => r.resources)]) {
-            const ressources = ressourceMap.get(type);
-            if (ressources) {
-                for (const [tagId, permissions] of ressources.entries()) {
-                    if (permissions.hasAccessRight(AccessRight.EventWrite)) {
-                        result.add(tagId);
-                    }
+        const ressources = permissions.resources.get(type);
+        if (ressources) {
+            for (const [tagId, permissions] of ressources.entries()) {
+                if (permissions.hasAccessRight(AccessRight.EventWrite)) {
+                    result.add(tagId);
                 }
             }
         }

@@ -60,7 +60,7 @@
                         :role="patched"
                         :resource="{id: '', name: 'Alle verenigingen', type: PermissionsResourceType.OrganizationTags }"
                         :inherited-roles="inheritedRoles"
-                        :configurable-access-rights="[AccessRight.EventWrite]"
+                        :configurable-access-rights="[AccessRight.EventWrite, AccessRight.OrganizationFinanceDirector, AccessRight.OrganizationEventNotificationReviewer]"
                         type="resource"
                         @patch:role="addPatch"
                     />
@@ -71,7 +71,7 @@
                         :role="patched"
                         :inherited-roles="inheritedRoles"
                         :resource="{id: tag.id, name: tag.name, type: PermissionsResourceType.OrganizationTags }"
-                        :configurable-access-rights="[AccessRight.EventWrite, AccessRight.OrganizationEventNotificationReviewer]"
+                        :configurable-access-rights="[AccessRight.EventWrite, AccessRight.OrganizationFinanceDirector, AccessRight.OrganizationEventNotificationReviewer]"
                         type="resource"
                         @patch:role="addPatch"
                     />
@@ -308,7 +308,7 @@ const title = computed(() => {
     return props.isNew ? 'Nieuwe rol' : props.role.name;
 });
 
-const { sortedAdmins, loading, getPermissions } = useAdmins();
+const { sortedAdmins, loading, getPermissions, getUnloadedPermissions } = useAdmins();
 const organization = useOrganization();
 const platform = usePlatform();
 const { patched, addPatch, hasChanges, patch } = usePatch(props.role);
@@ -381,7 +381,7 @@ const doDelete = async () => {
 };
 
 const hasAdminRole = (admin: User) => {
-    const permissions = getPermissions(admin);
+    const permissions = getUnloadedPermissions(admin);
     return permissions?.hasRole(props.role) ?? false;
 };
 

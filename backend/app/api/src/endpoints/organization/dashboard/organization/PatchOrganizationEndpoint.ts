@@ -346,7 +346,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             await organization.save();
         }
         else {
-            if (request.body.name || request.body.address) {
+            if (request.body.name || request.body.address || request.body.website || request.body.meta?.companies || request.body.meta?.recordsConfiguration || request.body.meta?.registrationPaymentConfiguration) {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: 'You do not have permissions to edit the organization settings',

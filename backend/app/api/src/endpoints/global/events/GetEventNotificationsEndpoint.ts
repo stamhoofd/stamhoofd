@@ -9,6 +9,7 @@ import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructure
 import { Context } from '../../../helpers/Context';
 import { eventNotificationsFilterCompilers } from '../../../sql-filters/event-notifications';
 import { eventNotificationsSorters } from '../../../sql-sorters/event-notifications';
+import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
@@ -16,7 +17,7 @@ type Body = undefined;
 type ResponseBody = PaginatedResponse<EventNotificationStruct[], LimitedFilteredRequest>;
 
 const filterCompilers: SQLFilterDefinitions = eventNotificationsFilterCompilers;
-const sorters: SQLSortDefinitions<EventNotification> = eventNotificationsSorters;
+const sorters: SQLSortDefinitions<SQLResultNamespacedRow> = eventNotificationsSorters;
 
 export class GetEventNotificationsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>;

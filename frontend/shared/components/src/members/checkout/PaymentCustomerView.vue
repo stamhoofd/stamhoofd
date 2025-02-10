@@ -38,7 +38,7 @@
             </STListItem>
         </STList>
 
-        <p class="style-button-bar">
+        <p v-if="auth.hasFullAccess()" class="style-button-bar">
             <button v-if="companies.length === 0" type="button" class="button primary" @click="editInvoiceSettings">
                 <span>Instellen</span>
             </button>
@@ -47,64 +47,66 @@
                 <span>Bewerk</span>
             </button>
         </p>
+        <p v-else class="warning-box">
+            {{ $t('Je hebt geen toegangsrechten om de facturatiegegevens van deze vereniging te bewerken.') }}
+        </p>
     </SaveView>
 </template>
 
-
 <script lang="ts" setup>
-import { SimpleError } from "@simonbackx/simple-errors";
-import { ComponentWithProperties, usePresent } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, GeneralSettingsView, NavigationActions, STErrorsDefault, useErrors, useNavigationActions, useOrganization, useUser } from "@stamhoofd/components";
-import { PaymentCustomer, RegisterCheckout } from "@stamhoofd/structures";
-import { computed, onMounted, ref } from "vue";
+import { SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { ErrorBox, GeneralSettingsView, NavigationActions, STErrorsDefault, useAuth, useErrors, useNavigationActions, useOrganization, useUser } from '@stamhoofd/components';
+import { PaymentCustomer, RegisterCheckout } from '@stamhoofd/structures';
+import { computed, onMounted, ref } from 'vue';
 
 const props = defineProps<{
-    checkout: RegisterCheckout,
-    saveHandler: (navigate: NavigationActions) => Promise<void>
-}>()
+    checkout: RegisterCheckout;
+    saveHandler: (navigate: NavigationActions) => Promise<void>;
+}>();
 
 const errors = useErrors();
 
-const organization = useOrganization()
-const loading = ref(false)
-const navigate = useNavigationActions()
+const organization = useOrganization();
+const loading = ref(false);
+const navigate = useNavigationActions();
 const user = useUser();
 const present = usePresent();
-const companies = computed(() => organization.value?.meta.companies ?? [])
-const selectedCompanyId = ref<string | null>(companies.value.length > 0 ? companies.value[0].id : null)
+const companies = computed(() => organization.value?.meta.companies ?? []);
+const selectedCompanyId = ref<string | null>(companies.value.length > 0 ? companies.value[0].id : null);
+const auth = useAuth();
 
 onMounted(() => {
     // Build default value
-})
-
+});
 
 function buildCustomer() {
     return PaymentCustomer.create({
         firstName: user.value?.firstName,
         lastName: user.value?.lastName,
         email: user.value?.email,
-        company: companies.value.find(c => c.id === selectedCompanyId.value) ?? (companies.value.length === 1 ? companies.value[0] : null) ?? null
-    })
+        company: companies.value.find(c => c.id === selectedCompanyId.value) ?? (companies.value.length === 1 ? companies.value[0] : null) ?? null,
+    });
 }
 
 async function editInvoiceSettings() {
     await present({
         components: [
             new ComponentWithProperties(
-                GeneralSettingsView
-            )
+                GeneralSettingsView,
+            ),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function goNext() {
     if (loading.value) {
-        return
+        return;
     }
 
-    loading.value = true
-    errors.errorBox = null
+    loading.value = true;
+    errors.errorBox = null;
 
     try {
         const customer = buildCustomer();
@@ -113,31 +115,33 @@ async function goNext() {
                 throw new SimpleError({
                     code: 'missing_field',
                     message: 'Stel je facturatiegegevens in voor je verder gaat',
-                    field: 'company'
-                })
+                    field: 'company',
+                });
             }
 
             throw new SimpleError({
                 code: 'missing_field',
                 message: 'Kies de juiste facturatiegegevens voor je verder gaat',
-                field: 'company'
-            })
+                field: 'company',
+            });
         }
 
         if (customer.company.name.length < 2 || !customer.company.address) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Deze facturatiegegevens zijn niet volledig. Bewerk ze en kijk ze na voor je verder gaat.',
-                field: 'company'
-            })
+                field: 'company',
+            });
         }
 
-        props.checkout.customer = customer
-        await props.saveHandler(navigate)
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
-    } finally {
-        loading.value = false
+        props.checkout.customer = customer;
+        await props.saveHandler(navigate);
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+    finally {
+        loading.value = false;
     }
 }
 

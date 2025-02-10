@@ -89,7 +89,7 @@
                                 <span class="icon user-admin-layer-1" />
                                 <span class="icon user-admin-layer-2 yellow" />
                             </span>
-                            <span v-else-if="hasNoRoles(admin)" v-tooltip="'Heeft geen rol'" class="icon layered">
+                            <span v-else-if="hasEmptyAccess(admin)" v-tooltip="'Heeft geen rol'" class="icon layered">
                                 <span class="icon user-blocked-layer-1" />
                                 <span class="icon user-blocked-layer-2 red" />
                             </span>
@@ -133,7 +133,7 @@ import { useAdmins } from './hooks/useAdmins';
 
 const me = useUser();
 const organization = useOrganization();
-const { sortedAdmins, sortedMembers, loading, reloadPromise, getPermissions } = useAdmins();
+const { sortedAdmins, sortedMembers, loading, reloadPromise, getPermissions, getUnloadedPermissions } = useAdmins();
 
 enum Routes {
     Roles = 'rollen',
@@ -223,10 +223,10 @@ const editAdmin = async (user: User) => {
 };
 
 const hasFullAccess = (user: User) => getPermissions(user)?.hasFullAccess() ?? false;
-const memberHasFullAccess = (member: PlatformMember) => !!member.patchedMember.users.find(u => u.memberId === member.id && hasFullAccess(u));
+const hasEmptyAccess = (user: User) => getPermissions(user)?.isEmpty ?? true;
 
-const hasNoRoles = (user: User) => (getPermissions(user)?.roles.length ?? 0) === 0;
-const memberHasNoRoles = (member: PlatformMember) => !!member.patchedMember.users.find(u => u.memberId === member.id && hasNoRoles(u));
+const memberHasFullAccess = (member: PlatformMember) => !!member.patchedMember.users.find(u => u.memberId === member.id && hasFullAccess(u));
+const memberHasNoRoles = (member: PlatformMember) => !!member.patchedMember.users.find(u => u.memberId === member.id && hasEmptyAccess(u));
 
 const permissionList = (user: User) => {
     const list: string[] = [];
@@ -239,7 +239,7 @@ const permissionList = (user: User) => {
         list.push('Hoofdbeheerders');
     }
 
-    for (const role of permissions.roles) {
+    for (const role of getUnloadedPermissions(user)?.roles ?? []) {
         list.push(role.name);
     }
 

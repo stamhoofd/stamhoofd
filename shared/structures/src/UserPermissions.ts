@@ -1,5 +1,6 @@
 import { AutoEncoder, AutoEncoderPatchType, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
+import { AccessRightHelper } from './AccessRight.js';
 import { LoadedPermissions } from './LoadedPermissions.js';
 import { MemberResponsibility } from './MemberResponsibility.js';
 import { PermissionLevel } from './PermissionLevel.js';
@@ -7,8 +8,6 @@ import { PermissionRoleDetailed, PermissionRoleForResponsibility } from './Permi
 import { Permissions } from './Permissions.js';
 import { PermissionsResourceType } from './PermissionsResourceType.js';
 import { Platform } from './Platform.js';
-import { ResourcePermissions } from './ResourcePermissions.js';
-import { AccessRight, AccessRightHelper } from './AccessRight.js';
 
 export type OrganizationForPermissionCalculation = {
     id: string;
@@ -41,43 +40,40 @@ export class UserPermissions extends AutoEncoder {
         }
 
         const platformRoles = platform.getRoles();
-        return LoadedPermissions.from(
+        const base = LoadedPermissions.from(
             this.globalPermissions,
             platformRoles,
             [],
             platform.config.responsibilities,
         );
+
+        if (base.hasFullAccess()) {
+            // Since the prohibited organization level access rights are not automatically
+            // inherited if you have full access, we'll need to add them manually for full platform admins
+            base.add(
+                LoadedPermissions.create({
+                    level: PermissionLevel.Full,
+                    accessRights: [...AccessRightHelper.prohibitedOrganizationLevelAccessRights()],
+                }),
+            );
+        }
+
+        return base;
     }
 
     forOrganization(organization: OrganizationForPermissionCalculation, platform?: Platform | null): LoadedPermissions | null {
-        let base: ResourcePermissions | null = null;
+        const base: LoadedPermissions = LoadedPermissions.create({});
 
         if (platform) {
             const platformPermissions = this.forPlatform(platform);
 
             if (platformPermissions) {
-                if (platformPermissions.hasFullAccess()) {
-                    const role = PermissionRoleDetailed.create({
-                        id: 'platform-admin',
-                        name: 'Platform hoofdbeheerder',
-                        accessRights: [...AccessRightHelper.prohibitedOrganizationLevelAccessRights()],
-                    });
-
-                    // Special case: if you have full access to the platform, you'll also get all access rights that aren't automatically granted for full level access
-                    // this isn't automatically granted if you give full access to a tag
-                    const pp = Permissions.create({
-                        level: PermissionLevel.Full,
-                        roles: [role],
-                    });
-                    return LoadedPermissions.from(pp, [role], [], []);
-                }
-
                 const tags = organization.meta.tags.length === 0 ? [''] : organization.meta.tags;
 
                 for (const tag of tags) {
                     const rp = platformPermissions.getMergedResourcePermissions(PermissionsResourceType.OrganizationTags, tag);
                     if (rp) {
-                        base = base ? base.merge(rp) : rp;
+                        base.add(rp);
                     }
                 }
             }
@@ -85,30 +81,13 @@ export class UserPermissions extends AutoEncoder {
 
         const specific = this.forWithoutInherit(organization);
 
-        if (base) {
-            const roleWithBaseAccessRights: PermissionRoleDetailed[] = base.accessRights.length > 0
-                ? [PermissionRoleDetailed.create({
-                        accessRights: base.accessRights,
-                    })]
-                : [];
-
-            const p = LoadedPermissions.from(
-                Permissions.create({
-                    level: base.level,
-                    roles: roleWithBaseAccessRights,
-                }),
-                roleWithBaseAccessRights,
-                [],
-                [],
-            );
-
-            if (!specific) {
-                return p;
+        if (!specific) {
+            if (base.isEmpty) {
+                return null;
             }
-
-            return specific.merge(p);
+            return base;
         }
-
+        specific.add(base);
         return specific;
     }
 
@@ -193,8 +172,11 @@ export class UserPermissions extends AutoEncoder {
                 }
                 else {
                     if (o && o.length) {
-                        // Not allowed to delete
-                        return old;
+                        // Keep responsibilities
+                        const kept = Permissions.create({
+                            responsibilities: o,
+                        });
+                        updated.organizationPermissions.set(organizationId, kept);
                     }
                 }
 
@@ -206,7 +188,7 @@ export class UserPermissions extends AutoEncoder {
         }
         else {
             // Only allow to set the permissions for the organization in scope
-            if (patch.organizationPermissions.get(organizationId)) {
+            if (patch.organizationPermissions.get(organizationId) !== undefined) {
                 const clonedPatch = UserPermissions.patch({});
                 clonedPatch.organizationPermissions.set(organizationId, patch.organizationPermissions.get(organizationId));
                 const updated = old ? old.patch(clonedPatch) : UserPermissions.create({}).patch(clonedPatch);
@@ -219,8 +201,11 @@ export class UserPermissions extends AutoEncoder {
                 }
                 else {
                     if (o && o.length) {
-                        // Not allowed to delete
-                        return old;
+                        // Keep responsibilities
+                        const kept = Permissions.create({
+                            responsibilities: o,
+                        });
+                        updated.organizationPermissions.set(organizationId, kept);
                     }
                 }
 

@@ -127,8 +127,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
                         const moreTab = new TabBarItemGroup({
                             icon: 'category',
                             name: 'Meer',
-                            items: [
-                            ],
+                            items: [],
                         });
 
                         if (reactiveSession.auth.hasFullAccess()) {

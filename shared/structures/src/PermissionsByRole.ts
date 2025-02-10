@@ -1,4 +1,4 @@
-import { AutoEncoder, field, ArrayDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field } from '@simonbackx/simple-encoding';
 import { PermissionLevel, getPermissionLevelNumber } from './PermissionLevel.js';
 import { PermissionRole } from './PermissionRole.js';
 
@@ -16,40 +16,6 @@ export class PermissionsByRole extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(PermissionRole) })
     full: PermissionRole[] = [];
-
-    getPermissionLevel(permissions: import('./LoadedPermissions.js').LoadedPermissions): PermissionLevel {
-        if (permissions.hasFullAccess()) {
-            return PermissionLevel.Full;
-        }
-
-        for (const role of this.full) {
-            if (permissions.roles.find(r => r.id === role.id)) {
-                return PermissionLevel.Full;
-            }
-        }
-
-        if (permissions.hasWriteAccess()) {
-            return PermissionLevel.Write;
-        }
-
-        for (const role of this.write) {
-            if (permissions.roles.find(r => r.id === role.id)) {
-                return PermissionLevel.Write;
-            }
-        }
-
-        if (permissions.hasReadAccess()) {
-            return PermissionLevel.Read;
-        }
-
-        for (const role of this.read) {
-            if (permissions.roles.find(r => r.id === role.id)) {
-                return PermissionLevel.Read;
-            }
-        }
-
-        return PermissionLevel.None;
-    }
 
     /**
      * Whetever a given user has access to the members in this group.
@@ -75,26 +41,7 @@ export class PermissionsByRole extends AutoEncoder {
         return PermissionLevel.None;
     }
 
-    hasAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | undefined | null, level: PermissionLevel): boolean {
-        if (!permissions) {
-            return false;
-        }
-        return getPermissionLevelNumber(this.getPermissionLevel(permissions)) >= getPermissionLevelNumber(level);
-    }
-
     roleHasAccess(role: PermissionRole, level: PermissionLevel = PermissionLevel.Read): boolean {
         return getPermissionLevelNumber(this.getRolePermissionLevel(role)) >= getPermissionLevelNumber(level);
-    }
-
-    hasFullAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | undefined | null): boolean {
-        return this.hasAccess(permissions, PermissionLevel.Full);
-    }
-
-    hasWriteAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | undefined | null): boolean {
-        return this.hasAccess(permissions, PermissionLevel.Write);
-    }
-
-    hasReadAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | undefined | null): boolean {
-        return this.hasAccess(permissions, PermissionLevel.Read);
     }
 }

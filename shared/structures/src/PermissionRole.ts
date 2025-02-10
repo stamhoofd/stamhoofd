@@ -55,12 +55,24 @@ export class PermissionRoleDetailed extends PermissionRole {
     })
     resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = new Map();
 
+    /**
+     * @deprecated
+     * Required for migration
+     */
     @field({ decoder: BooleanDecoder, field: 'managePayments', optional: true })
     legacyManagePayments = false;
 
+    /**
+     * @deprecated
+     * Required for migration
+     */
     @field({ decoder: BooleanDecoder, version: 199, field: 'financeDirector', optional: true })
     legacyFinanceDirector = false;
 
+    /**
+     * @deprecated
+     * Required for migration
+     */
     @field({ decoder: BooleanDecoder, field: 'createWebshops', optional: true })
     legacyCreateWebshops = false;
 

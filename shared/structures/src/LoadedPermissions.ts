@@ -1,9 +1,11 @@
+import { Formatter } from '@stamhoofd/utility';
 import { AccessRight, AccessRightHelper } from './AccessRight.js';
 import { MemberResponsibility } from './MemberResponsibility.js';
+import { MemberResponsibilityRecordBase } from './members/MemberResponsibilityRecord.js';
 import { PermissionLevel, getPermissionLevelNumber } from './PermissionLevel.js';
-import { PermissionRole, PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole.js';
+import { PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole.js';
 import { Permissions } from './Permissions.js';
-import { PermissionsResourceType } from './PermissionsResourceType.js';
+import { getPermissionResourceTypeName, PermissionsResourceType } from './PermissionsResourceType.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 
 /**
@@ -11,10 +13,10 @@ import { ResourcePermissions } from './ResourcePermissions.js';
  */
 export class LoadedPermissions {
     level: PermissionLevel = PermissionLevel.None;
-    roles: PermissionRoleDetailed[] = [];
-    resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = new Map();
+    resources: Map<PermissionsResourceType, Map<string, LoadedPermissions>> = new Map();
+    accessRights: AccessRight[] = [];
 
-    constructor(data: Partial<LoadedPermissions>) {
+    private constructor(data: Partial<LoadedPermissions>) {
         Object.assign(this, data);
     }
 
@@ -22,72 +24,129 @@ export class LoadedPermissions {
         return new LoadedPermissions(data);
     }
 
-    static buildRoleForResponsibility(groupId: string | null, responsibilityData: MemberResponsibility, inheritedResponsibilityRoles: PermissionRoleForResponsibility[]) {
-        const role = inheritedResponsibilityRoles.find(r => r.responsibilityId === responsibilityData.id && r.responsibilityGroupId === groupId);
-
-        const r = responsibilityData.permissions?.clone() ?? PermissionRoleForResponsibility.create({
-            id: responsibilityData.id,
-            name: responsibilityData.name,
-            level: PermissionLevel.None,
-            responsibilityId: responsibilityData.id,
-            responsibilityGroupId: groupId,
+    static fromResource(permissions: ResourcePermissions) {
+        return LoadedPermissions.create({
+            level: permissions.level,
             resources: new Map(),
+            accessRights: permissions.accessRights,
+        });
+    }
+
+    clone() {
+        const permissions = LoadedPermissions.create({
+            level: this.level,
+            resources: new Map(),
+            accessRights: this.accessRights,
         });
 
-        r.name = responsibilityData.name;
-        r.id = responsibilityData.id + (groupId ? '-' + groupId : '');
-        r.responsibilityId = responsibilityData.id;
-        r.responsibilityGroupId = groupId;
+        for (const [type, r] of this.resources) {
+            if (!permissions.resources.has(type)) {
+                permissions.resources.set(type, new Map());
+            }
+            for (const [id, resource] of r) {
+                permissions.resources.get(type)!.set(id, resource.clone());
+            }
+        }
 
-        if (groupId && responsibilityData.groupPermissionLevel !== PermissionLevel.None) {
-            const map: Map<string, ResourcePermissions> = new Map();
-            map.set(groupId, ResourcePermissions.create({ level: responsibilityData.groupPermissionLevel }));
-            r.resources.set(PermissionsResourceType.Groups, map);
+        return permissions;
+    }
+
+    static fromRole(role: PermissionRoleDetailed) {
+        const permissions = LoadedPermissions.create({
+            level: role.level,
+            resources: new Map(),
+            accessRights: role.accessRights,
+        });
+
+        for (const [type, r] of role.resources) {
+            if (!permissions.resources.has(type)) {
+                permissions.resources.set(type, new Map());
+            }
+            for (const [id, resource] of r) {
+                permissions.resources.get(type)!.set(id, LoadedPermissions.fromResource(resource));
+            }
         }
+
+        return permissions;
+    }
+
+    static fromResponsibilityRecord(responsibilityRecord: MemberResponsibilityRecordBase, inheritedResponsibilityRoles: PermissionRoleForResponsibility[], allResponsibilites: MemberResponsibility[]) {
+        const responsibility = allResponsibilites.find(r => r.id === responsibilityRecord.responsibilityId);
+        if (!responsibility) {
+            return LoadedPermissions.create({});
+        }
+        return this.fromResponsibility(responsibility, responsibilityRecord.groupId, inheritedResponsibilityRoles);
+    }
+
+    /**
+     * old name: buildRoleForResponsibility
+     */
+    static fromResponsibility(responsibility: MemberResponsibility, groupId: string | null, inheritedResponsibilityRoles: PermissionRoleForResponsibility[]) {
+        const permissions = responsibility.permissions
+            ? this.fromRole(responsibility.permissions)
+            : LoadedPermissions.create({});
+
+        if (groupId && responsibility.groupPermissionLevel !== PermissionLevel.None) {
+            const map: Map<string, LoadedPermissions> = new Map();
+            map.set(groupId, LoadedPermissions.create({ level: responsibility.groupPermissionLevel }));
+            permissions.resources.set(PermissionsResourceType.Groups, map);
+        }
+
+        const role = inheritedResponsibilityRoles.find(r => r.responsibilityId === responsibility.id && r.responsibilityGroupId === groupId);
+
         if (role) {
-            r.id = role.id;
-            r.add(role);
+            permissions.add(LoadedPermissions.fromRole(role));
         }
-        return r;
+
+        return permissions;
     }
 
     static from(permissions: Permissions, allRoles: PermissionRoleDetailed[], inheritedResponsibilityRoles: PermissionRoleForResponsibility[], allResponsibilites: MemberResponsibility[]) {
-        const roles = permissions.roles.flatMap((role) => {
-            const d = allRoles.find(a => a.id === role.id);
-            if (d) {
-                return [d];
-            }
-            return [];
+        const loaded = LoadedPermissions.create({
+            level: permissions.level,
+            accessRights: [],
+            resources: new Map(),
         });
 
-        for (const responsibility of permissions.responsibilities) {
-            if (responsibility.endDate !== null && responsibility.endDate < new Date()) {
-                continue;
+        for (const [type, r] of permissions.resources) {
+            if (!loaded.resources.has(type)) {
+                loaded.resources.set(type, new Map());
             }
-
-            if (responsibility.startDate > new Date()) {
-                continue;
+            for (const [id, resource] of r) {
+                loaded.resources.get(type)!.set(id, LoadedPermissions.fromResource(resource));
             }
-
-            const responsibilityData = allResponsibilites.find(r => r.id === responsibility.responsibilityId);
-            if (!responsibilityData) {
-                continue;
-            }
-
-            const r = this.buildRoleForResponsibility(responsibility.groupId, responsibilityData, inheritedResponsibilityRoles);
-            roles.push(r);
         }
 
-        const result = this.create({
-            level: permissions.level,
-            roles,
-            resources: permissions.resources,
-        });
+        for (const roleRecord of permissions.roles) {
+            const role = allRoles.find(a => a.id === roleRecord.id);
 
-        return result;
+            if (role) {
+                loaded.add(LoadedPermissions.fromRole(role));
+            }
+        }
+
+        for (const responsibilityRecord of permissions.responsibilities) {
+            if (responsibilityRecord.endDate !== null && responsibilityRecord.endDate < new Date()) {
+                continue;
+            }
+
+            if (responsibilityRecord.startDate > new Date()) {
+                continue;
+            }
+
+            const responsibility = allResponsibilites.find(r => r.id === responsibilityRecord.responsibilityId);
+            if (!responsibility) {
+                continue;
+            }
+
+            const r = this.fromResponsibility(responsibility, responsibilityRecord.groupId, inheritedResponsibilityRoles);
+            loaded.add(r);
+        }
+
+        return loaded;
     }
 
-    getResourcePermissions(type: PermissionsResourceType, id: string): ResourcePermissions | null {
+    getResourcePermissions(type: PermissionsResourceType, id: string): LoadedPermissions | null {
         const resource = this.resources.get(type);
         if (!resource) {
             return null;
@@ -108,45 +167,24 @@ export class LoadedPermissions {
         return rInstance;
     }
 
-    getMergedResourcePermissions(type: PermissionsResourceType, id: string): ResourcePermissions | null {
-        let base = this.getResourcePermissions(type, id);
+    getMergedResourcePermissions(type: PermissionsResourceType, id: string): LoadedPermissions {
+        const clone = this.clone();
 
-        for (const role of this.roles) {
-            const r = role.getMergedResourcePermissions(type, id);
-            if (r) {
-                if (base) {
-                    base.merge(r);
-                }
-                else {
-                    base = r;
-                }
-            }
+        // Remove this type from resources
+        clone.resources.delete(type);
+
+        const r = this.getResourcePermissions(type, id);
+        if (r) {
+            clone.add(r);
         }
 
-        if (getPermissionLevelNumber(this.level) > getPermissionLevelNumber(base?.level ?? PermissionLevel.None)) {
-            if (!base) {
-                base = ResourcePermissions.create({ level: this.level });
-            }
-            base.level = this.level;
-        }
-
-        return base;
-    }
-
-    hasRole(role: PermissionRole): boolean {
-        return this.roles.find(r => r.id === role.id) !== undefined;
+        return clone;
     }
 
     hasAccess(level: PermissionLevel): boolean {
         if (getPermissionLevelNumber(this.level) >= getPermissionLevelNumber(level)) {
             // Someone with read / write access for the whole organization, also the same access for each group
             return true;
-        }
-
-        for (const f of this.roles) {
-            if (f.hasAccess(level)) {
-                return true;
-            }
         }
 
         return false;
@@ -161,12 +199,6 @@ export class LoadedPermissions {
             return true;
         }
 
-        for (const r of this.roles) {
-            if (r.hasResourceAccess(type, id, level)) {
-                return true;
-            }
-        }
-
         return false;
     }
 
@@ -177,12 +209,6 @@ export class LoadedPermissions {
 
         if (this.getResourcePermissions(type, id)?.hasAccessRight(right) ?? false) {
             return true;
-        }
-
-        for (const r of this.roles) {
-            if (r.hasResourceAccessRight(type, id, right)) {
-                return true;
-            }
         }
 
         const autoInherit = AccessRightHelper.autoInheritFrom(right);
@@ -212,12 +238,6 @@ export class LoadedPermissions {
             }
         }
 
-        for (const r of this.roles) {
-            if (r.hasAccessRightForSomeResource(type, right)) {
-                return true;
-            }
-        }
-
         return false;
     }
 
@@ -235,13 +255,8 @@ export class LoadedPermissions {
 
     hasAccessRight(right: AccessRight): boolean {
         const gl = AccessRightHelper.autoGrantRightForLevel(right);
-        if (gl && this.hasAccess(gl)) {
+        if ((gl && this.hasAccess(gl)) || this.accessRights.includes(right)) {
             return true;
-        }
-        for (const f of this.roles) {
-            if (f.hasAccessRight(right)) {
-                return true;
-            }
         }
 
         const autoInherit = AccessRightHelper.autoInheritFrom(right);
@@ -254,45 +269,43 @@ export class LoadedPermissions {
         return false;
     }
 
-    merge(other: LoadedPermissions): LoadedPermissions {
-        const p = LoadedPermissions.create({});
-        p.level = this.level;
-        p.roles = this.roles.slice();
-        p.resources = new Map(this.resources);
+    add(other: LoadedPermissions) {
+        if (getPermissionLevelNumber(other.level) > getPermissionLevelNumber(this.level)) {
+            this.level = other.level;
+        }
 
-        if (getPermissionLevelNumber(other.level) > getPermissionLevelNumber(p.level)) {
-            p.level = other.level;
+        for (const right of other.accessRights) {
+            if (!this.accessRights.includes(right)) {
+                this.accessRights.push(right);
+            }
         }
 
         for (const [type, r] of other.resources) {
             for (const [id, resource] of r) {
-                if (!p.resources.has(type)) {
-                    p.resources.set(type, new Map());
+                if (!this.resources.has(type)) {
+                    this.resources.set(type, new Map());
                 }
 
-                const current = p.resources.get(type)!.get(id);
+                const current = this.resources.get(type)!.get(id);
                 if (!current) {
-                    p.resources.get(type)!.set(id, resource);
+                    this.resources.get(type)!.set(id, resource);
                 }
                 else {
-                    p.resources.get(type)!.set(id, current.merge(resource));
+                    current.add(resource);
                 }
             }
         }
+    }
 
-        for (const role of other.roles) {
-            const current = p.roles.find(r => r.id === role.id);
-            if (!current) {
-                p.roles.push(role);
-            }
-        }
-        return p;
+    merge(other: LoadedPermissions): LoadedPermissions {
+        const cloned = this.clone();
+        cloned.add(other);
+        return cloned;
     }
 
     removeAccessRights(rights: AccessRight[]) {
-        for (const role of this.roles) {
-            role.removeAccessRights(rights);
-        }
+        this.accessRights = this.accessRights.filter(r => !rights.includes(r));
+
         for (const resource of this.resources.values()) {
             for (const r of resource.values()) {
                 r.removeAccessRights(rights);
@@ -301,6 +314,59 @@ export class LoadedPermissions {
     }
 
     get isEmpty() {
-        return this.level === PermissionLevel.None && (this.roles.length === 0 || this.roles.every(r => r.isEmpty)) && this.resources.size === 0;
+        if (this.accessRights.length || this.level !== PermissionLevel.None) {
+            return false;
+        }
+
+        for (const resource of this.resources.values()) {
+            for (const r of resource.values()) {
+                if (!r.isEmpty) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    getDescription() {
+        const stack: string[] = [];
+        if (this.level === PermissionLevel.Read) {
+            stack.push('alles lezen');
+        }
+        if (this.level === PermissionLevel.Write) {
+            stack.push('alles bewerken');
+        }
+        if (this.level === PermissionLevel.Full) {
+            stack.push('volledige toegang');
+        }
+
+        for (const right of this.accessRights) {
+            stack.push(AccessRightHelper.getDescription(right));
+        }
+
+        for (const [type, resources] of this.resources) {
+            let count = 0;
+
+            if (resources.has('')) {
+                stack.push('alle ' + getPermissionResourceTypeName(type, true));
+                continue;
+            }
+
+            for (const resource of resources.values()) {
+                if (resource.hasAccess(PermissionLevel.Read) || resource.accessRights.length > 0) {
+                    count += 1;
+                }
+            }
+
+            if (count > 0) {
+                stack.push(count + ' ' + getPermissionResourceTypeName(type, count > 1));
+            }
+        }
+
+        if (stack.length === 0) {
+            return 'geen rechten';
+        }
+
+        return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' en '));
     }
 }
