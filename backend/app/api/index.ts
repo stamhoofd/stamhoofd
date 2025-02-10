@@ -13,6 +13,7 @@ import { sleep } from '@stamhoofd/utility';
 import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { Platform } from '@stamhoofd/models';
 import { resumeEmails } from './src/helpers/EmailResumer';
+import { GlobalHelper } from './src/helpers/GlobalHelper';
 import { SetupStepUpdater } from './src/helpers/SetupStepUpdater';
 import { ContextMiddleware } from './src/middleware/ContextMiddleware';
 import { AuditLogService } from './src/services/AuditLogService';
@@ -53,6 +54,7 @@ const start = async () => {
     console.log('Running server at v' + Version);
     loadLogger();
     await I18n.load();
+    GlobalHelper.load();
     const router = new Router();
     await router.loadAllEndpoints(__dirname + '/src/endpoints/global/*');
     await router.loadAllEndpoints(__dirname + '/src/endpoints/admin/*');

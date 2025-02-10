@@ -10,6 +10,16 @@ export function useTranslate(): typeof I18n.prototype.$t {
     return i18n ? i18n.$t.bind(i18n) : k => 'i18n missing';
 }
 
+function setGlobalTranslateFunction(i18n: I18n) {
+    if (i18n) {
+        (window as any).$t = (key: string, replace?: Record<string, string>) => i18n.$t.bind(i18n)(key, replace);
+        return;
+    }
+
+    (window as any).$t = (_key: string, _replace?: Record<string, string>) => 'i18n missing';
+    return;
+}
+
 export class I18nController {
     static i18n: I18n = import.meta.hot?.data?.i18n ?? undefined;
     static shared: I18nController = import.meta.hot?.data?.shared ?? undefined;
@@ -57,7 +67,10 @@ export class I18nController {
         if (this.i18n) {
             return this.i18n;
         }
-        this.i18n = new I18n();
+        const i18n = new I18n();
+        setGlobalTranslateFunction(i18n);
+        this.i18n = i18n;
+
         if (import.meta.hot) {
             import.meta.hot.data.i18n = this.i18n;
         }

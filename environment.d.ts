@@ -243,4 +243,6 @@ declare global {
     }
     
     type FrontendEnvironment = SharedEnvironment & FrontendSpecificEnvironment
+
+    const $t: (key: string, replace?: Record<string, string>) => string
 }
