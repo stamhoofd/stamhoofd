@@ -80,13 +80,7 @@
                 </STListItem>
             </STList>
 
-            <div v-for="category in recordCategories" :key="'category-'+category.id" class="container">
-                <hr>
-                <h2>
-                    {{ category.name }}
-                </h2>
-                <ViewRecordCategoryAnswersBox :category="category" :value="document" />
-            </div>
+            <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="document" />
         </main>
     </div>
 </template>

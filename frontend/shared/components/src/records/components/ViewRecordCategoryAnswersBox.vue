@@ -1,24 +1,31 @@
 <template>
-    <dl class="details-grid hover">
-        <template v-for="{record, answer, recordCheckboxAnswer} of recordsWithAnswers" :key="record.id">
-            <dt class="center">
-                {{ record.name }}
-            </dt>
-            <dd v-if="!answer">
-                /
-            </dd>
-            <template v-else-if="recordCheckboxAnswer">
-                <dd class="center icons">
-                    <span v-if="recordCheckboxAnswer.selected" class="icon success primary" />
-                    <span v-else class="icon canceled gray" />
+    <div class="container">
+        <hr>
+        <h2>
+            {{ category.name }}
+            <slot name="title-suffix" />
+        </h2>
+        <dl class="details-grid hover">
+            <template v-for="{record, answer, recordCheckboxAnswer} of recordsWithAnswers" :key="record.id">
+                <dt class="center">
+                    {{ record.name }}
+                </dt>
+                <dd v-if="!answer">
+                    /
                 </dd>
-                <dd v-if="recordCheckboxAnswer.comments" :key="'dd-description-'+record.id" class="description pre-wrap" v-text="recordCheckboxAnswer.comments" />
+                <template v-else-if="recordCheckboxAnswer">
+                    <dd class="center icons">
+                        <span v-if="recordCheckboxAnswer.selected" class="icon success primary" />
+                        <span v-else class="icon canceled gray" />
+                    </dd>
+                    <dd v-if="recordCheckboxAnswer.comments" :key="'dd-description-'+record.id" class="description pre-wrap" v-text="recordCheckboxAnswer.comments" />
+                </template>
+                <dd v-else v-copyable>
+                    {{ answer.stringValue }}
+                </dd>
             </template>
-            <dd v-else v-copyable>
-                {{ answer.stringValue }}
-            </dd>
-        </template>
-    </dl>
+        </dl>
+    </div>
 </template>
 
 <script lang="ts" setup generic="T extends ObjectWithRecords">

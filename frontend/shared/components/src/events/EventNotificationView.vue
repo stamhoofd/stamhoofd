@@ -60,43 +60,47 @@
                 </STListItem>
             </STList>
 
-            <hr>
-            <h2>Gegevens</h2>
-            <p>Vul de gegevens hieronder aan voor je de kampmelding indient.</p>
+            <template v-if="notification.status === EventNotificationStatus.Draft">
+                <hr>
+                <h2>Gegevens</h2>
+                <p>Vul de gegevens hieronder aan voor je de kampmelding indient.</p>
 
-            <!-- For each record category: a new view -->
-            <STList>
-                <STListItem v-for="category of recordCategories" :key="category.id" :selectable="isEnabled(category)" :disabled="!isEnabled(category)" @click="editRecordCategory(category)">
-                    <template #left>
-                        <IconContainer :icon="'file-filled'" :class="getRecordCategoryProgress(category) === 1 ? 'success' : 'gray'">
-                            <template #aside>
-                                <ProgressIcon :icon="getRecordCategoryProgress(category) === 1 ? 'success' : undefined" :progress="getRecordCategoryProgress(category)" />
-                            </template>
-                        </IconContainer>
-                    </template>
-                    <h3 class="style-title-list">
-                        {{ category.name }}
-                    </h3>
-                    <p v-if="getRecordCategoryProgress(category) === 0" class="style-description">
-                        Nog niet ingevuld
-                    </p>
-                    <p v-else-if="getRecordCategoryProgress(category) === 1" class="style-description">
-                        Volledig ingevuld
-                    </p>
-                    <p v-else class="style-description">
-                        Onvolledig
-                    </p>
+                <!-- For each record category: a new view -->
+                <STList>
+                    <STListItem v-for="category of recordCategories" :key="category.id" :selectable="isEnabled(category)" :disabled="!isEnabled(category)" @click="editRecordCategory(category)">
+                        <template #left>
+                            <IconContainer :icon="'file-filled'" :class="getRecordCategoryProgress(category) === 1 ? 'success' : 'gray'">
+                                <template #aside>
+                                    <ProgressIcon :icon="getRecordCategoryProgress(category) === 1 ? 'success' : undefined" :progress="getRecordCategoryProgress(category)" />
+                                </template>
+                            </IconContainer>
+                        </template>
+                        <h3 class="style-title-list">
+                            {{ category.name }}
+                        </h3>
+                        <p v-if="getRecordCategoryProgress(category) === 0" class="style-description">
+                            Nog niet ingevuld
+                        </p>
+                        <p v-else-if="getRecordCategoryProgress(category) === 1" class="style-description">
+                            Volledig ingevuld
+                        </p>
+                        <p v-else class="style-description">
+                            Onvolledig
+                        </p>
 
-                    <template #right>
-                        <span v-if="isEnabled(category)" class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-            </STList>
+                        <template #right>
+                            <span v-if="isEnabled(category)" class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+                </STList>
+            </template>
+
+            <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="notification" />
         </main>
 
-        <STToolbar>
+        <STToolbar v-if="notification.status === EventNotificationStatus.Draft">
             <template #right>
-                <LoadingButton v-if="notification.status === EventNotificationStatus.Draft" :loading="isSaving">
+                <LoadingButton :loading="isSaving">
                     <button class="button primary" :disabled="!isComplete" type="button" @click="doSubmit">
                         <span class="icon success" />
                         <span>Indienen</span>
@@ -109,7 +113,7 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, IconContainer, ProgressIcon } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, IconContainer, ProgressIcon, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
 import { EventNotification, EventNotificationStatus, RecordCategory } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useErrors } from '../errors/useErrors';

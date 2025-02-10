@@ -138,7 +138,7 @@
                                     {{ order.number }}
                                 </p>
                             </STListItem>
-                            <STListItem class="right-description" v-if="order.data.customer.name">
+                            <STListItem v-if="order.data.customer.name" class="right-description">
                                 <h3 class="style-definition-label">
                                     Naam
                                 </h3>
@@ -147,7 +147,7 @@
                                     {{ order.data.customer.name }}
                                 </p>
                             </STListItem>
-                            <STListItem class="right-description" v-if="order.data.customer.email">
+                            <STListItem v-if="order.data.customer.email" class="right-description">
                                 <h3 class="style-definition-label">
                                     E-mailadres
                                 </h3>
@@ -285,13 +285,7 @@
                             </STListItem>
                         </STList>
 
-                        <div v-for="category in recordCategories" :key="'category-'+category.id" class="container">
-                            <hr>
-                            <h2>
-                                {{ category.name }}
-                            </h2>
-                            <ViewRecordCategoryAnswersBox :category="category" :value="order.data" />
-                        </div>
+                        <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id"  :category="category" :value="order.data" />
 
                         <div v-if="order.data.checkoutMethod && order.data.checkoutMethod.description" class="container">
                             <hr>

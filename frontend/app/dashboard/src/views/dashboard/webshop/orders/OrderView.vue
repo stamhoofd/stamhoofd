@@ -277,13 +277,7 @@
                 </button>
             </div>
 
-            <div v-for="category in recordCategories" :key="'category-'+category.id" class="container">
-                <hr>
-                <h2>
-                    {{ category.name }}
-                </h2>
-                <ViewRecordCategoryAnswersBox :category="category" :value="order.data" />
-            </div>
+            <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="order.data" />
 
             <div v-if="order.data.checkoutMethod && order.data.checkoutMethod.description" class="container">
                 <hr>
@@ -351,7 +345,7 @@ useArrowUpDown({
 });
 
 const webshop = computed(() => props.webshopManager.webshop);
-const auth = useAuth()
+const auth = useAuth();
 
 props.webshopManager.loadWebshopIfNeeded().catch(console.error);
 
@@ -556,7 +550,7 @@ function editComments() {
 }
 
 async function onOrdersDeleted(orders: PrivateOrder[]): Promise<void> {
-    if(orders.some(o => o.id === props.initialOrder.id)) {
+    if (orders.some(o => o.id === props.initialOrder.id)) {
         await pop();
     }
 }

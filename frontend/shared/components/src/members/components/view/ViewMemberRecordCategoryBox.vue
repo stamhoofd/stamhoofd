@@ -1,14 +1,11 @@
 <template>
-    <div class="hover-box container">
-        <hr>
-        <h2>
-            {{ category.name }}
-            <span v-if="titleSuffix" class="title-suffix hover-show">
+    <ViewRecordCategoryAnswersBox :value="member" :category="category">
+        <template v-if="titleSuffix" #title-suffix>
+            <span class="title-suffix hover-show">
                 {{ titleSuffix }}
             </span>
-        </h2>
-        <ViewRecordCategoryAnswersBox :value="member" :category="category" />
-    </div>
+        </template>
+    </ViewRecordCategoryAnswersBox>
 </template>
 
 <script setup lang="ts">

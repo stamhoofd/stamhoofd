@@ -244,13 +244,7 @@
                 </STListItem>
             </STList>
 
-            <div v-for="category in recordCategories" :key="'category-'+category.id" class="container">
-                <hr>
-                <h2>
-                    {{ category.name }}
-                </h2>
-                <ViewRecordCategoryAnswersBox :category="category" :value="order.data" />
-            </div>
+            <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="order.data" />
 
             <div v-if="order.data.comments" class="container">
                 <hr>

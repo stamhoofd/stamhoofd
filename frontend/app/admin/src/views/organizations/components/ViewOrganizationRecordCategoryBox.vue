@@ -1,11 +1,5 @@
 <template>
-    <div class="hover-box container">
-        <hr>
-        <h2>
-            {{ category.name }}
-        </h2>
-        <ViewRecordCategoryAnswersBox :value="organization" :category="category" />
-    </div>
+    <ViewRecordCategoryAnswersBox :value="organization" :category="category" />
 </template>
 
 <script setup lang="ts">
