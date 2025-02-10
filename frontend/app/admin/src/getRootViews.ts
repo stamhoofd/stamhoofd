@@ -7,6 +7,7 @@ import { computed } from 'vue';
 import ChargeMembershipsView from './views/finances/ChargeMembershipsView.vue';
 import OrganizationsMenu from './views/organizations/OrganizationsMenu.vue';
 import EventNotificationsTableView from './views/event-notifications/EventNotificationsTableView.vue';
+import { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
     return new ComponentWithProperties(ModalStackComponent, { root: component, initialPresents });
@@ -111,16 +112,6 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
         component: settingsView,
     });
 
-    const moreTab = new TabBarItemGroup({
-        icon: 'category',
-        name: 'Meer',
-        items: [
-            settingsTab,
-            financesTab,
-        ],
-    });
-    let added = false;
-
     return wrapContext(reactiveSession, 'admin', wrapWithModalStack(
         new ComponentWithProperties(AuthenticatedView, {
             root: wrapWithModalStack(
@@ -133,19 +124,29 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
                             calendarTab,
                         ];
 
-                        if (!added && manualFeatureFlag('audit-logs', reactiveSession)) {
-                            // Feature is still in development so not visible for everyone
-                            moreTab.items.push(auditLogsTab);
+                        const moreTab = new TabBarItemGroup({
+                            icon: 'category',
+                            name: 'Meer',
+                            items: [
+                            ],
+                        });
+
+                        if (reactiveSession.auth.hasFullAccess()) {
+                            moreTab.items.push(settingsTab);
+                            moreTab.items.push(financesTab);
+
+                            if (manualFeatureFlag('audit-logs', reactiveSession)) {
+                                // Feature is still in development so not visible for everyone
+                                moreTab.items.push(auditLogsTab);
+                            }
                         }
 
-                        if (!added && manualFeatureFlag('event-notifications', reactiveSession)) {
+                        if (manualFeatureFlag('event-notifications', reactiveSession) && reactiveSession.auth.hasAccessRightForSomeResource(PermissionsResourceType.OrganizationTags, AccessRight.OrganizationEventNotificationReviewer)) {
                             // Feature is still in development so not visible for everyone
                             moreTab.items.push(eventNotificationsTab);
                         }
 
-                        added = true;
-
-                        if (reactiveSession.auth.hasPlatformFullAccess()) {
+                        if (moreTab.items.length > 0) {
                             tabs.push(moreTab);
                         }
 

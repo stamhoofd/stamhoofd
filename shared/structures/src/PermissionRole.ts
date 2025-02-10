@@ -229,7 +229,16 @@ export class PermissionRoleDetailed extends PermissionRole {
     }
 
     get isEmpty() {
-        return this.level === PermissionLevel.None && this.accessRights.length === 0 && this.resources.size === 0;
+        let resourcesEmpty = true;
+        for (const resource of this.resources.values()) {
+            for (const r of resource.values()) {
+                if (!r.isEmpty) {
+                    resourcesEmpty = false;
+                    break;
+                }
+            }
+        }
+        return this.level === PermissionLevel.None && this.accessRights.length === 0 && resourcesEmpty;
     }
 
     removeAccessRights(rights: AccessRight[]) {

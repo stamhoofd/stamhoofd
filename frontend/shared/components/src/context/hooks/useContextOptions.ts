@@ -3,7 +3,7 @@ import { Organization } from '@stamhoofd/structures';
 
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { PromiseComponent } from '../../containers/AsyncComponent';
-import { useOrganization, useUser } from '../../hooks';
+import { useOrganization, usePlatform, useUser } from '../../hooks';
 import { ReplaceRootEventBus } from '../../overlays/ModalStackEventBus';
 import { AppType, useAppContext } from '../appContext';
 
@@ -46,6 +46,7 @@ export function useContextOptions() {
     const $organization = useOrganization();
     const app = useAppContext();
     const $t = useTranslate();
+    const platform = usePlatform();
 
     const getRegistrationOption = async (): Promise<Option> => {
         const context = new SessionContext(null);
@@ -63,16 +64,18 @@ export function useContextOptions() {
         const opts: Option[] = [];
 
         if ($user.value && $user.value.organizationId === null && $user.value.permissions && $user.value.permissions.globalPermissions !== null) {
-            const context = new SessionContext(null);
-            await context.loadFromStorage();
+            if ($user.value.permissions?.forPlatform(platform.value)?.isEmpty !== false) {
+                const context = new SessionContext(null);
+                await context.loadFromStorage();
 
-            if (context.canGetCompleted()) {
-                opts.push({
-                    id: 'admin',
-                    organization: null,
-                    app: 'admin',
-                    context,
-                });
+                if (context.canGetCompleted()) {
+                    opts.push({
+                        id: 'admin',
+                        organization: null,
+                        app: 'admin',
+                        context,
+                    });
+                }
             }
         }
 

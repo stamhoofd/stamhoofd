@@ -82,4 +82,8 @@ export class ResourcePermissions extends AutoEncoder {
     removeAccessRights(rights: AccessRight[]) {
         this.accessRights = this.accessRights.filter(r => !rights.includes(r));
     }
+
+    get isEmpty() {
+        return this.level === PermissionLevel.None && this.accessRights.length === 0;
+    }
 }
