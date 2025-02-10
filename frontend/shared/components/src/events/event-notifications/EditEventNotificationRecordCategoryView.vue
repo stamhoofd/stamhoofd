@@ -59,9 +59,9 @@ async function saveDraft() {
     errors.errorBox = null;
     saving.value = true;
 
-    await saveModel(patch.value);
-
     try {
+        await saveModel(patch.value);
+
         if (props.skipHandler) {
             await props.skipHandler(navigationActions);
         }
