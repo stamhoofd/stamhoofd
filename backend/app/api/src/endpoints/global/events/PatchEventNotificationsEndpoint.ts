@@ -46,20 +46,8 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
         const notifications: EventNotification[] = [];
 
         for (const { put } of request.body.getPuts()) {
-            const notification = new EventNotification();
-
-            if (!organization) {
-                // Organization context is required when creating new event notifications
-
-                throw new SimpleError({
-                    code: 'invalid_field',
-                    message: 'Organization is required',
-                    human: 'Je moet een organisatie selecteren',
-                    field: 'organizationId',
-                });
-            }
-
             if (put.events.length === 0) {
+                // Required for authentication
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'At least one event is required',
@@ -67,11 +55,15 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 });
             }
 
+            const notification = new EventNotification();
+            notification.organizationId = put.organization.id;
+            notification.typeId = put.typeId;
+
             const validatedEvents: Event[] = [];
 
             for (const [index, event] of put.events.entries()) {
                 const model = await Event.getByID(event.id);
-                if (!model || model.organizationId !== organization.id) {
+                if (!model || model.organizationId !== notification.organizationId) {
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid event',
@@ -89,11 +81,10 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                     notification.endDate = model.endDate;
                 }
                 else {
-                    await this.validateEvent(notification, model);
+                    await this.validateEventDate(notification, model);
                 }
             }
 
-            notification.organizationId = organization.id;
             notification.recordAnswers = put.recordAnswers;
             notification.createdBy = user.id;
             notification.status = EventNotificationStatus.Draft;
@@ -157,7 +148,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
         );
     }
 
-    async validateEvent(notification: EventNotification, event: Event) {
+    async validateEventDate(notification: EventNotification, event: Event) {
         if (notification.startDate !== event.startDate) {
             throw new SimpleError({
                 code: 'invalid_field',

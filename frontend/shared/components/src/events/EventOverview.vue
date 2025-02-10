@@ -1,5 +1,5 @@
 <template>
-    <ExternalOrganizationContainer v-slot="{externalOrganization: groupOrganization}" :organization-id="event.organizationId" @update="setOrganization">
+    <ExternalOrganizationContainer v-slot="{externalOrganization: eventOrganization}" :organization-id="event.organizationId" @update="setOrganization">
         <div class="st-view event-overview">
             <STNavigationBar :title="title" />
 
@@ -107,7 +107,7 @@
                             </template>
                         </STListItem>
 
-                        <EventNotificationRow v-for="type of event.eventNotificationTypes" :key="type.id" class="container" :type="type" :event="event" />
+                        <EventNotificationRow v-if="eventOrganization" v-for="type of event.eventNotificationTypes" :key="type.id" class="container" :type="type" :event="event" :organization="eventOrganization" />
                     </STList>
                 </div>
                 <hr>
@@ -182,13 +182,13 @@ const platform = usePlatform();
 const pop = usePop();
 const auth = useAuth();
 
-const groupOrganization: Ref<Organization | null> = ref(null);
+const eventOrganization: Ref<Organization | null> = ref(null);
 
 function setOrganization(o: Organization) {
-    groupOrganization.value = o;
+    eventOrganization.value = o;
 }
 
-const canWriteEvent = computed(() => auth.canWriteEventForOrganization(props.event, groupOrganization.value));
+const canWriteEvent = computed(() => auth.canWriteEventForOrganization(props.event, eventOrganization.value));
 
 const levelPrefix = computed(() => {
     const prefixes: string[] = [];
@@ -203,12 +203,12 @@ const levelPrefix = computed(() => {
         }
     }
     else {
-        if (groupOrganization.value?.id === organization.value?.id) {
+        if (eventOrganization.value?.id === organization.value?.id) {
             // skip
         }
         else {
             // Name of the organization
-            prefixes.push(groupOrganization.value?.name ?? props.event.organizationId);
+            prefixes.push(eventOrganization.value?.name ?? props.event.organizationId);
         }
     }
 

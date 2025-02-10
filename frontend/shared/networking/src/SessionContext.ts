@@ -581,7 +581,7 @@ export class SessionContext implements RequestMiddleware {
         return server;
     }
 
-    getAuthenticatedServerForOrganization(organizationId: string) {
+    getAuthenticatedServerForOrganization(organizationId: string | null) {
         if (!this.hasToken()) {
             throw new Error('Could not get authenticated server without token');
         }

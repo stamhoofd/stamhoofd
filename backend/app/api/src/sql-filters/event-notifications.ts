@@ -31,7 +31,7 @@ export const eventNotificationsFilterCompilers: SQLFilterDefinitions = {
                     SQL.column('events', 'id'),
                 ),
             ).where(
-                SQL.column('_event_notifications_events', 'eventNotificationsId'),
+                SQL.column('_event_notifications_events', 'event_notificationsId'),
                 SQL.column('event_notifications', 'id'),
             ),
         eventFilterCompilers,

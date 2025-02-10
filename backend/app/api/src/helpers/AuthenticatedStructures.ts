@@ -488,14 +488,14 @@ export class AuthenticatedStructures {
         // Load events
         const rows = await SQL.select()
             .from('_event_notifications_events')
-            .where('_event_notifications_events.eventNotificationsId', eventNotifications.map(n => n.id))
+            .where('event_notificationsId', eventNotifications.map(n => n.id))
             .fetch();
 
         const eventIdsMapping = new Map<string, string[]>();
         const allEvents = new Set<string>();
 
         for (const row of rows) {
-            const notificationId = row['_event_notifications_events']['eventNotificationsId'];
+            const notificationId = row['_event_notifications_events']['event_notificationsId'];
             const eventId = row['_event_notifications_events']['eventsId'];
 
             if (typeof eventId !== 'string') {
@@ -521,17 +521,30 @@ export class AuthenticatedStructures {
 
         const events = allEvents.size > 0 ? await Event.getByIDs(...Array.from(allEvents)) : [];
         const eventStructs = await this.events(events);
+        const organizationIds = Formatter.uniqueArray(eventNotifications.map(n => n.organizationId));
+        const organizationModels = organizationIds.length > 0 ? await Organization.getByIDs(...organizationIds) : [];
 
         const result: EventNotificationStruct[] = [];
 
         for (const notification of eventNotifications) {
             const thisEventStructs = eventIdsMapping.get(notification.id)?.map(id => eventStructs.find(e => e.id === id)).filter(e => !!e) ?? [];
+            const organizationModel = organizationModels.find(o => o.id === notification.organizationId);
+            if (!organizationModel) {
+                throw new SimpleError({
+                    code: 'organization_not_found',
+                    message: 'Organization not found',
+                    human: 'Organisatie niet gevonden',
+                });
+            }
+
+            const organizationStruct = organizationModel.getBaseStructure();
 
             const struct = EventNotificationStruct.create({
                 ...notification,
+                organization: organizationStruct,
                 createdBy: null,
                 submittedBy: null,
-                events: eventStructs,
+                events: thisEventStructs,
             });
 
             result.push(struct);

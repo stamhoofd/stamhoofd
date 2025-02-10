@@ -5,6 +5,7 @@ import { StamhoofdFilter } from './filters/StamhoofdFilter.js';
 import { ObjectWithRecords } from './members/ObjectWithRecords.js';
 import { RecordAnswer, RecordAnswerDecoder } from './members/records/RecordAnswer.js';
 import { RecordSettings } from './members/records/RecordSettings.js';
+import { BaseOrganization } from './Organization.js';
 
 export enum EventNotificationStatus {
     Draft = 'Draft',
@@ -19,6 +20,9 @@ export class EventNotification extends AutoEncoder implements ObjectWithRecords 
 
     @field({ decoder: StringDecoder })
     typeId: string;
+
+    @field({ decoder: BaseOrganization })
+    organization: BaseOrganization;
 
     @field({ decoder: new ArrayDecoder(Event) })
     events: Event[] = [];

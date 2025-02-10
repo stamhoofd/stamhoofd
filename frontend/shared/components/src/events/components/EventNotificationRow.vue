@@ -20,21 +20,21 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { Event, EventNotification, EventNotificationType } from '@stamhoofd/structures';
+import { Event, EventNotificationType, Organization } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentOptions } from 'vue';
+import { usePlatform } from '../../hooks';
+import { ViewStepsManager } from '../../members/classes/ViewStepsManager';
 import { Toast } from '../../overlays/Toast';
+import { useNavigationActions } from '../../types/NavigationActions';
 import EventNotificationView from '../EventNotificationView.vue';
 import { useEventNotification } from '../composables/useEventNotification';
 import { EventNotificationViewModel } from '../event-notifications/classes/EventNotificationViewModel';
 import { getEventNotificationSteps } from '../event-notifications/getEventNotificationSteps';
-import { usePlatform } from '../../hooks';
-import { ViewStepsManager } from '../../members/classes/ViewStepsManager';
-import { useNavigationActions } from '../../types/NavigationActions';
 
 const props = defineProps<{
     event: Event;
     type: EventNotificationType;
+    organization: Organization;
 }>();
 
 const { promise: loadNotificationPromise, notification, loading, errors } = useEventNotification({
@@ -116,6 +116,7 @@ defineRoutes([
                             notification.value = viewModel.eventNotification;
                         },
                         platform: platform.value,
+                        organization: props.organization,
                     }),
                 };
             }

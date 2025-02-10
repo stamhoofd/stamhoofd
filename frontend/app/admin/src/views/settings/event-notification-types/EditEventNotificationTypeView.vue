@@ -61,7 +61,7 @@ import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from 
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, EditRecordCategoriesBox, ErrorBox, EventTypeIdsInput, getEventNotificationUIFilterBuilders, RecordEditorSettings, RecordEditorType, SaveView, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { EventNotification, EventNotificationDeadline, EventNotificationType, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
+import { Address, BaseOrganization, EventNotification, EventNotificationDeadline, EventNotificationType, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import EventNotificationDeadlineRow from './components/EventNotificationDeadlineRow.vue';
 import EditEventNotificationDeadlineView from './EditEventNotificationDeadlineView.vue';
@@ -156,6 +156,9 @@ const editorSettings = computed(() => {
         },
         exampleValue: EventNotification.create({
             typeId: patched.value.id,
+            organization: BaseOrganization.create({
+                address: Address.create({}),
+            }),
         }),
         patchExampleValue(value: EventNotification, patch: PatchAnswers) {
             const cloned = value.clone();
