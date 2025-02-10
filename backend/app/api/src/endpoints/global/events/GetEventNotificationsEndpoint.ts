@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EventNotification } from '@stamhoofd/models';
-import { SQL, SQLFilterDefinitions, SQLSortDefinitions, compileToSQLFilter, compileToSQLSorter } from '@stamhoofd/sql';
+import { SQL, SQLFilterDefinitions, SQLSortDefinitions, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import { CountFilteredRequest, EventNotification as EventNotificationStruct, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -85,7 +85,7 @@ export class GetEventNotificationsEndpoint extends Endpoint<Params, Query, Body,
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            query.orderBy(compileToSQLSorter(q.sort, sorters));
+            applySQLSorter(query, q.sort, sorters);
             query.limit(q.limit);
         }
 
@@ -101,7 +101,7 @@ export class GetEventNotificationsEndpoint extends Endpoint<Params, Query, Body,
         let next: LimitedFilteredRequest | undefined;
 
         if (notifications.length >= requestQuery.limit) {
-            const lastObject = notifications[notifications.length - 1];
+            const lastObject = data[data.length - 1];
             const nextFilter = getSortFilter(lastObject, sorters, requestQuery.sort);
 
             next = new LimitedFilteredRequest({

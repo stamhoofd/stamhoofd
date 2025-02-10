@@ -3,7 +3,7 @@ import { Document } from '@stamhoofd/models';
 import { assertSort, CountFilteredRequest, Document as DocumentStruct, getSortFilter, LimitedFilteredRequest, PaginatedResponse, SearchFilterFactory, StamhoofdFilter } from '@stamhoofd/structures';
 
 import { Decoder } from '@simonbackx/simple-encoding';
-import { compileToSQLFilter, compileToSQLSorter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { compileToSQLFilter, applySQLSorter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
 import { LimitedFilteredRequestHelper } from '../../../../helpers/LimitedFilteredRequestHelper';
@@ -68,7 +68,7 @@ export class GetDocumentsEndpoint extends Endpoint<Params, Query, Body, Response
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            query.orderBy(compileToSQLSorter(q.sort, sorters));
+            applySQLSorter(query, q.sort, sorters);
             query.limit(q.limit);
         }
 

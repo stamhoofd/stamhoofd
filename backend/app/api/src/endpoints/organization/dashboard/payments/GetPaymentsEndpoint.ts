@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Payment } from '@stamhoofd/models';
-import { SQL, compileToSQLFilter, compileToSQLSorter } from '@stamhoofd/sql';
+import { SQL, compileToSQLFilter, applySQLSorter } from '@stamhoofd/sql';
 import { CountFilteredRequest, LimitedFilteredRequest, PaginatedResponse, PaymentGeneral, StamhoofdFilter, TransferSettings, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
@@ -152,7 +152,7 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            query.orderBy(compileToSQLSorter(q.sort, sorters));
+            applySQLSorter(query, q.sort, sorters);
             query.limit(q.limit);
         }
 

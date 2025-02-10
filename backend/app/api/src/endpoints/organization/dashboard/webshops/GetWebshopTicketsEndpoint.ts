@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { Ticket } from '@stamhoofd/models';
 import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PaginatedResponse, TicketPrivate } from '@stamhoofd/structures';
 
-import { compileToSQLFilter, compileToSQLSorter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { compileToSQLFilter, applySQLSorter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
 import { LimitedFilteredRequestHelper } from '../../../../helpers/LimitedFilteredRequestHelper';
@@ -60,7 +60,7 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            query.orderBy(compileToSQLSorter(q.sort, sorters));
+            applySQLSorter(query, q.sort, sorters);
             query.limit(q.limit);
         }
 

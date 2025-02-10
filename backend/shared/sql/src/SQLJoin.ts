@@ -1,5 +1,5 @@
 import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery } from './SQLExpression';
-import { SQLWhere, Whereable } from './SQLWhere';
+import { Whereable } from './SQLWhere';
 
 export enum SQLJoinType {
     Left = 'Left',

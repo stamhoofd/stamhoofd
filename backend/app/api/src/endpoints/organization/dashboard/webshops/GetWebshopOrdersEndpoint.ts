@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { assertSort, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PrivateOrder, StamhoofdFilter } from '@stamhoofd/structures';
 
 import { Order } from '@stamhoofd/models';
-import { compileToSQLFilter, compileToSQLSorter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { compileToSQLFilter, applySQLSorter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { parsePhoneNumber } from 'libphonenumber-js/max';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
@@ -69,7 +69,7 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            query.orderBy(compileToSQLSorter(q.sort, sorters));
+            applySQLSorter(query, q.sort, sorters);
             query.limit(q.limit);
         }
 

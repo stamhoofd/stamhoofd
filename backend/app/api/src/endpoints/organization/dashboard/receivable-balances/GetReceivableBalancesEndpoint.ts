@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { CachedBalance } from '@stamhoofd/models';
-import { compileToSQLFilter, compileToSQLSorter } from '@stamhoofd/sql';
+import { compileToSQLFilter, applySQLSorter } from '@stamhoofd/sql';
 import { assertSort, CountFilteredRequest, DetailedReceivableBalance, getSortFilter, LimitedFilteredRequest, PaginatedResponse, ReceivableBalance as ReceivableBalanceStruct, StamhoofdFilter } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
@@ -100,7 +100,7 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            query.orderBy(compileToSQLSorter(q.sort, sorters));
+            applySQLSorter(query, q.sort, sorters);
             query.limit(q.limit);
         }
 

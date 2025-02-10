@@ -3,7 +3,7 @@ import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery, normalizeS
 import { SQLAlias, SQLColumnExpression, SQLCount, SQLSelectAs, SQLSum, SQLTableExpression } from './SQLExpressions';
 import { SQLJoin } from './SQLJoin';
 import { Orderable } from './SQLOrderBy';
-import { SQLWhereSign, Whereable } from './SQLWhere';
+import { Whereable } from './SQLWhere';
 
 class EmptyClass {}
 
@@ -66,6 +66,11 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     from(tableOrExpressiongOrNamespace: SQLExpression | string, table?: string): this {
         this._from = parseTable(tableOrExpressiongOrNamespace, table);
 
+        return this;
+    }
+
+    select(...columns: (SQLExpression | string)[]): this {
+        this._columns.push(...columns.map(c => typeof c === 'string' ? new SQLColumnExpression(c) : c));
         return this;
     }
 

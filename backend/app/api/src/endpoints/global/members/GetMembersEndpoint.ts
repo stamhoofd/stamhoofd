@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Member, Platform } from '@stamhoofd/models';
-import { SQL, compileToSQLFilter, compileToSQLSorter } from '@stamhoofd/sql';
+import { SQL, compileToSQLFilter, applySQLSorter } from '@stamhoofd/sql';
 import { CountFilteredRequest, Country, CountryCode, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 import { DataValidator } from '@stamhoofd/utility';
 
@@ -231,7 +231,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            query.orderBy(compileToSQLSorter(q.sort, sorters));
+            applySQLSorter(query, q.sort, sorters);
             query.limit(q.limit);
         }
 

@@ -1,8 +1,10 @@
-import { EventNotification } from '@stamhoofd/models';
+import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { SQL, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 
-export const eventNotificationsSorters: SQLSortDefinitions<EventNotification> = {
+const organizationJoin = SQL.join('organizations').where(SQL.column('organizations', 'id'), SQL.column('event_notifications', 'organizationId'));
+
+export const eventNotificationsSorters: SQLSortDefinitions<SQLResultNamespacedRow> = {
     // WARNING! TEST NEW SORTERS THOROUGHLY!
     // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
     // An example: sorting on 'name' is not a good idea, because it is a concatenation of two fields.
@@ -11,9 +13,9 @@ export const eventNotificationsSorters: SQLSortDefinitions<EventNotification> = 
     // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
 
-    id: {
+    'id': {
         getValue(a) {
-            return a.id;
+            return a['event_notifications'].id;
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -22,9 +24,20 @@ export const eventNotificationsSorters: SQLSortDefinitions<EventNotification> = 
             });
         },
     },
-    startDate: {
+    'status': {
         getValue(a) {
-            return Formatter.dateTimeIso(a.startDate);
+            return a['event_notifications'].status;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('status'),
+                direction,
+            });
+        },
+    },
+    'startDate': {
+        getValue(a) {
+            return Formatter.dateTimeIso(a['event_notifications'].startDate as Date);
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -33,9 +46,9 @@ export const eventNotificationsSorters: SQLSortDefinitions<EventNotification> = 
             });
         },
     },
-    endDate: {
+    'endDate': {
         getValue(a) {
-            return Formatter.dateTimeIso(a.endDate);
+            return Formatter.dateTimeIso(a['event_notifications'].endDate as Date);
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -43,5 +56,31 @@ export const eventNotificationsSorters: SQLSortDefinitions<EventNotification> = 
                 direction,
             });
         },
+    },
+    'organization.name': {
+        getValue(a) {
+            return a.organizations.name;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('organizations', 'name'),
+                direction,
+            });
+        },
+        join: organizationJoin,
+        select: [SQL.column('organizations', 'name')],
+    },
+    'organization.uriPadded': {
+        getValue(a) {
+            return (a.organizations.uri as string).padStart(100, '0');
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.lpad(SQL.column('organizations', 'uri'), 100, '0'),
+                direction,
+            });
+        },
+        join: organizationJoin,
+        select: [SQL.column('organizations', 'uri')],
     },
 };

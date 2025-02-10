@@ -19,7 +19,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, Column, ComponentExposed, EmailView, EventNotificationView, ModernTableView, TableAction, TableActionSelection, useAuth, useContext, useEventNotificationsObjectFetcher, useGetOrganizationUIFilterBuilders, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
+import { AsyncTableAction, Column, ComponentExposed, EmailView, EventNotificationView, ModernTableView, TableAction, TableActionSelection, useAuth, useEventNotificationsObjectFetcher, useGetOrganizationUIFilterBuilders, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { EventNotification, EventNotificationStatus, EventNotificationType, ExcelExportType, StamhoofdFilter } from '@stamhoofd/structures';
@@ -121,21 +121,19 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
 
     new Column<ObjectType, string>({
-        id: 'organizationName',
+        id: 'organization.name',
         name: $t('Vereniging'),
         getValue: notification => notification.organization.name,
         minimumWidth: 100,
         recommendedWidth: 200,
-        allowSorting: false,
     }),
 
     new Column<ObjectType, string>({
-        id: 'organizationUri',
+        id: 'organization.uriPadded',
         name: $t('Groepsnummer'),
         getValue: notification => notification.organization.uri,
         minimumWidth: 100,
         recommendedWidth: 200,
-        allowSorting: false,
     }),
 ];
 
