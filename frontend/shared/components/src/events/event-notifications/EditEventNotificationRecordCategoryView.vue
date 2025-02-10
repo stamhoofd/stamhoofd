@@ -61,11 +61,16 @@ async function saveDraft() {
 
     await saveModel(patch.value);
 
-    if (props.skipHandler) {
-        await props.skipHandler(navigationActions);
+    try {
+        if (props.skipHandler) {
+            await props.skipHandler(navigationActions);
+        }
+        else {
+            await dismiss({ force: true });
+        }
     }
-    else {
-        await dismiss({ force: true });
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
 
     saving.value = false;
