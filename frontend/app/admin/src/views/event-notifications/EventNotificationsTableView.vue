@@ -26,6 +26,7 @@ import { EventNotification, EventNotificationStatus, EventNotificationType, Exce
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
+import { EventNotificationViewModel } from '@stamhoofd/components/src/events/event-notifications/classes/EventNotificationViewModel';
 
 type ObjectType = EventNotification;
 const $t = useTranslate();
@@ -140,6 +141,14 @@ const allColumns: Column<ObjectType, any>[] = [
 const Route = {
     Component: EventNotificationView,
     objectKey: 'event-notification',
+    getProperties: (object: ObjectType) => {
+        return {
+            viewModel: EventNotificationViewModel.edit({
+                eventNotification: object,
+                platform: platform.value,
+            }),
+        };
+    },
 };
 
 const actions: TableAction<EventNotification>[] = [];
