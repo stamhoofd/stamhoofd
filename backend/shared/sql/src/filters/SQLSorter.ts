@@ -33,19 +33,24 @@ export function applySQLSorter(selectQuery: SQLSelect<any>, sortBy: SortList, de
 
         if (d.join) {
             // Check if no overlap in alias/table (otherwise we'll get issues)
-            const name = d.join.table.getSQL({ defaultNamespace: 'default' });
-
-            for (const j of selectQuery._joins) {
-                if (j.table.getSQL({ defaultNamespace: 'default' }) === name) {
-                    throw new SimpleError({
-                        code: 'sorter_join_overlap',
-                        message: 'This combination of sorters is not possible',
-                        human: 'Deze combinatie van sorteringen is niet mogelijk',
-                    });
-                }
+            if (selectQuery._joins.find(j => j === d.join)) {
+                // Already added
             }
+            else {
+                const name = d.join.table.getSQL({ defaultNamespace: 'default' });
 
-            selectQuery.join(d.join);
+                for (const j of selectQuery._joins) {
+                    if (j.table.getSQL({ defaultNamespace: 'default' }) === name) {
+                        throw new SimpleError({
+                            code: 'sorter_join_overlap',
+                            message: 'This combination of sorters is not possible',
+                            human: 'Deze combinatie van sorteringen is niet mogelijk',
+                        });
+                    }
+                }
+
+                selectQuery.join(d.join);
+            }
         }
 
         if (d.select) {

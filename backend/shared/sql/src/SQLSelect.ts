@@ -122,7 +122,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         // Joins
         query.push(...this._joins.map(j => j.getSQL(options)));
         if (this._where) {
-            const whereJoins = Formatter.uniqueArray(this._where.getJoins());
+            const whereJoins = Formatter.uniqueArray(this._where.getJoins()).filter(j => !this._joins.includes(j));
             query.push(...whereJoins.map(j => j.getSQL(options)));
         }
 

@@ -485,14 +485,50 @@ async function compileSQLFilter(filter: StamhoofdFilter, definitions: SQLFilterD
         }
 
         for (const key of Object.keys(f)) {
-            const ff = definitions[key];
+            let ff = definitions[key];
+            let value: StamhoofdFilter = f[key];
+
             if (!ff) {
-                throw new Error('Unsupported filter ' + key);
+                // Search with dot syntax shortcuts
+                if (key.includes('.')) {
+                    const parts = key.split('.');
+
+                    if (parts.length >= 2 && parts.every(p => p.length > 0)) {
+                        let subKey = parts.shift() ?? '';
+
+                        while (parts.length && !definitions[subKey]) {
+                            subKey = subKey + '.' + parts.shift();
+                        }
+
+                        if (subKey && definitions[subKey]) {
+                            const remaining = parts.join('.');
+
+                            const transformeInto = {
+                                [remaining]: value,
+                            };
+
+                            ff = definitions[subKey];
+                            value = transformeInto;
+                        }
+                    }
+                }
             }
 
-            const s = await ff(f[key] as StamhoofdFilter, definitions);
+            if (!ff) {
+                throw new SimpleError({
+                    code: 'invalid_filter',
+                    message: 'Invalid filter ' + key,
+                    human: $t('Deze filter wordt niet ondersteund, probeer een andere filter of neem contact op'),
+                });
+            }
+
+            const s = await ff(value, definitions);
             if (s === undefined || s === null) {
-                throw new Error('Unsupported filter value for ' + key);
+                throw new SimpleError({
+                    code: 'invalid_filter',
+                    message: 'Invalid filter value for filter ' + key,
+                    human: $t('Deze filter wordt niet ondersteund, probeer een andere filter of neem contact op'),
+                });
             }
             runners.push(s);
         }
