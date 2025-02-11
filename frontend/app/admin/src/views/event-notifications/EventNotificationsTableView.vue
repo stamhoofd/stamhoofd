@@ -118,9 +118,20 @@ const allColumns: Column<ObjectType, any>[] = [
         index: 0,
     }),
 
+    new Column<ObjectType, string>({
+        id: 'event.name',
+        name: $t('Naam activiteit'),
+        getValue: e => e.events.map(e => e.name).join(', '),
+        minimumWidth: 200,
+        recommendedWidth: 100,
+        index: 0,
+        allowSorting: false,
+        grow: true,
+    }),
+
     new Column<ObjectType, EventNotificationStatus>({
         id: 'status',
-        name: 'Status',
+        name: $t('Status'),
         getValue: organization => organization.status,
         format: status => Formatter.capitalizeFirstLetter(EventNotificationStatusHelper.getName(status)),
         getStyle: (status) => {
