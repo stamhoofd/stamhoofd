@@ -152,6 +152,17 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
             );
 
             all.push(
+                new StringFilterBuilder({
+                    name: $t('Groepsnaam'),
+                    key: 'name',
+                    allowCreation: hasPlatformPermissions,
+                    wrapper: {
+                        organization: FilterWrapperMarker,
+                    },
+                }),
+            );
+
+            all.push(
                 new MultipleChoiceFilterBuilder({
                     name: $t('ec2de613-f06f-4d9a-888a-40f98b6b3727'),
                     multipleChoiceConfiguration: {
