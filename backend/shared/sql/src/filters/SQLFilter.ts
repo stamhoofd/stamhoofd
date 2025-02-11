@@ -110,7 +110,11 @@ export function createSQLRelationFilterCompiler(baseSelect: InstanceType<typeof 
             return new SQLWhereExists(q);
         }
 
-        throw new Error('Invalid filter');
+        throw new SimpleError({
+            code: 'invalid_filter',
+            message: 'Invalid filter',
+            human: $t('Deze filter wordt niet ondersteund, probeer een andere filter of neem contact op'),
+        });
     };
 }
 
@@ -407,7 +411,11 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
             );
         }
 
-        throw new Error('Invalid filter ' + JSON.stringify(f));
+        throw new SimpleError({
+            code: 'invalid_filter',
+            message: 'Invalid filter',
+            human: $t('Deze filter wordt niet ondersteund, probeer een andere filter of neem contact op'),
+        });
     };
 }
 
