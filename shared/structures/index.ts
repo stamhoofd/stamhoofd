@@ -34,6 +34,7 @@ export * from './src/DefaultAgeGroup.js';
 export * from './src/Document.js';
 export * from './src/Event.js';
 export * from './src/EventNotification.js';
+export * from './src/EventNotificationStatus.js';
 export * from './src/EventNotificationType.js';
 export * from './src/GenericBalance.js';
 export * from './src/Group.js';

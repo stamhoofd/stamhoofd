@@ -6,13 +6,7 @@ import { ObjectWithRecords } from './members/ObjectWithRecords.js';
 import { RecordAnswer, RecordAnswerDecoder } from './members/records/RecordAnswer.js';
 import { RecordSettings } from './members/records/RecordSettings.js';
 import { BaseOrganization } from './Organization.js';
-
-export enum EventNotificationStatus {
-    Draft = 'Draft',
-    Pending = 'Pending',
-    Accepted = 'Accepted',
-    Rejected = 'Rejected',
-}
+import { EventNotificationStatus } from './EventNotificationStatus.js';
 
 export class EventNotification extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: StringDecoder, optional: true, defaultValue: () => uuidv4() })

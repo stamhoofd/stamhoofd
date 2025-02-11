@@ -38,12 +38,14 @@
                         Status
                     </h3>
                     <p class="style-definition-text">
-                        <span>{{ notification.status }}</span>
-                        <span class="icon clock" />
+                        <span>{{ capitalizeFirstLetter(EventNotificationStatusHelper.getName(notification.status)) }}</span>
+                        <span v-if="notification.status === EventNotificationStatus.Pending" class="icon clock" />
+                        <span v-if="notification.status === EventNotificationStatus.Rejected" class="icon error red" />
+                        <span v-if="notification.status === EventNotificationStatus.Accepted" class="icon success green" />
                     </p>
 
-                    <p v-if="notification.submittedBy" class="style-description-small">
-                        Ingediend door {{ notification.submittedBy.name }}
+                    <p v-if="notification.submittedBy && notification.submittedAt" class="style-description-small">
+                        {{ $t('Ingediend door {name} op {date}', {name: notification.submittedBy.name, date: formatDate(notification.submittedAt)}) }}
                     </p>
                 </STListItem>
 
@@ -168,11 +170,12 @@
 <script setup lang="ts">
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, IconContainer, ProgressIcon, useAuth, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
-import { AccessRight, EventNotification, EventNotificationStatus, RecordCategory } from '@stamhoofd/structures';
+import { AccessRight, EventNotification, EventNotificationStatus, EventNotificationStatusHelper, RecordCategory } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useErrors } from '../errors/useErrors';
 import { EventNotificationViewModel } from './event-notifications/classes/EventNotificationViewModel';
 import EditEventNotificationRecordCategoryView from './event-notifications/EditEventNotificationRecordCategoryView.vue';
+import { Formatter } from '@stamhoofd/utility';
 
 const props = withDefaults(
     defineProps<{
@@ -319,30 +322,30 @@ async function showContextMenu(event: MouseEvent) {
                 childMenu: new ContextMenu([
                     [
                         new ContextMenuItem({
-                            name: 'Klad',
+                            name: Formatter.capitalizeFirstLetter(EventNotificationStatusHelper.getName(EventNotificationStatus.Draft)),
                             action: async () => {
                                 await doDraft();
                             },
                         }),
                         new ContextMenuItem({
-                            name: 'Wacht op goedkeuring',
+                            name: Formatter.capitalizeFirstLetter(EventNotificationStatusHelper.getName(EventNotificationStatus.Pending)),
                             icon: 'clock',
                             action: async () => {
                                 await doSubmit();
                             },
                         }),
                         new ContextMenuItem({
-                            name: 'Goedgekeurd',
-                            icon: 'success',
-                            action: async () => {
-                                await doAccept();
-                            },
-                        }),
-                        new ContextMenuItem({
-                            name: 'Afgekeurd',
+                            name: Formatter.capitalizeFirstLetter(EventNotificationStatusHelper.getName(EventNotificationStatus.Rejected)),
                             icon: 'canceled',
                             action: async () => {
                                 await doReject();
+                            },
+                        }),
+                        new ContextMenuItem({
+                            name: Formatter.capitalizeFirstLetter(EventNotificationStatusHelper.getName(EventNotificationStatus.Accepted)),
+                            icon: 'success',
+                            action: async () => {
+                                await doAccept();
                             },
                         }),
                     ],

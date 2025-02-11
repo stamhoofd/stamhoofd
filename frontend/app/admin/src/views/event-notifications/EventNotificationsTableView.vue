@@ -20,13 +20,13 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncTableAction, Column, ComponentExposed, EmailView, EventNotificationView, ModernTableView, TableAction, TableActionSelection, useAuth, useEventNotificationsObjectFetcher, useGetOrganizationUIFilterBuilders, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
+import { EventNotificationViewModel } from '@stamhoofd/components/src/events/event-notifications/classes/EventNotificationViewModel';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { EventNotification, EventNotificationStatus, EventNotificationType, ExcelExportType, StamhoofdFilter } from '@stamhoofd/structures';
+import { EventNotification, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, ExcelExportType, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
-import { EventNotificationViewModel } from '@stamhoofd/components/src/events/event-notifications/classes/EventNotificationViewModel';
 
 type ObjectType = EventNotification;
 const $t = useTranslate();
@@ -120,7 +120,7 @@ const allColumns: Column<ObjectType, any>[] = [
         id: 'status',
         name: 'Status',
         getValue: organization => organization.status,
-        format: status => status,
+        format: status => Formatter.capitalizeFirstLetter(EventNotificationStatusHelper.getName(status)),
         getStyle: (status) => {
             if (status === EventNotificationStatus.Draft) {
                 return 'gray';
@@ -131,7 +131,7 @@ const allColumns: Column<ObjectType, any>[] = [
             if (status === EventNotificationStatus.Rejected) {
                 return 'error';
             }
-            return 'icon clock';
+            return '';
         },
         minimumWidth: 100,
         recommendedWidth: 200,
