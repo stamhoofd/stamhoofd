@@ -3,6 +3,7 @@ import { CountFilteredRequest, LimitedFilteredRequest, SortList, StamhoofdFilter
 import { onBeforeUnmount, reactive } from 'vue';
 import { useAuth } from '../../hooks';
 import { ObjectFetcher } from './ObjectFetcher';
+import { AutoEncoder } from '@simonbackx/simple-encoding';
 
 export function useTableObjectFetcher<O extends { id: string }, OF extends ObjectFetcher<O> = ObjectFetcher<O>>(objectFetcher: OF): TableObjectFetcher<O> {
     const auth = useAuth();
@@ -21,6 +22,10 @@ export function useTableObjectFetcher<O extends { id: string }, OF extends Objec
 export class TableObjectFetcher<O extends { id: string }> {
     objectFetcher: ObjectFetcher<O>;
 
+    /**
+     * When the table reloads, try to reuse these references if possible
+     */
+    _objectReferenceCache: Map<string, O & AutoEncoder> = new Map();
     objects: O[] = [];
     baseFilter: StamhoofdFilter | null = null;
     searchQuery = '';
@@ -67,6 +72,7 @@ export class TableObjectFetcher<O extends { id: string }> {
         if (this.objectFetcher.destroy) {
             this.objectFetcher.destroy();
         }
+        this._objectReferenceCache.clear();
         this.objects = []; // Fast memory cleanup
     }
 
@@ -110,6 +116,16 @@ export class TableObjectFetcher<O extends { id: string }> {
         console.info('Reset');
 
         this._clearIndex += 1;
+
+        // Save current objects in cache
+        for (const o of this.objects) {
+            if (o instanceof AutoEncoder) {
+                if (!this._objectReferenceCache.has(o.id)) {
+                    this._objectReferenceCache.set(o.id, o);
+                }
+            }
+        }
+
         this.objects = [];
 
         if (total) {
@@ -303,7 +319,14 @@ export class TableObjectFetcher<O extends { id: string }> {
 
                 this.resetRetryCount();
 
-                const objects = data.results;
+                const objects = data.results.map((o) => {
+                    const cachedReference = this._objectReferenceCache.get(o.id);
+                    if (cachedReference && cachedReference instanceof AutoEncoder && o instanceof AutoEncoder) {
+                        cachedReference.deepSet(o);
+                        return cachedReference;
+                    }
+                    return o;
+                });
                 this.nextRequest = data.next ?? null;
 
                 if (STAMHOOFD.environment === 'development') {
