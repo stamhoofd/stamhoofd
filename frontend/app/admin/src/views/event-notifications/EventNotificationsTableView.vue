@@ -79,9 +79,19 @@ const objectFetcher = useEventNotificationsObjectFetcher({
 const tableObjectFetcher = useTableObjectFetcher<EventNotification>(objectFetcher);
 
 const allColumns: Column<ObjectType, any>[] = [
+    new Column<ObjectType, Date | null>({
+        id: 'submittedAt',
+        name: $t('Ingediend op'),
+        getValue: e => e.submittedAt,
+        format: d => d ? Formatter.date(d, true) : $t('Nooit'),
+        minimumWidth: 60,
+        recommendedWidth: 100,
+        index: 0,
+    }),
+
     new Column<ObjectType, Date>({
         id: 'startDate',
-        name: 'Startdatum',
+        name: $t('Startdatum'),
         getValue: e => e.startDate,
         format: d => Formatter.date(d, true),
         minimumWidth: 60,
@@ -91,7 +101,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, Date>({
         id: 'endDate',
-        name: 'Einddatum',
+        name: $t('Einddatum'),
         getValue: e => e.endDate,
         format: d => Formatter.date(d, true),
         minimumWidth: 60,

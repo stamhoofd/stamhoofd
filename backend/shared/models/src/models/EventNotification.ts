@@ -47,6 +47,9 @@ export class EventNotification extends QueryableModel {
     @column({ type: 'string', nullable: true })
     submittedBy: string | null = null;
 
+    @column({ type: 'datetime', nullable: true })
+    submittedAt: Date | null = null;
+
     @column({
         type: 'datetime', beforeSave(old?: any) {
             if (old !== undefined) {

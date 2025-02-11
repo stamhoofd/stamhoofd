@@ -1,14 +1,17 @@
 import { SQL, SQLFilterDefinitions, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLRelationFilterCompiler } from '@stamhoofd/sql';
-import { organizationFilterCompilers } from './organizations';
 import { eventFilterCompilers } from './events';
+import { organizationFilterCompilers } from './organizations';
 
 export const eventNotificationsFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
     id: createSQLColumnFilterCompiler('id'),
     typeId: createSQLColumnFilterCompiler('typeId'),
+    periodId: createSQLColumnFilterCompiler('periodId'),
     organizationId: createSQLColumnFilterCompiler('organizationId'),
     startDate: createSQLColumnFilterCompiler('startDate'),
     endDate: createSQLColumnFilterCompiler('endDate'),
+    submittedAt: createSQLColumnFilterCompiler('submittedAt'),
+    createdAt: createSQLColumnFilterCompiler('createdAt'),
     status: createSQLColumnFilterCompiler('status'),
     organization: createSQLRelationFilterCompiler(
         SQL.select()

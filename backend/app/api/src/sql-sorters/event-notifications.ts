@@ -37,7 +37,7 @@ export const eventNotificationsSorters: SQLSortDefinitions<SQLResultNamespacedRo
     },
     'startDate': {
         getValue(a) {
-            return Formatter.dateTimeIso(a['event_notifications'].startDate as Date);
+            return Formatter.dateTimeIso(a['event_notifications'].startDate as Date, 'UTC');
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -48,11 +48,22 @@ export const eventNotificationsSorters: SQLSortDefinitions<SQLResultNamespacedRo
     },
     'endDate': {
         getValue(a) {
-            return Formatter.dateTimeIso(a['event_notifications'].endDate as Date);
+            return Formatter.dateTimeIso(a['event_notifications'].endDate as Date, 'UTC');
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
                 column: SQL.column('endDate'),
+                direction,
+            });
+        },
+    },
+    'submittedAt': {
+        getValue(a) {
+            return a['event_notifications'].submittedAt !== null ? Formatter.dateTimeIso(a['event_notifications'].submittedAt as Date, 'UTC') : null;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('submittedAt'),
                 direction,
             });
         },

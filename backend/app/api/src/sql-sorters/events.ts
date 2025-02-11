@@ -35,7 +35,7 @@ export const eventSorters: SQLSortDefinitions<Event> = {
     },
     startDate: {
         getValue(a) {
-            return Formatter.dateTimeIso(a.startDate);
+            return Formatter.dateTimeIso(a.startDate, 'UTC');
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -46,7 +46,7 @@ export const eventSorters: SQLSortDefinitions<Event> = {
     },
     endDate: {
         getValue(a) {
-            return Formatter.dateTimeIso(a.endDate);
+            return Formatter.dateTimeIso(a.endDate, 'UTC');
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({

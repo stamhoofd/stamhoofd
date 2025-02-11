@@ -182,8 +182,9 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                     await this.validateAnswers(notification);
                 }
                 notification.status = patch.status; // checks already happened
-                if (patch.status === EventNotificationStatus.Pending && !notification.submittedBy) {
+                if (patch.status === EventNotificationStatus.Pending) {
                     notification.submittedBy = user.id;
+                    notification.submittedAt = new Date();
                 }
 
                 if (patch.status === EventNotificationStatus.Pending) {

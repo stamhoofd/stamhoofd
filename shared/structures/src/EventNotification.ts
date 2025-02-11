@@ -21,6 +21,9 @@ export class EventNotification extends AutoEncoder implements ObjectWithRecords 
     @field({ decoder: StringDecoder })
     typeId: string;
 
+    @field({ decoder: StringDecoder, ...NextVersion })
+    periodId: string = '';
+
     @field({ decoder: BaseOrganization })
     organization: BaseOrganization;
 
@@ -47,6 +50,9 @@ export class EventNotification extends AutoEncoder implements ObjectWithRecords 
      */
     @field({ decoder: NamedObject, nullable: true })
     submittedBy: NamedObject | null = null;
+
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    submittedAt: Date | null = null;
 
     /**
      * User who created the notification
