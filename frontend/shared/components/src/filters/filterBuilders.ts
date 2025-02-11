@@ -1,6 +1,6 @@
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { FilterWrapperMarker, unwrapFilter, AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, getAuditLogTypeName, LoadedPermissions, MemberResponsibility, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User, WebshopPreview } from '@stamhoofd/structures';
+import { FilterWrapperMarker, unwrapFilter, AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, getAuditLogTypeName, LoadedPermissions, MemberResponsibility, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User, WebshopPreview, EventNotificationStatus, EventNotificationStatusHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { Gender } from '../../../../../shared/structures/esm/dist/src/members/Gender';
@@ -874,6 +874,100 @@ const organizationMemberUIFilterBuilders: UIFilterBuilders = [
         key: 'email',
     }),
 ];
+
+export function useEventNotificationUIFilterBuilders() {
+    const platform = usePlatform();
+
+    return () => {
+        const all: UIFilterBuilders = [
+            new DateFilterBuilder({
+                name: $t('Startdatum'),
+                key: 'startDate',
+            }),
+            new DateFilterBuilder({
+                name: $t('Einddatum'),
+                key: 'endDate',
+            }),
+            new MultipleChoiceFilterBuilder({
+                name: $t('Type activiteit'),
+                options: [
+                    ...platform.value.config.eventTypes.map((eventType) => {
+                        return new MultipleChoiceUIFilterOption(eventType.name, eventType.id);
+                    }),
+                ],
+                wrapper: {
+                    events: {
+                        $elemMatch: {
+                            typeId: {
+                                $in: FilterWrapperMarker,
+                            },
+                        },
+                    },
+                },
+            }),
+            new MultipleChoiceFilterBuilder({
+                name: $t('Status'),
+                options: [
+                    ...Object.values(EventNotificationStatus).map((status) => {
+                        return new MultipleChoiceUIFilterOption(
+                            Formatter.capitalizeFirstLetter(EventNotificationStatusHelper.getName(status)),
+                            status,
+                        );
+                    }),
+                ],
+                wrapper: {
+                    status: {
+                        $in: FilterWrapperMarker,
+                    },
+                },
+            }),
+            new MultipleChoiceFilterBuilder({
+                name: $t('Hiërarchie'),
+                multipleChoiceConfiguration: {
+                    isSubjectPlural: true,
+                },
+                options: platform.value.config.tags.map(tag => new MultipleChoiceUIFilterOption(tag.name, tag.id)),
+                wrapper: {
+                    organization: {
+                        $elemMatch: {
+                            tags: {
+                                $in: FilterWrapperMarker,
+                            },
+                        },
+                    },
+                },
+            }),
+            new StringFilterBuilder({
+                name: $t('05723781-9357-41b2-9fb8-cb4f80dde7f9'),
+                key: 'uri',
+                wrapper: {
+                    organization: {
+                        $elemMatch: FilterWrapperMarker,
+                    },
+                },
+            }),
+
+            new StringFilterBuilder({
+                name: $t('Groepsnaam'),
+                key: 'name',
+                wrapper: {
+                    organization: {
+                        $elemMatch: FilterWrapperMarker,
+                    },
+                },
+            }),
+        ];
+
+        // Recursive: self referencing groups
+        all.unshift(
+            new GroupUIFilterBuilder({
+                builders: all,
+            }),
+        );
+
+        return all;
+    };
+}
 
 export function useGetOrganizationUIFilterBuilders() {
     const $t = useTranslate();
