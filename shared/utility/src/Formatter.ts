@@ -272,8 +272,8 @@ export class Formatter {
         return year + '-' + (datetime.month + '').padStart(2, '0') + '-' + (datetime.day + '').padStart(2, '0') + ' ' + (datetime.hour + '').padStart(2, '0') + ':' + (datetime.minute + '').padStart(2, '0') + ':' + (datetime.second + '').padStart(2, '0');
     }
 
-    static startDate(startDate: Date, includeDay = false, withYear = false): string {
-        if (Formatter.time(startDate) === '0:00') {
+    static startDate(startDate: Date, includeDay = false, withYear = false, includeTime: boolean | null = null): string {
+        if ((Formatter.time(startDate) === '0:00' && includeTime === null) || includeTime === false) {
             if (includeDay) {
                 return Formatter.dateWithDay(startDate, withYear);
             }
@@ -286,8 +286,8 @@ export class Formatter {
         return Formatter.dateTime(startDate, withYear);
     }
 
-    static endDate(endDate: Date, includeDay = false, withYear = false): string {
-        if (Formatter.time(endDate) === '23:59') {
+    static endDate(endDate: Date, includeDay = false, withYear = false, includeTime: boolean | null = null): string {
+        if ((Formatter.time(endDate) === '23:59' && includeTime === null) || includeTime === false) {
             if (includeDay) {
                 return Formatter.dateWithDay(endDate, withYear);
             }
@@ -300,10 +300,10 @@ export class Formatter {
         return Formatter.dateTime(endDate, false, withYear);
     }
 
-    static dateRange(startDate: Date, endDate: Date, join = ' - '): string {
+    static dateRange(startDate: Date, endDate: Date, join = ' - ', includeTime: boolean | null = null): string {
         if (Formatter.dateIso(startDate) === Formatter.dateIso(endDate)) {
-            if (Formatter.time(startDate) === Formatter.time(endDate)) {
-                return Formatter.dateWithDay(startDate) + ', ' + Formatter.time(startDate);
+            if (Formatter.time(startDate) === Formatter.time(endDate) || includeTime === false) {
+                return Formatter.dateWithDay(startDate) + (includeTime !== false ? (', ' + Formatter.time(startDate)) : '');
             }
 
             if (Formatter.time(startDate) === '0:00' && Formatter.time(endDate) === '23:59') {
@@ -316,10 +316,10 @@ export class Formatter {
         // If start in evening and end on the next morning: only mention date once
         const differentYear = startDate < new Date() || Formatter.year(startDate) !== Formatter.year(endDate) || Formatter.year(startDate) !== Formatter.year(new Date());
         if (Formatter.dateIso(startDate) === Formatter.dateIso(new Date(endDate.getTime() - 24 * 60 * 60 * 1000)) && Formatter.timeIso(endDate) <= '07:00' && Formatter.timeIso(startDate) >= '12:00') {
-            return Formatter.dateWithDay(startDate, differentYear) + ', ' + Formatter.time(startDate) + join + Formatter.time(endDate);
+            return Formatter.dateWithDay(startDate, differentYear) + (includeTime !== false ? (', ' + Formatter.time(startDate) + join + Formatter.time(endDate)) : '');
         }
 
-        return Formatter.startDate(startDate, false, differentYear) + join + Formatter.endDate(endDate, false, differentYear);
+        return Formatter.startDate(startDate, false, differentYear, includeTime) + join + Formatter.endDate(endDate, false, differentYear, includeTime);
     }
 
     /**

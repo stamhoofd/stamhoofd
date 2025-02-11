@@ -148,7 +148,7 @@ export class EventNotificationService {
             }),
             Replacement.create({
                 token: 'dateRange',
-                value: Formatter.dateRange(notification.startDate, notification.endDate),
+                value: Formatter.dateRange(notification.startDate, notification.endDate, undefined, false),
             }),
             Replacement.create({
                 token: 'submitterName',
