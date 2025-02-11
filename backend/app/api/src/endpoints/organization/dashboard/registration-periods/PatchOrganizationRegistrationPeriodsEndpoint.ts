@@ -452,6 +452,14 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             }
         }
 
+        if (period.locked) {
+            throw new SimpleError({
+                code: 'invalid_period',
+                message: 'Period is locked',
+                human: Context.i18n.$t('Dit werkjaar is vergrendeld, je kan geen inschrijvingsgroepen meer toevoegen'),
+            });
+        }
+
         const user = Context.auth.user;
 
         const model = new Group();

@@ -16,6 +16,9 @@ export class EventNotification extends QueryableModel {
     @column({ type: 'string' })
     typeId: string;
 
+    @column({ type: 'string' })
+    periodId: string;
+
     @column({ type: 'datetime' })
     startDate: Date;
 

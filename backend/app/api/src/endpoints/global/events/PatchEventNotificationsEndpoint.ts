@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { Event, EventNotification } from '@stamhoofd/models';
-import { EventNotificationStatus, EventNotification as EventNotificationStruct, PermissionLevel } from '@stamhoofd/structures';
+import { Event, EventNotification, RegistrationPeriod, Platform } from '@stamhoofd/models';
+import { EventNotificationStatus, EventNotification as EventNotificationStruct, PermissionLevel, RecordCategory } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -58,6 +58,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             const notification = new EventNotification();
             notification.organizationId = put.organization.id;
             notification.typeId = put.typeId;
+            await this.validateType(notification);
 
             const validatedEvents: Event[] = [];
 
@@ -79,6 +80,27 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 if (index === 0) {
                     notification.startDate = model.startDate;
                     notification.endDate = model.endDate;
+                    const period = await RegistrationPeriod.getByDate(event.startDate);
+
+                    if (!period) {
+                        throw new SimpleError({
+                            code: 'invalid_period',
+                            message: 'No period found for this start date',
+                            human: Context.i18n.$t('5959a6a9-064a-413c-871f-c74a145ed569'),
+                            field: 'startDate',
+                        });
+                    }
+
+                    if (period.locked) {
+                        throw new SimpleError({
+                            code: 'invalid_period',
+                            message: 'Period is locked',
+                            human: Context.i18n.$t('Dit werkjaar is vergrendeld, je kan geen meldingen meer aanmaken voor deze periode'),
+                            field: 'startDate',
+                        });
+                    }
+
+                    notification.periodId = period.id;
                 }
                 else {
                     await this.validateEventDate(notification, model);
@@ -108,7 +130,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'EventNotification not found',
-                    human: 'De melding werd niet gevonden',
+                    human: Context.i18n.$t('De melding werd niet gevonden'),
                 });
             }
 
@@ -125,18 +147,39 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             if (!await Context.auth.canAccessEventNotification(notification, requiredPermissionLevel)) {
                 // Requires `OrganizationEventNotificationReviewer` access right for the organization
                 if (notification.status === EventNotificationStatus.Pending) {
-                    throw Context.auth.error('Je kan deze melding niet meer bewerken omdat deze al is ingediend');
+                    throw Context.auth.error(Context.i18n.$t('Je kan deze melding niet meer bewerken omdat deze al is ingediend'));
                 }
                 if (notification.status === EventNotificationStatus.Accepted) {
-                    throw Context.auth.error('Je kan deze melding niet meer bewerken omdat deze al is goedgekeurd');
+                    throw Context.auth.error(Context.i18n.$t('Je kan deze melding niet meer bewerken omdat deze al is goedgekeurd'));
                 }
-                throw Context.auth.error('Je hebt geen toegang om deze melding te bewerken');
+                throw Context.auth.error(Context.i18n.$t('Je hebt geen toegang om deze melding te bewerken'));
+            }
+
+            const period = await RegistrationPeriod.getByID(notification.periodId);
+            if (!period) {
+                throw new SimpleError({
+                    code: 'not_found',
+                    message: 'Period not found',
+                    human: Context.i18n.$t('Dit werkjaar werd niet gevonden'),
+                });
+            }
+
+            if (period.locked) {
+                throw new SimpleError({
+                    code: 'invalid_period',
+                    message: 'Period is locked',
+                    human: Context.i18n.$t('Dit werkjaar is vergrendeld, je kan geen meldingen meer aanpassen in deze periode'),
+                });
             }
 
             // Save answers
             notification.recordAnswers = patchObject(notification.recordAnswers, patch.recordAnswers);
 
             if (patch.status) {
+                if (notification.status === EventNotificationStatus.Draft) {
+                    // Only allowed if complete
+                    await this.validateAnswers(notification);
+                }
                 notification.status = patch.status; // checks already happened
                 if (patch.status === EventNotificationStatus.Pending && !notification.submittedBy) {
                     notification.submittedBy = user.id;
@@ -153,12 +196,32 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
         );
     }
 
+    async validateType(notification: EventNotification) {
+        const platform = await Platform.getSharedPrivateStruct();
+        const type = platform.config.eventNotificationTypes.find(t => t.id === notification.typeId);
+
+        if (!type) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: 'Invalid type',
+                human: Context.i18n.$t('Dit type melding bestaat niet'),
+                field: 'typeId',
+            });
+        }
+
+        return type;
+    }
+
+    async validateAnswers(notification: EventNotification) {
+
+    }
+
     async validateEventDate(notification: EventNotification, event: Event) {
         if (notification.startDate !== event.startDate) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid start date',
-                human: 'De startdatum van de melding moet gelijk zijn aan de startdatum van het evenement',
+                human: Context.i18n.$t('De startdatum van de melding moet gelijk zijn aan de startdatum van het evenement'),
                 field: 'startDate',
             });
         }
@@ -167,7 +230,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid end date',
-                human: 'De einddatum van de melding moet gelijk zijn aan de einddatum van het evenement',
+                human: Context.i18n.$t('De einddatum van de melding moet gelijk zijn aan de einddatum van het evenement'),
                 field: 'endDate',
             });
         }

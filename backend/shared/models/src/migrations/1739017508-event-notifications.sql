@@ -1,6 +1,7 @@
 CREATE TABLE `event_notifications` (
     `id` varchar(36) NOT NULL DEFAULT '',
     `typeId` varchar(36) NOT NULL,
+    `periodId` varchar(36) NOT NULL,
     `startDate` datetime NOT NULL,
     `endDate` datetime NOT NULL,
     `status` varchar(36) NOT NULL,
@@ -13,10 +14,12 @@ CREATE TABLE `event_notifications` (
     `updatedAt` datetime NOT NULL,
     PRIMARY KEY (`id`),
     KEY `organizationId` (`organizationId`),
+    KEY `periodId` (`periodId`),
     KEY `createdBy` (`createdBy`),
     KEY `submittedBy` (`submittedBy`),
     KEY `startDate` (`startDate`) USING BTREE,
     CONSTRAINT `organizationId` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `createdBy` FOREIGN KEY (`createdBy`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT `submittedBy` FOREIGN KEY (`submittedBy`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+    CONSTRAINT `submittedBy` FOREIGN KEY (`submittedBy`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT `periodId` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;

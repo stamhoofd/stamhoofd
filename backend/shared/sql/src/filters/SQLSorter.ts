@@ -15,7 +15,7 @@ export type SQLSortDefinition<T, B extends PlainObject | Date = PlainObject | Da
 
 export type SQLSortDefinitions<T = any> = Record<string, SQLSortDefinition<T>>;
 
-export function applySQLSorter(selectQuery: SQLSelect, sortBy: SortList, definitions: SQLSortDefinitions) {
+export function applySQLSorter(selectQuery: SQLSelect<any>, sortBy: SortList, definitions: SQLSortDefinitions) {
     if (sortBy.length === 0) {
         throw new SimpleError({
             code: 'empty_sort',
