@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { Event, EventNotification, RegistrationPeriod, Platform } from '@stamhoofd/models';
 import { EventNotificationStatus, EventNotification as EventNotificationStruct, PermissionLevel, RecordCategory } from '@stamhoofd/structures';
 
-import { SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
 
@@ -175,8 +175,8 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             // Save answers
             notification.recordAnswers = patchObject(notification.recordAnswers, patch.recordAnswers);
 
-            if (patch.status) {
-                if (notification.status === EventNotificationStatus.Draft) {
+            if (patch.status && patch.status !== notification.status) {
+                if (patch.status !== EventNotificationStatus.Rejected && patch.status !== EventNotificationStatus.Draft) {
                     // Only allowed if complete
                     await this.validateAnswers(notification);
                 }
@@ -213,7 +213,18 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
     }
 
     async validateAnswers(notification: EventNotification) {
+        const type = await this.validateType(notification);
+        const struct = await AuthenticatedStructures.eventNotification(notification);
 
+        try {
+            RecordCategory.validate(type.recordCategories, struct);
+        }
+        catch (e) {
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                e.addNamespace('recordAnswers');
+            }
+            throw e;
+        }
     }
 
     async validateEventDate(notification: EventNotification, event: Event) {

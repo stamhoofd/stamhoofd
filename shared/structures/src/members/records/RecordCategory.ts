@@ -73,6 +73,29 @@ export class RecordCategory extends AutoEncoder {
         return this.records.filter(r => filterValue.isRecordEnabled(r));
     }
 
+    validate<T extends ObjectWithRecords>(value: T) {
+        // check if everything has been answered already + check out of date
+        const requiredCategory = this.isRequired(value);
+
+        // Check all the properties in this category and check their last review times
+        const errors = new SimpleErrors();
+
+        for (const record of this.getAllFilteredRecords(value)) {
+            try {
+                record.validate(value.getRecordAnswers(), requiredCategory);
+            }
+            catch (e) {
+                if (isSimpleErrors(e) || isSimpleError(e)) {
+                    errors.addError(e);
+                }
+                else {
+                    throw e;
+                }
+            }
+        }
+        errors.throwIfNotEmpty();
+    }
+
     isComplete<T extends ObjectWithRecords>(value: T, outdatedTime: number | null = null) {
         // check if everything has been answered already + check out of date
         const records = this.getAllFilteredRecords(value);
@@ -267,7 +290,7 @@ export class RecordCategory extends AutoEncoder {
      */
     static flattenCategoriesForAnswers(categories: RecordCategory[], answers: RecordAnswer[]): RecordCategory[] {
         return this.flattenCategoriesWith(categories, (r) => {
-            return !!answers.find(a => a.settings.id == r.id);
+            return !!answers.find(a => a.settings.id === r.id);
         });
     }
 
@@ -277,19 +300,15 @@ export class RecordCategory extends AutoEncoder {
 
         // Delete all records that are not in the list
         for (const category of filteredCategories) {
-            const requiredCategory = category.isRequired(filterValue);
-
-            for (const record of category.getAllFilteredRecords(filterValue)) {
-                try {
-                    record.validate(filterValue.getRecordAnswers(), requiredCategory);
+            try {
+                category.validate(filterValue);
+            }
+            catch (e) {
+                if (isSimpleErrors(e) || isSimpleError(e)) {
+                    errors.addError(e);
                 }
-                catch (e) {
-                    if (isSimpleErrors(e) || isSimpleError(e)) {
-                        errors.addError(e);
-                    }
-                    else {
-                        throw e;
-                    }
+                else {
+                    throw e;
                 }
             }
         }

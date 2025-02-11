@@ -480,6 +480,10 @@ export class AuthenticatedStructures {
         return result;
     }
 
+    static async eventNotification(eventNotification: EventNotification): Promise<EventNotificationStruct> {
+        return (await this.eventNotifications([eventNotification]))[0];
+    }
+
     static async eventNotifications(eventNotifications: EventNotification[]): Promise<EventNotificationStruct[]> {
         if (eventNotifications.length === 0) {
             return [];
