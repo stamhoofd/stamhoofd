@@ -1,3 +1,21 @@
+if (typeof window === 'object') {
+    if (!(window as any).$t) {
+        (window as any).$t = (s: string) => s;
+    }
+}
+
+if (typeof global === 'object') {
+    if (!(global as any).$t) {
+        (global as any).$t = (s: string) => s;
+    }
+}
+
+if (typeof self === 'object') {
+    if (!(self as any).$t) {
+        (self as any).$t = (s: string) => s;
+    }
+}
+
 // Latest version of the structures
 export { Version } from './src/Version.js';
 

@@ -51,6 +51,13 @@ export class EditorSmartButton extends AutoEncoder {
         }));
 
         buttons.push(EditorSmartButton.create({
+            id: 'reviewUrl',
+            name: $t('d26eacf8-26b6-4fa6-8a58-1f8f256bd5fc'),
+            text: $t('b782247f-6a73-4de0-8563-03cf9187b888'),
+            hint: $t('21fb9a88-0fcd-4d55-8ae5-a2ef4af5637c'),
+        }));
+
+        buttons.push(EditorSmartButton.create({
             id: 'downloadUrl',
             name: 'Knop om te downloaden',
             text: 'Download',

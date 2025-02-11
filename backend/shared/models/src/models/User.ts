@@ -117,6 +117,30 @@ export class User extends QueryableModel {
         });
     }
 
+    static async getPlatformAdmins(options?: { verified?: boolean }) {
+        // Custom implementation
+        const q = User.select()
+            .where('organizationId', null)
+            .where('permissions', '!=', null)
+            .where(
+                SQL.jsonValue(SQL.column('permissions'), '$.value.globalPermissions'),
+                '!=',
+                null,
+            )
+            .where('id', '!=', '1');
+
+        if (options?.verified !== undefined) {
+            q.where('verified', options.verified);
+        }
+
+        let global = await q.fetch();
+
+        // Hide api accounts
+        global = global.filter(a => !a.isApiUser);
+
+        return global;
+    }
+
     static async getAdmins(organizationId: string, options?: { verified?: boolean }) {
         if (STAMHOOFD.userMode === 'platform') {
             // Custom implementation

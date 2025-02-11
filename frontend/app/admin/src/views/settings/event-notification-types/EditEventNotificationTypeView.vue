@@ -53,13 +53,27 @@
                 <span>{{ $t('59eba98e-b382-4075-af33-f8bf30b1042c') }}</span>
             </button>
         </p>
+
+        <div class="container">
+            <hr>
+            <h2>{{ $t('35c08279-a7ce-4536-a201-985bb882a6cf') }}</h2>
+            <p>{{ $t('8b9ef669-554d-4ee2-b3bd-2ea12f85fa26') }}</p>
+
+            <MultipleChoiceInput v-model="contactResponsibilityIds" :items="responsibilities.map(r => ({value: r.id, name: r.name}))" :nullable="false" />
+        </div>
+
+        <div class="container">
+            <hr>
+            <h2>{{ $t('95e5b391-4399-40ae-8e58-aed3b822e65a') }}</h2>
+            <p>{{ $t('f4b0aed8-5223-471c-81e3-1b580d359f66') }}</p>
+        </div>
     </SaveView>
 </template>
 
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, EditRecordCategoriesBox, ErrorBox, EventTypeIdsInput, getEventNotificationUIFilterBuilders, RecordEditorSettings, RecordEditorType, SaveView, useCountry, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
+import { MultipleChoiceInput, CenteredMessage, EditRecordCategoriesBox, ErrorBox, EventTypeIdsInput, getEventNotificationUIFilterBuilders, RecordEditorSettings, RecordEditorType, SaveView, useCountry, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Address, BaseOrganization, EventNotification, EventNotificationDeadline, EventNotificationType, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
@@ -83,6 +97,10 @@ const platform = usePlatform();
 const present = usePresent();
 const country = useCountry();
 const { patched, addPatch, hasChanges, patch } = usePatch(props.type);
+
+const responsibilities = computed(() => {
+    return platform.value.config.responsibilities.filter(r => r.organizationBased);
+});
 
 const save = async () => {
     if (saving.value || deleting.value) {
@@ -137,6 +155,11 @@ const description = computed({
 const eventTypeIds = computed({
     get: () => patched.value.eventTypeIds,
     set: eventTypeIds => addPatch({ eventTypeIds: eventTypeIds as any }),
+});
+
+const contactResponsibilityIds = computed({
+    get: () => patched.value.contactResponsibilityIds,
+    set: contactResponsibilityIds => addPatch({ contactResponsibilityIds: contactResponsibilityIds as any }),
 });
 
 const shouldNavigateAway = async () => {

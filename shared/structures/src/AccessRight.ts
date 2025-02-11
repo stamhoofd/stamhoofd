@@ -132,6 +132,9 @@ export class AccessRightHelper {
             // Finance director also can view and edit member financial data
             case AccessRight.MemberReadFinancialData: return [AccessRight.OrganizationFinanceDirector, AccessRight.MemberWriteFinancialData];
             case AccessRight.MemberWriteFinancialData: return [AccessRight.OrganizationFinanceDirector];
+
+            // Event notification reviewers automatically have access to events
+            case AccessRight.EventWrite: return [AccessRight.OrganizationEventNotificationReviewer];
         }
         return [];
     }

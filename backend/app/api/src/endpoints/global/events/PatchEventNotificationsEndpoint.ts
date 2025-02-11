@@ -1,11 +1,12 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Event, EventNotification, RegistrationPeriod, Platform } from '@stamhoofd/models';
-import { EventNotificationStatus, EventNotification as EventNotificationStruct, PermissionLevel, RecordCategory } from '@stamhoofd/structures';
+import { EmailTemplateType, EventNotificationStatus, EventNotification as EventNotificationStruct, PermissionLevel, RecordCategory } from '@stamhoofd/structures';
 
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
+import { EventNotificationService } from '../../../services/EventNotificationService';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -95,7 +96,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                         throw new SimpleError({
                             code: 'invalid_period',
                             message: 'Period is locked',
-                            human: Context.i18n.$t('Dit werkjaar is vergrendeld, je kan geen meldingen meer aanmaken voor deze periode'),
+                            human: Context.i18n.$t('97616151-90c3-4644-8854-e228c4f355f5'),
                             field: 'startDate',
                         });
                     }
@@ -130,7 +131,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'EventNotification not found',
-                    human: Context.i18n.$t('De melding werd niet gevonden'),
+                    human: Context.i18n.$t('a0c39573-d44e-4ac0-aaeb-f9062fa1b3ce'),
                 });
             }
 
@@ -147,12 +148,12 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             if (!await Context.auth.canAccessEventNotification(notification, requiredPermissionLevel)) {
                 // Requires `OrganizationEventNotificationReviewer` access right for the organization
                 if (notification.status === EventNotificationStatus.Pending) {
-                    throw Context.auth.error(Context.i18n.$t('Je kan deze melding niet meer bewerken omdat deze al is ingediend'));
+                    throw Context.auth.error(Context.i18n.$t('c5dcd14a-868e-4eba-a5dd-409932e44ce9'));
                 }
                 if (notification.status === EventNotificationStatus.Accepted) {
-                    throw Context.auth.error(Context.i18n.$t('Je kan deze melding niet meer bewerken omdat deze al is goedgekeurd'));
+                    throw Context.auth.error(Context.i18n.$t('289e2f29-cdc9-4f44-92de-d7188d6563d7'));
                 }
-                throw Context.auth.error(Context.i18n.$t('Je hebt geen toegang om deze melding te bewerken'));
+                throw Context.auth.error(Context.i18n.$t('b47ce42b-ac72-451e-b871-deb07d93b5fa'));
             }
 
             const period = await RegistrationPeriod.getByID(notification.periodId);
@@ -160,7 +161,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Period not found',
-                    human: Context.i18n.$t('Dit werkjaar werd niet gevonden'),
+                    human: Context.i18n.$t('16a3b696-f8da-4b2b-94b7-49c85ee1c38c'),
                 });
             }
 
@@ -168,7 +169,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 throw new SimpleError({
                     code: 'invalid_period',
                     message: 'Period is locked',
-                    human: Context.i18n.$t('Dit werkjaar is vergrendeld, je kan geen meldingen meer aanpassen in deze periode'),
+                    human: Context.i18n.$t('43cc054d-cf2f-432b-9259-e7764dc929e3'),
                 });
             }
 
@@ -183,6 +184,19 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 notification.status = patch.status; // checks already happened
                 if (patch.status === EventNotificationStatus.Pending && !notification.submittedBy) {
                     notification.submittedBy = user.id;
+                }
+
+                if (patch.status === EventNotificationStatus.Pending) {
+                    await EventNotificationService.sendSubmitterEmail(EmailTemplateType.EventNotificationSubmittedCopy, notification);
+                    await EventNotificationService.sendReviewerEmail(EmailTemplateType.EventNotificationSubmittedReviewer, notification);
+                }
+
+                if (patch.status === EventNotificationStatus.Accepted) {
+                    await EventNotificationService.sendSubmitterEmail(EmailTemplateType.EventNotificationAccepted, notification);
+                }
+
+                if (patch.status === EventNotificationStatus.Rejected) {
+                    await EventNotificationService.sendSubmitterEmail(EmailTemplateType.EventNotificationRejected, notification);
                 }
             }
 
@@ -204,7 +218,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid type',
-                human: Context.i18n.$t('Dit type melding bestaat niet'),
+                human: Context.i18n.$t('4d8be2b1-559a-4c16-a76f-67a8ba85de7f'),
                 field: 'typeId',
             });
         }
@@ -232,7 +246,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid start date',
-                human: Context.i18n.$t('De startdatum van de melding moet gelijk zijn aan de startdatum van het evenement'),
+                human: Context.i18n.$t('daa3726b-9b63-4f36-b41b-8f25d1b89cf4'),
                 field: 'startDate',
             });
         }
@@ -241,7 +255,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid end date',
-                human: Context.i18n.$t('De einddatum van de melding moet gelijk zijn aan de einddatum van het evenement'),
+                human: Context.i18n.$t('d326210d-ecc0-421c-b38b-d12ae0209420'),
                 field: 'endDate',
             });
         }

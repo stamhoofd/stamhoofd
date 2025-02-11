@@ -44,7 +44,7 @@ const title = computed(() => {
     if (props.type) {
         return props.type.title;
     }
-    return $t('Alle meldingen');
+    return $t('f86bcf9f-ffd2-429a-9b04-778e61c8288c');
 });
 
 const estimatedRows = computed(() => {
@@ -123,7 +123,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'organization.name',
-        name: $t('Vereniging'),
+        name: $t('87a2582f-6de5-4b59-9395-7c49f8540659'),
         getValue: notification => notification.organization.name,
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -131,7 +131,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'organization.uriPadded',
-        name: $t('Groepsnummer'),
+        name: $t('5dd0bc69-83ba-4ee7-99e9-141d0cdf5a84'),
         getValue: notification => notification.organization.uri,
         minimumWidth: 100,
         recommendedWidth: 200,

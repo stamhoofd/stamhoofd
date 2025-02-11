@@ -111,6 +111,14 @@ export enum EmailTemplateType {
      */
     UserBalanceReminder = 'UserBalanceReminder',
     OrganizationBalanceReminder = 'OrganizationBalanceReminder',
+
+    /**
+     * Event notifications
+     */
+    EventNotificationSubmittedCopy = 'EventNotificationSubmittedCopy',
+    EventNotificationSubmittedReviewer = 'EventNotificationSubmittedReviewer',
+    EventNotificationAccepted = 'EventNotificationAccepted',
+    EventNotificationRejected = 'EventNotificationRejected',
 }
 
 export class EmailTemplate extends AutoEncoder {
@@ -256,6 +264,11 @@ export class EmailTemplate extends AutoEncoder {
 
             case EmailTemplateType.OrganizationBalanceIncreaseNotification: return 'Saldo verhoogd';
             case EmailTemplateType.OrganizationBalanceReminder: return 'Saldo herinnering';
+
+            case EmailTemplateType.EventNotificationSubmittedCopy: return $t('9a9a7777-44ca-494b-9d15-c0192bc41a7f');
+            case EmailTemplateType.EventNotificationSubmittedReviewer: return $t('ff2beaea-cb8f-4de8-ba1c-039b7ba20bc0');
+            case EmailTemplateType.EventNotificationAccepted: return $t('c936748e-b6f9-4aa9-9822-77bd727501eb');
+            case EmailTemplateType.EventNotificationRejected: return $t('01266433-c6b9-4c4b-b09f-b212cc0ce5a8');
         }
     }
 
@@ -334,6 +347,12 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.OrganizationBalanceIncreaseNotification:
             case EmailTemplateType.OrganizationBalanceReminder:
                 return 'Openstaand bedrag groepen';
+
+            case EmailTemplateType.EventNotificationSubmittedCopy:
+            case EmailTemplateType.EventNotificationSubmittedReviewer:
+            case EmailTemplateType.EventNotificationAccepted:
+            case EmailTemplateType.EventNotificationRejected:
+                return $t('a4658017-52e9-4732-8570-2c60e5d6a5cd');
         }
 
         return 'Andere';
@@ -401,6 +420,11 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.AdminInvitationNewUser: return 'De e-mail die iemand zonder account ontvangt als hij toegevoegd wordt als beheerder.';
 
             case EmailTemplateType.SignupAlreadyHasAccount: return 'Als iemand probeert een account aan te maken, maar er al een account bestaat met dat e-mailadres';
+
+            case EmailTemplateType.EventNotificationSubmittedCopy: return $t('fdf6dd9d-25f9-41bc-869b-beb2906aa77f');
+            case EmailTemplateType.EventNotificationSubmittedReviewer: return $t('bd2321f7-caea-423e-a5e9-823023e74ec9');
+            case EmailTemplateType.EventNotificationAccepted: return $t('1bb58aa1-e36e-4384-8c54-be3b71d77a3b');
+            case EmailTemplateType.EventNotificationRejected: return $t('0b6949f6-80b7-4d48-9e1e-16bfb826014a');
         }
 
         return null;
@@ -435,6 +459,23 @@ export class EmailTemplate extends AutoEncoder {
     }
 
     static getSupportedReplacementsForType(type: EmailTemplateType): Replacement[] {
+        if ([
+            EmailTemplateType.EventNotificationSubmittedCopy,
+            EmailTemplateType.EventNotificationSubmittedReviewer,
+            EmailTemplateType.EventNotificationAccepted,
+            EmailTemplateType.EventNotificationRejected,
+        ].includes(type)) {
+            return [
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.reviewUrl,
+                ExampleReplacements.all.submitterName,
+                ExampleReplacements.all.organizationName,
+                ExampleReplacements.all.eventName,
+                ExampleReplacements.all.dateRange,
+                ...(type === EmailTemplateType.EventNotificationRejected ? [ExampleReplacements.all.feedbackText] : []),
+            ];
+        }
+
         if ([
             EmailTemplateType.DefaultReceivableBalancesEmail,
             EmailTemplateType.SavedReceivableBalancesEmail,

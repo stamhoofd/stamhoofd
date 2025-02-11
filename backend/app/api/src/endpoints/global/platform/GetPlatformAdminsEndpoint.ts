@@ -32,11 +32,7 @@ export class GetPlatformAdminsEndpoint extends Endpoint<Params, Query, Body, Res
         }
 
         // Get all admins
-        let admins = await User.where({ organizationId: null, permissions: { sign: '!=', value: null } });
-
-        // Hide api accounts
-        admins = admins.filter(a => !a.isApiUser);
-        admins = admins.filter(a => !!a.permissions?.globalPermissions);
+        const admins = await User.getPlatformAdmins();
 
         return new Response(
             await AuthenticatedStructures.usersWithMembers(admins),

@@ -48,7 +48,7 @@
             </button>
         </p>
         <p v-else class="warning-box">
-            {{ $t('Je hebt geen toegangsrechten om de facturatiegegevens van deze vereniging te bewerken.') }}
+            {{ $t('8bc53634-08a5-4404-9455-421955e83ce4') }}
         </p>
     </SaveView>
 </template>

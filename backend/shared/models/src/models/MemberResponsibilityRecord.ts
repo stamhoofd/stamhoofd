@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { QueryableModel } from '@stamhoofd/sql';
+import { QueryableModel, SQL } from '@stamhoofd/sql';
 import { Group as GroupStruct, MemberResponsibilityRecordBase, MemberResponsibilityRecord as MemberResponsibilityRecordStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -52,5 +52,9 @@ export class MemberResponsibilityRecord extends QueryableModel {
             ...this,
             group,
         });
+    }
+
+    static get whereActive() {
+        return SQL.where('startDate', '<', new Date()).and(SQL.where('endDate', null).or('endDate', '>', new Date()));
     }
 }

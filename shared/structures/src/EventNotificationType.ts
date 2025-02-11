@@ -76,4 +76,10 @@ export class EventNotificationType extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(RecordCategory) })
     recordCategories: RecordCategory[] = [];
+
+    /**
+     * Who will receive email notifications apart from submitter and creator.
+     */
+    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    contactResponsibilityIds: string[] = [];
 }

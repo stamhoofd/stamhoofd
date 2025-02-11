@@ -83,7 +83,7 @@ export class EditorSmartVariable extends AutoEncoder {
             transferSettings: TransferSettings.create({
                 type: TransferDescriptionType.Structured,
                 iban: 'BE1234 1234 1234',
-                creditor: 'Demovereniging',
+                creditor: $t('16ba3d97-5943-451d-92b5-0bf21555f7ae'),
             }),
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -185,7 +185,7 @@ export class EditorSmartVariable extends AutoEncoder {
             EditorSmartVariable.create({
                 id: 'platformOrOrganizationName',
                 name: 'Naam van de vereniging of van het platform',
-                example: 'Demovereniging',
+                example: $t('16ba3d97-5943-451d-92b5-0bf21555f7ae'),
             }),
             EditorSmartVariable.create({
                 id: 'outstandingBalance',
@@ -215,6 +215,15 @@ export class EditorSmartVariable extends AutoEncoder {
                 html: `<p class="description"><em>Je kan op het ledenportaal inloggen met <strong>${Formatter.escapeHtml('voorbeeld@email.com')}</strong></em></p>`,
                 hint: 'Deze tekst wijzigt afhankelijk van de situatie: als de ontvanger nog geen account heeft, vertelt het op welk e-mailadres de ontvanger kan registreren. In het andere geval op welk e-mailadres de ontvanger kan inloggen.',
             }),
+
+            EditorSmartVariable.create({
+                id: 'feedbackText',
+                name: $t('Tekst met feedback'),
+                example: '',
+                html: `<p></p>`,
+                hint: $t('Dit zijn de opmerkingen die ingevuld werden bij het afkeuren van een kampmelding'),
+            }),
+
             EditorSmartVariable.create({
                 id: 'groupName',
                 name: 'Groepnaam',
@@ -231,6 +240,12 @@ export class EditorSmartVariable extends AutoEncoder {
         variables.push(EditorSmartVariable.create({
             id: 'nr',
             name: 'Bestelnummer',
+            example: '',
+        }));
+
+        variables.push(EditorSmartVariable.create({
+            id: 'orderPrice',
+            name: 'Bestelbedrag',
             example: '',
         }));
 
@@ -352,14 +367,14 @@ export class EditorSmartVariable extends AutoEncoder {
 
         variables.push(EditorSmartVariable.create({
             id: 'memberNames',
-            name: 'Naam leden',
+            name: $t('bd54c45e-d3df-444e-b5d9-9722a6e08999'),
             example: exampleRegistrationPayment.memberNames,
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'organizationName',
-            name: 'Naam vereniging',
-            example: 'Demovereniging',
+            name: $t('e07bc7a1-92c0-48fc-91f3-46e12573ee03'),
+            example: $t('e60df757-6546-41c2-b3d3-599df08f34b6'),
         }));
 
         variables.push(EditorSmartVariable.create({
@@ -390,6 +405,24 @@ export class EditorSmartVariable extends AutoEncoder {
             id: 'packageName',
             name: 'Pakketnaam',
             example: STPackageTypeHelper.getName(STPackageType.Members),
+        }));
+
+        variables.push(EditorSmartVariable.create({
+            id: 'submitterName',
+            name: $t('5685519b-26b5-43cf-b1f3-73fdc2e642cd'),
+            example: '',
+        }));
+
+        variables.push(EditorSmartVariable.create({
+            id: 'eventName',
+            name: $t('cb76c693-29ff-4d41-9c45-56106a798818'),
+            example: '',
+        }));
+
+        variables.push(EditorSmartVariable.create({
+            id: 'dateRange',
+            name: $t('44f90dca-5bb1-4bad-bf03-fd425cdb6a03'),
+            example: '',
         }));
 
         return variables;

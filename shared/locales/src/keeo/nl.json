@@ -1,5 +1,7 @@
 {
     "replacements": {
+      "Demovereniging": "FOS De Goudvis",
+      "demovereniging": "FOS De Goudvis",
       "Verenigingen": "Eenheden",
       "verenigingen": "eenheden",
       "Vereniging": "Eenheid",

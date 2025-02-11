@@ -818,6 +818,10 @@ export class AdminPermissionChecker {
     }
 
     async canReviewEventNotification(eventNotification: { organizationId: string }) {
+        if (!this.checkScope(eventNotification.organizationId)) {
+            return false;
+        }
+
         const organizationPermissions = await this.getOrganizationPermissions(eventNotification.organizationId);
 
         if (!organizationPermissions) {

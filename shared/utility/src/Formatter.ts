@@ -314,11 +314,11 @@ export class Formatter {
         }
 
         // If start in evening and end on the next morning: only mention date once
+        const differentYear = startDate < new Date() || Formatter.year(startDate) !== Formatter.year(endDate) || Formatter.year(startDate) !== Formatter.year(new Date());
         if (Formatter.dateIso(startDate) === Formatter.dateIso(new Date(endDate.getTime() - 24 * 60 * 60 * 1000)) && Formatter.timeIso(endDate) <= '07:00' && Formatter.timeIso(startDate) >= '12:00') {
-            return Formatter.dateWithDay(startDate) + ', ' + Formatter.time(startDate) + join + Formatter.time(endDate);
+            return Formatter.dateWithDay(startDate, differentYear) + ', ' + Formatter.time(startDate) + join + Formatter.time(endDate);
         }
 
-        const differentYear = Formatter.year(startDate) !== Formatter.year(endDate);
         return Formatter.startDate(startDate, false, differentYear) + join + Formatter.endDate(endDate, false, differentYear);
     }
 

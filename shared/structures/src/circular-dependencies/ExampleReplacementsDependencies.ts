@@ -28,7 +28,7 @@ function fillReplacements(replacements: Replacement[]) {
             transferSettings: TransferSettings.create({
                 type: TransferDescriptionType.Structured,
                 iban: 'BE1234 1234 1234',
-                creditor: 'Demovereniging',
+                creditor: $t('16ba3d97-5943-451d-92b5-0bf21555f7ae'),
             }),
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -103,7 +103,7 @@ function fillReplacements(replacements: Replacement[]) {
     });
 
     const recipient = exampleOrder.getEmailRecipient(Organization.create({
-        name: 'Demovereniging',
+        name: $t('16ba3d97-5943-451d-92b5-0bf21555f7ae'),
         uri: 'demo',
         meta: OrganizationMetaData.create({
             type: OrganizationType.Other,
@@ -113,7 +113,7 @@ function fillReplacements(replacements: Replacement[]) {
         address: Address.createDefault(Country.Belgium),
     }), WebshopPreview.create({
         meta: WebshopMetaData.create({
-            name: 'Demowinkel',
+            name: $t('a17cab0f-62f8-4403-8436-c649f578196f'),
         }),
     }));
 

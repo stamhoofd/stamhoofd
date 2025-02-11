@@ -22,17 +22,10 @@ export class FlagMomentCleanup {
     static async getActiveMemberResponsibilityRecordsForOrganizationWithoutRegistrationInCurrentPeriod() {
         const currentPeriodId = (await Platform.getShared()).periodId;
 
-        const now = new Date();
-
         return await MemberResponsibilityRecord.select()
             .whereNot('organizationId', null)
             .where(
-                SQL.where('startDate', SQLWhereSign.LessEqual, now)
-                    .or('startDate', null),
-            )
-            .where(
-                SQL.where('endDate', SQLWhereSign.GreaterEqual, now)
-                    .or('endDate', null),
+                MemberResponsibilityRecord.whereActive,
             )
             .whereNot(
                 new SQLWhereExists(

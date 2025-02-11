@@ -109,12 +109,10 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
         await sendEmailTemplate(organization, {
             recipients: [
                 Recipient.create({
+                    firstName: admin.firstName,
+                    lastName: admin.lastName,
                     email,
                     replacements: [
-                        Replacement.create({
-                            token: 'greeting',
-                            value: admin.firstName ? `Dag ${admin.firstName},` : 'Hallo!',
-                        }),
                         Replacement.create({
                             token: 'resetUrl',
                             value: recoveryUrl,
@@ -130,10 +128,6 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
                         Replacement.create({
                             token: 'validUntil',
                             value: dateTime,
-                        }),
-                        Replacement.create({
-                            token: 'email',
-                            value: admin.email,
                         }),
                     ],
                 }),

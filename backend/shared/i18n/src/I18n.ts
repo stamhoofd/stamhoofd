@@ -216,6 +216,8 @@ export class I18n {
     }
 
     localizedDomains = {
+        adminUrl: 'https://' + STAMHOOFD.domains.dashboard + '/administratie',
+        dashboard: STAMHOOFD.domains.dashboard,
         marketing: (): string => this.getDomain(STAMHOOFD.domains.marketing),
         defaultTransactionalEmail: (): string => this.getDomain(STAMHOOFD.domains.defaultTransactionalEmail ?? { ['']: 'stamhoofd.be' }),
         defaultBroadcastEmail: (): string => this.getDomain(STAMHOOFD.domains.defaultBroadcastEmail ?? { ['']: 'stamhoofd.email' }),
