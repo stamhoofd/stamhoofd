@@ -1,8 +1,7 @@
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { SQL, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
-
-const organizationJoin = SQL.join('organizations').where(SQL.column('organizations', 'id'), SQL.column('event_notifications', 'organizationId'));
+import { organizationJoin } from '../sql-filters/event-notifications';
 
 export const eventNotificationsSorters: SQLSortDefinitions<SQLResultNamespacedRow> = {
     // WARNING! TEST NEW SORTERS THOROUGHLY!

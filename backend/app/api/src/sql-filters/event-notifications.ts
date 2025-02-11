@@ -2,7 +2,7 @@ import { SQL, SQLFilterDefinitions, baseSQLFilterCompilers, createSQLColumnFilte
 import { eventFilterCompilers } from './events';
 import { organizationFilterCompilers } from './organizations';
 
-const organizationJoin = SQL.join('organizations').where(SQL.column('organizations', 'id'), SQL.column('event_notifications', 'organizationId'));
+export const organizationJoin = SQL.join('organizations').where(SQL.column('organizations', 'id'), SQL.column('event_notifications', 'organizationId'));
 
 export const eventNotificationsFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
