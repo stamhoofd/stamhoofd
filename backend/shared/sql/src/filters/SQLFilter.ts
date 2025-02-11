@@ -132,7 +132,7 @@ export function createSQLRelationFilterCompiler(baseSelect: InstanceType<typeof 
         throw new SimpleError({
             code: 'invalid_filter',
             message: 'Invalid filter',
-            human: $t('Deze filter wordt niet ondersteund, probeer een andere filter of neem contact op'),
+            human: $t('a5c30846-b8ae-410d-8fcd-bfc3f127623d'),
         });
     };
 }
@@ -433,7 +433,7 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
         throw new SimpleError({
             code: 'invalid_filter',
             message: 'Invalid filter',
-            human: $t('Deze filter wordt niet ondersteund, probeer een andere filter of neem contact op'),
+            human: $t('a5c30846-b8ae-410d-8fcd-bfc3f127623d'),
         });
     };
 }
@@ -518,7 +518,7 @@ async function compileSQLFilter(filter: StamhoofdFilter, definitions: SQLFilterD
                 throw new SimpleError({
                     code: 'invalid_filter',
                     message: 'Invalid filter ' + key,
-                    human: $t('Deze filter wordt niet ondersteund, probeer een andere filter of neem contact op'),
+                    human: $t('a5c30846-b8ae-410d-8fcd-bfc3f127623d'),
                 });
             }
 
@@ -527,7 +527,7 @@ async function compileSQLFilter(filter: StamhoofdFilter, definitions: SQLFilterD
                 throw new SimpleError({
                     code: 'invalid_filter',
                     message: 'Invalid filter value for filter ' + key,
-                    human: $t('Deze filter wordt niet ondersteund, probeer een andere filter of neem contact op'),
+                    human: $t('a5c30846-b8ae-410d-8fcd-bfc3f127623d'),
                 });
             }
             runners.push(s);

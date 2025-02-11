@@ -45,7 +45,7 @@
                     </p>
 
                     <p v-if="notification.submittedBy && notification.submittedAt" class="style-description-small">
-                        {{ $t('Ingediend door {name} op {date}', {name: notification.submittedBy.name, date: formatDate(notification.submittedAt)}) }}
+                        {{ $t('46e61090-1188-4085-8995-69aef85af678', {name: notification.submittedBy.name, date: formatDate(notification.submittedAt)}) }}
                     </p>
                 </STListItem>
 

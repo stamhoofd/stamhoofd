@@ -90,9 +90,9 @@ const tableObjectFetcher = useTableObjectFetcher<EventNotification>(objectFetche
 const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, Date | null>({
         id: 'submittedAt',
-        name: $t('Ingediend op'),
+        name: $t('16c87ee7-27b1-4b87-93e3-221d35038e6a'),
         getValue: e => e.submittedAt,
-        format: d => d ? Formatter.date(d, true) : $t('Nooit'),
+        format: d => d ? Formatter.date(d, true) : $t('faf32311-9a1c-4659-8156-e1714071ca68'),
         minimumWidth: 60,
         recommendedWidth: 100,
         index: 0,
@@ -100,7 +100,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, Date>({
         id: 'startDate',
-        name: $t('Startdatum'),
+        name: $t('86983e38-4283-4f0a-bd1d-f48f050d3681'),
         getValue: e => e.startDate,
         format: d => Formatter.date(d, true),
         minimumWidth: 60,
@@ -110,7 +110,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, Date>({
         id: 'endDate',
-        name: $t('Einddatum'),
+        name: $t('c15040b1-3202-45a8-8d30-030a4e4c5f9c'),
         getValue: e => e.endDate,
         format: d => Formatter.date(d, true),
         minimumWidth: 60,
@@ -120,7 +120,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'event.name',
-        name: $t('Naam activiteit'),
+        name: $t('8e2f97c0-0687-4b50-91f1-2b0e266de755'),
         getValue: e => e.events.map(e => e.name).join(', '),
         minimumWidth: 200,
         recommendedWidth: 100,
@@ -131,7 +131,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, EventNotificationStatus>({
         id: 'status',
-        name: $t('Status'),
+        name: $t('fde0cfa6-c279-4eef-ab75-8f62fd4028a8'),
         getValue: organization => organization.status,
         format: status => Formatter.capitalizeFirstLetter(EventNotificationStatusHelper.getName(status)),
         getStyle: (status) => {

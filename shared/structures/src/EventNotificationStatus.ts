@@ -9,13 +9,13 @@ export class EventNotificationStatusHelper {
     public static getName(status: EventNotificationStatus): string {
         switch (status) {
             case EventNotificationStatus.Draft:
-                return $t('klad');
+                return $t('3771b48b-2385-47ac-b948-9f7ff6d1988e');
             case EventNotificationStatus.Pending:
-                return $t('ingediend');
+                return $t('62bee5f8-3532-4eee-8281-ff6df193d190');
             case EventNotificationStatus.Accepted:
-                return $t('goedgekeurd');
+                return $t('372e7507-9f34-4360-bb44-25e324ff36c6');
             case EventNotificationStatus.Rejected:
-                return $t('afgekeurd');
+                return $t('1ff072f8-6913-4b85-a1e4-4e4ecc1a1bf4');
         }
     }
 }

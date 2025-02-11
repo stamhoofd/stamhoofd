@@ -218,10 +218,10 @@ export class EditorSmartVariable extends AutoEncoder {
 
             EditorSmartVariable.create({
                 id: 'feedbackText',
-                name: $t('Tekst met feedback'),
+                name: $t('f90728f1-0e73-4027-9408-adfc38c9a4f0'),
                 example: '',
                 html: `<p></p>`,
-                hint: $t('Dit zijn de opmerkingen die ingevuld werden bij het afkeuren van een kampmelding'),
+                hint: $t('21c3edb6-8c2d-43c2-8c51-245d75006774'),
             }),
 
             EditorSmartVariable.create({

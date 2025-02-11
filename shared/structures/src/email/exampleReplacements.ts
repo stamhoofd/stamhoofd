@@ -116,7 +116,7 @@ function getReplacements() {
         }),
         feedbackText: Replacement.create({
             token: 'feedbackText',
-            html: '<p>' + Formatter.escapeHtml($t('Een van de telefoonnummers die je had opgegeven lijkt niet geldig te zijn, kan je deze nog aanvullen en de kampmelding daarna opnieuw indienen?')) + '</p>',
+            html: '<p>' + Formatter.escapeHtml($t('ac49cf9f-c0de-479c-829d-99e7a31874d2')) + '</p>',
         }),
         downloadUrl: Replacement.create({
             token: 'downloadUrl',

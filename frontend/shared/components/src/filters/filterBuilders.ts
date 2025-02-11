@@ -153,7 +153,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
 
             all.push(
                 new StringFilterBuilder({
-                    name: $t('Groepsnaam'),
+                    name: $t('47754708-6f27-4afd-b9fe-600a209cb980'),
                     key: 'name',
                     allowCreation: hasPlatformPermissions,
                     wrapper: {
@@ -881,15 +881,15 @@ export function useEventNotificationUIFilterBuilders() {
     return () => {
         const all: UIFilterBuilders = [
             new DateFilterBuilder({
-                name: $t('Startdatum'),
+                name: $t('86983e38-4283-4f0a-bd1d-f48f050d3681'),
                 key: 'startDate',
             }),
             new DateFilterBuilder({
-                name: $t('Einddatum'),
+                name: $t('c15040b1-3202-45a8-8d30-030a4e4c5f9c'),
                 key: 'endDate',
             }),
             new MultipleChoiceFilterBuilder({
-                name: $t('Type activiteit'),
+                name: $t('b8edf1c5-ebc8-4aae-83c1-249c08db529d'),
                 options: [
                     ...platform.value.config.eventTypes.map((eventType) => {
                         return new MultipleChoiceUIFilterOption(eventType.name, eventType.id);
@@ -906,7 +906,7 @@ export function useEventNotificationUIFilterBuilders() {
                 },
             }),
             new MultipleChoiceFilterBuilder({
-                name: $t('Status'),
+                name: $t('fde0cfa6-c279-4eef-ab75-8f62fd4028a8'),
                 options: [
                     ...Object.values(EventNotificationStatus).map((status) => {
                         return new MultipleChoiceUIFilterOption(
@@ -922,7 +922,7 @@ export function useEventNotificationUIFilterBuilders() {
                 },
             }),
             new MultipleChoiceFilterBuilder({
-                name: $t('Hiërarchie'),
+                name: $t('cef37396-3c75-4a85-b14e-d1f7cfb9e546'),
                 multipleChoiceConfiguration: {
                     isSubjectPlural: true,
                 },
@@ -948,7 +948,7 @@ export function useEventNotificationUIFilterBuilders() {
             }),
 
             new StringFilterBuilder({
-                name: $t('Groepsnaam'),
+                name: $t('47754708-6f27-4afd-b9fe-600a209cb980'),
                 key: 'name',
                 wrapper: {
                     organization: {
