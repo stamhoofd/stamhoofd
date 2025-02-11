@@ -28,6 +28,7 @@ import { EventNotification, EventNotificationStatus, EventNotificationStatusHelp
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 type ObjectType = EventNotification;
 const $t = useTranslate();
@@ -172,6 +173,14 @@ const Route = {
 const actions: TableAction<EventNotification>[] = [];
 
 async function openMail(selection: TableActionSelection<EventNotification>) {
+    if ((true as any)) {
+        throw new SimpleError({
+            code: 'not_implemented',
+            message: 'Not implemented',
+            human: 'Deze functie is nog niet beschikbaar',
+        });
+    }
+
     const displayedComponent = new ComponentWithProperties(NavigationController, {
         root: new ComponentWithProperties(EmailView, {
             recipientFilterOptions: [],
@@ -186,6 +195,14 @@ async function openMail(selection: TableActionSelection<EventNotification>) {
 }
 
 async function exportToExcel(selection: TableActionSelection<ObjectType>) {
+    if ((true as any)) {
+        throw new SimpleError({
+            code: 'not_implemented',
+            message: 'Not implemented',
+            human: 'Deze functie is nog niet beschikbaar',
+        });
+    }
+
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
