@@ -66,10 +66,17 @@ function getRequiredFilter(): StamhoofdFilter | null {
     if (props.type) {
         return {
             typeId: props.type.id,
+            status: {
+                $neq: EventNotificationStatus.Draft,
+            },
         };
     }
 
-    return null;
+    return {
+        status: {
+            $neq: EventNotificationStatus.Draft,
+        },
+    };
 }
 
 const objectFetcher = useEventNotificationsObjectFetcher({
