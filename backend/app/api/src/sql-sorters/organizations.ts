@@ -45,11 +45,11 @@ export const organizationSorters: SQLSortDefinitions<Organization> = {
     },
     uriPadded: {
         getValue(a) {
-            return a.uri.padStart(100, '0');
+            return a.uri.padStart(10, '0');
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
-                column: SQL.lpad(SQL.column('uri'), 100, '0'),
+                column: SQL.lpad(SQL.column('uri'), 10, '0'),
                 direction,
             });
         },

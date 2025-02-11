@@ -82,11 +82,11 @@ export const eventNotificationsSorters: SQLSortDefinitions<SQLResultNamespacedRo
     },
     'organization.uriPadded': {
         getValue(a) {
-            return (a.organizations.uri as string).padStart(100, '0');
+            return (a.organizations.uri as string).padStart(10, '0');
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
-                column: SQL.lpad(SQL.column('organizations', 'uri'), 100, '0'),
+                column: SQL.lpad(SQL.column('organizations', 'uri'), 10, '0'),
                 direction,
             });
         },
