@@ -5,7 +5,8 @@ import { SQLExpression } from '../SQLExpression';
 import { SQLArray, SQLCast, SQLColumnExpression, SQLLower, SQLNull, SQLSafeValue, SQLScalarValue, scalarToSQLExpression } from '../SQLExpressions';
 import { SQLJsonContains, SQLJsonOverlaps, SQLJsonSearch, SQLJsonUnquote, scalarToSQLJSONExpression } from '../SQLJsonExpressions';
 import { SQLSelect } from '../SQLSelect';
-import { SQLWhere, SQLWhereAnd, SQLWhereEqual, SQLWhereExists, SQLWhereLike, SQLWhereNot, SQLWhereOr, SQLWhereSign } from '../SQLWhere';
+import { SQLWhere, SQLWhereAnd, SQLWhereEqual, SQLWhereExists, SQLWhereJoin, SQLWhereLike, SQLWhereNot, SQLWhereOr, SQLWhereSign } from '../SQLWhere';
+import { SQLJoin } from '../SQLJoin';
 
 export type SQLFilterCompiler = (filter: StamhoofdFilter, filters: SQLFilterDefinitions) => Promise<SQLWhere | null> | SQLWhere | null;
 export type SQLFilterDefinitions = Record<string, SQLFilterCompiler>;
@@ -98,6 +99,24 @@ function doNormalizeValue(val: StamhoofdCompareValue, options?: SQLExpressionFil
     }
 
     return val;
+}
+
+/**
+ * WARNING: only use this on one-to-one relations. Using it on one-to-many relations will result in duplicate results.
+ */
+export function createSQLJoinedRelationFilterCompiler(join: SQLJoin, definitions: SQLFilterDefinitions): SQLFilterCompiler {
+    return async (filter: StamhoofdFilter) => {
+        const f = filter as any;
+
+        if ('$elemMatch' in f) {
+            // $elemMatch is also supported but not required (since this is a one-to-one relation)
+            const w = await compileToSQLFilter(f['$elemMatch'] as StamhoofdFilter, definitions);
+            return new SQLWhereJoin(join, w);
+        }
+
+        const w = await compileToSQLFilter(filter, definitions);
+        return new SQLWhereJoin(join, w);
+    };
 }
 
 export function createSQLRelationFilterCompiler(baseSelect: InstanceType<typeof SQLSelect> & SQLExpression, definitions: SQLFilterDefinitions): SQLFilterCompiler {

@@ -1,5 +1,6 @@
 import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery, normalizeSQLQuery } from './SQLExpression';
 import { SQLArray, SQLColumnExpression, SQLDynamicExpression, SQLNull, readDynamicSQLExpression } from './SQLExpressions';
+import { SQLJoin } from './SQLJoin';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -43,7 +44,7 @@ function assertWhereable(o: any): any {
     return o;
 }
 
-export function Whereable<Sup extends Constructor<{}>>(Base: Sup) {
+export function Whereable<Sup extends Constructor<object>>(Base: Sup) {
     return class extends Base {
         _where: SQLWhere | null = null;
 
@@ -121,6 +122,9 @@ export abstract class SQLWhere implements SQLExpression {
     }
 
     abstract getSQL(options?: SQLExpressionOptions): SQLQuery;
+    getJoins(): SQLJoin[] {
+        return [];
+    }
 }
 
 export class SQLEmptyWhere extends SQLWhere {
@@ -339,6 +343,32 @@ export class SQLWhereExists extends SQLWhere {
     }
 }
 
+/**
+ * Convenience helper which also caries a separate join that should be injected in the query for the where to work
+ */
+export class SQLWhereJoin extends SQLWhere {
+    join: SQLJoin;
+    where: SQLWhere;
+
+    constructor(join: SQLJoin, where: SQLWhere) {
+        super();
+        this.join = join;
+        this.where = where;
+    }
+
+    get isSingle(): boolean {
+        return this.where.isSingle;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return this.where.getSQL(options);
+    }
+
+    getJoins(): SQLJoin[] {
+        return [this.join];
+    }
+}
+
 export class SQLWhereAnd extends SQLWhere {
     children: SQLWhere[];
 
@@ -357,6 +387,10 @@ export class SQLWhereAnd extends SQLWhere {
             }),
             ' AND ',
         );
+    }
+
+    getJoins(): SQLJoin[] {
+        return this.children.flatMap(c => c.getJoins());
     }
 }
 
@@ -378,6 +412,10 @@ export class SQLWhereOr extends SQLWhere {
             }),
             ' OR ',
         );
+    }
+
+    getJoins(): SQLJoin[] {
+        return this.children.flatMap(c => c.getJoins());
     }
 }
 
@@ -405,5 +443,9 @@ export class SQLWhereNot extends SQLWhere {
             query: `NOT (${sqlA.query})`,
             params: sqlA.params,
         };
+    }
+
+    getJoins(): SQLJoin[] {
+        return this.a.getJoins();
     }
 }

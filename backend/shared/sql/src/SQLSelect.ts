@@ -4,6 +4,7 @@ import { SQLAlias, SQLColumnExpression, SQLCount, SQLSelectAs, SQLSum, SQLTableE
 import { SQLJoin } from './SQLJoin';
 import { Orderable } from './SQLOrderBy';
 import { Whereable } from './SQLWhere';
+import { Formatter } from '@stamhoofd/utility';
 
 class EmptyClass {}
 
@@ -118,8 +119,14 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
 
         query.push(this._from.getSQL(options));
 
+        // Joins
         query.push(...this._joins.map(j => j.getSQL(options)));
+        if (this._where) {
+            const whereJoins = Formatter.uniqueArray(this._where.getJoins());
+            query.push(...whereJoins.map(j => j.getSQL(options)));
+        }
 
+        // Where
         if (this._where) {
             query.push('WHERE');
             query.push(this._where.getSQL(options));
