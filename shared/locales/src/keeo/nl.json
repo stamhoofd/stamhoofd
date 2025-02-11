@@ -10,8 +10,12 @@
       "Werkjaar": "Scoutsjaar",
       "Werkjaren": "Scoutsjaren",
       "werkjaren": "scoutsjaren",
-      "#platform": "Keeo",
+      "Groepsnummer": "Eenheidsnummer",
+      "groepsnummer": "eenheidsnummer",
+      "Groepsnaam": "Eenheidsnaam",
+      "groepsnaam": "eenheidsnaam",
 
+      "#platform": "Keeo",
       "#groepseigen": "eenheidseigen",
       "#groepen": "eenheden",
       "#Groepen": "Eenheden",
