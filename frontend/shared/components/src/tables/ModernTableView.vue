@@ -1622,7 +1622,7 @@ async function handleAction(action: TableAction<Value>, event: MouseEvent) {
 
     action.handle(selection)?.catch((e) => {
         console.error(e);
-        Toast.fromError(e).show;
+        Toast.fromError(e).show();
     });
 }
 
