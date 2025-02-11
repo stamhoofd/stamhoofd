@@ -313,6 +313,18 @@ export class Formatter {
             return Formatter.dateWithDay(startDate) + ', ' + Formatter.time(startDate) + join + Formatter.time(endDate);
         }
 
+        if (Formatter.monthNumber(startDate) === Formatter.monthNumber(endDate) && Formatter.year(startDate) === Formatter.year(endDate)) {
+            // Only repeat number
+            if (includeTime === false || (Formatter.time(startDate) === '0:00' && Formatter.time(endDate) === '23:59')) {
+                const currentYear = DateTime.now().setZone(this.timezone).year;
+                const startDatetime = DateTime.fromJSDate(startDate).setZone(this.timezone);
+                const endDatetime = DateTime.fromJSDate(endDate).setZone(this.timezone);
+
+                const year = startDatetime.year;
+                return startDatetime.day + join + endDatetime.day + ' ' + this.month(startDatetime.month) + (currentYear !== year || startDate < new Date() ? (' ' + year) : '');
+            }
+        }
+
         // If start in evening and end on the next morning: only mention date once
         const differentYear = startDate < new Date() || Formatter.year(startDate) !== Formatter.year(endDate) || Formatter.year(startDate) !== Formatter.year(new Date());
         if (Formatter.dateIso(startDate) === Formatter.dateIso(new Date(endDate.getTime() - 24 * 60 * 60 * 1000)) && Formatter.timeIso(endDate) <= '07:00' && Formatter.timeIso(startDate) >= '12:00') {
