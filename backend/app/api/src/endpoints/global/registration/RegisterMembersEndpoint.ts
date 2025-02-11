@@ -5,7 +5,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, Group, Member, MemberWithRegistrations, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, Platform, RateLimiter, Registration, User } from '@stamhoofd/models';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItem as BalanceItemStruct, IDRegisterCheckout, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PermissionLevel, PlatformFamily, PlatformMember, RegisterItem, RegisterResponse, Version, PaymentType } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItem as BalanceItemStruct, BalanceItemType, IDRegisterCheckout, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PaymentType, PermissionLevel, PlatformFamily, PlatformMember, RegisterItem, RegisterResponse, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -388,7 +388,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (!await Context.auth.canAccessRegistration(existingRegistration, PermissionLevel.Write)) {
                 throw new SimpleError({
                     code: 'forbidden',
-                    message: 'Je hebt geen toegaansrechten om deze inschrijving te verwijderen.',
+                    message: 'Je hebt geen toegangsrechten om deze inschrijving te verwijderen.',
                     statusCode: 403,
                 });
             }
