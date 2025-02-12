@@ -38,8 +38,10 @@
                     <slot name="left" />
                 </template>
                 <template #right>
-                    <slot name="toolbar" />
-                    <button v-if="!$slots.toolbar && addExtraCancel && (canPop || canDismiss) && cancelText !== null" class="button secundary" type="button" @click="pop">
+                    <div v-if="$slots.toolbar" class="editor-button-bar">
+                        <slot name="toolbar" />
+                    </div>
+                    <button v-else-if="!$slots.toolbar && addExtraCancel && (canPop || canDismiss) && cancelText !== null" class="button secundary" type="button" @click="pop">
                         {{ cancelText }}
                     </button>
                     <LoadingButton :loading="loading">
