@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :title="title" :disabled="!hasChanges && !isNew" @save="save" v-on="!isNew ? {delete: deleteMe} : {}"  :deleting="deleting">
+    <SaveView :loading="saving" :title="title" :disabled="!hasChanges && !isNew" :deleting="deleting" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
@@ -193,7 +193,7 @@ const patchedCategory = computed(() => {
 });
 
 const hasFilters = computed(() => {
-    return filterBuilder.value instanceof GroupUIFilterBuilder && filterBuilder.value.builders.length > 1;
+    return filterBuilder.value instanceof GroupUIFilterBuilder && filterBuilder.value.builders.length >= 1;
 });
 
 const title = computed(() => props.isNew ? 'Nieuwe vragenlijst' : patchedCategory.value.name);
@@ -377,6 +377,7 @@ async function addRecord(parent: RecordCategory = patchedCategory.value) {
                 isNew: true,
                 parentCategory: parent,
                 settings: props.settings,
+                rootCategories: patchedRootCategories.value,
                 saveHandler: (patch: PatchableArrayAutoEncoder<RecordSettings>) => {
                     addPatch(
                         RecordCategory.patch({
@@ -399,6 +400,7 @@ async function editRecord(record: RecordSettings, parent: RecordCategory = patch
                 isNew: false,
                 parentCategory: parent,
                 settings: props.settings,
+                rootCategories: patchedRootCategories.value,
                 saveHandler: (patch: PatchableArrayAutoEncoder<RecordSettings>) => {
                     addPatch(
                         RecordCategory.patch({

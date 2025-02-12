@@ -176,8 +176,10 @@ const editorSettings = computed(() => {
     return new RecordEditorSettings({
         dataPermission: false,
         type: RecordEditorType.EventNotification,
-        filterBuilder: (_categories: RecordCategory[]) => {
-            return getFilterBuilders(patched.value)[0];
+        filterBuilder: (categories: RecordCategory[]) => {
+            return getFilterBuilders(patched.value.patch({
+                recordCategories: categories,
+            }))[0];
         },
         exampleValue: EventNotification.create({
             typeId: patched.value.id,

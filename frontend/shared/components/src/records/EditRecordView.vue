@@ -302,7 +302,7 @@ const editorType = computed(() => props.settings.type);
 const filterBuilder = computed(() => props.settings.filterBuilder(props.rootCategories));
 
 const hasFilters = computed(() => {
-    return filterBuilder.value instanceof GroupUIFilterBuilder && filterBuilder.value.builders.length > 1;
+    return filterBuilder.value instanceof GroupUIFilterBuilder && filterBuilder.value.builders.length >= 1;
 });
 
 const { patch: patchRecord, patched: patchedRecord, addPatch, hasChanges } = usePatch(props.record);
