@@ -141,6 +141,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 notification.status === EventNotificationStatus.Pending
                 || notification.status === EventNotificationStatus.Accepted
                 || (patch.status && patch.status !== EventNotificationStatus.Pending)
+                || patch.feedbackText !== undefined
             ) {
                 requiredPermissionLevel = PermissionLevel.Full;
             }
@@ -175,6 +176,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
 
             // Save answers
             notification.recordAnswers = patchObject(notification.recordAnswers, patch.recordAnswers);
+            notification.feedbackText = patchObject(notification.feedbackText, patch.feedbackText);
 
             if (patch.status && patch.status !== notification.status) {
                 if (patch.status !== EventNotificationStatus.Rejected && patch.status !== EventNotificationStatus.Draft) {

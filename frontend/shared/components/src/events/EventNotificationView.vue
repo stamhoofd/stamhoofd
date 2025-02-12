@@ -62,13 +62,11 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="notification.feedbackText">
+                <STListItem v-if="notification.feedbackText && notification.status !== EventNotificationStatus.Accepted">
                     <h3 class="style-definition-label">
                         {{ $t('Opmerkingen') }}
                     </h3>
-                    <p class="style-definition-text">
-                        {{ notification.feedbackText }}
-                    </p>
+                    <p class="style-definition-text pre-wrap style-em" v-text="notification.feedbackText" />
                 </STListItem>
             </STList>
 
@@ -182,7 +180,7 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, EventOverview, IconContainer, ProgressIcon, useAppContext, useAuth, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, EventOverview, IconContainer, InputSheet, ProgressIcon, useAppContext, useAuth, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
 import { AccessRight, Event, EventNotification, EventNotificationStatus, EventNotificationStatusHelper, RecordCategory } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
@@ -276,7 +274,7 @@ async function openEvent(event: Event | null) {
 }
 
 async function doSubmit() {
-    if (!await CenteredMessage.confirm('Ben je zeker dat je wilt indienen?', 'Ja, indienen', 'Je kan je melding niet meer aanpassen na het indienen.', undefined, false)) {
+    if (!await CenteredMessage.confirm($t('Ben je zeker dat je deze melding wilt indienen?'), $t('Ja, indienen'), $t('Je kan je melding niet meer aanpassen na het indienen.'), undefined, false)) {
         return;
     }
     try {
@@ -290,7 +288,7 @@ async function doSubmit() {
 }
 
 async function doAccept() {
-    if (!await CenteredMessage.confirm('Ben je zeker dat je wilt goedkeuren?', 'Ja, goedkeuren', 'Je kan je melding niet meer aanpassen na het indienen.', undefined, false)) {
+    if (!await CenteredMessage.confirm($t('Ben je zeker dat je deze melding wilt goedkeuren?'), $t('Ja, goedkeuren'), $t('Je kan je melding niet meer aanpassen na het indienen.'), undefined, false)) {
         return;
     }
     try {
@@ -304,17 +302,25 @@ async function doAccept() {
 }
 
 async function doReject() {
-    if (!await CenteredMessage.confirm('Ben je zeker dat je wilt afkeuren?', 'Ja, afkeuren', undefined)) {
-        return;
-    }
-    try {
-        await save(EventNotification.patch({
-            status: EventNotificationStatus.Rejected,
-        }));
-    }
-    catch (e) {
-        errors.errorBox = new ErrorBox(e);
-    }
+    await present({
+        components: [
+            new ComponentWithProperties(InputSheet, {
+                title: $t('Reden voor afkeuring'),
+                description: $t('Je kan een opmerking achterlaten waarom je deze melding afkeurt.'),
+                saveText: $t('Afkeuren'),
+                placeholder: $t('Reden voor afkeuring'),
+                defaultValue: notification.value.feedbackText ?? '',
+                multiline: true,
+                saveHandler: async (value: string) => {
+                    await save(EventNotification.patch({
+                        status: EventNotificationStatus.Rejected,
+                        feedbackText: value,
+                    }));
+                },
+            }),
+        ],
+        modalDisplayStyle: 'sheet',
+    });
 }
 
 async function doDelete() {

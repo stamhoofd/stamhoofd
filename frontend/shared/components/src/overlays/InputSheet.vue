@@ -1,15 +1,25 @@
 <template>
-    <SaveView :title="title" :loading="saving" @save="save">
+    <SaveView :title="title" :loading="saving" :save-text="saveText" @save="save">
         <h1>
             {{ title }}
         </h1>
         <p v-if="description">
             {{ description }}
         </p>
-          
-        <STErrorsDefault :error-box="errorBox" />
+
+        <STErrorsDefault :error-box="errors.errorBox" />
+
+        <textarea
+            v-if="props.multiline"
+            ref="firstInput"
+            v-model="value"
+            class="input"
+            :placeholder="placeholder"
+            autocomplete=""
+        />
 
         <input
+            v-else
             ref="firstInput"
             v-model="value"
             class="input"
@@ -20,62 +30,61 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, SaveView, STErrorsDefault } from "@stamhoofd/components";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+<script lang="ts" setup>
+import { usePop } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, ErrorBox, useErrors } from '@stamhoofd/components';
+import { computed, ref } from 'vue';
 
-@Component({
-    components: {
-        SaveView,
-        STErrorsDefault
-    },
-})
-export default class InputSheet extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
+const props = withDefaults(
+    defineProps<{
+        title: string;
+        description?: string;
+        placeholder?: string;
+        defaultValue?: string;
+        multiline?: boolean;
+        saveText?: string;
+        saveHandler: (value: string) => Promise<void> | void;
+    }>(), {
+        description: '',
+        placeholder: '',
+        defaultValue: '',
+        saveText: undefined,
+        multiline: false,
+    });
 
-    saving = false
+const errors = useErrors();
+const value = ref(props.defaultValue);
+const saving = ref(false);
+const pop = usePop();
 
-    @Prop({ required: true })
-        title: string
-
-    @Prop({ default: '' })
-        description: string
-
-    @Prop({ default: '' })
-        placeholder: string
-
-    @Prop({ default: '' })
-        defaultValue!: string
-    
-    @Prop({ required: true })
-        saveHandler: (value: string) => Promise<void>|void;
-
-    value = this.defaultValue
-
-    async save() {
-        if (this.saving) {
-            return;
-        }
-        this.saving = true;
-        try {
-            await this.saveHandler(this.value)
-            this.pop({ force: true })
-        } catch (e) {
-            this.errorBox = new ErrorBox(e)
-        }
-        this.saving = false;
+async function save() {
+    if (saving.value) {
+        return;
     }
-
-    get hasChanges() {
-        return this.value !== this.defaultValue
+    saving.value = true;
+    try {
+        await props.saveHandler(value.value);
+        await pop({ force: true });
     }
-
-    async shouldNavigateAway() {
-        if (!this.hasChanges) {
-            return true
-        }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
+    saving.value = false;
 }
+
+const hasChanges = computed(() => {
+    return value.value !== props.defaultValue;
+});
+
+const shouldNavigateAway = async () => {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
+
+defineExpose({
+    shouldNavigateAway,
+});
+
 </script>

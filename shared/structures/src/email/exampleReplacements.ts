@@ -116,7 +116,7 @@ function getReplacements() {
         }),
         feedbackText: Replacement.create({
             token: 'feedbackText',
-            html: '<p>' + Formatter.escapeHtml($t('ac49cf9f-c0de-479c-829d-99e7a31874d2')) + '</p>',
+            html: '<p class="pre-wrap"><em>' + Formatter.escapeHtml($t('ac49cf9f-c0de-479c-829d-99e7a31874d2')) + '</em></p>',
         }),
         downloadUrl: Replacement.create({
             token: 'downloadUrl',

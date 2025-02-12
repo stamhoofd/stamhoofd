@@ -156,7 +156,7 @@ export class EventNotificationService {
             }),
             Replacement.create({
                 token: 'feedbackText',
-                html: notification.feedbackText ? `<p>${Formatter.escapeHtml(notification.feedbackText)}</p>` : `<p>${Formatter.escapeHtml($t('4c3149b3-e02a-4071-bf21-941711e0238d'))}</p>`,
+                html: notification.feedbackText ? `<p class="pre-wrap"><em>${Formatter.escapeHtml(notification.feedbackText)}</em></p>` : `<p class="pre-wrap"><em>${Formatter.escapeHtml($t('4c3149b3-e02a-4071-bf21-941711e0238d'))}</em></p>`,
             }),
         ];
     }
