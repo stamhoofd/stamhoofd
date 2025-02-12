@@ -1245,4 +1245,8 @@ export class RegisterItem {
     getRecordAnswers(): Map<string, RecordAnswer> {
         return this.recordAnswers;
     }
+
+    isSameRegistration(item: RegisterItem) {
+        return item.memberId === this.memberId && item.groupId === this.groupId && item.organization.id === this.organization.id;
+    }
 }

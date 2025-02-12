@@ -480,7 +480,6 @@ describe('Endpoint.RegisterMembers', () => {
             // #endregion
         });
 
-        // todo: does fail now -> fix in backend code
         test('Should fail if duplicate registration in cart', async () => {
             // #region arrange
             const { organization, group, groupPrice, token, member } = await initData();
@@ -520,8 +519,9 @@ describe('Endpoint.RegisterMembers', () => {
             // #endregion
 
             // #region act and assert
-            const response = await post(body, organization, token);
-            expect(response.body.registrations.length).toBe(1);
+            await expect(async () => await post(body, organization, token))
+                .rejects
+                .toThrow(new RegExp('duplicate_register_item'));
             // #endregion
         });
 

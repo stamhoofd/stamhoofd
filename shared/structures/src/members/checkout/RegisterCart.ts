@@ -236,6 +236,16 @@ export class RegisterCart {
                 item.validate({ final: true });
                 item.cartError = null;
                 newItems.push(item);
+
+                const isDuplicate = !!this.items.find(i => i !== item && i.isSameRegistration(item));
+
+                if (isDuplicate) {
+                    errors.addError(new SimpleError({
+                        code: 'duplicate_register_item',
+                        message: 'duplicate register item',
+                        human: 'Het is niet mogelijk om meerdere keren in te schrijven voor dezelfde groep.',
+                    }));
+                }
             }
             catch (e) {
                 if (isSimpleError(e) || isSimpleErrors(e)) {
