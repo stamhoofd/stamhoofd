@@ -1,4 +1,5 @@
 import { Request } from '@simonbackx/simple-endpoints';
+import { Email } from '@stamhoofd/email';
 import { BalanceItemFactory, Group, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { BalanceItemCartItem, BalanceItemType, Company, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PayconiqAccount, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, STPackageStatus, STPackageType, UserPermissions, Version } from '@stamhoofd/structures';
 import nock from 'nock';
@@ -39,6 +40,10 @@ describe('Endpoint.RegisterMembers', () => {
 
         period.previousPeriodId = previousPeriod.id;
         await period.save();
+    });
+
+    afterEach(() => {
+        jest.restoreAllMocks();
     });
 
     const initOrganization = async (registrationPeriod: RegistrationPeriod = period) => {
@@ -133,10 +138,13 @@ describe('Endpoint.RegisterMembers', () => {
             // #endregion
         });
 
-        // does time out because of email
-        test.skip('Should fail if demo limit reached', async () => {
+        test('Should fail if demo limit reached', async () => {
             // #region arrange
             (STAMHOOFD.userMode as string) = 'organization';
+
+            const spySendWebmaster = jest.spyOn(Email, 'sendWebmaster').mockImplementation(() => {
+                // do nothing
+            });
 
             const { member, group, groupPrice, organization, token, otherMembers } = await initData({ otherMemberAmount: 10 });
 
@@ -206,6 +214,8 @@ describe('Endpoint.RegisterMembers', () => {
             await expect(async () => await post(body, organization, token))
                 .rejects
                 .toThrow('Too many e-mails limited');
+
+            expect(spySendWebmaster).toHaveBeenCalledOnce();
             // #endregion
 
             (STAMHOOFD.userMode as string) = 'platform';
