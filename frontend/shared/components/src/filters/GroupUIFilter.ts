@@ -4,7 +4,7 @@ import { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 import { markRaw } from 'vue';
 import GroupUIFilterView from './GroupUIFilterView.vue';
 import { StyledDescription, UIFilter, UIFilterBuilder, UIFilterWrapper, unwrapFilterForBuilder } from './UIFilter';
-import { UnknownFilterBuilder } from './UnknownUIFilter';
+import { UnknownFilterBuilder, UnknownUIFilter } from './UnknownUIFilter';
 
 export enum GroupUIFilterMode {
     Or = 'Or',
@@ -202,19 +202,20 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
                 const decoded = builder.fromFilter(f);
 
                 if (decoded !== null) {
-                    if (decoded instanceof GroupUIFilter && !decoded.filters.length) {
+                    if (decoded instanceof GroupUIFilter && (!decoded.filters.length || decoded.filters.every(f => f instanceof UnknownUIFilter))) {
                         continue;
                     }
 
                     // do we have a leftover?
                     const unwrappedF = unwrapFilterForBuilder(builder, f);
 
-                    subfilters.push(decoded.flatten() ?? decoded);
+                    const dd = decoded.flatten() ?? decoded;
 
                     if (unwrappedF.leftOver) {
                         // Keep processing this leftover one
                         queue.push(unwrappedF.leftOver);
                     }
+                    subfilters.push(dd);
                     break;
                 }
             }
