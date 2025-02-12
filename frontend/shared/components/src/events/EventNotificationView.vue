@@ -15,15 +15,15 @@
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <STList class="info">
-                <STListItem :selectable="notification.events.length === 1" @click="notification.events.length === 1 && openEvent(null)">
+                <STListItem :selectable="notification.events.length === 1" @click="isReviewer && notification.events.length === 1 && openEvent(null)">
                     <h3 class="style-definition-label">
                         {{ notification.events.length === 1 ? $t('Activiteitsnaam') : $t('Activiteiten') }}
                     </h3>
-                    <p v-for="event of notification.events" :key="event.id" class="style-definition-text" @click="notification.events.length !== 1 && openEvent(event)">
+                    <p v-for="event of notification.events" :key="event.id" class="style-definition-text" @click="isReviewer && notification.events.length !== 1 && openEvent(event)">
                         <span>{{ notification.events.map(e => e.name).join(', ') }}</span>
                     </p>
 
-                    <template v-if="notification.events.length === 1" #right>
+                    <template v-if="isReviewer && notification.events.length === 1" #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
@@ -62,11 +62,15 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="notification.feedbackText && notification.status !== EventNotificationStatus.Accepted">
+                <STListItem v-if="notification.feedbackText && notification.status !== EventNotificationStatus.Accepted" :selectable="isReviewer" @click="isReviewer && editFeedbackText()">
                     <h3 class="style-definition-label">
                         {{ $t('Opmerkingen') }}
                     </h3>
                     <p class="style-definition-text pre-wrap style-em" v-text="notification.feedbackText" />
+
+                    <template v-if="isReviewer" #right>
+                        <span class="icon edit gray" />
+                    </template>
                 </STListItem>
             </STList>
 
@@ -187,6 +191,7 @@ import { computed } from 'vue';
 import { useErrors } from '../errors/useErrors';
 import { EventNotificationViewModel } from './event-notifications/classes/EventNotificationViewModel';
 import EditEventNotificationRecordCategoryView from './event-notifications/EditEventNotificationRecordCategoryView.vue';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 const props = withDefaults(
     defineProps<{
@@ -306,15 +311,42 @@ async function doReject() {
         components: [
             new ComponentWithProperties(InputSheet, {
                 title: $t('Reden voor afkeuring'),
-                description: $t('Je kan een opmerking achterlaten waarom je deze melding afkeurt.'),
+                description: $t('Je kan hier een opmerking achterlaten waarom je deze melding afkeurt.'),
                 saveText: $t('Afkeuren'),
                 placeholder: $t('Reden voor afkeuring'),
                 defaultValue: notification.value.feedbackText ?? '',
                 multiline: true,
                 saveHandler: async (value: string) => {
+                    if (!value) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: $t('Gelieve een reden in te vullen'),
+                        });
+                    }
                     await save(EventNotification.patch({
                         status: EventNotificationStatus.Rejected,
-                        feedbackText: value,
+                        feedbackText: value ? value : null,
+                    }));
+                },
+            }),
+        ],
+        modalDisplayStyle: 'sheet',
+    });
+}
+
+async function editFeedbackText() {
+    await present({
+        components: [
+            new ComponentWithProperties(InputSheet, {
+                title: $t('Opmerkingen wijzigen'),
+                description: $t('Je kan hier een opmerking achterlaten waarom je deze melding afkeurt.'),
+                saveText: $t('Opslaan'),
+                placeholder: $t('Opmerkingen'),
+                defaultValue: notification.value.feedbackText ?? '',
+                multiline: true,
+                saveHandler: async (value: string) => {
+                    await save(EventNotification.patch({
+                        feedbackText: value ? value : null,
                     }));
                 },
             }),
