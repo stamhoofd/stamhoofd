@@ -6,6 +6,9 @@ import { ResolutionRequest } from '../../files/ResolutionRequest.js';
 import { getPermissionLevelNumber, PermissionLevel } from '../../PermissionLevel.js';
 import { ObjectWithRecords } from '../ObjectWithRecords.js';
 import { type RecordAnswer } from './RecordAnswer.js';
+import { StamhoofdFilterDecoder } from '../../filters/FilteredRequest.js';
+import { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
+import { PropertyFilter } from '../../filters/PropertyFilter.js';
 
 export type RecordFilterOptions = { level?: PermissionLevel; additionalFilter?: (record: RecordSettings) => boolean };
 
@@ -195,14 +198,6 @@ export class RecordSettings extends BaseRecordSettings {
     @field({ decoder: BooleanDecoder, version: 119 })
     askComments = false;
 
-    /**
-     * Future idea:
-     * Is this information visible for the member?
-     * -> needs some major changes in saving the encryption blobs (needs to get split in two)
-     */
-    // @field({ decoder: BooleanDecoder })
-    // visibleForMembers = true
-
     @field({ decoder: new EnumDecoder(RecordType) })
     type = RecordType.Text;
 
@@ -251,6 +246,9 @@ export class RecordSettings extends BaseRecordSettings {
     @field({ decoder: new EnumDecoder(PermissionLevel), version: 356 })
     externalPermissionLevel = PermissionLevel.Write;
 
+    @field({ decoder: PropertyFilter, ...NextVersion, nullable: true, optional: true })
+    filter: PropertyFilter | null = null;
+
     getDiffValue() {
         const type = getRecordTypeName(this.type);
         if (this.required) {
@@ -296,7 +294,7 @@ export class RecordSettings extends BaseRecordSettings {
         return [this.name];
     }
 
-    filter<T extends ObjectWithRecords>(filterValue: T, options?: RecordFilterOptions): boolean {
+    isEnabled<T extends ObjectWithRecords>(filterValue: T, options?: RecordFilterOptions): boolean {
         if (options?.level) {
             const level = options?.level;
             if (!this.checkPermissionForUserManager(level)) {
@@ -308,6 +306,10 @@ export class RecordSettings extends BaseRecordSettings {
             if (!options.additionalFilter(this)) {
                 return false;
             }
+        }
+
+        if (this.filter && !this.filter?.isEnabled(filterValue)) {
+            return false;
         }
 
         return !!filterValue.isRecordEnabled(this);

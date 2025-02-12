@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="false" :title="title" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="false" :title="title" :disabled="!hasChanges" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
@@ -260,16 +260,11 @@
             </Checkbox>
         </template>
 
-        <div v-if="!isNew" class="container">
+        <div v-if="hasFilters" class="container">
             <hr>
-            <h2>
-                Kenmerk verwijderen
-            </h2>
+            <h2>Slim in- en uitschakelen</h2>
 
-            <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>Verwijderen</span>
-            </button>
+            <PropertyFilterInput v-model="filter" :allow-optional="false" :builder="filterBuilder" />
         </div>
     </SaveView>
 </template>
@@ -278,8 +273,8 @@
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, Dropdown, ErrorBox, Radio, STErrorsDefault, STInputBox, STList, STListItem, SaveView, useErrors, usePatch } from '@stamhoofd/components';
-import { ObjectWithRecords, PermissionLevel, RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
+import { CenteredMessage, Checkbox, Dropdown, ErrorBox, GroupUIFilterBuilder, PropertyFilterInput, Radio, STErrorsDefault, STInputBox, STList, STListItem, SaveView, useErrors, usePatch } from '@stamhoofd/components';
+import { ObjectWithRecords, PermissionLevel, PropertyFilter, RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 import EditRecordChoiceView from './EditRecordChoiceView.vue';
@@ -293,14 +288,22 @@ const props = withDefaults(defineProps<{
     isNew: boolean;
     saveHandler: (patch: PatchableArrayAutoEncoder<RecordSettings>) => void;
     settings: RecordEditorSettings<T>;
+    rootCategories?: RecordCategory[];
 }>(), {
     category: null,
+    rootCategories: () => ([]),
 });
 
 const errors = useErrors();
 const pop = usePop();
 const present = usePresent();
 const editorType = computed(() => props.settings.type);
+
+const filterBuilder = computed(() => props.settings.filterBuilder(props.rootCategories));
+
+const hasFilters = computed(() => {
+    return filterBuilder.value instanceof GroupUIFilterBuilder && filterBuilder.value.builders.length > 1;
+});
 
 const { patch: patchRecord, patched: patchedRecord, addPatch, hasChanges } = usePatch(props.record);
 const showExternalPermissionLevel = computed(() => editorType.value === RecordEditorType.PlatformMember);
@@ -456,6 +459,13 @@ const askComments = computed({
     get: () => patchedRecord.value.askComments,
     set: (askComments: boolean) => {
         addPatch({ askComments });
+    },
+});
+
+const filter = computed({
+    get: () => patchedRecord.value.filter ?? PropertyFilter.createDefault(),
+    set: (filter) => {
+        addPatch({ filter });
     },
 });
 

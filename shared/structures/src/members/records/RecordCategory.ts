@@ -6,7 +6,6 @@ import { PropertyFilter } from '../../filters/PropertyFilter.js';
 import { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
 import { getPermissionLevelNumber, PermissionLevel } from '../../PermissionLevel.js';
 import { ObjectWithRecords } from '../ObjectWithRecords.js';
-import { RecordAnswer } from './RecordAnswer.js';
 import { RecordFilterOptions, RecordSettings } from './RecordSettings.js';
 
 export interface Filterable {
@@ -65,7 +64,7 @@ export class RecordCategory extends AutoEncoder {
     }
 
     filterRecords<T extends ObjectWithRecords>(filterValue: T, options?: RecordFilterOptions): RecordSettings[] {
-        return this.records.filter(r => r.filter(filterValue, options));
+        return this.records.filter(r => r.isEnabled(filterValue, options));
     }
 
     validate<T extends ObjectWithRecords>(value: T) {

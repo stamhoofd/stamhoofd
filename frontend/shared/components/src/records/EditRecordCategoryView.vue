@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :title="title" :disabled="!hasChanges && !isNew" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
+    <SaveView :loading="saving" :title="title" :disabled="!hasChanges && !isNew" @save="save" v-on="!isNew ? {delete: deleteMe} : {}"  :deleting="deleting">
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
@@ -172,7 +172,7 @@ const present = usePresent();
 // Data
 const saving = ref(false);
 const deleting = ref(false);
-const filterBuilder = props.settings.filterBuilder(props.rootCategories);
+const filterBuilder = computed(() => props.settings.filterBuilder(props.rootCategories));
 const app = useAppContext();
 const type = props.settings.type;
 
@@ -193,7 +193,7 @@ const patchedCategory = computed(() => {
 });
 
 const hasFilters = computed(() => {
-    return filterBuilder instanceof GroupUIFilterBuilder && filterBuilder.builders.length > 1;
+    return filterBuilder.value instanceof GroupUIFilterBuilder && filterBuilder.value.builders.length > 1;
 });
 
 const title = computed(() => props.isNew ? 'Nieuwe vragenlijst' : patchedCategory.value.name);
