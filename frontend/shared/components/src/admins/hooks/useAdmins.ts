@@ -40,11 +40,11 @@ export function useAdmins() {
     });
 
     const getPermissions = (user: User) => {
-        return new ContextPermissions(user, organization, platformManager.value.$platform, { allowInheritingPermissions: false }).permissions;
+        return new ContextPermissions(UserWithMembers.create(user), organization, platformManager.value.$platform, { allowInheritingPermissions: false }).permissions;
     };
 
     const getUnloadedPermissions = (user: User) => {
-        return new ContextPermissions(user, organization, platformManager.value.$platform, { allowInheritingPermissions: false }).unloadedPermissions;
+        return new ContextPermissions(UserWithMembers.create(user), organization, platformManager.value.$platform, { allowInheritingPermissions: false }).unloadedPermissions;
     };
 
     const getPermissionsPatch = (user: User, patch: AutoEncoderPatchType<Permissions> | null): AutoEncoderPatchType<UserPermissions> | UserPermissions => {

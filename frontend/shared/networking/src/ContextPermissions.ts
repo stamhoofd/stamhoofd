@@ -2,7 +2,7 @@ import { AccessRight, Event, EventPermissionChecker, Group, GroupCategory, Organ
 import { Ref, unref } from 'vue';
 
 export class ContextPermissions {
-    reactiveUser: UserWithMembers | User | null | Ref<User | UserWithMembers | null>;
+    reactiveUser: UserWithMembers | null | Ref<UserWithMembers | null>;
     reactiveOrganization: Organization | null | Ref<Organization | null>;
     reactivePlatform: Platform | Ref<Platform>;
 
@@ -13,7 +13,7 @@ export class ContextPermissions {
     allowInheritingPermissions = true;
 
     constructor(
-        user: User | UserWithMembers | null | undefined | Ref<User | UserWithMembers | null>,
+        user: UserWithMembers | null | undefined | Ref<UserWithMembers | null>,
         organization: Organization | null | undefined | Ref<Organization | null>,
         platform: Platform | Ref<Platform>,
         options?: { allowInheritingPermissions?: boolean },
