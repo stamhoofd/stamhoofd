@@ -2,12 +2,12 @@
     <div>
         <STList v-model="draggableCategories" :draggable="true">
             <template #item="{item: category}">
-                <RecordCategoryRow :category="category" :categories="categories" :selectable="true" :settings="settings" @patch:categories="addArrayPatch" @edit="editCategory" />
+                <RecordCategoryRow :category="category" :categories="categories" :selectable="true" :settings="settings" @patch:categories="addArrayPatch" @edit="editCategory" @add="addCategory($event)" />
             </template>
         </STList>
 
         <p>
-            <button class="button text" type="button" @click="addCategory">
+            <button class="button text" type="button" @click="addCategory()">
                 <span class="icon add" />
                 <span>Nieuwe vragenlijst</span>
             </button>
@@ -58,8 +58,8 @@ async function editCategory(category: RecordCategory) {
     });
 }
 
-async function addCategory() {
-    const category = RecordCategory.create({});
+async function addCategory(base?: RecordCategory) {
+    const category = base ?? RecordCategory.create({});
     const arr = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>;
     arr.addPut(category);
 

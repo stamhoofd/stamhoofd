@@ -10,26 +10,8 @@
                 <slot name="buttons" />
             </div>
         </h2>
-        <dl class="details-grid hover">
-            <template v-for="{record, answer, recordCheckboxAnswer} of recordsWithAnswers" :key="record.id">
-                <dt class="center">
-                    {{ record.name }}
-                </dt>
-                <dd v-if="!answer">
-                    /
-                </dd>
-                <template v-else-if="recordCheckboxAnswer">
-                    <dd class="center icons">
-                        <span v-if="recordCheckboxAnswer.selected" class="icon success primary" />
-                        <span v-else class="icon canceled gray" />
-                    </dd>
-                    <dd v-if="recordCheckboxAnswer.comments" :key="'dd-description-'+record.id" class="description pre-wrap" v-text="recordCheckboxAnswer.comments" />
-                </template>
-                <dd v-else v-copyable>
-                    {{ answer.stringValue }}
-                </dd>
-            </template>
-        </dl>
+
+        <RecordCategoryAnswersBox :value="value" :category="category" :compact="compact" />
     </div>
 </template>
 
@@ -37,11 +19,18 @@
 import { ObjectWithRecords, PermissionLevel, RecordCategory, RecordCheckboxAnswer } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAppContext } from '../../context';
+import RecordCategoryAnswersBox from './RecordCategoryAnswersBox.vue';
 
-const props = defineProps<{
-    value: T;
-    category: RecordCategory;
-}>();
+const props = withDefaults(
+    defineProps<{
+        value: T;
+        category: RecordCategory;
+        compact?: boolean;
+    }>(),
+    {
+        compact: false,
+    },
+);
 
 const app = useAppContext();
 const isAdmin = app === 'dashboard' || app === 'admin';
@@ -66,6 +55,10 @@ const recordsWithAnswers = computed(() => {
             recordCheckboxAnswer: answer instanceof RecordCheckboxAnswer ? answer : null,
         };
     });
+});
+
+const childCategories = computed(() => {
+    return props.category.filterChildCategories(props.value, filterOptions);
 });
 
 </script>

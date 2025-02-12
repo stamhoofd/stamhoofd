@@ -33,7 +33,7 @@ const recordCategories = computed(() => {
         scopeOrganization: organization.value,
     });
 
-    return RecordCategory.flattenCategories(categories, member);
+    return RecordCategory.filterCategories(categories, member);
 });
 
 </script>

@@ -35,13 +35,14 @@
 </template>
 
 <script setup lang="ts">
-import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { RecordCategory } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { propertyFilterToString } from '../../filters/UIFilter';
 import { useEmitPatchArray, usePatchMoveUpDownSingle } from '../../hooks';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
 import { RecordEditorSettings } from '../RecordEditorSettings';
+import { CenteredMessage } from '../../overlays/CenteredMessage';
 
 const props = withDefaults(
     defineProps<{
@@ -57,6 +58,7 @@ const props = withDefaults(
 const emit = defineEmits<{
     'patch:categories': [patch: PatchableArrayAutoEncoder<RecordCategory>];
     'edit': [category: RecordCategory];
+    'add': [category: RecordCategory | undefined];
 }>();
 
 const filterDescription = computed(() => props.category.filter ? propertyFilterToString(props.category.filter, filterBuilderForCategory()) : '');
@@ -65,6 +67,23 @@ const { up, down } = usePatchMoveUpDownSingle(props.category.id, props.categorie
 
 function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([
+        [
+            new ContextMenuItem({
+                name: 'Wijzig instellingen',
+                icon: 'settings',
+                action: () => editCategory(),
+            }),
+            new ContextMenuItem({
+                name: 'Categorie dupliceren',
+                icon: 'copy',
+                action: () => addCategory(props.category.duplicate()),
+            }),
+            new ContextMenuItem({
+                name: 'Categorie verwijderen',
+                icon: 'trash',
+                action: () => deleteCategory(),
+            }),
+        ],
         [
             new ContextMenuItem({
                 name: 'Verplaats omhoog',
@@ -83,12 +102,65 @@ function showContextMenu(event: MouseEvent) {
                 },
             }),
         ],
+        [
+            new ContextMenuItem({
+                name: 'Verplaats naar vragenlijst',
+                disabled: props.category.childCategories.length !== 0,
+                childMenu: new ContextMenu([
+                    [
+                        new ContextMenuItem({
+                            name: 'Hoofdvragenlijst',
+                            disabled: true,
+                        }),
+                    ],
+                    [
+                        ...props.categories.map(c => new ContextMenuItem({
+                            name: c.name,
+                            disabled: c.id === props.category.id,
+                            action: async () => {
+                                // Transform into a root category
+                                if (!await CenteredMessage.confirm('Ben je zeker dat je deze vragenlijst wilt verplaatsen?', 'Ja, verplaatsen', 'Deze vragenlijst zal worden verplaatst naar de gekozen vragenlijst (' + c.name + ').')) {
+                                    return;
+                                }
+
+                                const childCategoryPatch = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>;
+                                childCategoryPatch.addPut(props.category);
+
+                                const rootPatch = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>;
+                                rootPatch.addDelete(props.category.id);
+                                rootPatch.addPatch(RecordCategory.patch({
+                                    id: c.id,
+                                    childCategories: childCategoryPatch,
+                                }));
+
+                                emit('patch:categories', rootPatch);
+                            },
+                        })),
+                    ],
+                ]),
+            }),
+        ],
     ]);
     menu.show({ clickEvent: event }).catch(console.error);
 }
 
+async function deleteCategory() {
+    if (!await CenteredMessage.confirm('Weet je zeker dat je deze vragenlijst wilt verwijderen?', 'Verwijderen', 'Nadat je hebt opgeslagen kan je dit niet meer ongedaan maken')) {
+        return;
+    }
+
+    // Note we create a patch, but don't use it internally because that would throw errors. The view itszelf is not aware of the delete
+    const arr = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>;
+    arr.addDelete(props.category.id);
+    emit('patch:categories', arr);
+}
+
 function editCategory() {
     emit('edit', props.category);
+}
+
+async function addCategory(base?: RecordCategory) {
+    emit('add', base);
 }
 
 function filterBuilderForCategory() {

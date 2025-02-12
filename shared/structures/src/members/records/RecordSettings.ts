@@ -163,7 +163,7 @@ export class RecordChoice extends AutoEncoder {
     warning: RecordWarning | null = null;
 }
 
-export class RecordSettings extends AutoEncoder {
+export class BaseRecordSettings extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
@@ -172,7 +172,9 @@ export class RecordSettings extends AutoEncoder {
      */
     @field({ decoder: StringDecoder })
     name = '';
+}
 
+export class RecordSettings extends BaseRecordSettings {
     /**
      * When used with checkbox: checkbox needs to get checked (e.g accept terms, confirm age...)
      * Multiple choice: minimum one selection required

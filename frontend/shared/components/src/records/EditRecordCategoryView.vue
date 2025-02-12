@@ -475,6 +475,72 @@ async function showCategoryMenu(event: MouseEvent, category: RecordCategory) {
                 },
             }),
         ],
+        [
+
+        ],
+        [
+            new ContextMenuItem({
+                name: 'Verplaats naar vragenlijst',
+                childMenu: new ContextMenu([
+                    [
+                        new ContextMenuItem({
+                            name: 'Hoofdvragenlijst',
+                            action: async () => {
+                                // Transform into a root category
+                                if (!await CenteredMessage.confirm('Ben je zeker dat je dit wilt verplaatsen?', 'Ja, verplaatsen', 'Deze subcategorie zal worden omgezet in een vragenlijst als je de huidige vragenlijst opslaat.')) {
+                                    return;
+                                }
+
+                                // Move
+                                const childCategoryPatch = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>;
+                                childCategoryPatch.addDelete(category.id);
+
+                                const rootPatch = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>;
+                                rootPatch.addPatch(RecordCategory.patch({
+                                    id: props.categoryId,
+                                    childCategories: childCategoryPatch,
+                                }));
+
+                                rootPatch.addPut(category);
+
+                                addRootCategoriesPatch(rootPatch);
+                            },
+                        }),
+                    ],
+                    [
+                        ...patchedRootCategories.value.map(c => new ContextMenuItem({
+                            name: c.name,
+                            disabled: c.id === props.categoryId,
+                            action: async () => {
+                                // Transform into a root category
+                                if (!await CenteredMessage.confirm('Ben je zeker dat je dit wilt verplaatsen?', 'Ja, verplaatsen', 'Deze subcategorie zal worden verplaatst naar deze vragenlijst als je de huidige vragenlijst opslaat.')) {
+                                    return;
+                                }
+
+                                const childCategoryPatch = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>;
+                                childCategoryPatch.addDelete(category.id);
+
+                                const childCategoryPatch2 = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>;
+                                childCategoryPatch2.addPut(category);
+
+                                const rootPatch = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>;
+                                rootPatch.addPatch(RecordCategory.patch({
+                                    id: props.categoryId,
+                                    childCategories: childCategoryPatch,
+                                }));
+
+                                rootPatch.addPatch(RecordCategory.patch({
+                                    id: c.id,
+                                    childCategories: childCategoryPatch2,
+                                }));
+
+                                addRootCategoriesPatch(rootPatch);
+                            },
+                        })),
+                    ],
+                ]),
+            }),
+        ],
     ]);
 
     await menu.show({ button: event.target as HTMLElement });

@@ -149,7 +149,7 @@ export class RecordCategory extends AutoEncoder {
         return count;
     }
 
-    isEnabled<T extends ObjectWithRecords>(filterValue: T, ignoreFilter = false) {
+    isEnabled<T extends ObjectWithRecords>(filterValue: T, ignoreFilter = false, filterOptions?: RecordFilterOptions) {
         if (!ignoreFilter) {
             if (!this.defaultEnabled) {
                 return false;
@@ -160,12 +160,12 @@ export class RecordCategory extends AutoEncoder {
         }
 
         if (this.childCategories.length > 0) {
-            if (this.filterChildCategories(filterValue).length > 0) {
+            if (this.filterChildCategories(filterValue, filterOptions).length > 0) {
                 return true;
             }
         }
 
-        if (this.filterRecords(filterValue).length > 0) {
+        if (this.filterRecords(filterValue, filterOptions).length > 0) {
             return true;
         }
 
@@ -192,14 +192,14 @@ export class RecordCategory extends AutoEncoder {
         return false;
     }
 
-    static filterCategories<T extends ObjectWithRecords>(categories: RecordCategory[], filterValue: T): RecordCategory[] {
+    static filterCategories<T extends ObjectWithRecords>(categories: RecordCategory[], filterValue: T, filterOptions?: RecordFilterOptions): RecordCategory[] {
         return categories.filter((category) => {
-            return category.isEnabled(filterValue);
+            return category.isEnabled(filterValue, false, filterOptions);
         });
     }
 
-    filterChildCategories<T extends ObjectWithRecords>(filterValue: T): RecordCategory[] {
-        return RecordCategory.filterCategories(this.childCategories, filterValue);
+    filterChildCategories<T extends ObjectWithRecords>(filterValue: T, filterOptions?: RecordFilterOptions): RecordCategory[] {
+        return RecordCategory.filterCategories(this.childCategories, filterValue, filterOptions);
     }
 
     /**
@@ -209,6 +209,7 @@ export class RecordCategory extends AutoEncoder {
         return RecordCategory.filterCategories(
             categories,
             filterValue,
+            options,
         ).flatMap((cat) => {
             // Make a (not deep!) clone
             const cat2 = RecordCategory.create(cat);

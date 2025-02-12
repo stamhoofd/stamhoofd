@@ -110,7 +110,7 @@
             </template>
 
             <template v-else>
-                <ViewRecordCategoryAnswersBox v-for="category in flattenedRecordCategories" :key="'category-'+category.id" :category="category" :value="notification">
+                <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="notification">
                     <template v-if="isReviewer" #buttons>
                         <button type="button" class="button icon edit" @click="editRecordCategory(category)" />
                     </template>

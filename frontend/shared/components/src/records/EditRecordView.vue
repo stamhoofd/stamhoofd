@@ -333,6 +333,14 @@ const availableTypes = [
                 value: RecordType.Date,
                 name: 'Datum',
             },
+            {
+                value: RecordType.Integer,
+                name: 'Getal',
+            },
+            {
+                value: RecordType.Price,
+                name: 'Prijs',
+            },
         ],
     },
     {

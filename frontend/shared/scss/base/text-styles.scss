@@ -435,6 +435,10 @@
     color: $color-primary;
     text-transform: uppercase;
     padding-bottom: 3px;
+
+    + .details-grid {
+        padding-top: 5px;
+    }
 }
 
 .style-definition-text {
@@ -828,7 +832,7 @@
     display: grid;
     grid-template-columns: auto 1fr;
     grid-template-columns: fit-content(40%) 1fr;
-    gap: 8px 25px;
+    gap: 10px 25px;
 
     &.small {
         grid-template-columns: 150px 1fr;
