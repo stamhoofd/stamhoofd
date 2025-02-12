@@ -221,7 +221,7 @@ const title = computed(() => {
 });
 
 const recordCategories = computed(() => {
-    return RecordCategory.filterCategories(type.value.recordCategories, notification.value);
+    return RecordCategory.flattenCategories(type.value.recordCategories, notification.value);
 });
 
 async function editRecordCategory(recordCategory: RecordCategory) {
