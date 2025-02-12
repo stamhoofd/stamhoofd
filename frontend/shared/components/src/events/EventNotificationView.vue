@@ -28,12 +28,21 @@
                     </template>
                 </STListItem>
 
+                <STListItem v-if="app === 'admin'">
+                    <h3 class="style-definition-label">
+                        {{ $t('Organisator') }}
+                    </h3>
+                    <p class="style-definition-text">
+                        <span>{{ notification.organization.name }} ({{ notification.organization.uri }})</span>
+                    </p>
+                </STListItem>
+
                 <STListItem>
                     <h3 class="style-definition-label">
                         Wanneer
                     </h3>
                     <p class="style-definition-text">
-                        <span>{{ capitalizeFirstLetter(formatDateRange(notification.startDate, notification.endDate)) }}</span>
+                        <span>{{ capitalizeFirstLetter(formatDateRange(notification.startDate, notification.endDate, undefined, false)) }}</span>
                     </p>
                 </STListItem>
 
@@ -55,7 +64,7 @@
 
                 <STListItem v-if="notification.feedbackText">
                     <h3 class="style-definition-label">
-                        Opmerkingen
+                        {{ $t('Opmerkingen') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ notification.feedbackText }}
@@ -173,13 +182,13 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, EventOverview, IconContainer, ProgressIcon, useAuth, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, EventOverview, IconContainer, ProgressIcon, useAppContext, useAuth, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
 import { AccessRight, Event, EventNotification, EventNotificationStatus, EventNotificationStatusHelper, RecordCategory } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useErrors } from '../errors/useErrors';
 import { EventNotificationViewModel } from './event-notifications/classes/EventNotificationViewModel';
 import EditEventNotificationRecordCategoryView from './event-notifications/EditEventNotificationRecordCategoryView.vue';
-import { Formatter } from '@stamhoofd/utility';
 
 const props = withDefaults(
     defineProps<{
@@ -194,6 +203,7 @@ const errors = useErrors(); ;
 const type = props.viewModel.useType();
 const present = usePresent();
 const auth = useAuth();
+const app = useAppContext();
 const isReviewer = computed(() => {
     const p = auth.getPermissionsForOrganization(props.viewModel.eventNotification.organization);
     return p?.hasAccessRight(AccessRight.OrganizationEventNotificationReviewer) ?? false;
