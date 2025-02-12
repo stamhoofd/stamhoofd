@@ -110,7 +110,7 @@
             </template>
 
             <template v-else>
-                <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="notification">
+                <ViewRecordCategoryAnswersBox v-for="category in flattenedRecordCategories" :key="'category-'+category.id" :category="category" :value="notification">
                     <template v-if="isReviewer" #buttons>
                         <button type="button" class="button icon edit" @click="editRecordCategory(category)" />
                     </template>
@@ -221,6 +221,10 @@ const title = computed(() => {
 });
 
 const recordCategories = computed(() => {
+    return RecordCategory.filterCategories(type.value.recordCategories, notification.value);
+});
+
+const flattenedRecordCategories = computed(() => {
     return RecordCategory.flattenCategories(type.value.recordCategories, notification.value);
 });
 
@@ -228,11 +232,30 @@ async function editRecordCategory(recordCategory: RecordCategory) {
     if (!isEnabled(recordCategory)) {
         return;
     }
+
+    // Find root category
+    // thsi is required because the flattened versions are not usable for editing
+    let rootCategory = recordCategory;
+    outerLoop: for (const root of recordCategories.value) {
+        if (root.id === recordCategory.id) {
+            rootCategory = root;
+            break;
+        }
+
+        // Check children
+        for (const child of root.childCategories) {
+            if (child.id === recordCategory.id) {
+                rootCategory = root;
+                break outerLoop;
+            }
+        }
+    }
+
     await present({
         components: [
             new ComponentWithProperties(EditEventNotificationRecordCategoryView, {
                 viewModel: props.viewModel,
-                category: recordCategory,
+                category: rootCategory,
             }),
         ],
         modalDisplayStyle: 'popup',
