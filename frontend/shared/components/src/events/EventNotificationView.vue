@@ -15,13 +15,17 @@
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <STList class="info">
-                <STListItem :selectable="true">
+                <STListItem :selectable="notification.events.length === 1" @click="notification.events.length === 1 && openEvent(null)">
                     <h3 class="style-definition-label">
-                        {{ notification.events.length === 1 ? 'Naam' : 'Activiteiten' }}
+                        {{ notification.events.length === 1 ? $t('Activiteitsnaam') : $t('Activiteiten') }}
                     </h3>
-                    <p class="style-definition-text">
+                    <p v-for="event of notification.events" :key="event.id" class="style-definition-text" @click="notification.events.length !== 1 && openEvent(event)">
                         <span>{{ notification.events.map(e => e.name).join(', ') }}</span>
                     </p>
+
+                    <template v-if="notification.events.length === 1" #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
                 </STListItem>
 
                 <STListItem>
@@ -169,8 +173,8 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, IconContainer, ProgressIcon, useAuth, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
-import { AccessRight, EventNotification, EventNotificationStatus, EventNotificationStatusHelper, RecordCategory } from '@stamhoofd/structures';
+import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, EventOverview, IconContainer, ProgressIcon, useAuth, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import { AccessRight, Event, EventNotification, EventNotificationStatus, EventNotificationStatusHelper, RecordCategory } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useErrors } from '../errors/useErrors';
 import { EventNotificationViewModel } from './event-notifications/classes/EventNotificationViewModel';
@@ -242,6 +246,23 @@ function getRecordCategoryProgress(category: RecordCategory) {
         return 0;
     }
     return (completed / total);
+}
+
+async function openEvent(event: Event | null) {
+    event = event ?? notification.value.events[0];
+
+    if (!event) {
+        return;
+    }
+
+    await present({
+        components: [
+            new ComponentWithProperties(EventOverview, {
+                event: event,
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function doSubmit() {
