@@ -114,6 +114,20 @@ const description = computed(() => {
         return 'Groot tekstveld';
     }
 
+    if (props.record.type === RecordType.Integer) {
+        if (!props.record.required) {
+            return 'Optioneel getal';
+        }
+        return 'Getal';
+    }
+
+    if (props.record.type === RecordType.Price) {
+        if (!props.record.required) {
+            return 'Optionele prijs';
+        }
+        return 'Prijs';
+    }
+
     if (!props.record.required) {
         return 'Optioneel tekstveld';
     }

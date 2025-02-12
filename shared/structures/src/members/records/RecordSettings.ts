@@ -3,12 +3,10 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ResolutionRequest } from '../../files/ResolutionRequest.js';
+import { PropertyFilter } from '../../filters/PropertyFilter.js';
 import { getPermissionLevelNumber, PermissionLevel } from '../../PermissionLevel.js';
 import { ObjectWithRecords } from '../ObjectWithRecords.js';
 import { type RecordAnswer } from './RecordAnswer.js';
-import { StamhoofdFilterDecoder } from '../../filters/FilteredRequest.js';
-import { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
-import { PropertyFilter } from '../../filters/PropertyFilter.js';
 
 export type RecordFilterOptions = { level?: PermissionLevel; additionalFilter?: (record: RecordSettings) => boolean };
 
