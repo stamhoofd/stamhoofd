@@ -1,9 +1,9 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { User } from '@stamhoofd/models';
-import { OrganizationAdmins, User as UserStruct } from '@stamhoofd/structures';
+import { OrganizationAdmins } from '@stamhoofd/structures';
 
-import { Context } from '../../../../helpers/Context';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
+import { Context } from '../../../../helpers/Context';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined;
