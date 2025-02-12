@@ -152,6 +152,29 @@ function $inInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunne
     };
 }
 
+function $elemMatchInMemoryFilterCompiler(filter: StamhoofdFilter, compilers: InMemoryFilterCompilerSelector): InMemoryFilterRunner {
+    const runner = $andInMemoryFilterCompiler(filter, compilers);
+    return (val) => {
+        if (val === undefined) {
+            // Using $elemMatch on a property that does not exist should always return false
+            return false;
+        }
+
+        if (!Array.isArray(val)) {
+            throw new Error('Invalid filter: expected array as value for $elemMatch filter');
+        }
+
+        for (const o of val) {
+            // Check if individual item matches the filter
+            if (runner(o)) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+}
+
 function $lengthInMemoryFilterCompiler(filter: StamhoofdFilter, compilers: InMemoryFilterCompilerSelector): InMemoryFilterRunner {
     const runner = $andInMemoryFilterCompiler(filter, compilers);
 
@@ -305,6 +328,7 @@ export const baseInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     $lte: invertFilterCompiler($greaterThanInMemoryFilterCompiler),
     $gte: invertFilterCompiler($lessThanInMemoryFilterCompiler),
     $in: $inInMemoryFilterCompiler,
+    $elemMatch: $elemMatchInMemoryFilterCompiler,
     $contains: $containsInMemoryFilterCompiler,
     $length: $lengthInMemoryFilterCompiler,
 };

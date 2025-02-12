@@ -40,6 +40,14 @@ export const recordAnswersFilterCompilers: InMemoryFilterDefinitions = {
     recordAnswers: createInMemoryFilterCompiler('recordAnswers', createInMemoryWildcardCompilerSelector({
         ...baseInMemoryFilterCompilers,
         selected: createInMemoryFilterCompiler('selected'),
+        selectedChoice: createInMemoryFilterCompiler('selectedChoice', {
+            ...baseInMemoryFilterCompilers,
+            id: createInMemoryFilterCompiler('id'),
+        }),
+        selectedChoices: createInMemoryFilterCompiler('selectedChoices', {
+            ...baseInMemoryFilterCompilers,
+            id: createInMemoryFilterCompiler('id'),
+        }),
     })),
 };
 

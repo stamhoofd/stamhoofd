@@ -1385,6 +1385,52 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
                     }),
                 );
             }
+
+            if (record.type === RecordType.ChooseOne) {
+                allForCategory.push(
+                    new MultipleChoiceFilterBuilder({
+                        name: record.name,
+                        options: [
+                            ...record.choices.map(c => new MultipleChoiceUIFilterOption(c.name, c.id)),
+                        ],
+                        wrapper: {
+                            recordAnswers: {
+                                [record.id]: {
+                                    selectedChoice: {
+                                        id: {
+                                            $in: FilterWrapperMarker,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    }),
+                );
+            }
+
+            if (record.type === RecordType.MultipleChoice) {
+                allForCategory.push(
+                    new MultipleChoiceFilterBuilder({
+                        name: record.name,
+                        options: [
+                            ...record.choices.map(c => new MultipleChoiceUIFilterOption(c.name, c.id)),
+                        ],
+                        wrapper: {
+                            recordAnswers: {
+                                [record.id]: {
+                                    selectedChoices: {
+                                        $elemMatch: {
+                                            id: {
+                                                $in: FilterWrapperMarker,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    }),
+                );
+            }
         }
 
         allForCategory.push(
