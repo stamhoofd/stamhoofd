@@ -73,7 +73,7 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { MultipleChoiceInput, CenteredMessage, EditRecordCategoriesBox, ErrorBox, EventTypeIdsInput, getEventNotificationUIFilterBuilders, RecordEditorSettings, RecordEditorType, SaveView, useCountry, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, EditRecordCategoriesBox, ErrorBox, EventTypeIdsInput, MultipleChoiceInput, RecordEditorSettings, RecordEditorType, SaveView, useCountry, useErrors, useEventNotificationInMemoryFilterBuilders, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Address, BaseOrganization, EventNotification, EventNotificationDeadline, EventNotificationType, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
@@ -170,12 +170,14 @@ const shouldNavigateAway = async () => {
     return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
+const getFilterBuilders = useEventNotificationInMemoryFilterBuilders();
+
 const editorSettings = computed(() => {
     return new RecordEditorSettings({
         dataPermission: false,
         type: RecordEditorType.EventNotification,
         filterBuilder: (_categories: RecordCategory[]) => {
-            return getEventNotificationUIFilterBuilders(platform.value)[0];
+            return getFilterBuilders(patched.value)[0];
         },
         exampleValue: EventNotification.create({
             typeId: patched.value.id,
@@ -186,13 +188,9 @@ const editorSettings = computed(() => {
             }),
         }),
         patchExampleValue(value: EventNotification, patch: PatchAnswers) {
-            const cloned = value.clone();
-
-            value.patch(EventNotification.patch({
+            return value.patch(EventNotification.patch({
                 recordAnswers: patch,
             }));
-
-            return cloned;
         },
     });
 });

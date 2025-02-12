@@ -20,7 +20,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, Column, ComponentExposed, EmailView, EventNotificationView, ModernTableView, TableAction, TableActionSelection, useAuth, useEventNotificationsObjectFetcher, useEventNotificationUIFilterBuilders, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
+import { AsyncTableAction, Column, ComponentExposed, EmailView, EventNotificationView, ModernTableView, TableAction, TableActionSelection, useAuth, useEventNotificationsObjectFetcher, useEventNotificationBackendFilterBuilders, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
 import { EventNotificationViewModel } from '@stamhoofd/components/src/events/event-notifications/classes/EventNotificationViewModel';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
@@ -55,7 +55,7 @@ const estimatedRows = computed(() => {
 
 const present = usePresent();
 const platform = usePlatform();
-const getFilterBuilders = useEventNotificationUIFilterBuilders();
+const getFilterBuilders = useEventNotificationBackendFilterBuilders();
 
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const configurationId = computed(() => {

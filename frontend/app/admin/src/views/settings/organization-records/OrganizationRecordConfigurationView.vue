@@ -63,13 +63,9 @@ const editorSettings = computed(() => {
             }),
         }),
         patchExampleValue(value: Organization, patch: PatchAnswers) {
-            const cloned = value.clone();
-
-            value.patch(Organization.patch({
+            return value.patch(Organization.patch({
                 privateMeta: OrganizationPrivateMetaData.patch({ recordAnswers: patch }),
             }));
-
-            return cloned;
         },
     });
 });

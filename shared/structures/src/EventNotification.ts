@@ -1,12 +1,14 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { Event, NamedObject } from './Event.js';
+import { EventNotificationStatus } from './EventNotificationStatus.js';
+import { compileToInMemoryFilter } from './filters/InMemoryFilter.js';
+import { eventNotificationsInMemoryFilterCompilers } from './filters/inMemoryFilterDefinitions.js';
 import { StamhoofdFilter } from './filters/StamhoofdFilter.js';
 import { ObjectWithRecords } from './members/ObjectWithRecords.js';
 import { RecordAnswer, RecordAnswerDecoder } from './members/records/RecordAnswer.js';
 import { RecordSettings } from './members/records/RecordSettings.js';
 import { BaseOrganization } from './Organization.js';
-import { EventNotificationStatus } from './EventNotificationStatus.js';
 
 export class EventNotification extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: StringDecoder, optional: true, defaultValue: () => uuidv4() })
@@ -69,7 +71,13 @@ export class EventNotification extends AutoEncoder implements ObjectWithRecords 
     }
 
     doesMatchFilter(filter: StamhoofdFilter): boolean {
-        // todo
-        return true;
+        try {
+            const compiledFilter = compileToInMemoryFilter(filter, eventNotificationsInMemoryFilterCompilers);
+            return compiledFilter(this);
+        }
+        catch (e) {
+            console.error('Error while compiling filter', e, filter);
+        }
+        return false;
     }
 }

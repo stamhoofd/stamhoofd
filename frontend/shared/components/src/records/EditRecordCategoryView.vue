@@ -517,6 +517,7 @@ async function showExample() {
                 saveHandler: async (_patch: PatchAnswers, navigationActions: NavigationActions) => {
                     await navigationActions.pop({ force: true });
                 },
+                forceMarkReviewed: true,
             }),
         ],
         modalDisplayStyle: 'popup',

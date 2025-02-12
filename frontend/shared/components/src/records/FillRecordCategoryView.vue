@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts" generic="T extends ObjectWithRecords">
-import { PatchMap } from '@simonbackx/simple-encoding';
+import { PatchMap, patchObject } from '@simonbackx/simple-encoding';
 import { ObjectWithRecords, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
@@ -32,11 +32,14 @@ const props = withDefaults(
 const patch = ref(new PatchMap() as PatchAnswers);
 const patchedValue = computed(() => {
     const patched = props.patchHandler(patch.value);
+
+    console.log('patchedValue', patched);
     return patched;
 });
 
 function addPatch(p: PatchAnswers) {
-    patch.value = p.applyTo(patch.value) as PatchAnswers;
+    console.log('addPatch', p);
+    patch.value = patchObject(patch.value, p);
 }
 
 const loading = ref(false);

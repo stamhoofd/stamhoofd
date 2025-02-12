@@ -4,10 +4,17 @@ import { StamhoofdCompareValue, StamhoofdFilter } from './StamhoofdFilter.js';
 
 export type InMemoryFilterRunner = (object: any) => boolean;
 
-export type InMemoryFilterCompiler = (filter: StamhoofdFilter, filters: InMemoryFilterDefinitions) => InMemoryFilterRunner;
+export type InMemoryFilterCompiler = (filter: StamhoofdFilter, compilers: InMemoryFilterCompilerSelector) => InMemoryFilterRunner;
 export type InMemoryFilterDefinitions = Record<string, InMemoryFilterCompiler>;
+export type InMemoryFilterCompilerSelector = (key: string, filter: StamhoofdFilter) => InMemoryFilterCompiler | undefined;
 
-function $andInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFilterDefinitions): InMemoryFilterRunner {
+function filterDefinitionsToSelector(definitions: InMemoryFilterDefinitions): InMemoryFilterCompilerSelector {
+    return (key: string) => {
+        return definitions[key];
+    };
+}
+
+function $andInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFilterCompilerSelector): InMemoryFilterRunner {
     const runners = compileInMemoryFilter(filter, filters);
     return (object) => {
         for (const runner of runners) {
@@ -19,7 +26,7 @@ function $andInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFi
     };
 }
 
-function $orInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFilterDefinitions): InMemoryFilterRunner {
+function $orInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFilterCompilerSelector): InMemoryFilterRunner {
     const runners = compileInMemoryFilter(filter, filters);
     return (object) => {
         for (const runner of runners) {
@@ -31,7 +38,7 @@ function $orInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFil
     };
 }
 
-function $notInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFilterDefinitions): InMemoryFilterRunner {
+function $notInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFilterCompilerSelector): InMemoryFilterRunner {
     const andRunner = $andInMemoryFilterCompiler(filter, filters);
     return (object) => {
         return !andRunner(object);
@@ -84,8 +91,8 @@ function $equalsInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterR
 }
 
 function invertFilterCompiler(compiler: InMemoryFilterCompiler): InMemoryFilterCompiler {
-    return (filter: StamhoofdFilter, filters: InMemoryFilterDefinitions) => {
-        const runner = compiler(filter, filters);
+    return (filter: StamhoofdFilter, compilers: InMemoryFilterCompilerSelector) => {
+        const runner = compiler(filter, compilers);
         return (val) => {
             return !runner(val);
         };
@@ -106,6 +113,11 @@ function $containsInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilte
 
 function $inInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunner {
     return (val) => {
+        if (val === undefined) {
+            // Using $in on a property that does not exist should always return false
+            return false;
+        }
+
         if (!Array.isArray(filter)) {
             throw new Error('Invalid filter: expected array as value for $in filter');
         }
@@ -140,8 +152,8 @@ function $inInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunne
     };
 }
 
-function $lengthInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFilterDefinitions): InMemoryFilterRunner {
-    const runner = $andInMemoryFilterCompiler(filter, filters);
+function $lengthInMemoryFilterCompiler(filter: StamhoofdFilter, compilers: InMemoryFilterCompilerSelector): InMemoryFilterRunner {
+    const runner = $andInMemoryFilterCompiler(filter, compilers);
 
     return (val) => {
         if (typeof val === 'string' || Array.isArray(val)) {
@@ -162,6 +174,10 @@ function objectPathValue(object: any, path: string[]) {
         if (object.has(nextSearched)) {
             return objectPathValue(object.get(nextSearched), path.slice(1));
         }
+        return undefined;
+    }
+
+    if (typeof object !== 'object' || object === null) {
         return undefined;
     }
 
@@ -240,24 +256,36 @@ function wrapPlainFilter(filter: StamhoofdFilter): Exclude<StamhoofdFilter, Stam
     return filter;
 }
 
-export function createInMemoryFilterCompiler(path: string | string[], overrideFilterDefinitions?: InMemoryFilterDefinitions): InMemoryFilterCompiler {
+export function createInMemoryFilterCompiler(path: string | string[], overrideFilterDefinitions?: InMemoryFilterDefinitions | InMemoryFilterCompilerSelector): InMemoryFilterCompiler {
     const splitted = Array.isArray(path) ? path : path.split('.');
 
-    return (filter: StamhoofdFilter, filters: InMemoryFilterDefinitions) => {
-        const runner = $andInMemoryFilterCompiler(filter, overrideFilterDefinitions ?? filters);
+    return (filter: StamhoofdFilter, compilers: InMemoryFilterCompilerSelector) => {
+        const runner = $andInMemoryFilterCompiler(filter, overrideFilterDefinitions ? (typeof overrideFilterDefinitions === 'function' ? overrideFilterDefinitions : filterDefinitionsToSelector(overrideFilterDefinitions)) : compilers);
 
         return (object) => {
             const value = objectPathValue(object, splitted);
+            if (value === undefined) {
+                // Cannot filter on property that does not exists
+                // (no need to continue here on the filters as these will throw on an undefined value)
+                return false;
+            }
             return runner(value);
         };
+    };
+}
+
+export function createInMemoryWildcardCompilerSelector(overrideFilterDefinitions?: InMemoryFilterDefinitions | InMemoryFilterCompilerSelector): InMemoryFilterCompilerSelector {
+    return (key: string) => {
+        // Every key will match on this compiler
+        return createInMemoryFilterCompiler(key, overrideFilterDefinitions);
     };
 }
 
 export function createInMemoryFilterCompilerFromCompositePath(paths: string[], separator = ' '): InMemoryFilterCompiler {
     const splittedPaths = paths.map(path => path.split('.'));
 
-    return (filter: StamhoofdFilter, filters: InMemoryFilterDefinitions) => {
-        const runner = $andInMemoryFilterCompiler(filter, filters);
+    return (filter: StamhoofdFilter, compilers: InMemoryFilterCompilerSelector) => {
+        const runner = $andInMemoryFilterCompiler(filter, compilers);
 
         return (object) => {
             const value = splittedPaths.map(splitted => objectPathValue(object, splitted)).join(separator);
@@ -281,7 +309,7 @@ export const baseInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     $length: $lengthInMemoryFilterCompiler,
 };
 
-function compileInMemoryFilter(filter: StamhoofdFilter, definitions: InMemoryFilterDefinitions): InMemoryFilterRunner[] {
+function compileInMemoryFilter(filter: StamhoofdFilter, getCompilerForFilter: InMemoryFilterCompilerSelector): InMemoryFilterRunner[] {
     if (filter === undefined) {
         return [];
     }
@@ -291,13 +319,13 @@ function compileInMemoryFilter(filter: StamhoofdFilter, definitions: InMemoryFil
     for (const f2 of (Array.isArray(filter) ? filter : [filter])) {
         const f = wrapPlainFilter(f2);
         for (const key of Object.keys(f)) {
-            if (!(key in definitions)) {
+            const subFilter = f[key] as StamhoofdFilter;
+            const filterCompiler = getCompilerForFilter(key, subFilter);
+            if (!filterCompiler) {
                 throw new Error('Unsupported filter ' + key);
             }
-            const filterCompiler = definitions[key];
-            const subFilter = f[key] as StamhoofdFilter;
 
-            const s = filterCompiler(subFilter, definitions);
+            const s = filterCompiler(subFilter, getCompilerForFilter);
             if (s === undefined || s === null) {
                 throw new Error('Unsupported filter value for ' + key);
             }
@@ -312,5 +340,5 @@ export const compileToInMemoryFilter = (filter: StamhoofdFilter, filters: InMemo
     if (filter === null) {
         return () => true;
     }
-    return $andInMemoryFilterCompiler(filter, filters);
+    return $andInMemoryFilterCompiler(filter, filterDefinitionsToSelector(filters));
 };

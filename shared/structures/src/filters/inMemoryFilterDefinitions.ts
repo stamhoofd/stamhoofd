@@ -1,4 +1,4 @@
-import { InMemoryFilterDefinitions, baseInMemoryFilterCompilers, createInMemoryFilterCompiler } from './InMemoryFilter.js';
+import { InMemoryFilterDefinitions, baseInMemoryFilterCompilers, createInMemoryFilterCompiler, createInMemoryWildcardCompilerSelector } from './InMemoryFilter.js';
 
 export const memberWithRegistrationsBlobInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
@@ -34,4 +34,16 @@ export const receivableBalanceObjectContactInMemoryFilterCompilers: InMemoryFilt
 export const organizationItemInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
     tags: createInMemoryFilterCompiler('meta.tags'),
+};
+
+export const recordAnswersFilterCompilers: InMemoryFilterDefinitions = {
+    recordAnswers: createInMemoryFilterCompiler('recordAnswers', createInMemoryWildcardCompilerSelector({
+        ...baseInMemoryFilterCompilers,
+        selected: createInMemoryFilterCompiler('selected'),
+    })),
+};
+
+export const eventNotificationsInMemoryFilterCompilers: InMemoryFilterDefinitions = {
+    ...baseInMemoryFilterCompilers,
+    ...recordAnswersFilterCompilers,
 };

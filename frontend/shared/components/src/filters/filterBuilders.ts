@@ -1,6 +1,6 @@
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { FilterWrapperMarker, unwrapFilter, AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, getAuditLogTypeName, LoadedPermissions, MemberResponsibility, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User, WebshopPreview, EventNotificationStatus, EventNotificationStatusHelper } from '@stamhoofd/structures';
+import { FilterWrapperMarker, unwrapFilter, AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, getAuditLogTypeName, LoadedPermissions, MemberResponsibility, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User, WebshopPreview, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, RecordCategory, RecordType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { Gender } from '../../../../../shared/structures/esm/dist/src/members/Gender';
@@ -875,100 +875,6 @@ const organizationMemberUIFilterBuilders: UIFilterBuilders = [
     }),
 ];
 
-export function useEventNotificationUIFilterBuilders() {
-    const platform = usePlatform();
-
-    return () => {
-        const all: UIFilterBuilders = [
-            new DateFilterBuilder({
-                name: $t('86983e38-4283-4f0a-bd1d-f48f050d3681'),
-                key: 'startDate',
-            }),
-            new DateFilterBuilder({
-                name: $t('c15040b1-3202-45a8-8d30-030a4e4c5f9c'),
-                key: 'endDate',
-            }),
-            new MultipleChoiceFilterBuilder({
-                name: $t('b8edf1c5-ebc8-4aae-83c1-249c08db529d'),
-                options: [
-                    ...platform.value.config.eventTypes.map((eventType) => {
-                        return new MultipleChoiceUIFilterOption(eventType.name, eventType.id);
-                    }),
-                ],
-                wrapper: {
-                    events: {
-                        $elemMatch: {
-                            typeId: {
-                                $in: FilterWrapperMarker,
-                            },
-                        },
-                    },
-                },
-            }),
-            new MultipleChoiceFilterBuilder({
-                name: $t('fde0cfa6-c279-4eef-ab75-8f62fd4028a8'),
-                options: [
-                    ...Object.values(EventNotificationStatus).map((status) => {
-                        return new MultipleChoiceUIFilterOption(
-                            Formatter.capitalizeFirstLetter(EventNotificationStatusHelper.getName(status)),
-                            status,
-                        );
-                    }),
-                ],
-                wrapper: {
-                    status: {
-                        $in: FilterWrapperMarker,
-                    },
-                },
-            }),
-            new MultipleChoiceFilterBuilder({
-                name: $t('cef37396-3c75-4a85-b14e-d1f7cfb9e546'),
-                multipleChoiceConfiguration: {
-                    isSubjectPlural: true,
-                },
-                options: platform.value.config.tags.map(tag => new MultipleChoiceUIFilterOption(tag.name, tag.id)),
-                wrapper: {
-                    organization: {
-                        $elemMatch: {
-                            tags: {
-                                $in: FilterWrapperMarker,
-                            },
-                        },
-                    },
-                },
-            }),
-            new StringFilterBuilder({
-                name: $t('05723781-9357-41b2-9fb8-cb4f80dde7f9'),
-                key: 'uri',
-                wrapper: {
-                    organization: {
-                        $elemMatch: FilterWrapperMarker,
-                    },
-                },
-            }),
-
-            new StringFilterBuilder({
-                name: $t('47754708-6f27-4afd-b9fe-600a209cb980'),
-                key: 'name',
-                wrapper: {
-                    organization: {
-                        $elemMatch: FilterWrapperMarker,
-                    },
-                },
-            }),
-        ];
-
-        // Recursive: self referencing groups
-        all.unshift(
-            new GroupUIFilterBuilder({
-                builders: all,
-            }),
-        );
-
-        return all;
-    };
-}
-
 export function useGetOrganizationUIFilterBuilders() {
     const $t = useTranslate();
     const platform = usePlatform();
@@ -1454,64 +1360,190 @@ export function getDocumentsUIFilterBuilders() {
     return [groupFilter, ...builders];
 }
 
-// Events
-export function getEventNotificationUIFilterBuilders(platform: Platform) {
+export function getFilterBuildersForRecordCategories(categories: RecordCategory[]) {
     const all: UIFilterBuilder<UIFilter>[] = [];
 
-    const tagsFilter = new MultipleChoiceFilterBuilder({
-        name: 'Regio',
-        options: [
-            new MultipleChoiceUIFilterOption('Alles', null),
-            ...platform.config.tags.map(tag => new MultipleChoiceUIFilterOption(tag.name, tag.id)),
-        ],
-        wrapper: {
-            event: {
-                organizationTagIds: {
-                    $in: FilterWrapperMarker,
-                },
-            },
-        },
-    });
+    for (const category of categories) {
+        const allForCategory: UIFilterBuilder<UIFilter>[] = [];
 
-    all.push(tagsFilter);
+        for (const record of category.records) {
+            if (record.type === RecordType.Checkbox) {
+                allForCategory.push(
+                    new MultipleChoiceFilterBuilder({
+                        name: record.name,
+                        options: [
+                            new MultipleChoiceUIFilterOption($t('Aangevinkt'), true),
+                            new MultipleChoiceUIFilterOption($t('Niet aangevinkt'), false),
+                        ],
+                        wrapper: {
+                            recordAnswers: {
+                                [record.id]: {
+                                    selected: { $in: FilterWrapperMarker },
+                                },
+                            },
+                        },
+                    }),
+                );
+            }
+        }
 
-    const defaultAgeGroupFilter = new MultipleChoiceFilterBuilder({
-        name: 'Standaard leeftijdsgroep',
-        options: [
-            new MultipleChoiceUIFilterOption('Iedereen', null),
-            ...platform.config.defaultAgeGroups.map(g => new MultipleChoiceUIFilterOption(g.name, g.id)),
-        ],
-        wrapper: {
-            event: {
-                defaultAgeGroupIds: {
-                    $in: FilterWrapperMarker,
-                },
-            },
-        },
-    });
-    all.push(defaultAgeGroupFilter);
-
-    const typeFilter = new MultipleChoiceFilterBuilder({
-        name: 'Type',
-        options: [
-            ...platform.config.eventTypes.map(type => new MultipleChoiceUIFilterOption(type.name, type.id)),
-        ],
-        wrapper: {
-            event: {
-                typeId: {
-                    $in: FilterWrapperMarker,
-                },
-            },
-        },
-    });
-
-    all.push(typeFilter);
-
-    all.unshift(
-        new GroupUIFilterBuilder({
-            builders: all,
-        }),
-    );
+        if (allForCategory.length > 0) {
+            all.push(
+                new GroupUIFilterBuilder({
+                    name: category.name,
+                    builders: allForCategory,
+                }),
+            );
+        }
+    }
 
     return all;
+}
+
+/**
+ * These filters are compatible with the SQLFilter in the backend
+ */
+export function useEventNotificationBackendFilterBuilders() {
+    const platform = usePlatform();
+
+    return () => {
+        const all: UIFilterBuilders = [
+            new DateFilterBuilder({
+                name: $t('86983e38-4283-4f0a-bd1d-f48f050d3681'),
+                key: 'startDate',
+            }),
+            new DateFilterBuilder({
+                name: $t('c15040b1-3202-45a8-8d30-030a4e4c5f9c'),
+                key: 'endDate',
+            }),
+            new MultipleChoiceFilterBuilder({
+                name: $t('b8edf1c5-ebc8-4aae-83c1-249c08db529d'),
+                options: [
+                    ...platform.value.config.eventTypes.map((eventType) => {
+                        return new MultipleChoiceUIFilterOption(eventType.name, eventType.id);
+                    }),
+                ],
+                wrapper: {
+                    events: {
+                        $elemMatch: {
+                            typeId: {
+                                $in: FilterWrapperMarker,
+                            },
+                        },
+                    },
+                },
+            }),
+            new MultipleChoiceFilterBuilder({
+                name: $t('fde0cfa6-c279-4eef-ab75-8f62fd4028a8'),
+                options: [
+                    ...Object.values(EventNotificationStatus).map((status) => {
+                        return new MultipleChoiceUIFilterOption(
+                            Formatter.capitalizeFirstLetter(EventNotificationStatusHelper.getName(status)),
+                            status,
+                        );
+                    }),
+                ],
+                wrapper: {
+                    status: {
+                        $in: FilterWrapperMarker,
+                    },
+                },
+            }),
+            new MultipleChoiceFilterBuilder({
+                name: $t('cef37396-3c75-4a85-b14e-d1f7cfb9e546'),
+                multipleChoiceConfiguration: {
+                    isSubjectPlural: true,
+                },
+                options: platform.value.config.tags.map(tag => new MultipleChoiceUIFilterOption(tag.name, tag.id)),
+                wrapper: {
+                    organization: {
+                        $elemMatch: {
+                            tags: {
+                                $in: FilterWrapperMarker,
+                            },
+                        },
+                    },
+                },
+            }),
+            new StringFilterBuilder({
+                name: $t('05723781-9357-41b2-9fb8-cb4f80dde7f9'),
+                key: 'uri',
+                wrapper: {
+                    organization: {
+                        $elemMatch: FilterWrapperMarker,
+                    },
+                },
+            }),
+
+            new StringFilterBuilder({
+                name: $t('47754708-6f27-4afd-b9fe-600a209cb980'),
+                key: 'name',
+                wrapper: {
+                    organization: {
+                        $elemMatch: FilterWrapperMarker,
+                    },
+                },
+            }),
+        ];
+
+        // Recursive: self referencing groups
+        all.unshift(
+            new GroupUIFilterBuilder({
+                builders: all,
+            }),
+        );
+
+        return all;
+    };
+}
+
+/**
+ * These filters are compatible with the SQLFilter in the backend
+ */
+export function useEventNotificationInMemoryFilterBuilders() {
+    const platform = usePlatform();
+
+    return (type: EventNotificationType) => {
+        const all: UIFilterBuilders = [
+            new DateFilterBuilder({
+                name: $t('86983e38-4283-4f0a-bd1d-f48f050d3681'),
+                key: 'startDate',
+            }),
+            new DateFilterBuilder({
+                name: $t('c15040b1-3202-45a8-8d30-030a4e4c5f9c'),
+                key: 'endDate',
+            }),
+            new MultipleChoiceFilterBuilder({
+                name: $t('b8edf1c5-ebc8-4aae-83c1-249c08db529d'),
+                options: [
+                    ...platform.value.config.eventTypes.map((eventType) => {
+                        return new MultipleChoiceUIFilterOption(eventType.name, eventType.id);
+                    }),
+                ],
+                wrapper: {
+                    events: {
+                        $elemMatch: {
+                            typeId: {
+                                $in: FilterWrapperMarker,
+                            },
+                        },
+                    },
+                },
+            }),
+        ];
+
+        if (type) {
+            // Also include complex filters
+            all.push(...getFilterBuildersForRecordCategories(type.recordCategories));
+        }
+
+        // Recursive: self referencing groups
+        all.unshift(
+            new GroupUIFilterBuilder({
+                builders: all,
+            }),
+        );
+
+        return all;
+    };
 }
