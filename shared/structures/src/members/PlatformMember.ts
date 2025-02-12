@@ -26,7 +26,6 @@ import { RegisterItem } from './checkout/RegisterItem.js';
 import { RecordAnswer } from './records/RecordAnswer.js';
 import { RecordCategory } from './records/RecordCategory.js';
 import { RecordSettings } from './records/RecordSettings.js';
-import { User } from '../User.js';
 
 export class PlatformFamily {
     members: PlatformMember[] = [];
