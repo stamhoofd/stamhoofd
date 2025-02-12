@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :title="title" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :loading="saving" :title="title" :disabled="!hasChanges && !isNew" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
@@ -145,26 +145,9 @@
             <PropertyFilterInput v-model="filter" :allow-optional="allowChildCategories && patchedCategory.getAllRecords().length > 1" :builder="filterBuilder" />
         </div>
 
-        <div class="container">
-            <hr>
-            <h2>
-                Acties
-            </h2>
-
-            <div class="style-button-bar">
-                <button class="button secundary" type="button" @click="showExample">
-                    <span class="icon eye" />
-                    <span>Voorbeeld</span>
-                </button>
-
-                <LoadingButton v-if="!isNew" :loading="deleting">
-                    <button class="button secundary danger" type="button" @click="deleteMe">
-                        <span class="icon trash" />
-                        <span>Verwijderen</span>
-                    </button>
-                </LoadingButton>
-            </div>
-        </div>
+        <template #toolbar>
+            <button v-tooltip="$t('Voorbeeld bekijken')" class="button icon eye" type="button" @click="showExample" />
+        </template>
     </SaveView>
 </template>
 
