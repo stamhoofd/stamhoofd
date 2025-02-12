@@ -300,4 +300,15 @@ export class RecordCategory extends AutoEncoder {
         }
         errors.throwIfNotEmpty();
     }
+
+    duplicate() {
+        const c = this.clone();
+
+        c.id = uuidv4();
+
+        c.childCategories = this.childCategories.map(c => c.duplicate());
+        c.records = this.records.map(r => r.duplicate());
+
+        return c;
+    }
 }

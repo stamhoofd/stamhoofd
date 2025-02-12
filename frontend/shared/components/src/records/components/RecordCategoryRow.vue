@@ -39,7 +39,7 @@ import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { RecordCategory } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { propertyFilterToString } from '../../filters/UIFilter';
-import { useEmitPatchArray, usePatchMoveUpDown } from '../../hooks';
+import { useEmitPatchArray, usePatchMoveUpDownSingle } from '../../hooks';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
 import { RecordEditorSettings } from '../RecordEditorSettings';
 
@@ -61,7 +61,7 @@ const emit = defineEmits<{
 
 const filterDescription = computed(() => props.category.filter ? propertyFilterToString(props.category.filter, filterBuilderForCategory()) : '');
 const { addArrayPatch } = useEmitPatchArray<typeof props, 'categories', RecordCategory>(props, emit, 'categories' as const);
-const { up, down } = usePatchMoveUpDown(props.category.id, props.categories, addArrayPatch);
+const { up, down } = usePatchMoveUpDownSingle(props.category.id, props.categories, addArrayPatch);
 
 function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([

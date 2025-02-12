@@ -89,7 +89,7 @@
                 </div>
                 <div>
                     <button class="icon add button gray" type="button" @click="addRecord(c)" />
-                    <button class="icon settings button gray" type="button" @click="editCategory(c)" />
+                    <button class="icon more button gray" type="button" @click="showCategoryMenu($event, c)" />
                 </div>
             </h2>
             <p v-if="c.filter" class="info-box selectable with-icon" @click="editCategory(c)">
@@ -110,26 +110,7 @@
             </STList>
         </div>
 
-        <div v-if="draggableCategories.length > 1" class="container">
-            <hr>
-            <h2>Categorie volgorde</h2>
-            <p>
-                Je kan de volgorde van de categorieën aanpassen door ze te slepen.
-            </p>
-
-            <STList v-model="draggableCategories" :draggable="true">
-                <template #item="{item}">
-                    <STListItem :key="item.id" element-name="label">
-                        <template #left>
-                            <span class="icon drag" />
-                        </template>
-                        <h3 class="style-title-list" v-text="item.name" />
-                    </STListItem>
-                </template>
-            </STList>
-        </div>
-
-        <div v-if="defaultEnabled && (hasFilters || (allowChildCategories && patchedCategory.getAllRecords().length > 1))" class="container">
+        <div v-if="defaultEnabled && (hasFilters || (patchedCategory.getAllRecords().length > 1))" class="container">
             <hr>
             <h2>Slim in- en uitschakelen</h2>
             <p v-if="!hasFilters">
@@ -162,7 +143,7 @@ import { useErrors } from '../errors/useErrors';
 import { GroupUIFilterBuilder } from '../filters';
 import PropertyFilterInput from '../filters/PropertyFilterInput.vue';
 import { propertyFilterToString } from '../filters/UIFilter';
-import { useDraggableArray, usePatchArray } from '../hooks';
+import { useDraggableArray, usePatchArray, usePatchMoveUpDown } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
 import { NavigationActions } from '../types/NavigationActions';
@@ -170,6 +151,7 @@ import EditRecordView from './EditRecordView.vue';
 import FillRecordCategoryView from './FillRecordCategoryView.vue';
 import { RecordEditorSettings, RecordEditorType } from './RecordEditorSettings';
 import RecordRow from './components/RecordRow.vue';
+import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 
 // Define
 const props = defineProps<{
@@ -217,7 +199,8 @@ const hasFilters = computed(() => {
 const title = computed(() => props.isNew ? 'Nieuwe vragenlijst' : patchedCategory.value.name);
 const records = computed(() => patchedCategory.value.records);
 const categories = computed(() => patchedCategory.value.childCategories);
-const draggableCategories = useDraggableArray(() => patchedCategory.value.childCategories, (categoriesPatch) => {
+
+const moveRecordCategories = usePatchMoveUpDown(categories, (categoriesPatch) => {
     addPatch(
         RecordCategory.patch({
             id: patchedCategory.value.id,
@@ -432,8 +415,8 @@ async function editRecord(record: RecordSettings, parent: RecordCategory = patch
 
 const Self = getCurrentInstance()!.type!;
 
-async function addCategory() {
-    const category = RecordCategory.create({});
+async function addCategory(base?: RecordCategory) {
+    const category = base ?? RecordCategory.create({});
 
     const childCategoryPatch = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>;
     childCategoryPatch.addPut(category);
@@ -459,6 +442,42 @@ async function addCategory() {
         ],
         modalDisplayStyle: 'popup',
     });
+}
+
+async function showCategoryMenu(event: MouseEvent, category: RecordCategory) {
+    const menu = new ContextMenu([
+        [
+            new ContextMenuItem({
+                name: 'Wijzig instellingen',
+                icon: 'settings',
+                action: () => editCategory(category),
+            }),
+            new ContextMenuItem({
+                name: 'Categorie dupliceren',
+                icon: 'copy',
+                action: () => addCategory(category.duplicate()),
+            }),
+        ], [
+            new ContextMenuItem({
+                name: 'Verplaats naar boven',
+                icon: 'arrow-up',
+                disabled: !moveRecordCategories.canMoveUp(category.id),
+                action: () => {
+                    moveRecordCategories.up(category.id);
+                },
+            }),
+            new ContextMenuItem({
+                name: 'Verplaats naar beneden',
+                icon: 'arrow-down',
+                disabled: !moveRecordCategories.canMoveDown(category.id),
+                action: () => {
+                    moveRecordCategories.down(category.id);
+                },
+            }),
+        ],
+    ]);
+
+    await menu.show({ button: event.target as HTMLElement });
 }
 
 async function editCategory(category: RecordCategory) {

@@ -109,7 +109,7 @@ import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Group, GroupOption, GroupOptionMenu, GroupSettings } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useErrors } from '../../errors/useErrors';
-import { useDraggableArray, useEmitPatch, usePatchableArray, usePatchMoveUpDown } from '../../hooks';
+import { useDraggableArray, useEmitPatch, usePatchableArray, usePatchMoveUpDownSingle } from '../../hooks';
 import StepperInput from '../../inputs/StepperInput.vue';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
@@ -135,7 +135,7 @@ const present = usePresent();
 const {priceName: reducedPriceName} = useFinancialSupportSettings({
     group: computed(() => props.group)
 })
-const {up, canMoveUp, canMoveDown, down} = usePatchMoveUpDown(props.optionMenu.id, computed(() => props.group.settings.optionMenus), (patch) => {
+const {up, canMoveUp, canMoveDown, down} = usePatchMoveUpDownSingle(props.optionMenu.id, computed(() => props.group.settings.optionMenus), (patch) => {
     emit('patch:group', Group.patch({
         settings: GroupSettings.patch({
             optionMenus: patch

@@ -31,7 +31,7 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { RecordCategory, RecordSettings, RecordType } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { usePatchMoveUpDown } from '../../hooks';
+import { usePatchMoveUpDownSingle } from '../../hooks';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
 import { RecordEditorSettings } from '../RecordEditorSettings';
 
@@ -53,7 +53,7 @@ const emit = defineEmits<{
     patch: [patch: PatchableArrayAutoEncoder<RecordCategory>],
     edit: [edit: RecordSettings]
 }>();
-const {up, down} = usePatchMoveUpDown(props.record.id, props.category.records, addPatch)
+const {up, down} = usePatchMoveUpDownSingle(props.record.id, props.category.records, addPatch)
 
 const description = computed(() => {
     if (props.record.type === RecordType.Checkbox) {

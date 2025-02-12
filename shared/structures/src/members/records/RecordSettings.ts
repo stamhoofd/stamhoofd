@@ -310,4 +310,10 @@ export class RecordSettings extends AutoEncoder {
 
         return !!filterValue.isRecordEnabled(this);
     }
+
+    duplicate() {
+        const c = this.clone();
+        c.id = uuidv4();
+        return c;
+    }
 }
