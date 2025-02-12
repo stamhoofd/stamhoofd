@@ -1,7 +1,7 @@
 <template>
-    <STListItem :selectable="true" class="left-center" @click="navigate(Routes.View)">
+    <STListItem :selectable="true" class="left-center right-stack" @click="navigate(Routes.View)">
         <template #left>
-            <img src="@stamhoofd/assets/images/illustrations/event-notifications.svg">
+            <img src="@stamhoofd/assets/images/illustrations/tent.svg">
         </template>
         <h2 class="style-title-list">
             {{ type.title }}
@@ -10,9 +10,13 @@
             {{ type.description }}
         </p>
         <template #right>
-            <span v-if="notification">{{ notification.status }}</span>
+            <span v-if="notification" class="hide-smartphone">{{ capitalizeFirstLetter(EventNotificationStatusHelper.getName(notification.status)) }}</span>
             <span v-else-if="loading" class="style-placeholder-skeleton" />
             <span v-else-if="errors.errorBox" class="icon error" />
+
+            <span v-if="notification && notification.status === EventNotificationStatus.Pending" class="icon clock gray" />
+            <span v-if="notification && notification.status === EventNotificationStatus.Rejected" class="icon error" />
+            <span v-if="notification && notification.status === EventNotificationStatus.Accepted" class="icon success green" />
             <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>
@@ -20,7 +24,7 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { Event, EventNotificationType, Organization } from '@stamhoofd/structures';
+import { Event, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, Organization } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { usePlatform } from '../../hooks';
 import { ViewStepsManager } from '../../members/classes/ViewStepsManager';
