@@ -564,9 +564,9 @@ const recordCategories = computed(() => {
         return [];
     }
 
-    return RecordCategory.flattenCategoriesForAnswers(
+    return RecordCategory.flattenCategories(
         webshop.value.meta.recordCategories,
-        [...props.order.data.recordAnswers.values()],
+        props.order.data,
     );
 });
 

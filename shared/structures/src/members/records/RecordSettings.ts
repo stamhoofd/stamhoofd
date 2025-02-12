@@ -4,7 +4,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { ResolutionRequest } from '../../files/ResolutionRequest.js';
 import { getPermissionLevelNumber, PermissionLevel } from '../../PermissionLevel.js';
+import { ObjectWithRecords } from '../ObjectWithRecords.js';
 import { type RecordAnswer } from './RecordAnswer.js';
+
+export type RecordFilterOptions = { level?: PermissionLevel; additionalFilter?: (record: RecordSettings) => boolean };
 
 export enum RecordType {
     /**
@@ -289,5 +292,22 @@ export class RecordSettings extends AutoEncoder {
             ];
         }
         return [this.name];
+    }
+
+    filter<T extends ObjectWithRecords>(filterValue: T, options?: RecordFilterOptions): boolean {
+        if (options?.level) {
+            const level = options?.level;
+            if (!this.checkPermissionForUserManager(level)) {
+                return false;
+            }
+        }
+
+        if (options?.additionalFilter) {
+            if (!options.additionalFilter(this)) {
+                return false;
+            }
+        }
+
+        return !!filterValue.isRecordEnabled(this);
     }
 }

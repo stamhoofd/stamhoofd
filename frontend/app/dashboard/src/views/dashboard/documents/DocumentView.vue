@@ -176,9 +176,9 @@ function resetDocument() {
 }
 
 const recordCategories = computed(() => {
-    return RecordCategory.flattenCategoriesForAnswers(
+    return RecordCategory.flattenCategories(
         [...props.template.privateSettings.templateDefinition.documentFieldCategories, ...props.template.privateSettings.templateDefinition.groupFieldCategories],
-        [...props.document.data.fieldAnswers.values()],
+        props.document,
     );
 });
 </script>

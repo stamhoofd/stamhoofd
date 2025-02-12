@@ -7,7 +7,7 @@ import { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
 import { getPermissionLevelNumber, PermissionLevel } from '../../PermissionLevel.js';
 import { ObjectWithRecords } from '../ObjectWithRecords.js';
 import { RecordAnswer } from './RecordAnswer.js';
-import { RecordSettings } from './RecordSettings.js';
+import { RecordFilterOptions, RecordSettings } from './RecordSettings.js';
 
 export interface Filterable {
     doesMatchFilter(filter: StamhoofdFilter): boolean;
@@ -54,23 +54,18 @@ export class RecordCategory extends AutoEncoder {
         return this.records;
     }
 
-    getAllFilteredRecords<T extends ObjectWithRecords>(filterValue: T, checkUserManagerPermissions?: { level: PermissionLevel }): RecordSettings[] {
+    getAllFilteredRecords<T extends ObjectWithRecords>(filterValue: T, options?: RecordFilterOptions): RecordSettings[] {
         if (this.childCategories.length > 0) {
             return [
-                ...this.filterChildCategories(filterValue).flatMap(c => c.getAllFilteredRecords(filterValue, checkUserManagerPermissions)),
-                ...this.filterRecords(filterValue, checkUserManagerPermissions),
+                ...this.filterChildCategories(filterValue).flatMap(c => c.getAllFilteredRecords(filterValue, options)),
+                ...this.filterRecords(filterValue, options),
             ];
         }
-        return this.filterRecords(filterValue, checkUserManagerPermissions);
+        return this.filterRecords(filterValue, options);
     }
 
-    filterRecords<T extends ObjectWithRecords>(filterValue: T, checkUserManagerPermissions?: { level: PermissionLevel }): RecordSettings[] {
-        if (checkUserManagerPermissions) {
-            const level = checkUserManagerPermissions.level;
-            return this.records.filter(r => r.checkPermissionForUserManager(level) && filterValue.isRecordEnabled(r));
-        }
-
-        return this.records.filter(r => filterValue.isRecordEnabled(r));
+    filterRecords<T extends ObjectWithRecords>(filterValue: T, options?: RecordFilterOptions): RecordSettings[] {
+        return this.records.filter(r => r.filter(filterValue, options));
     }
 
     validate<T extends ObjectWithRecords>(value: T) {
@@ -210,7 +205,7 @@ export class RecordCategory extends AutoEncoder {
     /**
      * Flatten all categories and child categories into a single array
      */
-    static flattenCategories<T extends ObjectWithRecords>(categories: RecordCategory[], filterValue: T): RecordCategory[] {
+    static flattenCategories<T extends ObjectWithRecords>(categories: RecordCategory[], filterValue: T, options?: RecordFilterOptions): RecordCategory[] {
         return RecordCategory.filterCategories(
             categories,
             filterValue,
@@ -218,13 +213,13 @@ export class RecordCategory extends AutoEncoder {
             // Make a (not deep!) clone
             const cat2 = RecordCategory.create(cat);
             cat2.childCategories = [];
-            cat2.records = cat2.filterRecords(filterValue);
+            cat2.records = cat2.filterRecords(filterValue, options);
 
             if (cat.childCategories.length > 0) {
                 // Make a (not deep!) clone
                 return [
                     ...(cat2.records.length > 0 ? [cat2] : []),
-                    ...this.flattenCategories(cat.childCategories, filterValue).map((c) => {
+                    ...this.flattenCategories(cat.childCategories, filterValue, options).map((c) => {
                         // Make a (not deep!) clone
                         const cc = RecordCategory.create(c);
                         cc.name = cat.name + ' → ' + c.name;
@@ -282,15 +277,6 @@ export class RecordCategory extends AutoEncoder {
             cat2.records = updatedRecords;
             cat2.childCategories = this.filterRecordsWith(cat.childCategories, filter);
             return cat2.records.length > 0 || cat2.childCategories.length > 0 ? [cat2] : [];
-        });
-    }
-
-    /**
-     * Get all categories for the given answers
-     */
-    static flattenCategoriesForAnswers(categories: RecordCategory[], answers: RecordAnswer[]): RecordCategory[] {
-        return this.flattenCategoriesWith(categories, (r) => {
-            return !!answers.find(a => a.settings.id === r.id);
         });
     }
 
