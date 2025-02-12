@@ -183,6 +183,7 @@
 </template>
 
 <script setup lang="ts">
+import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, EventOverview, IconContainer, InputSheet, ProgressIcon, useAppContext, useAuth, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
 import { AccessRight, Event, EventNotification, EventNotificationStatus, EventNotificationStatusHelper, RecordCategory } from '@stamhoofd/structures';
@@ -191,7 +192,6 @@ import { computed } from 'vue';
 import { useErrors } from '../errors/useErrors';
 import { EventNotificationViewModel } from './event-notifications/classes/EventNotificationViewModel';
 import EditEventNotificationRecordCategoryView from './event-notifications/EditEventNotificationRecordCategoryView.vue';
-import { SimpleError } from '@simonbackx/simple-errors';
 
 const props = withDefaults(
     defineProps<{
@@ -228,11 +228,7 @@ const flattenedRecordCategories = computed(() => {
     return RecordCategory.flattenCategories(type.value.recordCategories, notification.value);
 });
 
-async function editRecordCategory(recordCategory: RecordCategory) {
-    if (!isEnabled(recordCategory)) {
-        return;
-    }
-
+function getRootCategory(recordCategory: RecordCategory) {
     // Find root category
     // thsi is required because the flattened versions are not usable for editing
     let rootCategory = recordCategory;
@@ -250,6 +246,13 @@ async function editRecordCategory(recordCategory: RecordCategory) {
             }
         }
     }
+    return rootCategory;
+}
+
+async function editRecordCategory(recordCategory: RecordCategory) {
+    // Find root category
+    // thsi is required because the flattened versions are not usable for editing
+    const rootCategory = getRootCategory(recordCategory);
 
     await present({
         components: [
@@ -263,9 +266,11 @@ async function editRecordCategory(recordCategory: RecordCategory) {
 }
 
 function isEnabled(category: RecordCategory) {
+    const rootCategory = getRootCategory(category);
+
     // Check all previous categories complete
     for (const c of recordCategories.value) {
-        if (c === category) {
+        if (c === rootCategory) {
             return true;
         }
         if (c.getTotalCompleteRecords(notification.value) !== c.getTotalRecords(notification.value)) {
