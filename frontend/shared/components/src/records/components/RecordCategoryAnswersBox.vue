@@ -1,11 +1,11 @@
 <template>
     <STList v-if="!compact" class="info">
-        <STListItem v-for="{record, answer, recordCheckboxAnswer} of recordsWithAnswers" :key="record.id">
+        <STListItem v-for="{record, answer, recordCheckboxAnswer, recordFileAnswer} of recordsWithAnswers" :key="record.id">
             <h3 class="style-definition-label">
                 {{ record.name }}
             </h3>
             <p v-if="!answer" class="style-definition-text">
-                /
+                <span>Niet ingevuld</span>
             </p>
             <template v-else-if="recordCheckboxAnswer">
                 <p class="style-definition-text">
@@ -14,6 +14,15 @@
                     <span v-if="recordCheckboxAnswer.comments" v-copyable class="pre-wrap style-copyable" v-text="recordCheckboxAnswer.comments" />
                 </p>
             </template>
+            <p v-else-if="recordFileAnswer" class="style-definition-text">
+                <span v-if="!recordFileAnswer.file">Leeg</span>
+                <template v-else>
+                    <a :href="recordFileAnswer.file?.getPublicPath()" target="_blank" class="button text">
+                        <span class="icon download" />
+                        <span>{{ recordFileAnswer.file.name }}</span>
+                    </a>
+                </template>
+            </p>
             <p v-else v-copyable class="style-definition-text pre-wrap style-copyable" v-text="answer.stringValue" />
         </STListItem>
 
@@ -58,7 +67,7 @@
 </template>
 
 <script lang="ts" setup generic="T extends ObjectWithRecords">
-import { ObjectWithRecords, PermissionLevel, RecordCategory, RecordCheckboxAnswer } from '@stamhoofd/structures';
+import { ObjectWithRecords, PermissionLevel, RecordCategory, RecordCheckboxAnswer, RecordFileAnswer } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAppContext } from '../../context';
 
@@ -94,6 +103,7 @@ const recordsWithAnswers = computed(() => {
             record,
             answer,
             recordCheckboxAnswer: answer instanceof RecordCheckboxAnswer ? answer : null,
+            recordFileAnswer: answer instanceof RecordFileAnswer ? answer : null,
         };
     });
 });
