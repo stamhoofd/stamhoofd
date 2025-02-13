@@ -1,22 +1,37 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { BalanceItem, BalanceItemFactory, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, Platform, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { BalanceItemCartItem, BalanceItemType, DefaultAgeGroup, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, PermissionLevel, Permissions, PlatformMembershipType, PlatformMembershipTypeConfig, Version } from '@stamhoofd/structures';
+import { BalanceItemFactory, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, Platform, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import { AdministrationFeeSettings, BalanceItemCartItem, BalanceItemType, DefaultAgeGroup, FreeContributionSettings, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, PermissionLevel, Permissions, PlatformMembershipType, PlatformMembershipTypeConfig, ReceivableBalanceType, ReduceablePrice, RegisterItemOption, Version } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { RegisterMembersEndpoint } from '../../src/endpoints/global/registration/RegisterMembersEndpoint';
+import { GetMemberBalanceEndpoint } from '../../src/endpoints/organization/dashboard/payments/GetMemberBalanceEndpoint';
+import { GetReceivableBalanceEndpoint } from '../../src/endpoints/organization/dashboard/receivable-balances/GetReceivableBalanceEndpoint';
 import { testServer } from '../helpers/TestServer';
-
-const baseUrl = `/v${Version}/members/register`;
 
 describe('Endpoint.RegisterMembers', () => {
     // #region global
-    const endpoint = new RegisterMembersEndpoint();
+    const registerEndpoint = new RegisterMembersEndpoint();
+    const memberBalanceEndpoint = new GetMemberBalanceEndpoint();
+    const receivableBalancesEndpoint = new GetReceivableBalanceEndpoint();
+
     let period: RegistrationPeriod;
 
     // #region helpers
-    const post = async (body: IDRegisterCheckout, organization: Organization, token: Token) => {
-        const request = Request.buildJson('POST', baseUrl, organization.getApiHost(), body);
+    const register = async (body: IDRegisterCheckout, organization: Organization, token: Token) => {
+        const request = Request.buildJson('POST', `/v${Version}/members/register`, organization.getApiHost(), body);
         request.headers.authorization = 'Bearer ' + token.accessToken;
-        return await testServer.test(endpoint, request);
+        return await testServer.test(registerEndpoint, request);
+    };
+
+    const getBalance = async (memberId: string, organization: Organization, token: Token) => {
+        const request = Request.buildJson('GET', `/v${Version}/organization/members/${memberId}/balance`, organization.getApiHost());
+        request.headers.authorization = 'Bearer ' + token.accessToken;
+        return await testServer.test(memberBalanceEndpoint, request);
+    };
+
+    const getReceivableBalance = async (type: ReceivableBalanceType, id: string, organization: Organization, token: Token) => {
+        const request = Request.buildJson('GET', `/v${Version}/receivable-balances/${type}/${id}`, organization.getApiHost());
+        request.headers.authorization = 'Bearer ' + token.accessToken;
+        return await testServer.test(receivableBalancesEndpoint, request);
     };
     // #endregion
 
@@ -73,52 +88,10 @@ describe('Endpoint.RegisterMembers', () => {
     beforeEach(async () => {
     });
 
-    describe('register', () => {
-        test.skip('Should create balance items', () => {
-            // also check options
-            throw new Error('Not implemented');
-        });
-
-        test.skip('Should create balance items for options', () => {
-            throw new Error('Not implemented');
-        });
-
-        test.skip('Should create balance item for free contribution', () => {
-            throw new Error('Not implemented');
-        });
-
-        test.skip('Should create balance item for free administration fee', () => {
-            throw new Error('Not implemented');
-        });
-
-        // todo (Not possible to pay balance items as the organization)
-        test.skip('Should fail if organization pays balance items', () => {
-            // also check options
-            throw new Error('Not implemented');
-        });
-
-        test.skip('Should update cached balance items in database', () => {
-            throw new Error('Not implemented');
-        });
-
-        test.skip('Should mark balance items as paid', async () => {
+    describe('Register', () => {
+        test('Register by member should create balance for member', async () => {
             // #region arrange
-            const { organization, group, groupPrice, token, member, user } = await initData();
-
-            const balanceItem1 = await new BalanceItemFactory({
-                organizationId: organization.id,
-                memberId: member.id,
-                userId: user.id,
-                payingOrganizationId: organization.id,
-                type: BalanceItemType.Registration,
-                amount: 10,
-                unitPrice: 2,
-            }).create();
-
-            const cartItem = BalanceItemCartItem.create({
-                item: balanceItem1.getStructure(),
-                price: 10,
-            });
+            const { organization, group, groupPrice, token, member } = await initData();
 
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
@@ -134,35 +107,311 @@ describe('Endpoint.RegisterMembers', () => {
                         }),
                     ],
                     balanceItems: [
-                        cartItem,
                     ],
                     deleteRegistrationIds: [],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 35,
+                totalPrice: 25,
+                customer: null,
             });
-
             // #endregion
 
             // #region act and assert
-            const response = await post(body, organization, token);
-            expect(response.body.registrations.length).toBe(1);
+            const balanceBefore = await getBalance(member.id, organization, token);
+            expect(balanceBefore).toBeDefined();
+            expect(balanceBefore.body.length).toBe(0);
 
-            const balanceItem1Id: string = balanceItem1.id;
-            const balanceItem = await BalanceItem.getByID(balanceItem1Id);
-            expect(balanceItem).toBeDefined();
-            expect(balanceItem!.pricePaid).toBe(10);
+            await register(body, organization, token);
+
+            const balance = await getBalance(member.id, organization, token);
+            expect(balance).toBeDefined();
+            expect(balance.body.length).toBe(1);
+            expect(balance.body[0].price).toBe(25);
+            expect(balance.body[0].pricePaid).toBe(0);
             // #endregion
         });
 
-        test.skip('should update balance item price paid in database', async () => {
+        // todo: test max option + allowAmount
+        // todo: test stock?
+        // todo: test reduced price?
+
+        test('Should create balance items for options', async () => {
             // #region arrange
-            const { organization, group, groupPrice, token, member, user } = await initData();
-            group.settings.maxMembers = 5;
+            const { organization, group, groupPrice, token, member } = await initData();
+
+            const option1 = GroupOption.create({
+                name: 'option 1',
+                price: ReduceablePrice.create({
+                    price: 5,
+                    reducedPrice: 3,
+                }),
+            });
+
+            const option2 = GroupOption.create({
+                name: 'option 2',
+                price: ReduceablePrice.create({
+                    price: 3,
+                    reducedPrice: 1,
+                }),
+            });
+
+            const optionMenu = GroupOptionMenu.create({
+                name: 'option menu 1',
+                multipleChoice: true,
+                options: [option1, option2],
+            });
+
+            group.settings.optionMenus = [
+                optionMenu,
+            ];
+
             await group.save();
 
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [
+                                RegisterItemOption.create({
+                                    option: option1,
+                                    amount: 2,
+                                    optionMenu,
+                                }),
+                                RegisterItemOption.create({
+                                    option: option2,
+                                    amount: 5,
+                                    optionMenu,
+                                }),
+                            ],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 50,
+                customer: null,
+            });
+            // #endregion
+
+            // #region act and assert
+            const balanceBefore = await getBalance(member.id, organization, token);
+            expect(balanceBefore).toBeDefined();
+            expect(balanceBefore.body.length).toBe(0);
+
+            await register(body, organization, token);
+
+            const balance = await getBalance(member.id, organization, token);
+            expect(balance).toBeDefined();
+            expect(balance.body.length).toBe(3);
+            expect(balance.body).toEqual(expect.arrayContaining([
+                expect.objectContaining({
+                    price: 25,
+                    pricePaid: 0,
+                }),
+                expect.objectContaining({
+                    price: 15,
+                    pricePaid: 0,
+                }),
+                expect.objectContaining({
+                    price: 10,
+                    pricePaid: 0,
+                }),
+            ]));
+            // #endregion
+        });
+
+        test('Should reset free contribution if no options on organization', async () => {
+            // #region arrange
+            const { organization, group, groupPrice, token, member, user } = await initData();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 31,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25,
+                customer: null,
+            });
+            // #endregion
+
+            // #region act and assert
+            const receivableBalanceBefore = await getReceivableBalance(ReceivableBalanceType.user, user.id, organization, token);
+            expect(receivableBalanceBefore).toBeDefined();
+            expect(receivableBalanceBefore.body.balanceItems.length).toBe(0);
+            expect(receivableBalanceBefore.body.amountOpen).toBe(0);
+
+            await register(body, organization, token);
+
+            const receivableBalanceAfter = await getReceivableBalance(ReceivableBalanceType.user, user.id, organization, token);
+            expect(receivableBalanceAfter).toBeDefined();
+            expect(receivableBalanceAfter.body.balanceItems.length).toBe(1);
+            expect(receivableBalanceAfter.body.amountOpen).toBe(0);
+            expect(receivableBalanceAfter.body.balanceItems).toEqual(expect.arrayContaining([
+                expect.objectContaining({
+                    price: 25,
+                    pricePaid: 0,
+                }),
+            ]));
+            // #endregion
+        });
+
+        test('Should create balance item for free contribution', async () => {
+            // #region arrange
+            const { organization, group, groupPrice, token, member, user } = await initData();
+
+            organization.meta.recordsConfiguration.freeContribution = FreeContributionSettings.create({
+                description: 'free contribution settings',
+                amounts: [30, 20],
+            });
+
+            await organization.save();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 30,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 55,
+                customer: null,
+            });
+            // #endregion
+
+            // #region act and assert
+            const receivableBalanceBefore = await getReceivableBalance(ReceivableBalanceType.user, user.id, organization, token);
+            expect(receivableBalanceBefore).toBeDefined();
+            expect(receivableBalanceBefore.body.balanceItems.length).toBe(0);
+            expect(receivableBalanceBefore.body.amountOpen).toBe(0);
+
+            await register(body, organization, token);
+
+            const receivableBalanceAfter = await getReceivableBalance(ReceivableBalanceType.user, user.id, organization, token);
+            expect(receivableBalanceAfter).toBeDefined();
+            expect(receivableBalanceAfter.body.balanceItems.length).toBe(2);
+            expect(receivableBalanceAfter.body.amountPending).toBe(55);
+
+            expect(receivableBalanceAfter.body.balanceItems).toEqual(expect.arrayContaining([
+                expect.objectContaining({
+                    price: 30,
+                    pricePaid: 0,
+                    type: BalanceItemType.FreeContribution,
+                }),
+                expect.objectContaining({
+                    price: 25,
+                    pricePaid: 0,
+                }),
+            ]));
+            // #endregion
+        });
+
+        test('Should create balance item for free administration fee if register by member', async () => {
+            // #region arrange
+            const { organization, group, groupPrice, token, member, user } = await initData();
+
+            organization.meta.registrationPaymentConfiguration.administrationFee = AdministrationFeeSettings.create({
+                fixed: 33,
+            });
+
+            await organization.save();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 33,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 58,
+            });
+            // #endregion
+
+            // #region act and assert
+            const receivableBalanceBefore = await getReceivableBalance(ReceivableBalanceType.user, user.id, organization
+                , token);
+            expect(receivableBalanceBefore).toBeDefined();
+            expect(receivableBalanceBefore.body.balanceItems.length).toBe(0);
+            expect(receivableBalanceBefore.body.amountOpen).toBe(0);
+
+            await register(body, organization, token);
+
+            const receivableBalanceAfter = await getReceivableBalance(ReceivableBalanceType.user, user.id, organization, token);
+            expect(receivableBalanceAfter).toBeDefined();
+            expect(receivableBalanceAfter.body.balanceItems.length).toBe(2);
+            expect(receivableBalanceAfter.body.amountPending).toBe(58);
+
+            expect(receivableBalanceAfter.body.balanceItems).toEqual(expect.arrayContaining([
+                expect.objectContaining({
+                    price: 25,
+                    pricePaid: 0,
+                    type: BalanceItemType.Registration,
+                }),
+                expect.objectContaining({
+                    price: 33,
+                    pricePaid: 0,
+                    type: BalanceItemType.AdministrationFee,
+                }),
+            ]));
+            // #endregion
+        });
+
+        test('Should create balance item for cart item', async () => {
+            // #region arrange
+            const { organization, group, groupPrice, token, member, user } = await initData();
+
             const balanceItem1 = await new BalanceItemFactory({
                 organizationId: organization.id,
                 memberId: member.id,
@@ -205,13 +454,23 @@ describe('Endpoint.RegisterMembers', () => {
             // #endregion
 
             // #region act and assert
-            const response = await post(body, organization, token);
+            const response = await register(body, organization, token);
             expect(response.body.registrations.length).toBe(1);
 
-            const balanceItem1Id: string = balanceItem1.id;
-            const balanceItem = await BalanceItem.getByID(balanceItem1Id);
-            expect(balanceItem).toBeDefined();
-            expect(balanceItem!.pricePaid).toBe(10);
+            const receivableBalanceAfter = await getReceivableBalance(ReceivableBalanceType.user, user.id, organization, token);
+
+            expect(receivableBalanceAfter.body.balanceItems.length).toBe(2);
+            expect(receivableBalanceAfter.body.amountPending).toBe(35);
+            expect(receivableBalanceAfter.body.amountOpen).toBe(10);
+
+            expect(receivableBalanceAfter.body.balanceItems).toEqual(expect.arrayContaining([
+                expect.objectContaining({
+                    pricePending: 10,
+                }),
+                expect.objectContaining({
+                    pricePending: 25,
+                }),
+            ]));
             // #endregion
         });
     });
@@ -262,7 +521,7 @@ describe('Endpoint.RegisterMembers', () => {
             // #endregion
 
             // #region act and assert
-            const response = await post(body, organization, token);
+            const response = await register(body, organization, token);
 
             throw new Error('not implemented');
             // #endregion
@@ -343,7 +602,7 @@ describe('Endpoint.RegisterMembers', () => {
             // #endregion
 
             // act
-            const response = await post(body, organization, token);
+            const response = await register(body, organization, token);
 
             // assert
             expect(response.body).toBeDefined();

@@ -841,7 +841,7 @@ describe('Endpoint.RegisterMembers', () => {
             // #endregion
         });
 
-        test('Should update registered mebers', async () => {
+        test('Should update registered members', async () => {
             // #region arrange
             const { member, group, groupPrice, organization, token } = await initData();
 
