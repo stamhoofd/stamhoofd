@@ -1,7 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { BalanceItemFactory, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, Platform, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import { BalanceItemFactory, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, OrganizationRegistrationPeriod, Platform, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AdministrationFeeSettings, BalanceItemCartItem, BalanceItemType, DefaultAgeGroup, FreeContributionSettings, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, PermissionLevel, Permissions, PlatformMembershipType, PlatformMembershipTypeConfig, ReceivableBalanceType, ReduceablePrice, RegisterItemOption, Version } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
+import { GetMemberFamilyEndpoint } from '../../src/endpoints/global/members/GetMemberFamilyEndpoint';
 import { RegisterMembersEndpoint } from '../../src/endpoints/global/registration/RegisterMembersEndpoint';
 import { GetMemberBalanceEndpoint } from '../../src/endpoints/organization/dashboard/payments/GetMemberBalanceEndpoint';
 import { GetReceivableBalanceEndpoint } from '../../src/endpoints/organization/dashboard/receivable-balances/GetReceivableBalanceEndpoint';
@@ -12,6 +13,7 @@ describe('Endpoint.RegisterMembers', () => {
     const registerEndpoint = new RegisterMembersEndpoint();
     const memberBalanceEndpoint = new GetMemberBalanceEndpoint();
     const receivableBalancesEndpoint = new GetReceivableBalanceEndpoint();
+    const getMemberFamilyEndpoint = new GetMemberFamilyEndpoint();
 
     let period: RegistrationPeriod;
 
@@ -33,12 +35,29 @@ describe('Endpoint.RegisterMembers', () => {
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test(receivableBalancesEndpoint, request);
     };
+
+    const getMemberFamily = async (memberId: string, organization: Organization, token: Token) => {
+        const request = Request.buildJson('GET', `/v${Version}/organization/members/${memberId}/family`, organization.getApiHost());
+        request.headers.authorization = 'Bearer ' + token.accessToken;
+        return await testServer.test(getMemberFamilyEndpoint, request);
+    };
     // #endregion
 
     // #endregion
 
     beforeAll(async () => {
-        period = await new RegistrationPeriodFactory({}).create();
+        const previousPeriod = await new RegistrationPeriodFactory({
+            startDate: new Date(2022, 0, 1),
+            endDate: new Date(2022, 11, 31),
+        }).create();
+
+        period = await new RegistrationPeriodFactory({
+            startDate: new Date(2023, 0, 1),
+            endDate: new Date(2023, 11, 31),
+        }).create();
+
+        period.previousPeriodId = previousPeriod.id;
+        await period.save();
     });
 
     const initData = async ({ otherMemberAmount = 0, permissionLevel = PermissionLevel.Full }: { otherMemberAmount?: number; permissionLevel?: PermissionLevel } = {}) => {
@@ -537,84 +556,207 @@ describe('Endpoint.RegisterMembers', () => {
     });
 
     describe('Register for group with default age group', () => {
-        test.skip('Should create membership', async () => {
-            throw new Error('Not implemented');
+        test('Should create membership', async () => {
+            // #region arrange
+            const date = new Date('2023-05-14');
+            jest.useFakeTimers().setSystemTime(date);
+
+            try {
+                const platformMembershipTypeConfig = PlatformMembershipTypeConfig.create({
+                    startDate: period.startDate,
+                    endDate: period.endDate,
+                });
+
+                const platformMembershipType = PlatformMembershipType.create({
+                    name: 'werkjaar',
+                    periods: new Map([
+                        [period.id, platformMembershipTypeConfig],
+                    ]),
+                });
+
+                const platform = await Platform.getShared();
+
+                platform.config.membershipTypes = [
+                    platformMembershipType,
+                ];
+
+                const defaultAgeGroup = DefaultAgeGroup.create({
+                    names: ['test groep'],
+                    defaultMembershipTypeId: platformMembershipType.id,
+                });
+
+                platform.config.defaultAgeGroups = [defaultAgeGroup];
+
+                await platform.save();
+
+                const { member, group, groupPrice, organization, token } = await initData();
+
+                // todo: remove from initData
+                member.organizationId = null;
+                await member.save();
+
+                group.defaultAgeGroupId = defaultAgeGroup.id;
+                await group.save();
+
+                const organizationPeriod = new OrganizationRegistrationPeriod();
+                organizationPeriod.organizationId = organization.id;
+                organizationPeriod.periodId = period.id;
+                await organizationPeriod.save();
+
+                const body = IDRegisterCheckout.create({
+                    cart: IDRegisterCart.create({
+                        items: [
+                            IDRegisterItem.create({
+                                id: uuidv4(),
+                                replaceRegistrationIds: [],
+                                options: [],
+                                groupPrice: groupPrice,
+                                organizationId: organization.id,
+                                groupId: group.id,
+                                memberId: member.id,
+                                trial: false,
+                            }),
+                        ],
+                        balanceItems: [],
+                        deleteRegistrationIds: [],
+                    }),
+                    administrationFee: 0,
+                    freeContribution: 0,
+                    paymentMethod: PaymentMethod.PointOfSale,
+                    totalPrice: 25,
+                    asOrganizationId: organization.id,
+                    customer: null,
+                });
+                // #endregion
+
+                // act and assert
+                const familyBefore = await getMemberFamily(member.id, organization, token);
+                expect(familyBefore).toBeDefined();
+                expect(familyBefore.body.members.length).toBe(1);
+                expect(familyBefore.body.members[0]).toBeDefined();
+                expect(familyBefore.body.members[0].platformMemberships.length).toBe(0);
+
+                const response = await register(body, organization, token);
+
+                expect(response.body).toBeDefined();
+                expect(response.body.registrations.length).toBe(1);
+
+                const familyAfter = await getMemberFamily(member.id, organization, token);
+                expect(familyAfter).toBeDefined();
+                expect(familyAfter.body.members.length).toBe(1);
+                expect(familyAfter.body.members[0]).toBeDefined();
+                expect(familyAfter.body.members[0].platformMemberships.length).toBe(1);
+                expect(familyAfter.body.members[0].platformMemberships[0].membershipTypeId).toBe(platformMembershipType.id);
+            }
+            finally {
+                jest.useFakeTimers().resetAllMocks();
+            }
         });
 
-        test.skip('Should set trial period on membership', async () => {
+        test('Should set trial until on membership if trial', async () => {
             // #region arrange
-            const platformMembershipTypeConfig = PlatformMembershipTypeConfig.create({
-                startDate: period.startDate,
-                endDate: period.endDate,
-                trialDays: 10,
-            });
+            const date = new Date('2023-05-14');
+            jest.useFakeTimers().setSystemTime(date);
 
-            const platformMembershipType = PlatformMembershipType.create({
-                name: 'werkjaar',
-                periods: new Map([
-                    [period.id, platformMembershipTypeConfig],
-                ]),
-            });
+            try {
+                const platformMembershipTypeConfig = PlatformMembershipTypeConfig.create({
+                    startDate: period.startDate,
+                    endDate: period.endDate,
+                    trialDays: 10,
+                });
 
-            const platform = await Platform.getShared();
+                const platformMembershipType = PlatformMembershipType.create({
+                    name: 'werkjaar',
+                    periods: new Map([
+                        [period.id, platformMembershipTypeConfig],
+                    ]),
+                });
 
-            platform.config.membershipTypes = [
-                platformMembershipType,
-            ];
+                const platform = await Platform.getShared();
 
-            await platform.save();
+                platform.config.membershipTypes = [
+                    platformMembershipType,
+                ];
 
-            const { member, group, groupPrice, organization, token } = await initData();
-            group.settings.trialDays = 5;
+                const defaultAgeGroup = DefaultAgeGroup.create({
+                    names: ['test groep'],
+                    defaultMembershipTypeId: platformMembershipType.id,
+                });
 
-            const defaultAgeGroup = DefaultAgeGroup.create({
-                names: ['test groep'],
-                defaultMembershipTypeId: platformMembershipType.id,
-            });
+                platform.config.defaultAgeGroups = [defaultAgeGroup];
 
-            group.defaultAgeGroupId = defaultAgeGroup.id;
-            await group.save();
+                await platform.save();
 
-            const body = IDRegisterCheckout.create({
-                cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
-                            groupPrice: groupPrice,
-                            organizationId: organization.id,
-                            groupId: group.id,
-                            memberId: member.id,
-                            trial: true,
-                        }),
-                    ],
-                    balanceItems: [],
-                    deleteRegistrationIds: [],
-                }),
-                administrationFee: 0,
-                freeContribution: 0,
-                paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 0,
-                asOrganizationId: organization.id,
-                customer: null,
-            });
-            // #endregion
+                const { member, group, groupPrice, organization, token } = await initData();
 
-            // act
-            const response = await register(body, organization, token);
+                // todo: remove from initData
+                member.organizationId = null;
+                await member.save();
 
-            // assert
-            expect(response.body).toBeDefined();
-            expect(response.body.registrations.length).toBe(1);
-            const trialUntil = response.body.registrations[0].trialUntil;
-            expect(trialUntil).not.toBeNull();
-            // 2023-05-14
-            expect(trialUntil!.getFullYear()).toBe(2023);
-            expect(trialUntil!.getMonth()).toBe(4);
-            expect(trialUntil!.getDate()).toBe(24);
+                group.settings.trialDays = 5;
+                group.defaultAgeGroupId = defaultAgeGroup.id;
+                await group.save();
 
-            throw new Error('Not implemented');
+                const organizationPeriod = new OrganizationRegistrationPeriod();
+                organizationPeriod.organizationId = organization.id;
+                organizationPeriod.periodId = period.id;
+                await organizationPeriod.save();
+
+                const body = IDRegisterCheckout.create({
+                    cart: IDRegisterCart.create({
+                        items: [
+                            IDRegisterItem.create({
+                                id: uuidv4(),
+                                replaceRegistrationIds: [],
+                                options: [],
+                                groupPrice: groupPrice,
+                                organizationId: organization.id,
+                                groupId: group.id,
+                                memberId: member.id,
+                                trial: true,
+                            }),
+                        ],
+                        balanceItems: [],
+                        deleteRegistrationIds: [],
+                    }),
+                    administrationFee: 0,
+                    freeContribution: 0,
+                    paymentMethod: PaymentMethod.PointOfSale,
+                    totalPrice: 0,
+                    asOrganizationId: organization.id,
+                    customer: null,
+                });
+                // #endregion
+
+                // act and assert
+                const familyBefore = await getMemberFamily(member.id, organization, token);
+                expect(familyBefore).toBeDefined();
+                expect(familyBefore.body.members.length).toBe(1);
+                expect(familyBefore.body.members[0]).toBeDefined();
+                expect(familyBefore.body.members[0].platformMemberships.length).toBe(0);
+
+                const response = await register(body, organization, token);
+
+                expect(response.body).toBeDefined();
+                expect(response.body.registrations.length).toBe(1);
+
+                const familyAfter = await getMemberFamily(member.id, organization, token);
+                expect(familyAfter).toBeDefined();
+                expect(familyAfter.body.members.length).toBe(1);
+                expect(familyAfter.body.members[0]).toBeDefined();
+                expect(familyAfter.body.members[0].platformMemberships.length).toBe(1);
+                expect(familyAfter.body.members[0].platformMemberships[0].membershipTypeId).toBe(platformMembershipType.id);
+
+                const trialUntil = familyAfter.body.members[0].platformMemberships[0].trialUntil;
+
+                expect(trialUntil).not.toBeNull();
+                expect(trialUntil!.getFullYear()).toBe(2023);
+                expect(trialUntil!.getMonth()).toBe(4);
+                expect(trialUntil!.getDate()).toBe(24);
+            }
+            finally {
+                jest.useFakeTimers().resetAllMocks();
+            }
         });
     });
 });
