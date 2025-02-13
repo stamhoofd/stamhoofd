@@ -12,7 +12,7 @@
                 class="input"
                 type="text"
                 placeholder="Naam van deze rol"
-                autocomplete=""
+                autocomplete="off"
             >
         </STInputBox>
 

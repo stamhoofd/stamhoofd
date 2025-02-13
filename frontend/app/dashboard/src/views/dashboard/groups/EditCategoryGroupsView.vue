@@ -22,7 +22,7 @@
                     class="input"
                     type="text"
                     placeholder="Naam van deze categorie"
-                    autocomplete=""
+                    autocomplete="off"
                 >
             </STInputBox>
             <Checkbox v-if="isPlatformAdmin" v-model="locked">

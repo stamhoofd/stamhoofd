@@ -15,7 +15,7 @@
                 class="input"
                 type="text"
                 placeholder="bv. Kies je extra's"
-                autocomplete=""
+                autocomplete="off"
             >
         </STInputBox>
 

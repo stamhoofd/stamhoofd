@@ -12,7 +12,7 @@
                 class="input"
                 type="text"
                 placeholder="Naam van deze tag"
-                autocomplete=""
+                autocomplete="off"
             >
         </STInputBox>
 
@@ -22,7 +22,7 @@
                 class="input"
                 type="text"
                 placeholder="Optioneel. Korte beschrijving van het doel van deze tag."
-                autocomplete=""
+                autocomplete="off"
                 enterkeyhint="next"
             />
         </STInputBox>

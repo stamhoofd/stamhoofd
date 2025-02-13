@@ -15,7 +15,7 @@
                 class="input"
                 type="text"
                 placeholder="Naam van deze categorie"
-                autocomplete=""
+                autocomplete="off"
                 enterkeyhint="next"
             >
         </STInputBox>
@@ -26,7 +26,7 @@
                 class="input"
                 type="text"
                 placeholder="Optioneel wat extra uitleg onder de titel van de categorie"
-                autocomplete=""
+                autocomplete="off"
             />
         </STInputBox>
 

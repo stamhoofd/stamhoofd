@@ -20,7 +20,7 @@
                     class="input"
                     type="text"
                     placeholder="Naam van dit menu"
-                    autocomplete=""
+                    autocomplete="off"
                 >
             </STInputBox>
 
@@ -30,7 +30,7 @@
                     class="input"
                     type="text"
                     placeholder="Optioneel. Meer info bij keuzes."
-                    autocomplete=""
+                    autocomplete="off"
                     enterkeyhint="next"
                 />
             </STInputBox>

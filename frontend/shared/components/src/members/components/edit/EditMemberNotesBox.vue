@@ -10,7 +10,7 @@
                 class="input"
                 type="text"
                 placeholder="Bijkomende informatie over dit lid (onzichtbaar voor het lid)."
-                autocomplete=""
+                autocomplete="off"
                 enterkeyhint="next"
                 :maxlength="maxLength"
             />

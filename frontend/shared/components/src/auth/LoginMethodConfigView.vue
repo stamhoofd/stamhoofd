@@ -16,7 +16,7 @@
                 class="input"
                 type="text"
                 placeholder="Optioneel"
-                autocomplete=""
+                autocomplete="off"
             >
         </STInputBox>
 
@@ -27,7 +27,7 @@
                 class="input"
                 type="text"
                 placeholder="Optioneel"
-                autocomplete=""
+                autocomplete="off"
             >
         </STInputBox>
 
@@ -38,7 +38,7 @@
                 class="input"
                 type="text"
                 placeholder="Optioneel"
-                autocomplete=""
+                autocomplete="off"
             >
         </STInputBox>
 
@@ -49,7 +49,7 @@
                     class="input"
                     type="text"
                     :placeholder="'Domeinnaam ' + (index + 1)"
-                    autocomplete=""
+                    autocomplete="off"
                     @input="updateModelValue(($event.target as HTMLInputElement).value || '')"
                 >
             </template>
@@ -71,7 +71,7 @@
                     class="input"
                     type="text"
                     :placeholder="'Domeinnaam ' + (index + 1)"
-                    autocomplete=""
+                    autocomplete="off"
                     @input="updateModelValue(($event.target as HTMLInputElement).value || '')"
                 >
             </template>

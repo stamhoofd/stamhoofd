@@ -11,7 +11,7 @@
                 v-model="name"
                 class="input"
                 type="text"
-                autocomplete=""
+                autocomplete="off"
                 placeholder="bv. privacyvoorwaarden"
             >
         </STInputBox>

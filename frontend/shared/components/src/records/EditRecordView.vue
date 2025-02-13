@@ -18,7 +18,7 @@
                         class="input"
                         type="text"
                         placeholder="bv. Toestemming publicatie foto’s"
-                        autocomplete=""
+                        autocomplete="off"
                         enterkeyhint="next"
                     >
                 </STInputBox>
@@ -93,7 +93,7 @@
                 class="input"
                 type="text"
                 :placeholder="name"
-                autocomplete=""
+                autocomplete="off"
                 enterkeyhint="next"
             >
         </STInputBox>
@@ -104,7 +104,7 @@
                 class="input"
                 type="text"
                 placeholder="Optioneel"
-                autocomplete=""
+                autocomplete="off"
             />
         </STInputBox>
         <p class="style-description-small">
@@ -117,7 +117,7 @@
                 class="input"
                 type="text"
                 placeholder="bv. 'Vul hier jouw naam in'"
-                autocomplete=""
+                autocomplete="off"
             >
         </STInputBox>
         <p class="style-description-small">
@@ -130,7 +130,7 @@
                 class="input"
                 type="text"
                 placeholder="Optioneel"
-                autocomplete=""
+                autocomplete="off"
             />
         </STInputBox>
         <p v-if="shouldAskCommentsDescription" class="style-description-small">
@@ -209,7 +209,7 @@
                     class="input"
                     type="text"
                     placeholder="bv. 'Geen toestemming om foto's te maken'"
-                    autocomplete=""
+                    autocomplete="off"
                 >
             </STInputBox>
 

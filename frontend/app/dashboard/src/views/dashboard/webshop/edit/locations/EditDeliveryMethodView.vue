@@ -16,7 +16,7 @@
                 class="input"
                 type="text"
                 :placeholder="$t('0d4b25fe-6a3d-480b-86e8-e21c664a15ee')"
-                autocomplete=""
+                autocomplete="off"
             >
         </STInputBox>
 
@@ -26,7 +26,7 @@
                 class="input"
                 type="text"
                 placeholder="Hier kan je eventeel leveringsinformatie kwijt (optioneel)"
-                autocomplete=""
+                autocomplete="off"
             />
         </STInputBox>
         <EditDeliveryRegionsSection :delivery-method="patchedDeliveryMethod" @patch="addPatch" />

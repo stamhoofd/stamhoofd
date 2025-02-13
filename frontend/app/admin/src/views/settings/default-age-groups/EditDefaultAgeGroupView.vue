@@ -11,7 +11,7 @@
             <input
                 class="input"
                 type="text"
-                autocomplete=""
+                autocomplete="off"
                 :value="getName(n - 1)" :placeholder="'Synoniem '+n" @input="setName(n - 1, ($event as any).target.value)"
             >
 
@@ -31,7 +31,7 @@
                 class="input"
                 type="text"
                 placeholder="Korte tip voor hoe deze standaard leeftijdsgroep gebruikt kan worden"
-                autocomplete=""
+                autocomplete="off"
             />
         </STInputBox>
         <p class="style-description-small">

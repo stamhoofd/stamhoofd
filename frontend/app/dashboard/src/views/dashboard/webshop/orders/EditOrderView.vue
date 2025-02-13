@@ -13,7 +13,7 @@
                     class="input large"
                     type="text"
                     placeholder="Hou zelf interne notities bij voor deze bestelling"
-                    autocomplete=""
+                    autocomplete="off"
                 />
             </STInputBox>
         </template>

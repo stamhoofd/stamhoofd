@@ -54,7 +54,7 @@
                     class="input"
                     type="text"
                     placeholder="Naam bankrekeningnummer"
-                    autocomplete=""
+                    autocomplete="off"
                 >
             </STInputBox>
 
@@ -67,7 +67,7 @@
                     class="input"
                     type="text"
                     placeholder="Bv. Aankoop x"
-                    autocomplete=""
+                    autocomplete="off"
                 >
             </STInputBox>
         </template>

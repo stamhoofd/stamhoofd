@@ -7,7 +7,7 @@
                 class="input"
                 type="text"
                 placeholder="Naam van deze keuze"
-                autocomplete=""
+                autocomplete="off"
             >
         </STInputBox>
 

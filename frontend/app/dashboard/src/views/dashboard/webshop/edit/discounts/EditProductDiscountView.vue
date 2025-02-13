@@ -110,7 +110,7 @@
                 class="input"
                 type="text"
                 placeholder="Optioneel"
-                autocomplete=""
+                autocomplete="off"
             >
         </STInputBox>
 

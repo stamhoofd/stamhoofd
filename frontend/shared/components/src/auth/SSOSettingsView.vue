@@ -16,7 +16,7 @@
                 class="input"
                 type="text"
                 placeholder="bv. https://login.microsoftonline.com/contoso.onmicrosoft.com/v2.0"
-                autocomplete=""
+                autocomplete="off"
             >
         </STInputBox>
 
@@ -26,7 +26,7 @@
                 class="input"
                 type="text"
                 placeholder="bv. 12345678-1234-1234-1234-123456789012"
-                autocomplete=""
+                autocomplete="off"
             >
         </STInputBox>
 
@@ -36,7 +36,7 @@
                 class="input"
                 type="text"
                 placeholder="bv. 12345678-1234-1234-1234-123456789012"
-                autocomplete=""
+                autocomplete="off"
             >
         </STInputBox>
 
@@ -46,7 +46,7 @@
                 :placeholder="defaultRedirectUri"
                 class="input"
                 type="text"
-                autocomplete=""
+                autocomplete="off"
             >
         </STInputBox>
         <p class="style-description-small">

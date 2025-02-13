@@ -18,7 +18,7 @@
                 class="input"
                 type="text"
                 :placeholder="'bv. Contact'"
-                autocomplete=""
+                autocomplete="off"
             >
         </STInputBox>
 

@@ -14,7 +14,7 @@
                     class="input"
                     type="text"
                     :placeholder="$t('c0a0c0f7-1282-40be-85fc-320d136d34ab')"
-                    autocomplete=""
+                    autocomplete="off"
                     enterkeyhint="next"
                 >
             </STInputBox>
@@ -188,7 +188,7 @@
                     class="input"
                     type="text"
                     placeholder="bv. Gemeentelijke feestzaal"
-                    autocomplete=""
+                    autocomplete="off"
                     enterkeyhint="next"
                 >
             </STInputBox>

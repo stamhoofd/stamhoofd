@@ -15,7 +15,7 @@
                 class="input"
                 type="text"
                 placeholder="Optioneel. bv. Webshopverantwoordelijke"
-                autocomplete=""
+                autocomplete="off"
             >
         </STInputBox>
 

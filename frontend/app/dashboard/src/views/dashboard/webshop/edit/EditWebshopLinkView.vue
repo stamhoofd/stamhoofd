@@ -36,7 +36,7 @@
                     class="input"
                     type="text"
                     :placeholder="$t('e06f1e9b-dc4c-4b3b-8ab7-52cd8048d894')"
-                    autocomplete=""
+                    autocomplete="off"
                     @blur="resetCache"
                 >
             </STInputBox>

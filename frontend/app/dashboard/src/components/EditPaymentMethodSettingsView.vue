@@ -12,7 +12,7 @@
                     class="input"
                     type="text"
                     :placeholder="organization.name"
-                    autocomplete=""
+                    autocomplete="off"
                 >
             </STInputBox>
 
@@ -42,7 +42,7 @@
                     class="input"
                     type="text"
                     :placeholder="transferType === 'Fixed' ? 'Mededeling' : (type === 'registration' ? 'Optioneel. Bv. Inschrijving' : 'Optioneel. Bv. Bestelling')"
-                    autocomplete=""
+                    autocomplete="off"
                 >
             </STInputBox>
 
@@ -67,7 +67,7 @@
                     class="input"
                     type="text"
                     placeholder="Optioneel. Indien niet ingevuld worden automatisch geschikte instructies getoond."
-                    autocomplete=""
+                    autocomplete="off"
                 />
             </STInputBox>
 
@@ -118,7 +118,7 @@
                             class="input"
                             type="text"
                             placeholder="Waarschuwingstekst"
-                            autocomplete=""
+                            autocomplete="off"
                         />
                     </STInputBox>
                 </div>

@@ -15,7 +15,7 @@
                 class="input"
                 type="text"
                 placeholder="Naam van deze sponsor"
-                autocomplete=""
+                autocomplete="off"
             >
         </STInputBox>
 

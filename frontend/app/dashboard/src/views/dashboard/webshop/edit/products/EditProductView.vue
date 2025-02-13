@@ -17,7 +17,7 @@
                     class="input"
                     type="text"
                     :placeholder="'Naam '+typeName"
-                    autocomplete=""
+                    autocomplete="off"
                     enterkeyhint="next"
                 >
             </STInputBox>
@@ -54,7 +54,7 @@
                 class="input"
                 type="text"
                 placeholder="Beschrijving van dit artikel"
-                autocomplete=""
+                autocomplete="off"
                 enterkeyhint="next"
             />
         </STInputBox>

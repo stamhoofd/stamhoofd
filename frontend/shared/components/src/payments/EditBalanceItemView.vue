@@ -18,7 +18,7 @@
                         class="input"
                         type="text"
                         placeholder="Bv. Aankoop T-shirt"
-                        autocomplete=""
+                        autocomplete="off"
                         :disabled="!!balanceItem.relations.size"
                     >
                 </STInputBox>

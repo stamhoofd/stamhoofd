@@ -16,7 +16,7 @@
                 class="input"
                 type="text"
                 :placeholder="'bv. Sportpaleis'"
-                autocomplete=""
+                autocomplete="off"
                 enterkeyhint="next"
             >
         </STInputBox>
@@ -74,7 +74,7 @@
                     class="input"
                     type="text"
                     :placeholder="'bv. Middenplein'"
-                    autocomplete=""
+                    autocomplete="off"
                     enterkeyhint="next"
                     @input="setSectionName(section, ($event as any).target.value)"
                 >

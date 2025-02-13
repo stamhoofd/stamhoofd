@@ -21,7 +21,7 @@
                     class="input"
                     type="text"
                     placeholder="Titel"
-                    autocomplete=""
+                    autocomplete="off"
                     enterkeyhint="next"
                 >
             </STInputBox>
@@ -33,7 +33,7 @@
                 class="input"
                 type="text"
                 placeholder="Optioneel"
-                autocomplete=""
+                autocomplete="off"
             />
         </STInputBox>
 

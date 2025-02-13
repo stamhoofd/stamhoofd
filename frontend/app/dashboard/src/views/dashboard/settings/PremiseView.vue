@@ -12,7 +12,7 @@
                     class="input"
                     type="text"
                     :placeholder="$t('8505e377-cc4d-4551-98d3-60a70d8b2c7b')"
-                    autocomplete=""
+                    autocomplete="off"
                 >
             </STInputBox>
 
@@ -23,7 +23,7 @@
                     class="input"
                     type="text"
                     :placeholder="$t('13650793-84d9-407a-b477-79b40011441d')"
-                    autocomplete=""
+                    autocomplete="off"
                 />
             </STInputBox>
 

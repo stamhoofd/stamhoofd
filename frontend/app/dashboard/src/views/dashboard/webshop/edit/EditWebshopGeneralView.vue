@@ -9,7 +9,7 @@
                 class="input"
                 type="text"
                 placeholder="bv. Wafelverkoop"
-                autocomplete=""
+                autocomplete="off"
             >
 
             <p v-if="name.length > 30" class="style-description-small">

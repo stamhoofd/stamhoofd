@@ -23,7 +23,7 @@
                 class="input"
                 type="text"
                 :placeholder="$t('930218d2-2e00-4d1f-90c9-59d77c1ed377')"
-                autocomplete=""
+                autocomplete="off"
             />
         </STInputBox>
 

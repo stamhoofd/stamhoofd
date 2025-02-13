@@ -17,7 +17,7 @@
                         class="input"
                         type="text"
                         placeholder="Vul hier je kortingscode in"
-                        autocomplete=""
+                        autocomplete="off"
                         @blur="cleanCode"
                     >
                     <LoadingButton :loading="loading">

@@ -20,7 +20,7 @@
                             class="input"
                             type="text"
                             placeholder="Naam van deze groep"
-                            autocomplete=""
+                            autocomplete="off"
                         >
                     </STInputBox>
 
@@ -49,7 +49,7 @@
                             class="input"
                             type="text"
                             placeholder="bv. Wachtlijst nieuwe leden"
-                            autocomplete=""
+                            autocomplete="off"
                         >
                     </STInputBox>
                 </div>
@@ -61,7 +61,7 @@
                     class="input"
                     type="text"
                     placeholder="Zichtbaar voor leden tijdens het inschrijven. Hier kan je bijvoorbeeld inschrijvinginstructies kwijt, of informatie geven over prijzen."
-                    autocomplete=""
+                    autocomplete="off"
                 />
             </STInputBox>
             <p v-if="patched.type === GroupType.EventRegistration" class="style-description-small">

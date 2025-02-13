@@ -8,7 +8,7 @@
                 class="input"
                 type="text"
                 placeholder="bv. Bestel je wafels"
-                autocomplete=""
+                autocomplete="off"
             >
         </STInputBox>
 

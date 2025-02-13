@@ -15,7 +15,7 @@
                 class="input"
                 type="text"
                 placeholder="Naam van deze keuze"
-                autocomplete=""
+                autocomplete="off"
                 enterkeyhint="next"
             >
         </STInputBox>
@@ -26,7 +26,7 @@
                 class="input"
                 type="text"
                 placeholder="Optioneel"
-                autocomplete=""
+                autocomplete="off"
             />
         </STInputBox>
         <p class="style-description-small">
@@ -44,7 +44,7 @@
                     class="input"
                     type="text"
                     placeholder="Tekst in lege velden"
-                    autocomplete=""
+                    autocomplete="off"
                 >
             </STInputBox>
             <p class="style-description-small">

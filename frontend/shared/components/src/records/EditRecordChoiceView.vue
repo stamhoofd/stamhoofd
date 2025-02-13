@@ -13,7 +13,7 @@
                 class="input"
                 type="text"
                 placeholder="Naam van deze keuze"
-                autocomplete=""
+                autocomplete="off"
             >
         </STInputBox>
     
@@ -23,7 +23,7 @@
                 class="input"
                 type="text"
                 placeholder="Optioneel"
-                autocomplete=""
+                autocomplete="off"
             />
         </STInputBox>
 
@@ -66,7 +66,7 @@
                 class="input"
                 type="text"
                 placeholder="bv. 'Geen toestemming om foto's te maken'"
-                autocomplete=""
+                autocomplete="off"
             >
         </STInputBox>
 

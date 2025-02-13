@@ -18,7 +18,7 @@
                         class="input"
                         type="text"
                         placeholder="bv. kantine"
-                        autocomplete=""
+                        autocomplete="off"
                     >
                 </STInputBox>
 
@@ -28,7 +28,7 @@
                         class="input"
                         type="text"
                         placeholder="Hier kan je eventeel afhaalinstructies kwijt (optioneel)"
-                        autocomplete=""
+                        autocomplete="off"
                     />
                 </STInputBox>
             </div>

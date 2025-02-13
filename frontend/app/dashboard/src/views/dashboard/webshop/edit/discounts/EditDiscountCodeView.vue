@@ -15,7 +15,7 @@
                 class="input"
                 type="text"
                 placeholder="Bv. BLACK-FRIDAY"
-                autocomplete=""
+                autocomplete="off"
                 @blur="cleanCode"
             >
         </STInputBox>
@@ -33,7 +33,7 @@
                 v-model="description"
                 class="input"
                 placeholder="Optioneel"
-                autocomplete=""
+                autocomplete="off"
             />
         </STInputBox>
         <p class="style-description-small">

@@ -15,7 +15,7 @@
             v-model="value"
             class="input"
             :placeholder="placeholder"
-            autocomplete=""
+            autocomplete="off"
         />
 
         <input
@@ -25,7 +25,7 @@
             class="input"
             type="text"
             :placeholder="placeholder"
-            autocomplete=""
+            autocomplete="off"
         >
     </SaveView>
 </template>
