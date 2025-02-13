@@ -6,7 +6,7 @@
         <h2 class="style-title-list">
             {{ type.title }}
         </h2>
-        <p class="style-description">
+        <p class="style-description style-limit-lines">
             {{ type.description }}
         </p>
         <template #right>
