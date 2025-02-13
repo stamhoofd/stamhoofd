@@ -115,7 +115,7 @@ export class Image extends QueryableModel {
                 server: 'https://' + STAMHOOFD.SPACES_BUCKET + '.' + STAMHOOFD.SPACES_ENDPOINT,
                 path: key,
                 size: f.info.size,
-                private: isPrivateFile,
+                isPrivate: isPrivateFile,
             });
 
             const _image = new Resolution({
