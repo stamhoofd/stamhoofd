@@ -25,9 +25,6 @@ describe('Endpoint.RegisterMembers', () => {
     // #endregion
 
     beforeAll(async () => {
-        const date = new Date('2023-05-14');
-        jest.useFakeTimers().setSystemTime(date);
-
         const previousPeriod = await new RegistrationPeriodFactory({
             startDate: new Date(2022, 0, 1),
             endDate: new Date(2022, 11, 31),
@@ -885,8 +882,7 @@ describe('Endpoint.RegisterMembers', () => {
             expect(updatedGroup!.settings.reservedMembers).toBe(0);
         });
 
-        // does timeout now, why? -> todo
-        test.skip('Should update reserved members', async () => {
+        test('Should update reserved members', async () => {
             // #region arrange
             const { member, organization, token } = await initData();
 
@@ -894,7 +890,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             organization.privateMeta.payconiqAccounts = [PayconiqAccount.create({
                 id: uuidv4(),
-                apiKey: '',
+                apiKey: 'testKey',
                 merchantId: 'test',
                 profileId: 'test',
                 name: 'test',
@@ -902,7 +898,7 @@ describe('Endpoint.RegisterMembers', () => {
                 callbackUrl: 'https://www.example.com',
             })];
 
-            // await organization.save();
+            await organization.save();
 
             const group2 = await new GroupFactory({
                 organization,
@@ -964,48 +960,56 @@ describe('Endpoint.RegisterMembers', () => {
 
         test('Register for group with trial should set trail period', async () => {
             // #region arrange
-            const { member, group, groupPrice, organization, token } = await initData();
-            group.settings.trialDays = 5;
-            await group.save();
+            const date = new Date('2023-05-14');
+            jest.useFakeTimers().setSystemTime(date);
 
-            const body = IDRegisterCheckout.create({
-                cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
-                            groupPrice: groupPrice,
-                            organizationId: organization.id,
-                            groupId: group.id,
-                            memberId: member.id,
-                            trial: true,
-                        }),
-                    ],
-                    balanceItems: [],
-                    deleteRegistrationIds: [],
-                }),
-                administrationFee: 0,
-                freeContribution: 0,
-                paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 0,
-                asOrganizationId: organization.id,
-                customer: null,
-            });
-            // #endregion
+            try {
+                const { member, group, groupPrice, organization, token } = await initData();
+                group.settings.trialDays = 5;
+                await group.save();
 
-            // act
-            const response = await post(body, organization, token);
+                const body = IDRegisterCheckout.create({
+                    cart: IDRegisterCart.create({
+                        items: [
+                            IDRegisterItem.create({
+                                id: uuidv4(),
+                                replaceRegistrationIds: [],
+                                options: [],
+                                groupPrice: groupPrice,
+                                organizationId: organization.id,
+                                groupId: group.id,
+                                memberId: member.id,
+                                trial: true,
+                            }),
+                        ],
+                        balanceItems: [],
+                        deleteRegistrationIds: [],
+                    }),
+                    administrationFee: 0,
+                    freeContribution: 0,
+                    paymentMethod: PaymentMethod.PointOfSale,
+                    totalPrice: 0,
+                    asOrganizationId: organization.id,
+                    customer: null,
+                });
+                // #endregion
 
-            // assert
-            expect(response.body).toBeDefined();
-            expect(response.body.registrations.length).toBe(1);
-            const trialUntil = response.body.registrations[0].trialUntil;
-            expect(trialUntil).not.toBeNull();
-            // 2023-05-14
-            expect(trialUntil!.getFullYear()).toBe(2023);
-            expect(trialUntil!.getMonth()).toBe(4);
-            expect(trialUntil!.getDate()).toBe(19);
+                // act
+                const response = await post(body, organization, token);
+
+                // assert
+                expect(response.body).toBeDefined();
+                expect(response.body.registrations.length).toBe(1);
+                const trialUntil = response.body.registrations[0].trialUntil;
+                expect(trialUntil).not.toBeNull();
+                // 2023-05-14
+                expect(trialUntil!.getFullYear()).toBe(2023);
+                expect(trialUntil!.getMonth()).toBe(4);
+                expect(trialUntil!.getDate()).toBe(19);
+            }
+            finally {
+                jest.useFakeTimers().resetAllMocks();
+            }
         });
     });
 
