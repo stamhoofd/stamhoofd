@@ -128,9 +128,41 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
 
         // Also include the source, in private mode
         const fileId = uuidv4();
-        const uploadExt = file.mimetype == 'application/pdf' ? 'pdf' : 'pdf';
+        let uploadExt = '';
+
+        switch (file.mimetype?.toLocaleLowerCase()) {
+            case 'image/jpeg':
+            case 'image/jpg':
+                uploadExt = 'jpg';
+                break;
+            case 'image/png':
+                uploadExt = 'png';
+                break;
+            case 'image/gif':
+                uploadExt = 'gif';
+                break;
+            case 'image/webp':
+                uploadExt = 'webp';
+                break;
+            case 'image/svg+xml':
+                uploadExt = 'svg';
+                break;
+            case 'application/pdf':
+                uploadExt = 'pdf';
+                break;
+            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+            case 'application/vnd.ms-excel':
+                uploadExt = 'xlsx';
+                break;
+
+            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+            case 'application/msword':
+                uploadExt = 'docx';
+                break;
+        }
+
         const filenameWithoutExt = file.originalFilename?.split('.').slice(0, -1).join('.') ?? fileId;
-        const key = prefix + (STAMHOOFD.environment ?? 'development') + '/' + fileId + '/' + (Formatter.slug(filenameWithoutExt) + '.' + uploadExt);
+        const key = prefix + (STAMHOOFD.environment ?? 'development') + '/' + fileId + '/' + (Formatter.slug(filenameWithoutExt) + (uploadExt ? ('.' + uploadExt) : ''));
         const params = {
             Bucket: STAMHOOFD.SPACES_BUCKET,
             Key: key,
