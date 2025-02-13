@@ -152,7 +152,7 @@ export class EventNotificationService {
             }),
             Replacement.create({
                 token: 'reviewUrl',
-                value: forReviewers ? Context.i18n.localizedDomains.adminUrl + '/kampmeldingen/' + encodeURIComponent(notification.id) : (organization.getBaseStructure().dashboardUrl + '/activiteiten/' + events[0].id + '/' + Formatter.slug(type.title)),
+                value: forReviewers ? Context.i18n.localizedDomains.adminUrl + '/kampmeldingen/' + encodeURIComponent(notification.id) : (events.length === 0 ? organization.getBaseStructure().dashboardUrl : (organization.getBaseStructure().dashboardUrl + '/activiteiten/' + events[0].id + '/' + Formatter.slug(type.title))),
             }),
             Replacement.create({
                 token: 'dateRange',

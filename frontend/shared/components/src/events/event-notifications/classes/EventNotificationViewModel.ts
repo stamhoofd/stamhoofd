@@ -129,6 +129,40 @@ export class EventNotificationViewModel {
                     this.isSaving = false;
                 }
             },
+            deleteModel: async () => {
+                if (this.isSaving) {
+                    throw new SimpleError({
+                        code: 'saving',
+                        message: 'Al bezig met opslaan... Even geduld.',
+                    });
+                }
+                this.isSaving = true;
+
+                try {
+                    const arr = new PatchableArray();
+                    if (this.isNew) {
+                        return;
+                    }
+                    arr.addDelete(this.eventNotification.id);
+
+                    const server = context.value.getAuthenticatedServerForOrganization(this.eventNotification.organization.id);
+
+                    await server.request({
+                        method: 'PATCH',
+                        path: '/event-notifications',
+                        body: arr,
+                        decoder: new ArrayDecoder(EventNotification as Decoder<EventNotification>),
+                        owner,
+                        shouldRetry: false,
+                    });
+
+                    this.isNew = true;
+                    return Promise.resolve();
+                }
+                finally {
+                    this.isSaving = false;
+                }
+            },
             isSaving: computed(() => this.isSaving),
         };
     }

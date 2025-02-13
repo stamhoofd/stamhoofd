@@ -211,6 +211,24 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             notifications.push(notification);
         }
 
+        for (const id of request.body.getDeletes()) {
+            const notification = await EventNotification.getByID(id);
+
+            if (!notification) {
+                throw new SimpleError({
+                    code: 'not_found',
+                    message: 'EventNotification not found',
+                    human: Context.i18n.$t('a0c39573-d44e-4ac0-aaeb-f9062fa1b3ce'),
+                });
+            }
+
+            if (!await Context.auth.canAccessEventNotification(notification, PermissionLevel.Full)) {
+                throw Context.auth.error();
+            }
+
+            await notification.delete();
+        }
+
         const structures = await AuthenticatedStructures.eventNotifications(notifications);
         return new Response(
             structures,

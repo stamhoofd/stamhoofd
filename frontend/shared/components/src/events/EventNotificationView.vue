@@ -22,6 +22,9 @@
                     <p v-for="event of notification.events" :key="event.id" class="style-definition-text" @click="isReviewer && notification.events.length !== 1 && openEvent(event)">
                         <span>{{ notification.events.map(e => e.name).join(', ') }}</span>
                     </p>
+                    <p v-if="notification.events.length === 0" class="style-definition-text style-em">
+                        Geen
+                    </p>
 
                     <template v-if="isReviewer && notification.events.length === 1" #right>
                         <span class="icon arrow-right-small gray" />
@@ -184,7 +187,7 @@
 
 <script setup lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, EventOverview, IconContainer, InputSheet, ProgressIcon, useAppContext, useAuth, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
 import { AccessRight, Event, EventNotification, EventNotificationStatus, EventNotificationStatusHelper, RecordCategory } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -207,6 +210,7 @@ const type = props.viewModel.useType();
 const present = usePresent();
 const auth = useAuth();
 const app = useAppContext();
+const pop = usePop();
 const isReviewer = computed(() => {
     const p = auth.getPermissionsForOrganization(props.viewModel.eventNotification.organization);
     return p?.hasAccessRight(AccessRight.OrganizationEventNotificationReviewer) ?? false;
@@ -214,7 +218,7 @@ const isReviewer = computed(() => {
 const isComplete = computed(() => {
     return recordCategories.value.every(c => c.isComplete(notification.value));
 });
-const { save, isSaving } = props.viewModel.useSave();
+const { save, deleteModel, isSaving } = props.viewModel.useSave();
 
 const title = computed(() => {
     return type.value.title;
@@ -388,9 +392,8 @@ async function doDelete() {
         return;
     }
     try {
-        await save(EventNotification.patch({
-            status: EventNotificationStatus.Rejected,
-        }));
+        await deleteModel();
+        await pop({ force: true });
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);
