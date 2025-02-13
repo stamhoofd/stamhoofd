@@ -8,7 +8,7 @@ import { GetMemberBalanceEndpoint } from '../../src/endpoints/organization/dashb
 import { GetReceivableBalanceEndpoint } from '../../src/endpoints/organization/dashboard/receivable-balances/GetReceivableBalanceEndpoint';
 import { testServer } from '../helpers/TestServer';
 
-describe('Endpoint.RegisterMembers', () => {
+describe('E2E.Register', () => {
     // #region global
     const registerEndpoint = new RegisterMembersEndpoint();
     const memberBalanceEndpoint = new GetMemberBalanceEndpoint();
