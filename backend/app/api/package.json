@@ -35,7 +35,7 @@
         "@mollie/api-client": "3.7.0",
         "@simonbackx/simple-database": "1.29.0",
         "@simonbackx/simple-encoding": "2.20.0",
-        "@simonbackx/simple-endpoints": "1.18.0",
+        "@simonbackx/simple-endpoints": "1.19.0",
         "@simonbackx/simple-logging": "^1.0.1",
         "@stamhoofd/backend-i18n": "2.74.0",
         "@stamhoofd/backend-middleware": "2.74.0",
