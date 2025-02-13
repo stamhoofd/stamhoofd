@@ -118,6 +118,17 @@ export class Image extends QueryableModel {
                 isPrivate: isPrivateFile,
             });
 
+            if (isPrivateFile) {
+                if (!await _file.sign()) {
+                    throw new SimpleError({
+                        code: 'failed_to_sign',
+                        message: 'Failed to sign file',
+                        human: $t('Er ging iet mis bij het uploaden van jouw bestand. Probeer het later opnieuw (foutcode: SIGN).'),
+                        statusCode: 500,
+                    });
+                }
+            }
+
             const _image = new Resolution({
                 file: _file,
                 width: f.info.width,
