@@ -3,11 +3,12 @@ backendEnv.load({ path: __dirname + '/../../.env.test.json' });
 
 import { Column, Database } from '@simonbackx/simple-database';
 import { Request } from '@simonbackx/simple-endpoints';
-import { I18n } from '@stamhoofd/backend-i18n';
 import { Email } from '@stamhoofd/email';
 import { Version } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 import nock from 'nock';
+import { GlobalHelper } from '../src/helpers/GlobalHelper';
+import * as jose from 'jose';
 
 // Set version of saved structures
 Column.setJSONVersion(Version);
@@ -47,7 +48,19 @@ beforeAll(async () => {
     await Database.delete('DELETE FROM `payments`');
     await Database.delete('OPTIMIZE TABLE organizations;'); // fix breaking of indexes due to deletes (mysql bug?)
 
-    await I18n.load();
+    // Use random file keys in tests
+    const alg = 'ES256';
+    (STAMHOOFD as any).FILE_SIGNING_ALG = alg;
+
+    const { publicKey, privateKey } = await jose.generateKeyPair(alg);
+
+    const exportedPublicKey = await jose.exportJWK(publicKey);
+    const exportedPrivateKey = await jose.exportJWK(privateKey);
+
+    (STAMHOOFD as any).FILE_SIGNING_PUBLIC_KEY = exportedPublicKey;
+    (STAMHOOFD as any).FILE_SIGNING_PRIVATE_KEY = exportedPrivateKey;
+
+    await GlobalHelper.load();
 });
 
 afterAll(async () => {

@@ -1,8 +1,12 @@
+import { I18n } from '@stamhoofd/backend-i18n';
+import { FileSignService } from '../services/FileSignService';
 import { Context } from './Context';
 
 export class GlobalHelper {
-    static load() {
+    static async load() {
+        await I18n.load();
         this.loadGlobalTranslateFunction();
+        await FileSignService.load();
     }
 
     private static loadGlobalTranslateFunction() {

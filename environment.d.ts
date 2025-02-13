@@ -1,3 +1,4 @@
+import type jose from 'jose'
 
 export { };
 
@@ -150,6 +151,11 @@ declare global {
 
         // Communication with other internal services
         readonly INTERNAL_SECRET_KEY: string
+
+        // File signing
+        readonly FILE_SIGNING_PUBLIC_KEY?: jose.JWK
+        readonly FILE_SIGNING_PRIVATE_KEY?: jose.JWK
+        readonly FILE_SIGNING_ALG?: string
 
         readonly CRONS_DISABLED?: boolean
 

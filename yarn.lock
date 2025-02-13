@@ -3172,24 +3172,24 @@
     "@sigstore/core" "^1.1.0"
     "@sigstore/protobuf-specs" "^0.3.1"
 
-"@simonbackx/simple-database@1.28.0":
-  version "1.28.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.28.0.tgz#788cf761e19501ea71c9510df247407c044d1d53"
-  integrity sha512-NKfOntBWiw2t9TmySR+BJ1qDoPgb8NxE7SvvbayEV+U4KZoNRM9Ta3tAZ2/cGAX1uLSojvA2upDxOySW+ACi+g==
+"@simonbackx/simple-database@1.29.0":
+  version "1.29.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.29.0.tgz#643ada4a37bba2c93cbdf2acec50f970efa4c920"
+  integrity sha512-Qp+MKvfwLpmtQXUKQccm2FVd07gvqB75spLmKwQkLZpYHYRW7Ww9sLMoZ2fjKTFmkecdn9v0xZbtB3AsnDMsIw==
   dependencies:
     "@simonbackx/simple-logging" "^1.0.0"
     colors "^1.4.0"
     mysql "^2.18.1"
 
-"@simonbackx/simple-encoding@2.19.0":
-  version "2.19.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.19.0.tgz#2a4d33eb76b7f9d8c639dfa432ad10d5b7c95ac2"
-  integrity sha512-upXEfm3EB4lpvTaKsuZYIWOpRHXuYtXPfRGuvsqWwyO2+ftLYXrAzjuOpAOKxVTTLPHBc/qw/85CaICd457TjA==
+"@simonbackx/simple-encoding@2.20.0":
+  version "2.20.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.20.0.tgz#eb0bf731951fcfe5903e457ef8708ee1f7eca1cb"
+  integrity sha512-A4KNuN8UDib6wC27H5nteZCqDIFdyFxYCCDyR2U9GIvoBM005CWw60lW9D+UhzSmNsYlz7nbKDrL3yvtnTovUQ==
 
-"@simonbackx/simple-endpoints@1.16.0":
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-endpoints/-/simple-endpoints-1.16.0.tgz#cc9130fc64d39cf67e43f16d792c83933467e6b9"
-  integrity sha512-Zl0/ROBFFTo1zxcB5bh2n+jWvYooc83Ddok2Lewfo/7nEr771qa4OpKjEGswkDjRF9o4iNgteq6YqZEJ8cvlsw==
+"@simonbackx/simple-endpoints@1.18.0":
+  version "1.18.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-endpoints/-/simple-endpoints-1.18.0.tgz#e566f0e9ec1545969b1fc8d42f886e8bd4769a37"
+  integrity sha512-wAqPjYZdGHRNJa0vkRVmIv/X7+P2CCyKd/7g4ZqRdVRewIFZE+aR+Hq0ikfV/VRT604tOixlKx/qVb261dAG9Q==
 
 "@simonbackx/simple-errors@^1.4", "@simonbackx/simple-errors@^1.4.0":
   version "1.4.0"
@@ -3203,10 +3203,10 @@
   dependencies:
     chalk "^4.1.2"
 
-"@simonbackx/simple-networking@1.16.0":
-  version "1.16.0"
-  resolved "https://registry.npmjs.org/@simonbackx/simple-networking/-/simple-networking-1.16.0.tgz"
-  integrity sha512-41u4f+sR91YmEAyHoqLvqNmrrHZknwGBbs73QToV5vk4bCTam9eE4XQCBjcLBpVCbmWgDWdodzXChfMBV86e6A==
+"@simonbackx/simple-networking@1.17.0":
+  version "1.17.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.17.0.tgz#ccc7d55475b3c471129996964e2ce2a36febced5"
+  integrity sha512-BZypSfxPMTCBbU4AP12w2f9Cpleqezn6nQ9f9J04DeFTQmjBS5nXTwYXqJeL2tSq1bvDj7VsMXOXrW6/Zt5A/w==
 
 "@simonbackx/vue-app-navigation@2.8.2":
   version "2.8.2"
@@ -9162,6 +9162,11 @@ jose@^4.15.5:
   version "4.15.5"
   resolved "https://registry.npmjs.org/jose/-/jose-4.15.5.tgz"
   integrity sha512-jc7BFxgKPKi94uOvEmzlSWFFe2+vASyXaKUpdQKatWAESU2MWjDfFf0fdfc83CDKcA5QecabZeNLyfhe3yKNkg==
+
+jose@^5.9.6:
+  version "5.9.6"
+  resolved "https://registry.yarnpkg.com/jose/-/jose-5.9.6.tgz#77f1f901d88ebdc405e57cce08d2a91f47521883"
+  integrity sha512-AMlnetc9+CV9asI19zHmrgS/WYsWUwCn2R7RzlbJWD7F9eWYUTGyBmU9o6PxngtLGOiDGPRu+Uc4fhKzbpteZQ==
 
 jpeg-exif@^1.1.4:
   version "1.1.4"

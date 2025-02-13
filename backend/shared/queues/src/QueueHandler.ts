@@ -187,7 +187,7 @@ export class QueueHandler {
 
         const currentQueues = this.asyncLocalStorage.getStore();
         if (currentQueues !== undefined && currentQueues.includes(queue)) {
-            console.warn('Recursive usage of queues detected. Ignored running in queue', queue, currentQueues);
+            // Recursive usage of queues detected. Ignored running in queue
             return await handler({ abort: new AbortSignal() });
         }
 

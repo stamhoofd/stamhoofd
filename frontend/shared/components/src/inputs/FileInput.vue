@@ -1,14 +1,18 @@
 <template>
     <STInputBox :title="title" error-fields="*" :error-box="errorBox">
-        <label class="file-input-box" :class="{ center: !modelValue }" @click="onClick">
+        <label class="file-input-box" :class="{ center: !modelValue }">
+
             <Spinner v-if="uploading" />
             <span v-else-if="modelValue === null" class="icon center upload" />
 
             <span v-if="modelValue" :class="'icon '+getFileIcon(modelValue)" />
-            <span v-if="modelValue">{{ modelValue.name }}</span>
+            <span v-if="modelValue" class="text">{{ modelValue.name }}</span>
 
-            <span v-if="!required && modelValue" class="icon trash" @click="deleteMe" />
             <input type="file" class="file-upload" :accept="accept" @change="changedFile">
+            <button v-if="!required && modelValue" class="button icon trash" type="button" @click="deleteMe" @click.prevent="openFile" />
+            <span v-if="required && modelValue" class="button icon sync" />
+
+            <button v-if="modelValue" class="button icon external" type="button" @click.prevent="openFile" />
         </label>
     </STInputBox>
 </template>
@@ -58,9 +62,9 @@ export default class FileInput extends Mixins(NavigationMixin) {
         this.$emit('update:modelValue', null);
     }
 
-    onClick(event) {
+    openFile(event: MouseEvent) {
         if (this.modelValue) {
-            window.open(this.modelValue.getPublicPath(), 'Privacyvoorwaarden');
+            window.open(this.modelValue.getPublicPath(), '_blank');
             event.preventDefault();
         }
     }
@@ -163,6 +167,13 @@ export default class FileInput extends Mixins(NavigationMixin) {
     touch-action: manipulation;
     position: relative;
 
+    > .text {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        padding-right: 5px;
+    }
+
     &.center {
         justify-content: center;
     }
@@ -193,11 +204,23 @@ export default class FileInput extends Mixins(NavigationMixin) {
         }
     }
 
+    .icon {
+        flex-shrink: 0;
+        color: $color-gray-4;
+    }
+
+    .button.icon {
+        margin-left: auto;
+
+        ~ .button.icon {
+            margin-left: 10px;
+        }
+    }
+
     .icon.trash {
+        color: $color-error;
         opacity: 0;
         transition: opacity 0.2s;
-        margin-left: auto;
-        color: $color-error;
 
         &:hover {
             opacity: 1;

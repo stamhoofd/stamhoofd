@@ -148,6 +148,18 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
             isPrivate: request.query.isPrivate,
         });
 
+        // Generate an upload signature for this file if it is private
+        if (request.query.isPrivate) {
+            if (!await fileStruct.sign()) {
+                throw new SimpleError({
+                    code: 'failed_to_sign',
+                    message: 'Failed to sign file',
+                    human: $t('Er ging iet mis bij het uploaden van jouw bestand. Probeer het later opnieuw (foutcode: SIGN).'),
+                    statusCode: 500,
+                });
+            }
+        }
+
         await s3.putObject(params).promise();
 
         return new Response(fileStruct);

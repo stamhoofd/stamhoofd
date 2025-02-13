@@ -3,7 +3,6 @@ backendEnv.load();
 
 import { Column, Database, Migration } from '@simonbackx/simple-database';
 import { CORSPreflightEndpoint, Router, RouterServer } from '@simonbackx/simple-endpoints';
-import { I18n } from '@stamhoofd/backend-i18n';
 import { CORSMiddleware, LogMiddleware, VersionMiddleware } from '@stamhoofd/backend-middleware';
 import { Email } from '@stamhoofd/email';
 import { loadLogger } from '@stamhoofd/logging';
@@ -54,8 +53,8 @@ const seeds = async () => {
 const start = async () => {
     console.log('Running server at v' + Version);
     loadLogger();
-    await I18n.load();
-    GlobalHelper.load();
+    await GlobalHelper.load();
+
     const router = new Router();
     await router.loadAllEndpoints(__dirname + '/src/endpoints/global/*');
     await router.loadAllEndpoints(__dirname + '/src/endpoints/admin/*');
@@ -74,7 +73,9 @@ const start = async () => {
     // Log requests and errors
     routerServer.addRequestMiddleware(LogMiddleware);
     routerServer.addResponseMiddleware(LogMiddleware);
+
     routerServer.addResponseMiddleware(FileSignService);
+    routerServer.addRequestMiddleware(FileSignService);
 
     // Contexts
     routerServer.addRequestMiddleware(ContextMiddleware);

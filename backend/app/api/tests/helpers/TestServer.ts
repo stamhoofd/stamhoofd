@@ -3,11 +3,14 @@ import { VersionMiddleware } from '@stamhoofd/backend-middleware';
 import { Version } from '@stamhoofd/structures';
 
 import { ContextMiddleware } from '../../src/middleware/ContextMiddleware';
+import { FileSignService } from '../../src/services/FileSignService';
 
 export const testServer = new TestServer();
 
 // Contexts
 testServer.addRequestMiddleware(ContextMiddleware);
+testServer.addResponseMiddleware(FileSignService);
+testServer.addRequestMiddleware(FileSignService);
 
 // Add version headers and minimum version
 const versionMiddleware = new VersionMiddleware({

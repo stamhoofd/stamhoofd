@@ -12,7 +12,7 @@ type ResponseBody = DocumentStruct[];
 /**
  * Get the members of the user
  */
-export class GetUserMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetUserDocumentsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
