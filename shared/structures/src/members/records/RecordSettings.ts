@@ -50,7 +50,14 @@ export enum RecordType {
     Date = 'Date',
     Price = 'Price',
     Image = 'Image',
+    File = 'File',
     Integer = 'Integer',
+}
+
+export enum FileType {
+    PDF = 'PDF',
+    Word = 'Word',
+    Excel = 'Excel',
 }
 
 export function getRecordTypeName(type: RecordType) {
@@ -90,6 +97,10 @@ export function getRecordTypeName(type: RecordType) {
         {
             value: RecordType.MultipleChoice,
             name: 'Keuzemenu (kies meerdere)',
+        },
+        {
+            value: RecordType.File,
+            name: 'Bestand',
         },
     ];
     return all.find(t => t.value === type)?.name ?? 'Onbekend';
@@ -240,6 +251,12 @@ export class RecordSettings extends BaseRecordSettings {
      */
     @field({ decoder: new ArrayDecoder(ResolutionRequest), optional: true })
     resolutions?: ResolutionRequest[];
+
+    /**
+     * Only for files
+    */
+    @field({ decoder: new EnumDecoder(FileType), nullable: true, optional: true })
+    fileType?: FileType | null;
 
     @field({ decoder: new EnumDecoder(PermissionLevel), version: 356 })
     externalPermissionLevel = PermissionLevel.Write;

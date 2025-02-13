@@ -59,7 +59,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             const notification = new EventNotification();
             notification.organizationId = put.organization.id;
             notification.typeId = put.typeId;
-            await this.validateType(notification);
+            const type = await this.validateType(notification);
 
             const validatedEvents: Event[] = [];
 
@@ -109,6 +109,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             }
 
             notification.recordAnswers = put.recordAnswers;
+            await EventNotificationService.cleanAnswers(notification);
             notification.createdBy = user.id;
             notification.status = EventNotificationStatus.Draft;
 
@@ -176,6 +177,9 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
 
             // Save answers
             notification.recordAnswers = patchObject(notification.recordAnswers, patch.recordAnswers);
+            if (patch.recordAnswers?.size) {
+                await EventNotificationService.cleanAnswers(notification);
+            }
             notification.feedbackText = patchObject(notification.feedbackText, patch.feedbackText);
 
             if (patch.status && patch.status !== notification.status) {

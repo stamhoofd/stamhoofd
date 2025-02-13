@@ -128,6 +128,20 @@ const description = computed(() => {
         return 'Prijs';
     }
 
+    if (props.record.type === RecordType.Image) {
+        if (!props.record.required) {
+            return 'Optionele afbeelding';
+        }
+        return 'Afbeelding';
+    }
+
+    if (props.record.type === RecordType.File) {
+        if (!props.record.required) {
+            return 'Optioneel bestand';
+        }
+        return 'Bestand';
+    }
+
     if (!props.record.required) {
         return 'Optioneel tekstveld';
     }

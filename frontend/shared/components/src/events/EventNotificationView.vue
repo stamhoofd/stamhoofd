@@ -111,7 +111,7 @@
 
             <template v-else>
                 <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="notification">
-                    <template v-if="isReviewer" #buttons>
+                    <template v-if="isReviewer || notification.status === EventNotificationStatus.Rejected" #buttons>
                         <button type="button" class="button icon edit" @click="editRecordCategory(category)" />
                     </template>
                 </ViewRecordCategoryAnswersBox>

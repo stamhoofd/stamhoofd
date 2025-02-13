@@ -14,82 +14,85 @@
 </template>
 
 <script lang="ts">
-import { SimpleError } from "@simonbackx/simple-errors";
-import { Request } from "@simonbackx/simple-networking";
+import { SimpleError } from '@simonbackx/simple-errors';
+import { Request } from '@simonbackx/simple-networking';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { Image, ResolutionRequest, Version } from "@stamhoofd/structures";
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { Image, ResolutionRequest, Version } from '@stamhoofd/structures';
 
-import { ErrorBox } from "../errors/ErrorBox";
-import { Validator } from "../errors/Validator";
-import Spinner from "../Spinner.vue";
-import STInputBox from "./STInputBox.vue";
+import { ErrorBox } from '../errors/ErrorBox';
+import { Validator } from '../errors/Validator';
+import Spinner from '../Spinner.vue';
+import STInputBox from './STInputBox.vue';
 
 @Component({
     components: {
         Spinner,
-        STInputBox
+        STInputBox,
     },
-    emits: ["update:modelValue"]
+    emits: ['update:modelValue'],
 })
 export default class ImageInput extends Mixins(NavigationMixin) {
-    @Prop({ default: "" }) 
-        title: string;
-
-    @Prop({ default: null }) 
-        validator: Validator | null
+    @Prop({ default: '' })
+    title: string;
 
     @Prop({ default: null })
-        resolutions: ResolutionRequest[] | null
-    
-    @Prop({ default: null })
-        modelValue: Image | null;
+    validator: Validator | null;
 
     @Prop({ default: null })
-        placeholder: Image | null;
+    resolutions: ResolutionRequest[] | null;
+
+    @Prop({ default: null })
+    modelValue: Image | null;
+
+    @Prop({ default: null })
+    placeholder: Image | null;
 
     @Prop({ default: true })
-        required!: boolean
+    required!: boolean;
 
     @Prop({ default: false })
-        dark!: boolean
+    dark!: boolean;
 
-    errorBox: ErrorBox | null = null
+    @Prop({ default: false })
+    isPrivate: boolean;
 
-    uploading = false
+    errorBox: ErrorBox | null = null;
+
+    uploading = false;
 
     get isSquare() {
         if (this.resolutions === null) {
-            return false
+            return false;
         }
-        return !!this.resolutions.find(r => r.width === r.height && r.width)
+        return !!this.resolutions.find(r => r.width === r.height && r.width);
     }
 
     get src() {
-        return this.shownResolution.file.getPublicPath()
+        return this.shownResolution.file.getPublicPath();
     }
 
     get shownResolution() {
-        return this.modelValue!.getResolutionForSize(undefined, 220)
+        return this.modelValue!.getResolutionForSize(undefined, 220);
     }
 
     get placeholderSrc() {
-        return this.placeholder!.getResolutionForSize(undefined, 220).file.getPublicPath()
+        return this.placeholder!.getResolutionForSize(undefined, 220).file.getPublicPath();
     }
 
     get placeholderShownResolution() {
-        return this.placeholder!.getResolutionForSize(undefined, 220)
+        return this.placeholder!.getResolutionForSize(undefined, 220);
     }
 
     onClick(event) {
         if (!this.required && this.modelValue) {
             event.preventDefault();
-            this.$emit('update:modelValue', null)
+            this.$emit('update:modelValue', null);
         }
     }
 
     beforeUnmount() {
-        Request.cancelAll(this)
+        Request.cancelAll(this);
     }
 
     changedFile(event) {
@@ -105,37 +108,40 @@ export default class ImageInput extends Mixins(NavigationMixin) {
         if (file.size > 5 * 1024 * 1024) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: 'file_too_large',
-                message: 'De bestandsgrootte is te groot. De afbeelding mag maximaal 5MB groot zijn. Probeer de afbeelding te verkleinen en daarna opnieuw te selecteren.'
-            }))
+                message: 'De bestandsgrootte is te groot. De afbeelding mag maximaal 5MB groot zijn. Probeer de afbeelding te verkleinen en daarna opnieuw te selecteren.',
+            }));
             return;
         }
 
-        const resolutions = this.resolutions ?? [ResolutionRequest.create({ height: 720 })]
+        const resolutions = this.resolutions ?? [ResolutionRequest.create({ height: 720 })];
 
         const formData = new FormData();
-        formData.append("file", file);
-        formData.append("resolutions", JSON.stringify(resolutions.map(r => r.encode({ version: Version }))))
+        formData.append('file', file);
+        formData.append('resolutions', JSON.stringify(resolutions.map(r => r.encode({ version: Version }))));
 
         this.uploading = true;
         this.errorBox = null;
 
-        Request.cancelAll(this)
+        Request.cancelAll(this);
         this.$context.authenticatedServer
             .request({
-                method: "POST",
-                path: "/upload-image",
+                method: 'POST',
+                path: '/upload-image',
                 body: formData,
                 decoder: Image,
-                timeout: 60*1000,
+                timeout: 60 * 1000,
                 shouldRetry: false,
-                owner: this
+                owner: this,
+                query: {
+                    private: this.isPrivate ? true : undefined,
+                },
             })
-            .then(response => {
-                this.$emit('update:modelValue', response.data)
+            .then((response) => {
+                this.$emit('update:modelValue', response.data);
             })
-            .catch(e => {
+            .catch((e) => {
                 console.error(e);
-                this.errorBox = new ErrorBox(e)
+                this.errorBox = new ErrorBox(e);
             })
             .finally(() => {
                 this.uploading = false;

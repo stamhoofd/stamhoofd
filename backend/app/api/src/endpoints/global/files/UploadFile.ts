@@ -9,9 +9,14 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Context } from '../../../helpers/Context';
 import { limiter } from './UploadImage';
+import { AutoEncoder, BooleanDecoder, Decoder, field } from '@simonbackx/simple-encoding';
 
 type Params = Record<string, never>;
-type Query = Record<string, never>;
+class Query extends AutoEncoder {
+    @field({ decoder: BooleanDecoder, optional: true, field: 'private' })
+    isPrivate: boolean = false;
+}
+
 type Body = undefined;
 type ResponseBody = File;
 
@@ -33,6 +38,8 @@ interface FormidableFile {
 }
 
 export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
+    queryDecoder = Query as Decoder<Query>;
+
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'POST') {
             return [false];
@@ -129,7 +136,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
             Key: key,
             Body: fileContent, // TODO
             ContentType: file.mimetype ?? 'application/pdf',
-            ACL: 'public-read',
+            ACL: request.query.isPrivate ? 'private' : 'public-read',
         };
 
         const fileStruct = new File({
@@ -138,6 +145,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
             path: key,
             size: fileContent.length,
             name: file.originalFilename,
+            isPrivate: request.query.isPrivate,
         });
 
         await s3.putObject(params).promise();

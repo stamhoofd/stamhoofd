@@ -7,6 +7,7 @@ import { Address } from '../../addresses/Address.js';
 import { CountryHelper } from '../../addresses/CountryDecoder.js';
 import { Image } from '../../files/Image.js';
 import { RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from './RecordSettings.js';
+import { File } from '../../files/File.js';
 
 export class RecordAnswer extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -164,6 +165,7 @@ export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {
             case RecordType.Price: return RecordPriceAnswer;
             case RecordType.Image: return RecordImageAnswer;
             case RecordType.Integer: return RecordIntegerAnswer;
+            case RecordType.File: return RecordFileAnswer;
         }
     }
 }
@@ -518,5 +520,36 @@ export class RecordImageAnswer extends RecordAnswer {
 
     transformForDiff() {
         return this.image;
+    }
+}
+
+export class RecordFileAnswer extends RecordAnswer {
+    @field({ decoder: File, nullable: true })
+    file: File | null = null;
+
+    get stringValue() {
+        return this.file?.getPublicPath() ?? '/';
+    }
+
+    get objectValue() {
+        return this.file?.encode({ version: 0 }) ?? null;
+    }
+
+    override validate() {
+        if (this.settings.required && this.file === null) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: 'Verplicht in te vullen',
+                field: 'input',
+            });
+        }
+    }
+
+    get isEmpty() {
+        return this.file === null;
+    }
+
+    transformForDiff() {
+        return this.file;
     }
 }

@@ -1,9 +1,10 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EventNotification, Member, MemberResponsibilityRecord, Organization, Platform, sendEmailTemplate, User } from '@stamhoofd/models';
-import { EmailTemplateType, PermissionLevel, Recipient, Replacement } from '@stamhoofd/structures';
+import { EmailTemplateType, PermissionLevel, Recipient, RecordCategory, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { AdminPermissionChecker } from '../helpers/AdminPermissionChecker';
 import { Context } from '../helpers/Context';
+import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures';
 
 export class EventNotificationService {
     static async validateType(notification: EventNotification) {
@@ -20,6 +21,13 @@ export class EventNotificationService {
         }
 
         return type;
+    }
+
+    static async cleanAnswers(notification: EventNotification) {
+        const type = await this.validateType(notification);
+        const struct = await AuthenticatedStructures.eventNotification(notification);
+        const patchedStruct = RecordCategory.removeOldAnswers(type.recordCategories, struct);
+        notification.recordAnswers = patchedStruct.getRecordAnswers();
     }
 
     static async getSubmitterRecipients(notification: EventNotification): Promise<Recipient[]> {

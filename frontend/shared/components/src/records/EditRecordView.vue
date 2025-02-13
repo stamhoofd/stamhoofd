@@ -34,6 +34,14 @@
                         </optgroup>
                     </Dropdown>
                 </STInputBox>
+
+                <STInputBox v-if="type === RecordType.File" title="Bestandtype" error-fields="fileType" :error-box="errors.errorBox">
+                    <Dropdown v-model="fileType">
+                        <option v-for="item in availableFileTypes" :key="item.value" :value="item.value">
+                            {{ item.name }}
+                        </option>
+                    </Dropdown>
+                </STInputBox>
             </div>
         </div>
 
@@ -274,7 +282,7 @@ import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-en
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, Checkbox, Dropdown, ErrorBox, GroupUIFilterBuilder, PropertyFilterInput, Radio, STErrorsDefault, STInputBox, STList, STListItem, SaveView, useErrors, usePatch } from '@stamhoofd/components';
-import { ObjectWithRecords, PermissionLevel, PropertyFilter, RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
+import { FileType, ObjectWithRecords, PermissionLevel, PropertyFilter, RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 import EditRecordChoiceView from './EditRecordChoiceView.vue';
@@ -363,6 +371,38 @@ const availableTypes = [
             },
         ],
     },
+    {
+        name: 'Geavanceerd',
+        values: [
+            {
+                value: RecordType.Image,
+                name: 'Afbeelding of foto',
+            },
+            {
+                value: RecordType.File,
+                name: 'Bestand',
+            },
+        ],
+    },
+];
+
+const availableFileTypes = [
+    {
+        name: 'Alles',
+        value: null,
+    },
+    {
+        name: 'PDF',
+        value: FileType.PDF,
+    },
+    {
+        name: 'Word',
+        value: FileType.Word,
+    },
+    {
+        name: 'Excel',
+        value: FileType.Excel,
+    },
 ];
 
 const canAddWarning = computed(() => {
@@ -424,6 +464,13 @@ const name = computed({
     get: () => patchedRecord.value.name,
     set: (name: string) => {
         addPatch({ name });
+    },
+});
+
+const fileType = computed({
+    get: () => patchedRecord.value.fileType ?? null,
+    set: (fileType) => {
+        addPatch({ fileType });
     },
 });
 

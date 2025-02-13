@@ -18,6 +18,7 @@ import { SetupStepUpdater } from './src/helpers/SetupStepUpdater';
 import { ContextMiddleware } from './src/middleware/ContextMiddleware';
 import { AuditLogService } from './src/services/AuditLogService';
 import { DocumentService } from './src/services/DocumentService';
+import { FileSignService } from './src/services/FileSignService';
 import { PlatformMembershipService } from './src/services/PlatformMembershipService';
 
 process.on('unhandledRejection', (error: Error) => {
@@ -73,6 +74,7 @@ const start = async () => {
     // Log requests and errors
     routerServer.addRequestMiddleware(LogMiddleware);
     routerServer.addResponseMiddleware(LogMiddleware);
+    routerServer.addResponseMiddleware(FileSignService);
 
     // Contexts
     routerServer.addRequestMiddleware(ContextMiddleware);

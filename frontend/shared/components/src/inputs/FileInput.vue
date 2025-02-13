@@ -8,76 +8,81 @@
             <span v-if="modelValue">{{ modelValue.name }}</span>
 
             <span v-if="!required && modelValue" class="icon trash" @click="deleteMe" />
-            <input type="file" class="file-upload" accept="application/pdf" @change="changedFile">
+            <input type="file" class="file-upload" :accept="accept" @change="changedFile">
         </label>
     </STInputBox>
 </template>
 
 <script lang="ts">
-import { SimpleError } from "@simonbackx/simple-errors";
-import { Request } from "@simonbackx/simple-networking";
+import { SimpleError } from '@simonbackx/simple-errors';
+import { Request } from '@simonbackx/simple-networking';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
-import { SessionManager } from '@stamhoofd/networking';
-import { File } from "@stamhoofd/structures";
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { File } from '@stamhoofd/structures';
 
-import {ErrorBox} from "../errors/ErrorBox";
-import {Validator} from "../errors/Validator";
-import Spinner from "../Spinner.vue";
-import STInputBox from "./STInputBox.vue";
+import { ErrorBox } from '../errors/ErrorBox';
+import { Validator } from '../errors/Validator';
+import Spinner from '../Spinner.vue';
+import STInputBox from './STInputBox.vue';
 
 @Component({
     components: {
         Spinner,
-        STInputBox
-    }
+        STInputBox,
+    },
 })
 export default class FileInput extends Mixins(NavigationMixin) {
-    @Prop({ default: "" }) 
-        title: string;
+    @Prop({ default: '' })
+    title: string;
 
-    @Prop({ default: null }) 
-        validator: Validator | null
-    
     @Prop({ default: null })
-        modelValue: File | null;
+    validator: Validator | null;
+
+    @Prop({ default: null })
+    modelValue: File | null;
 
     @Prop({ default: true })
-        required!: boolean
+    required!: boolean;
 
-    errorBox: ErrorBox | null = null
+    @Prop({ default: false })
+    isPrivate: boolean;
 
-    uploading = false
+    @Prop({ default: 'application/pdf' })
+    accept: string;
+
+    errorBox: ErrorBox | null = null;
+
+    uploading = false;
 
     deleteMe() {
-        this.$emit('update:modelValue', null)
+        this.$emit('update:modelValue', null);
     }
 
     onClick(event) {
         if (this.modelValue) {
-            window.open(this.modelValue.getPublicPath(), 'Privacyvoorwaarden')
+            window.open(this.modelValue.getPublicPath(), 'Privacyvoorwaarden');
             event.preventDefault();
         }
     }
 
     getFileIcon(file: File) {
-        if (file.path.endsWith(".png") || file.path.endsWith(".jpg") || file.path.endsWith(".jpeg") || file.path.endsWith(".gif")) {
-            return "file-image"
+        if (file.path.endsWith('.png') || file.path.endsWith('.jpg') || file.path.endsWith('.jpeg') || file.path.endsWith('.gif')) {
+            return 'file-image';
         }
-        if (file.path.endsWith(".pdf")) {
-            return "file-pdf color-pdf"
+        if (file.path.endsWith('.pdf')) {
+            return 'file-pdf color-pdf';
         }
-        if (file.path.endsWith(".xlsx") || file.path.endsWith(".xls")) {
-            return "file-excel color-excel"
+        if (file.path.endsWith('.xlsx') || file.path.endsWith('.xls')) {
+            return 'file-excel color-excel';
         }
-        if (file.path.endsWith(".docx") || file.path.endsWith(".doc")) {
-            return "file-word color-word"
+        if (file.path.endsWith('.docx') || file.path.endsWith('.doc')) {
+            return 'file-word color-word';
         }
-        return "file"
+        return 'file';
     }
 
     beforeUnmount() {
-        Request.cancelAll(this)
+        Request.cancelAll(this);
     }
 
     changedFile(event) {
@@ -93,33 +98,36 @@ export default class FileInput extends Mixins(NavigationMixin) {
         if (file.size > 20 * 1024 * 1024) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: 'file_too_large',
-                message: 'De bestandsgrootte is te groot. Het bestand mag maximaal 20MB groot zijn.'
-            }))
+                message: 'De bestandsgrootte is te groot. Het bestand mag maximaal 20MB groot zijn.',
+            }));
             return;
         }
 
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append('file', file);
 
         this.uploading = true;
         this.errorBox = null;
 
         this.$context.authenticatedServer
             .request({
-                method: "POST",
-                path: "/upload-file",
+                method: 'POST',
+                path: '/upload-file',
                 body: formData,
                 decoder: File,
-                timeout: 5*60*1000,
+                timeout: 5 * 60 * 1000,
                 shouldRetry: false,
-                owner: this
+                owner: this,
+                query: {
+                    private: this.isPrivate ? true : undefined,
+                },
             })
-            .then(response => {
-                this.$emit('update:modelValue', response.data)
+            .then((response) => {
+                this.$emit('update:modelValue', response.data);
             })
-            .catch(e => {
+            .catch((e) => {
                 console.error(e);
-                this.errorBox = new ErrorBox(e)
+                this.errorBox = new ErrorBox(e);
             })
             .finally(() => {
                 this.uploading = false;
@@ -159,7 +167,6 @@ export default class FileInput extends Mixins(NavigationMixin) {
         justify-content: center;
     }
 
-
     &:hover {
         border-color: $color-primary-gray-light;
         color: $color-primary;
@@ -191,7 +198,7 @@ export default class FileInput extends Mixins(NavigationMixin) {
         transition: opacity 0.2s;
         margin-left: auto;
         color: $color-error;
-       
+
         &:hover {
             opacity: 1;
         }

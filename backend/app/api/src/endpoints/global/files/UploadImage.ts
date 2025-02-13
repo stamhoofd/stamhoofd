@@ -1,4 +1,4 @@
-import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, Decoder, field, ObjectData } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Image, RateLimiter } from '@stamhoofd/models';
@@ -9,7 +9,10 @@ import { promises as fs } from 'fs';
 import { Context } from '../../../helpers/Context';
 
 type Params = Record<string, never>;
-type Query = Record<string, never>;
+class Query extends AutoEncoder {
+    @field({ decoder: BooleanDecoder, optional: true, field: 'private' })
+    isPrivate: boolean = false;
+}
 type Body = undefined;
 type ResponseBody = ImageStruct;
 
@@ -41,6 +44,8 @@ export const limiter = new RateLimiter({
 });
 
 export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
+    queryDecoder = Query as Decoder<Query>;
+
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'POST') {
             return [false];
@@ -114,6 +119,7 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
                     }));
                     return;
                 }
+
                 try {
                     const resolutions = new ObjectData(JSON.parse(fields.resolutions[0]), { version: request.request.getVersion() }).array(ResolutionRequest as Decoder<ResolutionRequest>);
                     resolve([files.file[0], resolutions]);
@@ -125,7 +131,7 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
         });
 
         const fileContent = await fs.readFile(file.filepath);
-        const image = await Image.create(fileContent, file.mimetype ?? undefined, resolutions);
+        const image = await Image.create(fileContent, file.mimetype ?? undefined, resolutions, request.query.isPrivate);
         return new Response(ImageStruct.create(image));
     }
 }

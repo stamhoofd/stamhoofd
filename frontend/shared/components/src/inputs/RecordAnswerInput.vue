@@ -53,7 +53,8 @@
         <STInputBox v-else-if="answer.settings.type === RecordType.Price" :title="label" error-fields="input" :error-box="errors.errorBox">
             <PriceInput v-model="integerValue" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
         </STInputBox>
-        <ImageInput v-else-if="answer.settings.type === RecordType.Image" v-model="imageValue" :title="label" :required="required" :validator="errors.validator" :resolutions="record.resolutions" />
+        <ImageInput v-else-if="answer.settings.type === RecordType.Image" v-model="imageValue" :title="label" :required="required" :validator="errors.validator" :resolutions="record.resolutions" :is-private="true" />
+        <FileInput v-else-if="answer.settings.type === RecordType.File" v-model="fileValue" :accept="accept" :title="label" :required="required" :validator="errors.validator" :is-private="true" />
         <STInputBox v-else-if="answer.settings.type === RecordType.Integer" :title="label" error-fields="input" :error-box="errors.errorBox">
             <NumberInput v-model="integerValue" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
         </STInputBox>
@@ -81,7 +82,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Address, Image, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCheckboxAnswer, RecordChoice, RecordChooseOneAnswer, RecordDateAnswer, RecordImageAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
+import { Address, File, FileType, Image, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCheckboxAnswer, RecordChoice, RecordChooseOneAnswer, RecordDateAnswer, RecordFileAnswer, RecordImageAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { computed, nextTick, onMounted } from 'vue';
@@ -102,6 +103,7 @@ import PhoneInput from './PhoneInput.vue';
 import PriceInput from './PriceInput.vue';
 import Radio from './Radio.vue';
 import STInputBox from './STInputBox.vue';
+import FileInput from './FileInput.vue';
 
 const props = withDefaults(defineProps<{
     record: RecordSettings;
@@ -163,6 +165,7 @@ const casted = {
     RecordDateAnswer: computed(() => answer.value instanceof RecordDateAnswer ? answer.value : null),
     RecordPriceAnswer: computed(() => answer.value instanceof RecordPriceAnswer ? answer.value : null),
     RecordImageAnswer: computed(() => answer.value instanceof RecordImageAnswer ? answer.value : null),
+    RecordFileAnswer: computed(() => answer.value instanceof RecordFileAnswer ? answer.value : null),
     RecordIntegerAnswer: computed(() => answer.value instanceof RecordIntegerAnswer ? answer.value : null),
 };
 
@@ -268,6 +271,33 @@ const imageValue = computed({
             image,
         }));
     },
+});
+
+const fileValue = computed({
+    get: () => {
+        return casted.RecordFileAnswer.value?.file ?? null;
+    },
+    set: (file) => {
+        patchAnswer(RecordFileAnswer.patch({
+            file,
+        }));
+    },
+});
+
+const accept = computed(() => {
+    if (props.record.type === RecordType.File) {
+        switch (props.record.fileType) {
+            case FileType.PDF:
+                return 'application/pdf';
+            case FileType.Excel:
+                return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel';
+            case FileType.Word:
+                return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword';
+            default:
+                return '';
+        }
+    }
+    return '';
 });
 
 function getChoiceSelected(choice: RecordChoice): boolean {

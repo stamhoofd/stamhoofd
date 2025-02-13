@@ -24,7 +24,7 @@ export class Image extends QueryableModel {
     @column({ type: 'datetime' })
     createdAt: Date = new Date();
 
-    static async create(fileContent: string | Buffer, type: string | undefined, resolutions: ResolutionRequest[]): Promise<Image> {
+    static async create(fileContent: string | Buffer, type: string | undefined, resolutions: ResolutionRequest[], isPrivateFile: boolean = false): Promise<Image> {
         if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
             throw new SimpleError({
                 code: 'not_available',
@@ -105,7 +105,7 @@ export class Image extends QueryableModel {
                 Key: key,
                 Body: f.data,
                 ContentType: !supportsTransparency ? 'image/jpeg' : 'image/png',
-                ACL: 'public-read',
+                ACL: isPrivateFile ? 'private' : 'public-read',
             };
 
             uploadPromises.push(s3.putObject(params).promise());
@@ -115,6 +115,7 @@ export class Image extends QueryableModel {
                 server: 'https://' + STAMHOOFD.SPACES_BUCKET + '.' + STAMHOOFD.SPACES_ENDPOINT,
                 path: key,
                 size: f.info.size,
+                private: isPrivateFile,
             });
 
             const _image = new Resolution({
@@ -142,6 +143,7 @@ export class Image extends QueryableModel {
             server: 'https://' + STAMHOOFD.SPACES_BUCKET + '.' + STAMHOOFD.SPACES_ENDPOINT,
             path: key,
             size: fileContent.length,
+            // Don't set private here, as we don't allow to download this file
         });
 
         uploadPromises.push(s3.putObject(params).promise());

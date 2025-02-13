@@ -1,11 +1,11 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, PatchMap, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
 import { v4 as uuidv4 } from 'uuid';
 
 import { PropertyFilter } from '../../filters/PropertyFilter.js';
 import { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
 import { getPermissionLevelNumber, PermissionLevel } from '../../PermissionLevel.js';
-import { ObjectWithRecords } from '../ObjectWithRecords.js';
+import { ObjectWithRecords, PatchableObjectWithRecords, PatchAnswers } from '../ObjectWithRecords.js';
 import { RecordFilterOptions, RecordSettings } from './RecordSettings.js';
 
 export interface Filterable {
@@ -299,6 +299,22 @@ export class RecordCategory extends AutoEncoder {
             }
         }
         errors.throwIfNotEmpty();
+    }
+
+    static removeOldAnswers<T extends PatchableObjectWithRecords>(categories: RecordCategory[], filterValue: T, filterOptions?: RecordFilterOptions): T {
+        const answers = filterValue.getRecordAnswers();
+        const filteredCategories = RecordCategory.filterCategories(categories, filterValue, filterOptions);
+        const records = filteredCategories.flatMap(c => c.getAllFilteredRecords(filterValue, filterOptions));
+        const patch: PatchAnswers = new PatchMap();
+
+        // Remove all answers not in the list
+        for (const [id, _] of answers) {
+            if (!records.find(r => r.id === id)) {
+                patch.set(id, null);
+            }
+        }
+
+        return filterValue.patchRecordAnswers(patch);
     }
 
     duplicate() {
