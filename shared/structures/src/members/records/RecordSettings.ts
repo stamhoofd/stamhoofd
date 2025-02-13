@@ -261,7 +261,7 @@ export class RecordSettings extends BaseRecordSettings {
     @field({ decoder: new EnumDecoder(PermissionLevel), version: 356 })
     externalPermissionLevel = PermissionLevel.Write;
 
-    @field({ decoder: PropertyFilter, ...NextVersion, nullable: true, optional: true })
+    @field({ decoder: PropertyFilter, version: 365, nullable: true, optional: true })
     filter: PropertyFilter | null = null;
 
     getDiffValue() {

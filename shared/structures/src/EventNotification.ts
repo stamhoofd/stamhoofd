@@ -17,7 +17,7 @@ export class EventNotification extends AutoEncoder implements PatchableObjectWit
     @field({ decoder: StringDecoder })
     typeId: string;
 
-    @field({ decoder: StringDecoder, ...NextVersion })
+    @field({ decoder: StringDecoder, version: 365 })
     periodId: string = '';
 
     @field({ decoder: BaseOrganization })
@@ -47,7 +47,7 @@ export class EventNotification extends AutoEncoder implements PatchableObjectWit
     @field({ decoder: NamedObject, nullable: true })
     submittedBy: NamedObject | null = null;
 
-    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: DateDecoder, nullable: true, version: 365 })
     submittedAt: Date | null = null;
 
     /**

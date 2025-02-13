@@ -80,6 +80,6 @@ export class EventNotificationType extends AutoEncoder {
     /**
      * Who will receive email notifications apart from submitter and creator.
      */
-    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 365 })
     contactResponsibilityIds: string[] = [];
 }
