@@ -153,8 +153,8 @@ declare global {
         readonly INTERNAL_SECRET_KEY: string
 
         // File signing
-        readonly FILE_SIGNING_PUBLIC_KEY?: jose.JWK
-        readonly FILE_SIGNING_PRIVATE_KEY?: jose.JWK
+        readonly FILE_SIGNING_PUBLIC_KEY: jose.JWK
+        readonly FILE_SIGNING_PRIVATE_KEY: jose.JWK
         readonly FILE_SIGNING_ALG?: string
 
         readonly CRONS_DISABLED?: boolean
@@ -172,7 +172,7 @@ declare global {
         readonly VERSION: string
         readonly NOLT_URL?: string
         readonly MOLLIE_CLIENT_ID: string
-        readonly APP_UPDATE_SERVER_URL: string
+        readonly APP_UPDATE_SERVER_URL?: string
 
         // Switching envs
         readonly APP_UPDATE_PRODUCTION_SERVER_URL?: string
