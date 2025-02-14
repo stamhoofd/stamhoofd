@@ -538,6 +538,109 @@ describe('E2E.Register', () => {
             expect(balance.body[0].pricePaid).toBe(0);
             // #endregion
         });
+
+        test('Should apply reduced price for options if member requires financial support', async () => {
+            // #region arrange
+            const { organization, group, groupPrice, token, member } = await initData();
+            member.details.requiresFinancialSupport = BooleanStatus.create({
+                value: true,
+            });
+
+            await member.save();
+
+            const option1 = GroupOption.create({
+                name: 'option 1',
+                price: ReduceablePrice.create({
+                    price: 5,
+                    reducedPrice: 3,
+                }),
+            });
+
+            const option2 = GroupOption.create({
+                name: 'option 2',
+                price: ReduceablePrice.create({
+                    price: 3,
+                    reducedPrice: 1,
+                }),
+            });
+
+            const optionMenu = GroupOptionMenu.create({
+                name: 'option menu 1',
+                multipleChoice: true,
+                options: [option1, option2],
+            });
+
+            group.settings.optionMenus = [
+                optionMenu,
+            ];
+
+            await group.save();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [
+                                RegisterItemOption.create({
+                                    option: option1,
+                                    amount: 2,
+                                    optionMenu,
+                                }),
+                                RegisterItemOption.create({
+                                    option: option2,
+                                    amount: 5,
+                                    optionMenu,
+                                }),
+                            ],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 32,
+                customer: null,
+            });
+            // #endregion
+
+            // #region act and assert
+            const balanceBefore = await getBalance(member.id, organization, token);
+            expect(balanceBefore).toBeDefined();
+            expect(balanceBefore.body.length).toBe(0);
+
+            await register(body, organization, token);
+
+            const balance = await getBalance(member.id, organization, token);
+            expect(balance).toBeDefined();
+            expect(balance.body.length).toBe(3);
+            expect.arrayContaining([
+                expect.objectContaining({
+                    price: 6,
+                    pricePaid: 0,
+                    status: BalanceItemStatus.Due,
+                }),
+                expect.objectContaining({
+                    price: 5,
+                    pricePaid: 0,
+                    status: BalanceItemStatus.Due,
+                }),
+                expect.objectContaining({
+                    price: 25,
+                    pricePaid: 0,
+                    status: BalanceItemStatus.Due,
+                }),
+            ]);
+            // #endregion
+        });
     });
 
     describe('Delete registrations', () => {
@@ -638,8 +741,148 @@ describe('E2E.Register', () => {
             // #endregion
         });
 
-        test.skip('Should cancel all related balance item for deleted registration', async () => {
-            throw new Error('Not implemented');
+        test('Should cancel all related balance item for deleted registration', async () => {
+            // #region arrange
+            const { member, group: group1, groupPrice: groupPrice1, organization, token } = await initData();
+
+            const option1 = GroupOption.create({
+                name: 'option 1',
+                price: ReduceablePrice.create({
+                    price: 5,
+                    reducedPrice: 3,
+                }),
+            });
+
+            const option2 = GroupOption.create({
+                name: 'option 2',
+                price: ReduceablePrice.create({
+                    price: 3,
+                    reducedPrice: 1,
+                }),
+            });
+
+            const optionMenu = GroupOptionMenu.create({
+                name: 'option menu 1',
+                multipleChoice: true,
+                options: [option1, option2],
+            });
+
+            group1.settings.optionMenus = [
+                optionMenu,
+            ];
+
+            await group1.save();
+
+            const body1 = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [
+                                RegisterItemOption.create({
+                                    option: option1,
+                                    amount: 2,
+                                    optionMenu,
+                                }),
+                                RegisterItemOption.create({
+                                    option: option2,
+                                    amount: 5,
+                                    optionMenu,
+                                }),
+                            ],
+                            groupPrice: groupPrice1,
+                            organizationId: organization.id,
+                            groupId: group1.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 50,
+                customer: null,
+                asOrganizationId: organization.id,
+            });
+
+            const response1 = await register(body1, organization, token);
+            expect(response1.body).toBeDefined();
+            expect(response1.body.registrations.length).toBe(1);
+
+            const registrationToDelete = response1.body.registrations[0];
+
+            const group = await new GroupFactory({
+                organization,
+                price: 30,
+                stock: 5,
+            }).create();
+
+            const groupPrice = group.settings.prices[0];
+
+            const body2 = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [registrationToDelete.id],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 30,
+                customer: null,
+                asOrganizationId: organization.id,
+            });
+            // #endregion
+
+            // #region act and assert
+            const balanceBefore = await getBalance(member.id, organization, token);
+            expect(balanceBefore).toBeDefined();
+            expect(balanceBefore.body.length).toBe(3);
+
+            await register(body2, organization, token);
+
+            const balance = await getBalance(member.id, organization, token);
+            expect(balance).toBeDefined();
+            expect(balance.body.length).toBe(4);
+
+            expect.arrayContaining([
+                expect.objectContaining({
+                    price: 10,
+                    pricePaid: 0,
+                    status: BalanceItemStatus.Canceled,
+                }),
+                expect.objectContaining({
+                    price: 15,
+                    pricePaid: 0,
+                    status: BalanceItemStatus.Canceled,
+                }),
+                expect.objectContaining({
+                    price: 25,
+                    pricePaid: 0,
+                    status: BalanceItemStatus.Canceled,
+                }),
+                expect.objectContaining({
+                    price: 30,
+                    pricePaid: 0,
+                    status: BalanceItemStatus.Due,
+                }),
+            ]);
+            // #endregion
         });
 
         test('Should apply cancelation fee', async () => {
