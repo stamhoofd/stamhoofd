@@ -1,9 +1,50 @@
+import bwipjs from '@bwip-js/node';
 import { ObjectData } from '@simonbackx/simple-encoding';
 import { Image } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import Handlebars from 'handlebars';
 import { Interval } from 'luxon';
-import bwipjs from '@bwip-js/node';
+
+/**
+ * Support for async helpers
+ */
+class AsyncResolver {
+    cacheIds: Map<string, Promise<string>> = new Map();
+
+    static ID_PREFIX = '__aSyNcId__';
+    static ID_ESCAPED_STRING = '<_'; // Detect whether the is is escaped or not
+    counter = 0;
+
+    static registerAsyncHelper(handlebars: typeof Handlebars, name: string, handler: (...args) => Promise<string>) {
+        handlebars.registerHelper(name, function (...args) {
+            const resolver = this.asyncResolver;
+            if (!resolver) {
+                throw new Error('Async helper called without resolver');
+            }
+
+            // Return an id instead
+            resolver.counter += 1;
+            const id = AsyncResolver.ID_PREFIX + AsyncResolver.ID_ESCAPED_STRING + Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + '_' + resolver.counter;
+            resolver.cacheIds.set(id, handler(...args));
+
+            return id;
+        });
+    }
+
+    async replace(compiledTemplate: string) {
+        for (const [id, promise] of this.cacheIds.entries()) {
+            const value = await promise;
+
+            // Replace unescaped ids with the unescaped value
+            compiledTemplate = compiledTemplate.replace(id, value);
+
+            // Replace escaped ids with the escaped value
+            compiledTemplate = compiledTemplate.replace(Handlebars.Utils.escapeExpression(id), Handlebars.Utils.escapeExpression(value));
+        }
+
+        return compiledTemplate;
+    }
+}
 
 Handlebars.registerHelper('eq', (a, b) => a == b);
 Handlebars.registerHelper('neq', (a, b) => a !== b);
@@ -70,11 +111,12 @@ Handlebars.registerHelper('days', (a, b) => {
     }
     return days + 1;
 });
+
 Handlebars.registerHelper('div', (a, b, options) => {
     if (typeof a !== 'number' || typeof b !== 'number') {
         return 0;
     }
-    if (b == 0) {
+    if (b === 0) {
         return 0;
     }
     if (options.hash.round) {
@@ -95,7 +137,7 @@ function getNumberValue(obj: any, keys: string[]): number {
     if (typeof obj !== 'object' || obj === null) {
         return 0;
     }
-    if (keys.length == 0) {
+    if (keys.length === 0) {
         return 0;
     }
     const key = keys[0];
@@ -120,7 +162,7 @@ Handlebars.registerHelper('mul', (a, b) => {
     return a * b;
 });
 
-Handlebars.registerHelper('src', (a, options) => {
+AsyncResolver.registerAsyncHelper(Handlebars, 'src', async (a, options) => {
     const width = options.hash.width || undefined;
     const height = options.hash.height || undefined;
 
@@ -137,6 +179,13 @@ Handlebars.registerHelper('src', (a, options) => {
     try {
         const image = Image.decode(new ObjectData(a, { version: 0 }));
         const resolution = image.getResolutionForSize(width as number | undefined, height as number | undefined);
+
+        // Private files cannot be used unless we have a signed url
+        const fileWithSignedUrl = await resolution.file.withSignedUrl();
+        if (fileWithSignedUrl) {
+            return fileWithSignedUrl.getPublicPath();
+        }
+
         return resolution.file.getPublicPath();
     }
     catch (e) {
@@ -150,12 +199,12 @@ Handlebars.registerHelper('src-width', (a, options) => {
 
     if (width !== undefined && typeof width !== 'number') {
         console.error('src-width helper: width is not a number');
-        return '';
+        return 0;
     }
 
     if (height !== undefined && typeof height !== 'number') {
         console.error('src-width helper: height is not a number');
-        return '';
+        return 0;
     }
 
     try {
@@ -174,12 +223,12 @@ Handlebars.registerHelper('src-height', (a, options) => {
 
     if (width !== undefined && typeof width !== 'number') {
         console.error('src-height helper: width is not a number');
-        return '';
+        return 0;
     }
 
     if (height !== undefined && typeof height !== 'number') {
         console.error('src-height helper: height is not a number');
-        return '';
+        return 0;
     }
 
     try {
@@ -210,9 +259,12 @@ Handlebars.registerHelper('datamatrix', (a) => {
 // Rander handlebars template
 export async function render(htmlTemplate: string, context: any): Promise<string | null> {
     try {
+        const resolver = new AsyncResolver();
+
         const template = Handlebars.compile(htmlTemplate);
-        const renderedHtml = template(context);
-        return renderedHtml;
+        const renderedHtml = template({ ...context, asyncResolver: resolver });
+        const html = await resolver.replace(renderedHtml);
+        return html;
     }
     catch (e) {
         console.error('Failed to render document html', e);

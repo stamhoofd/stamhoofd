@@ -34,6 +34,7 @@ export class File implements Encodeable {
      */
     static verifyFile: ((file: File) => Promise<boolean>) | null = null;
     static signFile: ((file: File) => Promise<void>) | null = null;
+    static getWithSignedUrl: ((file: File) => Promise<File | null>) | null = null;
 
     constructor(data: { id: string; server: string; path: string; size: number; name?: string | null; isPrivate?: boolean; signedUrl?: string | null; signature?: string | null }) {
         this.id = data.id;
@@ -77,6 +78,23 @@ export class File implements Encodeable {
         }
 
         return await File.verifyFile(this);
+    }
+
+    async withSignedUrl() {
+        if (!this.signature || !this.isPrivate) {
+            return null;
+        }
+
+        if (!File.getWithSignedUrl) {
+            return null;
+        }
+
+        if (!await this.verify()) {
+            // Never generate a signed url for an untrusted file
+            return null;
+        }
+
+        return await File.getWithSignedUrl(this);
     }
 
     static decode(data: Data): File {
