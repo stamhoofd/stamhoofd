@@ -7,7 +7,7 @@ import { organizationItemInMemoryFilterCompilers } from './filters/inMemoryFilte
 import { StamhoofdFilter } from './filters/StamhoofdFilter.js';
 import { Group } from './Group.js';
 import { GroupCategoryTree } from './GroupCategory.js';
-import { ObjectWithRecords } from './members/ObjectWithRecords.js';
+import { ObjectWithRecords, PatchAnswers } from './members/ObjectWithRecords.js';
 import { RecordAnswer } from './members/records/RecordAnswer.js';
 import { RecordSettings } from './members/records/RecordSettings.js';
 import { OrganizationMetaData } from './OrganizationMetaData.js';
@@ -214,6 +214,14 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
 
     getRecordAnswers(): Map<string, RecordAnswer> {
         return this.privateMeta?.recordAnswers ?? new Map();
+    }
+
+    patchRecordAnswers(patch: PatchAnswers): this {
+        return (this as Organization).patch({
+            privateMeta: OrganizationPrivateMetaData.patch({
+                recordAnswers: patch,
+            }),
+        }) as this;
     }
 
     doesMatchFilter(filter: StamhoofdFilter): boolean {

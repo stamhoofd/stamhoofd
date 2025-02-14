@@ -19,7 +19,6 @@ const props = withDefaults(
     defineProps<{
         category: RecordCategory;
         value: T;
-        patchHandler: (patch: PatchAnswers) => T;
         saveHandler: (patch: PatchAnswers, navigate: NavigationActions) => Promise<void> | void;
         saveText?: string;
         forceMarkReviewed?: boolean | null;
@@ -31,14 +30,11 @@ const props = withDefaults(
 
 const patch = ref(new PatchMap() as PatchAnswers);
 const patchedValue = computed(() => {
-    const patched = props.patchHandler(patch.value);
-
-    console.log('patchedValue', patched);
+    const patched = props.value.patchRecordAnswers(patch.value);
     return patched;
 });
 
 function addPatch(p: PatchAnswers) {
-    console.log('addPatch', p);
     patch.value = patchObject(patch.value, p);
 }
 

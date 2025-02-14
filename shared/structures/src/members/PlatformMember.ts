@@ -18,7 +18,7 @@ import { EmergencyContact } from './EmergencyContact.js';
 import { MemberDetails, MemberProperty } from './MemberDetails.js';
 import { MembersBlob, MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob.js';
 import { NationalRegisterNumberOptOut } from './NationalRegisterNumberOptOut.js';
-import { ObjectWithRecords } from './ObjectWithRecords.js';
+import { ObjectWithRecords, PatchAnswers } from './ObjectWithRecords.js';
 import { OrganizationRecordsConfiguration } from './OrganizationRecordsConfiguration.js';
 import { Parent } from './Parent.js';
 import { RegisterCheckout } from './checkout/RegisterCheckout.js';
@@ -1009,6 +1009,16 @@ export class PlatformMember implements ObjectWithRecords {
 
     getRecordAnswers(): Map<string, RecordAnswer> {
         return this.patchedMember.details.recordAnswers;
+    }
+
+    patchRecordAnswers(patch: PatchAnswers): this {
+        const cloned = this.clone();
+        cloned.addDetailsPatch(
+            MemberDetails.patch({
+                recordAnswers: patch,
+            }),
+        );
+        return cloned as this;
     }
 
     getResponsibilities(organization?: Organization | null) {

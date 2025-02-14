@@ -347,13 +347,6 @@ function gotoRecordCategory(index: number) {
         category,
         value: props.template,
         forceMarkReviewed: true,
-        patchHandler: (fieldAnswers: PatchAnswers) => {
-            return props.template.patch({
-                settings: DocumentSettings.patch({
-                    fieldAnswers,
-                }),
-            });
-        },
 
         saveHandler: async (fieldAnswers: PatchAnswers, component: NavigationActions) => {
             await patchTemplate(DocumentTemplatePrivate.patch({

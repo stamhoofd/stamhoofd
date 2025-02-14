@@ -5,12 +5,12 @@ import { EventNotificationStatus } from './EventNotificationStatus.js';
 import { compileToInMemoryFilter } from './filters/InMemoryFilter.js';
 import { eventNotificationsInMemoryFilterCompilers } from './filters/inMemoryFilterDefinitions.js';
 import { StamhoofdFilter } from './filters/StamhoofdFilter.js';
-import { PatchableObjectWithRecords, PatchAnswers } from './members/ObjectWithRecords.js';
+import { ObjectWithRecords, PatchAnswers } from './members/ObjectWithRecords.js';
 import { RecordAnswer, RecordAnswerDecoder } from './members/records/RecordAnswer.js';
 import { RecordSettings } from './members/records/RecordSettings.js';
 import { BaseOrganization } from './Organization.js';
 
-export class EventNotification extends AutoEncoder implements PatchableObjectWithRecords {
+export class EventNotification extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: StringDecoder, optional: true, defaultValue: () => uuidv4() })
     id: string;
 
@@ -70,10 +70,10 @@ export class EventNotification extends AutoEncoder implements PatchableObjectWit
         return this.recordAnswers;
     }
 
-    patchRecordAnswers<T extends EventNotification>(this: T, patch: PatchAnswers): T {
+    patchRecordAnswers(patch: PatchAnswers): this {
         return (this as EventNotification).patch({
             recordAnswers: patch,
-        }) as T;
+        }) as this;
     }
 
     doesMatchFilter(filter: StamhoofdFilter): boolean {

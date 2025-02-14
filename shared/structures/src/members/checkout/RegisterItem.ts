@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, MapDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,6 +12,7 @@ import { Organization } from '../../Organization.js';
 import { PlatformMembershipTypeBehaviour } from '../../Platform.js';
 import { PriceBreakdown } from '../../PriceBreakdown.js';
 import { StockReservation } from '../../StockReservation.js';
+import { ObjectWithRecords, PatchAnswers } from '../ObjectWithRecords.js';
 import { PlatformMember } from '../PlatformMember.js';
 import { RecordAnswer, RecordAnswerDecoder } from '../records/RecordAnswer.js';
 import { RecordCategory } from '../records/RecordCategory.js';
@@ -66,7 +67,7 @@ export class IDRegisterItem extends AutoEncoder {
     }
 }
 
-export class RegisterItem {
+export class RegisterItem implements ObjectWithRecords {
     id: string;
 
     member: PlatformMember;
@@ -1244,6 +1245,12 @@ export class RegisterItem {
 
     getRecordAnswers(): Map<string, RecordAnswer> {
         return this.recordAnswers;
+    }
+
+    patchRecordAnswers(patch: PatchAnswers): this {
+        const cloned = this.clone();
+        cloned.recordAnswers = patchObject(cloned.recordAnswers, patch);
+        return cloned as this;
     }
 
     isSameRegistration(item: RegisterItem) {

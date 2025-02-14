@@ -190,9 +190,7 @@ const editorSettings = computed(() => {
             }),
         }),
         patchExampleValue(value: EventNotification, patch: PatchAnswers) {
-            return value.patch(EventNotification.patch({
-                recordAnswers: patch,
-            }));
+            return value.patchRecordAnswers(patch);
         },
     });
 });

@@ -198,6 +198,12 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         return this.recordAnswers;
     }
 
+    patchRecordAnswers(patch: PatchAnswers): this {
+        return (this as Checkout).patch({
+            recordAnswers: patch,
+        }) as this;
+    }
+
     validateAnswers(webshop: Webshop) {
         const newAnswers: WebshopFieldAnswer[] = [];
         for (const field of webshop.meta.customFields) {

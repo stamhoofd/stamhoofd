@@ -127,7 +127,7 @@ export class DocumentTemplateDefinition extends AutoEncoder {
     }
 }
 
-export class DocumentTemplateGroup extends AutoEncoder {
+export class DocumentTemplateGroup extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: StringDecoder, field: 'groupId' })
     @field({ decoder: NamedObject, version: 344, upgrade: (old: any) => NamedObject.create({ id: old, name: 'Onbekend' }) })
     group: NamedObject;
@@ -157,6 +157,24 @@ export class DocumentTemplateGroup extends AutoEncoder {
 
     getDiffName() {
         return this.group.name;
+    }
+
+    isRecordEnabled(_record: RecordSettings): boolean {
+        return true;
+    }
+
+    doesMatchFilter(filter: StamhoofdFilter): boolean {
+        return true;
+    }
+
+    getRecordAnswers(): Map<string, RecordAnswer> {
+        return this.fieldAnswers;
+    }
+
+    patchRecordAnswers(patch: PatchAnswers): this {
+        return (this as DocumentTemplateGroup).patch({
+            fieldAnswers: patch,
+        }) as this;
     }
 }
 
@@ -200,13 +218,19 @@ export class DocumentTemplatePrivate extends AutoEncoder implements ObjectWithRe
     updatedAt = new Date();
 
     isRecordEnabled(_record: RecordSettings): boolean {
-        // todo: is this correct?
         return true;
     }
 
     getRecordAnswers(): Map<string, RecordAnswer> {
-        // todo: is this correct?
         return this.settings.fieldAnswers;
+    }
+
+    patchRecordAnswers(patch: PatchAnswers): this {
+        return (this as DocumentTemplatePrivate).patch({
+            settings: DocumentSettings.patch({
+                fieldAnswers: patch,
+            }),
+        }) as this;
     }
 
     doesMatchFilter(filter: StamhoofdFilter): boolean {
@@ -229,10 +253,6 @@ export class DocumentTemplatePrivate extends AutoEncoder implements ObjectWithRe
             console.error('Error while compiling filter', e, filter);
         }
         return false;
-    }
-
-    patchRecordAnswers(patch: PatchAnswers): this {
-        throw new Error('Method not implemented.');
     }
 }
 
@@ -306,13 +326,19 @@ export class Document extends AutoEncoder implements ObjectWithRecords {
     templateId: string;
 
     isRecordEnabled(_record: RecordSettings): boolean {
-        // todo: is this correct?
         return true;
     }
 
     getRecordAnswers(): Map<string, RecordAnswer> {
-        // todo: is this correct?
         return this.data.fieldAnswers;
+    }
+
+    patchRecordAnswers(patch: PatchAnswers): this {
+        return (this as Document).patch({
+            data: DocumentData.patch({
+                fieldAnswers: patch,
+            }),
+        }) as this;
     }
 
     doesMatchFilter(filter: StamhoofdFilter): boolean {
@@ -324,9 +350,5 @@ export class Document extends AutoEncoder implements ObjectWithRecords {
             console.error('Error while compiling filter', e, filter);
         }
         return false;
-    }
-
-    patchRecordAnswers(patch: PatchAnswers): this {
-        throw new Error('Method not implemented.');
     }
 }

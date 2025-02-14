@@ -126,7 +126,7 @@ const settings = new RecordEditorSettings({
     }),
     patchExampleValue(value: PlatformMember, patch) {
         const cloned = value.clone();
-        value.addDetailsPatch(MemberDetails.patch({
+        cloned.addDetailsPatch(MemberDetails.patch({
             recordAnswers: patch,
         }));
         return cloned;
@@ -371,10 +371,7 @@ async function previewCategory(category: RecordCategory) {
             new ComponentWithProperties(FillRecordCategoryView, {
                 category,
                 value: settings.exampleValue,
-                markReviewed: false,
-                patchHandler: (patch: PatchAnswers) => {
-                    return settings.patchExampleValue(settings.exampleValue, patch);
-                },
+                forceMarkReviewed: true,
                 saveHandler: async (_patch: PatchAnswers, navigate: NavigationActions) => {
                     await navigate.pop({ force: true });
                 },

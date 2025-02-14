@@ -215,15 +215,6 @@ function patchAnswers(patch: PatchAnswers | Map<string, RecordAnswer>) {
     });
 }
 
-const patchHandler = (patch: PatchAnswers): DocumentTemplatePrivate => {
-    addPatch({
-        settings: DocumentSettings.patch({
-            fieldAnswers: patch as any,
-        }),
-    });
-    return patchedDocument.value;
-};
-
 const isComplete = computed(() => !!patchedDocument.value.html && (!!patchedDocument.value.privateSettings.templateDefinition.xmlExport || !patchedDocument.value.privateSettings.templateDefinition.xmlExportDescription));
 
 const editingType = computed({
@@ -720,11 +711,6 @@ async function gotoGroupRecordCategory(group: DocumentTemplateGroup, actions: Na
                     });
                     gotoGroupRecordCategory(g, actions, index + 1).catch(console.error);
                 },
-                patchHandler: (fieldAnswers: PatchAnswers) => {
-                    return group.patch({
-                        fieldAnswers,
-                    });
-                },
             }),
         ],
     });
@@ -780,11 +766,6 @@ function gotoRecordCategory(group: DocumentTemplateGroup, index: number) {
         category,
         forceMarkReviewed: true,
         value: group,
-        patchHandler: (fieldAnswers: PatchAnswers) => {
-            return group.patch({
-                fieldAnswers,
-            });
-        },
         saveHandler: (fieldAnswers: PatchAnswers, actions: NavigationActions) => {
             const g = group.patch({
                 fieldAnswers,

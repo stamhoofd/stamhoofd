@@ -8,7 +8,7 @@ import { Group } from '../Group.js';
 import { GroupPrice } from '../GroupSettings.js';
 import { StockReservation } from '../StockReservation.js';
 import { RegisterItemOption } from './checkout/RegisterItem.js';
-import { ObjectWithRecords } from './ObjectWithRecords.js';
+import { ObjectWithRecords, PatchAnswers } from './ObjectWithRecords.js';
 import { RecordAnswer, RecordAnswerDecoder } from './records/RecordAnswer.js';
 import { RecordSettings } from './records/RecordSettings.js';
 
@@ -149,5 +149,11 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
 
     getRecordAnswers(): Map<string, RecordAnswer> {
         return this.recordAnswers;
+    }
+
+    patchRecordAnswers(patch: PatchAnswers): this {
+        return (this as Registration).patch({
+            recordAnswers: patch,
+        }) as this;
     }
 }

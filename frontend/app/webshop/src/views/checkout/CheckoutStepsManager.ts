@@ -178,11 +178,6 @@ export class CheckoutStepsManager {
                         url,
                         value: checkout,
                         forceMarkReviewed: true,
-                        patchHandler: (patch: PatchAnswers) => {
-                            const clone = checkout.clone();
-                            clone.recordAnswers = patchObject(clone.recordAnswers, patch);
-                            return clone;
-                        },
                         saveHandler: async (patch: PatchAnswers, navigate: NavigationActions) => {
                             checkout.recordAnswers = patchObject(checkout.recordAnswers, patch);
                             this.$checkoutManager.saveCheckout();

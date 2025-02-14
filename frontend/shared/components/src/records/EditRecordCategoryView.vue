@@ -598,9 +598,6 @@ async function showExample() {
                 category: patchedCategory.value,
                 value: reactiveValue,
                 saveText: 'Opslaan',
-                patchHandler: (patch: PatchAnswers) => {
-                    return props.settings.patchExampleValue(reactiveValue, patch);
-                },
                 saveHandler: async (_patch: PatchAnswers, navigationActions: NavigationActions) => {
                     await navigationActions.pop({ force: true });
                 },

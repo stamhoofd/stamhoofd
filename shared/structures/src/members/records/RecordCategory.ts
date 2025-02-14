@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { PropertyFilter } from '../../filters/PropertyFilter.js';
 import { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
 import { getPermissionLevelNumber, PermissionLevel } from '../../PermissionLevel.js';
-import { ObjectWithRecords, PatchableObjectWithRecords, PatchAnswers } from '../ObjectWithRecords.js';
+import { ObjectWithRecords, PatchAnswers } from '../ObjectWithRecords.js';
 import { RecordFilterOptions, RecordSettings } from './RecordSettings.js';
 
 export interface Filterable {
@@ -301,7 +301,7 @@ export class RecordCategory extends AutoEncoder {
         errors.throwIfNotEmpty();
     }
 
-    static removeOldAnswers<T extends PatchableObjectWithRecords>(categories: RecordCategory[], filterValue: T, filterOptions?: RecordFilterOptions): T {
+    static removeOldAnswers<T extends ObjectWithRecords>(categories: RecordCategory[], filterValue: T, filterOptions?: RecordFilterOptions): T {
         const answers = filterValue.getRecordAnswers();
         const filteredCategories = RecordCategory.filterCategories(categories, filterValue, filterOptions);
         const records = filteredCategories.flatMap(c => c.getAllFilteredRecords(filterValue, filterOptions));
