@@ -1165,6 +1165,15 @@ export class RegisterItem implements ObjectWithRecords {
                             meta: { recoverable: true },
                         });
                     }
+
+                    const maximumSelection = option.option.getMaximumSelection(this);
+                    if (maximumSelection !== null && maximumSelection < option.amount) {
+                        throw new SimpleError({
+                            code: 'option_max',
+                            message: 'Option maximum exceeded',
+                            human: `Het maximum voor de keuzemogelijkheid ${option.option.name} is overschreden`,
+                        });
+                    }
                 }
             }
 
