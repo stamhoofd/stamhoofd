@@ -7,6 +7,8 @@ import { Interval } from 'luxon';
 
 /**
  * Support for async helpers
+ * Uses the same method as express-hbs
+ * https://github.com/TryGhost/express-hbs
  */
 class AsyncResolver {
     cacheIds: Map<string, Promise<string>> = new Map();
