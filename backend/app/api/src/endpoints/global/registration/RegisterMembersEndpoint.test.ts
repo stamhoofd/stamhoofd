@@ -1,7 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { Email } from '@stamhoofd/email';
 import { BalanceItemFactory, Group, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { BalanceItemCartItem, BalanceItemType, Company, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PayconiqAccount, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, STPackageStatus, STPackageType, UserPermissions, Version } from '@stamhoofd/structures';
+import { BalanceItemCartItem, BalanceItemType, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PayconiqAccount, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, ReduceablePrice, RegisterItemOption, STPackageStatus, STPackageType, UserPermissions, Version } from '@stamhoofd/structures';
 import nock from 'nock';
 import { v4 as uuidv4 } from 'uuid';
 import { testServer } from '../../../../tests/helpers/TestServer';
@@ -1010,6 +1010,334 @@ describe('Endpoint.RegisterMembers', () => {
             finally {
                 jest.useFakeTimers().resetAllMocks();
             }
+        });
+
+        test('Should update group stock reservations', async () => {
+            // #region arrange
+            const { organization, group, groupPrice, token, member } = await initData();
+            groupPrice.stock = 5;
+            await group.save();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25,
+                asOrganizationId: organization.id,
+                customer: null,
+            });
+            // #endregion
+
+            // #region act and assert
+            expect(group?.stockReservations.length).toBe(0);
+
+            await post(body, organization, token);
+
+            const updatedGroup = await Group.getByID(group.id);
+            expect(updatedGroup?.stockReservations.length).toBe(1);
+            // #endregion
+        });
+
+        test('Should fail if group price stock sold out', async () => {
+            // #region arrange
+            const { organization, group, groupPrice, token, member, otherMembers } = await initData({
+                permissionLevel: PermissionLevel.Read, otherMemberAmount: 3 });
+            groupPrice.stock = 2;
+            await group.save();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                        ...otherMembers.map(m => IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: m.id,
+                        })),
+                    ],
+                    balanceItems: [],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 75,
+                customer: null,
+            });
+            // #endregion
+
+            // #region act and assert
+            expect(group?.stockReservations.length).toBe(0);
+
+            await expect(async () => await post(body, organization, token))
+                .rejects
+                .toThrow(new RegExp('Maximum reached'));
+            // #endregion
+        });
+
+        test('Should fail if option stock sold out', async () => {
+            // #region arrange
+            const { organization, group, groupPrice, token, member } = await initData();
+
+            const option1 = GroupOption.create({
+                name: 'option 1',
+                stock: 4,
+                price: ReduceablePrice.create({
+                    price: 5,
+                    reducedPrice: 3,
+                }),
+            });
+
+            const option2 = GroupOption.create({
+                name: 'option 2',
+                stock: 4,
+                price: ReduceablePrice.create({
+                    price: 3,
+                    reducedPrice: 1,
+                }),
+            });
+
+            const optionMenu = GroupOptionMenu.create({
+                name: 'option menu 1',
+                multipleChoice: true,
+                options: [option1, option2],
+            });
+
+            group.settings.optionMenus = [
+                optionMenu,
+            ];
+
+            await group.save();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [
+                                RegisterItemOption.create({
+                                    option: option1,
+                                    amount: 2,
+                                    optionMenu,
+                                }),
+                                RegisterItemOption.create({
+                                    option: option2,
+                                    amount: 5,
+                                    optionMenu,
+                                }),
+                            ],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 50,
+                customer: null,
+            });
+            // #endregion
+
+            // #region act and assert
+            await expect(async () => await post(body, organization, token))
+                .rejects
+                .toThrow(new RegExp('Stock empty'));
+            // #endregion
+        });
+
+        test('Should fail if max option exceeded', async () => {
+            // #region arrange
+            const { organization, group, groupPrice, token, member } = await initData();
+
+            const option1 = GroupOption.create({
+                name: 'option 1',
+                stock: 4,
+                maximum: 5,
+                allowAmount: true,
+                price: ReduceablePrice.create({
+                    price: 5,
+                    reducedPrice: 3,
+                }),
+            });
+
+            const option2 = GroupOption.create({
+                name: 'option 2',
+                stock: 5,
+                maximum: 2,
+                allowAmount: true,
+                price: ReduceablePrice.create({
+                    price: 3,
+                    reducedPrice: 1,
+                }),
+            });
+
+            const optionMenu = GroupOptionMenu.create({
+                name: 'option menu 1',
+                multipleChoice: true,
+                options: [option1, option2],
+            });
+
+            group.settings.optionMenus = [
+                optionMenu,
+            ];
+
+            await group.save();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [
+                                RegisterItemOption.create({
+                                    option: option1,
+                                    amount: 2,
+                                    optionMenu,
+                                }),
+                                RegisterItemOption.create({
+                                    option: option2,
+                                    amount: 5,
+                                    optionMenu,
+                                }),
+                            ],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 50,
+                customer: null,
+            });
+            // #endregion
+
+            // #region act and assert
+            await expect(async () => await post(body, organization, token))
+                .rejects
+                .toThrow(new RegExp('Option maximum exceeded'));
+            // #endregion
+        });
+
+        test('Should not fail if max option not exceeded', async () => {
+            // #region arrange
+            const { organization, group, groupPrice, token, member } = await initData();
+
+            const option1 = GroupOption.create({
+                name: 'option 1',
+                stock: 4,
+                maximum: 5,
+                allowAmount: true,
+                price: ReduceablePrice.create({
+                    price: 5,
+                    reducedPrice: 3,
+                }),
+            });
+
+            const option2 = GroupOption.create({
+                name: 'option 2',
+                stock: 5,
+                maximum: 5,
+                allowAmount: true,
+                price: ReduceablePrice.create({
+                    price: 3,
+                    reducedPrice: 1,
+                }),
+            });
+
+            const optionMenu = GroupOptionMenu.create({
+                name: 'option menu 1',
+                multipleChoice: true,
+                options: [option1, option2],
+            });
+
+            group.settings.optionMenus = [
+                optionMenu,
+            ];
+
+            await group.save();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [
+                                RegisterItemOption.create({
+                                    option: option1,
+                                    amount: 2,
+                                    optionMenu,
+                                }),
+                                RegisterItemOption.create({
+                                    option: option2,
+                                    amount: 5,
+                                    optionMenu,
+                                }),
+                            ],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 50,
+                customer: null,
+            });
+            // #endregion
+
+            // #region act and assert
+            const result = await post(body, organization, token);
+            expect(result).toBeDefined();
+            // #endregion
         });
     });
 
