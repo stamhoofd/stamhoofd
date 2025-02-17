@@ -107,7 +107,7 @@
                             </template>
                         </STListItem>
 
-                        <EventNotificationRow v-if="eventOrganization" v-for="type of event.eventNotificationTypes" :key="type.id" class="container" :type="type" :event="event" :organization="eventOrganization" />
+                        <EventNotificationRow v-for="type of event.eventNotificationTypes" v-if="eventOrganization" :key="type.id" class="container" :type="type" :event="event" :organization="eventOrganization" />
                     </STList>
                 </div>
                 <hr>
@@ -131,13 +131,13 @@
                     <h2>Handmatig leden inschrijven</h2>
 
                     <p v-if="organization && event.organizationId === organization.id">
-                        Hier kan je als beheerder leden inschrijven voor een activiteit. Het meest praktische is dat elk lid zichtzelf inschrijft via Ravot, maar dat is misschien niet altijd mogelijk.
+                        {{ $t('Hier kan je als beheerder leden inschrijven voor een activiteit. Het meest praktische is dat elk lid zichtzelf inschrijft via Stamhoofd, maar dat is misschien niet altijd mogelijk.') }}
                     </p>
                     <p v-else-if="!event.group.settings.isFree">
-                        Je kan zelf ook leden inschrijven voor deze activiteit. Jouw groep betaalt dan meteen de kostprijs aan de organisator, waarna Ravot automatisch één of meerdere openstaande bedragen aanmaakt van de ingeschreven leden aan jouw groep (te betalen via het ledenportaal of manueel betaling te registreren).
+                        {{ $t('Je kan zelf ook leden inschrijven voor deze activiteit. Jouw groep betaalt dan meteen de kostprijs aan de organisator, waarna Stamhoofd automatisch één of meerdere openstaande bedragen aanmaakt van de ingeschreven leden aan jouw groep (te betalen via het ledenportaal of manueel betaling te registreren).') }}
                     </p>
                     <p v-else>
-                        Je kan zelf ook leden inschrijven voor deze activiteit.
+                        {{ $t('Je kan zelf ook leden inschrijven voor deze activiteit.') }}
                     </p>
 
                     <p class="style-button-bar">
