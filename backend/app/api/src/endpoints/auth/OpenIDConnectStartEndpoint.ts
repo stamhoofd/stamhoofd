@@ -30,11 +30,6 @@ export class OpenIDConnectStartEndpoint extends Endpoint<Params, Query, Body, Re
         // Check webshop and/or organization
         await Context.setUserOrganizationScope();
         await Context.optionalAuthenticate({ allowWithoutAccount: false });
-        console.log('Full start connect body;', await request.request.body);
-
-        if (Context.user) {
-            console.log('User:', Context.user);
-        }
         const service = await SSOService.fromContext(request.body.provider);
         return await service.validateAndStartAuthCodeFlow(request.body);
     }

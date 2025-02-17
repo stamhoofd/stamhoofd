@@ -81,7 +81,7 @@ export class SSOService {
         const platform = await Platform.getShared();
 
         const service = new SSOService({ provider, platform, organization, user: Context.user });
-        service.validate();
+        service.validateConfiguration();
 
         return service;
     }
@@ -138,11 +138,13 @@ export class SSOService {
         return loginConfiguration;
     }
 
-    validate() {
+    validateConfiguration() {
         // Validate configuration exists
         const _ = this.configuration;
         const __ = this.loginConfiguration;
+    }
 
+    validateUser() {
         if (this.user) {
             this.validateEmail(this.user.email);
         }
@@ -316,6 +318,9 @@ export class SSOService {
         const nonce = generators.nonce();
         const code_challenge = generators.codeChallenge(code_verifier);
         const expires = new Date(Date.now() + 1000 * 60 * 15);
+
+        // Validate user id
+        this.validateUser();
 
         const session: SSOSessionContext = {
             expires,
