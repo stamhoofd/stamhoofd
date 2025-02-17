@@ -131,13 +131,13 @@
                     <h2>Handmatig leden inschrijven</h2>
 
                     <p v-if="organization && event.organizationId === organization.id">
-                        {{ $t('Hier kan je als beheerder leden inschrijven voor een activiteit. Het meest praktische is dat elk lid zichtzelf inschrijft via Stamhoofd, maar dat is misschien niet altijd mogelijk.') }}
+                        {{ $t('3f4666f9-59b5-4a24-b1a7-9f820275c042') }}
                     </p>
                     <p v-else-if="!event.group.settings.isFree">
-                        {{ $t('Je kan zelf ook leden inschrijven voor deze activiteit. Jouw groep betaalt dan meteen de kostprijs aan de organisator, waarna Stamhoofd automatisch één of meerdere openstaande bedragen aanmaakt van de ingeschreven leden aan jouw groep (te betalen via het ledenportaal of manueel betaling te registreren).') }}
+                        {{ $t('3ab07939-121b-47f9-956f-a573c57ec008') }}
                     </p>
                     <p v-else>
-                        {{ $t('Je kan zelf ook leden inschrijven voor deze activiteit.') }}
+                        {{ $t('7cac9136-10b5-4f1c-b9a4-0fb3f8410a9b') }}
                     </p>
 
                     <p class="style-button-bar">

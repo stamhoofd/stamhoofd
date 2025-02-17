@@ -2,7 +2,7 @@
     <LoadingViewTransition>
         <ReviewSetupStepView v-if="!$isLoading" :type="SetupStepType.Responsibilities">
             <template #top>
-                <p>{{ $t('Kijk hieronder na of alle functies toegekend zijn. Om een functie toe te kennen zorg je er eerst voor dat de persoon is ingeschreven in Stamhoofd, daarna kan je functies toekennen door het lid open te klikken in het tabblad ‘Leden’. Daar kan je met de rechtermuisknop op een lid klikken en "Functies bewerken" kiezen.') }}</p>
+                <p>{{ $t('209f9f13-4897-4310-95eb-f436987b8ba7') }}</p>
             </template>
 
             <p v-if="!$organizationBasedResponsibilities.length" class="info-box">

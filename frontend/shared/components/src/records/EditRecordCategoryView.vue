@@ -127,7 +127,7 @@
         </div>
 
         <template #toolbar>
-            <button v-tooltip="$t('Voorbeeld bekijken')" class="button icon eye" type="button" @click="showExample" />
+            <button v-tooltip="$t('ee2852cb-6458-4127-8ad0-3281cc286884')" class="button icon eye" type="button" @click="showExample" />
         </template>
     </SaveView>
 </template>

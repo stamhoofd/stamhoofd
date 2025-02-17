@@ -123,7 +123,7 @@ export class Image extends QueryableModel {
                     throw new SimpleError({
                         code: 'failed_to_sign',
                         message: 'Failed to sign file',
-                        human: $t('Er ging iet mis bij het uploaden van jouw bestand. Probeer het later opnieuw (foutcode: SIGN).'),
+                        human: $t('509cdb4f-131a-42a6-b3b1-a63cca231e65'),
                         statusCode: 500,
                     });
                 }

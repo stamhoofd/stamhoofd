@@ -1372,8 +1372,8 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
                     new MultipleChoiceFilterBuilder({
                         name: record.name,
                         options: [
-                            new MultipleChoiceUIFilterOption($t('Aangevinkt'), true),
-                            new MultipleChoiceUIFilterOption($t('Niet aangevinkt'), false),
+                            new MultipleChoiceUIFilterOption($t('d87cdb56-c8a6-4466-a6fd-f32fe59561f5'), true),
+                            new MultipleChoiceUIFilterOption($t('01b79813-933b-4045-b426-82700f921eaa'), false),
                         ],
                         wrapper: {
                             recordAnswers: {

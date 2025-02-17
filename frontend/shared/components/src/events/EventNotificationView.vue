@@ -17,7 +17,7 @@
             <STList class="info">
                 <STListItem :selectable="notification.events.length === 1" @click="isReviewer && notification.events.length === 1 && openEvent(null)">
                     <h3 class="style-definition-label">
-                        {{ notification.events.length === 1 ? $t('Activiteitsnaam') : $t('Activiteiten') }}
+                        {{ notification.events.length === 1 ? $t('a7db7ad2-4106-4cf0-a8fc-1e68b0a5bf24') : $t('cbfe8b26-7422-44dd-af53-90e14baa4d9a') }}
                     </h3>
                     <p v-for="event of notification.events" :key="event.id" class="style-definition-text" @click="isReviewer && notification.events.length !== 1 && openEvent(event)">
                         <span>{{ notification.events.map(e => e.name).join(', ') }}</span>
@@ -33,7 +33,7 @@
 
                 <STListItem v-if="app === 'admin'">
                     <h3 class="style-definition-label">
-                        {{ $t('Organisator') }}
+                        {{ $t('7f4247c2-2bc1-4f0d-89d5-f4ea51e92bfa') }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ notification.organization.name }} ({{ notification.organization.uri }})</span>
@@ -67,7 +67,7 @@
 
                 <STListItem v-if="notification.feedbackText && notification.status !== EventNotificationStatus.Accepted" :selectable="isReviewer" @click="isReviewer && editFeedbackText()">
                     <h3 class="style-definition-label">
-                        {{ $t('Opmerkingen') }}
+                        {{ $t('e4017a21-58c1-4cea-824c-8cef6a7ab019') }}
                     </h3>
                     <p class="style-definition-text pre-wrap style-em" v-text="notification.feedbackText" />
 
@@ -311,7 +311,7 @@ async function openEvent(event: Event | null) {
 }
 
 async function doSubmit() {
-    if (!await CenteredMessage.confirm($t('Ben je zeker dat je deze melding wilt indienen?'), $t('Ja, indienen'), $t('Je kan je melding niet meer aanpassen na het indienen.'), undefined, false)) {
+    if (!await CenteredMessage.confirm($t('ec0978f8-95bc-44c9-a906-ceaf6fd55baf'), $t('6b0ddff7-226f-4616-a0da-a280d0ccc2ff'), $t('754f6578-9fee-44f3-931c-dc00a34d7871'), undefined, false)) {
         return;
     }
     try {
@@ -325,7 +325,7 @@ async function doSubmit() {
 }
 
 async function doAccept() {
-    if (!await CenteredMessage.confirm($t('Ben je zeker dat je deze melding wilt goedkeuren?'), $t('Ja, goedkeuren'), $t('Je kan je melding niet meer aanpassen na het indienen.'), undefined, false)) {
+    if (!await CenteredMessage.confirm($t('f48e7518-0f1d-4610-a967-82d146a47f5b'), $t('eacd1cfa-a04b-485b-bd8d-41c1518e5306'), $t('754f6578-9fee-44f3-931c-dc00a34d7871'), undefined, false)) {
         return;
     }
     try {
@@ -342,17 +342,17 @@ async function doReject() {
     await present({
         components: [
             new ComponentWithProperties(InputSheet, {
-                title: $t('Reden voor afkeuring'),
-                description: $t('Je kan hier een opmerking achterlaten waarom je deze melding afkeurt.'),
-                saveText: $t('Afkeuren'),
-                placeholder: $t('Reden voor afkeuring'),
+                title: $t('f1bebbb8-20dc-4e6c-886d-68f080f71a1e'),
+                description: $t('2d9128d3-a428-4ba6-9b12-6c2f00ca7c31'),
+                saveText: $t('fe9c9ec1-dd24-4fc6-9622-7b5aef4e9208'),
+                placeholder: $t('f1bebbb8-20dc-4e6c-886d-68f080f71a1e'),
                 defaultValue: notification.value.feedbackText ?? '',
                 multiline: true,
                 saveHandler: async (value: string) => {
                     if (!value) {
                         throw new SimpleError({
                             code: 'invalid_field',
-                            message: $t('Gelieve een reden in te vullen'),
+                            message: $t('63e45277-76d4-4971-909b-1c86326b609f'),
                         });
                     }
                     await save(EventNotification.patch({
@@ -370,10 +370,10 @@ async function editFeedbackText() {
     await present({
         components: [
             new ComponentWithProperties(InputSheet, {
-                title: $t('Opmerkingen wijzigen'),
-                description: $t('Je kan hier een opmerking achterlaten waarom je deze melding afkeurt.'),
-                saveText: $t('Opslaan'),
-                placeholder: $t('Opmerkingen'),
+                title: $t('938b1f40-9563-4a26-8d87-05774839b5a7'),
+                description: $t('2d9128d3-a428-4ba6-9b12-6c2f00ca7c31'),
+                saveText: $t('cb13500b-5d71-46df-846c-03f27b898dd7'),
+                placeholder: $t('e4017a21-58c1-4cea-824c-8cef6a7ab019'),
                 defaultValue: notification.value.feedbackText ?? '',
                 multiline: true,
                 saveHandler: async (value: string) => {
