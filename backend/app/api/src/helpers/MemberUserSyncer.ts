@@ -5,6 +5,7 @@ import crypto from 'crypto';
 import basex from 'base-x';
 import { AuditLogService } from '../services/AuditLogService';
 import { Formatter } from '@stamhoofd/utility';
+import { QueueHandler } from '@stamhoofd/queues';
 
 const ALPHABET = '123456789ABCDEFGHJKMNPQRSTUVWXYZ'; // Note: we removed 0, O, I and l to make it easier for humans
 const customBase = basex(ALPHABET);
@@ -203,116 +204,119 @@ export class MemberUserSyncerStatic {
     }
 
     async linkUser(email: string, member: MemberWithRegistrations, asParent: boolean, updateNameIfEqual = true) {
-        console.log('Linking user', email, 'to member', member.id, 'as parent', asParent, 'update name if equal', updateNameIfEqual);
+        // This needs to happen in the queue to prevent creating duplicate users in the database
+        await QueueHandler.schedule('link-user/' + email, async () => {
+            console.log('Linking user', email, 'to member', member.id, 'as parent', asParent, 'update name if equal', updateNameIfEqual);
 
-        let user = member.users.find(u => u.email.toLocaleLowerCase() === email.toLocaleLowerCase()) ?? await User.getForAuthentication(member.organizationId, email, { allowWithoutAccount: true });
+            let user = member.users.find(u => u.email.toLocaleLowerCase() === email.toLocaleLowerCase()) ?? await User.getForAuthentication(member.organizationId, email, { allowWithoutAccount: true });
 
-        if (user) {
-            // console.log("Giving an existing user access to a member: " + user.id + ' - ' + member.id)
-            if (!asParent) {
-                if (user.memberId && user.memberId !== member.id) {
-                    console.error('Found conflicting user with multiple members', user.id, 'members', user.memberId, 'to', member.id);
+            if (user) {
+                // console.log("Giving an existing user access to a member: " + user.id + ' - ' + member.id)
+                if (!asParent) {
+                    if (user.memberId && user.memberId !== member.id) {
+                        console.error('Found conflicting user with multiple members', user.id, 'members', user.memberId, 'to', member.id);
 
-                    const otherMember = await Member.getWithRegistrations(user.memberId);
+                        const otherMember = await Member.getWithRegistrations(user.memberId);
 
-                    if (otherMember) {
-                        if (otherMember.registrations.length > 0 && member.registrations.length === 0) {
-                            // Choose the other member
-                            // don't make changes
-                            console.error('Resolved to current member - no changes made');
-                            return;
-                        }
+                        if (otherMember) {
+                            if (otherMember.registrations.length > 0 && member.registrations.length === 0) {
+                                // Choose the other member
+                                // don't make changes
+                                console.error('Resolved to current member - no changes made');
+                                return;
+                            }
 
-                        const responsibilities = await this.getResponsibilitiesForMembers([otherMember.id, member.id]);
-                        const responsibilitiesOther = responsibilities.filter(r => r.memberId === otherMember.id);
-                        const responsibilitiesCurrent = responsibilities.filter(r => r.memberId === member.id);
+                            const responsibilities = await this.getResponsibilitiesForMembers([otherMember.id, member.id]);
+                            const responsibilitiesOther = responsibilities.filter(r => r.memberId === otherMember.id);
+                            const responsibilitiesCurrent = responsibilities.filter(r => r.memberId === member.id);
 
-                        if (responsibilitiesOther.length >= responsibilitiesCurrent.length) {
-                            console.error('Resolved to current member because of more responsibilities - no changes made');
-                            return;
+                            if (responsibilitiesOther.length >= responsibilitiesCurrent.length) {
+                                console.error('Resolved to current member because of more responsibilities - no changes made');
+                                return;
+                            }
                         }
                     }
-                }
 
-                if (updateNameIfEqual) {
-                    user.firstName = member.details.firstName;
-                    user.lastName = member.details.lastName;
+                    if (updateNameIfEqual) {
+                        user.firstName = member.details.firstName;
+                        user.lastName = member.details.lastName;
+                    }
+                    user.memberId = member.id;
+                    await this.updateInheritedPermissions(user);
                 }
-                user.memberId = member.id;
-                await this.updateInheritedPermissions(user);
+                else {
+                    let shouldSave = false;
+
+                    if (!user.firstName && !user.lastName) {
+                        const parents = member.details.parents.filter(p => p.email === email);
+                        if (parents.length === 1) {
+                            if (updateNameIfEqual) {
+                                user.firstName = parents[0].firstName;
+                                user.lastName = parents[0].lastName;
+                            }
+                            shouldSave = true;
+                        }
+                    }
+
+                    if (user.firstName === member.details.firstName && user.lastName === member.details.lastName) {
+                        user.firstName = null;
+                        user.lastName = null;
+                        shouldSave = true;
+                    }
+
+                    if (user.memberId === member.id) {
+                        // Unlink: parents are never 'equal' to the member
+                        user.memberId = null;
+                        await this.updateInheritedPermissions(user);
+                    }
+                    if (shouldSave) {
+                        await user.save();
+                    }
+                }
             }
             else {
-                let shouldSave = false;
+                // Create a new placeholder user
+                user = new User();
+                user.organizationId = member.organizationId;
+                user.email = email;
 
-                if (!user.firstName && !user.lastName) {
+                if (!asParent) {
+                    if (updateNameIfEqual) {
+                        user.firstName = member.details.firstName;
+                        user.lastName = member.details.lastName;
+                    }
+                    user.memberId = member.id;
+                    await this.updateInheritedPermissions(user);
+                }
+                else {
                     const parents = member.details.parents.filter(p => p.email === email);
                     if (parents.length === 1) {
                         if (updateNameIfEqual) {
                             user.firstName = parents[0].firstName;
                             user.lastName = parents[0].lastName;
                         }
-                        shouldSave = true;
                     }
-                }
 
-                if (user.firstName === member.details.firstName && user.lastName === member.details.lastName) {
-                    user.firstName = null;
-                    user.lastName = null;
-                    shouldSave = true;
-                }
+                    if (user.firstName === member.details.firstName && user.lastName === member.details.lastName) {
+                        user.firstName = null;
+                        user.lastName = null;
+                    }
 
-                if (user.memberId === member.id) {
-                    // Unlink: parents are never 'equal' to the member
-                    user.memberId = null;
-                    await this.updateInheritedPermissions(user);
-                }
-                if (shouldSave) {
                     await user.save();
                 }
-            }
-        }
-        else {
-            // Create a new placeholder user
-            user = new User();
-            user.organizationId = member.organizationId;
-            user.email = email;
 
-            if (!asParent) {
-                if (updateNameIfEqual) {
-                    user.firstName = member.details.firstName;
-                    user.lastName = member.details.lastName;
-                }
-                user.memberId = member.id;
-                await this.updateInheritedPermissions(user);
-            }
-            else {
-                const parents = member.details.parents.filter(p => p.email === email);
-                if (parents.length === 1) {
-                    if (updateNameIfEqual) {
-                        user.firstName = parents[0].firstName;
-                        user.lastName = parents[0].lastName;
-                    }
-                }
-
-                if (user.firstName === member.details.firstName && user.lastName === member.details.lastName) {
-                    user.firstName = null;
-                    user.lastName = null;
-                }
-
-                await user.save();
+                console.log('Created new (placeholder) user that has access to a member: ' + user.id);
             }
 
-            console.log('Created new (placeholder) user that has access to a member: ' + user.id);
-        }
+            // Update model relation to correct response
+            if (!member.users.find(u => u.id === user.id)) {
+                await Member.users.reverse('members').link(user, [member]);
+                member.users.push(user);
 
-        // Update model relation to correct response
-        if (!member.users.find(u => u.id === user.id)) {
-            await Member.users.reverse('members').link(user, [member]);
-            member.users.push(user);
-
-            // Update balance of this user, as it could have changed
-            await this.updateUserBalance(user.id, member.id);
-        }
+                // Update balance of this user, as it could have changed
+                await this.updateUserBalance(user.id, member.id);
+            }
+        });
     }
 
     /**
