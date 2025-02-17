@@ -312,6 +312,39 @@ export class SSOService {
         return await this.startAuthCodeFlow(redirectUri, data.spaState, data.prompt);
     }
 
+    validateRedirectUri(uri: string) {
+        let parsed: URL;
+        try {
+            parsed = new URL(uri);
+        }
+        catch (e) {
+            throw new SimpleError({
+                code: 'invalid_redirect_uri',
+                message: 'Invalid redirect uri',
+                field: 'redirectUri',
+                statusCode: 400,
+            });
+        }
+
+        if (parsed.protocol !== 'https:') {
+            throw new SimpleError({
+                code: 'invalid_redirect_uri',
+                message: 'Invalid redirect uri',
+                field: 'redirectUri',
+                statusCode: 400,
+            });
+        }
+
+        if (parsed.host !== STAMHOOFD.domains.dashboard) {
+            throw new SimpleError({
+                code: 'invalid_redirect_uri',
+                message: 'Invalid redirect uri',
+                field: 'redirectUri',
+                statusCode: 400,
+            });
+        }
+    }
+
     async startAuthCodeFlow(redirectUri: string, spaState: string, prompt: string | null = null): Promise<Response<undefined>> {
         const code_verifier = generators.codeVerifier();
         const state = generators.state();
@@ -321,6 +354,7 @@ export class SSOService {
 
         // Validate user id
         this.validateUser();
+        this.validateRedirectUri(redirectUri);
 
         const session: SSOSessionContext = {
             expires,
@@ -332,6 +366,16 @@ export class SSOService {
             providerType: this.provider,
             userId: Context.user?.id ?? null,
         };
+
+        // Validate redirect uri
+        if (session.redirectUri !== 'x') {
+            throw new SimpleError({
+                code: 'invalid_redirect_uri',
+                message: 'Invalid redirect uri',
+                human: $t('Er ging iets mis bij het aanmelden. Neem contact op met een beheerder als dit probleem zich blijft voordoen.'),
+                statusCode: 400,
+            });
+        }
 
         try {
             const response = new Response(undefined);
