@@ -9,7 +9,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox title="Issuer" error-fields="issuer" :error-box="errors.errorBox">
+        <STInputBox title="Issuer" error-fields="issuer" :error-box="errors.errorBox" class="max">
             <input
                 ref="firstInput"
                 v-model="issuer"
@@ -20,7 +20,7 @@
             >
         </STInputBox>
 
-        <STInputBox title="Client ID" error-fields="clientId" :error-box="errors.errorBox">
+        <STInputBox title="Client ID" error-fields="clientId" :error-box="errors.errorBox" class="max">
             <input
                 v-model="clientId"
                 class="input"
@@ -30,7 +30,7 @@
             >
         </STInputBox>
 
-        <STInputBox title="Client Secret" error-fields="clientSecret" :error-box="errors.errorBox">
+        <STInputBox title="Client Secret" error-fields="clientSecret" :error-box="errors.errorBox" class="max">
             <input
                 v-model="clientSecret"
                 class="input"
@@ -40,7 +40,7 @@
             >
         </STInputBox>
 
-        <STInputBox title="Redirect URI" :error-box="errors.errorBox">
+        <STInputBox title="Redirect URI" :error-box="errors.errorBox" class="max">
             <input
                 v-model="redirectUri"
                 :placeholder="defaultRedirectUri"
@@ -48,6 +48,10 @@
                 type="text"
                 autocomplete="off"
             >
+
+            <template #right>
+                <button v-copyable="redirectUri || defaultRedirectUri" class="button icon copy small" type="button" />
+            </template>
         </STInputBox>
         <p class="style-description-small">
             De redirect URI behoud je best op de voorgestelde waarde.
