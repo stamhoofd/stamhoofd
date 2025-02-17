@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "be.ksa.ravot"
+    namespace "be.fos.keeo"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "be.ksa.ravot"
+        applicationId "be.fos.keeo"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 212
-        versionName "2.73.3"
+        versionCode 215
+        versionName "2.75.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

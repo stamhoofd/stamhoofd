@@ -1,6 +1,6 @@
 {
-	"appId": "be.ksa.ravot",
-	"appName": "Ravot",
+	"appId": "be.fos.keeo",
+	"appName": "Keeo",
 	"webDir": "dist",
 	"loggingBehavior": "none",
 	"plugins": {
@@ -19,7 +19,7 @@
 		}
 	},
 	"server": {
-		"hostname": "ravot.ksa.be",
+		"hostname": "keeo.fos.be",
 		"androidScheme": "https"
 	},
 	"packageClassList": [

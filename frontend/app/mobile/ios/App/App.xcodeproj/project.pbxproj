@@ -387,8 +387,8 @@
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 211;
-				DEVELOPMENT_TEAM = J8SKT697A7;
+				CURRENT_PROJECT_VERSION = 214;
+				DEVELOPMENT_TEAM = 83RA472B4E;
 				INFOPLIST_FILE = App/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Stamhoofd;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
@@ -397,9 +397,9 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.73.3;
+				MARKETING_VERSION = 2.75.1;
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" \"-DDEBUG\"";
-				PRODUCT_BUNDLE_IDENTIFIER = be.ksa.ravot;
+				PRODUCT_BUNDLE_IDENTIFIER = be.fos.keeo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -421,8 +421,8 @@
 				CODE_SIGN_ENTITLEMENTS = App/AppRelease.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 211;
-				DEVELOPMENT_TEAM = J8SKT697A7;
+				CURRENT_PROJECT_VERSION = 214;
+				DEVELOPMENT_TEAM = 83RA472B4E;
 				INFOPLIST_FILE = App/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Stamhoofd;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
@@ -431,8 +431,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.73.3;
-				PRODUCT_BUNDLE_IDENTIFIER = be.ksa.ravot;
+				MARKETING_VERSION = 2.75.1;
+				PRODUCT_BUNDLE_IDENTIFIER = be.fos.keeo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

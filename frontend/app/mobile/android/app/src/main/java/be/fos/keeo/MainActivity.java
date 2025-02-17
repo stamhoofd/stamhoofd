@@ -1,4 +1,4 @@
-package be.ksa.ravot;
+package be.fos.keeo;
 
 import com.getcapacitor.BridgeActivity;
 import android.content.res.Configuration;

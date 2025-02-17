@@ -5,8 +5,8 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>webcredentials:dashboard.stamhoofd?mode=developer</string>
-		<string>webcredentials:ravot.ksa.be?mode=developer</string>
-		<string>applinks:ravot.ksa.be?mode=developer</string>
+		<string>webcredentials:keeo.fos.be?mode=developer</string>
+		<string>applinks:keeo.fos.be?mode=developer</string>
 	</array>
 </dict>
 </plist>
