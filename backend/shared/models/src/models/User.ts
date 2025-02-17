@@ -1,13 +1,13 @@
 import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
 import { EmailInterfaceRecipient } from '@stamhoofd/email';
-import { QueryableModel, SQL, SQLExpression, SQLJsonExtract } from '@stamhoofd/sql';
+import { QueryableModel, SQL, SQLJSONValue } from '@stamhoofd/sql';
 import { LoginProviderType, NewUser, Permissions, Recipient, Replacement, UserMeta, UserPermissions, User as UserStruct } from '@stamhoofd/structures';
 import argon2 from 'argon2';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Organization } from './';
-import { QueueHandler } from '@stamhoofd/queues';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { QueueHandler } from '@stamhoofd/queues';
+import { Organization } from './';
 
 export class User extends QueryableModel {
     static table = 'users';
@@ -125,7 +125,7 @@ export class User extends QueryableModel {
             .where(
                 SQL.jsonValue(SQL.column('permissions'), '$.value.globalPermissions'),
                 '!=',
-                null,
+                new SQLJSONValue(null),
             )
             .where('id', '!=', '1');
 
