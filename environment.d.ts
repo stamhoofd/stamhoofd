@@ -185,6 +185,11 @@ declare global {
         readonly ILLUSTRATIONS_COLORS?: Record<string, `#${string}`>
         readonly PLAUSIBLE_DOMAIN?: string
 
+        /**
+         * Redirect users that are not logged in to this domain (maintaining the same path)
+         */
+        readonly REDIRECT_LOGIN_DOMAIN?: string
+
     }
 
     /** 

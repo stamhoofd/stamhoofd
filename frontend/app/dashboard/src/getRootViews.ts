@@ -12,6 +12,7 @@ import { WebshopManager } from '../../webshop/src/classes/WebshopManager';
 import { WhatsNewCount } from './classes/WhatsNewCount';
 import { useGlobalRoutes } from './useGlobalRoutes';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
+import RedirectView from '@stamhoofd/components/src/auth/RedirectView.vue';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
     return new ComponentWithProperties(ModalStackComponent, { root: component, initialPresents });
@@ -101,6 +102,15 @@ export async function loadSessionFromUrl() {
 }
 
 export function getLoginRoot() {
+    if (STAMHOOFD.REDIRECT_LOGIN_DOMAIN && UrlHelper.initial.getSearchParams().get('skipRedirect') !== 'true') {
+        const urlCopy = new URL(UrlHelper.initial.url);
+        urlCopy.hostname = STAMHOOFD.REDIRECT_LOGIN_DOMAIN;
+
+        return new ComponentWithProperties(RedirectView, {
+            location: urlCopy.href,
+        });
+    }
+
     return new ComponentWithProperties(CoverImageContainer, {
         root: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(LoginView, {
