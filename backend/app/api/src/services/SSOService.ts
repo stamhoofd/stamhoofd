@@ -367,16 +367,6 @@ export class SSOService {
             userId: Context.user?.id ?? null,
         };
 
-        // Validate redirect uri
-        if (session.redirectUri !== 'x') {
-            throw new SimpleError({
-                code: 'invalid_redirect_uri',
-                message: 'Invalid redirect uri',
-                human: $t('Er ging iets mis bij het aanmelden. Neem contact op met een beheerder als dit probleem zich blijft voordoen.'),
-                statusCode: 400,
-            });
-        }
-
         try {
             const response = new Response(undefined);
 
