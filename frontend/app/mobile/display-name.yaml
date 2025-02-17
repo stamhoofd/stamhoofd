@@ -3,9 +3,12 @@ vars:
   APP_ID:
   APP_NAME:
   HOSTNAME:
+  APPLE_TEAM_ID:
 
 platforms:
   ios:
     targets:
       App:
         displayName: $APP_NAME
+        buildSettings:
+            DEVELOPMENT_TEAM: $APPLE_TEAM_ID
