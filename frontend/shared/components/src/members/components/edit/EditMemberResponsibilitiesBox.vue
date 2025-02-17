@@ -359,7 +359,7 @@ function setMemberResponsibilityRecordEnabled(record: MemberResponsibilityRecord
 }
 
 function getResponsibilityMergedRole(responsibility: MemberResponsibility, groupId: string | null | undefined) {
-    return LoadedPermissions.buildRoleForResponsibility(groupId ?? null, responsibility, selectedOrganization.value?.privateMeta?.inheritedResponsibilityRoles ?? []);
+    return LoadedPermissions.fromResponsibility(responsibility, groupId ?? null, selectedOrganization.value?.privateMeta?.inheritedResponsibilityRoles ?? []);
 }
 
 function getResponsibilityMergedRoleDescription(responsibility: MemberResponsibility, groupId: string | null | undefined) {
