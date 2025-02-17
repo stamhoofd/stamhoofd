@@ -8,7 +8,7 @@ import android.view.Window;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.WindowCompat;
+import stamhoofd.FileOpenerPlugin;
 
 public class MainActivity extends BridgeActivity {
 

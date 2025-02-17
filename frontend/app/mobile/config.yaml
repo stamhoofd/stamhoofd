@@ -10,7 +10,19 @@ platforms:
     appName: $APP_NAME
     incrementVersionCode: true
     packageName: $APP_ID
-
+    xml:
+      - resFile: values/strings.xml
+        target: resources/string[@name="intent_host"]
+        replace: |
+          <string name="intent_host">$HOSTNAME</string>
+      - resFile: values/strings.xml
+        target: resources/string[@name="package_name"]
+        replace: |
+          <string name="package_name">$APP_ID</string>
+      - resFile: values/strings.xml
+        target: resources/string[@name="custom_url_scheme"]
+        replace: |
+          <string name="custom_url_scheme">$APP_ID</string>
   ios:
     targets:
       App:

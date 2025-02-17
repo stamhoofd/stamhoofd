@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
         android:allowBackup="true"
-        android:name="be.ksa.ravot.MainApplication"
+        android:name="stamhoofd.MainApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -11,7 +11,6 @@
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
             android:name=".MainActivity"
-            android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBarLaunch"
             android:windowSoftInputMode="adjustPan"
             android:launchMode="singleTask"
@@ -32,7 +31,7 @@
                 <data android:scheme="https" />
 
                 <!-- Include one or more domains that should be verified. -->
-                <data android:host="ravot.ksa.be" />
+                <data android:host="@string/intent_host" />
             </intent-filter>
         </activity>
 

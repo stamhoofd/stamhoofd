@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' ?>
 <resources>
     <string name="app_name">Keeo</string>
-    <string name="title_activity_main">Ravot</string>
-    <string name="package_name">be.ksa.ravot</string>
-    <string name="custom_url_scheme">be.ksa.ravot</string>
+    <string name="package_name">be.fos.keeo</string>
+    <string name="custom_url_scheme">be.fos.keeo</string>
+    <string name="intent_host">keeo.fos.be</string>
 </resources>
