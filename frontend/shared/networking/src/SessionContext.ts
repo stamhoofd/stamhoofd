@@ -2,7 +2,7 @@ import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking';
 import { Toast } from '@stamhoofd/components';
-import { LoginProviderType, Organization, Platform, Token, UserWithMembers, Version } from '@stamhoofd/structures';
+import { LoginProviderType, OpenIDAuthTokenResponse, Organization, Platform, Token, UserWithMembers, Version } from '@stamhoofd/structures';
 import { isReactive, reactive } from 'vue';
 
 import { SessionManager, UrlHelper } from '..';
@@ -409,99 +409,40 @@ export class SessionContext implements RequestMiddleware {
             return;
         }
 
-        // Check SSO required?
-        // if SSO
+        // Generate code verifier
+        // const codeVerifier = await this.generateCodeVerifier();
+        // Generate code challenge from code verifier
+        // const codeChallenge = await this.generateCodeChallenge(codeVerifier);
+        // code_challenge_method = S256
+
         const url = new URL((STAMHOOFD.environment === 'development' ? 'http://localhost:9091' : this.server.host) + '/openid/start');
-
-        const form = document.createElement('form');
-        form.action = url.href;
-        form.method = 'POST';
-
-        const spaStateInput = document.createElement('input');
-        spaStateInput.type = 'hidden';
-        spaStateInput.name = 'spaState';
-        spaStateInput.value = spaState;
-        form.appendChild(spaStateInput);
-
-        // Include webshopId
+        url.searchParams.set('spaState', spaState);
+        url.searchParams.set('provider', data.providerType);
         if (data.webshopId) {
-            if (!this.organization) {
-                throw new SimpleError({
-                    code: 'invalid_organization',
-                    message: 'Organization required when specifying webshopId',
-                    human: 'Er ging iets mis. Probeer het opnieuw.',
-                });
-            }
-            const webshopIdInput = document.createElement('input');
-            webshopIdInput.type = 'hidden';
-            webshopIdInput.name = 'webshopId';
-            webshopIdInput.value = data.webshopId;
-            form.appendChild(webshopIdInput);
+            url.searchParams.set('webshopId', data.webshopId);
         }
-
-        const redirectUriInput = document.createElement('input');
-        redirectUriInput.type = 'hidden';
-        redirectUriInput.name = 'redirectUri';
-        redirectUriInput.value = window.location.href;
-        form.appendChild(redirectUriInput);
-
-        // Include prompt
         if (data.prompt) {
-            const promptInput = document.createElement('input');
-            promptInput.type = 'hidden';
-            promptInput.name = 'prompt';
-            promptInput.value = data.prompt;
-            form.appendChild(promptInput);
+            url.searchParams.set('prompt', data.prompt);
         }
 
-        // Include client = sso
-        const clientInput = document.createElement('input');
-        clientInput.type = 'hidden';
-        clientInput.name = 'provider';
-        clientInput.value = data.providerType;
-        form.appendChild(clientInput);
+        const redirectUri = new URL(window.location.href);
+        if (STAMHOOFD.REDIRECT_LOGIN_DOMAIN) {
+            redirectUri.searchParams.set('skipRedirect', 'true');
+        }
+        url.searchParams.set('redirectUri', redirectUri.href);
 
         if (this.hasToken()) {
-            // Check if we have an updated token in storage (other browser tab refreshed the token)
-            await this.loadTokenFromStorage();
-
-            if (!this.token) {
-                // Euhm? The user is not signed in!
-                throw new Error('Could not authenticate request without token');
-            }
-
-            if (this.token.isRefreshing() || this.token.needsRefresh()) {
-                // Already expired.
-                console.log('Request started with expired access token, refreshing before starting request...');
-                try {
-                    await this.token.refresh(this.server, () => false);
-                }
-                catch (e) {
-                    if (isSimpleError(e) || isSimpleErrors(e)) {
-                        if (e.hasCode('invalid_refresh_token')) {
-                            await this.logout();
-                            throw new SimpleError({
-                                code: '',
-                                message: '',
-                                human: 'Je bent niet langer ingelogd. Log opnieuw in om verder te gaan.',
-                            });
-                        }
-                    }
-                    throw e;
-                }
-            }
-
-            // We need to pass the token via the body since we cannot set headers
-            // we require the usage of forms because we need cookies to be used after the redirect (otherwise we'll have CORS issues)
-            const clientInput = document.createElement('input');
-            clientInput.type = 'hidden';
-            clientInput.name = 'header_authorization';
-            clientInput.value = 'Bearer ' + this.token.token.accessToken;
-            form.appendChild(clientInput);
+            // Request a one-time auth token to connect an external account
+            const respponse = await this.authenticatedServer.request({
+                method: 'POST',
+                path: '/openid/auth-token',
+                decoder: OpenIDAuthTokenResponse as Decoder<OpenIDAuthTokenResponse>,
+            });
+            url.searchParams.set('authToken', respponse.data.ssoAuthToken);
         }
 
-        document.body.appendChild(form);
-        form.submit();
+        // Redirect / open url
+        window.location.href = url.toString();
     }
 
     addListener(owner: any, listener: AuthenticationStateListener) {

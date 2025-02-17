@@ -6,15 +6,15 @@ import { Context } from '../../helpers/Context';
 import { SSOService } from '../../services/SSOService';
 
 type Params = Record<string, never>;
-type Query = undefined;
-type Body = StartOpenIDFlowStruct;
+type Query = StartOpenIDFlowStruct;
+type Body = undefined;
 type ResponseBody = undefined;
 
 export class OpenIDConnectStartEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = StartOpenIDFlowStruct as Decoder<StartOpenIDFlowStruct>;
+    queryDecoder = StartOpenIDFlowStruct as Decoder<StartOpenIDFlowStruct>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method !== 'POST') {
+        if (request.method !== 'GET') {
             return [false];
         }
 
@@ -29,8 +29,7 @@ export class OpenIDConnectStartEndpoint extends Endpoint<Params, Query, Body, Re
     async handle(request: DecodedRequest<Params, Query, Body>) {
         // Check webshop and/or organization
         await Context.setUserOrganizationScope();
-        await Context.optionalAuthenticate({ allowWithoutAccount: false });
-        const service = await SSOService.fromContext(request.body.provider);
-        return await service.validateAndStartAuthCodeFlow(request.body);
+        const service = await SSOService.fromContext(request.query.provider);
+        return await service.validateAndStartAuthCodeFlow(request.query);
     }
 }

@@ -35,19 +35,71 @@ type SSOSessionContext = {
     userId?: string | null;
 };
 
+export class SSOAuthToken {
+    validUntil: Date;
+    token: string;
+    userId: string;
+}
+
 export class SSOService {
     provider: LoginProviderType;
     platform: Platform;
     organization: Organization | null;
-    user: User | null = null;
 
     static sessionStorage = new Map<string, SSOSessionContext>();
 
-    constructor(data: { provider: LoginProviderType; platform: Platform; organization?: Organization | null; user?: User | null }) {
+    /**
+     * Maps auth token to user id + expiry information
+     */
+    static authTokens = new Map<string, SSOAuthToken>();
+
+    constructor(data: { provider: LoginProviderType; platform: Platform; organization?: Organization | null }) {
         this.provider = data.provider;
         this.platform = data.platform;
         this.organization = data.organization ?? null;
-        this.user = data.user ?? null;
+    }
+
+    static async clearExpiredTokensOrFromUser(userId: string | null = null) {
+        const d = new Date();
+        for (const [key, value] of this.authTokens) {
+            if (value.userId === userId || value.validUntil < d) {
+                this.authTokens.delete(key);
+            }
+        }
+    }
+
+    static async createToken() {
+        if (!Context.user) {
+            throw new SimpleError({
+                code: 'invalid_user',
+                message: 'Not signed in',
+                statusCode: 401,
+            });
+        }
+
+        const token = new SSOAuthToken();
+        token.validUntil = new Date(Date.now() + 1000 * 60 * 5);
+        token.token = (await randomBytes(192)).toString('base64').toUpperCase();
+        token.userId = Context.user.id;
+
+        await this.clearExpiredTokensOrFromUser(token.userId);
+        this.authTokens.set(token.token, token);
+
+        return token.token;
+    }
+
+    static async validateToken(token: string) {
+        const authToken = this.authTokens.get(token);
+        if (!authToken || authToken.validUntil < new Date()) {
+            this.authTokens.delete(token);
+            throw new SimpleError({
+                code: 'invalid_token',
+                message: 'Invalid token',
+                statusCode: 401,
+            });
+        }
+        this.authTokens.delete(token);
+        return authToken;
     }
 
     /**
@@ -80,7 +132,7 @@ export class SSOService {
         const organization = Context.organization;
         const platform = await Platform.getShared();
 
-        const service = new SSOService({ provider, platform, organization, user: Context.user });
+        const service = new SSOService({ provider, platform, organization });
         service.validateConfiguration();
 
         return service;
@@ -142,12 +194,6 @@ export class SSOService {
         // Validate configuration exists
         const _ = this.configuration;
         const __ = this.loginConfiguration;
-    }
-
-    validateUser() {
-        if (this.user) {
-            this.validateEmail(this.user.email);
-        }
     }
 
     validateEmail(email: string) {
@@ -309,7 +355,26 @@ export class SSOService {
             });
         }
 
-        return await this.startAuthCodeFlow(redirectUri, data.spaState, data.prompt);
+        let user: User | undefined = undefined;
+
+        if (data.authToken) {
+            const token = await SSOService.validateToken(data.authToken);
+            if (token) {
+                user = await User.getByID(token.userId);
+
+                if (!user) {
+                    throw new SimpleError({
+                        code: 'invalid_user',
+                        message: 'User not found',
+                        statusCode: 404,
+                    });
+                }
+
+                this.validateEmail(user.email);
+            }
+        }
+
+        return await this.startAuthCodeFlow(redirectUri, data.spaState, data.prompt, user);
     }
 
     validateRedirectUri(uri: string) {
@@ -345,16 +410,12 @@ export class SSOService {
         }
     }
 
-    async startAuthCodeFlow(redirectUri: string, spaState: string, prompt: string | null = null): Promise<Response<undefined>> {
+    async startAuthCodeFlow(redirectUri: string, spaState: string, prompt: string | null = null, user?: User): Promise<Response<undefined>> {
         const code_verifier = generators.codeVerifier();
-        const state = generators.state();
+        const state = generators.state(); // this is the internal state backend <-> SSO provider
         const nonce = generators.nonce();
         const code_challenge = generators.codeChallenge(code_verifier);
         const expires = new Date(Date.now() + 1000 * 60 * 15);
-
-        // Validate user id
-        this.validateUser();
-        this.validateRedirectUri(redirectUri);
 
         const session: SSOSessionContext = {
             expires,
@@ -362,9 +423,9 @@ export class SSOService {
             state,
             nonce,
             redirectUri,
-            spaState,
+            spaState, // this is the state frontend <-> backend (not backend <-> SSO provider)
             providerType: this.provider,
-            userId: Context.user?.id ?? null,
+            userId: user?.id ?? null,
         };
 
         try {
@@ -389,7 +450,7 @@ export class SSOService {
                 state,
                 nonce,
                 prompt: prompt ?? undefined,
-                login_hint: this.user?.email ?? undefined,
+                login_hint: user?.email ?? undefined,
                 redirect_uri: this.externalRedirectUri,
 
                 // Google has this instead of the offline_access scope
