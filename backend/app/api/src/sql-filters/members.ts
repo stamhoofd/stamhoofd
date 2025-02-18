@@ -261,6 +261,9 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
             endDate: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'endDate')),
             expireDate: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'expireDate')),
             trialUntil: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'trialUntil')),
+            locked: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'locked')),
+            balanceItemId: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'balanceItemId')),
+            generated: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'generated')),
         },
     ),
 
