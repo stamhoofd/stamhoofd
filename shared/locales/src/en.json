@@ -749,5 +749,6 @@
   "039c2f51-c533-4262-91d6-24e4a503b003": "Niet vergrendeld",
   "6468d392-6711-48cd-9602-a5a26afe6f22": "Ben je zeker dat je deze aansluiting wilt ontgrendelen?",
   "ac1d3647-1c2f-48a1-a08a-ce4821103fb1": "Ja, ontgrendelen",
-  "04cac345-ed28-484c-8a50-96ac4db89911": "Aansluiting ontgrendeld"
+  "04cac345-ed28-484c-8a50-96ac4db89911": "Aansluiting ontgrendeld",
+  "880e4cac-5a7e-4d6d-80ad-c5472a005df6": "De eerstvolgende aansluiting van dit lid start op {date}. Vandaag is dit lid niet aangesloten bij KSA Nationaal en daardoor niet verzekerd."
 }

@@ -16,10 +16,11 @@
 
 <script setup lang="ts">
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { MembershipStatus, PermissionLevel, PlatformMember, RecordAnswer, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
+import { MemberPlatformMembership, MembershipStatus, PermissionLevel, PlatformMember, RecordAnswer, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useDataPermissionSettings, useFinancialSupportSettings } from '../../../groups';
-import { useAuth, useOrganization } from '../../../hooks';
+import { useAuth, useOrganization, usePlatform } from '../../../hooks';
 import { useIsPropertyEnabled } from '../../hooks/useIsPropertyRequired';
 
 defineOptions({
@@ -33,6 +34,7 @@ const organization = useOrganization();
 const auth = useAuth();
 const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), false);
 const $t = useTranslate();
+const platform = usePlatform();
 
 // Possible the member didn't fill in the answers yet
 const autoCompletedAnswers = computed(() => {
@@ -95,10 +97,21 @@ const warnings = computed(() => {
     }
 
     if (props.member.membershipStatus === MembershipStatus.Inactive) {
-        warnings.push(RecordWarning.create({
-            text: $t('60871aaf-1b90-4a7c-a755-a4aeb0585a8e'),
-            type: RecordWarningType.Error,
-        }));
+        // todo: check when temporal membership
+        const nextMembership = getNextMembership();
+
+        if (nextMembership) {
+            warnings.push(RecordWarning.create({
+                text: $t('880e4cac-5a7e-4d6d-80ad-c5472a005df6', { date: Formatter.date(nextMembership.startDate) }),
+                type: RecordWarningType.Warning,
+            }));
+        }
+        else {
+            warnings.push(RecordWarning.create({
+                text: $t('60871aaf-1b90-4a7c-a755-a4aeb0585a8e'),
+                type: RecordWarningType.Error,
+            }));
+        }
     }
 
     if (props.member.membershipStatus === MembershipStatus.Expiring) {
@@ -112,4 +125,20 @@ const warnings = computed(() => {
 });
 const hasWarnings = computed(() => warnings.value.length > 0);
 const sortedWarnings = computed(() => warnings.value.slice().sort(RecordWarning.sort));
+
+const getNextMembership = (): MemberPlatformMembership | null => {
+    const now = new Date().getTime();
+    const nextMemberships = [...props.member.member.platformMemberships]
+        .filter(m => m.startDate.getTime() >= now)
+        .sort((a, b) => Sorter.stack(
+            Sorter.byDateValue(b.startDate, a.startDate),
+            Sorter.byDateValue(b.createdAt, a.createdAt),
+        ));
+
+    if (nextMemberships.length > 0) {
+        return nextMemberships[0];
+    }
+
+    return null;
+};
 </script>
