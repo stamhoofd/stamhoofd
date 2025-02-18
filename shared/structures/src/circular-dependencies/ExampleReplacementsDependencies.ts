@@ -120,8 +120,12 @@ function fillReplacements(replacements: Replacement[]) {
     for (const replacement of [...recipient.replacements, ...recipient.getDefaultReplacements()]) {
         const variable = replacements.find(v => v.token === replacement.token);
         if (variable) {
-            variable.value = replacement.value;
-            variable.html = replacement.html;
+            if (replacement.value) {
+                variable.value = replacement.value;
+            }
+            if (replacement.html) {
+                variable.html = replacement.html;
+            }
         }
     }
 }

@@ -381,7 +381,7 @@ export class Order extends AutoEncoder {
     private getRecipientReplacements(organization: Organization, webshop: WebshopPreview, payments: Payment[] = this.payments) {
         const order = this;
         const succeededTransfers = payments
-            .filter(p => p.status === PaymentStatus.Succeeded && p.method === PaymentMethod.Transfer);
+            .filter(p => p.status === PaymentStatus.Succeeded && p.method === PaymentMethod.Transfer) ?? payments.filter(p => p.method === PaymentMethod.Transfer);
 
         return [
             Replacement.create({

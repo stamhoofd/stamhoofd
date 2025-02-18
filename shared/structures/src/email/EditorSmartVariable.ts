@@ -386,7 +386,7 @@ export class EditorSmartVariable extends AutoEncoder {
         variables.push(EditorSmartVariable.create({
             id: 'webshopName',
             name: 'Naam webshop',
-            example: '',
+            example: 'Demoshop',
         }));
 
         variables.push(EditorSmartVariable.create({
@@ -416,7 +416,7 @@ export class EditorSmartVariable extends AutoEncoder {
         variables.push(EditorSmartVariable.create({
             id: 'eventName',
             name: $t('cb76c693-29ff-4d41-9c45-56106a798818'),
-            example: '',
+            example: 'Activiteitsnaam',
         }));
 
         variables.push(EditorSmartVariable.create({
