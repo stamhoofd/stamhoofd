@@ -27,7 +27,7 @@
     "@capacitor/preferences": "6.0.2",
     "@capacitor/share": "6.0.2",
     "@capacitor/status-bar": "6.0.1",
-    "@capgo/capacitor-updater": "6.1.0",
+    "@capgo/capacitor-updater": "6.14.0",
     "@stamhoofd/assets": "1.0.0",
     "@stamhoofd/components": "1.0.0",
     "@stamhoofd/scss": "1.0.0",

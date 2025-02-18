@@ -1802,10 +1802,10 @@
   resolved "https://registry.yarnpkg.com/@capacitor/status-bar/-/status-bar-6.0.1.tgz#27cef2560cdefb8e14d2cecc976056ede7b822ef"
   integrity sha512-Usd9hZZQVAqy+jJfL7jRcYI7dcsxN09Na1yttwdl+F1bk3Ztoukk7CGPDm5VgKUSs53ihQBOy1+sczCACxhNiw==
 
-"@capgo/capacitor-updater@6.1.0":
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/@capgo/capacitor-updater/-/capacitor-updater-6.1.0.tgz#a335aab525a593dbfed5de52576646ef599a011c"
-  integrity sha512-VAGhOuhQ87zothZdyQw39ENvreuS0rz/Qxb1m6pI2sjMw1AKGxs275GazBHygzJyNLt12iOeLCyGGGRBY9rIRA==
+"@capgo/capacitor-updater@6.14.0":
+  version "6.14.0"
+  resolved "https://registry.yarnpkg.com/@capgo/capacitor-updater/-/capacitor-updater-6.14.0.tgz#fee6c5077b75e003c97fbec11fcec03095f607ed"
+  integrity sha512-NHQBpyrvf5DhgjBohuBpCGVy/ZYQfzmJ2ZfqbHBSohk0o/1GOnsOQnWcPTvxDGxcjX+pXmGBILWpB+4h/Xu5mw==
 
 "@cspotcode/source-map-support@^0.8.0":
   version "0.8.1"
