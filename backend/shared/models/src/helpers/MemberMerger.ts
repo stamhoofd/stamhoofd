@@ -386,14 +386,13 @@ function mergeEmail(
     base: { email: string | null; alternativeEmails: string[] },
     other: { email: string | null; alternativeEmails: string[] },
 ) {
-    const isEmailMerged = mergeStringIfBaseNotSet(base, other, 'email');
-    base.alternativeEmails = Formatter.uniqueArray([...base.alternativeEmails, ...other.alternativeEmails]);
-
-    if (!isEmailMerged && !isNullOrEmpty(other.email)) {
-        if (!base.alternativeEmails.some(email => email === other.email!)) {
-            base.alternativeEmails.push(other.email!);
-        }
-    }
+    const allEmails = Formatter.uniqueArray(
+        [base.email, ...base.alternativeEmails, other.email, ...other.alternativeEmails]
+            .filter(f => f !== null)
+            .filter(f => !isNullOrEmpty(f)),
+    );
+    base.email = allEmails.shift() ?? null;
+    base.alternativeEmails = allEmails;
 }
 
 function mergePhone(
