@@ -142,7 +142,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, Checkbox, CheckboxListItem, Dropdown, ErrorBox, FillRecordCategoryView, LoadingButton, MultiSelectInput, NavigationActions, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, useAuth, useContext, useErrors, usePatch, useRequiredOrganization } from '@stamhoofd/components';
 import { AppManager, useRequestOwner } from '@stamhoofd/networking';
-import { Country, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCategory, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
+import { Country, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCategory, RecordChoice, RecordChooseOneAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, onMounted, ref } from 'vue';
 
@@ -597,7 +597,7 @@ const name = computed({
 });
 
 function getDefaultGlobalData(): Record<string, RecordAnswer> {
-    return {
+    const b: Record<string, RecordAnswer> = {
         'organization.name': RecordTextAnswer.create({
             settings: RecordSettings.create({}), // settings will be overwritten
             value: organization.value.name,
@@ -611,6 +611,19 @@ function getDefaultGlobalData(): Record<string, RecordAnswer> {
             address: organization.value.address,
         }),
     };
+
+    if (STAMHOOFD.translationNamespace === 'keeo') {
+        b['certification.type'] = RecordChooseOneAnswer.create({
+            settings: RecordSettings.create({}), // settings will be overwritten
+            selectedChoice: RecordChoice.create({
+                id: 'authorities',
+                name: 'Gemeenten, gemeenschappen of gewesten',
+                description: 'is vergund, erkend, gesubsidieerd of gecontroleerd door de lokale openbare besturen of openbare besturen van de gemeenschappen of gewesten',
+            }),
+        });
+    }
+
+    return b;
 }
 
 async function loadHtml(type: string) {
