@@ -23,7 +23,7 @@
         "@types/node": "^20.12"
     },
     "dependencies": {
-        "@simonbackx/simple-endpoints": "1.19.0",
+        "@simonbackx/simple-endpoints": "1.19.1",
         "@simonbackx/simple-logging": "^1.0.1",
         "formidable": "3.5.1",
         "luxon": "3.4.4",
