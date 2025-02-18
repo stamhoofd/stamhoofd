@@ -729,5 +729,15 @@
   "7cac9136-10b5-4f1c-b9a4-0fb3f8410a9b": "Je kan zelf ook leden inschrijven voor deze activiteit.",
   "d87cdb56-c8a6-4466-a6fd-f32fe59561f5": "Aangevinkt",
   "01b79813-933b-4045-b426-82700f921eaa": "Niet aangevinkt",
-  "ee2852cb-6458-4127-8ad0-3281cc286884": "Voorbeeld bekijken"
+  "ee2852cb-6458-4127-8ad0-3281cc286884": "Voorbeeld bekijken",
+  "41b46e42-08eb-4146-b71c-d77c90f46219": "Aangerekend",
+  "87d9975e-d0ac-41d4-8472-dedcfaa571cb": "Proefperiode",
+  "52b7cfdf-2f2c-4d88-8689-96a91f885654": "Aanrekening via #koepel",
+  "227a2170-37b7-46b0-ac1e-516f603379b5": "Sommige aansluitingen verlopen via #koepel (lid betaalt rechtstreeks aan de koepel) en worden dus ook niet echt aangerekend aan een individuele vereniging. Je kan deze via deze filter uitsluiten.",
+  "48148df3-81a8-439e-a368-64355aa7da6e": "Lid betaald rechtstreeks aan #koepel",
+  "6507f89c-5c50-4c37-943f-ec17f5831cf0": "Lid betaald aan individuele vereniging",
+  "388a4417-a2df-4943-b446-d13d2445824b": "Type aansluiting",
+  "9bebe05c-cc6b-4f78-8704-80143df8e010": "historische inschrijving",
+  "07cba8c8-a135-48e8-83c4-59313ef296d8": "aansluitingen",
+  "8cd6fafc-25ae-4b8d-94e6-fa9d8be0ec16": "Filter op leden met een bepaalde aansluiting"
 }

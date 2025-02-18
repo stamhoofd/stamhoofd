@@ -96,6 +96,7 @@ export type MultipleChoiceUiFilterConfiguration = {
 
 export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoiceUIFilter> {
     name = '';
+    description = '';
     wrapper?: WrapperFilter;
     additionalUnwrappers?: WrapperFilter[];
     wrapFilter?: UIFilterWrapper | null | undefined;
@@ -111,6 +112,7 @@ export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoi
 
     constructor(data: {
         name: string;
+        description?: string;
         options: MultipleChoiceUIFilterOption[];
         wrapper?: WrapperFilter;
         additionalUnwrappers?: WrapperFilter[];
@@ -120,6 +122,7 @@ export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoi
         allowCreation?: boolean;
     }) {
         this.name = data.name;
+        this.description = data.description;
         this.multipleChoiceOptions = data.options;
         this.wrapper = data.wrapper;
         this.wrapFilter = data.wrapFilter;

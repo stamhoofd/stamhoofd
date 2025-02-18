@@ -219,6 +219,209 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
     };
 }
 
+export function useAdvancedPlatformMembershipUIFilterBuilders() {
+    const $platform = usePlatform();
+    const $user = useUser();
+    const $t = useTranslate();
+    const manager = usePlatformManager();
+    const owner = useRequestOwner();
+    const loading = ref(true);
+
+    manager.value.loadPeriods(false, true, owner).then(() => {
+        loading.value = false;
+    }).catch((e) => {
+        console.error('Failed to load periods in useAdvancedPlatformMembershipUIFilterBuilders', e);
+    });
+
+    return {
+        loading,
+        filterBuilders: computed(() => {
+            const platform = $platform.value;
+            const user = $user.value;
+            const hasPlatformPermissions = (user?.permissions?.platform !== null);
+
+            const all = [];
+            all.push(
+                new StringFilterBuilder({
+                    name: $t('2f2899e5-4c62-4452-97d2-97f4fd670e86'),
+                    key: 'organizationId',
+                    allowCreation: false,
+                    wrapper: FilterWrapperMarker,
+                }),
+            );
+
+            all.push(
+                new MultipleChoiceFilterBuilder({
+                    name: $t('322dd34f-a4ec-4065-be53-040725915e20'),
+                    options: (platform.periods ?? []).map((period) => {
+                        return new MultipleChoiceUIFilterOption(period.nameShort, period.id);
+                    }),
+                    allowCreation: hasPlatformPermissions,
+                    wrapper: {
+                        periodId: { $in: FilterWrapperMarker },
+                    },
+                    additionalUnwrappers: [
+                        {
+                            periodId: FilterWrapperMarker,
+                        },
+                    ],
+                }),
+            );
+
+            all.push(
+                new MultipleChoiceFilterBuilder({
+                    name: $t('41b46e42-08eb-4146-b71c-d77c90f46219'),
+                    options: [
+                        new MultipleChoiceUIFilterOption('Reeds aangerekend', true),
+                        new MultipleChoiceUIFilterOption('Nog niet aangerekend', false),
+                    ],
+                    allowCreation: hasPlatformPermissions,
+                    wrapFilter: (f: StamhoofdFilter) => {
+                        const choices = Array.isArray(f) ? f : [f];
+
+                        if (choices.length === 2) {
+                            return null;
+                        }
+
+                        if (choices.length === 1 && choices[0] === true) {
+                            return {
+                                balanceItemId: {
+                                    $neq: null,
+                                },
+                            };
+                        }
+
+                        return {
+                            balanceItemId: null,
+                        };
+                    },
+                }),
+            );
+
+            all.push(
+                new MultipleChoiceFilterBuilder({
+                    name: $t('87d9975e-d0ac-41d4-8472-dedcfaa571cb'),
+                    options: [
+                        new MultipleChoiceUIFilterOption('Met actieve proefperiode', true),
+                        new MultipleChoiceUIFilterOption('Zonder proefperiode', false),
+                    ],
+                    allowCreation: hasPlatformPermissions,
+                    wrapFilter: (f: StamhoofdFilter) => {
+                        const choices = Array.isArray(f) ? f : [f];
+
+                        if (choices.length === 2) {
+                            return null;
+                        }
+
+                        if (choices.length === 1 && choices[0] === false) {
+                            return {
+                                $or: [
+                                    {
+                                        trialUntil: {
+                                            $lte: { $: '$now' },
+                                        },
+                                    },
+                                    {
+                                        trialUntil: null,
+                                    },
+                                ],
+                            } as StamhoofdFilter;
+                        }
+
+                        return {
+                            trialUntil: {
+                                $gt: { $: '$now' },
+                            },
+                        };
+                    },
+                }),
+            );
+
+            all.push(
+                new MultipleChoiceFilterBuilder({
+                    name: $t('Vergrendeld'),
+                    description: $t('Een aansluiting kan soms worden vergrendeld zodat deze niet meer kan worden aangepast.'),
+                    options: [
+                        new MultipleChoiceUIFilterOption($t('Vergrendeld'), true),
+                        new MultipleChoiceUIFilterOption($t('Niet vergrendeld'), false),
+                    ],
+                    allowCreation: hasPlatformPermissions,
+                    wrapFilter: (f: StamhoofdFilter) => {
+                        const choices = Array.isArray(f) ? f : [f];
+
+                        if (choices.length === 2) {
+                            return null;
+                        }
+
+                        if (choices.length === 1 && choices[0] === false) {
+                            return {
+                                locked: false,
+                            } as StamhoofdFilter;
+                        }
+
+                        return {
+                            locked: true,
+                        };
+                    },
+                }),
+            );
+
+            all.push(
+                new MultipleChoiceFilterBuilder({
+                    name: $t('52b7cfdf-2f2c-4d88-8689-96a91f885654'),
+                    description: $t('227a2170-37b7-46b0-ac1e-516f603379b5'),
+                    options: [
+                        new MultipleChoiceUIFilterOption($t('48148df3-81a8-439e-a368-64355aa7da6e'), true),
+                        new MultipleChoiceUIFilterOption($t('6507f89c-5c50-4c37-943f-ec17f5831cf0'), false),
+                    ],
+                    allowCreation: hasPlatformPermissions,
+                    wrapFilter: (f: StamhoofdFilter) => {
+                        const choices = Array.isArray(f) ? f : [f];
+
+                        if (choices.length === 2) {
+                            return null;
+                        }
+
+                        if (choices.length === 1 && choices[0] === true) {
+                            return {
+                                organizationId: $platform.value.membershipOrganizationId,
+                            };
+                        }
+
+                        return {
+                            organizationId: {
+                                $neq: $platform.value.membershipOrganizationId,
+                            },
+                        };
+                    },
+                }),
+            );
+
+            all.push(
+                new MultipleChoiceFilterBuilder({
+                    name: $t('388a4417-a2df-4943-b446-d13d2445824b'),
+                    options: platform.config.membershipTypes.map((membershipType) => {
+                        return new MultipleChoiceUIFilterOption(membershipType.name, membershipType.id);
+                    }),
+                    wrapper: {
+                        membershipTypeId: {
+                            $in: FilterWrapperMarker,
+                        },
+                    },
+                }),
+            );
+
+            all.unshift(
+                new GroupUIFilterBuilder({
+                    builders: all,
+                }),
+            );
+
+            return all;
+        }),
+    };
+}
+
 export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
     const $platform = usePlatform();
     const $user = useUser();
@@ -227,6 +430,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
     const financialSupportSettings = useFinancialSupportSettings();
     const auth = useAuth();
     const organization = useOrganization();
+    const { loading: loadingMembershipFilters, filterBuilders: membershipFilters } = useAdvancedPlatformMembershipUIFilterBuilders();
 
     const filterResponsibilities = (responsibilities: MemberResponsibility[]) => {
         return responsibilities.filter((r) => {
@@ -243,7 +447,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
     };
 
     return {
-        loading,
+        loading: computed(() => loading.value || loadingMembershipFilters.value),
         filterBuilders: computed(() => {
             const platform = $platform.value;
             const user = $user.value;
@@ -702,11 +906,24 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
             if (auth.hasFullAccess()) {
                 all.push(
                     new GroupUIFilterBuilder({
-                        name: 'historische inschrijving',
+                        name: $t('9bebe05c-cc6b-4f78-8704-80143df8e010'),
                         description: $t('1316502a-5502-49ec-96fe-93e60cb94268'),
                         builders: registrationFilters.value,
                         wrapper: {
                             registrations: {
+                                $elemMatch: FilterWrapperMarker,
+                            },
+                        },
+                    }),
+                );
+
+                all.push(
+                    new GroupUIFilterBuilder({
+                        name: $t('07cba8c8-a135-48e8-83c4-59313ef296d8'),
+                        description: $t('8cd6fafc-25ae-4b8d-94e6-fa9d8be0ec16'),
+                        builders: membershipFilters.value,
+                        wrapper: {
+                            platformMemberships: {
                                 $elemMatch: FilterWrapperMarker,
                             },
                         },

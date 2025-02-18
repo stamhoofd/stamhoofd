@@ -21,7 +21,6 @@
 </template>
 
 <script lang="ts" setup>
-import { usePresent } from '@simonbackx/vue-app-navigation';
 import { Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, useAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { AccessRight, Group, GroupCategoryTree, GroupPrice, GroupType, MemberResponsibility, MembershipStatus, Organization, PermissionLevel, PlatformMember, RecordAnswer, RegisterItemOption, StamhoofdFilter } from '@stamhoofd/structures';
@@ -74,7 +73,6 @@ const estimatedRows = computed(() => {
     return 30;
 });
 
-const present = usePresent();
 const app = useAppContext();
 const $t = useTranslate();
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;

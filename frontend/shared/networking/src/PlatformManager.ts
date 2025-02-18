@@ -24,7 +24,7 @@ export class PlatformManager {
 
         $platform.setShared();
 
-        this.updateStyles()
+        this.updateStyles();
     }
 
     updateStyles() {
@@ -142,20 +142,32 @@ export class PlatformManager {
         }
     }
 
+    _pendingLoadPeriods: Promise<RegistrationPeriod[]> | null = null;
+
     async loadPeriods(force = false, shouldRetry?: boolean, owner?: any) {
+        if (!force && this._pendingLoadPeriods && !this.$platform.periods) {
+            await this._pendingLoadPeriods;
+        }
+
         if (!force && this.$platform.periods) {
             return this.$platform.periods;
         }
 
-        const response = await this.$context.optionalAuthenticatedServer.request({
-            method: 'GET',
-            path: '/registration-periods',
-            decoder: new ArrayDecoder(RegistrationPeriod as Decoder<RegistrationPeriod>),
-            owner,
-            shouldRetry: shouldRetry ?? false,
-        });
-        this.$platform.periods = response.data.sort((a, b) => Sorter.byDateValue(a.startDate, b.startDate));
-        return response.data;
+        this._pendingLoadPeriods = (async () => {
+            const response = await this.$context.optionalAuthenticatedServer.request({
+                method: 'GET',
+                path: '/registration-periods',
+                decoder: new ArrayDecoder(RegistrationPeriod as Decoder<RegistrationPeriod>),
+                owner,
+                shouldRetry: shouldRetry ?? false,
+            });
+            this.$platform.periods = response.data.sort((a, b) => Sorter.byDateValue(a.startDate, b.startDate));
+            return response.data;
+        })();
+
+        const awaited = await this._pendingLoadPeriods;
+        this._pendingLoadPeriods = null;
+        return awaited;
     }
 
     /**
