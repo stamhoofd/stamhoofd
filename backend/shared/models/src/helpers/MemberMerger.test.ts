@@ -57,7 +57,7 @@ describe('member merge', () => {
                 birthDay: new Date(1990, 1, 1),
                 memberNumber: '123',
                 uitpasNumber: '56',
-                email: 'b7v2X@example.com',
+                email: 'b7v2x@example.com',
                 phone: '04863544',
                 gender: Gender.Male,
                 requiresFinancialSupport: BooleanStatus.create({ value: true }),
@@ -227,7 +227,7 @@ describe('member merge', () => {
                 birthDay: new Date(1990, 1, 1),
                 memberNumber: '123',
                 uitpasNumber: '56',
-                email: 'b7v2X@example.com',
+                email: 'b7v2x@example.com',
                 phone: '04863544',
                 gender: Gender.Male,
                 requiresFinancialSupport: BooleanStatus.create({ value: true }),
@@ -438,7 +438,7 @@ describe('member merge', () => {
                 email: 'oldJohn@test.be',
                 phone: '0499999',
                 address: Address.create({
-                    street: 'john street',
+                    street: 'John street',
                     number: '5',
                     city: 'Amsterdam',
                     postalCode: '1011AB',
@@ -452,7 +452,7 @@ describe('member merge', () => {
                 birthDay: new Date(1990, 1, 1),
                 memberNumber: '123',
                 uitpasNumber: '56',
-                email: 'b7v2X@example.com',
+                email: 'b7v2x@example.com',
                 phone: '04863544',
                 gender: Gender.Male,
                 requiresFinancialSupport: BooleanStatus.create({
@@ -616,7 +616,8 @@ describe('member merge', () => {
 
             test('email', () => {
                 expect(d1.email).toBe(d1Old.email);
-                expect(d1.unverifiedEmails).toContain(d2Old.email);
+                expect(d1.alternativeEmails).toContain(d2Old.email);
+                expect(d1.unverifiedEmails).not.toContain(d2Old.email);
             });
 
             test('phone', () => {
@@ -661,7 +662,7 @@ describe('member merge', () => {
                 expect(parent1.phone).toBe(oldParent1.phone);
                 expect(parent1.address?.id).toBe(parent1Alt.address?.id);
                 expect(d1.unverifiedPhones).toContain(parent1Alt.phone);
-                expect(parent1.alternativeEmails).toContain(parent1Alt.email);
+                expect(parent1.alternativeEmails).toContain(parent1Alt.email!.toLocaleLowerCase());
             });
 
             test('emergency contacts', () => {
@@ -677,7 +678,11 @@ describe('member merge', () => {
             });
 
             test('unverifiedEmails', () => {
-                expect(d1.unverifiedEmails.length).toBe(4);
+                expect(d1.unverifiedEmails.sort()).toEqual([
+                    'email1@test.be',
+                    'email2@test.be',
+                    'otherunverivied@test.be',
+                ].sort());
             });
 
             test('unverifiedPhones', () => {
@@ -685,7 +690,15 @@ describe('member merge', () => {
             });
 
             test('unverifiedAddresses', () => {
-                expect(d1.unverifiedAddresses.length).toBe(3);
+                // expect(d1.unverifiedAddresses.length).toBe(3);
+
+                // Should be combination of unverified addresses + address of the second member (which coulnd't be merged)
+                const addressIds = d1.unverifiedAddresses.map(a => a.id);
+                expect(addressIds.sort()).toEqual([
+                    d2Old.address!.id,
+                    d1Old.unverifiedAddresses[0].id,
+                    d2Old.unverifiedAddresses[0].id,
+                ].sort());
             });
 
             test('notes', () => {
