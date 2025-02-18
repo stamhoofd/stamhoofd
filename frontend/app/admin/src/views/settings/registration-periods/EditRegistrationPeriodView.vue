@@ -16,7 +16,7 @@
             </STInputBox>
         </div>
 
-        <STList>
+        <STList v-if="locked || !isCurrentPeriod">
             <STListItem :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="locked" />
@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, DateSelection, ErrorBox, SaveView, useErrors, usePatch } from '@stamhoofd/components';
+import { CenteredMessage, DateSelection, ErrorBox, SaveView, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { RegistrationPeriod } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
@@ -52,6 +52,9 @@ const props = defineProps<{
     saveHandler: (p: AutoEncoderPatchType<RegistrationPeriod>) => Promise<void>;
     deleteHandler: (() => Promise<void>) | null;
 }>();
+
+const platform = usePlatform();
+const isCurrentPeriod = computed(() => platform.value.period.id === props.period.id);
 const title = computed(() => props.isNew ? $t('c6f24e63-4735-43c4-a93a-405755ba70c2') : $t('7118def6-da94-4fce-9398-2131b31acf01'));
 const pop = usePop();
 
