@@ -1,10 +1,9 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import { Platform } from '@stamhoofd/models';
+import { QueueHandler } from '@stamhoofd/queues';
 import { SQL, SQLAlias, SQLCount, SQLDistinct, SQLSelectAs, SQLSum, SQLWhereSign } from '@stamhoofd/sql';
 import { ChargeMembershipsSummary, ChargeMembershipsTypeSummary } from '@stamhoofd/structures';
 import { Context } from '../../../helpers/Context';
-import { QueueHandler } from '@stamhoofd/queues';
-import { Platform } from '@stamhoofd/models';
-import { SimpleError } from '@simonbackx/simple-errors';
 
 type Params = Record<string, never>;
 type Query = Record<string, never>;
@@ -102,6 +101,7 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
             .from('member_platform_memberships')
             .where('balanceItemId', null)
             .where('deletedAt', null)
+            .where('locked', false)
             .whereNot('organizationId', chargeVia);
 
         if (!trial) {
@@ -164,6 +164,7 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
             .from('member_platform_memberships')
             .where('balanceItemId', null)
             .where('deletedAt', null)
+            .where('locked', false)
             .where(trialQ)
             .whereNot('organizationId', chargeVia)
             .groupBy(

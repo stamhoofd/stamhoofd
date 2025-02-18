@@ -35,7 +35,7 @@ export const MembershipCharger = {
                 .where('id', SQLWhereSign.Greater, lastId)
                 .where('balanceItemId', null)
                 .where('deletedAt', null)
-                .whereNot('organizationId', chargeVia)
+                .where('locked', false)
                 .where(SQL.where('trialUntil', null).or('trialUntil', SQLWhereSign.LessEqual, new Date()))
                 .limit(chunkSize)
                 .orderBy(
@@ -66,10 +66,6 @@ export const MembershipCharger = {
                     continue;
                 }
 
-                if (membership.organizationId === chargeVia) {
-                    continue;
-                }
-
                 const member = members.find(m => m.id === membership.memberId);
 
                 if (!member) {
@@ -83,6 +79,15 @@ export const MembershipCharger = {
                 }
                 catch (e) {
                     console.error('Failed to update price for membership. Not charged.', membership.id, e);
+                    continue;
+                }
+
+                // Lock membership
+                membership.locked = true;
+
+                if (membership.organizationId === chargeVia) {
+                    // Do not charge
+                    await membership.save();
                     continue;
                 }
 
