@@ -8,8 +8,7 @@ import { Registration } from '../models/Registration';
 class Options {
     member: Member;
     group: Group;
-    groupPrice: GroupPrice;
-    price?: number;
+    groupPrice?: GroupPrice;
 }
 
 export class RegistrationFactory extends Factory<Options, Registration> {
@@ -21,8 +20,7 @@ export class RegistrationFactory extends Factory<Options, Registration> {
         registration.organizationId = this.options.group.organizationId;
         registration.registeredAt = new Date();
         registration.registeredAt.setMilliseconds(0);
-        registration.groupPrice = this.options.groupPrice;
-        registration.price = this.options.price === undefined ? registration.groupPrice.price.price : this.options.price;
+        registration.groupPrice = this.options.groupPrice ?? this.options.group?.settings.prices[0];
 
         await registration.save();
         return registration;
