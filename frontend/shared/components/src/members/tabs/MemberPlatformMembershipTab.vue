@@ -76,7 +76,7 @@
                                     </LoadingButton>
                                 </template>
 
-                                <span v-if="membership.locked && (auth.hasPlatformFullAccess())" v-tooltip="$t('b1c11fd1-81dc-46f2-8cfb-0ba02d260f19')" class="icon lock" />
+                                <button v-if="membership.locked && (auth.hasPlatformFullAccess())" v-tooltip="$t('b1c11fd1-81dc-46f2-8cfb-0ba02d260f19')" class="button icon lock" type="button" @click="unlockMembership(membership)" />
                             </template>
                         </STListItem>
                     </STList>
@@ -118,6 +118,7 @@ const $t = useTranslate();
 const present = usePresent();
 const platformFamilyManager = usePlatformFamilyManager();
 const deletingMemberships = ref(new Set());
+const patchingMemberships = ref(new Set());
 const platform = usePlatform();
 const now = new Date();
 const auth = useAuth();
@@ -195,6 +196,41 @@ async function deleteMembership(membership: MemberPlatformMembership) {
         Toast.fromError(e).show();
     }
     deletingMemberships.value.delete(membership.id);
+}
+
+async function unlockMembership(membership: MemberPlatformMembership) {
+    if (patchingMemberships.value.has(membership.id)) {
+        return;
+    }
+
+    if (!await CenteredMessage.confirm($t('Ben je zeker dat je deze aansluiting wilt ontgrendelen?'), $t('Ja, ontgrendelen'))) {
+        return;
+    }
+
+    patchingMemberships.value.add(membership.id);
+
+    try {
+        // Execute an isolated patch
+        const platformMembershipsPatch = new PatchableArray() as PatchableArrayAutoEncoder<MemberPlatformMembership>;
+        platformMembershipsPatch.addPatch(MemberPlatformMembership.patch({
+            id: membership.id,
+            locked: false,
+        }));
+
+        const patch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
+        patch.addPatch(MemberWithRegistrationsBlob.patch({
+            id: props.member.member.id,
+            platformMemberships: platformMembershipsPatch,
+        }));
+
+        await platformFamilyManager.isolatedPatch([props.member], patch, false);
+
+        Toast.success($t('Aansluiting ontgrendeld')).show();
+    }
+    catch (e) {
+        Toast.fromError(e).show();
+    }
+    patchingMemberships.value.delete(membership.id);
 }
 
 function getMembershipType(membership: MemberPlatformMembership) {

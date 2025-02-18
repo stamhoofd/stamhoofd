@@ -540,6 +540,63 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 updateMembershipMemberIds.add(member.id);
             }
 
+            for (const p of patch.platformMemberships.getPatches()) {
+                const membership = await MemberPlatformMembership.getByID(p.id);
+
+                if (!membership || membership.memberId !== member.id) {
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        field: 'id',
+                        message: 'Invalid id',
+                        human: 'Deze aansluiting bestaat niet',
+                    });
+                }
+
+                if (!await Context.auth.hasFullAccess(membership.organizationId)) {
+                    throw Context.auth.error('Je hebt niet voldoende rechten om deze aansluiting aan te passen');
+                }
+
+                if (membership.periodId !== platform.periodId) {
+                    const period = await RegistrationPeriod.getByID(membership.periodId);
+
+                    if (!period) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'Invalid period',
+                            human: $t(`Je kan geen aansluitingen aanpassen in een ongeldig werkjaar`),
+                            field: 'periodId',
+                        });
+                    }
+
+                    if (period?.locked) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'Invalid period',
+                            human: $t(`Je kan geen aansluitingen wijzigen in een vergrendeld werkjaar`),
+                            field: 'periodId',
+                        });
+                    }
+                }
+
+                // For now only alter 'locked'
+                if (Context.auth.hasPlatformFullAccess()) {
+                    membership.locked = p.locked ?? membership.locked;
+                    await membership.save();
+                }
+                else {
+                    if (p.locked === true) {
+                        throw Context.auth.error($t('Je hebt niet voldoende rechten om deze aansluiting te vergrendelen'));
+                    }
+
+                    if (p.locked === false) {
+                        throw Context.auth.error($t('Je hebt niet voldoende rechten om deze aansluiting te ontgrendelen'));
+                    }
+                }
+
+                updateMembershipsForOrganizations.add(membership.organizationId); // can influence free memberships in other members of same organization
+                updateMembershipMemberIds.add(member.id);
+            }
+
             // Delete platform memberships
             for (const id of patch.platformMemberships.getDeletes()) {
                 const membership = await MemberPlatformMembership.getByID(id);
