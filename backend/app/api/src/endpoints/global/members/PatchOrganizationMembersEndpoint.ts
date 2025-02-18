@@ -532,7 +532,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 membership.startDate = new Date(Math.max(Date.now(), put.startDate.getTime()));
                 membership.endDate = put.endDate;
                 membership.expireDate = put.expireDate;
-                membership.locked = put.locked;
+                membership.locked = false;
 
                 await membership.calculatePrice(member);
                 await membership.save();

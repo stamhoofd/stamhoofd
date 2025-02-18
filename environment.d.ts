@@ -38,7 +38,11 @@ declare global {
 
     type LocalizedDomain = Localized<string>;
     type GlobalCountry = Country;
-
+    enum MemberNumberAlgorithm {
+        KSA = 'KSA',
+        Incremental = 'Incremental',
+    }
+    
     type StamhoofdDomains = {
         dashboard: string,                      // requires both www + non-www DNS record
         registration?: LocalizedDomain,         // Optional. Set to undefined for platforms. requires wildcard prefix DNS
@@ -161,6 +165,9 @@ declare global {
 
         readonly WHITELISTED_EMAIL_DESTINATIONS?: string[] // E-mails we are allowed to send e-mails to in case of staging or development environment
         readonly CACHE_PATH: string
+
+        readonly MEMBER_NUMBER_ALGORITHM?: MemberNumberAlgorithm
+        readonly MEMBER_NUMBER_ALGORITHM_LENGTH?: number
     }
 
     type BackendEnvironment = SharedEnvironment & BackendSpecificEnvironment

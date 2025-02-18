@@ -42,6 +42,23 @@ export class SQLDistinct implements SQLExpression {
         ]);
     }
 }
+
+export class SQLCharLength implements SQLExpression {
+    expression: SQLExpression;
+
+    constructor(expression: SQLExpression) {
+        this.expression = expression;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            'CHAR_LENGTH(',
+            this.expression.getSQL(options),
+            ')',
+        ]);
+    }
+}
+
 export class SQLCount implements SQLExpression {
     expression: SQLExpression | null;
 
