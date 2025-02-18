@@ -502,7 +502,7 @@ export class User extends QueryableModel {
         user.organizationId = organization?.id ?? null;
         user.id = id ?? uuidv4();
         user.email = email;
-        user.verified = false;
+        user.verified = true;
         user.firstName = firstName;
         user.lastName = lastName;
         user.linkLoginProvider(data.type, data.sub);

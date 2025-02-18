@@ -613,6 +613,7 @@ export class SSOServiceWithSession {
                 if (!user.lastName || !user.hasPasswordBasedAccount()) {
                     user.lastName = lastName;
                 }
+                user.verified = true;
                 user.linkLoginProvider(this.service.provider, claims.sub, !!this.session.userId);
                 await user.save();
             }
