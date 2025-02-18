@@ -203,7 +203,7 @@ async function unlockMembership(membership: MemberPlatformMembership) {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('Ben je zeker dat je deze aansluiting wilt ontgrendelen?'), $t('Ja, ontgrendelen'))) {
+    if (!await CenteredMessage.confirm($t('6468d392-6711-48cd-9602-a5a26afe6f22'), $t('ac1d3647-1c2f-48a1-a08a-ce4821103fb1'))) {
         return;
     }
 
@@ -225,7 +225,7 @@ async function unlockMembership(membership: MemberPlatformMembership) {
 
         await platformFamilyManager.isolatedPatch([props.member], patch, false);
 
-        Toast.success($t('Aansluiting ontgrendeld')).show();
+        Toast.success($t('04cac345-ed28-484c-8a50-96ac4db89911')).show();
     }
     catch (e) {
         Toast.fromError(e).show();

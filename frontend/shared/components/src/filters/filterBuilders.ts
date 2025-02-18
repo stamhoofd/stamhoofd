@@ -339,11 +339,11 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
 
             all.push(
                 new MultipleChoiceFilterBuilder({
-                    name: $t('Vergrendeld'),
-                    description: $t('Een aansluiting kan soms worden vergrendeld zodat deze niet meer kan worden aangepast.'),
+                    name: $t('2f6eb4f4-cfc7-498f-9aef-e534979ea402'),
+                    description: $t('730983be-3471-4350-8c74-966480d46727'),
                     options: [
-                        new MultipleChoiceUIFilterOption($t('Vergrendeld'), true),
-                        new MultipleChoiceUIFilterOption($t('Niet vergrendeld'), false),
+                        new MultipleChoiceUIFilterOption($t('2f6eb4f4-cfc7-498f-9aef-e534979ea402'), true),
+                        new MultipleChoiceUIFilterOption($t('039c2f51-c533-4262-91d6-24e4a503b003'), false),
                     ],
                     allowCreation: hasPlatformPermissions,
                     wrapFilter: (f: StamhoofdFilter) => {

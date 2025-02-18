@@ -739,5 +739,15 @@
   "388a4417-a2df-4943-b446-d13d2445824b": "Type aansluiting",
   "9bebe05c-cc6b-4f78-8704-80143df8e010": "historische inschrijving",
   "07cba8c8-a135-48e8-83c4-59313ef296d8": "aansluitingen",
-  "8cd6fafc-25ae-4b8d-94e6-fa9d8be0ec16": "Filter op leden met een bepaalde aansluiting"
+  "8cd6fafc-25ae-4b8d-94e6-fa9d8be0ec16": "Filter op leden met een bepaalde aansluiting",
+  "bbc639c8-abdb-42d8-b5ed-f58084886ad9": "Je hebt niet voldoende rechten om deze aansluiting te vergrendelen",
+  "c6494677-86f0-4d2e-b9ac-bedfc9e87187": "Je hebt niet voldoende rechten om deze aansluiting te ontgrendelen",
+  "82af2364-c711-4e44-a871-9346c2cab66a": "Je kan geen aansluitingen aanpassen in een ongeldig werkjaar",
+  "92a41b40-9841-4326-abaf-a8a7d97e5d55": "Je kan geen aansluitingen wijzigen in een vergrendeld werkjaar",
+  "2f6eb4f4-cfc7-498f-9aef-e534979ea402": "Vergrendeld",
+  "730983be-3471-4350-8c74-966480d46727": "Een aansluiting kan soms worden vergrendeld zodat deze niet meer kan worden aangepast.",
+  "039c2f51-c533-4262-91d6-24e4a503b003": "Niet vergrendeld",
+  "6468d392-6711-48cd-9602-a5a26afe6f22": "Ben je zeker dat je deze aansluiting wilt ontgrendelen?",
+  "ac1d3647-1c2f-48a1-a08a-ce4821103fb1": "Ja, ontgrendelen",
+  "04cac345-ed28-484c-8a50-96ac4db89911": "Aansluiting ontgrendeld"
 }

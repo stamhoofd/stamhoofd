@@ -563,7 +563,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid period',
-                            human: $t(`Je kan geen aansluitingen aanpassen in een ongeldig werkjaar`),
+                            human: $t(`82af2364-c711-4e44-a871-9346c2cab66a`),
                             field: 'periodId',
                         });
                     }
@@ -572,7 +572,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid period',
-                            human: $t(`Je kan geen aansluitingen wijzigen in een vergrendeld werkjaar`),
+                            human: $t(`92a41b40-9841-4326-abaf-a8a7d97e5d55`),
                             field: 'periodId',
                         });
                     }
@@ -585,11 +585,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
                 else {
                     if (p.locked === true) {
-                        throw Context.auth.error($t('Je hebt niet voldoende rechten om deze aansluiting te vergrendelen'));
+                        throw Context.auth.error($t('bbc639c8-abdb-42d8-b5ed-f58084886ad9'));
                     }
 
                     if (p.locked === false) {
-                        throw Context.auth.error($t('Je hebt niet voldoende rechten om deze aansluiting te ontgrendelen'));
+                        throw Context.auth.error($t('c6494677-86f0-4d2e-b9ac-bedfc9e87187'));
                     }
                 }
 
