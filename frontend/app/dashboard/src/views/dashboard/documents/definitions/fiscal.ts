@@ -156,7 +156,7 @@ export const fiscal = DocumentTemplateDefinition.create({
                     type: RecordType.Text,
                     warning: RecordWarning.create({
                         id: 'missing.debtor.nationalRegisterNumber',
-                        text: 'Rijksregisternummer schuldenaar ontbreekt. Er is een uitzondering waardoor je het rijksregisternummer nog niet moet invullen voor aanslagjaar 2023. Maar we raden wel al aan om deze te verzamelen, en enkel leeg te laten waar je de gegevens niet op tijd hebt ontvangen.',
+                        text: 'Rijksregisternummer schuldenaar ontbreekt. Je vult dit best aan bij één van de ouders van dit lid.',
                         type: RecordWarningType.Warning,
                         inverted: true,
                     }),
@@ -172,7 +172,7 @@ export const fiscal = DocumentTemplateDefinition.create({
         RecordCategory.create({
             id: 'member',
             name: 'Gegevens lid',
-            description: 'Deze gegevens zijn allemaal standaard beschikbaar in Stamhoofd, met uitzondering van het rijksregisternummer.',
+            description: 'Deze gegevens zijn allemaal standaard beschikbaar.',
             records: [
                 RecordSettings.create({
                     id: 'member.nationalRegisterNumber',
@@ -181,7 +181,7 @@ export const fiscal = DocumentTemplateDefinition.create({
                     type: RecordType.Text,
                     warning: RecordWarning.create({
                         id: 'missing.member.nationalRegisterNumber',
-                        text: 'Rijksregisternummer lid ontbreekt. Er is een uitzondering waardoor je het rijksregisternummer nog niet moet invullen voor aanslagjaar 2023. Maar we raden wel al aan om deze te verzamelen, en enkel leeg te laten waar je de gegevens niet op tijd hebt ontvangen.',
+                        text: 'Rijksregisternummer lid ontbreekt. Je vult dit best aan bij dit lid.',
                         type: RecordWarningType.Warning,
                         inverted: true,
                     }),
