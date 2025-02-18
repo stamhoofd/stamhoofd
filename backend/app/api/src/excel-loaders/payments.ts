@@ -148,6 +148,32 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
             }),
         },
         {
+            id: 'balanceItem.createdAt',
+            name: 'Aangerekend op',
+            width: 16,
+            getValue: (object: PaymentWithItem) => ({
+                value: object.balanceItemPayment.balanceItem.createdAt,
+                style: {
+                    numberFormat: {
+                        id: XlsxBuiltInNumberFormat.DateTimeSlash,
+                    },
+                },
+            }),
+        },
+        {
+            id: 'balanceItem.dueAt',
+            name: 'Verschuldigd vanaf',
+            width: 16,
+            getValue: (object: PaymentWithItem) => ({
+                value: object.balanceItemPayment.balanceItem.dueAt,
+                style: {
+                    numberFormat: {
+                        id: XlsxBuiltInNumberFormat.DateTimeSlash,
+                    },
+                },
+            }),
+        },
+        {
             match: (id) => {
                 if (id.startsWith('balanceItem.relations.')) {
                     const type = id.split('.')[2] as BalanceItemRelationType;

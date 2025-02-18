@@ -83,6 +83,16 @@ export function getSelectableWorkbook() {
                         name: 'Beschrijving',
                     }),
 
+                    new SelectableColumn({
+                        id: 'balanceItem.createdAt',
+                        name: 'Aangerekend op',
+                    }),
+
+                    new SelectableColumn({
+                        id: 'balanceItem.dueAt',
+                        name: 'Verschuldigd vanaf',
+                    }),
+
                     ...Object.values(BalanceItemRelationType).map(relationType => new SelectableColumn({
                         id: `balanceItem.relations.${relationType}`,
                         name: getBalanceItemRelationTypeName(relationType),
