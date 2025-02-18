@@ -282,8 +282,8 @@ export class MemberDetails extends AutoEncoder {
         if (this.hasUnverifiedData) {
             const lastReviewed = this.reviewTimes.getLastReview('parents') && this.reviewTimes.getLastReview('details');
 
-            if (lastReviewed) {
-                // clear unverified data
+            if (lastReviewed && lastReviewed > new Date((new Date().getTime() - 1000 * 60 * 60 * 24))) {
+                // clear unverified data only if reviewed today
                 this.unverifiedAddresses = [];
                 this.unverifiedEmails = [];
                 this.unverifiedPhones = [];
@@ -817,7 +817,7 @@ export class MemberDetails extends AutoEncoder {
         const userEmails = [...this.alternativeEmails];
 
         if (this.email) {
-            userEmails.push(this.email);
+            userEmails.unshift(this.email);
         }
 
         return userEmails;
