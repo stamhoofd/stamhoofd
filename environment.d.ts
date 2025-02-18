@@ -38,7 +38,7 @@ declare global {
 
     type LocalizedDomain = Localized<string>;
     type GlobalCountry = Country;
-    enum MemberNumberAlgorithm {
+    const enum MemberNumberAlgorithm {
         KSA = 'KSA',
         Incremental = 'Incremental',
     }
