@@ -28,6 +28,13 @@ export function useAddMember() {
                         await navigate.dismiss({force: true})
                         return;
                     }
+
+                    if (realMember.patchedMember.registrations.length) {
+                        // This (new) member already has registrations. We don't need to show the choose group view.
+                        await navigate.dismiss({force: true});
+                        return;
+                    }
+
                     await options.finishHandler(realMember!, navigate)
                 }
             }),
