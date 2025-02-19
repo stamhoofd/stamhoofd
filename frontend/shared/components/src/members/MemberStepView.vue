@@ -47,15 +47,15 @@
 import { patchContainsChanges } from '@simonbackx/simple-encoding';
 import { useDismiss, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { PlatformMember, Version } from '@stamhoofd/structures';
-import { ComponentOptions, Ref, computed, ref } from 'vue';
+import { ComponentOptions, computed, Ref, ref } from 'vue';
 
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { onActivated } from 'vue';
 import { useAppContext } from '../context';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import CodeInput from '../inputs/CodeInput.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
+import { Toast } from '../overlays/Toast';
 import { NavigationActions } from '../types/NavigationActions';
 import { usePlatformFamilyManager } from './PlatformFamilyManager';
 
@@ -152,6 +152,11 @@ async function save() {
             // Copy over clone
             patchMemberWithReviewed(cloned.value);
             props.member.family.copyFromClone(cloned.value.family);
+        }
+
+        if (isDuplicate.value) {
+            Toast.success($t('Je hebt succesvol toegang gekregen tot de gegevens van {name}', { name: cloned.value.patchedMember.details.firstName })).show();
+            isDuplicate.value = false;
         }
 
         if (props.saveHandler) {
