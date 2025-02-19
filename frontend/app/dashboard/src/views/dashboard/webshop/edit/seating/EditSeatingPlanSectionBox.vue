@@ -707,20 +707,23 @@ function redo() {
 }
 
 const sizeConfig = computed(() => {
-    if (isMobile) {
-        return new SeatingSizeConfiguration({
-            seatWidth: 35,
-            seatHeight: 35,
-            seatXSpacing: 3 / 4 * 5,
-            seatYSpacing: 10 / 4 * 5,
-        });
-    }
-    return new SeatingSizeConfiguration({
+    let config = new SeatingSizeConfiguration({
         seatWidth: 28,
         seatHeight: 28,
         seatXSpacing: 3,
-        seatYSpacing: 10,
-    });
+        seatYSpacing: 10
+    })
+    if (isMobile) {
+        config = new SeatingSizeConfiguration({
+            seatWidth: 35,
+            seatHeight: 35,
+            seatXSpacing: 3 / 4 * 5,
+            seatYSpacing: 10 / 4 * 5
+        })
+    }
+
+    clonedSeatingPlanSection.value.correctSizeConfig(config)
+    return config;
 });
 
 const size = computed(() => clonedSeatingPlanSection.value.calculateSize(sizeConfig.value));
