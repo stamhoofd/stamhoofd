@@ -1655,11 +1655,13 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
         );
 
         if (allForCategory.length > 0) {
+            const group = new GroupUIFilterBuilder({
+                name: category.name,
+                builders: allForCategory,
+            });
+            allForCategory.unshift(group);
             all.push(
-                new GroupUIFilterBuilder({
-                    name: category.name,
-                    builders: allForCategory,
-                }),
+                group,
             );
         }
     }
