@@ -1582,12 +1582,13 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
 
     for (const category of categories) {
         const allForCategory: UIFilterBuilder<UIFilter>[] = [];
+        const categoryPrefix = category.name + ' → ';
 
         for (const record of category.records) {
             if (record.type === RecordType.Checkbox) {
                 allForCategory.push(
                     new MultipleChoiceFilterBuilder({
-                        name: prefix + record.name,
+                        name: prefix + categoryPrefix + record.name,
                         options: [
                             new MultipleChoiceUIFilterOption($t('d87cdb56-c8a6-4466-a6fd-f32fe59561f5'), true),
                             new MultipleChoiceUIFilterOption($t('01b79813-933b-4045-b426-82700f921eaa'), false),
@@ -1606,7 +1607,7 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
             if (record.type === RecordType.ChooseOne) {
                 allForCategory.push(
                     new MultipleChoiceFilterBuilder({
-                        name: prefix + record.name,
+                        name: prefix + categoryPrefix + record.name,
                         options: [
                             ...record.choices.map(c => new MultipleChoiceUIFilterOption(c.name, c.id)),
                         ],
@@ -1628,7 +1629,7 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
             if (record.type === RecordType.MultipleChoice) {
                 allForCategory.push(
                     new MultipleChoiceFilterBuilder({
-                        name: prefix + record.name,
+                        name: prefix + categoryPrefix + record.name,
                         options: [
                             ...record.choices.map(c => new MultipleChoiceUIFilterOption(c.name, c.id)),
                         ],
@@ -1651,7 +1652,7 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
         }
 
         allForCategory.push(
-            ...getFilterBuildersForRecordCategories(category.childCategories, category.name + ' → '),
+            ...getFilterBuildersForRecordCategories(category.childCategories, prefix + categoryPrefix),
         );
 
         if (allForCategory.length > 0) {
