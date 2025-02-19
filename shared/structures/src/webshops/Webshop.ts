@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { DNSRecord, DNSRecordType } from '../DNSRecord.js';
@@ -43,6 +43,9 @@ export class WebshopPreview extends AutoEncoder {
 
     @field({ decoder: WebshopPrivateMetaData, version: 62 })
     privateMeta = WebshopPrivateMetaData.create({});
+
+    @field({ decoder: DateDecoder, ...NextVersion })
+    createdAt: Date = new Date();
 
     get hasSingleTickets() {
         return this.meta.hasSingleTickets;

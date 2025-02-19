@@ -1,6 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuditLog, BalanceItem, CachedBalance, Document, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { Sorter } from '@stamhoofd/utility';
 
 import { SQL } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
@@ -254,7 +255,7 @@ export class AuthenticatedStructures {
                     ...baseStruct,
                     period,
                     privateMeta: organization.privateMeta,
-                    webshops: webshopPreviews.get(organization.id),
+                    webshops: webshopPreviews.get(organization.id)?.sort((a, b) => Sorter.byDateValue(b.createdAt, a.createdAt)),
                 });
             }
             else {
