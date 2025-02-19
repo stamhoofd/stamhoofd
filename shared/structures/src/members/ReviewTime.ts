@@ -1,5 +1,5 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { AuditLogReplacement } from '../AuditLogReplacement';
+import { AuditLogReplacement } from '../AuditLogReplacement.js';
 import { Formatter } from '@stamhoofd/utility';
 
 /**
