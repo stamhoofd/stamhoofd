@@ -1,6 +1,7 @@
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Group, Organization, Payment, Webshop } from "@stamhoofd/models";
 import { Group as GroupStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, Webshop as WebshopStruct,WebshopPreview } from '@stamhoofd/structures';
+import { Sorter } from "@stamhoofd/utility";
 
 import { Context } from "./Context";
 
@@ -78,7 +79,7 @@ export class AuthenticatedStructures {
                 website: organization.website,
                 groups: groups.map(g => this.group(g)).sort(GroupStruct.defaultSort),
                 privateMeta: organization.privateMeta,
-                webshops: webshops.flatMap(w => {
+                webshops: webshops.sort((a, b) => Sorter.byDateValue(b.createdAt, a.createdAt)).flatMap(w => {
                     if (!Context.auth.canAccessWebshop(w)) {
                         return []
                     }
