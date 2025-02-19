@@ -2,26 +2,37 @@ import fs from "fs";
 import { getFilesToSearch } from "./get-files-to-search";
 import { escapeRegExp } from "./regex-helper";
 
-// const regex = /(?<=<.+>)(?:\w|\d|\n|\s|\\n|[().,\-:;@#$%^&*\[\]"'+–/\/®°⁰!?{}|~])+?(?:\w|\d|\n|\s|\\n|[().,\-:;@#$%^&*\[\]"'+–/\/®°⁰!?{}|~])+?(?=<.*\/.+.?>)/ig;
-
-const regex = /(?<=<.*(\w|"|')>|}})(?:\w|\d|\n|\s|\\n|[().,\-:;@#$%^&*\[\]"'+–/\/®°⁰!?{}|~])+?(?:\w|\d|\n|\s|\\n|[().,\-:;@#$%^&*\[\]"'+–/\/®°⁰!?{}|~])+?(?=<.*\/.+.?>|{{)/ig;
+const vueTemplateTextRegex = /(?<=<.*(\w|"|')>|}})(?:\w|\d|\n|\s|\\n|[().,\-:;@#$%^&*\[\]"'+–/\/®°⁰!?{}|~])+?(?:\w|\d|\n|\s|\\n|[().,\-:;@#$%^&*\[\]"'+–/\/®°⁰!?{}|~])+?(?=<.*\/.+.?>|{{)/ig;
+const attributeRegex = /(?<=(:[^ ().,:;@#$%^&*\[\]"'+–/\/®°⁰!?{}|~]+=")).*?(?=")/ig;
+const quoteRegex = /"([^"]*?)"|'([^']*?)'/ig;
 
 const templateRegex = /<template>((.|\n)+)<\/template>/;
 
-// todo: update regex with $t('') etc
-// todo: search all .html and .vue files for text to replace?
-// -> do same as other code
+// todo: handle text arguments -> log only?
+// todo: handle attributes
 
-function isNumberOrSpecialCharacter(value: string) {
-    return /(^-?\d+$)|(^-?[().,\-:;@#$%^&*\[\]"'+–/\/®°⁰!?{}|~]+$)/.test(value);
+const attributeWhitelist = [
+    'placeholder',
+    'label',
+    'title',
+    'text'
+];
+
+const convertedWhiteList = attributeWhitelist.map(value => `:${value}=`);
+
+function isAttributeWhitelisted(value: string): boolean {
+    for(const item of convertedWhiteList) {
+        if(value.startsWith(item)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 export function replaceVueTemplateText() {
     const files = getFilesToSearch(['vue']);
 
     for (const filePath of files) {
-        console.log('- '+filePath);
-
         const fileContent = fs.readFileSync(filePath, "utf8");
         let newContent = fileContent;
 
@@ -36,8 +47,12 @@ export function replaceVueTemplateText() {
 
         let matches: RegExpExecArray | null;
 
-        while ((matches = regex.exec(template)) !== null) {
-            for(const match of matches) {
+        //#region replace text
+        const doReplaceText = true;
+
+        if(doReplaceText){
+            while ((matches = vueTemplateTextRegex.exec(template)) !== null) {
+                const match = matches[0];
                 if(!match) {
                     continue;
                 }
@@ -70,26 +85,15 @@ export function replaceVueTemplateText() {
                     const lastCharBeforeMatch = template[matches.index - 1];
                     const shouldKeepWhitespace = lastCharBeforeMatch === '}';
 
-                    let whiteSpaceBefore = '';
-                    let whiteSpaceAfter = '';
+                    let {whiteSpaceBefore, whiteSpaceAfter} = getWhiteSpaceBeforeAndAfter(line);
 
-                    const whiteSpaces = /(\s+$)|(^\s+)/g.exec(line);
-                    if(shouldKeepWhitespace) {
-                         whiteSpaceBefore = whiteSpaces?.[0] ?? '';
+                    if(!shouldKeepWhitespace) {
+                        whiteSpaceBefore = '';
                     }
 
-                    whiteSpaceAfter = whiteSpaces?.[1] ?? '';
-    
-                    let bracketType = "'";
                     const replaceValue = line.trim();
-    
-                    if(line.includes("'")) {
-                        bracketType = line.includes('"') ? '`' : '"';
-                    } else if(line.includes('"')) {
-                        bracketType = '`';
-                    }
 
-                    newLines.push(`${whiteSpaceBefore}{{$t(${bracketType}${replaceValue}${bracketType})}}${whiteSpaceAfter}`);
+                    newLines.push(`${whiteSpaceBefore}{{${wrapWithTranslationFunction(replaceValue)}}}${whiteSpaceAfter}`);
                 }
 
                 if(!newLines.length) {
@@ -101,10 +105,110 @@ export function replaceVueTemplateText() {
                 newContent = newContent.replace(replaceRegex, replaceValue);
             }
         }
+        //#endregion
+
+        //#region replace text in attributes
+        while((matches = attributeRegex.exec(template)) !== null) {
+            const match = matches[0];
+
+            if(!isAttributeWhitelisted(matches[1])) {
+                continue;
+            }
+
+            if(!match) {
+                continue;
+            }
+
+            const trimmedMatch = match.trim();
+            
+            if(trimmedMatch.length === 0) {
+                continue;
+            }
+
+            const transformed = replaceQuotedStringsByTranlation(match);
+
+            if(match !== transformed) {
+                newContent = newContent.replace(`"${match}"`, `"${transformed}"`);
+            }
+        }
+        //#endregion
 
         if(fileContent !== newContent) {
-            console.log('Replaced keys in ' + filePath);
             fs.writeFileSync(filePath, newContent);
+            console.log('Replaced vue template text in:');
+            console.log('- '+filePath);
         }
     }
+}
+
+function getWhiteSpaceBeforeAndAfter(value: string) {
+    return {
+        whiteSpaceBefore: /(^\s+)/.exec(value)?.[0] ?? '',
+        whiteSpaceAfter: /(\s+$)/.exec(value)?.[0] ?? ''
+    }
+}
+
+function isNumberOrSpecialCharacter(value: string) {
+    return /(^-?\d+$)|(^-?[().,\-:;@#$%^&*\[\]"'+–/\/®°⁰!?{}|~]+$)/.test(value);
+}
+
+function replaceQuotedStringsByTranlation(value: string): string {
+    let matches: RegExpExecArray | null;
+    let result = value;
+
+    while((matches = quoteRegex.exec(value)) !== null) {
+        const match = matches[0];
+
+        if(!match) {
+            continue;
+        }
+
+        const unquotedMatch = match.slice(1, match.length - 1);
+        const trimmedMatch = unquotedMatch.trim();
+        
+        if(trimmedMatch.length === 0) {
+            continue;
+        }
+
+        const before = value.slice(0, matches.index);
+
+        // not possible to know if should be translated
+        const isArgument = before.endsWith('(');
+
+        if(isArgument) {
+            continue;
+        }
+
+        const isTranslated = before.endsWith('$t(') || before.startsWith('$t(');
+
+        if(isTranslated) {
+            continue;
+        }
+
+        const isEquality = ['==', '!=', '>=', '<='].some(item => before.endsWith(item + ' ') || before.endsWith(item));
+
+        if(isEquality) {
+            continue;
+        }
+
+        const {whiteSpaceBefore, whiteSpaceAfter} = getWhiteSpaceBeforeAndAfter(unquotedMatch);
+        const quotedWhiteSpaceBefore = whiteSpaceBefore.length ? `"${whiteSpaceBefore}" + ` : '';
+        const quotedWhiteSpaceAfter = whiteSpaceAfter.length ? ` + "${whiteSpaceAfter}"` : '';
+
+        result = result.replace(match, quotedWhiteSpaceBefore + wrapWithTranslationFunction(trimmedMatch) + quotedWhiteSpaceAfter);
+    }
+
+    return result;
+}
+
+function wrapWithTranslationFunction(value: string): string {
+    let quoteType = "'";
+
+    if(value.includes("'")) {
+        quoteType = value.includes('"') ? '`' : '"';
+    } else if(value.includes('"')) {
+        quoteType = '`';
+    }
+
+    return `$t(${quoteType}${value}${quoteType})`;
 }
