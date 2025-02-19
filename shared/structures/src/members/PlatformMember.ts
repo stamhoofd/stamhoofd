@@ -50,7 +50,12 @@ export class PlatformFamily {
     }
 
     insertOrganization(organization: Organization) {
-        if (this.organizations.find(o => o.id === organization.id)) {
+        const existing = this.organizations.find(o => o.id === organization.id)
+        if (existing) {
+            // Deep set, because this might be the context organization
+            if (existing !== organization) {
+                existing.deepSet(organization);
+            }
             return;
         }
         this.organizations.push(organization);
@@ -92,9 +97,27 @@ export class PlatformFamily {
     }
 
     /**
+     * Update multiple members if you don't have a family reference (or multiple families)
+     */
+    static updateFromBlob(members: PlatformMember[], blob: MembersBlob) {
+        const passedFamilies = new Set<PlatformFamily>();
+        for (const member of members) {
+            if (passedFamilies.has(member.family)) {
+                continue;
+            }
+            member.family.updateFromBlob(blob);
+            passedFamilies.add(member.family);
+        }
+    }
+
+    /**
      * Same as insertFromBlob, but doesn't add new members, only updates existing members
      */
     updateFromBlob(blob: MembersBlob) {
+        for (const organization of blob.organizations) {
+            this.insertOrganization(organization);
+        }
+        
         for (const member of blob.members) {
             const existing = this.members.find(m => m.id === member.id);
             if (existing) {

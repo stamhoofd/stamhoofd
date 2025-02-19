@@ -183,7 +183,12 @@ export class MemberManager {
             decoder: MembersBlob as Decoder<MembersBlob>,
         });
         const blob = response.data;
+        blob.markReceivedFromBackend();
         this.family.insertFromBlob(blob, true);
+
+        if (this.$context.user) {
+            this.$context.user.members = blob;
+        }
     }
 
     async loadDocuments() {

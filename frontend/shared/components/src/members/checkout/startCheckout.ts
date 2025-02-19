@@ -7,7 +7,7 @@ import { DisplayOptions, NavigationActions } from '../../types/NavigationActions
 import { PaymentHandler } from '../../views/PaymentHandler';
 import { RegistrationSuccessView } from '../checkout';
 import { ViewStep, ViewStepsManager } from '../classes/ViewStepsManager';
-import { updateOrganizationFromMembers } from '../PlatformFamilyManager';
+import { updateContextFromMembersBlob } from '../PlatformFamilyManager';
 import { FreeContributionStep } from './steps/FreeContributionStep';
 import { PaymentCustomerStep } from './steps/PaymentCustomerStep';
 import { PaymentSelectionStep } from './steps/PaymentSelectionStep';
@@ -59,16 +59,8 @@ async function register({ checkout, context, admin, members }: { checkout: Regis
     const registrations = response.data.registrations;
 
     // Copy data to members
-    const passedFamilies = new Set<PlatformFamily>();
-    for (const member of [...(members ?? []), ...checkout.cart.items.map(i => i.member)]) {
-        if (passedFamilies.has(member.family)) {
-            continue;
-        }
-        member.family.updateFromBlob(response.data.members);
-        passedFamilies.add(member.family);
-    }
-
-    updateOrganizationFromMembers(context, response.data.members.members);
+    PlatformFamily.updateFromBlob([...(members ?? []), ...checkout.cart.items.map(i => i.member)], response.data.members)
+    updateContextFromMembersBlob(context, response.data.members);
 
     const clearAndEmit = () => {
         if (checkout.cart.items.length > 0) {

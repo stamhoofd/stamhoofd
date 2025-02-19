@@ -3,7 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Request, RequestResult } from '@simonbackx/simple-networking';
 import { AppType, useAppContext, useContext } from '@stamhoofd/components';
 import { SessionContext } from '@stamhoofd/networking';
-import { MemberWithRegistrationsBlob, MembersBlob, PlatformMember, Registration, Version } from '@stamhoofd/structures';
+import { MemberWithRegistrationsBlob, MembersBlob, PlatformFamily, PlatformMember, Registration, Version } from '@stamhoofd/structures';
 import { onBeforeUnmount, unref } from 'vue';
 
 export function usePlatformFamilyManager() {
@@ -46,7 +46,7 @@ export class PlatformFamilyManager {
 
         response.data.markReceivedFromBackend();
 
-        this.updateOrganizationFromMembers(response.data.members);
+        updateContextFromMembersBlob(this.context, response.data);
         return response.data;
     }
 
@@ -88,14 +88,6 @@ export class PlatformFamilyManager {
             });
             response.data.markReceivedFromBackend();
 
-            for (const c of members) {
-                // Check in response
-                const updatedMember = response.data.members.find(m => m.id === c.id);
-                if (updatedMember) {
-                    c.member.deepSet(updatedMember);
-                }
-            }
-
             // Remove deleted members from family
             for (const memberId of patches.getDeletes()) {
                 const member = members.find(m => m.id === memberId);
@@ -104,8 +96,8 @@ export class PlatformFamilyManager {
                 }
             }
 
-            this.updateUserMemberId(response.data.members);
-            this.updateOrganizationFromMembers(response.data.members);
+            PlatformFamily.updateFromBlob(members, response.data);
+            updateContextFromMembersBlob(this.context, response.data);
         }
     }
 
@@ -146,7 +138,7 @@ export class PlatformFamilyManager {
 
                 response = await this.context.authenticatedServer.request({
                     method: 'PATCH',
-                    path: this.app == 'registration' ? '/members' : '/organization/members',
+                    path: this.app === 'registration' ? '/members' : '/organization/members',
                     decoder: MembersBlob as Decoder<MembersBlob>,
                     body: patches,
                     shouldRetry,
@@ -192,38 +184,44 @@ export class PlatformFamilyManager {
                 }
             }
 
-            this.updateUserMemberId(response.data.members);
-            this.updateOrganizationFromMembers(response.data.members);
+            // Also insert the organizations into the families and deep set all the data we received
+            PlatformFamily.updateFromBlob(members, response.data);
+            updateContextFromMembersBlob(this.context, response.data);
         }
     }
+}
 
-    private updateUserMemberId(members: MemberWithRegistrationsBlob[]) {
-        const user = this.context.auth.user;
-        if (!user) {
-            return;
-        }
-
+export function updateContextFromMembersBlob(context: SessionContext, blob: MembersBlob) {
+    const user = context.auth.user;
+    if (user) {
+        // Update the user if we received a blob that contains a member with a user id equal to ours - while we don't have the memberId locally set
         const userId = user.id;
         const userMemberId = user.memberId;
 
-        const newUserMemberId = members
+        const newUserMemberId = blob.members
             .flatMap(cm => cm.users)
             .find(u => u.id === userId)?.memberId ?? null;
 
         if (userMemberId !== newUserMemberId) {
-            this.context.updateData(true, false, false).catch(console.error);
+            context.updateData(true, false, false).catch(console.error);
         }
     }
 
-    updateOrganizationFromMembers(members: MemberWithRegistrationsBlob[]) {
-        updateOrganizationFromMembers(this.context, members);
-    }
-}
-
-export function updateOrganizationFromMembers(context: SessionContext, members: MemberWithRegistrationsBlob[]) {
     // Update organizations we received
     // this updates the group cached counts
     if (context.organization) {
+        const id = context.organization.id;
+
+        // Skip this if we received a fresh organization in the response
+        const fresh = blob.organizations.find(o => o.id === id);
+        if (fresh) {
+            // Only deep set if we don't lose any private meta
+            context.updateOrganization(fresh);
+            return;
+        }
+
+        const members = blob.members;
+                
         // Update group data we received
         const processedGroups = new Set<string>();
         for (const member of members) {
