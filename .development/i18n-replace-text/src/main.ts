@@ -1,9 +1,10 @@
 import fs from "fs";
 import { getFilesToSearch } from "./get-files-to-search";
+import { escapeRegExp } from "./regex-helper";
 
 // const regex = /(?<=<.+>)(?:\w|\d|\n|\s|\\n|[().,\-:;@#$%^&*\[\]"'+–/\/®°⁰!?{}|~])+?(?:\w|\d|\n|\s|\\n|[().,\-:;@#$%^&*\[\]"'+–/\/®°⁰!?{}|~])+?(?=<.*\/.+.?>)/ig;
 
-const regex = /(?<=<.+>|}})(?:\w|\d|\n|\s|\\n|[().,\-:;@#$%^&*\[\]"'+–/\/®°⁰!?{}|~])+?(?:\w|\d|\n|\s|\\n|[().,\-:;@#$%^&*\[\]"'+–/\/®°⁰!?{}|~])+?(?=<.*\/.+.?>|{{)/ig;
+const regex = /(?<=<.*(\w|"|')>|}})(?:\w|\d|\n|\s|\\n|[().,\-:;@#$%^&*\[\]"'+–/\/®°⁰!?{}|~])+?(?:\w|\d|\n|\s|\\n|[().,\-:;@#$%^&*\[\]"'+–/\/®°⁰!?{}|~])+?(?=<.*\/.+.?>|{{)/ig;
 
 const templateRegex = /<template>((.|\n)+)<\/template>/;
 
@@ -11,8 +12,9 @@ const templateRegex = /<template>((.|\n)+)<\/template>/;
 // todo: search all .html and .vue files for text to replace?
 // -> do same as other code
 
-
-
+function isNumberOrSpecialCharacter(value: string) {
+    return /(^-?\d+$)|(^-?[().,\-:;@#$%^&*\[\]"'+–/\/®°⁰!?{}|~]+$)/.test(value);
+}
 
 export function replaceVueTemplateText() {
     const files = getFilesToSearch(['vue']);
@@ -37,24 +39,54 @@ export function replaceVueTemplateText() {
 
         while ((matches = regex.exec(template)) !== null) {
             for(const match of matches) {
-                const trimmed = match.trim();
-                if(trimmed.length === 0) {
+                if(!match) {
                     continue;
                 }
-                if(trimmed.startsWith('{{'))
+                const trimmedMatch = match.trim();
+                
+                if(trimmedMatch.length === 0) {
+                    continue;
+                }
+
+                if(trimmedMatch.startsWith('{{'))
                 {
                     continue
                 }
 
-                let bracketType = "'";
+                const replaceRegex = new RegExp(`(?<=<.*(\\w|"|')>|}})${escapeRegExp(match)}(?=<.*\/.+.?>|{{)`, 'ig');
 
-                if(match.includes("'")) {
-                    bracketType = match.includes('"') ? '`' : '"';
-                } else if(match.includes('"')) {
-                    bracketType = '`';
+                let newLines: string[] = [];
+
+                for(const line of match.split(/\r|\n/)) {
+                    const trimmedLine = line.trim();
+                
+                    if(trimmedLine.length < 2) {
+                        continue;
+                    }
+
+                    if(isNumberOrSpecialCharacter(trimmedLine)) {
+                        continue;
+                    }
+    
+                    let bracketType = "'";
+                    let replaceValue = line.trimStart();
+    
+                    if(line.includes("'")) {
+                        bracketType = line.includes('"') ? '`' : '"';
+                    } else if(line.includes('"')) {
+                        bracketType = '`';
+                    }
+
+                    newLines.push(`{{$t(${bracketType}${replaceValue}${bracketType})}}`);
                 }
 
-                newContent = newContent.replace(match, `{{$t(${bracketType}${match}${bracketType}}}`)
+                if(!newLines.length) {
+                    continue;
+                }
+
+                const replaceValue = newLines.join("\r\n");
+
+                newContent = newContent.replace(replaceRegex, replaceValue);
             }
         }
 
@@ -62,27 +94,5 @@ export function replaceVueTemplateText() {
             console.log('Replaced keys in ' + filePath);
             fs.writeFileSync(filePath, newContent);
         }
-
-        // todo: replace match with {{$t(``)}} or {{$t('')}}
-        
-
-        // let matches: RegExpExecArray | null;
-        // let hasMissingKey = false;
-
-        // // Extract all matches
-        // for(const regex of regexes) {
-        //     while ((matches = regex.exec(fileContent)) !== null) {
-        //         const key = matches[1];
-    
-        //         if (!translations[key]) {
-        //             missingKeys.add(key);
-        //             hasMissingKey = true;
-        //         }
-        //     }
-        // }
-
-        // if (hasMissingKey) {
-        //     filesWithMissingKeys.add(filePath);
-        // }
     }
 }
