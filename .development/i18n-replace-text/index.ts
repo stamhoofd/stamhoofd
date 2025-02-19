@@ -1,3 +1,3 @@
-import { replaceVueTemplateText } from "./src/main";
+import { replaceVueTemplateText } from "./src/replace-text-vue";
 
 replaceVueTemplateText();
