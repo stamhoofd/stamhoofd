@@ -44,7 +44,7 @@ export class WebshopPreview extends AutoEncoder {
     @field({ decoder: WebshopPrivateMetaData, version: 62 })
     privateMeta = WebshopPrivateMetaData.create({});
 
-    @field({ decoder: DateDecoder, ...NextVersion })
+    @field({ decoder: DateDecoder, version: 366 })
     createdAt: Date = new Date();
 
     get hasSingleTickets() {
