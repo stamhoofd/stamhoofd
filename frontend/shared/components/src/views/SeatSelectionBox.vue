@@ -204,29 +204,31 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
     }
 
     get defaultSizeConfig() {
+        let config = new SeatingSizeConfiguration({
+            seatWidth: 28,
+            seatHeight: 28,
+            seatXSpacing: 3,
+            seatYSpacing: 8
+        })
+
         if (!this.setSeats && (this as any).$isMobile) {
-            return new SeatingSizeConfiguration({
+            config = new SeatingSizeConfiguration({
                 seatWidth: 20,
                 seatHeight: 20,
                 seatXSpacing: 2,
                 seatYSpacing: 8
             })
-        }
-
-        if ((this as any).$isMobile) {
-            return new SeatingSizeConfiguration({
+        } else if ((this as any).$isMobile) {
+            config = new SeatingSizeConfiguration({
                 seatWidth: 30,
                 seatHeight: 30,
                 seatXSpacing: 3,
                 seatYSpacing: 8
             })
         }
-        return new SeatingSizeConfiguration({
-            seatWidth: 28,
-            seatHeight: 28,
-            seatXSpacing: 3,
-            seatYSpacing: 8
-        })
+
+        this.seatingPlanSection.correctSizeConfig(config)
+        return config
     }
 
     get size() {

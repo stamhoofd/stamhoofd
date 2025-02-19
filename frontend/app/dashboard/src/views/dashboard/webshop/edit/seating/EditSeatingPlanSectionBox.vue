@@ -711,20 +711,23 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
     }
 
     get sizeConfig() {
+        let config = new SeatingSizeConfiguration({
+            seatWidth: 28,
+            seatHeight: 28,
+            seatXSpacing: 3,
+            seatYSpacing: 10
+        })
         if ((this as any).$isMobile) {
-            return new SeatingSizeConfiguration({
+            config = new SeatingSizeConfiguration({
                 seatWidth: 35,
                 seatHeight: 35,
                 seatXSpacing: 3 / 4 * 5,
                 seatYSpacing: 10 / 4 * 5
             })
         }
-        return new SeatingSizeConfiguration({
-            seatWidth: 28,
-            seatHeight: 28,
-            seatXSpacing: 3,
-            seatYSpacing: 10
-        })
+
+        this.clonedSeatingPlanSection.correctSizeConfig(config)
+        return config;
     }
 
     get size() {

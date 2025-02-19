@@ -170,6 +170,34 @@ export class SeatingPlanSection extends AutoEncoder {
         return count;
     }
 
+    calculateMinimumWidth() {
+        let minWidth = 20;
+
+        for (const row of this.rows) {
+            for (const seat of row.seats) {
+                if (seat.isValidSeat) {
+                    // Check length
+                    const width = seat.label.length * 10;
+                    if (width > minWidth) {
+                        minWidth = width;
+                    }
+                }
+            }
+        }
+
+        return minWidth;
+    }
+
+    correctSizeConfig(config: SeatingSizeConfiguration) {
+        const minWidth = this.calculateMinimumWidth();
+        if (config.seatWidth < minWidth) {
+            config.seatWidth = minWidth
+        }
+        if (config.seatHeight < config.seatWidth) {
+            config.seatHeight = config.seatWidth
+        }
+    }
+
     calculateSize(config: SeatingSizeConfiguration): Size {
         const size = {
             width: config.seatWidth * 10, // = minimum width
