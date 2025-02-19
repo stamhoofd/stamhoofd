@@ -729,4 +729,34 @@ describe('member merge', () => {
         expect(otherIds).toContain(m1.id);
         expect(otherIds).toContain(m2.id);
     });
+
+    describe('Regressions', () => {
+        /**
+         * tests STA-460
+         */
+        test('Members with same email addreses do not get the email added as alternative email', () => {
+            const m1 = new Member();
+            const m2 = new Member();
+
+            const base = MemberDetails.create({
+                email: 'example@example.com',
+                firstName: 'John',
+                lastName: 'Doe',
+            });
+
+            const other = MemberDetails.create({
+                email: 'example@example.com',
+                firstName: 'John',
+                lastName: 'Doe',
+            });
+
+            m1.details = base.clone();
+            m2.details = other.clone();
+
+            mergeMemberDetails(m1, m2);
+
+            expect(m1.details.email).toBe('example@example.com');
+            expect(m1.details.alternativeEmails).toEqual([]);
+        });
+    });
 });

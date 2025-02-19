@@ -87,6 +87,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             expect(member.details.lastName).toBe(lastName);
             expect(member.details.birthDay).toEqual(existingMember.details.birthDay);
             expect(member.details.email).toBe('anewemail@example.com'); // this has been merged
+            expect(member.details.alternativeEmails).toHaveLength(0);
         });
 
         test('A duplicate member with existing registrations returns those registrations after a merge', async () => {
@@ -96,6 +97,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 firstName,
                 lastName,
                 securityCode: 'ABC-123',
+                email: 'original@example.com',
                 parents: [
                     Parent.create({
                         firstName: 'Jane',
@@ -146,7 +148,8 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             expect(member.details.firstName).toBe(firstName);
             expect(member.details.lastName).toBe(lastName);
             expect(member.details.birthDay).toEqual(existingMember.details.birthDay);
-            expect(member.details.email).toBe('anewemail@example.com'); // this has been merged
+            expect(member.details.email).toBe('original@example.com'); // this has been merged
+            expect(member.details.alternativeEmails).toEqual(['anewemail@example.com']); // this has been merged
 
             // Check the registration is still there
             expect(member.registrations.length).toBe(1);
