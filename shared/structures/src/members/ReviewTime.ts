@@ -1,4 +1,6 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AuditLogReplacement } from '../AuditLogReplacement';
+import { Formatter } from '@stamhoofd/utility';
 
 /**
  * Keep a timestamp of when certain information was reviewed of a member
@@ -12,6 +14,14 @@ export class ReviewTime extends AutoEncoder {
      */
     @field({ decoder: DateDecoder })
     reviewedAt: Date;
+
+    getDiffName() {
+        return AuditLogReplacement.key('reviewTime.' + this.name);
+    }
+
+    getDiffValue() {
+        return AuditLogReplacement.string(Formatter.dateNumber(this.reviewedAt, true));
+    }
 }
 
 export class ReviewTimes extends AutoEncoder {

@@ -165,4 +165,11 @@ export default {
     'permissions.organizationPermissions': 'groepsrechten',
     'balanceNotificationSettings': 'betaalherinneringen',
     'balanceNotificationSettings.organizationContactsFilter.meta.responsibilityIds.$in': 'Betaalherinnering naar verenigingen: functies',
+    'reviewTimes.times': 'laatst nagekeken',
+    'reviewTime.details': 'algemene gegevens',
+    'reviewTime.parents': 'ouders',
+    'reviewTime.emergencyContacts': 'noodcontactpersonen',
+    'reviewTime.records': 'persoonsgegevens',
+    'reviewTime.uitpasNumber': 'UiTPAS-nummer',
+    'reviewTimes': 'laatst nagekeken',
 };

@@ -2,8 +2,8 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, mergeTwoMembers, Organization, Platform, RateLimiter, Registration, RegistrationPeriod, User } from '@stamhoofd/models';
-import { GroupType, MembersBlob, MemberWithRegistrationsBlob, PermissionLevel } from '@stamhoofd/structures';
+import { AuditLog, BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, mergeTwoMembers, Organization, Platform, RateLimiter, Registration, RegistrationPeriod, User } from '@stamhoofd/models';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, GroupType, MembersBlob, MemberWithRegistrationsBlob, PermissionLevel } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Email } from '@stamhoofd/email';
@@ -17,6 +17,7 @@ import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater';
 import { PlatformMembershipService } from '../../../services/PlatformMembershipService';
 import { RegistrationService } from '../../../services/RegistrationService';
 import { shouldCheckIfMemberIsDuplicateForPatch, shouldCheckIfMemberIsDuplicateForPut } from './shouldCheckIfMemberIsDuplicate';
+import { AuditLogService } from '../../../services/AuditLogService';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -794,6 +795,29 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             // Grant temporary access to this member without needing to enter the security code again
             await Context.auth.temporarilyGrantMemberAccess(member, PermissionLevel.Write);
+
+            const log = new AuditLog();
+
+            // a member has multiple organizations, so this is difficult to determine - for now it is only visible in the admin panel
+            log.organizationId = member.organizationId; 
+            
+            log.type = AuditLogType.MemberSecurityCodeUsed;
+            log.source = AuditLogSource.Anonymous;
+
+            if (Context.user) {
+                log.userId = Context.user.id;
+                log.source = AuditLogSource.User;
+            }
+
+            log.objectId = member.id;
+            log.replacements = new Map([
+                ['m', AuditLogReplacement.create({
+                    value: member.details.name,
+                    type: AuditLogReplacementType.Member,
+                    id: member.id,
+                })],
+            ]);
+            await log.save();
         }
         else {
             throw new SimpleError({

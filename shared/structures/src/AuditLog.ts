@@ -97,6 +97,9 @@ export enum AuditLogType {
     MemberPlatformMembershipEdited = 'MemberPlatformMembershipEdited',
     MemberPlatformMembershipDeleted = 'MemberPlatformMembershipDeleted',
 
+    // Security code
+    MemberSecurityCodeUsed = 'MemberSecurityCodeUsed',
+
     // Email
     EmailSent = 'EmailSent',
     EmailSending = 'EmailSending',
@@ -231,6 +234,9 @@ export function getAuditLogTypeName(type: AuditLogType): string {
 
         case AuditLogType.EmailAddressFraudComplaint:
             return `E-mailadressen die een fraudeklacht hebben ingediend`;
+
+        case AuditLogType.MemberSecurityCodeUsed:
+            return `Gebruik van beveiligingscodes`;
     }
 }
 
@@ -363,6 +369,9 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
             return [`email-template`, `edit`];
         case AuditLogType.EmailTemplateDeleted:
             return [`email-template`, `canceled red`];
+
+        case AuditLogType.MemberSecurityCodeUsed:
+            return [`key`, `success primary`];
     }
 }
 
@@ -513,6 +522,9 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
 
         case AuditLogType.EmailTemplateDeleted:
             return `E-mailsjabloon {{e}} werd verwijderd {{if org " voor " org}}`;
+
+        case AuditLogType.MemberSecurityCodeUsed:
+            return `De beveiligingscode werd gebruikt om toegang te krijgen tot {{m}}`;
     }
 }
 
@@ -540,6 +552,7 @@ function getTypeReplacements(type: AuditLogType): string[] {
         case AuditLogType.MemberAdded:
         case AuditLogType.MemberEdited:
         case AuditLogType.MemberDeleted:
+        case AuditLogType.MemberSecurityCodeUsed:
             return ['m'];
         case AuditLogType.MemberRegistered:
         case AuditLogType.MemberUnregistered:
