@@ -21,7 +21,7 @@
                 </p>
             </STListItem>
 
-            <STListItem v-for="plan in allSeatingPlans" :key="plan.id" :selectable="true" element-name="label">
+            <STListItem v-for="plan in allSeatingPlans" :key="plan.id" :selectable="true" element-name="label" class="right-stack">
                 <Radio slot="left" v-model="selectedPlan" :value="plan.id" />
 
                 <h3 class="style-title-list">
@@ -32,11 +32,11 @@
                 </p>
 
                 <p v-if="isFromOtherWebshop(plan)" class="style-description-small">
-                    Dit zaalplan is van een andere webshop. Door het te kiezen wordt een kopie toegevoegd aan deze webshop. Aanpassingen worden niet overgenomen in bestaande webshops.
+                    Dit zaalplan is van een andere webshop ({{ getWebshopFor(plan)?.meta?.name ?? 'Onbekend' }}). Door het te kiezen wordt een kopie toegevoegd aan deze webshop. Aanpassingen worden niet overgenomen in bestaande webshops.
                 </p>
-                
 
                 <template slot="right">
+                    <button v-if="!isFromOtherWebshop(plan)" class="button icon trash gray" type="button" @click="deleteSeatingPlan(plan.id)" />
                     <button class="button icon edit gray" type="button" @click="editSeatingPlan(plan)" />
                 </template>
             </STListItem>
@@ -76,7 +76,7 @@ import { AutoEncoderPatchType, Decoder,ObjectData,patchContainsChanges, VersionB
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, LoadingButton,Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { PrivateWebshop, Product, SeatingPlan, SeatingPlanCategory, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatType, Version, WebshopMetaData } from "@stamhoofd/structures";
-import { Sorter } from '@stamhoofd/utility';
+import { sleep, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../../classes/OrganizationManager';
@@ -134,6 +134,10 @@ export default class ChooseSeatingPlanView extends Mixins(NavigationMixin) {
         return !this.patchedWebshop.meta.seatingPlans.find(p => p.id == seatingPlan.id)
     }
 
+    getWebshopFor(seatingPlan: SeatingPlan) {
+        return this.organization.webshops.find(w => w.meta.seatingPlans.find(p => p.id == seatingPlan.id))
+    }
+
     async save() {
         const isValid = await this.validator.validate()
         if (!isValid) {
@@ -169,6 +173,38 @@ export default class ChooseSeatingPlanView extends Mixins(NavigationMixin) {
             const webshopPatch = PrivateWebshop.patch({meta: webshopMetaPatch})
             return {webshopPatch, id: seatingPlan.id}
         }
+    }
+
+    async deleteSeatingPlan(id: string) {
+        // Check if other products use this seating plan
+        for (const product of this.patchedWebshop.products) {
+            if (product.id === this.patchedProduct.id) {
+                continue;
+            }
+            if (product.seatingPlanId === id) {
+                new Toast("Dit zaalplan wordt nog gebruikt door een ander ticket in deze webshop. Verwijder het eerst daar.", "error red").show()
+                return
+            }
+        }
+
+        if (!await CenteredMessage.confirm("Ben je zeker dat je dit zaalplan wilt verwijderen?", "Ja, verwijderen", 'Je kan dit niet ongedaan maken.')) {
+            return
+        }
+
+        await sleep(1000)
+
+        if (!await CenteredMessage.confirm("Ben je helemaal zeker?", "Ja, verwijderen", 'Je kan dit niet ongedaan maken.')) {
+            return
+        }
+
+        if (this.selectedPlan == id) {
+            this.selectedPlan = null
+        }
+        const webshopMetaPatch = WebshopMetaData.patch({})
+        webshopMetaPatch.seatingPlans.addDelete(id)
+        const webshopPatch = PrivateWebshop.patch({meta: webshopMetaPatch})
+
+        this.patchWebshop = this.patchWebshop.patch(webshopPatch)
     }
 
     get hasChanges() {
