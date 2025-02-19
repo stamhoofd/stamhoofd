@@ -6,6 +6,21 @@ import { PermissionRole } from './PermissionRole.js';
 import { PermissionsResourceType } from './PermissionsResourceType.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 
+export function getUnlistedResources(resourceType: PermissionsResourceType, permissions: {resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>>}, listedResources: {id: string}[]): {id: string, name: string, type: PermissionsResourceType}[] {
+    const resources = permissions.resources.get(resourceType);
+    if (!resources) {
+        return [];
+    }
+
+    const result: {id: string, name: string, type: PermissionsResourceType}[] = [];
+    for (const [id, resource] of resources) {
+        if (!listedResources.find(r => r.id === id)) {
+            result.push({id, name: resource.resourceName, type: resourceType});
+        }
+    }
+    return result;
+}
+
 export class Permissions extends AutoEncoder {
     /**
      * Automatically have all permissions (e.g. when someone created a new group)

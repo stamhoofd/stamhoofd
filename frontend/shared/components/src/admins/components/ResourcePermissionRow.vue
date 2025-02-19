@@ -20,6 +20,10 @@
             </p>
         </template>
 
+        <p v-if="unlisted" class="style-description-small">
+            {{ $t('Uit het archief') }}
+        </p>
+
         <template #right>
             <div v-if="selected">
                 <button class="button text" type="button" @click.stop.prevent="choosePermissions($event)">
@@ -43,8 +47,10 @@ const props = withDefaults(defineProps<{
     inheritedRoles?: (PermissionRoleDetailed | Permissions)[];
     type: 'resource' | 'role'; // whether we show the name of the role or the resource
     configurableAccessRights: AccessRight[];
+    unlisted?: boolean
 }>(), {
     inheritedRoles: () => [],
+    unlisted: false,
 });
 
 const emit = defineEmits(['patch:role']);

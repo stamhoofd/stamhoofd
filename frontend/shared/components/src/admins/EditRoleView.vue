@@ -75,6 +75,18 @@
                         type="resource"
                         @patch:role="addPatch"
                     />
+
+                    <ResourcePermissionRow
+                        v-for="resource in getUnlistedResources(PermissionsResourceType.OrganizationTags, patched, tags)"
+                        :key="resource.id"
+                        :role="patched"
+                        :inherited-roles="inheritedRoles"
+                        :resource="resource"
+                        :configurable-access-rights="[AccessRight.EventWrite, AccessRight.OrganizationFinanceDirector, AccessRight.OrganizationEventNotificationReviewer]"
+                        type="resource"
+                        @patch:role="addPatch"
+                        :unlisted="true"
+                    />
                 </STList>
             </template>
 
@@ -95,6 +107,18 @@
                         :configurable-access-rights="[AccessRight.OrganizationCreateGroups]"
                         type="resource"
                         @patch:role="addPatch"
+                    />
+
+                    <ResourcePermissionRow
+                        v-for="resource in getUnlistedResources(PermissionsResourceType.GroupCategories, patched, categories)"
+                        :key="resource.id"
+                        :role="patched"
+                        :inherited-roles="inheritedRoles"
+                        :resource="resource"
+                        :configurable-access-rights="[AccessRight.OrganizationCreateGroups]"
+                        type="resource"
+                        @patch:role="addPatch"
+                        :unlisted="true"
                     />
                 </STList>
             </template>
@@ -124,6 +148,18 @@
                         type="resource"
                         @patch:role="addPatch"
                     />
+
+                    <ResourcePermissionRow
+                        v-for="resource in getUnlistedResources(PermissionsResourceType.Groups, patched, groups)"
+                        :key="resource.id"
+                        :role="patched"
+                        :inherited-roles="inheritedRoles"
+                        :resource="resource"
+                        :configurable-access-rights="[AccessRight.EventWrite]"
+                        type="resource"
+                        @patch:role="addPatch"
+                        :unlisted="true"
+                    />
                 </STList>
             </div>
 
@@ -148,6 +184,18 @@
                         :configurable-access-rights="webshop.hasTickets ? [AccessRight.WebshopScanTickets] : []"
                         type="resource"
                         @patch:role="addPatch"
+                    />
+
+                    <ResourcePermissionRow
+                        v-for="resource in getUnlistedResources(PermissionsResourceType.Webshops, patched, webshops)"
+                        :key="resource.id"
+                        :role="patched"
+                        :inherited-roles="inheritedRoles"
+                        :resource="resource"
+                        :configurable-access-rights="[AccessRight.WebshopScanTickets]"
+                        type="resource"
+                        @patch:role="addPatch"
+                        :unlisted="true"
                     />
                 </STList>
             </div>
@@ -190,6 +238,18 @@
                         :configurable-access-rights="[]"
                         type="resource"
                         @patch:role="addPatch"
+                    />
+
+                    <ResourcePermissionRow
+                        v-for="resource in getUnlistedResources(PermissionsResourceType.RecordCategories, patched, recordCategories)"
+                        :key="resource.id"
+                        :role="patched"
+                        :inherited-roles="inheritedRoles"
+                        :resource="resource"
+                        :configurable-access-rights="[]"
+                        type="resource"
+                        @patch:role="addPatch"
+                        :unlisted="true"
                     />
                 </STList>
             </div>
@@ -260,7 +320,7 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, SaveView, Spinner, useAppContext, useAuth, useErrors, useOrganization, usePatch, usePlatform } from '@stamhoofd/components';
-import { AccessRight, Group, GroupCategory, maximumPermissionlevel, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType, User, WebshopPreview } from '@stamhoofd/structures';
+import { AccessRight, getUnlistedResources, Group, GroupCategory, maximumPermissionlevel, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType, User, WebshopPreview } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';
 import AccessRightPermissionRow from './components/AccessRightPermissionRow.vue';
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
