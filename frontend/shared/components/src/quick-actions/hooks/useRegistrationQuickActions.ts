@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { useMemberManager, useRequestOwner } from '@stamhoofd/networking';
 import { GroupType, PayableBalanceCollection, PlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, onActivated, ref, Ref } from 'vue';
+import { computed, onActivated, onMounted, ref, Ref } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { useErrors } from '../../errors/useErrors';
 import { GlobalEventBus } from '../../EventBus';
@@ -18,6 +18,7 @@ import emailWarningSvg from '@stamhoofd/assets/images/illustrations/email-warnin
 import missingDataSvg from '@stamhoofd/assets/images/illustrations/missing-data.svg';
 import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstanding-amount.svg';
 import { useNavigate } from '@simonbackx/vue-app-navigation';
+import { useVisibilityChange } from '../../composables';
 
 export function useRegistrationQuickActions(): QuickActions {
     const memberManager = useMemberManager();
@@ -77,11 +78,16 @@ export function useRegistrationQuickActions(): QuickActions {
     });
 
     // Load outstanding amount
+    console.log('Load outstanding balance setup');
     const outstandingBalance = ref(null) as Ref<PayableBalanceCollection | null>;
-    updateBalance().catch(console.error);
+    let lastLoadedBalance = new Date(0)
 
     // Fetch balance
     async function updateBalance() {
+        if (lastLoadedBalance.getTime() > new Date().getTime() - 5 * 60 * 1000) {
+            return;
+        }
+        lastLoadedBalance = new Date();
         try {
             const response = await context.value.authenticatedServer.request({
                 method: 'GET',
@@ -99,7 +105,15 @@ export function useRegistrationQuickActions(): QuickActions {
         }
     }
 
+    onMounted(() => {
+        updateBalance().catch(console.error);
+    });
+
     onActivated(() => {
+        updateBalance().catch(console.error);
+    });
+
+    useVisibilityChange(() => {
         updateBalance().catch(console.error);
     });
 
