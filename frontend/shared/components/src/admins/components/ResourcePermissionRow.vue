@@ -5,7 +5,7 @@
         </template>
         <template v-if="type === 'resource'">
             <h2 class="style-title-list">
-                {{ resource.name }}
+                {{ resource.name || $t('Naamloos') }}
             </h2>
             <p v-if="isEditingUserPermissions" class="style-description-small">
                 {{ capitalizeFirstLetter(getPermissionResourceTypeName(resource.type, false)) }}
