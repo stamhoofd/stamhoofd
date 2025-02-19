@@ -42,9 +42,18 @@ export class GetAuditLogsEndpoint extends Endpoint<Params, Query, Body, Response
             if (!await Context.auth.hasFullAccess(organization.id)) {
                 throw Context.auth.error();
             }
-            scopeFilter = {
-                organizationId: organization.id,
-            };
+            if (!Context.auth.hasPlatformFullAccess()) {
+                scopeFilter = {
+                    organizationId: organization.id,
+                };
+            } else {
+                if (!q.filter || typeof q.filter !== 'object' || !('objectId' in q.filter)) {
+                    scopeFilter = {
+                        organizationId: organization.id,
+                    };
+                }
+                
+            }
         }
         else {
             if (!Context.auth.hasPlatformFullAccess()) {

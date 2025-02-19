@@ -55,7 +55,7 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { DateSelection, useVisibilityChange } from '@stamhoofd/components';
+import { DateSelection, useOrganization, useVisibilityChange } from '@stamhoofd/components';
 import { AuditLog, isEmptyFilter, mergeFilters } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onActivated, ref, Ref, watch } from 'vue';
@@ -83,9 +83,10 @@ const selectedUIFilter = ref(null) as Ref<null | UIFilter>;
 const startDate = ref(null) as Ref<Date | null>;
 const endDate = ref(null) as Ref<Date | null>;
 const errors = useErrors();
+const organization = useOrganization();
 
 const objectFetcher = useAuditLogsObjectFetcher({
-    requiredFilter: props.objectIds ? { objectId: { $in: props.objectIds } } : null,
+    requiredFilter: props.objectIds ? { objectId: { $in: props.objectIds } } : {organizationId: organization.value?.id ?? null},
 });
 
 const fetcher = useInfiniteObjectFetcher<ObjectType>(objectFetcher);
