@@ -19,7 +19,6 @@ function isNumberOrSpecialCharacter(value: string) {
 export function replaceVueTemplateText() {
     const files = getFilesToSearch(['vue']);
 
-
     for (const filePath of files) {
         console.log('- '+filePath);
 
@@ -67,9 +66,22 @@ export function replaceVueTemplateText() {
                     if(isNumberOrSpecialCharacter(trimmedLine)) {
                         continue;
                     }
+
+                    const lastCharBeforeMatch = template[matches.index - 1];
+                    const shouldKeepWhitespace = lastCharBeforeMatch === '}';
+
+                    let whiteSpaceBefore = '';
+                    let whiteSpaceAfter = '';
+
+                    const whiteSpaces = /(\s+$)|(^\s+)/g.exec(line);
+                    if(shouldKeepWhitespace) {
+                         whiteSpaceBefore = whiteSpaces?.[0] ?? '';
+                    }
+
+                    whiteSpaceAfter = whiteSpaces?.[1] ?? '';
     
                     let bracketType = "'";
-                    let replaceValue = line.trimStart();
+                    const replaceValue = line.trim();
     
                     if(line.includes("'")) {
                         bracketType = line.includes('"') ? '`' : '"';
@@ -77,7 +89,7 @@ export function replaceVueTemplateText() {
                         bracketType = '`';
                     }
 
-                    newLines.push(`{{$t(${bracketType}${replaceValue}${bracketType})}}`);
+                    newLines.push(`${whiteSpaceBefore}{{$t(${bracketType}${replaceValue}${bracketType})}}${whiteSpaceAfter}`);
                 }
 
                 if(!newLines.length) {
