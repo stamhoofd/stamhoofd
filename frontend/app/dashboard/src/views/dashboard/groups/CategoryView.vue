@@ -250,6 +250,7 @@ export default class CategoryView extends Mixins(NavigationMixin) {
             components: [
                 new ComponentWithProperties(MembersTableView, {
                     category: this.tree,
+                    periodId: this.period.period.id,
                 }),
             ],
             animated,

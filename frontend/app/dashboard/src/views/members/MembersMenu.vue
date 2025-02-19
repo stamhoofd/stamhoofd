@@ -192,8 +192,7 @@ defineRoutes([
         component: MembersTableView as unknown as ComponentOptions,
         paramsToProps: () => {
             return {
-                category: tree.value,
-                periodId: period.value.id,
+                periodId: period.value.period.id,
             };
         },
         propsToParams() {

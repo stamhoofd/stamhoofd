@@ -125,6 +125,28 @@ function getRequiredFilter(): StamhoofdFilter | null {
     }
 
     if (!props.group && !props.category) {
+        if (organization.value && props.periodId) {
+            // Only show members that are registered in the current period AND in this group
+            // (avoid showing old members that moved to other groups)
+            return {
+                registrations: {
+                    $elemMatch: {
+                        organizationId: organization.value.id,
+                        periodId: props.periodId,
+                    },
+                },
+            };
+        }
+
+        if (props.periodId) {
+            return {
+                registrations: {
+                    $elemMatch: {
+                        periodId: props.periodId,
+                    },
+                },
+            };
+        }
         return null;
     }
 
@@ -341,6 +363,7 @@ if (props.group) {
                     getStyle: answer => answer === null || answer.isEmpty ? 'gray' : '',
                     minimumWidth: 100,
                     recommendedWidth: 200,
+                    enabled: false
                 }),
             );
         }
@@ -408,6 +431,7 @@ if (groups.length) {
             getStyle: prices => prices.length === 0 ? 'gray' : '',
             minimumWidth: 100,
             recommendedWidth: 300,
+            enabled: false
         }),
     );
 }
@@ -597,20 +621,13 @@ if (props.category) {
         new Column<ObjectType, Group[]>({
             id: 'category',
             allowSorting: false,
-            name: waitingList.value ? 'Wachtlijst' : (props.category.settings.name || 'Groep'),
+            name: waitingList.value ? 'Wachtlijst' : (props.category.settings.name || $t('Inschrijvingen')),
             getValue: (member) => {
                 if (!props.category) {
                     return [];
                 }
                 const groups = props.category.getAllGroups();
-                const registrations = member.filterRegistrations({ groups: groups, periodId: props.periodId ?? props.group?.periodId ?? '' });
-                const memberGroups = registrations.flatMap((r) => {
-                    const group = groups.find(g => g.id === r.groupId);
-                    if (!group) {
-                        return [];
-                    }
-                    return [group];
-                });
+                const memberGroups = member.filterGroups({ groups: groups, periodId: props.periodId ?? props.group?.periodId ?? '' });
                 const getIndex = g => groups.findIndex(_g => _g.id === g.id);
                 return memberGroups.sort((a, b) => Sorter.byNumberValue(getIndex(b), getIndex(a)));
             },
@@ -622,7 +639,35 @@ if (props.category) {
             },
             getStyle: groups => groups.length === 0 ? 'gray' : '',
             minimumWidth: 100,
-            recommendedWidth: 150,
+            recommendedWidth: 300,
+            enabled: false
+        }),
+    );
+}
+
+if (!props.group && !props.category) {
+    allColumns.push(
+        new Column<ObjectType, Group[]>({
+            id: 'category',
+            allowSorting: false,
+            name: $t('Inschrijvingen'),
+            getValue: (member) => {
+                let memberGroups = member.filterGroups({ periodId: props.periodId ?? props.group?.periodId ?? '', types: [GroupType.Membership, GroupType.WaitingList] });
+                if (app === 'admin') {
+                    memberGroups = memberGroups.filter(g => g.defaultAgeGroupId !== null)
+                }
+                return memberGroups.sort((a, b) => Sorter.byStringValue(a.settings.name, b.settings.name));
+            },
+            format: (groups) => {
+                if (groups.length === 0) {
+                    return 'Geen';
+                }
+                return groups.map(g => g.settings.name).join(', ');
+            },
+            getStyle: groups => groups.length === 0 ? 'gray' : '',
+            minimumWidth: 100,
+            recommendedWidth: 300,
+            enabled: false
         }),
     );
 }
