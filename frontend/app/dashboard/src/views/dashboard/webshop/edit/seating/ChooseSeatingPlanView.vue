@@ -23,7 +23,7 @@
                 </p>
             </STListItem>
 
-            <STListItem v-for="plan in allSeatingPlans" :key="plan.id" :selectable="true" element-name="label">
+            <STListItem v-for="plan in allSeatingPlans" :key="plan.id" :selectable="true" element-name="label" class="right-stack">
                 <template #left>
                     <Radio v-model="selectedPlan" :value="plan.id" />
                 </template>
@@ -36,10 +36,11 @@
                 </p>
 
                 <p v-if="isFromOtherWebshop(plan)" class="style-description-small">
-                    Dit zaalplan is van een andere webshop. Door het te kiezen wordt een kopie toegevoegd aan deze webshop. Aanpassingen worden niet overgenomen in bestaande webshops.
+                    Dit zaalplan is van een andere webshop ({{ getWebshopFor(plan)?.meta?.name ?? 'Onbekend' }}). Door het te kiezen wordt een kopie toegevoegd aan deze webshop. Aanpassingen worden niet overgenomen in bestaande webshops.
                 </p>
 
                 <template #right>
+                    <button v-if="!isFromOtherWebshop(plan)" class="button icon trash gray" type="button" @click="deleteSeatingPlan(plan.id)" />
                     <button class="button icon edit gray" type="button" @click="editSeatingPlan(plan)" />
                 </template>
             </STListItem>
@@ -86,7 +87,7 @@ import { AutoEncoderPatchType, Decoder, ObjectData, VersionBoxDecoder } from '@s
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, LoadingButton, Radio, SaveView, STErrorsDefault, STList, STListItem, Toast, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
 import { PrivateWebshop, Product, SeatingPlan, SeatingPlanCategory, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatType, WebshopMetaData } from '@stamhoofd/structures';
-import { Sorter } from '@stamhoofd/utility';
+import { sleep, Sorter } from '@stamhoofd/utility';
 
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { computed, ref } from 'vue';
@@ -113,6 +114,10 @@ const hasChanges = computed(() => hasWebshopChanges.value || hasProductChanges.v
 
 function isFromOtherWebshop(seatingPlan: SeatingPlan) {
     return !patchedWebshop.value.meta.seatingPlans.find(p => p.id === seatingPlan.id);
+}
+
+function getWebshopFor(seatingPlan: SeatingPlan) {
+    return organization.value?.webshops.find(w => w.meta.seatingPlans.find(p => p.id == seatingPlan.id))
 }
 
 async function save() {
@@ -151,6 +156,38 @@ function addSeatingPlanIfNotInWebshop(id: string | null) {
         return { webshopPatch, id: seatingPlan.id };
     }
 }
+
+async function deleteSeatingPlan(id: string) {
+    // Check if other products use this seating plan
+    for (const product of patchedWebshop.value.products) {
+        if (product.id === patchedProduct.value.id) {
+            continue;
+        }
+        if (product.seatingPlanId === id) {
+            new Toast("Dit zaalplan wordt nog gebruikt door een ander ticket in deze webshop. Verwijder het eerst daar.", "error red").show()
+            return
+        }
+    }
+
+    if (!await CenteredMessage.confirm("Ben je zeker dat je dit zaalplan wilt verwijderen?", "Ja, verwijderen", 'Je kan dit niet ongedaan maken.')) {
+        return
+    }
+
+    await sleep(1000)
+
+    if (!await CenteredMessage.confirm("Ben je helemaal zeker?", "Ja, verwijderen", 'Je kan dit niet ongedaan maken.')) {
+        return
+    }
+
+    if (selectedPlan.value == id) {
+        selectedPlan.value = null
+    }
+    const webshopMetaPatch = WebshopMetaData.patch({})
+    webshopMetaPatch.seatingPlans.addDelete(id)
+    const webshopPatch = PrivateWebshop.patch({meta: webshopMetaPatch})
+    addWebshopPatch(webshopPatch)
+}
+
 
 const selectedPlan = computed({
     get: () => patchedProduct.value.seatingPlanId,
