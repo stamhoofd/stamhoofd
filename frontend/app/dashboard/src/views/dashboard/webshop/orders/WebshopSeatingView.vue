@@ -47,8 +47,8 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { ContextMenu, ContextMenuItem, LoadingViewTransition, SeatSelectionBox, STNavigationBar, Toast, useContext, useIsMobile } from '@stamhoofd/components';
-import { PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, Product, ReservedSeat, TicketPrivate } from '@stamhoofd/structures';
+import { ContextMenu, ContextMenuItem, LoadingViewTransition, SeatSelectionBox, STNavigationBar, Toast, useAuth, useContext, useIsMobile } from '@stamhoofd/components';
+import { PermissionLevel, PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, Product, ReservedSeat, TicketPrivate } from '@stamhoofd/structures';
 
 import { useRequestOwner } from '@stamhoofd/networking';
 import { computed, onBeforeUnmount, Ref, ref } from 'vue';
@@ -376,7 +376,8 @@ async function refresh(reset = false) {
     isRefreshingOrders.value = false;
 }
 
-const hasFullPermissions = computed(() => preview.value.privateMeta.permissions.hasFullAccess(context.value.organizationPermissions));
+const auth = useAuth();
+const hasFullPermissions = computed(() => auth.canAccessWebshop(props.webshopManager.preview, PermissionLevel.Full));
 
 function reload() {
     loading.value = true;
