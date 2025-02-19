@@ -1577,7 +1577,7 @@ export function getDocumentsUIFilterBuilders() {
     return [groupFilter, ...builders];
 }
 
-export function getFilterBuildersForRecordCategories(categories: RecordCategory[]) {
+export function getFilterBuildersForRecordCategories(categories: RecordCategory[], prefix = '') {
     const all: UIFilterBuilder<UIFilter>[] = [];
 
     for (const category of categories) {
@@ -1587,7 +1587,7 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
             if (record.type === RecordType.Checkbox) {
                 allForCategory.push(
                     new MultipleChoiceFilterBuilder({
-                        name: record.name,
+                        name: prefix + record.name,
                         options: [
                             new MultipleChoiceUIFilterOption($t('d87cdb56-c8a6-4466-a6fd-f32fe59561f5'), true),
                             new MultipleChoiceUIFilterOption($t('01b79813-933b-4045-b426-82700f921eaa'), false),
@@ -1606,7 +1606,7 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
             if (record.type === RecordType.ChooseOne) {
                 allForCategory.push(
                     new MultipleChoiceFilterBuilder({
-                        name: record.name,
+                        name: prefix + record.name,
                         options: [
                             ...record.choices.map(c => new MultipleChoiceUIFilterOption(c.name, c.id)),
                         ],
@@ -1628,7 +1628,7 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
             if (record.type === RecordType.MultipleChoice) {
                 allForCategory.push(
                     new MultipleChoiceFilterBuilder({
-                        name: record.name,
+                        name: prefix + record.name,
                         options: [
                             ...record.choices.map(c => new MultipleChoiceUIFilterOption(c.name, c.id)),
                         ],
@@ -1651,7 +1651,7 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
         }
 
         allForCategory.push(
-            ...getFilterBuildersForRecordCategories(category.childCategories),
+            ...getFilterBuildersForRecordCategories(category.childCategories, category.name + ' → '),
         );
 
         if (allForCategory.length > 0) {
