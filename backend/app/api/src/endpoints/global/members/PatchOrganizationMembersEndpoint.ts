@@ -492,7 +492,22 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     });
                 }
 
-                // Check duplicate memberships
+                const membership = new MemberPlatformMembership();
+                membership.id = put.id;
+                membership.memberId = member.id;
+                membership.membershipTypeId = put.membershipTypeId;
+                membership.organizationId = put.organizationId;
+                membership.periodId = put.periodId;
+
+                membership.startDate = put.startDate;
+                membership.endDate = put.endDate;
+                membership.expireDate = put.expireDate;
+                membership.locked = false;
+
+                // Correct price and dates
+                await membership.calculatePrice(member);
+
+                // Check duplicate memberships after correcting the dates
                 const existing = await MemberPlatformMembership.select()
                     .where('memberId', member.id)
                     .where('membershipTypeId', put.membershipTypeId)
@@ -523,19 +538,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     });
                 }
 
-                const membership = new MemberPlatformMembership();
-                membership.id = put.id;
-                membership.memberId = member.id;
-                membership.membershipTypeId = put.membershipTypeId;
-                membership.organizationId = put.organizationId;
-                membership.periodId = put.periodId;
-
-                membership.startDate = new Date(Math.max(Date.now(), put.startDate.getTime()));
-                membership.endDate = put.endDate;
-                membership.expireDate = put.expireDate;
-                membership.locked = false;
-
-                await membership.calculatePrice(member);
+                // Save if okay
                 await membership.save();
 
                 updateMembershipMemberIds.add(member.id);
