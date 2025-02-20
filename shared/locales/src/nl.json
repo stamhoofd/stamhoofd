@@ -337,7 +337,7 @@
   "ca88e88f-d859-4445-a13a-4b73c359cd6f": "Schrijf leden in",
   "d14ea349-afa8-49f3-bdb0-aac23a41887f": "Schrijf leden in bij elke leeftijdsgroep.",
   "d54c9b23-2d3c-49cd-b1fc-7e821d36fd41": "Inloggen op Stamhoofd",
-  "75815048-939a-4ac1-a81c-f23fc3ec5006": "Je betaalt als #lokale-groep {price} aan #koepel.",
+  "75815048-939a-4ac1-a81c-f23fc3ec5006": "Jouw #lokale-groep betaalt {price} aan #koepel.",
   "a83523bb-ba90-4a6c-a73a-4d4f12defe7a": "De functie {financialSupportTitle} staat uit, maar je hebt nog {financialSupportPriceName} ingesteld",
   "77578f4e-049c-4d64-b63c-357fb6d0d7ac": "{financialSupportPriceName} moet minstens {minDifference} lager zijn dan de standaardprijs",
   "88119ffc-b692-4222-8217-75a9fa64f675": "Reken een bedrag aan aan de {count} geselecteerde #groepen.",
@@ -770,5 +770,5 @@
   "7c55cb44-8149-414a-a162-ca9859014e81": "Je kan geen inschrijvingen wijzigen van {group} omdat dat werkjaar niet actief is.",
   "f6360ada-86e7-4ec8-86fb-fe9e750c4926": "Je kan niet inschrijven voor {group} omdat dit werkjaar is afgesloten.",
   "26b8398d-a17c-4854-ae64-99a410ddeffb": "Je kan niet inschrijven voor {group} omdat werkjaar {period} is afgesloten.",
-  "f6e06abd-3e58-4f99-bc8d-6cf6a44273b3": "Je betaalt als #lokale-groep {price} aan #koepel, maar voor latere aansluitingen bedraagt het nu {priceReduced}."
+  "f6e06abd-3e58-4f99-bc8d-6cf6a44273b3": "Jouw #lokale-groep betaalt {price} aan #koepel, maar voor latere aansluitingen bedraagt het nu {priceReduced}."
 }
