@@ -675,7 +675,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
 
         if (updateMembershipsForOrganizations.size) {
-            QueueHandler.schedule('update-membership-prices', async () => {
+            QueueHandler.schedule('update-organization-membership-prices', async () => {
                 for (const id of updateMembershipsForOrganizations) {
                     await MembershipCharger.updatePrices(id);
                 }

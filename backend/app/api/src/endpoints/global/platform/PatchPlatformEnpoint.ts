@@ -213,7 +213,10 @@ export class PatchPlatformEndpoint extends Endpoint<
         if (shouldUpdateMemberships) {
             if (!QueueHandler.isRunning('update-membership-prices')) {
                 QueueHandler.schedule('update-membership-prices', async () => {
+                    // Update all membership prices (required to update temporary memberships)
                     await MembershipCharger.updatePrices();
+
+                    // Update memberships of all members (note: this only updates non-day memberships)
                     await PlatformMembershipService.updateAll();
                 }).catch(console.error);
             }
