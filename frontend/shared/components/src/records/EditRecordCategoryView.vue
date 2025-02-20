@@ -595,7 +595,10 @@ async function showExample() {
     await present({
         components: [
             new ComponentWithProperties(FillRecordCategoryView, {
-                category: patchedCategory.value,
+                category: patchedCategory.value.patch({
+                    // Disable filter on category level for the preview, since these cannot work
+                    filter: null
+                }),
                 value: reactiveValue,
                 saveText: 'Opslaan',
                 saveHandler: async (_patch: PatchAnswers, navigationActions: NavigationActions) => {
