@@ -13,7 +13,7 @@
                 Dit lid heeft recht op het kansentarief van de UiTPAS.
             </p>
         </template>
-        <Checkbox v-else v-model="requiresFinancialSupportCheckboxValue">
+        <Checkbox v-else v-model="requiresFinancialSupport" :indeterminate="!dataPermissionsChangeDate">
             {{ checkboxLabel }}
         </Checkbox>
 
@@ -21,6 +21,10 @@
             Laatst nagekeken op {{ formatDate(dataPermissionsChangeDate) }}. <button v-tooltip="'Het lid zal deze stap terug moeten doorlopen via het ledenportaal'" type="button" class="inline-link" @click="clear">
                 Wissen
             </button>.
+        </p>
+
+        <p v-if="!dataPermissionsChangeDate" class="style-description-small">
+            {{ $t('Het antwoord is niet gekend (werd nog nooit ingevuld in #platform). Er worden geen lagere tarieven automatisch toegepast.') }}
         </p>
     </div>
     <div v-else class="container">
@@ -38,7 +42,7 @@
                 Je hebt recht op het kansentarief van de UiTPAS.
             </p>
         </template>
-        <Checkbox v-else v-model="requiresFinancialSupportCheckboxValue" :disabled="hasKansenTarief">
+        <Checkbox v-else v-model="requiresFinancialSupport" :disabled="hasKansenTarief">
             {{ checkboxLabel }}
         </Checkbox>
     </div>
@@ -74,31 +78,9 @@ const isAdmin = app === 'dashboard' || app === 'admin';
 
 useValidation(props.validator, () => {
     // Save
-    tryCreateRequiresFinancialSupportPatch(requiresFinancialSupportCheckboxValue.value);
-
-    // Sync checkbox across family
-    for (const member of props.member.family.members) {
-        if (member.id !== props.member.patchedMember.id) {
-            const expectedValue = member.isPropertyEnabled('financialSupport') ? (props.member.patchedMember.details.requiresFinancialSupport ?? null) : null;
-
-            if (expectedValue !== null && expectedValue.value !== (member.patchedMember.details.requiresFinancialSupport?.value ?? null)) {
-                member.addDetailsPatch({
-                    requiresFinancialSupport: expectedValue,
-                });
-            }
-        }
-    }
-
-    return true;
-});
-
-function tryCreateRequiresFinancialSupportPatch(requiresFinancialSupport: boolean) {
-    function getPreventSelfAssignment(financialSupportSettings: FinancialSupportSettings): boolean {
-        return financialSupportSettings.preventSelfAssignment;
-    }
-
     if (!isAdmin) {
-        if (requiresFinancialSupport && getPreventSelfAssignment(financialSupportSettings.value)) {
+        // Check toggled on yourself
+        if (props.member.patchedMember.details.requiresFinancialSupport?.value === true && props.member.member.details.requiresFinancialSupport?.value !== true && financialSupportSettings.value.preventSelfAssignment) {
             throw new SimpleError({
                 code: 'financial_support_prevent_assignment',
                 message: 'Self assignment of financial support is not allowed',
@@ -107,23 +89,44 @@ function tryCreateRequiresFinancialSupportPatch(requiresFinancialSupport: boolea
         }
     }
 
-    if (requiresFinancialSupport === (props.member.member.details.requiresFinancialSupport?.value ?? false) && !props.willMarkReviewed) {
-        // Do not patch: hasn't changed
-        return;
+    // Sync checkbox across family if changed or marked reviewed only
+    if ((
+        props.member.patchedMember.details.requiresFinancialSupport
+        && props.member.patchedMember.details.requiresFinancialSupport.value !== props.member.member.details.requiresFinancialSupport?.value
+    )
+    || props.willMarkReviewed) {
+        for (const member of props.member.family.members) {
+            if (member.id !== props.member.patchedMember.id) {
+                const expectedValue = member.isPropertyEnabled('financialSupport') ? (props.member.patchedMember.details.requiresFinancialSupport ?? null) : null;
+
+                if (expectedValue !== null && expectedValue.value !== (member.patchedMember.details.requiresFinancialSupport?.value ?? null)) {
+                    member.addDetailsPatch({
+                        requiresFinancialSupport: expectedValue,
+                    });
+                }
+            }
+        }
     }
 
-    return props.member.addDetailsPatch({
-        requiresFinancialSupport: BooleanStatus.create({
-            value: requiresFinancialSupport,
-        }),
-    });
-}
+    return true;
+});
 
-const requiresFinancialSupportCheckboxValue = ref(props.member.patchedMember.details.requiresFinancialSupport?.value ?? false);
-const requiresFinancialSupport = computed(() => props.member.patchedMember.details.requiresFinancialSupport?.value ?? false);
-
-watch(requiresFinancialSupport, (requiresFinancialSupport) => {
-    requiresFinancialSupportCheckboxValue.value = requiresFinancialSupport;
+const requiresFinancialSupport = computed({
+    get: () => props.member.patchedMember.details.requiresFinancialSupport?.value ?? false,
+    set: (requiresFinancialSupport) => {
+        if (requiresFinancialSupport === (props.member.member.details.requiresFinancialSupport?.value ?? false) && !props.willMarkReviewed) {
+            return props.member.addDetailsPatch({
+                requiresFinancialSupport: props.member.member.details.requiresFinancialSupport ?? BooleanStatus.create({
+                    value: requiresFinancialSupport,
+                }),
+            });
+        }
+        return props.member.addDetailsPatch({
+            requiresFinancialSupport: BooleanStatus.create({
+                value: requiresFinancialSupport,
+            }),
+        });
+    },
 });
 
 const hasKansenTarief = computed(() => {
