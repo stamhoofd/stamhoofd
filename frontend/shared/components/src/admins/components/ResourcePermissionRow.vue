@@ -5,7 +5,7 @@
         </template>
         <template v-if="type === 'resource'">
             <h2 class="style-title-list">
-                {{ resource.name || $t('Naamloos') }}
+                {{ resource.name || $t('55f226d4-6147-4af7-9dc9-f3b55d4e506a') }}
             </h2>
             <p v-if="isEditingUserPermissions" class="style-description-small">
                 {{ capitalizeFirstLetter(getPermissionResourceTypeName(resource.type, false)) }}
@@ -21,7 +21,7 @@
         </template>
 
         <p v-if="unlisted" class="style-description-small">
-            {{ $t('Uit het archief') }}
+            {{ $t('3977f1e7-abb1-4876-90b4-02ecc45c2b31') }}
         </p>
 
         <template #right>

@@ -284,7 +284,7 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
 
             all.push(
                 new NumberFilterBuilder({
-                    name: $t('Prijs'),
+                    name: $t('b4f47589-f6b4-4f9e-a83b-ad4cbb3de416'),
                     key: 'price',
                     type: NumberFilterFormat.Currency,
                 }),
@@ -292,7 +292,7 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
 
             all.push(
                 new NumberFilterBuilder({
-                    name: $t('Prijs zonder korting'),
+                    name: $t('9e6fd655-abb5-43b2-ac0e-c62409058700'),
                     key: 'priceWithoutDiscount',
                     type: NumberFilterFormat.Currency,
                 }),
@@ -302,8 +302,8 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
                 new MultipleChoiceFilterBuilder({
                     name: $t('41b46e42-08eb-4146-b71c-d77c90f46219'),
                     options: [
-                        new MultipleChoiceUIFilterOption($t('Aangerekend'), true),
-                        new MultipleChoiceUIFilterOption($t('Nog niet aangerekend'), false),
+                        new MultipleChoiceUIFilterOption($t('c5235739-b78a-4add-ab2f-515aef40073d'), true),
+                        new MultipleChoiceUIFilterOption($t('539dc5d4-c221-412b-bc33-fe28f85625c4'), false),
                     ],
                     allowCreation: hasPlatformPermissions,
                     wrapFilter: (f: StamhoofdFilter) => {

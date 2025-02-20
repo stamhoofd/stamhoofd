@@ -621,7 +621,7 @@ if (props.category) {
         new Column<ObjectType, Group[]>({
             id: 'category',
             allowSorting: false,
-            name: waitingList.value ? 'Wachtlijst' : (props.category.settings.name || $t('Inschrijvingen')),
+            name: waitingList.value ? 'Wachtlijst' : (props.category.settings.name || $t('b467444b-879a-4bce-b604-f7e890008c4f')),
             getValue: (member) => {
                 if (!props.category) {
                     return [];
@@ -650,7 +650,7 @@ if (!props.group && !props.category) {
         new Column<ObjectType, Group[]>({
             id: 'category',
             allowSorting: false,
-            name: $t('Inschrijvingen'),
+            name: $t('b467444b-879a-4bce-b604-f7e890008c4f'),
             getValue: (member) => {
                 let memberGroups = member.filterGroups({ periodId: props.periodId ?? props.group?.periodId ?? '', types: [GroupType.Membership, GroupType.WaitingList] });
                 if (app === 'admin') {

@@ -750,5 +750,14 @@
   "6468d392-6711-48cd-9602-a5a26afe6f22": "Ben je zeker dat je deze aansluiting wilt ontgrendelen?",
   "ac1d3647-1c2f-48a1-a08a-ce4821103fb1": "Ja, ontgrendelen",
   "04cac345-ed28-484c-8a50-96ac4db89911": "Aansluiting ontgrendeld",
-  "880e4cac-5a7e-4d6d-80ad-c5472a005df6": "De eerstvolgende aansluiting van dit lid start op {date}. Vandaag is dit lid niet aangesloten bij KSA Nationaal en daardoor niet verzekerd."
+  "880e4cac-5a7e-4d6d-80ad-c5472a005df6": "De eerstvolgende aansluiting van dit lid start op {date}. Vandaag is dit lid niet aangesloten bij KSA Nationaal en daardoor niet verzekerd.",
+  "55f226d4-6147-4af7-9dc9-f3b55d4e506a": "Naamloos",
+  "3977f1e7-abb1-4876-90b4-02ecc45c2b31": "Uit het archief",
+  "b4f47589-f6b4-4f9e-a83b-ad4cbb3de416": "Prijs",
+  "9e6fd655-abb5-43b2-ac0e-c62409058700": "Prijs zonder korting",
+  "c5235739-b78a-4add-ab2f-515aef40073d": "Aangerekend",
+  "539dc5d4-c221-412b-bc33-fe28f85625c4": "Nog niet aangerekend",
+  "c113898b-d8ce-47ca-915d-2d069496aa88": "Je hebt succesvol toegang gekregen tot de gegevens van {name}",
+  "b467444b-879a-4bce-b604-f7e890008c4f": "Inschrijvingen",
+  "4a39e12b-efa2-46fe-aa30-83bc576548a3": "Aangesloten via #koepel (niet aangerekend aan een #groep)"
 }

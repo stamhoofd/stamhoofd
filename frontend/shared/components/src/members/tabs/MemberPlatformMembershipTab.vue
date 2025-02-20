@@ -47,7 +47,7 @@
                             </p>
 
                             <p class="style-description-small" v-if="membership.organizationId === platform.membershipOrganizationId">
-                                {{ $t('Aangesloten via #koepel (niet aangerekend aan een #groep)') }}
+                                {{ $t('4a39e12b-efa2-46fe-aa30-83bc576548a3') }}
                             </p>
                             <p v-else class="style-description-small">
                                 <p v-if="membership.price === 0" class="style-description-small">
