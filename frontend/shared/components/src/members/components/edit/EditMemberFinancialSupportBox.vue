@@ -24,7 +24,7 @@
         </p>
 
         <p v-if="!dataPermissionsChangeDate" class="style-description-small">
-            {{ $t('Het antwoord is niet gekend (werd nog nooit ingevuld in #platform). Er worden geen lagere tarieven automatisch toegepast.') }}
+            {{ $t('cd5ee584-5b0c-4acb-af75-7b21ad37cead') }}
         </p>
     </div>
     <div v-else class="container">

@@ -51,16 +51,16 @@
                             </p>
                             <p v-else class="style-description-small">
                                 <p v-if="membership.price === 0" class="style-description-small">
-                                    {{ $t('Via {organization}', {organization: getOrganizationName(membership)}) }}
+                                    {{ $t('c8f1e4d4-669c-4ccb-a9d9-30584f6c2d55', {organization: getOrganizationName(membership)}) }}
                                 </p>
                                 <p v-else-if="membership.balanceItemId" class="style-description-small">
-                                    {{ $t('Aangerekend aan {organization}', {organization: getOrganizationName(membership)}) }}
+                                    {{ $t('f1582fe7-3168-4579-bcc5-9db17568dac0', {organization: getOrganizationName(membership)}) }}
                                 </p>
                                 <p v-else-if="membership.trialUntil && membership.trialUntil > now">
-                                    {{ $t('Zal na proefperiode aangerekend worden aan {organization}', {organization: getOrganizationName(membership)}) }}
+                                    {{ $t('b0a70381-66b1-4bff-a613-8332a35bec7a', {organization: getOrganizationName(membership)}) }}
                                 </p>
                                 <p v-else>
-                                    {{ $t('Zal binnenkort aangerekend worden aan {organization}', {organization: getOrganizationName(membership)}) }}
+                                    {{ $t('a2f6d632-9e20-4366-9393-b52431525596', {organization: getOrganizationName(membership)}) }}
                                 </p>
                             </p>
 

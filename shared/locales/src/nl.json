@@ -759,5 +759,11 @@
   "539dc5d4-c221-412b-bc33-fe28f85625c4": "Nog niet aangerekend",
   "c113898b-d8ce-47ca-915d-2d069496aa88": "Je hebt succesvol toegang gekregen tot de gegevens van {name}",
   "b467444b-879a-4bce-b604-f7e890008c4f": "Inschrijvingen",
-  "4a39e12b-efa2-46fe-aa30-83bc576548a3": "Aangesloten via #koepel (niet aangerekend aan een #groep)"
+  "4a39e12b-efa2-46fe-aa30-83bc576548a3": "Aangesloten via #koepel (niet aangerekend aan een #groep)",
+  "308d1e59-057c-4a51-846f-8557ba5a385e": "Het antwoord is niet gekend. Daardoor blijft het mogelijk om gegevens te verzamelen waarvoor toestemming nodig is tot er een expliciet antwoord werd gegeven.",
+  "cd5ee584-5b0c-4acb-af75-7b21ad37cead": "Het antwoord is niet gekend (werd nog nooit ingevuld in #platform). Er worden geen lagere tarieven automatisch toegepast.",
+  "c8f1e4d4-669c-4ccb-a9d9-30584f6c2d55": "Via {organization}",
+  "f1582fe7-3168-4579-bcc5-9db17568dac0": "Aangerekend aan {organization}",
+  "b0a70381-66b1-4bff-a613-8332a35bec7a": "Zal na proefperiode aangerekend worden aan {organization}",
+  "a2f6d632-9e20-4366-9393-b52431525596": "Zal binnenkort aangerekend worden aan {organization}"
 }

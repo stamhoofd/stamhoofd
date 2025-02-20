@@ -15,7 +15,7 @@
             </button>.
         </p>
         <p v-if="!dataPermissionsChangeDate" class="style-description-small">
-            {{ $t('Het antwoord is niet gekend. Daardoor blijft het mogelijk om gegevens te verzamelen waarvoor toestemming nodig is tot er een expliciet antwoord werd gegeven.') }}
+            {{ $t('308d1e59-057c-4a51-846f-8557ba5a385e') }}
         </p>
 
         <p v-if="checkboxWarning" v-show="!dataPermissions" class="warning-box">
