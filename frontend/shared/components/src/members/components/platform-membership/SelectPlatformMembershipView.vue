@@ -226,7 +226,7 @@ async function save() {
                 membershipTypeId: selectedMembershipType.value.id,
                 organizationId: selectedOrganization.value!.id,
                 periodId: props.period.id,
-                startDate: selectedMembershipType.value.behaviour === PlatformMembershipTypeBehaviour.Days ? customStartDate.value : periodConfig.startDate,
+                startDate: customStartDate.value,
                 endDate: selectedMembershipType.value.behaviour === PlatformMembershipTypeBehaviour.Days ? customEndDate.value : periodConfig.endDate,
                 expireDate: selectedMembershipType.value.behaviour === PlatformMembershipTypeBehaviour.Days ? null : periodConfig.expireDate,
             }),
