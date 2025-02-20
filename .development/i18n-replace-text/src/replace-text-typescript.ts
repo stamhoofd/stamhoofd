@@ -1,9 +1,11 @@
+import fs from "fs";
+import { getFilesToSearch } from "./get-files-to-search";
 import { getWhiteSpaceBeforeAndAfter } from "./regex-helper";
 import { wrapWithTranslationFunction } from "./translation-helper";
 
 const quoteRegex = /"([^"]*?)"|'([^']*?)'/ig;
 
-export function replaceTextInTypescript(value: string): string {
+export function replaceTextInTypescriptString(value: string): string {
     let matches: RegExpExecArray | null;
     let result = value;
 
@@ -50,4 +52,46 @@ export function replaceTextInTypescript(value: string): string {
     }
 
     return result;
+}
+
+export function replaceTextInTypescript() {
+    const files = getFilesToSearch(['vue']);
+
+    for (const filePath of files) {
+        const fileContent = fs.readFileSync(filePath, "utf8");
+        const newContent = replaceTextInTypescriptFileContent(fileContent);
+
+        if(fileContent !== newContent) {
+            fs.writeFileSync(filePath, newContent);
+            console.log('Replaced vue template text in:');
+            console.log('- '+filePath);
+        }
+    }
+}
+
+export function replaceTextInTypescriptFileContent(content: string) {
+    let newContent = content;
+
+    let matches: RegExpExecArray | null;
+
+    while ((matches = quoteRegex.exec(content)) !== null) {
+        const match = matches[0];
+        if(!match) {
+            continue;
+        }
+
+        const trimmedMatch = match.trim();
+            
+        if(trimmedMatch.length === 0) {
+            continue;
+        }
+
+        const transformed = replaceTextInTypescriptString(match);
+
+        if(match !== transformed) {
+            newContent = newContent.replace(`"${match}"`, `"${transformed}"`);
+        }
+    }
+
+    return newContent;
 }

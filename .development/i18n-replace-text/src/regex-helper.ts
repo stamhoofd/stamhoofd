@@ -16,3 +16,12 @@ export function getWhiteSpaceBeforeAndAfter(value: string) {
 export function isNumberOrSpecialCharacter(value: string) {
     return /(^-?\d+$)|(^-?[().,\-:;@#$%^&*\[\]"'+–/\/®°⁰!?{}|~]+$)/.test(value);
 }
+
+export function getIndexOfLastNewLine(value: string): number {
+   return value.search(/(\r|\n)(?=.*$)/);
+}
+
+export function getIndexOfFirstNewLine(value: string): number {
+    return value.search(/(\r|\n)/);
+ }
+ 

@@ -5,7 +5,6 @@ import { globals } from "./globals";
 export function getFilesToSearch(types: ('vue' | 'typescript')[]): string[] {
     const root = globals.I18NUUID_ROOT;
     
-
     const includes: RegExp[] = [];
 
     if(types.includes('vue')) {
