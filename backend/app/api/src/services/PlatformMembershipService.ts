@@ -248,12 +248,26 @@ export class PlatformMembershipService {
 
                     const shouldApplyReducedPrice = me.details.shouldApplyReducedPrice;
 
+                    // We'll by default give this member the most cheap membership it can get, and if the price is the same, the membership associated with the first registration
                     const cheapestMembership = defaultMembershipsWithOrganization.sort((a, b) => {
                         const tagIdsA = a.organization?.meta.tags ?? [];
                         const tagIdsB = b.organization?.meta.tags ?? [];
-                        const diff = a.membership.getPrice(period.id, a.registration.startDate ?? a.registration.registeredAt ?? now, tagIdsA, shouldApplyReducedPrice)! - b.membership.getPrice(period.id, a.registration.startDate ?? a.registration.registeredAt ?? now, tagIdsB, shouldApplyReducedPrice)!;
+                        const aPrice = a.membership.getPrice(
+                            period.id, 
+                            a.registration.startDate ?? a.registration.registeredAt ?? a.registration.createdAt, 
+                            tagIdsA, 
+                            shouldApplyReducedPrice
+                        ) ?? 10000000;
+                        const bPrice = b.membership.getPrice(
+                            period.id, 
+                            b.registration.startDate ?? b.registration.registeredAt ?? b.registration.createdAt, 
+                            tagIdsB, 
+                            shouldApplyReducedPrice
+                        ) ?? 10000000;
+
+                        const diff = aPrice - bPrice;
                         if (diff === 0) {
-                            return Sorter.byDateValue(b.registration.startDate ?? b.registration.createdAt, a.registration.startDate ?? a.registration.createdAt);
+                            return Sorter.byDateValue(b.registration.startDate ?? b.registration.registeredAt ?? b.registration.createdAt, a.registration.startDate ?? a.registration.registeredAt ?? a.registration.createdAt);
                         }
                         return diff;
                     })[0];
@@ -264,6 +278,7 @@ export class PlatformMembershipService {
                     }
 
                     // Check if already have the same membership
+                    // if that is the case, we'll keep that one and update the price + dates if the organization matches the cheapest/earliest membership
                     let didFind = false;
                     for (const m of activeMemberships) {
                         if (m.membershipTypeId === cheapestMembership.membership.id && m.organizationId === cheapestMembership.registration.organizationId) {
@@ -303,6 +318,8 @@ export class PlatformMembershipService {
                     membership.membershipTypeId = cheapestMembership.membership.id;
                     membership.organizationId = cheapestMembership.registration.organizationId;
                     membership.periodId = period.id;
+
+                    // Note: the dates will get modified in the price calculation
                     membership.startDate = periodConfig.startDate;
                     membership.endDate = periodConfig.endDate;
                     membership.expireDate = periodConfig.expireDate;
