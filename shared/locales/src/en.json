@@ -765,5 +765,9 @@
   "c8f1e4d4-669c-4ccb-a9d9-30584f6c2d55": "Via {organization}",
   "f1582fe7-3168-4579-bcc5-9db17568dac0": "Aangerekend aan {organization}",
   "b0a70381-66b1-4bff-a613-8332a35bec7a": "Zal na proefperiode aangerekend worden aan {organization}",
-  "a2f6d632-9e20-4366-9393-b52431525596": "Zal binnenkort aangerekend worden aan {organization}"
+  "a2f6d632-9e20-4366-9393-b52431525596": "Zal binnenkort aangerekend worden aan {organization}",
+  "dcb9126f-72c4-42c8-990a-8ddc747c0e2b": "Je kan niet inschrijven voor {group} omdat dit werkjaar niet actief is.",
+  "7c55cb44-8149-414a-a162-ca9859014e81": "Je kan geen inschrijvingen wijzigen van {group} omdat dat werkjaar niet actief is.",
+  "f6360ada-86e7-4ec8-86fb-fe9e750c4926": "Je kan niet inschrijven voor {group} omdat dit werkjaar is afgesloten.",
+  "26b8398d-a17c-4854-ae64-99a410ddeffb": "Je kan niet inschrijven voor {group} omdat werkjaar {period} is afgesloten."
 }

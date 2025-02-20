@@ -876,7 +876,9 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'different_period',
                         message: 'Different period',
-                        human: type === 'register' ? `Je kan niet inschrijven voor ${group.settings.name} omdat dit werkjaar niet actief is.` : `Je kan geen inschrijvingen wijzigen van ${group.settings.name} omdat dat werkjaar niet actief is.`,
+                        human: type === 'register'
+                            ? $t('dcb9126f-72c4-42c8-990a-8ddc747c0e2b', { group: group.settings.name })
+                            : $t('7c55cb44-8149-414a-a162-ca9859014e81', { group: group.settings.name }),
                     });
                 }
             }
@@ -888,7 +890,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'locked_period',
                 message: 'Locked period',
-                human: type === 'register' ? `Je kan niet inschrijven voor ${group.settings.name} omdat dit werkjaar is afgesloten.` : `Je kan geen inschrijvingen wijzigen van ${group.settings.name} omdat dit werkjaar is afgesloten.`,
+                human: type === 'register' ? $t('f6360ada-86e7-4ec8-86fb-fe9e750c4926', { group: group.settings.name }) : $t('Je kan geen inschrijvingen wijzigen van {group} omdat dit werkjaar is afgesloten.', { group: group.settings.name }),
             });
         }
 
@@ -896,7 +898,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'locked_period',
                 message: 'Locked period',
-                human: type === 'register' ? `Je kan niet inschrijven voor ${group.settings.name} omdat werkjaar ${period.nameShort} is afgesloten.` : `Je kan geen inschrijvingen wijzigen van ${group.settings.name} omdat werkjaar ${period.nameShort} is afgesloten.`,
+                human: type === 'register' ? $t('26b8398d-a17c-4854-ae64-99a410ddeffb', { group: group.settings.name, period: period.nameShort }) : $t('Je kan geen inschrijvingen wijzigen van {group} omdat werkjaar {period} is afgesloten.', { group: group.settings.name, period: period.nameShort }),
             });
         }
     }
