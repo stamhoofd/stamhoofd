@@ -871,12 +871,14 @@ export class RegisterItem implements ObjectWithRecords {
 
         const periodId = group.periodId;
         if (periodId !== this.organization.period.period.id) {
-            if (!admin) {
-                throw new SimpleError({
-                    code: 'different_period',
-                    message: 'Different period',
-                    human: type === 'register' ? `Je kan niet meer inschrijven voor ${group.settings.name} omdat dit werkjaar niet actief is.` : `Je kan geen inschrijvingen wijzigen van ${group.settings.name} omdat dat werkjaar niet actief is.`,
-                });
+            if (group.type === GroupType.Membership) {
+                if (!admin) {
+                    throw new SimpleError({
+                        code: 'different_period',
+                        message: 'Different period',
+                        human: type === 'register' ? `Je kan niet inschrijven voor ${group.settings.name} omdat dit werkjaar niet actief is.` : `Je kan geen inschrijvingen wijzigen van ${group.settings.name} omdat dat werkjaar niet actief is.`,
+                    });
+                }
             }
         }
 
@@ -886,7 +888,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'locked_period',
                 message: 'Locked period',
-                human: type === 'register' ? `Je kan niet meer inschrijven voor ${group.settings.name} omdat dit werkjaar is afgesloten.` : `Je kan geen inschrijvingen wijzigen van ${group.settings.name} omdat dit werkjaar is afgesloten.`,
+                human: type === 'register' ? `Je kan niet inschrijven voor ${group.settings.name} omdat dit werkjaar is afgesloten.` : `Je kan geen inschrijvingen wijzigen van ${group.settings.name} omdat dit werkjaar is afgesloten.`,
             });
         }
 
@@ -894,7 +896,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'locked_period',
                 message: 'Locked period',
-                human: type === 'register' ? `Je kan niet meer inschrijven voor ${group.settings.name} omdat werkjaar ${period.nameShort} is afgesloten.` : `Je kan geen inschrijvingen wijzigen van ${group.settings.name} omdat werkjaar ${period.nameShort} is afgesloten.`,
+                human: type === 'register' ? `Je kan niet inschrijven voor ${group.settings.name} omdat werkjaar ${period.nameShort} is afgesloten.` : `Je kan geen inschrijvingen wijzigen van ${group.settings.name} omdat werkjaar ${period.nameShort} is afgesloten.`,
             });
         }
     }
