@@ -93,7 +93,7 @@ function getDefaultPrice(isReduced: boolean, date: Date) {
 
 function formatPriceForPlatform(price: number, priceNow: number) {
     if (priceNow < price) {
-        return $t('Je betaalt als #lokale-groep {price} aan #koepel, maar voor latere aansluitingen bedraagt het nu {priceReduced}.', { price: Formatter.price(price), priceReduced: Formatter.price(priceNow) });
+        return $t('f6e06abd-3e58-4f99-bc8d-6cf6a44273b3', { price: Formatter.price(price), priceReduced: Formatter.price(priceNow) });
     }
     return $t('75815048-939a-4ac1-a81c-f23fc3ec5006', { price: Formatter.price(price) });
 }

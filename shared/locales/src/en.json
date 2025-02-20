@@ -769,5 +769,6 @@
   "dcb9126f-72c4-42c8-990a-8ddc747c0e2b": "Je kan niet inschrijven voor {group} omdat dit werkjaar niet actief is.",
   "7c55cb44-8149-414a-a162-ca9859014e81": "Je kan geen inschrijvingen wijzigen van {group} omdat dat werkjaar niet actief is.",
   "f6360ada-86e7-4ec8-86fb-fe9e750c4926": "Je kan niet inschrijven voor {group} omdat dit werkjaar is afgesloten.",
-  "26b8398d-a17c-4854-ae64-99a410ddeffb": "Je kan niet inschrijven voor {group} omdat werkjaar {period} is afgesloten."
+  "26b8398d-a17c-4854-ae64-99a410ddeffb": "Je kan niet inschrijven voor {group} omdat werkjaar {period} is afgesloten.",
+  "f6e06abd-3e58-4f99-bc8d-6cf6a44273b3": "Je betaalt als #lokale-groep {price} aan #koepel, maar voor latere aansluitingen bedraagt het nu {priceReduced}."
 }
