@@ -147,7 +147,7 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     /**
      * @deprecated
      */
-    @field({ decoder: StringDecoder, version: 149, nullable: true })
+    @field({ decoder: StringDecoder, version: 149, nullable: true, optional: true })
     privateKey: string | null = null;
 
     /**
