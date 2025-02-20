@@ -116,14 +116,7 @@ const settings = computed(() => {
             }),
             isNew: true,
             family,
-        }),
-        patchExampleValue(value: PlatformMember, patch) {
-            const cloned = value.clone();
-            value.addDetailsPatch(MemberDetails.patch({
-                recordAnswers: patch,
-            }));
-            return cloned;
-        },
+        })
     });
     family.members.push(ss.exampleValue);
     return ss;

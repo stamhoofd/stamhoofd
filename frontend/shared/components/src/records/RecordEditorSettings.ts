@@ -18,7 +18,6 @@ export class RecordEditorSettings<T extends ObjectWithRecords> {
     toggleDefaultEnabled = false;
 
     exampleValue!: T;
-    patchExampleValue!: (exampleValue: T, patch: PatchAnswers) => T;
     filterBuilder!: (categories: RecordCategory[]) => UIFilterBuilder;
 
     inheritedRecordsConfiguration: OrganizationRecordsConfiguration | null = null;

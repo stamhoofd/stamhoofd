@@ -61,12 +61,7 @@ const editorSettings = computed(() => {
                 city: 'Voorbeeldstad',
                 country: Country.Belgium,
             }),
-        }),
-        patchExampleValue(value: Organization, patch: PatchAnswers) {
-            return value.patch(Organization.patch({
-                privateMeta: OrganizationPrivateMetaData.patch({ recordAnswers: patch }),
-            }));
-        },
+        })
     });
 });
 

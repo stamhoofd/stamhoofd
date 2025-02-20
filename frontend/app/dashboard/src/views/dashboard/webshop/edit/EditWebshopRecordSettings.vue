@@ -89,14 +89,7 @@ const editorSettings = computed(() => {
         filterBuilder: (_categories: RecordCategory[]) => {
             return checkoutUIFilterBuilders[0];
         },
-        exampleValue: Checkout.create({}),
-        patchExampleValue(checkout, patch: PatchAnswers) {
-            return checkout.patch(
-                Checkout.patch({
-                    recordAnswers: patch,
-                }),
-            );
-        },
+        exampleValue: Checkout.create({})
     });
 });
 

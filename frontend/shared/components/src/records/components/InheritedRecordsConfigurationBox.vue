@@ -123,14 +123,7 @@ const settings = new RecordEditorSettings({
         }),
         isNew: true,
         family,
-    }),
-    patchExampleValue(value: PlatformMember, patch) {
-        const cloned = value.clone();
-        cloned.addDetailsPatch(MemberDetails.patch({
-            recordAnswers: patch,
-        }));
-        return cloned;
-    },
+    })
 });
 family.members.push(settings.exampleValue);
 

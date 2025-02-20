@@ -1264,12 +1264,7 @@ const recordEditorSettings = new RecordEditorSettings({
         group: patched.value,
         groupPrice: patched.value.settings.prices[0],
         organizationId: patched.value.organizationId,
-    }),
-    patchExampleValue(value: Registration, patch) {
-        return value.patch({
-            recordAnswers: patch,
-        });
-    },
+    })
 });
 
 defineExpose({

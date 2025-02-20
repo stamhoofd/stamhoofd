@@ -188,10 +188,7 @@ const editorSettings = computed(() => {
                     country: country.value,
                 }),
             }),
-        }),
-        patchExampleValue(value: EventNotification, patch: PatchAnswers) {
-            return value.patchRecordAnswers(patch);
-        },
+        })
     });
 });
 
