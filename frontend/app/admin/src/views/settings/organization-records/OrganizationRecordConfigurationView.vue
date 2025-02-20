@@ -61,7 +61,8 @@ const editorSettings = computed(() => {
                 city: 'Voorbeeldstad',
                 country: Country.Belgium,
             }),
-        })
+            privateMeta: OrganizationPrivateMetaData.create({}),
+        }),
     });
 });
 

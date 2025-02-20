@@ -138,7 +138,6 @@ const active = computed({
 });
 
 function patchAnswers(patch: PatchAnswers) {
-    console.error('patch answers 1 - todo remove');
     addPatch({
         privateMeta: OrganizationPrivateMetaData.patch({ recordAnswers: patch }),
     });

@@ -24,7 +24,7 @@ import { AsyncTableAction, Column, ComponentExposed, EmailView, InMemoryTableAct
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { I18nController, useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { Address, EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, isEmptyFilter, Organization, OrganizationTag, StamhoofdFilter } from '@stamhoofd/structures';
+import { Address, EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, isEmptyFilter, Organization, OrganizationPrivateMetaData, OrganizationTag, StamhoofdFilter } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';
 import EditOrganizationView from './EditOrganizationView.vue';
 import OrganizationView from './OrganizationView.vue';
@@ -279,6 +279,7 @@ if (auth.hasPlatformFullAccess()) {
             handler: async () => {
                 const organization = Organization.create({
                     address: Address.createDefault(I18nController.shared.countryCode),
+                    privateMeta: OrganizationPrivateMetaData.create({}),
                 });
 
                 const component = new ComponentWithProperties(EditOrganizationView, {
