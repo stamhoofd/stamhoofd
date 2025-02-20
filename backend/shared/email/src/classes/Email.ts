@@ -335,12 +335,37 @@ class EmailStatic {
             return '"' + cleanedName + '" <' + recipient.email + '>';
         }).join(', ');
 
+        // Clean bcc
+        let bccRecipients: EmailInterfaceRecipient[] = [];
+        if (data.bcc) {    
+            // Filter
+            bccRecipients.push(...(await EmailAddress.filterSendTo(this.parseTo(data.bcc))));
+
+            // Filter by environment
+            if (STAMHOOFD.environment !== 'production' || (STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS && STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS.length > 0)) {
+                const whitelist = STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS ?? [];
+                bccRecipients = this.filterWhitelist(bccRecipients, whitelist);
+            }
+        }
+
+        // Rebuild to
+        const bcc = bccRecipients.length === 0 ? undefined : bccRecipients.map((recipient) => {
+            if (!recipient.name) {
+                return recipient.email;
+            }
+            const cleanedName = Formatter.emailSenderName(recipient.name);
+            if (cleanedName.length < 2) {
+                return recipient.email;
+            }
+            return '"' + cleanedName + '" <' + recipient.email + '>';
+        }).join(', ');
+
         this.setupIfNeeded();
 
         // send mail with defined transport object
         const mail: InternalEmailData = {
             from: data.from, // sender address
-            bcc: (STAMHOOFD.environment === 'production' || !data.bcc) ? data.bcc : 'simon@stamhoofd.be',
+            bcc,
             replyTo: data.replyTo,
             to,
             subject: data.subject.substring(0, 1000), // Subject line
