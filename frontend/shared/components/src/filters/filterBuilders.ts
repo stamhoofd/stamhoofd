@@ -269,11 +269,41 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
             );
 
             all.push(
+                new DateFilterBuilder({
+                    name: $t('300d2935-b578-48cc-b58e-1c0446a68d59'),
+                    key: 'startDate',
+                }),
+            );
+
+            all.push(
+                new DateFilterBuilder({
+                    name: $t('85dcdb87-b504-43b6-8a52-c22a046eefad'),
+                    key: 'endDate',
+                }),
+            );
+
+            all.push(
+                new NumberFilterBuilder({
+                    name: $t('Prijs'),
+                    key: 'price',
+                    type: NumberFilterFormat.Currency,
+                }),
+            )
+
+            all.push(
+                new NumberFilterBuilder({
+                    name: $t('Prijs zonder korting'),
+                    key: 'priceWithoutDiscount',
+                    type: NumberFilterFormat.Currency,
+                }),
+            )
+
+            all.push(
                 new MultipleChoiceFilterBuilder({
                     name: $t('41b46e42-08eb-4146-b71c-d77c90f46219'),
                     options: [
-                        new MultipleChoiceUIFilterOption('Reeds aangerekend', true),
-                        new MultipleChoiceUIFilterOption('Nog niet aangerekend', false),
+                        new MultipleChoiceUIFilterOption($t('Aangerekend'), true),
+                        new MultipleChoiceUIFilterOption($t('Nog niet aangerekend'), false),
                     ],
                     allowCreation: hasPlatformPermissions,
                     wrapFilter: (f: StamhoofdFilter) => {

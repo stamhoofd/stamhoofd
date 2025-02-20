@@ -257,6 +257,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
             organizationId: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'organizationId')),
             periodId: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'periodId')),
             price: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'price')),
+            priceWithoutDiscount: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'priceWithoutDiscount')),
             startDate: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'startDate')),
             endDate: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'endDate')),
             expireDate: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'expireDate')),
