@@ -4,14 +4,14 @@
         <STInputBox :title="title" error-fields="price" :error-box="errorBox">
             <PriceInput v-model="price" placeholder="Gratis" :min="min" />
             <p v-if="defaultMembershipTypeId" class="style-description-small">
-                {{ formatPriceForPlatform(defaultPrice) }}
+                {{ formatPriceForPlatform(defaultPrice, defaultPriceNow) }}
             </p>
         </STInputBox>
 
         <STInputBox v-if="$showReducedPrice" :title="financialSupportSettings.priceName" error-fields="price" :error-box="errorBox">
             <PriceInput v-model="reducedPrice" :placeholder="formatPrice(price)" :min="min" :required="false" />
             <p v-if="defaultMembershipTypeId" class="style-description-small">
-                {{ formatPriceForPlatform(defaultReducedPrice) }}
+                {{ formatPriceForPlatform(defaultReducedPrice, defaultReducedPriceNow) }}
             </p>
         </STInputBox>
 
@@ -61,11 +61,23 @@ const $t = useTranslate();
 
 const $showReducedPrice = computed(() => enabled || reducedPrice.value !== null);
 
-const defaultReducedPrice = computed(() => getDefaultPrice(true));
-const defaultPrice = computed(() => getDefaultPrice(false));
-const minPriceDifference = computed(() => defaultPrice.value - defaultReducedPrice.value);
+const defaultReducedPrice = computed(() => getDefaultPrice(true, new Date(0)));
+const defaultPrice = computed(() => getDefaultPrice(false, new Date(0)));
 
-function getDefaultPrice(isReduced: boolean) {
+const defaultReducedPriceNow = computed(() => getDefaultPrice(true, new Date()));
+const defaultPriceNow = computed(() => getDefaultPrice(false, new Date()));
+
+const minPriceDifference = computed(() =>
+    Math.max(0,
+        Math.min(
+            // It is possible that the difference changes over the year, so we should allow them to also alter it after this date
+            defaultPrice.value - defaultReducedPrice.value,
+            defaultPriceNow.value - defaultReducedPriceNow.value,
+        ),
+    ),
+);
+
+function getDefaultPrice(isReduced: boolean, date: Date) {
     if (!props.defaultMembershipTypeId) {
         return 0;
     }
@@ -76,11 +88,14 @@ function getDefaultPrice(isReduced: boolean) {
         return 0;
     }
 
-    return defaultMembership.getPrice(platform.value.period.id, new Date(), organization.value?.meta.tags ?? [], isReduced) ?? 0;
+    return defaultMembership.getPrice(platform.value.period.id, date, organization.value?.meta.tags ?? [], isReduced) ?? 0;
 }
 
-function formatPriceForPlatform(price: number) {
-    return $t('75815048-939a-4ac1-a81c-f23fc3ec5006', {price: Formatter.price(price)});
+function formatPriceForPlatform(price: number, priceNow: number) {
+    if (priceNow < price) {
+        return $t('Je betaalt als #lokale-groep {price} aan #koepel, maar voor latere aansluitingen bedraagt het nu {priceReduced}.', { price: Formatter.price(price), priceReduced: Formatter.price(priceNow) });
+    }
+    return $t('75815048-939a-4ac1-a81c-f23fc3ec5006', { price: Formatter.price(price) });
 }
 
 useValidation(props.validator, () => {
@@ -89,21 +104,22 @@ useValidation(props.validator, () => {
             code: 'invalid_reduced_price',
             field: 'price',
             message: 'Financial support is not enabled, but you have set a reduced price',
-            human: $t("a83523bb-ba90-4a6c-a73a-4d4f12defe7a", {
+            human: $t('a83523bb-ba90-4a6c-a73a-4d4f12defe7a', {
                 financialSupportTitle: financialSupportSettings.value.title,
-                financialSupportPriceName: financialSupportSettings.value.priceName
+                financialSupportPriceName: financialSupportSettings.value.priceName,
             }),
         }));
         return false;
     }
 
-    if (model.value.reducedPrice !== null
-        && (model.value.price - model.value.reducedPrice) < minPriceDifference.value) {
+    if (model.value.reducedPrice !== null && model.value.reducedPrice !== 0
+        && (model.value.price - model.value.reducedPrice) < minPriceDifference.value
+    ) {
         ownErrors.errorBox = new ErrorBox(new SimpleError({
             code: 'invalid_reduced_price',
             field: 'price',
             message: 'Reduced price should be at least be the normal price minus the minimum difference between the normal and reduced price',
-            human: $t("77578f4e-049c-4d64-b63c-357fb6d0d7ac", {
+            human: $t('77578f4e-049c-4d64-b63c-357fb6d0d7ac', {
                 financialSupportPriceName: financialSupportSettings.value.priceName,
                 minDifference: Formatter.price(minPriceDifference.value),
             }),
