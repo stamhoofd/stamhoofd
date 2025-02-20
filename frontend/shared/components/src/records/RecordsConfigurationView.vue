@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" title="Persoonsgegevens van leden" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="saving" :title="$t('69a7751b-c316-42cd-a766-98e7e11fe3d6')" :disabled="!hasChanges" @save="save">
         <h1>
             {{ $t('69a7751b-c316-42cd-a766-98e7e11fe3d6') }}
         </h1>
@@ -60,7 +60,7 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, memberWithRegistrationsBlobUIFilterBuilders, useAppContext, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, useAppContext, useErrors, useOrganization, usePatch, usePlatformMemberFilterBuilders } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
@@ -89,6 +89,7 @@ const $t = useTranslate();
 
 const organization = useOrganization();
 const app = useAppContext();
+const getPlatformMemberFilterBuilders = usePlatformMemberFilterBuilders();
 
 const settings = computed(() => {
     const family = new PlatformFamily({
@@ -101,11 +102,11 @@ const settings = computed(() => {
         toggleDefaultEnabled: true,
         inheritedRecordsConfiguration: props.inheritedRecordsConfiguration ? OrganizationRecordsConfiguration.mergeChild(props.inheritedRecordsConfiguration, patched.value) : patched.value,
         filterBuilder: (categories: RecordCategory[]) => {
-            /*return getFilterBuilders(patched.value.patch({
+            const patchedSelf = patched.value.patch({
                 recordCategories: categories,
-            }))[0];*/
-            
-            return memberWithRegistrationsBlobUIFilterBuilders[0];
+            });
+            const baseConfig = props.inheritedRecordsConfiguration ? OrganizationRecordsConfiguration.mergeChild(props.inheritedRecordsConfiguration, patchedSelf) : patchedSelf;
+            return getPlatformMemberFilterBuilders(baseConfig)[0];
         },
         exampleValue: new PlatformMember({
             member: MemberWithRegistrationsBlob.create({

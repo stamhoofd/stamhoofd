@@ -1,18 +1,20 @@
 import { InMemoryFilterDefinitions, baseInMemoryFilterCompilers, createInMemoryFilterCompiler, createInMemoryWildcardCompilerSelector } from './InMemoryFilter.js';
 
-export const recordAnswersFilterCompilers: InMemoryFilterDefinitions = {
-    recordAnswers: createInMemoryFilterCompiler('recordAnswers', createInMemoryWildcardCompilerSelector({
+export const recordAnswerItemFilterCompilers: InMemoryFilterDefinitions = {
+    ...baseInMemoryFilterCompilers,
+    selected: createInMemoryFilterCompiler('selected'),
+    selectedChoice: createInMemoryFilterCompiler('selectedChoice', {
         ...baseInMemoryFilterCompilers,
-        selected: createInMemoryFilterCompiler('selected'),
-        selectedChoice: createInMemoryFilterCompiler('selectedChoice', {
-            ...baseInMemoryFilterCompilers,
-            id: createInMemoryFilterCompiler('id'),
-        }),
-        selectedChoices: createInMemoryFilterCompiler('selectedChoices', {
-            ...baseInMemoryFilterCompilers,
-            id: createInMemoryFilterCompiler('id'),
-        }),
-    })),
+        id: createInMemoryFilterCompiler('id'),
+    }),
+    selectedChoices: createInMemoryFilterCompiler('selectedChoices', {
+        ...baseInMemoryFilterCompilers,
+        id: createInMemoryFilterCompiler('id'),
+    }),
+};
+
+export const recordAnswersFilterCompilers: InMemoryFilterDefinitions = {
+    recordAnswers: createInMemoryFilterCompiler('recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers)),
 };
 
 export const memberWithRegistrationsBlobInMemoryFilterCompilers: InMemoryFilterDefinitions = {
@@ -20,7 +22,7 @@ export const memberWithRegistrationsBlobInMemoryFilterCompilers: InMemoryFilterD
     age: createInMemoryFilterCompiler('details.defaultAge'),
     gender: createInMemoryFilterCompiler('details.gender'),
     birthDay: createInMemoryFilterCompiler('details.birthDay'),
-    ...recordAnswersFilterCompilers,
+    recordAnswers: createInMemoryFilterCompiler('details.recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers)),
 };
 
 export const registrationInMemoryFilterCompilers: InMemoryFilterDefinitions = {

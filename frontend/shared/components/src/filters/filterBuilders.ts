@@ -1,6 +1,6 @@
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, FilterWrapperMarker, getAuditLogTypeName, Group, LoadedPermissions, MemberResponsibility, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, RecordCategory, RecordType, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, unwrapFilter, User, WebshopPreview } from '@stamhoofd/structures';
+import { AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, FilterWrapperMarker, getAuditLogTypeName, Group, LoadedPermissions, MemberResponsibility, OrderStatus, OrderStatusHelper, Organization, OrganizationRecordsConfiguration, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, RecordCategory, RecordType, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, unwrapFilter, User, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { Gender } from '../../../../../shared/structures/esm/dist/src/members/Gender';
@@ -78,6 +78,57 @@ memberWithRegistrationsBlobUIFilterBuilders.unshift(
         builders: memberWithRegistrationsBlobUIFilterBuilders,
     }),
 );
+
+export function useMemberWithRegistrationsBlobFilterBuilders() {
+    return (recordConfiguration: OrganizationRecordsConfiguration) => {
+        const all: UIFilterBuilders = [];
+        
+        if (recordConfiguration.birthDay) {
+            all.push(new DateFilterBuilder({
+                name: 'Geboortedatum',
+                key: 'birthDay'
+            }));
+
+            all.push(new NumberFilterBuilder({
+                name: 'Leeftijd',
+                key: 'age'
+            }));
+        }
+
+        if (recordConfiguration.gender) {
+            all.push(new MultipleChoiceFilterBuilder({
+                name: 'Gender',
+                options: [
+                    new MultipleChoiceUIFilterOption('Vrouw', Gender.Female),
+                    new MultipleChoiceUIFilterOption('Man', Gender.Male),
+                    new MultipleChoiceUIFilterOption('Andere', Gender.Other),
+                ],
+                wrapper: {
+                    gender: {
+                        $in: FilterWrapperMarker,
+                    },
+                }
+            }));
+        }
+
+        // Add record categories
+        all.push(...getFilterBuildersForRecordCategories(recordConfiguration.recordCategories));
+        
+        // Recursive: self referencing groups
+        all.unshift(
+            new GroupUIFilterBuilder({
+                builders: all,
+            }),
+        );
+
+        return all;
+    }
+}
+
+export function usePlatformMemberFilterBuilders() {
+    // the platform member passes all filters directly to the memberWithRegistrationsBlob
+    return useMemberWithRegistrationsBlobFilterBuilders()
+}
 
 export function useRegisterItemFilterBuilders() {
     return (group: Group) => {
