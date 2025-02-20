@@ -138,9 +138,18 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
                 // Apply payconiq patch
                 if (request.body.privateMeta.payconiqAccounts !== undefined) {
+                    const originalAccounts = organization.privateMeta.payconiqAccounts;
+
+                    // Ignore patches of payconiq accounts which contain a placeholder key
                     organization.privateMeta.payconiqAccounts = patchObject(organization.privateMeta.payconiqAccounts, cloneObject(request.body.privateMeta.payconiqAccounts as any));
 
                     for (const account of organization.privateMeta.payconiqAccounts) {
+                        if (account.apiKey === PayconiqAccount.placeholderApiKey) {
+                            // Reset back to original
+                            organization.privateMeta.payconiqAccounts = originalAccounts;
+                            break;
+                        }
+
                         if (account.merchantId === null) {
                             const payment = await PayconiqPayment.createTest(organization, account);
 

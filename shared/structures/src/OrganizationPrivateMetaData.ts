@@ -333,4 +333,14 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
 
         return null;
     }
+
+    get removedPrivateKeys(): OrganizationPrivateMetaData {
+        const c = this.clone();
+
+        for (const account of c.payconiqAccounts) {
+            account.apiKey = PayconiqAccount.placeholderApiKey;
+        }
+
+        return c;
+    }
 }

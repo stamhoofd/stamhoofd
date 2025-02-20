@@ -50,6 +50,10 @@ export class PayconiqAccount extends AutoEncoder {
         // Don't list properties
         return '';
     }
+
+    static get placeholderApiKey() {
+        return '••••';
+    }
 }
 
 /**

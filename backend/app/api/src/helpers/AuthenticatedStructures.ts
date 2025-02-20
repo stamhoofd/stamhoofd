@@ -254,7 +254,7 @@ export class AuthenticatedStructures {
                 result = OrganizationStruct.create({
                     ...baseStruct,
                     period,
-                    privateMeta: organization.privateMeta,
+                    privateMeta: organization.privateMeta.removedPrivateKeys,
                     webshops: webshopPreviews.get(organization.id)?.sort((a, b) => Sorter.byDateValue(b.createdAt, a.createdAt)),
                 });
             }
