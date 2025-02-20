@@ -101,6 +101,10 @@ const settings = computed(() => {
         toggleDefaultEnabled: true,
         inheritedRecordsConfiguration: props.inheritedRecordsConfiguration ? OrganizationRecordsConfiguration.mergeChild(props.inheritedRecordsConfiguration, patched.value) : patched.value,
         filterBuilder: (categories: RecordCategory[]) => {
+            /*return getFilterBuilders(patched.value.patch({
+                recordCategories: categories,
+            }))[0];*/
+            
             return memberWithRegistrationsBlobUIFilterBuilders[0];
         },
         exampleValue: new PlatformMember({

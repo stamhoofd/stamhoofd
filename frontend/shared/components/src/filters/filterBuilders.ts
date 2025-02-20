@@ -80,14 +80,42 @@ memberWithRegistrationsBlobUIFilterBuilders.unshift(
 );
 
 // This one should match registrationInMemoryFilterCompilers
-export const registrationUIFilterBuilders: UIFilterBuilders = [
-    // tood
+export const registerItemFilterBuilders: UIFilterBuilders = [
+    new NumberFilterBuilder({
+        name: 'Leeftijd',
+        key: 'age',
+        wrapper: {
+            member: FilterWrapperMarker
+        }
+    }),
+    new DateFilterBuilder({
+        name: 'Geboortedatum',
+        key: 'birthDay',
+        wrapper: {
+            member: FilterWrapperMarker
+        }
+    }),
+    new MultipleChoiceFilterBuilder({
+        name: 'Gender',
+        options: [
+            new MultipleChoiceUIFilterOption('Vrouw', Gender.Female),
+            new MultipleChoiceUIFilterOption('Man', Gender.Male),
+            new MultipleChoiceUIFilterOption('Andere', Gender.Other),
+        ],
+        wrapper: {
+            member: {
+                gender: {
+                    $in: FilterWrapperMarker,
+                },
+            }
+        }
+    }),
 ];
 
 // Recursive: self referencing groups
-registrationUIFilterBuilders.unshift(
+registerItemFilterBuilders.unshift(
     new GroupUIFilterBuilder({
-        builders: registrationUIFilterBuilders,
+        builders: registerItemFilterBuilders,
     }),
 );
 

@@ -1,10 +1,26 @@
 import { InMemoryFilterDefinitions, baseInMemoryFilterCompilers, createInMemoryFilterCompiler, createInMemoryWildcardCompilerSelector } from './InMemoryFilter.js';
 
+export const recordAnswersFilterCompilers: InMemoryFilterDefinitions = {
+    recordAnswers: createInMemoryFilterCompiler('recordAnswers', createInMemoryWildcardCompilerSelector({
+        ...baseInMemoryFilterCompilers,
+        selected: createInMemoryFilterCompiler('selected'),
+        selectedChoice: createInMemoryFilterCompiler('selectedChoice', {
+            ...baseInMemoryFilterCompilers,
+            id: createInMemoryFilterCompiler('id'),
+        }),
+        selectedChoices: createInMemoryFilterCompiler('selectedChoices', {
+            ...baseInMemoryFilterCompilers,
+            id: createInMemoryFilterCompiler('id'),
+        }),
+    })),
+};
+
 export const memberWithRegistrationsBlobInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
     age: createInMemoryFilterCompiler('details.defaultAge'),
     gender: createInMemoryFilterCompiler('details.gender'),
     birthDay: createInMemoryFilterCompiler('details.birthDay'),
+    ...recordAnswersFilterCompilers,
 };
 
 export const registrationInMemoryFilterCompilers: InMemoryFilterDefinitions = {
@@ -13,6 +29,7 @@ export const registrationInMemoryFilterCompilers: InMemoryFilterDefinitions = {
 
 export const registerItemInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
+    member: createInMemoryFilterCompiler('member.patchedMember', memberWithRegistrationsBlobInMemoryFilterCompilers),
 };
 
 export const documentInMemoryFilterCompilers: InMemoryFilterDefinitions = {
@@ -34,21 +51,6 @@ export const receivableBalanceObjectContactInMemoryFilterCompilers: InMemoryFilt
 export const organizationItemInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
     tags: createInMemoryFilterCompiler('meta.tags'),
-};
-
-export const recordAnswersFilterCompilers: InMemoryFilterDefinitions = {
-    recordAnswers: createInMemoryFilterCompiler('recordAnswers', createInMemoryWildcardCompilerSelector({
-        ...baseInMemoryFilterCompilers,
-        selected: createInMemoryFilterCompiler('selected'),
-        selectedChoice: createInMemoryFilterCompiler('selectedChoice', {
-            ...baseInMemoryFilterCompilers,
-            id: createInMemoryFilterCompiler('id'),
-        }),
-        selectedChoices: createInMemoryFilterCompiler('selectedChoices', {
-            ...baseInMemoryFilterCompilers,
-            id: createInMemoryFilterCompiler('id'),
-        }),
-    })),
 };
 
 export const eventNotificationsInMemoryFilterCompilers: InMemoryFilterDefinitions = {

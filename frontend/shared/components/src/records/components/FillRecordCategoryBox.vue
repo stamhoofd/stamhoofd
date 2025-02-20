@@ -1,5 +1,10 @@
 <template>
-    <div class="container">
+    <div class="container" v-if="!category.isEnabled(value)">
+        <p class="error-box" v-if="STAMHOOFD.environment === 'development'">
+            This category should be invisible. Check if the record categories are filtered using .filter(c => c.isEnabled(value))
+        </p>
+    </div>
+    <div v-else class="container">
         <component :is="level === 1 ? 'h1' : 'h2'">
             {{ category.name }}
             <span v-if="titleSuffix" class="title-suffix">

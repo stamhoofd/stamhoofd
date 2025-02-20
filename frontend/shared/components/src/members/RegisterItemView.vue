@@ -126,7 +126,7 @@
             </STList>
         </div>
 
-        <div v-for="category in categories" :key="category.id" class="container">
+        <div v-for="category in categories.filter(c => c.isEnabled(item))" :key="category.id" class="container">
             <hr>
             <FillRecordCategoryBox :category="category" :value="item" :validator="errors.validator" :level="2" :all-optional="false" :force-mark-reviewed="true" @patch="addRecordAnswersPatch" />
         </div>
