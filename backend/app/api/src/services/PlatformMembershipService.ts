@@ -164,7 +164,6 @@ export class PlatformMembershipService {
                 // Every (not-locked) period can have a generated membership
                 for (const period of periods) {
                     const registrations = me.registrations.filter(r => r.group.periodId === period.id && r.registeredAt && !r.deactivatedAt);
-                    const now = new Date();
 
                     const defaultMemberships = registrations.flatMap((r) => {
                         if (!r.group.defaultAgeGroupId) {
