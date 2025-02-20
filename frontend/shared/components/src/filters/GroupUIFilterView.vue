@@ -58,7 +58,7 @@ const builders = computed(() => {
         // Remove first
         return filterBuilders(props.filter.builders.slice(1));
     }
-    return filterBuilders(props.filter.builders);
+    return filterBuilders(props.filter.builders).filter(b => b !== props.filter.builder);
 });
 
 async function addFilter(builder: UIFilterBuilder) {

@@ -110,7 +110,7 @@
             </STList>
         </div>
 
-        <div v-if="defaultEnabled && (hasFilters || (patchedCategory.getAllRecords().length > 1))" class="container">
+        <div v-if="defaultEnabled && (hasFilters || (allowChildCategories && patchedCategory.getAllRecords().length > 1))" class="container">
             <hr>
             <h2>Slim in- en uitschakelen</h2>
             <p v-if="!hasFilters">
@@ -193,7 +193,7 @@ const patchedCategory = computed(() => {
 });
 
 const hasFilters = computed(() => {
-    return filterBuilder.value instanceof GroupUIFilterBuilder && filterBuilder.value.builders.length >= 1;
+    return filterBuilder.value instanceof GroupUIFilterBuilder && filterBuilder.value.builders.length > 1;
 });
 
 const title = computed(() => props.isNew ? 'Nieuwe vragenlijst' : patchedCategory.value.name);
