@@ -82,10 +82,10 @@
 </template>
 
 <script lang="ts" setup>
-import { Address, File, FileType, Image, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCheckboxAnswer, RecordChoice, RecordChooseOneAnswer, RecordDateAnswer, RecordFileAnswer, RecordImageAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
+import { Address, FileType, Image, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCheckboxAnswer, RecordChoice, RecordChooseOneAnswer, RecordDateAnswer, RecordFileAnswer, RecordImageAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
-import { computed, nextTick, onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
 import { Validator } from '../errors/Validator';
@@ -97,13 +97,13 @@ import AddressInput from './AddressInput.vue';
 import Checkbox from './Checkbox.vue';
 import DateSelection from './DateSelection.vue';
 import EmailInput from './EmailInput.vue';
+import FileInput from './FileInput.vue';
 import ImageInput from './ImageInput.vue';
 import NumberInput from './NumberInput.vue';
 import PhoneInput from './PhoneInput.vue';
 import PriceInput from './PriceInput.vue';
 import Radio from './Radio.vue';
 import STInputBox from './STInputBox.vue';
-import FileInput from './FileInput.vue';
 
 const props = withDefaults(defineProps<{
     record: RecordSettings;
@@ -343,7 +343,7 @@ onMounted(() => {
     // Make sure the answer (updated one) is inside the recordAnswers
     const existing = props.answers.get(props.record.id);
     const readValue = answer.value;
-    if (existing !== undefined && existing !== readValue) {
+    if (existing === undefined || existing !== readValue) {
         answer.value = readValue;
     }
 });
