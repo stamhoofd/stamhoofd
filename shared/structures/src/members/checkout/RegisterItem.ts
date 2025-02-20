@@ -540,6 +540,9 @@ export class RegisterItem implements ObjectWithRecords {
                     throw e;
                 }
             }
+
+            // Remove unsued answers
+            this.recordAnswers = RecordCategory.removeOldAnswers(this.group.settings.recordCategories, this).getRecordAnswers();
         }
 
         errors.throwIfNotEmpty();

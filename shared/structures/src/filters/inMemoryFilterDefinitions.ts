@@ -30,6 +30,23 @@ export const registrationInMemoryFilterCompilers: InMemoryFilterDefinitions = {
 export const registerItemInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
     member: createInMemoryFilterCompiler('member.patchedMember', memberWithRegistrationsBlobInMemoryFilterCompilers),
+    groupPrice: createInMemoryFilterCompiler('groupPrice', {
+        ...baseInMemoryFilterCompilers,
+        id: createInMemoryFilterCompiler('id'),
+    }),
+    options: createInMemoryFilterCompiler('options', {
+        ...baseInMemoryFilterCompilers,
+        option: createInMemoryFilterCompiler('option', {
+            ...baseInMemoryFilterCompilers,
+            id: createInMemoryFilterCompiler('id'),
+        }),
+        optionMenu: createInMemoryFilterCompiler('optionMenu', {
+            ...baseInMemoryFilterCompilers,
+            id: createInMemoryFilterCompiler('id'),
+        }),
+        amount: createInMemoryFilterCompiler('amount'),
+    }),
+    ...recordAnswersFilterCompilers,
 };
 
 export const documentInMemoryFilterCompilers: InMemoryFilterDefinitions = {

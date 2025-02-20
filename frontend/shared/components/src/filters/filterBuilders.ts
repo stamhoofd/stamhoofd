@@ -1,6 +1,6 @@
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, FilterWrapperMarker, getAuditLogTypeName, LoadedPermissions, MemberResponsibility, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, RecordCategory, RecordType, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, unwrapFilter, User, WebshopPreview } from '@stamhoofd/structures';
+import { AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, FilterWrapperMarker, getAuditLogTypeName, Group, LoadedPermissions, MemberResponsibility, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, RecordCategory, RecordType, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, unwrapFilter, User, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { Gender } from '../../../../../shared/structures/esm/dist/src/members/Gender';
@@ -79,45 +79,102 @@ memberWithRegistrationsBlobUIFilterBuilders.unshift(
     }),
 );
 
-// This one should match registrationInMemoryFilterCompilers
-export const registerItemFilterBuilders: UIFilterBuilders = [
-    new NumberFilterBuilder({
-        name: 'Leeftijd',
-        key: 'age',
-        wrapper: {
-            member: FilterWrapperMarker
-        }
-    }),
-    new DateFilterBuilder({
-        name: 'Geboortedatum',
-        key: 'birthDay',
-        wrapper: {
-            member: FilterWrapperMarker
-        }
-    }),
-    new MultipleChoiceFilterBuilder({
-        name: 'Gender',
-        options: [
-            new MultipleChoiceUIFilterOption('Vrouw', Gender.Female),
-            new MultipleChoiceUIFilterOption('Man', Gender.Male),
-            new MultipleChoiceUIFilterOption('Andere', Gender.Other),
-        ],
-        wrapper: {
-            member: {
-                gender: {
-                    $in: FilterWrapperMarker,
-                },
-            }
-        }
-    }),
-];
+export function useRegisterItemFilterBuilders() {
+    return (group: Group) => {
+        const all: UIFilterBuilders = [
+            new NumberFilterBuilder({
+                name: 'Leeftijd',
+                key: 'age',
+                wrapper: {
+                    member: FilterWrapperMarker
+                }
+            }),
+            new DateFilterBuilder({
+                name: 'Geboortedatum',
+                key: 'birthDay',
+                wrapper: {
+                    member: FilterWrapperMarker
+                }
+            }),
+            new MultipleChoiceFilterBuilder({
+                name: 'Gender',
+                options: [
+                    new MultipleChoiceUIFilterOption('Vrouw', Gender.Female),
+                    new MultipleChoiceUIFilterOption('Man', Gender.Male),
+                    new MultipleChoiceUIFilterOption('Andere', Gender.Other),
+                ],
+                wrapper: {
+                    member: {
+                        gender: {
+                            $in: FilterWrapperMarker,
+                        },
+                    }
+                }
+            }),
+        ];
 
-// Recursive: self referencing groups
-registerItemFilterBuilders.unshift(
-    new GroupUIFilterBuilder({
-        builders: registerItemFilterBuilders,
-    }),
-);
+        // Add price filter
+        all.push(
+            new MultipleChoiceFilterBuilder({
+                name: 'Tarief',
+                options: [
+                    ...group.settings.prices.map((price) => {
+                        return new MultipleChoiceUIFilterOption(price.name, price.id);
+                    }),
+                ],
+                allowCreation: group.settings.prices.length > 1,
+                wrapper: {
+                    groupPrice: {
+                        id: {
+                            $in: FilterWrapperMarker,
+                        },
+                    }
+                }
+            })
+        );
+
+        // Option filter
+        for (const menu of group.settings.optionMenus) {
+            all.push(
+                new MultipleChoiceFilterBuilder({
+                    name: menu.name,
+                    options: [
+                        ...menu.options.map((option) => {
+                            return new MultipleChoiceUIFilterOption(option.name, option.id);
+                        }),
+                    ],
+                    wrapper: {
+                        options: {
+                            $elemMatch: {
+                                optionMenu: {
+                                    id: menu.id,
+                                },
+                                option: {
+                                    id: {
+                                        $in: FilterWrapperMarker
+                                    },
+                                },
+                            }
+                        },
+                    },
+                }),
+            );
+        }
+
+        // Add record categories
+        all.push(...getFilterBuildersForRecordCategories(group.settings.recordCategories));
+        
+
+        // Recursive: self referencing groups
+        all.unshift(
+            new GroupUIFilterBuilder({
+                builders: all,
+            }),
+        );
+
+        return all;
+    }
+}
 
 export function useAdvancedRegistrationsUIFilterBuilders() {
     const $platform = usePlatform();
