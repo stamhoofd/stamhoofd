@@ -153,6 +153,107 @@ export class MemberPlatformMembership extends QueryableModel {
         return true;
     }
 
+    async correctDates(member: Member, registration?: Registration) {
+        if (this.locked) {
+            // price of locked membership cannot be changed
+            return;
+        }
+
+        const platform = await Platform.getSharedPrivateStruct();
+        const membershipType = platform.config.membershipTypes.find(m => m.id === this.membershipTypeId);
+
+        if (!membershipType) {
+            throw new SimpleError({
+                code: 'invalid_membership_type',
+                message: 'Unknown membership type',
+                human: 'Deze aansluiting is niet (meer) beschikbaar',
+            });
+        }
+
+        const periodConfig = membershipType.periods.get(this.periodId);
+
+        if (!periodConfig) {
+            throw new SimpleError({
+                code: 'period_unavailable',
+                message: 'Membership not available for this period',
+                human: 'Deze aansluiting is nog niet beschikbaar voor dit werkjaar',
+            });
+        }
+
+        if (membershipType.behaviour === PlatformMembershipTypeBehaviour.Days) {
+            // Make sure time is equal between start and end date
+            let startBrussels = Formatter.luxon(this.startDate);
+            let endBrussels = Formatter.luxon(this.endDate);
+            startBrussels = startBrussels.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+            endBrussels = endBrussels.set({ hour: 23, minute: 59, second: 59, millisecond: 0 });
+            this.startDate = startBrussels.toJSDate();
+            this.endDate = endBrussels.toJSDate();
+            this.expireDate = null;
+        }
+        else {
+            this.endDate = Formatter.luxon(periodConfig.endDate).set({ hour: 23, minute: 59, second: 59, millisecond: 0 }).toJSDate();
+            this.expireDate = periodConfig.expireDate ? Formatter.luxon(periodConfig.expireDate).set({ hour: 23, minute: 59, second: 59, millisecond: 0 }).toJSDate() : null;
+
+            // Alter start date
+            if (registration) {
+                const preferredStartDate = registration.startDate ?? registration.registeredAt ?? this.createdAt;
+                this.startDate = periodConfig.startDate;
+
+                if (preferredStartDate > periodConfig.startDate && preferredStartDate < periodConfig.endDate) {
+                    let startBrussels = Formatter.luxon(preferredStartDate);
+                    startBrussels = startBrussels.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+                    this.startDate = startBrussels.toJSDate();
+                }
+            }
+            else {
+                // Keep the set date, but make sure it is at 0:00 in CET
+                let startBrussels = Formatter.luxon(this.startDate);
+                startBrussels = startBrussels.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+                this.startDate = startBrussels.toJSDate();
+            }
+        }
+
+        let minimumStartDate = Formatter.luxon(periodConfig.startDate).set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).toJSDate();
+
+        if (!this.existsInDatabase) {
+            if (membershipType.behaviour === PlatformMembershipTypeBehaviour.Days) {
+                // Cannot create a membership in the past
+                minimumStartDate = Formatter.luxon(new Date()).set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).toJSDate();
+            }
+        }
+
+        if (this.startDate < minimumStartDate) {
+            this.startDate = minimumStartDate;
+        }
+
+        if (this.endDate < this.startDate) {
+            this.endDate = Formatter.luxon(this.startDate).set({ hour: 23, minute: 59, second: 59, millisecond: 0 }).toJSDate();
+        }
+
+        if (periodConfig.trialDays) {
+            // Check whether you are elegible for a trial
+            if (await this.isElegibleForTrial(member)) {
+                // Allowed to set trial until, maximum periodConfig.trialDays after startDate
+                let trialUntil = Formatter.luxon(this.startDate).plus({ days: periodConfig.trialDays });
+                trialUntil = trialUntil.set({ hour: 23, minute: 59, second: 59, millisecond: 0 });
+
+                // Max end date
+                if (trialUntil.toJSDate() > this.endDate) {
+                    trialUntil = Formatter.luxon(this.endDate).set({ hour: 23, minute: 59, second: 59, millisecond: 0 });
+                }
+
+                this.trialUntil = trialUntil.toJSDate();
+            }
+            else {
+                this.trialUntil = null;
+            }
+        }
+        else {
+            // No trial
+            this.trialUntil = null;
+        }
+    }
+
     async calculatePrice(member: Member, registration?: Registration) {
         if (this.locked) {
             // price of locked membership cannot be changed
@@ -193,8 +294,10 @@ export class MemberPlatformMembership extends QueryableModel {
         const tagIds = organization.meta.tags;
         const shouldApplyReducedPrice = member.details.shouldApplyReducedPrice;
 
-        const priceConfig = periodConfig.getPriceConfigForDate(membershipType.behaviour === PlatformMembershipTypeBehaviour.Days ? this.startDate : (this.createdAt ?? new Date()));
-        const earliestPriceConfig = periodConfig.getPriceConfigForDate(membershipType.behaviour === PlatformMembershipTypeBehaviour.Days ? new Date(1950, 0, 1) : (new Date(1950, 0, 1)));
+        // Correct dates so we get the correct price config
+        await this.correctDates(member, registration);
+        const priceConfig = periodConfig.getPriceConfigForDate(this.startDate);
+        const earliestPriceConfig = periodConfig.getPriceConfigForDate(new Date(1950, 0, 1));
 
         let freeDays = 0;
 
@@ -227,16 +330,6 @@ export class MemberPlatformMembership extends QueryableModel {
         }
 
         if (membershipType.behaviour === PlatformMembershipTypeBehaviour.Days) {
-            // Make sure time is equal between start and end date
-            let startBrussels = Formatter.luxon(this.startDate);
-            let endBrussels = Formatter.luxon(this.endDate);
-            startBrussels = startBrussels.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-            endBrussels = endBrussels.set({ hour: 23, minute: 59, second: 59, millisecond: 0 });
-            this.startDate = startBrussels.toJSDate();
-            this.endDate = endBrussels.toJSDate();
-
-            this.expireDate = null;
-
             const days = Math.round((this.endDate.getTime() - this.startDate.getTime()) / (1000 * 60 * 60 * 24));
             this.maximumFreeAmount = days;
             this.priceWithoutDiscount = earliestPriceConfig.calculatePrice(tagIds, false, days);
@@ -246,8 +339,6 @@ export class MemberPlatformMembership extends QueryableModel {
         else {
             this.priceWithoutDiscount = earliestPriceConfig.getBasePrice(tagIds, false);
             this.price = priceConfig.getBasePrice(tagIds, shouldApplyReducedPrice);
-            this.endDate = periodConfig.endDate;
-            this.expireDate = periodConfig.expireDate;
             this.maximumFreeAmount = this.price > 0 ? 1 : 0;
             this.freeAmount = 0;
 
@@ -255,45 +346,6 @@ export class MemberPlatformMembership extends QueryableModel {
                 this.price = 0;
                 this.freeAmount = 1;
             }
-
-            // Alter start date
-            if (registration && registration.startDate) {
-                this.startDate = periodConfig.startDate;
-
-                if (registration.startDate > periodConfig.startDate && registration.startDate < periodConfig.endDate) {
-                    let startBrussels = Formatter.luxon(registration.startDate);
-                    startBrussels = startBrussels.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-                    this.startDate = startBrussels.toJSDate();
-                }
-            }
-            else {
-                let startBrussels = Formatter.luxon(this.startDate);
-                startBrussels = startBrussels.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-                this.startDate = startBrussels.toJSDate();
-            }
-        }
-
-        if (periodConfig.trialDays) {
-            // Check whether you are elegible for a trial
-            if (await this.isElegibleForTrial(member)) {
-                // Allowed to set trial until, maximum periodConfig.trialDays after startDate
-                let trialUntil = Formatter.luxon(this.startDate).plus({ days: periodConfig.trialDays });
-                trialUntil = trialUntil.set({ hour: 23, minute: 59, second: 59, millisecond: 0 });
-
-                // Max end date
-                if (trialUntil.toJSDate() > this.endDate) {
-                    trialUntil = Formatter.luxon(this.endDate).set({ hour: 23, minute: 59, second: 59, millisecond: 0 });
-                }
-
-                this.trialUntil = trialUntil.toJSDate();
-            }
-            else {
-                this.trialUntil = null;
-            }
-        }
-        else {
-            // No trial
-            this.trialUntil = null;
         }
 
         // Never charge itself
@@ -302,6 +354,7 @@ export class MemberPlatformMembership extends QueryableModel {
             this.price = 0;
             this.priceWithoutDiscount = 0;
             this.freeAmount = 0;
+            this.maximumFreeAmount = 0;
         }
 
         if (this.balanceItemId) {
