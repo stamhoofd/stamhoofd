@@ -119,7 +119,7 @@ export default class DateSelection extends Mixins(NavigationMixin) {
         }
 
         if (this.modelValue && this.time) {
-            if ((this.min && this.modelValue > this.min) || (this.max && this.modelValue > this.max) || this.modelValue.getHours() !== this.time.hours || this.modelValue.getMinutes() !== this.time.minutes || this.modelValue.getSeconds() !== this.time.seconds || this.modelValue.getMilliseconds() !== 0) {
+            if ((this.min && this.modelValue < this.min) || (this.max && this.modelValue > this.max) || this.modelValue.getHours() !== this.time.hours || this.modelValue.getMinutes() !== this.time.minutes || this.modelValue.getSeconds() !== this.time.seconds || this.modelValue.getMilliseconds() !== 0) {
                 this.emitDate(this.modelValue);
             }
         }
@@ -394,6 +394,15 @@ export default class DateSelection extends Mixins(NavigationMixin) {
         }
         const d = new Date(value.getTime());
 
+        // First correct for min/max
+        if (this.max && d > this.max) {
+            d.setTime(this.max.getTime());
+        }
+
+        if (this.min && d < this.min) {
+            d.setTime(this.min.getTime());
+        }
+
         if (this.time) {
             d.setHours(this.time.hours, this.time.minutes, this.time.seconds, 0);
         }
@@ -404,12 +413,25 @@ export default class DateSelection extends Mixins(NavigationMixin) {
             d.setHours(12, 0, 0, 0);
         }
 
+        // End with min/max correction again
         if (this.max && d > this.max) {
             d.setTime(this.max.getTime());
+
+            if (this.time) {
+                // To fix infinite loop, we'll need to decrease the day with 1
+                d.setTime(this.max.getTime() - 24 * 60 * 60 * 1000);
+                d.setHours(this.time.hours, this.time.minutes, this.time.seconds, 0);
+            }
         }
 
         if (this.min && d < this.min) {
             d.setTime(this.min.getTime());
+
+            if (this.time) {
+                // To fix infinite loop, we'll need to increase the day with 1
+                d.setTime(this.min.getTime() + 24 * 60 * 60 * 1000);
+                d.setHours(this.time.hours, this.time.minutes, this.time.seconds, 0);
+            }
         }
         this.$emit('update:modelValue', d);
     }
