@@ -6,7 +6,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <template v-if="sortedPeriods.length && patchedPlatform.period.id !== sortedPeriods[0].id">
+        <template v-if="sortedPeriods.length && patchedPlatform.period.id !== sortedPeriods[0].id && (sortedPeriods[0].startDate.getTime() - new Date().getTime()) < 1000 * 60 * 60 * 24 * 30 * 2">
             <hr>
             <h2>Overschakelen naar {{ sortedPeriods[0].nameShort }}</h2>
             <p>{{ $t("31e91d3b-16e5-4608-9390-75e61d4d090d") }}</p>
