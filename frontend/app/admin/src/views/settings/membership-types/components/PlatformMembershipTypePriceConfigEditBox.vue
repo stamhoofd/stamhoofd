@@ -5,7 +5,7 @@
         <template v-if="hasMultiplePrices">
             <h2 v-if="showStartDate" class="style-with-button">
                 <div>
-                    Prijs vanaf {{ $startDate ? formatDate($startDate) : '?' }}
+                    Prijs vanaf {{ startDate ? formatDate(startDate) : '?' }}
                 </div>
                 <div>
                     <button class="button text" type="button" @click="emits('delete')">
@@ -18,13 +18,17 @@
                 Standaardprijs
             </h2>
         </template>
-
+        
         <STInputBox
-            v-if="showStartDate || $startDate"
+            v-if="showStartDate || startDate"
             :title="$t('d93bd297-5794-4588-8bfb-17fb2074a364')" :error-box="errorBox"
         >
             <DateSelection
-                v-model="$startDate" :required="false"
+                v-model="startDate" 
+                :required="true"
+                :min="config.startDate"
+                :max="config.endDate"
+                :time="{hours: 0, minutes: 0, seconds: 0}"
                 :placeholder="$t('f19516b2-0c37-4dce-86f4-46690ec3dfc9')"
             />
         </STInputBox>
@@ -39,11 +43,11 @@
                     @update:model-value="patchReduceablePrice(tagId, $event)"
                 >
                     <STInputBox
-                        v-if="!tagId && (showPricePerDay || $pricePerDay)"
+                        v-if="!tagId && (showPricePerDay || pricePerDay)"
                         title="Prijs per dag" :error-box="errorBox"
                     >
                         <PriceInput
-                            v-model="$pricePerDay"
+                            v-model="pricePerDay"
                             placeholder="Prijs per dag"
                         />
                     </STInputBox>
@@ -74,11 +78,12 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { DateSelection, ErrorBox, OrganizationTagSelectorView, PriceInput, useEmitPatch, Validator } from '@stamhoofd/components';
-import { OrganizationTag, PlatformMembershipTypeConfigPrice, ReduceablePrice } from '@stamhoofd/structures';
+import { OrganizationTag, PlatformMembershipTypeConfig, PlatformMembershipTypeConfigPrice, ReduceablePrice } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import PlatformMembershipTypeReduceablePriceEditRow from './PlatformMembershipTypeReduceablePriceEditRow.vue';
 
 const props = defineProps<{
+    config: PlatformMembershipTypeConfig;
     priceConfig: PlatformMembershipTypeConfigPrice;
     hasMultiplePrices: boolean;
     showStartDate: boolean;
@@ -92,12 +97,12 @@ const { patched, addPatch } = useEmitPatch<PlatformMembershipTypeConfigPrice>(pr
 
 const present = usePresent();
 
-const $startDate = computed({
+const startDate = computed({
     get: () => patched.value.startDate,
     set: startDate => addPatch({ startDate }),
 });
 
-const $pricePerDay = computed({
+const pricePerDay = computed({
     get: () => patched.value.pricePerDay,
     set: pricePerDay => addPatch({ pricePerDay }),
 });

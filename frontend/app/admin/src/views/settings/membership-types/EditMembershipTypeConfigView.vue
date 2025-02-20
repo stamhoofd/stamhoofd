@@ -38,6 +38,7 @@
         </p>
 
         <PlatformMembershipTypePriceConfigEditBox
+            :config="patched"
             v-for="(priceConfig, index) of prices"
             :key="priceConfig.id"
             :has-multiple-prices="prices.length > 1"
