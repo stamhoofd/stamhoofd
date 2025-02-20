@@ -50,7 +50,7 @@ export class PlatformFamily {
     }
 
     insertOrganization(organization: Organization) {
-        const existing = this.organizations.find(o => o.id === organization.id)
+        const existing = this.organizations.find(o => o.id === organization.id);
         if (existing) {
             // Deep set, because this might be the context organization
             if (existing !== organization) {
@@ -117,7 +117,7 @@ export class PlatformFamily {
         for (const organization of blob.organizations) {
             this.insertOrganization(organization);
         }
-        
+
         for (const member of blob.members) {
             const existing = this.members.find(m => m.id === member.id);
             if (existing) {
@@ -532,7 +532,7 @@ export class PlatformMember implements ObjectWithRecords {
 
     isPropertyEnabledForPlatform(property: MemberProperty) {
         if ((property === 'financialSupport' || property === 'uitpasNumber')
-            && !this.patchedMember.details.dataPermissions?.value) {
+            && this.patchedMember.details.dataPermissions?.value === false) {
             return false;
         }
 
@@ -565,7 +565,7 @@ export class PlatformMember implements ObjectWithRecords {
             property = 'nationalRegisterNumber';
         }
         if ((property === 'financialSupport' || property === 'uitpasNumber')
-            && !this.patchedMember.details.dataPermissions?.value) {
+            && this.patchedMember.details.dataPermissions?.value === false) {
             return false;
         }
 
@@ -1024,7 +1024,7 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     isRecordEnabled(record: RecordSettings): boolean {
-        if (record.sensitive && !this.patchedMember.details.dataPermissions?.value) {
+        if (record.sensitive && this.patchedMember.details.dataPermissions?.value === false) {
             return false;
         }
         return true;

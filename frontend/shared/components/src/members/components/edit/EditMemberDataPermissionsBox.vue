@@ -5,7 +5,7 @@
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <Checkbox v-model="dataPermissions">
+        <Checkbox v-model="dataPermissions" :indeterminate="!dataPermissionsChangeDate">
             Er werd toestemming gegeven
         </Checkbox>
 
@@ -13,6 +13,9 @@
             Laatst nagekeken op {{ formatDate(dataPermissionsChangeDate) }}. <button v-tooltip="'Het lid zal deze stap terug moeten doorlopen via het ledenportaal'" type="button" class="inline-link" @click="clear">
                 Wissen
             </button>.
+        </p>
+        <p v-if="!dataPermissionsChangeDate" class="style-description-small">
+            {{ $t('Het antwoord is niet gekend. Daardoor blijft het mogelijk om gegevens te verzamelen waarvoor toestemming nodig is tot er een expliciet antwoord werd gegeven.') }}
         </p>
 
         <p v-if="checkboxWarning" v-show="!dataPermissions" class="warning-box">
@@ -49,28 +52,28 @@ import { usePlatform } from '../../../hooks';
 import Title from './Title.vue';
 
 defineOptions({
-    inheritAttrs: false
-})
+    inheritAttrs: false,
+});
 
 const props = defineProps<{
-    member: PlatformMember,
-    validator: Validator,
-    parentErrorBox?: ErrorBox | null,
-    willMarkReviewed?: boolean
+    member: PlatformMember;
+    validator: Validator;
+    parentErrorBox?: ErrorBox | null;
+    willMarkReviewed?: boolean;
 }>();
 
 const platform = usePlatform();
-const errors = useErrors({validator: props.validator});
+const errors = useErrors({ validator: props.validator });
 const app = useAppContext();
 const isAdmin = app === 'dashboard' || app === 'admin';
 
-const checkboxWarning = computed(() => platform.value.config.dataPermission?.checkboxWarning ?? null)
+const checkboxWarning = computed(() => platform.value.config.dataPermission?.checkboxWarning ?? null);
 
 useValidation(props.validator, async () => {
     if (props.willMarkReviewed) {
         // Force saving: increase saved date + make sure it is not null
-        dataPermissions.value = dataPermissions.value as any
-        await nextTick()
+        dataPermissions.value = dataPermissions.value as any;
+        await nextTick();
     }
     return true;
 });
@@ -80,19 +83,21 @@ const dataPermissions = computed({
     set: (dataPermissions) => {
         if (dataPermissions === (props.member.member.details.dataPermissions?.value ?? false) && !props.willMarkReviewed) {
             return props.member.addDetailsPatch({
-                dataPermissions: props.member.member.details.dataPermissions ?? null
-            })
+                dataPermissions: props.member.member.details.dataPermissions ?? BooleanStatus.create({
+                    value: dataPermissions,
+                }),
+            });
         }
         return props.member.addDetailsPatch({
             dataPermissions: BooleanStatus.create({
-                value: dataPermissions
-            })
-        })
-    }
+                value: dataPermissions,
+            }),
+        });
+    },
 });
 const dataPermissionsChangeDate = computed(() => props.member.patchedMember.details.dataPermissions?.date ?? null);
 
-const {dataPermissionSettings} = useDataPermissionSettings()
+const { dataPermissionSettings } = useDataPermissionSettings();
 
 const title = computed(() => dataPermissionSettings.value.title);
 const description = computed(() => dataPermissionSettings.value.description);
@@ -100,8 +105,8 @@ const checkboxLabel = computed(() => dataPermissionSettings.value.checkboxLabel)
 
 function clear() {
     props.member.addDetailsPatch({
-        dataPermissions: null
-    })
+        dataPermissions: null,
+    });
 }
 
 </script>
