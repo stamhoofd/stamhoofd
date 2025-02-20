@@ -39,19 +39,28 @@
                                     {{ Formatter.pluralText(membership.freeAmount, 'dag', 'dagen') }} gratis
                                 </span>
                             </h3>
-                            <p class="style-description-small">
-                                {{ formatStartDate(membership.startDate, false, true) }} tot en met {{ formatEndDate(membership.expireDate ?? membership.endDate, false, true) }}
+                            <p class="style-description-small style-tooltip" v-tooltip="'Toegevoegd op ' + formatDate(membership.createdAt, true)">
+                                {{ capitalizeFirstLetter(formatDateRange(membership.startDate, membership.expireDate ?? membership.endDate)) }}
                             </p>
-                            <p v-if="membership.trialUntil" class="style-description-small">
+                            <p v-if="membership.trialUntil && membership.trialUntil > now" class="style-description-small">
                                 Proefperiode tot {{ formatDate(membership.trialUntil, true) }}
                             </p>
 
-                            <p class="style-description-small">
-                                Toegevoegd op {{ formatDate(membership.createdAt, true) }}
+                            <p class="style-description-small" v-if="membership.organizationId === platform.membershipOrganizationId">
+                                {{ $t('Aangesloten via #koepel (niet aangerekend aan een #groep)') }}
                             </p>
-                            <p class="style-description-small">
-                                Via {{ getOrganizationName(membership) }}
+                            <p v-else class="style-description-small">
+                                <p v-if="membership.price === 0" class="style-description-small">
+                                    Via {{ getOrganizationName(membership) }}
+                                </p>
+                                <p v-else-if="membership.balanceItemId" class="style-description-small">
+                                    Aangerekend aan {{ getOrganizationName(membership) }}
+                                </p>
+                                <p v-else>
+                                    Zal binnenkort aangerekend worden aan {{ getOrganizationName(membership) }}
+                                </p>
                             </p>
+
                             <p v-if="membership.expireDate && membership.expireDate < now && membership.endDate > now" class="style-description-small">
                                 Verlopen. Verleng de aansluiting om de verzekering te behouden.
                             </p>
@@ -59,22 +68,17 @@
                             <p v-if="membership.generated && auth.hasPlatformFullAccess()" class="style-description-small">
                                 {{ $t('41464f90-088a-4c6a-827b-cd5907ad1fac') }}
                             </p>
-                            <p v-if="membership.balanceItemId && auth.hasPlatformFullAccess()" class="style-description-small">
-                                {{ $t('8e515034-5d58-4042-84e6-7e32943dbdec') }}
-                            </p>
-
                             <template v-if="hasFull && (!organization || membership.organizationId === organization.id)" #right>
-                                <template v-if="!period.locked">
-                                    <span v-if="membership.price === membership.priceWithoutDiscount || membership.priceWithoutDiscount === 0" class="style-price-base">{{ formatPrice(membership.price) }}</span>
-                                    <template v-else>
-                                        <span class="style-discount-old-price">{{ formatPrice(membership.priceWithoutDiscount) }}</span>
-                                        <span class="style-discount-price">{{ formatPrice(membership.price) }}</span>
-                                    </template>
-
-                                    <LoadingButton v-if="!membership.locked && (!membership.generated || !isRegisteredAt(period.id, membership.organizationId)) && (!membership.balanceItemId || auth.hasPlatformFullAccess())" :loading="deletingMemberships.has(membership.id)">
-                                        <button class="button icon trash" type="button" @click="deleteMembership(membership)" />
-                                    </LoadingButton>
+                                <span v-if="membership.price === 0 && (membership.organizationId === platform.membershipOrganizationId || period.locked)"></span>
+                                <span v-else-if="membership.price === membership.priceWithoutDiscount || membership.priceWithoutDiscount === 0" class="style-price-base">{{ formatPrice(membership.price) }}</span>
+                                <template v-else>
+                                    <span class="style-discount-old-price">{{ formatPrice(membership.priceWithoutDiscount) }}</span>
+                                    <span class="style-discount-price">{{ formatPrice(membership.price) }}</span>
                                 </template>
+
+                                <LoadingButton v-if="!membership.locked && (!membership.generated || !isRegisteredAt(period.id, membership.organizationId)) && (!membership.balanceItemId || auth.hasPlatformFullAccess())" :loading="deletingMemberships.has(membership.id)">
+                                    <button class="button icon trash" type="button" @click="deleteMembership(membership)" />
+                                </LoadingButton>
 
                                 <button v-if="membership.locked && (auth.hasPlatformFullAccess())" v-tooltip="$t('b1c11fd1-81dc-46f2-8cfb-0ba02d260f19')" class="button icon lock" type="button" @click="unlockMembership(membership)" />
                             </template>
