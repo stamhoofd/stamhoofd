@@ -51,13 +51,16 @@
                             </p>
                             <p v-else class="style-description-small">
                                 <p v-if="membership.price === 0" class="style-description-small">
-                                    Via {{ getOrganizationName(membership) }}
+                                    {{ $t('Via {organization}', {organization: getOrganizationName(membership)}) }}
                                 </p>
                                 <p v-else-if="membership.balanceItemId" class="style-description-small">
-                                    Aangerekend aan {{ getOrganizationName(membership) }}
+                                    {{ $t('Aangerekend aan {organization}', {organization: getOrganizationName(membership)}) }}
+                                </p>
+                                <p v-else-if="membership.trialUntil && membership.trialUntil > now">
+                                    {{ $t('Zal na proefperiode aangerekend worden aan {organization}', {organization: getOrganizationName(membership)}) }}
                                 </p>
                                 <p v-else>
-                                    Zal binnenkort aangerekend worden aan {{ getOrganizationName(membership) }}
+                                    {{ $t('Zal binnenkort aangerekend worden aan {organization}', {organization: getOrganizationName(membership)}) }}
                                 </p>
                             </p>
 
