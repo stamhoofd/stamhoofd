@@ -115,6 +115,8 @@ $checkbox-border-radius: 5px;
 
     > input[type="checkbox"] + div {
         > div:first-child {
+            position: relative;
+            
             &:after {
                 // For indeterminate state
                 content: "";
