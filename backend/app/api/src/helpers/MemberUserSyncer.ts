@@ -1,6 +1,6 @@
-import { CachedBalance, Member, MemberResponsibilityRecord, MemberWithRegistrations, User } from '@stamhoofd/models';
+import { CachedBalance, Member, MemberResponsibilityRecord, MemberWithRegistrations, Organization, Platform, User } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import { AuditLogSource, MemberDetails, Permissions, UserPermissions } from '@stamhoofd/structures';
+import { AuditLogSource, MemberDetails, PermissionRole, Permissions, UserPermissions } from '@stamhoofd/structures';
 import crypto from 'crypto';
 import basex from 'base-x';
 import { AuditLogService } from '../services/AuditLogService';
@@ -129,6 +129,20 @@ export class MemberUserSyncerStatic {
         return MemberResponsibilityRecord.fromRows(rows, MemberResponsibilityRecord.table);
     }
 
+    async updatePermissionsForOrganization(organizationId: string) {
+        const admins = await User.getAdmins(organizationId);
+        for (const admin of admins) {
+            await this.updateInheritedPermissions(admin);
+        }
+    }
+
+    async updatePermissionsForPlatform() {
+        const admins = await User.getPlatformAdmins();
+        for (const admin of admins) {
+            await this.updateInheritedPermissions(admin);
+        }
+    }
+
     async updateInheritedPermissions(user: User) {
         const responsibilities = user.memberId ? (await this.getResponsibilitiesForMembers([user.memberId])) : [];
 
@@ -170,6 +184,54 @@ export class MemberUserSyncerStatic {
                     organizationId,
                 );
                 user.permissions = user.permissions.patch(patch);
+            }
+        }
+
+        // Update roles (remove roles from permissions that no longer exist)
+        for (const organizationId of user.permissions.organizationPermissions.keys()) {
+            const organizationPermissions = user.permissions.organizationPermissions.get(organizationId);
+            if (!organizationPermissions) {
+                continue;
+            }
+
+            const roles = organizationPermissions.roles;
+            if (roles.length === 0) {
+                continue;
+            }
+
+            const organization = await Organization.getByID(organizationId);
+            if (!organization) {
+                // Delete key
+                user.permissions.organizationPermissions.delete(organizationId);
+                continue;
+            }
+
+            const availableRoles = organization.privateMeta.roles;
+            const newRoles: PermissionRole[] = [];
+            for (const role of roles) {
+                const roleInfo = availableRoles.find(r => r.id === role.id);
+                if (roleInfo) {
+                    role.name = roleInfo.name;
+                    newRoles.push(role);
+                }
+            }
+            organizationPermissions.roles = newRoles;
+        }
+
+        const globalPermissions = user.permissions.globalPermissions;
+        if (globalPermissions) {
+            const roles = globalPermissions.roles;
+            if (roles.length > 0) {
+                const availableRoles = (await Platform.getSharedPrivateStruct()).privateConfig.roles;
+                const newRoles: PermissionRole[] = [];
+                for (const role of roles) {
+                    const roleInfo = availableRoles.find(r => r.id === role.id);
+                    if (roleInfo) {
+                        role.name = roleInfo.name;
+                        newRoles.push(role);
+                    }
+                }
+                globalPermissions.roles = newRoles;
             }
         }
 

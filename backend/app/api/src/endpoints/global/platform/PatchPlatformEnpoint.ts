@@ -11,6 +11,7 @@ import { PeriodHelper } from '../../../helpers/PeriodHelper';
 import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater';
 import { TagHelper } from '../../../helpers/TagHelper';
 import { PlatformMembershipService } from '../../../services/PlatformMembershipService';
+import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -49,6 +50,7 @@ export class PatchPlatformEndpoint extends Endpoint<
         }
 
         const platform = await Platform.getShared();
+        let shouldUpdateUserPermissions = false;
 
         if (request.body.privateConfig) {
             // Did we patch roles?
@@ -62,6 +64,7 @@ export class PatchPlatformEndpoint extends Endpoint<
                     platform.privateConfig.roles,
                     request.body.privateConfig.roles,
                 );
+                shouldUpdateUserPermissions = true;
             }
 
             if (request.body.privateConfig.emails) {
@@ -232,6 +235,10 @@ export class PatchPlatformEndpoint extends Endpoint<
         else if (shouldUpdateSetupSteps) {
             // Do not call this right away when moving to a period, because this needs to happen AFTER moving to the period
             SetupStepUpdater.updateSetupStepsForAllOrganizationsInCurrentPeriod().catch(console.error);
+        }
+
+        if (shouldUpdateUserPermissions) {
+            await MemberUserSyncer.updatePermissionsForPlatform();
         }
 
         return new Response(await Platform.getSharedPrivateStruct());

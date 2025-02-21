@@ -11,6 +11,7 @@ import { Context } from '../../../../helpers/Context';
 import { SetupStepUpdater } from '../../../../helpers/SetupStepUpdater';
 import { TagHelper } from '../../../../helpers/TagHelper';
 import { ViesHelper } from '../../../../helpers/ViesHelper';
+import { MemberUserSyncer } from '../../../../helpers/MemberUserSyncer';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -65,6 +66,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
         const errors = new SimpleErrors();
         let shouldUpdateSetupSteps = false;
+        let shouldUpdateUserPermissions = false;
         let updateTags = false;
 
         if (await Context.auth.hasFullAccess(organization.id)) {
@@ -127,6 +129,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 organization.privateMeta.featureFlags = patchObject(organization.privateMeta.featureFlags, request.body.privateMeta.featureFlags);
                 organization.privateMeta.balanceNotificationSettings = patchObject(organization.privateMeta.balanceNotificationSettings, request.body.privateMeta.balanceNotificationSettings);
                 organization.privateMeta.recordAnswers = request.body.privateMeta.recordAnswers.applyTo(organization.privateMeta.recordAnswers);
+
+                if (request.body.privateMeta.responsibilities || request.body.privateMeta.roles) {
+                    shouldUpdateUserPermissions = true;
+                }
 
                 if (request.body.privateMeta.mollieProfile !== undefined) {
                     organization.privateMeta.mollieProfile = patchObject(organization.privateMeta.mollieProfile, request.body.privateMeta.mollieProfile);
@@ -390,6 +396,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
         if (shouldUpdateSetupSteps) {
             await SetupStepUpdater.updateForOrganization(organization);
+        }
+
+        if (shouldUpdateUserPermissions) {
+            await MemberUserSyncer.updatePermissionsForOrganization(organization.id);
         }
 
         if (updateTags) {
