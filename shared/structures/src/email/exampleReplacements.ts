@@ -171,7 +171,7 @@ function getReplacements() {
         }),
         groupName: Replacement.create({
             token: 'groupName',
-            value: $t('Voorbeeldleeftijdsgroep'),
+            value: $t('07290df8-cad5-40df-9e10-3c7eccc049bc'),
         }),
         signInUrl: Replacement.create({
             token: 'signInUrl',

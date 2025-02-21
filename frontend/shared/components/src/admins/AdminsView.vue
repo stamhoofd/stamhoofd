@@ -103,7 +103,7 @@
                             {{ admin.email }}
                         </p>
                         <p v-if="admin.memberId && sortedMembers.find(m => m.id === admin.memberId)" class="style-description-small">
-                            {{ $t('Dit is een interne beheerder die ook een externe beheerdersol heeft gekregen.') }}
+                            {{ $t('61d55c53-d63d-49a1-ac0c-806548eb294a') }}
                         </p>
                         <p class="style-description-small">
                             {{ permissionList(admin) }}

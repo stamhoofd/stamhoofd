@@ -772,5 +772,7 @@
   "26b8398d-a17c-4854-ae64-99a410ddeffb": "Je kan niet inschrijven voor {group} omdat werkjaar {period} is afgesloten.",
   "f6e06abd-3e58-4f99-bc8d-6cf6a44273b3": "Jouw #lokale-groep betaalt {price} aan #koepel, maar voor latere aansluitingen bedraagt het nu {priceReduced}.",
   "a9605085-cd44-454d-9386-3dd30206f3bf": "Opgelet, deze beheerders zijn ook niet aangesloten bij #koepel, en zijn dus ook niet verzekerd. Gebruik met mate, bv. om externen toegang te geven voor evenementen.",
-  "71b37c1d-7a2d-41c9-a6c0-fcd9c69a2492": "Deze functie is ongeldig omdat {name} niet is ingeschreven. Deze functie zal automatisch verwijderd worden op het einde van de maand."
+  "71b37c1d-7a2d-41c9-a6c0-fcd9c69a2492": "Deze functie is ongeldig omdat {name} niet is ingeschreven. Deze functie zal automatisch verwijderd worden op het einde van de maand.",
+  "61d55c53-d63d-49a1-ac0c-806548eb294a": "Dit is een interne beheerder die ook een externe beheerdersol heeft gekregen.",
+  "07290df8-cad5-40df-9e10-3c7eccc049bc": "Voorbeeldleeftijdsgroep"
 }
