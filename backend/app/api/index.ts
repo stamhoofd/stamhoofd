@@ -19,6 +19,7 @@ import { AuditLogService } from './src/services/AuditLogService';
 import { DocumentService } from './src/services/DocumentService';
 import { FileSignService } from './src/services/FileSignService';
 import { PlatformMembershipService } from './src/services/PlatformMembershipService';
+import { UniqueUserService } from './src/services/UniqueUserService';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -49,21 +50,31 @@ const seeds = async () => {
         console.error(e);
     }
 };
+const bootTime = process.hrtime();
 
 const start = async () => {
     console.log('Running server at v' + Version);
     loadLogger();
+
     await GlobalHelper.load();
+    await UniqueUserService.check();
+
+    // Init platform shared struct: otherwise permissions won't work with missing responsibilities
+    await Platform.getSharedStruct();
 
     const router = new Router();
-    await router.loadAllEndpoints(__dirname + '/src/endpoints/global/*');
-    await router.loadAllEndpoints(__dirname + '/src/endpoints/admin/*');
-    await router.loadAllEndpoints(__dirname + '/src/endpoints/auth');
-    await router.loadAllEndpoints(__dirname + '/src/endpoints/organization/dashboard/*');
-    await router.loadAllEndpoints(__dirname + '/src/endpoints/organization/registration');
-    await router.loadAllEndpoints(__dirname + '/src/endpoints/organization/webshops');
-    await router.loadAllEndpoints(__dirname + '/src/endpoints/organization/shared');
-    await router.loadAllEndpoints(__dirname + '/src/endpoints/organization/shared/*');
+
+    const endpointsPromises = [
+        router.loadAllEndpoints(__dirname + '/src/endpoints/global/*'),
+        router.loadAllEndpoints(__dirname + '/src/endpoints/admin/*'),
+        router.loadAllEndpoints(__dirname + '/src/endpoints/auth'),
+        router.loadAllEndpoints(__dirname + '/src/endpoints/organization/dashboard/*'),
+        router.loadAllEndpoints(__dirname + '/src/endpoints/organization/registration'),
+        router.loadAllEndpoints(__dirname + '/src/endpoints/organization/webshops'),
+        router.loadAllEndpoints(__dirname + '/src/endpoints/organization/shared'),
+        router.loadAllEndpoints(__dirname + '/src/endpoints/organization/shared/*'),
+    ];
+    await Promise.all(endpointsPromises);
 
     router.endpoints.push(new CORSPreflightEndpoint());
 
@@ -95,9 +106,6 @@ const start = async () => {
     // Add CORS headers
     routerServer.addResponseMiddleware(CORSMiddleware);
 
-    // Init platform shared struct: otherwise permissions won't work with missing responsibilities
-    await Platform.getSharedStruct();
-
     // Register Excel loaders
     await import('./src/excel-loaders/members');
     await import('./src/excel-loaders/payments');
@@ -110,6 +118,9 @@ const start = async () => {
     await import('./src/email-recipient-loaders/receivable-balances');
 
     routerServer.listen(STAMHOOFD.PORT ?? 9090);
+
+    const hrend = process.hrtime(bootTime);
+    console.log('🟢 HTTP server started in ' + Math.ceil(hrend[0] * 1000 + hrend[1] / 1000000) + 'ms');
 
     resumeEmails().catch(console.error);
 

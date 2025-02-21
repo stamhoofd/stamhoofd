@@ -1,16 +1,16 @@
-import {logger} from "@simonbackx/simple-logging";
+import { logger } from '@simonbackx/simple-logging';
 
 export function loadLogger() {
     logger.infectConsole();
 
-    logger.hideTags('silent-seed')
-    
+    logger.hideTags('silent-seed');
+
     // Requests
     logger.addClassStyle(['request', 'tag'], ['cyan']);
 
     logger.addClassStyle(['request', 'tag', 'output'], ['dim']);
     logger.addClassAfterStyle(['request', 'tag', 'output'], ['dim']);
-    
+
     logger.addClassStyle(['request', 'time'], ['dim']);
     logger.addClassAfterStyle(['request', 'time'], ['dim']);
 
@@ -38,4 +38,7 @@ export function loadLogger() {
     // I18n
     logger.addClassStyle(['i18n', 'tag'], ['blue']);
     logger.addClassAfterStyle(['i18n', 'tag'], ['dim']);
+
+    // UniqueUserService
+    logger.addClassStyle(['unique-user-service', 'tag'], ['yellow']);
 }
