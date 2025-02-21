@@ -984,16 +984,14 @@ export class PlatformMember implements ObjectWithRecords {
 
                 if (recordCategory.isEnabled(this)) {
                     if (checkPermissions) {
+                        let hasUserManagerPermissions = false;
+                        let hasAdminPermissions = false;
                         if (isUserManager) {
-                            const hasPermission = recordCategory.checkPermissionForUserManager(checkPermissions.level);
-                            if (!hasPermission) {
-                                continue;
-                            }
+                            hasUserManagerPermissions = recordCategory.checkPermissionForUserManager(checkPermissions.level);
                         }
-                        else if (checkPermissions.user.permissions) {
+                        if (checkPermissions.user.permissions) {
                             // Check permissions
                             // we need at least permission in one organization
-                            let hasPermission = false;
                             for (const organization of scopedOrganizations) {
                                 const organizationPermissions = checkPermissions.user.permissions.forOrganization(organization, Platform.shared);
 
@@ -1002,14 +1000,14 @@ export class PlatformMember implements ObjectWithRecords {
                                 }
 
                                 if (organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, recordCategory.id, checkPermissions.level)) {
-                                    hasPermission = true;
+                                    hasAdminPermissions = true;
                                     break;
                                 }
                             }
+                        }
 
-                            if (!hasPermission) {
-                                continue;
-                            }
+                        if (!hasUserManagerPermissions && !hasAdminPermissions) {
+                            continue;
                         }
                     }
 

@@ -852,8 +852,6 @@ export class AdminPermissionChecker {
      * Return a list of RecordSettings the current user can view or edit
      */
     async getAccessibleRecordCategories(member: MemberWithRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<RecordCategory[]> {
-        const isUserManager = this.isUserManager(member);
-
         // First list all organizations this member is part of
         const organizations: Organization[] = [];
 
@@ -875,14 +873,6 @@ export class AdminPermissionChecker {
         // Check if we have access to their data
         const recordCategories: RecordCategory[] = [];
         for (const organization of organizations) {
-            if (isUserManager) {
-                for (const category of organization.meta.recordsConfiguration.recordCategories) {
-                    if (category.checkPermissionForUserManager(level)) {
-                        recordCategories.push(category);
-                    }
-                }
-            }
-
             const permissions = await this.getOrganizationPermissions(organization);
 
             if (!permissions) {
@@ -891,7 +881,7 @@ export class AdminPermissionChecker {
 
             // Now add all records of this organization
             for (const category of organization.meta.recordsConfiguration.recordCategories) {
-                if (isUserManager && recordCategories.find(c => c.id === category.id)) {
+                if (recordCategories.find(c => c.id === category.id)) {
                     // Already added
                     continue;
                 }
@@ -916,7 +906,7 @@ export class AdminPermissionChecker {
 
         // Platform data
         const platformPermissions = this.platformPermissions;
-        if (platformPermissions || isUserManager) {
+        if (platformPermissions) {
             for (const category of this.platform.config.recordsConfiguration.recordCategories) {
                 if (recordCategories.find(c => c.id === category.id)) {
                     // Already added
@@ -925,11 +915,6 @@ export class AdminPermissionChecker {
 
                 if (platformPermissions?.hasResourceAccess(PermissionsResourceType.RecordCategories, category.id, level)) {
                     recordCategories.push(category);
-                }
-                else if (isUserManager) {
-                    if (category.checkPermissionForUserManager(level)) {
-                        recordCategories.push(category);
-                    }
                 }
             }
         }
@@ -1069,21 +1054,45 @@ export class AdminPermissionChecker {
     async getAccessibleRecordSet(member: MemberWithRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<Set<string>> {
         const categories = await this.getAccessibleRecordCategories(member, level);
         const set = new Set<string>();
+
+        for (const category of categories) {
+            for (const record of category.getAllRecords()) {
+                set.add(record.id);
+            }
+        }
+
         const isUserManager = this.isUserManager(member);
 
+        // Also include those we can access as user manager
         if (isUserManager) {
-            for (const category of categories) {
+            const allCategories = this.platform.config.recordsConfiguration.recordCategories.slice();
+
+            // First list all organizations this member is part of
+            const organizations: Organization[] = [];
+
+            if (member.organizationId) {
+                if (this.checkScope(member.organizationId)) {
+                    organizations.push(await this.getOrganization(member.organizationId));
+                }
+            }
+
+            for (const registration of member.registrations) {
+                if (this.checkScope(registration.organizationId)) {
+                    if (!organizations.find(o => o.id === registration.organizationId)) {
+                        organizations.push(await this.getOrganization(registration.organizationId));
+                    }
+                }
+            }
+
+            for (const organization of organizations) {
+                allCategories.push(...organization.meta.recordsConfiguration.recordCategories);
+            }
+
+            for (const category of allCategories) {
                 for (const record of category.getAllRecords()) {
                     if (record.checkPermissionForUserManager(level)) {
                         set.add(record.id);
                     }
-                }
-            }
-        }
-        else {
-            for (const category of categories) {
-                for (const record of category.getAllRecords()) {
-                    set.add(record.id);
                 }
             }
         }
