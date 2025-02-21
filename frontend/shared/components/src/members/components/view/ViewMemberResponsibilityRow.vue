@@ -21,7 +21,7 @@
         </p>
 
         <template #right>
-            <span v-if="!hasRegistration" v-tooltip="'Deze functie is ongeldig omdat '+member.patchedMember.firstName+' niet is ingeschreven en zal automatisch verwijderd worden.'" class="icon warning yellow" />
+            <span v-if="!hasRegistration" v-tooltip="$t('Deze functie is ongeldig omdat {name} niet is ingeschreven. Deze functie zal automatisch verwijderd worden op het einde van de maand.', {name: member.patchedMember.firstName})" class="icon warning yellow" />
         </template>
     </STListItem>
 </template>
@@ -35,34 +35,34 @@ import ResponsibilityIcon from '../ResponsibilityIcon.vue';
 
 const props = defineProps<{
     responsibility: MemberResponsibilityRecord;
-    member: PlatformMember
+    member: PlatformMember;
 }>();
 
 const organization = useOrganization();
 const platform = usePlatform();
 
-const app = useAppContext()
+const app = useAppContext();
 
 const responsibilityOrganization = computed(() => {
-    return props.member.organizations.find(o => o.id === props.responsibility.organizationId)
-})
+    return props.member.organizations.find(o => o.id === props.responsibility.organizationId);
+});
 
 const group = computed(() => {
-    return props.responsibility.group
-})
+    return props.responsibility.group;
+});
 
 const resp = computed(() => {
-    return platform.value.config.responsibilities.find(rr => rr.id === props.responsibility.responsibilityId) 
-        ?? responsibilityOrganization.value?.privateMeta?.responsibilities?.find(rr => rr.id === props.responsibility.responsibilityId) 
-        ?? null
-})
+    return platform.value.config.responsibilities.find(rr => rr.id === props.responsibility.responsibilityId)
+        ?? responsibilityOrganization.value?.privateMeta?.responsibilities?.find(rr => rr.id === props.responsibility.responsibilityId)
+        ?? null;
+});
 
 const name = computed(() => {
-    const suffix = group.value ? ` van ${group.value.settings.name}` : (props.responsibility.groupId ? ' van onbekende groep' : '')
-    return (resp.value?.name ?? 'Verwijderde functie') + suffix
-})
+    const suffix = group.value ? ` van ${group.value.settings.name}` : (props.responsibility.groupId ? ' van onbekende groep' : '');
+    return (resp.value?.name ?? 'Verwijderde functie') + suffix;
+});
 
 const hasRegistration = computed(() => {
-    return props.member.filterRegistrations({currentPeriod: true, organizationId: responsibilityOrganization.value?.id ?? undefined}).length > 0
-})
+    return props.member.filterRegistrations({ currentPeriod: true, organizationId: responsibilityOrganization.value?.id ?? undefined }).length > 0;
+});
 </script>
