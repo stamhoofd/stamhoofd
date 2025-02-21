@@ -94,11 +94,15 @@ export class SessionContext implements RequestMiddleware {
      * Use auth
      */
     get organizationAuth() {
-        return new ContextPermissions(this.user, this.organization, Platform.shared);
+        return this.auth;
     }
 
+    _auth: ContextPermissions | null = null;
     get auth() {
-        return new ContextPermissions(this.user, this.organization, Platform.shared);
+        if (!this._auth) {
+            this._auth = new ContextPermissions(this.user, this.organization, Platform.shared);
+        }
+        return this._auth;
     }
 
     static async createFrom(data: ({ organization: Organization } | { organizationId: string })) {

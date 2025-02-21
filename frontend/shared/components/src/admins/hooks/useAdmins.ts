@@ -1,9 +1,9 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { useOrganization, usePlatform } from '@stamhoofd/components';
-import { ContextPermissions, usePlatformManager } from '@stamhoofd/networking';
-import { GroupType, PermissionLevel, PermissionRoleForResponsibility, Permissions, PlatformFamily, PlatformMember, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
+import { GlobalEventBus, useOrganization, usePlatform } from '@stamhoofd/components';
+import { ContextPermissions, usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
+import { GroupType, Permissions, PlatformFamily, PlatformMember, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
-import { computed, onActivated } from 'vue';
+import { computed, onActivated, shallowRef } from 'vue';
 import { useReloadAdmins } from './useReloadAdmins';
 
 export function useAdmins() {
@@ -28,6 +28,22 @@ export function useAdmins() {
     onActivated(() => {
         // Reload admins
         reload();
+        clearPermissionCache();
+    });
+
+    // Listen for updates that require the permission to get recalculated
+    const owner = useRequestOwner();
+
+    GlobalEventBus.addListener(owner, 'organization-updated', async () => {
+        clearPermissionCache();
+    });
+
+    GlobalEventBus.addListener(owner, 'platform-updated', async () => {
+        clearPermissionCache();
+    });
+
+    GlobalEventBus.addListener(owner, 'user-updated', async () => {
+        clearPermissionCache();
     });
 
     const admins = computed(() => {
@@ -39,12 +55,26 @@ export function useAdmins() {
         return platformManager.value.$platform.admins ?? [];
     });
 
+    const permissionContextCache = shallowRef(new WeakMap<User, ContextPermissions>());
+
+    const getPermissionContext = (user: User) => {
+        const cache = permissionContextCache.value;
+        if (!cache.has(user)) {
+            cache.set(user, new ContextPermissions(UserWithMembers.create(user), organization, platformManager.value.$platform, { allowInheritingPermissions: false }));
+        }
+        return cache.get(user)!;
+    };
+
+    function clearPermissionCache() {
+        permissionContextCache.value = new WeakMap<User, ContextPermissions>();
+    }
+
     const getPermissions = (user: User) => {
-        return new ContextPermissions(UserWithMembers.create(user), organization, platformManager.value.$platform, { allowInheritingPermissions: false }).permissions;
+        return getPermissionContext(user).permissions;
     };
 
     const getUnloadedPermissions = (user: User) => {
-        return new ContextPermissions(UserWithMembers.create(user), organization, platformManager.value.$platform, { allowInheritingPermissions: false }).unloadedPermissions;
+        return getPermissionContext(user).unloadedPermissions;
     };
 
     const getPermissionsPatch = (user: User, patch: AutoEncoderPatchType<Permissions> | null): AutoEncoderPatchType<UserPermissions> | UserPermissions => {
@@ -138,5 +168,5 @@ export function useAdmins() {
         }
     };
 
-    return { loading, admins, reloadPromise, sortedAdmins, sortedMembers, getPermissions, getUnloadedPermissions, getPermissionsPatch, pushInMemory, dropFromMemory };
+    return { loading, admins, reloadPromise, sortedAdmins, sortedMembers, getPermissions, getUnloadedPermissions, getPermissionsPatch, pushInMemory, dropFromMemory, clearPermissionCache };
 }

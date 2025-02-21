@@ -1,5 +1,5 @@
-import { AccessRight, Event, EventPermissionChecker, Group, GroupCategory, Organization, OrganizationForPermissionCalculation, OrganizationTag, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, Registration, User, UserWithMembers } from '@stamhoofd/structures';
-import { Ref, unref } from 'vue';
+import { AccessRight, Event, EventPermissionChecker, Group, GroupCategory, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationTag, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
+import { Ref, toRaw, unref } from 'vue';
 
 export class ContextPermissions {
     reactiveUser: UserWithMembers | null | Ref<UserWithMembers | null>;
@@ -35,18 +35,44 @@ export class ContextPermissions {
     }
 
     get organization() {
-        return unref(this.reactiveOrganization);
+        // We mark organization as raw, because the permission calculation is too expensive to run on every change of an organization
+        // to reload permissions, a user needs to reload the page or app
+        return toRaw(unref(this.reactiveOrganization));
     }
 
     get platform() {
-        return unref(this.reactivePlatform);
+        // We mark platform as raw, because the permission calculation is too expensive to run on every change of the platform
+        // to reload permissions, a user needs to reload the page or app
+        return toRaw(unref(this.reactivePlatform));
     }
 
+    _cachedPlatformPermissions: LoadedPermissions | null = null;
     get platformPermissions() {
+        if (this._cachedPlatformPermissions) {
+            return this._cachedPlatformPermissions;
+        }
+
+        const c = this._platformPermissions;
+        this._cachedPlatformPermissions = c;
+        return c;
+    }
+
+    get _platformPermissions() {
         return unref(this.userPermissions)?.forPlatform(this.platform) ?? null;
     }
 
+    _cachedPermissions: LoadedPermissions | null = null;
     get permissions() {
+        if (this._cachedPermissions) {
+            return this._cachedPermissions;
+        }
+
+        const c = this._permissions;
+        this._cachedPermissions = c;
+        return c;
+    }
+
+    get _permissions() {
         if (!this.organization) {
             return this.platformPermissions;
         }

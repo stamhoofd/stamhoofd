@@ -257,4 +257,8 @@ const actionBuilder = useMemberActions();
 async function editMember(member: PlatformMember) {
     await actionBuilder().showMember(member);
 }
+
+function clearPermissionCache() {
+    throw new Error('Function not implemented.');
+}
 </script>

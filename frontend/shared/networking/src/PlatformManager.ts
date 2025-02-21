@@ -1,5 +1,5 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
-import { AppType, ColorHelper } from '@stamhoofd/components';
+import { AppType, ColorHelper, GlobalEventBus } from '@stamhoofd/components';
 import { SessionContext, Storage } from '@stamhoofd/networking';
 import { Platform, RegistrationPeriod, UserWithMembers, Version, Webshop } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
@@ -54,6 +54,7 @@ export class PlatformManager {
         const platform = reactive(await PlatformManager.fetchPlatform($context)) as Platform;
         const platformManager = new PlatformManager($context, platform, app);
         await platformManager.savePlatform();
+        await GlobalEventBus.sendEvent('platform-updated', platformManager.$platform);
         return platformManager;
     }
 
@@ -92,6 +93,7 @@ export class PlatformManager {
         this.$platform.deepSet(await PlatformManager.fetchPlatform(this.$context));
         this.updateStyles();
         await this.savePlatform();
+        await GlobalEventBus.sendEvent('platform-updated', this.$platform);
     }
 
     async patch(patch: AutoEncoderPatchType<Platform>, shouldRetry = false) {
@@ -117,8 +119,8 @@ export class PlatformManager {
 
         // Save platform in localstorage
         this.savePlatform().catch(console.error);
-
         this.updateStyles();
+        await GlobalEventBus.sendEvent('platform-updated', this.$platform);
     }
 
     async loadAdmins(force = false, shouldRetry?: boolean, owner?: any): Promise<void> {

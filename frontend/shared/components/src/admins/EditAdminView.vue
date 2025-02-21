@@ -99,7 +99,7 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, EditUserPermissionsBox, EmailInput, ErrorBox, SaveView, Toast, useContext, useErrors, usePatch, useUninheritedPermissions } from '@stamhoofd/components';
+import { CenteredMessage, EditUserPermissionsBox, EmailInput, ErrorBox, GlobalEventBus, SaveView, Toast, useContext, useErrors, usePatch, useUninheritedPermissions } from '@stamhoofd/components';
 import { Permissions, PermissionsResourceType, User, UserWithMembers } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
@@ -218,7 +218,7 @@ const save = async () => {
         if (props.isNew) {
             pushInMemory(props.user);
         }
-
+        await GlobalEventBus.sendEvent('user-updated', props.user);
         await pop({ force: true });
     }
     catch (e) {

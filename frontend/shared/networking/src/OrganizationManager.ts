@@ -1,5 +1,6 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder, deepSetArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { GlobalEventBus } from '@stamhoofd/components';
 import { LoginHelper, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { Group, Organization, OrganizationAdmins, OrganizationPatch, OrganizationRegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures';
 import { Ref, inject, toRef } from 'vue';
@@ -64,7 +65,6 @@ export class OrganizationManager {
         const admins = this.$context.organization.admins;
 
         this.$context.updateOrganization(response.data);
-        console.log('Organization updated', this.$context);
 
         if (admins && !response.data.admins && patch.admins) {
             this.$context.organization.admins = patch.admins.applyTo(admins);
@@ -76,6 +76,8 @@ export class OrganizationManager {
 
         // Save organization in localstorage
         this.save().catch(console.error);
+
+        await GlobalEventBus.sendEvent('organization-updated', this.$context.organization);
     }
 
     async patchPeriods(patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>, options: { shouldRetry?: boolean; owner?: any } = {}) {
