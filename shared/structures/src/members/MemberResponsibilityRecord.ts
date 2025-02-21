@@ -27,7 +27,7 @@ export class MemberResponsibilityRecordBase extends AutoEncoder {
     endDate: Date | null = null;
 
     get isActive() {
-        return this.startDate < new Date() && (this.endDate === null || this.endDate > new Date());
+        return this.startDate <= new Date() && (this.endDate === null || this.endDate > new Date());
     }
 
     getDiffName() {

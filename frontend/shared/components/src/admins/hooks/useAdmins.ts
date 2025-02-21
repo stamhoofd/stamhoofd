@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { useOrganization, usePlatform } from '@stamhoofd/components';
 import { ContextPermissions, usePlatformManager } from '@stamhoofd/networking';
-import { PermissionLevel, PermissionRoleForResponsibility, Permissions, PlatformFamily, PlatformMember, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
+import { GroupType, PermissionLevel, PermissionRoleForResponsibility, Permissions, PlatformFamily, PlatformMember, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, onActivated } from 'vue';
 import { useReloadAdmins } from './useReloadAdmins';
@@ -59,11 +59,24 @@ export function useAdmins() {
         return user.permissions!.convertPlatformPatch(patch);
     };
 
+    function isExternalUser(a: UserWithMembers) {
+        if (!a.memberId) {
+            return true;
+        }
+        const member = a.members.members.find(m => m.id === a.memberId!);
+        if (!member) {
+            return true;
+        }
+        const registrations = organization.value ? member.registrations.filter(r => r.organizationId === organization.value?.id) : member.registrations;
+        return !registrations.find(r =>
+            r.registeredAt !== null && r.deactivatedAt === null && r.group.type === GroupType.Membership
+            && r.group.periodId === (organization.value?.period.period.id ?? platform.value.period.id),
+        );
+    }
+
     const sortedAdmins = computed(() => {
         return admins.value
-            .filter(a => !a.memberId
-                || (getUnloadedPermissions(a) && (!!getUnloadedPermissions(a)?.roles.find(r => !(r instanceof PermissionRoleForResponsibility)) || (getUnloadedPermissions(a)?.level ?? PermissionLevel.None) !== PermissionLevel.None)),
-            )
+            .filter(isExternalUser)
             .sort((a, b) => Sorter.stack(
                 Sorter.byBooleanValue(getPermissions(a)?.hasFullAccess() ?? false, getPermissions(b)?.hasFullAccess() ?? false),
                 Sorter.byStringValue(a.firstName + ' ' + a.lastName, b.firstName + ' ' + b.lastName),
@@ -81,6 +94,9 @@ export function useAdmins() {
             });
 
             for (const m of adminMembers) {
+                if (m.getResponsibilities(organization.value).length === 0) {
+                    continue;
+                }
                 if (!members.has(m.id)) {
                     members.set(m.id, m);
                 }
