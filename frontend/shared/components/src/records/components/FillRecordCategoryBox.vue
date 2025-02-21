@@ -13,6 +13,7 @@
         </component>
         <p v-if="category.description" class="style-description-block pre-wrap" v-text="category.description" />
 
+<STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
         <slot />
 
@@ -49,6 +50,7 @@ import { Validator } from '../../errors/Validator';
 import { useErrors } from '../../errors/useErrors';
 import { useValidation } from '../../errors/useValidation';
 import RecordAnswerInput from '../../inputs/RecordAnswerInput.vue';
+import { ErrorBox } from '../../errors/ErrorBox';
 
 const props = withDefaults(
     defineProps<{
@@ -58,6 +60,7 @@ const props = withDefaults(
          */
         value: T;
         validator: Validator;
+parentErrorBox?: ErrorBox | null;
         level?: number;
         allOptional?: boolean;
         titleSuffix?: string;
@@ -67,6 +70,7 @@ const props = withDefaults(
         allOptional: false,
         titleSuffix: '',
         forceMarkReviewed: null,
+parentErrorBox: null,
     },
 );
 const errors = useErrors({ validator: props.validator });
