@@ -5,7 +5,7 @@
         </p>
     </div>
     <div v-else class="container">
-        <component :is="level === 1 ? 'h1' : 'h2'" class="style-with-button">
+        <component :is="level === 1 ? 'h1' : 'h2'" :class="level === 2 ? 'style-with-button' : undefined">
             <div>
                 {{ category.name }}
                 <span v-if="titleSuffix" class="title-suffix">
