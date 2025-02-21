@@ -13,7 +13,7 @@ async function fileExists(file) {
     return false;
 }
 
-const namespaces = ['stamhoofd', 'digit', 'keeo', 'chiro', 'landelijke-gilden'];
+const namespaces = ['stamhoofd', 'digit', 'keeo', 'landelijke-gilden'];
 
 for (const namespace of namespaces) {
     // await fs.rm("./dist/"+namespace, { recursive: true, force: true })
@@ -22,7 +22,7 @@ for (const namespace of namespaces) {
     await fs.mkdir('./esm/dist/' + namespace, { recursive: true });
 }
 
-function mergeObjects(into, from) {
+function mergeObjects(into, from, missingOnly = false) {
     if (
         typeof into !== 'object'
         || Array.isArray(into)
@@ -32,6 +32,12 @@ function mergeObjects(into, from) {
             // Do not override empty values
             return into;
         }
+
+        if (typeof into === 'string' && into.length > 0 && missingOnly) {
+            // Do not override
+            return into;
+        }
+
         // Override full variable
         return from;
     }
@@ -55,7 +61,7 @@ function mergeObjects(into, from) {
 
         if (Object.prototype.hasOwnProperty.call(into, key)) {
             // Merge again
-            into[key] = mergeObjects(into[key], from[key]);
+            into[key] = mergeObjects(into[key], from[key], missingOnly);
         }
         else {
             into[key] = from[key];
@@ -92,8 +98,6 @@ if (enIndex != -1) {
 
 const fallbackLanguages = ['en', 'nl'];
 
-let defaultKeys = JSON.parse(await fs.readFile('./src/base.json'));
-
 function runReplacements(json) {
     const replacements = json.replacements;
     if (replacements) {
@@ -111,87 +115,74 @@ function runReplacements(json) {
     delete json.replacements;
 }
 
+async function build(country, language, namespace, skipFallbackLanguages, skipNamespaces) {
+    const locale = language + '-' + country;
+    let json = {};
+
+    if (namespace) {
+        if (skipNamespaces && skipNamespaces.includes(namespace)) {
+            throw new Error('Circular dependency detected: ' + skipNamespaces.join(' -> ') + ' -> ' + namespace);
+        }
+        // Start with inheriting from the non namespaced version
+        json = mergeObjects(json, await build(country, language, null, skipFallbackLanguages, [...skipNamespaces || [], namespace]));
+    }
+
+    let folder = namespace ? './src/' + namespace : './src';
+
+    // base
+    if (await fileExists(folder + '/base.json')) {
+        const specifics = JSON.parse(await fs.readFile(folder + '/base.json'));
+        if ('extends' in specifics) {
+            if (!Array.isArray(specifics.extends)) {
+                throw new Error('Invalid extends in ' + folder + '/base.json');
+            }
+            for (const extend of specifics.extends) {
+                const extendJson = await build(country, language, extend, skipFallbackLanguages, [...skipNamespaces || [], namespace]);
+                json = mergeObjects(json, extendJson);
+            }
+        }
+        json = mergeObjects(json, specifics);
+    }
+
+    // language
+    if (await fileExists(folder + '/' + language + '.json')) {
+        const specifics = JSON.parse(await fs.readFile(folder + '/' + language + '.json'));
+        json = mergeObjects(json, specifics);
+    }
+
+    // locale
+    if (await fileExists(folder + '/' + locale + '.json')) {
+        const specifics = JSON.parse(await fs.readFile(folder + '/' + locale + '.json'));
+        json = mergeObjects(json, specifics);
+    }
+
+    await runReplacements(json);
+
+    // If we still have missing translations, fall back to the fallback languages, by only setting missing values
+    if (!skipFallbackLanguages) {
+        for (const fallbackLanguage of [...fallbackLanguages].reverse()) {
+            if (fallbackLanguage === language) {
+                continue;
+            }
+
+            json = mergeObjects(
+                json,
+                await build(country, fallbackLanguage, namespace, true, skipNamespaces),
+                true, // missing only
+            );
+        }
+    }
+
+    return json;
+}
+
 for (const country of countries) {
     // Build country defatuls
     for (const language of languages) {
         const locale = language + '-' + country;
 
         for (const namespace of namespaces) {
-            // global base
-            let json = JSON.parse(JSON.stringify(defaultKeys));
-
-            // Fallbacks
-            for (const fallbackLanguage of fallbackLanguages) {
-                if (fallbackLanguage === language) {
-                    continue;
-                }
-                const fallbackLocale = fallbackLanguage + '-' + country;
-
-                // Language
-                if (await fileExists('./src/' + fallbackLanguage + '.json')) {
-                    const specifics = JSON.parse(await fs.readFile('./src/' + fallbackLanguage + '.json'));
-                    json = mergeObjects(json, specifics);
-                }
-
-                // Locale
-                if (await fileExists('./src/' + fallbackLocale + '.json')) {
-                    const specifics = JSON.parse(await fs.readFile('./src/' + fallbackLocale + '.json'));
-                    json = mergeObjects(json, specifics);
-                }
-
-                // Namespace base
-                if (await fileExists('./src/' + namespace + '/base.json')) {
-                    const specifics = JSON.parse(await fs.readFile('./src/' + namespace + '/base.json'));
-                    json = mergeObjects(json, specifics);
-                }
-
-                // Namespace language
-                if (await fileExists('./src/' + namespace + '/' + fallbackLanguage + '.json')) {
-                    const specifics = JSON.parse(await fs.readFile('./src/' + namespace + '/' + fallbackLanguage + '.json'));
-                    json = mergeObjects(json, specifics);
-                }
-
-                // Namespace locale
-                if (await fileExists('./src/' + namespace + '/' + fallbackLocale + '.json')) {
-                    const specifics = JSON.parse(await fs.readFile('./src/' + namespace + '/' + fallbackLocale + '.json'));
-                    json = mergeObjects(json, specifics);
-                }
-
-                // Run replacements in local context
-                runReplacements(json);
-            }
-
-            // Language
-            if (await fileExists('./src/' + language + '.json')) {
-                const specifics = JSON.parse(await fs.readFile('./src/' + language + '.json'));
-                json = mergeObjects(json, specifics);
-            }
-
-            // Locale
-            if (await fileExists('./src/' + locale + '.json')) {
-                const specifics = JSON.parse(await fs.readFile('./src/' + locale + '.json'));
-                json = mergeObjects(json, specifics);
-            }
-
-            // Namespace base
-            if (await fileExists('./src/' + namespace + '/base.json')) {
-                const specifics = JSON.parse(await fs.readFile('./src/' + namespace + '/base.json'));
-                json = mergeObjects(json, specifics);
-            }
-
-            // Namespace language
-            if (await fileExists('./src/' + namespace + '/' + language + '.json')) {
-                const specifics = JSON.parse(await fs.readFile('./src/' + namespace + '/' + language + '.json'));
-                json = mergeObjects(json, specifics);
-            }
-
-            // Namespace locale
-            if (await fileExists('./src/' + namespace + '/' + locale + '.json')) {
-                const specifics = JSON.parse(await fs.readFile('./src/' + namespace + '/' + locale + '.json'));
-                json = mergeObjects(json, specifics);
-            }
-
-            runReplacements(json);
+            const json = await build(country, language, namespace);
             const data = JSON.stringify(json);
 
             try {

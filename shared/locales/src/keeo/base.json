@@ -1,4 +1,5 @@
 {
+    "extends": ["platforms"],
     "replacements": {
         "#Groep": "Eenheid",
         "#Groepen": "Eenheden",
