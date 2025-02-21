@@ -72,7 +72,7 @@
                     </template>
                 </p>
 
-                <template v-if="((isPropertyEnabled('parents.nationalRegisterNumber') && patched.address?.country === Country.Belgium) || nationalRegisterNumber)">
+                <template v-if="(isPropertyEnabled('parents.nationalRegisterNumber') || nationalRegisterNumber)">
                     <NRNInput v-model="nationalRegisterNumber" :title="'Rijksregisternummer'" :required="isNRNRequiredForThisParent" :nullable="true" :validator="errors.validator" />
                     <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
                         Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
