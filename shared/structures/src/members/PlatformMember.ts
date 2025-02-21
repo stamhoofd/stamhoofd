@@ -839,7 +839,7 @@ export class PlatformMember implements ObjectWithRecords {
         return configurations;
     }
 
-    filterOrganizations(filters: { groups?: Group[] | null; canRegister?: boolean; periodId?: string; currentPeriod?: boolean; types?: GroupType[] }) {
+    filterOrganizations(filters: { groups?: Group[] | null; canRegister?: boolean; periodId?: string; withResponsibilities?: boolean; currentPeriod?: boolean; types?: GroupType[] }) {
         const registrations = this.filterRegistrations(filters);
         const base: Organization[] = [];
 
@@ -877,6 +877,24 @@ export class PlatformMember implements ObjectWithRecords {
 
                 if (!base.find(g => g.id === item.organization.id)) {
                     base.push(item.organization);
+                }
+            }
+        }
+
+        // Loop responsibilities
+        if (filters.withResponsibilities) {
+            for (const responsibility of this.patchedMember.responsibilities) {
+                if (!responsibility.isActive) {
+                    continue;
+                }
+
+                if (base.find(g => g.id === responsibility.organizationId)) {
+                    continue;
+                }
+
+                const organization = this.organizations.find(o => o.id === responsibility.organizationId);
+                if (organization) {
+                    base.push(organization);
                 }
             }
         }

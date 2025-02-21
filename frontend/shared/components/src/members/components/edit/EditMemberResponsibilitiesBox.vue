@@ -120,7 +120,7 @@ const items = computed(() => {
         return [organization.value];
     }
     // Only show organization that have an active registration in the organization active period
-    return [...props.member.filterOrganizations({ currentPeriod: true }), null];
+    return [...props.member.filterOrganizations({ currentPeriod: true, withResponsibilities: true }), null];
 });
 
 const platformResponsibilities = computed(() => {
