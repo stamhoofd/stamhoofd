@@ -54,6 +54,9 @@ export const ExampleReplacements = {
 };
 
 function getReplacements() {
+    const htmlPlaceholder = '<p class="description">Oeps, er ging iets mis bij het laden van het voorbeeld dat hier moet komen</p>';
+    const textPlaceholder = 'ONTBREEKT';
+
     return {
         greeting: Replacement.create({
             token: 'greeting',
@@ -216,9 +219,11 @@ function getReplacements() {
         }),
         overviewTable: Replacement.create({
             token: 'overviewTable',
+            html: htmlPlaceholder,
         }),
         paymentTable: Replacement.create({
             token: 'paymentTable',
+            html: htmlPlaceholder,
         }),
         packageName: Replacement.create({
             token: 'packageName',
@@ -230,6 +235,7 @@ function getReplacements() {
         }),
         orderStatus: Replacement.create({
             token: 'orderStatus',
+            value: textPlaceholder,
         }),
         nr: Replacement.create({
             token: 'nr',
@@ -237,27 +243,35 @@ function getReplacements() {
         }),
         orderTime: Replacement.create({
             token: 'orderTime',
+            value: textPlaceholder,
         }),
         orderDate: Replacement.create({
             token: 'orderDate',
+            value: textPlaceholder,
         }),
         orderMethod: Replacement.create({
             token: 'orderMethod',
+            value: textPlaceholder,
         }),
         orderLocation: Replacement.create({
             token: 'orderLocation',
+            value: textPlaceholder,
         }),
         orderDetailsTable: Replacement.create({
             token: 'orderDetailsTable',
+            html: htmlPlaceholder,
         }),
         orderTable: Replacement.create({
             token: 'orderTable',
+            html: htmlPlaceholder,
         }),
         orderUrl: Replacement.create({
             token: 'orderUrl',
+            value: textPlaceholder,
         }),
         webshopName: Replacement.create({
             token: 'webshopName',
+            value: textPlaceholder,
         }),
 
     };

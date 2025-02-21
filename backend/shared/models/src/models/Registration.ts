@@ -260,11 +260,6 @@ export class Registration extends QueryableModel {
                         value: payment.transferSettings?.creditor ?? organization.name,
                     }),
                     Replacement.create({
-                        token: 'overviewTable',
-                        value: '',
-                        html: paymentGeneral.getDetailsHTMLTable(),
-                    }),
-                    Replacement.create({
                         token: 'overviewContext',
                         value: 'Inschrijving van ' + paymentGeneral.memberNames,
                     }),
