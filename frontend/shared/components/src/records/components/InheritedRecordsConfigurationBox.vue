@@ -123,7 +123,7 @@ const settings = new RecordEditorSettings({
         }),
         isNew: true,
         family,
-    })
+    }),
 });
 family.members.push(settings.exampleValue);
 
@@ -362,7 +362,11 @@ async function previewCategory(category: RecordCategory) {
     await present({
         components: [
             new ComponentWithProperties(FillRecordCategoryView, {
-                category,
+                category: category.patch({
+                    // Disable filter on category level for the preview, since these cannot work
+                    filter: null,
+                    defaultEnabled: true,
+                }),
                 value: settings.exampleValue,
                 forceMarkReviewed: true,
                 saveHandler: async (_patch: PatchAnswers, navigate: NavigationActions) => {

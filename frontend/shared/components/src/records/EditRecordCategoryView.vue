@@ -145,13 +145,13 @@ import PropertyFilterInput from '../filters/PropertyFilterInput.vue';
 import { propertyFilterToString } from '../filters/UIFilter';
 import { useDraggableArray, usePatchArray, usePatchMoveUpDown } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
+import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import { NavigationActions } from '../types/NavigationActions';
 import EditRecordView from './EditRecordView.vue';
 import FillRecordCategoryView from './FillRecordCategoryView.vue';
 import { RecordEditorSettings, RecordEditorType } from './RecordEditorSettings';
 import RecordRow from './components/RecordRow.vue';
-import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 
 // Define
 const props = defineProps<{
@@ -597,7 +597,8 @@ async function showExample() {
             new ComponentWithProperties(FillRecordCategoryView, {
                 category: patchedCategory.value.patch({
                     // Disable filter on category level for the preview, since these cannot work
-                    filter: null
+                    filter: null,
+                    defaultEnabled: true
                 }),
                 value: reactiveValue,
                 saveText: 'Opslaan',
