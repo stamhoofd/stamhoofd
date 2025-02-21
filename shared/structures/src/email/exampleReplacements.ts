@@ -54,6 +54,10 @@ export const ExampleReplacements = {
 };
 
 function getReplacements() {
+    /**
+     * Note: please also add the corresponding smart variable to shared/structures/src/email/EditorSmartVariable.ts
+     * and the corresponding buttons to shared/structures/src/email/EditorSmartButton.ts
+     */
     const htmlPlaceholder = '<p class="description">Oeps, er ging iets mis bij het laden van het voorbeeld dat hier moet komen</p>';
     const textPlaceholder = 'ONTBREEKT';
 
@@ -95,11 +99,11 @@ function getReplacements() {
         }),
         objectName: Replacement.create({
             token: 'objectName',
-            value: 'Naam schuldenaar',
+            value: 'Jan Jansens',
         }),
         resetUrl: Replacement.create({
             token: 'resetUrl',
-            value: 'https://www.example.com/reset',
+            value: 'https://www.voorbeeld.com/heel-lange-code-waarmee-de-link-beveiligd-wordt',
         }),
         confirmEmailUrl: Replacement.create({
             token: 'confirmEmailUrl',
@@ -163,11 +167,11 @@ function getReplacements() {
         }),
         registerUrl: Replacement.create({
             token: 'registerUrl',
-            value: 'https://www.example.com/register',
+            value: 'https://inschrijven.voorbeeld.com',
         }),
         groupName: Replacement.create({
             token: 'groupName',
-            value: 'Voorbeeldgroep',
+            value: $t('Voorbeeldleeftijdsgroep'),
         }),
         signInUrl: Replacement.create({
             token: 'signInUrl',
@@ -211,7 +215,7 @@ function getReplacements() {
         }),
         overviewContext: Replacement.create({
             token: 'overviewContext',
-            value: 'Voorbeeldcontext',
+            value: 'Inschrijving van Klaas en Piet',
         }),
         memberNames: Replacement.create({
             token: 'memberNames',
@@ -271,7 +275,7 @@ function getReplacements() {
         }),
         webshopName: Replacement.create({
             token: 'webshopName',
-            value: textPlaceholder,
+            value: 'Demoshop',
         }),
 
     };

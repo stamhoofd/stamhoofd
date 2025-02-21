@@ -115,6 +115,8 @@ import Underline from '@tiptap/extension-underline';
 import StarterKit from '@tiptap/starter-kit';
 import { Editor, EditorContent } from '@tiptap/vue-3';
 
+import { useCanDismiss, useCanPop, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
+import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue';
 import UploadButton from '../inputs/UploadButton.vue';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
@@ -129,8 +131,6 @@ import { DescriptiveText } from './EditorDescriptiveText';
 import { SmartButtonInlineNode, SmartButtonNode } from './EditorSmartButton';
 import { SmartVariableNode, SmartVariableNodeBlock } from './EditorSmartVariable';
 import TextStyleButtonsView from './TextStyleButtonsView.vue';
-import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue';
-import { useCanDismiss, useCanPop, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
@@ -180,11 +180,11 @@ const props = withDefaults(
 );
 
 function smartVariablesFor(replacements: Replacement[]) {
-    return EditorSmartVariable.fillExamples(EditorSmartVariable.all, replacements);
+    return EditorSmartVariable.forReplacements(replacements);
 }
 
 function smartButtonsFor(replacements: Replacement[]) {
-    return EditorSmartVariable.fillExamples(EditorSmartButton.all, replacements);
+    return EditorSmartButton.forReplacements(replacements);
 }
 
 const smartVariables = computed(() => {

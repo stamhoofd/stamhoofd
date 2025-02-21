@@ -1,6 +1,7 @@
 import { AutoEncoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { Recipient, Replacement } from '../endpoints/EmailRequest.js';
 import { EmailRecipient } from './Email.js';
+import { EditorSmartVariable } from './EditorSmartVariable.js';
 
 export class EditorSmartButton extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -20,6 +21,10 @@ export class EditorSmartButton extends AutoEncoder {
 
     @field({ decoder: new EnumDecoder(['block', 'inline']) })
     type: 'block' | 'inline' = 'block';
+
+    static forReplacements(replacements: Replacement[]) {
+        return EditorSmartVariable.fillExamples(this.all.map(v => v.clone()), replacements);
+    }
 
     static forRecipient(recipient: EmailRecipient | Recipient) {
         const replacements = [...recipient.replacements, ...recipient.getDefaultReplacements()];
