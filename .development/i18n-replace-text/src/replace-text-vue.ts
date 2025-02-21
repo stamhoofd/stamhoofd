@@ -1,6 +1,8 @@
+import chalk from "chalk";
 import fs from "fs";
 import { getFilesToSearch } from "./get-files-to-search";
 import { getChangedFiles, getDiffChunks } from "./git-helper";
+import { promptBoolean } from "./prompt-helper";
 import { escapeRegExp, getIndexOfFirstNewLine, getIndexOfLastNewLine, getWhiteSpaceBeforeAndAfter, isNumberOrSpecialCharacter } from "./regex-helper";
 import { replaceTextInTypescriptString } from "./replace-text-typescript";
 import { wrapWithTranslationFunction } from "./translation-helper";
@@ -33,27 +35,31 @@ function isAttributeWhitelisted(value: string): boolean {
     }
     return false;
 }
+interface Options {
+    replaceChangesOnly?: boolean;
+    doPrompt?: boolean;
+}
 
-export function replaceAllVueTemplateText({replaceChangesOnly = true}: {replaceChangesOnly?: boolean} = {}) {
+export async function replaceAllVueTemplateText(options: Options = {}) {
     const files = getFilesToSearch(['vue']);
 
-    if(replaceChangesOnly) {
+    if(options.doPrompt) {
         const changedFiles = getChangedFiles('vue');
         
         for (const filePath of files) {
             if(changedFiles.has(filePath)) {
-                replaceVueTemplateText(filePath, {replaceChangesOnly});
+                await replaceVueTemplateText(filePath, options);
             }
         }
         return;
     }
 
     for (const filePath of files) {
-        replaceVueTemplateText(filePath, {replaceChangesOnly});
+        replaceVueTemplateText(filePath, options);
     }
 }
 
-export function replaceVueTemplateText(filePath: string, {replaceChangesOnly = true}: {replaceChangesOnly?: boolean} = {}) {
+export async function replaceVueTemplateText(filePath: string, {replaceChangesOnly = true, doPrompt = true}: Options = {}) {
     console.log('Try translate vue template text in:', filePath);
     const fileContent = fs.readFileSync(filePath, "utf8");
 
@@ -77,7 +83,7 @@ export function replaceVueTemplateText(filePath: string, {replaceChangesOnly = t
     let matches: RegExpExecArray | null;
 
     //#region replace text
-    while ((matches = vueTemplateTextRegex.exec(template)) !== null) {
+    while ((matches = vueTemplateTextRegex.exec(newContent)) !== null) {
         const match = matches[0];
         if(!match) {
             continue;
@@ -107,7 +113,6 @@ export function replaceVueTemplateText(filePath: string, {replaceChangesOnly = t
             }
         }
 
-        // todo: check if one of the lines is changed
         for(const line of lines) {
             const trimmedLine = line.trim();
         
@@ -139,7 +144,13 @@ export function replaceVueTemplateText(filePath: string, {replaceChangesOnly = t
 
         const replaceValue = newLines.join("\r\n");
 
-        newContent = newContent.replace(replaceRegex, replaceValue);
+        // todo: only replace 1 match? from index
+        const replacedContent = newContent.replace(replaceRegex, replaceValue);
+        // const originalReplacedContent = template.replace(replaceRegex, replaceValue);
+
+        if(!doPrompt || await isAccepted(getContext(replacedContent, replaceValue, matchIndex), getRegExpExecContext(matches))) {
+            newContent = replacedContent;
+        }
     }
     //#endregion
 
@@ -183,6 +194,13 @@ export function replaceVueTemplateText(filePath: string, {replaceChangesOnly = t
     }
 }
 
+function getRegExpExecContext(execArray: RegExpExecArray, {lines = 5}: {lines?: number} = {}) {
+    const match = execArray[0];
+    const matchIndex = execArray.index;
+
+    return getContext(execArray.input, match, matchIndex, lines);
+}
+
 function isSomeLineChanged(match: string, matchIndex: number, template: string,lines: string[], allNewLines: string[]) {
     const startIndex = getIndexOfLastNewLine(template.substring(0, matchIndex)) + 1;
     const startOfLine = template.substring(startIndex, matchIndex);
@@ -205,6 +223,66 @@ function isSomeLineChanged(match: string, matchIndex: number, template: string,l
     });
 
     return isSomeLineChanged;
+}
+
+interface LineContext {
+    before: string;
+    value: string;
+    after: string;
+}
+
+function getContext(completeString: string, value: string, startIndex: number, lines: number = 5): LineContext {
+    const endIndex = startIndex + value.length;
+
+    let currentStartIndex = startIndex;
+    let linesBeforeLeft = lines;
+
+    while(linesBeforeLeft > 0) {
+        linesBeforeLeft = linesBeforeLeft - 1;
+        currentStartIndex = getIndexOfLastNewLine(completeString.substring(0, currentStartIndex));
+
+        if(currentStartIndex < 0) {
+            linesBeforeLeft = 0;
+            currentStartIndex = 0;
+        }
+    }
+
+    let currentEndIndex = endIndex;
+    let linesAfterLeft = lines;
+
+    while(linesAfterLeft > 0) {
+        linesAfterLeft = linesAfterLeft - 1;
+        currentEndIndex = currentEndIndex + getIndexOfFirstNewLine(completeString.substring(currentEndIndex));
+
+        if(currentEndIndex >= completeString.length) {
+            linesAfterLeft = 0;
+            currentEndIndex = completeString.length;
+        }
+    }
+
+    return {
+        before: completeString.substring(currentStartIndex, startIndex),
+        value: completeString.substring(startIndex, endIndex),
+        after: completeString.substring(endIndex, currentEndIndex)
+    }
+}
+
+async function isAccepted(contextAfter: LineContext, contextBefore: LineContext) {
+    console.log(chalk.underline.white(`
+
+MATCH:`))
+
+    console.log(chalk.gray(contextBefore.before)+chalk.red(contextBefore.value)+chalk.gray(contextBefore.after));
+
+
+    console.log(chalk.underline.white(`
+REPLACEMENT:`))
+
+    console.log(chalk.gray(contextAfter.before)+chalk.green(contextAfter.value)+chalk.gray(contextAfter.after));
+    console.log(`
+`);
+
+    return await promptBoolean(chalk.yellow(`> Accept (y or enter to accept)?`));
 }
 
 /**

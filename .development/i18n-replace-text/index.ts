@@ -1,6 +1,12 @@
 import { replaceAllVueTemplateText } from "./src/replace-text-vue";
 
-replaceAllVueTemplateText({replaceChangesOnly: true});
+
+replaceAllVueTemplateText({doPrompt: true, replaceChangesOnly: true});
+// promptBoolean('Answer y or n?').then(answer => {
+//     console.log(answer)
+// });
+
+// replaceAllVueTemplateText({replaceChangesOnly: true});
 // getChangedFiles('vue').forEach(element => {
 //     console.log(element)
 // });
