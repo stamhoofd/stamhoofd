@@ -40,7 +40,6 @@ Email.recipientLoaders.set(EmailRecipientFilterType.Members, {
 
         }]);
         const q = await GetMembersEndpoint.buildQuery(query);
-        console.log(q.getSQL());
         return await q.count();
     },
 });
