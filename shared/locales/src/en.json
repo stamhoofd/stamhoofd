@@ -774,5 +774,6 @@
   "a9605085-cd44-454d-9386-3dd30206f3bf": "Opgelet, deze beheerders zijn ook niet aangesloten bij #koepel, en zijn dus ook niet verzekerd. Gebruik met mate, bv. om externen toegang te geven voor evenementen.",
   "71b37c1d-7a2d-41c9-a6c0-fcd9c69a2492": "Deze functie is ongeldig omdat {name} niet is ingeschreven. Deze functie zal automatisch verwijderd worden op het einde van de maand.",
   "61d55c53-d63d-49a1-ac0c-806548eb294a": "Dit is een interne beheerder die ook een externe beheerdersol heeft gekregen.",
-  "07290df8-cad5-40df-9e10-3c7eccc049bc": "Voorbeeldleeftijdsgroep"
+  "07290df8-cad5-40df-9e10-3c7eccc049bc": "Voorbeeldleeftijdsgroep",
+  "5d507258-d6dd-4b3b-a6ef-1b14c6db14bc": "Een extra Stripe account naast je eerste Stripe account kost éénmalig 5 euro. Hiermee kan je betalingen per webshop op een andere rekening laten storten door een andere bankrekening te koppelen met je nieuwe account."
 }

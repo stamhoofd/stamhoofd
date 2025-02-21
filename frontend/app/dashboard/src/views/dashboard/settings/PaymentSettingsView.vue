@@ -129,7 +129,7 @@
             </div>
 
             <p class="style-description-small for-input">
-                * Een extra Stripe account naast je eerste Stripe account kost éénmalig 5 euro. Hiermee kan je betalingen per webshop op een andere rekening laten storten door een andere bankrekening te koppelen met je nieuwe account.
+                * {{ $t('5d507258-d6dd-4b3b-a6ef-1b14c6db14bc') }}
             </p>
         </template>
         <template v-if="stripeAccounts.length === 0 || creatingStripeAccount">
