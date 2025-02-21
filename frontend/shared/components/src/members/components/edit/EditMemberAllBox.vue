@@ -32,7 +32,7 @@
 
         <div v-for="category of recordCategories" :key="category.id" class="container">
             <hr>
-            <EditMemberRecordCategoryBox v-bind="$attrs" :member="member" :category="category" :mark-reviewed="true" :level="level + 1" :validator="validator" />
+            <EditMemberRecordCategoryBox v-bind="$attrs" :member="member" :category="category" :level="level + 1" :validator="validator" />
         </div>
 
         <div v-if="app !== 'registration'" class="container">
