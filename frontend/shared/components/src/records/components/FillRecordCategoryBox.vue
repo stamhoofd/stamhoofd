@@ -1,26 +1,32 @@
 <template>
-    <div class="container" v-if="!category.isEnabled(value)">
-        <p class="error-box" v-if="STAMHOOFD.environment === 'development'">
+    <div v-if="!category.isEnabled(value)" class="container">
+        <p v-if="STAMHOOFD.environment === 'development'" class="error-box">
             This category should be invisible. Check if the record categories are filtered using .filter(c => c.isEnabled(value))
         </p>
     </div>
     <div v-else class="container">
-        <component :is="level === 1 ? 'h1' : 'h2'">
-            {{ category.name }}
-            <span v-if="titleSuffix" class="title-suffix">
-                {{ titleSuffix }}
-            </span>
+        <component :is="level === 1 ? 'h1' : 'h2'" class="style-with-button">
+            <div>
+                {{ category.name }}
+                <span v-if="titleSuffix" class="title-suffix">
+                    {{ titleSuffix }}
+                </span>
+            </div>
+            <div>
+                <button v-if="!markReviewed && hasAnswers" v-tooltip="'Wis alle antwoorden'" type="button" class="button icon trash" @click="clearAnswers" />
+            </div>
         </component>
+
         <p v-if="category.description" class="style-description-block pre-wrap" v-text="category.description" />
 
-<STErrorsDefault :error-box="parentErrorBox" />
+        <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
         <slot />
 
         <RecordAnswerInput v-for="record of filteredWriteableRecords" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
         <div v-for="childCategory of childCategories" :key="childCategory.id" class="container">
             <hr>
-            <h2>{{ childCategory.name }}</h2>
+            <h2>{{ level === 1 ? childCategory.name : (category.name + ': ' + childCategory.name) }}</h2>
             <p v-if="childCategory.description" class="style-description pre-wrap" v-text="childCategory.description" />
 
             <RecordAnswerInput v-for="record of childCategory.filterRecords(props.value, filterOptions)" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
@@ -51,6 +57,7 @@ import { useErrors } from '../../errors/useErrors';
 import { useValidation } from '../../errors/useValidation';
 import RecordAnswerInput from '../../inputs/RecordAnswerInput.vue';
 import { ErrorBox } from '../../errors/ErrorBox';
+import { CenteredMessage } from '../../overlays/CenteredMessage';
 
 const props = withDefaults(
     defineProps<{
@@ -60,7 +67,7 @@ const props = withDefaults(
          */
         value: T;
         validator: Validator;
-parentErrorBox?: ErrorBox | null;
+        parentErrorBox?: ErrorBox | null;
         level?: number;
         allOptional?: boolean;
         titleSuffix?: string;
@@ -70,7 +77,7 @@ parentErrorBox?: ErrorBox | null;
         allOptional: false,
         titleSuffix: '',
         forceMarkReviewed: null,
-parentErrorBox: null,
+        parentErrorBox: null,
     },
 );
 const errors = useErrors({ validator: props.validator });
@@ -163,6 +170,29 @@ function doMarkReviewed() {
         patch.set(record.id, answer.patch({
             reviewedAt: new Date(),
         }));
+    }
+
+    addPatch(patch);
+}
+
+const hasAnswers = computed(() => {
+    for (const record of deepFilteredWriteableRecords.value) {
+        const a = answers.value.get(record.id);
+        if (a && !a.isEmpty) {
+            return true;
+        }
+    }
+    return false;
+});
+
+async function clearAnswers() {
+    if (!await CenteredMessage.confirm($t('Ben je zeker dat je alle antwoorden wilt wissen?'), $t('Ja, wissen'))) {
+        return;
+    }
+    const patch = new PatchMap() as PatchAnswers;
+
+    for (const record of deepFilteredWriteableRecords.value) {
+        patch.set(record.id, null);
     }
 
     addPatch(patch);
