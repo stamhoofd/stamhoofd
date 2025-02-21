@@ -343,7 +343,7 @@ onMounted(() => {
     // Make sure the answer (updated one) is inside the recordAnswers
     const existing = props.answers.get(props.record.id);
     const readValue = answer.value;
-    if (existing === undefined || existing !== readValue) {
+    if ((existing === undefined && !props.allOptional) || existing !== readValue) {
         answer.value = readValue;
     }
 });
