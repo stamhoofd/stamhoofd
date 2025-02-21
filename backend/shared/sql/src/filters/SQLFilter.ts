@@ -170,6 +170,7 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
         const n = doNormalizeValue(guardFilterCompareValue(val), options);
         return normalizeValue(n);
     };
+    let convertToExpression = scalarToSQLExpression;
 
     if (isJSONValue) {
         const castJsonType = (expression: SQLExpression, type: SQLValueType | undefined): SQLExpression => {
@@ -188,9 +189,11 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
         };
 
         sqlExpression = castJsonType(sqlExpression, options.type);
+        convertToExpression = (q: SQLScalarValue | null) => {
+            const base = scalarToSQLJSONExpression(q);
+            return castJsonType(base, options.type);
+        };
     }
-
-    const convertToExpression = isJSONValue ? scalarToSQLJSONExpression : scalarToSQLExpression;
 
     return async (filter: StamhoofdFilter, filters: SQLFilterDefinitions) => {
         if (options.checkPermission) {
