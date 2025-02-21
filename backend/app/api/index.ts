@@ -64,17 +64,15 @@ const start = async () => {
 
     const router = new Router();
 
-    const endpointsPromises = [
-        router.loadAllEndpoints(__dirname + '/src/endpoints/global/*'),
-        router.loadAllEndpoints(__dirname + '/src/endpoints/admin/*'),
-        router.loadAllEndpoints(__dirname + '/src/endpoints/auth'),
-        router.loadAllEndpoints(__dirname + '/src/endpoints/organization/dashboard/*'),
-        router.loadAllEndpoints(__dirname + '/src/endpoints/organization/registration'),
-        router.loadAllEndpoints(__dirname + '/src/endpoints/organization/webshops'),
-        router.loadAllEndpoints(__dirname + '/src/endpoints/organization/shared'),
-        router.loadAllEndpoints(__dirname + '/src/endpoints/organization/shared/*'),
-    ];
-    await Promise.all(endpointsPromises);
+    // Note: we should load endpoints one by once to have a reliable order of url matching
+    await router.loadAllEndpoints(__dirname + '/src/endpoints/global/*');
+    await router.loadAllEndpoints(__dirname + '/src/endpoints/admin/*');
+    await router.loadAllEndpoints(__dirname + '/src/endpoints/auth');
+    await router.loadAllEndpoints(__dirname + '/src/endpoints/organization/dashboard/*');
+    await router.loadAllEndpoints(__dirname + '/src/endpoints/organization/registration');
+    await router.loadAllEndpoints(__dirname + '/src/endpoints/organization/webshops');
+    await router.loadAllEndpoints(__dirname + '/src/endpoints/organization/shared');
+    await router.loadAllEndpoints(__dirname + '/src/endpoints/organization/shared/*');
 
     router.endpoints.push(new CORSPreflightEndpoint());
 
