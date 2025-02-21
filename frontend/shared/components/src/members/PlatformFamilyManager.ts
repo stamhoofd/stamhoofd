@@ -202,6 +202,9 @@ export function updateContextFromMembersBlob(context: SessionContext, blob: Memb
             .flatMap(cm => cm.users)
             .find(u => u.id === userId)?.memberId ?? null;
 
+        // Update user blob
+        user.members = blob;
+
         if (userMemberId !== newUserMemberId) {
             context.updateData(true, false, false).catch(console.error);
         }
@@ -221,7 +224,7 @@ export function updateContextFromMembersBlob(context: SessionContext, blob: Memb
         }
 
         const members = blob.members;
-                
+
         // Update group data we received
         const processedGroups = new Set<string>();
         for (const member of members) {
