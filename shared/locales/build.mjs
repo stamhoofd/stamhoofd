@@ -115,7 +115,7 @@ function runReplacements(json) {
     delete json.replacements;
 }
 
-async function build(country, language, namespace, skipFallbackLanguages, skipNamespaces) {
+async function build(country, language, namespace, skipFallbackLanguages, skipNamespaces, skipReplace) {
     const locale = language + '-' + country;
     let json = {};
 
@@ -124,7 +124,16 @@ async function build(country, language, namespace, skipFallbackLanguages, skipNa
             throw new Error('Circular dependency detected: ' + skipNamespaces.join(' -> ') + ' -> ' + namespace);
         }
         // Start with inheriting from the non namespaced version
-        json = mergeObjects(json, await build(country, language, null, skipFallbackLanguages, [...skipNamespaces || [], namespace]));
+        json = mergeObjects(json,
+            await build(
+                country,
+                language,
+                null,
+                skipFallbackLanguages,
+                [...skipNamespaces || [], namespace],
+                true, // do not replace translations from the default namespace
+            ),
+        );
     }
 
     let folder = namespace ? './src/' + namespace : './src';
@@ -137,7 +146,13 @@ async function build(country, language, namespace, skipFallbackLanguages, skipNa
                 throw new Error('Invalid extends in ' + folder + '/base.json');
             }
             for (const extend of specifics.extends) {
-                const extendJson = await build(country, language, extend, skipFallbackLanguages, [...skipNamespaces || [], namespace]);
+                const extendJson = await build(
+                    country,
+                    language,
+                    extend,
+                    skipFallbackLanguages, [...skipNamespaces || [], namespace],
+                    true, // do not replace translations from the extended namespaces
+                );
                 json = mergeObjects(json, extendJson);
             }
         }
@@ -156,7 +171,9 @@ async function build(country, language, namespace, skipFallbackLanguages, skipNa
         json = mergeObjects(json, specifics);
     }
 
-    await runReplacements(json);
+    if (!skipReplace) {
+        await runReplacements(json);
+    }
 
     // If we still have missing translations, fall back to the fallback languages, by only setting missing values
     if (!skipFallbackLanguages) {
@@ -167,7 +184,7 @@ async function build(country, language, namespace, skipFallbackLanguages, skipNa
 
             json = mergeObjects(
                 json,
-                await build(country, fallbackLanguage, namespace, true, skipNamespaces),
+                await build(country, fallbackLanguage, namespace, true, skipNamespaces, skipReplace),
                 true, // missing only
             );
         }
