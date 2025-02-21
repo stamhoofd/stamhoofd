@@ -75,7 +75,7 @@
 
                 <p>Deze beheerders hebben enkel een account en zijn niet aangesloten als lid (of hun account kon niet gekoppeld worden aan een lid omdat ze een onbekend e-mailadres gebruiken).</p>
                 <p class="info-box">
-                    {{ $t('Opgelet, deze beheerders zijn ook niet aangesloten bij #koepel, en zijn dus ook niet verzekerd. Gebruik met mate, bv. om externen toegang te geven voor evenementen.') }}
+                    {{ $t('a9605085-cd44-454d-9386-3dd30206f3bf') }}
                 </p>
 
                 <p v-if="sortedAdmins.length === 0" class="info-box">

@@ -21,7 +21,7 @@
         </p>
 
         <template #right>
-            <span v-if="!hasRegistration" v-tooltip="$t('Deze functie is ongeldig omdat {name} niet is ingeschreven. Deze functie zal automatisch verwijderd worden op het einde van de maand.', {name: member.patchedMember.firstName})" class="icon warning yellow" />
+            <span v-if="!hasRegistration" v-tooltip="$t('71b37c1d-7a2d-41c9-a6c0-fcd9c69a2492', {name: member.patchedMember.firstName})" class="icon warning yellow" />
         </template>
     </STListItem>
 </template>
