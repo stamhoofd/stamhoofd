@@ -5,7 +5,13 @@
         </p>
     </div>
     <div v-else class="container">
-        <component :is="level === 1 ? 'h1' : 'h2'" :class="level === 2 ? 'style-with-button' : undefined">
+        <h1 v-if="level === 1">
+            {{ category.name }}
+            <span v-if="titleSuffix" class="title-suffix">
+                {{ titleSuffix }}
+            </span>
+        </h1>
+        <h2 v-else class="style-with-button">
             <div>
                 {{ category.name }}
                 <span v-if="titleSuffix" class="title-suffix">
@@ -15,7 +21,7 @@
             <div>
                 <button v-if="!markReviewed && hasAnswers" v-tooltip="'Wis alle antwoorden'" type="button" class="button icon trash" @click="clearAnswers" />
             </div>
-        </component>
+        </h2>
 
         <p v-if="category.description" class="style-description-block pre-wrap" v-text="category.description" />
 
@@ -52,11 +58,11 @@ import { PatchMap } from '@simonbackx/simple-encoding';
 import { ObjectWithRecords, PatchAnswers, PermissionLevel, RecordCategory } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAppContext } from '../../context/appContext';
+import { ErrorBox } from '../../errors/ErrorBox';
 import { Validator } from '../../errors/Validator';
 import { useErrors } from '../../errors/useErrors';
 import { useValidation } from '../../errors/useValidation';
 import RecordAnswerInput from '../../inputs/RecordAnswerInput.vue';
-import { ErrorBox } from '../../errors/ErrorBox';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 
 const props = withDefaults(
