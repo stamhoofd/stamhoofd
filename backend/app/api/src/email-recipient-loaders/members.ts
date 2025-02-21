@@ -25,11 +25,22 @@ Email.recipientLoaders.set(EmailRecipientFilterType.Members, {
 
     count: async (query: LimitedFilteredRequest) => {
         query.filter = mergeFilters([query.filter, {
-            email: {
-                $neq: null,
-            },
+            $and: [
+                {
+                    email: {
+                        $neq: null,
+                    },
+                },
+                {
+                    email: {
+                        $neq: '',
+                    },
+                },
+            ],
+
         }]);
         const q = await GetMembersEndpoint.buildQuery(query);
+        console.log(q.getSQL());
         return await q.count();
     },
 });
