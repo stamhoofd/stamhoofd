@@ -40,12 +40,21 @@ export class MemberRecordCategoryStep implements EditMemberStep {
     }
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {
+        // The record category filters can get adjusted due to inheritance. That is why we need to proplery load them
+        const member = manager.member;
+        const enabledCategories = member.getEnabledRecordCategories({
+            scopeOrganization: this.item?.organization,
+            scopeGroup: this.item?.group,
+        });
+
+        const recordCategory = enabledCategories.find(c => c.id === this.recordCategory.id) ?? this.recordCategory;
+
         return new ComponentWithProperties(MemberStepView, {
-            title: this.recordCategory.name,
+            title: recordCategory.name,
             member: manager.member,
             component: markRaw(EditMemberRecordCategoryBox),
             saveText: 'Doorgaan',
-            category: this.recordCategory,
+            category: recordCategory,
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);
             },
