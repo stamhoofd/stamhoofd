@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/crons",
-    "version": "2.77.4",
+    "version": "2.77.5",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "license": "UNLICENCED",
