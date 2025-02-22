@@ -775,5 +775,7 @@
   "71b37c1d-7a2d-41c9-a6c0-fcd9c69a2492": "Deze functie is ongeldig omdat {name} niet is ingeschreven. Deze functie zal automatisch verwijderd worden op het einde van de maand.",
   "61d55c53-d63d-49a1-ac0c-806548eb294a": "Dit is een interne beheerder die ook een externe beheerdersol heeft gekregen.",
   "07290df8-cad5-40df-9e10-3c7eccc049bc": "Voorbeeldleeftijdsgroep",
-  "5d507258-d6dd-4b3b-a6ef-1b14c6db14bc": "Een extra Stripe account naast je eerste Stripe account kost éénmalig 5 euro. Hiermee kan je betalingen per webshop op een andere rekening laten storten door een andere bankrekening te koppelen met je nieuwe account."
+  "5d507258-d6dd-4b3b-a6ef-1b14c6db14bc": "Een extra Stripe account naast je eerste Stripe account kost éénmalig 5 euro. Hiermee kan je betalingen per webshop op een andere rekening laten storten door een andere bankrekening te koppelen met je nieuwe account.",
+  "e977e290-dff3-401c-a520-0a5e8abac1e1": "Ben je zeker dat je alle antwoorden wilt wissen?",
+  "587c7b87-b79e-4f3c-a55e-9fc8331d86c6": "Ja, wissen"
 }

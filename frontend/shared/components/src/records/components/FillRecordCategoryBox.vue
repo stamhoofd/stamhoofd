@@ -192,7 +192,7 @@ const hasAnswers = computed(() => {
 });
 
 async function clearAnswers() {
-    if (!await CenteredMessage.confirm($t('Ben je zeker dat je alle antwoorden wilt wissen?'), $t('Ja, wissen'))) {
+    if (!await CenteredMessage.confirm($t('e977e290-dff3-401c-a520-0a5e8abac1e1'), $t('587c7b87-b79e-4f3c-a55e-9fc8331d86c6'))) {
         return;
     }
     const patch = new PatchMap() as PatchAnswers;
