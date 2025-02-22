@@ -33,7 +33,6 @@ export const MembershipCharger = {
         while (true) {
             const memberships = await MemberPlatformMembership.select()
                 .where('id', SQLWhereSign.Greater, lastId)
-                .where('balanceItemId', null)
                 .where('deletedAt', null)
                 .where('locked', false)
                 .where(SQL.where('trialUntil', null).or('trialUntil', SQLWhereSign.LessEqual, new Date()))
@@ -57,6 +56,11 @@ export const MembershipCharger = {
             for (const membership of memberships) {
                 // charge
                 if (membership.balanceItemId) {
+                    if (!membership.locked) {
+                        // Lock this membership
+                        membership.locked = true;
+                        await membership.save();
+                    }
                     continue;
                 }
 
