@@ -471,7 +471,7 @@
             </JumpToContainer>
 
             <template v-if="$feature('member-trials')">
-                <template v-if="patched.type === GroupType.Membership">
+                <template v-if="patched.type === GroupType.Membership && (!defaultMembershipConfig || defaultMembershipConfig.trialDays)">
                     <hr>
                     <h2>{{ $t('8265d9e0-32c1-453c-ab2f-d31f1eb244c3') }}</h2>
                     <p>{{ $t('89a760d7-8995-458c-9635-da104971e95c') }}</p>
@@ -1253,7 +1253,7 @@ function getAgeGroupSelectionText(ageGroup: DefaultAgeGroup) {
     return text;
 }
 
-const getRegisterItemFilterBuilders = useRegisterItemFilterBuilders()
+const getRegisterItemFilterBuilders = useRegisterItemFilterBuilders();
 
 const recordEditorSettings = new RecordEditorSettings({
     type: RecordEditorType.Registration,
@@ -1262,15 +1262,15 @@ const recordEditorSettings = new RecordEditorSettings({
     filterBuilder: (recordCategories: RecordCategory[]) => {
         return getRegisterItemFilterBuilders(patched.value.patch({
             settings: GroupSettings.patch({
-                recordCategories: recordCategories as any
-            })
+                recordCategories: recordCategories as any,
+            }),
         }))[0];
     },
     exampleValue: Registration.create({
         group: patched.value,
         groupPrice: patched.value.settings.prices[0],
         organizationId: patched.value.organizationId,
-    })
+    }),
 });
 
 defineExpose({
