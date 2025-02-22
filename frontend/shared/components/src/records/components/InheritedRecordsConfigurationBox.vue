@@ -26,7 +26,7 @@
                 <Checkbox v-model="property.value.enabled" v-tooltip="property.value.locked ? 'Verplicht op een hoger niveau' : ''" :disabled="property.value.locked" />
             </template>
 
-            <p v-if="property.value.configuration" class="style-title-prefix-list">
+            <p v-if="property.value.configuration && property.value.configuration !== true" class="style-title-prefix-list">
                 {{ propertyFilterToString(property.value.configuration, filterBuilder) }}
             </p>
 
@@ -37,7 +37,7 @@
                 {{ property.value.description }}
             </p>
 
-            <p v-if="!groupLevel && property.value.configuration && property.value.configuration.isAlwaysEnabledAndRequired && property.value.options?.preventAlways" class="error-box">
+            <p v-if="!groupLevel && property.value.configuration && property.value.configuration !== true && property.value.configuration.isAlwaysEnabledAndRequired && property.value.options?.preventAlways" class="error-box">
                 {{ property.value.options?.warning ?? 'Dit werd onjuist ingesteld' }}
             </p>
 
