@@ -245,6 +245,7 @@ const patchRecordsConfiguration = (recordsConfiguration: AutoEncoderPatchType<Or
 const inheritedRecordsConfiguration = computed(() => {
     return OrganizationRecordsConfiguration.build({
         platform: platform.value,
+        forceDefaultAgeGroup: true,
     });
 });
 

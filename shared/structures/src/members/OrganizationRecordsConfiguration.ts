@@ -219,13 +219,19 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
         group?: Group | null;
 
         /**
+         * When configuring default age groups, this has to be set to true so the platform record categories
+         * that are enabled by default for default age groups, are not disabled
+         */
+        forceDefaultAgeGroup?: boolean;
+
+        /**
          * Whether the group itself should be included
          */
         includeGroup?: boolean;
     }) {
         // If not a default-age-group: disable enabled record categories in platform
         const platformConfig = options.platform.config.recordsConfiguration.clone();
-        if (!options.group || !options.group.defaultAgeGroupId) {
+        if ((!options.group || !options.group.defaultAgeGroupId) && !options.forceDefaultAgeGroup) {
             for (const c of platformConfig.recordCategories) {
                 c.defaultEnabled = false;
             }
@@ -246,7 +252,9 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
             }
 
             if (options.group && options.group.type === GroupType.WaitingList) {
-                // Disable default organization - BUT still keep the record categories (to know which ones are available)
+                // All fields are disabled by default, but can be enabled in the settings of the group
+                // We still keep all the record categories (defaultEnabled already has been set to false)
+                // so they can be enabled again in the group
                 organizationConfig = OrganizationRecordsConfiguration.create({
                     recordCategories: organizationConfig.recordCategories,
                 });
