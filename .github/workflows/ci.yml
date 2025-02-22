@@ -40,12 +40,16 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
-      - name: 'Install MySQL'
-        uses: mirromutth/mysql-action@v1.1
+      - name: Shutdown MySQL
+        run: sudo service mysql stop
+
+      - uses: daniellockyer/mysql-action@main
         with:
+          authentication plugin: 'mysql_native_password'
           mysql version: '8.0'
-          mysql database: 'stamhoofd'
-          mysql root password: "root"
+          mysql database: 'root'
+          mysql root password: 'root'
+
       - name: Install dependencies
         run: yarn install --prefer-offline --frozen-lockfile
       - name: Build shared packages
@@ -53,7 +57,7 @@ jobs:
       - name: Set test env
         run: cp backend/app/api/.env.ci.json backend/app/api/.env.test.json
       - name: Run tests
-        run: cd backend/app/api && yarn test
+        run: cd backend/app/api && yarn build && yarn test
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
         if: ${{ failure() }}
