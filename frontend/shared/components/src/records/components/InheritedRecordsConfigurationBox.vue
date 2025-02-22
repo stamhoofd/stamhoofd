@@ -26,7 +26,7 @@
                 <Checkbox v-model="property.value.enabled" v-tooltip="property.value.locked ? 'Verplicht op een hoger niveau' : ''" :disabled="property.value.locked" />
             </template>
 
-            <p v-if="property.value.configuration && property.value.configuration !== true" class="style-title-prefix-list">
+            <p v-if="property.value.configuration" class="style-title-prefix-list">
                 {{ propertyFilterToString(property.value.configuration, filterBuilder) }}
             </p>
 
@@ -37,7 +37,7 @@
                 {{ property.value.description }}
             </p>
 
-            <p v-if="!groupLevel && property.value.configuration && property.value.configuration !== true && property.value.configuration.isAlwaysEnabledAndRequired && property.value.options?.preventAlways" class="error-box">
+            <p v-if="!groupLevel && property.value.configuration && property.value.configuration.isAlwaysEnabledAndRequired && property.value.options?.preventAlways" class="error-box">
                 {{ property.value.options?.warning ?? 'Dit werd onjuist ingesteld' }}
             </p>
 
@@ -71,7 +71,7 @@ import { PatchMap } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { NavigationActions, PropertyFilterView, Toast, memberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, useEmitPatch, useFinancialSupportSettings, useOrganization } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { BooleanStatus, MemberDetails, MemberProperty, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, PatchAnswers, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
+import { BooleanStatus, MemberDetails, MemberPropertyWithFilter, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, PatchAnswers, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref, watchEffect } from 'vue';
 import FillRecordCategoryView from '../FillRecordCategoryView.vue';
 import { RecordEditorSettings, RecordEditorType } from '../RecordEditorSettings';
@@ -201,7 +201,7 @@ const financialSupport = {
 };
 
 // Methods
-function buildPropertyRefs(property: MemberProperty, title: string, options?: { warning?: string; description?: string; preventAlways?: boolean }) {
+function buildPropertyRefs(property: MemberPropertyWithFilter, title: string, options?: { warning?: string; description?: string; preventAlways?: boolean }) {
     const locked = computed(() => !!props.inheritedRecordsConfiguration?.[property] && !patched.value[property]);
     const enabled = computed({
         get: () => !!getFilterConfiguration(property),
@@ -229,11 +229,11 @@ function buildPropertyRefs(property: MemberProperty, title: string, options?: { 
     });
 }
 
-function getFilterConfiguration(property: MemberProperty): PropertyFilter | null | boolean {
+function getFilterConfiguration(property: MemberPropertyWithFilter): PropertyFilter | null {
     return props.inheritedRecordsConfiguration?.[property] ?? patched.value[property];
 }
 
-function setEnableProperty(property: MemberProperty, enable: boolean) {
+function setEnableProperty(property: MemberPropertyWithFilter, enable: boolean) {
     if (props.inheritedRecordsConfiguration?.[property]) {
         return;
     }
@@ -252,7 +252,7 @@ function setEnableProperty(property: MemberProperty, enable: boolean) {
     }
 }
 
-async function editPropertyFilterConfiguration(property: MemberProperty, title: string, options?: { warning?: string; description?: string }) {
+async function editPropertyFilterConfiguration(property: MemberPropertyWithFilter, title: string, options?: { warning?: string; description?: string }) {
     await present({
         components: [
             new ComponentWithProperties(PropertyFilterView, {
