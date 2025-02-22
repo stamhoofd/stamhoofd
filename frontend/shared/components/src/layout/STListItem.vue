@@ -55,7 +55,7 @@ export default class STListItem extends VueComponent {
     }
 
     get hoverable() {
-        return this.dynamicElementName === 'button';
+        return this.dynamicElementName === 'button' || this.dynamicElementName === 'label';
     }
 
     onClick(event) {
@@ -369,21 +369,13 @@ button.st-list-item {
             transition: opacity 0.4s 0.1s;
         }
 
-        @at-root {
-            label#{&} {
-                &:before {
-                    background: $color-primary-lighter;
-                }
-            }
-        }
-
         &.hoverable:hover {
             &:after {
                 opacity: 1;
                 transition: none;
             }
 
-            &:has(button:hover), &:has(select:hover), &:has(input:hover), &:has(label:hover) {
+            &:has(button:hover), &:has(select:hover), &:has(textarea:hover), &:has(input:not([type=radio]):not([type=checkbox]):hover), &:has(label:hover), &:has(.input:hover) {
                 // Skip hover
                 &:after {
                     opacity: 0;
@@ -397,7 +389,7 @@ button.st-list-item {
                 transition: none;
             }
 
-            &:has(button:active), &:has(select:active), &:has(label:active), &:has(textarea:active), &:has(input:not([type=radio]):not([type=checkbox]):active) {
+            &:has(button:active), &:has(select:active), &:has(label:active), &:has(textarea:active), &:has(input:not([type=radio]):not([type=checkbox]):active), &:has(.input:active) {
                 &:before {
                     opacity: 0;
                 }
