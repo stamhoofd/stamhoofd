@@ -18,7 +18,7 @@ if (typeof self === 'object') {
 
 // Latest version of the structures
 export { Version } from './src/Version.js';
-syntax error here
+
 export * from './src/PriceBreakdown.js';
 
 // General
