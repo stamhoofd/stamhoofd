@@ -20,7 +20,7 @@ type TranslationValue =
 function replaceKeysWithUuidInTranslations(
     translationsWithPath: Map<string, Record<string, string>>,
 ) {
-    const keysToSkip = ["replacements"];
+    const keysToSkip = ["replacements", "extends"];
     // oldKey, newKey
     const replacedKeys = new Map<string, string>();
 

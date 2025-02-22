@@ -186,11 +186,7 @@ The possible language / country combinations are not restricted. E.g. en-NL is s
 Translations are resolved in the following order: en-NL > en. So translations from a specific language + country combination are used before the translation for a given language. Try to define most translations only in the language.json file, only  country specific translations should be placed in the full locale files.
 
 The keys of the translations are uuids. A new translation can be added by writing $t('new translation value') in a .vue or .ts file. Running `yarn translate` from the root will add the translation to the shared/locales .json files (of the main locales) and will replace the key with a new uuid. The main locales are specified in the `.env` folder of the i18n-uuid package in the .development directory. The .env file in the i18n-uuid directory should contain all required variables (see `.env.template`):
-- `I18NUUID_ROOT`: path to the root of the project
-- `I18NUUID_LOCALES_DIR`: path to the directory containing the translations
 - `I18NUUID_DEFAULT_LOCALE`: default locale (e.g. nl)
-- `I18NUUID_OTHER_MAIN_LOCALES_ARRAY`: other main locales separated by commas (e.g. en,fr)
-- `I18NUUID_EXCLUDE_DIRS_ARRAY`: directories to ignore separated by commas (e.g. dist,esm,node_modules)
 
 # License
 
