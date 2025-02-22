@@ -15,10 +15,8 @@
             </template>
             <p class="style-title-list">
                 {{ financialSupportSettings.title }}
+                <span v-tooltip="'Vereist toestemming voor gegevensverzameling'" class="gray small icon privacy" />
             </p>
-            <template #right>
-                <span v-tooltip="'Vereist toestemming voor gegevensverzameling'" class="gray icon privacy" />
-            </template>
         </STListItem>
 
         <STListItem v-for="property of properties" :key="property.value.title" element-name="label" :selectable="!property.value.locked">
@@ -56,9 +54,9 @@
             </p>
             <p class="style-title-list">
                 {{ getRefForInheritedCategory(category.id).value.title }}
+                <span v-if="getRefForInheritedCategory(category.id).value.requiresDataPermissions" v-tooltip="'Vereist toestemming voor gegevensverzameling'" class="gray icon privacy small" />
             </p>
             <template #right>
-                <span v-if="getRefForInheritedCategory(category.id).value.requiresDataPermissions" v-tooltip="'Vereist toestemming voor gegevensverzameling'" class="gray icon privacy" />
                 <button class="button gray icon eye" type="button" @click.stop="previewCategory(category)" />
                 <button v-if="!getRefForInheritedCategory(category.id).value.locked && getRefForInheritedCategory(category.id).value.enabled" class="button gray icon settings" type="button" @click.stop="getRefForInheritedCategory(category.id).value.edit" />
             </template>
