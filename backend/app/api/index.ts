@@ -30,7 +30,7 @@ process.on('unhandledRejection', (error: Error) => {
 // Set version of saved structures
 Column.setJSONVersion(Version);
 
-// Set timezone!
+// Set timezone
 process.env.TZ = 'UTC';
 
 // Quick check
