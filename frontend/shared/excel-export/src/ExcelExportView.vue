@@ -52,7 +52,7 @@
 import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, ScrollableSegmentedControl, Toast, ToastButton, useContext, useErrors } from '@stamhoofd/components';
-import { Storage } from '@stamhoofd/networking';
+import { AppManager, Storage } from '@stamhoofd/networking';
 import { ExcelExportRequest, ExcelExportResponse, ExcelExportType, ExcelWorkbookFilter, LimitedFilteredRequest, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, ref } from 'vue';
@@ -169,12 +169,13 @@ async function doExport() {
         });
 
         if (response.data.url) {
+            const url = new URL(response.data.url);
             const filename = Formatter.fileSlug(props.type) + '.xlsx';
             new Toast('Jouw bestand is klaar, download het hier', 'download')
                 .setButton(
-                    new ToastButton('Downloaden')
-                        .setHref(response.data.url)
-                        .setDownload(filename),
+                    new ToastButton('Downloaden', async () => {
+                        await AppManager.shared.downloadFile(url, filename);
+                    })
                 )
                 .setHide(null)
                 .setForceButtonClick()

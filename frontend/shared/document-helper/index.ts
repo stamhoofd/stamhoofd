@@ -1,11 +1,11 @@
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { Toast } from '@stamhoofd/components';
-import { NetworkManager, SessionContext } from '@stamhoofd/networking';
+import { AppManager, NetworkManager, SessionContext } from '@stamhoofd/networking';
 import { Document } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-export async function getDocumentPdfBuffer($context: SessionContext, document: Document, owner?: any): Promise<Buffer> {
+export async function getDocumentPdfBlob($context: SessionContext, document: Document, owner?: any): Promise<Blob> {
     const cacheId = 'document-' + document.id;
     const timestamp = document.updatedAt.getTime();
 
@@ -23,7 +23,7 @@ export async function getDocumentPdfBuffer($context: SessionContext, document: D
             owner,
             responseType: 'blob',
         });
-        return cachedResponse.data as Buffer;
+        return cachedResponse.data as Blob;
     }
     catch (e) {
         if (Request.isAbortError(e)) {
@@ -76,22 +76,14 @@ export async function getDocumentPdfBuffer($context: SessionContext, document: D
         responseType: 'blob',
     });
 
-    return pdfResponse.data as Buffer;
+    return pdfResponse.data as Blob;
 }
 
 export async function downloadDocument($context: SessionContext, document: Document, owner?: any) {
     try {
-        const buffer = await getDocumentPdfBuffer($context, document, owner);
-
-        /* if (STAMHOOFD.environment === 'development') {
-            // Open html in new tab
-            const blob = new Blob([buffer], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            window.open(url);
-            return;
-        } */
-        const saveAs = (await import(/* webpackChunkName: "file-saver" */ 'file-saver')).default.saveAs;
-        saveAs(buffer, Formatter.fileSlug(document.data.name + ' - ' + document.data.description) + '.pdf');
+        const blob = await getDocumentPdfBlob($context, document, owner);
+        const filename = Formatter.fileSlug(document.data.name + ' - ' + document.data.description) + '.pdf';
+        await AppManager.shared.downloadFile(blob, filename);
     }
     catch (e) {
         if (!Request.isAbortError(e)) {
@@ -113,7 +105,6 @@ export async function downloadDocuments($context: SessionContext, documents: Doc
     try {
         pendingToast = new Toast('Documenten downloaden...', 'spinner').setProgress(0).setHide(null).show();
         const JSZip = (await import(/* webpackChunkName: "jszip" */ 'jszip')).default;
-        const saveAs = (await import(/* webpackChunkName: "file-saver" */ 'file-saver')).default.saveAs;
         const zip = new JSZip();
 
         const entries = documents.entries();
@@ -121,7 +112,7 @@ export async function downloadDocuments($context: SessionContext, documents: Doc
 
         const promises = new Array(maxConcurrency).fill(0).map(async () => {
             for (const [index, document] of entries) {
-                const buffer = await getDocumentPdfBuffer($context, document, owner);
+                const buffer = await getDocumentPdfBlob($context, document, owner);
                 zip.file(Formatter.fileSlug(document.id + ' - ' + document.data.name + ' - ' + document.data.description) + '.pdf', buffer);
                 pendingToast?.setProgress((index + 1) / documents.length);
             }
@@ -132,7 +123,7 @@ export async function downloadDocuments($context: SessionContext, documents: Doc
         pendingToast?.hide();
         pendingToast = new Toast('Documenten bundelen in een .zip...', 'spinner').setHide(null).show();
         const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
-        saveAs(blob, 'documenten.zip');
+        await AppManager.shared.downloadFile(blob, 'documenten.zip');
         pendingToast?.hide();
     }
     catch (e) {

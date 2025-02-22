@@ -148,8 +148,9 @@
                         <span v-if="document.status === 'MissingData'" class="style-tag error">Onvolledig</span>
 
                         <template #right>
-                            <Spinner v-if="isDocumentDownloading(document)" class="gray" />
-                            <span v-else class="icon download gray" />
+                            <LoadingButton :loading="isDocumentDownloading(document)">
+                                <span class="icon download gray" />
+                            </LoadingButton>
                         </template>
                     </STListItem>
                 </STList>
@@ -165,7 +166,7 @@ import { downloadDocument } from '@stamhoofd/document-helper';
 import { useMemberManager, useRequestOwner } from '@stamhoofd/networking';
 import { Document, DocumentStatus, GroupType, PlatformMember } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 enum Routes {
     RegisterMembers = 'registerMembers',
@@ -265,7 +266,7 @@ async function addNewMember() {
     });
 }
 
-let downloadingDocuments: Document[] = [];
+const downloadingDocuments = ref([] as Document[]);
 
 async function onDownloadDocument(document: Document) {
     if (isDocumentDownloading(document)) {
@@ -276,17 +277,17 @@ async function onDownloadDocument(document: Document) {
         new Toast('Dit document kan niet gedownload worden omdat er nog gegevens ontbreken of ongeldig zijn. Kijk alle gegevens van ' + (member?.member.firstName ?? 'dit lid') + ' na en contacteer ons indien het probleem nog niet is verholpen.', 'error red').setHide(20000).show();
         return;
     }
-    downloadingDocuments.push(document);
+    downloadingDocuments.value.push(document);
     try {
         await downloadDocument(context.value, document, requestOwner);
     }
     catch (e) {
         console.error(e);
     }
-    downloadingDocuments = downloadingDocuments.filter(d => d.id !== document.id);
+    downloadingDocuments.value = downloadingDocuments.value.filter(d => d.id !== document.id);
 }
 
 function isDocumentDownloading(document: Document) {
-    return !!downloadingDocuments.find(d => d.id === document.id);
+    return !!downloadingDocuments.value.find(d => d.id === document.id);
 }
 </script>

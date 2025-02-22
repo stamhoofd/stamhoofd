@@ -135,7 +135,7 @@ import { DocumentSettings, DocumentStatus, DocumentTemplatePrivate, PatchAnswers
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref } from 'vue';
 
-import { useRequestOwner } from '@stamhoofd/networking';
+import { AppManager, useRequestOwner } from '@stamhoofd/networking';
 import DocumentsView from './DocumentsView.vue';
 import EditDocumentTemplateView from './EditDocumentTemplateView.vue';
 
@@ -319,9 +319,8 @@ async function generateXML(): Promise<Blob> {
 
 async function downloadXml() {
     try {
-        const buffer = await generateXML();
-        const saveAs = (await import(/* webpackChunkName: "file-saver" */ 'file-saver')).default.saveAs;
-        saveAs(buffer, Formatter.fileSlug(props.template.settings.name) + '.xml');
+        const blob = await generateXML();
+        AppManager.shared.downloadFile(blob, Formatter.fileSlug(props.template.settings.name) + '.xml');
     }
     catch (e: any) {
         if (!Request.isAbortError(e as Error)) {

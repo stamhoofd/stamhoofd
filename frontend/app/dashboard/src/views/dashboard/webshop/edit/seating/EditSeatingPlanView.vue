@@ -137,6 +137,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import EditSeatingPlanCategoryView from './EditSeatingPlanCategoryView.vue';
 import EditSeatingPlanSectionBox from './EditSeatingPlanSectionBox.vue';
+import { AppManager } from '@stamhoofd/networking';
 
 const props = defineProps<{
     isNew: boolean;
@@ -282,11 +283,10 @@ async function downloadSettings() {
 
         // Zip the file
         const JSZip = (await import(/* webpackChunkName: "jszip" */ 'jszip')).default;
-        const saveAs = (await import(/* webpackChunkName: "file-saver" */ 'file-saver')).default.saveAs;
         const zip = new JSZip();
         zip.file('plan.json', blob);
         const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
-        saveAs(zipBlob, Formatter.fileSlug(patchedSeatingPlan.value.name) + '.plan');
+        await AppManager.shared.downloadFile(zipBlob, Formatter.fileSlug(patchedSeatingPlan.value.name) + '.plan');
     }
     catch (e) {
         console.error(e);

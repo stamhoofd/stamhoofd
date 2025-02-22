@@ -239,31 +239,49 @@ window.addEventListener('statusTap', () => {
     }
 });
 
+function blobToBase64(blob: Blob | File): Promise<string> {
+    return new Promise((resolve, _) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+    });
+}
+
 // Download File
-AppManager.shared.downloadFile = async (data: any, filename: string) => {
+AppManager.shared.downloadFile = async (data: Blob | File | URL, filename: string) => {
     const { publicStorage } = await Filesystem.checkPermissions();
     if (!publicStorage) {
         throw new Error('Geen toegang tot bestanden. Wijzig de toestemmingen van de app om bestanden te kunnen opslaan.');
     }
 
     // TODO: automatically encode data to base64 in case of buffer
+    let url: string;
 
-    const result = await Filesystem.writeFile({
-        path: filename,
-        data,
-        directory: Directory.External,
-        // encoding: Encoding.UTF8, // if not present: data should be base64 encoded
-    });
+    if (data instanceof URL) {
+        url = data.href;
+    }
+    else {
+        // Convert data to a string
+        const base64String = await blobToBase64(data); // capacitor plugin will automatically remove the 'data:image/png;base64,' prefix
+
+        const result = await Filesystem.writeFile({
+            path: filename,
+            data: base64String,
+            directory: Directory.External,
+            // encoding: Encoding.UTF8, // if not present: data should be base64 encoded
+        });
+        url = result.uri;
+    }
 
     try {
         if (Capacitor.getPlatform() === 'ios') {
             await Share.share({
                 dialogTitle: filename,
-                url: result.uri,
+                url,
             });
         }
         else {
-            await FileOpener.open({ url: result.uri });
+            await FileOpener.open({ url });
         }
     }
     catch (e) {

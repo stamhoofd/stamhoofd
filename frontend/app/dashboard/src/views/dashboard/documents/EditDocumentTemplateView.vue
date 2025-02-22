@@ -137,7 +137,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, AutoEncoder, Decoder, PatchableArray, PatchableArrayAutoEncoder, PatchMap } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder, PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, Checkbox, CheckboxListItem, Dropdown, ErrorBox, FillRecordCategoryView, LoadingButton, MultiSelectInput, NavigationActions, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, useAuth, useContext, useErrors, usePatch, useRequiredOrganization } from '@stamhoofd/components';
@@ -869,19 +869,13 @@ async function save() {
     saving.value = false;
 }
 
-function cloneMap<K, T extends AutoEncoder>(map: Map<K, T>): Map<K, T> {
-    return new Map([...map.entries()]
-        .map(([key, value]) => [key, value.clone()]));
-}
-
 defineExpose({
     shouldNavigateAway,
 });
 
 async function downloadHtml() {
-    const saveAs = (await import('file-saver')).default.saveAs;
-    const blob = new Blob([patchedDocument.value.html], { type: 'pplication/octet-stream' });
-    saveAs(blob, Formatter.fileSlug(editingType.value ?? 'unknown') + '.html');
+    const blob = new Blob([patchedDocument.value.html], { type: 'text/html' });
+    await AppManager.shared.downloadFile(blob, Formatter.fileSlug(editingType.value ?? 'unknown') + '.html');
 }
 
 async function changedFile(event: InputEvent & { target: HTMLInputElement & { files: FileList } }) {

@@ -6,7 +6,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { type App } from 'vue';
 
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
-import { Checkbox, CopyableDirective, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, SaveView, STList, STToolbar, TooltipDirective, useAppContext } from '..';
+import { Checkbox, CopyableDirective, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, SaveView, Spinner, STList, STToolbar, TooltipDirective, useAppContext } from '..';
 import PromiseView from './containers/PromiseView.vue';
 import { ColorDirective } from './directives/ColorDirective';
 import { FormatInputDirective } from './directives/FormatInputDirective';
@@ -119,6 +119,7 @@ export class VueGlobalHelper {
         app.component('LoadingView', LoadingView);
         app.component('LoadingButton', LoadingButton);
         app.component('STToolbar', STToolbar);
+        app.component('Spinner', Spinner);
 
         document.addEventListener('keydown', (event) => {
             const element = event.target as HTMLInputElement;

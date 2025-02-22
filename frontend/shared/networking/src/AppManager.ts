@@ -91,7 +91,7 @@ export class AppManager {
         // No default implementation
     };
 
-    downloadFile: ((data: any, filename: string) => Promise<void>) | null = null;
+    downloadFile: (data: Blob | File | URL, filename: string) => Promise<void>;
 
     // Optional: if the current platform ahs a native scanner (see QRScannerPlugin in mobile frontend), this pluging will get instered here
     QRScanner?: QRScannerPlugin;
@@ -143,5 +143,12 @@ export class AppManager {
         }
 
         return 'unknown';
+    }
+
+    constructor() {
+        this.downloadFile = async (data: Blob | File | URL, filename: string) => {
+            const saveAs = (await import('file-saver')).default.saveAs;
+            saveAs(data instanceof URL ? data.href : data, filename);
+        };
     }
 }
