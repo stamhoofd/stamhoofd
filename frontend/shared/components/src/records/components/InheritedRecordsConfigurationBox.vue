@@ -50,11 +50,12 @@
             <template #left>
                 <Checkbox v-model="getRefForInheritedCategory(category.id).value.enabled" v-tooltip="getRefForInheritedCategory(category.id).value.locked ? 'Verplicht op een hoger niveau' : ''" :disabled="getRefForInheritedCategory(category.id).value.locked" />
             </template>
+
+            <p v-if="getRefForInheritedCategory(category.id).value.configuration" class="style-title-prefix-list">
+                {{ propertyFilterToString(getRefForInheritedCategory(category.id).value.configuration!, filterBuilder) }}
+            </p>
             <p class="style-title-list">
                 {{ getRefForInheritedCategory(category.id).value.title }}
-            </p>
-            <p v-if="getRefForInheritedCategory(category.id).value.configuration" class="style-description-small">
-                {{ propertyFilterToString(getRefForInheritedCategory(category.id).value.configuration!, filterBuilder) }}
             </p>
             <template #right>
                 <span v-if="getRefForInheritedCategory(category.id).value.requiresDataPermissions" v-tooltip="'Vereist toestemming voor gegevensverzameling'" class="gray icon privacy" />
@@ -315,7 +316,7 @@ function buildRefForInheritedCategory(categoryId: string) {
             });
         },
     });
-    const configuration = computed(() => patched.value.inheritedRecordCategories.get(categoryId) ?? category.value?.filter ?? null);
+    const configuration = computed(() => enabled.value ? (patched.value.inheritedRecordCategories.get(categoryId) ?? category.value?.filter ?? PropertyFilter.createDefault()) : null);
 
     return ref({
         title: category.value?.name ?? 'Naamloos',
