@@ -5,7 +5,7 @@
                 Doorverwijzen...
             </h1>
 
-            <p>Bezig met doorverwijzen naar</p>
+            <p>Bezig met doorverwijzen</p>
         </main>
     </div>
 </template>
