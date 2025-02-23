@@ -105,6 +105,10 @@ export class SessionContext implements RequestMiddleware {
         return this._auth;
     }
 
+    clearAuthCache() {
+        this._auth = null;
+    }
+
     static async createFrom(data: ({ organization: Organization } | { organizationId: string })) {
         let organization: Organization;
         if ('organizationId' in data) {
@@ -637,6 +641,7 @@ export class SessionContext implements RequestMiddleware {
     updateOrganization(organization: Organization) {
         if (!this.organization) {
             this.setOrganization(organization);
+            this.clearAuthCache();
         }
         else {
             const oldAdmins = this.organization.admins;
@@ -646,6 +651,7 @@ export class SessionContext implements RequestMiddleware {
             if (oldAdmins && !this.organization.admins) {
                 this.organization.admins = oldAdmins;
             }
+            this.clearAuthCache();
             this.callListeners('organization');
         }
     }
