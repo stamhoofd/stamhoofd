@@ -8784,6 +8784,13 @@ jest-config@^29.7.0:
     slash "^3.0.0"
     strip-json-comments "^3.1.1"
 
+jest-console-group-reporter@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/jest-console-group-reporter/-/jest-console-group-reporter-1.1.1.tgz#d5c2fe5202822402ad16d37874723e0dbd21ac91"
+  integrity sha512-P7QPuRAh0cD2GEsofjH5YvGb3+QUmSIpZU8Hfkpwd4HEDa/ux5UC2zWRwhaCW2d82pok3kwqVuxgF9GH7qb+xg==
+  dependencies:
+    chalk "^4.0.0"
+
 "jest-diff@>=29.4.3 < 30", jest-diff@^29.4.1, jest-diff@^29.7.0:
   version "29.7.0"
   resolved "https://registry.npmjs.org/jest-diff/-/jest-diff-29.7.0.tgz"
