@@ -634,12 +634,9 @@ export class MemberDetails extends AutoEncoder {
      * This will add or update the parent (possibily partially if not all data is present)
      */
     addParent(parent: Parent) {
-        console.log('adding parent to ', this.name);
-
         // Multiple loops to mangage priority
         for (const [index, _parent] of this.parents.entries()) {
             if (_parent.id == parent.id) {
-                console.log('Merging parent on id', index, parent);
                 this.parents[index].merge(parent);
                 return;
             }
@@ -652,7 +649,6 @@ export class MemberDetails extends AutoEncoder {
 
             if (_parent.name && parent.name) {
                 if (StringCompare.typoCount(_parent.name, parent.name) === 0) {
-                    console.log('Merging parent on name', index, parent);
                     this.parents[index].merge(parent);
                     return;
                 }
@@ -662,7 +658,6 @@ export class MemberDetails extends AutoEncoder {
         for (const [index, _parent] of this.parents.entries()) {
             if (_parent.name && parent.name) {
                 if (StringCompare.typoCount(_parent.name, parent.name) < 2) {
-                    console.log('Merging parent on name typo', index, parent);
                     this.parents[index].merge(parent);
                     return;
                 }
@@ -674,14 +669,12 @@ export class MemberDetails extends AutoEncoder {
                 if (_parent.email && parent.email) {
                     // Compare on email address
                     if (_parent.email == parent.email) {
-                        console.log('Merging parent on email', index, parent);
                         this.parents[index].merge(parent);
                         return;
                     }
                 }
                 if (_parent.phone && parent.phone) {
                     if (_parent.phone == parent.phone) {
-                        console.log('Merging parent on phone', index, parent);
                         this.parents[index].merge(parent);
                         return;
                     }
