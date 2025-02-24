@@ -707,7 +707,6 @@ export class MemberDetails extends AutoEncoder {
      * Apply newer details without deleting data or replacing filled in data with empty data
      */
     merge(other: MemberDetails) {
-        console.log('merge member details', this, other);
         if (other.firstName.length > 0) {
             this.firstName = other.firstName;
         }
