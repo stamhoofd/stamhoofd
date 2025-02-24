@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import { GroupFactory, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
-import { Group, GroupGenderType, GroupPatch, GroupPrivateSettings, GroupSettings, GroupSettingsPatch, Organization, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
+import { Group, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupSettingsPatch, Organization, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
 
 import { testServer } from '../../../../../tests/helpers/TestServer';
 import { PatchOrganizationEndpoint } from './PatchOrganizationEndpoint';
@@ -95,7 +95,7 @@ describe('Endpoint.PatchOrganization', () => {
             const token = await Token.createToken(user);
 
             const changes = new PatchableArray<string, Group, AutoEncoderPatchType<Group>>();
-            changes.addPatch(GroupPatch.create({
+            changes.addPatch(Group.patch({
                 id: groups[0].id,
                 settings: GroupSettingsPatch.create({
                     name: 'My crazy group name',
@@ -171,7 +171,7 @@ describe('Endpoint.PatchOrganization', () => {
             const token = await Token.createToken(user);
 
             const changes = new PatchableArray<string, Group, AutoEncoderPatchType<Group>>();
-            changes.addPatch(GroupPatch.create({
+            changes.addPatch(Group.patch({
                 id: groups[0].id,
                 settings: GroupSettingsPatch.create({
                     name: 'My crazy group name',

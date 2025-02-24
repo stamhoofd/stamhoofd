@@ -374,5 +374,3 @@ export class Group extends AutoEncoder {
         return filter;
     }
 }
-
-export const GroupPatch = Group.patchType();
