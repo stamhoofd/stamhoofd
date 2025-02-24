@@ -60,11 +60,6 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                                 },
                             },
                             periodId: platform.periodId,
-                            group: {
-                                defaultAgeGroupId: {
-                                    $neq: null,
-                                },
-                            },
                         },
                     },
                 };
