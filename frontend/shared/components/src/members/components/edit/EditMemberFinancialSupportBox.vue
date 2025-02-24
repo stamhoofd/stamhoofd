@@ -52,14 +52,14 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BooleanStatus, FinancialSupportSettings, PlatformMember } from '@stamhoofd/structures';
 import { DataValidator } from '@stamhoofd/utility';
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
 import { useValidation } from '../../../errors/useValidation';
-import Title from './Title.vue';
 import { useFinancialSupportSettings } from '../../../groups';
+import Title from './Title.vue';
 
 defineOptions({
     inheritAttrs: false,
@@ -87,6 +87,11 @@ useValidation(props.validator, () => {
                 human: financialSupportSettings.value.preventSelfAssignmentText ?? FinancialSupportSettings.defaultPreventSelfAssignmentText,
             });
         }
+    }
+
+    if (props.willMarkReviewed && !props.member.patchedMember.details.requiresFinancialSupport) {
+        // Make sure we save an answer
+        requiresFinancialSupport.value = requiresFinancialSupport.value as any;
     }
 
     // Sync checkbox across family if changed or marked reviewed only
