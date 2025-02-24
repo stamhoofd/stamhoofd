@@ -1,22 +1,10 @@
-import { replaceAllVueTemplateText } from "./src/replace-text-vue";
+import { translateVueFileHelper } from './src/translate-vue-files';
+translateVueFileHelper('/Users/bjarne/Projects/stamhoofd/frontend/app/admin/src/views/finances/ChargeMembershipsView.vue', {doPrompt: true}, true);
+
+// translateVueFiles({dryRun: true, replaceChangesOnly: false});
 
 
-replaceAllVueTemplateText({doPrompt: true, replaceChangesOnly: true});
-// promptBoolean('Answer y or n?').then(answer => {
-//     console.log(answer)
-// });
 
-// replaceAllVueTemplateText({replaceChangesOnly: true});
-// getChangedFiles('vue').forEach(element => {
-//     console.log(element)
-// });
-// replaceAllVueTemplateText()
-// replaceVueTemplateText('/Users/bjarne/Projects/stamhoofd/frontend/app/admin/src/views/settings/registration-periods/EditRegistrationPeriodView.vue');
-// replaceTextInTypescript();
+// import { test } from './src/test-parser';
 
-// getDiffChunks('/Users/bjarne/Projects/stamhoofd/.development/i18n-replace-text/src/replace-text-vue.ts').forEach(chunk => {
-//     console.log(`@@line number: ${chunk.lineNumber}`);
-//     chunk.newLineValues.forEach(value => {
-//         console.log('- ' + value);
-//     })
-// })
+// test();

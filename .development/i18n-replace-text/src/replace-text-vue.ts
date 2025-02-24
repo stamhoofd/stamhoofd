@@ -18,6 +18,10 @@ const attributeRegex = /(?<=(:[^ ().,:;@#$%^&*\[\]"'+–/\/®°⁰!?{}|~]+=")).*
 
 const templateRegex = /<template>((.|\n)+)<\/template>/;
 
+// const testRegex = /(?:<((\w|\d)+).*?>)(?:(.|\n)*)(?:<\/\1>)/ig;
+// const testRegex = /(?:<((\w|\d)+)(.|\r|\n)*?>)(?:(.|\n)*)(?:<\/\1\s*>)/gi;
+const regex = /(?:<((?:\w|\d)+)(?:.|\r|\n)*?>)((?:.|\n)*)(?:<\/\1\s*>)/ig;
+
 const attributeWhitelist = [
     'placeholder',
     'label',
@@ -35,6 +39,7 @@ function isAttributeWhitelisted(value: string): boolean {
     }
     return false;
 }
+
 interface Options {
     replaceChangesOnly?: boolean;
     doPrompt?: boolean;
@@ -43,7 +48,7 @@ interface Options {
 export async function replaceAllVueTemplateText(options: Options = {}) {
     const files = getFilesToSearch(['vue']);
 
-    if(options.doPrompt) {
+    if(options.replaceChangesOnly) {
         const changedFiles = getChangedFiles('vue');
         
         for (const filePath of files) {
