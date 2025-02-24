@@ -10,12 +10,14 @@ export async function promptBoolean(message: string) {
     
     rl.question(message + ' ');
 
+    let listener = () => {};
+
     const answer: string = await new Promise(resolve => {
-        (rl as any)['input'].on("keypress", () => {
-            const line = rl.line;
-            resolve(line)
-            });
+        listener = () => resolve(rl.line);
+        (rl as any)['input'].on("keypress", listener);
     });
+
+    (rl as any)['input'].removeListener("keypress", listener);
 
     rl.close();
     rl.removeAllListeners();
