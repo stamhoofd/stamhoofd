@@ -36,7 +36,8 @@ export interface TranslateHtmlFileOptions {
     path?: string[],
     doPrompt?: boolean,
     skipKeys?: Set<string>,
-    attributeWhiteList?: Set<string>
+    attributeWhiteList?: Set<string>,
+    onBeforePrompt?: () => void
 }
 
 export async function translateHtml(html: string, options: TranslateHtmlFileOptions = {}): Promise<string> {
@@ -136,7 +137,11 @@ function translateText(text: string) {
     return `${whiteSpaceBefore}{{${wrapWithTranslationFunction(trimmed)}}}${whiteSpaceAfter}`
 }
 
-async function prompt(parent: Record<string, any>, record: Record<string, string>, key: string, part: string, translatedPart: string, processedParts: string, unprocessedPart: string): Promise<boolean> {
+async function prompt(parent: Record<string, any>, record: Record<string, string>, key: string, part: string, translatedPart: string, processedParts: string, unprocessedPart: string, options: TranslateHtmlFileOptions): Promise<boolean> {
+    if(options.onBeforePrompt) {
+        options.onBeforePrompt();
+    }
+
     logContext(parent, record, key, part, translatedPart, processedParts, unprocessedPart)
     return await promptBoolean(chalk.yellow(`> Accept (press [y] or [enter])?`));
 }
@@ -265,7 +270,7 @@ async function translateTextParts(parent: Record<string, any>, record: Record<st
         const translatedPart = translate(value);
         const isTranslated = translatedPart !== value;
 
-        const canTranslate = isTranslated && (!options.doPrompt || await prompt(parent, record, key, value, translatedPart, processedParts.join(''), getUnprocessedpart(i)));
+        const canTranslate = isTranslated && (!options.doPrompt || await prompt(parent, record, key, value, translatedPart, processedParts.join(''), getUnprocessedpart(i), options));
 
         processedParts.push(canTranslate ? translatedPart : value);
     }

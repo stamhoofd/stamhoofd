@@ -6,7 +6,10 @@ export async function promptBoolean(message: string) {
         output: process.stdout,
       });
 
-    rl.on("SIGINT", () => process.exit());
+    rl.on("SIGINT", () => {
+        console.clear();
+        process.exit()
+    });
     
     rl.question(message + ' ');
 

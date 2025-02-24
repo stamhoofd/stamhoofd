@@ -1,3 +1,4 @@
+import chalk from "chalk";
 import fs from "fs";
 import { getFilesToSearch } from "./get-files-to-search";
 import { getChangedFiles } from "./git-helper";
@@ -37,7 +38,11 @@ export async function translateVueFileHelper(filePath: string, options: Translat
             'title',
             'text'
         ]),
-        doPrompt: options.doPrompt === undefined ? true : options.doPrompt
+        doPrompt: options.doPrompt === undefined ? true : options.doPrompt,
+        onBeforePrompt: () => {
+            console.clear();
+            console.log(chalk.blue(filePath));
+        }
     };
 
     const fileContent = fs.readFileSync(filePath, "utf8");

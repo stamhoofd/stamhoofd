@@ -1,7 +1,9 @@
-import { translateVueFileHelper } from './src/translate-vue-files';
-translateVueFileHelper('/Users/bjarne/Projects/stamhoofd/frontend/app/admin/src/views/finances/ChargeMembershipsView.vue', {doPrompt: true}, true);
+// import { translateVueFileHelper } from './src/translate-vue-files';
+// translateVueFileHelper('/Users/bjarne/Projects/stamhoofd/frontend/app/admin/src/views/finances/ChargeMembershipsView.vue', {doPrompt: true}, true);
 
-// translateVueFiles({dryRun: true, replaceChangesOnly: false});
+import { translateVueFiles } from "./src/translate-vue-files";
+
+translateVueFiles({dryRun: true, doPrompt: true, replaceChangesOnly: false});
 
 
 

@@ -3,6 +3,7 @@ import { translateHtml } from "./translate-html";
 export interface TranslateVueFileOptions {
     doPrompt?: boolean,
     attributeWhiteList?: Set<string>
+    onBeforePrompt?: () => void
 }
 
 export async function translateVueTemplate(vueTemplate: string, options: TranslateVueFileOptions = {}) {
