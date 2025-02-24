@@ -151,7 +151,10 @@ const properties = [
     buildPropertyRefs('emergencyContacts', 'Extra noodcontactpersonen', {
         description: 'Naam, relatie en telefoonnummer van één of meerdere noodcontactpersonen (als uitbreiding op ouders, niet de ouders zelf)',
     }),
-    buildPropertyRefs('uitpasNumber', 'UiTPAS-nummer'),
+    buildPropertyRefs('uitpasNumber', 'UiTPAS-nummer', {
+        warning: 'Maak dit niet verplicht voor alle leden anders moet iedereen verplicht een UiTPAS-nummer invullen, wat niet iedereen heeft.',
+        preventAlways: true,
+    }),
 ];
 
 watchEffect(() => {
