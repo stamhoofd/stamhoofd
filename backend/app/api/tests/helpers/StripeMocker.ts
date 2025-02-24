@@ -24,6 +24,10 @@ export class StripeMocker {
     }
 
     start() {
+        if (!STAMHOOFD.STRIPE_SECRET_KEY || !STAMHOOFD.STRIPE_SECRET_KEY.startsWith('sk_test_')) {
+            throw new Error('Invalid STRIPE_SECRET_KEY. Even in test mode it should start with sk_test_');
+        }
+
         nock('https://api.stripe.com')
             .persist()
             .get(/v1\/.*/)
