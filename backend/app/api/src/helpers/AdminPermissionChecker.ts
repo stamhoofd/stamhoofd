@@ -256,6 +256,11 @@ export class AdminPermissionChecker {
             return true;
         }
 
+        if (this.getPlatformAccessibleOrganizationTags(permissionLevel) === 'all') {
+            // Can access all members: even members without any registration
+            return true;
+        }
+
         if (member.organizationId && await this.hasFullAccess(member.organizationId, permissionLevel)) {
             return true;
         }
