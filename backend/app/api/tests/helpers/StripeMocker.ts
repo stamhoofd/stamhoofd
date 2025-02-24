@@ -162,8 +162,8 @@ export class StripeMocker {
 
         const r = Request.buildJson('POST', `/stripe/webhooks`, undefined, payload);
         r.headers['stripe-signature'] = stripe.webhooks.generateTestHeaderString({
-            payload: JSON.stringify(payload),
-            secret: STAMHOOFD.STRIPE_ENDPOINT_SECRET,
+            payload: await r.body,
+            secret: payload.account ? STAMHOOFD.STRIPE_CONNECT_ENDPOINT_SECRET : STAMHOOFD.STRIPE_ENDPOINT_SECRET,
         });
         await testServer.test(endpoint, r);
     }
