@@ -210,6 +210,7 @@ export class StripeMocker {
 
     stop() {
         nock.cleanAll();
+        nock.disableNetConnect();
     }
 }
 

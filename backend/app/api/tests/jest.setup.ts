@@ -30,6 +30,9 @@ if (new Date().getTimezoneOffset() !== 0) {
 console.log = jest.fn();
 
 beforeAll(async () => {
+    nock.cleanAll();
+    nock.disableNetConnect();
+
     await Database.delete('DELETE FROM `tokens`');
     await Database.delete('DELETE FROM `users`');
     await Database.delete('DELETE FROM `registrations`');

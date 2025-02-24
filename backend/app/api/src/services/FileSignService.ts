@@ -70,7 +70,7 @@ export class FileSignService {
                 if (e instanceof jose.errors.JWSSignatureVerificationFailed) {
                     return false;
                 }
-                console.error('Failed to verify file:', e);
+                console.error('Failed to verify file signature:', e);
                 return false;
             }
         };
@@ -115,7 +115,7 @@ export class FileSignService {
             });
         }
         catch (e) {
-            console.error('Failed to sign file:', e);
+            console.error('Failed to generate signedUrl for file:', e);
             return null;
         }
     }
