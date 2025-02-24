@@ -770,7 +770,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 0,
+                totalPrice: 25,
                 asOrganizationId: organization.id,
             });
 
@@ -1649,7 +1649,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 5,
+                totalPrice: 30,
                 asOrganizationId: organization.id,
                 customer: null,
             });
@@ -1927,7 +1927,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 5,
+                totalPrice: 30,
                 asOrganizationId: organization1.id,
                 customer: null,
             });
@@ -2049,7 +2049,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 5,
+                totalPrice: 30,
                 asOrganizationId: organization.id,
                 customer: null,
             });
@@ -2226,7 +2226,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 5,
+                totalPrice: 30,
                 customer: null,
                 asOrganizationId: organization.id,
             });
@@ -2331,7 +2331,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 5,
+                totalPrice: 30,
                 customer: null,
                 asOrganizationId: organization.id,
             });
@@ -2355,7 +2355,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 5,
+                totalPrice: 30,
                 customer: null,
                 asOrganizationId: organization.id,
             });
