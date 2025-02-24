@@ -137,7 +137,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                     await order.updateStock(null, true);
                     const totalPrice = order.data.totalPrice;
 
-                    if (totalPrice == 0) {
+                    if (totalPrice === 0) {
                         // Force unknown payment method
                         order.data.paymentMethod = PaymentMethod.Unknown;
 
@@ -160,6 +160,9 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
                         order.paymentId = payment.id;
                         order.setRelation(Order.payment, payment);
+
+                        // Save order because we need the id
+                        await order.save();
 
                         // Create balance item
                         const balanceItem = new BalanceItem();
@@ -189,12 +192,12 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         balanceItemPayment.price = balanceItem.price;
                         await balanceItemPayment.save();
 
-                        if (payment.method == PaymentMethod.Transfer) {
+                        if (payment.method === PaymentMethod.Transfer) {
                             await order.markValid(payment, []);
                             await payment.save();
                             await order.save();
                         }
-                        else if (payment.method == PaymentMethod.PointOfSale) {
+                        else if (payment.method === PaymentMethod.PointOfSale) {
                             // Not really paid, but needed to create the tickets if needed
                             await order.markPaid(payment, organization, webshop);
                             await payment.save();

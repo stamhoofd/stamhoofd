@@ -11,9 +11,6 @@ class Options {
     reducedPrice?: number;
     stock?: number;
 
-    delayDate?: Date;
-    delayPrice?: number;
-    delayReducedPrice?: number;
     skipCategory?: boolean;
     maxMembers?: number | null;
 }
@@ -31,14 +28,6 @@ export class GroupFactory extends Factory<Options, Group> {
             endDate: new Date(new Date().getTime() + 10 * 1000),
             registrationStartDate: new Date(new Date().getTime() - 10 * 1000),
             registrationEndDate: new Date(new Date().getTime() + 10 * 1000),
-            oldPrices: [
-                OldGroupPrices.create({
-                    prices: [OldGroupPrice.create({
-                        price: this.options.price ?? 400,
-                        reducedPrice: this.options.reducedPrice ?? null,
-                    })],
-                }),
-            ],
             prices: [
                 GroupPrice.create({
                     price: ReduceablePrice.create({
@@ -50,16 +39,6 @@ export class GroupFactory extends Factory<Options, Group> {
             ],
             maxMembers: this.options.maxMembers === undefined ? null : this.options.maxMembers,
         });
-
-        if (this.options.delayPrice !== undefined) {
-            group.settings.oldPrices.push(OldGroupPrices.create({
-                startDate: this.options.delayDate ?? new Date(),
-                prices: [OldGroupPrice.create({
-                    price: this.options.delayPrice,
-                    reducedPrice: this.options.delayReducedPrice ?? null,
-                })],
-            }));
-        }
 
         await group.save();
 

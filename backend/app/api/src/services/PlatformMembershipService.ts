@@ -138,6 +138,9 @@ export class PlatformMembershipService {
 
     static async updateMembershipsForId(id: string, silent = false) {
         if (STAMHOOFD.userMode === 'organization') {
+            if (!silent) {
+                console.warn('Skipping automatic membership for: ' + id, ' - organization mode');
+            }
             return;
         }
 
@@ -160,6 +163,12 @@ export class PlatformMembershipService {
                     .where('organizationId', me.organizationId)
                     .where('endDate', SQLWhereSign.GreaterEqual, new Date()) // Avoid updating the price of past periods that were not yet locked
                     .fetch();
+
+                if (periods.length === 0) {
+                    if (!silent) {
+                        console.warn('No periods found for member ' + me.id);
+                    }
+                }
 
                 // Every (not-locked) period can have a generated membership
                 for (const period of periods) {
@@ -252,16 +261,16 @@ export class PlatformMembershipService {
                         const tagIdsA = a.organization?.meta.tags ?? [];
                         const tagIdsB = b.organization?.meta.tags ?? [];
                         const aPrice = a.membership.getPrice(
-                            period.id, 
-                            a.registration.startDate ?? a.registration.registeredAt ?? a.registration.createdAt, 
-                            tagIdsA, 
-                            shouldApplyReducedPrice
+                            period.id,
+                            a.registration.startDate ?? a.registration.registeredAt ?? a.registration.createdAt,
+                            tagIdsA,
+                            shouldApplyReducedPrice,
                         ) ?? 10000000;
                         const bPrice = b.membership.getPrice(
-                            period.id, 
-                            b.registration.startDate ?? b.registration.registeredAt ?? b.registration.createdAt, 
-                            tagIdsB, 
-                            shouldApplyReducedPrice
+                            period.id,
+                            b.registration.startDate ?? b.registration.registeredAt ?? b.registration.createdAt,
+                            tagIdsB,
+                            shouldApplyReducedPrice,
                         ) ?? 10000000;
 
                         const diff = aPrice - bPrice;

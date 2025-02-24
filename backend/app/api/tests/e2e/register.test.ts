@@ -1,11 +1,13 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { BalanceItemFactory, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, OrganizationRegistrationPeriod, Platform, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import { QueueHandler } from '@stamhoofd/queues';
 import { AdministrationFeeSettings, BalanceItemCartItem, BalanceItemStatus, BalanceItemType, BooleanStatus, DefaultAgeGroup, FreeContributionSettings, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, PermissionLevel, Permissions, PlatformMembershipType, PlatformMembershipTypeConfig, ReceivableBalanceType, ReduceablePrice, RegisterItemOption, Version } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { GetMemberFamilyEndpoint } from '../../src/endpoints/global/members/GetMemberFamilyEndpoint';
 import { RegisterMembersEndpoint } from '../../src/endpoints/global/registration/RegisterMembersEndpoint';
 import { GetMemberBalanceEndpoint } from '../../src/endpoints/organization/dashboard/payments/GetMemberBalanceEndpoint';
 import { GetReceivableBalanceEndpoint } from '../../src/endpoints/organization/dashboard/receivable-balances/GetReceivableBalanceEndpoint';
+import { PlatformMembershipService } from '../../src/services/PlatformMembershipService';
 import { testServer } from '../helpers/TestServer';
 
 describe('E2E.Register', () => {
@@ -46,6 +48,9 @@ describe('E2E.Register', () => {
     // #endregion
 
     beforeAll(async () => {
+        // These tests should run in platform mode
+        (STAMHOOFD as any).userMode = 'platform';
+
         const previousPeriod = await new RegistrationPeriodFactory({
             startDate: new Date(2022, 0, 1),
             endDate: new Date(2022, 11, 31),
@@ -1075,6 +1080,8 @@ describe('E2E.Register', () => {
 
                 expect(response.body).toBeDefined();
                 expect(response.body.registrations.length).toBe(1);
+
+                await PlatformMembershipService.updateMembershipsForId(member.id, false);
 
                 const familyAfter = await getMemberFamily(member.id, organization, token);
                 expect(familyAfter).toBeDefined();

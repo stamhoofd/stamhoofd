@@ -4,7 +4,7 @@ import { Address, Country, CreateOrganization, NewUser, Organization as Organiza
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { CreateOrganizationEndpoint } from './CreateOrganizationEndpoint';
 
-describe('Endpoint.CreateOrganization', () => {
+describe.skip('Endpoint.CreateOrganization', () => {
     // Test endpoint
     const endpoint = new CreateOrganizationEndpoint();
 

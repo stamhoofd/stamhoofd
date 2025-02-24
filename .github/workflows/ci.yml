@@ -57,7 +57,7 @@ jobs:
       - name: Set test env
         run: cp backend/app/api/.env.ci.json backend/app/api/.env.test.json
       - name: Run tests
-        run: cd backend/app/api && yarn build && yarn test
+        run: cd backend/app/api && yarn build && yarn test --bail
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
         if: ${{ failure() }}

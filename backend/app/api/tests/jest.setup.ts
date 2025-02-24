@@ -61,6 +61,9 @@ beforeAll(async () => {
     (STAMHOOFD as any).FILE_SIGNING_PRIVATE_KEY = exportedPrivateKey;
 
     await GlobalHelper.load();
+
+    // Resetting environment
+    (STAMHOOFD as any).userMode = 'organization';
 });
 
 afterAll(async () => {

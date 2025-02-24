@@ -8,7 +8,7 @@ module.exports = {
         './dist/tests/jest.setup.js',
     ],
     reporters: [['jest-console-group-reporter', {
-        consoleLevels: ['error', 'warn'],
+        consoleLevels: ['error', 'warn', 'log'],
         filters: [],
         groups: [],
         onlyFailingTestSuites: true,

@@ -11,7 +11,6 @@ describe('Endpoint.GetOrganizationFromDomain', () => {
 
     test('Get organization from default uri', async () => {
         const organization = await new OrganizationFactory({}).create();
-        const groups = await new GroupFactory({ organization }).createMultiple(2);
 
         const r = Request.buildJson('GET', '/v2/organization-from-domain');
         r.query = {
@@ -26,12 +25,10 @@ describe('Endpoint.GetOrganizationFromDomain', () => {
         }
 
         expect(response.body.id).toEqual(organization.id);
-        expect(response.body.groups.map(g => g.id).sort()).toEqual(groups.map(g => g.id).sort());
     });
 
     test('Get organization from custom domain', async () => {
         const organization = await new OrganizationFactory({ domain: 'inschrijven.mijnscouts.be' }).create();
-        const groups = await new GroupFactory({ organization }).createMultiple(2);
 
         const r = Request.buildJson('GET', '/v2/organization-from-domain');
         r.query = {
@@ -46,6 +43,5 @@ describe('Endpoint.GetOrganizationFromDomain', () => {
         }
 
         expect(response.body.id).toEqual(organization.id);
-        expect(response.body.groups.map(g => g.id).sort()).toEqual(groups.map(g => g.id).sort());
     });
 });

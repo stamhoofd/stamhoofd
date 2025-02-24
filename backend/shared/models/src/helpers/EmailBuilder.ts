@@ -55,6 +55,9 @@ export async function getEmailTemplate(data: EmailTemplateOptions) {
     }
 
     if (templates.length == 0) {
+        if (STAMHOOFD.environment === 'test') {
+            return;
+        }
         console.error('Could not find email template for type ' + data.type);
         return;
     }
