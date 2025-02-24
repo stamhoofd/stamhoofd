@@ -6,17 +6,19 @@ export async function promptBoolean(message: string) {
         output: process.stdout,
       });
 
+    rl.on("close", () => process.exit());
+    
     rl.question(message + ' ');
 
     const answer: string = await new Promise(resolve => {
-    (rl as any)['input'].on("keypress", () => {
-        const line = rl.line;
-        resolve(line)
-        });
-
+        (rl as any)['input'].on("keypress", () => {
+            const line = rl.line;
+            resolve(line)
+            });
     });
 
     rl.close();
+    rl.removeAllListeners();
     
     return answerToBoolean(answer);
 }
