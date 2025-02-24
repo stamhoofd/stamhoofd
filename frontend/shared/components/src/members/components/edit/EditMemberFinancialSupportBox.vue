@@ -52,7 +52,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BooleanStatus, FinancialSupportSettings, PlatformMember } from '@stamhoofd/structures';
 import { DataValidator } from '@stamhoofd/utility';
-import { computed } from 'vue';
+import { computed, nextTick } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { Validator } from '../../../errors/Validator';
@@ -76,7 +76,7 @@ const errors = useErrors({ validator: props.validator });
 const app = useAppContext();
 const isAdmin = app === 'dashboard' || app === 'admin';
 
-useValidation(props.validator, () => {
+useValidation(props.validator, async () => {
     // Save
     if (!isAdmin) {
         // Check toggled on yourself
@@ -92,6 +92,7 @@ useValidation(props.validator, () => {
     if (props.willMarkReviewed && !props.member.patchedMember.details.requiresFinancialSupport) {
         // Make sure we save an answer
         requiresFinancialSupport.value = requiresFinancialSupport.value as any;
+        await nextTick();
     }
 
     // Sync checkbox across family if changed or marked reviewed only
