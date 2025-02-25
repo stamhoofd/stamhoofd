@@ -4,6 +4,7 @@ import { GroupFactory, MemberFactory, OrganizationFactory, Platform, Registratio
 import { MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PatchAnswers, PermissionLevel, RecordCategory, RecordSettings, RecordTextAnswer } from '@stamhoofd/structures';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { PatchUserMembersEndpoint } from './PatchUserMembersEndpoint';
+import { Database } from '@simonbackx/simple-database';
 
 const baseUrl = `/members`;
 const endpoint = new PatchUserMembersEndpoint();
@@ -19,6 +20,11 @@ const errorWithCode = (code: string) => expect.objectContaining({ code }) as jes
 describe('Endpoint.PatchUserMembersEndpoint', () => {
     beforeAll(async () => {
         (STAMHOOFD as any).userMode = 'platform';
+    });
+
+    afterEach(async () => {
+        // Delete all members (so the duplicate checks work as expected)
+        await Database.delete('DELETE FROM `members`');
     });
 
     describe('Duplicate members', () => {
