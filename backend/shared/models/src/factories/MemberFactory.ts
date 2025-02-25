@@ -30,7 +30,7 @@ class Options {
 export class MemberFactory extends Factory<Options, MemberWithRegistrations> {
     async create(): Promise<MemberWithRegistrations> {
         const organization = this.options.organization
-            ?? await new OrganizationFactory({}).create();
+            ?? (STAMHOOFD.userMode === 'organization' ? (await new OrganizationFactory({}).create()) : null);
 
         const memberDetails = this.options.details?.clone() ?? new MemberDetails();
         const minAge = (this.options.minAge ?? 6);
@@ -146,7 +146,7 @@ export class MemberFactory extends Factory<Options, MemberWithRegistrations> {
             .setManyRelation(Member.registrations, [])
             .setManyRelation(Member.users, this.options.user ? [this.options.user] : []);
 
-        member.organizationId = organization.id;
+        member.organizationId = organization?.id ?? null;
         member.details = memberDetails;
         await member.save();
 

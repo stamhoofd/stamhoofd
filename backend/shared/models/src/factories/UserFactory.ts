@@ -21,14 +21,14 @@ class Options {
 
 export class UserFactory extends Factory<Options, User> {
     async create(): Promise<User> {
-        let organization: Organization;
+        let organization: Organization | null = null;
 
-        if (!this.options.organization) {
+        if (!this.options.organization && STAMHOOFD.userMode !== 'platform') {
             const organizationFactory = new OrganizationFactory({});
             organization = await organizationFactory.create();
         }
         else {
-            organization = this.options.organization;
+            organization = this.options.organization ?? null;
         }
 
         const email = this.options.email ?? 'generated-email-' + this.randomString(20) + '@domain.com';
@@ -36,7 +36,7 @@ export class UserFactory extends Factory<Options, User> {
 
         const user = await User.register(organization, NewUser.create({
             email,
-            organizationId: organization.id,
+            organizationId: organization?.id ?? null,
             password,
         }));
         if (!user) {
@@ -44,6 +44,9 @@ export class UserFactory extends Factory<Options, User> {
         }
 
         if (this.options.permissions) {
+            if (!organization) {
+                throw new Error('Cannot set permissions without organization');
+            }
             user.permissions = UserPermissions.create({});
             user.permissions.organizationPermissions.set(organization.id, this.options.permissions);
         }

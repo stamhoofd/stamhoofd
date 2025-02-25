@@ -1,9 +1,10 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, CachedBalance, Document, EmailTemplate, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
-import { AccessRight, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory } from '@stamhoofd/structures';
+import { AccessRight, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory, RecordSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryMemberAccess';
+import { MemberRecordStore } from '../services/MemberRecordStore';
 
 /**
  * One class with all the responsabilities of checking permissions to each resource in the system by a given user, possibly in an organization context.
@@ -856,80 +857,6 @@ export class AdminPermissionChecker {
     /**
      * Return a list of RecordSettings the current user can view or edit
      */
-    async getAccessibleRecordCategories(member: MemberWithRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<RecordCategory[]> {
-        // First list all organizations this member is part of
-        const organizations: Organization[] = [];
-
-        if (member.organizationId) {
-            if (this.checkScope(member.organizationId)) {
-                organizations.push(await this.getOrganization(member.organizationId));
-            }
-        }
-
-        for (const registration of member.registrations) {
-            if (this.checkScope(registration.organizationId)) {
-                if (!organizations.find(o => o.id === registration.organizationId)) {
-                    organizations.push(await this.getOrganization(registration.organizationId));
-                }
-            }
-        }
-
-        // Loop all organizations.
-        // Check if we have access to their data
-        const recordCategories: RecordCategory[] = [];
-        for (const organization of organizations) {
-            const permissions = await this.getOrganizationPermissions(organization);
-
-            if (!permissions) {
-                continue;
-            }
-
-            // Now add all records of this organization
-            for (const category of organization.meta.recordsConfiguration.recordCategories) {
-                if (recordCategories.find(c => c.id === category.id)) {
-                    // Already added
-                    continue;
-                }
-
-                if (permissions.hasResourceAccess(PermissionsResourceType.RecordCategories, category.id, level)) {
-                    recordCategories.push(category);
-                }
-            }
-
-            // Platform ones where we have been given permissions for in this organization
-            for (const category of this.platform.config.recordsConfiguration.recordCategories) {
-                if (recordCategories.find(c => c.id === category.id)) {
-                    // Already added
-                    continue;
-                }
-
-                if (permissions.hasResourceAccess(PermissionsResourceType.RecordCategories, category.id, level)) {
-                    recordCategories.push(category);
-                }
-            }
-        }
-
-        // Platform data
-        const platformPermissions = this.platformPermissions;
-        if (platformPermissions) {
-            for (const category of this.platform.config.recordsConfiguration.recordCategories) {
-                if (recordCategories.find(c => c.id === category.id)) {
-                    // Already added
-                    continue;
-                }
-
-                if (platformPermissions?.hasResourceAccess(PermissionsResourceType.RecordCategories, category.id, level)) {
-                    recordCategories.push(category);
-                }
-            }
-        }
-
-        return recordCategories;
-    }
-
-    /**
-     * Return a list of RecordSettings the current user can view or edit
-     */
     async hasFinancialMemberAccess(member: MemberWithRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
         const isUserManager = this.isUserManager(member);
 
@@ -1053,56 +980,72 @@ export class AdminPermissionChecker {
         return false;
     }
 
-    /**
-     * Return a list of RecordSettings the current user can view or edit
-     */
-    async getAccessibleRecordSet(member: MemberWithRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<Set<string>> {
-        const categories = await this.getAccessibleRecordCategories(member, level);
-        const set = new Set<string>();
-
-        for (const category of categories) {
-            for (const record of category.getAllRecords()) {
-                set.add(record.id);
-            }
-        }
-
+    async checkRecordAccess(member: MemberWithRegistrations, recordId: string, level: PermissionLevel = PermissionLevel.Read): Promise<{ canAccess: false; record: RecordSettings | null } | { canAccess: true; record: RecordSettings }> {
         const isUserManager = this.isUserManager(member);
-
-        // Also include those we can access as user manager
+        const record = await MemberRecordStore.getRecord(recordId);
+        if (!record) {
+            return {
+                canAccess: false,
+                record: null,
+            };
+        }
         if (isUserManager) {
-            const allCategories = this.platform.config.recordsConfiguration.recordCategories.slice();
-
-            // First list all organizations this member is part of
-            const organizations: Organization[] = [];
-
-            if (member.organizationId) {
-                if (this.checkScope(member.organizationId)) {
-                    organizations.push(await this.getOrganization(member.organizationId));
-                }
+            if (record.record.checkPermissionForUserManager(level)) {
+                return {
+                    canAccess: true,
+                    record: record.record,
+                };
             }
+        }
 
-            for (const registration of member.registrations) {
-                if (this.checkScope(registration.organizationId)) {
-                    if (!organizations.find(o => o.id === registration.organizationId)) {
-                        organizations.push(await this.getOrganization(registration.organizationId));
-                    }
-                }
+        if (!this.checkScope(record.organizationId)) {
+            return {
+                canAccess: false,
+                record: record.record,
+            };
+        }
+
+        if (!this.user.permissions) {
+            return {
+                canAccess: false,
+                record: record.record,
+            };
+        }
+
+        if (record.organizationId) {
+            const organizationPermissions = await this.getOrganizationPermissions(record.organizationId);
+            if (organizationPermissions && organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, record.rootCategoryId, level)) {
+                return {
+                    canAccess: true,
+                    record: record.record,
+                };
             }
-
-            for (const organization of organizations) {
-                allCategories.push(...organization.meta.recordsConfiguration.recordCategories);
-            }
-
-            for (const category of allCategories) {
-                for (const record of category.getAllRecords()) {
-                    if (record.checkPermissionForUserManager(level)) {
-                        set.add(record.id);
-                    }
+        }
+        else {
+            // 1. Check all organizations (they can give permissions)
+            for (const organizationId of this.user.permissions.organizationPermissions.keys()) {
+                const organizationPermissions = await this.getOrganizationPermissions(organizationId);
+                if (organizationPermissions && organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, record.rootCategoryId, level)) {
+                    return {
+                        canAccess: true,
+                        record: record.record,
+                    };
                 }
             }
         }
 
-        return set;
+        // 2. Check platform permissions
+        if (this.platformPermissions?.hasResourceAccess(PermissionsResourceType.RecordCategories, record.rootCategoryId, level)) {
+            return {
+                canAccess: true,
+                record: record.record,
+            };
+        }
+
+        return {
+            canAccess: false,
+            record: record.record,
+        };
     }
 
     async getAccessibleGroups(organizationId: string, level: PermissionLevel = PermissionLevel.Read): Promise<string[] | 'all'> {
@@ -1125,13 +1068,18 @@ export class AdminPermissionChecker {
      * Changes data inline
      */
     async filterMemberData(member: MemberWithRegistrations, data: MemberWithRegistrationsBlob): Promise<MemberWithRegistrationsBlob> {
-        const records = await this.getAccessibleRecordSet(member, PermissionLevel.Read);
-
         const cloned = data.clone();
 
         for (const [key, value] of cloned.details.recordAnswers.entries()) {
-            if (!records.has(value.settings.id)) {
+            const { canAccess, record } = await this.checkRecordAccess(member, key, PermissionLevel.Read);
+            if (!canAccess) {
                 cloned.details.recordAnswers.delete(key);
+            }
+            else {
+                if (value) {
+                    // Force update
+                    value.settings = record;
+                }
             }
         }
 
@@ -1227,38 +1175,19 @@ export class AdminPermissionChecker {
                 });
             }
 
-            const records = await this.getAccessibleRecordSet(member, PermissionLevel.Write);
-
             for (const [key, value] of data.details.recordAnswers.entries()) {
-                let name: string | undefined = undefined;
-                if (value) {
-                    if (value.isPatch()) {
-                        throw new SimpleError({
-                            code: 'invalid_request',
-                            message: 'Cannot PATCH a record answer object',
-                            statusCode: 400,
-                        });
-                    }
-
-                    const id = value.settings.id;
-
-                    if (id !== key) {
-                        throw new SimpleError({
-                            code: 'invalid_request',
-                            message: 'Record answer key does not match record id',
-                            statusCode: 400,
-                        });
-                    }
-
-                    name = value.settings.name;
-                }
-
-                if (!records.has(key)) {
+                const { canAccess, record } = await this.checkRecordAccess(member, key, PermissionLevel.Write);
+                if (!canAccess) {
                     throw new SimpleError({
                         code: 'permission_denied',
-                        message: `Je hebt geen toegangsrechten om het antwoord op ${name ?? 'deze vraag'} aan te passen voor dit lid`,
+                        message: `Je hebt geen toegangsrechten om het antwoord op ${record?.name ?? 'deze vraag'} aan te passen voor dit lid`,
                         statusCode: 400,
                     });
+                }
+
+                // Force set the value settings
+                if (value) {
+                    value.settings = record;
                 }
             }
         }

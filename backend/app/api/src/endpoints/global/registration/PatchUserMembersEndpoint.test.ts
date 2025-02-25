@@ -1,7 +1,7 @@
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import { Endpoint, Request } from '@simonbackx/simple-endpoints';
-import { GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
-import { MemberDetails, MemberWithRegistrationsBlob, Parent } from '@stamhoofd/structures';
+import { GroupFactory, MemberFactory, OrganizationFactory, Platform, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
+import { MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PatchAnswers, PermissionLevel, RecordCategory, RecordSettings, RecordTextAnswer } from '@stamhoofd/structures';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { PatchUserMembersEndpoint } from './PatchUserMembersEndpoint';
 
@@ -17,12 +17,15 @@ const birthDay = { year: 1993, month: 4, day: 5 };
 const errorWithCode = (code: string) => expect.objectContaining({ code }) as jest.Constructable;
 
 describe('Endpoint.PatchUserMembersEndpoint', () => {
+    beforeAll(async () => {
+        (STAMHOOFD as any).userMode = 'platform';
+    });
+
     describe('Duplicate members', () => {
         test('The security code should be a requirement', async () => {
             const organization = await new OrganizationFactory({ }).create();
-            const user = await new UserFactory({ organization }).create();
+            const user = await new UserFactory({ }).create();
             const existingMember = await new MemberFactory({
-                organization,
                 firstName,
                 lastName,
                 birthDay,
@@ -50,9 +53,8 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
         test('The security code is not a requirement for members without additional data', async () => {
             const organization = await new OrganizationFactory({ }).create();
-            const user = await new UserFactory({ organization }).create();
+            const user = await new UserFactory({ }).create();
             const existingMember = await new MemberFactory({
-                organization,
                 firstName,
                 lastName,
                 birthDay,
@@ -108,7 +110,6 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             });
 
             const existingMember = await new MemberFactory({
-                organization,
                 birthDay,
                 details,
             }).create();
@@ -158,6 +159,278 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             // Check parent is still there
             expect(member.details.parents.length).toBe(1);
             expect(member.details.parents[0]).toEqual(existingMember.details.parents[0]);
+        });
+    });
+
+    describe('Record answers', () => {
+        test('A user can save answers of records of an organization it has not yet registered for', async () => {
+            const commentsRecord = RecordSettings.create({
+                name: 'Opmerkingen',
+            });
+
+            const recordCategory = RecordCategory.create({
+                name: 'Medische fiche',
+                records: [
+                    commentsRecord,
+                ],
+            });
+            const organization = await new OrganizationFactory({
+                meta: OrganizationMetaData.create({
+                    recordsConfiguration: OrganizationRecordsConfiguration.create({
+                        recordCategories: [recordCategory],
+                    }),
+                }),
+            }).create();
+
+            const user = await new UserFactory({ }).create();
+            const existingMember = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+                // Give user access to this member
+                user,
+            }).create();
+
+            const token = await Token.createToken(user);
+
+            const recordAnswers = new PatchMap() as PatchAnswers;
+
+            recordAnswers.set(commentsRecord.id, RecordTextAnswer.create({
+                settings: commentsRecord,
+                value: 'Some comments',
+            }));
+
+            const arr: Body = new PatchableArray();
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: existingMember.id,
+                details: MemberDetails.patch({
+                    recordAnswers,
+                }),
+            });
+            arr.addPatch(patch);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            // Check returned
+            expect(response.status).toBe(200);
+            expect(response.body.members.length).toBe(1);
+            const member = response.body.members[0];
+            expect(member.details.recordAnswers.get(commentsRecord.id)).toMatchObject({
+                value: 'Some comments',
+            });
+        });
+
+        test('A user cannot save answers to organization read-only records', async () => {
+            const commentsRecord = RecordSettings.create({
+                name: 'Opmerkingen',
+                externalPermissionLevel: PermissionLevel.Read,
+            });
+
+            const recordCategory = RecordCategory.create({
+                name: 'Medische fiche',
+                records: [
+                    commentsRecord,
+                ],
+            });
+            const organization = await new OrganizationFactory({
+                meta: OrganizationMetaData.create({
+                    recordsConfiguration: OrganizationRecordsConfiguration.create({
+                        recordCategories: [recordCategory],
+                    }),
+                }),
+            }).create();
+
+            const user = await new UserFactory({ }).create();
+            const existingMember = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+                // Give user access to this member
+                user,
+            }).create();
+
+            const token = await Token.createToken(user);
+
+            const recordAnswers = new PatchMap() as PatchAnswers;
+
+            recordAnswers.set(commentsRecord.id, RecordTextAnswer.create({
+                settings: commentsRecord,
+                value: 'Some comments',
+            }));
+
+            const arr: Body = new PatchableArray();
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: existingMember.id,
+                details: MemberDetails.patch({
+                    recordAnswers,
+                }),
+            });
+            arr.addPatch(patch);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(errorWithCode('permission_denied'));
+        });
+
+        test('A user can save answers of records of the platform', async () => {
+            const commentsRecord = RecordSettings.create({
+                name: 'Opmerkingen',
+            });
+
+            const recordCategory = RecordCategory.create({
+                name: 'Medische fiche',
+                records: [
+                    commentsRecord,
+                ],
+            });
+
+            const platform = await Platform.getShared();
+            platform.config.recordsConfiguration.recordCategories.push(recordCategory);
+            await platform.save();
+
+            const organization = await new OrganizationFactory({}).create();
+
+            const user = await new UserFactory({ }).create();
+            const existingMember = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+                // Give user access to this member
+                user,
+            }).create();
+
+            const token = await Token.createToken(user);
+
+            const recordAnswers = new PatchMap() as PatchAnswers;
+
+            recordAnswers.set(commentsRecord.id, RecordTextAnswer.create({
+                settings: commentsRecord,
+                value: 'Some comments',
+            }));
+
+            const arr: Body = new PatchableArray();
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: existingMember.id,
+                details: MemberDetails.patch({
+                    recordAnswers,
+                }),
+            });
+            arr.addPatch(patch);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            // Check returned
+            expect(response.status).toBe(200);
+            expect(response.body.members.length).toBe(1);
+            const member = response.body.members[0];
+            expect(member.details.recordAnswers.get(commentsRecord.id)).toMatchObject({
+                value: 'Some comments',
+            });
+        });
+
+        test('A user cannot save answers to platform read-only records', async () => {
+            const commentsRecord = RecordSettings.create({
+                name: 'Opmerkingen',
+                externalPermissionLevel: PermissionLevel.Read,
+            });
+
+            const recordCategory = RecordCategory.create({
+                name: 'Medische fiche',
+                records: [
+                    commentsRecord,
+                ],
+            });
+
+            const platform = await Platform.getShared();
+            platform.config.recordsConfiguration.recordCategories.push(recordCategory);
+            await platform.save();
+
+            const organization = await new OrganizationFactory({}).create();
+
+            const user = await new UserFactory({ }).create();
+            const existingMember = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+                // Give user access to this member
+                user,
+            }).create();
+
+            const token = await Token.createToken(user);
+
+            const recordAnswers = new PatchMap() as PatchAnswers;
+
+            recordAnswers.set(commentsRecord.id, RecordTextAnswer.create({
+                settings: commentsRecord,
+                value: 'Some comments',
+            }));
+
+            const arr: Body = new PatchableArray();
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: existingMember.id,
+                details: MemberDetails.patch({
+                    recordAnswers,
+                }),
+            });
+            arr.addPatch(patch);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(errorWithCode('permission_denied'));
+        });
+
+        test('A user can not save anwers to inexisting records', async () => {
+            const commentsRecord = RecordSettings.create({
+                name: 'Opmerkingen',
+            });
+
+            const organization = await new OrganizationFactory({
+                meta: OrganizationMetaData.create({
+                    recordsConfiguration: OrganizationRecordsConfiguration.create({
+                        recordCategories: [],
+                    }),
+                }),
+            }).create();
+
+            const user = await new UserFactory({ }).create();
+            const existingMember = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+                // Give user access to this member
+                user,
+            }).create();
+
+            const token = await Token.createToken(user);
+
+            const recordAnswers = new PatchMap() as PatchAnswers;
+
+            recordAnswers.set(commentsRecord.id, RecordTextAnswer.create({
+                settings: commentsRecord,
+                value: 'Some comments',
+            }));
+
+            const arr: Body = new PatchableArray();
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: existingMember.id,
+                details: MemberDetails.patch({
+                    recordAnswers,
+                }),
+            });
+            arr.addPatch(patch);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(errorWithCode('permission_denied'));
         });
     });
 });
