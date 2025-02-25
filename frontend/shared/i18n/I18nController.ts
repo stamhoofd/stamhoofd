@@ -2,7 +2,7 @@
 import { HistoryManager } from '@simonbackx/vue-app-navigation';
 import { countries, languages } from '@stamhoofd/locales';
 import { SessionContext, Storage, UrlHelper } from '@stamhoofd/networking';
-import { Country, CountryCode, countryToCode } from '@stamhoofd/structures';
+import { Address, Country, CountryCode, countryToCode } from '@stamhoofd/structures';
 import { I18n } from './I18n';
 
 export function useTranslate(): typeof I18n.prototype.$t {
@@ -13,6 +13,8 @@ export function useTranslate(): typeof I18n.prototype.$t {
 function setGlobalTranslateFunction(i18n: I18n) {
     if (i18n) {
         (window as any).$t = (key: string, replace?: Record<string, string>) => i18n.$t.bind(i18n)(key, replace);
+        (window as any).$getLanguage = () => i18n.language;
+        (window as any).$getCountry = () => i18n.country;
         return;
     }
 
@@ -181,7 +183,7 @@ export class I18nController {
             console.log('[I18n] Successfully loaded locale', namespace, locale);
         }
 
-        i18n.setLocale(locale);
+        i18n.setLocale(locale, this.language, this.countryCode);
     }
 
     static async getLocaleFromStorage(): Promise<{ language?: string; country?: string }> {

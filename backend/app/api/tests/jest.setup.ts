@@ -51,6 +51,9 @@ beforeAll(async () => {
     await Database.delete('DELETE FROM `payments`');
     await Database.delete('OPTIMIZE TABLE organizations;'); // fix breaking of indexes due to deletes (mysql bug?)
 
+    // Resetting environment
+    (STAMHOOFD as any).userMode = 'organization';
+
     // Use random file keys in tests
     const alg = 'ES256';
     (STAMHOOFD as any).FILE_SIGNING_ALG = alg;
@@ -64,9 +67,6 @@ beforeAll(async () => {
     (STAMHOOFD as any).FILE_SIGNING_PRIVATE_KEY = exportedPrivateKey;
 
     await GlobalHelper.load();
-
-    // Resetting environment
-    (STAMHOOFD as any).userMode = 'organization';
 });
 
 afterAll(async () => {

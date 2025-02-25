@@ -2,7 +2,6 @@ module.exports = {
     setupFilesAfterEnv: [
         'jest-extended/all',
     ],
-    globalSetup: './tests/jest.global.setup.ts',
     testEnvironment: 'node',
     preset: 'ts-jest',
     testTimeout: 10 * 1000,
@@ -10,7 +9,7 @@ module.exports = {
         './src/',
     ],
     transform: {
-        '\\.ts?$': [
+        '\\.[jt]s?$': [
             'ts-jest',
             {
                 useESM: true,

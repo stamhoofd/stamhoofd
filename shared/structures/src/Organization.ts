@@ -42,7 +42,7 @@ export class BaseOrganization extends AutoEncoder {
     meta: OrganizationMetaData;
 
     @field({ decoder: Address })
-    address: Address;
+    address = Address.create({});
 
     @field({ decoder: DateDecoder, version: 259 })
     createdAt = new Date();

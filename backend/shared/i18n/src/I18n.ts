@@ -64,7 +64,7 @@ export class I18n {
     }
 
     language = '';
-    country = '';
+    country = Country.Belgium;
 
     // Reference to messages in loadedLocales
     messages: Map<string, string>;
@@ -73,7 +73,7 @@ export class I18n {
         return this.language + '-' + this.country;
     }
 
-    constructor(language: string, country: string) {
+    constructor(language: string, country: Country) {
         this.language = language;
         this.country = country;
         this.correctLanguageCountryCombination();

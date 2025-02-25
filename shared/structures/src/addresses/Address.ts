@@ -24,7 +24,7 @@ export class Address extends AutoEncoder {
     @field({ decoder: StringDecoder })
     city = '';
 
-    @field({ decoder: CountryDecoder })
+    @field({ decoder: CountryDecoder, defaultValue: () => $getCountry() })
     country: Country;
 
     toString(): string {
@@ -46,7 +46,11 @@ export class Address extends AutoEncoder {
         return this.street + ', ' + this.city + ' (' + CountryHelper.getName(this.country) + ')';
     }
 
-    static createDefault(country = Country.Belgium): Address {
+    /**
+     * @deprecated
+     * Use .create({}) instead
+     */
+    static createDefault(country: Country = $getCountry()): Address {
         return Address.create({
             street: '',
             number: '',

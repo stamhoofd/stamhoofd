@@ -600,7 +600,7 @@ export class RegisterItem implements ObjectWithRecords {
 
         if (this.group.settings.requireDefaultAgeGroupIds.length > 0) {
             const hasGroup = this.member.member.registrations.find((r) => {
-                return r.group.periodId === this.group.periodId && !this.willReplace(r.id) && r.registeredAt !== null && r.deactivatedAt === null && r.group.defaultAgeGroupId && this.group.settings.requireDefaultAgeGroupIds.includes(r.group.defaultAgeGroupId);
+                return r.registeredAt !== null && r.deactivatedAt === null && r.group.defaultAgeGroupId && this.isActivePeriodId(r.group.periodId) && !this.willReplace(r.id) && this.group.settings.requireDefaultAgeGroupIds.includes(r.group.defaultAgeGroupId);
             });
 
             if (!hasGroup && !this.checkout.cart.items.find(item => item.member.id === this.member.id && item.group.defaultAgeGroupId && this.group.settings.requireDefaultAgeGroupIds.includes(item.group.defaultAgeGroupId))) {
@@ -613,7 +613,7 @@ export class RegisterItem implements ObjectWithRecords {
     doesMeetRequireOrganizationIds() {
         if (this.group.settings.requireOrganizationIds.length > 0) {
             const hasGroup = this.member.member.registrations.find((r) => {
-                return r.group.periodId === this.group.periodId && !this.willReplace(r.id) && r.group.type === GroupType.Membership && this.group.settings.requireOrganizationIds.includes(r.organizationId) && r.registeredAt !== null && r.deactivatedAt === null;
+                return r.group.type === GroupType.Membership && r.registeredAt !== null && r.deactivatedAt === null && this.group.settings.requireOrganizationIds.includes(r.organizationId) && this.isActivePeriodId(r.group.periodId) && !this.willReplace(r.id);
             });
 
             if (!hasGroup && !this.checkout.cart.items.find(item => item.member.id === this.member.id && this.group.settings.requireOrganizationIds.includes(item.organization.id))) {
@@ -860,6 +860,23 @@ export class RegisterItem implements ObjectWithRecords {
             periodId: previousPeriodId,
         });
         return reg.length === 0;
+    }
+
+    /**
+     * Return wheter a given period id matches the period of this group for a requirement.
+     * E.g. if you need to be registered for a default age group or organization, only count registrations that are in an active period.
+     *
+     * This evaluates to either the period of the group or the current period of the organization. The platform period is ignored and does not count as active.
+     * This allows organizations to switch to a new period earlier and disable allowing registrations of the previous organization as being valid.
+     */
+    isActivePeriodId(periodId: string) {
+        if (periodId === this.group.periodId) {
+            return true;
+        }
+        if (periodId === this.organization.period.period.id) {
+            return true;
+        }
+        return false;
     }
 
     validatePeriod(group: Group, type: 'move' | 'register', admin = false) {

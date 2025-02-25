@@ -1,6 +1,5 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { BalanceItemFactory, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, OrganizationRegistrationPeriod, Platform, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { QueueHandler } from '@stamhoofd/queues';
 import { AdministrationFeeSettings, BalanceItemCartItem, BalanceItemStatus, BalanceItemType, BooleanStatus, DefaultAgeGroup, FreeContributionSettings, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, PermissionLevel, Permissions, PlatformMembershipType, PlatformMembershipTypeConfig, ReceivableBalanceType, ReduceablePrice, RegisterItemOption, Version } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { GetMemberFamilyEndpoint } from '../../src/endpoints/global/members/GetMemberFamilyEndpoint';
