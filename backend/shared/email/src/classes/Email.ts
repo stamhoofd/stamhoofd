@@ -1,12 +1,12 @@
-import { DataValidator, Formatter } from '@stamhoofd/utility';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { I18n } from '@stamhoofd/backend-i18n';
+import { Country } from '@stamhoofd/structures';
+import { DataValidator, Formatter, sleep } from '@stamhoofd/utility';
+import htmlToText from 'html-to-text';
 import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
-import { EmailAddress } from '../models/EmailAddress';
-import htmlToText from 'html-to-text';
-import { sleep } from '@stamhoofd/utility';
-import { I18n } from '@stamhoofd/backend-i18n';
-import { SimpleError } from '@simonbackx/simple-errors';
 import { type default as Postmark } from 'postmark';
+import { EmailAddress } from '../models/EmailAddress';
 
 // Importing postmark returns undefined (this is a bug, so we need to use require)
 
@@ -337,7 +337,7 @@ class EmailStatic {
 
         // Clean bcc
         let bccRecipients: EmailInterfaceRecipient[] = [];
-        if (data.bcc) {    
+        if (data.bcc) {
             // Filter
             bccRecipients.push(...(await EmailAddress.filterSendTo(this.parseTo(data.bcc))));
 
@@ -349,16 +349,18 @@ class EmailStatic {
         }
 
         // Rebuild to
-        const bcc = bccRecipients.length === 0 ? undefined : bccRecipients.map((recipient) => {
-            if (!recipient.name) {
-                return recipient.email;
-            }
-            const cleanedName = Formatter.emailSenderName(recipient.name);
-            if (cleanedName.length < 2) {
-                return recipient.email;
-            }
-            return '"' + cleanedName + '" <' + recipient.email + '>';
-        }).join(', ');
+        const bcc = bccRecipients.length === 0
+            ? undefined
+            : bccRecipients.map((recipient) => {
+                if (!recipient.name) {
+                    return recipient.email;
+                }
+                const cleanedName = Formatter.emailSenderName(recipient.name);
+                if (cleanedName.length < 2) {
+                    return recipient.email;
+                }
+                return '"' + cleanedName + '" <' + recipient.email + '>';
+            }).join(', ');
 
         this.setupIfNeeded();
 
@@ -519,7 +521,7 @@ class EmailStatic {
     }
 
     getWebmasterFromEmail() {
-        return '"' + (STAMHOOFD.platformName ?? 'Stamhoofd') + ' " <webmaster@' + (new I18n('nl', 'BE').localizedDomains.defaultTransactionalEmail()) + '>';
+        return '"' + (STAMHOOFD.platformName ?? 'Stamhoofd') + ' " <webmaster@' + (new I18n('nl', Country.Belgium).localizedDomains.defaultTransactionalEmail()) + '>';
     }
 
     getWebmasterToEmail() {
