@@ -13,24 +13,25 @@ interface TranslateVueFilesOptions {
 
 export async function translateVueFiles(options: TranslateVueFilesOptions = {}) {
     const files = getFilesToSearch(['vue']);
-    const dryRun = options.dryRun;
 
     if(options.replaceChangesOnly) {
         const changedFiles = getChangedFiles('vue');
         
         for (const filePath of files.filter(filePath => changedFiles.has(filePath))) {
-            await translateVueFileHelper(filePath, options, dryRun);
+            await translateVueFileHelper(filePath, options);
         }
 
         return;
     }
 
     for (const filePath of files) {
-        await translateVueFileHelper(filePath, options, dryRun);
+        await translateVueFileHelper(filePath, options);
     }
 }
 
-export async function translateVueFileHelper(filePath: string, options: TranslateVueFileOptions, dryRun = false) {
+type TranslateVueFileHelperOptions = Omit<TranslateVueFileOptions, 'replaceChangesOnly'> & {dryRun?: boolean, replaceChangesOnly?: boolean}
+
+export async function translateVueFileHelper(filePath: string, options: TranslateVueFileHelperOptions) {
     const fileOptions: TranslateVueFileOptions = {
         attributeWhiteList: options.attributeWhiteList ?? new Set([
             'placeholder',
@@ -40,9 +41,10 @@ export async function translateVueFileHelper(filePath: string, options: Translat
         ]),
         doPrompt: options.doPrompt === undefined ? true : options.doPrompt,
         onBeforePrompt: () => {
-            console.clear();
+            // console.clear();
             console.log(chalk.blue(filePath));
-        }
+        },
+        replaceChangesOnly: options.replaceChangesOnly ? {filePath} : undefined
     };
 
     const fileContent = fs.readFileSync(filePath, "utf8");
@@ -54,7 +56,7 @@ export async function translateVueFileHelper(filePath: string, options: Translat
 
     const translation = await translateVueTemplate(templateContent, fileOptions);
 
-    if(!dryRun) {
+    if(!options.dryRun) {
         const newFileContent = replaceTemplate(fileContent, translation);
         fs.writeFileSync(filePath, newFileContent);
     }

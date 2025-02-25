@@ -1,5 +1,4 @@
 import { X2jOptions, XMLParser } from "fast-xml-parser";
-import { translateHtml } from "./translate-html";
 
 const parsingOptions: X2jOptions = {
     ignoreAttributes: false,
@@ -8,6 +7,7 @@ const parsingOptions: X2jOptions = {
     stopNodes : [ "*.pre", "*.script"],
     processEntities: false,
     allowBooleanAttributes: true,
+    commentPropName: "#comment"
     // unpairedTags: ["unpaired"]
   };
 
@@ -25,9 +25,11 @@ export async function test() {
     // </template>`;
 
     const text = ` <template #left>
+     
                                     <img src="@stamhoofd/assets/images/illustrations/calculator.svg" :test="'abc'">
                                 </template>
-                                <h2 class="style-title-list">
+                                <!--Student details-->
+                                <h2 [test-placeholder] class="style-title-list">
                                     {{ $t('77e1bb0a-166c-4d37-9dd6-c5ad10a9d91b') }}
                                 </h2>
                                 <p class="style-description">
@@ -37,7 +39,10 @@ export async function test() {
                                     <span class="icon external gray" />
                                 </template>`;
 
-    const result = await translateHtml(text, {attributeWhiteList: new Set(['test']), doPrompt: true});
-    // const result = parser.parse(text);
+    // const text = `<div>test</div>`;
+
+    // const result = await translateHtml(text, {attributeWhiteList: new Set(['test']), doPrompt: true});
+    const result = parser.parse(text);
+    console.log(result);
     // console.log(result[0].template);
 }

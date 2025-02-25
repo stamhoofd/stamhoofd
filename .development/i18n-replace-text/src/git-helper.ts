@@ -14,10 +14,26 @@ export function getChanges(filePath: string) {
     });
 }
 
-
-interface DiffChunk {
+export interface DiffChunk {
     lineNumber: number;
     newLineValues: string[]
+}
+
+export interface DiffChunk2 {
+    startIndex: number;
+    endIndex: number;
+}
+
+export function getDiffChunks2(filePath: string): DiffChunk2[] {
+    const changes = getChanges(filePath);
+    const firstChunkIndex = changes.findIndex(isDiffChunkHeader);
+    if(firstChunkIndex === -1) {
+        return [];
+    }
+
+    return changes.slice(firstChunkIndex)
+        .filter(isDiffChunkHeader)
+        .map(getStartAndEndIndexFromDifChunkHeader);
 }
 
 export function getDiffChunks(filePath: string): DiffChunk[] {
@@ -52,6 +68,34 @@ export function getDiffChunks(filePath: string): DiffChunk[] {
 
 function isDiffChunkHeader(line: string): boolean {
     return line.startsWith('@@');
+}
+
+function getStartAndEndIndexFromDifChunkHeader(diffChunkHeader: string): DiffChunk2 {
+    const match = diffChunkHeader.match(/\+([0-9]+),([0-9]+)/);
+    
+    if(match === null) {
+        const match = diffChunkHeader.match(/\+([0-9]+)/);
+
+        if(match === null) {
+            throw new Error('Failed to read start and end index from diff chunk header, header: '+ diffChunkHeader);
+        }
+
+        const startIndex = parseInt(match[1]) - 1;
+        const endIndex = startIndex;
+    
+        return {
+            startIndex,
+            endIndex
+        }
+    }
+
+    const startIndex = parseInt(match[1]) - 1;
+    const endIndex = startIndex + parseInt(match[2]) - 1;
+
+    return {
+        startIndex,
+        endIndex
+    }
 }
 
 function getLineNumberFromDiffChunkHeader(line: string): number {
