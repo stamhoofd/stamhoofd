@@ -179,20 +179,6 @@ export class Organization extends QueryableModel {
     /**
      * Get an Organization by looking at the host of a request
      * Format is 2331c59a-0cbe-4279-871c-ea9d0474cd54.api.stamhoofd.app
-     * + switch country if needed
-     */
-    static async getFromRequest(request: DecodedRequest<any, any, any>): Promise<Organization> {
-        const organization = await Organization.fromApiHost(request.host);
-
-        const i18n = I18n.fromRequest(request);
-        i18n.switchToLocale({ country: organization.address.country });
-
-        return organization;
-    }
-
-    /**
-     * Get an Organization by looking at the host of a request
-     * Format is 2331c59a-0cbe-4279-871c-ea9d0474cd54.api.stamhoofd.app
      */
     static async fromApiHost(host: string, options?: { allowInactive?: boolean }): Promise<Organization> {
         const splitted = host.split('.');

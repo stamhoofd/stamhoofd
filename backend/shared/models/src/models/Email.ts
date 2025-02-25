@@ -194,7 +194,7 @@ export class Email extends QueryableModel {
     }
 
     getDefaultFromAddress(organization?: Organization | null): string {
-        const i18n = new I18n('nl', 'BE');
+        const i18n = new I18n($getLanguage(), $getCountry());
         let address = 'noreply@' + i18n.localizedDomains.defaultBroadcastEmail();
 
         if (organization) {

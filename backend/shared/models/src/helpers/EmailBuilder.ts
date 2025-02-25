@@ -1,10 +1,10 @@
 import { Email, EmailAddress, EmailBuilder } from '@stamhoofd/email';
-import { Platform as PlatformStruct, BalanceItem as BalanceItemStruct, EmailTemplateType, OrganizationEmail, ReceivableBalanceType, Recipient, Replacement } from '@stamhoofd/structures';
+import { BalanceItem as BalanceItemStruct, Country, EmailTemplateType, OrganizationEmail, Platform as PlatformStruct, ReceivableBalanceType, Recipient, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import { CachedBalance, EmailTemplate, Group, Organization, Platform, User, Webshop } from '../models';
 import { I18n } from '@stamhoofd/backend-i18n';
+import { CachedBalance, EmailTemplate, Group, Organization, Platform, User, Webshop } from '../models';
 
 export type EmailTemplateOptions = {
     type: EmailTemplateType;
@@ -122,7 +122,7 @@ export async function getDefaultEmailFrom(organization: Organization | null, opt
     const platform = await Platform.getSharedPrivateStruct();
 
     // Default e-mail if no email addresses are configured
-    const i18n = new I18n('nl', 'BE');
+    const i18n = new I18n($getLanguage(), $getCountry());
     const transactionalDomain = i18n.localizedDomains.defaultTransactionalEmail();
     const broadcastDomain = i18n.localizedDomains.defaultBroadcastEmail();
     const domain = (options.type === 'transactional' ? transactionalDomain : broadcastDomain);

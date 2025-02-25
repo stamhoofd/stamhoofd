@@ -58,7 +58,7 @@ export class I18n {
             const l = locale.substr(0, 2).toLowerCase();
             const c = locale.substr(3, 2).toUpperCase();
 
-            return languages.includes(l) && countries.includes(c);
+            return languages.includes(l) && (countries as string[]).includes(c);
         }
         return false;
     }
@@ -118,7 +118,7 @@ export class I18n {
 
     switchToLocale(options: {
         language?: string;
-        country?: string;
+        country?: Country;
     }) {
         this.country = options.country ?? this.country;
         this.language = options.language ?? this.language;
@@ -141,7 +141,7 @@ export class I18n {
         const localeHeader = request.headers['x-locale'];
         if (localeHeader && typeof localeHeader === 'string' && this.isValidLocale(localeHeader)) {
             const l = localeHeader.substr(0, 2).toLowerCase();
-            const c = localeHeader.substr(3, 2).toUpperCase();
+            const c = localeHeader.substr(3, 2).toUpperCase() as Country;
 
             const i18n = new I18n(l, c);
             (request as any)._cached_i18n = i18n;
@@ -172,7 +172,7 @@ export class I18n {
                 }
                 else if (locale.length === 5 && this.isValidLocale(locale)) {
                     const l = locale.substr(0, 2).toLowerCase();
-                    const c = locale.substr(3, 2).toUpperCase();
+                    const c = locale.substr(3, 2).toUpperCase() as Country;
 
                     // Lang + country
                     const i18n = new I18n(l, c);

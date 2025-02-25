@@ -1,2 +1,2 @@
-export const countries = ["BE","NL", "FR"]
-export const languages = ["nl", "en"]
+export const countries: GlobalCountry[] = ['BE', 'NL', 'FR'] as GlobalCountry[];
+export const languages = ['nl', 'en'];
