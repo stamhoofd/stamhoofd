@@ -69,7 +69,7 @@
         </STInputBox>
 
         <template v-if="$feature('member-trials')">
-            <STInputBox :title="$t('Aantal dagen op proef' + '*')" error-fields="trialDays" :error-box="errors.errorBox">
+            <STInputBox :title="$t('Aantal dagen op proef')+ '*'" error-fields="trialDays" :error-box="errors.errorBox">
                 <NumberInput v-model="trialDays" suffix="dagen" suffix-singular="dag" :min="0" />
             </STInputBox>
             <p class="style-description-small">
