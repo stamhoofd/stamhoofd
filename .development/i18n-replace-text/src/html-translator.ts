@@ -14,6 +14,10 @@ export interface HtmlTranslatorOptions {
     replaceChangesOnly?: {
         filePath: string
     };
+    fileProgress?: {
+        current: number,
+        total: number
+    }
 }
 
 type HtmlTranslatorContext = {
@@ -24,23 +28,46 @@ type HtmlTranslatorContext = {
 export class HtmlTranslator {
     private readonly htmlBuilder: XMLBuilder;
     private readonly htmlParser: XMLParser;
+    private areCurrentLinesChanged = false;
     private isChanged = false;
+    private _currentMatchCount = 0;
+    private totalMatchCount = 0;
     private static readonly PLACEHOLDER = '[[html-translator-placeholder]]';
     private static readonly START_CHANGE_MARKER = startChangeMarker;
     private static readonly END_CHANGE_MARKER = endChangeMarker;
     private readonly shouldCheckChanges: boolean;
+    private readonly fileProgressText: string;
+
+    get currentMatchCount() {
+        return this._currentMatchCount;
+    }
 
     constructor(readonly options: HtmlTranslatorOptions = {}) {
         this.htmlBuilder = this.initHtmlBuilder();
         this.htmlParser = this.initHtmlParser();
         this.shouldCheckChanges = this.options.replaceChangesOnly !== undefined;
+        this.fileProgressText = options.fileProgress ? chalk.gray(` (File ${options.fileProgress.current} / ${options.fileProgress.total})`) : '';
     }
 
-    async translate(html: string) {
+    private async getTotalMatchCount(html: string): Promise<number> {
+        const copyTranslator = new HtmlTranslator({...this.options, doPrompt: false});
+        await copyTranslator.translate(html);
+        return copyTranslator.currentMatchCount;
+    }
+
+    async translate(html: string): Promise<string> {
+        this._currentMatchCount = 0;
+        this.isChanged = false;
+
+        if(this.options.doPrompt) {
+            this.totalMatchCount = await this.getTotalMatchCount(html);
+        }
+
+        const originalHtml = html;
         if(this.shouldCheckChanges) {
             html = addChangeMarkers(this.options.replaceChangesOnly!.filePath, html);
         } else {
-            this.isChanged = true;
+            this.areCurrentLinesChanged = true;
         }
         
         const object = this.htmlParser.parse(html);
@@ -69,6 +96,10 @@ export class HtmlTranslator {
             await this.processArray(parent, source);
         } else if(typeof source === 'object') {
             await this.processRecord(parent, source);
+        }
+
+        if(!this.isChanged) {
+            return originalHtml;
         }
 
         const newHtml = this.htmlBuilder.build(source);
@@ -247,7 +278,7 @@ export class HtmlTranslator {
         const completeContextBefore = before + processedParts;
         let contextBefore = completeContextBefore.substring(completeContextBefore.length - maxContextLength);
         let contextAfter = removeChangeMarkers((unprocessedPart + after)).substring(0, maxContextLength);
-    
+
         console.log(chalk.underline.white(`
 MATCH:`))
         console.log(chalk.gray(contextBefore)+chalk.red(part)+chalk.gray(contextAfter));
@@ -264,6 +295,7 @@ REPLACEMENT:`))
     
         console.log(`
 `);
+        console.log(chalk.white(`Match ${this._currentMatchCount} / ${this.totalMatchCount}` )+ this.fileProgressText);
     }
 
     private async processAttributes(parent: Record<string, any>, record: Record<string, any>) {
@@ -278,7 +310,7 @@ REPLACEMENT:`))
     
         for(let [attributeKey, attributeValue] of attributes) {
             this.checkIsStartOrEndChange(attributeKey);
-            let isChanged = this.isChanged;
+            let isChanged = this.areCurrentLinesChanged;
 
             if(typeof attributeValue === 'string') {
                 attributeValue = this.setIsChangedAndRemoveMarkers(attributeValue);
@@ -321,7 +353,7 @@ REPLACEMENT:`))
 
     private checkIsStartChange(value: string): boolean {
         if(this.shouldCheckChanges && value.includes(HtmlTranslator.START_CHANGE_MARKER)) {
-            this.isChanged = true;
+            this.areCurrentLinesChanged = true;
             return true;
         }
 
@@ -330,7 +362,7 @@ REPLACEMENT:`))
 
     private checkIsEndChange(value: string): boolean {
         if(this.shouldCheckChanges && value.includes(HtmlTranslator.END_CHANGE_MARKER)) {
-            this.isChanged = false;
+            this.areCurrentLinesChanged = false;
             return true;
         }
 
@@ -340,7 +372,7 @@ REPLACEMENT:`))
     private setIsChangedAndRemoveMarkers(value: string): string | null {
         const startIndex = value.indexOf(HtmlTranslator.START_CHANGE_MARKER);
         const endIndex = value.indexOf(HtmlTranslator.END_CHANGE_MARKER);
-        const originalIsChanged = this.isChanged;
+        const originalIsChanged = this.areCurrentLinesChanged;
 
         if(startIndex === -1) {
             if(endIndex === -1) {
@@ -351,7 +383,7 @@ REPLACEMENT:`))
                 return null;
             }
 
-            this.isChanged = false;
+            this.areCurrentLinesChanged = false;
 
             // should not translate if the marker is at the beginning
             if(endIndex === 0) {
@@ -366,11 +398,11 @@ REPLACEMENT:`))
         }
 
         if(endIndex === -1) {
-            this.isChanged = true;
+            this.areCurrentLinesChanged = true;
             return value.replace(HtmlTranslator.START_CHANGE_MARKER, '');
         }
 
-        this.isChanged = startIndex > endIndex;
+        this.areCurrentLinesChanged = startIndex > endIndex;
         return value.replace(HtmlTranslator.START_CHANGE_MARKER, '').replace(HtmlTranslator.END_CHANGE_MARKER, '')
     }
 
@@ -392,8 +424,16 @@ REPLACEMENT:`))
     
             const translatedPart = translate(value);
             const isTranslated = translatedPart !== value;
+
+            if(isTranslated) {
+                this._currentMatchCount = this._currentMatchCount + 1;
+            }
     
             const canTranslate = isTranslated && (!this.options.doPrompt || await this.prompt(parent, record, key, value, translatedPart, processedParts.join(''), getUnprocessedpart(i), transformContext));
+
+            if(canTranslate) {
+                this.isChanged = true;
+            }
     
             processedParts.push(canTranslate ? translatedPart : value);
         }

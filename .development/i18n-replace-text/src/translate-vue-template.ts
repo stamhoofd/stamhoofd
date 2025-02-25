@@ -6,6 +6,10 @@ export interface TranslateVueFileOptions {
     onBeforePrompt?: () => void,
     replaceChangesOnly?: {
         filePath: string
+    },
+    fileProgress?: {
+        current: number,
+        total: number
     }
 }
 

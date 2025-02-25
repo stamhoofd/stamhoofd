@@ -13,25 +13,34 @@ interface TranslateVueFilesOptions {
 
 export async function translateVueFiles(options: TranslateVueFilesOptions = {}) {
     const files = getFilesToSearch(['vue']);
+    let filesToLoop: string[];
 
     if(options.replaceChangesOnly) {
         const changedFiles = getChangedFiles('vue');
-        
-        for (const filePath of files.filter(filePath => changedFiles.has(filePath))) {
-            await translateVueFileHelper(filePath, options);
-        }
-
-        return;
+        filesToLoop = files.filter(filePath => changedFiles.has(filePath));
+    } else {
+        filesToLoop = files;
     }
+    
+    const totalFiles = filesToLoop.length;
 
-    for (const filePath of files) {
-        await translateVueFileHelper(filePath, options);
+    for (let i = 0; i < filesToLoop.length; i++) {
+        const filePath = filesToLoop[i];
+        const fileProgress = {
+            current: i + 1,
+            total: totalFiles
+        }
+        
+        await translateVueFileHelper(filePath, options, fileProgress);
     }
 }
 
 type TranslateVueFileHelperOptions = Omit<TranslateVueFileOptions, 'replaceChangesOnly'> & {dryRun?: boolean, replaceChangesOnly?: boolean}
 
-export async function translateVueFileHelper(filePath: string, options: TranslateVueFileHelperOptions) {
+export async function translateVueFileHelper(filePath: string, options: TranslateVueFileHelperOptions, fileProgress?: {
+    current: number,
+    total: number
+}) {
     const fileOptions: TranslateVueFileOptions = {
         attributeWhiteList: options.attributeWhiteList ?? new Set([
             'placeholder',
@@ -44,7 +53,8 @@ export async function translateVueFileHelper(filePath: string, options: Translat
             // console.clear();
             console.log(chalk.blue(filePath));
         },
-        replaceChangesOnly: options.replaceChangesOnly ? {filePath} : undefined
+        replaceChangesOnly: options.replaceChangesOnly ? {filePath} : undefined,
+        fileProgress
     };
 
     const fileContent = fs.readFileSync(filePath, "utf8");
@@ -56,9 +66,18 @@ export async function translateVueFileHelper(filePath: string, options: Translat
 
     const translation = await translateVueTemplate(templateContent, fileOptions);
 
-    if(!options.dryRun) {
-        const newFileContent = replaceTemplate(fileContent, translation);
-        fs.writeFileSync(filePath, newFileContent);
+    if(translation !== templateContent) {
+        const infoText = options.dryRun ? 'Completed with changes (dry-run)' : 'Write file';
+
+        console.log(chalk.magenta(`
+${infoText}: `) + chalk.gray(filePath) + `
+`)
+
+        if(!options.dryRun) {
+            const newFileContent = replaceTemplate(fileContent, translation);
+            
+            fs.writeFileSync(filePath, newFileContent);
+        }
     }
 }
 
