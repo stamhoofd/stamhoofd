@@ -1,7 +1,7 @@
 <template>
     <div>
         <STErrorsDefault :error-box="errors.errorBox" />
-        <PrefixInput v-model="uri" placeholder="Vul ene URI in" :prefix="prefix" @blur="onBlur" />
+        <PrefixInput v-model="uri" placeholder="Vul een URI in" :prefix="prefix" @blur="onBlur" />
         <template v-if="errors.errorBox === null && (checkingAvailability || (isAvailable !== null)) ">
             <p v-if="checkingAvailability" class="loading-box">
                 <Spinner />
@@ -26,7 +26,7 @@
 <script lang="ts" setup>
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { ErrorBox, PrefixInput, Validator, useErrors, useValidation, Spinner } from '@stamhoofd/components';
+import { ErrorBox, PrefixInput, Spinner, Validator, useErrors, useValidation } from '@stamhoofd/components';
 import { NetworkManager, useRequestOwner } from '@stamhoofd/networking';
 import { Formatter, throttle } from '@stamhoofd/utility';
 import { ref, watch } from 'vue';
