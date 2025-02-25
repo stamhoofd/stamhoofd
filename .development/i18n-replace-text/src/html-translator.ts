@@ -16,6 +16,11 @@ export interface HtmlTranslatorOptions {
     };
 }
 
+type HtmlTranslatorContext = {
+    before: string;
+    after: string;
+}
+
 export class HtmlTranslator {
     private readonly htmlBuilder: XMLBuilder;
     private readonly htmlParser: XMLParser;
@@ -171,12 +176,12 @@ export class HtmlTranslator {
         return `${whiteSpaceBefore}{{${wrapWithTranslationFunction(trimmed)}}}${whiteSpaceAfter}`
     }
 
-    private async prompt(parent: Record<string, any>, record: Record<string, string>, key: string, part: string, translatedPart: string, processedParts: string, unprocessedPart: string): Promise<boolean> {
+    private async prompt(parent: Record<string, any>, record: Record<string, string>, key: string, part: string, translatedPart: string, processedParts: string, unprocessedPart: string, transformContext?: (context: HtmlTranslatorContext) => HtmlTranslatorContext): Promise<boolean> {
         if(this.options.onBeforePrompt) {
             this.options.onBeforePrompt();
         }
     
-        this.logContext(parent, record, key, part, translatedPart, processedParts, unprocessedPart);
+        this.logContext(parent, record, key, part, translatedPart, processedParts, unprocessedPart, transformContext);
         return await promptBoolean(chalk.yellow(`> Accept (press [y] or [enter])?`));
     }
 
@@ -233,17 +238,25 @@ export class HtmlTranslator {
         return parts;
     }
 
-    private logContext(parent: Record<string, any>, record: Record<string, string>, key: string, part: string, translatedPart: string, processedParts: string, unprocessedPart: string) {
+    
+
+    private logContext(parent: Record<string, any>, record: Record<string, string>, key: string, part: string, translatedPart: string, processedParts: string, unprocessedPart: string, transformContext?: (context: HtmlTranslatorContext) => HtmlTranslatorContext) {
         const [before, after] = this.getTextBeforeAndAfterChildHtmlObject(parent, record, key);
     
-        const maxContextLength = 500;
+        const maxContextLength = 100;
         const completeContextBefore = before + processedParts;
-        const contextBefore = completeContextBefore.substring(completeContextBefore.length - maxContextLength);
-        const contextAfter = (unprocessedPart + after).substring(0, maxContextLength);
+        let contextBefore = completeContextBefore.substring(completeContextBefore.length - maxContextLength);
+        let contextAfter = removeChangeMarkers((unprocessedPart + after)).substring(0, maxContextLength);
     
         console.log(chalk.underline.white(`
 MATCH:`))
         console.log(chalk.gray(contextBefore)+chalk.red(part)+chalk.gray(contextAfter));
+
+        if(transformContext) {
+            const newContext = transformContext({before: contextBefore, after: contextAfter});
+            contextBefore = newContext.before;
+            contextAfter = newContext.after;
+        }
     
         console.log(chalk.underline.white(`
 REPLACEMENT:`))
@@ -284,7 +297,7 @@ REPLACEMENT:`))
                         if(isReactive) {
                             value[attributeKey] = await this.replaceTextInTypescript(parent, value, attributeKey, attributeValue);
                         } else {
-                            const newValue = await this.replaceTextInNonReactiveAttributeValue(parent, value, attributeKey, attributeValue);
+                            const newValue = await this.replaceTextInNonReactiveAttributeValue(parent, value, attributeKey, attributeValue, attributeName);
                             if(attributeValue !== newValue) {
                                 // make the attribute reactive
                                 const newKey = attributeKey.replace('@_', '@_:')
@@ -340,6 +353,11 @@ REPLACEMENT:`))
 
             this.isChanged = false;
 
+            // should not translate if the marker is at the beginning
+            if(endIndex === 0) {
+                return null;
+            }
+
             if(originalIsChanged) {
                 return value.replace(HtmlTranslator.END_CHANGE_MARKER, '')
             }
@@ -356,7 +374,7 @@ REPLACEMENT:`))
         return value.replace(HtmlTranslator.START_CHANGE_MARKER, '').replace(HtmlTranslator.END_CHANGE_MARKER, '')
     }
 
-    private async translateTextParts(parent: Record<string, any>, record: Record<string, string>, key: string, textParts: {value: string, shouldTranslate: boolean}[], translate: (text: string) => string) {
+    private async translateTextParts(parent: Record<string, any>, record: Record<string, string>, key: string, textParts: {value: string, shouldTranslate: boolean}[], translate: (text: string) => string, transformContext?: (context: HtmlTranslatorContext) => HtmlTranslatorContext) {
 
         const processedParts: string[] = [];
     
@@ -375,7 +393,7 @@ REPLACEMENT:`))
             const translatedPart = translate(value);
             const isTranslated = translatedPart !== value;
     
-            const canTranslate = isTranslated && (!this.options.doPrompt || await this.prompt(parent, record, key, value, translatedPart, processedParts.join(''), getUnprocessedpart(i)));
+            const canTranslate = isTranslated && (!this.options.doPrompt || await this.prompt(parent, record, key, value, translatedPart, processedParts.join(''), getUnprocessedpart(i), transformContext));
     
             processedParts.push(canTranslate ? translatedPart : value);
         }
@@ -411,7 +429,7 @@ REPLACEMENT:`))
         return results;
     }
 
-    private async replaceTextInNonReactiveAttributeValue(parent: Record<string, any>, record: Record<string, string>, key: string, value: string): Promise<string> {
+    private async replaceTextInNonReactiveAttributeValue(parent: Record<string, any>, record: Record<string, string>, key: string, value: string, attributeName: string): Promise<string> {
         const allParts: {value: string, shouldTranslate: boolean}[] = [{
             value,
             shouldTranslate: value !== undefined && value.trim().length > 0
@@ -419,6 +437,16 @@ REPLACEMENT:`))
     
         return await this.translateTextParts(parent, record, key, allParts, (value: string) => {
             return wrapWithTranslationFunction(value);
+        }, context => {
+
+            const insertIndex = attributeName.length + 2;
+            const toInsert = ':';
+            const before = context.before.substring(0, context.before.length - insertIndex) + chalk.green(toInsert) + context.before.substring(context.before.length - insertIndex);
+
+            return {
+                ...context,
+                before 
+            }
         });
     }
 
