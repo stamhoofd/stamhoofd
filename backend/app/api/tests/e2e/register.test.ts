@@ -113,7 +113,7 @@ describe('E2E.Register', () => {
     beforeEach(async () => {
     });
 
-    describe('Register', () => {
+    describe('Register prices and balances', () => {
         test('Register by member should create balance for member', async () => {
             // #region arrange
             const { organization, group, groupPrice, token, member } = await initData();
@@ -155,6 +155,7 @@ describe('E2E.Register', () => {
             expect(balance.body.length).toBe(1);
             expect(balance.body[0].price).toBe(25);
             expect(balance.body[0].pricePaid).toBe(0);
+            expect(balance.body[0].pricePending).toBe(25);
             // #endregion
         });
 
@@ -627,23 +628,29 @@ describe('E2E.Register', () => {
             const balance = await getBalance(member.id, organization, token);
             expect(balance).toBeDefined();
             expect(balance.body.length).toBe(3);
-            expect.arrayContaining([
+            expect(balance.body).toEqual(expect.arrayContaining([
                 expect.objectContaining({
-                    price: 6,
+                    unitPrice: 3,
+                    amount: 2,
+                    pricePending: 6,
                     pricePaid: 0,
                     status: BalanceItemStatus.Due,
                 }),
                 expect.objectContaining({
-                    price: 5,
+                    unitPrice: 21,
                     pricePaid: 0,
+                    pricePending: 21,
+                    amount: 1,
                     status: BalanceItemStatus.Due,
                 }),
                 expect.objectContaining({
-                    price: 25,
+                    unitPrice: 1,
                     pricePaid: 0,
+                    pricePending: 5,
+                    amount: 5,
                     status: BalanceItemStatus.Due,
                 }),
-            ]);
+            ]));
             // #endregion
         });
     });
@@ -731,18 +738,18 @@ describe('E2E.Register', () => {
             expect(balance).toBeDefined();
             expect(balance.body.length).toBe(2);
 
-            expect.arrayContaining([
+            expect(balance.body).toEqual(expect.arrayContaining([
                 expect.objectContaining({
-                    price: 25,
+                    unitPrice: 25,
                     pricePaid: 0,
                     status: BalanceItemStatus.Canceled,
                 }),
                 expect.objectContaining({
-                    price: 30,
+                    unitPrice: 30,
                     pricePaid: 0,
                     status: BalanceItemStatus.Due,
                 }),
-            ]);
+            ]));
             // #endregion
         });
 
@@ -865,28 +872,32 @@ describe('E2E.Register', () => {
             expect(balance).toBeDefined();
             expect(balance.body.length).toBe(4);
 
-            expect.arrayContaining([
+            expect(balance.body).toEqual(expect.arrayContaining([
                 expect.objectContaining({
-                    price: 10,
+                    unitPrice: 5,
+                    amount: 2,
                     pricePaid: 0,
                     status: BalanceItemStatus.Canceled,
                 }),
                 expect.objectContaining({
-                    price: 15,
+                    unitPrice: 3,
                     pricePaid: 0,
+                    amount: 5,
                     status: BalanceItemStatus.Canceled,
                 }),
                 expect.objectContaining({
-                    price: 25,
+                    unitPrice: 25,
                     pricePaid: 0,
+                    amount: 1,
                     status: BalanceItemStatus.Canceled,
                 }),
                 expect.objectContaining({
-                    price: 30,
+                    unitPrice: 30,
                     pricePaid: 0,
+                    amount: 1,
                     status: BalanceItemStatus.Due,
                 }),
-            ]);
+            ]));
             // #endregion
         });
 
@@ -973,24 +984,32 @@ describe('E2E.Register', () => {
             expect(balance).toBeDefined();
             expect(balance.body.length).toBe(3);
 
-            expect.arrayContaining([
+            expect(balance.body).toEqual(expect.arrayContaining([
                 expect.objectContaining({
-                    price: 25,
+                    unitPrice: 25,
                     pricePaid: 0,
+                    pricePending: 0,
+                    amount: 1,
                     status: BalanceItemStatus.Canceled,
+                    type: BalanceItemType.Registration,
                 }),
                 expect.objectContaining({
-                    price: 30,
+                    unitPrice: 30,
                     pricePaid: 0,
+                    pricePending: 0,
+                    amount: 1,
                     status: BalanceItemStatus.Due,
+                    type: BalanceItemType.Registration,
                 }),
                 expect.objectContaining({
-                    price: 5,
+                    unitPrice: 5,
                     pricePaid: 0,
+                    pricePending: 0,
+                    amount: 1,
                     type: BalanceItemType.CancellationFee,
                     status: BalanceItemStatus.Due,
                 }),
-            ]);
+            ]));
             // #endregion
         });
     });
