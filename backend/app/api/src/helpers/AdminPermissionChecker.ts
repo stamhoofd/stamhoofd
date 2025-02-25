@@ -981,7 +981,6 @@ export class AdminPermissionChecker {
     }
 
     async checkRecordAccess(member: MemberWithRegistrations, recordId: string, level: PermissionLevel = PermissionLevel.Read): Promise<{ canAccess: false; record: RecordSettings | null } | { canAccess: true; record: RecordSettings }> {
-        const isUserManager = this.isUserManager(member);
         const record = await MemberRecordStore.getRecord(recordId);
         if (!record) {
             return {
@@ -989,6 +988,15 @@ export class AdminPermissionChecker {
                 record: null,
             };
         }
+
+        if (!this.checkScope(record.organizationId)) {
+            return {
+                canAccess: false,
+                record: record.record,
+            };
+        }
+
+        const isUserManager = this.isUserManager(member);
         if (isUserManager) {
             if (record.record.checkPermissionForUserManager(level)) {
                 return {
@@ -996,13 +1004,6 @@ export class AdminPermissionChecker {
                     record: record.record,
                 };
             }
-        }
-
-        if (!this.checkScope(record.organizationId)) {
-            return {
-                canAccess: false,
-                record: record.record,
-            };
         }
 
         if (!this.user.permissions) {
