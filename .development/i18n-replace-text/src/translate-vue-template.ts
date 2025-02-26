@@ -1,4 +1,4 @@
-import { translateHtml } from "./html-translator";
+import { getTotalMatchCount, translateHtml } from "./html-translator";
 
 export interface TranslateVueFileOptions {
     doPrompt?: boolean,
@@ -7,6 +7,10 @@ export interface TranslateVueFileOptions {
     replaceChangesOnly?: {
         filePath: string
     },
+    totalProgress?: {
+        current: number,
+        total: number
+    }
     fileProgress?: {
         current: number,
         total: number
@@ -15,4 +19,8 @@ export interface TranslateVueFileOptions {
 
 export async function translateVueTemplate(vueTemplate: string, options: TranslateVueFileOptions = {}) {
     return translateHtml(vueTemplate, {skipKeys: new Set(['script', 'style']), ...options});
+}
+
+export async function getVueTemplateMatchCount(vueTemplate: string, options: TranslateVueFileOptions = {}): Promise<number> {
+    return getTotalMatchCount(vueTemplate, {skipKeys: new Set(['script', 'style']), ...options});
 }

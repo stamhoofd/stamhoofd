@@ -14,6 +14,10 @@ export interface HtmlTranslatorOptions {
     replaceChangesOnly?: {
         filePath: string
     };
+    totalProgress?: {
+        current: number,
+        total: number
+    },
     fileProgress?: {
         current: number,
         total: number
@@ -46,10 +50,10 @@ export class HtmlTranslator {
         this.htmlBuilder = this.initHtmlBuilder();
         this.htmlParser = this.initHtmlParser();
         this.shouldCheckChanges = this.options.replaceChangesOnly !== undefined;
-        this.fileProgressText = options.fileProgress ? chalk.gray(` (File ${options.fileProgress.current} / ${options.fileProgress.total})`) : '';
+        this.fileProgressText = options.fileProgress ? chalk.gray(' File ') + chalk.white(`${options.fileProgress.current} / ${options.fileProgress.total}`) : '';
     }
 
-    private async getTotalMatchCount(html: string): Promise<number> {
+    async getTotalMatchCount(html: string): Promise<number> {
         const copyTranslator = new HtmlTranslator({...this.options, doPrompt: false});
         await copyTranslator.translate(html);
         return copyTranslator.currentMatchCount;
@@ -295,7 +299,10 @@ REPLACEMENT:`))
     
         console.log(`
 `);
-        console.log(chalk.white(`Match ${this._currentMatchCount} / ${this.totalMatchCount}` )+ this.fileProgressText);
+        const totalProgress = this.options.totalProgress;
+        const totalProgressText = totalProgress ? chalk.gray(' Total ') + chalk.white(`${totalProgress.current + this._currentMatchCount} / ${totalProgress.total}`) : '';
+
+        console.log(chalk.gray('Match ') +chalk.white(`${this._currentMatchCount} / ${this.totalMatchCount}` )+ chalk.gray(this.fileProgressText) + chalk.gray(totalProgressText));
     }
 
     private async processAttributes(parent: Record<string, any>, record: Record<string, any>) {
@@ -567,4 +574,9 @@ REPLACEMENT:`))
 export async function translateHtml(html: string, options: HtmlTranslatorOptions = {}) {
     const translator = new HtmlTranslator(options);
     return translator.translate(html);
+}
+
+export async function getTotalMatchCount(html: string, options: HtmlTranslatorOptions = {}) {
+    const translator = new HtmlTranslator(options);
+    return translator.getTotalMatchCount(html);
 }
