@@ -38,7 +38,7 @@ export type EmailInterface = EmailInterfaceBase & {
 /// An email builder is called until it returns undefined. This allows to reduce memory usage for an e-mail with multiple recipients
 export type EmailBuilder = () => EmailInterface | undefined;
 
-type InternalEmailData = {
+export type InternalEmailData = {
     from: string;
     bcc: string | undefined;
     replyTo: string | undefined;
@@ -62,6 +62,11 @@ class EmailStatic {
         if (this.transporter) {
             return;
         }
+
+        if (STAMHOOFD.environment === 'test') {
+            throw new Error('When using Email in tests, make sure to use EmailMocker.infect() in jest.setup.ts');
+        }
+
         if (!STAMHOOFD.SMTP_HOST || !STAMHOOFD.SMTP_PORT) {
             throw new Error('Missing environment variables to send emails');
             return;
@@ -130,6 +135,9 @@ class EmailStatic {
             this.sending = true;
             this.doSend(next).catch((e) => {
                 console.error(e);
+                if (next.callback) {
+                    next.callback(e);
+                }
             }).finally(() => {
                 this.sending = false;
                 this.sendNextIfNeeded();
@@ -246,7 +254,9 @@ class EmailStatic {
                 return true;
             }
 
-            console.warn('Filtered email to ' + l + ': not whitelisted');
+            if (STAMHOOFD.environment === 'production') {
+                console.warn('Filtered email ' + l + ': not whitelisted');
+            }
             return false;
         }
 
@@ -264,17 +274,25 @@ class EmailStatic {
     }
 
     private async doSend(data: EmailInterface) {
-        if (STAMHOOFD.environment === 'test') {
-            // Do not send any emails
-            return;
-        }
-
         // Check if this email is not marked as spam
         // Filter recipients if bounced or spam
         let recipients = this.parseTo(data.to);
         if (recipients.length === 0) {
             // Invalid string
-            console.warn("Invalid e-mail string: '" + data.to + "'. E-mail skipped");
+            console.warn('Invalid e-mail string: ' + JSON.stringify(data.to) + '. E-mail skipped');
+
+            try {
+                data.callback?.(
+                    new SimpleError({
+                        code: 'all_filtered',
+                        message: 'Invalid email address',
+                        human: 'Ongeldig e-mailadres',
+                    }),
+                );
+            }
+            catch (e) {
+                console.error('Error in email callback', e);
+            }
             return;
         }
 
@@ -439,12 +457,14 @@ class EmailStatic {
             }
         }
         catch (e) {
-            console.error('Failed to send e-mail:');
-            console.error(e);
-            console.error(mail);
+            if (STAMHOOFD.environment !== 'test') {
+                console.error('Failed to send e-mail:');
+                console.error(e);
+                console.error(mail);
 
-            // Sleep 1 second to give servers some time to fix possible rate limits
-            await sleep(1000);
+                // Sleep 1 second to give servers some time to fix possible rate limits
+                await sleep(1000);
+            }
 
             // Reschedule twice (at maximum) to fix temporary connection issues
             data.retryCount = (data.retryCount ?? 0) + 1;
@@ -457,14 +477,16 @@ class EmailStatic {
             }
             else {
                 try {
-                    data.callback?.(e);
+                    if (data.callback) {
+                        data.callback(e);
+                    }
                 }
                 catch (e2) {
                     console.error('Error in email failure callback', e2, 'for original error', e);
                 }
 
                 // Email address is not verified.
-                if (STAMHOOFD.environment !== 'development') {
+                if (STAMHOOFD.environment === 'production') {
                     if (data.from !== this.getWebmasterFromEmail()) {
                         this.sendWebmaster({
                             subject: 'E-mail kon niet worden verzonden',
@@ -540,10 +562,6 @@ class EmailStatic {
     }
 
     send(data: EmailInterface) {
-        if (STAMHOOFD.environment === 'test') {
-            // Do not send any emails
-            return;
-        }
         let didSend = false;
 
         this.schedule(() => {

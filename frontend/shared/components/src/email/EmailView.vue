@@ -422,26 +422,43 @@ async function patchEmail() {
     }
     catch (e) {
         console.error(e);
-        // patch.value = patch.value ? _savingPatch.patch(patch.value) : _savingPatch
-
         Toast.fromError(e).setHide(20000).show();
     }
     savingPatch.value = null;
 }
 
+const updating = ref(false);
 async function updateEmail() {
     if (!email.value) {
         return;
     }
-    const response = await context.value.authenticatedServer.request({
-        method: 'GET',
-        path: '/email/' + email.value.id,
-        decoder: EmailPreview as Decoder<EmailPreview>,
-        owner,
-        shouldRetry: false,
-    });
 
-    email.value = response.data;
+    if (sending.value || updating.value) {
+        return;
+    }
+
+    if (savingPatch.value) {
+        return;
+    }
+    updating.value = true;
+
+    try {
+        const response = await context.value.authenticatedServer.request({
+            method: 'GET',
+            path: '/email/' + email.value.id,
+            decoder: EmailPreview as Decoder<EmailPreview>,
+            owner,
+            shouldRetry: true,
+        });
+
+        email.value = response.data;
+    }
+    catch (e) {
+        console.error(e);
+        Toast.fromError(e).setHide(2000).show();
+    }
+
+    updating.value = false;
 }
 
 async function manageEmails() {
@@ -500,7 +517,7 @@ async function send() {
 
     try {
         const { text, html } = await getHTML();
-        await context.value.authenticatedServer.request({
+        const resopnse = await context.value.authenticatedServer.request({
             method: 'PATCH',
             path: '/email/' + email.value.id,
             body: Email.patch({

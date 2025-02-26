@@ -5,6 +5,7 @@ import { MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, Organ
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { PatchUserMembersEndpoint } from './PatchUserMembersEndpoint';
 import { Database } from '@simonbackx/simple-database';
+import { TestUtils } from '@stamhoofd/test-utils';
 
 const baseUrl = `/members`;
 const endpoint = new PatchUserMembersEndpoint();
@@ -18,8 +19,8 @@ const birthDay = { year: 1993, month: 4, day: 5 };
 const errorWithCode = (code: string) => expect.objectContaining({ code }) as jest.Constructable;
 
 describe('Endpoint.PatchUserMembersEndpoint', () => {
-    beforeAll(async () => {
-        (STAMHOOFD as any).userMode = 'platform';
+    beforeEach(async () => {
+        TestUtils.setEnvironment('userMode', 'platform');
     });
 
     afterEach(async () => {

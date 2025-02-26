@@ -9,6 +9,7 @@ import { sleep } from '@stamhoofd/utility';
 import nock from 'nock';
 import { GlobalHelper } from '../src/helpers/GlobalHelper';
 import * as jose from 'jose';
+import { TestUtils } from '@stamhoofd/test-utils';
 
 // Set version of saved structures
 Column.setJSONVersion(Version);
@@ -40,6 +41,8 @@ beforeAll(async () => {
     await Database.delete('DELETE FROM `postal_codes`');
     await Database.delete('DELETE FROM `cities`');
     await Database.delete('DELETE FROM `provinces`');
+    await Database.delete('DELETE FROM `email_recipients`');
+    await Database.delete('DELETE FROM `emails`');
 
     await Database.delete('DELETE FROM `webshop_orders`');
     await Database.delete('DELETE FROM `webshops`');
@@ -51,9 +54,6 @@ beforeAll(async () => {
     await Database.delete('DELETE FROM `payments`');
     await Database.delete('OPTIMIZE TABLE organizations;'); // fix breaking of indexes due to deletes (mysql bug?)
 
-    // Resetting environment
-    (STAMHOOFD as any).userMode = 'organization';
-
     // Use random file keys in tests
     const alg = 'ES256';
     (STAMHOOFD as any).FILE_SIGNING_ALG = alg;
@@ -63,8 +63,8 @@ beforeAll(async () => {
     const exportedPublicKey = await jose.exportJWK(publicKey);
     const exportedPrivateKey = await jose.exportJWK(privateKey);
 
-    (STAMHOOFD as any).FILE_SIGNING_PUBLIC_KEY = exportedPublicKey;
-    (STAMHOOFD as any).FILE_SIGNING_PRIVATE_KEY = exportedPrivateKey;
+    TestUtils.setPermanentEnvironment('FILE_SIGNING_PUBLIC_KEY', exportedPublicKey);
+    TestUtils.setPermanentEnvironment('FILE_SIGNING_PRIVATE_KEY', exportedPrivateKey);
 
     await GlobalHelper.load();
 });
@@ -77,3 +77,5 @@ afterAll(async () => {
     }
     await Database.end();
 });
+
+TestUtils.setup();

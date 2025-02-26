@@ -333,6 +333,15 @@ export async function getEmailBuilder(organization: Organization | null, email: 
         email.html = email.html.replaceAll(s.from, s.to);
     }
 
+    if (queue.length === 0) {
+        if (email.callback) {
+            email.callback(new SimpleError({
+                code: 'no_recipients',
+                message: 'No recipients left',
+            }));
+        }
+    }
+
     // Create e-mail builder
     const builder: EmailBuilder = () => {
         const recipient = queue.shift();

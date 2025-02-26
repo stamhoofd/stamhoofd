@@ -1,6 +1,7 @@
 module.exports = {
     setupFilesAfterEnv: [
         'jest-extended/all',
+        './tests/jest.setup.ts',
     ],
     globalSetup: './tests/jest.global.setup.ts',
     testEnvironment: 'node',

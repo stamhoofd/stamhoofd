@@ -8,6 +8,7 @@ import { GetMemberBalanceEndpoint } from '../../src/endpoints/organization/dashb
 import { GetReceivableBalanceEndpoint } from '../../src/endpoints/organization/dashboard/receivable-balances/GetReceivableBalanceEndpoint';
 import { PlatformMembershipService } from '../../src/services/PlatformMembershipService';
 import { testServer } from '../helpers/TestServer';
+import { TestUtils } from '@stamhoofd/test-utils';
 
 describe('E2E.Register', () => {
     // #region global
@@ -46,10 +47,12 @@ describe('E2E.Register', () => {
 
     // #endregion
 
-    beforeAll(async () => {
+    beforeEach(async () => {
         // These tests should run in platform mode
-        (STAMHOOFD as any).userMode = 'platform';
+        TestUtils.setEnvironment('userMode', 'platform');
+    });
 
+    beforeAll(async () => {
         const previousPeriod = await new RegistrationPeriodFactory({
             startDate: new Date(2022, 0, 1),
             endDate: new Date(2022, 11, 31),

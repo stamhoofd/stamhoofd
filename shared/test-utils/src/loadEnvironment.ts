@@ -14,7 +14,7 @@ export function loadEnvironment() {
         globalObject = self;
     }
 
-    (globalObject as any).STAMHOOFD = testEnv;
+    (globalObject as any).STAMHOOFD = JSON.parse(JSON.stringify(testEnv)); // deep clone
 
     (globalObject as any).$t = (key: string, replace?: Record<string, string>) => key;
     (globalObject as any).$getLanguage = () => 'nl';

@@ -32,4 +32,18 @@ export class QueryableModel extends Model {
     static insert(): SQLInsert {
         return SQL.insert(SQL.table(this.table));
     }
+
+    async refresh() {
+        const { fields, skipUpdate } = this.getChangedDatabaseProperties();
+
+        if (Object.keys(fields).length > skipUpdate) {
+            throw new Error('Cannot refresh a model that has unsaved changes');
+        }
+
+        const me = await (this.static as typeof QueryableModel).select().where(this.static.primary.name, this.getPrimaryKey()).first(true);
+
+        for (const column of this.static.columns.values()) {
+            this[column.name] = me[column.name];
+        }
+    }
 }

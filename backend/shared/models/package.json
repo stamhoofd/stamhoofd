@@ -11,7 +11,8 @@
     ],
     "scripts": {
         "build": "tsc -b && mkdir -p ./dist/src/migrations && rsync --delete --exclude='*.ts' --exclude='*.js' -r --checksum ./src/migrations/ ./dist/src/migrations/ && rsync -r --checksum ./src/assets/ ./dist/src/assets/",
-        "test": "jest",
+        "test": "jest --runInBand",
+        "test:build": "yarn -s build && yarn -s test",
         "lint": "eslint"
     },
     "peerDependencies": {
