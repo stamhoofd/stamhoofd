@@ -106,7 +106,7 @@ ${infoText}: `) + chalk.gray(filePath) + `
             fs.writeFileSync(filePath, newFileContent);
 
             if(options.doFix) {
-                eslintFormatter.tryFixFile(filePath);
+                await eslintFormatter.tryFixFile(filePath);
             }
         }
     }

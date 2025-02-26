@@ -120,7 +120,7 @@ export class HtmlTranslator {
     private initHtmlBuilder(): XMLBuilder {
         const builderOptions: XmlBuilderOptions = {
             ignoreAttributes: false,
-            format: true,
+            format: false,
             preserveOrder: true,
             suppressEmptyNode: true,
             unpairedTags: ["hr", "br", "link", "meta", 'img'],
@@ -210,7 +210,7 @@ export class HtmlTranslator {
     
         const {whiteSpaceBefore, whiteSpaceAfter} = getWhiteSpaceBeforeAndAfter(text);
     
-        return `${whiteSpaceBefore}{{${wrapWithTranslationFunction(trimmed)}}}${whiteSpaceAfter}`
+        return `${whiteSpaceBefore}{{ ${wrapWithTranslationFunction(trimmed)} }}${whiteSpaceAfter}`
     }
 
     private async prompt(parent: Record<string, any>, record: Record<string, string>, key: string, part: string, translatedPart: string, processedParts: string, unprocessedPart: string, transformContext?: (context: HtmlTranslatorContext) => HtmlTranslatorContext): Promise<boolean> {
