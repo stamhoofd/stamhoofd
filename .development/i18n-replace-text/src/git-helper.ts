@@ -1,4 +1,3 @@
-import chalk from 'chalk';
 import { execSync } from 'child_process';
 import { globals } from './globals';
 
@@ -10,7 +9,6 @@ export interface GetGitChangesOptions {
 export function getChanges(filePath: string, options: GetGitChangesOptions = {}) {
     const compareText = options.compare ? `${options.compare[0]} ${options.compare[1]} ` : '';
     const command = `git diff -U0 ${compareText}${filePath}`;
-    console.log(chalk.cyan(command));
 
     const diffOutput = execSync(command).toString();
 
@@ -82,7 +80,7 @@ export function getChangedFiles(extension: string = '', options: GetGitChangedFi
 
     const compareText = options.compare ? `${options.compare[0]} ${options.compare[1]} ` : '';
     const command = `git diff --name-only ${compareText}${root}`;
-    console.log(chalk.cyan(command));
+    
     const diffOutput = execSync(command).toString();
     return new Set(diffOutput.toString().split('\n').map(file => root + '/' + file).filter(file => file.endsWith(extensionWithDot)));
 }

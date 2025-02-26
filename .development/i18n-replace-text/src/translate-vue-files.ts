@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import fs from "fs";
+import { eslintFormatter } from "./eslint-formatter";
 import { getFilesToSearch } from "./get-files-to-search";
 import { getChangedFiles } from "./git-helper";
 import { getVueTemplateMatchCount, TranslateVueFileOptions, translateVueTemplate } from "./translate-vue-template";
@@ -8,6 +9,7 @@ interface TranslateVueFilesOptions {
     replaceChangesOnly?: boolean;
     commitsToCompare?: [string, string];
     doPrompt?: boolean;
+    doFix?: boolean;
     dryRun?: boolean;
     attributeWhiteList?: Set<string>;
 }
@@ -61,7 +63,7 @@ export async function translateVueFiles(options: TranslateVueFilesOptions = {}) 
     }
 }
 
-type TranslateVueFileHelperOptions = Omit<TranslateVueFileOptions, 'replaceChangesOnly'> & {dryRun?: boolean, replaceChangesOnly?: boolean}
+type TranslateVueFileHelperOptions = Omit<TranslateVueFileOptions, 'replaceChangesOnly'> & {dryRun?: boolean, replaceChangesOnly?: boolean, doFix?: boolean}
 
 export async function translateVueFileHelper(filePath: string, options: TranslateVueFileHelperOptions, fileProgress?: {
     current: number,
@@ -102,6 +104,10 @@ ${infoText}: `) + chalk.gray(filePath) + `
             const newFileContent = replaceTemplate(fileContent, translation);
             
             fs.writeFileSync(filePath, newFileContent);
+
+            if(options.doFix) {
+                eslintFormatter.tryFixFile(filePath);
+            }
         }
     }
 }

@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { globals } from "./globals";
 
-export function getFilesToSearch(types: ('vue' | 'typescript')[]): string[] {
+export function getFilesToSearch(types: ('vue' | 'typescript' | 'eslint')[]): string[] {
     const root = globals.I18NUUID_ROOT;
     
     const includes: RegExp[] = [];
@@ -13,6 +13,10 @@ export function getFilesToSearch(types: ('vue' | 'typescript')[]): string[] {
 
     if(types.includes('typescript')) {
         includes.push(/^[^.]+.ts$/);
+    }
+
+    if(types.includes('eslint')) {
+        includes.push(/^[^.]+eslint.config.mjs$/);
     }
 
     const excludeDirectories = globals.I18NUUID_EXCLUDE_DIRS_ARRAY;
