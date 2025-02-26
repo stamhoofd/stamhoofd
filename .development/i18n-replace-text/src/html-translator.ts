@@ -12,7 +12,8 @@ export interface HtmlTranslatorOptions {
     attributeWhiteList?: Set<string>,
     onBeforePrompt?: () => void,
     replaceChangesOnly?: {
-        filePath: string
+        filePath: string,
+        commitsToCompare?: [string, string]
     };
     totalProgress?: {
         current: number,
@@ -69,7 +70,8 @@ export class HtmlTranslator {
 
         const originalHtml = html;
         if(this.shouldCheckChanges) {
-            html = addChangeMarkers(this.options.replaceChangesOnly!.filePath, html);
+            const {filePath, commitsToCompare} = this.options.replaceChangesOnly!;
+            html = addChangeMarkers(filePath, html, commitsToCompare);
         } else {
             this.areCurrentLinesChanged = true;
         }

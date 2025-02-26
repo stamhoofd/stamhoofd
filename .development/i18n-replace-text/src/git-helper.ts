@@ -1,9 +1,17 @@
+import chalk from 'chalk';
 import { execSync } from 'child_process';
 import { globals } from './globals';
 
-// todo: specify commit to compare
-export function getChanges(filePath: string) {
-    const command = `git diff -U0 ${filePath}`;
+export interface GetGitChangesOptions {
+    // ids of commits to compare
+    compare?: [string, string]
+}
+
+export function getChanges(filePath: string, options: GetGitChangesOptions = {}) {
+    const compareText = options.compare ? `${options.compare[0]} ${options.compare[1]} ` : '';
+    const command = `git diff -U0 ${compareText}${filePath}`;
+    console.log(chalk.cyan(command));
+
     const diffOutput = execSync(command).toString();
 
     return diffOutput.split('\n').filter(line => {
@@ -13,13 +21,14 @@ export function getChanges(filePath: string) {
         return line.trim().length > 0
     });
 }
+
 export interface DiffChunk {
     startIndex: number;
     endIndex: number;
 }
 
-export function getDiffChunks(filePath: string): DiffChunk[] {
-    const changes = getChanges(filePath);
+export function getDiffChunks(filePath: string, options: GetGitChangesOptions = {}): DiffChunk[] {
+    const changes = getChanges(filePath, options);
     const firstChunkIndex = changes.findIndex(isDiffChunkHeader);
     if(firstChunkIndex === -1) {
         return [];
@@ -62,11 +71,18 @@ function getStartAndEndIndexFromDifChunkHeader(diffChunkHeader: string): DiffChu
     }
 }
 
-export function getChangedFiles(extension: string = ''): Set<string> {
+export interface GetGitChangedFilesOptions {
+    // ids of commits to compare
+    compare?: [string, string]
+}
+
+export function getChangedFiles(extension: string = '', options: GetGitChangedFilesOptions = {}): Set<string> {
     const root = globals.I18NUUID_ROOT;
     const extensionWithDot = '.'+extension;
 
-    const command = `git diff --name-only ${root}`;
+    const compareText = options.compare ? `${options.compare[0]} ${options.compare[1]} ` : '';
+    const command = `git diff --name-only ${compareText}${root}`;
+    console.log(chalk.cyan(command));
     const diffOutput = execSync(command).toString();
     return new Set(diffOutput.toString().split('\n').map(file => root + '/' + file).filter(file => file.endsWith(extensionWithDot)));
 }

@@ -5,7 +5,8 @@ export interface TranslateVueFileOptions {
     attributeWhiteList?: Set<string>
     onBeforePrompt?: () => void,
     replaceChangesOnly?: {
-        filePath: string
+        filePath: string,
+        commitsToCompare?: [string, string]
     },
     totalProgress?: {
         current: number,

@@ -4,7 +4,7 @@
 
 import { translateVueFiles } from "./src/translate-vue-files";
 
-translateVueFiles({dryRun: true, doPrompt: true, replaceChangesOnly: false});
+translateVueFiles({dryRun: true, doPrompt: true, replaceChangesOnly: true, commitsToCompare: ['48ca0aaa8aba9589581177ba7192a507549a5c0f', '022542984217e6dfbe78bade19ff9e1e8ed2c165']});
 
 
 

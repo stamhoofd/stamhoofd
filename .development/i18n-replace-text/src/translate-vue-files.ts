@@ -6,9 +6,10 @@ import { getVueTemplateMatchCount, TranslateVueFileOptions, translateVueTemplate
 
 interface TranslateVueFilesOptions {
     replaceChangesOnly?: boolean;
+    commitsToCompare?: [string, string];
     doPrompt?: boolean;
     dryRun?: boolean;
-    attributeWhiteList?: Set<string>
+    attributeWhiteList?: Set<string>;
 }
 
 const attributeWhiteList = new Set([
@@ -23,14 +24,14 @@ export async function translateVueFiles(options: TranslateVueFilesOptions = {}) 
     let filesToLoop: string[];
 
     if(options.replaceChangesOnly) {
-        const changedFiles = getChangedFiles('vue');
+        const changedFiles = getChangedFiles('vue', {compare: options.commitsToCompare});
         filesToLoop = files.filter(filePath => changedFiles.has(filePath));
     } else {
         filesToLoop = files;
     }
 
     if(options.doPrompt) {
-        const filesWithChangeInfo = await getChangeInfo(filesToLoop, options);
+        const filesWithChangeInfo = await getMatchInfo(filesToLoop, options, options.commitsToCompare);
         const changedFiles = filesWithChangeInfo.filter(item => item.matchCount > 0);
         const totalMatchCount = changedFiles.map(x => x.matchCount).reduce((total, current) => total + current, 0);
         let currentMatchCount = 0;
@@ -48,7 +49,7 @@ export async function translateVueFiles(options: TranslateVueFilesOptions = {}) 
                 total: totalMatchCount
             }
             
-            await translateVueFileHelper(file, options, fileProgress, totalProgress);
+            await translateVueFileHelper(file, options, fileProgress, totalProgress, options.commitsToCompare);
             currentMatchCount = currentMatchCount + matchCount;
         }
 
@@ -56,7 +57,7 @@ export async function translateVueFiles(options: TranslateVueFilesOptions = {}) 
     }
 
     for(const file of filesToLoop) {
-        await translateVueFileHelper(file, options);
+        await translateVueFileHelper(file, options, undefined, undefined, options.commitsToCompare);
     }
 }
 
@@ -68,7 +69,7 @@ export async function translateVueFileHelper(filePath: string, options: Translat
 }, totalProgress?: {
     current: number,
     total: number
-}) {
+}, commitsToCompare?: [string, string]) {
     const fileOptions: TranslateVueFileOptions = {
         attributeWhiteList: options.attributeWhiteList ?? attributeWhiteList,
         doPrompt: options.doPrompt === undefined ? true : options.doPrompt,
@@ -76,7 +77,7 @@ export async function translateVueFileHelper(filePath: string, options: Translat
             // console.clear();
             console.log(chalk.blue(filePath));
         },
-        replaceChangesOnly: options.replaceChangesOnly ? {filePath} : undefined,
+        replaceChangesOnly: options.replaceChangesOnly ? {filePath, commitsToCompare} : undefined,
         fileProgress,
         totalProgress
     };
@@ -105,9 +106,9 @@ ${infoText}: `) + chalk.gray(filePath) + `
     }
 }
 
-async function getChangeInfo(files: string[], options: TranslateVueFileHelperOptions): Promise<{file: string, matchCount: number}[]> {
+async function getMatchInfo(files: string[], options: TranslateVueFileHelperOptions, commitsToCompare?: [string, string]): Promise<{file: string, matchCount: number}[]> {
     const promises = files.map(async file => {
-        const matchCount = await getVueFileMatchCount(file, options);
+        const matchCount = await getVueFileMatchCount(file, options, commitsToCompare);
 
         return {
             file,
@@ -118,11 +119,11 @@ async function getChangeInfo(files: string[], options: TranslateVueFileHelperOpt
     return await Promise.all(promises);
 }
 
-async function getVueFileMatchCount(filePath: string, options: TranslateVueFileHelperOptions): Promise<number> {
+async function getVueFileMatchCount(filePath: string, options: TranslateVueFileHelperOptions, commitsToCompare?: [string, string]): Promise<number> {
     const fileOptions: TranslateVueFileOptions = {
         attributeWhiteList: options.attributeWhiteList ?? attributeWhiteList,
         doPrompt: false,
-        replaceChangesOnly: options.replaceChangesOnly ? {filePath} : undefined
+        replaceChangesOnly: options.replaceChangesOnly ? {filePath, commitsToCompare} : undefined
     };
 
     const fileContent = fs.readFileSync(filePath, "utf8");

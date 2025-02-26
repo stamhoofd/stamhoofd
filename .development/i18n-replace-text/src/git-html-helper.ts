@@ -20,9 +20,9 @@ export function testAddChangeMarkers() {
     console.log(removed)
 }
 
-export function addChangeMarkers(filePath: string, text: string): string {
+export function addChangeMarkers(filePath: string, text: string, commitsToCompare?: [string, string]): string {
     const lines = splitLines(text);
-    const changes = getDiffChunks(filePath);
+    const changes = getDiffChunks(filePath, {compare: commitsToCompare});
 
     for(const {startIndex, endIndex} of changes) {
         lines[startIndex] = startChangeMarker + lines[startIndex];
