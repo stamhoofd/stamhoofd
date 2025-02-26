@@ -1,13 +1,12 @@
 import chalk from "chalk";
 import fs from "fs";
-import { getDiffChunks2 } from "./git-helper";
+import { getDiffChunks } from "./git-helper";
 
 export const startChangeMarker = '[[start-change]]';
 export const endChangeMarker = '[[end-change]]';
 
 function splitLines(text: string): string[] {
     return text.split(/(\r|\n)/).filter(item => !/(\r|\n)/.test(item));
-
 }
 
 export function testAddChangeMarkers() {
@@ -23,7 +22,7 @@ export function testAddChangeMarkers() {
 
 export function addChangeMarkers(filePath: string, text: string): string {
     const lines = splitLines(text);
-    const changes = getDiffChunks2(filePath);
+    const changes = getDiffChunks(filePath);
 
     for(const {startIndex, endIndex} of changes) {
         lines[startIndex] = startChangeMarker + lines[startIndex];
