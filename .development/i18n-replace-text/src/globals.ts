@@ -7,7 +7,6 @@ type EnvVariables = {
     readonly I18NUUID_ROOT: string;
     // Directories that should be ignored
     readonly I18NUUID_EXCLUDE_DIRS_ARRAY: string[];
-    
 }
 
 function getVariables(): EnvVariables {
