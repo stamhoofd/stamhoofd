@@ -58,11 +58,29 @@ export class AuthenticatedStructures {
 
     static async groups(groups: Group[]) {
         const waitingListIds = Formatter.uniqueArray(groups.map(g => g.waitingListId).filter(id => id !== null));
-        const waitingLists = waitingListIds.length > 0 ? await Group.getByIDs(...waitingListIds) : [];
+
+        const waitingLists: Group[] = [];
+        const waitingListsToFetch: string[] = [];
+
+        for (const waitingListId of waitingListIds) {
+            const existingGroup = groups.find(g => g.id === waitingListId);
+
+            if (existingGroup) {
+                waitingLists.push(existingGroup);
+            }
+            else {
+                waitingListsToFetch.push(waitingListId);
+            }
+        }
+
+        if (waitingListsToFetch.length) {
+            const fetchedWaitingLists = await Group.getByIDs(...waitingListsToFetch);
+            waitingLists.push(...fetchedWaitingLists);
+        }
 
         const structs: GroupStruct[] = [];
         for (const group of groups) {
-            const waitingList = waitingLists.find(g => g.id == group.waitingListId) ?? null;
+            const waitingList = waitingLists.find(g => g.id === group.waitingListId) ?? null;
             const waitingListStruct = waitingList ? GroupStruct.create(waitingList) : null;
             if (waitingList && waitingListStruct && !await Context.optionalAuth?.canAccessGroup(waitingList)) {
                 waitingListStruct.privateSettings = null;
