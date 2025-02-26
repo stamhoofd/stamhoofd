@@ -9,7 +9,7 @@ import { Email as EmailClass } from '@stamhoofd/email';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel, SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
-import { fillRecipientReplacements, getEmailBuilder } from '../helpers/EmailBuilder';
+import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder } from '../helpers/EmailBuilder';
 import { EmailRecipient } from './EmailRecipient';
 import { Organization } from './Organization';
 import { EmailTemplate } from './EmailTemplate';
@@ -285,27 +285,9 @@ export class Email extends QueryableModel {
             }
 
             // Can we send from this e-mail or reply-to?
-            if (organization) {
-                if (organization.privateMeta.mailDomain && organization.privateMeta.mailDomainActive && upToDate.fromAddress!.endsWith('@' + organization.privateMeta.mailDomain)) {
-                    from = upToDate.getFromAddress();
-                    replyTo = null;
-                }
-            }
-            else {
-                // Platform
-                // Is the platform allowed to send from the provided email address?
-                const domains = [
-                    ...Object.values(STAMHOOFD.domains.defaultTransactionalEmail ?? {}),
-                    ...Object.values(STAMHOOFD.domains.defaultBroadcastEmail ?? {}),
-                ];
-
-                for (const domain of domains) {
-                    if (upToDate.fromAddress!.endsWith('@' + domain)) {
-                        from = upToDate.getFromAddress();
-                        replyTo = null;
-                        break;
-                    }
-                }
+            if (upToDate.fromAddress && await canSendFromEmail(upToDate.fromAddress, organization ?? null)) {
+                from = upToDate.getFromAddress();
+                replyTo = null;
             }
 
             upToDate.status = EmailStatus.Sending;

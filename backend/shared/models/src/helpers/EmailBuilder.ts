@@ -1,5 +1,5 @@
 import { Email, EmailAddress, EmailBuilder } from '@stamhoofd/email';
-import { BalanceItem as BalanceItemStruct, Country, EmailTemplateType, OrganizationEmail, Platform as PlatformStruct, ReceivableBalanceType, Recipient, Replacement } from '@stamhoofd/structures';
+import { BalanceItem as BalanceItemStruct, EmailTemplateType, OrganizationEmail, Platform as PlatformStruct, ReceivableBalanceType, Recipient, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -65,6 +65,31 @@ export async function getEmailTemplate(data: EmailTemplateOptions) {
     return templates[0];
 }
 
+export async function canSendFromEmail(fromAddress: string, organization: Organization | null) {
+    if (organization) {
+        if (organization.privateMeta.mailDomain && organization.privateMeta.mailDomainActive && fromAddress.endsWith('@' + organization.privateMeta.mailDomain)) {
+            return true;
+        }
+
+        if (organization.id === (await Platform.getSharedPrivateStruct()).membershipOrganizationId) {
+            return canSendFromEmail(fromAddress, null);
+        }
+
+        return false;
+    }
+    const transactionalDomains = Object.values(STAMHOOFD.domains.defaultTransactionalEmail ?? {});
+    const broadcastDomains = Object.values(STAMHOOFD.domains.defaultBroadcastEmail ?? {});
+    const domains = Formatter.uniqueArray([...transactionalDomains, ...broadcastDomains]);
+
+    for (const domain of domains) {
+        if (fromAddress.endsWith('@' + domain)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 export async function getDefaultEmailFrom(organization: Organization | null, options: Pick<EmailBuilderOptions, 'type'> & { template: Omit<EmailTemplateOptions, 'organizationId' | 'type'> }) {
     // When choosing sending domain, prefer using the one with the highest reputation
     let preferEmailId: string | null = null;
@@ -88,7 +113,7 @@ export async function getDefaultEmailFrom(organization: Organization | null, opt
             replyTo = sender.email;
 
             // Can we send from this e-mail or reply-to?
-            if (replyTo && organization.privateMeta.mailDomain && organization.privateMeta.mailDomainActive && sender.email.endsWith('@' + organization.privateMeta.mailDomain)) {
+            if (await canSendFromEmail(sender.email, organization)) {
                 from = sender.email;
                 replyTo = undefined;
             }
@@ -118,13 +143,13 @@ export async function getDefaultEmailFrom(organization: Organization | null, opt
             from, replyTo,
         };
     }
-
     const platform = await Platform.getSharedPrivateStruct();
 
     // Default e-mail if no email addresses are configured
     const i18n = new I18n($getLanguage(), $getCountry());
     const transactionalDomain = i18n.localizedDomains.defaultTransactionalEmail();
     const broadcastDomain = i18n.localizedDomains.defaultBroadcastEmail();
+
     const domain = (options.type === 'transactional' ? transactionalDomain : broadcastDomain);
     let from = 'hallo@' + domain;
 
@@ -136,7 +161,7 @@ export async function getDefaultEmailFrom(organization: Organization | null, opt
         replyTo = sender.email;
 
         // Are we allowed to send an e-mail from this domain?
-        if (sender.email.endsWith('@' + transactionalDomain) || sender.email.endsWith('@' + broadcastDomain)) {
+        if (await canSendFromEmail(sender.email, null)) {
             // Allowed to send from
             from = sender.email;
             replyTo = undefined;

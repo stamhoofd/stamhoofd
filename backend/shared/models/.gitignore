@@ -219,3 +219,4 @@ yalc.lock
 .env.json
 .env.*.json
 !.env.template.json
+!.env.ci.json

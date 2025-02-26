@@ -3,6 +3,8 @@ import { Email } from './Email';
 import { EmailRecipient } from './EmailRecipient';
 import { EmailMocker } from '@stamhoofd/email';
 import { TestUtils } from '@stamhoofd/test-utils';
+import { OrganizationFactory } from '../factories/OrganizationFactory';
+import { Platform } from './Platform';
 
 async function buildEmail(data: {
     recipients: EmailRecipientStruct[];
@@ -24,7 +26,7 @@ async function buildEmail(data: {
 
     const model = new Email();
     model.userId = null;
-    model.organizationId = null;
+    model.organizationId = data.organizationId ?? null;
     model.recipientFilter = EmailRecipientFilter.create({
         filters: [
             EmailRecipientSubfilter.create({
@@ -350,5 +352,182 @@ describe('Model.Email', () => {
                 sentAt: expect.any(Date),
             }),
         ]);
+    }, 15_000);
+
+    it('Platform can send from default domain', async () => {
+        TestUtils.setEnvironment('domains', {
+            ...STAMHOOFD.domains,
+            defaultTransactionalEmail: {
+                '': 'my-platform.com',
+            },
+            defaultBroadcastEmail: {
+                '': 'broadcast.my-platform.com',
+            },
+        });
+
+        const model = await buildEmail({
+            recipients: [
+                EmailRecipientStruct.create({
+                    email: 'example@domain.be',
+                }),
+            ],
+            fromAddress: 'info@my-platform.com',
+            fromName: 'My Platform',
+        });
+
+        await model.send();
+        await model.refresh();
+
+        // Check if it was sent correctly
+        expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
+        expect(model.recipientCount).toBe(1);
+        expect(model.status).toBe(EmailStatus.Sent);
+
+        // Both have succeeded
+        expect(EmailMocker.broadcast.getSucceededCount()).toBe(1);
+        expect(EmailMocker.broadcast.getFailedCount()).toBe(0);
+
+        // Check to header
+        expect(EmailMocker.broadcast.getSucceededEmail(0)).toMatchObject({
+            to: 'example@domain.be',
+            from: '"My Platform" <info@my-platform.com>',
+            replyTo: undefined,
+        });
+    }, 15_000);
+
+    it('Platform cannot send from unsupported domain', async () => {
+        TestUtils.setEnvironment('domains', {
+            ...STAMHOOFD.domains,
+            defaultTransactionalEmail: {
+                '': 'my-platform.com',
+            },
+            defaultBroadcastEmail: {
+                '': 'broadcast.my-platform.com',
+            },
+        });
+
+        const model = await buildEmail({
+            recipients: [
+                EmailRecipientStruct.create({
+                    email: 'example@domain.be',
+                }),
+            ],
+            fromAddress: 'info@other-platform.com',
+            fromName: 'My Platform',
+        });
+
+        await model.send();
+        await model.refresh();
+
+        // Check if it was sent correctly
+        expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
+        expect(model.recipientCount).toBe(1);
+        expect(model.status).toBe(EmailStatus.Sent);
+
+        // Both have succeeded
+        expect(EmailMocker.broadcast.getSucceededCount()).toBe(1);
+        expect(EmailMocker.broadcast.getFailedCount()).toBe(0);
+
+        // Check to header
+        expect(EmailMocker.broadcast.getSucceededEmail(0)).toMatchObject({
+            to: 'example@domain.be',
+            from: '"My Platform" <noreply@broadcast.my-platform.com>', // domain has changed here
+            replyTo: '"My Platform" <info@other-platform.com>', // Reply to should be set
+        });
+    }, 15_000);
+
+    it('Organization cannot send from platform domain', async () => {
+        TestUtils.setEnvironment('domains', {
+            ...STAMHOOFD.domains,
+            defaultTransactionalEmail: {
+                '': 'my-platform.com',
+            },
+            defaultBroadcastEmail: {
+                '': 'broadcast.my-platform.com',
+            },
+        });
+
+        const organization = await new OrganizationFactory({
+            uri: 'uritest',
+        }).create();
+
+        const model = await buildEmail({
+            organizationId: organization.id,
+            recipients: [
+                EmailRecipientStruct.create({
+                    email: 'example@domain.be',
+                }),
+            ],
+            fromAddress: 'info@my-platform.com',
+            fromName: 'My Platform',
+        });
+
+        await model.send();
+        await model.refresh();
+
+        // Check if it was sent correctly
+        expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
+        expect(model.recipientCount).toBe(1);
+        expect(model.status).toBe(EmailStatus.Sent);
+
+        // Both have succeeded
+        expect(EmailMocker.broadcast.getSucceededCount()).toBe(1);
+        expect(EmailMocker.broadcast.getFailedCount()).toBe(0);
+
+        // Check to header
+        expect(EmailMocker.broadcast.getSucceededEmail(0)).toMatchObject({
+            to: 'example@domain.be',
+            from: '"My Platform" <noreply-uritest@broadcast.my-platform.com>', // domain has changed here
+            replyTo: '"My Platform" <info@my-platform.com>', // Reply to should be set
+        });
+    }, 15_000);
+
+    it('Organization can send from platform domain if default membership organization', async () => {
+        TestUtils.setEnvironment('domains', {
+            ...STAMHOOFD.domains,
+            defaultTransactionalEmail: {
+                '': 'my-platform.com',
+            },
+            defaultBroadcastEmail: {
+                '': 'broadcast.my-platform.com',
+            },
+        });
+
+        const organization = await new OrganizationFactory({
+        }).create();
+
+        const platform = await Platform.getShared();
+        platform.membershipOrganizationId = organization.id;
+        await platform.save();
+
+        const model = await buildEmail({
+            organizationId: organization.id,
+            recipients: [
+                EmailRecipientStruct.create({
+                    email: 'example@domain.be',
+                }),
+            ],
+            fromAddress: 'info@my-platform.com',
+            fromName: 'My Platform',
+        });
+
+        await model.send();
+        await model.refresh();
+
+        // Check if it was sent correctly
+        expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
+        expect(model.recipientCount).toBe(1);
+        expect(model.status).toBe(EmailStatus.Sent);
+
+        // Both have succeeded
+        expect(EmailMocker.broadcast.getSucceededCount()).toBe(1);
+        expect(EmailMocker.broadcast.getFailedCount()).toBe(0);
+
+        // Check to header
+        expect(EmailMocker.broadcast.getSucceededEmail(0)).toMatchObject({
+            to: 'example@domain.be',
+            from: '"My Platform" <info@my-platform.com>', // domain has changed here
+            replyTo: undefined,
+        });
     }, 15_000);
 });
