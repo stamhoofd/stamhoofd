@@ -1,4 +1,4 @@
-import { getCliArguments } from "./node-cli-argument-reader";
+import { getCliArguments } from "./cli-arguments";
 import { translateVueFiles } from "./translate-vue-files";
 
 export function start() {

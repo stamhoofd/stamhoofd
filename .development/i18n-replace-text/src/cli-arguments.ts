@@ -48,6 +48,7 @@ export function getCliArguments(): CliArguments {
             });
 
             result.attributeWhiteList = new Set(parsed);
+            continue;
         }
 
         if(arg === attributeWhiteListFlag) {
