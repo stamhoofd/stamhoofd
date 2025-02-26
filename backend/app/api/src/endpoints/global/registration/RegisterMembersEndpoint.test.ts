@@ -33,10 +33,8 @@ describe('Endpoint.RegisterMembers', () => {
         period = await new RegistrationPeriodFactory({
             startDate: new Date(2023, 0, 1),
             endDate: new Date(2023, 11, 31),
+            previousPeriodId: previousPeriod.id,
         }).create();
-
-        period.previousPeriodId = previousPeriod.id;
-        await period.save();
     });
 
     afterEach(() => {

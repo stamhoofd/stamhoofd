@@ -1,6 +1,7 @@
 import { Factory } from '@simonbackx/simple-database';
-import { GroupPrice, GroupSettings, OldGroupPrice, OldGroupPrices, ReduceablePrice } from '@stamhoofd/structures';
+import { GroupPrice, GroupSettings, GroupType, ReduceablePrice } from '@stamhoofd/structures';
 
+import { RegistrationPeriod } from '../models';
 import { Group } from '../models/Group';
 import { Organization } from '../models/Organization';
 import { OrganizationFactory } from './OrganizationFactory';
@@ -10,9 +11,10 @@ class Options {
     price?: number;
     reducedPrice?: number;
     stock?: number;
-
+    type?: GroupType;
     skipCategory?: boolean;
     maxMembers?: number | null;
+    period?: RegistrationPeriod;
 }
 
 export class GroupFactory extends Factory<Options, Group> {
@@ -21,7 +23,14 @@ export class GroupFactory extends Factory<Options, Group> {
 
         const group = new Group();
         group.organizationId = organization.id;
-        group.periodId = organization.periodId;
+
+        if (this.options.period) {
+            group.periodId = this.options.period.id;
+        }
+        else {
+            group.periodId = organization.periodId;
+        }
+
         group.settings = GroupSettings.create({
             name: 'Group name',
             startDate: new Date(new Date().getTime() - 10 * 1000),
@@ -39,6 +48,10 @@ export class GroupFactory extends Factory<Options, Group> {
             ],
             maxMembers: this.options.maxMembers === undefined ? null : this.options.maxMembers,
         });
+
+        if (this.options.type) {
+            group.type = this.options.type;
+        }
 
         await group.save();
 

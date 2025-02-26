@@ -11,6 +11,7 @@ export * from './factories/UserFactory';
 export * from './factories/WebshopFactory';
 export * from './factories/BalanceItemFactory';
 export * from './factories/RegistrationPeriodFactory';
+export * from './factories/OrganizationRegistrationPeriodFactory';
 
 // Helpers
 export * from './helpers/EmailBuilder';
