@@ -1,5 +1,5 @@
 import { translateVueFileHelper } from './src/translate-vue-files';
-translateVueFileHelper('/Users/bjarne/Projects/stamhoofd/frontend/app/admin/src/views/event-notifications/EventNotificationsTableView.vue', {dryRun: false, doPrompt: true, doFix: true, replaceChangesOnly: false});
+translateVueFileHelper('/Users/bjarne/Projects/stamhoofd/frontend/app/admin/src/views/finances/ChargeMembershipsView.vue', {dryRun: false, doPrompt: true, doFix: true, replaceChangesOnly: false});
 
 
 
@@ -8,7 +8,7 @@ translateVueFileHelper('/Users/bjarne/Projects/stamhoofd/frontend/app/admin/src/
 
 // translateVueFiles({dryRun: true, doPrompt: true, replaceChangesOnly: true, commitsToCompare: ['48ca0aaa8aba9589581177ba7192a507549a5c0f', '022542984217e6dfbe78bade19ff9e1e8ed2c165']});
 
-// translateVueFiles({dryRun: true, doPrompt: true, doFix: true, replaceChangesOnly: true});
+// translateVueFiles({dryRun: false, doPrompt: false, doFix: true, replaceChangesOnly: false});
 
 // import { test } from './src/test-parser';
 

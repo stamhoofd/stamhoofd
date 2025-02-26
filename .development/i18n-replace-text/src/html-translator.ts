@@ -340,6 +340,8 @@ REPLACEMENT:`))
                         } else {
                             const newValue = await this.replaceTextInNonReactiveAttributeValue(parent, value, attributeKey, attributeValue, attributeName);
                             if(attributeValue !== newValue) {
+                                value[attributeKey] = newValue;
+                                
                                 // make the attribute reactive
                                 const newKey = attributeKey.replace('@_', '@_:')
                                 const propertyDescriptor = Object.getOwnPropertyDescriptor(value, attributeKey);
