@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuditLog, BalanceItem, CachedBalance, Document, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
 import { SQL } from '@stamhoofd/sql';
@@ -88,31 +88,51 @@ export class AuthenticatedStructures {
             return [];
         }
 
+        const periodIds = periods ? Formatter.uniqueArray(periods.map(p => p.id)) : Formatter.uniqueArray(organizationRegistrationPeriods.map(p => p.periodId));
+
         if (!periods) {
-            const periodIds = Formatter.uniqueArray(organizationRegistrationPeriods.map(p => p.periodId));
             periods = await RegistrationPeriod.getByIDs(...periodIds);
         }
 
+        const organizationIds = Formatter.uniqueArray(organizationRegistrationPeriods.map(r => r.organizationId));
+
         const groupIds = Formatter.uniqueArray(organizationRegistrationPeriods.flatMap(p => p.settings.categories.flatMap(c => c.groupIds)));
-        const groups = groupIds.length ? await Group.getByIDs(...groupIds) : [];
+
+        const groups = await Group.select()
+            .where('id', groupIds)
+            .orWhere(SQL.where('organizationId', organizationIds)
+                .and('periodId', periodIds)
+                .and('type', GroupType.WaitingList)
+                .and('deletedAt', null))
+            .fetch();
 
         const groupStructs = await this.groups(groups);
 
         const structs: OrganizationRegistrationPeriodStruct[] = [];
         for (const organizationPeriod of organizationRegistrationPeriods) {
-            const period = periods.find(p => p.id == organizationPeriod.periodId) ?? null;
+            const period = periods.find(p => p.id === organizationPeriod.periodId) ?? null;
             if (!period) {
                 continue;
             }
-            const groupIds = Formatter.uniqueArray(organizationPeriod.settings.categories.flatMap(c => c.groupIds));
 
-            structs.push(
-                OrganizationRegistrationPeriodStruct.create({
-                    ...organizationPeriod,
-                    period: period.getStructure(),
-                    groups: groupStructs.filter(gg => groupIds.includes(gg.id)).sort(GroupStruct.defaultSort),
-                }),
-            );
+            const struct = OrganizationRegistrationPeriodStruct.create({
+                ...organizationPeriod,
+                period: period.getStructure(),
+                groups: groupStructs.filter((gg) => {
+                    if (gg.organizationId !== organizationPeriod.organizationId) {
+                        return false;
+                    }
+
+                    if (gg.periodId !== organizationPeriod.periodId) {
+                        return false;
+                    }
+
+                    return true;
+                })
+                    .sort(GroupStruct.defaultSort),
+            });
+
+            structs.push(struct);
         }
 
         return structs;
