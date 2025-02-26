@@ -7,10 +7,11 @@ import { getVueTemplateMatchCount, TranslateVueFileOptions, translateVueTemplate
 
 interface TranslateVueFilesOptions {
     replaceChangesOnly?: boolean;
-    commitsToCompare?: [string, string];
     doPrompt?: boolean;
     doFix?: boolean;
     dryRun?: boolean;
+
+    commitsToCompare?: [string, string];
     attributeWhiteList?: Set<string>;
 }
 

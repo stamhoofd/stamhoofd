@@ -6,7 +6,8 @@
     "private": true,
     "scripts": {
         "build": "tsc -b",
-        "start": "yarn build && node ./dist/index.js"
+        "start": "yarn build && node ./dist/index.js",
+        "changes": "yarn build && node ./dist/index.js --fix --changes --prompt"
     },
     "dependencies": {
         "chalk": "4",
