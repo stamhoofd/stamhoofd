@@ -91,6 +91,10 @@ export class AdminPermissionChecker {
         });
     }
 
+    memberNotFoundOrNoAccess(): SimpleError {
+        return this.notFoundOrNoAccess($t('Je hebt geen toegang tot dit lid of het bestaat niet'));
+    }
+
     notFoundOrNoAccess(message?: string): SimpleError {
         return new SimpleError({
             code: 'not_found',
@@ -1043,6 +1047,20 @@ export class AdminPermissionChecker {
             };
         }
 
+        // It is possible that this is a platform admin, and inherits automatic permissions for tags. So'll need to loop all the organizations where this member has an active registration for
+        if (!record.organizationId && this.platformPermissions) {
+            const organizations = Formatter.uniqueArray(member.registrations.map(r => r.organizationId));
+            for (const organizationId of organizations) {
+                const organizationPermissions = await this.getOrganizationPermissions(organizationId);
+                if (organizationPermissions && organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, record.rootCategoryId, level)) {
+                    return {
+                        canAccess: true,
+                        record: record.record,
+                    };
+                }
+            }
+        }
+
         return {
             canAccess: false,
             record: record.record,
@@ -1088,8 +1106,8 @@ export class AdminPermissionChecker {
         if (isUserManager) {
             // For a user manager without an organization, we don't delete data, because when registering a new member, it doesn't have any organizations yet...
             if (!(await this.canAccessMember(member, PermissionLevel.Full))) {
-                cloned.details.securityCode = null;
                 cloned.details.notes = null;
+                // a user manager can see the security codes
             }
 
             return cloned;

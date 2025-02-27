@@ -16,8 +16,7 @@ import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
 import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater';
 import { PlatformMembershipService } from '../../../services/PlatformMembershipService';
 import { RegistrationService } from '../../../services/RegistrationService';
-import { shouldCheckIfMemberIsDuplicateForPatch, shouldCheckIfMemberIsDuplicateForPut } from './shouldCheckIfMemberIsDuplicate';
-import { AuditLogService } from '../../../services/AuditLogService';
+import { shouldCheckIfMemberIsDuplicateForPatch } from './shouldCheckIfMemberIsDuplicate';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -109,12 +108,10 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             struct.details.cleanData();
             member.details = struct.details;
 
-            if (shouldCheckIfMemberIsDuplicateForPut(struct)) {
-                const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, struct.details.securityCode);
-                if (duplicate) {
+            const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, struct.details.securityCode, 'put');
+            if (duplicate) {
                 // Merge data
-                    member = duplicate;
-                }
+                member = duplicate;
             }
 
             // We risk creating a new member without being able to access it manually afterwards
@@ -159,12 +156,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             const securityCode = patch.details?.securityCode; // will get cleared after the filter
 
             if (!member) {
-                throw Context.auth.notFoundOrNoAccess('Je hebt geen toegang tot dit lid of het bestaat niet');
+                throw Context.auth.memberNotFoundOrNoAccess();
             }
 
-            if (!await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
-                // Still allowed if you provide a security code
-                await PatchOrganizationMembersEndpoint.checkSecurityCode(member, securityCode);
+            if (!(await Context.auth.canAccessMember(member, PermissionLevel.Write))) {
+                await PatchOrganizationMembersEndpoint.checkSecurityCode(member, securityCode, 'patch');
             }
 
             patch = await Context.auth.filterMemberPatch(member, patch);
@@ -194,7 +190,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
 
             if (shouldCheckDuplicate) {
-                const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, securityCode);
+                const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, securityCode, 'patch');
 
                 if (duplicate) {
                     // Remove the member from the list
@@ -759,8 +755,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
     }
 
-    static async checkSecurityCode(member: MemberWithRegistrations, securityCode: string | null | undefined) {
-        if (await member.isSafeToMergeDuplicateWithoutSecurityCode() || await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
+    static async checkSecurityCode(member: MemberWithRegistrations, securityCode: string | null | undefined, type: 'put' | 'patch') {
+        if ((type === 'put' && await member.isSafeToMergeDuplicateWithoutSecurityCode()) || await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
             console.log('checkSecurityCode: without security code: allowed for ' + member.id);
         }
         else if (securityCode) {
@@ -802,8 +798,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             const log = new AuditLog();
 
             // a member has multiple organizations, so this is difficult to determine - for now it is only visible in the admin panel
-            log.organizationId = member.organizationId; 
-            
+            log.organizationId = member.organizationId;
+
             log.type = AuditLogType.MemberSecurityCodeUsed;
             log.source = AuditLogSource.Anonymous;
 
@@ -823,6 +819,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             await log.save();
         }
         else {
+            if (type === 'patch') {
+                throw Context.auth.memberNotFoundOrNoAccess();
+            }
             throw new SimpleError({
                 code: 'known_member_missing_rights',
                 message: 'Creating known member without sufficient access rights',
@@ -832,11 +831,25 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
     }
 
-    static async checkDuplicate(member: Member, securityCode: string | null | undefined) {
+    static shouldCheckIfMemberIsDuplicate(put: Member): boolean {
+        if (put.details.firstName.length <= 3 && put.details.lastName.length <= 3) {
+            return false;
+        }
+
+        const age = put.details.age;
+        // do not check if member is duplicate for historical members
+        return age !== null && age < 81;
+    }
+
+    static async checkDuplicate(member: Member, securityCode: string | null | undefined, type: 'put' | 'patch') {
+        if (!this.shouldCheckIfMemberIsDuplicate(member)) {
+            return;
+        }
+
         // Check for duplicates and prevent creating a duplicate member by a user
         const duplicate = await this.findExistingMember(member);
         if (duplicate) {
-            await this.checkSecurityCode(duplicate, securityCode);
+            await this.checkSecurityCode(duplicate, securityCode, type);
 
             // Merge data
             // NOTE: We use mergeTwoMembers instead of mergeMultipleMembers, because we should never safe 'member' , because that one does not exist in the database
