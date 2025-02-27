@@ -82,22 +82,22 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Alamofire: 2291f7d21ca607c491dd17642e5d40fdcda0e65c
-  Capacitor: 7d42085cb786b2d3ea9ac8a17ebd7e3305be7b72
-  CapacitorApp: 17fecd0e6cb23feafac7eb0939417389038b0979
-  CapacitorAppLauncher: 7b2705481a74cbe322441bd374f56194de59ab1a
-  CapacitorCommunityHttp: 7be90668527ef14ee10d08135b0e00fac9cf8247
+  Capacitor: 7a18af881e4be18578381ae43aa860b20a5905d6
+  CapacitorApp: b23ce4279972fa24721b9ad7aefdf05e36c29db7
+  CapacitorAppLauncher: 3c24de236f37bf7ab79e90ecf5576f962cc7d99e
+  CapacitorCommunityHttp: 7eba71da94e070e37a26a60483350285a33e3903
   CapacitorCordova: c946a6052b547e1e185fc46862003f7b9130ead1
-  CapacitorFilesystem: af704badfbc69f6f8623d9ed313e5490e3723dcb
-  CapacitorHaptics: 7c7c206f0c96a628fed073830c96d28c4b2e772e
-  CapacitorKeyboard: ce5e01064cf57a2c05b32565310713b7fe6cc6f9
-  CapacitorPreferences: 77ac427e98db83bace772455f8ba447430382c4c
-  CapacitorRateApp: 896df7ec6a237fea72d1955e0cb26394654b00db
-  CapacitorShare: c6a1ebbf0114ff9e863b966cd6052678fa25d480
-  CapacitorStatusBar: f390fbb49b82ffb754ea4b3cf71dc8b048baf3e7
-  CapgoCapacitorUpdater: 8636a221d10697643b5d29a74f7fb3e88ad2457f
+  CapacitorFilesystem: e75468db4353d254b2fbae481d26a3d40c10d0f5
+  CapacitorHaptics: 85a1ecd1d3026089642518d789f0fb81fe93cf80
+  CapacitorKeyboard: 7998987a2d8719967f0fec2508ea13244b7630b7
+  CapacitorPreferences: cbf7f033bd08dd33b07090fe9ff54344dc02d6e2
+  CapacitorRateApp: 20928fa996851647e912bbf119af59a48a171712
+  CapacitorShare: 3cdbe767398f9d73a556e5b71fc1106d7686dfb7
+  CapacitorStatusBar: 37ca5200a1791340c519239521ec2519d384eacb
+  CapgoCapacitorUpdater: 0c08d989a490f2a1badadbe842f67338151b40fc
   SSZipArchive: fe6a26b2a54d5a0890f2567b5cc6de5caa600aef
   Version: de5907f2c5d0f3cf21708db7801d1d5401139486
 
 PODFILE CHECKSUM: 0ab19c2ff2793d13698b8066eecad7171166e79a
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2
