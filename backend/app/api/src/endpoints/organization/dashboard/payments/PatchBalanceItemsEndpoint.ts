@@ -250,7 +250,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
         if (!member || !(await Context.auth.canLinkBalanceItemToMember(member))) {
             throw new SimpleError({
                 code: 'permission_denied',
-                message: 'No permission to link balanace items to this member',
+                message: 'No permission to link balance items to this member',
                 human: 'Je hebt geen toegang om aanrekeningen te maken verbonden met dit lid',
                 field: 'memberId',
             });
@@ -264,7 +264,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
         if (!user || !await Context.auth.canLinkBalanceItemToUser(balanceItem, user)) {
             throw new SimpleError({
                 code: 'permission_denied',
-                message: 'No permission to link balanace items to this user',
+                message: 'No permission to link balance items to this user',
                 human: 'Je hebt geen toegang om aanrekeningen te maken verbonden met deze gebruiker',
                 field: 'userId',
             });
