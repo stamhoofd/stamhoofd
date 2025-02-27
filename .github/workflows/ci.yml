@@ -206,11 +206,16 @@ jobs:
           mysql version: '8.0'
           mysql database: 'stamhoofd-tests'
           mysql root password: 'root'
-
-      - name: Install production dependencies only
-        run: yarn install --prefer-offline --frozen-lockfile --production
+      - name: For building, we need development dependencies - install them
+        run: yarn install --prefer-offline --frozen-lockfile
       - name: Build shared packages
         run: yarn build:shared
+      - name: Build API
+        run: cd backend/app/api && yarn build
+      - name: Remove all installed dependencies
+        run: yarn clear-dependencies
+      - name: Install production dependencies only
+        run: yarn install --prefer-offline --frozen-lockfile --production
       - name: Set test env
         run: cp backend/app/api/.env.ci.json backend/app/api/.env.test.json
       - name: Run boot test
