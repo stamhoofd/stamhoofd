@@ -28,7 +28,7 @@ export class LoadedPermissions {
         return LoadedPermissions.create({
             level: permissions.level,
             resources: new Map(),
-            accessRights: permissions.accessRights,
+            accessRights: [...permissions.accessRights],
         });
     }
 
@@ -36,7 +36,7 @@ export class LoadedPermissions {
         const permissions = LoadedPermissions.create({
             level: this.level,
             resources: new Map(),
-            accessRights: this.accessRights,
+            accessRights: [...this.accessRights],
         });
 
         for (const [type, r] of this.resources) {
@@ -55,7 +55,7 @@ export class LoadedPermissions {
         const permissions = LoadedPermissions.create({
             level: role.level,
             resources: new Map(),
-            accessRights: role.accessRights,
+            accessRights: [...role.accessRights],
         });
 
         for (const [type, r] of role.resources) {
