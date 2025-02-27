@@ -11,9 +11,11 @@ PID=$!  # Capture the PID of the background process
 sleep 5
 
 # Send SIGTERM to the process
+echo "Sending SIGTERM to the process with PID $PID..."
 kill -SIGTERM $PID
 
 # Wait for the process to exit
+echo "Waiting for the API to exit..."
 wait $PID
 EXIT_CODE=$?
 

@@ -220,7 +220,7 @@ jobs:
       - name: Running migrations
         run: cd backend/app/api && node ./dist/migrations.js
       - name: Run boot test
-        run: test/boot/boot-test.sh
+        run: bash test/boot/boot-test.sh
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
         if: ${{ failure() }}
