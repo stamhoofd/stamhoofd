@@ -91,7 +91,7 @@ function replaceValues(object, callback) {
 
 // Make sure English is loaded as last, because this should contain the default values for untranslated properties
 const enIndex = languages.findIndex(n => n === 'en');
-if (enIndex != -1) {
+if (enIndex !== -1) {
     languages.splice(enIndex, 1);
     languages.push('en');
 }
@@ -172,7 +172,7 @@ async function build(country, language, namespace, skipFallbackLanguages, skipNa
     }
 
     if (!skipReplace) {
-        await runReplacements(json);
+        runReplacements(json);
     }
 
     // If we still have missing translations, fall back to the fallback languages, by only setting missing values
@@ -194,7 +194,7 @@ async function build(country, language, namespace, skipFallbackLanguages, skipNa
 }
 
 for (const country of countries) {
-    // Build country defatuls
+    // Build country defaults
     for (const language of languages) {
         const locale = language + '-' + country;
 
