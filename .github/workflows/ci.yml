@@ -189,7 +189,6 @@ jobs:
     name: 'API boot and shutdown'
     runs-on: ubuntu-latest
     needs: [job_setup]
-    if: needs.job_setup.outputs.changed_backend == 'true'
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js ${{ env.NODE_VERSION }}
