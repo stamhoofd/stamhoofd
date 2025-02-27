@@ -60,9 +60,12 @@ const start = async () => {
     await UniqueUserService.check();
 
     // Init platform shared struct: otherwise permissions won't work with missing responsibilities
+    console.log('Loading platform...');
     await Platform.getSharedStruct();
 
     const router = new Router();
+
+    console.log('Loading endpoints...');
 
     // Note: we should load endpoints one by once to have a reliable order of url matching
     await router.loadAllEndpoints(__dirname + '/src/endpoints/global/*');
@@ -76,6 +79,7 @@ const start = async () => {
 
     router.endpoints.push(new CORSPreflightEndpoint());
 
+    console.log('Creating router...');
     const routerServer = new RouterServer(router);
     routerServer.verbose = false;
 
@@ -104,6 +108,8 @@ const start = async () => {
     // Add CORS headers
     routerServer.addResponseMiddleware(CORSMiddleware);
 
+    console.log('Loading loaders...');
+
     // Register Excel loaders
     await import('./src/excel-loaders/members');
     await import('./src/excel-loaders/payments');
@@ -115,6 +121,7 @@ const start = async () => {
     await import('./src/email-recipient-loaders/orders');
     await import('./src/email-recipient-loaders/receivable-balances');
 
+    console.log('Opening port...');
     routerServer.listen(STAMHOOFD.PORT ?? 9090);
 
     const hrend = process.hrtime(bootTime);
