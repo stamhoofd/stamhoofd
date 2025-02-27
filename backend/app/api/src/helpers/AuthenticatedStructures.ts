@@ -116,17 +116,32 @@ export class AuthenticatedStructures {
 
         const groupIds = Formatter.uniqueArray(organizationRegistrationPeriods.flatMap(p => p.settings.categories.flatMap(c => c.groupIds)));
 
-        const getGroupsQuery = Group.select()
-            .where('id', groupIds);
+        let groups: Group[] = [];
 
-        if (organizationIds.length && periodIds.length) {
-            getGroupsQuery.orWhere(SQL.where('organizationId', organizationIds)
-                .and('periodId', periodIds)
-                .and('type', GroupType.WaitingList)
-                .and('deletedAt', null));
+        const whereWaitingList = SQL.where('organizationId', organizationIds)
+            .and('periodId', periodIds)
+            .and('type', GroupType.WaitingList)
+            .and('deletedAt', null);
+
+        if (groupIds.length) {
+            const whereGroupIds = SQL.where('id', groupIds);
+
+            if (organizationIds.length && periodIds.length) {
+                groups = await Group.select()
+                    .where(whereGroupIds)
+                    .orWhere(whereWaitingList)
+                    .fetch();
+            }
+            else {
+                groups = await Group.select()
+                    .where(whereGroupIds).fetch();
+            }
         }
-
-        const groups = await getGroupsQuery.fetch();
+        else if (organizationIds.length && periodIds.length) {
+            groups = await Group.select()
+                .where(whereWaitingList)
+                .fetch();
+        }
 
         const groupStructs = await this.groups(groups);
 
