@@ -216,7 +216,7 @@ jobs:
       - name: Install production dependencies only
         run: yarn install --prefer-offline --frozen-lockfile --production
       - name: Set test env
-        run: cp backend/app/api/.env.ci.json backend/app/api/.env.test.json
+        run: cp backend/app/api/.env.ci.json backend/app/api/.env.json
       - name: Run boot test
         run: test/boot/boot-test.sh
       - name: Notify Slack of failure
