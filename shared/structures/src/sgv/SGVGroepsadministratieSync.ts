@@ -355,15 +355,20 @@ export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer:
     // Construct the patch: compare and check the fields that need changes
     const patch: any = {
         persoonsgegevens: {
+            ...(lid.persoonsgegevens ?? {}),
             geslacht: details.gender == Gender.Male ? "man" : (details.gender == Gender.Female ? "vrouw" : "andere"),
             gsm: details.phone ?? ""
         },
         vgagegevens: {
+            // Maintain:
+            verhoogdekinderbijslag:	false,
+            beperking: false,
+            ...(lid.vgagegevens ?? {}),
+
+            // Override:
             voornaam: details.firstName,
             achternaam: details.lastName,
-            beperking: lid.vgagegevens && lid.vgagegevens.beperking ? true : false,
             geboortedatum: Formatter.dateNumber(details.birthDay).split("/").reverse().join("-"),
-            //individueleSteekkaartdatumaangepast: lid.vgagegevens && lid.vgagegevens.individueleSteekkaartdatumaangepast ? lid.vgagegevens.individueleSteekkaartdatumaangepast : undefined,
             verminderdlidgeld: details.requiresFinancialSupport?.value ?? false,
         }
     }
