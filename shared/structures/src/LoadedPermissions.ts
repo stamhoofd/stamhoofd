@@ -2,10 +2,10 @@ import { Formatter } from '@stamhoofd/utility';
 import { AccessRight, AccessRightHelper } from './AccessRight.js';
 import { MemberResponsibility } from './MemberResponsibility.js';
 import { MemberResponsibilityRecordBase } from './members/MemberResponsibilityRecord.js';
-import { PermissionLevel, getPermissionLevelNumber } from './PermissionLevel.js';
+import { getPermissionLevelNumber, PermissionLevel } from './PermissionLevel.js';
 import { PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole.js';
 import { Permissions } from './Permissions.js';
-import { getPermissionResourceTypeName, PermissionsResourceType } from './PermissionsResourceType.js';
+import { PermissionsResourceType } from './PermissionsResourceType.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 
 /**
@@ -344,24 +344,7 @@ export class LoadedPermissions {
             stack.push(AccessRightHelper.getDescription(right));
         }
 
-        for (const [type, resources] of this.resources) {
-            let count = 0;
-
-            if (resources.has('')) {
-                stack.push('alle ' + getPermissionResourceTypeName(type, true));
-                continue;
-            }
-
-            for (const resource of resources.values()) {
-                if (resource.hasAccess(PermissionLevel.Read) || resource.accessRights.length > 0) {
-                    count += 1;
-                }
-            }
-
-            if (count > 0) {
-                stack.push(count + ' ' + getPermissionResourceTypeName(type, count > 1));
-            }
-        }
+        stack.push(...ResourcePermissions.getMapDescription(this.resources));
 
         if (stack.length === 0) {
             return 'geen rechten';
