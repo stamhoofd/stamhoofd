@@ -2,19 +2,9 @@ import { column } from '@simonbackx/simple-database';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel } from '@stamhoofd/sql';
 import { PlatformConfig, PlatformPrivateConfig, PlatformServerConfig, Platform as PlatformStruct } from '@stamhoofd/structures';
+import { deepFreeze } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { RegistrationPeriod } from './RegistrationPeriod';
-
-type DeepReadonly<T> =
-    T extends (infer R)[] ? ReadonlyArray<DeepReadonly<R>> :
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-        T extends Function ? T :
-            T extends object ? DeepReadonlyObject<T> :
-                T;
-
-type DeepReadonlyObject<T> = {
-    readonly [P in keyof T]: DeepReadonly<T[P]>;
-};
 
 export class Platform extends QueryableModel {
     static table = 'platform';
@@ -98,25 +88,17 @@ export class Platform extends QueryableModel {
         });
     }
 
-    static async getShared(): Promise<DeepReadonly<Platform>> {
+    static async getShared(): Promise<Readonly<Platform> & { save: never }> {
         return QueueHandler.schedule('Platform.getShared', async () => {
             if (this.shared) {
-                if (STAMHOOFD.environment !== 'production') {
-                    const { fields, skipUpdate } = this.shared.getChangedDatabaseProperties();
-                    if (Object.keys(fields).length > skipUpdate) {
-                        throw new Error('[Platform] The shared Platform model has unsaved changes');
-                    }
-                }
-
-                if (this.shared) {
-                    return this.shared;
-                }
+                return this.shared;
             }
 
             // Build a new one
             const model = await this.getForEditing();
+            deepFreeze(model);
             this.shared = model;
-            return model;
+            return model as any;
         });
     }
 

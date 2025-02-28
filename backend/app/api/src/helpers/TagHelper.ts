@@ -10,12 +10,12 @@ export class TagHelper extends SharedTagHelper {
 
         await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
             await QueueHandler.schedule(queueId, async () => {
-                let platform = await Platform.getShared();
+                const sharedPlatform = await Platform.getShared();
 
                 const tagCounts = new Map<string, number>();
 
                 for await (const organization of Organization.select().all()) {
-                    organization.meta.tags = this.getAllTagsFromHierarchy(organization.meta.tags, platform.config.tags);
+                    organization.meta.tags = this.getAllTagsFromHierarchy(organization.meta.tags, sharedPlatform.config.tags);
 
                     for (const tag of organization.meta.tags) {
                         tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
@@ -24,7 +24,7 @@ export class TagHelper extends SharedTagHelper {
                 }
 
                 // Reload platform to avoid race conditions
-                platform = await Platform.getShared();
+                const platform = await Platform.getForEditing();
                 for (const [tag, count] of tagCounts.entries()) {
                     const tagObject = platform.config.tags.find(t => t.id === tag);
                     if (tagObject) {

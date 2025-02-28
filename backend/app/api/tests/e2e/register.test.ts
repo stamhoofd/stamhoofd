@@ -1035,7 +1035,7 @@ describe('E2E.Register', () => {
                     ]),
                 });
 
-                const platform = await Platform.getShared();
+                const platform = await Platform.getForEditing();
 
                 platform.config.membershipTypes = [
                     platformMembershipType,
@@ -1135,7 +1135,7 @@ describe('E2E.Register', () => {
                     ]),
                 });
 
-                const platform = await Platform.getShared();
+                const platform = await Platform.getForEditing();
 
                 platform.config.membershipTypes = [
                     platformMembershipType,

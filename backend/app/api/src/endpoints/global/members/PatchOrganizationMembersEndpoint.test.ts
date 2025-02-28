@@ -579,7 +579,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 ],
             });
 
-            const platform = await Platform.getShared();
+            const platform = await Platform.getForEditing();
             platform.config.recordsConfiguration.recordCategories.push(recordCategory);
             await platform.save();
 
@@ -657,7 +657,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 ],
             });
 
-            const platform = await Platform.getShared();
+            const platform = await Platform.getForEditing();
             platform.config.recordsConfiguration.recordCategories.push(recordCategory);
             await platform.save();
 
