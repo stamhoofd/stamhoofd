@@ -627,7 +627,7 @@ const present = usePresent();
 const didSetAutomaticGroup = ref(false);
 
 const availableWaitingLists = computed(() => {
-    let base = externalOrganization?.value?.period?.groups.flatMap(g => g.waitingList ? [g.waitingList] : []) ?? [];
+    let base = externalOrganization?.value?.period?.waitingLists ?? [];
 
     // Replace patched waiting lists
     base = base.map((list) => {

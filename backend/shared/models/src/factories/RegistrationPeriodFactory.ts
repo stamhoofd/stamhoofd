@@ -6,6 +6,7 @@ import { RegistrationPeriod } from '../models';
 class Options {
     startDate?: Date;
     endDate?: Date;
+    previousPeriodId?: string;
 }
 
 export class RegistrationPeriodFactory extends Factory<Options, RegistrationPeriod> {
@@ -15,6 +16,9 @@ export class RegistrationPeriodFactory extends Factory<Options, RegistrationPeri
         period.organizationId = null;
         period.startDate = this.options.startDate ?? new Date(2024, 0, 1, 0, 0, 0, 0);
         period.endDate = this.options.endDate ?? new Date(2024, 11, 31, 59, 59, 59, 999);
+        if (this.options.previousPeriodId) {
+            period.previousPeriodId = this.options.previousPeriodId;
+        }
         period.settings = RegistrationPeriodSettings.create({});
 
         await period.save();
