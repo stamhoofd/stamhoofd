@@ -1,36 +1,187 @@
 <template>
-    <SaveView :loading="saving" :title="title" :disabled="!isNew && !hasChanges" @save="save">
+    <SaveView :loading="saving" :title="title" :disabled="!isNew && !hasChanges" @save="save" v-on="!isNew ? {delete: doDelete} : {}">
         <h1>
             {{ title }}
         </h1>
 
-        <STErrorsDefault :error-box="errorBox" />
-        <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+        <STErrorsDefault :error-box="errors.errorBox" />
+        <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
             <input v-model="name" enterkeyhint="next" class="input" type="text" placeholder="Naam">
         </STInputBox>
 
         <div class="container">
             <hr>
-            <h2>Rollen</h2>
-            <p>Je kan een API-key verschillende rollen geven, net zoals een beheerder. Hiermee kan je jouw key beter beveiligen en enkel toegang geven waarvoor je het nodig hebt.</p>
+            <h2>Externe beheerdersrollen</h2>
+            <p>Je kan een API-key verschillende rollen geven, net zoals een externe beheerder. Hiermee kan je jouw key beter beveiligen en enkel toegang geven waarvoor je het nodig hebt.</p>
 
-            <EditUserPermissionsBox :user="patchedUser" @patch:user="addPatch($event)" />
+            <EditUserPermissionsBox :user="patched" @patch:user="addPatch($event)" />
         </div>
-
-        <hr v-if="!isNew">
-        <h2 v-if="!isNew">
-            Verwijderen
-        </h2>
-
-        <button v-if="!isNew" class="button secundary danger" type="button" @click="deleteMe">
-            <span class="icon trash" />
-            <span>Verwijderen</span>
-        </button>
     </SaveView>
 </template>
 
-<script lang="ts">
-import { AutoEncoderPatchType, Decoder, PartialWithoutMethods, patchContainsChanges, PatchType } from '@simonbackx/simple-encoding';
+<script lang="ts" setup>
+import { Decoder } from '@simonbackx/simple-encoding';
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, usePop, useShow } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, EditUserPermissionsBox, ErrorBox, SaveView, Toast, useContext, useErrors, usePatch } from '@stamhoofd/components';
+import { ApiUser, ApiUserWithToken } from '@stamhoofd/structures';
+import { computed, ref } from 'vue';
+import CopyApiTokenView from './CopyApiTokenView.vue';
+
+const errors = useErrors();
+const saving = ref(false);
+const deleting = ref(false);
+const $context = useContext();
+const pop = usePop();
+const show = useShow();
+
+const props = defineProps<{
+    user: ApiUser;
+    isNew: boolean;
+    callback: () => void;
+}>();
+const { patch, patched, addPatch, hasChanges } = usePatch(props.user);
+
+const title = computed(() => {
+    if (props.isNew) {
+        return 'Nieuwe API-key';
+    }
+    return 'API-key bewerken';
+});
+
+const name = computed({
+    get: () => patched.value.name ?? '',
+    set: (value: string) => addPatch({ name: value ? value : null }),
+});
+
+async function save() {
+    if (deleting.value || saving.value) {
+        return;
+    }
+
+    saving.value = true;
+
+    const errorGroup = new SimpleErrors();
+
+    if ((name.value?.length ?? 0) < 2) {
+        errorGroup.addError(new SimpleError({
+            code: 'invalid_field',
+            message: 'Vul een naam in',
+            field: 'name',
+        }));
+    }
+
+    let valid = false;
+
+    if (errorGroup.errors.length > 0) {
+        errors.errorBox = new ErrorBox(errorGroup);
+    }
+    else {
+        errors.errorBox = null;
+        valid = true;
+    }
+    valid = valid && await errors.validator.validate();
+
+    if (!valid) {
+        saving.value = false;
+        return;
+    }
+
+    try {
+        let user: ApiUser | ApiUserWithToken;
+        if (props.isNew) {
+            const response = await $context.value.authenticatedServer.request({
+                method: 'POST',
+                path: '/api-keys',
+                body: patched.value,
+                decoder: ApiUserWithToken as Decoder<ApiUserWithToken>,
+            });
+            user = response.data;
+        }
+        else {
+            const response = await $context.value.authenticatedServer.request({
+                method: 'PATCH',
+                path: '/api-keys/' + patched.value.id,
+                body: patch.value,
+                decoder: ApiUser as Decoder<ApiUser>,
+            });
+            user = response.data;
+        }
+
+        // Copy all data
+        props.user.deepSet(user);
+        props.callback();
+
+        if (props.isNew) {
+            await show({
+                components: [
+                    new ComponentWithProperties(CopyApiTokenView, { user }),
+                ],
+                replace: 1,
+                animated: true,
+                force: true,
+            });
+        }
+        else {
+            Toast.success($t('API-key {name} is aangepast', { name: user.name ?? '?' })).setHide(5000).show();
+            await pop({ force: true });
+        }
+    }
+    catch (e) {
+        console.error(e);
+        errors.errorBox = new ErrorBox(e);
+        saving.value = false;
+    }
+};
+
+async function doDelete() {
+    if (deleting.value || saving.value) {
+        return false;
+    }
+
+    if (props.isNew) {
+        return false;
+    }
+
+    if (!await CenteredMessage.confirm($t('Ben je zeker dat je deze API-key wilt verwijderen?'), $t('Verwijderen'))) {
+        return false;
+    }
+
+    deleting.value = true;
+
+    try {
+        // Patch the user
+        await $context.value.authenticatedServer.request({
+            method: 'DELETE',
+            path: '/api-keys/' + props.user.id,
+        });
+        props.callback();
+
+        await pop({ force: true });
+
+        deleting.value = false;
+        Toast.success($t('API-key {name} werd verwijderd', { name: props.user.name ?? '?' })).setHide(2000).show();
+    }
+    catch (e) {
+        console.error(e);
+        errors.errorBox = new ErrorBox(e);
+        deleting.value = false;
+    }
+    return false;
+};
+
+const shouldNavigateAway = async () => {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'));
+};
+
+defineExpose({
+    shouldNavigateAway,
+});
+
+/* import { AutoEncoderPatchType, Decoder, PartialWithoutMethods, patchContainsChanges, PatchType } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
@@ -259,5 +410,5 @@ export default class ApiUserView extends Mixins(NavigationMixin) {
     set name(name: string) {
         this.addPatch({ name });
     }
-}
+} */
 </script>
