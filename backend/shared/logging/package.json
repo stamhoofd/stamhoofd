@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/logging",
-    "version": "2.78.3",
+    "version": "2.78.4",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "license": "UNLICENCED",
