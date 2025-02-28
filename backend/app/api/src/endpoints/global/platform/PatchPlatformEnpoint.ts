@@ -49,7 +49,7 @@ export class PatchPlatformEndpoint extends Endpoint<
             throw Context.auth.error();
         }
 
-        const platform = await Platform.getShared();
+        const platform = await Platform.getForEditing();
         let shouldUpdateUserPermissions = false;
 
         if (request.body.privateConfig) {

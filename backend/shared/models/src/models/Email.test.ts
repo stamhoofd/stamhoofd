@@ -493,10 +493,9 @@ describe('Model.Email', () => {
             },
         });
 
-        const organization = await new OrganizationFactory({
-        }).create();
+        const organization = await new OrganizationFactory({}).create();
 
-        const platform = await Platform.getShared();
+        const platform = await Platform.getForEditing();
         platform.membershipOrganizationId = organization.id;
         await platform.save();
 

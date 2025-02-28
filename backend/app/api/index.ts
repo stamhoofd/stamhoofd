@@ -61,7 +61,7 @@ const start = async () => {
 
     // Init platform shared struct: otherwise permissions won't work with missing responsibilities
     console.log('Loading platform...');
-    await Platform.getSharedStruct();
+    await Platform.loadCaches();
 
     const router = new Router();
 

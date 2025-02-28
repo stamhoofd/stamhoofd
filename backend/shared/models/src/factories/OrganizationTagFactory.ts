@@ -14,7 +14,7 @@ export class OrganizationTagFactory extends Factory<Options, OrganizationTag> {
         });
 
         // Add to platform
-        const platform = await Platform.getShared();
+        const platform = await Platform.getForEditing();
         platform.config.tags.push(tag);
         await platform.save();
 

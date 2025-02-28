@@ -31,7 +31,7 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
         const organization = await Context.setOptionalOrganizationScope();
 
         if (STAMHOOFD.userMode === 'platform') {
-            const platform = await Platform.getShared();
+            const platform = await Platform.getSharedPrivateStruct();
             const config = platform.config.loginMethods.get(LoginMethod.Password);
             if (!config) {
                 throw new SimpleError({

@@ -7,7 +7,7 @@ describe('QueueHandler', () => {
             return QueueHandler.schedule('test', async () => {
                 return 'test';
             });
-        })
+        });
 
         expect(result).toBe('test');
     });
@@ -23,7 +23,7 @@ describe('QueueHandler', () => {
                     });
                 });
             });
-        })
+        });
 
         expect(result).toBe('test');
     });
@@ -36,17 +36,19 @@ describe('QueueHandler', () => {
 
         // Do some quick scheduling
         for (let i = 0; i < 20; i++) {
-            context.run(i.toString(), async () => {
-                promises.push(QueueHandler.schedule('test', async () => {
-                    await new Promise<void>(resolve => {
+            promises.push(context.run(i.toString(), async () => {
+                return await QueueHandler.schedule('test', async () => {
+                    await new Promise<void>((resolve) => {
                         setTimeout(() => {
                             resolve();
                         }, 100);
                     });
 
-                    ranContexts.push(context.getStore() ?? '');
-                }));
-            });
+                    if (i.toString() === context.getStore()) {
+                        ranContexts.push(context.getStore() ?? '');
+                    }
+                });
+            }));
         }
 
         await Promise.allSettled(promises);
@@ -63,17 +65,19 @@ describe('QueueHandler', () => {
 
         // Do some quick scheduling
         for (let i = 0; i < 50; i++) {
-            context.run(i.toString(), async () => {
-                promises.push(QueueHandler.schedule('test', async () => {
-                    await new Promise<void>(resolve => {
+            promises.push(context.run(i.toString(), async () => {
+                await QueueHandler.schedule('test', async () => {
+                    await new Promise<void>((resolve) => {
                         setTimeout(() => {
                             resolve();
                         }, 100);
                     });
 
-                    ranContexts.push(context.getStore() ?? '');
-                }, 5));
-            });
+                    if (i.toString() === context.getStore()) {
+                        ranContexts.push(context.getStore() ?? '');
+                    }
+                }, 5);
+            }));
         }
 
         await Promise.allSettled(promises);

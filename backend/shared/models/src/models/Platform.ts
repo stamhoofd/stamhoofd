@@ -5,6 +5,17 @@ import { PlatformConfig, PlatformPrivateConfig, PlatformServerConfig, Platform a
 import { v4 as uuidv4 } from 'uuid';
 import { RegistrationPeriod } from './RegistrationPeriod';
 
+type DeepReadonly<T> =
+    T extends (infer R)[] ? ReadonlyArray<DeepReadonly<R>> :
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+        T extends Function ? T :
+            T extends object ? DeepReadonlyObject<T> :
+                T;
+
+type DeepReadonlyObject<T> = {
+    readonly [P in keyof T]: DeepReadonly<T[P]>;
+};
+
 export class Platform extends QueryableModel {
     static table = 'platform';
 
@@ -36,15 +47,20 @@ export class Platform extends QueryableModel {
     @column({ type: 'json', decoder: PlatformServerConfig })
     serverConfig: PlatformServerConfig = PlatformServerConfig.create({});
 
-    static sharedStruct: PlatformStruct | null = null;
+    private static shared: Platform | null = null;
+    private static sharedPrivateStruct: PlatformStruct & { privateConfig: PlatformPrivateConfig } | null = null;
+    private static sharedStruct: PlatformStruct | null = null;
 
     static async getSharedStruct(): Promise<PlatformStruct> {
-        const struct: PlatformStruct = await this.getSharedPrivateStruct();
-        const clone = struct.clone();
-        clone.privateConfig = null;
-        clone.setShared();
+        if (!this.sharedStruct) {
+            await this.loadCaches();
+        }
 
-        return clone;
+        if (!this.sharedStruct || !!this.sharedStruct.privateConfig) {
+            throw new Error('[Platform] Failed to load platform shared struct');
+        }
+
+        return this.sharedStruct;
     }
 
     async setPreviousPeriodId() {
@@ -53,28 +69,24 @@ export class Platform extends QueryableModel {
     }
 
     static async getSharedPrivateStruct(): Promise<PlatformStruct & { privateConfig: PlatformPrivateConfig }> {
-        if (this.sharedStruct && this.sharedStruct.privateConfig) {
-            return this.sharedStruct as any;
+        if (!this.sharedPrivateStruct) {
+            await this.loadCaches();
         }
 
-        return await QueueHandler.schedule('Platform.getSharedStruct', async () => {
-            const model = await this.getShared();
-            const period = await RegistrationPeriod.getByID(model.periodId);
-            const struct = PlatformStruct.create({
-                ...model,
-                period: period?.getStructure() ?? undefined,
-            });
-            this.sharedStruct = struct;
+        if (!this.sharedPrivateStruct || !this.sharedPrivateStruct.privateConfig) {
+            throw new Error('[Platform] Failed to load platform shared private struct');
+        }
 
-            return struct as any;
-        });
+        return this.sharedPrivateStruct;
     }
 
-    static async getShared(): Promise<Platform> {
-        return QueueHandler.schedule('Platform.getShared', async () => {
+    static async getForEditing(): Promise<Platform> {
+        return QueueHandler.schedule('Platform.getModel', async () => {
             // Build a new one
             let model = await this.getByID('1');
             if (!model) {
+                console.info('[Platform] Creating new platform');
+
                 // Create a new platform
                 model = new Platform();
                 model.id = '1';
@@ -86,16 +98,74 @@ export class Platform extends QueryableModel {
         });
     }
 
-    static clearCache() {
+    static async getShared(): Promise<DeepReadonly<Platform>> {
+        return QueueHandler.schedule('Platform.getShared', async () => {
+            if (this.shared) {
+                if (STAMHOOFD.environment !== 'production') {
+                    const { fields, skipUpdate } = this.shared.getChangedDatabaseProperties();
+                    if (Object.keys(fields).length > skipUpdate) {
+                        throw new Error('[Platform] The shared Platform model has unsaved changes');
+                    }
+                }
+
+                if (this.shared) {
+                    return this.shared;
+                }
+            }
+
+            // Build a new one
+            const model = await this.getForEditing();
+            this.shared = model;
+            return model;
+        });
+    }
+
+    static async loadCaches(): Promise<void> {
+        await QueueHandler.schedule('Platform.loadCaches', async () => {
+            if (this.sharedPrivateStruct && this.sharedStruct) {
+                // Already loaded (possible if multiple calls to loadCaches were made)
+                return;
+            }
+            // Build a new one
+            const model = await this.getForEditing();
+            await this.setCachesFromModel(model);
+        });
+    }
+
+    private static async setCachesFromModel(model: Platform) {
+        // Set structure cache
+        const period = await RegistrationPeriod.getByID(model.periodId);
+        const struct = PlatformStruct.create({
+            ...model,
+            period: period?.getStructure() ?? undefined,
+        });
+
+        // We clone to avoid the chance of updating the platform model
+        this.sharedPrivateStruct = struct.clone() as PlatformStruct & { privateConfig: PlatformPrivateConfig };
+
+        const clone = struct.clone();
+        clone.privateConfig = null;
+        clone.setShared();
+        this.sharedStruct = clone;
+    }
+
+    static async clearCache() {
         this.sharedStruct = null;
+        this.sharedPrivateStruct = null;
+        await this.loadCaches();
     }
 
     async save() {
+        let update = false;
+        if (this.existsInDatabase) {
+            update = true;
+        }
         const s = await super.save();
-        Platform.clearCache();
 
-        // Force update cache immediately
-        await Platform.getSharedStruct();
+        if (update) {
+            // Force update cache immediately
+            await Platform.setCachesFromModel(this);
+        }
 
         return s;
     }
