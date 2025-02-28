@@ -14,13 +14,37 @@ interface SearchResult {
     translationRefs: TextToTranslateRef[];
 }
 
+interface MissingTranslationsOutput {
+    allTranslationRefs: Set<TextToTranslateRef>;
+    searchResults: SearchResult[];
+}
+
 class TextToTranslateRef {
+    private _translation: string | null = null;
+    
+    get isTranslated(): boolean {
+        return this._translation !== null;
+    }
+
+    get translation(): string {
+        const translation = this._translation;
+        if(translation === null) {
+            throw new Error('Not translated.');
+        }
+        return translation;
+    }
+
     constructor(readonly language: string, readonly id: string,  readonly text: string) {
+    }
+
+    setTranslation(value: string) {
+        this._translation = value;
     }
 }
 
 export class MissingTranslationFinder {
     private readonly dictionary: Map<Language, Map<Namespace, Map<TranslationId, string | TextToTranslateRef>>> = new Map();
+    private readonly allTranslationRefs: Set<TextToTranslateRef> = new Set();
     private readonly translationManager: TranslationManager;
 
     constructor(options: {translationManager?: TranslationManager} = {}) {
@@ -64,7 +88,8 @@ export class MissingTranslationFinder {
         return results;
     }
 
-    private initDictionary() {
+    private init() {
+        this.allTranslationRefs.clear();
         this.dictionary.clear();
         const allNamespaces = [globals.DEFAULT_NAMESPACE, ...this.translationManager.namespaces];
 
@@ -74,18 +99,20 @@ export class MissingTranslationFinder {
         }
     }
 
-    async findAll() {
-        // todo: load existing translations in cache from default dist language for each namespace
-        this.initDictionary();
+    async findAll(): Promise<MissingTranslationsOutput> {
+        this.init();
 
         // first check default country
-        const output = await this.getSearchResultsForLanguage(globals.DEFAULT_LANGUAGE);
+        const searchResults = await this.getSearchResultsForLanguage(globals.DEFAULT_LANGUAGE);
 
         for(const language of this.translationManager.otherLanguages) {
-            output.push(...await this.getSearchResultsForLanguage(language));
+            searchResults.push(...await this.getSearchResultsForLanguage(language));
         }
 
-        return output;
+        return {
+            allTranslationRefs: this.allTranslationRefs,
+            searchResults
+        };
     }
 
     private addToDictionary(args: {language: Language, namespace?: Namespace, toAdd: Translations | TextToTranslateRef[]}) {
