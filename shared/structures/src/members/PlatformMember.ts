@@ -1062,6 +1062,6 @@ export class PlatformMember implements ObjectWithRecords {
 
     getResponsibilities(organization?: Organization | null) {
         return this.patchedMember.responsibilities
-            .filter(r => r.isActive && (!organization || r.organizationId === organization.id));
+            .filter(r => r.isActive && (organization ? r.organizationId === organization.id : r.organizationId === null));
     }
 }
