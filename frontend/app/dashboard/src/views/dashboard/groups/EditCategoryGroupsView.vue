@@ -60,7 +60,7 @@
         <template v-if="groups.length > 0 || categories.length === 0">
             <hr>
             <h2>Groepen</h2>
-            <p class="error-box" v-if="categories.length > 0">
+            <p v-if="categories.length > 0" class="error-box">
                 Je kan groepen niet combineren met categorieën op hetzelfde niveau. Verplaats deze groepen naar een categorie of verwijder ze.
             </p>
 
@@ -94,7 +94,7 @@
             </button>
         </div>
 
-        <div v-if="canDeleteOrRename &&!isNew && !isRoot && enableActivities" class="container">
+        <div v-if="canDeleteOrRename && !isNew && !isRoot && enableActivities" class="container">
             <hr>
             <h2>
                 Verwijder deze categorie
@@ -138,7 +138,7 @@ const pop = usePop();
 const errors = useErrors();
 const present = usePresent();
 const auth = useAuth();
-const isPlatformAdmin = auth.hasFullPlatformAccess();
+const isPlatformAdmin = auth.hasPlatformFullAccess();
 
 const patchedCategory = computed(() => {
     const c = patchedPeriod.value.settings.categories.find(c => c.id === props.category.id);
