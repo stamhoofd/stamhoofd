@@ -180,7 +180,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Checkbox, DateSelection, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast, useContext } from '@stamhoofd/components';
+import { Checkbox, DateSelection, NumberInput, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast, useContext } from '@stamhoofd/components';
 import { PaymentConfiguration, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductType, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
