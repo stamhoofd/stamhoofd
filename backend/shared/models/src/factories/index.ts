@@ -12,3 +12,4 @@ export * from './WebshopFactory';
 export * from './BalanceItemFactory';
 export * from './RegistrationPeriodFactory';
 export * from './OrganizationTagFactory';
+export * from './OrganizationRegistrationPeriodFactory';
