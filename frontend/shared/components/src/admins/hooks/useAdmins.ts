@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { GlobalEventBus, useOrganization, usePlatform } from '@stamhoofd/components';
 import { ContextPermissions, usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { ApiUser, GroupType, Permissions, PlatformFamily, PlatformMember, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
+import { ApiUser, GroupType, PermissionLevel, Permissions, PlatformFamily, PlatformMember, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, onActivated, shallowRef } from 'vue';
 import { useReloadAdmins } from './useReloadAdmins';
@@ -113,10 +113,27 @@ export function useAdmins() {
             return true;
         }
         const registrations = organization.value ? member.registrations.filter(r => r.organizationId === organization.value?.id) : member.registrations;
-        return !registrations.find(r =>
+        const hasRegistrations = registrations.find(r =>
             r.registeredAt !== null && r.deactivatedAt === null && r.group.type === GroupType.Membership
             && r.group.periodId === (organization.value?.period.period.id ?? platform.value.period.id),
         );
+
+        if (!hasRegistrations) {
+            return true;
+        }
+
+        // Check received a manual role
+        const unloaded = getUnloadedPermissions(a);
+        if (unloaded) {
+            if (unloaded.roles.length > 0) {
+                return true;
+            }
+            if (unloaded.level !== PermissionLevel.None) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     const sortedAdmins = computed(() => {
