@@ -53,8 +53,6 @@ export class MissingTranslationFinder {
 
     private async search({language, locale, namespace}: {language: string, locale: string, namespace?: string}): Promise<SearchResult> {
         const sourceTranslations = this.translationManager.readSource(locale, namespace);
-        // todo: maybe do on start for all?
-        this.addToDictionary({language, namespace, toAdd: sourceTranslations});
         const distTranslations = this.translationManager.readDist(locale, namespace);
         const missingTranslations = this.getMissingTranslations(sourceTranslations, distTranslations);
         const searchResult = this.getSearchResult({language, locale, namespace, missingTranslations});
@@ -134,7 +132,7 @@ export class MissingTranslationFinder {
 
         if(Array.isArray(toAdd)) {
             for(const textRef of toAdd) {
-                namespaceMap.set(textRef.id, textRef.text);
+                namespaceMap.set(textRef.id, textRef);
             }
         } else {
             for(const [id, text] of Object.entries(toAdd)) {
@@ -144,6 +142,7 @@ export class MissingTranslationFinder {
     }
 
     private getExistingTranslation(args: {language: Language, namespace?: Namespace, id: TranslationId, value: string}): string | TextToTranslateRef | null {
+        
         const languageMap = this.dictionary.get(args.language);
         if(!languageMap || languageMap.size === 0) {
             return null;
@@ -151,16 +150,13 @@ export class MissingTranslationFinder {
 
         const namespace = args.namespace ?? globals.DEFAULT_NAMESPACE;
     
-        // todo: is necessary?
-        // if(namespace) {
-            const namespaceMap = languageMap.get(namespace);
-            if(namespaceMap) {
-                const existingTranslation = namespaceMap.get(args.id);
-                if(existingTranslation) {
-                    return existingTranslation;
-                }
+        const namespaceMap = languageMap.get(namespace);
+        if(namespaceMap) {
+            const existingTranslation = namespaceMap.get(args.id);
+            if(existingTranslation) {
+                return existingTranslation;
             }
-        // }
+        }
     
         for(const [currentNamespace, currentNamespaceMap] of languageMap.entries()) {
             if(currentNamespace === namespace) {
@@ -206,6 +202,7 @@ export class MissingTranslationFinder {
             }
 
             const newTranslationRef = new TextToTranslateRef(language, id, text);
+            this.allTranslationRefs.add(newTranslationRef);
             newTranslationRefs.push(newTranslationRef);
             translationRefs.push(newTranslationRef);
         }

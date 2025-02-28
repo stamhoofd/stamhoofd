@@ -20,6 +20,10 @@ export class TranslationManager {
     }
 
     private getSourcePath(locale: string, namespace?: string) {
+        if(namespace === globals.DEFAULT_NAMESPACE) {
+            namespace = undefined;
+        }
+        
         return namespace ? globals.I18NUUID_LOCALES_DIR + '/' + namespace + '/' + locale + '.json' : globals.I18NUUID_LOCALES_DIR + '/' + locale + '.json';
     }
 

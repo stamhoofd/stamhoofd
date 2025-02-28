@@ -6,7 +6,7 @@ export class Translator implements ITranslator {
 
     }
 
-    async translate(text: string): Promise<string> {
-        return `TRANSLATED TEST > ${text}`;
+    async translate(args: {text: string, originalLocal: string, targetLocal: string}): Promise<string> {
+        return `TRANSLATED from ${args.originalLocal} to ${args.targetLocal} > ${args.text}`;
     }
 }

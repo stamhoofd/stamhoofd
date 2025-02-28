@@ -1,4 +1,4 @@
 export interface ITranslator {
-    translate(text: string): Promise<string>;
+    translate(args: {text: string, originalLocal: string, targetLocal: string}): Promise<string>;
     
 }

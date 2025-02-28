@@ -10,7 +10,10 @@ export async function start() {
     const output = await finder.findAll();
 
     for(const translationRef of output.allTranslationRefs) {
-        const translation = await translator.translate(translationRef.text);
+        const text = translationRef.text;
+        const originalLocal = manager.defaultLocale;
+        const targetLocal = translationRef.language;
+        const translation = await translator.translate({text, originalLocal, targetLocal});
         translationRef.setTranslation(translation);
     }
 
