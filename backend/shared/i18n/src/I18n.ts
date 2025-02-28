@@ -80,6 +80,10 @@ export class I18n {
 
         const m = I18n.loadedLocales.get(this.locale);
         if (!m) {
+            if (STAMHOOFD.environment === 'test') {
+                this.messages = new Map();
+                return;
+            }
             throw new Error('Locale not loaded when creating I18n for ' + language + '-' + country);
         }
 
@@ -126,6 +130,10 @@ export class I18n {
 
         const m = I18n.loadedLocales.get(this.locale);
         if (!m) {
+            if (STAMHOOFD.environment === 'test') {
+                this.messages = new Map();
+                return;
+            }
             throw new Error('Locale not loaded, when switching to locale ' + this.language + '-' + this.country);
         }
 

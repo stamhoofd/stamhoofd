@@ -28,10 +28,14 @@ jobs:
               - 'backend/**'
             structures:
               - 'shared/**'
+            models:
+              - 'shared/**'
+              - 'backend/shared/models/**'
 
     outputs:
       changed_backend: ${{ steps.changed.outputs.backend }}
       changed_structures: ${{ steps.changed.outputs.structures }}
+      changed_models: ${{ steps.changed.outputs.models }}
 
   job_test_backend:
     name: 'Backend API Tests'
@@ -52,7 +56,7 @@ jobs:
         with:
           authentication plugin: 'mysql_native_password'
           mysql version: '8.0'
-          mysql database: 'stamhoofd'
+          mysql database: 'stamhoofd-tests'
           mysql root password: 'root'
 
       - name: Install dependencies
@@ -76,6 +80,59 @@ jobs:
                 text:
                   type: "mrkdwn"
                   text: "@channel *Backend tests failed* for `${{ github.event.head_commit.message }}` by ${{ github.event.pull_request.user.name || github.event.head_commit.author.name }}"
+                accessory:
+                  type: "button"
+                  text:
+                    type: "plain_text"
+                    text: "Open commit"
+                    emoji: false
+                  value: "click_me"
+                  url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
+                  action_id: "button-action"
+  
+  job_test_models:
+    name: 'Backend Models Tests'
+    runs-on: ubuntu-latest
+    needs: [job_setup]
+    if: needs.job_setup.outputs.changed_models == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+      - name: Shutdown MySQL
+        run: sudo service mysql stop
+
+      - uses: daniellockyer/mysql-action@main
+        with:
+          authentication plugin: 'mysql_native_password'
+          mysql version: '8.0'
+          mysql database: 'stamhoofd-tests'
+          mysql root password: 'root'
+
+      - name: Install dependencies
+        run: yarn install --prefer-offline --frozen-lockfile
+      - name: Build shared packages
+        run: yarn build:shared
+      - name: Set test env
+        run: cp backend/shared/models/.env.ci.json backend/shared/models/.env.test.json
+      - name: Run tests
+        run: cd backend/shared/models && yarn build && yarn test --bail
+      - name: Notify Slack of failure
+        uses: slackapi/slack-github-action@v2.0.0
+        if: ${{ failure() }}
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "Models tests failed"
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "@channel *Models tests failed* for `${{ github.event.head_commit.message }}` by ${{ github.event.pull_request.user.name || github.event.head_commit.author.name }}"
                 accessory:
                   type: "button"
                   text:
@@ -118,6 +175,65 @@ jobs:
                 text:
                   type: "mrkdwn"
                   text: "@channel *Structures tests failed* for `${{ github.event.head_commit.message }}` by ${{ github.event.pull_request.user.name || github.event.head_commit.author.name }}"
+                accessory:
+                  type: "button"
+                  text:
+                    type: "plain_text"
+                    text: "Open commit"
+                    emoji: false
+                  value: "click_me"
+                  url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
+                  action_id: "button-action"
+  
+  job_boot:
+    name: 'API boot and shutdown'
+    runs-on: ubuntu-latest
+    needs: [job_setup]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+      - name: Shutdown MySQL
+        run: sudo service mysql stop
+
+      - uses: daniellockyer/mysql-action@main
+        with:
+          authentication plugin: 'mysql_native_password'
+          mysql version: '8.0'
+          mysql database: 'stamhoofd-tests'
+          mysql root password: 'root'
+      - name: For building, we need development dependencies - install them
+        run: yarn install --prefer-offline --frozen-lockfile
+      - name: Build shared packages
+        run: yarn build:shared
+      - name: Build API
+        run: cd backend/app/api && yarn build
+      - name: Remove all installed dependencies
+        run: yarn clear-dependencies
+      - name: Install production dependencies only
+        run: yarn install --prefer-offline --frozen-lockfile --production
+      - name: Set test env
+        run: cp backend/app/api/.env.ci.json backend/app/api/.env.json
+      - name: Running migrations
+        run: cd backend/app/api && node ./dist/migrations.js
+      - name: Run boot test
+        run: bash test/boot/boot-test.sh
+      - name: Notify Slack of failure
+        uses: slackapi/slack-github-action@v2.0.0
+        if: ${{ failure() }}
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "Boot test failed"
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "@channel *Boot test failed* for `${{ github.event.head_commit.message }}` by ${{ github.event.pull_request.user.name || github.event.head_commit.author.name }}"
                 accessory:
                   type: "button"
                   text:

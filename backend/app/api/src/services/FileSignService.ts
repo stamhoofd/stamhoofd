@@ -22,7 +22,7 @@ export class FileSignService {
         const alg = STAMHOOFD.FILE_SIGNING_ALG || 'ES256';
 
         if (!STAMHOOFD.FILE_SIGNING_PUBLIC_KEY || !STAMHOOFD.FILE_SIGNING_PRIVATE_KEY) {
-            if (STAMHOOFD.environment !== 'development') {
+            if (STAMHOOFD.environment !== 'development' && STAMHOOFD.environment !== 'test') {
                 throw new Error('Missing environment variables for file signing. Please make sure FILE_SIGNING_PUBLIC_KEY, FILE_SIGNING_PRIVATE_KEY and FILE_SIGNING_ALG are set.');
             }
 

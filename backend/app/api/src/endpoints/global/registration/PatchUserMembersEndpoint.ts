@@ -8,7 +8,7 @@ import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructure
 import { Context } from '../../../helpers/Context';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
 import { PatchOrganizationMembersEndpoint } from '../../global/members/PatchOrganizationMembersEndpoint';
-import { shouldCheckIfMemberIsDuplicateForPatch, shouldCheckIfMemberIsDuplicateForPut } from '../members/shouldCheckIfMemberIsDuplicate';
+import { shouldCheckIfMemberIsDuplicateForPatch } from '../members/shouldCheckIfMemberIsDuplicate';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
@@ -61,12 +61,10 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
 
             this.throwIfInvalidDetails(member.details);
 
-            if (shouldCheckIfMemberIsDuplicateForPut(struct)) {
-                const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, struct.details.securityCode);
-                if (duplicate) {
-                    addedMembers.push(duplicate);
-                    continue;
-                }
+            const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, struct.details.securityCode, 'put');
+            if (duplicate) {
+                addedMembers.push(duplicate);
+                continue;
             }
 
             await member.save();
@@ -79,12 +77,9 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
         for (let struct of request.body.getPatches()) {
             const member = members.find(m => m.id === struct.id);
             if (!member) {
-                throw new SimpleError({
-                    code: 'invalid_member',
-                    message: "This member does not exist or you don't have permissions to modify this member",
-                    human: 'Je probeert een lid aan te passen die niet (meer) bestaat. Er ging ergens iets mis.',
-                });
+                throw Context.auth.memberNotFoundOrNoAccess();
             }
+
             const securityCode = struct.details?.securityCode; // will get cleared after the filter
             struct = await Context.auth.filterMemberPatch(member, struct);
 
@@ -117,7 +112,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             }
 
             if (shouldCheckDuplicate) {
-                const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, securityCode);
+                const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, securityCode, 'patch');
                 if (duplicate) {
                 // Remove the member from the list
                     members.splice(members.findIndex(m => m.id === member.id), 1);

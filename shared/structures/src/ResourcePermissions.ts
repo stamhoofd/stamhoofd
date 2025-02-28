@@ -2,7 +2,10 @@ import { AutoEncoder, field, StringDecoder, EnumDecoder, ArrayDecoder, AutoEncod
 import { AccessRight, AccessRightHelper } from './AccessRight.js';
 import { PermissionLevel, getPermissionLevelNumber } from './PermissionLevel.js';
 import { PermissionRoleDetailed } from './PermissionRole.js';
-import { PermissionsResourceType } from './PermissionsResourceType.js';
+import { getPermissionResourceTypeName, PermissionsResourceType } from './PermissionsResourceType.js';
+import { Formatter } from '@stamhoofd/utility';
+
+type ResourceLike = { accessRights: AccessRight[]; level: PermissionLevel; isEmpty: boolean; resourceName?: string };
 
 /**
  * More granular access rights to specific things in the system
@@ -85,5 +88,74 @@ export class ResourcePermissions extends AutoEncoder {
 
     get isEmpty() {
         return this.level === PermissionLevel.None && this.accessRights.length === 0;
+    }
+
+    static getMapDescription(map: Map<PermissionsResourceType, Map<string, ResourceLike>>): string[] {
+        const stack: string[] = [];
+
+        const resourceDescription = (resource: ResourceLike) => {
+            const accessRights = resource.accessRights.map(a => AccessRightHelper.getDescription(a));
+            if (resource.level === PermissionLevel.None) {
+                return Formatter.joinLast(accessRights, ', ', ' en ');
+            }
+
+            let prefix = 'lezen';
+
+            if (resource.level === PermissionLevel.Write) {
+                prefix = 'bewerken';
+            }
+            else if (resource.level === PermissionLevel.Full) {
+                prefix = 'volledige toegang';
+            }
+
+            return prefix + (accessRights.length > 0 ? ' met ' + Formatter.joinLast(accessRights, ', ', ' en ') : '');
+        };
+
+        for (const [type, resources] of map) {
+            const all = resources.get('');
+            let allDescription: string | null = null;
+
+            if (all && !all.isEmpty) {
+                const accessRights = all.accessRights.map(a => AccessRightHelper.getDescription(a));
+                if (all.level === PermissionLevel.None) {
+                    stack.push('alle ' + getPermissionResourceTypeName(type, true) + ': ' + Formatter.joinLast(accessRights, ', ', ' en '));
+                }
+
+                let prefix = 'alle ';
+                let suffix = ' lezen';
+
+                if (all.level === PermissionLevel.Write) {
+                    suffix = ' bewerken';
+                }
+                else if (all.level === PermissionLevel.Full) {
+                    prefix = 'volledige toegang tot alle ';
+                    suffix = '';
+                }
+
+                stack.push(prefix + getPermissionResourceTypeName(type, true) + suffix + (accessRights.length > 0 ? ' met ' + Formatter.joinLast(accessRights, ', ', ' en ') : ''));
+                allDescription = resourceDescription(all);
+            }
+
+            const countsPer = new Map<string, { count: number; firstName: string | null }>();
+
+            for (const resource of resources.values()) {
+                if (!resource.isEmpty) {
+                    const description = resourceDescription(resource);
+                    if (description === allDescription) {
+                        continue;
+                    }
+                    if (!countsPer.has(description)) {
+                        countsPer.set(description, { count: 0, firstName: resource.resourceName ?? null });
+                    }
+                    countsPer.get(description)!.count += 1;
+                }
+            }
+
+            for (const [description, { count, firstName }] of countsPer) {
+                stack.push((count === 1 && firstName ? firstName : (count + ' ' + getPermissionResourceTypeName(type, count > 1))) + ' (' + description + ')');
+            }
+        }
+
+        return stack;
     }
 }

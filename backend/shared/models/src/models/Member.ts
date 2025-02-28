@@ -1,6 +1,6 @@
 import { column, Database, ManyToManyRelation, ManyToOneRelation, OneToManyRelation } from '@simonbackx/simple-database';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
-import { MemberDetails, RegistrationWithMember as RegistrationWithMemberStruct, TinyMember } from '@stamhoofd/structures';
+import { MemberDetails, NationalRegisterNumberOptOut, RegistrationWithMember as RegistrationWithMemberStruct, TinyMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -353,17 +353,7 @@ export class Member extends QueryableModel {
     }
 
     async isSafeToMergeDuplicateWithoutSecurityCode() {
-        // If responsibilities: not safe
-        const responsibilities = await MemberResponsibilityRecord.where({ memberId: this.id }, { limit: 1 });
-        if (responsibilities.length > 0) {
-            return false;
-        }
-
         if (this.details.recordAnswers.size > 0) {
-            return false;
-        }
-
-        if (this.details.reviewTimes.isReviewed('details')) {
             return false;
         }
 
@@ -376,6 +366,24 @@ export class Member extends QueryableModel {
         }
 
         if (this.details.uitpasNumber) {
+            return false;
+        }
+
+        if (this.details.nationalRegisterNumber !== null && this.details.nationalRegisterNumber !== NationalRegisterNumberOptOut) {
+            return false;
+        }
+
+        if (this.details.requiresFinancialSupport !== null) {
+            return false;
+        }
+
+        if (this.details.address || this.details.phone || this.details.email || this.details.alternativeEmails.length > 0 || this.details.unverifiedAddresses.length > 0 || this.details.unverifiedPhones.length > 0 || this.details.unverifiedEmails.length > 0) {
+            return false;
+        }
+
+        // If responsibilities: not safe
+        const responsibilities = await MemberResponsibilityRecord.where({ memberId: this.id }, { limit: 1 });
+        if (responsibilities.length > 0) {
             return false;
         }
 

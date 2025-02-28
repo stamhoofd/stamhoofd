@@ -1,3 +1,5 @@
+const useGithubActions = !!process.env.GITHUB_ACTIONS;
+
 module.exports = {
     roots: ['<rootDir>/dist'],
     testEnvironment: 'node',
@@ -6,5 +8,19 @@ module.exports = {
         './dist/tests/jest.setup.js',
     ],
     globalSetup: './dist/tests/jest.global.setup.js',
-    // verbose: true,
+    reporters: [['jest-console-group-reporter', {
+        consoleLevels: ['error', 'warn', 'log'],
+        filters: [],
+        groups: [],
+        onlyFailingTestSuites: true,
+        afterEachTest: {
+            enable: false,
+        },
+        afterAllTests: {
+            reportType: 'detailed',
+            enable: true,
+            filePaths: true,
+        },
+        useGitHubActions: useGithubActions,
+    }]],
 };

@@ -4,23 +4,32 @@ import { GroupPrice } from '@stamhoofd/structures';
 import { Group } from '../models/Group';
 import { Member } from '../models/Member';
 import { Registration } from '../models/Registration';
+import { Organization } from '../models';
+import { GroupFactory } from './GroupFactory';
 
-class Options {
+type Options = {
     member: Member;
     group: Group;
     groupPrice?: GroupPrice;
-}
+} | {
+    member: Member;
+    organization: Organization;
+};
 
 export class RegistrationFactory extends Factory<Options, Registration> {
     async create(): Promise<Registration> {
         const registration = new Registration();
         registration.memberId = this.options.member.id;
-        registration.groupId = this.options.group.id;
-        registration.periodId = this.options.group.periodId;
-        registration.organizationId = this.options.group.organizationId;
+
+        const group = 'group' in this.options ? this.options.group : await new GroupFactory({ organization: this.options.organization }).create();
+
+        registration.groupId = group.id;
+        registration.periodId = group.periodId;
+        registration.organizationId = group.organizationId;
+
         registration.registeredAt = new Date();
         registration.registeredAt.setMilliseconds(0);
-        registration.groupPrice = this.options.groupPrice ?? this.options.group?.settings.prices[0];
+        registration.groupPrice = 'groupPrice' in this.options && this.options.groupPrice ? this.options.groupPrice : group.settings.prices[0];
 
         await registration.save();
         return registration;

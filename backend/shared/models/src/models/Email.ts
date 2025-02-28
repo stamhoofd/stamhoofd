@@ -9,7 +9,7 @@ import { Email as EmailClass } from '@stamhoofd/email';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel, SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
-import { fillRecipientReplacements, getEmailBuilder } from '../helpers/EmailBuilder';
+import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder } from '../helpers/EmailBuilder';
 import { EmailRecipient } from './EmailRecipient';
 import { Organization } from './Organization';
 import { EmailTemplate } from './EmailTemplate';
@@ -285,27 +285,9 @@ export class Email extends QueryableModel {
             }
 
             // Can we send from this e-mail or reply-to?
-            if (organization) {
-                if (organization.privateMeta.mailDomain && organization.privateMeta.mailDomainActive && upToDate.fromAddress!.endsWith('@' + organization.privateMeta.mailDomain)) {
-                    from = upToDate.getFromAddress();
-                    replyTo = null;
-                }
-            }
-            else {
-                // Platform
-                // Is the platform allowed to send from the provided email address?
-                const domains = [
-                    ...Object.values(STAMHOOFD.domains.defaultTransactionalEmail ?? {}),
-                    ...Object.values(STAMHOOFD.domains.defaultBroadcastEmail ?? {}),
-                ];
-
-                for (const domain of domains) {
-                    if (upToDate.fromAddress!.endsWith('@' + domain)) {
-                        from = upToDate.getFromAddress();
-                        replyTo = null;
-                        break;
-                    }
-                }
+            if (upToDate.fromAddress && await canSendFromEmail(upToDate.fromAddress, organization ?? null)) {
+                from = upToDate.getFromAddress();
+                replyTo = null;
             }
 
             upToDate.status = EmailStatus.Sending;
@@ -371,7 +353,7 @@ export class Email extends QueryableModel {
 
                 const recipients = EmailRecipient.fromRows(data, 'email_recipients');
 
-                if (recipients.length == 0) {
+                if (recipients.length === 0) {
                     break;
                 }
 
@@ -394,21 +376,32 @@ export class Email extends QueryableModel {
 
                     const virtualRecipient = recipient.getRecipient();
 
+                    let resolved = false;
                     const callback = async (error: Error | null) => {
-                        if (error === null) {
-                            // Mark saved
-                            recipient.sentAt = new Date();
-
-                            // Update repacements that have been generated
-                            recipient.replacements = virtualRecipient.replacements;
-                            await recipient.save();
+                        if (resolved) {
+                            return;
                         }
-                        else {
-                            recipient.failCount += 1;
-                            recipient.failErrorMessage = error.message;
-                            recipient.firstFailedAt = recipient.firstFailedAt ?? new Date();
-                            recipient.lastFailedAt = new Date();
-                            await recipient.save();
+                        resolved = true;
+
+                        try {
+                            if (error === null) {
+                                // Mark saved
+                                recipient.sentAt = new Date();
+
+                                // Update repacements that have been generated
+                                recipient.replacements = virtualRecipient.replacements;
+                                await recipient.save();
+                            }
+                            else {
+                                recipient.failCount += 1;
+                                recipient.failErrorMessage = error.message;
+                                recipient.firstFailedAt = recipient.firstFailedAt ?? new Date();
+                                recipient.lastFailedAt = new Date();
+                                await recipient.save();
+                            }
+                        }
+                        catch (e) {
+                            console.error(e);
                         }
                         promiseResolve();
                     };
@@ -433,7 +426,12 @@ export class Email extends QueryableModel {
                     EmailClass.schedule(builder);
                 }
 
-                await Promise.all(sendingPromises);
+                if (sendingPromises.length > 0) {
+                    await Promise.all(sendingPromises);
+                }
+                else {
+                    break;
+                }
             }
 
             if (upToDate.recipientCount === 0 && upToDate.userId === null) {
@@ -557,9 +555,11 @@ export class Email extends QueryableModel {
                     while (request) {
                         const response = await loader.fetch(request, subfilter.subfilter);
 
-                        count += response.results.length;
-
                         for (const item of response.results) {
+                            if (!item.email) {
+                                continue;
+                            }
+                            count += 1;
                             const recipient = new EmailRecipient();
                             recipient.emailType = upToDate.emailType;
                             recipient.objectId = item.objectId;
@@ -586,7 +586,7 @@ export class Email extends QueryableModel {
                 upToDate.recipientsStatus = EmailRecipientsStatus.NotCreated;
                 await upToDate.save();
             }
-        }).catch(console.error);
+        });
     }
 
     async buildExampleRecipient() {
@@ -653,7 +653,7 @@ export class Email extends QueryableModel {
                 console.error('Failed to build example recipient for email', id);
                 console.error(e);
             }
-        }).catch(console.error);
+        });
     }
 
     getStructure() {
