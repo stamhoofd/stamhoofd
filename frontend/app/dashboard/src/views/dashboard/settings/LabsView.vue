@@ -79,20 +79,6 @@
                     Hou er rekening mee dat de tarieven van Mollie anders zijn dan die van Stripe. <a :href="$domains.getDocs('transactiekosten')" class="inline-link" target="_blank">Meer info</a>
                 </p>
             </STListItem>
-
-            <STListItem v-if="!enableBuckaroo" :selectable="true" element-name="label">
-                <template #left>
-                    <Checkbox :model-value="getFeatureFlag('webshop-discounts')" @update:model-value="setFeatureFlag('webshop-discounts', !!$event)" />
-                </template>
-
-                <h3 class="style-title-list">
-                    Kortingen en kortingscodes in webshops
-                </h3>
-
-                <p class="style-description-small">
-                    Volg de ontwikkeling van kortingen op webshops via <a href="https://feedback.stamhoofd.app/48" class="inline-link" target="_blank">de feedback tool</a>
-                </p>
-            </STListItem>
         </STList>
 
         <div v-if="isStamhoofd" key="stamhoofd-settings" class="container">
