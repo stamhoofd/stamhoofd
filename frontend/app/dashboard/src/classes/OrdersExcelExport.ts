@@ -577,8 +577,9 @@ export class OrdersExcelExport {
         }
 
         if (AppManager.shared.downloadFile) {
-            const data = XLSX.write(wb, { type: 'base64' });
-            AppManager.shared.downloadFile(data, 'bestellingen.xlsx').catch((e) => {
+            const data: ArrayBuffer = XLSX.write(wb, { type: 'array' });
+            const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            AppManager.shared.downloadFile(blob, 'bestellingen.xlsx').catch((e) => {
                 Toast.fromError(e).show();
             });
         }
