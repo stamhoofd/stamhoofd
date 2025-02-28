@@ -1,4 +1,4 @@
-import { GenerativeModel, GoogleGenerativeAI } from "@google/generative-ai";
+import { GenerativeModel, GoogleGenerativeAI, Schema, SchemaType } from "@google/generative-ai";
 import chalk from "chalk";
 import { globals } from "../globals";
 import { Translations } from "../types/Translations";
@@ -11,7 +11,22 @@ export class GoogleTranslator implements ITranslator {
 
     constructor() {
         this.genAI = new GoogleGenerativeAI(globals.GEMINI_API_KEY);
-        this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        const schema: Schema = {
+            description: "List of translations",
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.STRING
+            },
+          };
+
+        this.model = this.genAI.getGenerativeModel({
+            model: "gemini-1.5-flash",
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: schema,
+            }
+        });
     }
 
     translate(args: { text: string; originalLocal: string; targetLocal: string; }): Promise<string> {
@@ -22,11 +37,89 @@ export class GoogleTranslator implements ITranslator {
         // - Try to use the same word for things you referenced in other translations to. E.g. 'vereniging' should be 'organization' everywhere.
         // - Be consistent and copy the caps and punctuation of the original language unless a capital letter is required in English (e.g. weekdays)
         // - Do not change inline replacement values, which are recognizable by either the # prefix or surrounding curly brackets: #groep, {name}
-        const prompt = `Translate the values of the following json array from ${args.originalLocal} to ${args.targetLocal}: ${JSON.stringify(textArray)}. Do not translate text between curly brackets.`;
+
+        const prompt = `Translate the values of the following json array from ${args.originalLocal} to ${args.targetLocal}: ${JSON.stringify(textArray)}. Do not translate text between curly brackets. Keep the original order. The response should be a valid json array. Make sure that double quotes are escaped`;
+          
         const apiResult = await this.model.generateContent(prompt);
         const text = apiResult.response.text();
         console.log(text);
         return text;
+
+        // return JSON.stringify(textArray);
+    }
+
+    private splitTranslationInBatches(translations: Translations): string[][] {
+        const maxTextLength = 15000;
+
+        const batches: string[][] = [];
+
+        let currentLength = 0;
+        let currentIndex = 0;
+        for(const [id, text] of Object.entries(translations)) {
+            if(currentLength > maxTextLength) {
+                currentIndex = currentIndex + 1;
+                currentLength = 0;
+            }
+
+            let array = batches[currentIndex];
+            if(!array) {
+                array = [];
+                batches[currentIndex] = array;
+            }
+
+            array.push(text);
+            currentLength += text.length;
+        }
+
+        return batches;
+    }
+
+    private async translateBatch(batch: string[], args: { originalLocal: string; targetLocal: string; }): Promise<string[]> {
+        const text = await this.getTextFromApi(batch, args);
+        const json = this.textToJson(text);
+
+        if(json.length !== batch.length) {
+            throw new Error("Json length does not match batch length.");
+        }
+
+        return json;
+    }
+
+    private async translateBatches(batches: string[][], {originalLocal, targetLocal, translations}: { originalLocal: string; targetLocal: string; translations: Translations}): Promise<Translations> {
+        const result: Translations = {};
+        const translationEntries = Object.entries(translations);
+
+        let currentIndex = 0;
+
+        for(let i = 0; i < batches.length; i++) {
+            const batch = batches[i];
+            console.log(chalk.yellow(`Translating batch ${i + 1} of ${batches.length}.`));
+
+            let translationCount = 0;
+
+            try {
+                const translatedBatch = await this.translateBatch(batch, {originalLocal, targetLocal});
+
+                for(let j = 0; j < translatedBatch.length; j++) {
+                    const [id, text] = translationEntries[currentIndex];
+                    const translation = translatedBatch[j];
+                    const isTranslationValid = this.validateTranslation(text, translation);
+
+                    if(isTranslationValid) {
+                        result[id] = translation;
+                    }
+
+                    currentIndex = currentIndex + 1;
+                    translationCount = translationCount + 1;
+                    
+                }
+            } catch(error) {
+                currentIndex = currentIndex + batch.length - translationCount;
+                console.error(error);
+            }
+        }
+
+        return result;
     }
 
     async translateAll(translations: Translations, args: { originalLocal: string; targetLocal: string; }): Promise<Translations> {
@@ -35,30 +128,9 @@ export class GoogleTranslator implements ITranslator {
             throw new Error(message);
         }
         
-        const textArray = Object.values(translations);
-        const text = await this.getTextFromApi(textArray, args);
-        // const text = '["Acties", "{appel} Beheer hier alle {taart} personen die toegang hebben tot Stamhoofd, en wijzig hun toegangsrechten {taart}.","Er zijn nog geen facturen aangemaakt","Facturen","Verwijder deze vereniging","Bekijk alle leden van deze vereniging via het beheerdersportaal","Today is {datum}."]';
+        const batches = this.splitTranslationInBatches(translations);
 
-        const json = this.textToJson(text);
-
-        if(json.length !== textArray.length) {
-            throw new Error("Json length does not match text array length.");
-        }
-
-        const entries = Object.entries(translations);
-        const translationResult = {};
-
-        for(let i = 0; i < entries.length; i++) {
-            const [id, text] = entries[i];
-            const translation = json[i];
-            const isTranslationValid = this.validateTranslation(text, translation);
-
-            if(isTranslationValid) {
-                translationResult[id] = translation;
-            }
-        }
-
-        return translationResult;
+        return this.translateBatches(batches, {originalLocal: args.originalLocal, targetLocal: args.targetLocal, translations});
     }
 
     private validateTranslation(original: string, translation: string): boolean {
@@ -69,7 +141,7 @@ export class GoogleTranslator implements ITranslator {
         const translationArguments = [...translationMatches].map(match => match[1]);
 
         if(originalArguments.length !== translationArguments.length) {
-            console.error("Original arguments length does not match translation arguments length.");
+            console.error(`Original arguments length (${originalArguments.length}) does not match translation arguments length (${translationArguments.length}). Original: ${original}, translation: ${translation}`);
             return false;
         }
 
@@ -99,16 +171,7 @@ export class GoogleTranslator implements ITranslator {
     }
 
     private textToJson(result: string): string[] {
-        const regex = /\["(?:(?:.|\r|\n)*)"\]/;
-
-        const match = result.match(regex);
-        const jsonString = match?.[0];
-
-        if(!jsonString) {
-            throw new Error("Failed to find array in response.");
-        }
-
-        const json = JSON.parse(jsonString);
+        const json = JSON.parse(result);
         const {isValid, message} = this.validateJson(json);
 
         if(!isValid) {

@@ -1,7 +1,7 @@
 import { MissingTranslationFinder, TextToTranslateRef } from "./MissingTranslationFinder";
 import { TranslationManager } from "./TranslationManager";
+import { GoogleTranslator } from "./translators/GoogleTranslator";
 import { ITranslator } from "./translators/ITranslator";
-import { Translator } from "./translators/Translator";
 
 /**
  * TODO:
@@ -9,12 +9,13 @@ import { Translator } from "./translators/Translator";
  * - improve prompt
  * - ask to use consistent wording, provide context?
  * - context caching?
+ * - add feedback while translating (if it takes a long time for example)
  */
 
 export async function start() {
     const manager = new TranslationManager();
     const finder = new MissingTranslationFinder({translationManager: manager});
-    const translator = new Translator();
+    const translator = new GoogleTranslator();
 
     const output = await finder.findAll();
 
