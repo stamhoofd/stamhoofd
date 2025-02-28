@@ -4,7 +4,7 @@ import { Request, RequestMiddleware, RequestResult, Server } from '@simonbackx/s
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Toast } from '@stamhoofd/components';
 import { AppManager, sleep, UrlHelper } from '@stamhoofd/networking';
-import { getDefaultGroepFuncties, getPatch, GroepFunctie, isManaged, MemberWithRegistrations, Organization, OrganizationPrivateMetaData, schrappen, SGVFoutenDecoder, SGVGroep, SGVGroepResponse, SGVLedenResponse, SGVLid, SGVLidMatch, SGVLidMatchVerify, SGVMemberError, SGVProfielResponse, SGVSyncReport, SGVZoekenResponse, SGVZoekLid } from '@stamhoofd/structures';
+import { createStamhoofdFunctie, getDefaultGroepFuncties, getPatch, getStamhoofdFunctie, GroepFunctie, isManaged, MemberWithRegistrations, Organization, OrganizationPrivateMetaData, schrappen, SGVFoutenDecoder, SGVFunctie, SGVGFunctieResponse, SGVGroep, SGVGroepResponse, SGVLedenResponse, SGVLid, SGVLidMatch, SGVLidMatchVerify, SGVMemberError, SGVProfielResponse, SGVSyncReport, SGVZoekenResponse, SGVZoekLid } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 import SGVOldMembersView from '../views/dashboard/scouts-en-gidsen/SGVOldMembersView.vue';
@@ -193,19 +193,37 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     }
 
     async getFuncties() {
+        if (!this.groupNumber) {
+            throw new Error('Group number not set')
+        }
         // Temporary replaced because of issue in API that misses normal member functies
-        this.functies = getDefaultGroepFuncties()
+        this.functies = [...getDefaultGroepFuncties()]
 
-        return Promise.resolve()
-        // const response = await this.authenticatedServer.request({
-        //     method: "GET",
-        //     path: "/functie",
-        //     query: {
-        //         groep: this.groupNumber
-        //     },
-        //     decoder: SGVGFunctieResponse as Decoder<SGVGFunctieResponse>
-        // })
-        // this.functies = response.data.functies
+        const response = await this.authenticatedServer.request({
+            method: "GET",
+            path: "/functie",
+            query: {
+                groep: this.groupNumber
+            },
+            decoder: SGVGFunctieResponse as Decoder<SGVGFunctieResponse>
+        })
+        const list = response.data.functies;
+
+        // Check if Stamhoofd functie exists
+        const stamhoofdFunctie = getStamhoofdFunctie(list);
+        if (!stamhoofdFunctie) {
+            // Create Stamhoofd functie
+            const response = await this.authenticatedServer.request({
+                method: "POST",
+                path: "/functie",
+                body: createStamhoofdFunctie(this.groupNumber),
+                decoder: SGVFunctie as Decoder<SGVFunctie>
+            })
+
+            this.functies.push(response.data);
+        } else {
+            this.functies.push(stamhoofdFunctie)
+        }
     }
 
     async getProfiel() {
@@ -218,7 +236,6 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     }
 
     async checkFuncties() {
-        await this.getFuncties()
         const profiel = await this.getProfiel()
 
         // Check if this user has access to all the needed groups...
@@ -228,6 +245,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 message: "Log in met een account met minstens de functies (Adjunct) Verantwoordelijke Groepsadministratie (VGA) of groepsleiding in de groepsadministratie."
             })
         }
+        await this.getFuncties()
     }
 
     async setManagedFilter() {
@@ -631,7 +649,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         const lidData = response.data;
         const patch = schrappen(lidData, this.functies)
 
-        await sleep(100);
+        await sleep(200);
             
         if (!this.dryRun) {
 
@@ -648,7 +666,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             }
         }
 
-        await sleep(100);
+        await sleep(200);
     }
 
     async fetchLid(sgvId: string) {
@@ -725,7 +743,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             method: "GET",
             path: "/lid/"+sgvId
         })
-        await sleep(100);
+        await sleep(200);
 
         return response.data;
     }
@@ -747,7 +765,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 const updateResponse = await this.authenticatedServer.request<any>({
                     method: "PATCH",
                     path: "/lid/"+match.sgvId+"?bevestig=true",
-                    body: patch
+                    body: patch,
                 })
                 match.stamhoofd.details.memberNumber = updateResponse.data.verbondsgegevens.lidnummer ?? null
 
@@ -767,7 +785,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             throw e;
         }
 
-        await sleep(100);
+        await sleep(200);
 
         return lid;
     }
@@ -816,9 +834,16 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                         path: "/lid?bevestig=true",
                         body: post
                     })
+                    
+                    // JSON response content-type header is missing
+                    if (typeof updateResponse.data === 'string') {
+                        lid = JSON.parse(updateResponse.data)
+                    } else {
+                        lid = updateResponse.data
+                    }
 
                     // Mark as synced in Stamhoofd
-                    member.details.memberNumber = updateResponse.data.verbondsgegevens?.lidnummer ?? null
+                    member.details.memberNumber = lid.verbondsgegevens?.lidnummer ?? null
                     member.details.lastExternalSync = new Date()
                     await MemberManager.patchMembersDetails([member])
 

@@ -71,7 +71,7 @@
                         </dd>
                     </template>
 
-                    <template v-if="isManagedSGV">
+                    <template v-if="isManagedSGV || (isSGV && member.details.lastExternalSync)">
                         <dt>Gesynchroniseerd</dt>
                         <dd v-tooltip="hasFull ? 'Leden moeten na wijzigingen gesynchroniseerd worden met de groepadministratie van Scouts en Gidsen Vlaanderen. Stamhoofd laat je weten wanneer dit nodig is.\n\nGa hiervoor naar ‘Instellingen’ → ‘Synchroniseer met de groepsadministratie’.' : 'Leden moeten periodiek gesynchroniseerd worden met de groepadministratie van Scouts en Gidsen Vlaanderen. Jouw VGA/groepsleiding kan dit in orde brengen via Stamhoofd'" class="with-icon">
                             {{ member.details.lastExternalSync ? (formatDate(member.details.lastExternalSync)) : "Nooit" }}

@@ -114,17 +114,22 @@ export class SGVSyncReport {
         const counts = new Map<string, number>();
 
         for (const item of [...this.created, ...this.synced]) {
-            for (const functie of item.lid.functies) {
-                if (functie.einde) {
-                    continue;
-                }
+            try {
+                for (const functie of item.lid.functies) {
+                    if (functie.einde) {
+                        continue;
+                    }
 
-                const code: string = functie.omschrijving || functie.code || 'Onbekende functie';
-                if (counts.has(code)) {
-                    counts.set(code, counts.get(code)! + 1)
-                } else {
-                    counts.set(code, 1)
+                    const code: string = functie.omschrijving || functie.code || 'Onbekende functie';
+                    if (counts.has(code)) {
+                        counts.set(code, counts.get(code)! + 1)
+                    } else {
+                        counts.set(code, 1)
+                    }
                 }
+            } catch (e) {
+                console.error('Report failed for item', item)
+                console.error(e)
             }
         }
 
@@ -207,7 +212,7 @@ export function getLidFuncties(lid: any) {
 
 
 export function schrappen(lid: any, groepFuncties: GroepFunctie[]): any {
-    const managedFuncties = getManagedFuncties(groepFuncties);
+    const managedFuncties = getManagedFuncties(groepFuncties, true);
 
     const newFunctions: LidFunctie[] = []
 
@@ -215,7 +220,7 @@ export function schrappen(lid: any, groepFuncties: GroepFunctie[]): any {
     for (const lidFunctie of (lid.functies ?? []) as LidFunctie[]) {
         // Keep all functies that have been ended
         if (lidFunctie.einde) {
-            newFunctions.push(lidFunctie)
+            // Do not alter
             continue;
         }
 
@@ -224,14 +229,17 @@ export function schrappen(lid: any, groepFuncties: GroepFunctie[]): any {
 
         if (!managedFunctie) {
             // Not managed by Stamhoofd
-            newFunctions.push(lidFunctie)
             continue;
         }
+        
+        // SGV bug: throws error if you send links
+        delete (lidFunctie as any).links;
+        delete (lidFunctie as any).omschrijving;
 
         // End this function
         newFunctions.push({
             ...lidFunctie,
-            einde: Formatter.dateIso(new Date())
+            einde: new Date().toISOString()
         });
     }
 
@@ -295,9 +303,11 @@ export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer:
         throw new Error("Een geboortedatum is noodzakelijk voor de groepsadministratie")
     }
 
-    const managedFuncties = getManagedFuncties(groepFuncties);
+    const managedFuncties = getManagedFuncties(groepFuncties, true);
     const lidManagedFunctie = getFunctie(details, groups, groepFuncties);
+    const stamhoofdFunctie = getStamhoofdFunctie(groepFuncties);
     let functieAlreadyPresent = false;
+    let stamhoofdFunctieAlreadyPresent = false;
 
     const newFunctions: LidFunctie[] = []
 
@@ -318,12 +328,23 @@ export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer:
             continue;
         }
 
+        if (stamhoofdFunctie && id === stamhoofdFunctie.id) {
+            // Already registered
+            stamhoofdFunctieAlreadyPresent = true;
+            newFunctions.push(lidFunctie)
+            continue;
+        }
+
         if (lidManagedFunctie && id === lidManagedFunctie.id) {
             // Already registered
             functieAlreadyPresent = true;
             newFunctions.push(lidFunctie)
             continue;
         }
+
+        // SGV bug: throws error if you send links when creating or deleting
+        delete (lidFunctie as any).links;
+        delete (lidFunctie as any).omschrijving;
 
         // End this function
         newFunctions.push({
@@ -343,13 +364,22 @@ export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer:
         report?.addInfo(details.name + ': functie toegekend ' + lidManagedFunctie.beschrijving)
     }
 
+    if (!stamhoofdFunctieAlreadyPresent && stamhoofdFunctie) {
+        // Start
+        newFunctions.push({
+            groep: groepNummer,
+            functie: stamhoofdFunctie.id,
+            begin: new Date().toISOString(),
+        })
+    }
+
     if (!lidManagedFunctie) {
-        if (!lid.persoonsgegevens) {
-            // New members need a functie
-            throw new Error(details.firstName+" "+details.lastName+": we konden niet automatisch bepalen welke functie we moeten toekennen. Ten minste één functie in de groepsadministratie is verplicht om een lid te kunnen toevoegen in de groepsadministratie. Voor nieuwe leiding moet je zelf eerst de leiding toevoegen met de juiste functies, daarna kan je de andere gegevens synchroniseren.")
+        if (!stamhoofdFunctie && !lid.persoonsgegevens) {
+            // Dit is een nieuw lid zonder functies
+            throw new Error('We kunnen geen lid toevoegen zonder functie. Stamhoofd kan niet weten welke functies dit lid moet krijgen. Lees de documentatie na.')
         }
+        // in groepsadmin, én in Stamhoofd, maar heeft geen functies
         report?.markUnmanaged(member, lid)
-        //report?.addWarning("Je moet zelf de functies (bv. kapoenenleiding...) voor " + details.firstName+" "+details.lastName+" beheren in de groepsadministratie. Voor leiding en vrijwilligers synchroniseert Stamhoofd enkel de gegevens, niet de functies.")
     }
 
     // Construct the patch: compare and check the fields that need changes
@@ -399,7 +429,7 @@ export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer:
 }
 
 export function isManaged(lid: any, groepFuncties: GroepFunctie[]): any {
-    const managedFuncties = getManagedFuncties(groepFuncties);
+    const managedFuncties = getManagedFuncties(groepFuncties, false);
 
     for (const lidFunctie of (lid.functies ?? []) as LidFunctie[]) {
         // Keep all functies that have been ended
@@ -420,8 +450,17 @@ export function isManaged(lid: any, groepFuncties: GroepFunctie[]): any {
 /**
  * Geeft een lijst van alle groepsadministratie functie ids die door Stamhoofd worden beheerd.
  */
-export function getManagedFuncties(groepFuncties: GroepFunctie[]): GroepFunctie[] {
-    return [...getGroepCodeMapping(groepFuncties).values()]
+export function getManagedFuncties(groepFuncties: GroepFunctie[], includeStamhoofdFunctie = true): GroepFunctie[] {
+    const b = [...getGroepCodeMapping(groepFuncties).values()]
+
+    if (includeStamhoofdFunctie) {
+        const s = getStamhoofdFunctie(groepFuncties)
+        if (s) {
+            b.push(s)
+        }
+    }
+
+    return b;
 }
 
 /**
@@ -466,6 +505,28 @@ export function getGroepCodeMapping(groepFuncties: GroepFunctie[]): Map<string, 
     }
 
     return ids;
+}
+
+const StamhoofdFunctieNaam = 'Beheerd in Stamhoofd'
+
+/**
+ * De groepseigenfunctie die Stamhoofd gebruikt om leden te markeren als 'beheerd in Stamhoofd' en toe tevoegen zonder functies
+ */
+export function getStamhoofdFunctie(groepFuncties: GroepFunctie[]): GroepFunctie|null {
+    return groepFuncties.find(f => f.beschrijving === StamhoofdFunctieNaam) ?? null;
+}
+
+/**
+ * De groepseigenfunctie die Stamhoofd gebruikt om leden te markeren als 'beheerd in Stamhoofd' en toe tevoegen zonder functies
+ */
+export function createStamhoofdFunctie(groepsnummer: string): GroepFunctie {
+    return {
+        beschrijving: StamhoofdFunctieNaam,
+        groepen: [
+            groepsnummer
+        ],
+        id: 'tempFunctie' + new Date().getTime()
+    } as GroepFunctie
 }
 
 /**

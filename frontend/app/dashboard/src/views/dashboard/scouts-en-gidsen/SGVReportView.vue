@@ -55,28 +55,6 @@
                 </STList>
             </template>
 
-            <template v-if="report.unmanagedMissingInStamhoofd.length > 0">
-                <hr>
-                <h2>Leiding niet in Stamhoofd</h2>
-                <p>Deze leiding staat in de groepsadministratie, maar niet in Stamhoofd. Hun gegevens worden niet aangepast door Stamhoofd. Kijk de gegevens én functies na in de groepsadministratie zelf (wie is materiaalmeester, kapoenenleiding...). Schrap ze uit de groepsadministratie indien nodig.</p>
-
-                <STList>
-                    <STListItem v-for="member in report.unmanagedMissingInStamhoofd" :key="member.id">
-                        <div>
-                            <h2 class="style-title-list">
-                                {{ getLidName(member) }}
-                            </h2>
-                            <p class="style-description-small">
-                                {{ getLidBirthDay(member) }}
-                            </p>
-                            <p class="style-description-small">
-                                {{ getLidFuncties(member) || 'Geen functies' }}
-                            </p>
-                        </div>
-                    </STListItem>
-                </STList>
-            </template>
-
             <template v-if="report.deleted.length > 0">
                 <hr>
                 <h2>Geschrapt in de groepsadministratie</h2>
@@ -128,6 +106,28 @@
                             </p>
                             <p class="style-description-small">
                                 {{ getLidFuncties(lid) || 'Geen functies' }}
+                            </p>
+                        </div>
+                    </STListItem>
+                </STList>
+            </template>
+
+            <template v-if="report.unmanagedMissingInStamhoofd.length > 0">
+                <hr>
+                <h2>Leiding niet in Stamhoofd</h2>
+                <p>Deze leiding staat in de groepsadministratie, maar niet in Stamhoofd. Hun gegevens worden niet aangepast door Stamhoofd. Kijk de gegevens én functies na in de groepsadministratie zelf (wie is materiaalmeester, kapoenenleiding...). Schrap ze uit de groepsadministratie indien nodig.</p>
+
+                <STList>
+                    <STListItem v-for="member in report.unmanagedMissingInStamhoofd" :key="member.id">
+                        <div>
+                            <h2 class="style-title-list">
+                                {{ getLidName(member) }}
+                            </h2>
+                            <p class="style-description-small">
+                                {{ getLidBirthDay(member) }}
+                            </p>
+                            <p class="style-description-small">
+                                {{ getLidFuncties(member) || 'Geen functies' }}
                             </p>
                         </div>
                     </STListItem>
