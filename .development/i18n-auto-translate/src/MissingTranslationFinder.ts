@@ -1,7 +1,5 @@
-import { getChildDirectories, getChildFiles } from "./fs-helper";
 import { globals } from "./globals";
-import { isLanguage, isLocale } from "./i18n-helper";
-import { readTranslationsAllowNull } from "./read-translations";
+import { TranslationManager } from "./TranslationManager";
 
 type Language = string;
 type Namespace = string;
@@ -23,60 +21,38 @@ class TextToTranslateRef {
 
 export class MissingTranslationFinder {
     private readonly dictionary: Map<Language, Map<Namespace, Map<TranslationId, string | TextToTranslateRef>>> = new Map();
-    private readonly defaultLanguage: Language;
-    private readonly otherLanguages: Set<Language>;
-    // todo: add default namespace to env?
-    private readonly defaultNamespace = 'stamhoofd';
-    // todo: add default country to env?
-    private readonly defaultCountry = 'BE';
-    private readonly namespaces: string[];
-    private readonly locales: string[];
-    private readonly defaultLocale: string;
+    private readonly translationManager: TranslationManager;
 
-    constructor(private readonly translator: (text: string) => Promise<string>) {
-        this.defaultLanguage = this.getDefaultLanguage();
-        this.defaultLocale = `${this.defaultLanguage}-${this.defaultCountry}`;
-        this.otherLanguages = this.getAllLanguagesInProject([this.defaultLanguage]);
-        this.locales = this.getAllLocalesInProject();
-        this.namespaces = this.getAllNamespacesInProject();
+    constructor(options: {translationManager?: TranslationManager} = {}) {
+        this.translationManager = options.translationManager ?? new TranslationManager();
     }
 
     private async search({language, locale, namespace}: {language: string, locale: string, namespace?: string}): Promise<SearchResult> {
-        const sourceTranslations = this.getSourceTranslations(locale, namespace);
+        const sourceTranslations = this.translationManager.readSource(locale, namespace);
         // todo: maybe do on start for all?
         this.addToDictionary({language, namespace, toAdd: sourceTranslations});
-        const distTranslations = this.getDistTranslations(locale, namespace);
+        const distTranslations = this.translationManager.readDist(locale, namespace);
         const missingTranslations = this.getMissingTranslations(sourceTranslations, distTranslations);
         const searchResult = this.getSearchResult({language, locale, namespace, missingTranslations});
 
         return searchResult;
     }
 
-    private async translateAll(translations: Translations) {
-        const translated: Translations = {};
-
-        for(const [id, text] of Object.entries(translations)) {
-            translated[id] = await this.translator(text);
-        }
-
-        return translated;
-    }
-
     private async getSearchResultsForLanguage(language: string): Promise<SearchResult[]> {
         const results: SearchResult[] = [];
 
-        if(language !== this.defaultLanguage) {
+        if(language !== globals.DEFAULT_LANGUAGE) {
             results.push(await this.search({language, locale: language}));
         }
 
-        const locales = this.getLocalesForLanguage(language);
+        const locales = this.translationManager.getLocalesForLanguage(language);
 
         for(const locale of locales) {
             results.push(await this.search({language, locale}));
         }
 
-        for(const namespace of this.namespaces) {
-            if(language !== this.defaultLanguage) {
+        for(const namespace of this.translationManager.namespaces) {
+            if(language !== globals.DEFAULT_LANGUAGE) {
                 results.push(await this.search({language, locale: language, namespace}));
             }
             
@@ -90,11 +66,11 @@ export class MissingTranslationFinder {
 
     private initDictionary() {
         this.dictionary.clear();
-        const allNamespaces = [this.defaultNamespace, ...this.namespaces];
+        const allNamespaces = [globals.DEFAULT_NAMESPACE, ...this.translationManager.namespaces];
 
         for(const namespace of allNamespaces) {
-            const toAdd = this.getDistTranslations(this.defaultLocale, namespace);
-            this.addToDictionary({language: this.defaultLanguage, namespace, toAdd});
+            const toAdd = this.translationManager.readDist(this.translationManager.defaultLocale, namespace);
+            this.addToDictionary({language: globals.DEFAULT_LANGUAGE, namespace, toAdd});
         }
     }
 
@@ -103,9 +79,9 @@ export class MissingTranslationFinder {
         this.initDictionary();
 
         // first check default country
-        const output = await this.getSearchResultsForLanguage(this.defaultLanguage);
+        const output = await this.getSearchResultsForLanguage(globals.DEFAULT_LANGUAGE);
 
-        for(const language of this.otherLanguages) {
+        for(const language of this.translationManager.otherLanguages) {
             output.push(...await this.getSearchResultsForLanguage(language));
         }
 
@@ -115,7 +91,7 @@ export class MissingTranslationFinder {
     private addToDictionary(args: {language: Language, namespace?: Namespace, toAdd: Translations | TextToTranslateRef[]}) {
         const language = args.language;
         const toAdd = args.toAdd;
-        const namespace = args.namespace ?? this.defaultNamespace;
+        const namespace = args.namespace ?? globals.DEFAULT_NAMESPACE;
     
         let languageMap = this.dictionary.get(language);
         if(!languageMap) {
@@ -146,7 +122,7 @@ export class MissingTranslationFinder {
             return null;
         }
 
-        const namespace = args.namespace ?? this.defaultNamespace;
+        const namespace = args.namespace ?? globals.DEFAULT_NAMESPACE;
     
         // todo: is necessary?
         // if(namespace) {
@@ -184,7 +160,7 @@ export class MissingTranslationFinder {
     }
 
     private getSearchResult(args: {language: Language, locale: string, namespace?: string, missingTranslations: Translations}): SearchResult {
-        const {language, locale, namespace = this.defaultNamespace, missingTranslations} = args;
+        const {language, locale, namespace = globals.DEFAULT_NAMESPACE, missingTranslations} = args;
     
         const existingTranslationsToAdd: Translations = {};
         const translationRefs: TextToTranslateRef[] = [];
@@ -219,59 +195,5 @@ export class MissingTranslationFinder {
     
     private getMissingTranslations(sourceTranslations: Translations, distTranslations: Translations): Translations {
         return Object.fromEntries(Object.entries(distTranslations).filter(entry => sourceTranslations.hasOwnProperty(entry[0]) === false));
-    }
-    
-    private getDefaultLanguage() {
-        const defaultLanguage = globals.I18NUUID_DEFAULT_LOCALE;
-        if(!isLanguage(defaultLanguage)) {
-            throw new Error(`Default language ${defaultLanguage} should be a language`);
-        }
-        return defaultLanguage;
-    }
-
-    private getAllLanguagesInProject(exclude?: string[]): Set<string> {
-        const localesDir = globals.I18NUUID_LOCALES_DIR;
-    
-        const jsonFiles = getChildFiles(localesDir).filter(file => file.endsWith(".json"));
-        const jsonFileNames = jsonFiles.map(file => file.substring(0, file.length - 5));
-        const result = new Set(jsonFileNames.filter(name => isLanguage(name)));
-        if(exclude) {
-            exclude.forEach(item => result.delete(item));
-        }
-        return result;
-    }
-
-    private getAllLocalesInProject(): string[] {
-        const localesDir = globals.I18NUUID_LOCALES_DIR;
-    
-        const jsonFiles = getChildFiles(localesDir).filter(file => file.endsWith(".json"));
-        const jsonFileNames = jsonFiles.map(file => file.substring(0, file.length - 5));
-        return jsonFileNames.filter(name => isLocale(name));
-    }
-
-    private getAllNamespacesInProject(): string[] {
-        const localesDir = globals.I18NUUID_LOCALES_DIR;
-        const exclude = ['platforms'];
-        return getChildDirectories(localesDir).filter(name => !exclude.includes(name));
-    }
-
-    private getLocalesForLanguage(language: Language) {
-        return this.locales.filter(locale => locale.startsWith(language));
-    }
-
-    private getSourceTranslations(locale: string, namespace?: string): Translations {
-        // const path = globals.I18NUUID_LOCALES_DIR + '/' + locale + '.json';
-        const filePath = namespace ? globals.I18NUUID_LOCALES_DIR + '/' + locale + '/' + namespace + '.json' : globals.I18NUUID_LOCALES_DIR + '/' + locale + '.json';
-        return readTranslationsAllowNull(filePath) ?? {};
-    }
-
-    private getDistTranslations(locale: string, namespace: string = this.defaultNamespace): Translations {
-        if(isLanguage(locale)) {
-            locale = locale + '-' + this.defaultCountry;
-        }
-        const filePath = globals.I18NUUID_LOCALES_DIR_DIST + '/' + namespace + '/' + locale + '.json';
-
-        console.log(filePath)
-        return readTranslationsAllowNull(filePath) ?? {};
     }
 }

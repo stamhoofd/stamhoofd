@@ -1,5 +1,6 @@
 import { config } from 'dotenv';
 import path from 'node:path';
+import { isLanguage } from './i18n-helper';
 
 config()
 
@@ -10,8 +11,9 @@ type EnvVariables = {
     readonly I18NUUID_LOCALES_DIR: string;
     // Path to the directory containing your built translations
     readonly I18NUUID_LOCALES_DIR_DIST: string;
-    // The locale where the translations that are replaced will be stored into
-    readonly I18NUUID_DEFAULT_LOCALE: string;
+    readonly DEFAULT_LANGUAGE: string;
+    readonly DEFAULT_COUNTRY: string;
+    readonly DEFAULT_NAMESPACE: string;
     // Directories that should be ignored
     readonly I18NUUID_EXCLUDE_DIRS_ARRAY: string[];
     
@@ -23,9 +25,16 @@ function getVariables(): EnvVariables {
         I18NUUID_ROOT: root,
         I18NUUID_LOCALES_DIR: root + '/shared/locales/src',
         I18NUUID_LOCALES_DIR_DIST: root + '/shared/locales/dist',
-        I18NUUID_DEFAULT_LOCALE: process.env.I18NUUID_DEFAULT_LOCALE ?? 'nl',  // This is the only environment variable we'll read for now, because the other once should always stay the same
+        DEFAULT_LANGUAGE: process.env.DEFAULT_LANGUAGE ?? 'nl',
+        DEFAULT_COUNTRY: process.env.DEFAULT_COUNTRY ?? 'BE',
+        DEFAULT_NAMESPACE: process.env.DEFAULT_NAMESPACE ?? 'stamhoofd',
+        // This is the only environment variable we'll read for now, because the other once should always stay the same
         I18NUUID_EXCLUDE_DIRS_ARRAY: ['dist', 'esm', 'node_modules']
     };
+
+    if(!isLanguage(emptyVariables.DEFAULT_LANGUAGE)) {
+        throw new Error(`Default language ${emptyVariables.DEFAULT_LANGUAGE} should be a language`);
+    }
 
     return emptyVariables;
 }
