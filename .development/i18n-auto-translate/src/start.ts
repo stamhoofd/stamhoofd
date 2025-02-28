@@ -1,6 +1,15 @@
 import { MissingTranslationFinder } from "./MissingTranslationFinder";
 import { TranslationManager } from "./TranslationManager";
-import { Translator } from "./Translator";
+import { Translator } from "./translators/Translator";
+
+/**
+ * TODO:
+ * - check changes (use cache files?)
+ * - improve prompt (send array?)
+ * - check if arguments in text are preserved in output, add to prompt also
+ * - ask to use consistent wording, provide context?
+ * - context caching?
+ */
 
 export async function start() {
     const manager = new TranslationManager();

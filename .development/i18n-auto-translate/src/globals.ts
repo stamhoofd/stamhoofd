@@ -16,7 +16,7 @@ type EnvVariables = {
     readonly DEFAULT_NAMESPACE: string;
     // Directories that should be ignored
     readonly I18NUUID_EXCLUDE_DIRS_ARRAY: string[];
-    
+    readonly GEMINI_API_KEY: string;
 }
 
 function getVariables(): EnvVariables {
@@ -29,7 +29,8 @@ function getVariables(): EnvVariables {
         DEFAULT_COUNTRY: process.env.DEFAULT_COUNTRY ?? 'BE',
         DEFAULT_NAMESPACE: process.env.DEFAULT_NAMESPACE ?? 'stamhoofd',
         // This is the only environment variable we'll read for now, because the other once should always stay the same
-        I18NUUID_EXCLUDE_DIRS_ARRAY: ['dist', 'esm', 'node_modules']
+        I18NUUID_EXCLUDE_DIRS_ARRAY: ['dist', 'esm', 'node_modules'],
+        GEMINI_API_KEY: process.env.GEMINI_API_KEY ?? '',
     };
 
     if(!isLanguage(emptyVariables.DEFAULT_LANGUAGE)) {
