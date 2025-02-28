@@ -19,11 +19,16 @@ interface MissingTranslationsOutput {
     searchResults: SearchResult[];
 }
 
-class TextToTranslateRef {
+export class TextToTranslateRef {
+    private _didTry = false;
     private _translation: string | null = null;
     
     get isTranslated(): boolean {
         return this._translation !== null;
+    }
+
+    get didTry(): boolean {
+        return this._didTry;
     }
 
     get translation(): string {
@@ -35,6 +40,10 @@ class TextToTranslateRef {
     }
 
     constructor(readonly language: string, readonly id: string,  readonly text: string) {
+    }
+
+    markDidTry() {
+        this._didTry = true;
     }
 
     setTranslation(value: string) {
