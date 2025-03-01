@@ -2197,34 +2197,16 @@ describe('Endpoint.RegisterMembers', () => {
                 groupPrice: groupPrice1,
             }).create();
 
-            const group2 = await new GroupFactory({
-                organization,
-                price: 30,
-                stock: 5,
-            }).create();
-
-            const groupPrice = group2.settings.prices[0];
-
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
-                            groupPrice,
-                            organizationId: organization.id,
-                            groupId: group2.id,
-                            memberId: member.id,
-                        }),
-                    ],
+                    items: [],
                     balanceItems: [],
                     deleteRegistrationIds: [registration.id],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 30,
+                totalPrice: 0,
                 customer: null,
                 asOrganizationId: organization.id,
             });

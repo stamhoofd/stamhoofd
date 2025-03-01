@@ -139,8 +139,8 @@ export class ContextPermissions {
         if (this.canAccessGroup(group, PermissionLevel.Write)) {
             return true;
         }
-        if (this.organization && group.type === GroupType.EventRegistration) {
-            if (group.organizationId !== this.organization.id && group.settings.allowRegistrationsByOrganization && !group.closed) {
+        if (this.organization) {
+            if (group.settings.allowRegistrationsByOrganization && !group.closed) {
                 return this.hasFullAccess();
             }
         }

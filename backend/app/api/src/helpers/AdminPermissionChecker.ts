@@ -210,7 +210,7 @@ export class AdminPermissionChecker {
         if (await this.canAccessGroup(group, PermissionLevel.Write)) {
             return true;
         }
-        if (asOrganizationId && group.type === GroupType.EventRegistration) {
+        if (asOrganizationId) {
             if (group.settings.allowRegistrationsByOrganization) {
                 return await this.hasFullAccess(asOrganizationId);
             }

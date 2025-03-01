@@ -144,20 +144,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
-        if (request.body.asOrganizationId) {
-            // Do you have write access to this group?
-            for (const group of groups) {
-                if (!await Context.auth.canRegisterMembersInGroup(group, request.body.asOrganizationId)) {
-                    throw new SimpleError({
-                        code: 'forbidden',
-                        message: 'No permission to register this member',
-                        human: $t('Je hebt geen toegangsrechten om een lid in te schrijven voor {group}', { group: group.settings.name }),
-                        statusCode: 403,
-                    });
-                }
-            }
-        }
-
         const blob = await AuthenticatedStructures.membersBlob(members, true);
         const platformMembers: PlatformMember[] = [];
 
@@ -253,6 +239,18 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     code: 'invalid_member',
                     message: 'De groep waarin je een lid probeert in te schrijven lijkt niet meer te bestaan. Je herlaadt best even de pagina om opnieuw te proberen.',
                 });
+            }
+
+            if (request.body.asOrganizationId) {
+                // Do you have write access to this group?
+                if (!await Context.auth.canRegisterMembersInGroup(group, request.body.asOrganizationId)) {
+                    throw new SimpleError({
+                        code: 'forbidden',
+                        message: 'No permission to register in this group',
+                        human: $t('Je hebt geen toegangsrechten om een lid in te schrijven voor {group}', { group: group.settings.name }),
+                        statusCode: 403,
+                    });
+                }
             }
 
             // Check if this member is already registered in this group?
