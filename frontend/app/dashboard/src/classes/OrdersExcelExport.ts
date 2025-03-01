@@ -376,13 +376,13 @@ export class OrdersExcelExport {
                 }
             }
 
-            const itemAmounts: RowValue[] = itemNames.map(a => "")
+            const itemAmounts: number[] = itemNames.map(a => 0)
 
             for (const item of order.data.cart.items) {
                 const group = cartItemGroupingString(item)
                 const index = itemColumns.get(group)
                 if (index !== undefined) {
-                    itemAmounts[index] = item.amount
+                    itemAmounts[index] = (itemAmounts[index] ?? 0) + item.amount
                 }
             }
 
