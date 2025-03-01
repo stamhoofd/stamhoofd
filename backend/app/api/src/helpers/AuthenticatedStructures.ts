@@ -824,11 +824,11 @@ export class AuthenticatedStructures {
                                     ]
                                 : []),
 
-                            ...(member.details.parentsHaveAccess
-                                ? member.details.parents.filter(p => !!p.email).map(p => ReceivableBalanceObjectContact.create({
+                            ...((member.details.defaultAge <= 18 || member.details.getMemberEmails().length === 0)
+                                ? member.details.parents.filter(p => p.getEmails().length > 0).map(p => ReceivableBalanceObjectContact.create({
                                     firstName: p.firstName ?? '',
                                     lastName: p.lastName ?? '',
-                                    emails: [p.email!],
+                                    emails: p.getEmails(),
                                     meta: {
                                         type: 'parent',
                                         responsibilityIds: [],
@@ -867,11 +867,11 @@ export class AuthenticatedStructures {
                                     ]
                                 : []),
 
-                            ...(member.details.parentsHaveAccess
-                                ? member.details.parents.filter(p => !!p.email).map(p => ReceivableBalanceObjectContact.create({
+                            ...((member.details.defaultAge <= 18 || member.details.getMemberEmails().length === 0)
+                                ? member.details.parents.filter(p => p.getEmails().length > 0).map(p => ReceivableBalanceObjectContact.create({
                                     firstName: p.firstName ?? '',
                                     lastName: p.lastName ?? '',
-                                    emails: [p.email!],
+                                    emails: p.getEmails(),
                                     meta: {
                                         type: 'parent',
                                         responsibilityIds: [],

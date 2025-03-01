@@ -5,8 +5,10 @@ import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Group, MemberResponsibilityRecord, Payment, Registration, User } from './';
-export type MemberWithRegistrations = Member & {
+export type MemberWithUsers = Member & {
     users: User[];
+};
+export type MemberWithRegistrations = MemberWithUsers & {
     registrations: (Registration & { group: Group })[];
 };
 

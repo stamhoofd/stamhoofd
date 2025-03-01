@@ -91,9 +91,6 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 277 })
     alternativeEmails: string[] = [];
 
-    /**
-     * These emails will get access to the member if parentsHaveAccess is true
-     */
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 304 })
     unverifiedEmails: string[] = [];
 
@@ -688,14 +685,6 @@ export class MemberDetails extends AutoEncoder {
         return Formatter.firstLetters(this.firstName, maxLength);
     }
 
-    get canHaveOwnAccount() {
-        return (this.age === null || (this.age >= 12));
-    }
-
-    get parentsHaveAccess() {
-        return (this.age && (this.age < 18));
-    }
-
     /**
      * Apply newer details without deleting data or replacing filled in data with empty data
      */
@@ -816,7 +805,7 @@ export class MemberDetails extends AutoEncoder {
     }
 
     getParentEmails() {
-        return this.parents.flatMap(p => p.email ? [p.email, ...p.alternativeEmails] : p.alternativeEmails);
+        return this.parents.flatMap(p => p.getEmails());
     }
 
     hasEmail(email: string) {

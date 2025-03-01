@@ -66,6 +66,16 @@ export class Parent extends AutoEncoder {
         return false;
     }
 
+    getEmails() {
+        const userEmails = [...this.alternativeEmails];
+
+        if (this.email) {
+            userEmails.unshift(this.email);
+        }
+
+        return userEmails;
+    }
+
     hasEmail(email: string): boolean {
         const cleaned = email.toLowerCase().trim();
         if (this.email === cleaned) {

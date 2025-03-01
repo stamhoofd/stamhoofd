@@ -48,14 +48,14 @@
                     </template>
                 </EmailInput>
 
-                <p v-if="email && member && member.patchedMember.details.parentsHaveAccess && app !== 'registration'" class="style-description-small">
+                <p v-if="email && member && app !== 'registration'" class="style-description-small">
                     Deze ouder kan inloggen of registreren op <template v-if="alternativeEmails.length">
                         één van de ingevoerde e-mailadressen
                     </template><template v-else>
                         het ingevoerde e-mailadres
                     </template> en krijgt dan automatisch toegang tot de gegevens van {{ member.patchedMember.firstName }} en het ledenportaal.
                 </p>
-                <p v-else-if="firstName && email && member && member.patchedMember.details.parentsHaveAccess" class="style-description-small">
+                <p v-else-if="firstName && email && member" class="style-description-small">
                     {{ firstName }} kan inloggen of registreren op <template v-if="alternativeEmails.length">
                         één van de ingevoerde e-mailadressen
                     </template><template v-else>
@@ -63,7 +63,7 @@
                     </template> en krijgt dan automatisch toegang tot de gegevens van {{ member.patchedMember.firstName }} en het ledenportaal.
                 </p>
 
-                <p v-if="alternativeEmails.length && member && member.patchedMember.details.parentsHaveAccess" class="style-description-small">
+                <p v-if="alternativeEmails.length && member" class="style-description-small">
                     <template v-if="app !== 'registration'">
                         De ouder ontvangt enkel communicatie op het eerste e-mailadres.
                     </template>

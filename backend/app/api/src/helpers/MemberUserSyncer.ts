@@ -1,11 +1,11 @@
-import { CachedBalance, Member, MemberResponsibilityRecord, MemberWithRegistrations, Organization, Platform, User } from '@stamhoofd/models';
+import { CachedBalance, Member, MemberResponsibilityRecord, MemberWithUsers, Organization, Platform, User } from '@stamhoofd/models';
+import { QueueHandler } from '@stamhoofd/queues';
 import { SQL } from '@stamhoofd/sql';
 import { AuditLogSource, MemberDetails, PermissionRole, Permissions, UserPermissions } from '@stamhoofd/structures';
-import crypto from 'crypto';
-import basex from 'base-x';
-import { AuditLogService } from '../services/AuditLogService';
 import { Formatter } from '@stamhoofd/utility';
-import { QueueHandler } from '@stamhoofd/queues';
+import basex from 'base-x';
+import crypto from 'crypto';
+import { AuditLogService } from '../services/AuditLogService';
 
 const ALPHABET = '123456789ABCDEFGHJKMNPQRSTUVWXYZ'; // Note: we removed 0, O, I and l to make it easier for humans
 const customBase = basex(ALPHABET);
@@ -28,89 +28,101 @@ export class MemberUserSyncerStatic {
      * - responsibilities have changed
      * - email addresses have changed
      */
-    async onChangeMember(member: MemberWithRegistrations, unlinkUsers: boolean = false) {
-        await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
-            const { userEmails, parentAndUnverifiedEmails } = this.getMemberAccessEmails(member.details);
-
-            // Make sure all these users have access to the member
-            for (const email of userEmails) {
-            // Link users that are found with these email addresses.
-                await this.linkUser(email, member, false, true);
-            }
-
-            for (const email of parentAndUnverifiedEmails) {
-                if (userEmails.includes(email)) {
-                    continue;
+    async onChangeMember(member: Member) {
+        await QueueHandler.schedule('change-member/' + member.id, async () => {
+            await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
+                // Note: Refresh member data is not really required because we'll just schedule a new task if it changes again
+                // Reload member users
+                await Member.users.load(member);
+                if (!Member.users.isLoaded(member)) {
+                    throw new Error('Failed to load users for member ' + member.id);
                 }
 
-                // Link parents and unverified emails
-                // Now we add the responsibility permissions to the parent if there are no userEmails
-                const asParent = userEmails.length > 0 || !member.details.unverifiedEmails.includes(email) || member.details.defaultAge < 16;
-                await this.linkUser(email, member, asParent, true);
-            }
+                const { userEmails, parentEmails, unverifiedEmails, allEmails } = this.getMemberAccessEmails(member.details);
 
-            if (unlinkUsers && !member.details.parentsHaveAccess) {
-            // Remove access of users that are not in this list
-            // NOTE: we should only do this once a year (preferably on the birthday of the member)
-            // only once because otherwise users loose the access to a member during the creation of the member, or when they have changed their email address
-            // users can regain access to a member after they have lost control by using the normal verification flow when detecting duplicate members
+                // Make sure all these users have access to the member
+                for (const email of userEmails) {
+                    // Link users that are found with these email addresses.
+                    await this.linkUser(email, member, false, {
+                        firstName: member.details.firstName,
+                        lastName: member.details.lastName,
+                    });
+                }
 
-                for (const user of member.users) {
-                    if (!userEmails.includes(user.email) && !parentAndUnverifiedEmails.includes(user.email)) {
-                        await this.unlinkUser(user, member);
+                for (const parent of member.details.parents) {
+                    for (const email of parent.getEmails()) {
+                        if (userEmails.includes(email.toLocaleLowerCase())) {
+                            continue;
+                        }
+
+                        // Link parents and unverified emails
+                        await this.linkUser(email, member, true, {
+                            firstName: parent.firstName,
+                            lastName: parent.lastName,
+                        });
                     }
                 }
-            }
-            else {
-            // Only auto unlink users that do not have an account
-                for (const user of member.users) {
-                    if (!userEmails.includes(user.email) && !parentAndUnverifiedEmails.includes(user.email)) {
+
+                // Make sure all these users have access to the member
+                for (const email of unverifiedEmails) {
+                    if (userEmails.includes(email)) {
+                        continue;
+                    }
+                    if (parentEmails.includes(email)) {
+                        continue;
+                    }
+
+                    // Do not update name + do not link as member (no permissions inheritance here)
+                    await this.linkUser(email, member, true);
+                }
+
+                // Only auto unlink users that do not have an account
+                // note: we create a copy of the users array here because it is modified in the loop
+                for (const user of [...member.users]) {
+                    if (!allEmails.includes(user.email.toLocaleLowerCase())) {
                         if (!user.hasAccount()) {
                             await this.unlinkUser(user, member);
                         }
                         else {
-                        // Make sure only linked as a parent, not as user self
-                        // This makes sure we don't inherit permissions and aren't counted as 'being' the member
+                            // Make sure only linked as a parent, not as user self
+                            // This makes sure we don't inherit permissions and aren't counted as 'being' the member
                             await this.linkUser(user.email, member, true);
                         }
                     }
                 }
-            }
 
-            if (member.details.securityCode === null) {
-                console.log('Generating security code for member ' + member.id);
+                if (member.details.securityCode === null) {
+                    console.log('Generating security code for member ' + member.id);
 
-                const length = 16;
-                const code = customBase.encode(await randomBytes(100)).toUpperCase().substring(0, length);
-                member.details.securityCode = code;
-                await member.save();
-            }
+                    const length = 16;
+                    const code = customBase.encode(await randomBytes(100)).toUpperCase().substring(0, length);
+                    member.details.securityCode = code;
+                    await member.save();
+                }
+            });
         });
     }
 
     getMemberAccessEmails(details: MemberDetails) {
-        const userEmails = [...details.alternativeEmails];
-
-        if (details.email) {
-            userEmails.push(details.email);
-        }
-
-        const unverifiedEmails: string[] = details.unverifiedEmails;
-        const parentAndUnverifiedEmails = details.parentsHaveAccess ? details.parents.flatMap(p => p.email ? [p.email, ...p.alternativeEmails] : p.alternativeEmails).concat(unverifiedEmails) : details.unverifiedEmails;
+        const userEmails = details.getMemberEmails().map(e => e.toLocaleLowerCase());
+        const parentEmails = details.getParentEmails().map(e => e.toLocaleLowerCase());
+        const unverifiedEmails = details.unverifiedEmails.map(e => e.toLocaleLowerCase());
+        const allEmails = [...userEmails, ...parentEmails, ...unverifiedEmails];
 
         return {
+            allEmails,
             userEmails,
-            parentAndUnverifiedEmails,
-            emails: userEmails.concat(parentAndUnverifiedEmails),
+            parentEmails,
+            unverifiedEmails,
         };
     }
 
     doesEmailHaveAccess(details: MemberDetails, email: string) {
-        const { emails } = this.getMemberAccessEmails(details);
-        return emails.includes(email);
+        const { allEmails } = this.getMemberAccessEmails(details);
+        return allEmails.includes(email.toLocaleLowerCase());
     }
 
-    async onDeleteMember(member: MemberWithRegistrations) {
+    async onDeleteMember(member: MemberWithUsers) {
         await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
             for (const u of member.users) {
                 console.log('Unlinking user ' + u.email + ' from deleted member ' + member.id);
@@ -245,7 +257,7 @@ export class MemberUserSyncerStatic {
         await user.save();
     }
 
-    async unlinkUser(user: User, member: MemberWithRegistrations) {
+    async unlinkUser(user: User, member: MemberWithUsers) {
         console.log('Removing access for ' + user.id + ' to member ' + member.id);
         await Member.users.reverse('members').unlink(user, member);
 
@@ -254,6 +266,11 @@ export class MemberUserSyncerStatic {
 
         if (user.memberId === member.id) {
             user.memberId = null;
+
+            if (user.firstName === member.details.firstName && user.lastName === member.details.lastName) {
+                user.firstName = null;
+                user.lastName = null;
+            }
         }
 
         // Update model relation to correct response
@@ -265,64 +282,84 @@ export class MemberUserSyncerStatic {
         await this.updateInheritedPermissions(user);
     }
 
-    async linkUser(email: string, member: MemberWithRegistrations, asParent: boolean, updateNameIfEqual = true) {
+    private async resolveUserWithMultipleMembers(currentMemberId: string, otherMember: Member): Promise<'current' | 'other'> {
+        const otherMemberId = otherMember.id;
+        const responsibilities = await this.getResponsibilitiesForMembers([otherMemberId, currentMemberId]);
+        const responsibilitiesOther = responsibilities.filter(r => r.memberId === otherMemberId && r.getBaseStructure().isActive);
+        const responsibilitiesCurrent = responsibilities.filter(r => r.memberId === currentMemberId && r.getBaseStructure().isActive);
+
+        if (responsibilitiesOther.length > 0 && responsibilitiesCurrent.length === 0) {
+            return 'other';
+        }
+
+        if (responsibilitiesCurrent.length > 0 && responsibilitiesOther.length === 0) {
+            return 'current';
+        }
+        const currentMember = await Member.getByID(currentMemberId);
+        if (!currentMember) {
+            return 'other';
+        }
+
+        if (responsibilitiesOther.length > 0 && responsibilitiesCurrent.length > 0) {
+            // Resolve to oldest created member (this is always the most secure option)
+            if (currentMember.createdAt <= otherMember.createdAt) {
+                return 'current';
+            }
+
+            return 'other';
+        }
+
+        // Resolve to newest member
+        if (currentMember.createdAt > otherMember.createdAt) {
+            return 'current';
+        }
+
+        return 'other';
+    }
+
+    async linkUser(email: string, member: MemberWithUsers, asParent: boolean, name: { firstName: string; lastName: string } | null = null) {
         // This needs to happen in the queue to prevent creating duplicate users in the database
         await QueueHandler.schedule('link-user/' + email, async () => {
-            console.log('Linking user', email, 'to member', member.id, 'as parent', asParent, 'update name if equal', updateNameIfEqual);
-
             let user = member.users.find(u => u.email.toLocaleLowerCase() === email.toLocaleLowerCase()) ?? await User.getForAuthentication(member.organizationId, email, { allowWithoutAccount: true });
 
             if (user) {
-                // console.log("Giving an existing user access to a member: " + user.id + ' - ' + member.id)
                 if (!asParent) {
+                    let setMemberId = true;
                     if (user.memberId && user.memberId !== member.id) {
-                        console.error('Found conflicting user with multiple members', user.id, 'members', user.memberId, 'to', member.id);
+                        const resolveTo = await this.resolveUserWithMultipleMembers(user.memberId, member);
 
-                        const otherMember = await Member.getWithRegistrations(user.memberId);
-
-                        if (otherMember) {
-                            if (otherMember.registrations.length > 0 && member.registrations.length === 0) {
-                                // Choose the other member
-                                // don't make changes
-                                console.error('Resolved to current member - no changes made');
-                                return;
-                            }
-
-                            const responsibilities = await this.getResponsibilitiesForMembers([otherMember.id, member.id]);
-                            const responsibilitiesOther = responsibilities.filter(r => r.memberId === otherMember.id);
-                            const responsibilitiesCurrent = responsibilities.filter(r => r.memberId === member.id);
-
-                            if (responsibilitiesOther.length >= responsibilitiesCurrent.length) {
-                                console.error('Resolved to current member because of more responsibilities - no changes made');
-                                return;
-                            }
+                        if (resolveTo === 'current') {
+                            // Do not change memberId
+                            setMemberId = false;
                         }
                     }
 
-                    if (updateNameIfEqual) {
-                        user.firstName = member.details.firstName;
-                        user.lastName = member.details.lastName;
+                    if (setMemberId) {
+                        if (name) {
+                            user.firstName = name.firstName;
+                            user.lastName = name.lastName;
+                        }
+                        user.memberId = member.id;
                     }
-                    user.memberId = member.id;
                     await this.updateInheritedPermissions(user);
                 }
                 else {
                     let shouldSave = false;
 
-                    if (!user.firstName && !user.lastName) {
-                        const parents = member.details.parents.filter(p => p.email === email);
-                        if (parents.length === 1) {
-                            if (updateNameIfEqual) {
-                                user.firstName = parents[0].firstName;
-                                user.lastName = parents[0].lastName;
-                            }
+                    // Clear clearly wrong name
+                    if (user.firstName?.toLocaleLowerCase() === member.details.firstName?.toLocaleLowerCase() && user.lastName?.toLocaleLowerCase() === member.details.lastName?.toLocaleLowerCase()) {
+                        if (!name || (name.firstName !== user.firstName && name.lastName !== user.lastName)) {
+                            user.firstName = null;
+                            user.lastName = null;
                             shouldSave = true;
                         }
                     }
 
-                    if (user.firstName === member.details.firstName && user.lastName === member.details.lastName) {
-                        user.firstName = null;
-                        user.lastName = null;
+                    if (!user.firstName && !user.lastName) {
+                        if (name) {
+                            user.firstName = name.firstName;
+                            user.lastName = name.lastName;
+                        }
                         shouldSave = true;
                     }
 
@@ -341,25 +378,17 @@ export class MemberUserSyncerStatic {
                 user = new User();
                 user.organizationId = member.organizationId;
                 user.email = email;
+                if (name) {
+                    user.firstName = name.firstName;
+                    user.lastName = name.lastName;
+                }
 
                 if (!asParent) {
-                    if (updateNameIfEqual) {
-                        user.firstName = member.details.firstName;
-                        user.lastName = member.details.lastName;
-                    }
                     user.memberId = member.id;
                     await this.updateInheritedPermissions(user);
                 }
                 else {
-                    const parents = member.details.parents.filter(p => p.email === email);
-                    if (parents.length === 1) {
-                        if (updateNameIfEqual) {
-                            user.firstName = parents[0].firstName;
-                            user.lastName = parents[0].lastName;
-                        }
-                    }
-
-                    if (user.firstName === member.details.firstName && user.lastName === member.details.lastName) {
+                    if (!name && user.firstName?.toLocaleLowerCase() === member.details.firstName?.toLocaleLowerCase() && user.lastName?.toLocaleLowerCase() === member.details.lastName?.toLocaleLowerCase()) {
                         user.firstName = null;
                         user.lastName = null;
                     }

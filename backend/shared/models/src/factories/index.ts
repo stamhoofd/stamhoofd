@@ -13,3 +13,5 @@ export * from './BalanceItemFactory';
 export * from './RegistrationPeriodFactory';
 export * from './OrganizationTagFactory';
 export * from './OrganizationRegistrationPeriodFactory';
+export * from './MemberResponsibilityRecordFactory';
+export * from './PlatformResponsibilityFactory';
