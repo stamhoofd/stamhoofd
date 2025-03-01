@@ -16,10 +16,14 @@
 
             <div v-for="(error, index) in report.errors" :key="index" class="error-box-parent">
                 <div class="error-box" :class="{ selectable: canClickError(error)}" @click="handleError(error)">
-                    <h2 v-if="error.member" class="style-title-list">
-                        {{ error.member.firstName }} {{ error.member.lastName || error.member.details.lastName }}<span v-if="canClickError(error)" class="icon arrow-right-small" />
-                    </h2>
-                    {{ getErrorMessage(error) }}
+                    <div>
+                        <span v-if="error.member">
+                            {{ error.member.firstName }} {{ error.member.lastName || error.member.details.lastName }}
+                        </span>
+                        {{ getErrorMessage(error) }}
+                    </div>
+
+                    <span v-if="canClickError(error)" class="icon arrow-right-small" />
                 </div>
             </div>
 
