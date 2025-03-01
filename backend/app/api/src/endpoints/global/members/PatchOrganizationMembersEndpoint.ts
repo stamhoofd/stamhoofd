@@ -3,7 +3,7 @@ import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, Patch
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuditLog, BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, mergeTwoMembers, Organization, Platform, RateLimiter, Registration, RegistrationPeriod, User } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, GroupType, MembersBlob, MemberWithRegistrationsBlob, PermissionLevel } from '@stamhoofd/structures';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, GroupType, MemberResponsibility, MembersBlob, MemberWithRegistrationsBlob, PermissionLevel } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Email } from '@stamhoofd/email';
@@ -257,6 +257,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     responsibilityRecord.startDate = patchResponsibility.startDate;
                 }
 
+                // Check maximum
+                if (responsibility) {
+                    await this.checkResponsbilityLimits(responsibilityRecord, responsibility);
+                }
+
                 await responsibilityRecord.save();
                 shouldUpdateSetupSteps = true;
             }
@@ -388,6 +393,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
 
                 model.startDate = put.startDate;
+
+                // Check maximum
+                await this.checkResponsbilityLimits(model, responsibility);
 
                 await model.save();
                 shouldUpdateSetupSteps = true;
@@ -862,5 +870,42 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         await new MemberFactory({
             organization,
         }).createMultiple(count);
+    }
+
+    async checkResponsbilityLimits(model: MemberResponsibilityRecord, responsibility: MemberResponsibility) {
+        if (responsibility.maximumMembers !== null) {
+            if (!model.getBaseStructure().isActive) {
+                return;
+            }
+
+            const query = MemberResponsibilityRecord.select()
+                .where('responsibilityId', responsibility.id)
+                .andWhere('organizationId', model.organizationId)
+                .andWhere('groupId', model.groupId)
+                .andWhere(MemberResponsibilityRecord.whereActive);
+
+            if (model.existsInDatabase) {
+                query.andWhere('id', '!=', model.id);
+            }
+
+            const count = (await query.count()) + 1;
+
+            // Because it should be possible to move around responsibilities, we allow 1 extra
+            const actualLimit = responsibility.maximumMembers <= 1 ? 2 : responsibility.maximumMembers;
+
+            if (count > actualLimit) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: 'Maximum members reached',
+                    human: responsibility.maximumMembers === 1
+                        ? (model.groupId
+                                ? $t('Je kan maar één lid hebben met de functie {responsibility} in deze leeftijdsgroep', { responsibility: responsibility.name })
+                                : $t('Je kan maar één lid hebben met de functie {responsibility}', { responsibility: responsibility.name }))
+                        : (model.groupId
+                                ? $t('Je kan maximum {count} leden hebben met de functie {responsibility} in deze leeftijdsgroep', { count: responsibility.maximumMembers.toFixed(), responsibility: responsibility.name })
+                                : $t('Je kan maximum {count} leden hebben met de functie {responsibility}', { count: responsibility.maximumMembers.toFixed(), responsibility: responsibility.name })),
+                });
+            }
+        }
     }
 }
