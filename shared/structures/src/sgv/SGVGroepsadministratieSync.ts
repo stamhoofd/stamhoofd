@@ -550,9 +550,14 @@ export function getFunctie(details: MemberDetails, memberGroups: Group[], groepF
         const words = allowedExactMatches[code];
         for (const word of words) {
             for (const group of memberGroups) {
-                if (StringCompare.typoCount(word, group.settings.name) == 0) {
+                const name = group.settings.name;
+
+                // Remove text between brackets, and sluggify the name
+                const removedBrackets = name.replace(/\(.*?\)/g, '');
+                const removedNumbers = removedBrackets.replace(/\d+/g, '');
+                const slug = Formatter.slug(removedNumbers)
+                if (StringCompare.typoCount(word, slug) == 0) {
                     matches.add(code);
-                    
                 }
             }
         }
