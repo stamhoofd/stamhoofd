@@ -68,7 +68,7 @@
                 De beschrijving is zichtbaar als leden doorklikken om in te schrijven voor de activiteit.
             </p>
 
-            <template v-if="patched.type === GroupType.EventRegistration && !organization && isMultiOrganization">
+            <template v-if="patched.type === GroupType.EventRegistration && isMultiOrganization">
                 <hr>
                 <h2>Organisator</h2>
                 <p>Voor nationale activiteiten moet je kiezen via welke groep alle betalingen verlopen. De betaalinstellingen van die groep worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die groep.</p>

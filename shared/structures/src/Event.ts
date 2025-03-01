@@ -134,4 +134,15 @@ export class Event extends AutoEncoder {
     get eventNotificationTypes() {
         return Platform.shared.config.eventNotificationTypes.filter(t => t.eventTypeIds.includes(this.typeId));
     }
+
+    static decode(...args: Parameters<typeof AutoEncoder.decode>) {
+        const result = super.decode.call(this, ...args) as any as Event;
+
+        // Create circular reference for permission checking in the frontend
+        if (result.group) {
+            result.group.event = result;
+        }
+
+        return result as any;
+    }
 }

@@ -363,7 +363,7 @@ if (props.group) {
                     getStyle: answer => answer === null || answer.isEmpty ? 'gray' : '',
                     minimumWidth: 100,
                     recommendedWidth: 200,
-                    enabled: false
+                    enabled: false,
                 }),
             );
         }
@@ -431,7 +431,7 @@ if (groups.length) {
             getStyle: prices => prices.length === 0 ? 'gray' : '',
             minimumWidth: 100,
             recommendedWidth: 300,
-            enabled: false
+            enabled: false,
         }),
     );
 }
@@ -640,7 +640,7 @@ if (props.category) {
             getStyle: groups => groups.length === 0 ? 'gray' : '',
             minimumWidth: 100,
             recommendedWidth: 300,
-            enabled: false
+            enabled: false,
         }),
     );
 }
@@ -654,7 +654,7 @@ if (!props.group && !props.category) {
             getValue: (member) => {
                 let memberGroups = member.filterGroups({ periodId: props.periodId ?? props.group?.periodId ?? '', types: [GroupType.Membership, GroupType.WaitingList] });
                 if (app === 'admin') {
-                    memberGroups = memberGroups.filter(g => g.defaultAgeGroupId !== null)
+                    memberGroups = memberGroups.filter(g => g.defaultAgeGroupId !== null);
                 }
                 return memberGroups.sort((a, b) => Sorter.byStringValue(a.settings.name, b.settings.name));
             },
@@ -667,7 +667,7 @@ if (!props.group && !props.category) {
             getStyle: groups => groups.length === 0 ? 'gray' : '',
             minimumWidth: 100,
             recommendedWidth: 300,
-            enabled: false
+            enabled: false,
         }),
     );
 }
@@ -685,6 +685,11 @@ const actionBuilder = useDirectMemberActions({
 });
 
 const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup();
+let canAdd = (props.group ? auth.canRegisterMembersInGroup(props.group) : false);
+if (!organization.value) {
+    // For now not possible via admin panel
+    canAdd = false;
+}
 
 const actions: TableAction<ObjectType>[] = [
     new InMemoryTableAction({
@@ -693,7 +698,7 @@ const actions: TableAction<ObjectType>[] = [
         priority: 0,
         groupIndex: 1,
         needsSelection: false,
-        enabled: (props.group && organization.value ? props.group.hasWriteAccess(auth.permissions, organization.value.period.settings.categories) : false),
+        enabled: canAdd,
         handler: async () => {
             await chooseOrganizationMembersForGroup({
                 members: [],

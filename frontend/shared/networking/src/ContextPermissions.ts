@@ -1,4 +1,4 @@
-import { AccessRight, Event, EventPermissionChecker, Group, GroupCategory, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationTag, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
+import { AccessRight, Event, EventPermissionChecker, Group, GroupCategory, GroupType, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationTag, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
 import { Ref, toRaw, unref } from 'vue';
 
 export class ContextPermissions {
@@ -123,7 +123,28 @@ export class ContextPermissions {
             return this.hasFullPlatformAccess();
         }
 
-        return group.hasAccess(this.permissions, this.organization.period.settings.categories, permissionLevel);
+        if (group.hasAccess(this.permissions, this.organization.period.settings.categories, permissionLevel)) {
+            return true;
+        }
+
+        if (group.type === GroupType.EventRegistration && group.event && group.event.organizationId === this.organization.id) {
+            // we'll need to check the event permissions
+            return this.canWriteEventForOrganization(group.event, this.organization);
+        }
+
+        return false;
+    }
+
+    canRegisterMembersInGroup(group: Group) {
+        if (this.canAccessGroup(group, PermissionLevel.Write)) {
+            return true;
+        }
+        if (this.organization && group.type === GroupType.EventRegistration) {
+            if (group.organizationId !== this.organization.id && group.settings.allowRegistrationsByOrganization && !group.closed) {
+                return this.hasFullAccess();
+            }
+        }
+        return false;
     }
 
     canCreateGroupInCategory(category: GroupCategory) {
@@ -279,6 +300,7 @@ export class ContextPermissions {
     }
 
     canWriteEventForOrganization(event: Event, organization: Organization | null) {
+        console.log('canWriteEventForOrganization', event, organization);
         return EventPermissionChecker.hasPermissionToWriteEvent(
             event,
             {

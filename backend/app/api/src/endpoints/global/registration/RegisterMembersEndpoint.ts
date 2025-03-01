@@ -144,6 +144,20 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
+        if (request.body.asOrganizationId) {
+            // Do you have write access to this group?
+            for (const group of groups) {
+                if (!await Context.auth.canRegisterMembersInGroup(group, request.body.asOrganizationId)) {
+                    throw new SimpleError({
+                        code: 'forbidden',
+                        message: 'No permission to register this member',
+                        human: $t('Je hebt geen toegangsrechten om een lid in te schrijven voor {group}', { group: group.settings.name }),
+                        statusCode: 403,
+                    });
+                }
+            }
+        }
+
         const blob = await AuthenticatedStructures.membersBlob(members, true);
         const platformMembers: PlatformMember[] = [];
 

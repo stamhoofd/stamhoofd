@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, CachedBalance, Document, EmailTemplate, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
-import { AccessRight, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory, RecordSettings } from '@stamhoofd/structures';
+import { AccessRight, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, GroupType, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory, RecordSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryMemberAccess';
 import { MemberRecordStore } from '../services/MemberRecordStore';
@@ -185,6 +185,15 @@ export class AdminPermissionChecker {
             return true;
         }
 
+        if (group.type === GroupType.EventRegistration) {
+            // Check if we can access the event
+            const event = await Event.select().where('groupId', group.id).first(false);
+
+            if (event && event.organizationId === group.organizationId && await this.canAccessEvent(event)) {
+                return true;
+            }
+        }
+
         // Check parent categories
         const organizationPeriod = await this.getOrganizationCurrentPeriod(organization);
         const parentCategories = group.getParentCategories(organizationPeriod.settings.categories);
@@ -194,6 +203,18 @@ export class AdminPermissionChecker {
             }
         }
 
+        return false;
+    }
+
+    async canRegisterMembersInGroup(group: Group, asOrganizationId: string | null) {
+        if (await this.canAccessGroup(group, PermissionLevel.Write)) {
+            return true;
+        }
+        if (asOrganizationId && group.type === GroupType.EventRegistration) {
+            if (group.settings.allowRegistrationsByOrganization) {
+                return await this.hasFullAccess(asOrganizationId);
+            }
+        }
         return false;
     }
 

@@ -109,7 +109,7 @@
             <p>{{ $t('2662a425-f996-479b-a1fc-8498f068ea97') }}</p>
 
             <STList>
-                <STListItem v-if="externalOrganization" :selectable="true" @click="chooseOrganizer('Kies een organisator', canSelectOrganization)">
+                <STListItem v-if="externalOrganization" :selectable="!organization" @click="chooseOrganizer('Kies een organisator', canSelectOrganization)">
                     <template #left>
                         <OrganizationAvatar :organization="externalOrganization" />
                     </template>
@@ -118,7 +118,7 @@
                         {{ externalOrganization.name }}
                     </h3>
 
-                    <template #right>
+                    <template v-if="!organization" #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
@@ -276,12 +276,12 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AddressInput, CenteredMessage, DateSelection, Dropdown, EditGroupView, ErrorBox, GlobalEventBus, ImageComponent, NavigationActions, OrganizationAvatar, TagIdsInput, TimeInput, Toast, UploadButton, useAppContext, useExternalOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Event, EventLocation, EventMeta, Group, GroupSettings, GroupType, Organization, ResolutionRequest } from '@stamhoofd/structures';
+import { AccessRight, Event, EventLocation, EventMeta, Group, GroupSettings, GroupType, Organization, ResolutionRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch, watchEffect } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
 import { useErrors } from '../errors/useErrors';
-import { useContext, useOrganization, usePatch, usePlatform } from '../hooks';
+import { useAuth, useContext, useOrganization, usePatch, usePlatform } from '../hooks';
 import DefaultAgeGroupIdsInput from '../inputs/DefaultAgeGroupIdsInput.vue';
 import GroupsInput from '../inputs/GroupsInput.vue';
 import SearchOrganizationView from '../members/SearchOrganizationView.vue';
@@ -482,8 +482,8 @@ const locationAddress = computed({
     },
 });
 
-const app = useAppContext();
-const canSetNationalActivity = computed(() => app === 'admin');
+const auth = useAuth();
+const canSetNationalActivity = computed(() => auth.platformPermissions?.hasAccessRight(AccessRight.EventWrite));
 const isNationalActivity = computed({
     get: () => patched.value.organizationId === null,
     set: (isNationalActivity) => {
@@ -560,13 +560,21 @@ const isTagEnabledPredicate = computed(() => {
     return eventPermissions.isTagEnabledPredicateFactory();
 });
 
-const canSelectOrganization = (organization: Organization) => {
-    const result = eventPermissions.canAdminEventForExternalOrganization(organization);
+const canSelectOrganization = (o: Organization) => {
+    const result = eventPermissions.canAdminEventForExternalOrganization(o);
     if (!result) {
-        Toast.error('Je hebt geen rechten om een activiteit aan te maken voor deze organisatie.')
+        Toast.error($t('Je hebt geen rechten om een activiteit aan te maken voor deze #groep.'))
             .show();
+        return false;
     }
-    return result;
+
+    if (organization.value && o.id !== organization.value.id) {
+        Toast.error($t('Je kan activiteiten voor andere #groepen enkel aanmaken via het beheerdersportaal van die #groep zelf.'))
+            .show();
+        return false;
+    }
+
+    return true;
 };
 
 const resolutions = [
@@ -708,7 +716,7 @@ async function addRegistrations() {
         });
     }
     else {
-        const organizationId = patched.value.organizationId ?? undefined;
+        const organizationId = patched.value.organizationId ?? organization.value?.id ?? '';
         const group = Group.create({
             organizationId,
             periodId: externalOrganization.value?.period.period.id ?? organization.value?.period.period.id,
@@ -725,8 +733,8 @@ async function addRegistrations() {
                 components: [
                     new ComponentWithProperties(NavigationController, {
                         root: new ComponentWithProperties(SearchOrganizationView, {
-                            title: 'Kies een organisator van deze inschrijvingen',
-                            description: 'Voor nationale activiteiten moet je kiezen via welke groep alle betalingen verlopen. De betaalinstellingen van die groep worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die groep.\n\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.',
+                            title: $t('Kies een organisator van deze inschrijvingen'),
+                            description: $t('Voor nationale activiteiten moet je kiezen via welke #groep alle betalingen verlopen. De betaalinstellingen van die #groep worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die #groep.\n\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.'),
                             selectOrganization: async (organization: Organization, navigation: NavigationActions) => {
                                 group.organizationId = organization.id;
                                 group.periodId = organization.period.period.id;
