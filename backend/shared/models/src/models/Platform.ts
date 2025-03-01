@@ -132,8 +132,13 @@ export class Platform extends QueryableModel {
     }
 
     static async clearCache() {
-        this.sharedStruct = null;
-        this.sharedPrivateStruct = null;
+        await QueueHandler.schedule('Platform.loadCaches', async () => {
+            this.sharedStruct = null;
+            this.sharedPrivateStruct = null;
+        });
+        await QueueHandler.schedule('Platform.getShared', async () => {
+            this.shared = null;
+        });
         await this.loadCaches();
     }
 
@@ -146,7 +151,7 @@ export class Platform extends QueryableModel {
 
         if (update) {
             // Force update cache immediately
-            await Platform.setCachesFromModel(this);
+            await Platform.clearCache();
         }
 
         return s;
