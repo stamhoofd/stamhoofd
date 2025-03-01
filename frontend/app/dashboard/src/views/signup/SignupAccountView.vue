@@ -197,7 +197,11 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             }
         
             const token = await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName, this.registerCode?.code)
-            plausible('signup');
+            try {
+                plausible('signup');
+            } catch (e) {
+                console.error(e)
+            }
 
             this.loading = false;
 
