@@ -300,7 +300,6 @@ export class ContextPermissions {
     }
 
     canWriteEventForOrganization(event: Event, organization: Organization | null) {
-        console.log('canWriteEventForOrganization', event, organization);
         return EventPermissionChecker.hasPermissionToWriteEvent(
             event,
             {
