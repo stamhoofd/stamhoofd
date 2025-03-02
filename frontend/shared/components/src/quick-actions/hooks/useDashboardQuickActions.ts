@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { AccessRight, PayableBalanceCollection } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, ref, Ref, unref } from 'vue';
+import { computed, onActivated, onMounted, ref, Ref, unref } from 'vue';
 import { useContextOptions } from '../../context';
 import PlatformAvatar from '../../context/PlatformAvatar.vue';
 import { ErrorBox } from '../../errors/ErrorBox';
@@ -14,6 +14,7 @@ import { useRegistrationQuickActions } from './useRegistrationQuickActions';
 
 import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstanding-amount.svg';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { useVisibilityChange } from '../../composables';
 
 export function useDashboardQuickActions(): QuickActions {
     const registrationQuickActions = useRegistrationQuickActions();
@@ -26,7 +27,7 @@ export function useDashboardQuickActions(): QuickActions {
 
     // Load outstanding amount
     const outstandingBalance = ref(null) as Ref<PayableBalanceCollection | null>;
-    updateBalance().catch(console.error);
+    let lastLoadedBalance = new Date(0);
 
     // Fetch balance
     async function updateBalance() {
@@ -34,6 +35,11 @@ export function useDashboardQuickActions(): QuickActions {
             outstandingBalance.value = PayableBalanceCollection.create({});
             return;
         }
+
+        if (lastLoadedBalance.getTime() > new Date().getTime() - 5 * 60 * 1000) {
+            return;
+        }
+        lastLoadedBalance = new Date();
 
         try {
             const response = await context.value.authenticatedServer.request({
@@ -51,6 +57,18 @@ export function useDashboardQuickActions(): QuickActions {
             errors.errorBox = new ErrorBox(e);
         }
     }
+
+    onMounted(() => {
+        updateBalance().catch(console.error);
+    });
+
+    onActivated(() => {
+        updateBalance().catch(console.error);
+    });
+
+    useVisibilityChange(() => {
+        updateBalance().catch(console.error);
+    });
 
     return {
         actions: computed(() => {
