@@ -1,6 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { AccessRight, PayableBalanceCollection, PermissionsResourceType } from '@stamhoofd/structures';
+import { AccessRight, PayableBalanceCollection } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, onActivated, onMounted, ref, Ref, unref } from 'vue';
 import { useContextOptions } from '../../context';
@@ -13,7 +13,7 @@ import { mergeErrorBox, QuickAction, QuickActions } from '../classes/QuickAction
 import { useRegistrationQuickActions } from './useRegistrationQuickActions';
 
 import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstanding-amount.svg';
-import eventNotificationSvg from '@stamhoofd/assets/images/illustrations/event-notifications.svg';
+import tentSvg from '@stamhoofd/assets/images/illustrations/tent.svg';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useVisibilityChange } from '../../composables';
 import { Toast } from '../../overlays/Toast';
@@ -116,7 +116,7 @@ export function useDashboardQuickActions(): QuickActions {
                 const deadline = notificationType.deadlines.filter(d => d.deadline > new Date() && (d.reminderFrom === null || d.reminderFrom <= new Date())).sort((a, b) => Sorter.byDateValue(a.deadline, b.deadline))[0];
                 if (deadline) {
                     arr.push({
-                        illustration: eventNotificationSvg,
+                        illustration: tentSvg,
                         title: deadline.reminderTitle || notificationType.title,
                         description: deadline.reminderText ?? '',
                         action: async () => {
