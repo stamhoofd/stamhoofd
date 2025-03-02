@@ -176,7 +176,7 @@ export class PermissionRoleDetailed extends PermissionRole {
         return this.getResourcePermissions(type, id)?.hasAccessRight(right) ?? false;
     }
 
-    hasAccessRightForSomeResource(type: PermissionsResourceType, right: AccessRight): boolean {
+    hasAccessRightForSomeResourceOfType(type: PermissionsResourceType, right: AccessRight): boolean {
         if (this.hasAccessRight(right)) {
             return true;
         }

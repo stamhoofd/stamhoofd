@@ -1,20 +1,22 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { AccessRight, PayableBalanceCollection } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { AccessRight, PayableBalanceCollection, PermissionsResourceType } from '@stamhoofd/structures';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, onActivated, onMounted, ref, Ref, unref } from 'vue';
 import { useContextOptions } from '../../context';
 import PlatformAvatar from '../../context/PlatformAvatar.vue';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { useErrors } from '../../errors/useErrors';
 import { GlobalEventBus } from '../../EventBus';
-import { useAuth, useContext } from '../../hooks';
+import { useAuth, useContext, usePlatform } from '../../hooks';
 import { mergeErrorBox, QuickAction, QuickActions } from '../classes/QuickActions';
 import { useRegistrationQuickActions } from './useRegistrationQuickActions';
 
 import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstanding-amount.svg';
+import eventNotificationSvg from '@stamhoofd/assets/images/illustrations/event-notifications.svg';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useVisibilityChange } from '../../composables';
+import { Toast } from '../../overlays/Toast';
 
 export function useDashboardQuickActions(): QuickActions {
     const registrationQuickActions = useRegistrationQuickActions();
@@ -24,6 +26,7 @@ export function useDashboardQuickActions(): QuickActions {
     const errors = useErrors();
     const auth = useAuth();
     const $t = useTranslate();
+    const platform = usePlatform();
 
     // Load outstanding amount
     const outstandingBalance = ref(null) as Ref<PayableBalanceCollection | null>;
@@ -104,6 +107,26 @@ export function useDashboardQuickActions(): QuickActions {
                         await GlobalEventBus.sendEvent('selectTabByName', 'boekhouding');
                     },
                 });
+            }
+
+            for (const notificationType of platform.value.config.eventNotificationTypes) {
+                if (!auth.permissions?.hasAccessRightForSomeResource(AccessRight.EventWrite)) {
+                    continue;
+                }
+                const deadline = notificationType.deadlines.filter(d => d.deadline > new Date() && (d.reminderFrom === null || d.reminderFrom <= new Date())).sort((a, b) => Sorter.byDateValue(a.deadline, b.deadline))[0];
+                if (deadline) {
+                    arr.push({
+                        illustration: eventNotificationSvg,
+                        title: deadline.reminderTitle || notificationType.title,
+                        description: deadline.reminderText ?? '',
+                        action: async () => {
+                            await GlobalEventBus.sendEvent('selectTabByName', 'activiteiten');
+                            if (deadline.reminderText) {
+                                new Toast(deadline.reminderText, 'info').setHide(20_000).show();
+                            }
+                        },
+                    });
+                }
             }
 
             return arr;

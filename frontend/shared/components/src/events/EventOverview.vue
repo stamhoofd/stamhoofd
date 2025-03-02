@@ -107,7 +107,9 @@
                             </template>
                         </STListItem>
 
-                        <EventNotificationRow v-for="type of event.eventNotificationTypes" v-if="eventOrganization" :key="type.id" class="container" :type="type" :event="event" :organization="eventOrganization" />
+                        <template v-if="eventOrganization">
+                            <EventNotificationRow v-for="type of event.eventNotificationTypes" :key="type.id" class="container" :type="type" :event="event" :organization="eventOrganization" />
+                        </template>
                     </STList>
                 </div>
                 <hr>

@@ -224,7 +224,25 @@ export class LoadedPermissions {
         return this.hasResourceAccessRight(type, '', right);
     }
 
-    hasAccessRightForSomeResource(type: PermissionsResourceType, right: AccessRight): boolean {
+    hasAccessRightForSomeResource(right: AccessRight): boolean {
+        if (this.hasAccessRight(right)) {
+            return true;
+        }
+
+        for (const resource of this.resources.values()) {
+            if (resource) {
+                for (const r of resource.values()) {
+                    if (r.hasAccessRight(right)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    hasAccessRightForSomeResourceOfType(type: PermissionsResourceType, right: AccessRight): boolean {
         if (this.hasAccessRight(right)) {
             return true;
         }
