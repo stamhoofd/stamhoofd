@@ -7,6 +7,7 @@ config()
 type EnvVariables = {
     // Path to the directory containing your files that should be checked for translation keys
     readonly I18NUUID_ROOT: string;
+    readonly I18NUUID_LOCALES_ROOT: string;
     // Path to the directory containing your translation files (e.g., locales/en.json)
     readonly I18NUUID_LOCALES_DIR: string;
     // Path to the directory containing your built translations
@@ -23,6 +24,7 @@ function getVariables(): EnvVariables {
     const root = path.normalize(__dirname + '/../../../..'); // (note we should build relative to the compiled output file in .development/i18n-uuid/dist/src/globals.js)
     const emptyVariables: EnvVariables = {
         I18NUUID_ROOT: root,
+        I18NUUID_LOCALES_ROOT: root + '/shared/locales',
         I18NUUID_LOCALES_DIR: root + '/shared/locales/src',
         I18NUUID_LOCALES_DIR_DIST: root + '/shared/locales/dist',
         DEFAULT_LANGUAGE: process.env.DEFAULT_LANGUAGE ?? 'nl',

@@ -14,6 +14,7 @@ import { ITranslator } from "./translators/ITranslator";
 
 export async function start() {
     const manager = new TranslationManager();
+    await manager.buildTranslations();
     const finder = new MissingTranslationFinder({translationManager: manager});
     const translator = new GoogleTranslator();
 
