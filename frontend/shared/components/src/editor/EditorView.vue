@@ -197,7 +197,6 @@ const showTextStyles = ref(false);
 const editLink = ref('');
 const showLinkEditor = ref(false);
 const canPop = useCanPop();
-const canDismiss = useCanDismiss();
 const pop = usePop();
 const dismiss = useDismiss();
 const editor = ref(buildEditor());
