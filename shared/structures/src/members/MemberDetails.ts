@@ -1,5 +1,5 @@
 import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, PatchableArray, PatchableArrayAutoEncoder, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
-import { DataValidator, Formatter, StringCompare } from '@stamhoofd/utility';
+import { DataValidator, Formatter, Sorter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address.js';
 import { Replacement } from '../endpoints/EmailRequest.js';
@@ -537,86 +537,25 @@ export class MemberDetails extends AutoEncoder {
     }
 
     updateAddressPatch(oldValue: Address, newValue: Address): AutoEncoderPatchType<MemberDetails> | null {
+        if (newValue.toString() === oldValue.toString()) {
+            return null;
+        }
+
         const str = oldValue.toString();
         let patch = MemberDetails.patch({});
         let changed = false;
 
-        if (this.address && this.address.toString() == str) {
+        if (this.address && this.address.toString() === str) {
             patch = patch.patch({ address: newValue });
             changed = true;
         }
 
         for (const parent of this.parents) {
-            if (parent.address && parent.address.toString() == str) {
+            if (parent.address && parent.address.toString() === str) {
                 // parent.address = newValue
                 const arr = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
                 arr.addPatch(Parent.patch({ id: parent.id, address: newValue }));
                 patch = patch.patch({ parents: arr });
-                changed = true;
-            }
-        }
-
-        if (changed) {
-            return patch;
-        }
-        return null;
-    }
-
-    /**
-     * This will SET the parent
-     */
-    updateParent(parent: Parent) {
-        for (const [index, _parent] of this.parents.entries()) {
-            if (_parent.id == parent.id || _parent.isEqual(parent)) {
-                this.parents[index] = parent;
-            }
-        }
-    }
-
-    /**
-     * This will SET the parent
-     */
-    updateParentPatch(parent: Parent): AutoEncoderPatchType<MemberDetails> | null {
-        let patch = MemberDetails.patch({});
-        let changed = false;
-
-        for (const [index, _parent] of this.parents.entries()) {
-            if (_parent.id == parent.id || _parent.isEqual(parent)) {
-                const arr = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
-
-                // Assure we auto correct possible duplicates
-                arr.addDelete(_parent.id);
-                arr.addDelete(_parent.id);
-
-                arr.addPut(parent);
-                patch = patch.patch({ parents: arr });
-                changed = true;
-            }
-        }
-
-        if (changed) {
-            return patch;
-        }
-        return null;
-    }
-
-    /**
-     * This will SET the parent
-     */
-    updateEmergencyContactPatch(emergencyContact: EmergencyContact): AutoEncoderPatchType<MemberDetails> | null {
-        let patch = MemberDetails.patch({});
-        let changed = false;
-
-        for (const [index, _emergencyContact] of this.emergencyContacts.entries()) {
-            if (_emergencyContact.id == emergencyContact.id || _emergencyContact.isEqual(emergencyContact)) {
-                const arr = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
-
-                // Assure we auto correct possible duplicates
-                arr.addDelete(_emergencyContact.id);
-                arr.addDelete(_emergencyContact.id);
-
-                arr.addPut(emergencyContact);
-                patch = patch.patch({ emergencyContacts: arr });
                 changed = true;
             }
         }
@@ -835,12 +774,145 @@ export class MemberDetails extends AutoEncoder {
         return addresses;
     }
 
-    hasAllCountry(country: Country) {
-        const aa = this.getAllAddresses();
+    static mergeParents(members: MemberDetails[], allowOverrides = true) {
+        const parentsMap: Map<string, { parent: Parent; reviewDate?: Date; createdAt: Date; setParent: (parent: Parent) => void }[]> = new Map();
+        const mergeIdMap: Map<string, string> = new Map();
 
-        if (aa.length === 0) {
-            return false;
+        for (const member of members) {
+            for (const [index, parent] of member.parents.entries()) {
+                if (parent.name.length <= 3) {
+                    continue;
+                }
+                if (!parentsMap.has(parent.name)) {
+                    parentsMap.set(parent.name, []);
+                }
+                parentsMap.get(parent.name)!.push({
+                    parent,
+                    setParent(parent: Parent) {
+                        member.parents[index] = parent;
+                    },
+                    reviewDate: parent.updatedAt ?? member.reviewTimes.getLastReview('parents') ?? parent.createdAt,
+                    createdAt: parent.createdAt,
+                });
+            }
         }
-        return aa.every(a => a.country === country);
+
+        // Sort each parent by review date and merge
+        for (const [_, parents] of parentsMap) {
+            if (parents.length >= 2) {
+                // Fetch parent with oldest createdAt
+                // This is so we can keep the oldest createdAt and oldest id
+                parents.sort((a, b) => Sorter.byDateValue(
+                    b.createdAt,
+                    a.createdAt,
+                ));
+                const oldestParent = parents[0].parent;
+
+                // Sort from oldest reviewed to latest reviewed
+                parents.sort((a, b) => Sorter.byDateValue(b.reviewDate ?? new Date(0), a.reviewDate ?? new Date(0)));
+
+                // Each merge operation will override the parent details, so start with the oldest one
+                let mergeTo = parents[0].parent.clone();
+
+                for (const { parent } of parents.slice(1)) {
+                    if (parent.id === mergeTo.id && allowOverrides) {
+                        // Override (they have the same id, so the last changed one can have deleted fields)
+                        mergeTo = parent;
+                    }
+                    else {
+                        mergeTo.merge(parent);
+                    }
+                }
+
+                // Force set id + createdAt
+                mergeTo.id = oldestParent.id;
+                mergeTo.createdAt = oldestParent.createdAt;
+
+                for (const { parent, setParent } of parents) {
+                    if (parent.id !== mergeTo.id) {
+                        mergeIdMap.set(parent.id, mergeTo.id);
+                    }
+                    setParent(mergeTo);
+                }
+
+                // Remove duplicate parents by id for each member
+                for (const member of members) {
+                    member.parents = member.parents.filter((p, i, self) => self.findIndex(p2 => p2.id === p.id) === i);
+                }
+            }
+        }
+
+        return mergeIdMap;
+    }
+
+    static mergeEmergencyContacts(members: MemberDetails[], allowOverrides = true) {
+        const contactsMap: Map<string, { contact: EmergencyContact; reviewDate?: Date; createdAt: Date; setContact: (contact: EmergencyContact) => void }[]> = new Map();
+        const mergeIdMap: Map<string, string> = new Map();
+
+        for (const member of members) {
+            for (const [index, contact] of member.emergencyContacts.entries()) {
+                if (contact.name.length <= 3) {
+                    continue;
+                }
+                if (!contactsMap.has(contact.name)) {
+                    contactsMap.set(contact.name, []);
+                }
+                contactsMap.get(contact.name)!.push({
+                    contact,
+                    reviewDate: contact.updatedAt ?? member.reviewTimes.getLastReview('emergencyContacts') ?? contact.createdAt,
+                    createdAt: contact.createdAt,
+                    setContact(contact: EmergencyContact) {
+                        member.emergencyContacts[index] = contact;
+                    },
+                });
+            }
+        }
+
+        // Sort each parent by review date and merge
+        for (const [_, contacts] of contactsMap) {
+            if (contacts.length >= 2) {
+                // Fetch parent with oldest createdAt
+                // This is so we can keep the oldest createdAt and oldest id
+                contacts.sort((a, b) => Sorter.byDateValue(
+                    b.createdAt,
+                    a.createdAt,
+                ));
+                const oldestContact = contacts[0].contact;
+
+                // Sort from old to new
+                contacts.sort((a, b) => Sorter.byDateValue(b.reviewDate ?? new Date(0), a.reviewDate ?? new Date(0)));
+
+                // Each merge operation will override the parent details, so start with the oldest one
+                let mergeTo = contacts[0].contact.clone();
+
+                for (const { contact } of contacts.slice(1)) {
+                    if (contact.id === mergeTo.id && allowOverrides) {
+                        // Override (they have the same id, so the last changed one can have deleted fields)
+                        mergeTo = contact;
+                    }
+                    else {
+                        mergeTo.merge(contact);
+                    }
+                }
+
+                // Force set id + createdAt
+                mergeTo.id = oldestContact.id;
+                mergeTo.createdAt = oldestContact.createdAt;
+
+                for (const { contact, setContact } of contacts) {
+                    if (contact.id !== mergeTo.id) {
+                        mergeIdMap.set(contact.id, mergeTo.id);
+                    }
+                    setContact(mergeTo);
+                }
+
+                // Remove duplicate parents by id for each member
+                for (const member of members) {
+                    const newContacts = member.emergencyContacts.filter((p, i, self) => self.findIndex(p2 => p2.id === p.id) === i);
+                    member.emergencyContacts = newContacts;
+                }
+            }
+        }
+        return mergeIdMap;
     }
 }

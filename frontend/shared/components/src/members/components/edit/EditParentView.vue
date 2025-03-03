@@ -97,9 +97,9 @@
 <script setup lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { Address, Country, NationalRegisterNumberOptOut, Parent, ParentType, ParentTypeHelper, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
+import { Address, NationalRegisterNumberOptOut, Parent, ParentType, ParentTypeHelper, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { useErrors } from '../../../errors/useErrors';
@@ -126,7 +126,7 @@ const props = withDefaults(defineProps<{
 });
 
 const family = props.family || props.member!.family;
-const { patched, addPatch, hasChanges } = usePatch(props.parent);
+const { patched, addPatch, hasChanges, patch } = usePatch(props.parent);
 const errors = useErrors();
 const pop = usePop();
 const loading = ref(false);
@@ -299,6 +299,14 @@ async function save() {
             await modifyAddress(old, updated);
         }
 
+        // Mark this parent as updated (not the same as reviewed, this helps merge duplicate parents correctly)
+        addPatch({
+            updatedAt: new Date(),
+        });
+
+        // Await patched.value to be updated
+        await nextTick();
+
         if (props.member && props.isNew) {
             const minorMembers = family.members.filter(m => m.id !== props.member!.id && m.isPropertyEnabled('parents'));
 
@@ -313,7 +321,12 @@ async function save() {
             }
         }
         else {
-            family.updateParent(patched.value);
+            if (props.member) {
+                props.member.patchParent(patch.value);
+            }
+            else if (props.family) {
+                props.family.patchParent(patch.value);
+            }
         }
 
         if (props.saveHandler) {

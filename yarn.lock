@@ -3181,10 +3181,10 @@
     colors "^1.4.0"
     mysql "^2.18.1"
 
-"@simonbackx/simple-encoding@2.20.0":
-  version "2.20.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.20.0.tgz#eb0bf731951fcfe5903e457ef8708ee1f7eca1cb"
-  integrity sha512-A4KNuN8UDib6wC27H5nteZCqDIFdyFxYCCDyR2U9GIvoBM005CWw60lW9D+UhzSmNsYlz7nbKDrL3yvtnTovUQ==
+"@simonbackx/simple-encoding@2.21.0":
+  version "2.21.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.21.0.tgz#eac28764806362b527508c82b0260211a813957f"
+  integrity sha512-sikJsIPZtHFwLZ0fKaRlsGF8fWtatmF0vZKGZrfvHE/556y24APxrgRdMb9E7TWzVmYRULJrbtLZkLYdYIrbPw==
 
 "@simonbackx/simple-endpoints@1.19.1":
   version "1.19.1"

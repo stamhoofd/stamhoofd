@@ -79,7 +79,11 @@
                 </div>
 
                 <div v-if="!member.isNew && (nationalRegisterNumber || isPropertyEnabled('nationalRegisterNumber') )">
-                    <NRNInput v-model="nationalRegisterNumber" :title="'Rijksregisternummer' + lidSuffix" :required="isPropertyRequired('nationalRegisterNumber')" :nullable="true" :validator="validator" :birth-day="birthDay" />
+                    <NRNInput v-model="nationalRegisterNumber" :title="'Rijksregisternummer' + lidSuffix" :required="isPropertyRequired('nationalRegisterNumber')" :nullable="true" :validator="validator" :birth-day="birthDay">
+                        <template v-if="!isPropertyEnabled('nationalRegisterNumber')" #right>
+                            <button class="button icon trash small gray" type="button" @click="nationalRegisterNumber = null" />
+                        </template>
+                    </NRNInput>
                     <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
                         Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. Heeft {{ firstName || 'dit lid' }} geen Belgische nationaliteit, <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
                             klik dan hier

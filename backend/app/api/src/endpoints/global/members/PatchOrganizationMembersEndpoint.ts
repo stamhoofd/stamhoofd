@@ -1,9 +1,9 @@
 import { OneToManyRelation } from '@simonbackx/simple-database';
-import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder, isEmptyPatch, isPatchableArray, PatchableArray, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuditLog, BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, mergeTwoMembers, Organization, Platform, RateLimiter, Registration, RegistrationPeriod, User } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, GroupType, MemberResponsibility, MembersBlob, MemberWithRegistrationsBlob, PermissionLevel } from '@stamhoofd/structures';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, EmergencyContact, GroupType, MemberDetails, MemberResponsibility, MembersBlob, MemberWithRegistrationsBlob, Parent, PermissionLevel } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Email } from '@stamhoofd/email';
@@ -206,6 +206,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
 
             await member.save();
+
+            // If parents changed or emergeny contacts: fetch family and merge data
+            if (patch.details && (!isEmptyPatch(patch.details?.parents) || !isEmptyPatch(patch.details?.emergencyContacts))) {
+                await PatchOrganizationMembersEndpoint.mergeDuplicateRelations(member, patch.details);
+            }
 
             // Update documents
             await Document.updateForMember(member.id);
@@ -736,6 +741,120 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
         for (const organization of organizations) {
             SetupStepUpdater.updateForOrganization(organization).catch(console.error);
+        }
+    }
+
+    static async mergeDuplicateRelations(member: MemberWithRegistrations, patch: AutoEncoderPatchType<MemberDetails> | MemberDetails) {
+        const _familyMembers = await Member.getFamilyWithRegistrations(member.id);
+        const familyMembers: typeof _familyMembers = [];
+        // Only modify members if we have write access to them (this avoids issues with overriding data)
+        for (const member of _familyMembers) {
+            if (await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
+                familyMembers.push(member);
+            }
+        }
+
+        // Replace member with member
+        const memberIndex = familyMembers.findIndex(m => m.id === member.id);
+        if (memberIndex !== -1 && familyMembers.length >= 2) {
+            familyMembers[memberIndex] = member;
+            const parentMergeMap = MemberDetails.mergeParents(
+                familyMembers.map(m => m.details),
+                true, // Allow deletes
+            );
+            const contactsMergeMap = MemberDetails.mergeEmergencyContacts(
+                familyMembers.map(m => m.details),
+                true, // Allow deletes
+            );
+
+            // If there were patches or puts of parents or emergency contacts
+            // Make sure that those patches have been applied even after a potential merge
+            // E.g. you only changed the email, but there was a more recent parent object in a different member
+            // -> avoid losing the email change
+            const parentPatches = isPatchableArray(patch.parents) ? patch.parents.getPatches() : [];
+
+            // Add puts
+            const parentPuts = isPatchableArray(patch.parents) ? patch.parents.getPuts().map(p => p.put) : patch.parents;
+            for (const put of parentPuts) {
+                const alternativeEmailsArr = new PatchableArray() as PatchableArray<string, string, string>;
+                for (const alternativeEmail of put.alternativeEmails) {
+                    alternativeEmailsArr.addPut(alternativeEmail);
+                }
+
+                const p = Parent.patch({
+                    ...put,
+                    alternativeEmails: alternativeEmailsArr,
+                    createdAt: undefined, // Not allowed to change (should have already happened + the merge method will already chose the right value)
+                    updatedAt: undefined, // Not allowed to change (should have already happened + the merge method will already chose the right value)
+                });
+
+                // Delete null values or empty strings
+                for (const key in p) {
+                    if (p[key] === null || p[key] === '') {
+                        delete p[key];
+                    }
+                }
+
+                parentPatches.push(p);
+            }
+
+            // Same for emergency contacts
+            const contactsPatches = isPatchableArray(patch.emergencyContacts) ? patch.emergencyContacts.getPatches() : [];
+
+            // Add puts
+            const contactsPuts = isPatchableArray(patch.emergencyContacts) ? patch.emergencyContacts.getPuts().map(p => p.put) : patch.emergencyContacts;
+            for (const put of contactsPuts) {
+                const p = EmergencyContact.patch({
+                    ...put,
+                    createdAt: undefined, // Not allowed to change (should have already happened + the merge method will already chose the right value)
+                    updatedAt: undefined, // Not allowed to change (should have already happened + the merge method will already chose the right value)
+                });
+
+                // Delete null values or empty strings
+                for (const key in p) {
+                    if (p[key] === null || p[key] === '') {
+                        delete p[key];
+                    }
+                }
+
+                contactsPatches.push(p);
+            }
+
+            // Apply patches
+            for (const parentPatch of parentPatches) {
+                for (const m of familyMembers) {
+                    const arr = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+                    parentPatch.id = parentMergeMap.get(parentPatch.id) ?? parentPatch.id;
+                    arr.addPatch(parentPatch);
+                    m.details = m.details.patch({
+                        parents: arr,
+                    });
+                }
+            }
+
+            // Apply patches
+            for (const contactPatch of contactsPatches) {
+                for (const m of familyMembers) {
+                    const arr = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+                    contactPatch.id = contactsMergeMap.get(contactPatch.id) ?? contactPatch.id;
+                    arr.addPatch(contactPatch);
+                    m.details = m.details.patch({
+                        emergencyContacts: arr,
+                    });
+                }
+            }
+
+            for (const m of familyMembers) {
+                m.details.cleanData();
+
+                if (await m.save() && m.id !== member.id) {
+                    // Auto link users based on data
+                    await MemberUserSyncer.onChangeMember(m);
+
+                    // Update documents
+                    await Document.updateForMember(m.id);
+                }
+            }
         }
     }
 

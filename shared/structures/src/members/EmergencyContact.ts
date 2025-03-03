@@ -1,4 +1,4 @@
-import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -14,6 +14,12 @@ export class EmergencyContact extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     title = '';
+
+    @field({ decoder: DateDecoder, ...NextVersion })
+    createdAt = new Date();
+
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    updatedAt: Date | null = null;
 
     /**
      * Call this to clean up capitals in all the available data
@@ -35,5 +41,19 @@ export class EmergencyContact extends AutoEncoder {
         this.cleanData();
         other.cleanData();
         return this.name === other.name && this.phone === other.phone && this.title === other.title;
+    }
+
+    merge(other: EmergencyContact) {
+        if (other.name.length > 0) {
+            this.name = other.name;
+        }
+
+        if (other.phone) {
+            this.phone = other.phone;
+        }
+
+        if (other.title) {
+            this.title = other.title;
+        }
     }
 }

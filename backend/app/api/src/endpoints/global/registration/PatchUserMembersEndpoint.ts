@@ -1,4 +1,4 @@
-import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, Decoder, isEmptyPatch, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Document, Member, RateLimiter } from '@stamhoofd/models';
@@ -124,6 +124,12 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             }
 
             await member.save();
+
+            // If parents changed or emergeny contacts: fetch family and merge data
+            if (struct.details && (!isEmptyPatch(struct.details?.parents) || !isEmptyPatch(struct.details?.emergencyContacts))) {
+                await PatchOrganizationMembersEndpoint.mergeDuplicateRelations(member, struct.details);
+            }
+
             await MemberUserSyncer.onChangeMember(member);
 
             // Update documents

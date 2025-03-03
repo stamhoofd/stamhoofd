@@ -66,7 +66,9 @@ import { Parent, PlatformMember } from '@stamhoofd/structures';
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { NationalRegisterNumberOptOut } from '@stamhoofd/structures';
 import { computed } from 'vue';
+import { useAppContext } from '../../../context';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
@@ -75,8 +77,6 @@ import STList from '../../../layout/STList.vue';
 import { useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import EditParentView from './EditParentView.vue';
 import Title from './Title.vue';
-import { useAppContext } from '../../../context';
-import { NationalRegisterNumberOptOut } from '@stamhoofd/structures';
 
 defineOptions({
     inheritAttrs: false,
@@ -148,6 +148,7 @@ const isAdmin = app === 'dashboard' || app === 'admin';
 
 const initialParents = computed(() => props.member.member.details.parents);
 const parents = computed(() => props.member.patchedMember.details.parents);
+
 const visibleParents = computed(() => {
     // combine both unique
     const result: Parent[] = [];
