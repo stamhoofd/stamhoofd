@@ -32,7 +32,7 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { EditorSmartButton, EditorSmartVariable, EmailTemplate, getExampleRecipient } from '@stamhoofd/structures';
+import { EmailTemplate, Replacement, getExampleRecipient } from '@stamhoofd/structures';
 import { Ref, computed, nextTick, onMounted, ref } from 'vue';
 import EditorView from '../editor/EditorView.vue';
 import { EmailStyler } from '../editor/EmailStyler';
@@ -40,7 +40,6 @@ import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { useOrganization, usePatch, usePlatform } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
-import { Replacement } from '@stamhoofd/structures';
 
 const props = withDefaults(
     defineProps<{
@@ -77,15 +76,15 @@ const exampleRecipient = computed(() => EmailTemplate.getRecipientType(patched.v
 const replacements = computed(() => {
     const base: Replacement[] = [...EmailTemplate.getSupportedReplacementsForType(patched.value.type)];
 
+    if (platform.value) {
+        const defaultReplacements = platform.value.config.getEmailReplacements();
+        base.unshift(...defaultReplacements);
+    }
+
     // Change some defaults
     if (organization.value) {
         const defaultReplacements = organization.value.meta.getEmailReplacements(organization.value);
-        base.push(...defaultReplacements);
-    }
-
-    if (platform.value) {
-        const defaultReplacements = platform.value.config.getEmailReplacements();
-        base.push(...defaultReplacements);
+        base.unshift(...defaultReplacements);
     }
 
     if (exampleRecipient.value) {
