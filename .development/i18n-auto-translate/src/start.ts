@@ -45,16 +45,23 @@ export async function start() {
     });
 }
 
- function groupByLanguage(allTranslationRefs: TextToTranslateRef[]): Map<string, TextToTranslateRef[]> {
-    const map = new Map<string, TextToTranslateRef[]>();
+ function groupByLanguageAndNamespace(allTranslationRefs: TextToTranslateRef[]): Map<string, Map<string, TextToTranslateRef[]>> {
+    const map = new Map<string, Map<string, TextToTranslateRef[]>>();
 
     for(const translationRef of allTranslationRefs) {
         const language = translationRef.language;
+        const namespace = translationRef.namespace;
 
-        let array = map.get(language);
+        let languageMap = map.get(language);
+        if(!languageMap) {
+            languageMap = new Map();
+            map.set(language, languageMap);
+        }
+
+        let array = languageMap.get(namespace);
         if(!array) {
             array = [];
-            map.set(language, array);
+            languageMap.set(namespace, array);
         }
 
         array.push(translationRef);
@@ -85,9 +92,12 @@ async function translateBatch({translator, allTranslationRefs, originalLocal, ta
 }
 
 async function translateAll({translator, allTranslationRefs, originalLocal}: {translator: ITranslator, allTranslationRefs: TextToTranslateRef[], originalLocal: string}) {
-    const map =  groupByLanguage(allTranslationRefs);
+    const map =  groupByLanguageAndNamespace(allTranslationRefs);
 
-    for(const [language, group] of map.entries()) {
-        await translateBatch({translator, allTranslationRefs: group, originalLocal, targetLocal: language});
+    for(const [language, languageMap] of map.entries()) {
+        // todo: use namespace for translation and merge consistent words with the default namespace consistent words
+        for(const [namespace, group] of languageMap.entries()) {
+            await translateBatch({translator, allTranslationRefs: group, originalLocal, targetLocal: language});
+        }
     }   
 }

@@ -39,7 +39,7 @@ export class TextToTranslateRef {
         return translation;
     }
 
-    constructor(readonly language: string, readonly id: string,  readonly text: string) {
+    constructor(readonly language: string, readonly namespace: string, readonly id: string,  readonly text: string) {
     }
 
     markDidTry() {
@@ -64,6 +64,7 @@ export class MissingTranslationFinder {
         const sourceTranslations = this.translationManager.readSource(locale, namespace);
         const distTranslations = this.translationManager.readDist(locale, namespace);
         const missingTranslations = this.getMissingTranslations(sourceTranslations, distTranslations);
+
         const searchResult = this.getSearchResult({language, locale, namespace, missingTranslations});
 
         return searchResult;
@@ -151,7 +152,6 @@ export class MissingTranslationFinder {
     }
 
     private getExistingTranslation(args: {language: Language, namespace?: Namespace, id: TranslationId, value: string}): string | TextToTranslateRef | null {
-        
         const languageMap = this.dictionary.get(args.language);
         if(!languageMap || languageMap.size === 0) {
             return null;
@@ -210,7 +210,8 @@ export class MissingTranslationFinder {
                 continue;
             }
 
-            const newTranslationRef = new TextToTranslateRef(language, id, text);
+            const newTranslationRef = new TextToTranslateRef(language, namespace, id, text);
+
             this.allTranslationRefs.add(newTranslationRef);
             newTranslationRefs.push(newTranslationRef);
             translationRefs.push(newTranslationRef);
