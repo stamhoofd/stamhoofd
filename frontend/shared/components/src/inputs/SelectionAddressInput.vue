@@ -196,7 +196,9 @@ export default class SelectionAddressInput extends VueComponent {
         }
 
         if (this.selectedAddress) {
-            this.$emit('update:modelValue', this.selectedAddress);
+            if (this.selectedAddress.toString() !== this.modelValue?.toString()) {
+                this.$emit('update:modelValue', this.selectedAddress);
+            }
             this.errorBox = null;
             return true;
         }
@@ -211,7 +213,10 @@ export default class SelectionAddressInput extends VueComponent {
         }
 
         this.errorBox = null;
-        this.$emit('update:modelValue', this.customAddress);
+
+        if (this.customAddress?.toString() !== this.modelValue?.toString()) {
+            this.$emit('update:modelValue', this.customAddress);
+        }
         return true;
     }
 }
