@@ -5,7 +5,6 @@ import { ITranslator } from "./translators/ITranslator";
 
 /**
  * TODO:
- * - check changes (use cache files?)
  * - improve prompt
  * - ask to use consistent wording, provide context?
  * - context caching?
@@ -16,7 +15,7 @@ export async function start() {
     const manager = new TranslationManager();
     await manager.buildTranslations();
     const finder = new MissingTranslationFinder({translationManager: manager});
-    const translator = new GoogleTranslator();
+    const translator = new GoogleTranslator(manager);
 
     const output = await finder.findAll();
 

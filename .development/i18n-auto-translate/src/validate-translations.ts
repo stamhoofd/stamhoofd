@@ -1,6 +1,6 @@
 import { Translations } from "./types/Translations";
 
-export function validateTranslations(translations: Translations): {valid: boolean, message?: string} {
+export function validateTranslations(translations: Translations, allowedObjects: string[] | null = []): {valid: boolean, message?: string} {
     if(typeof translations !== "object" || Array.isArray(translations)) {
         return {
             valid: false,
@@ -27,7 +27,20 @@ export function validateTranslations(translations: Translations): {valid: boolea
             continue;
         }
 
+        if(key === 'consistent-words') {
+            const validationResult = validateConsistentWords(value);
+
+            if(validationResult.valid === false) {
+                return validationResult;
+            }
+            continue;
+        }
+
         if(typeof value !== 'string') {
+            if(allowedObjects === null || allowedObjects.includes(key)) {
+                continue;
+            }
+
             return {
                 valid: false,
                 message: `translations.${key} must be a string`,
@@ -83,3 +96,48 @@ function validateExtends(extendsArray: any): {valid: boolean, message?: string} 
         valid: true
     }
 }
+
+function validateConsistentWords(consistentWordsRecord: any): {valid: boolean, message?: string} {
+    if(typeof consistentWordsRecord !== "object" || Array.isArray(consistentWordsRecord)) {
+        return {
+            valid: false,
+            message: 'consistent-words must be an object',
+        };
+    }
+
+    for(const [key, value] of Object.entries(consistentWordsRecord)) {
+
+        if(typeof value !== 'string') {
+            return {
+                valid: false,
+                message: `consistent-words.${key} must be a string`,
+            };
+        }
+
+        if(typeof key !== 'string') {
+            return {
+                valid: false,
+                message: `consistent-words key ${key} must be a string`,
+            };
+        }
+
+        if(key.length < 1) {
+            return {
+                valid: false,
+                message: `consistent-words key ${key} must be at least 1 character long`,
+            };
+        }
+
+        if(value.trim().length === 0) {
+            return {
+                valid: false,
+                message: `consistent-words.${key} must be at least 1 character long`,
+            };
+        }
+    }
+
+    return {
+        valid: true
+    }
+}
+

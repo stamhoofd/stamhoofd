@@ -4,7 +4,7 @@ import { getChildDirectories, getChildFiles } from "./fs-helper";
 import { globals } from "./globals";
 import { isLanguage, isLocale } from "./i18n-helper";
 import { readTranslationsAllowNull } from "./read-translations";
-import { Translations } from "./types/Translations";
+import { Translations, TranslationsWithConfig } from "./types/Translations";
 import { validateTranslations } from "./validate-translations";
 
 export class TranslationManager {
@@ -12,6 +12,7 @@ export class TranslationManager {
      readonly namespaces: string[];
      readonly locales: string[];
      readonly otherLanguages: Set<string>;
+    static readonly SUFFIX_AI = 'ai';
 
     constructor() {
         this.defaultLocale = `${globals.DEFAULT_LANGUAGE}-${globals.DEFAULT_COUNTRY}`;
@@ -68,28 +69,28 @@ export class TranslationManager {
         return this.locales.filter(locale => locale.startsWith(language));
     }
 
-    readSource(locale: string, namespace?: string, suffix?: string): Translations {
-        return readTranslationsAllowNull(this.getSourcePath(locale, namespace, suffix)) ?? {};
+    readSource(locale: string, namespace?: string, suffix?: string, allowedObjects?: string[] | null): TranslationsWithConfig {
+        return readTranslationsAllowNull(this.getSourcePath(locale, namespace, suffix), allowedObjects) ?? {};
     }
 
-    readDist(locale: string, namespace: string = globals.DEFAULT_NAMESPACE): Translations {
-        return readTranslationsAllowNull(this.getDistPath(locale, namespace)) ?? {};
+    readDist(locale: string, namespace: string = globals.DEFAULT_NAMESPACE, allowedObjects?: string[] | null): Translations {
+        return readTranslationsAllowNull(this.getDistPath(locale, namespace), allowedObjects) ?? {};
     }
 
     addMachineTranslations(translations: Translations, args: {locale: string, namespace?: string}) {
-        this.addTranslations(translations, {...args, suffix: 'ai'});
+        this.addTranslations(translations, {...args, suffix: TranslationManager.SUFFIX_AI, allowedObjects: ['consistent-words']});
     }
 
     // will merge translations with existing file
-    addTranslations(translations: Translations, args: {locale: string, namespace?: string, suffix?: string}) {
-        const existingTranslations = this.readSource(args.locale, args.namespace, args.suffix);
+    addTranslations(translations: Translations, args: {locale: string, namespace?: string, suffix?: string, allowedObjects?: string[] | null}) {
+        const existingTranslations = this.readSource(args.locale, args.namespace, args.suffix, args.allowedObjects);
         const mergedTranslations = {...existingTranslations, ...translations};
         this.setTranslations(mergedTranslations, args);
     }
 
     // will overwrite all translations in file
-    setTranslations(translations: Translations, args: {locale: string, namespace?: string, suffix?: string}) {
-        const isValid = validateTranslations(translations);
+    setTranslations(translations: Translations, args: {locale: string, namespace?: string, suffix?: string, allowedObjects?: string[] | null}) {
+        const isValid = validateTranslations(translations, args.allowedObjects);
         if(isValid.valid === false) {
             throw new Error(`Failed to write translations: ${isValid.message}`);
         }
@@ -107,5 +108,11 @@ export class TranslationManager {
             console.log('Finished building translations.');
             exec(command, resolve);
         });
+    }
+
+    getConsistentWords(locale: string, namespace?: string): Record<string, string> | null {
+        const key = 'consistent-words';
+        const source = this.readSource(locale, namespace, TranslationManager.SUFFIX_AI, [key]);
+        return source[key] ?? null;
     }
 }

@@ -1,6 +1,7 @@
 import { GenerativeModel, GoogleGenerativeAI, Schema, SchemaType } from "@google/generative-ai";
 import chalk from "chalk";
 import { globals } from "../globals";
+import { TranslationManager } from "../TranslationManager";
 import { Translations } from "../types/Translations";
 import { validateTranslations } from "../validate-translations";
 import { ITranslator } from "./ITranslator";
@@ -9,7 +10,7 @@ export class GoogleTranslator implements ITranslator {
     private readonly genAI: GoogleGenerativeAI;
     private readonly model: GenerativeModel;
 
-    constructor() {
+    constructor(private readonly manager: TranslationManager) {
         this.genAI = new GoogleGenerativeAI(globals.GEMINI_API_KEY);
 
         const schema: Schema = {
@@ -33,19 +34,18 @@ export class GoogleTranslator implements ITranslator {
         throw new Error("Method not implemented.");
     }
 
-    private async getTextFromApi(textArray: string[],args: { originalLocal: string; targetLocal: string; }): Promise<string> {
+    private async getTextFromApi(textArray: string[],args: { originalLocal: string; targetLocal: string; consistentWords: Record<string, string> | null }): Promise<string> {
         // - Try to use the same word for things you referenced in other translations to. E.g. 'vereniging' should be 'organization' everywhere.
         // - Be consistent and copy the caps and punctuation of the original language unless a capital letter is required in English (e.g. weekdays)
         // - Do not change inline replacement values, which are recognizable by either the # prefix or surrounding curly brackets: #groep, {name}
 
-        const prompt = `Translate the values of the following json array from ${args.originalLocal} to ${args.targetLocal}: ${JSON.stringify(textArray)}. Do not translate text between curly brackets. Keep the original order. The response should be a valid json array. Make sure that double quotes are escaped`;
+        const consistentWordsText = args.consistentWords ? `Use this dictionary of translations for consistency: ` + JSON.stringify(args.consistentWords) + '.' : null;
+
+        const prompt = `Translate the values of the json array from ${args.originalLocal} to ${args.targetLocal}. Do not translate text between curly brackets. Keep the original order.${consistentWordsText} This is the array: ${JSON.stringify(textArray)}`;
           
         const apiResult = await this.model.generateContent(prompt);
         const text = apiResult.response.text();
-        console.log(text);
         return text;
-
-        // return JSON.stringify(textArray);
     }
 
     private splitTranslationInBatches(translations: Translations): string[][] {
@@ -55,6 +55,7 @@ export class GoogleTranslator implements ITranslator {
 
         let currentLength = 0;
         let currentIndex = 0;
+
         for(const [id, text] of Object.entries(translations)) {
             if(currentLength > maxTextLength) {
                 currentIndex = currentIndex + 1;
@@ -74,7 +75,8 @@ export class GoogleTranslator implements ITranslator {
         return batches;
     }
 
-    private async translateBatch(batch: string[], args: { originalLocal: string; targetLocal: string; }): Promise<string[]> {
+    private async translateBatch(batch: string[], args: { originalLocal: string; targetLocal: string; consistentWords: Record<string, string> | null; }): Promise<string[]> {
+        // const text = JSON.stringify(batch);
         const text = await this.getTextFromApi(batch, args);
         const json = this.textToJson(text);
 
@@ -85,7 +87,7 @@ export class GoogleTranslator implements ITranslator {
         return json;
     }
 
-    private async translateBatches(batches: string[][], {originalLocal, targetLocal, translations}: { originalLocal: string; targetLocal: string; translations: Translations}): Promise<Translations> {
+    private async translateBatches(batches: string[][], {originalLocal, targetLocal, translations, consistentWords}: { originalLocal: string; targetLocal: string; translations: Translations, consistentWords: Record<string, string> | null}): Promise<Translations> {
         const result: Translations = {};
         const translationEntries = Object.entries(translations);
 
@@ -98,7 +100,7 @@ export class GoogleTranslator implements ITranslator {
             let translationCount = 0;
 
             try {
-                const translatedBatch = await this.translateBatch(batch, {originalLocal, targetLocal});
+                const translatedBatch = await this.translateBatch(batch, {originalLocal, targetLocal, consistentWords});
 
                 for(let j = 0; j < translatedBatch.length; j++) {
                     const [id, text] = translationEntries[currentIndex];
@@ -111,7 +113,6 @@ export class GoogleTranslator implements ITranslator {
 
                     currentIndex = currentIndex + 1;
                     translationCount = translationCount + 1;
-                    
                 }
             } catch(error) {
                 currentIndex = currentIndex + batch.length - translationCount;
@@ -130,7 +131,9 @@ export class GoogleTranslator implements ITranslator {
         
         const batches = this.splitTranslationInBatches(translations);
 
-        return this.translateBatches(batches, {originalLocal: args.originalLocal, targetLocal: args.targetLocal, translations});
+        const consistentWords = this.manager.getConsistentWords(args.targetLocal);
+
+        return this.translateBatches(batches, {originalLocal: args.originalLocal, targetLocal: args.targetLocal, translations, consistentWords});
     }
 
     private validateTranslation(original: string, translation: string): boolean {
@@ -209,8 +212,8 @@ export class GoogleTranslator implements ITranslator {
     }
 }
 
-export async function testGoogleTranslator() {
-    const translator = new GoogleTranslator();
+export async function testGoogleTranslator(manager: TranslationManager) {
+    const translator = new GoogleTranslator(manager);
     
     const translations: Translations = {
         "90d26048-d9a4-429b-a39f-d549ab059915": "Acties",
