@@ -6,7 +6,7 @@ import { ITranslator } from "./translators/ITranslator";
 /**
  * TODO:
  * - improve prompt
- * - ask to use consistent wording, provide context?
+ * - provide context?
  * - context caching?
  * - add feedback while translating (if it takes a long time for example)
  */
@@ -70,7 +70,7 @@ export async function start() {
     return map;
 }
 
-async function translateBatch({translator, allTranslationRefs, originalLocal, targetLocal}: {translator: ITranslator, allTranslationRefs: TextToTranslateRef[], originalLocal: string, targetLocal: string}) {
+async function translateBatch({translator, allTranslationRefs, originalLocal, targetLocal, namespace}: {translator: ITranslator, allTranslationRefs: TextToTranslateRef[], originalLocal: string, targetLocal: string, namespace: string}) {
     const tempTranslationObject = {};
 
     for(const translationRef of allTranslationRefs) {
@@ -79,7 +79,7 @@ async function translateBatch({translator, allTranslationRefs, originalLocal, ta
         tempTranslationObject[id] = text;
     }
 
-    const translations = await translator.translateAll(tempTranslationObject, {originalLocal, targetLocal});
+    const translations = await translator.translateAll(tempTranslationObject, {originalLocal, targetLocal, namespace});
 
     for(const translationRef of allTranslationRefs) {
         const id = translationRef.id;
@@ -95,9 +95,8 @@ async function translateAll({translator, allTranslationRefs, originalLocal}: {tr
     const map =  groupByLanguageAndNamespace(allTranslationRefs);
 
     for(const [language, languageMap] of map.entries()) {
-        // todo: use namespace for translation and merge consistent words with the default namespace consistent words
         for(const [namespace, group] of languageMap.entries()) {
-            await translateBatch({translator, allTranslationRefs: group, originalLocal, targetLocal: language});
+            await translateBatch({translator, allTranslationRefs: group, originalLocal, targetLocal: language, namespace});
         }
     }   
 }

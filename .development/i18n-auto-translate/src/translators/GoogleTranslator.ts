@@ -34,7 +34,7 @@ export class GoogleTranslator implements ITranslator {
         throw new Error("Method not implemented.");
     }
 
-    private async getTextFromApi(textArray: string[],args: { originalLocal: string; targetLocal: string; consistentWords: Record<string, string> | null }): Promise<string> {
+    private async getTextFromApi(textArray: string[], args: { originalLocal: string; targetLocal: string; consistentWords: Record<string, string> | null }): Promise<string> {
         // - Try to use the same word for things you referenced in other translations to. E.g. 'vereniging' should be 'organization' everywhere.
         // - Be consistent and copy the caps and punctuation of the original language unless a capital letter is required in English (e.g. weekdays)
         // - Do not change inline replacement values, which are recognizable by either the # prefix or surrounding curly brackets: #groep, {name}
@@ -43,8 +43,9 @@ export class GoogleTranslator implements ITranslator {
 
         const prompt = `Translate the values of the json array from ${args.originalLocal} to ${args.targetLocal}. Do not translate text between curly brackets. Keep the original order.${consistentWordsText} This is the array: ${JSON.stringify(textArray)}`;
           
-        const apiResult = await this.model.generateContent(prompt);
-        const text = apiResult.response.text();
+        // const apiResult = await this.model.generateContent(prompt);
+        // const text = apiResult.response.text();
+        const text = JSON.stringify(textArray)
         return text;
     }
 
@@ -95,7 +96,7 @@ export class GoogleTranslator implements ITranslator {
 
         for(let i = 0; i < batches.length; i++) {
             const batch = batches[i];
-            console.log(chalk.yellow(`Translating batch ${i + 1} of ${batches.length}.`));
+            console.log(chalk.gray(`Translating batch ${i + 1} of ${batches.length}`));
 
             let translationCount = 0;
 
@@ -123,7 +124,8 @@ export class GoogleTranslator implements ITranslator {
         return result;
     }
 
-    async translateAll(translations: Translations, args: { originalLocal: string; targetLocal: string; }): Promise<Translations> {
+    async translateAll(translations: Translations, args: { originalLocal: string; targetLocal: string; namespace: string; }): Promise<Translations> {
+        console.log(chalk.white(`Start translate ${Object.keys(translations).length} items from ${args.originalLocal} to ${args.targetLocal} for namespace ${args.namespace}`));
         const {valid, message} = validateTranslations(translations);
         if(!valid) {
             throw new Error(message);
@@ -131,9 +133,11 @@ export class GoogleTranslator implements ITranslator {
         
         const batches = this.splitTranslationInBatches(translations);
 
-        const consistentWords = this.manager.getConsistentWords(args.targetLocal);
+        const consistentWords = this.manager.getConsistentWords(args.targetLocal, args.namespace);
 
-        return this.translateBatches(batches, {originalLocal: args.originalLocal, targetLocal: args.targetLocal, translations, consistentWords});
+        const result = await this.translateBatches(batches, {originalLocal: args.originalLocal, targetLocal: args.targetLocal, translations, consistentWords});
+        console.log(chalk.gray('Finished translating items'));
+        return result;
     }
 
     private validateTranslation(original: string, translation: string): boolean {
@@ -225,7 +229,7 @@ export async function testGoogleTranslator(manager: TranslationManager) {
         "abc": "Vandaag is {datum}."
     };
 
-    const result = await translator.translateAll(translations, {originalLocal: "nl", targetLocal: "en"});
+    const result = await translator.translateAll(translations, {originalLocal: "nl", targetLocal: "en", namespace: 'stamhoofd'});
 
     console.log(chalk.red('Did translate!'))
     console.log(result);

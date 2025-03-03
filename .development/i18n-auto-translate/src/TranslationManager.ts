@@ -110,8 +110,28 @@ export class TranslationManager {
         });
     }
 
-    getConsistentWords(locale: string, namespace?: string): Record<string, string> | null {
+    // Currently the locale will always be a language!
+    getConsistentWords(language: string, namespace?: string): Record<string, string> | null {
+        if(isLocale(language)) {
+            throw new Error('A locale containing a country is currently not supported.');
+        }
+
+        // first get default consistent words for locale
+        const result = this.getConsistentWordsHelper(language, globals.DEFAULT_NAMESPACE) ?? {};
+
+        if(namespace === undefined || namespace !== globals.DEFAULT_NAMESPACE) {
+            const namespaceConsistentWords = this.getConsistentWordsHelper(language, namespace);
+            if(namespaceConsistentWords) {
+                Object.entries(namespaceConsistentWords).forEach(([key, value]) => result[key] = value);
+            }
+        }
+
+        return result;
+    }
+
+    private getConsistentWordsHelper(locale: string, namespace?: string) {
         const key = 'consistent-words';
+
         const source = this.readSource(locale, namespace, TranslationManager.SUFFIX_AI, [key]);
         return source[key] ?? null;
     }
