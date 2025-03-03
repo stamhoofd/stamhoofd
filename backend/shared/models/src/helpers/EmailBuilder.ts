@@ -1,4 +1,4 @@
-import { Email, EmailAddress, EmailBuilder } from '@stamhoofd/email';
+import { Email, EmailAddress, EmailBuilder, EmailInterfaceRecipient } from '@stamhoofd/email';
 import { BalanceItem as BalanceItemStruct, EmailTemplateType, OrganizationEmail, Platform as PlatformStruct, ReceivableBalanceType, Recipient, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -104,39 +104,36 @@ export async function getDefaultEmailFrom(organization: Organization | null, opt
 
     if (organization) {
         // Default email address for the chosen email type
-        let from = organization.getDefaultFrom(organization.i18n, false, options.type ?? 'broadcast');
+        let from = organization.getDefaultFrom(organization.i18n, options.type ?? 'broadcast');
 
         const sender: OrganizationEmail | undefined = (preferEmailId ? organization.privateMeta.emails.find(e => e.id === preferEmailId) : null) ?? organization.privateMeta.emails.find(e => e.default) ?? organization.privateMeta.emails[0];
-        let replyTo: string | undefined = undefined;
+        let replyTo: EmailInterfaceRecipient | undefined = undefined;
 
         if (sender) {
-            replyTo = sender.email;
+            replyTo = {
+                email: sender.email,
+                name: sender.name,
+            };
 
             // Can we send from this e-mail or reply-to?
             if (await canSendFromEmail(sender.email, organization)) {
-                from = sender.email;
+                from = {
+                    email: sender.email,
+                    name: sender.name,
+                };
                 replyTo = undefined;
             }
 
-            // Include name in form field
-            if (sender.name) {
-                from = '"' + sender.name.replaceAll('"', '\\"') + '" <' + from + '>';
-            }
-            else {
-                from = '"' + organization.name.replaceAll('"', '\\"') + '" <' + from + '>';
+            // Default to organization name
+            if (!from.name) {
+                from.name = organization.name;
             }
 
             if (replyTo) {
-                if (sender.name) {
-                    replyTo = '"' + sender.name.replaceAll('"', '\\"') + '" <' + replyTo + '>';
-                }
-                else {
-                    replyTo = '"' + organization.name.replaceAll('"', '\\"') + '" <' + replyTo + '>';
+                if (!replyTo.name) {
+                    replyTo.name = organization.name;
                 }
             }
-        }
-        else {
-            from = '"' + organization.name.replaceAll('"', '\\"') + '" <' + from + '>';
         }
 
         return {
@@ -151,41 +148,40 @@ export async function getDefaultEmailFrom(organization: Organization | null, opt
     const broadcastDomain = i18n.localizedDomains.defaultBroadcastEmail();
 
     const domain = (options.type === 'transactional' ? transactionalDomain : broadcastDomain);
-    let from = 'hallo@' + domain;
+    let from: EmailInterfaceRecipient = {
+        email: 'hallo@' + domain,
+    };
 
     // Platform
     const sender: OrganizationEmail | undefined = (preferEmailId ? platform.privateConfig.emails.find(e => e.id === preferEmailId) : null) ?? platform.privateConfig.emails.find(e => e.default) ?? platform.privateConfig.emails[0];
-    let replyTo: string | undefined = undefined;
+    let replyTo: EmailInterfaceRecipient | undefined = undefined;
 
     if (sender) {
-        replyTo = sender.email;
+        replyTo = {
+            email: sender.email,
+            name: sender.name,
+        };
 
         // Are we allowed to send an e-mail from this domain?
         if (await canSendFromEmail(sender.email, null)) {
             // Allowed to send from
-            from = sender.email;
+            from = {
+                email: sender.email,
+                name: sender.name,
+            };
             replyTo = undefined;
         }
 
-        // Include name in form field
-        if (sender.name) {
-            from = '"' + sender.name.replaceAll('"', '\\"') + '" <' + from + '>';
-        }
-        else {
-            from = '"' + platform.config.name.replaceAll('"', '\\"') + '" <' + from + '>';
+        // Default to platform name
+        if (!from.name) {
+            from.name = platform.config.name;
         }
 
         if (replyTo) {
-            if (sender.name) {
-                replyTo = '"' + sender.name.replaceAll('"', '\\"') + '" <' + replyTo + '>';
-            }
-            else {
-                replyTo = '"' + platform.config.name.replaceAll('"', '\\"') + '" <' + replyTo + '>';
+            if (!replyTo.name) {
+                replyTo.name = platform.config.name;
             }
         }
-    }
-    else {
-        from = '"' + platform.config.name.replaceAll('"', '\\"') + '" <' + from + '>';
     }
 
     return {
@@ -206,7 +202,7 @@ export async function sendEmailTemplate(organization: Organization | null, optio
     }
 }
 
-export async function getEmailBuilderForTemplate(organization: Organization | null, options: Omit<EmailBuilderOptions, 'subject' | 'html'> & { template: Omit<EmailTemplateOptions, 'organizationId'> }) {
+async function getEmailBuilderForTemplate(organization: Organization | null, options: Omit<EmailBuilderOptions, 'subject' | 'html'> & { template: Omit<EmailTemplateOptions, 'organizationId'> }) {
     const template = await getEmailTemplate({
         ...options.template,
         organizationId: organization?.id ?? null,
@@ -226,8 +222,8 @@ export async function getEmailBuilderForTemplate(organization: Organization | nu
 export type EmailBuilderOptions = {
     defaultReplacements?: Replacement[];
     recipients: Recipient[];
-    from: string;
-    replyTo?: string | null;
+    from: EmailInterfaceRecipient;
+    replyTo?: EmailInterfaceRecipient | null;
     subject: string;
     html: string;
     attachments?: {
@@ -239,7 +235,7 @@ export type EmailBuilderOptions = {
     type?: 'transactional' | 'broadcast';
     unsubscribeType?: 'all' | 'marketing';
     fromStamhoofd?: boolean;
-    singleBcc?: string;
+    singleBcc?: EmailInterfaceRecipient;
     replaceAll?: { from: string; to: string }[]; // replace in all e-mails, not recipient dependent
     callback?: (error: Error | null) => void; // for each email
 };
@@ -333,8 +329,6 @@ export async function getEmailBuilder(organization: Organization | null, email: 
     }
     email.recipients = cleaned;
 
-    const fromAddress = Email.parseEmailStr(email.from)[0];
-
     // Update recipients
     for (const recipient of email.recipients) {
         recipient.replacements = recipient.replacements.slice();
@@ -346,7 +340,8 @@ export async function getEmailBuilder(organization: Organization | null, email: 
         await fillRecipientReplacements(recipient, {
             organization,
             platform,
-            fromAddress,
+            from: email.from,
+            replyTo: email.replyTo ?? null,
         });
     }
 
@@ -382,7 +377,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
         return {
             from: email.from,
             replyTo: email.replyTo ?? undefined,
-            bcc: emailIndex === 1 ? email.singleBcc : undefined,
+            bcc: emailIndex === 1 && email.singleBcc ? [email.singleBcc] : undefined,
             to: [
                 {
                     // Name will get cleaned by email service
@@ -404,12 +399,13 @@ export async function getEmailBuilder(organization: Organization | null, email: 
 export async function fillRecipientReplacements(recipient: Recipient, options: {
     organization: Organization | null;
     platform?: PlatformStruct;
-    fromAddress: string | null;
+    from: EmailInterfaceRecipient | null;
+    replyTo: EmailInterfaceRecipient | null;
 }) {
     if (!options.platform) {
         options.platform = await Platform.getSharedPrivateStruct();
     }
-    const { organization, platform, fromAddress } = options;
+    const { organization, platform, from, replyTo } = options;
     recipient.replacements = recipient.replacements.slice();
 
     // Default signInUrl
@@ -454,11 +450,19 @@ export async function fillRecipientReplacements(recipient: Recipient, options: {
         );
     }
 
-    if (fromAddress) {
+    if (from || replyTo) {
         recipient.replacements.push(Replacement.create({
             token: 'fromAddress',
-            value: fromAddress,
+            value: replyTo?.email ?? from!.email,
         }));
+
+        const name = replyTo?.name ?? from?.name;
+        if (name) {
+            recipient.replacements.push(Replacement.create({
+                token: 'fromName',
+                value: name,
+            }));
+        }
     }
 
     recipient.replacements.push(...recipient.getDefaultReplacements());
@@ -469,6 +473,6 @@ export async function fillRecipientReplacements(recipient: Recipient, options: {
     }
 
     // Defaults
-    const extra = platform.config.getEmailReplacements();
+    const extra = platform.config.getEmailReplacements(platform);
     recipient.replacements.push(...extra);
 }

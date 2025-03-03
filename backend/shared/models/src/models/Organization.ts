@@ -1,5 +1,4 @@
 import { column, Database } from '@simonbackx/simple-database';
-import { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { Email, EmailInterfaceRecipient } from '@stamhoofd/email';
@@ -12,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { QueueHandler } from '@stamhoofd/queues';
 import { validateDNSRecords } from '../helpers/DNSValidator';
-import { getEmailBuilderForTemplate } from '../helpers/EmailBuilder';
+import { sendEmailTemplate } from '../helpers/EmailBuilder';
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
 import { OrganizationRegistrationPeriod, StripeAccount } from './';
 
@@ -420,7 +419,6 @@ export class Organization extends QueryableModel {
     async sendEmailTemplate(data: {
         type: EmailTemplateType;
         personal?: boolean;
-        replyTo?: string;
         bcc?: boolean;
     }) {
         const recipients = await this.getAdminRecipients();
@@ -443,15 +441,13 @@ export class Organization extends QueryableModel {
         ];
 
         // Create e-mail builder
-        const builder = await getEmailBuilderForTemplate(this, {
+        await sendEmailTemplate(null, {
             replaceAll,
             recipients,
             template: {
                 type: data.type,
             },
-            from: Email.getInternalEmailFor(this.i18n),
-            singleBcc: data.bcc ? 'simon@stamhoofd.be' : undefined,
-            replyTo: data.replyTo,
+            singleBcc: data.bcc ? { email: 'simon@stamhoofd.be' } : undefined,
             type: 'transactional',
             defaultReplacements: [
                 Replacement.create({
@@ -462,10 +458,6 @@ export class Organization extends QueryableModel {
             unsubscribeType: 'marketing',
             fromStamhoofd: true,
         });
-
-        if (builder) {
-            Email.schedule(builder);
-        }
     }
 
     async deleteAWSMailIdenitity(mailDomain: string) {
@@ -855,99 +847,12 @@ export class Organization extends QueryableModel {
     /**
      * Return default e-mail address if no email addresses are set.
      */
-    getDefaultFrom(i18n: I18n, withName = true, type: 'transactional' | 'broadcast' = 'broadcast') {
+    getDefaultFrom(i18n: I18n, type: 'transactional' | 'broadcast' = 'broadcast'): EmailInterfaceRecipient {
         const domain = type === 'transactional' ? i18n.localizedDomains.defaultTransactionalEmail() : i18n.localizedDomains.defaultBroadcastEmail();
 
-        if (!withName) {
-            return ('noreply-' + this.uri + '@' + domain);
-        }
-        return '"' + this.name.replaceAll('"', '\\"') + '" <' + ('noreply-' + this.uri + '@' + domain) + '>';
-    }
-
-    /**
-     * @deprecated Switch to EmailBuilder.sendEmailTemplate
-     */
-    getEmail(id: string | null, strongDefault = false): { from: string; replyTo: string | undefined } {
-        if (id === null) {
-            return this.getDefaultEmail(strongDefault);
-        }
-
-        // Send confirmation e-mail
-        let from = this.getDefaultFrom(this.i18n, false, strongDefault ? 'transactional' : 'broadcast');
-        const sender: OrganizationEmail | undefined = this.privateMeta.emails.find(e => e.id === id);
-        let replyTo: string | undefined = undefined;
-
-        if (sender) {
-            replyTo = sender.email;
-
-            // Can we send from this e-mail or reply-to?
-            if (replyTo && this.privateMeta.mailDomain && this.privateMeta.mailDomainActive && sender.email.endsWith('@' + this.privateMeta.mailDomain)) {
-                from = sender.email;
-                replyTo = undefined;
-            }
-
-            // Include name in form field
-            if (sender.name) {
-                from = '"' + sender.name.replaceAll('"', '\\"') + '" <' + from + '>';
-            }
-            else {
-                from = '"' + this.name.replaceAll('"', '\\"') + '" <' + from + '>';
-            }
-
-            if (replyTo) {
-                if (sender.name) {
-                    replyTo = '"' + sender.name.replaceAll('"', '\\"') + '" <' + replyTo + '>';
-                }
-                else {
-                    replyTo = '"' + this.name.replaceAll('"', '\\"') + '" <' + replyTo + '>';
-                }
-            }
-            return { from, replyTo };
-        }
-        return this.getDefaultEmail(strongDefault);
-    }
-
-    /**
-     * @deprecated Switch to EmailBuilder.sendEmailTemplate
-     */
-    getDefaultEmail(strongDefault = false): { from: string; replyTo: string | undefined } {
-        // Send confirmation e-mail
-        let from = strongDefault ? this.getDefaultFrom(this.i18n, false) : this.uri + '@stamhoofd.email';
-        const sender: OrganizationEmail | undefined = this.privateMeta.emails.find(e => e.default) ?? this.privateMeta.emails[0];
-        let replyTo: string | undefined = undefined;
-
-        if (sender) {
-            replyTo = sender.email;
-
-            // Can we send from this e-mail or reply-to?
-            if (replyTo && this.privateMeta.mailDomain && this.privateMeta.mailDomainActive && sender.email.endsWith('@' + this.privateMeta.mailDomain)) {
-                from = sender.email;
-                replyTo = undefined;
-            }
-
-            // Include name in form field
-            if (sender.name) {
-                from = '"' + sender.name.replaceAll('"', '\\"') + '" <' + from + '>';
-            }
-            else {
-                from = '"' + this.name.replaceAll('"', '\\"') + '" <' + from + '>';
-            }
-
-            if (replyTo) {
-                if (sender.name) {
-                    replyTo = '"' + sender.name.replaceAll('"', '\\"') + '" <' + replyTo + '>';
-                }
-                else {
-                    replyTo = '"' + this.name.replaceAll('"', '\\"') + '" <' + replyTo + '>';
-                }
-            }
-        }
-        else {
-            from = '"' + this.name.replaceAll('"', '\\"') + '" <' + from + '>';
-        }
-
         return {
-            from, replyTo,
+            name: this.name,
+            email: ('noreply-' + this.uri + '@' + domain),
         };
     }
 

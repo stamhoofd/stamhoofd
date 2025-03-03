@@ -442,8 +442,8 @@ export class PlatformConfig extends AutoEncoder {
         LoginMethodConfig.create({}),
     ]]);
 
-    getEmailReplacements() {
-        return [
+    getEmailReplacements(platform: { privateConfig: PlatformPrivateConfig | null }, isPreviewing = false) {
+        const base = [
             Replacement.create({
                 token: 'primaryColor',
                 value: this.color ? this.color : '#0053ff',
@@ -452,11 +452,44 @@ export class PlatformConfig extends AutoEncoder {
                 token: 'primaryColorContrast',
                 value: this.color ? Colors.getContrastColor(this.color) : '#fff',
             }),
-            Replacement.create({
-                token: 'organizationName',
-                value: this.name,
-            }),
         ];
+
+        const fromAddress = platform.privateConfig?.emails?.find(e => e.default) || platform.privateConfig?.emails[0];
+
+        if (fromAddress) {
+            base.push(
+                Replacement.create({
+                    token: 'fromAddress',
+                    value: fromAddress.email,
+                }),
+            );
+            base.push(
+                Replacement.create({
+                    token: 'fromName',
+                    value: fromAddress.name ?? this.name,
+                }),
+            );
+        }
+        else {
+            base.push(
+                Replacement.create({
+                    token: 'fromName',
+                    value: this.name,
+                }),
+            );
+        }
+
+        if (!isPreviewing) {
+            // Add organizationName fallback
+            base.push(
+                Replacement.create({
+                    token: 'organizationName',
+                    value: this.name,
+                }),
+            );
+        }
+
+        return base;
     }
 
     getEnabledPlatformMembershipTypes(tagIds: string[], defaultAgeGroupIds: string[]): PlatformMembershipType[] {

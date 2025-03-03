@@ -452,13 +452,27 @@ export class OrganizationMetaData extends AutoEncoder {
 
         ];
 
-        const fromAddress = organization.privateMeta?.emails?.find(e => e.default)?.email || organization.privateMeta?.emails[0]?.email;
+        const fromAddress = organization.privateMeta?.emails?.find(e => e.default) || organization.privateMeta?.emails[0];
 
         if (fromAddress) {
             base.push(
                 Replacement.create({
                     token: 'fromAddress',
-                    value: fromAddress,
+                    value: fromAddress.email,
+                }),
+            );
+            base.push(
+                Replacement.create({
+                    token: 'fromName',
+                    value: fromAddress.name ?? organization.name,
+                }),
+            );
+        }
+        else {
+            base.push(
+                Replacement.create({
+                    token: 'fromName',
+                    value: organization.name,
                 }),
             );
         }

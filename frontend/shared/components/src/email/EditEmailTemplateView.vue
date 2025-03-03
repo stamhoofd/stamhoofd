@@ -77,7 +77,7 @@ const replacements = computed(() => {
     const base: Replacement[] = [...EmailTemplate.getSupportedReplacementsForType(patched.value.type)];
 
     if (platform.value) {
-        const defaultReplacements = platform.value.config.getEmailReplacements();
+        const defaultReplacements = platform.value.config.getEmailReplacements(platform.value, true);
         base.unshift(...defaultReplacements);
     }
 

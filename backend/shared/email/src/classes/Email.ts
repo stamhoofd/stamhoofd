@@ -18,9 +18,9 @@ export type EmailInterfaceRecipient = {
 };
 
 export type EmailInterfaceBase = {
-    to: string | EmailInterfaceRecipient[];
-    bcc?: string;
-    replyTo?: string;
+    to: EmailInterfaceRecipient[];
+    bcc?: EmailInterfaceRecipient[];
+    replyTo?: EmailInterfaceRecipient;
     subject: string;
     text?: string;
     html?: string;
@@ -32,7 +32,7 @@ export type EmailInterfaceBase = {
 };
 
 export type EmailInterface = EmailInterfaceBase & {
-    from: string;
+    from: EmailInterfaceRecipient;
 };
 
 /// An email builder is called until it returns undefined. This allows to reduce memory usage for an e-mail with multiple recipients
@@ -49,6 +49,29 @@ export type InternalEmailData = {
     attachments?: { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string }[];
     headers?: Record<string, string>;
 };
+
+function emailObjectToString(email: null | undefined): undefined;
+function emailObjectToString(email: EmailInterfaceRecipient): string;
+function emailObjectToString(email: EmailInterfaceRecipient | null | undefined): string | undefined {
+    if (!email) {
+        return;
+    }
+    if (email.name) {
+        const cleaned = Formatter.emailSenderName(email.name);
+        if (cleaned.length < 2) {
+            return email.email;
+        }
+        return '"' + email.name.replaceAll('"', '') + '" <' + email.email + '>';
+    }
+    return email.email;
+}
+
+function emailObjectsToString(emails: EmailInterfaceRecipient[]): string | undefined {
+    if (emails.length === 0) {
+        return;
+    }
+    return emails.map(emailObjectToString).join(', ');
+}
 
 class EmailStatic {
     transporter: Mail;
@@ -274,12 +297,13 @@ class EmailStatic {
     }
 
     private async doSend(data: EmailInterface) {
+        let recipients = data.to.filter(({ email }) => DataValidator.isEmailValid(email));
+
         // Check if this email is not marked as spam
         // Filter recipients if bounced or spam
-        let recipients = this.parseTo(data.to);
         if (recipients.length === 0) {
             // Invalid string
-            console.warn('Invalid e-mail string: ' + JSON.stringify(data.to) + '. E-mail skipped');
+            console.warn('No recipients for email');
 
             try {
                 data.callback?.(
@@ -324,7 +348,9 @@ class EmailStatic {
             recipients = this.filterWhitelist(recipients, whitelist);
         }
 
-        if (recipients.length === 0) {
+        const to = emailObjectsToString(recipients);
+
+        if (!to || recipients.length === 0) {
             // Invalid string
             try {
                 data.callback?.(
@@ -341,23 +367,11 @@ class EmailStatic {
             return;
         }
 
-        // Rebuild to
-        const to = recipients.map((recipient) => {
-            if (!recipient.name) {
-                return recipient.email;
-            }
-            const cleanedName = Formatter.emailSenderName(recipient.name);
-            if (cleanedName.length < 2) {
-                return recipient.email;
-            }
-            return '"' + cleanedName + '" <' + recipient.email + '>';
-        }).join(', ');
-
         // Clean bcc
         let bccRecipients: EmailInterfaceRecipient[] = [];
         if (data.bcc) {
             // Filter
-            bccRecipients.push(...(await EmailAddress.filterSendTo(this.parseTo(data.bcc))));
+            bccRecipients.push(...(await EmailAddress.filterSendTo(data.bcc.filter(({ email }) => DataValidator.isEmailValid(email)))));
 
             // Filter by environment
             if (STAMHOOFD.environment !== 'production' || (STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS && STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS.length > 0)) {
@@ -365,28 +379,13 @@ class EmailStatic {
                 bccRecipients = this.filterWhitelist(bccRecipients, whitelist);
             }
         }
-
-        // Rebuild to
-        const bcc = bccRecipients.length === 0
-            ? undefined
-            : bccRecipients.map((recipient) => {
-                if (!recipient.name) {
-                    return recipient.email;
-                }
-                const cleanedName = Formatter.emailSenderName(recipient.name);
-                if (cleanedName.length < 2) {
-                    return recipient.email;
-                }
-                return '"' + cleanedName + '" <' + recipient.email + '>';
-            }).join(', ');
-
         this.setupIfNeeded();
 
         // send mail with defined transport object
         const mail: InternalEmailData = {
-            from: data.from, // sender address
-            bcc,
-            replyTo: data.replyTo,
+            from: emailObjectToString(data.from), // sender address
+            bcc: emailObjectsToString(bccRecipients),
+            replyTo: data.replyTo ? emailObjectToString(data.replyTo) : undefined,
             to,
             subject: data.subject.substring(0, 1000), // Subject line
             text: data.text, // plain text body
@@ -411,15 +410,14 @@ class EmailStatic {
             }
         }
 
-        const parsedFrom = this.parseEmailStr(data.from);
-        if (parsedFrom.length !== 1) {
-            throw new Error('Invalid from email ' + data.from);
+        if (!DataValidator.isEmailValid(data.from.email)) {
+            throw new Error('Invalid from email ' + data.from.email);
         }
 
         try {
             // Can we send from the transactional email server?
             if (STAMHOOFD.TRANSACTIONAL_WHITELIST !== undefined && data.type === 'transactional') {
-                if (!this.matchWhitelist(parsedFrom[0], STAMHOOFD.TRANSACTIONAL_WHITELIST)) {
+                if (!this.matchWhitelist(data.from.email, STAMHOOFD.TRANSACTIONAL_WHITELIST)) {
                     // Not supported
                     data.type = 'broadcast';
                 }
@@ -487,10 +485,10 @@ class EmailStatic {
 
                 // Email address is not verified.
                 if (STAMHOOFD.environment === 'production') {
-                    if (data.from !== this.getWebmasterFromEmail()) {
+                    if (data.from.email !== this.getWebmasterFromEmail().email) {
                         this.sendWebmaster({
                             subject: 'E-mail kon niet worden verzonden',
-                            text: 'Een e-mail vanaf ' + data.from + ' kon niet worden verstuurd aan ' + mail.to + ': \n\n' + e + '\n\n' + (mail.text ?? ''),
+                            text: 'Een e-mail vanaf ' + data.from.email + ' kon niet worden verstuurd aan ' + mail.to + ': \n\n' + e + '\n\n' + (mail.text ?? ''),
                             type: (data.type === 'transactional') ? 'broadcast' : 'transactional',
                         });
                     }
@@ -533,21 +531,18 @@ class EmailStatic {
         }
     }
 
-    /**
-     * @deprecated
-     * Please use EmailBuilder.sendEmailTemplate
-     */
-    getInternalEmailFor(i18n: I18n) {
-        // todo: use default email in platform settings
-        return '"' + (STAMHOOFD.platformName ?? 'Stamhoofd') + ' " <hallo@' + (i18n.localizedDomains.defaultTransactionalEmail()) + '>';
-    }
-
     getWebmasterFromEmail() {
-        return '"' + (STAMHOOFD.platformName ?? 'Stamhoofd') + ' " <webmaster@' + (new I18n('nl', Country.Belgium).localizedDomains.defaultTransactionalEmail()) + '>';
+        return {
+            name: STAMHOOFD.platformName ?? 'Stamhoofd',
+            email: 'webmaster@' + (new I18n('nl', Country.Belgium).localizedDomains.defaultTransactionalEmail()),
+        };
     }
 
     getWebmasterToEmail() {
-        return 'hallo@stamhoofd.be';
+        return {
+            name: 'Stamhoofd',
+            email: 'hallo@stamhoofd.be',
+        };
     }
 
     /**
@@ -556,7 +551,7 @@ class EmailStatic {
     sendWebmaster(data: Omit<EmailInterfaceBase, 'to'>) {
         const mail = Object.assign(data, {
             from: this.getWebmasterFromEmail(),
-            to: this.getWebmasterToEmail(),
+            to: [this.getWebmasterToEmail()],
         });
         this.send(mail);
     }

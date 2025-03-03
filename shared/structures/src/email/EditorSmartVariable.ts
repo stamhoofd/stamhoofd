@@ -99,6 +99,10 @@ export class EditorSmartVariable extends AutoEncoder {
                 name: 'E-mailadres verstuurder',
             }),
             EditorSmartVariable.create({
+                id: 'fromName',
+                name: 'Naam verstuurder',
+            }),
+            EditorSmartVariable.create({
                 id: 'firstNameMember',
                 name: 'Voornaam van lid',
                 deleteMessage: 'Je kan de voornaam van een lid enkel gebruiken als je één e-mail per lid verstuurt.',

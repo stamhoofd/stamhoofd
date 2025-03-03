@@ -183,7 +183,7 @@ export class EmailRecipient extends AutoEncoder {
             ...this.replacements,
             ...this.getDefaultReplacements(),
             ...(organization ? organization.meta.getEmailReplacements(organization) : []),
-            ...platform.config.getEmailReplacements(),
+            ...platform.config.getEmailReplacements(platform),
         ];
     }
 

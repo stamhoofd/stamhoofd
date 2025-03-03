@@ -101,7 +101,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
         const platformName = ((await Platform.getSharedStruct()).config.name);
 
         const name = organization?.name ?? platformName;
-        const what = organization ? `de vereniging ${name} op ${platformName}` : platformName;
+        const what = organization ? $t('de vereniging {name} op {platform}', { name, platform: platformName }) : platformName;
 
         const emailTo = admin.getEmailTo();
         const email: string = typeof emailTo === 'string' ? emailTo : emailTo[0]?.email;
