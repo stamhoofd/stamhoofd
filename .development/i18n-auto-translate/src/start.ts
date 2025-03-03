@@ -35,7 +35,7 @@ export async function start() {
             }
         }
 
-        manager.addTranslations(allTranslationsToAdd, {locale: searchResult.locale, namespace: searchResult.namespace});
+        manager.addMachineTranslations(allTranslationsToAdd, {locale: searchResult.locale, namespace: searchResult.namespace});
     }
 
     // log failed translations
