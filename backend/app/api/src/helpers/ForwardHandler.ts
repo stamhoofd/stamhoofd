@@ -80,8 +80,12 @@ export class ForwardHandler {
 
             // Send back to receiver without including the original message to avoid spam
             return {
-                from: email ?? Email.getWebmasterToEmail(),
-                to: from,
+                from: email
+                    ? {
+                            email,
+                        }
+                    : Email.getWebmasterToEmail(),
+                to: [{ email: from }],
                 subject: 'Ongeldig e-mailadres',
                 text: 'Beste,\n\nDe vereniging die je probeert te bereiken via ' + email + ' is helaas niet bereikbaar via dit e-mailadres. Dit e-mailadres wordt enkel gebruikt voor het versturen van automatische e-mails in naam van een vereniging. Probeer de vereniging te contacteren via een ander e-mailadres.\n\nBedankt.',
             };
