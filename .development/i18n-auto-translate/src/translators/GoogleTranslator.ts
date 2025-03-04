@@ -92,34 +92,32 @@ export class GoogleTranslator implements ITranslator {
         const result: Translations = {};
         const translationEntries = Object.entries(translations);
 
-        let currentIndex = 0;
-
-        for(let i = 0; i < batches.length; i++) {
-            const batch = batches[i];
-            console.log(chalk.gray(`Translating batch ${i + 1} of ${batches.length}`));
-
-            let translationCount = 0;
-
+        const promises: Promise<(string | null)[]>[] = batches.map(async (batch, i) => {
             try {
-                const translatedBatch = await this.translateBatch(batch, {originalLocal, targetLocal, consistentWords});
-
-                for(let j = 0; j < translatedBatch.length; j++) {
-                    const [id, text] = translationEntries[currentIndex];
-                    const translation = translatedBatch[j];
-                    const isTranslationValid = this.validateTranslation(text, translation);
-
-                    if(isTranslationValid) {
-                        result[id] = translation;
-                    }
-
-                    currentIndex = currentIndex + 1;
-                    translationCount = translationCount + 1;
-                }
+                console.log(chalk.gray(`Start translating batch ${i + 1} of ${batches.length}`));
+                const result = this.translateBatch(batch, {originalLocal, targetLocal, consistentWords})
+                console.log(chalk.gray(`Finished translating batch ${i + 1} of ${batches.length}`));
+                return result;
             } catch(error) {
-                currentIndex = currentIndex + batch.length - translationCount;
-                console.error(error);
+                console.error(chalk.gray(`Failed translating batch ${i + 1} of ${batches.length}: ${error.message}`));
+                return batch.map(() => null);
             }
-        }
+        });
+
+        const translatedText = await Promise.all(promises);
+
+        translatedText.flatMap(x => x).forEach((translation, i) => {
+            if(translation === null) {
+                return;
+            }
+
+            const [id, text] = translationEntries[i];
+            const isTranslationValid = this.validateTranslation(text, translation);
+
+            if(isTranslationValid) {
+                result[id] = translation;
+            }
+        })
 
         return result;
     }
@@ -136,7 +134,7 @@ export class GoogleTranslator implements ITranslator {
         const consistentWords = this.manager.getConsistentWords(args.targetLocal, args.namespace);
 
         const result = await this.translateBatches(batches, {originalLocal: args.originalLocal, targetLocal: args.targetLocal, translations, consistentWords});
-        console.log(chalk.gray('Finished translating items'));
+        console.log(chalk.green(`Finished translate ${Object.keys(translations).length} items from ${args.originalLocal} to ${args.targetLocal} for namespace ${args.namespace}`));
         return result;
     }
 
@@ -158,7 +156,7 @@ export class GoogleTranslator implements ITranslator {
         for(const [argument, count] of orginalMap.entries()) {
             const translationCount = translationMap.get(argument);
             if(translationCount !== count) {
-                console.error(`Original arguments count does not match translation arguments count. Argument: ${argument}, Original count: ${count}, Translation count: ${translationCount}`);
+                console.error(`Original arguments count does not match translation arguments count. Argument: ${argument}, Original count: ${count}, Translation count: ${translationCount}, original: ${original}, translation: ${translation}`);
                 return false;
             }
         }

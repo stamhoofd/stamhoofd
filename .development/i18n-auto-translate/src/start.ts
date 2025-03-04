@@ -5,10 +5,13 @@ import { ITranslator } from "./translators/ITranslator";
 
 /**
  * TODO:
+ * - handle errors
+ * - fix uuid overwriting of consistent-words
  * - improve prompt
  * - provide context?
  * - context caching?
  * - add feedback while translating (if it takes a long time for example)
+ * - keep log of prompts and results?
  */
 
 export async function start() {
@@ -94,9 +97,14 @@ async function translateBatch({translator, allTranslationRefs, originalLocal, ta
 async function translateAll({translator, allTranslationRefs, originalLocal}: {translator: ITranslator, allTranslationRefs: TextToTranslateRef[], originalLocal: string}) {
     const map =  groupByLanguageAndNamespace(allTranslationRefs);
 
+    const promises: Promise<void>[] = [];
+
     for(const [language, languageMap] of map.entries()) {
         for(const [namespace, group] of languageMap.entries()) {
-            await translateBatch({translator, allTranslationRefs: group, originalLocal, targetLocal: language, namespace});
+            const promise = translateBatch({translator, allTranslationRefs: group, originalLocal, targetLocal: language, namespace});
+            promises.push(promise)
         }
-    }   
+    }
+    
+    await Promise.all(promises);
 }
