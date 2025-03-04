@@ -15,13 +15,13 @@ export class EmergencyContact extends AutoEncoder {
     @field({ decoder: StringDecoder })
     title = '';
 
-    @field({ decoder: DateDecoder, ...NextVersion })
+    @field({ decoder: DateDecoder, version: 367 })
     createdAt = new Date();
 
     /**
      * Stores the timestamp the contact was last edited in the UI (not the same as edited in the database - this is used to find the most correct data in case of duplicates)
      */
-    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: DateDecoder, nullable: true, version: 367 })
     updatedAt: Date | null = null;
 
     /**

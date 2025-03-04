@@ -25,7 +25,7 @@ export class EventNotificationDeadline extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     reminderText: string | null = null;
 
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 367 })
     reminderTitle: string | null = null;
 
     /**
