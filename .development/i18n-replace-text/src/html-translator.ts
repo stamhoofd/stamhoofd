@@ -123,7 +123,7 @@ export class HtmlTranslator {
             format: false,
             preserveOrder: true,
             suppressEmptyNode: true,
-            unpairedTags: ["hr", "br", "link", "meta", 'img'],
+            unpairedTags: ["hr", "br", "link", "meta", 'img','input'],
             stopNodes : [ "*.pre", "*.script"],
             processEntities: false,
           }
@@ -135,7 +135,7 @@ export class HtmlTranslator {
         const parsingOptions: X2jOptions = {
             ignoreAttributes: false,
             preserveOrder: true,
-            unpairedTags: ["hr", "br", "link", "meta", 'img'],
+            unpairedTags: ["hr", "br", "link", "meta", 'img', 'input'],
             stopNodes : [ "*.pre", "*.script"],
             processEntities: false,
             allowBooleanAttributes: true,
