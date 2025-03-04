@@ -457,6 +457,13 @@ REPLACEMENT:`))
         const startsWithMatch = matches[0]?.index === 0;
         const matchedText = matches.map(match => match[0]);
         const otherText = text.split(regex);
+
+        if(startsWithMatch) {
+            const removed = otherText.shift();
+            if(removed !== '') {
+                throw new Error('Removed part is not empty')
+            }
+        }
     
         const results: {isMatch: boolean, value: string}[] = [];
     
