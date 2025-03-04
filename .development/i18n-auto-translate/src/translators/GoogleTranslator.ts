@@ -35,26 +35,26 @@ export class GoogleTranslator implements ITranslator {
         throw new Error("Method not implemented.");
     }
 
-    private async getTextFromApi(textArray: string[], args: { originalLocal: string; targetLocal: string; consistentWords: Record<string, string> | null, namespace: string }): Promise<string> {
+    private async getTextFromApi(textArray: string[], {originalLocal, targetLocal, consistentWords, namespace, batchNumber, totalBatches}: { originalLocal: string; targetLocal: string; consistentWords: Record<string, string> | null, namespace: string,batchNumber: number, totalBatches: number }): Promise<string> {
         // - Try to use the same word for things you referenced in other translations to. E.g. 'vereniging' should be 'organization' everywhere.
         // - Be consistent and copy the caps and punctuation of the original language unless a capital letter is required in English (e.g. weekdays)
         // - Do not change inline replacement values, which are recognizable by either the # prefix or surrounding curly brackets: #groep, {name}
 
-        const consistentWordsText = args.consistentWords ? `Use this dictionary of translations for consistency: ` + JSON.stringify(args.consistentWords) + '.' : null;
+        const consistentWordsText = consistentWords ? `Use this dictionary of translations for consistency: ` + JSON.stringify(consistentWords) + '.' : null;
 
-        const prompt = `Translate the values of the json array from ${args.originalLocal} to ${args.targetLocal}. Do not translate text between curly brackets. Keep the original order.${consistentWordsText} This is the array: ${JSON.stringify(textArray)}`;
+        const prompt = `Translate the values of the json array from ${originalLocal} to ${targetLocal}. Do not translate text between curly brackets. Keep the original order.${consistentWordsText} This is the array: ${JSON.stringify(textArray)}`;
 
         const logResult = promptLogger.logPrompt(prompt, {
-            originalLocal: args.originalLocal,
-            targetLocal: args.targetLocal,
-            namespace: args.namespace,
-            batchNumber: 1,
-            totalBatches: 1
+            originalLocal,
+            targetLocal,
+            namespace,
+            batchNumber,
+            totalBatches
         });
           
-        // const apiResult = await this.model.generateContent(prompt);
-        // const text = apiResult.response.text();
-        const text = JSON.stringify(textArray);
+        const apiResult = await this.model.generateContent(prompt);
+        const text = apiResult.response.text();
+        // const text = JSON.stringify(textArray);
 
         logResult(text);
         
@@ -89,7 +89,6 @@ export class GoogleTranslator implements ITranslator {
     }
 
     private async translateBatch(batch: string[], args: { originalLocal: string; targetLocal: string; consistentWords: Record<string, string> | null; namespace: string, batchNumber: number, totalBatches: number }): Promise<string[]> {
-        // const text = JSON.stringify(batch);
         const text = await this.getTextFromApi(batch, args);
         const json = this.textToJson(text);
 
@@ -138,7 +137,8 @@ export class GoogleTranslator implements ITranslator {
     }
 
     async translateAll(translations: Translations, args: { originalLocal: string; targetLocal: string; namespace: string; }): Promise<Translations> {
-        console.log(chalk.white(`Start translate ${Object.keys(translations).length} items from ${args.originalLocal} to ${args.targetLocal} for namespace ${args.namespace}`));
+        const targetLocal = args.targetLocal === 'es' ? 'es-CO' : args.targetLocal;
+        console.log(chalk.white(`Start translate ${Object.keys(translations).length} items from ${args.originalLocal} to ${targetLocal} for namespace ${args.namespace}`));
         const {valid, message} = validateTranslations(translations);
         if(!valid) {
             throw new Error(message);
@@ -146,10 +146,10 @@ export class GoogleTranslator implements ITranslator {
         
         const batches = this.splitTranslationInBatches(translations);
 
-        const consistentWords = this.manager.getConsistentWords(args.targetLocal, args.namespace);
+        const consistentWords = this.manager.getConsistentWords(targetLocal, args.namespace);
 
-        const result = await this.translateBatches(batches, {originalLocal: args.originalLocal, targetLocal: args.targetLocal, translations, consistentWords, namespace: args.namespace});
-        console.log(chalk.green(`Finished translate ${Object.keys(translations).length} items from ${args.originalLocal} to ${args.targetLocal} for namespace ${args.namespace}`));
+        const result = await this.translateBatches(batches, {originalLocal: args.originalLocal, targetLocal, translations, consistentWords, namespace: args.namespace});
+        console.log(chalk.green(`Finished translate ${Object.keys(translations).length} items from ${args.originalLocal} to ${targetLocal} for namespace ${args.namespace}`));
         return result;
     }
 
