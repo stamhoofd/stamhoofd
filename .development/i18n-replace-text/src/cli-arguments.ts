@@ -10,7 +10,12 @@ export interface CliArguments {
 export function getCliArguments(): CliArguments {
     const args = process.argv.slice(2);
 
-    const result: CliArguments = {};
+    const result: CliArguments = {
+        replaceChangesOnly: false,
+        doPrompt: false,
+        doFix: false,
+        dryRun: false
+    };
 
     const compareFlag = '--compare';
     let isReadingCommitsToCompare = false;
