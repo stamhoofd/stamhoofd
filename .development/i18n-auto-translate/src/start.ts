@@ -1,4 +1,5 @@
 import { MissingTranslationFinder, TextToTranslateRef } from "./MissingTranslationFinder";
+import { promptLogger } from "./PromptLogger";
 import { TranslationManager } from "./TranslationManager";
 import { GoogleTranslator } from "./translators/GoogleTranslator";
 import { ITranslator } from "./translators/ITranslator";
@@ -43,7 +44,8 @@ export async function start() {
     Array.from(output.allTranslationRefs)
     .filter(x => x.didTry && !x.isTranslated)
     .forEach(translationRef => {
-        console.error(`Failed to translate ${translationRef.id} in ${translationRef.language}: ${translationRef.text}`);
+        const errorMessage = `Failed to translate ${translationRef.id} in ${translationRef.language}: ${translationRef.text}`;
+        promptLogger.error(errorMessage);
     });
 }
 

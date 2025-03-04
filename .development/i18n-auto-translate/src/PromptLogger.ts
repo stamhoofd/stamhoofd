@@ -20,7 +20,7 @@ function formatDuration(durationMs: number): string {
       );
 
 class PromptLogger {
-    private readonly winstonLogger = winston.createLogger({
+    private readonly winstonPromptLogger = winston.createLogger({
         level: 'info',
         format: winston.format.json(),
         transports: [
@@ -29,20 +29,22 @@ class PromptLogger {
         ],
       });
 
+      private readonly winstonErrorLogger = winston.createLogger({
+        level: 'error',
+        transports: [
+          new winston.transports.File({ filename: 'errors.log',
+            options: { flags: "w" }, }),
+        ],
+      });
 
-
-      info(value: string) {
-        this.winstonLogger.info(value);
-      }
-
-      logPrompt(prompt: string, args: { originalLocal: string; targetLocal: string; namespace: string; batchNumber: number, totalBatches: number}) {
+      prompt(prompt: string, args: { originalLocal: string; targetLocal: string; namespace: string; batchNumber: number, totalBatches: number}) {
         const now = new Date();
 
 
         const promptString = `[PROMPT]
 ${prompt}`;
 
-        const profiler = this.winstonLogger.startTimer();
+        const profiler = this.winstonPromptLogger.startTimer();
 
         return (result: string) => {
             const resultString = `[RESULT]
@@ -60,6 +62,10 @@ ${resultString}`;
 
             profiler.done({ message: message })
         }
+      }
+
+      error(message: string) {
+        this.winstonErrorLogger.error(message);
       }
 }
 

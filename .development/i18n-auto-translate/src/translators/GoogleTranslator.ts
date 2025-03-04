@@ -40,11 +40,11 @@ export class GoogleTranslator implements ITranslator {
         // - Be consistent and copy the caps and punctuation of the original language unless a capital letter is required in English (e.g. weekdays)
         // - Do not change inline replacement values, which are recognizable by either the # prefix or surrounding curly brackets: #groep, {name}
 
-        const consistentWordsText = consistentWords ? `Use this dictionary of translations for consistency: ` + JSON.stringify(consistentWords) + '.' : null;
+        const consistentWordsText = consistentWords ? ` Use this dictionary of translations for consistency: ` + JSON.stringify(consistentWords) + '.' : '';
 
         const prompt = `Translate the values of the json array from ${originalLocal} to ${targetLocal}. Do not translate text between curly brackets. Keep the original order.${consistentWordsText} This is the array: ${JSON.stringify(textArray)}`;
 
-        const logResult = promptLogger.logPrompt(prompt, {
+        const logResult = promptLogger.prompt(prompt, {
             originalLocal,
             targetLocal,
             namespace,
@@ -113,7 +113,9 @@ export class GoogleTranslator implements ITranslator {
                 console.log(chalk.gray(`Finished translating batch ${batchNumber} of ${totalBatches}`));
                 return result;
             } catch(error) {
-                console.error(chalk.red(`Failed translating batch ${batchNumber} of ${totalBatches}: ${error.message}`));
+                const errorMessage = `Failed translating batch ${batchNumber} of ${totalBatches}: ${error.message}`;
+                console.error(errorMessage);
+                promptLogger.error(errorMessage);
                 return batch.map(() => null);
             }
         });
@@ -161,7 +163,9 @@ export class GoogleTranslator implements ITranslator {
         const translationArguments = [...translationMatches].map(match => match[1]);
 
         if(originalArguments.length !== translationArguments.length) {
-            console.error(`Original arguments length (${originalArguments.length}) does not match translation arguments length (${translationArguments.length}). Original: ${original}, translation: ${translation}`);
+            const errorMessage = `Original arguments length (${originalArguments.length}) does not match translation arguments length (${translationArguments.length}). Original: ${original}, translation: ${translation}`;
+            console.error(errorMessage);
+            promptLogger.error(errorMessage);
             return false;
         }
 
@@ -171,7 +175,9 @@ export class GoogleTranslator implements ITranslator {
         for(const [argument, count] of orginalMap.entries()) {
             const translationCount = translationMap.get(argument);
             if(translationCount !== count) {
-                console.error(`Original arguments count does not match translation arguments count. Argument: ${argument}, Original count: ${count}, Translation count: ${translationCount}, original: ${original}, translation: ${translation}`);
+                const errorMessage = `Original arguments count does not match translation arguments count. Argument: ${argument}, Original count: ${count}, Translation count: ${translationCount}, original: ${original}, translation: ${translation}`;
+                console.error(chalk.red(errorMessage));
+                promptLogger.error(errorMessage);
                 return false;
             }
         }
