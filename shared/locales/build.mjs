@@ -159,9 +159,21 @@ async function build(country, language, namespace, skipFallbackLanguages, skipNa
         json = mergeObjects(json, specifics);
     }
 
+    // ai translations of language file
+    if (await fileExists(folder + '/' + language + '-ai.json')) {
+        const specifics = JSON.parse(await fs.readFile(folder + '/' + language + '-ai.json'));
+        json = mergeObjects(json, specifics);
+    }
+
     // language
     if (await fileExists(folder + '/' + language + '.json')) {
         const specifics = JSON.parse(await fs.readFile(folder + '/' + language + '.json'));
+        json = mergeObjects(json, specifics);
+    }
+
+    // ai translations of locale file
+    if (await fileExists(folder + '/' + locale + '-ai.json')) {
+        const specifics = JSON.parse(await fs.readFile(folder + '/' + locale + '-ai.json'));
         json = mergeObjects(json, specifics);
     }
 
