@@ -113,7 +113,7 @@ export function useDashboardQuickActions(): QuickActions {
                 if (!auth.permissions?.hasAccessRightForSomeResource(AccessRight.EventWrite)) {
                     continue;
                 }
-                const deadline = notificationType.deadlines.filter(d => d.deadline > new Date() && (d.reminderFrom === null || d.reminderFrom <= new Date())).sort((a, b) => Sorter.byDateValue(a.deadline, b.deadline))[0];
+                const deadline = notificationType.deadlines.filter(d => d.deadline > new Date() && (d.reminderFrom === null || d.reminderFrom <= new Date())).sort((a, b) => Sorter.byDateValue(b.deadline, a.deadline))[0];
                 if (deadline) {
                     arr.push({
                         illustration: tentSvg,
