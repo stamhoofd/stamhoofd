@@ -275,8 +275,6 @@ export class HtmlTranslator {
         return parts;
     }
 
-    
-
     private logContext(parent: Record<string, any>, record: Record<string, string>, key: string, part: string, translatedPart: string, processedParts: string, unprocessedPart: string, transformContext?: (context: HtmlTranslatorContext) => HtmlTranslatorContext) {
         const [before, after] = this.getTextBeforeAndAfterChildHtmlObject(parent, record, key);
     
@@ -494,7 +492,7 @@ REPLACEMENT:`))
         }];
     
         return await this.translateTextParts(parent, record, key, allParts, (value: string) => {
-            return wrapWithTranslationFunction(value);
+            return wrapWithTranslationFunction(value, ['"']);
         }, context => {
 
             const insertIndex = attributeName.length + 2;
