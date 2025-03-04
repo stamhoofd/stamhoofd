@@ -5,7 +5,6 @@ import { ITranslator } from "./translators/ITranslator";
 
 /**
  * TODO:
- * - handle errors
  * - fix uuid overwriting of consistent-words
  * - improve prompt
  * - provide context?

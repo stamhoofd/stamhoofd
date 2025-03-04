@@ -1,6 +1,7 @@
 import { GenerativeModel, GoogleGenerativeAI, Schema, SchemaType } from "@google/generative-ai";
 import chalk from "chalk";
 import { globals } from "../globals";
+import { promptLogger } from "../PromptLogger";
 import { TranslationManager } from "../TranslationManager";
 import { Translations } from "../types/Translations";
 import { validateTranslations } from "../validate-translations";
@@ -34,7 +35,7 @@ export class GoogleTranslator implements ITranslator {
         throw new Error("Method not implemented.");
     }
 
-    private async getTextFromApi(textArray: string[], args: { originalLocal: string; targetLocal: string; consistentWords: Record<string, string> | null }): Promise<string> {
+    private async getTextFromApi(textArray: string[], args: { originalLocal: string; targetLocal: string; consistentWords: Record<string, string> | null, namespace: string }): Promise<string> {
         // - Try to use the same word for things you referenced in other translations to. E.g. 'vereniging' should be 'organization' everywhere.
         // - Be consistent and copy the caps and punctuation of the original language unless a capital letter is required in English (e.g. weekdays)
         // - Do not change inline replacement values, which are recognizable by either the # prefix or surrounding curly brackets: #groep, {name}
@@ -42,10 +43,21 @@ export class GoogleTranslator implements ITranslator {
         const consistentWordsText = args.consistentWords ? `Use this dictionary of translations for consistency: ` + JSON.stringify(args.consistentWords) + '.' : null;
 
         const prompt = `Translate the values of the json array from ${args.originalLocal} to ${args.targetLocal}. Do not translate text between curly brackets. Keep the original order.${consistentWordsText} This is the array: ${JSON.stringify(textArray)}`;
+
+        const logResult = promptLogger.logPrompt(prompt, {
+            originalLocal: args.originalLocal,
+            targetLocal: args.targetLocal,
+            namespace: args.namespace,
+            batchNumber: 1,
+            totalBatches: 1
+        });
           
         // const apiResult = await this.model.generateContent(prompt);
         // const text = apiResult.response.text();
-        const text = JSON.stringify(textArray)
+        const text = JSON.stringify(textArray);
+
+        logResult(text);
+        
         return text;
     }
 
@@ -76,7 +88,7 @@ export class GoogleTranslator implements ITranslator {
         return batches;
     }
 
-    private async translateBatch(batch: string[], args: { originalLocal: string; targetLocal: string; consistentWords: Record<string, string> | null; }): Promise<string[]> {
+    private async translateBatch(batch: string[], args: { originalLocal: string; targetLocal: string; consistentWords: Record<string, string> | null; namespace: string, batchNumber: number, totalBatches: number }): Promise<string[]> {
         // const text = JSON.stringify(batch);
         const text = await this.getTextFromApi(batch, args);
         const json = this.textToJson(text);
@@ -88,18 +100,21 @@ export class GoogleTranslator implements ITranslator {
         return json;
     }
 
-    private async translateBatches(batches: string[][], {originalLocal, targetLocal, translations, consistentWords}: { originalLocal: string; targetLocal: string; translations: Translations, consistentWords: Record<string, string> | null}): Promise<Translations> {
+    private async translateBatches(batches: string[][], {originalLocal, targetLocal, translations, consistentWords, namespace}: { originalLocal: string; targetLocal: string; translations: Translations, consistentWords: Record<string, string> | null, namespace: string}): Promise<Translations> {
         const result: Translations = {};
         const translationEntries = Object.entries(translations);
 
         const promises: Promise<(string | null)[]>[] = batches.map(async (batch, i) => {
+            const batchNumber = i + 1;
+            const totalBatches = batches.length;
+
             try {
-                console.log(chalk.gray(`Start translating batch ${i + 1} of ${batches.length}`));
-                const result = this.translateBatch(batch, {originalLocal, targetLocal, consistentWords})
-                console.log(chalk.gray(`Finished translating batch ${i + 1} of ${batches.length}`));
+                console.log(chalk.gray(`Start translating batch ${batchNumber} of ${totalBatches}`));
+                const result = this.translateBatch(batch, {originalLocal, targetLocal, consistentWords, namespace, batchNumber, totalBatches});
+                console.log(chalk.gray(`Finished translating batch ${batchNumber} of ${totalBatches}`));
                 return result;
             } catch(error) {
-                console.error(chalk.gray(`Failed translating batch ${i + 1} of ${batches.length}: ${error.message}`));
+                console.error(chalk.gray(`Failed translating batch ${batchNumber} of ${totalBatches}: ${error.message}`));
                 return batch.map(() => null);
             }
         });
@@ -133,7 +148,7 @@ export class GoogleTranslator implements ITranslator {
 
         const consistentWords = this.manager.getConsistentWords(args.targetLocal, args.namespace);
 
-        const result = await this.translateBatches(batches, {originalLocal: args.originalLocal, targetLocal: args.targetLocal, translations, consistentWords});
+        const result = await this.translateBatches(batches, {originalLocal: args.originalLocal, targetLocal: args.targetLocal, translations, consistentWords, namespace: args.namespace});
         console.log(chalk.green(`Finished translate ${Object.keys(translations).length} items from ${args.originalLocal} to ${args.targetLocal} for namespace ${args.namespace}`));
         return result;
     }
