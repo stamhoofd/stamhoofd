@@ -1481,6 +1481,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                     country: Country.Belgium,
                 }),
                 nationalRegisterNumber: '93042012345',
+                createdAt: new Date(0),
             });
 
             // Create two clones of this parent with a different ID
@@ -1488,6 +1489,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 id: parent1.id,
                 firstName: 'Linda',
                 lastName: 'Doe',
+                createdAt: new Date(1000),
             });
 
             const parent3 = Parent.create({
@@ -1504,6 +1506,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                     country: Country.Belgium,
                 }),
                 nationalRegisterNumber: '93042012348',
+                createdAt: new Date(3000),
             });
 
             const member1 = await new MemberFactory({
@@ -1600,11 +1603,197 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             await member3.refresh();
 
             // Check all parents equal
-            const expectedParent = parent2;
+            const expectedParent = Parent.create({
+                ...parent2,
+                createdAt: parent1.createdAt, // the oldest one is used
+            });
 
             expect(member1.details.parents).toEqual([expectedParent]);
             expect(member2.details.parents).toEqual([expectedParent]);
             expect(member3.details.parents).toEqual([expectedParent]);
+        });
+
+        test('When adding a new parent that is and old copy, the most recent copy is added instead', async () => {
+            const user = await new UserFactory({}).create();
+
+            /**
+             * This one is the oldest and has been reviewed the most recent
+             */
+            const latestParent = Parent.create({
+                firstName: 'Linda',
+                lastName: 'Doe',
+                email: 'linda@example.com',
+                alternativeEmails: ['linda@work2.com'],
+                phone: '+32412345679',
+                address: Address.create({
+                    street: 'Main street 2',
+                    postalCode: '1000',
+                    city: 'Brussels',
+                    country: Country.Belgium,
+                }),
+                nationalRegisterNumber: '93042012348',
+                createdAt: new Date(3000),
+                updatedAt: new Date(),
+            });
+
+            const oldestParent = Parent.create({
+                id: latestParent.id,
+                firstName: 'Linda',
+                lastName: 'Doe',
+                email: 'ignored@example.com',
+                createdAt: new Date(3000),
+                updatedAt: new Date(10_000),
+            });
+
+            const member1 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    parents: [latestParent],
+                }),
+            }).create();
+
+            const member2 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'Jane',
+                    lastName: 'Doe',
+                    parents: [],
+                }),
+            }).create();
+
+            // Now simulate a change to member1's contacts, and check if all contacts are updated to the same id and details
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await Token.createToken(admin);
+            const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+            nonEmtpyArray.addPut(oldestParent);
+
+            const arr: Body = new PatchableArray();
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: member2.id,
+                details: MemberDetails.patch({
+                    parents: nonEmtpyArray,
+                }),
+            });
+            arr.addPatch(patch);
+
+            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            // Check returned
+            expect(response.status).toBe(200);
+            expect(response.body.members.length).toBe(1);
+
+            // Load contacts again
+            await member1.refresh();
+            await member2.refresh();
+
+            // The contact should be equal to contact1, and ignore other changes
+            const expectedParent = Parent.create({
+                ...latestParent,
+            });
+
+            expect(member1.details.parents).toEqual([expectedParent]);
+            expect(member2.details.parents).toEqual([expectedParent]);
+        });
+
+        test('It is possible to change the name of a parent without setting updatedAt', async () => {
+            const user = await new UserFactory({}).create();
+
+            /**
+             * This one is the oldest and has been reviewed the most recent
+             */
+            const latestParent = Parent.create({
+                firstName: 'Linda',
+                lastName: 'Doe',
+                email: 'linda@example.com',
+                alternativeEmails: ['linda@work2.com'],
+                phone: '+32412345679',
+                address: Address.create({
+                    street: 'Main street 2',
+                    postalCode: '1000',
+                    city: 'Brussels',
+                    country: Country.Belgium,
+                }),
+                nationalRegisterNumber: '93042012348',
+                createdAt: new Date(3000),
+                updatedAt: new Date(),
+            });
+
+            const oldestParent = Parent.create({
+                id: latestParent.id,
+                firstName: 'Linda',
+                lastName: 'Doe',
+                email: 'ignored@example.com',
+                createdAt: new Date(3000),
+                updatedAt: new Date(10_000),
+            });
+
+            const member1 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    parents: [latestParent],
+                }),
+            }).create();
+
+            const member2 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'Jane',
+                    lastName: 'Doe',
+                    parents: [oldestParent],
+                }),
+            }).create();
+
+            // Now simulate a change to member1's contacts, and check if all contacts are updated to the same id and details
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await Token.createToken(admin);
+            const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+            nonEmtpyArray.addPatch(Parent.patch({
+                id: latestParent.id,
+                firstName: 'Linda2',
+                lastName: 'Doe2',
+                // Note that 'by accident' the frontend did not pass the updatedAt value correctly - this should still work as expected
+            }));
+
+            const arr: Body = new PatchableArray();
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: member2.id,
+                details: MemberDetails.patch({
+                    parents: nonEmtpyArray,
+                }),
+            });
+            arr.addPatch(patch);
+
+            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            // Check returned
+            expect(response.status).toBe(200);
+            expect(response.body.members.length).toBe(1);
+
+            // Load contacts again
+            await member1.refresh();
+            await member2.refresh();
+
+            // The contact should be equal to contact1, and ignore other changes
+            const expectedParent = Parent.create({
+                ...latestParent,
+                firstName: 'Linda2',
+                lastName: 'Doe2',
+            });
+
+            expect(member1.details.parents).toEqual([expectedParent]);
+            expect(member2.details.parents).toEqual([expectedParent]);
         });
     });
 
@@ -1919,6 +2108,579 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             expect(member1.details.emergencyContacts).toEqual([expectedParent]);
             expect(member2.details.emergencyContacts).toEqual([expectedParent]);
+        });
+
+        test('When adding a new emergency contact that is an old copy, the most recent copy is added instead', async () => {
+            const user = await new UserFactory({}).create();
+
+            /**
+             * This one is the oldest and has been reviewed the most recent
+             */
+            const contact1 = EmergencyContact.create({
+                name: 'Linda Doe',
+                title: 'Grandmother',
+                phone: '+32412345678',
+                createdAt: new Date(0),
+                updatedAt: new Date(),
+            });
+
+            // The frontend for some reason got and old version of this contact
+            const oldVersionContact = EmergencyContact.create({
+                id: contact1.id,
+                name: 'Linda Doe',
+                title: 'Oma',
+                phone: '+32412345676',
+                createdAt: new Date(0),
+                updatedAt: new Date(10_000), // This one is older
+            });
+
+            const member1 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    emergencyContacts: [contact1],
+                }),
+            }).create();
+
+            const member2 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'Jane',
+                    lastName: 'Doe',
+                    emergencyContacts: [],
+                }),
+            }).create();
+
+            // Now simulate a change to member1's contacts, and check if all contacts are updated to the same id and details
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await Token.createToken(admin);
+            const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+            nonEmtpyArray.addPut(oldVersionContact);
+
+            const arr: Body = new PatchableArray();
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: member2.id,
+                details: MemberDetails.patch({
+                    emergencyContacts: nonEmtpyArray,
+                }),
+            });
+            arr.addPatch(patch);
+
+            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            // Check returned
+            expect(response.status).toBe(200);
+            expect(response.body.members.length).toBe(1);
+
+            // Load contacts again
+            await member1.refresh();
+            await member2.refresh();
+
+            // The contact should be equal to contact1, and ignore other changes
+            const expectedParent = EmergencyContact.create({
+                ...contact1,
+            });
+
+            expect(member1.details.emergencyContacts).toEqual([expectedParent]);
+            expect(member2.details.emergencyContacts).toEqual([expectedParent]);
+        });
+
+        test('It is possible to change the name of an emergency contact without setting updatedAt', async () => {
+            const user = await new UserFactory({}).create();
+
+            /**
+             * This one is the oldest and has been reviewed the most recent
+             */
+            const contact1 = EmergencyContact.create({
+                name: 'Linda Doe',
+                title: 'Grandmother',
+                phone: '+32412345678',
+                createdAt: new Date(0),
+                updatedAt: new Date(),
+            });
+
+            const member1 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    emergencyContacts: [contact1],
+                }),
+            }).create();
+
+            const member2 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'Jane',
+                    lastName: 'Doe',
+                    emergencyContacts: [contact1],
+                }),
+            }).create();
+
+            // Now simulate a change to member1's contacts, and check if all contacts are updated to the same id and details
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await Token.createToken(admin);
+            const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+            nonEmtpyArray.addPatch(EmergencyContact.patch({
+                id: contact1.id,
+                name: 'Linda2 Doe2',
+                // Note that 'by accident' the frontend did not pass the updatedAt value correctly - this should still work as expected
+            }));
+
+            const arr: Body = new PatchableArray();
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: member2.id,
+                details: MemberDetails.patch({
+                    emergencyContacts: nonEmtpyArray,
+                }),
+            });
+            arr.addPatch(patch);
+
+            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            // Check returned
+            expect(response.status).toBe(200);
+            expect(response.body.members.length).toBe(1);
+
+            // Load contacts again
+            await member1.refresh();
+            await member2.refresh();
+
+            // The contact should be equal to contact1, and ignore other changes
+            const expectedContact = EmergencyContact.create({
+                ...contact1,
+                name: 'Linda2 Doe2',
+            });
+
+            expect(member1.details.emergencyContacts).toEqual([expectedContact]);
+            expect(member2.details.emergencyContacts).toEqual([expectedContact]);
+        });
+
+        test('It is possible to change the name of an emergency contact with setting updatedAt', async () => {
+            const user = await new UserFactory({}).create();
+
+            /**
+             * This one is the oldest and has been reviewed the most recent
+             */
+            const contact1 = EmergencyContact.create({
+                name: 'Linda Doe',
+                title: 'Grandmother',
+                phone: '+32412345678',
+                createdAt: new Date(0),
+                updatedAt: new Date(Date.now() - 5_000),
+            });
+
+            const member1 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    emergencyContacts: [contact1],
+                }),
+            }).create();
+
+            const member2 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'Jane',
+                    lastName: 'Doe',
+                    emergencyContacts: [contact1],
+                }),
+            }).create();
+
+            // Now simulate a change to member1's contacts, and check if all contacts are updated to the same id and details
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await Token.createToken(admin);
+            const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+            const d = new Date();
+            nonEmtpyArray.addPatch(EmergencyContact.patch({
+                id: contact1.id,
+                name: 'Linda2 Doe2',
+                title: 'Changed',
+                updatedAt: d,
+            }));
+
+            const arr: Body = new PatchableArray();
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: member2.id,
+                details: MemberDetails.patch({
+                    emergencyContacts: nonEmtpyArray,
+                }),
+            });
+            arr.addPatch(patch);
+
+            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            // Check returned
+            expect(response.status).toBe(200);
+            expect(response.body.members.length).toBe(1);
+
+            // Load contacts again
+            await member1.refresh();
+            await member2.refresh();
+
+            // The contact should be equal to contact1, and ignore other changes
+            const expectedContact = EmergencyContact.create({
+                ...contact1,
+                name: 'Linda2 Doe2',
+                title: 'Changed',
+                updatedAt: d,
+            });
+
+            expect(member1.details.emergencyContacts).toEqual([expectedContact]);
+            expect(member2.details.emergencyContacts).toEqual([expectedContact]);
+        });
+
+        test('Adding a completely new emergency contact works correctly', async () => {
+            const user = await new UserFactory({}).create();
+
+            const existing = EmergencyContact.create({
+                name: 'Existing friend',
+                title: 'Friend',
+                phone: '+32412345111',
+            });
+            const member1 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    emergencyContacts: [
+                        existing,
+                    ],
+                }),
+            }).create();
+
+            const newContact = EmergencyContact.create({
+                name: 'New Contact',
+                title: 'Friend',
+                phone: '+32412345670',
+            });
+
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await Token.createToken(admin);
+            const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+            nonEmtpyArray.addPut(newContact);
+
+            const arr: Body = new PatchableArray();
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: member1.id,
+                details: MemberDetails.patch({
+                    emergencyContacts: nonEmtpyArray,
+                }),
+            });
+            arr.addPatch(patch);
+
+            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            // Check returned
+            expect(response.status).toBe(200);
+            expect(response.body.members.length).toBe(1);
+
+            // Load contacts again
+            await member1.refresh();
+
+            // Check the new contact is added
+            expect(member1.details.emergencyContacts).toEqual([
+                existing,
+                newContact,
+            ]);
+        });
+
+        test('Updating an existing emergency contact\'s details works correctly', async () => {
+            const user = await new UserFactory({}).create();
+
+            const contact1 = EmergencyContact.create({
+                name: 'Linda Doe',
+                title: 'Grandmother',
+                phone: '+32412345678',
+                createdAt: new Date(0),
+            });
+
+            const member1 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    emergencyContacts: [contact1],
+                }),
+            }).create();
+
+            const updatedContact = EmergencyContact.patch({
+                id: contact1.id,
+                phone: '+32412345679',
+            });
+
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await Token.createToken(admin);
+            const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+            nonEmtpyArray.addPatch(updatedContact);
+
+            const arr: Body = new PatchableArray();
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: member1.id,
+                details: MemberDetails.patch({
+                    emergencyContacts: nonEmtpyArray,
+                }),
+            });
+            arr.addPatch(patch);
+
+            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            // Check returned
+            expect(response.status).toBe(200);
+            expect(response.body.members.length).toBe(1);
+
+            // Load contacts again
+            await member1.refresh();
+
+            // Check the contact is updated
+            const expectedContact = EmergencyContact.create({
+                ...contact1,
+                phone: '+32412345679',
+            });
+
+            expect(member1.details.emergencyContacts).toEqual([expectedContact]);
+        });
+
+        test('Removing an emergency contact works correctly', async () => {
+            const user = await new UserFactory({}).create();
+
+            const contact1 = EmergencyContact.create({
+                name: 'Linda Doe',
+                title: 'Grandmother',
+                phone: '+32412345678',
+                createdAt: new Date(0),
+            });
+
+            const member1 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    emergencyContacts: [contact1],
+                }),
+            }).create();
+
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await Token.createToken(admin);
+            const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+            nonEmtpyArray.addDelete(contact1.id);
+
+            const arr: Body = new PatchableArray();
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: member1.id,
+                details: MemberDetails.patch({
+                    emergencyContacts: nonEmtpyArray,
+                }),
+            });
+            arr.addPatch(patch);
+
+            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            // Check returned
+            expect(response.status).toBe(200);
+            expect(response.body.members.length).toBe(1);
+
+            // Load contacts again
+            await member1.refresh();
+
+            // Check the contact is removed
+            expect(member1.details.emergencyContacts).toEqual([]);
+        });
+
+        test('Handling multiple members with different emergency contacts works correctly', async () => {
+            const user = await new UserFactory({}).create();
+
+            const contact1 = EmergencyContact.create({
+                name: 'Linda Doe',
+                title: 'Grandmother',
+                phone: '+32412345678',
+                createdAt: new Date(0),
+            });
+
+            const contact2 = EmergencyContact.create({
+                name: 'John Doe',
+                title: 'Uncle',
+                phone: '+32412345679',
+                createdAt: new Date(1000),
+            });
+
+            const member1 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    emergencyContacts: [contact1],
+                }),
+            }).create();
+
+            const member2 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'Jane',
+                    lastName: 'Doe',
+                    emergencyContacts: [contact2],
+                }),
+            }).create();
+
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await Token.createToken(admin);
+            const nonEmtpyArray1 = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+            nonEmtpyArray1.addPatch(EmergencyContact.patch({
+                id: contact1.id,
+                phone: '+32412345680',
+            }));
+
+            const nonEmtpyArray2 = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+            nonEmtpyArray2.addPatch(EmergencyContact.patch({
+                id: contact2.id,
+                phone: '+32412345681',
+            }));
+
+            const arr: Body = new PatchableArray();
+            const patch1 = MemberWithRegistrationsBlob.patch({
+                id: member1.id,
+                details: MemberDetails.patch({
+                    emergencyContacts: nonEmtpyArray1,
+                }),
+            });
+            const patch2 = MemberWithRegistrationsBlob.patch({
+                id: member2.id,
+                details: MemberDetails.patch({
+                    emergencyContacts: nonEmtpyArray2,
+                }),
+            });
+            arr.addPatch(patch1);
+            arr.addPatch(patch2);
+
+            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            // Check returned
+            expect(response.status).toBe(200);
+            expect(response.body.members.length).toBe(2);
+
+            // Load contacts again
+            await member1.refresh();
+            await member2.refresh();
+
+            // Check the contacts are updated independently
+            const expectedContact1 = EmergencyContact.create({
+                ...contact1,
+                phone: '+32412345680',
+            });
+
+            const expectedContact2 = EmergencyContact.create({
+                ...contact2,
+                phone: '+32412345681',
+            });
+
+            expect(member1.details.emergencyContacts).toEqual([expectedContact1]);
+            expect(member2.details.emergencyContacts).toEqual([expectedContact2]);
+        });
+
+        test('Handling emergency contacts with different IDs but same details works correctly', async () => {
+            const user = await new UserFactory({}).create();
+
+            const contact1 = EmergencyContact.create({
+                name: 'Linda Doe',
+                title: 'Grandmother',
+                phone: '+32412345678',
+                createdAt: new Date(0),
+            });
+
+            const contact2 = EmergencyContact.create({
+                name: 'Linda Doe',
+                title: 'Grandmother',
+                phone: '+32412345678',
+                createdAt: new Date(1000),
+            });
+
+            const member1 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    emergencyContacts: [contact1],
+                }),
+            }).create();
+
+            const member2 = await new MemberFactory({
+                user,
+                details: MemberDetails.create({
+                    firstName: 'Jane',
+                    lastName: 'Doe',
+                    emergencyContacts: [contact2],
+                }),
+            }).create();
+
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await Token.createToken(admin);
+            const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+            nonEmtpyArray.addPatch(EmergencyContact.patch({
+                id: contact1.id,
+                phone: '+32412345679',
+            }));
+
+            const arr: Body = new PatchableArray();
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: member1.id,
+                details: MemberDetails.patch({
+                    emergencyContacts: nonEmtpyArray,
+                }),
+            });
+            arr.addPatch(patch);
+
+            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            // Check returned
+            expect(response.status).toBe(200);
+            expect(response.body.members.length).toBe(1);
+
+            // Load contacts again
+            await member1.refresh();
+            await member2.refresh();
+
+            // Check the contacts are updated correctly
+            const expectedContact = EmergencyContact.create({
+                ...contact1,
+                phone: '+32412345679',
+            });
+
+            expect(member1.details.emergencyContacts).toEqual([expectedContact]);
+            expect(member2.details.emergencyContacts).toEqual([expectedContact]);
         });
     });
 });

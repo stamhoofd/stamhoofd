@@ -776,6 +776,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             // Add puts
             const parentPuts = isPatchableArray(patch.parents) ? patch.parents.getPuts().map(p => p.put) : patch.parents;
             for (const put of parentPuts) {
+                if (!parentMergeMap.get(put.id)) {
+                    // This one has not been merged
+                    continue;
+                }
+
                 const alternativeEmailsArr = new PatchableArray() as PatchableArray<string, string, string>;
                 for (const alternativeEmail of put.alternativeEmails) {
                     alternativeEmailsArr.addPut(alternativeEmail);
@@ -804,6 +809,10 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             // Add puts
             const contactsPuts = isPatchableArray(patch.emergencyContacts) ? patch.emergencyContacts.getPuts().map(p => p.put) : patch.emergencyContacts;
             for (const put of contactsPuts) {
+                if (!contactsMergeMap.get(put.id)) {
+                    // This one has not been merged
+                    continue;
+                }
                 const p = EmergencyContact.patch({
                     ...put,
                     createdAt: undefined, // Not allowed to change (should have already happened + the merge method will already chose the right value)

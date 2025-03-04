@@ -775,30 +775,56 @@ export class MemberDetails extends AutoEncoder {
     }
 
     static mergeParents(members: MemberDetails[], allowOverrides = true) {
-        const parentsMap: Map<string, { parent: Parent; reviewDate?: Date; createdAt: Date; setParent: (parent: Parent) => void }[]> = new Map();
+        return MemberDetails.mergeRelations(members, 'parents', allowOverrides);
+    }
+
+    static mergeEmergencyContacts(members: MemberDetails[], allowOverrides = true) {
+        return MemberDetails.mergeRelations(members, 'emergencyContacts', allowOverrides);
+    }
+
+    private static mergeRelations(members: MemberDetails[], type: 'parents' | 'emergencyContacts', allowOverrides = true) {
+        type T = Parent | EmergencyContact;
+        type RelationGroup = { object: T; reviewDate?: Date; createdAt: Date; setObject: (object: T) => void }[];
+
+        const allGroups: RelationGroup[] = [];
+        const parentsGroupByName: Map<string, RelationGroup> = new Map();
+        const parentsGroupById: Map<string, RelationGroup> = new Map();
         const mergeIdMap: Map<string, string> = new Map();
 
         for (const member of members) {
-            for (const [index, parent] of member.parents.entries()) {
-                if (parent.name.length <= 3) {
+            for (const [index, object] of (member[type] as T[]).entries()) {
+                if (object.name.length <= 3) {
                     continue;
                 }
-                if (!parentsMap.has(parent.name)) {
-                    parentsMap.set(parent.name, []);
+
+                // First find group by ID, then name
+                let group = parentsGroupById.get(object.id) ?? parentsGroupByName.get(object.name);
+                if (!group) {
+                    group = [];
+                    allGroups.push(group);
                 }
-                parentsMap.get(parent.name)!.push({
-                    parent,
-                    setParent(parent: Parent) {
-                        member.parents[index] = parent;
+
+                // Save name and id groups
+                if (!parentsGroupByName.has(object.name)) {
+                    parentsGroupByName.set(object.name, group);
+                }
+                if (!parentsGroupById.has(object.id)) {
+                    parentsGroupById.set(object.id, group);
+                }
+
+                group.push({
+                    object: object,
+                    setObject(object: T) {
+                        member[type][index] = object;
                     },
-                    reviewDate: parent.updatedAt ?? member.reviewTimes.getLastReview('parents') ?? parent.createdAt,
-                    createdAt: parent.createdAt,
+                    reviewDate: object.updatedAt ?? member.reviewTimes.getLastReview(type) ?? object.createdAt,
+                    createdAt: object.createdAt,
                 });
             }
         }
 
         // Sort each parent by review date and merge
-        for (const [_, parents] of parentsMap) {
+        for (const parents of allGroups) {
             if (parents.length >= 2) {
                 // Fetch parent with oldest createdAt
                 // This is so we can keep the oldest createdAt and oldest id
@@ -806,113 +832,58 @@ export class MemberDetails extends AutoEncoder {
                     b.createdAt,
                     a.createdAt,
                 ));
-                const oldestParent = parents[0].parent;
+                const oldestParent = parents[0].object;
 
                 // Sort from oldest reviewed to latest reviewed
                 parents.sort((a, b) => Sorter.byDateValue(b.reviewDate ?? new Date(0), a.reviewDate ?? new Date(0)));
 
-                // Each merge operation will override the parent details, so start with the oldest one
-                let mergeTo = parents[0].parent.clone();
+                // Parents with the same id override each other, while parents with different ids merge while maintaining as much data as possible
+                // this happens in groups
+                let mergeTo = parents[0].object.clone();
+                const remaining = parents.slice(1);
+                let allowSet = true; // Only the first 'streak' of parents with the same id override mergeTo
 
-                for (const { parent } of parents.slice(1)) {
-                    if (parent.id === mergeTo.id && allowOverrides) {
-                        // Override (they have the same id, so the last changed one can have deleted fields)
-                        mergeTo = parent;
+                for (const [index, { object }] of remaining.entries()) {
+                    if (allowSet && object.id === mergeTo.id && allowOverrides) {
+                        mergeTo = object.clone();
+                        continue;
                     }
                     else {
-                        mergeTo.merge(parent);
+                        allowSet = false;
                     }
+                    if (allowOverrides) {
+                        if (index < remaining.length - 1) {
+                            const nextParent = remaining[index + 1].object;
+                            // If the next parent has the same id, we'll simply ignore this parent because it is out of date.
+                            // This is different from setting mergeTo because we'll still merge with the previous parents that had a different id
+                            if (object.id === nextParent.id) {
+                                continue;
+                            }
+                        }
+                    }
+
+                    // TypeScript does not understand the complexity here, so'll need to help it understand mergeTo is always the same type as object
+                    mergeTo.merge(object as EmergencyContact & Parent);
                 }
 
                 // Force set id + createdAt
                 mergeTo.id = oldestParent.id;
                 mergeTo.createdAt = oldestParent.createdAt;
 
-                for (const { parent, setParent } of parents) {
-                    if (parent.id !== mergeTo.id) {
-                        mergeIdMap.set(parent.id, mergeTo.id);
+                for (const { object, setObject } of parents) {
+                    if (object.id !== mergeTo.id) {
+                        mergeIdMap.set(object.id, mergeTo.id);
                     }
-                    setParent(mergeTo);
+                    setObject(mergeTo);
                 }
 
                 // Remove duplicate parents by id for each member
                 for (const member of members) {
-                    member.parents = member.parents.filter((p, i, self) => self.findIndex(p2 => p2.id === p.id) === i);
+                    member[type] = member[type].filter((p, i, self) => self.findIndex(p2 => p2.id === p.id) === i) as any;
                 }
             }
         }
 
-        return mergeIdMap;
-    }
-
-    static mergeEmergencyContacts(members: MemberDetails[], allowOverrides = true) {
-        const contactsMap: Map<string, { contact: EmergencyContact; reviewDate?: Date; createdAt: Date; setContact: (contact: EmergencyContact) => void }[]> = new Map();
-        const mergeIdMap: Map<string, string> = new Map();
-
-        for (const member of members) {
-            for (const [index, contact] of member.emergencyContacts.entries()) {
-                if (contact.name.length <= 3) {
-                    continue;
-                }
-                if (!contactsMap.has(contact.name)) {
-                    contactsMap.set(contact.name, []);
-                }
-                contactsMap.get(contact.name)!.push({
-                    contact,
-                    reviewDate: contact.updatedAt ?? member.reviewTimes.getLastReview('emergencyContacts') ?? contact.createdAt,
-                    createdAt: contact.createdAt,
-                    setContact(contact: EmergencyContact) {
-                        member.emergencyContacts[index] = contact;
-                    },
-                });
-            }
-        }
-
-        // Sort each parent by review date and merge
-        for (const [_, contacts] of contactsMap) {
-            if (contacts.length >= 2) {
-                // Fetch parent with oldest createdAt
-                // This is so we can keep the oldest createdAt and oldest id
-                contacts.sort((a, b) => Sorter.byDateValue(
-                    b.createdAt,
-                    a.createdAt,
-                ));
-                const oldestContact = contacts[0].contact;
-
-                // Sort from old to new
-                contacts.sort((a, b) => Sorter.byDateValue(b.reviewDate ?? new Date(0), a.reviewDate ?? new Date(0)));
-
-                // Each merge operation will override the parent details, so start with the oldest one
-                let mergeTo = contacts[0].contact.clone();
-
-                for (const { contact } of contacts.slice(1)) {
-                    if (contact.id === mergeTo.id && allowOverrides) {
-                        // Override (they have the same id, so the last changed one can have deleted fields)
-                        mergeTo = contact;
-                    }
-                    else {
-                        mergeTo.merge(contact);
-                    }
-                }
-
-                // Force set id + createdAt
-                mergeTo.id = oldestContact.id;
-                mergeTo.createdAt = oldestContact.createdAt;
-
-                for (const { contact, setContact } of contacts) {
-                    if (contact.id !== mergeTo.id) {
-                        mergeIdMap.set(contact.id, mergeTo.id);
-                    }
-                    setContact(mergeTo);
-                }
-
-                // Remove duplicate parents by id for each member
-                for (const member of members) {
-                    const newContacts = member.emergencyContacts.filter((p, i, self) => self.findIndex(p2 => p2.id === p.id) === i);
-                    member.emergencyContacts = newContacts;
-                }
-            }
-        }
         return mergeIdMap;
     }
 }

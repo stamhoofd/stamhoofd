@@ -18,6 +18,9 @@ export class EmergencyContact extends AutoEncoder {
     @field({ decoder: DateDecoder, ...NextVersion })
     createdAt = new Date();
 
+    /**
+     * Stores the timestamp the contact was last edited in the UI (not the same as edited in the database - this is used to find the most correct data in case of duplicates)
+     */
     @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
     updatedAt: Date | null = null;
 
