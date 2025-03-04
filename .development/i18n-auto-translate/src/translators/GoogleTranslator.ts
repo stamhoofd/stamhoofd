@@ -110,11 +110,11 @@ export class GoogleTranslator implements ITranslator {
 
             try {
                 console.log(chalk.gray(`Start translating batch ${batchNumber} of ${totalBatches}`));
-                const result = this.translateBatch(batch, {originalLocal, targetLocal, consistentWords, namespace, batchNumber, totalBatches});
+                const result = await this.translateBatch(batch, {originalLocal, targetLocal, consistentWords, namespace, batchNumber, totalBatches});
                 console.log(chalk.gray(`Finished translating batch ${batchNumber} of ${totalBatches}`));
                 return result;
             } catch(error) {
-                console.error(chalk.gray(`Failed translating batch ${batchNumber} of ${totalBatches}: ${error.message}`));
+                console.error(chalk.red(`Failed translating batch ${batchNumber} of ${totalBatches}: ${error.message}`));
                 return batch.map(() => null);
             }
         });
