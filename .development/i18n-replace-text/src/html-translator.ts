@@ -567,10 +567,11 @@ REPLACEMENT:`))
         return await this.translateTextParts(parent, record, key, allParts, (value: string) => {
             const unquoted = value.slice(1, value.length - 1);
             const trimmed = unquoted.trim();
+            const quoteType = "'";
             const {whiteSpaceBefore, whiteSpaceAfter} = getWhiteSpaceBeforeAndAfter(unquoted);
-            const quotedWhiteSpaceBefore = whiteSpaceBefore.length ? `"${whiteSpaceBefore}" + ` : '';
-            const quotedWhiteSpaceAfter = whiteSpaceAfter.length ? ` + "${whiteSpaceAfter}"` : '';
-            return quotedWhiteSpaceBefore + wrapWithTranslationFunction(trimmed) + quotedWhiteSpaceAfter;
+            const quotedWhiteSpaceBefore = whiteSpaceBefore.length ? `${quoteType}${whiteSpaceBefore}${quoteType} + ` : '';
+            const quotedWhiteSpaceAfter = whiteSpaceAfter.length ? ` + ${quoteType}${whiteSpaceAfter}${quoteType}` : '';
+            return quotedWhiteSpaceBefore + wrapWithTranslationFunction(trimmed, ['"']) + quotedWhiteSpaceAfter;
         });
     }
 }
