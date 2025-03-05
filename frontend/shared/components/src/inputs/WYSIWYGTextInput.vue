@@ -1,5 +1,5 @@
 <template>
-    <div class="wysiwyg-text-input" v-if="editor">
+    <div v-if="editor" class="wysiwyg-text-input">
         <editor-content :editor="editor" class="editor-content" />
 
         <div class="tools">
@@ -27,7 +27,7 @@
                 <button v-tooltip="'Onderlijn tekst'" class="button icon underline" type="button" :class="{ 'is-active': editor.isActive('underline') }" @click="editor.chain().focus().toggleUnderline().run()" />
 
                 <hr v-if="!$isMobile">
-                
+
                 <button v-tooltip="'Titel'" class="button icon text-style" type="button" @click="openTextStyles" />
                 <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
                 <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click.prevent.stop="openLinkEditor()" @mousedown.prevent />
@@ -36,33 +36,33 @@
     </div>
 </template>
 
-
 <script lang="ts">
-import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
-import { RichText } from "@stamhoofd/structures";
+import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
+import { RichText } from '@stamhoofd/structures';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
-import Typography from "@tiptap/extension-typography";
+import Typography from '@tiptap/extension-typography';
 import Underline from '@tiptap/extension-underline';
 import StarterKit from '@tiptap/starter-kit';
 import { Editor, EditorContent } from '@tiptap/vue-3';
 
-import { ColorHelper } from "../ColorHelper";
-import TooltipDirective from "../directives/Tooltip";
-import { WarningBox } from "../editor/EditorWarningBox";
-import STList from "../layout/STList.vue";
-import STListItem from "../layout/STListItem.vue";
-import STButtonToolbar from "../navigation/STButtonToolbar.vue";
-import { ContextMenu, ContextMenuItem } from "../overlays/ContextMenu";
-import { Toast } from "../overlays/Toast";
+import { ColorHelper } from '../ColorHelper';
+import TooltipDirective from '../directives/Tooltip';
+import { WarningBox } from '../editor/EditorWarningBox';
+import STList from '../layout/STList.vue';
+import STListItem from '../layout/STListItem.vue';
+import STButtonToolbar from '../navigation/STButtonToolbar.vue';
+import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
+import { Toast } from '../overlays/Toast';
+import { DataValidator } from '@stamhoofd/utility';
 
-function escapeHtml(unsafe: string ): string {
+function escapeHtml(unsafe: string): string {
     return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
 
 @Component({
@@ -70,53 +70,53 @@ function escapeHtml(unsafe: string ): string {
         EditorContent,
         STButtonToolbar,
         STList,
-        STListItem
+        STListItem,
     },
     directives: {
-        Tooltip: TooltipDirective
+        Tooltip: TooltipDirective,
     },
-    emits: ['update:modelValue']
+    emits: ['update:modelValue'],
 })
 export default class WYSIWYGTextInput extends VueComponent {
     @Prop({ required: true })
-        modelValue!: RichText
+    modelValue!: RichText;
 
     @Prop({ default: '' })
-        placeholder!: string
+    placeholder!: string;
 
     @Prop({ default: 2 })
-        headingStartLevel!: number
+    headingStartLevel!: number;
 
     @Prop({ required: false, default: null })
-        color!: string | null
+    color!: string | null;
 
-    @Prop({ default: "" })
-        editorClass!: string
+    @Prop({ default: '' })
+    editorClass!: string;
 
-    showLinkEditor = false
-    editLink = ""
-    editor: Editor|null = null
-    showTextStyles = false
+    showLinkEditor = false;
+    editLink = '';
+    editor: Editor | null = null;
+    showTextStyles = false;
 
     beforeMount() {
-        this.editor = this.buildEditor()
+        this.editor = this.buildEditor();
     }
 
     mounted() {
         if (this.color) {
             const el = (this.$el as HTMLElement).querySelector('.editor-content') as HTMLElement;
             if (el) {
-                ColorHelper.setColor(this.color, el)
+                ColorHelper.setColor(this.color, el);
             }
         }
     }
 
-    @Watch("color")
+    @Watch('color')
     onColorChanged() {
         if (this.color) {
             const el = (this.$el as HTMLElement).querySelector('.editor-content') as HTMLElement;
             if (el) {
-                ColorHelper.setColor(this.color, el)
+                ColorHelper.setColor(this.color, el);
             }
         }
     }
@@ -125,7 +125,7 @@ export default class WYSIWYGTextInput extends VueComponent {
         // This fixes a glitch that the editor content is wiped before the transition is finished
         const content = (this.$el as HTMLElement).innerHTML;
         (this.$el as HTMLElement).innerHTML = content;
-        this.editor?.destroy()
+        this.editor?.destroy();
     }
 
     buildEditor() {
@@ -133,176 +133,188 @@ export default class WYSIWYGTextInput extends VueComponent {
 
         if (!content && this.modelValue.text) {
             // Special conversion operation
-            const splitted = this.modelValue.text.split("\n")
+            const splitted = this.modelValue.text.split('\n');
             for (const split of splitted) (
                 content += `<p>${escapeHtml(split)}</p>`
-            )
+            );
         }
         return new Editor({
             content,
             extensions: [
                 StarterKit.configure({
-                    heading:{
+                    heading: {
                         levels: [this.headingStartLevel as any, this.headingStartLevel + 1 as any],
-                    }
+                    },
                 }),
                 Placeholder.configure({
-                    placeholder: this.placeholder
+                    placeholder: this.placeholder,
                 }),
                 WarningBox.configure({}),
                 Typography.configure({}),
                 Link.configure({
                     openOnClick: false,
+                    protocols: ['mailto'],
                 }),
-                Underline
+                Underline,
             ],
-            onSelectionUpdate: ({editor}) => {
-                if (this.showLinkEditor){
-                    if (editor.isActive("link")) {
-                        this.editLink = editor.getAttributes('link')?.href ?? ""
-                    } else {
+            onSelectionUpdate: ({ editor }) => {
+                if (this.showLinkEditor) {
+                    if (editor.isActive('link')) {
+                        this.editLink = editor.getAttributes('link')?.href ?? '';
+                    }
+                    else {
                         if (editor.state.selection.empty) {
-                            this.showLinkEditor = false
+                            this.showLinkEditor = false;
                         }
                     }
                 }
             },
             onUpdate: ({ editor }) => {
-                this.$emit('update:modelValue', RichText.create({ html: editor.getHTML(), text: editor.getText() }))
+                this.$emit('update:modelValue', RichText.create({ html: editor.getHTML(), text: editor.getText() }));
             },
             editorProps: {
                 attributes: {
-                class: this.editorClass
+                    class: this.editorClass,
                 },
             },
-        })
+        });
     }
 
     openLinkEditor() {
         if (this.showLinkEditor) {
-            this.editor.chain().focus().run()
+            this.editor.chain().focus().run();
             this.$nextTick(() => {
-                this.showLinkEditor = false
-            })
-            return
+                this.showLinkEditor = false;
+            });
+            return;
         }
-        if (!this.editor.isActive("link") && this.editor.state.selection.empty) {
-            new Toast("Selecteer eerst tekst die je klikbaar wilt maken", "info").show()
-            return
+        if (!this.editor.isActive('link') && this.editor.state.selection.empty) {
+            new Toast('Selecteer eerst tekst die je klikbaar wilt maken', 'info').show();
+            return;
         }
-        this.editLink = this.editor.getAttributes('link')?.href ?? ""
+        this.editLink = this.editor.getAttributes('link')?.href ?? '';
         this.showLinkEditor = true;
         this.$nextTick(() => {
-            (this.$refs.linkInput as HTMLInputElement).focus()
-        })
+            (this.$refs.linkInput as HTMLInputElement).focus();
+        });
     }
 
     openTextStyles(event) {
-        // Get initial selection        
-        const m = this
+        // Get initial selection
+        const m = this;
         const menu = new ContextMenu([
             [
                 new ContextMenuItem({
-                    name: "Titel",
-                    icon: "h1",
-                    selected: this.editor.isActive("heading", { level: this.headingStartLevel }),
+                    name: 'Titel',
+                    icon: 'h1',
+                    selected: this.editor.isActive('heading', { level: this.headingStartLevel }),
                     action: () => {
-                        m.editor.chain().focus().toggleHeading({ level: this.headingStartLevel as any }).run()
-                        return true
-                    }
+                        m.editor.chain().focus().toggleHeading({ level: this.headingStartLevel as any }).run();
+                        return true;
+                    },
                 }),
                 new ContextMenuItem({
-                    name: "Koptekst",
-                    icon: "h2",
-                    selected: this.editor.isActive("heading", { level: this.headingStartLevel + 1 }),
+                    name: 'Koptekst',
+                    icon: 'h2',
+                    selected: this.editor.isActive('heading', { level: this.headingStartLevel + 1 }),
                     action: () => {
-                        m.editor.chain().focus().toggleHeading({ level: this.headingStartLevel + 1 as any }).run()
-                        return true
-                    }
+                        m.editor.chain().focus().toggleHeading({ level: this.headingStartLevel + 1 as any }).run();
+                        return true;
+                    },
                 }),
                 new ContextMenuItem({
-                    name: "Waarschuwing",
-                    icon: "warning",
-                    selected: this.editor.isActive("warningBox", { type: 'warning' }),
+                    name: 'Waarschuwing',
+                    icon: 'warning',
+                    selected: this.editor.isActive('warningBox', { type: 'warning' }),
                     action: () => {
-                        m.editor.chain().focus().toggleBox('warning').run()
-                        return true
-                    }
+                        m.editor.chain().focus().toggleBox('warning').run();
+                        return true;
+                    },
                 }),
                 new ContextMenuItem({
-                    name: "Info",
-                    icon: "info",
-                    selected: this.editor.isActive("warningBox", { type: 'info' }),
+                    name: 'Info',
+                    icon: 'info',
+                    selected: this.editor.isActive('warningBox', { type: 'info' }),
                     action: () => {
-                        m.editor.chain().focus().toggleBox('info').run()
-                        return true
-                    }
-                })
+                        m.editor.chain().focus().toggleBox('info').run();
+                        return true;
+                    },
+                }),
             ],
             [
                 new ContextMenuItem({
-                    name: "Opsomming met bolletjes",
-                    icon: "ul",
-                    selected: this.editor.isActive("bulletList"),
+                    name: 'Opsomming met bolletjes',
+                    icon: 'ul',
+                    selected: this.editor.isActive('bulletList'),
                     action: () => {
-                        m.editor.chain().focus().toggleBulletList().run()
-                        return true
-                    }
+                        m.editor.chain().focus().toggleBulletList().run();
+                        return true;
+                    },
                 }),
                 new ContextMenuItem({
-                    name: "Opsomming met nummers",
-                    icon: "ol",
-                    selected: this.editor.isActive("orderedList"),
+                    name: 'Opsomming met nummers',
+                    icon: 'ol',
+                    selected: this.editor.isActive('orderedList'),
                     action: () => {
-                        m.editor.chain().focus().toggleOrderedList().run()
-                        return true
-                    }
+                        m.editor.chain().focus().toggleOrderedList().run();
+                        return true;
+                    },
                 }),
-            ]
-        ])
-        menu.show({ button: event.currentTarget, yPlacement: "top" }).catch(console.error)
+            ],
+        ]);
+        menu.show({ button: event.currentTarget, yPlacement: 'top' }).catch(console.error);
     }
 
     isValidHttpUrl(string: string) {
-        let url;
-        
-        try {
-            url = new URL(string);
-        } catch (_) {
-            return false;  
+        if (string.startsWith('mailto:')) {
+            // Strip mailto and validate email address
+            string = string.substring(7);
+            if (DataValidator.isEmailValid(string)) {
+                return true;
+            }
+            return false;
         }
 
-        return url.protocol === "http:" || url.protocol === "https:";
+        let url;
+
+        try {
+            url = new URL(string);
+        }
+        catch (_) {
+            return false;
+        }
+
+        return url.protocol === 'http:' || url.protocol === 'https:';
     }
 
     saveLink() {
-        let cleanedUrl = this.editLink.trim()
+        let cleanedUrl = this.editLink.trim();
 
         if (cleanedUrl.length === 0) {
-            this.clearLink()
-            return
+            this.clearLink();
+            return;
         }
 
-        if (!cleanedUrl.startsWith("http://") && !cleanedUrl.startsWith("https://")) {
-            cleanedUrl = "http://" + cleanedUrl
+        if (!this.isValidHttpUrl(cleanedUrl) && this.isValidHttpUrl('http://' + cleanedUrl)) {
+            cleanedUrl = 'http://' + cleanedUrl;
         }
 
         if (!this.isValidHttpUrl(cleanedUrl)) {
-            new Toast("Ongeldige URL", "error red").show()
-            return
+            new Toast('Ongeldige URL', 'error red').show();
+            return;
         }
 
-        this.editor.chain().focus().setLink({ href: cleanedUrl }).focus().run()
+        this.editor.chain().focus().extendMarkRange('link').setLink({ href: cleanedUrl }).focus().run();
         this.$nextTick(() => {
-            this.showLinkEditor = false
-        })
+            this.showLinkEditor = false;
+        });
     }
 
     clearLink() {
-        this.editor.chain().focus().unsetLink().focus().run()
+        this.editor.chain().focus().unsetLink().focus().run();
         this.$nextTick(() => {
-            this.showLinkEditor = false
-        })
+            this.showLinkEditor = false;
+        });
     }
 }
 </script>

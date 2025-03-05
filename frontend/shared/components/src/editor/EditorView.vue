@@ -131,6 +131,7 @@ import { DescriptiveText } from './EditorDescriptiveText';
 import { SmartButtonInlineNode, SmartButtonNode } from './EditorSmartButton';
 import { SmartVariableNode, SmartVariableNodeBlock } from './EditorSmartVariable';
 import TextStyleButtonsView from './TextStyleButtonsView.vue';
+import { DataValidator } from '@stamhoofd/utility';
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
@@ -221,6 +222,7 @@ function buildEditor(content: Content = '') {
             }),
             Link.configure({
                 openOnClick: false,
+                protocols: ['mailto'],
             }),
             Underline,
             DescriptiveText,
@@ -267,6 +269,15 @@ async function openLinkEditor() {
 }
 
 function isValidHttpUrl(string: string) {
+    if (string.startsWith('mailto:')) {
+        // Strip mailto and validate email address
+        string = string.substring(7);
+        if (DataValidator.isEmailValid(string)) {
+            return true;
+        }
+        return false;
+    }
+
     let url;
 
     try {
@@ -287,21 +298,21 @@ async function saveLink() {
         return;
     }
 
-    if (!cleanedUrl.startsWith('http://') && !cleanedUrl.startsWith('https://')) {
+    if (!isValidHttpUrl(cleanedUrl) && isValidHttpUrl('http://' + cleanedUrl)) {
         cleanedUrl = 'http://' + cleanedUrl;
     }
 
     if (!isValidHttpUrl(cleanedUrl)) {
-        new Toast('Ongeldige URL', 'error red').show();
+        Toast.error('Ongeldige URL').show();
         return;
     }
 
-    editor.value.chain().focus().setLink({ href: cleanedUrl }).focus().run();
+    editor.value.chain().focus().extendMarkRange('link').setLink({ href: cleanedUrl }).focus().run();
     await nextTick(() => {
         showLinkEditor.value = false;
     });
 }
-//
+
 async function clearLink() {
     editor.value.chain().focus().unsetLink().focus().run();
     await nextTick(() => {
