@@ -563,13 +563,13 @@ const isTagEnabledPredicate = computed(() => {
 const canSelectOrganization = (o: Organization) => {
     const result = eventPermissions.canAdminEventForExternalOrganization(o);
     if (!result) {
-        Toast.error($t('Je hebt geen rechten om een activiteit aan te maken voor deze #groep.'))
+        Toast.error($t('43ff8e32-1a0b-41cf-b9a6-8e4c85d12739'))
             .show();
         return false;
     }
 
     if (organization.value && o.id !== organization.value.id) {
-        Toast.error($t('Je kan activiteiten voor andere #groepen enkel aanmaken via het beheerdersportaal van die #groep zelf.'))
+        Toast.error($t('13a4b7fa-7de6-497e-9e7c-6aee4f783260'))
             .show();
         return false;
     }
@@ -733,8 +733,8 @@ async function addRegistrations() {
                 components: [
                     new ComponentWithProperties(NavigationController, {
                         root: new ComponentWithProperties(SearchOrganizationView, {
-                            title: $t('Kies een organisator van deze inschrijvingen'),
-                            description: $t('Voor nationale activiteiten moet je kiezen via welke #groep alle betalingen verlopen. De betaalinstellingen van die #groep worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die #groep.\n\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.'),
+                            title: $t('67967405-d320-4d40-8dc0-889915da1f34'),
+                            description: $t('2e5e052c-98b7-4375-b771-05a8913c145b'),
                             selectOrganization: async (organization: Organization, navigation: NavigationActions) => {
                                 group.organizationId = organization.id;
                                 group.periodId = organization.period.period.id;

@@ -247,7 +247,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     throw new SimpleError({
                         code: 'forbidden',
                         message: 'No permission to register in this group',
-                        human: $t('Je hebt geen toegangsrechten om een lid in te schrijven voor {group}', { group: group.settings.name }),
+                        human: $t('36e8f895-91df-4c88-88e7-d4f0e9d1b5bf', { group: group.settings.name }),
                         statusCode: 403,
                     });
                 }

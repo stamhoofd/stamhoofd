@@ -26,21 +26,21 @@
             <TimeInput v-model="deadlineDate" title="Tijdstip" :validator="errors.validator" />
         </div>
 
-        <STInputBox :title="$t('Herinnering titel')" error-fields="reminderText" :error-box="errors.errorBox" class="max">
+        <STInputBox :title="$t('9106b204-3db9-4fac-acfa-e53e07d5a867')" error-fields="reminderText" :error-box="errors.errorBox" class="max">
             <input
                 v-model="reminderTitle"
                 class="input"
                 type="text"
-                :placeholder="$t('bv. Dien je kampmeldingen voor je paaskampen in voor 1 maart')"
+                :placeholder="$t('16e52c0a-81e8-4d24-9efb-470a92b74c15')"
             >
         </STInputBox>
 
-        <STInputBox :title="$t('Herinnering beschrijving')" error-fields="reminderText" :error-box="errors.errorBox" class="max">
+        <STInputBox :title="$t('49706c38-6fcf-4533-8692-ccf5836a27df')" error-fields="reminderText" :error-box="errors.errorBox" class="max">
             <textarea
                 v-model="reminderText"
                 class="input"
                 type="text"
-                :placeholder="$t('bv. Ga naar je kamp in het tabblad Activiteiten (of maak het eerst aan) en klik op de knop om je kampmelding in te dienen')"
+                :placeholder="$t('55770076-d3a3-48db-a49b-ba23c6a54a39')"
                 autocomplete="off"
             />
         </STInputBox>
@@ -49,7 +49,7 @@
         </p>
 
         <STInputBox title="Herinnering tonen vanaf" error-fields="reminderFrom" :error-box="errors.errorBox">
-            <DateSelection v-model="reminderFrom" :required="false" :placeholder="$t('Als eerstsvolgende deadline')" :time="{hours: 0, minutes: 0, seconds: 0}" />
+            <DateSelection v-model="reminderFrom" :required="false" :placeholder="$t('ba2b2a5a-8c8a-42c5-9ee7-78daa3b6c5ec')" :time="{hours: 0, minutes: 0, seconds: 0}" />
         </STInputBox>
     </SaveView>
 </template>

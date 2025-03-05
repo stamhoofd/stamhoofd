@@ -41,7 +41,7 @@
                         </template>
 
                         <h2 class="style-title-list">
-                            <span>{{ user.name || $t('Naamloos') }}</span>
+                            <span>{{ user.name || $t('0076d594-efee-4ec7-a00a-073a4c689a38') }}</span>
                         </h2>
                         <p class="style-description-small">
                             {{ permissionList(user) }}

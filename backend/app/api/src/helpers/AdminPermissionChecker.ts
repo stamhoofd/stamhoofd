@@ -92,7 +92,7 @@ export class AdminPermissionChecker {
     }
 
     memberNotFoundOrNoAccess(): SimpleError {
-        return this.notFoundOrNoAccess($t('Je hebt geen toegang tot dit lid of het bestaat niet'));
+        return this.notFoundOrNoAccess($t('d24814a3-aedc-4569-9ab3-f854027c4e9f'));
     }
 
     notFoundOrNoAccess(message?: string): SimpleError {

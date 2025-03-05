@@ -6,7 +6,7 @@
                 <input v-model="postalCode" class="input" type="text" placeholder="Postcode" name="postal-code" autocomplete="postal-code" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur">
             </div>
             <div>
-                <input v-model="city" class="input" type="text" placeholder="Gemeente" name="city" autocomplete="address-level2" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur"> <!-- name needs to be city for safari autocomplete -->
+                <input v-model="city" class="input" type="text" :placeholder="$t('3f4f6c6a-e2c5-4bee-83a3-77d8e55a1e60')" name="city" autocomplete="address-level2" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur"> <!-- name needs to be city for safari autocomplete -->
             </div>
         </div>
 

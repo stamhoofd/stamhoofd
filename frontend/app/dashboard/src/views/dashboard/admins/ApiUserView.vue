@@ -123,7 +123,7 @@ async function save() {
             });
         }
         else {
-            Toast.success($t('API-key {name} is aangepast', { name: user.name ?? '?' })).setHide(5000).show();
+            Toast.success($t('d2047614-32d8-436f-9b95-dff31cfe20de', { name: user.name ?? '?' })).setHide(5000).show();
             await pop({ force: true });
         }
     }
@@ -143,7 +143,7 @@ async function doDelete() {
         return false;
     }
 
-    if (!await CenteredMessage.confirm($t('Ben je zeker dat je deze API-key wilt verwijderen?'), $t('Verwijderen'))) {
+    if (!await CenteredMessage.confirm($t('7b900dda-9d43-4373-ae86-34ec7f236cca'), $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689'))) {
         return false;
     }
 
@@ -160,7 +160,7 @@ async function doDelete() {
         await pop({ force: true });
 
         deleting.value = false;
-        Toast.success($t('API-key {name} werd verwijderd', { name: props.user.name ?? '?' })).setHide(2000).show();
+        Toast.success($t('5fd1f84b-ed82-4022-80d0-49caad220c88', { name: props.user.name ?? '?' })).setHide(2000).show();
     }
     catch (e) {
         console.error(e);
@@ -174,7 +174,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'));
+    return await CenteredMessage.confirm($t('545f3db5-ae26-41dd-8771-e123bc2b583e'), $t('f0c89199-09c8-48d4-ad73-bff0ac426df8'));
 };
 
 defineExpose({

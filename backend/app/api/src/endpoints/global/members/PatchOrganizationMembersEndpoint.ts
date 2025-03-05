@@ -1027,11 +1027,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     message: 'Maximum members reached',
                     human: responsibility.maximumMembers === 1
                         ? (model.groupId
-                                ? $t('Je kan maar één lid hebben met de functie {responsibility} in deze leeftijdsgroep', { responsibility: responsibility.name })
-                                : $t('Je kan maar één lid hebben met de functie {responsibility}', { responsibility: responsibility.name }))
+                                ? $t('e3e4ba16-7923-42bc-ae23-cd729ce06869', { responsibility: responsibility.name })
+                                : $t('77e408e8-59e5-42c2-b58d-956f7c391e5c', { responsibility: responsibility.name }))
                         : (model.groupId
-                                ? $t('Je kan maximum {count} leden hebben met de functie {responsibility} in deze leeftijdsgroep', { count: responsibility.maximumMembers.toFixed(), responsibility: responsibility.name })
-                                : $t('Je kan maximum {count} leden hebben met de functie {responsibility}', { count: responsibility.maximumMembers.toFixed(), responsibility: responsibility.name })),
+                                ? $t('10c13841-9f58-4651-a9b3-a34c8ce1a505', { count: responsibility.maximumMembers.toFixed(), responsibility: responsibility.name })
+                                : $t('01ef9768-89b5-48ea-955e-b896306a9a87', { count: responsibility.maximumMembers.toFixed(), responsibility: responsibility.name })),
                 });
             }
         }
