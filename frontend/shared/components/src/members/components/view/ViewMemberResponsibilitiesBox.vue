@@ -49,7 +49,7 @@ const nationalResponsibilities = computed(() => {
 });
 
 const organizationResponsibilities = computed(() => {
-    return platform.value.config.responsibilities.filter(r => !r.organizationBased);
+    return platform.value.config.responsibilities.filter(r => r.organizationBased);
 });
 
 function getResponsibilityIndex(responsibility: MemberResponsibilityRecord) {
