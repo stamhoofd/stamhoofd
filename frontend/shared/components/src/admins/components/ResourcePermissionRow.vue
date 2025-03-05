@@ -1,7 +1,7 @@
 <template>
     <STListItem element-name="label" :selectable="true" class="left-center">
         <template #left>
-            <Checkbox v-model="selected" :disabled="locked" />
+            <Checkbox v-model="selected" :disabled="locked"/>
         </template>
         <template v-if="type === 'resource'">
             <h2 class="style-title-list">
@@ -16,7 +16,7 @@
                 {{ role.name }}
             </h2>
             <p v-if="isMe" class="style-description-small">
-                Jij zit in deze groep
+                {{ $t('7e50e068-c51f-4809-8f49-5c947bbe66b0') }}
             </p>
         </template>
 
@@ -28,7 +28,7 @@
             <div v-if="selected">
                 <button class="button text" type="button" @click.stop.prevent="choosePermissions($event)">
                     <span>{{ levelText }}</span>
-                    <span class="icon arrow-down-small" />
+                    <span class="icon arrow-down-small"/>
                 </button>
             </div>
         </template>

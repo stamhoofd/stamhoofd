@@ -2,14 +2,14 @@
     <div>
         <STList v-model="draggableCategories" :draggable="true">
             <template #item="{item: category}">
-                <RecordCategoryRow :category="category" :categories="categories" :selectable="true" :settings="settings" @patch:categories="addArrayPatch" @edit="editCategory" @add="addCategory($event)" />
+                <RecordCategoryRow :category="category" :categories="categories" :selectable="true" :settings="settings" @patch:categories="addArrayPatch" @edit="editCategory" @add="addCategory($event)"/>
             </template>
         </STList>
 
         <p>
             <button class="button text" type="button" @click="addCategory()">
-                <span class="icon add" />
-                <span>Nieuwe vragenlijst</span>
+                <span class="icon add"/>
+                <span>{{ $t('80fe32ab-10a5-49de-b71b-522b248385f8') }}</span>
             </button>
         </p>
     </div>

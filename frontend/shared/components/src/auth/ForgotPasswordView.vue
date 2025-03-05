@@ -1,16 +1,16 @@
 <template>
     <form class="st-view forgot-password-view" @submit.prevent="submit">
-        <STNavigationBar title="Wachtwoord vergeten" />
+        <STNavigationBar :title="$t(`Wachtwoord vergeten`)"/>
         <main class="center small">
-            <h1>Wachtwoord vergeten</h1>
-            <p>Vul jouw e-mailadres in, en we sturen jou een e-mail waarmee je een nieuw wachtwoord kan kiezen.</p>
+            <h1>{{ $t('c2f9f716-35f7-4f98-9795-92fbb6e7c1a5') }}</h1>
+            <p>{{ $t('1438dcdc-6e69-4679-a095-7567854fb04e') }}</p>
             
-            <STErrorsDefault :error-box="errorBox" />
-            <EmailInput v-model="email" title="E-mailadres" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :validator="validator" class="max" />
+            <STErrorsDefault :error-box="errorBox"/>
+            <EmailInput v-model="email" autocomplete="username" :validator="validator" class="max" :title="$t(`0be79160-b242-44dd-94f0-760093f7f9f2`)" :placeholder="$t(`0a65c7be-dcc1-4bf7-9c6e-560085de9052`)"/>
         
             <LoadingButton :loading="loading" class="block">
                 <button class="button primary full" type="submit">
-                    Opnieuw instellen
+                    {{ $t('3222d108-93be-4f6c-b4ca-7a6f384aa15f') }}
                 </button>
             </LoadingButton>
         </main>

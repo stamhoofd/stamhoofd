@@ -1,22 +1,18 @@
 <template>
     <div class="st-view webshop-statistics-view background">
-        <STNavigationBar />
+        <STNavigationBar/>
 
         <main>
             <h1>
-                Statistieken
+                {{ $t('a1727d44-5479-48d5-8532-bef4bbc60713') }}
             </h1>
 
-            <hr>
-
-            <div class="graph-grid">
-                <GraphView :configurations="graphConfigurations" />
+            <hr><div class="graph-grid">
+                <GraphView :configurations="graphConfigurations"/>
             </div>
 
-            <hr>
-
-            <div class="stats-grid">
-                <STInputBox title="Bestellingen">
+            <hr><div class="stats-grid">
+                <STInputBox :title="$t(`31194ed7-1f06-497b-82e8-70028b6bcd0c`)">
                     <p class="style-statistic">
                         <span>
                             {{ loading ? '-' : totalOrders }}
@@ -28,7 +24,7 @@
                 </STInputBox>
 
                 <template v-if="hasTickets">
-                    <STInputBox title="Tickets">
+                    <STInputBox :title="$t(`f3005a87-5877-435d-bc0e-5b4883e7ca11`)">
                         <p class="style-statistic">
                             {{ loading ? '-' : totalTickets }}
                         </p>
@@ -39,7 +35,7 @@
                 </template>
 
                 <template v-if="hasVouchers">
-                    <STInputBox title="Vouchers">
+                    <STInputBox :title="$t(`49156314-6db7-4b41-b6db-0885cc3413f0`)">
                         <p class="style-statistic">
                             {{ loading ? '-' : totalVouchers }}
                         </p>
@@ -51,13 +47,12 @@
             </div>
 
             <div v-for="category of totalByCategory" :key="category.name" class="container">
-                <hr>
-                <h2>{{ totalByCategory.length > 1 ? category.name : 'Per productcombinatie' }}</h2>
+                <hr><h2>{{ totalByCategory.length > 1 ? category.name : 'Per productcombinatie' }}</h2>
 
                 <STList>
                     <STListItem v-for="(info, index) in category.products" :key="index" class="right-small">
                         <h3>{{ info.name }}</h3>
-                        <p v-if="info.description" class="style-description-small pre-wrap" v-text="info.description" />
+                        <p v-if="info.description" class="style-description-small pre-wrap" v-text="info.description"/>
 
                         <template #right>
                             <p class="style-price-big">
@@ -71,9 +66,8 @@
                 </STList>
             </div>
 
-            <hr>
-            <h2>Info</h2>
-            <p>Geannuleerde bestellingen of verwijderde bestellingen worden niet meegeteld in de statistieken.</p>
+            <hr><h2>{{ $t('49b4a68a-8d36-4fd6-a768-cfd35e7ac15f') }}</h2>
+            <p>{{ $t('96c63175-a87f-4d25-a3aa-ed95098375a2') }}</p>
         </main>
     </div>
 </template>

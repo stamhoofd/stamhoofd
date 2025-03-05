@@ -6,57 +6,42 @@
                     {{ name }}
                 </div>
                 <div>
-                    <button class="button icon more" type="button" @click="showContextMenu" />
-                    <button class="button icon add" type="button" @click="addOption" />
+                    <button class="button icon more" type="button" @click="showContextMenu"/>
+                    <button class="button icon add" type="button" @click="addOption"/>
                 </div>
             </h2>
-            <p v-if="description" class="style-description pre-wrap" v-text="description" />
+            <p v-if="description" class="style-description pre-wrap" v-text="description"/>
         </template>
 
         <template v-if="level === 1">
-            <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
-                <input
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    placeholder="Naam van dit menu"
-                    autocomplete="off"
-                >
-            </STInputBox>
+            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`d32893b7-c9b0-4ea3-a311-90d29f2c0cf3`)">
+                <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`7940da81-72ce-4c31-82bd-73f46ea9a57f`)"></STInputBox>
 
-            <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox" class="max">
-                <textarea
-                    v-model="description"
-                    class="input"
-                    type="text"
-                    placeholder="Optioneel. Meer info bij keuzes."
-                    autocomplete="off"
-                    enterkeyhint="next"
-                />
+            <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`f72f5546-ed6c-4c93-9b0d-9718f0cc9626`)">
+                <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`ead484a5-94fd-4180-a96b-2afb404de8ed`)"/>
             </STInputBox>
 
             <STList>
                 <STListItem element-name="label" :selectable="true">
                     <template #left>
-                        <Checkbox v-model="multipleChoice" />
+                        <Checkbox v-model="multipleChoice"/>
                     </template>
                     <h3 class="style-title-list">
-                        Meerkeuze
+                        {{ $t('14902f38-96a6-48b1-85ea-65992b8dcd3f') }}
                     </h3>
                     <p class="style-description-small">
-                        Bij meerkeuze is het mogelijk om verschillende opties aan te duiden. In het andere geval moet er exact één keuze gemaakt worden (wil je het optioneel maken, voeg dan een optie 'Geen' toe).
+                        {{ $t("54c7df4d-a1b9-4ef4-9ccd-eabd8624c78f") }}
                     </p>
                 </STListItem>
             </STList>
 
             
-            <hr>
-            <h2 class="style-with-button">
-                <div>Keuzes</div>
+            <hr><h2 class="style-with-button">
+                <div>{{ $t('24dec8c3-16e8-4dc9-b71a-d0a4adce2c8d') }}</div>
                 <div>
                     <button class="button text only-icon-smartphone" type="button" @click="addOption">
-                        <span class="icon add" />
-                        <span>Keuze</span>
+                        <span class="icon add"/>
+                        <span>{{ $t('7eb44f10-ac07-4174-adc0-ae3ffb1e4f6e') }}</span>
                     </button>
                 </div>
             </h2>
@@ -66,8 +51,8 @@
             <template #item="{item: option, index}">
                 <STListItem :selectable="true" class="right-stack" @click="editOption(option)">
                     <template #left>
-                        <Radio v-if="!optionMenu.multipleChoice" :model-value="index === 0" :value="true" :disabled="true" />
-                        <Checkbox v-else :disabled="true" />
+                        <Radio v-if="!optionMenu.multipleChoice" :model-value="index === 0" :value="true" :disabled="true"/>
+                        <Checkbox v-else :disabled="true"/>
                     </template>
 
                     <h3 class="style-title-list">
@@ -83,18 +68,18 @@
                     </p>
 
                     <p v-if="option.stock !== null" class="style-description-small">
-                        Nog {{ pluralText(option.getRemainingStock(group), 'stuk', 'stuks') }} beschikbaar
+                        {{ $t('6878be1d-f7ca-4c4c-b6fa-de59c8028cd7') }} {{ pluralText(option.getRemainingStock(group), 'stuk', 'stuks') }} {{ $t('79828b21-b66f-4e18-bb1e-bb46ee12a8af') }}
                     </p>
 
                     <p v-if="option.maximum !== null && option.allowAmount" class="style-description-small">
-                        Maximaal {{ pluralText(option.maximum, 'stuk', 'stuks') }} per inschrijving
+                        {{ $t('9b5ab8db-e5ff-4a62-8d48-d126447432b7') }} {{ pluralText(option.maximum, 'stuk', 'stuks') }} {{ $t('35b58221-09c1-4f62-846e-4dedb505bf73') }}
                     </p>
 
                     <template #right>
-                        <StepperInput v-if="option.allowAmount" />
-                        <span v-if="option.hidden" v-tooltip="$t('aff982ed-0f1a-4838-af79-9e00cd53131b')" class="icon gray eye-off" />
-                        <span class="button icon drag gray" @click.stop @contextmenu.stop />
-                        <span class="icon arrow-right-small gray" />
+                        <StepperInput v-if="option.allowAmount"/>
+                        <span v-if="option.hidden" v-tooltip="$t('aff982ed-0f1a-4838-af79-9e00cd53131b')" class="icon gray eye-off"/>
+                        <span class="button icon drag gray" @click.stop @contextmenu.stop/>
+                        <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
             </template>

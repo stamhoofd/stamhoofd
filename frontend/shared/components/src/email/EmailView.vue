@@ -1,28 +1,24 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
-        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" class="mail-view" :loading="sending" title="Nieuwe e-mail" save-text="Versturen" :replacements="replacements" @save="send">
+        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" class="mail-view" :loading="sending" save-text="Versturen" :replacements="replacements" :title="$t(`Nieuwe e-mail`)" @save="send">
             <h1 class="style-navigation-title">
-                Nieuwe e-mail
+                {{ $t('ca97c94e-ba26-436a-8950-ea77e9cf9666') }}
             </h1>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <!-- Buttons -->
             <template #buttons>
                 <label v-tooltip="'Bijlage toevoegen'" class="button icon attachment">
-                    <input type="file" multiple="true" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile">
-                    <span v-if="$isMobile && files.length > 0" class="style-bubble">{{ files.length }}</span>
+                    <input type="file" multiple="true" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile"><span v-if="$isMobile && files.length > 0" class="style-bubble">{{ files.length }}</span>
                 </label>
 
-                <hr v-if="canOpenTemplates">
-                <button v-if="canOpenTemplates" v-tooltip="'Sjablonen'" class="button icon email-template" type="button" @click="openTemplates" />
+                <hr v-if="canOpenTemplates"><button v-if="canOpenTemplates" v-tooltip="'Sjablonen'" class="button icon email-template" type="button" @click="openTemplates" />
             </template>
 
-            <!-- List -->
             <template #list>
                 <STListItem class="no-padding right-stack">
                     <div class="list-input-box">
-                        <span>Aan:</span>
+                        <span>{{ $t('5c8b3991-b5a5-4af4-ae0f-40c578d9ec57') }}</span>
 
                         <div v-if="onlyOption" class="list-input">
                             {{ toDescription }}
@@ -39,13 +35,13 @@
                 </STListItem>
                 <STListItem class="no-padding" element-name="label">
                     <div class="list-input-box">
-                        <span>Onderwerp:</span>
-                        <input id="mail-subject" v-model="subject" class="list-input" type="text" placeholder="Typ hier het onderwerp van je e-mail">
+                        <span>{{ $t('efc766be-14ad-4d3c-8650-e3c47116f32d') }}</span>
+                        <input id="mail-subject" v-model="subject" class="list-input" type="text" :placeholder="$t(`f1e8adc7-c865-4fcf-98d7-a52937ab7872`)">
                     </div>
                 </STListItem>
                 <STListItem v-if="emails.length > 0" class="no-padding" element-name="label">
                     <div class="list-input-box">
-                        <span>Van:</span>
+                        <span>{{ $t('45458c9f-8d70-480d-9e2c-df5d56da38ef') }}</span>
 
                         <div class="input-icon-container right icon arrow-down-small gray">
                             <select v-model="selectedEmailAddress" class="list-input">
@@ -64,9 +60,7 @@
                 </STListItem>
             </template>
 
-            <!-- Editor footer -->
             <template #footer>
-                <!-- E-mail attachments -->
                 <STList v-if="patchedEmail.attachments.length > 0">
                     <STListItem v-for="attachment in patchedEmail.attachments" :key="attachment.id" class="file-list-item">
                         <template #left>
@@ -84,17 +78,16 @@
                 </STList>
             </template>
 
-            <!-- Warnings and errors -->
             <template v-if="emails.length === 0">
                 <p v-if="auth.hasFullAccess()" class="warning-box selectable with-button" @click="manageEmails">
-                    Stel eerst jouw e-mailadressen in
+                    {{ $t('d0e8dcee-f84d-4071-beb9-0a5e1f9d78d3') }}
                     <span class="button text inherit-color">
                         <span class="icon settings" />
-                        <span>Wijzigen</span>
+                        <span>{{ $t('ea863dfa-41ce-41a6-b560-b4ef1e930fce') }}</span>
                     </span>
                 </p>
                 <p v-else class="warning-box">
-                    Een hoofdbeheerder van jouw vereniging moet eerst e-mailadressen instellen voor je een e-mail kan versturen.
+                    {{ $t('26ed2d0c-c348-4cf4-a778-378566f2330f') }}
                 </p>
             </template>
         </EditorView>
@@ -109,6 +102,7 @@ import { Email, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipi
 import { Formatter, throttle } from '@stamhoofd/utility';
 import { Ref, computed, nextTick, onMounted, ref, watch } from 'vue';
 import { EditEmailTemplatesView } from '.';
+import { LoadingViewTransition } from '../containers';
 import EditorView from '../editor/EditorView.vue';
 import { EmailStyler } from '../editor/EmailStyler';
 import { ErrorBox } from '../errors/ErrorBox';
@@ -118,7 +112,6 @@ import { CenteredMessage } from '../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import EmailSettingsView from './EmailSettingsView.vue';
-import { LoadingViewTransition } from '../containers';
 
 export type RecipientChooseOneOption = {
     type: 'ChooseOne';

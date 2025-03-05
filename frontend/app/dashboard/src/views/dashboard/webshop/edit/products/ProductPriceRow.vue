@@ -4,13 +4,13 @@
             {{ productPrice.name || 'Naamloos' }}
         </h3>
         <p v-if="productPrice.hidden" class="style-description-small">
-            Verborgen
+            {{ $t('4fe2a3a7-c314-4566-a47a-4221c79f790d') }}
         </p>
         <p v-if="productPrice.isSoldOut" class="style-description-small">
-            Uitverkocht
+            {{ $t('4c249834-df40-4c1f-9c79-c56864100c36') }}
         </p>
         <p v-else-if="productPrice.stock" class="style-description-small">
-            Nog {{ pluralText(productPrice.remainingStock ?? 0, 'stuk', 'stuks') }} beschikbaar
+            {{ $t('6878be1d-f7ca-4c4c-b6fa-de59c8028cd7') }} {{ pluralText(productPrice.remainingStock ?? 0, 'stuk', 'stuks') }} {{ $t('79828b21-b66f-4e18-bb1e-bb46ee12a8af') }}
         </p>
 
         <template #right>
@@ -18,8 +18,8 @@
                       {{ formatPrice(productPrice.discountPrice) }} /
                   </template>
                 {{ formatPrice(productPrice.price) }}</span>
-            <span class="button icon drag gray" @click.stop @contextmenu.stop />
-            <span class="icon arrow-right-small gray" />
+            <span class="button icon drag gray" @click.stop @contextmenu.stop/>
+            <span class="icon arrow-right-small gray"/>
         </template>
     </STListItem>
 </template>

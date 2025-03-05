@@ -1,6 +1,6 @@
 <template>
     <form class="st-view choose-seats-view shade" @submit.prevent="save">
-        <STNavigationBar :title="title" />
+        <STNavigationBar :title="title"/>
         <main v-if="seatingPlan">
             <h1>
                 {{ title }}
@@ -13,32 +13,22 @@
             </p>
             
 
-            <STErrorsDefault :error-box="errorBox" />
+            <STErrorsDefault :error-box="errorBox"/>
 
 
             <div v-for="(seatingPlanSection, index) of seatingPlan.sections" :key="seatingPlanSection.id" class="container">
-                <hr v-if="index > 0">
-                <h2 v-if="seatingPlan.sections.length > 1 && seatingPlanSection.name">
+                <hr v-if="index > 0"><h2 v-if="seatingPlan.sections.length > 1 && seatingPlanSection.name">
                     {{ seatingPlanSection.name }}
                 </h2>
 
-                <SeatSelectionBox 
-                    :seating-plan="seatingPlan"
-                    :seating-plan-section="seatingPlanSection"
-                    :seats="cartItem.seats"
-                    :amount="cartItem.amount"
-                    :reserved-seats="reservedSeats"
-                    :highlight-seats="highlighedSeats"
-                    :set-seats="setSeats"
-                    :admin="admin"
-                />
+                <SeatSelectionBox :seating-plan="seatingPlan" :seating-plan-section="seatingPlanSection" :seats="cartItem.seats" :amount="cartItem.amount" :reserved-seats="reservedSeats" :highlight-seats="highlighedSeats" :set-seats="setSeats" :admin="admin"/>
             </div>
         </main>
 
         <STToolbar>
             <template #right><button class="button primary" type="submit" :disabled="selectedAmount !== amount">
-                <span>Bevestigen</span>
-                <span class="icon arrow-right" />
+                <span>{{ $t('da58ee7b-f99e-448b-9acc-37f7df4f9f26') }}</span>
+                <span class="icon arrow-right"/>
             </button></template>
         </STToolbar>
     </form>

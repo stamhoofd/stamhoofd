@@ -1,46 +1,46 @@
 <template>
     <div class="st-view background category-view">
-        <STNavigationBar :title="title" />
+        <STNavigationBar :title="title"/>
 
         <main>
             <h1 class="style-navigation-title with-icons" :class="{button: !!parentCategories.length}" @click="openCategorySelector">
                 {{ title }}
-                <span v-if="!isPublic" v-tooltip="'Deze categorie is enkel zichtbaar voor beheerders (leden die geen beheerder zijn kunnen zichtzelf niet inschrijven). Je kan dit aanpassen bij de instellingen van deze categorie.'" class="icon lock small" />
-                <span v-if="parentCategories.length" class="button icon arrow-swap" />
+                <span v-if="!isPublic" v-tooltip="'Deze categorie is enkel zichtbaar voor beheerders (leden die geen beheerder zijn kunnen zichtzelf niet inschrijven). Je kan dit aanpassen bij de instellingen van deze categorie.'" class="icon lock small"/>
+                <span v-if="parentCategories.length" class="button icon arrow-swap"/>
             </h1>
 
-            <STErrorsDefault :error-box="errorBox" />
+            <STErrorsDefault :error-box="errorBox"/>
 
             <template v-if="categories.length > 0">
                 <STList>
                     <STListItem v-if="categories.length > 1" :selectable="true" class="left-center" @click="openAll(true)">
                         <template #left>
-                            <span class="icon group" />
+                            <span class="icon group"/>
                         </template>
 
                         <h2 class="style-title-list bolder">
-                            Alle leden
+                            {{ $t('c5588e4c-4842-4b06-ad95-d784a13c47f9') }}
                         </h2>
                         <p class="style-description-small">
-                            Bekijk alle leden samen
+                            {{ $t('43bf8ceb-242d-4da7-a25e-9a870ceaba75') }}
                         </p>
                         <template #right>
                             <span v-if="getMemberCount() !== null" class="style-description-small">{{ getMemberCount() }}</span>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
 
                     <STListItem v-for="category in categories" :key="category.id" :selectable="true" @click="openCategory(category)">
                         <template #left>
-                            <span v-if="category.categories.length" class="icon category" />
-                            <span v-else class="icon category" />
+                            <span v-if="category.categories.length" class="icon category"/>
+                            <span v-else class="icon category"/>
                         </template>
 
                         {{ category.settings.name }}
 
                         <template #right>
                             <span v-if="category.getMemberCount() !== null" class="style-description-small">{{ category.getMemberCount() }}</span>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
                 </STList>
@@ -50,51 +50,51 @@
                 <STList>
                     <STListItem v-if="groups.length > 1" :selectable="true" class="left-center" @click="openAll(true)">
                         <template #left>
-                            <span class="icon group" />
+                            <span class="icon group"/>
                         </template>
 
                         <h2 class="style-title-list bolder">
-                            Alle leden in deze categorie
+                            {{ $t('dccd83e3-4afd-4f50-bdf1-df710ebf527a') }}
                         </h2>
                         <template #right>
                             <span v-if="getMemberCount() !== null" class="style-description-small">{{ getMemberCount() }}</span>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
 
                     <STListItem v-for="group in groups" :key="group.id" :selectable="true" @click="openGroup(group)">
                         <template #left>
-                            <GroupAvatar :group="group" />
+                            <GroupAvatar :group="group"/>
                         </template>
                         <h3 class="style-title-list">
                             {{ group.settings.name }}
                         </h3>
                         <template #right>
                             <span v-if="group.getMemberCount() !== null" class="style-description-small">{{ group.getMemberCount() }}</span>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
                 </STList>
 
                 <p v-if="canCreate" class="style-button-bar">
                     <button class="button text" type="button" @click="createGroup">
-                        <span class="icon add" />
-                        <span>Inschrijvingsgroep</span>
+                        <span class="icon add"/>
+                        <span>{{ $t('f340d193-6f45-49e0-ab12-7ef3d6f91baa') }}</span>
                     </button>
                 </p>
             </template>
 
             <p v-if="categories.length === 0 && groups.length === 0 && canCreate" class="info-box">
-                Deze inschrijvingscategorie is leeg, maak zelf inschrijvingsgroepen aan waarin leden kunnen inschrijven.
+                {{ $t('f0b46a8b-bb28-4e37-b451-202a312a166c') }}
             </p>
             <p v-else-if="categories.length === 0 && groups.length === 0" class="info-box">
-                Deze inschrijvingscategorie is leeg. Vraag een hoofdbeheerder om groepen aan te maken.
+                {{ $t('699258ac-8361-4882-92c6-16f2765d1ee2') }}
             </p>
 
             <p v-if="categories.length === 0 && groups.length === 0 && canCreate">
                 <button class="button text" type="button" @click="createGroup">
-                    <span class="icon add" />
-                    <span>Nieuwe groep</span>
+                    <span class="icon add"/>
+                    <span>{{ $t('e577b286-44a4-4e64-8375-a0bc90cc5c5a') }}</span>
                 </button>
             </p>
         </main>

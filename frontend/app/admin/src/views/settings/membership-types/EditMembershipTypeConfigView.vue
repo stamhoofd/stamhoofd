@@ -1,80 +1,50 @@
 <template>
-    <SaveView
-        :title="title" :loading="saving" :disabled="!hasChanges && !isNew" @save="save"
-        v-on="!isNew && deleteHandler ? {delete: doDelete} : {}"
-    >
+    <SaveView :title="title" :loading="saving" :disabled="!hasChanges && !isNew" @save="save" v-on="!isNew && deleteHandler ? {delete: doDelete} : {}">
         <h1>
             {{ title }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <div class="split-inputs">
             <STInputBox :title="$t('a656bc79-940d-4cfd-a7f8-4700cd95a4f3')" error-fields="startDate" :error-box="errors.errorBox">
-                <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" />
+                <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}"/>
             </STInputBox>
 
             <STInputBox :title="$t('7955066a-93c8-4872-8ac7-e7ccdc7f61f9')" error-fields="endDate" :error-box="errors.errorBox">
-                <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" />
+                <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}"/>
             </STInputBox>
         </div>
         <p v-if="type.behaviour === PlatformMembershipTypeBehaviour.Days" class="style-description-small">
-            Het is enkel mogelijk om de aansluiting binnen de start- en einddata aan te vragen.
+            {{ $t('372ff366-9509-47af-b478-35f0af9c2d92') }}
         </p>
 
-        <STInputBox
-            v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period"
-            :title="$t('b0215bc3-b94d-47de-99d2-4dcb9f59b299')" error-fields="expireDate"
-            :error-box="errors.errorBox"
-        >
-            <DateSelection
-                v-model="expireDate" :required="false"
-                :placeholder="$t('f19516b2-0c37-4dce-86f4-46690ec3dfc9')"
-                :time="{hours: 23, minutes: 59, seconds: 59}"
-            />
+        <STInputBox v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period" :title="$t('b0215bc3-b94d-47de-99d2-4dcb9f59b299')" error-fields="expireDate" :error-box="errors.errorBox">
+            <DateSelection v-model="expireDate" :required="false" :placeholder="$t('f19516b2-0c37-4dce-86f4-46690ec3dfc9')" :time="{hours: 23, minutes: 59, seconds: 59}"/>
         </STInputBox>
         <p v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period" class="style-description-small">
             {{ $t('e866488b-bc8d-481f-900b-9cf1779f44b8') }}
         </p>
 
-        <PlatformMembershipTypePriceConfigEditBox
-            :config="patched"
-            v-for="(priceConfig, index) of prices"
-            :key="priceConfig.id"
-            :has-multiple-prices="prices.length > 1"
-            :show-start-date="index > 0"
-            :show-price-per-day="$showPricePerDay"
-            :error-box="errors.errorBox"
-            :validator="errors.validator"
-            :price-config="priceConfig"
-            @patch:price-config="patchPrice(priceConfig, $event)"
-            @delete="deletePrice(priceConfig)"
-        />
+        <PlatformMembershipTypePriceConfigEditBox :config="patched" v-for="(priceConfig, index) of prices" :key="priceConfig.id" :has-multiple-prices="prices.length > 1" :show-start-date="index > 0" :show-price-per-day="$showPricePerDay" :error-box="errors.errorBox" :validator="errors.validator" :price-config="priceConfig" @patch:price-config="patchPrice(priceConfig, $event)" @delete="deletePrice(priceConfig)"/>
 
-        <hr>
-        <p>
+        <hr><p>
             <button class="button text" type="button" @click="addPrice">
-                <span class="icon add" />
+                <span class="icon add"/>
                 <span>{{ $t('285539ab-4119-4dcd-b0fe-87952f71d90d') }}</span>
             </button>
         </p>
 
-        <hr>
-
-        <STInputBox title="Gratis per lokale groep" error-fields="price" :error-box="errors.errorBox">
-            <NumberInput
-                v-model="amountFree" placeholder="Geen"
-                :suffix="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dagen' : 'leden'"
-                :suffix-singular="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dag' : 'lid'"
-            />
+        <hr><STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`eb6ebd1b-5075-480a-8bb6-b6a6aabd0486`)">
+            <NumberInput v-model="amountFree" :suffix="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dagen' : 'leden'" :suffix-singular="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dag' : 'lid'" :placeholder="$t(`039ea891-15aa-42d4-8513-7f29d0743514`)"/>
         </STInputBox>
 
         <template v-if="$feature('member-trials')">
-            <STInputBox :title="$t('Aantal dagen op proef')+ '*'" error-fields="trialDays" :error-box="errors.errorBox">
-                <NumberInput v-model="trialDays" suffix="dagen" suffix-singular="dag" :min="0" />
+            <STInputBox :title="$t('558743b4-4049-4f4c-bf82-4f2782309a08')+ $t(`3b44090b-05d4-463b-975e-14f7cf8968a2`)" error-fields="trialDays" :error-box="errors.errorBox">
+                <NumberInput v-model="trialDays" suffix="dagen" suffix-singular="dag" :min="0"/>
             </STInputBox>
             <p class="style-description-small">
-                * Enkel voor nieuwe leden
+                {{ $t('aa05271d-aa08-49ed-90b6-b9cfc0330ad3') }}
             </p>
         </template>
     </SaveView>

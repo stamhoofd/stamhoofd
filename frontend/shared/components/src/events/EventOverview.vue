@@ -1,10 +1,10 @@
 <template>
     <ExternalOrganizationContainer v-slot="{externalOrganization: eventOrganization}" :organization-id="event.organizationId" @update="setOrganization">
         <div class="st-view event-overview">
-            <STNavigationBar :title="title" />
+            <STNavigationBar :title="title"/>
 
             <main class="center">
-                <ImageComponent v-if="event.meta.coverPhoto" :image="event.meta.coverPhoto" :auto-height="true" class="style-cover-photo" />
+                <ImageComponent v-if="event.meta.coverPhoto" :image="event.meta.coverPhoto" :auto-height="true" class="style-cover-photo"/>
 
                 <p class="style-title-prefix">
                     {{ levelPrefix }}
@@ -14,121 +14,114 @@
                 </h1>
 
                 <template v-if="event.meta.description.html">
-                    <div class="description style-wysiwyg gray large" v-html="event.meta.description.html" />
+                    <div class="description style-wysiwyg gray large" v-html="event.meta.description.html"/>
                 </template>
 
                 <EventInfoTable :event="event">
                     <template v-if="event.group && (!organization || event.group.organizationId === organization.id || event.group.settings.allowRegistrationsByOrganization)">
                         <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.Registrations)">
                             <template #left>
-                                <span class="icon group" />
+                                <span class="icon group"/>
                             </template>
 
                             <h2 class="style-title-list">
-                                Ingeschreven leden
+                                {{ $t('c252fbf3-d038-4cee-a1b3-9c84a54644fd') }}
                             </h2>
                             <p class="style-description">
-                                Bekijk, beheer, exporteer of e-mail ingeschreven leden.
+                                {{ $t('20da7617-2d90-4e9f-841d-3151ef0e7f14') }}
                             </p>
                             <template #right>
                                 <span v-if="event.group.getMemberCount() !== null" class="style-description-small">{{ formatInteger(event.group.getMemberCount()!) }}</span>
-                                <span class="icon arrow-right-small gray" />
+                                <span class="icon arrow-right-small gray"/>
                             </template>
                         </STListItem>
 
                         <STListItem v-if="event.group.waitingList && (!organization || event.group.organizationId === organization.id || event.group.waitingList.settings.allowRegistrationsByOrganization)" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.WaitingList)">
                             <template #left>
-                                <span class="icon clock" />
+                                <span class="icon clock"/>
                             </template>
 
                             <h2 class="style-title-list">
                                 {{ event.group.waitingList.settings.name }}
                             </h2>
                             <p class="style-description">
-                                Bekijk leden op de wachtlijst
+                                {{ $t('70518913-efd7-4546-a5f7-569712da6888') }}
                             </p>
                             <template #right>
                                 <span v-if="event.group.waitingList.getMemberCount() !== null" class="style-description-small">{{ formatInteger(event.group.waitingList.getMemberCount()!) }}</span>
-                                <span class="icon arrow-right-small gray" />
+                                <span class="icon arrow-right-small gray"/>
                             </template>
                         </STListItem>
                     </template>
                 </EventInfoTable>
 
                 <div v-if="canWriteEvent" class="container">
-                    <hr>
-                    <h2>
-                        Instellingen
+                    <hr><h2>
+                        {{ $t('a370eff9-c1c1-450c-8bdb-dcee89bd2f70') }}
                     </h2>
 
                     <STList class="illustration-list">
                         <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Edit)">
                             <template #left>
-                                <img src="@stamhoofd/assets/images/illustrations/flag.svg">
-                            </template>
+                                <img src="@stamhoofd/assets/images/illustrations/flag.svg"></template>
                             <h2 class="style-title-list">
-                                Algemeen
+                                {{ $t('f8ce21aa-06de-4373-874c-ddad1629cad8') }}
                             </h2>
                             <p class="style-description">
-                                Wijzig de naam, beschrijving, datum en beschikbaarheid.
+                                {{ $t('76272d65-bf87-4d72-89f7-5a0a42eb92f6') }}
                             </p>
                             <template #right>
-                                <span class="icon arrow-right-small gray" />
+                                <span class="icon arrow-right-small gray"/>
                             </template>
                         </STListItem>
 
                         <STListItem v-if="event.group" :selectable="true" class="left-center" @click="$navigate(Routes.EditGroup)">
                             <template #left>
-                                <img src="@stamhoofd/assets/images/illustrations/list.svg">
-                            </template>
+                                <img src="@stamhoofd/assets/images/illustrations/list.svg"></template>
                             <h2 class="style-title-list">
-                                Inschrijvingsinstellingen
+                                {{ $t('bfacf7f3-1216-4efb-abd0-8a681c9e9912') }}
                             </h2>
                             <p class="style-description">
-                                Wijzig hoe leden kunnen inschrijven, de tarieven en de verzamelde gegevens.
+                                {{ $t('b169f5af-86c5-472a-88ef-e4f4d956610d') }}
                             </p>
                             <template #right>
-                                <span class="icon arrow-right-small gray" />
+                                <span class="icon arrow-right-small gray"/>
                             </template>
                         </STListItem>
 
                         <STListItem v-if="event.group" :selectable="true" class="left-center" @click="$navigate(Routes.EditEmails)">
                             <template #left>
-                                <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
-                            </template>
+                                <img src="@stamhoofd/assets/images/illustrations/email-template.svg"></template>
                             <h2 class="style-title-list">
-                                E-mailsjablonen
+                                {{ $t('e4e79acd-2538-406e-927c-e18c5383a493') }}
                             </h2>
                             <p class="style-description">
-                                Wijzig de inhoud van automatische e-mails naar leden die zijn of worden ingeschreven voor deze activiteit.
+                                {{ $t('429cb238-7f3f-4cd9-b4cf-345f6a0e938f') }}
                             </p>
                             <template #right>
-                                <span class="icon arrow-right-small gray" />
+                                <span class="icon arrow-right-small gray"/>
                             </template>
                         </STListItem>
 
-                        <EventNotificationRow v-for="type of event.eventNotificationTypes" v-if="eventOrganization" :key="type.id" class="container" :type="type" :event="event" :organization="eventOrganization" />
+                        <EventNotificationRow v-for="type of event.eventNotificationTypes" v-if="eventOrganization" :key="type.id" class="container" :type="type" :event="event" :organization="eventOrganization"/>
                     </STList>
                 </div>
-                <hr>
-                <h2>Link kopiëren</h2>
+                <hr><h2>{{ $t('3d843783-9cb5-4ae9-818a-40e845c8bf67') }}</h2>
                 <p>{{ $t("40b31f32-5a02-488d-beb3-d987ea5c9315") }}</p>
 
                 <div class="input-with-buttons">
                     <div>
-                        <input class="input" :value="link" readonly>
-                    </div>
+                        <input class="input" :value="link" readonly></div>
                     <div>
                         <button v-copyable="link" type="button" class="button text">
-                            <span class="icon copy" />
-                            <span class="hide-small">Kopiëren</span>
+                            <span class="icon copy"/>
+                            <span class="hide-small">{{ $t('32f946c9-f58e-4a8b-9772-d8897ec186ac') }}</span>
                         </button>
                     </div>
                 </div>
 
                 <template v-if="event.group && (!organization || event.organizationId === organization.id || (event.group.settings.allowRegistrationsByOrganization && !event.group.closed))">
-                    <hr>
-                    <h2>Handmatig leden inschrijven</h2>
+                    <hr><h2>{{ $t('db57d5a7-43e6-45db-8735-ec9a55104562') }}</h2>
 
                     <p v-if="organization && event.organizationId === organization.id">
                         {{ $t('3f4666f9-59b5-4a24-b1a7-9f820275c042') }}
@@ -142,8 +135,8 @@
 
                     <p class="style-button-bar">
                         <button class="button primary" type="button" @click="addMembers">
-                            <span class="icon add" />
-                            <span>Leden inschrijven</span>
+                            <span class="icon add"/>
+                            <span>{{ $t('884874cc-4375-49e8-a5d5-51c0d615d18f') }}</span>
                         </button>
                     </p>
                 </template>

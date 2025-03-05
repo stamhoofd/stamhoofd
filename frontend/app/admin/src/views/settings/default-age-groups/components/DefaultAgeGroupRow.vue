@@ -9,20 +9,20 @@
         </p>
 
         <p v-if="group.minAge && group.maxAge" class="style-description">
-            {{ group.minAge }} - {{ group.maxAge }} jaar
+            {{ group.minAge }} - {{ group.maxAge }} {{ $t('713d01b3-ff96-4f72-a393-562b95044880') }}
         </p>
 
         <p v-if="!group.defaultMembershipTypeId" class="style-description">
-            Geen automatische aansluiting
+            {{ $t('b05c255c-8530-4aa4-b2d2-b3aed7256e17') }}
         </p>
 
         <p v-if="group.minimumRequiredMembers" class="style-description">
-            Minimum {{ Formatter.pluralText(group.minimumRequiredMembers, 'lid', 'leden') }}
+            {{ $t('6805286d-d7bb-4a26-8b36-26ec76b8ad3c') }} {{ Formatter.pluralText(group.minimumRequiredMembers, 'lid', 'leden') }}
         </p>
 
         <template #right>
-            <span class="button icon drag gray" @click.stop @contextmenu.stop />
-            <span class="icon arrow-right-small gray" />
+            <span class="button icon drag gray" @click.stop @contextmenu.stop/>
+            <span class="icon arrow-right-small gray"/>
         </template>
     </STListItem>
 </template>

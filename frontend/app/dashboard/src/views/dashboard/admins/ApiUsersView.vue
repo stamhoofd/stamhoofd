@@ -1,43 +1,41 @@
 <template>
     <LoadingViewTransition>
         <div v-if="!loading" class="st-view background">
-            <STNavigationBar title="Beheerders">
+            <STNavigationBar :title="$t(`efd3248e-bb26-4d50-8dd9-35bac8f44656`)">
                 <template #right>
-                    <button class="button navigation icon add" aria-label="Nieuwe beheerder" type="button" @click="createUser" />
+                    <button class="button navigation icon add" aria-label="Nieuwe beheerder" type="button" @click="createUser"/>
                 </template>
             </STNavigationBar>
 
             <main>
-                <h1>API-keys</h1>
+                <h1>{{ $t('b97d8955-5ce5-435f-ba7d-f3899afb953f') }}</h1>
                 <p>{{ $t('4d995169-f792-40f5-addf-60d8aed00362') }}</p>
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="createUser">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/laptop-add.svg">
-                        </template>
+                            <img src="@stamhoofd/assets/images/illustrations/laptop-add.svg"></template>
                         <h2 class="style-title-list">
-                            Nieuwe API-key
+                            {{ $t('6807ac16-2f7f-4738-831f-ead40eb9b704') }}
                         </h2>
                         <p class="style-description">
-                            Maak een nieuwe key aan.
+                            {{ $t('e92947ee-19a0-44d6-88a0-6acf384ba83e') }}
                         </p>
                         <template #right>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
                 </STList>
 
-                <hr>
-                <h2>Alle API-keys</h2>
+                <hr><h2>{{ $t('bf0ea1d3-ad5e-4a6b-af19-91fd4850c08c') }}</h2>
 
                 <p v-if="apiUsers.length === 0" class="info-box">
-                    Nog geen API-keys aangemaakt
+                    {{ $t('a77057db-2981-47ad-8403-ca294b0cf44c') }}
                 </p>
                 <STList v-else>
                     <STListItem v-for="user in apiUsers" :key="user.id" :selectable="true" class="right-stack" @click="editUser(user)">
                         <template #left>
-                            <span class="icon key" />
+                            <span class="icon key"/>
                         </template>
 
                         <h2 class="style-title-list">
@@ -47,14 +45,14 @@
                             {{ permissionList(user) }}
                         </p>
                         <p class="style-description-small">
-                            Aangemaakt op {{ formatDate(user.createdAt) }}
+                            {{ $t('25981b4f-4483-47f9-8c3a-ac5e7bdc1a69') }} {{ formatDate(user.createdAt) }}
                         </p>
                         <p class="style-description-small">
-                            Geldig tot {{ formatDate(user.expiresAt) }}
+                            {{ $t('cce09c3a-eaea-4183-89db-7e519c13d2f8') }} {{ formatDate(user.expiresAt) }}
                         </p>
 
                         <template #right>
-                            <span><span class="icon gray edit" /></span>
+                            <span><span class="icon gray edit"/></span>
                         </template>
                     </STListItem>
                 </STList>

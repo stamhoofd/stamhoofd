@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="title" />
+        <STNavigationBar :title="title"/>
 
         <main class="center">
             <h1>{{ title }}</h1>
@@ -8,7 +8,7 @@
             <STList class="illustration-list">
                 <STListItem v-for="member in members" :key="member.member.id" class="right-stack" :selectable="true" @click.stop="selectMember(member)">
                     <template #left>
-                        <MemberIcon :member="member" />
+                        <MemberIcon :member="member"/>
                     </template>
 
                     <h2 class="style-title-list">
@@ -19,22 +19,22 @@
                     </p>
 
                     <template #right>
-                        <span v-if="user && member.id === user.memberId" v-color="member" class="style-tag">Dit ben jij</span>
-                        <span class="icon gray arrow-right-small" />
+                        <span v-if="user && member.id === user.memberId" v-color="member" class="style-tag">{{ $t('31841592-24ec-45c9-a720-4f86b9755edb') }}</span>
+                        <span class="icon gray arrow-right-small"/>
                     </template>
                 </STListItem>
 
                 <STListItem v-if="isAcceptingNewMembers" class="right-stack" :selectable="true" @click="addNewMember">
                     <template #left>
-                        <span class="icon add" />
+                        <span class="icon add"/>
                     </template>
 
                     <h2 class="style-title-list">
-                        Nieuw lid toevoegen
+                        {{ $t('a021eccf-1618-43a4-aede-97029a08b61b') }}
                     </h2>
 
                     <template #right>
-                        <span class="icon arrow-right-small gray" />
+                        <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
             </STList>

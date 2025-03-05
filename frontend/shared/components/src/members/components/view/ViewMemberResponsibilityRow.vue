@@ -1,7 +1,7 @@
 <template>
     <STListItem v-color="responsibilityOrganization ? responsibilityOrganization.meta.color : null" class="hover-box right-stack">
         <template #left>
-            <ResponsibilityIcon v-if="resp" :responsibility="resp" :group="group" :organization="responsibilityOrganization" />
+            <ResponsibilityIcon v-if="resp" :responsibility="resp" :group="group" :organization="responsibilityOrganization"/>
         </template>
 
         <p v-if="responsibilityOrganization && (app !== 'dashboard' || !organization || responsibilityOrganization.id !== organization.id)" class="style-title-prefix-list">
@@ -13,15 +13,15 @@
         </h3>
 
         <p v-if="responsibility.startDate" class="style-description-small">
-            Sinds {{ formatDate(responsibility.startDate, true) }}
+            {{ $t('f516b131-7286-48c4-b9fb-d53ce30acbc3') }} {{ formatDate(responsibility.startDate, true) }}
         </p>
 
         <p v-if="responsibility.endDate" class="style-description-small">
-            Loopt automatisch af op {{ formatDateTime(responsibility.endDate) }}
+            {{ $t('c99bfd79-ddf7-4dca-ae7a-1c3223f5db80') }} {{ formatDateTime(responsibility.endDate) }}
         </p>
 
         <template #right>
-            <span v-if="!hasRegistration" v-tooltip="$t('71b37c1d-7a2d-41c9-a6c0-fcd9c69a2492', {name: member.patchedMember.firstName})" class="icon warning yellow" />
+            <span v-if="!hasRegistration" v-tooltip="$t('71b37c1d-7a2d-41c9-a6c0-fcd9c69a2492', {name: member.patchedMember.firstName})" class="icon warning yellow"/>
         </template>
     </STListItem>
 </template>

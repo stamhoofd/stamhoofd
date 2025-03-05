@@ -1,19 +1,19 @@
 <template>
-    <SearchOrganizationView v-if="!selectedOrganization" :member="member" :select-organization="addOrganization" :title="searchOrganizationTitle" />
+    <SearchOrganizationView v-if="!selectedOrganization" :member="member" :select-organization="addOrganization" :title="searchOrganizationTitle"/>
     <div v-else class="st-view">
-        <STNavigationBar :title="member.patchedMember.name" />
+        <STNavigationBar :title="member.patchedMember.name"/>
 
         <main class="center">
-            <h1>Waarvoor wil je {{ member.patchedMember.firstName }} inschrijven?</h1>
+            <h1>{{ $t('5738cac2-e91e-4b06-bd23-c9d6fc14115b') }} {{ member.patchedMember.firstName }} {{ $t('5bd75f4c-db3f-4f1b-8ec8-9d07ee7c4823') }}</h1>
 
             <ScrollableSegmentedControl v-if="allowChangingOrganization" v-model="selectedOrganization" :items="items" :labels="labels">
                 <template #right>
-                    <button v-tooltip="'Bij een andere vereniging inschrijven'" class="button icon gray add" type="button" @click="searchOrganization" />
+                    <button v-tooltip="'Bij een andere vereniging inschrijven'" class="button icon gray add" type="button" @click="searchOrganization"/>
                 </template>
             </ScrollableSegmentedControl>
 
             <p v-if="differentOrganization" class="info-box icon basket">
-                Reken eerst jouw huidige winkelmandje af. Je kan de huidige inhoud van jouw winkelmandje niet samen afrekenen met een inschrijving bij {{ selectedOrganization.name }}.
+                {{ $t('4e86dc03-04f0-4616-af29-949c72b611eb') }} {{ selectedOrganization.name }}.
             </p>
 
             <template v-else>
@@ -26,18 +26,17 @@
             </template>
 
             <div v-for="(category, index) of tree.categories" :key="category.id" class="container">
-                <hr v-if="index > 0 || !allowChangingOrganization">
-                <h2 class="style-with-button">
+                <hr v-if="index > 0 || !allowChangingOrganization"><h2 class="style-with-button">
                     <div>
                         {{ category.settings.name }}
-                        <span v-if="!category.settings.public" v-tooltip="'Deze categorie is niet zichtbaar voor gewone leden'" class="icon lock gray" />
+                        <span v-if="!category.settings.public" v-tooltip="'Deze categorie is niet zichtbaar voor gewone leden'" class="icon lock gray"/>
                     </div>
                     <div>
                         <span class="title-suffix">{{ selectedOrganization.period.period.nameShort }}</span>
                     </div>
                 </h2>
                 <STList class="illustration-list">
-                    <RegisterMemberGroupRow v-for="group in category.groups" :key="group.id" :group="group" :member="member" :organization="selectedOrganization" @click="openGroup(group)" />
+                    <RegisterMemberGroupRow v-for="group in category.groups" :key="group.id" :group="group" :member="member" :organization="selectedOrganization" @click="openGroup(group)"/>
                 </STList>
             </div>
         </main>

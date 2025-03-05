@@ -1,38 +1,37 @@
 <template>
     <div class="hover-box container">
-        <hr>
-        <h2 class="style-with-button">
-            <span class="icon-spacer">Acties</span>
+        <hr><h2 class="style-with-button">
+            <span class="icon-spacer">{{ $t('8424a02d-2147-40d1-9db2-ddece074a650') }}</span>
         </h2>
 
         <STList>
             <STListItem :selectable="true" @click="editMember">
                 <template #left>
-                    <span class="icon edit" />
+                    <span class="icon edit"/>
                 </template>
 
                 <h3 class="style-title-list">
-                    Gegevens wijzigen
+                    {{ $t('695c2e46-2187-4b09-895d-349940781949') }}
                 </h3>
             </STListItem>
 
             <STListItem :selectable="true" @click="addRegistration">
                 <template #left>
-                    <span class="icon add" />
+                    <span class="icon add"/>
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ props.member.patchedMember.firstName }} inschrijven
+                    {{ props.member.patchedMember.firstName }} {{ $t('adebd7bf-9b3b-46c5-b46a-c753797c6268') }}
                 </h3>
             </STListItem>
 
             <STListItem v-if="member.patchedMember.registrations.length === 0" :selectable="true" @click="deleteMember">
                 <template #left>
-                    <span class="icon trash red" />
+                    <span class="icon trash red"/>
                 </template>
 
                 <h3 class="style-title-list red">
-                    Definitief verwijderen
+                    {{ $t('ab75bb49-dfaa-4608-bf1c-d163ccd7a9b0') }}
                 </h3>
             </STListItem>
         </STList>

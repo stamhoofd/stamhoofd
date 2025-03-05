@@ -2,14 +2,11 @@
     <SaveView :title="title" :disabled="!$hasChanges" :save-text="$saveText" @save="save">
         <h1>{{ title }}<span v-show="$selectedTags.size > 0" class="selection-count">{{ " (" + $selectedTags.size + ")" }}</span></h1>
         <form class="search-box input-icon-container icon search gray" @submit.prevent>
-            <input ref="input" v-model="$searchString" :autofocus="true" class="input" placeholder="Zoek tag" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
-        </form>
-        <hr>
-
-        <STList>
+            <input ref="input" v-model="$searchString" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`aa85df69-ea38-434e-9613-d5dfe53d218e`)"></form>
+        <hr><STList>
             <STListItem v-for="tag in $searchResult" :key="tag.id" :selectable="true" @click="toggleSelect(tag)">
                 <template #left>
-                    <Checkbox :model-value="isSelected(tag)" @click.stop.prevent="toggleSelect(tag)" />
+                    <Checkbox :model-value="isSelected(tag)" @click.stop.prevent="toggleSelect(tag)"/>
                 </template>
                 <div>
                     <h2 class="style-title-list">
@@ -19,17 +16,16 @@
             </STListItem>
         </STList>
         <p v-if="!$searchResult.length" class="style-description-large">
-            Er zijn geen resultaten gevonden.
+            {{ $t('7c74334b-91a3-4a86-9f63-dcbb5d473cff') }}
         </p>
 
         <TransitionFade>
             <div v-if="$selectedOutsideSearch.length" class="container">
-                <hr>
-                <h2>Selectie buiten zoekresultaat</h2>
+                <hr><h2>{{ $t('471e251c-65b0-49b8-9f86-c1ddcf23b665') }}</h2>
                 <STList :draggable="false">
                     <STListItem v-for="tag in $selectedOutsideSearch" :key="tag.id" :selectable="true" @click="toggleSelect(tag)">
                         <template #left>
-                            <Checkbox :model-value="isSelected(tag)" @click.stop.prevent="toggleSelect(tag)" />
+                            <Checkbox :model-value="isSelected(tag)" @click.stop.prevent="toggleSelect(tag)"/>
                         </template>
                         <div>
                             <h2 class="style-title-list">

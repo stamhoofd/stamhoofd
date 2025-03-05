@@ -1,9 +1,9 @@
 <template>
     <LoadingViewTransition>
-        <div v-if="!loading"> class="st-view ticket-view">
+        <div v-if="!loading"> {{ $t(`eb53d274-8cdb-4739-b19d-88c850a4465c`) }}
             <STNavigationBar v-if="!$isMobile" :large="!true" :sticky="false">
                 <template #left>
-                    <OrganizationLogo :organization="organization" />
+                    <OrganizationLogo :organization="organization"/>
                 </template>
             </STNavigationBar>
         </div>

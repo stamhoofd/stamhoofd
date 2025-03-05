@@ -1,7 +1,7 @@
 <template>
     <STListItem class="right-stack">
         <template #left>
-            <GroupIconWithWaitingList :group="registration.group" icon="canceled" />
+            <GroupIconWithWaitingList :group="registration.group" icon="canceled"/>
         </template>
 
         <h3 class="style-title-list">
@@ -9,7 +9,7 @@
         </h3>
 
         <p class="style-description-small">
-            Uitschrijven voor {{ registration.group.settings.name }}
+            {{ $t('663f97bb-c34e-4673-8fdc-474922dd2033') }} {{ registration.group.settings.name }}
         </p>
 
         <template #right>
@@ -17,7 +17,7 @@
                 {{ formatPrice(balance.amountOpen + balance.amountPaid + balance.amountPending) }}
             </p>
 
-            <button class="button icon trash gray" type="button" @click.stop="deleteMe()" />
+            <button class="button icon trash gray" type="button" @click.stop="deleteMe()"/>
         </template>
     </STListItem>
 </template>

@@ -1,10 +1,10 @@
 <template>
     <ExternalOrganizationContainer v-slot="{externalOrganization: groupOrganization}" :organization-id="event.organizationId" @update="setOrganization">
         <div class="st-view event-view">
-            <STNavigationBar :title="title" />
+            <STNavigationBar :title="title"/>
 
             <main class="center">
-                <ImageComponent v-if="event.meta.coverPhoto" :image="event.meta.coverPhoto" :auto-height="true" class="style-cover-photo" />
+                <ImageComponent v-if="event.meta.coverPhoto" :image="event.meta.coverPhoto" :auto-height="true" class="style-cover-photo"/>
 
                 <p class="style-title-prefix">
                     {{ levelPrefix }}
@@ -13,21 +13,19 @@
                     {{ title }}
                 </h1>
 
-                <div v-if="event.meta.description.html" class="description style-wysiwyg gray large" v-html="event.meta.description.html" />
+                <div v-if="event.meta.description.html" class="description style-wysiwyg gray large" v-html="event.meta.description.html"/>
 
                 <p v-if="differentOrganization" class="info-box icon basket">
-                    Reken eerst jouw huidige winkelmandje af. Je kan de huidige inhoud van jouw winkelmandje niet samen afrekenen met de inschrijving voor deze activiteit.
+                    {{ $t('016982e3-d43a-4307-913b-e470f808756e') }}
                 </p>
 
-                <EventInfoTable :event="event" :family="memberManager.family" />
+                <EventInfoTable :event="event" :family="memberManager.family"/>
 
                 <template v-if="!$isMobile && event.group">
-                    <hr>
-
-                    <p class="style-button-bar right-align">
+                    <hr><p class="style-button-bar right-align">
                         <button class="button primary" type="button" :disabled="!!differentOrganization" @click="openGroup">
-                            <span>Inschrijven</span>
-                            <span class="icon arrow-right" />
+                            <span>{{ $t('ea8c4639-c08e-4413-aede-d3027e0bbef6') }}</span>
+                            <span class="icon arrow-right"/>
                         </button>
                     </p>
                 </template>
@@ -36,8 +34,8 @@
             <STToolbar v-if="$isMobile && event.group">
                 <template #right>
                     <button class="button primary" type="button" :disabled="!!differentOrganization" @click="openGroup">
-                        <span>Inschrijven</span>
-                        <span class="icon arrow-right" />
+                        <span>{{ $t('ea8c4639-c08e-4413-aede-d3027e0bbef6') }}</span>
+                        <span class="icon arrow-right"/>
                     </button>
                 </template>
             </STToolbar>

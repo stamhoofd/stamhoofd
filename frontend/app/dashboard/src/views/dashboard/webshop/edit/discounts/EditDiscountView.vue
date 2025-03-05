@@ -1,33 +1,32 @@
 <template>
-    <SaveView :title="isNew ? 'Korting toevoegen' : 'Korting bewerken'" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`Korting toevoegen`) : $t(`Korting bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            Korting toevoegen
+            {{ $t('80068224-902d-4e6b-9584-be2260b19f18') }}
         </h1>
         <h1 v-else>
-            Korting bewerken
+            {{ $t('0d0b5b56-7561-4024-8df5-826cd6b1a1c8') }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <div class="split-inputs">
-            <STInputBox title="Vast bedrag" error-fields="administrationFee.fixed" :error-box="errors.errorBox">
-                <PriceInput v-model="fixedDiscount" :min="0" placeholder="Vaste kost" :required="true" />
+            <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`4f60c233-cec7-45f2-ad56-bfb49dd53f56`)">
+                <PriceInput v-model="fixedDiscount" :min="0" :required="true" :placeholder="$t(`0375d617-58bc-4fff-abbc-b73d4a3a1e28`)"/>
             </STInputBox>
 
-            <STInputBox title="Percentage" error-fields="administrationFee.fixed" :error-box="errors.errorBox">
-                <PermyriadInput v-model="percentageDiscount" placeholder="Percentage" :required="true" />
+            <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`2041e6a0-2f90-485e-8144-4169e0f7ff31`)">
+                <PermyriadInput v-model="percentageDiscount" :required="true" :placeholder="$t(`2041e6a0-2f90-485e-8144-4169e0f7ff31`)"/>
             </STInputBox>
         </div>
 
         <p class="style-description-small">
-            Deze kortingen worden op de volledige bestelling toegepast.
+            {{ $t('f2dfb2ca-691a-4ff3-bd16-157ccf4c1b85') }}
         </p>
 
-        <hr>
-        <h2>
-            Korting op specifieke artikels
+        <hr><h2>
+            {{ $t('6971a6f6-3bcc-4aa4-8f5d-49a7b25edfa9') }}
         </h2>
-        <p>Je kan een procentuele korting geven op bepaalde artikels, je kan één artikel gratis maken, je kan een korting per stuk geven op de eerste x aantal stuks (of alle stuks) van een artikel...</p>
+        <p>{{ $t('9680c881-cb91-4200-ac95-ac883dc25492') }}</p>
 
         <STList v-if="patchedDiscount.productDiscounts.length">
             <STListItem v-for="productDiscount of patchedDiscount.productDiscounts" :key="productDiscount.id" class="right-description right-stack" :selectable="true" @click="editProductDiscount(productDiscount)">
@@ -42,23 +41,22 @@
                 </p>
 
                 <template #right>
-                    <span class="icon arrow-right-small gray" />
+                    <span class="icon arrow-right-small gray"/>
                 </template>
             </STListItem>
         </STList>
 
         <p>
             <button class="button text" type="button" @click="addProductDiscount">
-                <span class="icon add" />
-                <span>Artikel toevoegen</span>
+                <span class="icon add"/>
+                <span>{{ $t('3c2b0f17-52bd-4b6b-8a83-d88218682a72') }}</span>
             </button>
         </p>
 
-        <hr>
-        <h2>
-            Artikelvoorwaarden
+        <hr><h2>
+            {{ $t('cc30665b-cdb4-46c1-a89d-ed72fef3bed9') }}
         </h2>
-        <p>De korting wordt enkel toegepast als deze artikels met een bepaalde hoeveelheid aanwezig zijn in het winkelmandje. Hiermee kan je speciale kortingen bereiken waarbij je bijvoorbeeld korting geeft op een bepaald artikel als je eerst een ander artikel bestelt (bv. één drankkaart gratis als je 10 tickets bestelt).</p>
+        <p>{{ $t('e5d721bb-eb1e-43ee-b640-3059326f12f2') }}</p>
 
         <STList v-if="patchedDiscount.requirements.length">
             <STListItem v-for="requirement of patchedDiscount.requirements" :key="requirement.id" class="right-description right-stack" :selectable="true" @click="editRequirement(requirement)">
@@ -70,42 +68,41 @@
                 </p>
 
                 <template #right>
-                    <span class="icon arrow-right-small gray" />
+                    <span class="icon arrow-right-small gray"/>
                 </template>
             </STListItem>
         </STList>
 
         <p>
             <button class="button text" type="button" @click="addRequirement">
-                <span class="icon add" />
-                <span>Artikelvoorwaarde toevoegen</span>
+                <span class="icon add"/>
+                <span>{{ $t('ba00f93d-1fb4-464e-b3cb-876db05831f1') }}</span>
             </button>
         </p>
 
         <STList v-if="patchedDiscount.requirements.length">
             <STListItem :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox v-model="applyMultipleTimes" />
+                    <Checkbox v-model="applyMultipleTimes"/>
                 </template>
 
                 <h3 class="style-title-list">
-                    Meerdere keren toepassen
+                    {{ $t('baea82eb-99be-4ed0-a569-445d68c583dc') }}
                 </h3>
                 <p class="style-description-small">
-                    Als de vereiste artikels meerdere keren aanwezig zijn, dan wordt de korting meerdere keren toegepast. Bijvoorbeeld als je korting op één artikel geeft op voorwaarde dat je eerst een ander artikel erbij bestelt.
+                    {{ $t('593fb8b6-f558-40a4-b37c-4033790b774a') }}
                 </p>
             </STListItem>
         </STList>
 
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Verwijder deze korting
+            <hr><h2>
+                {{ $t('a9c5cb42-61c2-452f-957d-08fd61175f56') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span class="icon trash"/>
+                <span>{{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}</span>
             </button>
         </div>
     </SaveView>

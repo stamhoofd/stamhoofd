@@ -2,20 +2,20 @@
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
         <p>
-            Lees zeker ook onze <a :href="$domains.getDocs('webshop-link-wijzigen')" target="_blank" class="inline-link">documentatie hierover</a> na.
+            {{ $t('df033725-c963-4fe5-9e82-a0eea761c1bd') }} <a :href="$domains.getDocs('webshop-link-wijzigen')" target="_blank" class="inline-link">{{ $t('448c210e-67df-428e-aec8-a2b58f62b89f') }}</a> {{ $t('f7277113-1ee1-48fd-aa97-40ee5017ffca') }}
         </p>
 
         <p v-if="legacyUrl && webshop.domain === null" class="info-box">
-            We hebben het formaat gewijzigd van webshop links. Maar jouw webshop is (en blijft) ook bereikbaar via {{ legacyUrl }}. In toekomstige communicaties gebruik je best de nieuwe link, maar pas de nieuwe link eerst aan naar wens.
+            {{ $t('1fcb8b3e-35c5-4ac6-bf6b-25fabb85a599') }} {{ legacyUrl }}{{ $t('c9cf2185-8796-42a0-ad5a-dd87419db2ff') }}
         </p>
 
         <p v-if="hasOrders" class="warning-box">
             {{ $t('7a44f6f1-bb2f-4e46-93c2-afcae9db3f80') }}
         </p>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
-        <STInputBox title="Domeinnaam">
+        <STInputBox :title="$t(`838c80f3-bf67-48eb-9475-5ac3a45ad28e`)">
             <Dropdown v-model="selectedDomain" @update:model-value="onChangeSelectedDomain">
                 <option :value="null">
                     {{ defaultDomain }}
@@ -24,96 +24,88 @@
                     {{ d }}
                 </option>
                 <option :value="''">
-                    Andere domeinnaam
+                    {{ $t('929d68a2-c44c-4815-8bbc-2dcc36c8c025') }}
                 </option>
             </Dropdown>
         </STInputBox>
 
         <template v-if="useNewDomain">
-            <STInputBox title="Jouw webshop link" error-fields="customUrl" :error-box="errors.errorBox" class="max">
-                <input
-                    v-model="customUrl"
-                    class="input"
-                    type="text"
-                    :placeholder="$t('e06f1e9b-dc4c-4b3b-8ab7-52cd8048d894')"
-                    autocomplete="off"
-                    @blur="resetCache"
-                >
-            </STInputBox>
+            <STInputBox error-fields="customUrl" :error-box="errors.errorBox" class="max" :title="$t(`1023f214-4395-4c75-88c2-06e032c5befe`)">
+                <input v-model="customUrl" class="input" type="text" :placeholder="$t('e06f1e9b-dc4c-4b3b-8ab7-52cd8048d894')" autocomplete="off" @blur="resetCache"></STInputBox>
             <p class="st-list-description">
                 {{ $t('2ad81e83-bca1-43c9-9f18-3af1ae6e35a7') }}
             </p>
 
             <template v-if="didDNSRecordsChange">
                 <p class="info-box">
-                    Jouw webmaster zal enkele wijzigingen moeten doen om deze link mogelijk te maken. We geven je de instructies in de volgende stap.
+                    {{ $t('0819fb31-996d-4f2f-891a-89a561e6c9c6') }}
                 </p>
             </template>
             <template v-else>
                 <p v-if="webshop.meta.domainActive && originalWebshop.domain === webshop.domain" class="success-box">
-                    Jouw domeinnaam is correct geconfigureerd.
+                    {{ $t('84b4be02-817a-49f7-9364-b4bab14280dd') }}
                 </p>
                 <p v-else class="warning-box with-button selectable" @click="openDnsRecordSettings(false)">
-                    Jouw domeinnaam is momenteel nog niet actief. Breng de nodige DNS-wijzigingen in orde, dit kan tot 24 uur duren.
+                    {{ $t('131b2fa4-887c-4d93-b71a-52be5b5c59b2') }}
 
                     <button class="button text" type="button">
-                        Instellen
+                        {{ $t('3b774241-fcc0-4801-81ee-afb7dcd321ae') }}
                     </button>
                 </p>
                 <p v-if="webshop.meta.domainActive && originalWebshop.domain === webshop.domain">
                     <button type="button" class="button text" @click="openDnsRecordSettings(false)">
-                        Bekijk DNS-records instructies
+                        {{ $t('b57ba220-fa7f-49fb-affa-2464818bff67') }}
                     </button>
                 </p>
             </template>
 
             <p v-if="!webshop.meta.domainActive" class="info-box">
-                Jouw webshop blijft ook bereikbaar via {{ defaultUrl }}. Die link kan je gebruiken om je webshop te bezoeken in tussentijd, tot de DNS-records zijn aangepast (kan tot 24 uur duren).
+                {{ $t('a2672015-039a-401a-a2b5-ff3c232aa0d2') }} {{ defaultUrl }}{{ $t('2a9598bb-7680-425a-a9bf-4d2a8cd230f9') }}
             </p>
         </template>
 
         <template v-else-if="selectedDomain !== null">
-            <STInputBox title="Jouw webshop link" error-fields="domainUri" :error-box="errors.errorBox" class="max">
+            <STInputBox error-fields="domainUri" :error-box="errors.errorBox" class="max" :title="$t(`1023f214-4395-4c75-88c2-06e032c5befe`)">
                 <template #right>
                     <button type="button" class="button text" @click="copyLink">
-                        <span class="icon copy" />
-                        <span>Kopiëren</span>
+                        <span class="icon copy"/>
+                        <span>{{ $t('32f946c9-f58e-4a8b-9772-d8897ec186ac') }}</span>
                     </button>
                 </template>
-                <PrefixInput v-model="domainUri" placeholder="bv. wafelbak" :prefix="domainUri ? webshop.domain+'/' : webshop.domain" :focus-prefix="webshop.domain+'/'" :fade-prefix="!!domainUri" @blur="resetCache" />
+                <PrefixInput v-model="domainUri" :prefix="domainUri ? webshop.domain+'/' : webshop.domain" :focus-prefix="webshop.domain+'/'" :fade-prefix="!!domainUri" @blur="resetCache" :placeholder="$t(`ceb38ed0-3774-4e31-9572-26c8d8796fac`)"/>
             </STInputBox>
             <p class="style-description-small">
-                Vul eventueel iets in na het streepje (/), maar dat is niet verplicht.
+                {{ $t('d9f1d305-a3a6-40bb-8d8d-78814c17ba3c') }}
             </p>
         </template>
 
         <template v-else>
-            <STInputBox title="Jouw webshop link" error-fields="uri" :error-box="errors.errorBox" class="max custom-bottom-box" :class="{'input-success': isAvailable && !checkingAvailability && availabilityCheckerCount > 0, 'input-errors': !isAvailable && !checkingAvailability && availabilityCheckerCount > 0}">
+            <STInputBox error-fields="uri" :error-box="errors.errorBox" class="max custom-bottom-box" :class="{'input-success': isAvailable && !checkingAvailability && availabilityCheckerCount > 0, 'input-errors': !isAvailable && !checkingAvailability && availabilityCheckerCount > 0}" :title="$t(`1023f214-4395-4c75-88c2-06e032c5befe`)">
                 <template #right>
                     <button type="button" class="button text" @click="copyLink">
-                        <span class="icon copy" />
-                        <span>Kopiëren</span>
+                        <span class="icon copy"/>
+                        <span>{{ $t('32f946c9-f58e-4a8b-9772-d8897ec186ac') }}</span>
                     </button>
                 </template>
-                <PrefixInput v-model="uri" placeholder="bv. wafelbak" :prefix="defaultDomain+'/'" @blur="updateUri" />
+                <PrefixInput v-model="uri" :prefix="defaultDomain+'/'" @blur="updateUri" :placeholder="$t(`ceb38ed0-3774-4e31-9572-26c8d8796fac`)"/>
             </STInputBox>
 
             <template v-if="errors.errorBox === null && ((availabilityCheckerCount > 0 && isAvailable !== null) || checkingAvailability)">
                 <p v-if="checkingAvailability" class="loading-box">
-                    <Spinner />
-                    Nakijken of deze link nog beschikbaar is...
+                    <Spinner/>
+                    {{ $t('33d49334-ebd9-4c56-94bb-87f21b1e3f21') }}
                 </p>
 
                 <p v-else-if="uri.length === 0" class="error-box">
-                    Je moet verplicht iets na de domeinnaam invullen.
+                    {{ $t('d876d987-d7d6-4e6f-90bd-4bd70d4088e1') }}
                 </p>
 
                 <p v-else-if="!isAvailable" class="error-box">
-                    Deze link is al in gebruik. Kies een andere. Voeg iets uniek toe, bv. de naam van je vereniging.
+                    {{ $t('3bae6fd5-fb13-4186-8917-1cf6b8c6cf45') }}
                 </p>
 
                 <p v-else class="success-box">
-                    Deze link is nog beschikbaar!
+                    {{ $t('d4cb92f6-f83b-438f-a670-c33138b200bb') }}
                 </p>
             </template>
         </template>

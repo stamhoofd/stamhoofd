@@ -4,49 +4,33 @@
             {{ title }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
-        <STInputBox :title="'Naam'">
-            <input
-                v-model="name"
-                class="input"
-                type="text"
-                autocomplete="off"
-                placeholder="bv. privacyvoorwaarden"
-            >
-        </STInputBox>
+        <STInputBox :title="$t(`d32893b7-c9b0-4ea3-a311-90d29f2c0cf3`)">
+            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`4e6baa26-ebdd-43c1-a8f5-3da0b79ce646`)"></STInputBox>
 
-        <STInputBox title="Volledige link" error-fields="privacyPolicyUrl" :error-box="errors.errorBox">
-            <input
-                v-model="url"
-                class="input"
-                type="url"
-                :placeholder="$t('4c8b6dd3-e058-45f7-8da8-1e1a6014a7a7')"
-            >
-        </STInputBox>
+        <STInputBox error-fields="privacyPolicyUrl" :error-box="errors.errorBox" :title="$t(`82530bca-53e8-4dc7-b04b-dc520853efc8`)">
+            <input v-model="url" class="input" type="url" :placeholder="$t('4c8b6dd3-e058-45f7-8da8-1e1a6014a7a7')"></STInputBox>
 
-        <UploadFileButton text="Upload PDF" accept="application/pdf" @change="url = $event.getPublicPath()" />
+        <UploadFileButton accept="application/pdf" @change="url = $event.getPublicPath()" :text="$t(`d25801f1-2a68-4d06-8ff7-29118efee363`)"/>
 
         <Checkbox v-model="enableAtSignup" class="long-text">
-            Tonen bij het registeren
+            {{ $t('f5d9f28e-0848-4f7c-b57e-1b7111aa00df') }}
         </Checkbox>
 
         <template v-if="enableAtSignup">
             <Checkbox v-model="checkbox" class="long-text">
-                Verplicht aanvinkvakje
+                {{ $t('c97da592-24c7-462c-aa20-195e2e937a61') }}
             </Checkbox>
             <p class="style-description-small">
-                Het aanvinkvakje moet aangevinkt worden bij het registreren als je dit aanzet. In het andere geval is het enkel een vermelding die impliciet aanvaard wordt.
+                {{ $t('3b90166d-41ad-46c0-96c4-ca975dec1131') }}
             </p>
 
-            <STInputBox title="Aanvinktekst" error-fields="meta.description" :error-box="errors.errorBox" class="max">
-                <WYSIWYGTextInput
-                    v-model="richText"
-                    placeholder="Tekst die naast het aanvinkvakje staat"
-                />
+            <STInputBox error-fields="meta.description" :error-box="errors.errorBox" class="max" :title="$t(`e62e2295-a80e-4e25-b559-991dfadb6daf`)">
+                <WYSIWYGTextInput v-model="richText" :placeholder="$t(`e31632a6-b1b2-42b6-8803-b6cc8d21b7d6`)"/>
             </STInputBox>
             <p class="style-description-small">
-                Herhaal jouw link in deze tekst door een deel van de tekst te selecteren en op de link-knop te drukken.
+                {{ $t('35402d81-fce4-44c0-b9e5-1f7b6d4e0f30') }}
             </p>
         </template>
     </SaveView>

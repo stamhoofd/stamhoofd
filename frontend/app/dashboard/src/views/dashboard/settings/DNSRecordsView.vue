@@ -1,27 +1,27 @@
 <template>
     <div id="dns-records-view" class="st-view">
-        <STNavigationBar title="Instellingen" />
+        <STNavigationBar :title="$t(`a370eff9-c1c1-450c-8bdb-dcee89bd2f70`)"/>
 
         <main>
             <h1>
-                Pas de volgende instellingen aan
+                {{ $t('b7537bc6-0373-4754-941c-71d6dbb1904b') }}
             </h1>
 
             <p class="st-list-description">
-                Stel de volgende DNS-instellingen in voor jouw domeinnaam. Dit kan je meestal doen in het klantenpaneel van jouw registrar (bv. Combell, Versio, Transip, One.com, GoDaddy...) waar je je domeinnaam hebt gekocht.
+                {{ $t('efd1964f-1503-43b6-aeac-8338e3c8dba6') }}
             </p>
 
-            <STErrorsDefault :error-box="errorBox" />
+            <STErrorsDefault :error-box="errorBox"/>
 
             <div v-for="record in records" :key="record.id">
-                <DNSRecordBox :record="record" />
+                <DNSRecordBox :record="record"/>
             </div>
 
             <p class="warning-box">
-                Kijk alles goed na voor je aanpassingen maakt, verwijder zeker geen bestaande DNS-records. Als je DNS-records verwijdert, kan jouw huidige website onbereikbaar worden.
+                {{ $t('5942fcf3-8e50-4fbe-a935-7608a8652ec0') }}
             </p>
             <p class="warning-box">
-                Het kan tot 24 uur duren tot de aanpassingen zijn doorgevoerd, in de meeste gevallen zou het binnen 1 uur al in orde moeten zijn. Je mag dit scherm sluiten als je de aanpassingen hebt gemaakt, we blijven op de achtergrond proberen en sturen jou een mailtje als alles in orde is.
+                {{ $t('a3f763c0-7268-48c1-8f49-1a857b28ff6f') }}
             </p>
         </main>
 
@@ -29,7 +29,7 @@
             <template #right>
                 <LoadingButton :loading="saving">
                     <button class="button primary" type="button" @click="validate">
-                        Verifieer
+                        {{ $t('29a5a9a4-89f6-415c-b15d-65bd0f60249b') }}
                     </button>
                 </LoadingButton>
             </template>

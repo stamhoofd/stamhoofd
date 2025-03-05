@@ -1,10 +1,10 @@
 <template>
     <LoadingViewTransition>
         <div v-if="!loadingDefault">
-            <STGradientBackground v-if="!platform.config.horizontalLogo" />
+            <STGradientBackground v-if="!platform.config.horizontalLogo"/>
 
             <div class="st-view">
-                <STNavigationBar :large="!isNative" class="transparent" title="Beheer jouw groep" />
+                <STNavigationBar :large="!isNative" class="transparent" :title="$t(`2c953c17-7cfd-4037-bea0-e537a9d82bcd`)"/>
 
                 <main class="flex center small organization-selection-view">
                     <h1>
@@ -16,17 +16,16 @@
                     </p>
 
                     <form class="input-icon-container icon search gray" @submit.prevent>
-                        <input ref="input" v-model="query" autofocus class="input" :placeholder="$t('89b3f7fe-d2b2-4194-a971-886b0665a0df')" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" @keydown.down.prevent="focusResult(0)">
-                    </form>
+                        <input ref="input" v-model="query" autofocus class="input" :placeholder="$t('89b3f7fe-d2b2-4194-a971-886b0665a0df')" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" @keydown.down.prevent="focusResult(0)"></form>
 
                     <div v-if="showVersionFooter" class="version-box">
-                        <VersionFooter />
+                        <VersionFooter/>
                     </div>
 
-                    <Spinner v-else-if="loadingResults" class="gray center" />
+                    <Spinner v-else-if="loadingResults" class="gray center"/>
                     <template v-else>
                         <button v-for="(option, index) in visibleOptions" ref="resultElements" :key="option.id" type="button" class="search-result" @keydown.down.prevent="focusResult(index + 1)" @keydown.up.prevent="focusResult(index - 1)" @click="selectOption(option)">
-                            <ContextLogo :organization="option.organization" :app="option.app" />
+                            <ContextLogo :organization="option.organization" :app="option.app"/>
                             <div>
                                 <h1>{{ getAppTitle(option.app, option.organization) }}</h1>
 
@@ -34,33 +33,33 @@
                                     {{ getAppDescription(option.app, option.organization) }}
                                 </p>
                                 <p v-if="option.userDescription" class="style-description-small style-em">
-                                    Ingelogd als {{ option.userDescription }}
+                                    {{ $t('b08fc53c-8fa9-4b33-b783-719fb00cb699') }} {{ option.userDescription }}
                                 </p>
 
-                                <span v-if="option.userDescription" class="icon gray sync floating" />
-                                <span v-if="!isPlatform && option.context.canGetCompleted()" class="icon success primary floating" />
-                                <span v-if="isPlatform && option.context.hasPermissions() && option.app === 'auto'" class="icon privacy gray floating" />
+                                <span v-if="option.userDescription" class="icon gray sync floating"/>
+                                <span v-if="!isPlatform && option.context.canGetCompleted()" class="icon success primary floating"/>
+                                <span v-if="isPlatform && option.context.hasPermissions() && option.app === 'auto'" class="icon privacy gray floating"/>
                             </div>
                         </button>
                     </template>
 
                     <p v-if="!loadingResults && visibleOptions.length === 0 && query" class="info-box">
-                        Geen verenigingen gevonden. Probeer te zoeken op postcode of naam. Is jouw vereniging nog niet aangesloten? Maak dan eerst een vereniging aan.
+                        {{ $t('bf1dd22e-adc0-463e-9a1b-a330449a179e') }}
                     </p>
 
                     <footer v-if="!isPlatform">
                         <a v-if="!isNative" href="/aansluiten" class="button text full selected" @click.prevent="$navigate('join')">
-                            <span class="icon add" />
-                            <span>Mijn vereniging aansluiten</span>
+                            <span class="icon add"/>
+                            <span>{{ $t('1a435ed4-2b28-438e-8bc9-be6e216aed83') }}</span>
                         </a>
 
                         <button class="button text full" type="button" @click="help">
-                            <span class="icon help" />
-                            <span>Mijn vereniging staat er niet tussen</span>
+                            <span class="icon help"/>
+                            <span>{{ $t('d63e7940-ca55-4e56-b1b1-8a13488346d6') }}</span>
                         </button>
                     </footer>
 
-                    <PlatformFooter />
+                    <PlatformFooter/>
                 </main>
             </div>
         </div>

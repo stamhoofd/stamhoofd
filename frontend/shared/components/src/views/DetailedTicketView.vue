@@ -2,23 +2,22 @@
     <div class="st-view detailed-ticket-view">
         <STNavigationBar :title="name" :disable-dismiss="!allowDismiss" :sticky="false" :large="logo">
             <template #left>
-                <OrganizationLogo v-if="logo" :organization="organization" />
+                <OrganizationLogo v-if="logo" :organization="organization"/>
             </template>
             <template v-if="canShare" #right>
-                <button class="button icon share navigation" type="button" @click="share" />
+                <button class="button icon share navigation" type="button" @click="share"/>
             </template>
         </STNavigationBar>
         <main>
             <figure class="qr-box">
                 <div>
-                    <img v-if="QRCodeUrl" :src="QRCodeUrl" :class="{ scanned: !!ticket.scannedAt}" class="peak-brightness" width="370" height="370">
-                    <div class="placeholder" />
+                    <img v-if="QRCodeUrl" :src="QRCodeUrl" :class="{ scanned: !!ticket.scannedAt}" class="peak-brightness" width="370" height="370"><div class="placeholder"/>
                 </div>
             </figure>
 
             <aside v-if="sponsors.length" class="stamhoofd-rosnops-box">
                 <component :is="sponsor.url ? 'a' : 'div'" v-for="(sponsor, index) of sponsors" :key="sponsor.id" class="rosnops" :class="{visible: visibleSponsor === index, isLogo: !sponsor.banner}" :href="sponsor.url" target="_blank">
-                    <ImageComponent v-if="sponsor.banner || sponsor.logo" :image="sponsor.banner || sponsor.logo" :auto-height="true" />
+                    <ImageComponent v-if="sponsor.banner || sponsor.logo" :image="sponsor.banner || sponsor.logo" :auto-height="true"/>
                 </component>
             </aside>
 
@@ -29,9 +28,9 @@
                 {{ name }}
                 <span v-if="ticket.getIndexText()" class="ticket-index">{{ ticket.getIndexText() }}</span>
             </h1>
-            <p v-if="isSingle && order" class="description" v-text="'Bestelling #'+order.number" />
-            <p v-if="isSingle && order" class="description" v-text="order.data.customer.name" />
-            <p v-if="cartItem.descriptionWithoutDate" class="description" v-text="cartItem.descriptionWithoutDate" />
+            <p v-if="isSingle && order" class="description" v-text="'Bestelling #'+order.number"/>
+            <p v-if="isSingle && order" class="description" v-text="order.data.customer.name"/>
+            <p v-if="cartItem.descriptionWithoutDate" class="description" v-text="cartItem.descriptionWithoutDate"/>
             <p v-if="changedSeatString" class="warning-box">
                 {{ changedSeatString }}
             </p>
@@ -39,7 +38,7 @@
             <STList>
                 <STListItem v-if="cartItem.product.location">
                     <h3 class="style-definition-label">
-                        Locatie
+                        {{ $t('257a3fd5-bd2f-4430-b268-1c85e99db41a') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ cartItem.product.location.name }}
@@ -60,14 +59,14 @@
                         </div>
                     </div>
                     <button class="button text" type="button" @click="showSeats">
-                        <span>Toon op zaalplan</span>
-                        <span class="icon arrow-right-small" />
+                        <span>{{ $t('2d560043-3fb1-4564-9dfa-b4f47fb224b4') }}</span>
+                        <span class="icon arrow-right-small"/>
                     </button>
                 </STListItem>
 
                 <STListItem v-if="cartItem.product.dateRange">
                     <h3 class="style-definition-label">
-                        Wanneer?
+                        {{ $t('999b580a-c487-468b-9527-e1812d170df6') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDateRange(cartItem.product.dateRange) }}
@@ -76,7 +75,7 @@
 
                 <STListItem v-if="price">
                     <h3 class="style-definition-label">
-                        Prijs
+                        {{ $t('e9f3660d-ab54-4f29-8c3f-85c756ac2ce0') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(price) }}
@@ -88,8 +87,8 @@
         <STToolbar>
             <template #right>
                 <button class="button primary" type="button" @click="download">
-                    <span class="icon download" />
-                    <span>Opslaan</span>
+                    <span class="icon download"/>
+                    <span>{{ $t('bd7fc57f-7ba8-4011-8557-a720a55ecc6f') }}</span>
                 </button>
             </template>
         </STToolbar>

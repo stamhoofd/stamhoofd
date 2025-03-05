@@ -13,10 +13,9 @@
 
             <figure v-if="imageSrc" class="image-box">
                 <div>
-                    <img :src="imageSrc" :width="image.width" :height="image.height">
-                </div>
+                    <img :src="imageSrc" :width="image.width" :height="image.height"></div>
             </figure>
-            <p v-if="cartItem.product.description" class="description" v-text="cartItem.product.description" />
+            <p v-if="cartItem.product.description" class="description" v-text="cartItem.product.description"/>
 
             <p v-if="oldItem && oldItem.cartError" class="error-box small">
                 {{ oldItem.cartError.getHuman() }}
@@ -27,15 +26,15 @@
             </p>
 
             <p v-else-if="cartItem.product.isSoldOut" class="warning-box">
-                Dit artikel is uitverkocht
+                {{ $t('afc9332f-6b17-451d-aba0-8c10ebe39403') }}
             </p>
 
             <p v-else-if="areSeatsSoldOut" class="warning-box">
-                Alle plaatsen zijn volzet
+                {{ $t('65e9fe14-7392-463c-a08b-2b65e1db51d2') }}
             </p>
 
             <p v-else-if="!canOrder" class="warning-box">
-                Je hebt het maximaal aantal stuks bereikt dat je nog kan bestellen van dit artikel
+                {{ $t('a9d946f9-353f-410d-bd03-f84c30a58fcd') }}
             </p>
 
             <p v-else-if="cartItem.product.closesSoonText" class="info-box">
@@ -43,15 +42,15 @@
             </p>
 
             <p v-if="remainingReduced > 0" class="info-box">
-                Bestel je {{ cartItem.productPrice.discountAmount }} of meer stuks, dan betaal je maar {{ formatPrice(discountPrice) }} per stuk!
+                {{ $t('6490a4f6-34f9-4615-afde-18d21780cc48') }} {{ cartItem.productPrice.discountAmount }} of meer stuks, dan betaal je maar {{ formatPrice(discountPrice) }} {{ $t('92fe847f-3dfc-4156-b4ad-98e2cf8d4963') }}
             </p>
 
-            <STErrorsDefault :error-box="errors.errorBox" />
+            <STErrorsDefault :error-box="errors.errorBox"/>
 
             <STList v-if="(cartItem.product.type === 'Ticket' || cartItem.product.type === 'Voucher') && cartItem.product.location" class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        Locatie
+                        {{ $t('257a3fd5-bd2f-4430-b268-1c85e99db41a') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ cartItem.product.location.name }}
@@ -63,7 +62,7 @@
 
                 <STListItem v-if="cartItem.product.dateRange">
                     <h3 class="style-definition-label">
-                        Wanneer?
+                        {{ $t('999b580a-c487-468b-9527-e1812d170df6') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDateRange(cartItem.product.dateRange) }}
@@ -72,11 +71,10 @@
             </STList>
 
             <div v-if="cartItem.product.filteredPrices({admin}).length > 1" class="container">
-                <hr>
-                <STList>
+                <hr><STList>
                     <STListItem v-for="price in cartItem.product.filteredPrices({admin})" :key="price.id" class="no-border right-price" :selectable="canSelectPrice(price)" :disabled="!canSelectPrice(price)" element-name="label">
                         <template #left>
-                            <Radio v-model="cartItem.productPrice" :value="price" :name="cartItem.product.id+'price'" :disabled="!canSelectPrice(price)" />
+                            <Radio v-model="cartItem.productPrice" :value="price" :name="cartItem.product.id+'price'" :disabled="!canSelectPrice(price)"/>
                         </template>
                         <h4 class="style-title-list">
                             {{ price.name || 'Naamloos' }}
@@ -97,39 +95,38 @@
                 </STList>
             </div>
 
-            <OptionMenuBox v-for="optionMenu in cartItem.product.optionMenus" :key="optionMenu.id" :cart-item="cartItem" :option-menu="optionMenu" :cart="cart" :old-item="oldItem" :admin="admin" :webshop="webshop" />
+            <OptionMenuBox v-for="optionMenu in cartItem.product.optionMenus" :key="optionMenu.id" :cart-item="cartItem" :option-menu="optionMenu" :cart="cart" :old-item="oldItem" :admin="admin" :webshop="webshop"/>
 
-            <FieldBox v-for="field in cartItem.product.customFields" :key="field.id" :field="field" :answers="cartItem.fieldAnswers" :error-box="errors.errorBox" />
+            <FieldBox v-for="field in cartItem.product.customFields" :key="field.id" :field="field" :answers="cartItem.fieldAnswers" :error-box="errors.errorBox"/>
 
             <template v-if="canOrder && canSelectAmount">
-                <hr>
-                <h2>Aantal</h2>
+                <hr><h2>{{ $t('ab09a97a-20f7-4a90-8482-58be993bb12e') }}</h2>
 
-                <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" />
+                <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true"/>
 
-                <p v-if="stockText" class="st-list-description" v-text="stockText" />
+                <p v-if="stockText" class="st-list-description" v-text="stockText"/>
             </template>
 
             <div v-if="!cartEnabled && (pricedCheckout.priceBreakown.length > 1 || (pricedCheckout.totalPrice > 0 && cartItem.amount > 1))" class="pricing-box max">
-                <PriceBreakdownBox :price-breakdown="pricedCheckout.priceBreakown" />
+                <PriceBreakdownBox :price-breakdown="pricedCheckout.priceBreakown"/>
             </div>
         </main>
 
         <STToolbar v-if="canOrder">
             <template #right>
                 <button v-if="willNeedSeats" class="button primary" type="submit">
-                    <span>Kies plaatsen</span>
-                    <span class="icon arrow-right" />
+                    <span>{{ $t('8f4194dc-b4d9-4da8-b741-6faa18b9fa1c') }}</span>
+                    <span class="icon arrow-right"/>
                 </button>
                 <button v-else-if="oldItem && cartEnabled" class="button primary" type="submit">
-                    <span class="icon basket" />
-                    <span>Opslaan</span>
+                    <span class="icon basket"/>
+                    <span>{{ $t('bd7fc57f-7ba8-4011-8557-a720a55ecc6f') }}</span>
                 </button>
                 <button v-else class="button primary" type="submit">
-                    <span v-if="cartEnabled" class="icon basket" />
-                    <span v-if="cartEnabled">Toevoegen</span>
-                    <span v-else>Doorgaan</span>
-                    <span v-if="!cartEnabled" class="icon arrow-right" />
+                    <span v-if="cartEnabled" class="icon basket"/>
+                    <span v-if="cartEnabled">{{ $t('73b74929-78f4-4cfa-8a20-92a071a84ec5') }}</span>
+                    <span v-else>{{ $t('458858f8-0a9a-4a3d-b4f4-a4421a48114e') }}</span>
+                    <span v-if="!cartEnabled" class="icon arrow-right"/>
                 </button>
             </template>
         </STToolbar>

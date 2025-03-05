@@ -1,37 +1,35 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Activiteiten" />
+        <STNavigationBar :title="$t(`Activiteiten`)"/>
 
         <main class="center">
             <h1>
-                Activiteiten
+                {{ $t('51964c91-40ec-4448-a032-c7f89ea6a22a') }}
             </h1>
 
             <div class="input-with-buttons">
                 <div>
                     <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                        <input v-model="searchQuery" class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
-                    </form>
+                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`83d986c4-e6c9-42ed-963a-8220c6d933e4`)"></form>
                 </div>
                 <div>
                     <button type="button" class="button text" @click="editFilter">
-                        <span class="icon filter" />
-                        <span class="hide-small">Filter</span>
-                        <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary" />
+                        <span class="icon filter"/>
+                        <span class="hide-small">{{ $t('52577565-f3ae-4d34-8e1a-14ca2507629e') }}</span>
+                        <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary"/>
                     </button>
                 </div>
             </div>
 
             <div v-for="group of groupedEvents" :key="group.title" class="container">
-                <hr>
-                <h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
+                <hr><h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
 
                 <STList>
-                    <EventRow v-for="event of group.events" :key="event.id" :event="event" @click="$navigate(Routes.Event, {properties: {event}})" />
+                    <EventRow v-for="event of group.events" :key="event.id" :event="event" @click="$navigate(Routes.Event, {properties: {event}})"/>
                 </STList>
             </div>
 
-            <InfiniteObjectFetcherEnd empty-message="Geen activiteiten gevonden" :fetcher="fetcher" />
+            <InfiniteObjectFetcherEnd empty-message="Geen activiteiten gevonden" :fetcher="fetcher"/>
         </main>
     </div>
 </template>

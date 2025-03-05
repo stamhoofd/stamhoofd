@@ -4,50 +4,34 @@
             {{ title }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
-        <STInputBox title="Titel" error-fields="name" :error-box="errors.errorBox">
-            <input
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="Naam van deze tag"
-                autocomplete="off"
-            >
-        </STInputBox>
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`04043e8a-6a58-488e-b538-fea133738532`)">
+            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`06189d26-7050-4571-bfa6-6cfe452d9c79`)"></STInputBox>
 
-        <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox" class="max">
-            <textarea
-                v-model="description"
-                class="input"
-                type="text"
-                placeholder="Optioneel. Korte beschrijving van het doel van deze tag."
-                autocomplete="off"
-                enterkeyhint="next"
-            />
+        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`f72f5546-ed6c-4c93-9b0d-9718f0cc9626`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`4bbc9543-d578-4ca7-8851-9d955723044c`)"/>
         </STInputBox>
         <div class="container">
-            <hr>
-            <h2>{{ $t('b381ed6f-c509-418d-9668-7c161a0fa652') }}</h2>
+            <hr><h2>{{ $t('b381ed6f-c509-418d-9668-7c161a0fa652') }}</h2>
             <p class="style-description">
                 {{ $t('4139ef30-55c8-4775-b97a-69b3a8b7d112') }}
             </p>
             <STList v-model="draggableChildTags" :draggable="true">
                 <template #item="{item}">
-                    <TagRow :all-tags="allPatchedTags" :tag="item" @click="editTag(item)" @patch:all-tags="addArrayPatch" />
+                    <TagRow :all-tags="allPatchedTags" :tag="item" @click="editTag(item)" @patch:all-tags="addArrayPatch"/>
                 </template>
             </STList>
             <p>
                 <button class="button text" type="button" @click="addTag">
-                    <span class="icon add" />
+                    <span class="icon add"/>
                     <span>{{ $t('20699886-7112-43f5-b38c-f5b686c37257') }}</span>
                 </button>
             </p>
         </div>
 
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
+            <hr><h2>
                 {{ $t('e5c15476-6092-45c9-ac55-541f45720c71') }}
             </h2>
             <p v-if="!isEmpty" class="style-description">
@@ -55,7 +39,7 @@
             </p>
 
             <button class="button secundary danger" type="button" @click="doDelete">
-                <span class="icon trash" />
+                <span class="icon trash"/>
                 <span>{{ $t('5bb7b4d5-def0-431d-ba3c-e34ffc7ee777') }}</span>
             </button>
         </div>

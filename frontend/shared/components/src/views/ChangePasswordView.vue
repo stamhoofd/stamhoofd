@@ -1,25 +1,21 @@
 <template>
-    <SaveView class="auto" data-submit-last-field title="Wachtwoord wijzigen" save-icon="lock" @save="submit">
+    <SaveView class="auto" data-submit-last-field save-icon="lock" @save="submit" :title="$t(`Wachtwoord wijzigen`)">
         <h1 v-if="$context.user?.hasPassword">
-            Wachtwoord wijzigen
+            {{ $t('55f44c6c-4d38-480a-805f-2378d2ca4319') }}
         </h1>
         <h1 v-else>
-            Wachtwoord instellen
+            {{ $t('f7b5c0dc-2c0e-4b7a-9422-af08f0b520dc') }}
         </h1>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox"/>
 
-        <input id="username" style="display: none;" type="text" name="username" autocomplete="username" :value="email">
+        <input id="username" style="display: none;" type="text" name="username" autocomplete="username" :value="email"><STInputBox :title="$t(`418c9ab2-77de-441b-b9ab-af7bd55558ef`)">
+            <input id="new-password" v-model="password" class="input" enterkeyhint="next" autocomplete="new-password" type="password" :placeholder="$t(`c28da8f7-0e6c-4159-98d8-d87f5ae7c533`)"></STInputBox>
 
-        <STInputBox title="Kies een wachtwoord">
-            <input id="new-password" v-model="password" class="input" enterkeyhint="next" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
-        </STInputBox>
+        <STInputBox :title="$t(`64bc8c3c-4feb-4fb4-b5bf-71726f2b6609`)">
+            <input id="confirm-password" v-model="passwordRepeat" enterkeyhint="go" class="input" autocomplete="new-password" type="password" :placeholder="$t(`91317163-c535-47be-a080-0f2b4f055dcc`)"></STInputBox>
 
-        <STInputBox title="Herhaal wachtwoord">
-            <input id="confirm-password" v-model="passwordRepeat" enterkeyhint="go" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
-        </STInputBox>
-
-        <PasswordStrength v-model="password" />
+        <PasswordStrength v-model="password"/>
     </SaveView>
 </template>
 

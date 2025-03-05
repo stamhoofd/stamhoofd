@@ -1,36 +1,35 @@
 <template>
-    <SaveView :loading="saving" title="Exporteren" :disabled="!canContinue" save-text="Exporteren" @save="save">
+    <SaveView :loading="saving" :disabled="!canContinue" save-text="Exporteren" @save="save" :title="$t(`3efec767-4e66-48a4-af15-3e629f37df32`)">
         <h1>
-            Cijfers exporteren
+            {{ $t('91a585d2-a615-4b97-8372-1e50e81f238d') }}
         </h1>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox"/>
 
         <div class="split-inputs">
-            <STInputBox title="Vanaf" error-fields="startDate" :error-box="errorBox">
-                <DateSelection v-model="startDate" />
+            <STInputBox error-fields="startDate" :error-box="errorBox" :title="$t(`cb8367e9-6497-483f-9d61-a595d1f5f441`)">
+                <DateSelection v-model="startDate"/>
             </STInputBox>
 
-            <STInputBox title="Tot en met" error-fields="endDate" :error-box="errorBox">
-                <DateSelection v-model="endDate" />
+            <STInputBox error-fields="endDate" :error-box="errorBox" :title="$t(`c0ab1bdb-143d-45cc-86f3-90ced04addad`)">
+                <DateSelection v-model="endDate"/>
             </STInputBox>
         </div>
 
         <p class="style-description-small">
-            Snel selecteren: <span v-for="(suggestion, index) in dateRangeSuggestions" :key="suggestion.name">
+            {{ $t('89466cd6-b1d8-4fb7-be92-1a4ee972530e') }} <span v-for="(suggestion, index) in dateRangeSuggestions" :key="suggestion.name">
                 <button type="button" class="inline-link" :class="isSuggestionSelected(suggestion) ? {secundary: false} : {secundary: true}" @click="selectSuggestion(suggestion)">
                     {{ suggestion.name }}
                 </button><template v-if="index < dateRangeSuggestions.length - 1">, </template>
             </span>
         </p>
 
-        <hr>
-        <h2>Betaalmethodes</h2>
+        <hr><h2>{{ $t('47ffc673-424e-4be8-aa64-f01ba8581b64') }}</h2>
 
         <STList>
             <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox :model-value="getPaymentMethod(method)" @update:model-value="setPaymentMethod(method, $event)" />
+                    <Checkbox :model-value="getPaymentMethod(method)" @update:model-value="setPaymentMethod(method, $event)"/>
                 </template>
                 <h3 class="style-title-list">
                     {{ getMethodName(method) }}
@@ -39,13 +38,12 @@
         </STList>
 
         <template v-if="allPaymentProviders.length">
-            <hr>
-            <h2>Betaalaccounts</h2>
+            <hr><h2>{{ $t('32cef019-60fa-4cdc-ad0f-0e7cc255a1d6') }}</h2>
 
             <STList>
                 <STListItem v-for="provider in allPaymentProviders" :key="provider" :selectable="true" element-name="label" class="left-center">
                     <template #left>
-                        <Checkbox :model-value="getProvider(provider)" @update:model-value="setProvider(provider, $event)" />
+                        <Checkbox :model-value="getProvider(provider)" @update:model-value="setProvider(provider, $event)"/>
                     </template>
                     <h3 class="style-title-list">
                         {{ getProviderName(provider) }}
@@ -55,18 +53,17 @@
         </template>
 
         <template v-if="getProvider('Stripe') || useUTCTimezone">
-            <hr>
-            <h2>Tijdzone</h2>
+            <hr><h2>{{ $t('5342c286-853d-4d59-800b-5db5b0a03b05') }}</h2>
             <STList>
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
-                        <Checkbox v-model="useUTCTimezone" />
+                        <Checkbox v-model="useUTCTimezone"/>
                     </template>
                     <h3 class="style-title-list">
-                        Gebruik UTC-tijdzone
+                        {{ $t('70c49e48-d73e-4781-8388-6c4a707042c4') }}
                     </h3>
                     <p class="style-description-small">
-                        Voor de maandelijkse facturen van Stripe gebruiken we de UTC-tijdzone.
+                        {{ $t('2efea58a-a6d8-4a00-b369-d6e8bc28559f') }}
                     </p>
                 </STListItem>
             </STList>

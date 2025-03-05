@@ -1,68 +1,54 @@
 <template>
-    <SaveView :title="isNew ? 'Kortingscode toevoegen' : 'Kortingscode bewerken'" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`Kortingscode toevoegen`) : $t(`Kortingscode bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            Kortingscode toevoegen
+            {{ $t('f56b27d2-c893-43eb-8364-e475cca1c7b5') }}
         </h1>
         <h1 v-else>
-            Kortingscode bewerken
+            {{ $t('0bd1fdf6-8908-46f4-ba01-ad001803b796') }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
-        <STInputBox title="Code" error-fields="code" :error-box="errors.errorBox">
-            <input
-                v-model="code"
-                class="input"
-                type="text"
-                placeholder="Bv. BLACK-FRIDAY"
-                autocomplete="off"
-                @blur="cleanCode"
-            >
-        </STInputBox>
+        <STInputBox error-fields="code" :error-box="errors.errorBox" :title="$t(`1ae2e944-e3b9-4354-bb7a-05e28272c554`)">
+            <input v-model="code" class="input" type="text" autocomplete="off" @blur="cleanCode" :placeholder="$t(`f8f07f8d-bca2-4442-b332-134d56ed4b15`)"></STInputBox>
         <p v-if="!code" class="style-description-small">
-            Kies zelf een code of <button type="button" class="inline-link" @click="generateCode()">
-                genereer één willekeurig
+            {{ $t('d221fa98-5a7f-48b9-b0cd-a9891680bea6') }} <button type="button" class="inline-link" @click="generateCode()">
+                {{ $t('584cc7ec-06a2-40ee-8123-6e3689973890') }}
             </button>
         </p>
         <p v-else class="style-description-small">
-            De kortingscode kan gebruikt worden via <span v-copyable="'https://'+link" class="style-copyable style-inline-code">{{ link }}</span>
+            {{ $t('5ddc56e5-8e32-4ba9-82ac-a42030ec30c0') }} <span v-copyable="'https://'+link" class="style-copyable style-inline-code">{{ link }}</span>
         </p>
 
-        <STInputBox title="Beschrijving" class="max" error-fields="description" :error-box="errors.errorBox">
-            <textarea
-                v-model="description"
-                class="input"
-                placeholder="Optioneel"
-                autocomplete="off"
-            />
+        <STInputBox class="max" error-fields="description" :error-box="errors.errorBox" :title="$t(`f72f5546-ed6c-4c93-9b0d-9718f0cc9626`)">
+            <textarea v-model="description" class="input" autocomplete="off" :placeholder="$t(`e64a0d25-fe5a-4c87-a087-97ad30b2b12b`)"/>
         </STInputBox>
         <p class="style-description-small">
-            De beschrijving is een interne referentie, en is niet zichtbaar voor bestellers.
+            {{ $t('dd0790c6-2447-43e6-8edc-9bea21a2c250') }}
         </p>
 
         <STList>
             <STListItem :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox v-model="useMaximumUsage" />
+                    <Checkbox v-model="useMaximumUsage"/>
                 </template>
 
                 <h3 class="style-title-list">
-                    Beperk aantal keer te gebruiken (waarvan al {{ patchedDiscountCode.usageCount }} keer gebruikt)
+                    {{ $t('272692c3-6e9d-4e02-a1ef-9ad33f96496d') }} {{ patchedDiscountCode.usageCount }} {{ $t('b46b6e73-532f-4ddc-a576-09e9325cfd99') }}
                 </h3>
 
                 <div v-if="useMaximumUsage" class="split-inputs option" @click.stop.prevent>
                     <STInputBox title="" error-fields="stock" :error-box="errors.errorBox">
-                        <NumberInput v-model="maximumUsage" />
+                        <NumberInput v-model="maximumUsage"/>
                     </STInputBox>
                 </div>
             </STListItem>
         </STList>
 
-        <hr>
-        <h2>
-            Kortingen
+        <hr><h2>
+            {{ $t('47931f38-0599-41aa-bc5c-0d91526017a4') }}
         </h2>
-        <p>Je kan één of meerdere kortingen verbinden aan een kortingscode.</p>
+        <p>{{ $t('a3d3a0f4-d97d-4690-9dab-1149f8da0f1e') }}</p>
 
         <STList v-if="patchedDiscountCode.discounts.length">
             <STListItem v-for="discount of patchedDiscountCode.discounts" :key="discount.id" class="right-description right-stack" :selectable="true" @click="editDiscount(discount)">
@@ -72,30 +58,29 @@
                 <p v-if="getDiscountTitle(discount).description" class="style-description-small">
                     {{ getDiscountTitle(discount).description }}
                 </p>
-                <p v-if="getDiscountTitle(discount).footnote" class="style-description-small pre-wrap" v-text="getDiscountTitle(discount).footnote" />
+                <p v-if="getDiscountTitle(discount).footnote" class="style-description-small pre-wrap" v-text="getDiscountTitle(discount).footnote"/>
 
                 <template #right>
-                    <span class="icon arrow-right-small gray" />
+                    <span class="icon arrow-right-small gray"/>
                 </template>
             </STListItem>
         </STList>
 
         <p>
             <button class="button text" type="button" @click="addDiscount">
-                <span class="icon add" />
-                <span>Korting toevoegen</span>
+                <span class="icon add"/>
+                <span>{{ $t('80068224-902d-4e6b-9584-be2260b19f18') }}</span>
             </button>
         </p>
 
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Verwijder deze code
+            <hr><h2>
+                {{ $t('17d869d4-5a16-4404-b548-410e81a161c3') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span class="icon trash"/>
+                <span>{{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}</span>
             </button>
         </div>
     </SaveView>

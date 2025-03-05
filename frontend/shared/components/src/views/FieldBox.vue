@@ -1,12 +1,10 @@
 <template>
     <div class="container field-box">
-        <hr v-if="withTitle">
-        <h2 v-if="withTitle">
+        <hr v-if="withTitle"><h2 v-if="withTitle">
             {{ field.name || 'Maak een keuze' }}
         </h2>
-        <STInputBox :title="withTitle ? undefined : (field.name || 'Maak een keuze')" :error-box="errorBox" :error-fields="'fieldAnswers.'+field.id" :class="{'no-padding': withTitle}">
-            <input v-model="value" :placeholder="field.required ? (field.placeholder || field.name) : 'Optioneel' " class="input">
-            <p v-if="field.description" class="style-description-small" v-text="field.description" />
+        <STInputBox :title="withTitle ? undefined : (field.name || $t(`4da08c88-e58a-4694-a9a4-0e34c1a65618`))" :error-box="errorBox" :error-fields="'fieldAnswers.'+field.id" :class="{'no-padding': withTitle}">
+            <input v-model="value" :placeholder="field.required ? (field.placeholder || field.name) : $t(`e64a0d25-fe5a-4c87-a087-97ad30b2b12b`) " class="input"><p v-if="field.description" class="style-description-small" v-text="field.description"/>
         </STInputBox>
     </div>
 </template>

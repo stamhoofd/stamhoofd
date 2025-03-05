@@ -1,31 +1,31 @@
 <template>
-    <SaveView title="Jouw gegevens" :loading="loading" save-icon-right="arrow-right" save-text="Doorgaan" data-submit-last-field :disabled="companies.length === 0" @save="goNext">
-        <h1>Facturatiegegevens</h1>
-        <p>Deze gegevens komen op jouw betaalbewijs. Zorg dat ze in orde zijn, je kan ze later niet meer wijzigen.</p>
+    <SaveView :loading="loading" save-icon-right="arrow-right" save-text="Doorgaan" data-submit-last-field :disabled="companies.length === 0" @save="goNext" :title="$t(`59da4f9d-b727-4ccd-ab74-219bd84c935b`)">
+        <h1>{{ $t('add6177f-a067-4e79-b7b9-aee2070375f6') }}</h1>
+        <p>{{ $t('5cdbe0b4-67e8-4935-b870-ca96d3f48924') }}</p>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <p v-if="companies.length === 0" class="info-box">
-            Je hebt nog geen facturatiegegevens toegevoegd aan jouw vereniging. Stel deze eerst in voor je verder gaat.
+            {{ $t('a11f9b7c-f01e-4cc5-9e63-9230bd1bbd46') }}
         </p>
 
         <STList v-else>
             <STListItem v-for="company of companies" :key="company.id" :selectable="companies.length > 1" class="right-stack" element-name="label">
                 <template #left>
-                    <Radio v-if="companies.length > 1" v-model="selectedCompanyId" :value="company.id" />
+                    <Radio v-if="companies.length > 1" v-model="selectedCompanyId" :value="company.id"/>
                 </template>
                 <h3 class="style-title-list">
                     {{ company.name || 'Naamloos' }}
                 </h3>
 
                 <p v-if="company.VATNumber" class="style-description-small">
-                    {{ company.VATNumber }} (BTW-plichtig)
+                    {{ company.VATNumber }} {{ $t('4023e307-cbc4-48e4-a5dc-277cf74db1e3') }}
                 </p>
                 <p v-else-if="company.companyNumber" class="style-description-small">
-                    {{ company.companyNumber }} (niet BTW-plichtig)
+                    {{ company.companyNumber }} {{ $t('de9c4810-ea20-4c8c-9d28-813cfa2fadd4') }}
                 </p>
                 <p v-else class="style-description-small">
-                    Feitelijke vereniging
+                    {{ $t('522b4446-bd3d-4d53-a95a-e82f0de07d5e') }}
                 </p>
 
                 <p v-if="company.address" class="style-description-small">
@@ -40,11 +40,11 @@
 
         <p v-if="auth.hasFullAccess()" class="style-button-bar">
             <button v-if="companies.length === 0" type="button" class="button primary" @click="editInvoiceSettings">
-                <span>Instellen</span>
+                <span>{{ $t('3b774241-fcc0-4801-81ee-afb7dcd321ae') }}</span>
             </button>
             <button v-else type="button" class="button text" @click="editInvoiceSettings">
-                <span class="icon edit" />
-                <span>Bewerk</span>
+                <span class="icon edit"/>
+                <span>{{ $t('b0aa62aa-3b40-44dd-b7a3-7f8c752eeb22') }}</span>
             </button>
         </p>
         <p v-else class="warning-box">

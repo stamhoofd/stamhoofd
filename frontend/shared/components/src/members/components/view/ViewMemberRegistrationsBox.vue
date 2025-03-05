@@ -1,39 +1,38 @@
 <template>
     <article class="container">
-        <hr>
-        <h2 class="style-with-button">
+        <hr><h2 class="style-with-button">
             <button v-long-press="(e) => switchCycle(e)" type="button" class="button" @click.prevent="switchCycle" @contextmenu.prevent="switchCycle">
                 {{ visibleRegistrationsTitle }}
-                <span class="icon arrow-down-small" />
+                <span class="icon arrow-down-small"/>
             </button>
             <div>
-                <button v-if="hasWrite" v-long-press="(e) => addRegistration(e)" type="button" class="button icon add gray" @click.prevent="addRegistration" @contextmenu.prevent="addRegistration" />
+                <button v-if="hasWrite" v-long-press="(e) => addRegistration(e)" type="button" class="button icon add gray" @click.prevent="addRegistration" @contextmenu.prevent="addRegistration"/>
             </div>
         </h2>
 
         <button v-if="!member.family.checkout.cart.isEmpty && app === 'registration'" class="info-box selectable icon" type="button" @click="openCart">
-            <span>Er staan inschrijvingen klaar in je mandje. Reken ze af om ze definitief te maken.</span>
-            <span class="button icon arrow-right-small" />
+            <span>{{ $t('fe02d740-cf46-45a4-aefc-83c1f91c225a') }}</span>
+            <span class="button icon arrow-right-small"/>
         </button>
         <template v-else>
             <p v-if="visibleRegistrations.length === 0 && period.id === defaultPeriod.id" class="info-box">
-                {{ member.patchedMember.firstName }} is niet ingeschreven
+                {{ member.patchedMember.firstName }} {{ $t('d835a128-3eb9-4633-920d-0ae8b74db73a') }}
             </p>
             <p v-else-if="visibleRegistrations.length === 0" class="info-box">
-                {{ member.patchedMember.firstName }} was niet ingeschreven
+                {{ member.patchedMember.firstName }} {{ $t('318b60df-98fe-40c9-b3e1-86a451dadb53') }}
             </p>
         </template>
 
         <STList v-if="hasWrite && app !== 'registration'">
-            <ViewMemberRegistrationRow v-for="registration in visibleRegistrations" :key="registration.id" :member="member" :registration="registration" @edit="(e) => editRegistration(registration, e)" />
+            <ViewMemberRegistrationRow v-for="registration in visibleRegistrations" :key="registration.id" :member="member" :registration="registration" @edit="(e) => editRegistration(registration, e)"/>
         </STList>
         <STList v-else>
-            <ViewMemberRegistrationRow v-for="registration in visibleRegistrations" :key="registration.id" :member="member" :registration="registration" />
+            <ViewMemberRegistrationRow v-for="registration in visibleRegistrations" :key="registration.id" :member="member" :registration="registration"/>
         </STList>
 
         <footer v-if="hasDeleted && !showDeleted" class="style-button-bar">
             <button class="button text" type="button" @click="showDeleted = true;">
-                Toon beëindigde inschrijvingen
+                {{ $t('e20184d6-d53c-4e9c-8775-08cefa71c65a') }}
             </button>
         </footer>
     </article>

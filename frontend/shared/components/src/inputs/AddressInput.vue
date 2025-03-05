@@ -1,13 +1,10 @@
 <template>
     <STInputBox :title="title" error-fields="address" :error-box="errorBox">
-        <input v-model="addressLine1" class="input" type="text" placeholder="Straat en nummer" name="street-address" autocomplete="street-address" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur">
-        <div class="input-group">
+        <input v-model="addressLine1" class="input" type="text" name="street-address" autocomplete="street-address" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur" :placeholder="$t(`930d4ecb-34f2-4230-9502-5aead81585be`)"><div class="input-group">
             <div>
-                <input v-model="postalCode" class="input" type="text" placeholder="Postcode" name="postal-code" autocomplete="postal-code" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur">
-            </div>
+                <input v-model="postalCode" class="input" type="text" name="postal-code" autocomplete="postal-code" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur" :placeholder="$t(`c6d2cc38-d1f7-48c5-a4d3-246bae6f7f7e`)"></div>
             <div>
-                <input v-model="city" class="input" type="text" placeholder="Gemeente" name="city" autocomplete="address-level2" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur"> <!-- name needs to be city for safari autocomplete -->
-            </div>
+                <input v-model="city" class="input" type="text" name="city" autocomplete="address-level2" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur" :placeholder="$t(`7ba41633-732a-47f4-b037-7ebbf49a3903`)"></div>
         </div>
 
         <Dropdown v-model="country" autocomplete="country" name="country" @update:model-value="updateAddress" @focus="onFocus" @blur="onBlur">

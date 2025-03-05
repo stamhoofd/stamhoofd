@@ -1,31 +1,31 @@
 <template>
     <div class="st-view sms-view">
-        <STNavigationBar title="SMS'en" />
+        <STNavigationBar :title="$t(`SMS'en`)"/>
 
         <main>
             <h1>
-                SMS'en
+                {{ $t("68c36512-27ac-4f2d-b71c-029d5d45ffd2") }}
             </h1>
 
             <div v-if="!isSupported" class="error-box">
-                SMS functionaliteit is niet beschikbaar op dit toestel. Probeer het op een smartphone (Android of iOS) of Mac.
+                {{ $t('928dd27f-e108-4097-be07-0a1804e89c04') }}
             </div>
-            <STInputBox v-if="customers.length === 0 && parentsEnabled" title="Naar wie?">
+            <STInputBox v-if="customers.length === 0 && parentsEnabled" :title="$t(`f40db38c-ea48-4a43-80da-fbc5d50e78a6`)">
                 <Dropdown id="sms-who" v-model="smsFilter">
                     <option value="parents">
-                        Enkel naar ouders
+                        {{ $t('ae436301-c9a4-4280-b0d4-f7143d11aa77') }}
                     </option>
                     <option value="members">
-                        Enkel naar leden
+                        {{ $t('37a7828b-0ba1-4e41-a203-e37ccd658885') }}
                     </option>
                     <option value="all">
-                        Ouders en leden
+                        {{ $t('b6ba3a89-db58-4e73-9d89-171cddfdb426') }}
                     </option>
                 </Dropdown>
             </STInputBox>
 
-            <STInputBox v-if="canUseBody" id="message-title" title="Bericht" />
-            <textarea v-if="canUseBody" id="sms-text" v-model="message" class="input" placeholder="Typ hier je SMS-bericht" />
+            <STInputBox v-if="canUseBody" id="message-title" :title="$t(`37a80cbe-8d17-4392-a568-b6c05c8ab6cc`)"/>
+            <textarea v-if="canUseBody" id="sms-text" v-model="message" class="input" :placeholder="$t(`be796726-39b1-4de9-9da9-a4be6652ab75`)"/>
         </main>
 
         <STToolbar>
@@ -40,7 +40,7 @@
             </template>
             <template #right>
                 <button class="button primary" :disabled="!isSupported || phones.length === 0" type="button" @click="send">
-                    Versturen...
+                    {{ $t('1ae3cae8-4fdc-410e-af1e-e29717ab7374') }}
                 </button>
             </template>
         </STToolbar>

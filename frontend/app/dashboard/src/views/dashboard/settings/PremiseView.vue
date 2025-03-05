@@ -3,39 +3,23 @@
         <div class="container">
             <h1>{{ title }}</h1>
 
-            <STErrorsDefault :error-box="errors.errorBox" />
+            <STErrorsDefault :error-box="errors.errorBox"/>
 
             <STInputBox :title="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e')" error-fields="name" :error-box="errors.errorBox">
-                <input
-                    id="premise-name"
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    :placeholder="$t('8505e377-cc4d-4551-98d3-60a70d8b2c7b')"
-                    autocomplete="off"
-                >
-            </STInputBox>
+                <input id="premise-name" v-model="name" class="input" type="text" :placeholder="$t('8505e377-cc4d-4551-98d3-60a70d8b2c7b')" autocomplete="off"></STInputBox>
 
             <STInputBox :title="$t('1c338881-0940-429b-a47e-7c9d3055f533')" error-fields="description" :error-box="errors.errorBox" class="max">
-                <textarea
-                    id="premise-description"
-                    v-model="description"
-                    class="input"
-                    type="text"
-                    :placeholder="$t('13650793-84d9-407a-b477-79b40011441d')"
-                    autocomplete="off"
-                />
+                <textarea id="premise-description" v-model="description" class="input" type="text" :placeholder="$t('13650793-84d9-407a-b477-79b40011441d')" autocomplete="off"/>
             </STInputBox>
 
-            <AddressInput v-model="address" :title="$t('622c0dd7-cddd-4417-9bfd-5f6aca2480f5')" :validator="errors.validator" :required="true" :link-country-to-locale="true" error-fields="address" />
+            <AddressInput v-model="address" :title="$t('622c0dd7-cddd-4417-9bfd-5f6aca2480f5')" :validator="errors.validator" :required="true" :link-country-to-locale="true" error-fields="address"/>
 
             <div v-if="platformPremiseTypes.length || originalPremiseTypeIds.size" class="container">
-                <hr>
-                <h2>Type</h2>
+                <hr><h2>{{ $t('b610d465-2901-4b54-97ae-dbeab72e4762') }}</h2>
                 <STList>
                     <STListItem v-for="premiseType of platformPremiseTypes" :key="premiseType.id" :selectable="true" element-name="label" class="hover-box">
                         <template #left>
-                            <Checkbox :model-value="isPremiseTypeSelected(premiseType)" :disabled="isPremiseTypeDisabled(premiseType)" @update:model-value="($event: boolean) => selectPremiseType($event, premiseType)" />
+                            <Checkbox :model-value="isPremiseTypeSelected(premiseType)" :disabled="isPremiseTypeDisabled(premiseType)" @update:model-value="($event: boolean) => selectPremiseType($event, premiseType)"/>
                         </template>
                         <div class="checkbox-label">
                             <h2 class="style-title-list">
@@ -47,20 +31,20 @@
                         </div>
 
                         <template #right>
-                            <span v-if="premiseTypeWarnings.has(premiseType.id)" v-tooltip="premiseTypeWarnings.get(premiseType.id)" class="icon warning yellow" />
-                            <span v-else-if="isPremiseTypeDisabled(premiseType)" v-tooltip="'Het maximum aantal van dit type is bereikt. Verwijder eerst een ander lokaal van dit type om dit type te selecteren.'" class="icon info-circle hover-show" />
+                            <span v-if="premiseTypeWarnings.has(premiseType.id)" v-tooltip="premiseTypeWarnings.get(premiseType.id)" class="icon warning yellow"/>
+                            <span v-else-if="isPremiseTypeDisabled(premiseType)" v-tooltip="'Het maximum aantal van dit type is bereikt. Verwijder eerst een ander lokaal van dit type om dit type te selecteren.'" class="icon info-circle hover-show"/>
                         </template>
                     </STListItem>
                     <STListItem v-if="hasUnknownType" :selectable="true" element-name="label">
                         <template #left>
-                            <Checkbox :model-value="isUnknownTypeSelected" @update:model-value="selectUnkownType" />
+                            <Checkbox :model-value="isUnknownTypeSelected" @update:model-value="selectUnkownType"/>
                         </template>
                         <div class="checkbox-label">
                             <h2 class="style-title-list">
-                                Onbekend
+                                {{ $t('011693e3-782c-4bc5-a9f5-7e7682c3e53a') }}
                             </h2>
                             <p class="style-description-small">
-                                Dit type lokaal is onbekend. Waarschijnlijk is deze verwijderd.
+                                {{ $t('1fedfd1a-fb81-44b5-8234-9b0eb575328c') }}
                             </p>
                         </div>
                     </STListItem>

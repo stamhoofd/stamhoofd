@@ -1,14 +1,14 @@
 <template>
     <LoadingBoxTransition :loading="loadingStripeAccounts">
         <div class="container">
-            <STErrorsDefault :error-box="errors.errorBox" />
-            <STInputBox v-if="(stripeAccountObject === null && stripeAccounts.length > 0) || stripeAccounts.length > 1 || (stripeAccounts.length > 0 && hasMollieOrBuckaroo)" title="Betaalaccount" error-fields="stripeAccountId">
+            <STErrorsDefault :error-box="errors.errorBox"/>
+            <STInputBox v-if="(stripeAccountObject === null && stripeAccounts.length > 0) || stripeAccounts.length > 1 || (stripeAccounts.length > 0 && hasMollieOrBuckaroo)" error-fields="stripeAccountId" :title="$t(`58e7a0f9-5432-4159-8405-d7dfaeeca79b`)">
                 <Dropdown v-model="stripeAccountId">
                     <option v-if="hasMollieOrBuckaroo" :value="null">
                         {{ mollieOrBuckarooName }}
                     </option>
                     <option v-else :value="null">
-                        Geen
+                        {{ $t('039ea891-15aa-42d4-8513-7f29d0743514') }}
                     </option>
                     <option v-for="account in stripeAccounts" :key="account.id" :value="account.id">
                         {{ account.meta.settings.dashboard.display_name }} - {{ account.meta.business_profile.name }}, xxxx {{ account.meta.bank_account_last4 }} - {{ account.accountId }}
@@ -18,48 +18,47 @@
             <p v-if="stripeAccountObject && stripeAccountObject.warning" :class="stripeAccountObject.warning.type + '-box'">
                 {{ stripeAccountObject.warning.text }}
                 <a :href="$domains.getDocs('documenten-stripe-afgekeurd')" target="_blank" class="button text">
-                    Meer info
+                    {{ $t('34099e11-aafe-435c-bd11-5b681610008e') }}
                 </a>
             </p>
 
             <STList>
                 <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label" :disabled="!canEnablePaymentMethod(method)">
                     <template #left>
-                        <Checkbox :model-value="getPaymentMethod(method)" @update:model-value="setPaymentMethod(method, $event)" />
+                        <Checkbox :model-value="getPaymentMethod(method)" @update:model-value="setPaymentMethod(method, $event)"/>
                     </template>
                     <h3 class="style-title-list">
                         {{ getName(method) }}
                     </h3>
-                    <p v-if="getPaymentMethod(method) && getDescription(method)" class="style-description-small pre-wrap" v-text="getDescription(method)" />
-                    <p v-if="getPaymentMethod(method) && getSettingsDescription(method)" class="style-description-small pre-wrap" v-text="getSettingsDescription(method)" />
+                    <p v-if="getPaymentMethod(method) && getDescription(method)" class="style-description-small pre-wrap" v-text="getDescription(method)"/>
+                    <p v-if="getPaymentMethod(method) && getSettingsDescription(method)" class="style-description-small pre-wrap" v-text="getSettingsDescription(method)"/>
 
                     <template #right>
-                        <button v-if="getPaymentMethod(method)" class="icon button settings" type="button" @click="editPaymentMethodSettings(method)" />
+                        <button v-if="getPaymentMethod(method)" class="icon button settings" type="button" @click="editPaymentMethodSettings(method)"/>
                     </template>
                 </STListItem>
             </STList>
 
             <template v-if="showAdministrationFee">
-                <hr>
-                <h2>Administratiekosten</h2>
+                <hr><h2>{{ $t('d0b159d0-ae10-4afc-87e5-84b6342c7468') }}</h2>
                 <p>{{ $t('b091538b-014e-4db2-8241-9ed98e0c51c7') }}</p>
 
                 <div class="split-inputs">
-                    <STInputBox title="Vaste kost" error-fields="administrationFee.fixed" :error-box="errors.errorBox">
-                        <PriceInput v-model="fixed" :min="0" placeholder="Vaste kost" :required="true" />
+                    <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`0375d617-58bc-4fff-abbc-b73d4a3a1e28`)">
+                        <PriceInput v-model="fixed" :min="0" :required="true" :placeholder="$t(`0375d617-58bc-4fff-abbc-b73d4a3a1e28`)"/>
                     </STInputBox>
 
-                    <STInputBox title="Percentage" error-fields="administrationFee.fixed" :error-box="errors.errorBox">
-                        <PermyriadInput v-model="percentage" placeholder="Percentage" :required="true" />
+                    <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`2041e6a0-2f90-485e-8144-4169e0f7ff31`)">
+                        <PermyriadInput v-model="percentage" :required="true" :placeholder="$t(`2041e6a0-2f90-485e-8144-4169e0f7ff31`)"/>
                     </STInputBox>
                 </div>
 
                 <Checkbox v-if="fixed > 0" v-model="zeroIfZero">
-                    Reken geen administratiekosten aan als het totaalbedrag 0 euro is
+                    {{ $t('b2fcc2b5-1f49-4f57-a1bc-20ee7b42dcba') }}
                 </Checkbox>
 
                 <p v-if="percentage && exampleAdministrationFee1" class="style-description-small">
-                    Voorbeeld: de aangerekende administratiekost bedraagt {{ formatPrice(exampleAdministrationFee1) }} op een bedrag van {{ formatPrice(exampleAdministrationFeeValue1) }}, en {{ formatPrice(exampleAdministrationFee2) }} op een bedrag van {{ formatPrice(exampleAdministrationFeeValue2) }}.
+                    {{ $t('7047346c-2d90-432d-8a6e-ec9ac45a96ad') }} {{ formatPrice(exampleAdministrationFee1) }} op een bedrag van {{ formatPrice(exampleAdministrationFeeValue1) }}, en {{ formatPrice(exampleAdministrationFee2) }} op een bedrag van {{ formatPrice(exampleAdministrationFeeValue2) }}.
                 </p>
             </template>
         </div>

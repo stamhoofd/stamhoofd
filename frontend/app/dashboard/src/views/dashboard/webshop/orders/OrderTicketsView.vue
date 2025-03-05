@@ -1,24 +1,24 @@
 <template>
     <div class="st-view order-tickets-view">
-        <STNavigationBar :title="'Tickets'" />
+        <STNavigationBar :title="$t(`Tickets`)"/>
         <main>
             <h1 v-if="tickets.length > 1">
-                Tickets
+                {{ $t('f3005a87-5877-435d-bc0e-5b4883e7ca11') }}
             </h1>
             <h1 v-else>
-                Ticket
+                {{ $t('57c98fd7-1432-4b03-99f7-452b6c95a7f1') }}
             </h1>
 
             <STList>
-                <TicketRow v-for="ticket in tickets" :key="ticket.id" :ticket="ticket" :webshop-manager="webshopManager" :order="order" />
+                <TicketRow v-for="ticket in tickets" :key="ticket.id" :ticket="ticket" :webshop-manager="webshopManager" :order="order"/>
             </STList>
         </main>
 
         <STToolbar>
             <template #right>
                 <button class="button primary" type="button" @click="downloadAllTickets">
-                    <span class="icon download" />
-                    <span>Download</span>
+                    <span class="icon download"/>
+                    <span>{{ $t('e6b57793-7438-442c-9455-e75ac4a3fd0b') }}</span>
                 </button>
             </template>
         </STToolbar>

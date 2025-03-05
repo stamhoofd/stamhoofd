@@ -4,20 +4,14 @@
             <p v-if="!checkout.isAdminFromSameOrganization" class="style-title-prefix">
                 {{ groupOrganization!.name }}
             </p>
-            <h1>Inschrijven voor {{ group.settings.name }}</h1>
+            <h1>{{ $t('5d7ed621-b08d-4f48-b64e-640b17036800') }} {{ group.settings.name }}</h1>
 
             <p v-if="hasNoMembers" class="info-box">
                 {{ $t('d5e39906-8c0b-4006-bab5-96827f8daa53') }}
             </p>
 
             <STList>
-                <RegisterItemCheckboxRow
-                    v-for="member in family.members"
-                    :key="member.id"
-                    :member="member"
-                    :group="group"
-                    :group-organization="groupOrganization"
-                />
+                <RegisterItemCheckboxRow v-for="member in family.members" :key="member.id" :member="member" :group="group" :group-organization="groupOrganization"/>
             </STList>
         </SaveView>
     </ExternalOrganizationContainer>

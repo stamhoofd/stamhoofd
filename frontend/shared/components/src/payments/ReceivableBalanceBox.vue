@@ -2,13 +2,13 @@
     <LoadingBoxTransition :error-box="errors.errorBox">
         <div v-if="detailedItem" class="container">
             <template v-if="detailedItem.filteredBalanceItems.length">
-                <SegmentedControl v-if="!hideSegmentedControl" v-model="selectedTab" :items="['Gegroepeerd', 'Individueel']" />
-                <ReceivableBalanceList v-if="selectedTab === 'Individueel'" :item="detailedItem" />
-                <GroupedBalanceList v-else :item="detailedItem" />
-                <BalancePriceBreakdown :item="detailedItem" />
+                <SegmentedControl v-if="!hideSegmentedControl" v-model="selectedTab" :items="['Gegroepeerd', 'Individueel']"/>
+                <ReceivableBalanceList v-if="selectedTab === 'Individueel'" :item="detailedItem"/>
+                <GroupedBalanceList v-else :item="detailedItem"/>
+                <BalancePriceBreakdown :item="detailedItem"/>
             </template>
             <p v-else class="info-box">
-                Geen openstaand bedrag
+                {{ $t('8e3db09e-b04b-4f29-866c-ab202093fa99') }}
             </p>
 
             <STList v-if="hasWrite">
@@ -16,19 +16,19 @@
                     <template #left>
                         <IconContainer icon="box">
                             <template #aside>
-                                <span class="icon add small primary" />
+                                <span class="icon add small primary"/>
                             </template>
                         </IconContainer>
                     </template>
                     <h3 class="style-title-list">
-                        Item toevoegen
+                        {{ $t('fa974919-91ab-4005-930c-5df57de4532f') }}
                     </h3>
                     <p class="style-description-small">
-                        Voeg een item toe aan het openstaand bedrag of geef een tegoed
+                        {{ $t('ffbb5f15-84cb-48be-98f4-cf392fd6f227') }}
                     </p>
 
                     <template #right>
-                        <span class="icon arrow-right-small gray" />
+                        <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
 
@@ -36,20 +36,20 @@
                     <template #left>
                         <IconContainer icon="receive">
                             <template #aside>
-                                <span class="icon add small primary" />
+                                <span class="icon add small primary"/>
                             </template>
                         </IconContainer>
                     </template>
 
                     <h3 class="style-title-list">
-                        Betaling registreren
+                        {{ $t('8bb10f83-0c50-4dc0-bb2a-a99582b1e378') }}
                     </h3>
                     <p class="style-description-small">
-                        Via een betaling kan je één of meerdere items markeren als betaald
+                        {{ $t('957c4689-d573-4e71-8438-1a07764cafe8') }}
                     </p>
 
                     <template #right>
-                        <span class="icon arrow-right-small gray" />
+                        <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
 
@@ -57,61 +57,57 @@
                     <template #left>
                         <IconContainer icon="undo">
                             <template #aside>
-                                <span class="icon add small primary" />
+                                <span class="icon add small primary"/>
                             </template>
                         </IconContainer>
                     </template>
 
                     <h3 class="style-title-list">
-                        Terugbetaling registreren
+                        {{ $t('22bc0216-abd2-44ff-81cb-d4476b1e8e75') }}
                     </h3>
                     <p class="style-description-small">
-                        Via een betaling kan je één of meerdere items markeren als betaald
+                        {{ $t('957c4689-d573-4e71-8438-1a07764cafe8') }}
                     </p>
 
                     <template #right>
-                        <span class="icon arrow-right-small gray" />
+                        <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
             </STList>
 
             <template v-if="item.objectType === ReceivableBalanceType.member || item.objectType === ReceivableBalanceType.user">
-                <hr>
-                <h2>Hoe kan men dit betalen?</h2>
-                <p>Leden kunnen hun openstaand bedrag betalen door naar het ledenportaal te gaan. Bovenaan zullen ze bij 'snelle acties' een knop zien waarmee ze hun openstaand bedrag kunnen betalen (je kan een e-mail sturen met een inlogknop om naar het ledenportaal te gaan).</p>
+                <hr><h2>{{ $t('cbd5c9a7-70dc-4dcb-bb65-3d46ef49401c') }}</h2>
+                <p>{{ $t("9ae0414a-e2d9-4f1c-b0db-dc38de1bd62a") }}</p>
                 <p v-if="detailedItem.amountPending !== 0" class="style-description-block">
-                    Opgelet, het deel dat in verwerking is kan niet betaald worden via het ledenportaal. Je kan wel de betalingen die in verwerking zijn annuleren zodat ze via een andere betaalmethode betaald kunnen worden via het ledenportaal. Bijvoorbeeld een overschrijving die al lang niet betaald werd kan je annuleren om vervolgens een nieuw betaalverzoek te versturen van het openstaande bedrag.
+                    {{ $t('2afc84b6-337e-48a6-9892-37a7913c07ff') }}
                 </p>
                 <p v-if="detailedItem.amountOpen !== 0" class="style-description-block">
-                    Je kan zelf ook manueel een betaling toevoegen (bv. als er ter plaatse werd betaald, of via een overschrijving die niet in het systeem is opgenomen) via de knop 'Betaling/terugbetaling registreren' hierboven.
+                    {{ $t("ca839440-2f49-434a-8bc6-1a5d1d7ab9b7") }}
                 </p>
             </template>
 
             <template v-if="pendingPayments.length > 0">
-                <hr>
-                <h2>In verwerking</h2>
-                <p>Bij betalingen via overschrijving of domiciliëring kan het even duren voor een betaling wordt bevestigd.</p>
+                <hr><h2>{{ $t('8083d1d7-7325-4b2c-a708-9ddf0c5d38c8') }}</h2>
+                <p>{{ $t('35a6d90a-2aec-4104-bdc0-ccce5465a6b0') }}</p>
 
                 <STList>
-                    <PaymentRow v-for="payment of pendingPayments" :key="payment.id" :payments="pendingPayments" :payment="payment" />
+                    <PaymentRow v-for="payment of pendingPayments" :key="payment.id" :payments="pendingPayments" :payment="payment"/>
                 </STList>
             </template>
 
-            <hr>
-            <h2>Betalingen</h2>
+            <hr><h2>{{ $t('e8b43c8b-cc18-46bd-bc0c-d40f2dfc306c') }}</h2>
 
             <p v-if="succeededPayments.length === 0" class="info-box">
-                Je hebt nog geen ontvangen
+                {{ $t('0d3b57c0-0dd1-4e4e-8377-25e1cd917323') }}
             </p>
 
             <STList v-else>
-                <PaymentRow v-for="payment of succeededPayments" :key="payment.id" :payment="payment" :payments="succeededPayments" />
+                <PaymentRow v-for="payment of succeededPayments" :key="payment.id" :payment="payment" :payments="succeededPayments"/>
             </STList>
 
-            <hr>
-            <h2>Contactpersonen</h2>
+            <hr><h2>{{ $t('af3d8f0d-cfb4-470e-b092-d460f0eec7f3') }}</h2>
 
-            <p>Deze personen ontvangen een e-mail bij elke communicatie rond dit openstaand bedrag.</p>
+            <p>{{ $t('97b88796-3507-4c70-a493-09e6cf4d321c') }}</p>
 
             <STList v-if="detailedItem.object.contacts.length" class="info">
                 <STListItem v-for="(contact, index) of detailedItem.object.contacts" :key="index">
@@ -124,7 +120,7 @@
                 </STListItem>
             </STList>
             <p v-else class="info-box">
-                Geen contactpersonen gevonden
+                {{ $t('44298d09-608b-45e7-b398-8835ab6e1a4e') }}
             </p>
         </div>
     </LoadingBoxTransition>

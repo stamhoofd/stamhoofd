@@ -1,52 +1,43 @@
 <template>
-    <SaveView :title="isNew ? 'Categorie toevoegen' : 'Categorie bewerken'" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`127967a5-502a-4e42-be8b-562cd96953d8`) : $t(`Categorie bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            Zetelcategorie toevoegen
+            {{ $t('de34c588-39ff-4d2f-94c4-dd0594219ba3') }}
         </h1>
         <h1 v-else>
-            Categorie bewerken
+            {{ $t('949deda3-2ee8-46e8-8791-e594b30fe50b') }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
-            <input
-                ref="firstInput"
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="Naam van deze keuze"
-                autocomplete="off"
-            >
-        </STInputBox>
+        <STErrorsDefault :error-box="errors.errorBox"/>
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`d32893b7-c9b0-4ea3-a311-90d29f2c0cf3`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`a9d8f27c-b4d3-415a-94a4-2ec3c018ee48`)"></STInputBox>
 
-        <STInputBox title="Meer of minkost" error-fields="price" :error-box="errors.errorBox">
-            <PriceInput v-model="price" placeholder="+ 0 euro" :min="null" />
+        <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`aeb33249-07e1-420d-908b-17cb4ddb7e05`)">
+            <PriceInput v-model="price" :min="null" :placeholder="$t(`adf86174-0aaa-4486-8428-bed8cce8851d`)"/>
         </STInputBox>
 
         <STList>
             <STListItem :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox v-model="adminOnly" />
+                    <Checkbox v-model="adminOnly"/>
                 </template>
 
                 <h3 class="style-title-list">
-                    Enkel voor beheerders
+                    {{ $t('dbcb1ffc-c564-4b17-9b98-a1e8d93769ce') }}
                 </h3>
                 <p class="style-description-small">
-                    Enkel een beheerder kan deze plaatsen selecteren bij het toevoegen van een bestelling.
+                    {{ $t('96d24174-c406-4d98-8803-15a11628a68f') }}
                 </p>
             </STListItem>
         </STList>
 
         <div v-if="!isNew && !isSingle" class="container">
-            <hr>
-            <h2>
-                Verwijder deze categorie
+            <hr><h2>
+                {{ $t('143eea60-461e-44d9-8536-dd90e3e99413') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span class="icon trash"/>
+                <span>{{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}</span>
             </button>
         </div>
     </SaveView>

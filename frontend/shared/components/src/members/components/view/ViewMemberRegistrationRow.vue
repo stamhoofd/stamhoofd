@@ -1,7 +1,7 @@
 <template>
     <STListItem v-long-press="editRegistration" v-color="registrationOrganization && (app !== 'dashboard' || !organization || registrationOrganization.id !== organization.id) ? registrationOrganization.meta.color : null" :selectable="isEditable" class="hover-box" :class="{'theme-secundary': !registration.deactivatedAt && registration.isTrial, 'theme-error': !!registration.deactivatedAt}" @contextmenu.prevent="editRegistration($event)" @click.prevent="editRegistration($event)">
         <template #left>
-            <GroupIconWithWaitingList :group="group" :icon="registration.deactivatedAt ? 'disabled error' : (registration.isTrial? 'trial secundary' : '')" :organization="registrationOrganization && (app !== 'dashboard' || !organization || registrationOrganization.id !== organization.id) ? registrationOrganization : null" />
+            <GroupIconWithWaitingList :group="group" :icon="registration.deactivatedAt ? 'disabled error' : (registration.isTrial? 'trial secundary' : '')" :organization="registrationOrganization && (app !== 'dashboard' || !organization || registrationOrganization.id !== organization.id) ? registrationOrganization : null"/>
         </template>
         <p v-if="registrationOrganization && (app !== 'dashboard' || !organization || registrationOrganization.id !== organization.id)" class="style-title-prefix-list">
             {{ registrationOrganization.name }}
@@ -16,37 +16,37 @@
         <h3 class="style-title-list">
             <span>{{ group.settings.name }}</span>
         </h3>
-        <p v-if="defaultAgeGroup && group.settings.name !== defaultAgeGroup && app === 'admin'" class="style-description-small" v-text="defaultAgeGroup" />
+        <p v-if="defaultAgeGroup && group.settings.name !== defaultAgeGroup && app === 'admin'" class="style-description-small" v-text="defaultAgeGroup"/>
 
-        <p v-if="registration.description" class="style-description-small pre-wrap" v-text="registration.description" />
+        <p v-if="registration.description" class="style-description-small pre-wrap" v-text="registration.description"/>
 
         <p v-if="registration.startDate" class="style-description-small">
-            Gestart op {{ formatDate(registration.startDate) }}
+            {{ $t('fd1fc370-8cfe-4f69-83f1-d9396e266492') }} {{ formatDate(registration.startDate) }}
         </p>
 
         <p v-if="registration.registeredAt && !(registration.startDate && formatDate(registration.registeredAt) === formatDate(registration.startDate))" class="style-description-small">
-            Ingeschreven op {{ formatDate(registration.registeredAt) }}
+            {{ $t('0982a700-81b3-40ca-bd1e-a49c1d12a35b') }} {{ formatDate(registration.registeredAt) }}
         </p>
         <p v-if="registration.deactivatedAt" class="style-description-small">
-            Uitgeschreven op {{ formatDate(registration.deactivatedAt) }}
+            {{ $t('3533e6ec-12b7-4b53-8891-57824202f349') }} {{ formatDate(registration.deactivatedAt) }}
         </p>
         <p v-if="registration.isTrial && registration.trialUntil" class="style-description-small">
-            Proefperiode tot {{ formatDate(registration.trialUntil) }}
+            {{ $t('112277ff-c338-45a2-80cd-7a3c6f44c9c3') }} {{ formatDate(registration.trialUntil) }}
         </p>
         <p v-else-if="registration.startDate && registration.trialUntil" class="style-description-small">
-            Had een proefperiode van {{ Formatter.dateNumber(registration.startDate) }} tot {{ Formatter.dateNumber(registration.trialUntil) }}
+            {{ $t('f9ff6e74-64ea-41e4-b1a6-a702a0be089d') }} {{ Formatter.dateNumber(registration.startDate) }} tot {{ Formatter.dateNumber(registration.trialUntil) }}
         </p>
 
         <p v-if="!registration.registeredAt && registration.canRegister" class="style-description-small">
-            Uitgenodigd om in te schrijven
+            {{ $t('d5967081-b714-4664-a1ed-e7f3b6889531') }}
         </p>
 
         <p v-if="registration.payingOrganizationId" class="style-description-small">
-            Via groepsinschrijving
+            {{ $t('dbc3a701-7ba6-45ed-a238-bf27b3baf84c') }}
         </p>
 
         <template v-if="isEditable" #right>
-            <span class="icon arrow-down-small gray" />
+            <span class="icon arrow-down-small gray"/>
         </template>
     </STListItem>
 </template>

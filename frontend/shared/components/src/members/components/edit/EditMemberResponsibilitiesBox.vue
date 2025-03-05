@@ -1,31 +1,30 @@
 <template>
     <div class="container">
-        <Title v-bind="$attrs" :title="title" />
+        <Title v-bind="$attrs" :title="title"/>
 
-        <ScrollableSegmentedControl v-if="!organization && items.length" v-model="selectedOrganization" :items="items" :labels="labels" />
+        <ScrollableSegmentedControl v-if="!organization && items.length" v-model="selectedOrganization" :items="items" :labels="labels"/>
 
-        <STErrorsDefault :error-box="parentErrorBox" />
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="parentErrorBox"/>
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <p v-if="groupedResponsibilites.length === 0" class="info-box">
-            Geen functies gevonden
+            {{ $t('2c9590a6-9dd9-4b78-b758-383be9414aaa') }}
         </p>
 
         <div v-for="({title: groupTitle, responsibilities}, index) of groupedResponsibilites" :key="''+index" class="container">
-            <hr v-if="index > 0 || !(!organization && items.length)">
-            <h2 v-if="groupTitle && groupedResponsibilites.length > 1">
+            <hr v-if="index > 0 || !(!organization && items.length)"><h2 v-if="groupTitle && groupedResponsibilites.length > 1">
                 {{ groupTitle }}
             </h2>
 
             <STList>
                 <STListItem v-for="{responsibility, group} of responsibilities" :key="responsibility.id" element-name="label" :selectable="true">
                     <template #left>
-                        <Checkbox :model-value="isResponsibilityEnabled(responsibility, group?.id)" @update:model-value="setResponsibilityEnabled(responsibility, group?.id, $event)" />
+                        <Checkbox :model-value="isResponsibilityEnabled(responsibility, group?.id)" @update:model-value="setResponsibilityEnabled(responsibility, group?.id, $event)"/>
                     </template>
 
                     <h2 class="style-title-list">
                         {{ responsibility.name }}<template v-if="group">
-                            van {{ group.settings.name }}
+                            {{ $t('e05ace0a-b0d8-4df5-982a-d10c43929d9d') }} {{ group.settings.name }}
                         </template>
                     </h2>
                     <p v-if="group && selectedOrganization && group.periodId === selectedOrganization?.period.period.id" class="style-description-small">
@@ -36,7 +35,7 @@
                     </p>
 
                     <p class="style-description-small">
-                        Rechten: {{ getResponsibilityMergedRoleDescription(responsibility, group?.id) }}
+                        {{ $t('c69efe99-92e9-4f56-9d1b-9f47f2dd28a7') }} {{ getResponsibilityMergedRoleDescription(responsibility, group?.id) }}
                     </p>
 
                     <p v-if="getResponsibilityEnabledDescription(responsibility, group?.id)" class="style-description-small">
@@ -47,19 +46,18 @@
                     </p>
 
                     <template #right>
-                        <ResponsibilityIcon :responsibility="responsibility" :group="group" :organization="selectedOrganization" />
+                        <ResponsibilityIcon :responsibility="responsibility" :group="group" :organization="selectedOrganization"/>
                     </template>
                 </STListItem>
             </STList>
         </div>
 
         <div v-if="deletedMemberResponsibilityRecords.length > 0" class="container">
-            <hr>
-            <h2>{{ $t('e81e0bdb-c15f-4b9a-abca-172a8d379993') }}</h2>
+            <hr><h2>{{ $t('e81e0bdb-c15f-4b9a-abca-172a8d379993') }}</h2>
             <STList>
                 <STListItem v-for="record of deletedMemberResponsibilityRecords" :key="record.id" element-name="label" :selectable="true">
                     <template #left>
-                        <Checkbox :model-value="isMemberResponsibilityRecordEnabled(record)" @update:model-value="setMemberResponsibilityRecordEnabled(record, $event)" />
+                        <Checkbox :model-value="isMemberResponsibilityRecordEnabled(record)" @update:model-value="setMemberResponsibilityRecordEnabled(record, $event)"/>
                     </template>
 
                     <h2>{{ record.getName(member) }}</h2>
@@ -72,7 +70,7 @@
                     </p>
 
                     <p class="style-description-small">
-                        Rechten: {{ getResponsibilityRecordMergedRoleDescription(record) }}
+                        {{ $t('c69efe99-92e9-4f56-9d1b-9f47f2dd28a7') }} {{ getResponsibilityRecordMergedRoleDescription(record) }}
                     </p>
 
                     <p v-if="getResponsibilityRecordEnabledDescription(record)" class="style-description-small">

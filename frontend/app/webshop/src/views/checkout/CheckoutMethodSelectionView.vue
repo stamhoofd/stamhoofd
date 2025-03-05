@@ -1,13 +1,13 @@
 <template>
-    <SaveView title="Kies je afhaalmethode" :loading="loading" save-icon-right="arrow-right" save-text="Doorgaan" :prefer-large-button="true" @save="goNext">
-        <h1>Kies je afhaalmethode</h1>
+    <SaveView :loading="loading" save-icon-right="arrow-right" save-text="Doorgaan" :prefer-large-button="true" @save="goNext" :title="$t(`Kies je afhaalmethode`)">
+        <h1>{{ $t('a13c114f-e365-46a9-8840-8ebb47afe317') }}</h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <STList>
             <STListItem v-for="checkoutMethod in checkoutMethods" :key="checkoutMethod.id" :selectable="true" element-name="label" class="right-stack left-center">
                 <template #left>
-                    <Radio v-model="selectedMethod" name="choose-checkout-method" :value="checkoutMethod" />
+                    <Radio v-model="selectedMethod" name="choose-checkout-method" :value="checkoutMethod"/>
                 </template>
                 <h2 class="style-title-list">
                     {{ getTypeName(checkoutMethod.type) }}: {{ checkoutMethod.name }}
@@ -20,8 +20,8 @@
                 </p>
 
                 <template v-if="checkoutMethod.timeSlots.timeSlots.length === 1" #right>
-                    <span v-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 0" class="style-tag error">Volzet</span>
-                    <span v-else-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock !== null" class="style-tag">Nog {{ checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock }} {{ checkoutMethod.timeSlots.timeSlots[0].remainingPersons !== null ? (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "persoon" : "personen") : (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
+                    <span v-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 0" class="style-tag error">{{ $t('ed9400bf-ff8e-4180-932f-3fe0347201a4') }}</span>
+                    <span v-else-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock !== null" class="style-tag">{{ $t('6878be1d-f7ca-4c4c-b6fa-de59c8028cd7') }} {{ checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock }} {{ checkoutMethod.timeSlots.timeSlots[0].remainingPersons !== null ? (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "persoon" : "personen") : (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
                 </template>
             </STListItem>
         </STList>

@@ -1,29 +1,19 @@
 <template>
     <div v-if="shouldShow">
         <div class="hover-box container">
-            <hr>
-            <h2 class="style-with-button"><div>Niet-geverifieerde gegevens</div></h2>
-            <p>Deze gegevens konden niet automatisch toegewezen worden aan het lid of aan een ouder.</p>
+            <hr><h2 class="style-with-button"><div>{{ $t('1ee54b6a-75db-4208-9f15-13ac45dd6ad1') }}</div></h2>
+            <p>{{ $t('4027b0c1-fe8c-4e40-84c0-91aa5a13640a') }}</p>
             <dl class="details-grid hover">
                 <template v-for="(email, index) of unverifiedEmails">
-                    <MemberDetailWithButton
-                        :label="formatWithIndex('E-mailadres', index, unverifiedEmails)"
-                        :value="email" icon="trash" color="gray"
-                        :onClick="() => deleteEmail(email)"/>
+                    <MemberDetailWithButton :label="formatWithIndex('E-mailadres', index, unverifiedEmails)" :value="email" icon="trash" color="gray" :onClick="() => deleteEmail(email)"/>
                 </template>
 
                 <template v-for="(phone, index) of unverifiedPhones">
-                    <MemberDetailWithButton
-                        :label="formatWithIndex($t('90d84282-3274-4d85-81cd-b2ae95429c34'), index, unverifiedPhones)"
-                        :value="phone" icon="trash" color="gray"
-                        :onClick="() => deletePhone(phone)"/>
+                    <MemberDetailWithButton :label="formatWithIndex($t('90d84282-3274-4d85-81cd-b2ae95429c34'), index, unverifiedPhones)" :value="phone" icon="trash" color="gray" :onClick="() => deletePhone(phone)"/>
                 </template>
 
                 <template v-for="(address, index) of unverifiedAddresses">
-                    <MemberDetailWithButton
-                        :label="formatWithIndex('Adres', index, unverifiedAddresses)"
-                        :value="addressToLines(address)" icon="trash" color="gray"
-                        :onClick="() => deleteAddress(address)"/>
+                    <MemberDetailWithButton :label="formatWithIndex('Adres', index, unverifiedAddresses)" :value="addressToLines(address)" icon="trash" color="gray" :onClick="() => deleteAddress(address)"/>
                 </template>
             </dl>
         </div>  

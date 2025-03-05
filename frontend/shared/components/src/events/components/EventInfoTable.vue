@@ -2,7 +2,7 @@
     <STList>
         <STListItem>
             <template #left>
-                <span class="icon calendar-grid" />
+                <span class="icon calendar-grid"/>
             </template>
 
             <h2 class="style-title-list">
@@ -12,7 +12,7 @@
 
         <STListItem v-if="event.meta.location" :selectable="googleMapsUrl" :href="googleMapsUrl" :element-name="googleMapsUrl ? 'a' : undefined" target="_blank">
             <template #left>
-                <span class="icon location" />
+                <span class="icon location"/>
             </template>
 
             <h2 class="style-title-list">
@@ -23,13 +23,13 @@
             </p>
 
             <template v-if="googleMapsUrl" #right>
-                <span class="icon arrow-right-small gray" />
+                <span class="icon arrow-right-small gray"/>
             </template>
         </STListItem>
 
         <STListItem v-if="ageGroups.length">
             <template #left>
-                <span class="icon group" />
+                <span class="icon group"/>
             </template>
 
             <h2 class="style-title-list">
@@ -39,15 +39,15 @@
 
         <STListItem v-if="event.group" :selectable="!differentOrganization && !event.group.closed" class="right-stack" @click="!differentOrganization && !event.group.closed ? openGroup() : undefined">
             <template #left>
-                <span class="icon edit" />
+                <span class="icon edit"/>
             </template>
 
             <h2 class="style-title-list">
-                <span v-if="event.group.notYetOpen && event.group.settings.registrationEndDate">Inschrijven mogelijk van {{ Formatter.dateRange(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date(), event.group.settings.registrationEndDate, ' tot ') }}</span>
-                <span v-else-if="event.group.notYetOpen">Inschrijven mogelijk vanaf {{ Formatter.startDate(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date()) }}</span>
-                <span v-else-if="event.group.closed">De inschrijvingen zijn gesloten</span>
-                <span v-else-if="event.group.settings.registrationEndDate">Inschrijven kan tot {{ Formatter.endDate(event.group.settings.registrationEndDate) }}</span>
-                <span v-else>Inschrijvingen zijn geopend</span>
+                <span v-if="event.group.notYetOpen && event.group.settings.registrationEndDate">{{ $t('b909404e-d391-4e2f-991d-c788353363fd') }} {{ Formatter.dateRange(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date(), event.group.settings.registrationEndDate, ' tot ') }}</span>
+                <span v-else-if="event.group.notYetOpen">{{ $t('29e1ba53-8c54-462c-bb14-545036ce1f5e') }} {{ Formatter.startDate(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date()) }}</span>
+                <span v-else-if="event.group.closed">{{ $t('15e7390c-0e30-4c20-a0cb-2293a417e835') }}</span>
+                <span v-else-if="event.group.settings.registrationEndDate">{{ $t('53c44440-e9a8-4c5c-8294-48de9d1698dd') }} {{ Formatter.endDate(event.group.settings.registrationEndDate) }}</span>
+                <span v-else>{{ $t('2274bdb1-3f1f-42ac-832d-cba86fc50868') }}</span>
             </h2>
 
             <p v-if="app !== 'registration' && !event.group.closed && (organization && event.organizationId !== organization.id && !event.group.settings.allowRegistrationsByOrganization)" class="style-description-small">
@@ -55,11 +55,11 @@
             </p>
 
             <template v-if="!differentOrganization && !event.group.closed" #right>
-                <span class="icon arrow-right-small gray" />
+                <span class="icon arrow-right-small gray"/>
             </template>
         </STListItem>
 
-        <slot />
+        <slot/>
     </STList>
 </template>
 

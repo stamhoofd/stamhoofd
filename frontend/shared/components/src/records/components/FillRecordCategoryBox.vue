@@ -1,7 +1,7 @@
 <template>
     <div v-if="!category.isEnabled(value)" class="container">
         <p v-if="STAMHOOFD.environment === 'development'" class="error-box">
-            This category should be invisible. Check if the record categories are filtered using .filter(c => c.isEnabled(value))
+            {{ $t('1102ad07-07fc-4996-941f-f0627cc428f1') }}
         </p>
     </div>
     <div v-else class="container">
@@ -19,35 +19,34 @@
                 </span>
             </div>
             <div>
-                <button v-if="!markReviewed && hasAnswers" v-tooltip="'Wis alle antwoorden'" type="button" class="button icon trash" @click="clearAnswers" />
+                <button v-if="!markReviewed && hasAnswers" v-tooltip="'Wis alle antwoorden'" type="button" class="button icon trash" @click="clearAnswers"/>
             </div>
         </h2>
 
-        <p v-if="category.description" class="style-description-block pre-wrap" v-text="category.description" />
+        <p v-if="category.description" class="style-description-block pre-wrap" v-text="category.description"/>
 
-        <STErrorsDefault :error-box="parentErrorBox" />
-        <STErrorsDefault :error-box="errors.errorBox" />
-        <slot />
+        <STErrorsDefault :error-box="parentErrorBox"/>
+        <STErrorsDefault :error-box="errors.errorBox"/>
+        <slot/>
 
-        <RecordAnswerInput v-for="record of filteredWriteableRecords" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
+        <RecordAnswerInput v-for="record of filteredWriteableRecords" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch"/>
         <div v-for="childCategory of childCategories" :key="childCategory.id" class="container">
-            <hr>
-            <h2>{{ level === 1 ? childCategory.name : (category.name + ': ' + childCategory.name) }}</h2>
-            <p v-if="childCategory.description" class="style-description pre-wrap" v-text="childCategory.description" />
+            <hr><h2>{{ level === 1 ? childCategory.name : (category.name + ': ' + childCategory.name) }}</h2>
+            <p v-if="childCategory.description" class="style-description pre-wrap" v-text="childCategory.description"/>
 
-            <RecordAnswerInput v-for="record of childCategory.filterRecords(props.value, filterOptions)" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
+            <RecordAnswerInput v-for="record of childCategory.filterRecords(props.value, filterOptions)" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch"/>
         </div>
 
         <p v-if="!markReviewed && lastReviewed" class="style-description-small">
-            Laatst nagekeken op {{ formatDate(lastReviewed) }}<template v-if="isLastReviewIncomplete">
-                (onvolledig)
+            {{ $t('169a6691-dd2e-41a1-b10a-2442330dffbf') }} {{ formatDate(lastReviewed) }}<template v-if="isLastReviewIncomplete">
+                {{ $t('e4dd66d7-cb08-48d2-8054-39d3c3a71645') }}
             </template>. <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
-                Markeer als nagekeken
+                {{ $t('c9fa0494-e809-443b-8fb6-d5a856081476') }}
             </button>
         </p>
         <p v-if="!markReviewed && !lastReviewed" class="style-description-small">
-            Nog nooit nagekeken. <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
-                Markeer als nagekeken
+            {{ $t('b427ad33-686d-4670-b2b7-5289b681369e') }} <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
+                {{ $t('c9fa0494-e809-443b-8fb6-d5a856081476') }}
             </button>
         </p>
     </div>

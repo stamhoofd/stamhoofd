@@ -1,43 +1,40 @@
 <template>
     <div ref="rootRef" class="st-view scanner-view">
-        <STNavigationBar title="Scan een ticket" :show-title="true">
+        <STNavigationBar :show-title="true" :title="$t(`c1dd805c-c90b-4292-bbfc-fbda0ce3277b`)">
             <template #left>
-                <button class="icon button close" type="button" @click="() => dismiss()" />
+                <button class="icon button close" type="button" @click="() => dismiss()"/>
             </template>
         </STNavigationBar>
 
         <div class="video-container" :class="{ native: disableWebVideo }">
-            <video v-if="!disableWebVideo" ref="videoRef" />
-            <div v-if="!disableWebVideo" class="scan-overlay" />
+            <video v-if="!disableWebVideo" ref="videoRef"/>
+            <div v-if="!disableWebVideo" class="scan-overlay"/>
 
             <div class="video-footer">
                 <div class="button-bar">
                     <button v-if="hasFlash" class="round-button" :class="{ selected: isFlashOn }" type="button" @click="toggleFlash">
-                        <span class="icon flashlight" />
+                        <span class="icon flashlight"/>
                     </button>
                     <button v-if="cameras.length > 1" class="round-button" type="button" @click="switchCamera">
-                        <span class="icon reverse" />
+                        <span class="icon reverse"/>
                     </button>
                 </div>
 
                 <div class="status-bar">
                     <p v-if="isLoading">
-                        <Spinner class="inline" /> Bijwerken...
+                        <Spinner class="inline"/> {{ $t('c6102d81-a8aa-4504-b6d7-c6220aebb293') }}
                     </p>
                     <p v-else-if="hadNetworkError">
-                        Geen internetverbinding. Scannen van tickets blijft gedeeltelijk werken. Internet is aan te raden.<br>
-                        <span class="style-description-small">Laatst bijgewerkt: {{ lastUpdatedText }}</span><br>
-                        <button class="button text" type="button" @click="updateTickets">
-                            Opnieuw proberen
+                        {{ $t('b15512e4-645d-40f1-b5f9-39a5defec190') }}<br><span class="style-description-small">{{ $t('f9b92e34-bbd6-41a8-8eb5-2bd8c84c744e') }} {{ lastUpdatedText }}</span><br><button class="button text" type="button" @click="updateTickets">
+                            {{ $t('bb3e7bd9-eead-4baa-a445-78f35b0d7c56') }}
                         </button>
                     </p>
                     <p v-else>
                         <template v-if="disableWebVideo">
-                            Plaats de QR-code in het midden van het scherm.
+                            {{ $t('2b979ef2-5a86-480d-9d77-5b4f15ea1318') }}
                         </template><template v-else>
-                            Plaats de QR-code in het kader om te scannen.
-                        </template><br>
-                        <span class="style-description-small">Laatst bijgewerkt: {{ lastUpdatedText }}</span>
+                            {{ $t('3c6f8339-ef88-4a3f-ae09-4ddcfcc51311') }}
+                        </template><br><span class="style-description-small">{{ $t('f9b92e34-bbd6-41a8-8eb5-2bd8c84c744e') }} {{ lastUpdatedText }}</span>
                     </p>
                 </div>
             </div>

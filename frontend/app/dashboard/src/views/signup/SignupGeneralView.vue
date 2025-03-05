@@ -1,24 +1,24 @@
 <template>
     <LoadingViewTransition>
         <form v-if="!loadingRegisterCode" id="signup-general-view" class="st-view" @submit.prevent="goNext">
-            <STNavigationBar title="Nieuwe vereniging" />
+            <STNavigationBar :title="$t(`7e3b4208-a8d9-4c88-b02c-5c044ad95623`)"/>
 
             <main>
                 <h1>
                     {{ $t("92f76d54-282e-448e-ae15-21411b7bc085") }}
                 </h1>
                 <p>
-                    Je kan alle functies gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen. <a v-if="validatedRegisterCode" :href="'https://'+ $domains.marketing" target="_blank" class="inline-link">{{ $t("2ca73761-bc6c-4ffb-9550-a988376f26ef") }}</a>
+                    {{ $t('c067ad86-3ebf-4b91-bc24-4371433e185b') }} <a v-if="validatedRegisterCode" :href="'https://'+ $domains.marketing" target="_blank" class="inline-link">{{ $t("2ca73761-bc6c-4ffb-9550-a988376f26ef") }}</a>
                 </p>
                 <button v-if="!validatedRegisterCode && visitViaUrl" class="info-box with-button selectable" type="button" @click="dismiss">
                     {{ $t('d80e2291-5bb9-4799-9594-bcda54480efa') }}
                     <span class="button text" type="button">
-                        Log dan hier in
+                        {{ $t('386c0c50-a15b-4ee0-be9f-6e7445f54cb2') }}
                     </span>
                 </button>
 
                 <p v-if="validatedRegisterCode && !validatedRegisterCode.customMessage" class="success-box icon gift">
-                    Je ontvangt {{ formatPrice(validatedRegisterCode.value) }} tegoed van {{ validatedRegisterCode.organizationName }} als je nu registreert
+                    {{ $t('101beef3-0d75-452c-8a12-08f71cb7e3ec') }} {{ formatPrice(validatedRegisterCode.value) }} tegoed van {{ validatedRegisterCode.organizationName }} {{ $t('0e477dd7-72e5-4b3f-8a12-a5464e01ddc7') }}
                 </p>
                 <p v-else-if="validatedRegisterCode" class="success-box icon gift">
                     {{ validatedRegisterCode.customMessage }}
@@ -28,32 +28,23 @@
                     {{ $t('5e60cf0f-5489-4e90-8dab-97c56c2e989c') }}
                 </p>
 
-                <STErrorsDefault :error-box="errorBox" />
+                <STErrorsDefault :error-box="errorBox"/>
                 <div class="split-inputs">
                     <div>
                         <STInputBox :title="$t('d185d3ca-e20f-43a2-a79f-f77404b8f33a')" error-fields="name" :error-box="errorBox">
-                            <input
-                                id="organization-name"
-                                ref="firstInput"
-                                v-model="name"
-                                class="input"
-                                type="text"
-                                :placeholder="$t('cb51b737-c4cf-4ea7-aeb5-b5736a43c333')"
-                                autocomplete="organization"
-                            >
-                        </STInputBox>
+                            <input id="organization-name" ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('cb51b737-c4cf-4ea7-aeb5-b5736a43c333')" autocomplete="organization"></STInputBox>
 
-                        <AddressInput v-model="address" :title="$t('68c40b9e-30d7-4ce5-8069-f7ca93221906')" :validator="validator" :link-country-to-locale="true" />
+                        <AddressInput v-model="address" :title="$t('68c40b9e-30d7-4ce5-8069-f7ca93221906')" :validator="validator" :link-country-to-locale="true"/>
                         <p class="style-description-small">
-                            Geen adres? Vul dan een adres in dat in de buurt ligt
+                            {{ $t('3dc60688-e62f-4750-9ce6-c5e50c6f2425') }}
                         </p>
                     </div>
 
                     <div>
-                        <STInputBox title="Type vereniging" error-fields="type" :error-box="errorBox">
+                        <STInputBox error-fields="type" :error-box="errorBox" :title="$t(`0ea1819e-fdc2-4b30-b753-072f01b19550`)">
                             <Dropdown v-model="type">
                                 <option :value="null" disabled>
-                                    Maak een keuze
+                                    {{ $t('4da08c88-e58a-4694-a9a4-0e34c1a65618') }}
                                 </option>
 
                                 <optgroup v-for="group in availableTypes" :key="group.name" :label="group.name">
@@ -64,13 +55,13 @@
                             </Dropdown>
                         </STInputBox>
                         <p class="style-description-small">
-                            Hiermee stellen we automatisch al enkele instellingen goed in.
+                            {{ $t('bcfdaa20-2a76-4cf2-8e46-86fdce57306e') }}
                         </p>
 
-                        <STInputBox v-if="type === 'Youth' && isBelgium" title="Koepelorganisatie" error-fields="umbrellaOrganization" :error-box="errorBox">
+                        <STInputBox v-if="type === 'Youth' && isBelgium" error-fields="umbrellaOrganization" :error-box="errorBox" :title="$t(`4e66ca7e-ab53-4246-9744-951339e983e7`)">
                             <Dropdown v-model="umbrellaOrganization">
                                 <option :value="null" disabled>
-                                    Maak een keuze
+                                    {{ $t('4da08c88-e58a-4694-a9a4-0e34c1a65618') }}
                                 </option>
                                 <option v-for="item in availableUmbrellaOrganizations" :key="item.value" :value="item.value">
                                     {{ item.name }}
@@ -81,23 +72,22 @@
                 </div>
 
                 <template v-if="!validatedRegisterCode">
-                    <hr>
-                    <h2>Hoe ken je Stamhoofd?</h2>
+                    <hr><h2>{{ $t('8a2b37d3-5c6d-4daa-9490-2fb18b067dff') }}</h2>
 
                     <Checkbox :model-value="getBooleanType(AcquisitionType.Recommended)" @update:model-value="setBooleanType(AcquisitionType.Recommended, $event)">
-                        Op aanraden van andere vereniging / persoon
+                        {{ $t('5953d065-4d15-4d1f-b00a-bad7b8f9e7b1') }}
                     </Checkbox>
                     <Checkbox :model-value="getBooleanType(AcquisitionType.Seen)" @update:model-value="setBooleanType(AcquisitionType.Seen, $event)">
-                        Gezien bij andere vereniging
+                        {{ $t('cae3059b-51dc-4bd6-a670-3114169ff77a') }}
                     </Checkbox>
                     <Checkbox :model-value="getBooleanType(AcquisitionType.SocialMedia)" @update:model-value="setBooleanType(AcquisitionType.SocialMedia, $event)">
-                        Via sociale media
+                        {{ $t('7cf8e2ec-f057-41ec-8d59-f9ace7e1b53b') }}
                     </Checkbox>
                     <Checkbox :model-value="getBooleanType(AcquisitionType.Search)" @update:model-value="setBooleanType(AcquisitionType.Search, $event)">
-                        Via opzoekwerk (bv. Google)
+                        {{ $t('63265f9d-1c48-47a4-99f6-47a3e7f208cc') }}
                     </Checkbox>
                     <Checkbox :model-value="getBooleanType(AcquisitionType.Other)" @update:model-value="setBooleanType(AcquisitionType.Other, $event)">
-                        Andere
+                        {{ $t('f155bd72-de32-4a15-8627-bd185718a14e') }}
                     </Checkbox>
                 </template>
             </main>
@@ -106,7 +96,7 @@
                 <template #right>
                     <LoadingButton :loading="loading">
                         <button class="button primary" type="submit" @click.prevent="goNext">
-                            Vereniging aanmaken
+                            {{ $t('cc0ab4f3-a7d7-46d1-8eb2-ac12398b4c16') }}
                         </button>
                     </LoadingButton>
                 </template>

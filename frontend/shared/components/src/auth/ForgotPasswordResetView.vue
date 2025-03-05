@@ -1,44 +1,40 @@
 <template>
     <LoadingViewTransition>
         <form v-if="!loadingSession" key="form" class="forgot-password-reset-view st-view" @submit.prevent="submit">
-            <STNavigationBar :title="title" />
+            <STNavigationBar :title="title"/>
             <main>
                 <h1>{{ title }}</h1>
 
                 <p>{{ description }}</p>
 
-                <STErrorsDefault :error-box="errorBox" />
+                <STErrorsDefault :error-box="errorBox"/>
 
-                <STInputBox v-if="!hasAccount" title="Jouw naam" error-fields="firstName,lastName" :error-box="errorBox">
+                <STInputBox v-if="!hasAccount" error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`c0b0a159-8e96-40bb-84f6-dd40f579fef5`)">
                     <div class="input-group">
                         <div>
-                            <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
-                        </div>
+                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`883f9695-e18f-4df6-8c0d-651c6dd48e59`)"></div>
                         <div>
-                            <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
-                        </div>
+                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :placeholder="$t(`f89d8bfa-6b5d-444d-a40f-ec17b3f456ee`)"></div>
                     </div>
                 </STInputBox>
-                <EmailInput v-model="email" title="Persoonlijk e-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
+                <EmailInput v-model="email" :validator="validator" autocomplete="username" :title="$t(`d99eda85-0c3d-4669-a389-ace3b4e50708`)" :placeholder="$t(`0a65c7be-dcc1-4bf7-9c6e-560085de9052`)"/>
                 <div class="split-inputs">
                     <div>
-                        <STInputBox title="Kies een nieuw wachtwoord">
-                            <input v-model="password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
-                        </STInputBox>
+                        <STInputBox :title="$t(`c28da8f7-0e6c-4159-98d8-d87f5ae7c533`)">
+                            <input v-model="password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`c28da8f7-0e6c-4159-98d8-d87f5ae7c533`)"></STInputBox>
 
-                        <STInputBox title="Herhaal wachtwoord">
-                            <input v-model="passwordRepeat" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
-                        </STInputBox>
+                        <STInputBox :title="$t(`64bc8c3c-4feb-4fb4-b5bf-71726f2b6609`)">
+                            <input v-model="passwordRepeat" class="input" autocomplete="new-password" type="password" :placeholder="$t(`91317163-c535-47be-a080-0f2b4f055dcc`)"></STInputBox>
                     </div>
                     <div>
-                        <PasswordStrength v-model="password" />
+                        <PasswordStrength v-model="password"/>
                     </div>
                 </div>
 
                 <SignupPoliciesBox :validator="validator">
                     <LoadingButton :loading="loading" class="block input-spacing">
                         <button id="submit" class="button primary" type="submit">
-                            <span class="icon lock" />
+                            <span class="icon lock"/>
                             <span>{{ buttonText }}</span>
                         </button>
                     </LoadingButton>

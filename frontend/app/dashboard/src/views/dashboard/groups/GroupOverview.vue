@@ -1,6 +1,6 @@
 <template>
     <div id="webshop-overview" class="st-view background">
-        <STNavigationBar :title="title" />
+        <STNavigationBar :title="title"/>
 
         <main>
             <h1 class="style-navigation-title">
@@ -14,182 +14,173 @@
                 {{ $t('7dd9a44e-8a47-4b74-9d57-d20b1efb706f') }}
             </p>
             <p v-if="!isPublic" class="info-box">
-                Deze groep staat in een categorie die enkel zichtbaar is voor beheerders of leden met een functie
+                {{ $t('8678523e-92c1-427d-8fdd-62f1ff58c6aa') }}
             </p>
             <p v-if="!isArchive && !isOpen" class="info-box">
-                Inschrijvingen zijn momenteel gesloten via het ledenportaal. <template v-if="hasFullPermissions">
-                    Stel een datum in waarop ze moeten openen, of open de inschrijvingen manueel via de knoppen onderaan.
+                {{ $t('3d43c2bd-0cfd-495e-a0c3-7545b63a66ce') }} <template v-if="hasFullPermissions">
+                    {{ $t('2f80767f-4fd2-41c2-b476-d4353c514f5b') }}
                 </template>
             </p>
 
-            <BillingWarningBox filter-types="members" class="data-table-prefix" />
+            <BillingWarningBox filter-types="members" class="data-table-prefix"/>
 
             <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center right-stack" @click="navigate(Routes.Members)">
                     <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/group.svg">
-                    </template>
+                        <img src="@stamhoofd/assets/images/illustrations/group.svg"></template>
                     <h2 class="style-title-list">
-                        Ingeschreven leden
+                        {{ $t('c252fbf3-d038-4cee-a1b3-9c84a54644fd') }}
                     </h2>
                     <p class="style-description">
-                        Bekijk, beheer, exporteer of e-mail ingeschreven leden.
+                        {{ $t('20da7617-2d90-4e9f-841d-3151ef0e7f14') }}
                     </p>
                     <template #right>
                         <span v-if="group.getMemberCount() !== null" class="style-description-small">{{ formatInteger(group.getMemberCount()!) }}</span>
-                        <span class="icon arrow-right-small gray" />
+                        <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
 
                 <STListItem v-if="group.waitingList" :selectable="true" class="left-center right-stack" @click="navigate(Routes.WaitingList)">
                     <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/clock.svg">
-                    </template>
+                        <img src="@stamhoofd/assets/images/illustrations/clock.svg"></template>
                     <h2 class="style-title-list">
-                        Wachtlijst
+                        {{ $t('505f83e9-65b8-4484-9595-9cdac499a9d2') }}
                     </h2>
                     <p class="style-description">
-                        Bekijk leden op de wachtlijst.
+                        {{ $t('bf1453dd-489b-4cdd-8a6c-f61c1ffd0340') }}
                     </p>
                     <template #right>
                         <span v-if="group.waitingList.getMemberCount() !== null" class="style-description-small">{{ formatInteger(group.waitingList.getMemberCount()!) }}</span>
-                        <span class="icon arrow-right-small gray" />
+                        <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
 
                 <STListItem v-for="responsibility of linkedResponsibilities" :key="responsibility.id" :selectable="true" class="left-center right-stack" @click="openResponsibility(responsibility)">
                     <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/responsibility.svg">
-                    </template>
+                        <img src="@stamhoofd/assets/images/illustrations/responsibility.svg"></template>
                     <h2 class="style-title-list">
                         {{ responsibility.name }} van {{ group.settings.name }}
                     </h2>
                     <p class="style-description">
-                        Bekijk, beheer, exporteer of e-mail leden met deze functie.
+                        {{ $t('0109ab23-ef98-4799-a2f8-b49d7578c55b') }}
                     </p>
 
                     <template #right>
-                        <MemberCountSpan :filter="getResponsibilityFilter(responsibility)" class="style-description-small" />
-                        <span class="icon arrow-right-small gray" />
+                        <MemberCountSpan :filter="getResponsibilityFilter(responsibility)" class="style-description-small"/>
+                        <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
             </STList>
 
             <template v-if="hasFullPermissions">
-                <hr>
-                <h2>Instellingen</h2>
+                <hr><h2>{{ $t('a370eff9-c1c1-450c-8bdb-dcee89bd2f70') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editGeneral(true)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/flag.svg">
-                        </template>
+                            <img src="@stamhoofd/assets/images/illustrations/flag.svg"></template>
                         <h2 class="style-title-list">
-                            Algemeen
+                            {{ $t('f8ce21aa-06de-4373-874c-ddad1629cad8') }}
                         </h2>
                         <p class="style-description">
-                            Naam, tarieven, keuzeopties, gegevens, limieten en beschikbaarheid
+                            {{ $t('26f488f7-9329-46c4-9912-ad8db06260d4') }}
                         </p>
                         <template #right>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editPermissions(true)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/lock.svg">
-                        </template>
+                            <img src="@stamhoofd/assets/images/illustrations/lock.svg"></template>
                         <h2 class="style-title-list">
-                            Toegangsbeheer
+                            {{ $t('5f64bf27-51c6-427b-b92a-8dd8d3c3cfae') }}
                         </h2>
                         <p class="style-description">
-                            Bepaal wie leden en instellingen van deze groep kan bekijken of wijzigen
+                            {{ $t('dcb0e8f9-8d0d-4d43-b4e8-3df3226e7f4c') }}
                         </p>
                         <template #right>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editPage(true)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/palette.svg">
-                        </template>
+                            <img src="@stamhoofd/assets/images/illustrations/palette.svg"></template>
                         <h2 class="style-title-list">
-                            Foto's en icoontje
+                            {{ $t("f1ac1789-bc6c-40e4-8327-0295fafe48ab") }}
                         </h2>
                         <p class="style-description">
-                            Stel een foto en icoontje van deze groep in.
+                            {{ $t('28b10608-dac5-4fbc-b152-2ae3256207e0') }}
                         </p>
                         <template #right>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editEmails(true)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
-                        </template>
+                            <img src="@stamhoofd/assets/images/illustrations/email-template.svg"></template>
                         <h2 class="style-title-list">
-                            E-mailsjablonen
+                            {{ $t('e4e79acd-2538-406e-927c-e18c5383a493') }}
                         </h2>
                         <p class="style-description">
-                            Wijzig de inhoud van automatische e-mails voor deze groep.
+                            {{ $t('31aeb45a-47d7-48c0-b6ad-985c44268fde') }}
                         </p>
                         <template #right>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
                 </STList>
 
-                <hr>
-                <h2>Acties</h2>
+                <hr><h2>{{ $t('8424a02d-2147-40d1-9db2-ddece074a650') }}</h2>
 
                 <STList>
                     <STListItem v-if="!isArchive && !isOpen" :selectable="true" @click="openGroup()">
                         <h2 class="style-title-list">
-                            Inschrijvingen openen
+                            {{ $t('064ac7fd-c416-445e-bff1-8a8263610bf3') }}
                         </h2>
                         <p class="style-description">
-                            Open inschrijvingen van leden via het ledenportaal.
+                            {{ $t('cb257e72-aba4-419b-96ed-bfe586930220') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary green hide-smartphone">
-                                <span class="icon power" />
-                                <span>Open</span>
+                                <span class="icon power"/>
+                                <span>{{ $t('e8ddc6ce-fe87-42dd-847a-892d17a029a0') }}</span>
                             </button>
-                            <button type="button" class="button icon power only-smartphone" />
+                            <button type="button" class="button icon power only-smartphone"/>
                         </template>
                     </STListItem>
 
                     <STListItem v-if="!isArchive && isOpen" :selectable="true" @click="closeGroup()">
                         <h2 class="style-title-list">
-                            Inschrijvingen sluiten
+                            {{ $t('88d51521-4938-4048-9477-e3b10f97d1e4') }}
                         </h2>
                         <p class="style-description">
-                            Stop inschrijvingen van leden via het ledenportaal. Na het sluiten van de inschrijvingen kan je de groep ook eventueel archiveren.
+                            {{ $t('4bea5d5b-3632-49e3-aefc-b2956a6029eb') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary danger hide-smartphone">
-                                <span class="icon power" />
-                                <span>Sluiten</span>
+                                <span class="icon power"/>
+                                <span>{{ $t('08919911-1157-400d-b89c-265233590019') }}</span>
                             </button>
-                            <button type="button" class="button icon power only-smartphone" />
+                            <button type="button" class="button icon power only-smartphone"/>
                         </template>
                     </STListItem>
 
                     <STListItem :selectable="true" @click="deleteGroup()">
                         <h2 class="style-title-list">
-                            Groep definitief verwijderen
+                            {{ $t('81232fe7-6956-4e0f-868e-f34acd4c396b') }}
                         </h2>
                         <p class="style-description">
-                            Verwijder deze groep en alle daarbij horende informatie. Dit is meestal niet nodig.
+                            {{ $t('c30f782e-c2b3-4b0c-8686-500a3c9af57e') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary danger hide-smartphone">
-                                <span class="icon trash" />
-                                <span>Verwijderen</span>
+                                <span class="icon trash"/>
+                                <span>{{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}</span>
                             </button>
-                            <button type="button" class="button icon trash only-smartphone" />
+                            <button type="button" class="button icon trash only-smartphone"/>
                         </template>
                     </STListItem>
                 </STList>

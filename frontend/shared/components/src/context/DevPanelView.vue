@@ -1,15 +1,14 @@
 <template>
-    <SaveView title="Developers" :loading="saving" @save="save">
+    <SaveView :loading="saving" @save="save" :title="$t(`Developers`)">
         <h1>
-            Developers
+            {{ $t('e558b6aa-a843-4e88-80cf-129b06d535a9') }}
         </h1>
 
-        <hr>
-        <h2>Kanaal</h2>
+        <hr><h2>{{ $t('04d466b9-4ea3-4fbc-9d55-2f88a3fc7d6f') }}</h2>
         <STList>
             <STListItem v-for="r in availableChannels" :key="r.url" :selectable="true" element-name="label">
                 <template #left>
-                    <Radio v-model="releaseChannel" :value="r.url" />
+                    <Radio v-model="releaseChannel" :value="r.url"/>
                 </template>
                 <h3 class="style-title-list">
                     {{ r.name }}
@@ -20,13 +19,12 @@
             </STListItem>
             <STListItem :selectable="true" element-name="label">
                 <template #left>
-                    <Radio v-model="releaseChannel" value="custom" />
+                    <Radio v-model="releaseChannel" value="custom"/>
                 </template>
                 <h3 class="style-title-list">
-                    Custom
+                    {{ $t('329f260d-40f8-4ee6-85e0-6a23ad1714b5') }}
                 </h3>
-                <input v-if="releaseChannel === 'custom'" v-model="customChannel" type="text" placeholder="Vul een URL in" class="input option">
-            </STListItem>
+                <input v-if="releaseChannel === 'custom'" v-model="customChannel" type="text" class="input option" :placeholder="$t(`22517091-7798-4d09-a50f-19aabfbef875`)"></STListItem>
         </STList>
     </SaveView>
 </template>

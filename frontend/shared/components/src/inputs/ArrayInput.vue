@@ -3,23 +3,23 @@
         <div v-if="model.length > 0" class="array-list-items">
             <div v-for="n in model.length" :key="virtualId + '-' + n" class="array-list-item">
                 <div class="left">
-                    <slot name="item" v-bind="{index: n - 1}" :model-value="getValue(n - 1)" :update-model-value="(event: T) => setValue(n - 1, event)" />
+                    <slot name="item" v-bind="{index: n - 1}" :model-value="getValue(n - 1)" :update-model-value="(event: T) => setValue(n - 1, event)"/>
                 </div>
 
                 <div class="right">
-                    <button class="button icon trash gray small" type="button" @click="removeValue(n - 1)" />
+                    <button class="button icon trash gray small" type="button" @click="removeValue(n - 1)"/>
                 </div>
             </div>
         </div>
 
         <slot v-else name="empty">
             <p class="style-description-small">
-                Geen items
+                {{ $t('7b997b9a-cdfc-4259-b6fa-28ec3feabe31') }}
             </p>
         </slot>
 
         <template #right>
-            <button class="button icon add gray small" type="button" @click="addValue" />
+            <button class="button icon add gray small" type="button" @click="addValue"/>
         </template>
     </STInputBox>
 </template>

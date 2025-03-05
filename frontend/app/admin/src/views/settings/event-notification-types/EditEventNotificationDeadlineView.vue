@@ -4,26 +4,26 @@
             {{ viewTitle }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <div class="split-inputs">
-            <STInputBox title="Startdatum (inclusief)" error-fields="startDate" :error-box="errors.errorBox">
-                <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" />
+            <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`9073a7e1-327b-4b28-80fb-38120d64d3e7`)">
+                <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}"/>
             </STInputBox>
 
-            <STInputBox title="Einddatum (inclusief)" error-fields="endDate" :error-box="errors.errorBox">
-                <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" />
+            <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t(`c25b9f6c-4e40-4330-9ede-576c66686cb9`)">
+                <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}"/>
             </STInputBox>
         </div>
         <p class="style-description-small">
-            Activiteiten die vallen binnen dit bereik moeten voldoen aan de deadline.
+            {{ $t('944b0f2f-d8ef-46c6-9156-4687b836b258') }}
         </p>
 
         <div class="split-inputs">
-            <STInputBox title="Deadline" error-fields="startDate" :error-box="errors.errorBox">
-                <DateSelection v-model="deadlineDate" />
+            <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`a62b3c20-4cc5-4f0f-ab64-05af382b98eb`)">
+                <DateSelection v-model="deadlineDate"/>
             </STInputBox>
-            <TimeInput v-model="deadlineDate" title="Tijdstip" :validator="errors.validator" />
+            <TimeInput v-model="deadlineDate" :validator="errors.validator" :title="$t(`93a310d9-c446-46ac-b2b6-663bfab3a0ad`)"/>
         </div>
     </SaveView>
 </template>

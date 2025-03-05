@@ -1,20 +1,20 @@
 <template>
     <LoadingViewTransition>
         <div v-if="!showLoading" class="st-view check-update-view">
-            <STNavigationBar :title="title" :disable-dismiss="true" :disable-pop="true" />
+            <STNavigationBar :title="title" :disable-dismiss="true" :disable-pop="true"/>
 
             <main class="flex">
                 <h1 v-if="status.options.customText">
                     {{ status.options.customText }}
                 </h1>
                 <h1 v-else-if="status.status === 'checking'">
-                    Controleren op updates...
+                    {{ $t('3ec0eee4-5311-404f-97cd-8d04bb642117') }}
                 </h1>
                 <h1 v-else-if="status.status === 'downloading'">
-                    Nieuwe functionaliteiten in elkaar timmeren...
+                    {{ $t('53ecad1b-7ac5-4c3f-bda5-25fa583155a5') }}
                 </h1>
                 <h1 v-else-if="status.status === 'installing'">
-                    Nieuwe functionaliteiten klaarzetten...
+                    {{ $t('aaef4e09-eb18-45f0-8aab-772604c55472') }}
                 </h1>
 
                 <div class="comment-box">
@@ -25,7 +25,7 @@
 
                 <div class="progress" :class="{ hide: status.progress !== null && status.progress >= 1 }">
                     <div class="progress-transform-box" :style="{transform: transform }">
-                        <div :style="{ width: width}" />
+                        <div :style="{ width: width}"/>
                     </div>
                 </div>
             </main>

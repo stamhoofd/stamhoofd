@@ -4,120 +4,97 @@
             {{ title }}
         </h1>
         
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox"/>
 
-        <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
-            <input
-                ref="firstInput"
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="Naam van deze keuze"
-                autocomplete="off"
-            >
-        </STInputBox>
+        <STInputBox error-fields="name" :error-box="errorBox" :title="$t(`d32893b7-c9b0-4ea3-a311-90d29f2c0cf3`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`a9d8f27c-b4d3-415a-94a4-2ec3c018ee48`)"></STInputBox>
     
-        <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox" class="max">
-            <textarea
-                v-model="description"
-                class="input"
-                type="text"
-                placeholder="Optioneel"
-                autocomplete="off"
-            />
+        <STInputBox error-fields="description" :error-box="errorBox" class="max" :title="$t(`f72f5546-ed6c-4c93-9b0d-9718f0cc9626`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`e64a0d25-fe5a-4c87-a087-97ad30b2b12b`)"/>
         </STInputBox>
 
-        <hr>
-        <h2>Waarschuwing</h2>
-        <p>Soms wil je dat iets opvalt voor beheerders, dat kan je bereiken met waarschuwingen.</p>
+        <hr><h2>{{ $t('0c94358f-26c4-434d-85a8-af7b49f3dcba') }}</h2>
+        <p>{{ $t('f3be5d04-ce33-40be-b6d7-82c576df9155') }}</p>
 
         <STList>
             <STListItem :selectable="true" element-name="label">
                 <template #left>
-                    <Radio v-model="warningInverted" :value="null" name="warningInverted" />
+                    <Radio v-model="warningInverted" :value="null" name="warningInverted"/>
                 </template>
                 <h3 class="style-title-list">
-                    Geen waarschuwing
+                    {{ $t('a1377c7d-d46e-48be-a102-3776f987eff1') }}
                 </h3>
             </STListItem>
 
             <STListItem :selectable="true" element-name="label">
                 <template #left>
-                    <Radio v-model="warningInverted" :value="false" name="warningInverted" />
+                    <Radio v-model="warningInverted" :value="false" name="warningInverted"/>
                 </template>
                 <h3 class="style-title-list">
-                    Waarschuwing als aangevinkt
+                    {{ $t('1584cde5-f783-4e5c-adbc-71b63d1fa6a1') }}
                 </h3>
             </STListItem>
 
             <STListItem :selectable="true" element-name="label">
                 <template #left>
-                    <Radio v-model="warningInverted" :value="true" name="warningInverted" />
+                    <Radio v-model="warningInverted" :value="true" name="warningInverted"/>
                 </template>
                 <h3 class="style-title-list">
-                    Waarschuwing als niet aangevinkt
+                    {{ $t('bcf85ddc-d71f-49c6-b9d1-f3de0159eaed') }}
                 </h3>
             </STListItem>
         </STList>
 
-        <STInputBox v-if="warningText !== null" title="Waarschuwingstekst" error-fields="label" :error-box="errorBox" class="max">
-            <input
-                v-model="warningText"
-                class="input"
-                type="text"
-                placeholder="bv. 'Geen toestemming om foto's te maken'"
-                autocomplete="off"
-            >
-        </STInputBox>
+        <STInputBox v-if="warningText !== null" error-fields="label" :error-box="errorBox" class="max" :title="$t(`ec2d213d-35b7-4938-bd72-a05f8a4569b0`)">
+            <input v-model="warningText" class="input" type="text" autocomplete="off" :placeholder="$t(`2eaefa45-449f-41d2-a8ef-5c9d765ceb83`)"></STInputBox>
 
-        <STInputBox v-if="warningType" class="max" title="Type">
+        <STInputBox v-if="warningType" class="max" :title="$t(`b610d465-2901-4b54-97ae-dbeab72e4762`)">
             <STList>
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
-                        <Radio v-model="warningType" :value="RecordWarningType.Info" name="warningType" />
+                        <Radio v-model="warningType" :value="RecordWarningType.Info" name="warningType"/>
                     </template>
                     <h3 class="style-title-list">
-                        Informatief
+                        {{ $t('00d36793-b202-45ff-9278-9ee6068de932') }}
                     </h3>
                     <p class="style-description-small">
-                        Grijze achtergrond. Voor minder belangrijke zaken
+                        {{ $t('a08311c4-24b8-4481-a98d-0c8bf41f6c6c') }}
                     </p>
                 </STListItem>
 
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
-                        <Radio v-model="warningType" :value="RecordWarningType.Warning" name="warningType" />
+                        <Radio v-model="warningType" :value="RecordWarningType.Warning" name="warningType"/>
                     </template>
                     <h3 class="style-title-list">
-                        Waarschuwing
+                        {{ $t('0c94358f-26c4-434d-85a8-af7b49f3dcba') }}
                     </h3>
                     <p class="style-description-small">
-                        Gele achtergrond
+                        {{ $t('58032b6e-ced3-4f52-a0fb-b169d753a1f6') }}
                     </p>
                 </STListItem>
 
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
-                        <Radio v-model="warningType" :value="RecordWarningType.Error" name="warningType" />
+                        <Radio v-model="warningType" :value="RecordWarningType.Error" name="warningType"/>
                     </template>
                     <h3 class="style-title-list">
-                        Foutmelding
+                        {{ $t('150c5466-955c-4f5e-9147-5364f48b1cbc') }}
                     </h3>
                     <p class="style-description-small">
-                        Voor zaken die echt heel belangrijk zijn. Probeer dit weinig te gebruiken, zet niet alles op 'foutmelding', anders valt het niet meer op.
+                        {{ $t("d6f14d2d-75fc-4a3f-bc1b-8b9495c4473a") }}
                     </p>
                 </STListItem>
             </STList>
         </STInputBox>
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Optie verwijderen
+            <hr><h2>
+                {{ $t('80976efa-3f08-47c4-a64e-b460f4862f56') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span class="icon trash"/>
+                <span>{{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}</span>
             </button>
         </div>
     </SaveView>

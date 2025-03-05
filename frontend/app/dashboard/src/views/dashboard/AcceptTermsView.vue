@@ -1,24 +1,24 @@
 <template>
-    <SaveView title="Aangepaste overeenkomsten" :loading="loading" @save="save">
+    <SaveView :loading="loading" @save="save" :title="$t(`beef9a38-2c2f-4c2c-a2b6-c0e448bc1a0d`)">
         <h1>
-            Bekijk de aangepaste overeenkomsten
+            {{ $t('dc74a214-71c0-4daa-83cb-6bc90444810f') }}
         </h1>
 
         <p>
-            We hebben een wijziging aangebracht in onze algemene voorwaarden, privacyvoorwaarden en verwerkingsovereenkomst. Bekijk deze eerst en accepteer de nieuwe overeenkomsten voor je verder gaat.
+            {{ $t('362621f4-52d2-4df6-acfd-24fe73c5872a') }}
         </p>
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox"/>
 
         <Checkbox v-model="acceptPrivacy" class="long-text">
-            Ik heb kennis genomen van <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/privacy'" target="_blank">het privacybeleid</a>.
+            {{ $t('5640d1b2-0dfa-4fb3-a5ea-71214bf2947b') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/privacy'" target="_blank">{{ $t('96072da2-bd1e-4bd8-99c9-0cd572f8c83f') }}</a>.
         </Checkbox>
 
         <Checkbox v-model="acceptTerms" class="long-text">
-            Ik heb <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/algemene-voorwaarden'" target="_blank">de algemene voorwaarden</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
+            {{ $t('a689c709-899c-4e83-aed4-2d22ebb52f18') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/algemene-voorwaarden'" target="_blank">{{ $t('31101e24-f2d3-4f54-af0a-7fadd2177236') }}</a> {{ $t('2a42726d-41b7-494a-be4f-0497471ba621') }}
         </Checkbox>
 
         <Checkbox v-model="acceptDataAgreement" class="long-text">
-            Ik heb <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/verwerkersovereenkomst'" target="_blank">de verwerkersovereenkomst</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
+            {{ $t('a689c709-899c-4e83-aed4-2d22ebb52f18') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/verwerkersovereenkomst'" target="_blank">{{ $t('7add8ff4-5d9b-48a5-85d9-54580fda3a4b') }}</a> {{ $t('2a42726d-41b7-494a-be4f-0497471ba621') }}
         </Checkbox>
     </SaveView>
 </template>

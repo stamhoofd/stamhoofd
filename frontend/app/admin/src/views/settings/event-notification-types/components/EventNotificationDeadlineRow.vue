@@ -4,11 +4,11 @@
             {{ formatDate(deadline.startDate, true) }} - {{ formatDate(deadline.endDate) }}
         </h2>
         <p class="style-description-small">
-            Indienen kan tot {{ Formatter.endDate(deadline.deadline, false, true) }}
+            {{ $t('e07f97ee-d8c6-4259-924b-0af0588646bb') }} {{ Formatter.endDate(deadline.deadline, false, true) }}
         </p>
 
         <template #right>
-            <span class="icon arrow-right-small gray" />
+            <span class="icon arrow-right-small gray"/>
         </template>
     </STListItem>
 </template>

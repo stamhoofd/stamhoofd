@@ -1,12 +1,12 @@
 <template>
     <SaveView :loading="exporting" save-icon="download" @save="startExport">
-        <h1>Exporteren naar Excel</h1>
+        <h1>{{ $t('0c160cf8-7e58-4b9d-ac54-85fb3fab17a1') }}</h1>
 
         <ScrollableSegmentedControl v-if="workbook.sheets.length > 1" v-model="visibleSheet" :items="workbook.sheets">
             <template #item="{item}">
                 <span>{{ item.name }}</span>
 
-                <span v-if="item.enabledCount === 0" v-tooltip="'Dit werkblad wordt niet mee geëxporteerd'" class="icon disabled small" />
+                <span v-if="item.enabledCount === 0" v-tooltip="'Dit werkblad wordt niet mee geëxporteerd'" class="icon disabled small"/>
             </template>
         </ScrollableSegmentedControl>
 
@@ -14,16 +14,15 @@
             {{ visibleSheet.description }}
         </p>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <div v-for="({categoryName, columns}, index) in groupedColumns" :key="visibleSheet.name + '-' + categoryName" class="container">
-            <hr v-if="index > 0">
-            <h2>{{ categoryName }}</h2>
+            <hr v-if="index > 0"><h2>{{ categoryName }}</h2>
 
             <STList>
                 <STListItem element-name="label" :selectable="true" class="full-border">
                     <template #left>
-                        <Checkbox :model-value="getAllSelected(columns)" :indeterminate="getAllSelectedindeterminate(columns)" @update:model-value="setAllSelected($event, columns)" />
+                        <Checkbox :model-value="getAllSelected(columns)" :indeterminate="getAllSelectedindeterminate(columns)" @update:model-value="setAllSelected($event, columns)"/>
                     </template>
 
                     <div class="style-table-head">
@@ -33,7 +32,7 @@
 
                 <STListItem v-for="column of columns" :key="column.id" element-name="label" :selectable="true">
                     <template #left>
-                        <Checkbox v-model="column.enabled" />
+                        <Checkbox v-model="column.enabled"/>
                     </template>
 
                     <h3 class="style-title-list">

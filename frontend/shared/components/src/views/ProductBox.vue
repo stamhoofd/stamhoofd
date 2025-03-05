@@ -1,6 +1,6 @@
 <template>
     <article class="product-box" :class="{ selected: count > 0}" @click="onClicked">
-        <div class="left" />
+        <div class="left"/>
         <div class="content">
             <div>
                 <h3>
@@ -10,28 +10,26 @@
                     {{ product.name }}
                 </h3>
 
-                <p v-if="(product.type === 'Ticket' || product.type === 'Voucher') && product.location" class="description" v-text="product.location.name" />
-                <p v-if="(product.type === 'Ticket' || product.type === 'Voucher') && product.dateRange" class="description" v-text="formatDateRange(product.dateRange)" />
-                <p v-else-if="product.description" class="description" v-text="product.description" />
+                <p v-if="(product.type === 'Ticket' || product.type === 'Voucher') && product.location" class="description" v-text="product.location.name"/>
+                <p v-if="(product.type === 'Ticket' || product.type === 'Voucher') && product.dateRange" class="description" v-text="formatDateRange(product.dateRange)"/>
+                <p v-else-if="product.description" class="description" v-text="product.description"/>
 
                 <p class="price">
                     {{ priceString }}
 
-                    <span v-if="product.enableInFuture" class="style-tag">Vanaf {{ product.enableAfter ? formatDateTime(product.enableAfter) : '?' }}</span>
-                    <span v-else-if="!product.isEnabled && !admin" class="style-tag error">Onbeschikbaar</span>
-                    <span v-else-if="product.isSoldOut" class="style-tag error">Uitverkocht</span>
+                    <span v-if="product.enableInFuture" class="style-tag">{{ $t('cb8367e9-6497-483f-9d61-a595d1f5f441') }} {{ product.enableAfter ? formatDateTime(product.enableAfter) : '?' }}</span>
+                    <span v-else-if="!product.isEnabled && !admin" class="style-tag error">{{ $t('b189bb90-5982-48e6-a752-bb673d261bad') }}</span>
+                    <span v-else-if="product.isSoldOut" class="style-tag error">{{ $t('4c249834-df40-4c1f-9c79-c56864100c36') }}</span>
                     <span v-else-if="stockText !== null" class="style-tag" :class="stockText.style">{{ stockText.text }}</span>
                 </p>
             </div>
             <figure v-if="imageSrc">
-                <img :src="imageSrc" :width="imgWidth" :height="imgHeight" :alt="product.name">
-            </figure>
+                <img :src="imageSrc" :width="imgWidth" :height="imgHeight" :alt="product.name"></figure>
             <figure v-else>
-                <span v-if="product.type === 'Ticket' || product.type === 'Voucher'" class="icon ticket gray" />
-                <span class="icon arrow-right-small gray" />
+                <span v-if="product.type === 'Ticket' || product.type === 'Voucher'" class="icon ticket gray"/>
+                <span class="icon arrow-right-small gray"/>
             </figure>
-            <hr>
-        </div>
+            <hr></div>
     </article>
 </template>
 

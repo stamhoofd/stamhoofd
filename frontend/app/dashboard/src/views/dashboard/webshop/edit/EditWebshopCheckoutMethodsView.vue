@@ -1,40 +1,40 @@
 <template>
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
-        <p>Stel hier in waar en wanneer de bestelde producten kunnen worden afgehaald, geleverd of ter plaatse geconsumeerd. Dit is optioneel, maar we raden het wel sterk aan, want zo is de juiste informatie zichtbaar in de bestelbevestiging.</p>
+        <p>{{ $t('9e21bd1c-fddf-46cb-aaee-f0ed98e0651c') }}</p>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <STList>
             <STListItem v-for="method in webshop.meta.checkoutMethods" :key="method.id" :selectable="true" class="right-stack" @click="editCheckoutMethod(method)">
                 {{ method.typeName }}: {{ method.name }}
 
                 <template #right>
-                    <button class="button icon arrow-up gray" type="button" @click.stop="moveCheckoutUp(method)" />
-                    <button class="button icon arrow-down gray" type="button" @click.stop="moveCheckoutDown(method)" />
-                    <span class="icon arrow-right-small gray" />
+                    <button class="button icon arrow-up gray" type="button" @click.stop="moveCheckoutUp(method)"/>
+                    <button class="button icon arrow-down gray" type="button" @click.stop="moveCheckoutDown(method)"/>
+                    <span class="icon arrow-right-small gray"/>
                 </template>
             </STListItem>
         </STList>
 
         <p>
             <button class="button text" type="button" @click="addOnSiteMethod">
-                <span class="icon add" />
-                <span>Ter plaatse consumeren toevoegen</span>
+                <span class="icon add"/>
+                <span>{{ $t('351e39fd-47ab-4f61-9b26-aa4b81f760cf') }}</span>
             </button>
         </p>
 
         <p>
             <button class="button text" type="button" @click="addTakeoutMethod">
-                <span class="icon add" />
-                <span>Afhaallocatie toevoegen</span>
+                <span class="icon add"/>
+                <span>{{ $t('e44bd2a6-83bd-4806-abbf-7af1d5f34d7a') }}</span>
             </button>
         </p>
 
         <p>
             <button class="button text" type="button" @click="addDeliveryMethod">
-                <span class="icon add" />
-                <span>Leveringsoptie toevoegen</span>
+                <span class="icon add"/>
+                <span>{{ $t('095825af-b8fd-4c24-a660-f171610a2805') }}</span>
             </button>
         </p>
     </SaveView>

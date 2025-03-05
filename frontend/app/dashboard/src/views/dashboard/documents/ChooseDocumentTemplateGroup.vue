@@ -1,23 +1,22 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Inschrijvingsgroep" />
+        <STNavigationBar :title="$t(`f340d193-6f45-49e0-ab12-7ef3d6f91baa`)"/>
 
         <main>
-            <h1>Kies voor welke inschrijvingen je dit document wilt aanmaken</h1>
+            <h1>{{ $t('9dd7c607-d6d8-49d8-9424-049a7278f6fa') }}</h1>
 
-            <SegmentedControl v-model="selectedTab" :items="tabs.map(t => t.id)" :labels="tabs.map(t => t.label)" />
+            <SegmentedControl v-model="selectedTab" :items="tabs.map(t => t.id)" :labels="tabs.map(t => t.label)"/>
 
             <div v-if="selectedTab === Tab.Activities" class="input-with-buttons">
                 <div>
                     <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                        <input v-model="searchQuery" class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
-                    </form>
+                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`83d986c4-e6c9-42ed-963a-8220c6d933e4`)"></form>
                 </div>
                 <div>
                     <button type="button" class="button text" @click="editFilter">
-                        <span class="icon filter" />
-                        <span class="hide-small">Filter</span>
-                        <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary" />
+                        <span class="icon filter"/>
+                        <span class="hide-small">{{ $t('52577565-f3ae-4d34-8e1a-14ca2507629e') }}</span>
+                        <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary"/>
                     </button>
                 </div>
             </div>
@@ -26,17 +25,16 @@
                 <p>
                     <button type="button" class="button text" @click="switchPeriod">
                         <span>{{ period.period.name }}</span>
-                        <span class="icon arrow-down-small" />
+                        <span class="icon arrow-down-small"/>
                     </button>
                 </p>
 
                 <div v-for="category in categoryTree.categories" :key="category.id" class="container">
-                    <hr>
-                    <h2>{{ category.settings.name }}</h2>
+                    <hr><h2>{{ category.settings.name }}</h2>
                     <STList>
                         <STListItem v-for="group in category.groups" :key="group.id" :selectable="true" @click="selectGroup(group)">
                             <template #left>
-                                <GroupAvatar :group="group" />
+                                <GroupAvatar :group="group"/>
                             </template>
 
                             <h3 class="style-title-list">
@@ -48,19 +46,18 @@
 
                             <template #right>
                                 <span v-if="group.getMemberCount() !== null" class="style-description-small">{{ group.getMemberCount() }}</span>
-                                <span class="icon arrow-right-small gray" />
+                                <span class="icon arrow-right-small gray"/>
                             </template>
                         </STListItem>
                     </STList>
                 </div>
 
-                <hr>
-                <h2>Archief</h2>
-                <Spinner v-if="loadingGroups" />
+                <hr><h2>{{ $t('f8e18afd-9ec9-4695-adc5-d6f2351d8dc3') }}</h2>
+                <Spinner v-if="loadingGroups"/>
                 <STList v-else-if="archivedGroups.length">
                     <STListItem v-for="group in archivedGroups" :key="group.id" :selectable="true" @click="selectGroup(group)">
                         <template #left>
-                            <GroupAvatar :group="group" />
+                            <GroupAvatar :group="group"/>
                         </template>
 
                         <h3 class="style-title-list">
@@ -71,20 +68,20 @@
                         </p>
                         <template #right>
                             <span v-if="group.getMemberCount() !== null" class="style-description-small">{{ group.getMemberCount() }}</span>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
                 </STList>
                 <p v-else class="info-box">
-                    Het archief is leeg.
+                    {{ $t('7139a5e0-00cd-4b19-81ad-a77075d61a23') }}
                 </p>
             </template>
 
             <template v-else>
                 <STList>
-                    <EventRow v-for="event of fetcher.objects" :key="event.id" :event="event" @click="selectGroup(event.group!)" />
+                    <EventRow v-for="event of fetcher.objects" :key="event.id" :event="event" @click="selectGroup(event.group!)"/>
                 </STList>
-                <InfiniteObjectFetcherEnd empty-message="Geen activiteiten gevonden" :fetcher="fetcher" />
+                <InfiniteObjectFetcherEnd empty-message="Geen activiteiten gevonden" :fetcher="fetcher"/>
             </template>
         </main>
     </div>

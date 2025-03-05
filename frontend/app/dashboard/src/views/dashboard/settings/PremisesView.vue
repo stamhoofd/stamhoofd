@@ -8,11 +8,10 @@
         </p>
 
         <div v-if="isReview" class="container">
-            <ReviewCheckbox :data="$reviewCheckboxData" />
-            <hr>
-        </div>
+            <ReviewCheckbox :data="$reviewCheckboxData"/>
+            <hr></div>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox"/>
 
         <p v-for="warning of premiseLimitationWarnings" :key="warning.id" class="warning-box">
             {{ warning.message }}
@@ -20,19 +19,19 @@
 
         <template v-if="!draggablePremises.length">
             <p class="info-box">
-                Er zijn nog geen lokalen toegevoegd
+                {{ $t('fe76fe8c-a98c-4ffe-b36a-00e978fc225c') }}
             </p>
         </template>
 
         <STList v-model="draggablePremises" :draggable="true">
             <template #item="{item: premise}">
-                <PremiseRow :premise="premise" @click="editPremise(premise)" />
+                <PremiseRow :premise="premise" @click="editPremise(premise)"/>
             </template>
         </STList>
 
         <p>
             <button class="button text" type="button" @click="addPremise">
-                <span class="icon add" />
+                <span class="icon add"/>
                 <span>{{ $t('5e40dfe9-b4ed-497c-a37d-e162191ba96a') }}</span>
             </button>
         </p>

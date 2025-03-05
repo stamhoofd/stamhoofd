@@ -1,8 +1,8 @@
 <template>
     <div class="st-view show-seats-view shade">
-        <STNavigationBar title="Jouw plaatsen" :disableDismiss="!allowDismiss" />
+        <STNavigationBar :disableDismiss="!allowDismiss" :title="$t(`Jouw plaatsen`)"/>
         <main>
-            <h1>Jouw plaatsen</h1>
+            <h1>{{ $t('8c43d336-4965-4933-aed4-d98f6aab777c') }}</h1>
 
             <STList>
                 <STListItem v-if="seatDescription.length">
@@ -19,17 +19,7 @@
                 </STListItem>
             </STList>
 
-            <hr>
-
-            <SeatSelectionBox 
-                v-if="seatingPlan && seatingPlanSection"
-                :allow-changes="false"
-                :seating-plan="seatingPlan"
-                :seating-plan-section="seatingPlanSection"
-                :seats="seats"
-                :reserved-seats="reservedSeats"
-                :highlight-seats="highlightSeats"
-            />
+            <hr><SeatSelectionBox v-if="seatingPlan && seatingPlanSection" :allow-changes="false" :seating-plan="seatingPlan" :seating-plan-section="seatingPlanSection" :seats="seats" :reserved-seats="reservedSeats" :highlight-seats="highlightSeats"/>
         </main>
     </div>
 </template>

@@ -2,20 +2,20 @@
     <section class="st-view shade webshop-view">
         <STNavigationBar :large="true" :left-logo="true">
             <template #left>
-                <OrganizationLogo :organization="organization" :webshop="webshop" />
+                <OrganizationLogo :organization="organization" :webshop="webshop"/>
             </template>
 
             <template #right>
                 <button v-if="isLoggedIn" type="button" class="button text limit-space" @click="switchAccount">
-                    <span class="icon user" />
+                    <span class="icon user"/>
                     <span>{{ userName }}</span>
                 </button>
                 <a v-else-if="organization.website" class="button text limit-space" :href="organization.website" target="_blank" rel="nofollow noreferrer noopener">
-                    <span class="icon external" />
-                    <span>Terug naar website</span>
+                    <span class="icon external"/>
+                    <span>{{ $t('521853e8-2370-4977-baaf-4d8754c14621') }}</span>
                 </a>
                 <button v-if="cartEnabled" class="primary button" type="button" @click="openCart(true)">
-                    <span class="icon basket" />
+                    <span class="icon basket"/>
                     <span>{{ cartCount }}</span>
                 </button>
             </template>
@@ -25,37 +25,36 @@
             <div class="webshop-layout" :class="webshopLayout + ' ' + (webshopLayout === 'Default' ? 'enable-grid' : '')">
                 <header class="webshop-header">
                     <figure v-if="bannerImageSrc" class="webshop-banner">
-                        <img :src="bannerImageSrc" :width="bannerImageWidth" :height="bannerImageHeight">
-                    </figure>
+                        <img :src="bannerImageSrc" :width="bannerImageWidth" :height="bannerImageHeight"></figure>
                     <h1>{{ webshop.meta.title || webshop.meta.name }}</h1>
-                    <!-- eslint-disable-next-line vue/no-v-html -> cleaned in backend -->
-                    <div v-if="webshop.meta.description.html" class="description style-wysiwyg" v-html="webshop.meta.description.html" />
-                    <p v-else-if="webshop.meta.description.text" class="description" v-text="webshop.meta.description.text" />
+                    
+                    <div v-if="webshop.meta.description.html" class="description style-wysiwyg" v-html="webshop.meta.description.html"/>
+                    <p v-else-if="webshop.meta.description.text" class="description" v-text="webshop.meta.description.text"/>
 
                     <p v-if="showOpenAt" class="info-box">
-                        Bestellen kan vanaf {{ webshop.meta.openAt ? formatDateTime(webshop.meta.openAt) : '?' }}
+                        {{ $t('cd7ffd2c-7d46-4a7f-aa41-6273f56b88e2') }} {{ webshop.meta.openAt ? formatDateTime(webshop.meta.openAt) : '?' }}
                     </p>
                     <p v-else-if="closed" class="info-box">
-                        Bestellingen zijn gesloten
+                        {{ $t('ada39cfc-26c7-48d8-8593-c5e9d362d8e6') }}
                     </p>
                     <p v-else-if="almostClosed" class="info-box">
-                        Bestellen kan tot {{ webshop.meta.availableUntil ? formatTime(webshop.meta.availableUntil) : '?' }}
+                        {{ $t('22c88853-c540-47d7-8930-546680785ae0') }} {{ webshop.meta.availableUntil ? formatTime(webshop.meta.availableUntil) : '?' }}
                     </p>
                     <p v-if="categories.length === 0 && products.length === 0" class="info-box">
-                        Momenteel is er niets beschikbaar.
+                        {{ $t('5b051e18-4f89-41af-b900-2e0ab7b2e9c4') }}
                     </p>
                 </header>
 
                 <template v-if="!closed || showOpenAt">
-                    <FullPageProduct v-if="products.length === 1 && webshopLayout === 'Split'" :product="products[0]" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem" />
+                    <FullPageProduct v-if="products.length === 1 && webshopLayout === 'Split'" :product="products[0]" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem"/>
                     <div v-else class="products">
-                        <CategoryBox v-for="(category, index) in categories" :key="category.id" :category="category" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem" :is-last="index === categories.length - 1" />
-                        <ProductGrid v-if="categories.length === 0" :products="products" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem" />
+                        <CategoryBox v-for="(category, index) in categories" :key="category.id" :category="category" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem" :is-last="index === categories.length - 1"/>
+                        <ProductGrid v-if="categories.length === 0" :products="products" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem"/>
                     </div>
                 </template>
             </div>
 
-            <LegalFooter :organization="organization" :webshop="webshop" />
+            <LegalFooter :organization="organization" :webshop="webshop"/>
         </main>
     </section>
 </template>

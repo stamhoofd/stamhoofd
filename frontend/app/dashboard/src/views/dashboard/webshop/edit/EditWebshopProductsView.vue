@@ -3,12 +3,12 @@
         <h1 class="style-navigation-title">
             {{ viewTitle }}
         </h1>
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <template v-if="webshop.categories.length > 0">
             <STList v-model="draggableCategories" :draggable="true">
                 <template #item="{item: category}">
-                    <CategoryRow :category="category" :webshop="webshop" @patch="addPatch($event)" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)" />
+                    <CategoryRow :category="category" :webshop="webshop" @patch="addPatch($event)" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)"/>
                 </template>
             </STList>
         </template>
@@ -16,41 +16,40 @@
         <template v-else-if="webshop.products.length > 0">
             <STList v-model="draggableProducts" :draggable="true">
                 <template #item="{item: product}">
-                    <ProductRow :product="product" :webshop="webshop" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
+                    <ProductRow :product="product" :webshop="webshop" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)"/>
                 </template>
             </STList>
         </template>
 
         <p v-if="webshop.categories.length === 0">
             <button class="button text" type="button" @click="addProduct">
-                <span class="icon add" />
-                <span v-if="isTickets">Ticket toevoegen</span>
-                <span v-else>Artikel toevoegen</span>
+                <span class="icon add"/>
+                <span v-if="isTickets">{{ $t('f0949a12-7b87-41cf-b2e1-e3bfacda8894') }}</span>
+                <span v-else>{{ $t('3c2b0f17-52bd-4b6b-8a83-d88218682a72') }}</span>
             </button>
         </p>
 
         <p>
             <button class="button text" type="button" @click="addCategory">
-                <span class="icon add" />
-                <span v-if="webshop.categories.length === 0 && webshop.products.length > 0">Opdelen in categorieën</span>
-                <span v-else>Categorie toevoegen</span>
+                <span class="icon add"/>
+                <span v-if="webshop.categories.length === 0 && webshop.products.length > 0">{{ $t('9a714cea-4e3f-49b2-8901-087c6a896fbd') }}</span>
+                <span v-else>{{ $t('127967a5-502a-4e42-be8b-562cd96953d8') }}</span>
             </button>
         </p>
 
         <template v-if="webshop.canEnableCart">
-            <hr>
-            <h2>Winkelmandje</h2>
+            <hr><h2>{{ $t('608dd4a9-dbba-4c2b-818b-5e32296e7289') }}</h2>
             <p>
-                Met een winkelmandje kunnen bezoekers meerdere artikel combinaties in één keer bestellen. Zet je het uit, dan kunnen bezoekers meteen afrekenen na het selecteren van een artikel. Voor formulieren waar je maar één ingevuld formulier (= artikel) verwacht, is het vaak nuttig om het uit te zetten.
+                {{ $t('d148d875-f5fb-4c89-a58d-f47f461c22f3') }}
             </p>
 
             <STList>
                 <STListItem :selectable="true" element-name="label" class="left-center">
                     <template #left>
-                        <Checkbox v-model="cartEnabled" />
+                        <Checkbox v-model="cartEnabled"/>
                     </template>
                     <h3 class="style-title-list">
-                        Winkelmandje gebruiken
+                        {{ $t('e8eb9939-94b1-4d1b-aec3-5897d04078e4') }}
                     </h3>
                 </STListItem>
             </STList>

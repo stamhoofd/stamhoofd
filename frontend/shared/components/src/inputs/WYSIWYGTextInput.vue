@@ -1,36 +1,33 @@
 <template>
     <div class="wysiwyg-text-input" v-if="editor">
-        <editor-content :editor="editor" class="editor-content" />
+        <editor-content :editor="editor" class="editor-content"/>
 
         <div class="tools">
             <form v-if="showLinkEditor" class="editor-button-bar sticky link" autocomplete="off" novalidate data-submit-last-field @submit.prevent="saveLink()">
                 <STList>
                     <STListItem class="no-padding right-stack">
                         <div class="list-input-box">
-                            <span>Link:</span>
+                            <span>{{ $t('f11f6464-a7e8-435b-9c46-853fc432bb0f') }}</span>
 
-                            <input ref="linkInput" v-model="editLink" class="list-input" type="url" placeholder="https://" enterkeyhint="go">
-                        </div>
+                            <input ref="linkInput" v-model="editLink" class="list-input" type="url" enterkeyhint="go" :placeholder="$t(`b897c43c-c595-4de3-9e45-ce13485a32f9`)"></div>
                         <template #right>
                             <button class="button text" type="submit" @mousedown.prevent>
                                 {{ editLink.length === 0 ? "Sluiten" : "Opslaan" }}
                             </button>
-                            <button v-if="editor.isActive('link')" v-tooltip="'Link verwijderen'" class="button icon trash gray" type="button" @mousedown.prevent @click.stop.prevent="clearLink()" />
+                            <button v-if="editor.isActive('link')" v-tooltip="'Link verwijderen'" class="button icon trash gray" type="button" @mousedown.prevent @click.stop.prevent="clearLink()"/>
                         </template>
                     </STListItem>
                 </STList>
             </form>
 
             <div v-else class="small editor-button-bar sticky">
-                <button v-tooltip="'Vet gedrukte tekst'" class="button icon bold" :class="{ 'is-active': editor.isActive('bold') }" type="button" @click="editor.chain().focus().toggleBold().run()" />
-                <button v-tooltip="'Schuine tekst'" class="button icon italic" type="button" :class="{ 'is-active': editor.isActive('italic') }" @click="editor.chain().focus().toggleItalic().run()" />
-                <button v-tooltip="'Onderlijn tekst'" class="button icon underline" type="button" :class="{ 'is-active': editor.isActive('underline') }" @click="editor.chain().focus().toggleUnderline().run()" />
+                <button v-tooltip="'Vet gedrukte tekst'" class="button icon bold" :class="{ 'is-active': editor.isActive('bold') }" type="button" @click="editor.chain().focus().toggleBold().run()"/>
+                <button v-tooltip="'Schuine tekst'" class="button icon italic" type="button" :class="{ 'is-active': editor.isActive('italic') }" @click="editor.chain().focus().toggleItalic().run()"/>
+                <button v-tooltip="'Onderlijn tekst'" class="button icon underline" type="button" :class="{ 'is-active': editor.isActive('underline') }" @click="editor.chain().focus().toggleUnderline().run()"/>
 
-                <hr v-if="!$isMobile">
-                
-                <button v-tooltip="'Titel'" class="button icon text-style" type="button" @click="openTextStyles" />
-                <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
-                <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click.prevent.stop="openLinkEditor()" @mousedown.prevent />
+                <hr v-if="!$isMobile"><button v-tooltip="'Titel'" class="button icon text-style" type="button" @click="openTextStyles"/>
+                <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent/>
+                <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click.prevent.stop="openLinkEditor()" @mousedown.prevent/>
             </div>
         </div>
     </div>

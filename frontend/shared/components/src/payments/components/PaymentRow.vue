@@ -2,9 +2,9 @@
     <STListItem :selectable="true" :class="'right-stack ' +payment.theme" @click="openPayment(payment)">
         <template #left>
             <PaymentMethodIcon :method="payment.method" :type="payment.type">
-                <span v-if="payment.type !== PaymentType.Payment && payment.method !== PaymentMethod.Unknown" :class="'icon small stroke primary ' + PaymentTypeHelper.getIcon(payment.type)" />
-                <span v-if="payment.status === PaymentStatus.Failed" class="icon disabled small error stroke" />
-                <span v-if="payment.status === PaymentStatus.Pending || payment.status === PaymentStatus.Created" class="icon hourglass small primary stroke" />
+                <span v-if="payment.type !== PaymentType.Payment && payment.method !== PaymentMethod.Unknown" :class="'icon small stroke primary ' + PaymentTypeHelper.getIcon(payment.type)"/>
+                <span v-if="payment.status === PaymentStatus.Failed" class="icon disabled small error stroke"/>
+                <span v-if="payment.status === PaymentStatus.Pending || payment.status === PaymentStatus.Created" class="icon hourglass small primary stroke"/>
             </PaymentMethodIcon>
         </template>
 
@@ -21,18 +21,18 @@
         </p>
 
         <p v-if="!payment.paidAt || formatDate(payment.createdAt) !== formatDate(payment.paidAt)" class="style-description-small">
-            Aangemaakt op {{ formatDate(payment.createdAt) }}
+            {{ $t('25981b4f-4483-47f9-8c3a-ac5e7bdc1a69') }} {{ formatDate(payment.createdAt) }}
         </p>
         <p v-if="payment.paidAt" class="style-description-small">
-            Betaald op {{ formatDate(payment.paidAt) }}
+            {{ $t('977d1522-14fd-4d2c-a589-5ad2a3be8e1c') }} {{ formatDate(payment.paidAt) }}
         </p>
         <p v-if="payment.price && price !== null && price !== payment.price" class="style-description-small">
-            Betaling van {{ formatPrice(payment.price) }}
+            {{ $t('b7c32c48-67a1-4011-ab34-82f21dfc7398') }} {{ formatPrice(payment.price) }}
         </p>
 
         <template #right>
             <span class="style-price-base" :class="{negative: (price ?? payment.price) < 0}">{{ formatPrice(price ?? payment.price) }}</span>
-            <span class="icon arrow-right-small gray" />
+            <span class="icon arrow-right-small gray"/>
         </template>
     </STListItem>
 </template>

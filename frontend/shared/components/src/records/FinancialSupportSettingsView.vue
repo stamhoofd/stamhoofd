@@ -4,70 +4,62 @@
             {{ title || FinancialSupportSettings.defaultTitle }}
         </h1>
 
-        <p>Net voor het betalen van inschrijvingen is het mogelijk om te vragen of een gezin wenst gebruik te maken van financiële ondersteuning. Of dat aanstaat kan je op verschillende niveau's configureren, o.a. via 'Gegevens van leden'. Maar als het ingeschakeld is, bepaal je hier hoe het werkt voor alle groepen.</p>
+        <p>{{ $t("639d486a-9f7c-4083-a10b-54809dca2c7c") }}</p>
          
         <p class="info-box">
-            Leden die een UiTPAS-nummer met kansentarief ingaven, slaan deze stap automatisch over
+            {{ $t('646b3e51-563e-44a3-b2da-d356c29019c3') }}
         </p>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <template v-if="!inheritedFinancialSupport">
-            <STInputBox title="Benaming" class="max">
-                <input v-model="title" class="input" :placeholder="FinancialSupportSettings.defaultTitle">
-            </STInputBox>
+            <STInputBox class="max" :title="$t(`c27bda98-1c92-4aa2-86a7-a32d980ef60b`)">
+                <input v-model="title" class="input" :placeholder="FinancialSupportSettings.defaultTitle"></STInputBox>
             <p class="style-description-small">
-                De benaming van het systeem voor financiële ondersteuning. Bijvoorbeeld: "Financiële ondersteuning" of "Kansentarief"
+                {{ $t(`51b025f3-c08b-49bd-8884-f52bb5eb84fa`) }}
             </p>
         </template>
 
-        <hr>
-        <h2>Wijzig uitleg voor leden</h2>
-        <p>Kies zelf de uitleg en titels die zichtbaar zijn voor leden op de pagina (net voor het afrekenen).</p>
+        <hr><h2>{{ $t('1999ed09-def6-4892-99a7-8b448ed667fb') }}</h2>
+        <p>{{ $t('cf0653ca-5d45-4eec-8799-b36d23c410ed') }}</p>
 
-        <STInputBox title="Beschrijving" class="max">
-            <textarea v-model="description" class="input" :placeholder="inheritedFinancialSupport?.description || FinancialSupportSettings.defaultDescription" />
+        <STInputBox class="max" :title="$t(`f72f5546-ed6c-4c93-9b0d-9718f0cc9626`)">
+            <textarea v-model="description" class="input" :placeholder="inheritedFinancialSupport?.description || FinancialSupportSettings.defaultDescription"/>
         </STInputBox>
         <p class="style-description-small">
-            Tekst onder de titel. Leg hier uit wat voor financiële ondersteuning je geeft en wie er gebruik van kan maken. Leg uit dat ze discreet kunnen aanvinken dat ze gebruik willen maken van de ondersteuning.
+            {{ $t('32c78d01-17b5-44f2-bb7a-907a310220c2') }}
         </p>
 
-        <STInputBox title="Tekst naast aankruisvakje" class="max">
-            <input v-model="checkboxLabel" class="input" :placeholder="inheritedFinancialSupport?.checkboxLabel || FinancialSupportSettings.defaultCheckboxLabel">
-        </STInputBox>
+        <STInputBox class="max" :title="$t(`a56d3f07-e708-4dec-b508-b8c1bc29dd77`)">
+            <input v-model="checkboxLabel" class="input" :placeholder="inheritedFinancialSupport?.checkboxLabel || FinancialSupportSettings.defaultCheckboxLabel"></STInputBox>
         <p class="style-description-small">
-            Deze tekst is zichtbaar naast het aankruisvakje (dat ze moeten aanvinken als ze de ondersteuning willen gebruiken). Zorg dat je duidelijk bent, bv. "{{ FinancialSupportSettings.defaultCheckboxLabel }}"
+            {{ $t(`2e785781-b722-4431-b7d4-cf6ad702f2cb`) }}{{ FinancialSupportSettings.defaultCheckboxLabel }}"
         </p>
 
-        <hr>
-        <h2>Waarschuwing bij leden</h2>
-        <p>Als een lid gebruik wil maken van de financiële ondersteuning, dan tonen we dit als waarschuwing als je dat lid bekijkt. Je kan zelf de tekst in deze waarschuwing wijzigen. Dit is niet zichtbaar voor de leden zelf.</p>
+        <hr><h2>{{ $t('03a36461-9a39-479d-a37e-832d0defd2a7') }}</h2>
+        <p>{{ $t('48cf6db1-dc0c-4392-85a1-b61b002d1ea4') }}</p>
         
-        <STInputBox title="Waarschuwingstekst" class="max">
-            <input v-model="warningText" class="input" :placeholder="inheritedFinancialSupport?.warningText || FinancialSupportSettings.defaultWarningText">
-        </STInputBox>
+        <STInputBox class="max" :title="$t(`ec2d213d-35b7-4938-bd72-a05f8a4569b0`)">
+            <input v-model="warningText" class="input" :placeholder="inheritedFinancialSupport?.warningText || FinancialSupportSettings.defaultWarningText"></STInputBox>
 
-        <hr>
-        <h2>Benaming verlaagd tarief</h2>
-        <p>Overal in het systeem krijg je nu de optie om een 2de prijs in te vullen voor personen met deze financiële ondersteuning. Je kan deze prijs daar een naam geven.</p>
+        <hr><h2>{{ $t('6fcb249d-513b-4533-a2ad-da44b5b7d394') }}</h2>
+        <p>{{ $t('bb1806eb-666b-4003-910a-36c284b495cb') }}</p>
         
-        <STInputBox title="Benaming">
-            <input v-model="priceName" class="input" :placeholder="inheritedFinancialSupport?.priceName || FinancialSupportSettings.defaultPriceName">
-        </STInputBox>
+        <STInputBox :title="$t(`c27bda98-1c92-4aa2-86a7-a32d980ef60b`)">
+            <input v-model="priceName" class="input" :placeholder="inheritedFinancialSupport?.priceName || FinancialSupportSettings.defaultPriceName"></STInputBox>
 
-        <hr>
-        <h2>Verhinder automatische toekenning</h2>
-        <p>Normaal wordt de financiële ondersteuning automatisch goedgekeurd zodra een lid bij het inschrijven het aanvinkvakje aankruist. Je kan dit uitschakelen. In dat geval kan een lid niet verder met inschrijven als ze gebruik willen maken van de financiële ondersteuning. Een beheerder moet het dan zelf eerst aanvinken bij dat lid alvorens het lid verder kan inschrijven aan de verlaagde tarieven. Als het lid een UiTPAS-nummer met kansentarief opgeeft dan krijgt het lid wel automatisch financiële ondersteuning en kan het lid meteen inschrijven met de verlaagde tarieven.</p>
+        <hr><h2>{{ $t('b679f5d0-718b-4d63-8358-0e4cec9e946d') }}</h2>
+        <p>{{ $t('7388c031-6285-4228-9fce-2a8901d29feb') }}</p>
 
         <STList>
             <STListItem>
                 <Checkbox v-model="preventSelfAssignment" :locked="inheritedFinancialSupport?.preventSelfAssignment">
-                    Verhinder automatische toekenning van financiële ondersteuning door een lid
+                    {{ $t('29e4863f-99b0-45dc-beea-676fdec2ba51') }}
                 </Checkbox>
 
                 <template v-if="preventSelfAssignment">
-                    <STInputBox title="Verduidelijking voor een lid als hij niet kan inschrijven" class="max extra-padding">
-                        <textarea v-model="preventSelfAssignmentText" class="input" :placeholder="FinancialSupportSettings.defaultPreventSelfAssignmentText" />
+                    <STInputBox class="max extra-padding" :title="$t(`6e0723a1-1d1b-4102-832e-3178f8b8e258`)">
+                        <textarea v-model="preventSelfAssignmentText" class="input" :placeholder="FinancialSupportSettings.defaultPreventSelfAssignmentText"/>
                     </STInputBox>
                 </template>
             </STListItem>

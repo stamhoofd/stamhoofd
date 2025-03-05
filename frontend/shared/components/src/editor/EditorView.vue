@@ -2,9 +2,9 @@
     <form class="editor-view st-view" @submit.prevent="$emit('save')">
         <STNavigationBar :title="title" :disable-dismiss="true" :disable-pop="true">
             <template #left>
-                <BackButton v-if="canPop" @click="pop" />
+                <BackButton v-if="canPop" @click="pop"/>
                 <template v-else-if="$isMobile || $isIOS || $isAndroid">
-                    <button v-if="$isAndroid" class="button navigation icon close" type="button" @click="pop()" />
+                    <button v-if="$isAndroid" class="button navigation icon close" type="button" @click="pop()"/>
                     <button v-else class="button text selected unbold" type="button" @click="pop()">
                         {{ cancelText }}
                     </button>
@@ -19,26 +19,24 @@
                 </LoadingButton>
             </template>
             <template v-else-if="canDismiss" #right>
-                <button class="button navigation icon close" type="button" @click="dismiss()" />
+                <button class="button navigation icon close" type="button" @click="dismiss()"/>
             </template>
         </STNavigationBar>
         <main ref="main" class="flex">
-            <slot />
+            <slot/>
 
             <STList>
-                <!-- Place for e.g. To, From, Subject ... -->
-                <slot name="list" />
+                
+                <slot name="list"/>
             </STList>
 
-            <hr class="mail-hr">
-
-            <div class="editor-container">
-                <editor-content v-color="primaryColor" :editor="editor" class="editor-content" />
+            <hr class="mail-hr"><div class="editor-container">
+                <editor-content v-color="primaryColor" :editor="editor" class="editor-content"/>
                 <footer>
-                    <slot name="footer" />
+                    <slot name="footer"/>
                 </footer>
             </div>
-            <TextStyleButtonsView v-if="!$isMobile && showTextStyles && !showLinkEditor" class="editor-button-bar sticky" :editor="editor" />
+            <TextStyleButtonsView v-if="!$isMobile && showTextStyles && !showLinkEditor" class="editor-button-bar sticky" :editor="editor"/>
 
             <div v-if="!$isMobile && !showTextStyles && !showLinkEditor && editor.isActive('smartButton') && getSmartButton(editor.getAttributes('smartButton').id)" class="editor-button-bar hint sticky">
                 {{ getSmartButton(editor.getAttributes('smartButton').id)!.hint }}
@@ -56,15 +54,14 @@
                 <STList>
                     <STListItem class="no-padding right-stack">
                         <div class="list-input-box">
-                            <span>Link:</span>
+                            <span>{{ $t('f11f6464-a7e8-435b-9c46-853fc432bb0f') }}</span>
 
-                            <input ref="linkInput" v-model="editLink" class="list-input" type="url" placeholder="https://" enterkeyhint="go">
-                        </div>
+                            <input ref="linkInput" v-model="editLink" class="list-input" type="url" enterkeyhint="go" :placeholder="$t(`b897c43c-c595-4de3-9e45-ce13485a32f9`)"></div>
                         <template #right>
                             <button class="button text" type="submit" @mousedown.prevent>
                                 {{ editLink.length === 0 ? "Sluiten" : "Opslaan" }}
                             </button>
-                            <button v-if="editor.isActive('link')" v-tooltip="'Link verwijderen'" class="button icon trash gray" type="button" @mousedown.prevent @click.stop.prevent="clearLink()" />
+                            <button v-if="editor.isActive('link')" v-tooltip="'Link verwijderen'" class="button icon trash gray" type="button" @mousedown.prevent @click.stop.prevent="clearLink()"/>
                         </template>
                     </STListItem>
                 </STList>
@@ -73,34 +70,33 @@
         <STToolbar v-if="!$isMobile && !$isIOS && !$isAndroid">
             <template #right>
                 <div class="editor-button-bar">
-                    <button v-tooltip="'Toon/verberg tekst opties'" class="button icon text-style" :class="{ 'is-active': showTextStyles }" type="button" @mousedown.prevent @click.prevent="showTextStyles = !showTextStyles" />
-                    <hr>
-                    <button v-if="smartVariables.length > 0" v-tooltip="'Magische tekstvervanging'" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
-                    <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
-                    <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click.prevent="openLinkEditor()" @mousedown.prevent />
+                    <button v-tooltip="'Toon/verberg tekst opties'" class="button icon text-style" :class="{ 'is-active': showTextStyles }" type="button" @mousedown.prevent @click.prevent="showTextStyles = !showTextStyles"/>
+                    <hr><button v-if="smartVariables.length > 0" v-tooltip="'Magische tekstvervanging'" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.prevent/>
+                    <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent/>
+                    <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click.prevent="openLinkEditor()" @mousedown.prevent/>
                     <UploadButton :resolutions="imageResolutions" @update:model-value="insertImage" @mousedown.native.prevent>
-                        <div v-tooltip="'Afbeelding toevoegen'" class="button icon image" type="button" />
+                        <div v-tooltip="'Afbeelding toevoegen'" class="button icon image" type="button"/>
                     </UploadButton>
-                    <slot name="buttons" />
+                    <slot name="buttons"/>
                 </div>
 
                 <LoadingButton :loading="loading">
                     <button class="button primary" :disabled="disabled" type="submit">
-                        <span v-if="saveIcon" class="icon " :class="saveIcon" />
+                        <span v-if="saveIcon" class="icon " :class="saveIcon"/>
                         <span>{{ saveText }}</span>
                     </button>
                 </LoadingButton>
             </template>
         </STToolbar>
         <STButtonToolbar v-else-if="!showLinkEditor" class="sticky" @mousedown.prevent>
-            <button v-tooltip="'Toon/verberg tekst opties'" class="button icon text-style" type="button" @click.prevent="openTextStyles($event)" @mousedown.prevent />
-            <button v-if="smartVariables.length > 0" v-tooltip="'Slimme tekstvervanging'" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
-            <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
-            <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click="openLinkEditor()" @mousedown.prevent />
+            <button v-tooltip="'Toon/verberg tekst opties'" class="button icon text-style" type="button" @click.prevent="openTextStyles($event)" @mousedown.prevent/>
+            <button v-if="smartVariables.length > 0" v-tooltip="'Slimme tekstvervanging'" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.prevent/>
+            <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent/>
+            <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click="openLinkEditor()" @mousedown.prevent/>
             <UploadButton :resolutions="imageResolutions" @update:model-value="insertImage" @mousedown.prevent>
-                <div v-tooltip="'Afbeelding toevoegen'" class="button icon image" type="button" />
+                <div v-tooltip="'Afbeelding toevoegen'" class="button icon image" type="button"/>
             </UploadButton>
-            <slot name="buttons" />
+            <slot name="buttons"/>
         </STButtonToolbar>
     </form>
 </template>

@@ -1,13 +1,11 @@
 <template>
     <div class="container">
-        <hr>
-        <h2>Leveringsgebied</h2>
-        <p>Voeg de gemeenten, provincies en landen toe waarin je wilt leveren.</p>
+        <hr><h2>{{ $t('3d82b2da-1c82-4838-bbfd-b6f474079eee') }}</h2>
+        <p>{{ $t('019b0ecc-6cb6-4dab-8b4c-7599ffc82663') }}</p>
 
         <LoadingButton :loading="loadingSearch" class="edit-regions-search-bar block">
             <div class="input-icon-container icon search gray">
-                <input v-model="searchQuery" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" spellcheck="false" autocapitalize="off" class="input" placeholder="Toevoegen">
-            </div>
+                <input v-model="searchQuery" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" spellcheck="false" autocapitalize="off" class="input" :placeholder="$t(`73b74929-78f4-4cfa-8a20-92a071a84ec5`)"></div>
         </LoadingButton>
 
         <STList>
@@ -15,8 +13,8 @@
                 {{ city.name }} ({{ city.province.name }}, {{ countryName(city.country) }})
 
                 <template #right>
-                    <span v-if="hasCity(city)" class="icon trash" />
-                    <span v-else class="icon plus" />
+                    <span v-if="hasCity(city)" class="icon trash"/>
+                    <span v-else class="icon plus"/>
                 </template>
             </STListItem>
 
@@ -24,8 +22,8 @@
                 {{ province.name }} (provincie, {{ countryName(province.country) }})
 
                 <template #right>
-                    <span v-if="hasProvince(province)" class="icon trash" />
-                    <span v-else class="icon plus" />
+                    <span v-if="hasProvince(province)" class="icon trash"/>
+                    <span v-else class="icon plus"/>
                 </template>
             </STListItem>
 
@@ -33,8 +31,8 @@
                 {{ countryName(country) }}
 
                 <template #right>
-                    <span v-if="hasCountry(country)" class="icon trash" />
-                    <span v-else class="icon plus" />
+                    <span v-if="hasCountry(country)" class="icon trash"/>
+                    <span v-else class="icon plus"/>
                 </template>
             </STListItem>
         </STList>

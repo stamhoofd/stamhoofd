@@ -1,51 +1,50 @@
 <template>
-    <SaveView id="personalize-settings-view" :loading="saving" title="Personaliseren" :disabled="!hasChanges" @save="save">
+    <SaveView id="personalize-settings-view" :loading="saving" :disabled="!hasChanges" @save="save" :title="$t(`Personaliseren`)">
         <h1>
-            Personaliseren
+            {{ $t('ba0f4e0a-0e1e-4fd2-8078-2ff1956e3396') }}
         </h1>
-        <p>Als je een logo hebt kan je deze hier toevoegen. Je kan kiezen om een vierkant logo, een horizontaal logo of beide te uploaden. We kiezen dan automatisch het beste logo afhankelijk van de schermgrootte.</p>
+        <p>{{ $t('f761b1f2-b6da-49ec-8e64-91aa4dbeb8b7') }}</p>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox"/>
 
         <div class="split-inputs">
             <div>
-                <ImageInput v-model="horizontalLogo" title="Horizontaal logo" :validator="validator" :resolutions="horizontalLogoResolutions" :required="false" />
+                <ImageInput v-model="horizontalLogo" :validator="validator" :resolutions="horizontalLogoResolutions" :required="false" :title="$t(`59924b9c-ddf1-4d91-8dd9-0fa957190e6e`)"/>
 
                 <p class="st-list-description">
-                    Beter voor grotere schermen.
+                    {{ $t('d61be3d6-607f-4289-a319-54da109b87d0') }}
                 </p>
             </div>
 
             <div>
-                <ImageInput v-model="squareLogo" title="Vierkant logo" :validator="validator" :resolutions="squareLogoResolutions" :required="false" />
+                <ImageInput v-model="squareLogo" :validator="validator" :resolutions="squareLogoResolutions" :required="false" :title="$t(`4fbc3334-41b5-4dfb-8928-5835357ebdd8`)"/>
                 <p class="st-list-description">
-                    Beter voor op kleine schermen. Laat tekst zoveel mogelijk weg uit dit logo.
+                    {{ $t('17118694-a6de-402b-8ca0-03a95d5ac8d9') }}
                 </p>
             </div>
         </div>
 
         <Checkbox v-model="expandLogo">
-            Logo groter weergeven (afgeraden)
+            {{ $t('a100125a-d7f9-4f4c-98ef-c0a42dda44bc') }}
         </Checkbox>
         <p class="st-list-description">
-            Heb je een vierkant logo met veel tekst of heb je veel witruimte? Vink dit dan aan, in het andere geval kan je dit beter uitgevinkt laten. Sowieso is het verstandig om eerst alle witruimte van je logo weg te knippen voor je het hier uploadt.
+            {{ $t('1d29d6e1-d1ed-4151-83d0-a7d5a5ffd877') }}
         </p>
 
-        <ColorInput v-model="color" title="Hoofdkleur (optioneel)" :validator="validator" placeholder="Geen kleur" :required="false" :disallowed="['#FFFFFF']" />
+        <ColorInput v-model="color" :validator="validator" :required="false" :disallowed="['#FFFFFF']" :title="$t(`14a3d334-8815-495c-8941-cd6842b1a88e`)" :placeholder="$t(`e122f3ae-6d69-4b24-88f1-1bb48288812c`)"/>
         <p class="st-list-description">
-            Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om de blauwe kleur te behouden.
+            {{ $t('d878ef06-b4f9-42d2-96bc-ed627941549f') }}
         </p>
 
         <template v-if="STAMHOOFD.userMode === 'organization'">
-            <hr>
-            <h2>Domeinnaam</h2>
+            <hr><h2>{{ $t('838c80f3-bf67-48eb-9475-5ac3a45ad28e') }}</h2>
 
-            <p>Alle informatie over domeinnamen vind je op <a class="inline-link" :href="$domains.getDocs('domeinnaam-koppelen')" target="_blank">deze pagina</a>.</p>
+            <p>{{ $t('c01dbe73-74b1-4e01-aae3-51de074d605e') }} <a class="inline-link" :href="$domains.getDocs('domeinnaam-koppelen')" target="_blank">{{ $t('7fd04b13-e600-49b1-bafb-e4f642154bcd') }}</a>.</p>
 
             <template v-if="organization.privateMeta && (organization.privateMeta.mailDomain || organization.privateMeta.pendingMailDomain || organization.privateMeta.pendingRegisterDomain || organization.registerDomain)">
                 <p v-if="isMailOk" class="success-box">
-                    Jouw domeinnaam is correct ingesteld voor het versturen van e-mails. <template v-if="!organization.privateMeta.mailDomainActive">
-                        Maar hij wordt momenteel nog niet gebruikt omdat het nog aan het verwerken is, dit kan enkele uren duren.
+                    {{ $t('642b317f-4516-42da-a6ea-6cfa40c9f8be') }} <template v-if="!organization.privateMeta.mailDomainActive">
+                        {{ $t('ac941775-879f-4d97-8981-2a07179fec48') }}
                     </template>
                 </p>
                 <p v-else class="warning-box">
@@ -54,31 +53,31 @@
 
                 <template v-if="enableMemberModule">
                     <p v-if="isRegisterOk" class="success-box">
-                        Jouw domeinnaam is correct ingesteld voor jouw inschrijvingsportaal (op {{ organization.registerDomain }})
+                        {{ $t('7325092e-4648-4c9e-a288-ec37c8c411d5') }} {{ organization.registerDomain }})
                     </p>
                     <p v-else class="warning-box">
-                        Jouw domeinnaam wordt nog niet gebruikt voor jullie inschrijvingsportaal. Je kan dit instellen door onderaan op 'Domeinnaam instellen' te klikken.
+                        {{ $t("d95aa6b9-c9b4-481f-9a7a-481229b3970a") }}
                     </p>
                 </template>
 
                 <p v-if="isMailOk && (isRegisterOk || !enableMemberModule)" class="st-list-description">
                     <button class="button text" type="button" @click="setupDomain">
-                        <span class="icon settings" />
-                        <span>Domeinnaam wijzigen</span>
+                        <span class="icon settings"/>
+                        <span>{{ $t('1b93f1ce-0305-4fb5-920a-7c9751c66237') }}</span>
                     </button>
                 </p>
 
                 <p v-else class="st-list-description">
                     <button class="button text" type="button" @click="setupDomain">
-                        <span class="icon settings" />
-                        <span>Domeinnaam instellen</span>
+                        <span class="icon settings"/>
+                        <span>{{ $t('a48bccec-baf5-4cb9-8e3e-ab85fd97b9fb') }}</span>
                     </button>
                 </p>
             </template>
 
             <template v-else>
                 <p v-if="organization.registerUrl && enableMemberModule" class="st-list-description">
-                    Jullie ledenportaal is bereikbaar via <a class="button inline-link" :href="organization.registerUrl" target="_blank">{{ organization.registerUrl }}</a>. {{ $t('57e20ed4-d50a-4947-96fc-57958550dcfa') }}
+                    {{ $t('0da3b89b-080a-44a3-9a34-5b6056f245c4') }} <a class="button inline-link" :href="organization.registerUrl" target="_blank">{{ organization.registerUrl }}</a>. {{ $t('57e20ed4-d50a-4947-96fc-57958550dcfa') }}
                 </p>
                 <p v-else class="st-list-description">
                     {{ $t('8b32118a-658d-4e17-96f9-a009449ec342') }}
@@ -86,8 +85,8 @@
 
                 <p class="st-list-description">
                     <button class="button text" type="button" @click="setupDomain">
-                        <span class="icon settings" />
-                        <span>Domeinnaam instellen</span>
+                        <span class="icon settings"/>
+                        <span>{{ $t('a48bccec-baf5-4cb9-8e3e-ab85fd97b9fb') }}</span>
                     </button>
                 </p>
             </template>

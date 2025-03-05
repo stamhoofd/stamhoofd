@@ -1,24 +1,24 @@
 <template>
     <STListItem v-long-press="(e: MouseEvent) => showContextMenu(e)" :selectable="true" class="right-description right-stack" @click="editOption()" @contextmenu.prevent="showContextMenu">
         <template #left>
-            <Radio v-if="!optionMenu.multipleChoice" v-model="isFirst" :value="true" :disabled="true" />
-            <Checkbox v-else :disabled="true" />
+            <Radio v-if="!optionMenu.multipleChoice" v-model="isFirst" :value="true" :disabled="true"/>
+            <Checkbox v-else :disabled="true"/>
         </template>
 
         <h3 class="style-title-list">
             {{ option.name || 'Naamloos' }}
         </h3>
         <p v-if="option.isSoldOut" class="style-description-small">
-            Uitverkocht
+            {{ $t('4c249834-df40-4c1f-9c79-c56864100c36') }}
         </p>
         <p v-else-if="option.stock" class="style-description-small">
-            Nog {{ pluralText(option.remainingStock ?? 0, 'stuk', 'stuks') }} beschikbaar
+            {{ $t('6878be1d-f7ca-4c4c-b6fa-de59c8028cd7') }} {{ pluralText(option.remainingStock ?? 0, 'stuk', 'stuks') }} {{ $t('79828b21-b66f-4e18-bb1e-bb46ee12a8af') }}
         </p>
 
         <template #right>
             <span>{{ formatPriceChange(option.price) }}</span>
-            <span class="button icon drag gray" @click.stop @contextmenu.stop />
-            <span class="icon arrow-right-small gray" />
+            <span class="button icon drag gray" @click.stop @contextmenu.stop/>
+            <span class="icon arrow-right-small gray"/>
         </template>
     </STListItem>
 </template>

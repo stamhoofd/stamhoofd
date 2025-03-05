@@ -1,21 +1,20 @@
 <template>
     <div id="parent-view" class="st-view">
-        <STNavigationBar title="Kies inschrijvingsgroepen" />
+        <STNavigationBar :title="$t(`c22d7983-a8ec-4ffb-af72-8d78a9541bbc`)"/>
 
         <main>
             <h1>
-                Kies één of meerdere inschrijvingsgroepen
+                {{ $t('730a2154-0e84-48bc-bc69-176d8eb0b2f7') }}
             </h1>
 
-            <STErrorsDefault :error-box="errorBox" />
+            <STErrorsDefault :error-box="errorBox"/>
 
             <div v-for="category in categoryTree.categories" :key="category.id" class="container">
-                <hr>
-                <h2>{{ category.settings.name }}</h2>
+                <hr><h2>{{ category.settings.name }}</h2>
                 <STList>
                     <STListItem v-for="group in category.groups" :key="group.id" :selectable="true" element-name="label" class="right-stack left-center">
                         <template #left>
-                            <Checkbox :model-value="getSelectedGroup(group)" @update:model-value="setSelectedGroup(group, $event)" />
+                            <Checkbox :model-value="getSelectedGroup(group)" @update:model-value="setSelectedGroup(group, $event)"/>
                         </template>
                         <h2 class="style-title-list">
                             {{ group.settings.name }}
@@ -25,15 +24,14 @@
             </div>
 
             <template v-if="allowArchived">
-                <Spinner v-if="loadingGroups" />
+                <Spinner v-if="loadingGroups"/>
                 <template v-else-if="archivedGroups.length">
-                    <hr>
-                    <h2>Archief</h2>
+                    <hr><h2>{{ $t('f8e18afd-9ec9-4695-adc5-d6f2351d8dc3') }}</h2>
 
                     <STList>
                         <STListItem v-for="group in archivedGroups" :key="group.id" :selectable="true" element-name="label" class="right-stack left-center">
                             <template #left>
-                                <Checkbox :model-value="getSelectedGroup(group)" @update:model-value="setSelectedGroup(group, $event)" />
+                                <Checkbox :model-value="getSelectedGroup(group)" @update:model-value="setSelectedGroup(group, $event)"/>
                             </template>
                             <h2 class="style-title-list">
                                 {{ group.settings.name }}
@@ -44,7 +42,7 @@
             </template>
 
             <p v-if="categoryTree.categories.length === 0 && archivedGroups.length === 0 && !loadingGroups" class="info-box">
-                Geen inschrijvingsgroepen beschikbaar om te selecteren.
+                {{ $t('6cdcb781-8335-4f14-aeec-c5c4b85746d2') }}
             </p>
         </main>
 
@@ -52,7 +50,7 @@
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" @click="save">
-                        Opslaan
+                        {{ $t('bd7fc57f-7ba8-4011-8557-a720a55ecc6f') }}
                     </button>
                 </LoadingButton>
             </template>

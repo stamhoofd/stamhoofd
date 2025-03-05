@@ -1,400 +1,379 @@
 <template>
     <div id="webshop-overview" class="st-view background">
-        <STNavigationBar :title="title" />
+        <STNavigationBar :title="title"/>
 
         <main>
             <h1 class="style-navigation-title with-icons">
                 <span>{{ title }}</span>
 
-                <span v-if="isOpen" class="icon dot green" />
-                <span v-else-if="isArchive" class="icon archive" />
-                <span v-else class="icon dot red" />
+                <span v-if="isOpen" class="icon dot green"/>
+                <span v-else-if="isArchive" class="icon archive"/>
+                <span v-else class="icon dot red"/>
             </h1>
 
-            <BillingWarningBox filter-types="webshops" class="data-table-prefix" />
+            <BillingWarningBox filter-types="webshops" class="data-table-prefix"/>
 
             <STList class="illustration-list">
                 <STListItem v-if="hasReadPermissions" :selectable="true" class="left-center" @click="openOrders(true)">
                     <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/cart.svg">
-                    </template>
+                        <img src="@stamhoofd/assets/images/illustrations/cart.svg"></template>
                     <h2 class="style-title-list">
-                        Bestellingen
+                        {{ $t('31194ed7-1f06-497b-82e8-70028b6bcd0c') }}
                     </h2>
                     <p class="style-description">
-                        Bekijk en exporteer bestellingen, e-mail en SMS klanten.
+                        {{ $t('a29a7c18-889a-4b49-85af-9390e3b855c3') }}
                     </p>
                     <template #right>
-                        <span class="icon arrow-right-small gray" />
+                        <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
 
                 <STListItem v-if="hasSeating && hasReadPermissions" :selectable="true" class="left-center" @click="openSeating(true)">
                     <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/seating-plan.svg">
-                    </template>
+                        <img src="@stamhoofd/assets/images/illustrations/seating-plan.svg"></template>
                     <h2 class="style-title-list">
-                        Zaaloverzicht
+                        {{ $t('274e3def-240a-465c-b2e2-7fe2edac2dc5') }}
                     </h2>
                     <p class="style-description">
-                        Bekijk welke plaatsen door welke personen zijn ingenomen.
+                        {{ $t('4a7a4807-6ae0-478e-b485-88393e17e8e4') }}
                     </p>
                     <template #right>
-                        <span class="icon arrow-right-small gray" />
+                        <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
 
                 <STListItem v-if="hasTickets && hasScanPermissions" :selectable="true" class="left-center" @click="openTickets(true)">
                     <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/scanner.svg">
-                    </template>
+                        <img src="@stamhoofd/assets/images/illustrations/scanner.svg"></template>
                     <h2 class="style-title-list">
-                        Scan tickets
+                        {{ $t('ba6e6227-0141-45b5-87fb-139c4da0575f') }}
                     </h2>
                     <p class="style-description">
-                        Gebruik je camera om snel tickets te scannen.
+                        {{ $t('3df80fa1-7291-4731-8688-87d89a9f56b1') }}
                     </p>
                     <template #right>
-                        <span class="icon arrow-right-small gray" />
+                        <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
 
                 <STListItem v-if="hasReadPermissions" :selectable="true" class="left-center" @click="openStatistics(true)">
                     <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/diagram.svg">
-                    </template>
+                        <img src="@stamhoofd/assets/images/illustrations/diagram.svg"></template>
                     <h2 class="style-title-list">
-                        Statistieken
+                        {{ $t('a1727d44-5479-48d5-8532-bef4bbc60713') }}
                     </h2>
                     <p class="style-description">
-                        Bekijk jouw omzet en andere statistieken.
+                        {{ $t('c924679f-d7e8-4b07-b2e8-684129f87cfd') }}
                     </p>
                     <template #right>
-                        <span class="icon arrow-right-small gray" />
+                        <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
 
                 <STListItem :selectable="true" class="left-center" element-name="a" :href="'https://'+webshopUrl" target="_blank">
                     <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/earth.svg">
-                    </template>
+                        <img src="@stamhoofd/assets/images/illustrations/earth.svg"></template>
                     <h2 class="style-title-list">
-                        Bekijk jouw webshop
+                        {{ $t('6e34c0f4-3ccf-4197-b866-e491cec17eb7') }}
                     </h2>
                     <p class="style-description">
-                        Jouw webshop is bereikbaar via {{ webshopUrl }}
+                        {{ $t('9f815814-a113-4c67-aeb7-32b1e220364e') }} {{ webshopUrl }}
                     </p>
                     <template #right>
-                        <span class="icon external gray" />
+                        <span class="icon external gray"/>
                     </template>
                 </STListItem>
             </STList>
 
             <template v-if="hasFullPermissions">
-                <hr>
-                <h2>Instellingen</h2>
+                <hr><h2>{{ $t('a370eff9-c1c1-450c-8bdb-dcee89bd2f70') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editGeneral(true)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/flag.svg">
-                        </template>
+                            <img src="@stamhoofd/assets/images/illustrations/flag.svg"></template>
                         <h2 class="style-title-list">
-                            Algemeen
+                            {{ $t('f8ce21aa-06de-4373-874c-ddad1629cad8') }}
                         </h2>
                         <p class="style-description">
-                            Naam, type en beschikbaarheid.
+                            {{ $t('e95456b9-6bce-42cf-be50-2db317d47967') }}
                         </p>
                         <template #right>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
 
                     <STListItem v-if="!isTicketsOnly" :selectable="true" class="left-center" @click="editProducts(true)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/edit-package.svg">
-                        </template>
+                            <img src="@stamhoofd/assets/images/illustrations/edit-package.svg"></template>
                         <h2 class="style-title-list">
-                            Productaanbod
+                            {{ $t('a089e85e-52e3-4d40-a87b-cfe4547ef255') }}
                         </h2>
                         <p class="style-description">
-                            Bewerk welke artikels je verkoopt in jouw webshop.
+                            {{ $t('c98cbbe3-3da8-46a7-8683-23cebd129dca') }}
                         </p>
                         <template #right>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
 
                     <STListItem v-else :selectable="true" class="left-center" @click="editProducts(true)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/tickets.svg">
-                        </template>
+                            <img src="@stamhoofd/assets/images/illustrations/tickets.svg"></template>
                         <h2 class="style-title-list">
-                            Aanbod tickets en vouchers
+                            {{ $t('36df7abc-a2b3-4f5a-b96b-871097dbe9bf') }}
                         </h2>
                         <p class="style-description">
-                            Bewerk en voeg nieuwe tickets en vouchers toe aan je webshop.
+                            {{ $t('e89cc353-5eb5-4168-b38e-4967e62bf00e') }}
                         </p>
                         <template #right>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
 
                     <STListItem v-if="!isTicketsOnly" :selectable="true" class="left-center" @click="editCheckoutMethods(true)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/bike.svg">
-                        </template>
+                            <img src="@stamhoofd/assets/images/illustrations/bike.svg"></template>
                         <h2 class="style-title-list">
-                            Afhalen, leveren, ter plaatse eten
+                            {{ $t('619e8780-d586-4be0-bc30-5a2fe8b144e2') }}
                         </h2>
                         <p class="style-description">
-                            Wijzig tijdstippen, locaties en afhaalmethodes.
+                            {{ $t('0ce210ba-d725-411e-8a69-548cd62f9fe9') }}
                         </p>
                         <template #right>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editPaymentMethods(true)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
-                        </template>
+                            <img src="@stamhoofd/assets/images/illustrations/creditcards.svg"></template>
                         <h2 class="style-title-list">
-                            Betaalmethodes
+                            {{ $t('47ffc673-424e-4be8-aa64-f01ba8581b64') }}
                         </h2>
                         <p class="style-description">
-                            Kies welke betaalmethodes je wilt activeren, en stel eventueel administratiekosten in.
+                            {{ $t('4959d860-2b5b-46e3-8f49-655ceb00fed9') }}
                         </p>
                         <template #right>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
 
                     <STListItem v-if="getFeatureFlag('webshop-discounts')" :selectable="true" class="left-center" @click="editDiscounts(true)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/discount.svg">
-                        </template>
+                            <img src="@stamhoofd/assets/images/illustrations/discount.svg"></template>
                         <h2 class="style-title-list">
-                            Kortingen
+                            {{ $t('47931f38-0599-41aa-bc5c-0d91526017a4') }}
                         </h2>
                         <p class="style-description">
-                            Voeg kortingen toe aan je webshop.
+                            {{ $t('f5c9600d-4a35-4bb0-b4cb-050d4c705532') }}
                         </p>
                         <template #right>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
 
                     <STListItem v-if="preview.meta.customFields.length" :selectable="true" class="left-center" @click="editInputFields(true)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
-                        </template>
+                            <img src="@stamhoofd/assets/images/illustrations/edit-data.svg"></template>
                         <h2 class="style-title-list">
-                            Vrije invoervelden
+                            {{ $t('c9e3d4c3-7a50-43d7-b6ed-6d7abb376a58') }}
                         </h2>
                         <p class="style-description">
-                            Verzamel extra informatie van bestellers bij het afrekenen.
+                            {{ $t('aa7bacc7-acb6-49c2-9c5f-74b99fb5d7cd') }}
                         </p>
 
                         <template #right>
-                            <span v-tooltip="'Deze functie is verouderd. Als je alle vrije invoervelden wist, kan je gebruik maken van uitgebreidere vragenlijsten.'" class="icon error " />
-                            <span class="icon arrow-right-small gray" />
+                            <span v-tooltip="'Deze functie is verouderd. Als je alle vrije invoervelden wist, kan je gebruik maken van uitgebreidere vragenlijsten.'" class="icon error "/>
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
 
                     <STListItem v-else :selectable="true" class="left-center" @click="editRecordSettings(true)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
-                        </template>
+                            <img src="@stamhoofd/assets/images/illustrations/edit-data.svg"></template>
                         <h2 class="style-title-list">
-                            Vragenlijsten en gegevens
+                            {{ $t('26f3d0e6-eeaf-447e-b537-dcf94bd5591c') }}
                         </h2>
                         <p class="style-description">
-                            Verzamel extra informatie van bestellers bij het afrekenen.
+                            {{ $t('aa7bacc7-acb6-49c2-9c5f-74b99fb5d7cd') }}
                         </p>
                         <template #right>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editPermissions(true)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/lock.svg">
-                        </template>
+                            <img src="@stamhoofd/assets/images/illustrations/lock.svg"></template>
                         <h2 class="style-title-list">
-                            Toegangsbeheer
+                            {{ $t('5f64bf27-51c6-427b-b92a-8dd8d3c3cfae') }}
                         </h2>
                         <p class="style-description">
-                            Bepaal wie bestellingen en instellingen van deze webshop kan bekijken of wijzigen.
+                            {{ $t('4731f379-9b6a-408d-b882-78c8faae2f59') }}
                         </p>
                         <template #right>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editNotifications(true)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/notifications.svg">
-                        </template>
+                            <img src="@stamhoofd/assets/images/illustrations/notifications.svg"></template>
                         <h2 class="style-title-list">
-                            Meldingen
+                            {{ $t('e6151f11-801d-4289-9443-cbfbaeb002bd') }}
                         </h2>
                         <p class="style-description">
-                            Blijf zelf op de hoogte van nieuwe bestellingen.
+                            {{ $t('0a3e315d-ad35-463d-864e-cc207fc02f25') }}
                         </p>
                         <template #right>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
                 </STList>
 
-                <hr>
-                <h2>Personaliseren</h2>
+                <hr><h2>{{ $t('ba0f4e0a-0e1e-4fd2-8078-2ff1956e3396') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editPage(true)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/palette.svg">
-                        </template>
+                            <img src="@stamhoofd/assets/images/illustrations/palette.svg"></template>
                         <h2 class="style-title-list">
-                            Tekst, uiterlijk, en externe links
+                            {{ $t('81510386-eaab-419e-a17a-eb94e2d7df02') }}
                         </h2>
                         <p class="style-description">
-                            Wijzig de teksten en uitzicht van jouw webshop.
+                            {{ $t('206ad4f0-8ca5-4fec-b5f8-04ca12959738') }}
                         </p>
                         <template #right>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editLink(true)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/compass.svg">
-                        </template>
+                            <img src="@stamhoofd/assets/images/illustrations/compass.svg"></template>
                         <h2 class="style-title-list">
-                            Link
+                            {{ $t('aa3136b8-6c01-4d96-9ae9-6a23061552b3') }}
                         </h2>
                         <p class="style-description">
-                            Wijzig de link van jouw webshop.
+                            {{ $t('ca76d9f3-e033-477c-9d78-6e5443cb778c') }}
                         </p>
                         <template #right>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editEmails(true)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/email.svg">
-                        </template>
+                            <img src="@stamhoofd/assets/images/illustrations/email.svg"></template>
                         <h2 class="style-title-list">
-                            E-mailsjablonen
+                            {{ $t('e4e79acd-2538-406e-927c-e18c5383a493') }}
                         </h2>
                         <p class="style-description">
-                            Wijzig de inhoud van automatische e-mails naar bestellers.
+                            {{ $t('cf623b01-0a67-4255-9eec-bf18a2f9e4b3') }}
                         </p>
                         <template #right>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
                 </STList>
 
-                <hr>
-                <h2>Acties</h2>
+                <hr><h2>{{ $t('8424a02d-2147-40d1-9db2-ddece074a650') }}</h2>
 
                 <STList>
                     <STListItem v-if="isOpen" :selectable="true" @click="closeWebshop()">
                         <h2 class="style-title-list">
-                            Webshop sluiten
+                            {{ $t('253d8bc7-dcdc-42b0-a065-a4a15dac2690') }}
                         </h2>
                         <p class="style-description">
-                            Sluit de webshop, zodat geen nieuwe bestellingen meer mogelijk zijn.
+                            {{ $t('758bda1a-cdb9-45bb-8f88-ec2ab8077985') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary danger hide-smartphone">
-                                <span class="icon power" />
-                                <span>Sluiten</span>
+                                <span class="icon power"/>
+                                <span>{{ $t('08919911-1157-400d-b89c-265233590019') }}</span>
                             </button>
-                            <button type="button" class="button icon power only-smartphone" />
+                            <button type="button" class="button icon power only-smartphone"/>
                         </template>
                     </STListItem>
 
                     <STListItem v-if="!isOpen && !isArchive" :selectable="true" @click="openWebshop()">
                         <h2 class="style-title-list">
-                            Webshop terug openen
+                            {{ $t('46ce31fb-9dfd-4c64-b0de-dfbe33e8d426') }}
                         </h2>
                         <p class="style-description">
-                            Open de webshop opnieuw.
+                            {{ $t('4886d5c2-0bb6-4656-a80c-502802ecd10f') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary green hide-smartphone">
-                                <span class="icon power" />
-                                <span>Openen</span>
+                                <span class="icon power"/>
+                                <span>{{ $t('83e8ab51-f6b6-4ca5-8932-046a91adf1a8') }}</span>
                             </button>
-                            <button type="button" class="button icon power only-smartphone" />
+                            <button type="button" class="button icon power only-smartphone"/>
                         </template>
                     </STListItem>
 
                     <STListItem v-if="!isOpen && !isArchive" :selectable="true" @click="archiveWebshop()">
                         <h2 class="style-title-list">
-                            Webshop archiveren
+                            {{ $t('d66a6b08-c204-489b-999f-7d10b02d70d7') }}
                         </h2>
                         <p class="style-description">
-                            Verplaats de webshop naar het archief, maar behoud alle gegevens. De webshop is dan niet meer zo prominent zichtbaar in het menu.
+                            {{ $t('d9b66375-e890-4efe-972a-09185f629410') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary hide-smartphone">
-                                <span class="icon archive" />
-                                <span>Archiveren</span>
+                                <span class="icon archive"/>
+                                <span>{{ $t('2f77b75b-02e2-472c-a494-5187d30ff9f7') }}</span>
                             </button>
-                            <button type="button" class="button icon archive only-smartphone" />
+                            <button type="button" class="button icon archive only-smartphone"/>
                         </template>
                     </STListItem>
 
                     <STListItem v-if="isArchive" :selectable="true" @click="closeWebshop()">
                         <h2 class="style-title-list">
-                            Webshop uit archief halen
+                            {{ $t('c774a8fc-e75e-4a91-b680-984a09a1cee4') }}
                         </h2>
                         <p class="style-description">
-                            Verplaats de webshop terug naar het hoofdmenu.
+                            {{ $t('8377cd1c-6672-4ff0-b673-12b6253dfefb') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary hide-smartphone">
-                                <span class="icon undo" />
-                                <span>Terugzetten</span>
+                                <span class="icon undo"/>
+                                <span>{{ $t('ba2daa96-55f3-476c-9d08-201b05b9d941') }}</span>
                             </button>
-                            <button type="button" class="button icon undo only-smartphone" />
+                            <button type="button" class="button icon undo only-smartphone"/>
                         </template>
                     </STListItem>
 
                     <STListItem :selectable="true" @click="duplicateWebshop()">
                         <h2 class="style-title-list">
-                            Webshop dupliceren
+                            {{ $t('3fd2cf06-b5ad-40fe-a9dc-878172c951ca') }}
                         </h2>
                         <p class="style-description">
-                            Maak een nieuwe webshop met dezelfde instellingen, maar met een andere naam en link.
+                            {{ $t('ac0c9e44-810b-44bf-a658-d732c8774086') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary hide-smartphone">
-                                <span class="icon copy" />
-                                <span>Dupliceren</span>
+                                <span class="icon copy"/>
+                                <span>{{ $t('5011cd6e-5979-4cf7-90b1-75a45ebd78e5') }}</span>
                             </button>
-                            <button type="button" class="button icon copy only-smartphone" />
+                            <button type="button" class="button icon copy only-smartphone"/>
                         </template>
                     </STListItem>
 
                     <STListItem v-if="isArchive" :selectable="true" @click="deleteWebshop()">
                         <h2 class="style-title-list">
-                            Webshop definitief verwijderen
+                            {{ $t('bec97ff6-d10e-4fed-90c8-d2634ad821e1') }}
                         </h2>
                         <p class="style-description">
-                            Verwijder deze webshop en alle daarbij horende informatie en bestellingen. Dit is meestal niet nodig.
+                            {{ $t('c4a7d404-e887-4cbe-b716-12d6499bc32a') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary danger hide-smartphone">
-                                <span class="icon trash" />
-                                <span>Verwijderen</span>
+                                <span class="icon trash"/>
+                                <span>{{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}</span>
                             </button>
-                            <button type="button" class="button icon trash only-smartphone" />
+                            <button type="button" class="button icon trash only-smartphone"/>
                         </template>
                     </STListItem>
                 </STList>

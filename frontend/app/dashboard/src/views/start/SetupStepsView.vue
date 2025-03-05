@@ -5,14 +5,13 @@
                 {{ $t('a654551b-6dcd-48a9-a5c5-4609fdcba5f3') }}
 
                 <button class="button text" type="button">
-                    Toon stappen
+                    {{ $t('58c2e834-6ed0-48e7-9027-c0b2adf18917') }}
                 </button>
             </p>
             <div v-else key="steps" class="container">
-                <hr>
-                <h2>{{ $t('8e77d1c1-87dc-4fdb-ad6e-13145bc96f78') }}</h2>
-                <p>{{ $t('cd60d49f-9fc8-4fb7-b574-1231874c1d43') }} <a :href="$domains.getDocs('vlagmoment')" class="inline-link" target="_blank">Meer info</a></p>
-                <SetupStepRows :steps="$setupSteps" list-type="todo" @select="onClickStep" />
+                <hr><h2>{{ $t('8e77d1c1-87dc-4fdb-ad6e-13145bc96f78') }}</h2>
+                <p>{{ $t('cd60d49f-9fc8-4fb7-b574-1231874c1d43') }} <a :href="$domains.getDocs('vlagmoment')" class="inline-link" target="_blank">{{ $t('34099e11-aafe-435c-bd11-5b681610008e') }}</a></p>
+                <SetupStepRows :steps="$setupSteps" list-type="todo" @select="onClickStep"/>
             </div>
         </TransitionFade>
     </template>

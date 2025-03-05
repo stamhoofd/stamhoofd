@@ -5,27 +5,20 @@
         </h1>
 
         <p class="warning-box">
-            Als je hier gegevens wijzigt, zullen die gegevens van dit document niet meer automatisch gekoppeld zijn aan de gegevens van de bijhorende leden en inschrijvingen. Meestal is het beter om de gegevens rechtstreeks bij het lid of de inschrijving te wijzigen.
+            {{ $t('0cd9a18d-78ee-4d0a-b11d-cc7b4a0ab73a') }}
         </p>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
-        <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox">
-            <input
-                v-model="description"
-                class="input"
-                type="text"
-                placeholder="Beschrijving document"
-            >
-        </STInputBox>
+        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t(`f72f5546-ed6c-4c93-9b0d-9718f0cc9626`)">
+            <input v-model="description" class="input" type="text" :placeholder="$t(`408ab9ba-d443-4d2d-bf9b-c2452f198935`)"></STInputBox>
 
         <div v-for="category of fieldCategories" :key="category.id" class="container">
-            <hr>
-            <h2>{{ category.name }}</h2>
-            <p v-if="category.description" class="style-description pre-wrap" v-text="category.description" />
+            <hr><h2>{{ category.name }}</h2>
+            <p v-if="category.description" class="style-description pre-wrap" v-text="category.description"/>
 
-            <!-- todo: should records be filtered? -->
-            <RecordAnswerInput v-for="record of category.records" :key="record.id" :record="record" :answers="answers" :validator="errors.validator" @patch="patchAnswers" />
+            
+            <RecordAnswerInput v-for="record of category.records" :key="record.id" :record="record" :answers="answers" :validator="errors.validator" @patch="patchAnswers"/>
         </div>
     </SaveView>
 </template>

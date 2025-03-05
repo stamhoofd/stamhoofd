@@ -3,31 +3,31 @@
         <STList>
             <STListItem element-name="label" :selectable="true" class="right-description smartphone-wrap">
                 <template #left>
-                    <Checkbox v-model="fullAccess" :disabled="lockedFullAccess" />
+                    <Checkbox v-model="fullAccess" :disabled="lockedFullAccess"/>
                 </template>
-                Hoofdbeheerder
+                {{ $t('a5a5fc93-fae8-4c0d-8767-4802fbffbf0d') }}
 
                 <template #right>
-                    Kan alles bekijken en bewerken
+                    {{ $t('21ab6dfd-5119-48c1-9bd6-321c602c58c1') }}
                 </template>
             </STListItem>
 
             <STListItem v-for="role in roles" :key="role.id" element-name="label" :selectable="true" class="right-description smartphone-wrap">
                 <template #left>
-                    <Checkbox :model-value="getRole(role)" @update:model-value="setRole(role, $event)" />
+                    <Checkbox :model-value="getRole(role)" @update:model-value="setRole(role, $event)"/>
                 </template>
                 {{ role.name }}
             </STListItem>
         </STList>
 
         <p v-if="roles.length === 0" class="info-box">
-            Je hebt nog geen rollen aangemaakt. Maak een rol aan om beheerders op te delen.
+            {{ $t('e91e2fc8-f186-40de-821b-81220be4905b') }}
         </p>
 
         <p class="style-button-bar">
             <button class="button text" type="button" @click="editRoles">
-                <span class="icon edit" />
-                <span>Rollen bewerken</span>
+                <span class="icon edit"/>
+                <span>{{ $t('6ba23694-0b96-4970-abce-b3ce0b1fb782') }}</span>
             </button>
         </p>
     </div>

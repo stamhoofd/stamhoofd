@@ -1,43 +1,36 @@
 <template>
     <div class="container">
-        <Title :title="member.patchedMember.firstName + ' bewerken'" :level="level" />
+        <Title :title="member.patchedMember.firstName + ' ' + $t(`67c5998c-da2a-4c23-b089-86cc90f011e0`)" :level="level"/>
 
-        <STErrorsDefault :error-box="parentErrorBox" />
-        <EditMemberGeneralBox v-bind="$attrs" :member="member" :validator="validator" />
+        <STErrorsDefault :error-box="parentErrorBox"/>
+        <EditMemberGeneralBox v-bind="$attrs" :member="member" :validator="validator"/>
 
         <div v-if="isPropertyEnabled('dataPermission')" class="container">
-            <hr>
-            <EditMemberDataPermissionsBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
+            <hr><EditMemberDataPermissionsBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator"/>
         </div>
 
         <div v-if="member.patchedMember.details.parents.length || isPropertyEnabled('parents')" class="container">
-            <hr>
-            <EditMemberParentsBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
+            <hr><EditMemberParentsBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator"/>
         </div>
 
         <div v-if="member.patchedMember.details.emergencyContacts.length || isPropertyEnabled('emergencyContacts')" class="container">
-            <hr>
-            <EditEmergencyContactsBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
+            <hr><EditEmergencyContactsBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator"/>
         </div>
 
         <div v-if="member.patchedMember.details.uitpasNumber || isPropertyEnabled('uitpasNumber')" class="container">
-            <hr>
-            <EditMemberUitpasBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
+            <hr><EditMemberUitpasBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator"/>
         </div>
 
         <div v-if="isPropertyEnabled('financialSupport')" class="container">
-            <hr>
-            <EditMemberFinancialSupportBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
+            <hr><EditMemberFinancialSupportBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator"/>
         </div>
 
         <div v-for="category of recordCategories" :key="category.id" class="container">
-            <hr>
-            <EditMemberRecordCategoryBox v-bind="$attrs" :member="member" :category="category" :level="level + 1" :validator="validator" />
+            <hr><EditMemberRecordCategoryBox v-bind="$attrs" :member="member" :category="category" :level="level + 1" :validator="validator"/>
         </div>
 
         <div v-if="app !== 'registration'" class="container">
-            <hr>
-            <EditMemberNotesBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
+            <hr><EditMemberNotesBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator"/>
         </div>
     </div>
 </template>

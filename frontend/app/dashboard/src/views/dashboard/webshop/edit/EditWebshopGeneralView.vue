@@ -1,175 +1,153 @@
 <template>
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
-        <STInputBox title="Naam (kort)" error-fields="meta.name" :error-box="errors.errorBox">
-            <input
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="bv. Wafelverkoop"
-                autocomplete="off"
-            >
-
-            <p v-if="name.length > 30" class="style-description-small">
-                Lange naam? Je kan de zichtbare titel op de webshop apart wijzigen bij de instellingen 'Personaliseren'. Hier houd je het beter kort.
+        <STInputBox error-fields="meta.name" :error-box="errors.errorBox" :title="$t(`13820aaf-6866-4c8b-a6bd-01abfe0f0d61`)">
+            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`e48ade8a-73de-40f4-a143-0fc1ab25eb66`)"><p v-if="name.length > 30" class="style-description-small">
+                {{ $t("3bcd2c3e-72db-4352-ade7-e4de63a8d901") }}
             </p>
         </STInputBox>
 
-        <hr>
-        <h2>Type</h2>
+        <hr><h2>{{ $t('b610d465-2901-4b54-97ae-dbeab72e4762') }}</h2>
 
         <STList>
             <STListItem :selectable="true" element-name="label" class="left-center">
                 <template #left>
-                    <Radio v-model="ticketType" :value="WebshopTicketType.None" />
+                    <Radio v-model="ticketType" :value="WebshopTicketType.None"/>
                 </template>
                 <h3 class="style-title-list">
-                    Geen tickets
+                    {{ $t('1dbfb9a1-95fd-414e-b85b-1450b70f853c') }}
                 </h3>
                 <p class="style-description">
-                    Webshop zonder scanners. Er worden geen tickets aangemaakt.
+                    {{ $t('6a56b9f7-81dc-48f5-8ace-1289bb54f740') }}
                 </p>
             </STListItem>
             <STListItem :selectable="true" element-name="label" class="left-center">
                 <template #left>
-                    <Radio v-model="ticketType" :value="WebshopTicketType.SingleTicket" />
+                    <Radio v-model="ticketType" :value="WebshopTicketType.SingleTicket"/>
                 </template>
                 <h3 class="style-title-list">
-                    Ticketverkoop voor groepen
+                    {{ $t('17c555ca-e3cb-4b12-a86a-edff1875914f') }}
                 </h3>
                 <p class="style-description">
-                    Eén ticket per bestelling. Ideaal voor een eetfestijn
+                    {{ $t('8c5323cf-05d2-4798-8f0d-7f39a516ba9c') }}
                 </p>
             </STListItem>
             <STListItem :selectable="true" element-name="label" class="left-center">
                 <template #left>
-                    <Radio v-model="ticketType" :value="WebshopTicketType.Tickets" />
+                    <Radio v-model="ticketType" :value="WebshopTicketType.Tickets"/>
                 </template>
                 <h3 class="style-title-list">
-                    Ticketverkoop voor personen
+                    {{ $t('b819223e-d855-4b97-952c-48327513130e') }}
                 </h3>
                 <p class="style-description">
-                    Eén ticket per artikel. Ideaal voor een fuif
+                    {{ $t('ab8c4033-af75-4874-a786-5fb62003eac1') }}
                 </p>
             </STListItem>
         </STList>
 
         <p v-if="ticketType === WebshopTicketType.SingleTicket" class="info-box">
-            Per bestelling wordt er maar één ticket met QR-code aangemaakt. Dus als er 5 spaghetti's en één beenham besteld worden, dan krijgt de besteller één scanbaar ticket.
+            {{ $t("384e1319-2248-40c9-970b-6d3a82285360") }}
         </p>
         <p v-if="ticketType === WebshopTicketType.Tickets" class="info-box">
-            Op de webshop staan tickets en vouchers te koop die elk hun eigen QR-code krijgen en apart gescand moeten worden. Ideaal voor een fuif of evenement waar toegang betalend is per persoon. Minder ideaal voor grote groepen omdat je dan elk ticket afzonderlijk moet scannen (dus best niet voor een eetfestijn gebruiken).
+            {{ $t('13d39c1d-e2ed-4b76-959a-7d8ce1eddf61') }}
         </p>
 
-        <hr>
-        <h2>Beschikbaarheid</h2>
+        <hr><h2>{{ $t('bdbaebf3-eae4-4736-959b-97b90f979a8d') }}</h2>
 
         <Checkbox v-model="useAvailableUntil">
-            Sluit webshop na een bepaalde datum
+            {{ $t('fade612c-d834-4075-bca6-73a70f74206b') }}
         </Checkbox>
 
         <div v-if="useAvailableUntil" class="split-inputs">
-            <STInputBox title="Stop bestellingen op" error-fields="settings.availableUntil" :error-box="errors.errorBox">
-                <DateSelection v-model="availableUntil" />
+            <STInputBox error-fields="settings.availableUntil" :error-box="errors.errorBox" :title="$t(`deb17aac-d7c6-40a7-812d-0255be3b3308`)">
+                <DateSelection v-model="availableUntil"/>
             </STInputBox>
-            <TimeInput v-model="availableUntil" title="Om" :validator="errors.validator" />
+            <TimeInput v-model="availableUntil" :validator="errors.validator" :title="$t(`6a36a332-b846-4649-9125-0b519cd40c99`)"/>
         </div>
 
         <Checkbox v-model="useOpenAt">
-            Open webshop pas na een bepaalde datum
+            {{ $t('f095038b-322f-4a6d-b53e-7213270298f9') }}
         </Checkbox>
 
         <div v-if="useOpenAt" class="split-inputs">
-            <STInputBox title="Open op" error-fields="settings.openAt" :error-box="errors.errorBox">
-                <DateSelection v-model="openAt" />
+            <STInputBox error-fields="settings.openAt" :error-box="errors.errorBox" :title="$t(`7a091052-638a-47d2-be57-3c6b3b4a39bd`)">
+                <DateSelection v-model="openAt"/>
             </STInputBox>
-            <TimeInput v-model="openAt" title="Om" :validator="errors.validator" />
+            <TimeInput v-model="openAt" :validator="errors.validator" :title="$t(`6a36a332-b846-4649-9125-0b519cd40c99`)"/>
         </div>
 
         <div class="container">
-            <hr>
-            <h2>Nummering</h2>
+            <hr><h2>{{ $t('e478cf5c-0246-4262-a6aa-c9c00b8d0c0b') }}</h2>
 
             <STList>
                 <STListItem :selectable="true" element-name="label" class="left-center">
                     <template #left>
-                        <Radio v-model="numberingType" :value="WebshopNumberingType.Continuous" />
+                        <Radio v-model="numberingType" :value="WebshopNumberingType.Continuous"/>
                     </template>
                     <h3 class="style-title-list">
-                        Gebruik opeenvolgende bestelnummers
+                        {{ $t('f7de5251-5998-4167-b303-1c0c1a92296b') }}
                     </h3>
                     <p class="style-description">
-                        1, 2, 3, ...
+                        {{ $t('9be8efb3-5d29-4174-992c-1d2478eda95f') }}
                     </p>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label" class="left-center">
                     <template #left>
-                        <Radio v-model="numberingType" :value="WebshopNumberingType.Random" />
+                        <Radio v-model="numberingType" :value="WebshopNumberingType.Random"/>
                     </template>
                     <h3 class="style-title-list">
-                        Gebruik willekeurige bestelnummers
+                        {{ $t('c8581633-ef39-4dc5-9975-fa27ee07b102') }}
                     </h3>
                     <p class="style-description">
-                        964824335, 116455337, 228149715, ...
+                        {{ $t('af9f21b4-9225-44dc-baab-b1da83029cd1') }}
                     </p>
                 </STListItem>
             </STList>
 
-            <STInputBox v-if="numberingType === WebshopNumberingType.Continuous" title="Eerste bestelnummer" error-fields="settings.openAt" :error-box="errors.errorBox">
-                <NumberInput v-model="startNumber" :min="1" />
+            <STInputBox v-if="numberingType === WebshopNumberingType.Continuous" error-fields="settings.openAt" :error-box="errors.errorBox" :title="$t(`66a80ef9-acac-473f-8a28-0676c77793a8`)">
+                <NumberInput v-model="startNumber" :min="1"/>
             </STInputBox>
             <p v-if="!isNew && numberingType === WebshopNumberingType.Continuous" class="style-description-small">
-                Je kan dit enkel wijzigen als je alle bestellingen verwijdert.
+                {{ $t('50281700-6356-4f30-937d-b463b1686726') }}
             </p>
         </div>
 
         <template v-if="isNew">
-            <hr>
-            <h2>Betaalmethodes</h2>
-            <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-webshops-instellen')" target="_blank">deze pagina</a>.</p>
+            <hr><h2>{{ $t('47ffc673-424e-4be8-aa64-f01ba8581b64') }}</h2>
+            <p>{{ $t('c228c56d-caf0-40a7-aebd-ff883cad7f7f') }} <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-webshops-instellen')" target="_blank">{{ $t('7fd04b13-e600-49b1-bafb-e4f642154bcd') }}</a>.</p>
 
-            <EditPaymentMethodsBox
-                type="webshop"
-                :organization="organization"
-                :config="config"
-                :private-config="privateConfig"
-                :validator="errors.validator"
-                :show-administration-fee="false"
-                @patch:config="patchConfig($event)"
-                @patch:private-config="patchPrivateConfig($event)"
-            />
+            <EditPaymentMethodsBox type="webshop" :organization="organization" :config="config" :private-config="privateConfig" :validator="errors.validator" :show-administration-fee="false" @patch:config="patchConfig($event)" @patch:private-config="patchPrivateConfig($event)"/>
         </template>
 
         <div v-if="getFeatureFlag('webshop-auth')" class="container">
-            <hr>
-            <h2>Inloggen</h2>
+            <hr><h2>{{ $t('e146434b-e70f-44de-85d3-6b80dbc21041') }}</h2>
             <p>
-                Verplicht gebruikers om in te loggen om de webshop te kunnen bekijken.
+                {{ $t('e3b34dc8-9054-46c1-8cc4-5acd0207ceb4') }}
             </p>
 
             <STList>
                 <STListItem :selectable="true" element-name="label" class="left-center">
                     <template #left>
-                        <Radio v-model="authType" :value="WebshopAuthType.Disabled" />
+                        <Radio v-model="authType" :value="WebshopAuthType.Disabled"/>
                     </template>
                     <h3 class="style-title-list">
-                        Uitgeschakeld
+                        {{ $t('8ca1d7b0-f411-4f44-90f7-c05baa24e506') }}
                     </h3>
                     <p class="style-description">
-                        Gebruikers kunnen en moeten niet inloggen om een bestelling te plaatsen.
+                        {{ $t('034704db-c10d-4cd2-bc36-51f01b8aa41e') }}
                     </p>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label" class="left-center">
                     <template #left>
-                        <Radio v-model="authType" :value="WebshopAuthType.Required" />
+                        <Radio v-model="authType" :value="WebshopAuthType.Required"/>
                     </template>
                     <h3 class="style-title-list">
-                        Verplicht
+                        {{ $t('f15c7a6e-ed02-40a1-ba8c-b1cdd2f6d213') }}
                     </h3>
                     <p class="style-description">
-                        Gebruikers moeten inloggen om de webshop te zien en een bestelling te plaatsen.
+                        {{ $t('b1db6c7e-5a7f-4f0d-9580-fefc4c2f019a') }}
                     </p>
                 </STListItem>
             </STList>

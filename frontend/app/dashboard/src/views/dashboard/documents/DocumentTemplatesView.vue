@@ -1,23 +1,23 @@
 <template>
     <LoadingViewTransition>
         <div v-if="!loading" id="documents-view" class="st-view background">
-            <STNavigationBar title="Documenten" />
+            <STNavigationBar :title="$t(`Documenten`)"/>
 
             <main class="center">
                 <h1 class="style-navigation-title">
-                    Documenten
+                    {{ $t('eeb261d4-2a8d-46f3-ae06-f294fa1721a6') }}
                 </h1>
 
                 <p v-if="disableActivities" class="error-box">
-                    Deze functie is niet beschikbaar omdat jouw vereniging nog het oude gratis ledenadministratie pakket gebruikt. Via instellingen kunnen hoofdbeheerders overschakelen op de betaalde versie met meer functionaliteiten.
+                    {{ $t('d124789b-9938-4908-b761-03e2c099d554') }}
                 </p>
 
                 <p class="style-description">
-                    Maak documenten aan en deel ze met jouw leden. Daarbij is het mogelijk om gegevens van leden automatisch in te vullen in de documenten, bijvoorbeeld voor een fiscaal attest of een deelnamebewijs voor de mutualiteit.
+                    {{ $t('f1b88265-be98-486d-bfc1-1aa59ddfceb4') }}
                 </p>
 
                 <p v-if="!enabled" class="info-box">
-                    Deze functie komt binnenkort beschikbaar!
+                    {{ $t('deef1768-d96e-4fa2-baee-1e2b7b209646') }}
                 </p>
 
                 <STList>
@@ -26,20 +26,20 @@
                             {{ template.settings.name }}
                         </h2>
                         <p class="style-description-small">
-                            Aangemaakt op {{ formatDate(template.createdAt) }}
+                            {{ $t('25981b4f-4483-47f9-8c3a-ac5e7bdc1a69') }} {{ formatDate(template.createdAt) }}
                         </p>
 
                         <template #right>
-                            <span v-if="template.status === 'Draft'" class="style-tag">Klad</span>
-                            <span class="icon arrow-right-small gray" />
+                            <span v-if="template.status === 'Draft'" class="style-tag">{{ $t('56df9ce7-5a68-4c6c-b389-267625628782') }}</span>
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
                 </STList>
 
                 <p v-if="enabled" class="style-button-bar">
                     <button type="button" class="button text" @click="addDocument">
-                        <span class="icon add" />
-                        <span class="text">Nieuw document</span>
+                        <span class="icon add"/>
+                        <span class="text">{{ $t('39a008a7-3ac7-4b2e-9026-9e2865643b71') }}</span>
                     </button>
                 </p>
             </main>

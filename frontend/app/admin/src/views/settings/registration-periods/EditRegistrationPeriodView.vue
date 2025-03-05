@@ -4,26 +4,26 @@
             {{ title }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <div class="split-inputs">
-            <STInputBox title="Startdatum" error-fields="settings.minAge" :error-box="errors.errorBox">
-                <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" />
+            <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`5eb46bbe-816e-4c92-9bde-09777c924326`)">
+                <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}"/>
             </STInputBox>
 
-            <STInputBox title="Einddatum" error-fields="settings.maxAge" :error-box="errors.errorBox">
-                <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" />
+            <STInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`f8aa75e4-d41f-4264-a273-8ac100dfd543`)">
+                <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}"/>
             </STInputBox>
         </div>
 
         <STList v-if="locked || !isCurrentPeriod">
             <STListItem :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox v-model="locked" />
+                    <Checkbox v-model="locked"/>
                 </template>
 
                 <h3 class="style-title-list">
-                    Vergrendel inschrijvingen
+                    {{ $t('5ecc5e17-5355-436c-8f4c-72f82ec187d4') }}
                 </h3>
                 <p v-if="locked" class="style-description-small">
                     {{ $t('cc48e00f-2c6b-4f4d-9bae-65a889364ea3') }}

@@ -2,8 +2,8 @@
     <div class="st-view">
         <STNavigationBar :title="title">
             <template #right>
-                <button v-if="hasPrevious || hasNext" v-tooltip="'Ga naar vorige'" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" v-tooltip="'Ga naar volgende'" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goForward" />
+                <button v-if="hasPrevious || hasNext" v-tooltip="'Ga naar vorige'" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack"/>
+                <button v-if="hasNext || hasPrevious" v-tooltip="'Ga naar volgende'" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goForward"/>
             </template>
         </STNavigationBar>
 
@@ -48,10 +48,10 @@
                         {{ formatPrice(item.amountOpen + Math.max(0, item.amountPending)) }}
                     </p>
                     <p v-if="item.amountPending > 0" class="style-description-small">
-                        waarvan {{ formatPrice(item.amountPending) }} in verwerking
+                        {{ $t('a902358b-991b-46af-882f-8e982dc5c0d1') }} {{ formatPrice(item.amountPending) }} {{ $t('d2728495-de3c-4730-b4d3-4d11223ea2bc') }}
                     </p>
                     <p v-if="item.amountPending < 0" class="style-description-small">
-                        een terugbetaling van {{ formatPrice(-item.amountPending) }} is nog in verwerking
+                        {{ $t('fd658785-9c3e-4c9c-a0d3-448bfb288d4c') }} {{ formatPrice(-item.amountPending) }} {{ $t('90541b50-5989-4a97-949c-19b13ff37df0') }}
                     </p>
                 </STListItem>
 
@@ -63,10 +63,10 @@
                         {{ formatPrice(-item.amountOpen + Math.max(0, -item.amountPending)) }}
                     </p>
                     <p v-if="item.amountPending > 0" class="style-description-small">
-                        een betaling in verwerking van {{ formatPrice(item.amountPending) }} dient geannuleerd te worden
+                        {{ $t('a04fd86b-8055-4820-9fd4-dab6a6d6c7e6') }} {{ formatPrice(item.amountPending) }} {{ $t('cb770768-0857-409d-af67-4338a080b85a') }}
                     </p>
                     <p v-if="item.amountPending < 0" class="style-description-small">
-                        waarvan een terugbetaling van {{ formatPrice(-item.amountPending) }} nog in verwerking
+                        {{ $t('cb7333ff-7270-4f82-b372-4bcdea86f3b2') }} {{ formatPrice(-item.amountPending) }} {{ $t('93a9ad5c-46fa-45f8-b534-682b1bc78659') }}
                     </p>
                 </STListItem>
 
@@ -78,19 +78,18 @@
                         {{ item.lastReminderEmail && item.reminderEmailCount > 0 ? formatDateTime(item.lastReminderEmail, true) : 'Nog niet verstuurd' }}
                     </p>
                     <p v-if="item.lastReminderEmail && item.reminderEmailCount > 1" class="style-description-small">
-                        Al {{ item.reminderEmailCount }} automatische e-mails verstuurd
+                        {{ $t('e6f75293-bd61-49d9-ae02-aba166f67e7e') }} {{ item.reminderEmailCount }} {{ $t('126a254e-7223-4096-a38d-4a7c53159543') }}
                     </p>
                     <p v-if="item.lastReminderEmail && item.reminderEmailCount && item.lastReminderAmountOpen !== item.amountOpen" class="style-description-small">
-                        Bedrag was toen {{ formatPrice(item.lastReminderAmountOpen) }}
+                        {{ $t('db73f771-f05e-4c42-a10f-807578b18a54') }} {{ formatPrice(item.lastReminderAmountOpen) }}
                     </p>
                     <p v-if="!item.lastReminderEmail || item.reminderEmailCount === 0" class="style-description-small">
-                        Als automatische e-mails zijn ingeschakeld wordt de eerste e-mail morgenvroeg verzonden.
+                        {{ $t('ec57dfee-1ea7-48d8-aa1a-402d9ec87c81') }}
                     </p>
                 </STListItem>
             </STList>
 
-            <hr>
-            <ReceivableBalanceBox :item="item" :member="member" :hide-segmented-control="false" />
+            <hr><ReceivableBalanceBox :item="item" :member="member" :hide-segmented-control="false"/>
         </main>
     </div>
 </template>

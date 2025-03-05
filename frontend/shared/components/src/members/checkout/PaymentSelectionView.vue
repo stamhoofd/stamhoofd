@@ -1,33 +1,33 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="needsPay ? 'Betaalmethode' : 'Bevestigen'" />
+        <STNavigationBar :title="needsPay ? $t(`d880e10c-63f5-4a84-a994-97bbfcb04f4f`) : $t(`Bevestigen`)"/>
         <main v-if="needsPay" class="center">
-            <h1>Kies een betaalmethode</h1>
+            <h1>{{ $t('ac889a25-4ace-416a-b82d-544881eab46a') }}</h1>
 
-            <STErrorsDefault :error-box="errors.errorBox" />
+            <STErrorsDefault :error-box="errors.errorBox"/>
 
-            <PaymentSelectionList v-model="selectedPaymentMethod" :payment-configuration="paymentConfiguration" :amount="checkout.totalPrice" :customer="checkout.customer" :organization="organization" />
+            <PaymentSelectionList v-model="selectedPaymentMethod" :payment-configuration="paymentConfiguration" :amount="checkout.totalPrice" :customer="checkout.customer" :organization="organization"/>
 
-            <PriceBreakdownBox :price-breakdown="checkout.priceBreakown" />
+            <PriceBreakdownBox :price-breakdown="checkout.priceBreakown"/>
         </main>
         <main v-else class="center">
-            <h1>Bevestig je inschrijvingen</h1>
-            <p>Heb je alle inschrijvingen toegevoegd aan je mandje? Je kan meerdere inschrijvingen in één keer afrekenen.</p>
+            <h1>{{ $t('d7d0ab80-9321-49a2-b050-cf8f3c23640e') }}</h1>
+            <p>{{ $t('6292ce9e-a57a-4f8f-be04-4d9e17497b2c') }}</p>
 
-            <STErrorsDefault :error-box="errors.errorBox" />
+            <STErrorsDefault :error-box="errors.errorBox"/>
         </main>
 
         <STToolbar>
             <template #left>
-                <span>Totaal: {{ formatPrice(checkout.totalPrice) }}</span>
+                <span>{{ $t('6cbde4da-3770-4726-8ea4-9a53b785a66e') }} {{ formatPrice(checkout.totalPrice) }}</span>
             </template>
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" @click="goNext">
-                        <span v-if="needsPay && (selectedPaymentMethod === 'Transfer' || selectedPaymentMethod === 'PointOfSale')">Bevestigen</span>
-                        <span v-else-if="needsPay">Betalen</span>
-                        <span v-else>Bevestigen</span>
-                        <span class="icon arrow-right" />
+                        <span v-if="needsPay && (selectedPaymentMethod === 'Transfer' || selectedPaymentMethod === 'PointOfSale')">{{ $t('da58ee7b-f99e-448b-9acc-37f7df4f9f26') }}</span>
+                        <span v-else-if="needsPay">{{ $t('627c742f-ce38-4b13-be64-314727b98608') }}</span>
+                        <span v-else>{{ $t('da58ee7b-f99e-448b-9acc-37f7df4f9f26') }}</span>
+                        <span class="icon arrow-right"/>
                     </button>
                 </LoadingButton>
             </template>

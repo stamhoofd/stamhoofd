@@ -4,35 +4,33 @@
             <template #right>
                 <LoadingButton :loading="retrying">
                     <button class="button text" type="button" @click="retry">
-                        <span class="icon retry" />
-                        <span>Opnieuw</span>
+                        <span class="icon retry"/>
+                        <span>{{ $t('9f51c413-5080-409c-91ac-d39a16501663') }}</span>
                     </button>
                 </LoadingButton>
             </template>
         </STNavigationBar>
-        <img src="@stamhoofd/assets/images/illustrations/email.svg" class="email-illustration">
-
-        <main class="center">
+        <img src="@stamhoofd/assets/images/illustrations/email.svg" class="email-illustration"><main class="center">
             <h1 v-if="!login">
-                Vul de code uit de e-mail in
+                {{ $t('a136e50d-1ab8-4544-ae3e-1b9013cd4be0') }}
             </h1>
             <h1 v-else>
-                Verifieer jouw e-mailadres
+                {{ $t('f0f9acac-9351-4773-89ca-61b3b767fad3') }}
             </h1>
 
-            <p>Er werd een e-mail verstuurd naar '{{ email }}'. Vul de code uit de e-mail in of klik op de link in de e-mail en wacht enkele seconden. E-mail niet ontvangen? Kijk in jouw spambox!</p>
+            <p>{{ $t("5eff0ef8-bfb2-4e38-a90b-b29805e417c5") }}{{ email }}{{ $t("817452c3-f605-4eb6-8ec8-0be609928d90") }}</p>
 
-            <div><CodeInput v-model="code" @complete="submit" /></div>
+            <div><CodeInput v-model="code" @complete="submit"/></div>
 
-            <div><STErrorsDefault :error-box="errorBox" /></div>
+            <div><STErrorsDefault :error-box="errorBox"/></div>
         </main>
 
         <STToolbar>
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary full" type="button">
-                        <span>Doorgaan</span>
-                        <span class="icon arrow-right" />
+                        <span>{{ $t('458858f8-0a9a-4a3d-b4f4-a4421a48114e') }}</span>
+                        <span class="icon arrow-right"/>
                     </button>
                 </LoadingButton>
             </template>

@@ -1,72 +1,67 @@
 <template>
-    <SaveView title="Zaalplan" :disabled="!hasChanges" @save="save">
+    <SaveView :disabled="!hasChanges" @save="save" :title="$t(`72cec47d-ea5a-4e4f-a712-d80e51fde1db`)">
         <h1>
-            Kies een zaalplan
+            {{ $t('01a67ead-f324-469d-a7b3-1afecc8cdb9a') }}
         </h1>
         <p>
-            Je kan een zaalplan aanmaken of een bestaand zaalplan kiezen. Je kan in de loop van een evenement wijzigingen maken aan een zaalplan of zelfs een ander zaalplan kiezen op voorwaarde dat dezelfde rij en zetelnummers gebruikt worden.
+            {{ $t('81fce6f1-82b9-4f70-8146-0122164e4129') }}
         </p>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <STList>
             <STListItem :selectable="true" element-name="label">
                 <template #left>
-                    <Radio v-model="selectedPlan" :value="null" />
+                    <Radio v-model="selectedPlan" :value="null"/>
                 </template>
 
                 <h3 class="style-title-list">
-                    Geen zetelselectie
+                    {{ $t('1fb4c700-073f-431c-bf10-e0167d4ee024') }}
                 </h3>
                 <p class="style-description-small">
-                    Er worden geen plaatsen aan tickets gekoppeld.
+                    {{ $t('19a013c2-20b2-4841-9ba5-75e4908d4907') }}
                 </p>
             </STListItem>
 
             <STListItem v-for="plan in allSeatingPlans" :key="plan.id" :selectable="true" element-name="label" class="right-stack">
                 <template #left>
-                    <Radio v-model="selectedPlan" :value="plan.id" />
+                    <Radio v-model="selectedPlan" :value="plan.id"/>
                 </template>
 
                 <h3 class="style-title-list">
                     {{ plan.name }}
                 </h3>
                 <p v-if="plan.seatCount > 1" class="style-description-small">
-                    {{ plan.seatCount }} plaatsen
+                    {{ plan.seatCount }} {{ $t('18c8b161-07d5-40c6-9f12-a4d5c5c0b823') }}
                 </p>
 
                 <p v-if="isFromOtherWebshop(plan)" class="style-description-small">
-                    Dit zaalplan is van een andere webshop ({{ getWebshopFor(plan)?.meta?.name ?? 'Onbekend' }}). Door het te kiezen wordt een kopie toegevoegd aan deze webshop. Aanpassingen worden niet overgenomen in bestaande webshops.
+                    {{ $t('c4dc1a10-d6ed-432e-9d69-596128219e4c') }}{{ getWebshopFor(plan)?.meta?.name ?? 'Onbekend' }}{{ $t('16c5592a-48cf-40a2-8e57-4e2308c0019a') }}
                 </p>
 
                 <template #right>
-                    <button v-if="!isFromOtherWebshop(plan)" class="button icon trash gray" type="button" @click="deleteSeatingPlan(plan.id)" />
-                    <button class="button icon edit gray" type="button" @click="editSeatingPlan(plan)" />
+                    <button v-if="!isFromOtherWebshop(plan)" class="button icon trash gray" type="button" @click="deleteSeatingPlan(plan.id)"/>
+                    <button class="button icon edit gray" type="button" @click="editSeatingPlan(plan)"/>
                 </template>
             </STListItem>
         </STList>
 
         <p>
             <button class="button text" type="button" @click="addSeatingPlan">
-                <span class="icon add" />
-                <span>Zaalplan aanmaken</span>
+                <span class="icon add"/>
+                <span>{{ $t('fcf01905-4219-449f-85a3-69b722a7aa6c') }}</span>
             </button>
         </p>
 
-        <hr>
-
-        <h2>Acties</h2>
+        <hr><h2>{{ $t('8424a02d-2147-40d1-9db2-ddece074a650') }}</h2>
 
         <STList class="illustration-list">
             <STListItem :selectable="true" class="left-center" element-name="label">
-                <input type="file" multiple style="display: none;" accept=".plan" @change="importSeatingPlan">
-
-                <template #left>
-                    <img src="@stamhoofd/assets/images/illustrations/box-upload.svg">
-                </template>
+                <input type="file" multiple style="display: none;" accept=".plan" @change="importSeatingPlan"><template #left>
+                    <img src="@stamhoofd/assets/images/illustrations/box-upload.svg"></template>
 
                 <h2 class="style-title-list">
-                    Importeer zaalplan
+                    {{ $t('51244d76-b0c0-499f-9bc0-d234cc307d85') }}
                 </h2>
                 <p class="style-description">
                     {{ $t('5c7d8f29-9d83-4f33-9d6b-0f947e384f75') }}
@@ -74,7 +69,7 @@
 
                 <template #right>
                     <LoadingButton :loading="importingSeatingPlan">
-                        <span class="icon download gray" />
+                        <span class="icon download gray"/>
                     </LoadingButton>
                 </template>
             </STListItem>

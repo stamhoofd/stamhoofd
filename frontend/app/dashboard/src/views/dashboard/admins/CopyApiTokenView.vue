@@ -1,17 +1,17 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Token" />
+        <STNavigationBar :title="$t(`d131b883-1500-4568-ba8e-b36f9a960c4e`)"/>
 
         <main>
             <h1>
-                Sla jouw key op
+                {{ $t('a361f76c-7ab9-404d-a904-473e48c76e96') }}
             </h1>
 
             <p class="st-list-description">
-                Hieronder kan je jouw key kopiëren. Bewaar deze goed, want je kan deze nooit meer opvragen.
+                {{ $t('738b8ccf-bd5c-4521-bdeb-127914ee90a7') }}
             </p>
 
-            <STInputBox title="API-key" class="max">
+            <STInputBox class="max" :title="$t(`2cec0671-0d30-437d-843b-85de648d01bc`)">
                 <div v-copyable class="input-icon-container right icon copy gray">
                     <div class="token-input input selectable">
                         <div>{{ user.token }}</div>
@@ -19,14 +19,14 @@
                 </div>
             </STInputBox>
             <p class="style-description-small">
-                Geldig tot {{ formatDate(user.expiresAt) }}
+                {{ $t('cce09c3a-eaea-4183-89db-7e519c13d2f8') }} {{ formatDate(user.expiresAt) }}
             </p>
         </main>
 
         <STToolbar>
             <template #right>
                 <button class="button primary" type="button" @click="dismiss">
-                    Klaar
+                    {{ $t('e59cf50c-5654-467c-a168-34f6a5194cf1') }}
                 </button>
             </template>
         </STToolbar>

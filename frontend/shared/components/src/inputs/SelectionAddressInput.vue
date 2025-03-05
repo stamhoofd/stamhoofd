@@ -1,27 +1,25 @@
 <template>
     <div>
-        <STInputBox v-if="addresses.length > 0" :title="title || 'Kies een adres'" :error-box="errorBox" error-fields="selectedAddress">
+        <STInputBox v-if="addresses.length > 0" :title="title || $t(`81f29f28-aa89-4794-b76e-f2822369e3a7`)" :error-box="errorBox" error-fields="selectedAddress">
             <STList>
                 <STListItem v-for="_address in addresses" :key="_address.toString()" element-name="label" :selectable="true" class="left-center address-selection">
                     <template #left>
-                        <Radio v-model="selectedAddress" :value="_address" @update:model-value="changeSelected" />
+                        <Radio v-model="selectedAddress" :value="_address" @update:model-value="changeSelected"/>
                     </template>
-                    {{ _address.street }} {{ _address.number }}<br>
-                    {{ _address.postalCode }} {{ _address.city }}
-                    <template #right>
-                        <button class="button icon gray edit" type="button" @click.stop="doEditAddress(_address)" />
+                    {{ _address.street }} {{ _address.number }}<br><template #right>
+                        <button class="button icon gray edit" type="button" @click.stop="doEditAddress(_address)"/>
                     </template>
                 </STListItem>
                 <STListItem element-name="label" :selectable="true" class="left-center">
                     <template #left>
-                        <Radio v-model="selectedAddress" :value="null" @update:model-value="changeSelected" />
+                        <Radio v-model="selectedAddress" :value="null" @update:model-value="changeSelected"/>
                     </template>
-                    Een ander adres ingeven
+                    {{ $t('9c21382c-bcee-4729-bf4a-bde0b6b02379') }}
                 </STListItem>
             </STList>
         </STInputBox>
-        <AddressInput v-if="editingAddress || selectedAddress === null" v-model="editAddress" :title="selectedAddress === null ? (addresses.length > 0 ? 'Nieuw adres' : 'Adres') : 'Adres bewerken'" :validator="internalValidator" :required="false" />
-        <STErrorsDefault :error-box="errorBox" />
+        <AddressInput v-if="editingAddress || selectedAddress === null" v-model="editAddress" :title="selectedAddress === null ? (addresses.length > 0 ? $t(`af2616ae-53a6-4ed0-8c1d-cf79c7bbb773`) : $t(`e6dc987c-457b-4253-9eef-db9ccdb774f1`)) : $t(`bbfcded0-6e7b-4510-94e8-14ee8d96b9a7`)" :validator="internalValidator" :required="false"/>
+        <STErrorsDefault :error-box="errorBox"/>
     </div>
 </template>
 

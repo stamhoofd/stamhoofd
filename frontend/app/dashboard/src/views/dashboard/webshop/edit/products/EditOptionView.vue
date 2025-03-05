@@ -1,59 +1,50 @@
 <template>
-    <SaveView :title="isNew ? 'Keuze toevoegen' : name+' bewerken'" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`Keuze toevoegen`) : name+' ' + $t(`bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            Keuze toevoegen
+            {{ $t('911356c4-bd23-416d-9156-fbef6630b861') }}
         </h1>
         <h1 v-else>
-            {{ name }} bewerken
+            {{ name }} {{ $t('67c5998c-da2a-4c23-b089-86cc90f011e0') }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
-            <input
-                ref="firstInput"
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="Naam van deze keuze"
-                autocomplete="off"
-            >
-        </STInputBox>
+        <STErrorsDefault :error-box="errors.errorBox"/>
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`d32893b7-c9b0-4ea3-a311-90d29f2c0cf3`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`a9d8f27c-b4d3-415a-94a4-2ec3c018ee48`)"></STInputBox>
 
-        <STInputBox title="Meer of minkost" error-fields="price" :error-box="errors.errorBox">
-            <PriceInput v-model="price" placeholder="+ 0 euro" :min="null" />
+        <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`aeb33249-07e1-420d-908b-17cb4ddb7e05`)">
+            <PriceInput v-model="price" :min="null" :placeholder="$t(`adf86174-0aaa-4486-8428-bed8cce8851d`)"/>
         </STInputBox>
 
         <STList>
             <STListItem :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox v-model="useStock" />
+                    <Checkbox v-model="useStock"/>
                 </template>
 
                 <h3 class="style-title-list">
-                    Beperk het beschikbare aantal stuks (waarvan nu {{ usedStock }} verkocht of gereserveerd)
+                    {{ $t('083ceff7-ae68-4bd8-871a-6e4002991513') }} {{ usedStock }} {{ $t('e284d77b-c88c-4c0f-8464-58c4fe12eda8') }}
                 </h3>
 
                 <p v-if="useStock" class="style-description-small">
-                    Geannuleerde en verwijderde bestellingen worden niet meegerekend.
+                    {{ $t('7ce15ac4-bde4-4893-8db7-e0d0ab030c79') }}
                 </p>
 
                 <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
                     <STInputBox title="" error-fields="stock" :error-box="errors.errorBox">
-                        <NumberInput v-model="stock" />
+                        <NumberInput v-model="stock"/>
                     </STInputBox>
                 </div>
             </STListItem>
         </STList>
 
         <div v-if="!isNew && !isSingle" class="container">
-            <hr>
-            <h2>
-                Verwijder deze keuze
+            <hr><h2>
+                {{ $t('d1933a7b-d63f-49d0-8e3d-1784236aee0e') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span class="icon trash"/>
+                <span>{{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}</span>
             </button>
         </div>
     </SaveView>

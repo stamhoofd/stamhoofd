@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="title" />
+        <STNavigationBar :title="title"/>
 
         <main>
             <h1>
@@ -8,13 +8,13 @@
             </h1>
 
             <p>
-                Deze inschrijvingsgroepen werden gearchiveerd. Je kan ze altijd nog bekijken en hun gegevens blijven behouden tot je ze manueel verwijdert. Hier kan je dus afgelopen activiteiten in bewaren.
+                {{ $t('a1791aaa-e095-4fa8-a56a-ff6f80cc08c1') }}
             </p>
 
-            <Spinner v-if="loadingGroups" />
+            <Spinner v-if="loadingGroups"/>
             <STList v-else-if="groups.length">
                 <STListItem v-for="group in groups" :key="group.id" :selectable="true" @click="openGroup(group)">
-                    <GroupAvatar #left :group="group" />
+                    <GroupAvatar #left :group="group"/>
 
                     <h2 class="style-title-list">
                         {{ group.settings.name }}
@@ -22,12 +22,12 @@
 
                     <template #right>
                         <span v-if="group.settings.registeredMembers !== null" class="style-description-small">{{ group.settings.registeredMembers }}</span>
-                        <span class="icon arrow-right-small gray" />
+                        <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
             </STList>
             <p v-else class="info-box">
-                Het archief is leeg.
+                {{ $t('7139a5e0-00cd-4b19-81ad-a77075d61a23') }}
             </p>
         </main>
     </div>

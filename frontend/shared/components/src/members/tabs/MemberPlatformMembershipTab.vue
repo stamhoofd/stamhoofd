@@ -7,8 +7,7 @@
                 </p>
 
                 <div v-for="period of filteredPeriods" :key="period.id" class="container">
-                    <hr>
-                    <h2>{{ period.name }}</h2>
+                    <hr><h2>{{ period.name }}</h2>
                     <p v-if="getMembershipsForPeriod(period.id).length === 0" class="warning-box">
                         {{ $t('65cbb5ad-4a6b-4800-a7db-59627fb576ef', {werkjaar: period.name}) }}
                     </p>
@@ -18,32 +17,32 @@
                             <template #left>
                                 <figure class="style-image-with-icon" :class="{'theme-secundary': membership.isTrial}">
                                     <figure>
-                                        <span class="icon membership" />
+                                        <span class="icon membership"/>
                                     </figure>
                                     <aside v-if="membership.endDate > now">
-                                        <span v-if="membership.startDate > now" class="icon small clock" />
-                                        <span v-else-if="membership.expireDate && membership.expireDate < now" class="icon small warning" />
-                                        <span v-else-if="membership.isTrial" class="icon trial stroke small secundary" />
-                                        <span v-else class="icon small success primary" />
+                                        <span v-if="membership.startDate > now" class="icon small clock"/>
+                                        <span v-else-if="membership.expireDate && membership.expireDate < now" class="icon small warning"/>
+                                        <span v-else-if="membership.isTrial" class="icon trial stroke small secundary"/>
+                                        <span v-else class="icon small success primary"/>
                                     </aside>
                                 </figure>
                             </template>
 
                             <p v-if="membership.isTrial" class="style-title-prefix-list theme-secundary">
-                                <span>Proefperiode</span>
+                                <span>{{ $t('dc822d7a-6c98-4ee4-92db-413b3b5e2b31') }}</span>
                             </p>
                             <h3 class="style-title-list">
                                 <span>{{ getMembershipType(membership).name }}</span>
 
                                 <span v-if="membership.freeAmount" class="style-tag discount inline-first">
-                                    {{ Formatter.pluralText(membership.freeAmount, 'dag', 'dagen') }} gratis
+                                    {{ Formatter.pluralText(membership.freeAmount, 'dag', 'dagen') }} {{ $t('9cdf1589-7ac7-4832-a13f-f6b6ea04f497') }}
                                 </span>
                             </h3>
                             <p class="style-description-small style-tooltip" v-tooltip="'Toegevoegd op ' + formatDate(membership.createdAt, true)">
                                 {{ capitalizeFirstLetter(formatDateRange(membership.startDate, membership.expireDate ?? membership.endDate)) }}
                             </p>
                             <p v-if="membership.trialUntil && membership.trialUntil > now" class="style-description-small">
-                                Proefperiode tot {{ formatDate(membership.trialUntil, true) }}
+                                {{ $t('112277ff-c338-45a2-80cd-7a3c6f44c9c3') }} {{ formatDate(membership.trialUntil, true) }}
                             </p>
 
                             <p class="style-description-small" v-if="membership.organizationId === platform.membershipOrganizationId">
@@ -65,14 +64,14 @@
                             </p>
 
                             <p v-if="membership.expireDate && membership.expireDate < now && membership.endDate > now" class="style-description-small">
-                                Verlopen. Verleng de aansluiting om de verzekering te behouden.
+                                {{ $t('3329305f-a98e-4839-b35b-80b54812ee9a') }}
                             </p>
 
                             <p v-if="membership.generated && auth.hasPlatformFullAccess()" class="style-description-small">
                                 {{ $t('41464f90-088a-4c6a-827b-cd5907ad1fac') }}
                             </p>
                             <template v-if="hasFull && (!organization || membership.organizationId === organization.id)" #right>
-                                <span v-if="membership.price === 0 && (membership.organizationId === platform.membershipOrganizationId || period.locked)"></span>
+                                <span v-if="membership.price === 0 && (membership.organizationId === platform.membershipOrganizationId || period.locked)"/>
                                 <span v-else-if="membership.price === membership.priceWithoutDiscount || membership.priceWithoutDiscount === 0" class="style-price-base">{{ formatPrice(membership.price) }}</span>
                                 <template v-else>
                                     <span class="style-discount-old-price">{{ formatPrice(membership.priceWithoutDiscount) }}</span>
@@ -80,18 +79,18 @@
                                 </template>
 
                                 <LoadingButton v-if="!membership.locked && (!membership.generated || !isRegisteredAt(period.id, membership.organizationId)) && (!membership.balanceItemId || auth.hasPlatformFullAccess())" :loading="deletingMemberships.has(membership.id)">
-                                    <button class="button icon trash" type="button" @click="deleteMembership(membership)" />
+                                    <button class="button icon trash" type="button" @click="deleteMembership(membership)"/>
                                 </LoadingButton>
 
-                                <button v-if="membership.locked && (auth.hasPlatformFullAccess())" v-tooltip="$t('b1c11fd1-81dc-46f2-8cfb-0ba02d260f19')" class="button icon lock" type="button" @click="unlockMembership(membership)" />
+                                <button v-if="membership.locked && (auth.hasPlatformFullAccess())" v-tooltip="$t('b1c11fd1-81dc-46f2-8cfb-0ba02d260f19')" class="button icon lock" type="button" @click="unlockMembership(membership)"/>
                             </template>
                         </STListItem>
                     </STList>
 
                     <p v-if="hasFull && !period.locked">
                         <button type="button" class="button text" @click="addMembership(period)">
-                            <span class="icon add" />
-                            <span>Aansluiting of verzekering toevoegen in {{ period.name }}</span>
+                            <span class="icon add"/>
+                            <span>{{ $t('a5273fcf-87e7-48d7-9b4d-2676cb67fbc2') }} {{ period.name }}</span>
                         </button>
                     </p>
                 </div>

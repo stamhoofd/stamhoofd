@@ -12,7 +12,7 @@
             <STList>
                 <STListItem v-for="choice in record.choices" :key="choice.id" :selectable="true" element-name="label">
                     <template #left>
-                        <Checkbox :model-value="getChoiceSelected(choice)" @update:model-value="setChoiceSelected(choice, $event)" />
+                        <Checkbox :model-value="getChoiceSelected(choice)" @update:model-value="setChoiceSelected(choice, $event)"/>
                     </template>
                     <h3 class="style-title-list">
                         {{ choice.name }}
@@ -27,7 +27,7 @@
             <STList>
                 <STListItem v-for="choice in record.choices" :key="choice.id" :selectable="true" element-name="label">
                     <template #left>
-                        <Radio v-model="selectedChoice" :name="'record-answer-'+answer.id" :value="choice.id" />
+                        <Radio v-model="selectedChoice" :name="'record-answer-'+answer.id" :value="choice.id"/>
                     </template>
                     <h3 class="style-title-list">
                         {{ choice.name }}
@@ -39,42 +39,41 @@
             </STList>
         </STInputBox>
         <STInputBox v-else-if="answer.settings.type === RecordType.Text" :title="label" error-fields="input" :error-box="errors.errorBox">
-            <input v-model="textValue" :placeholder="inputPlaceholder" class="input">
-        </STInputBox>
+            <input v-model="textValue" :placeholder="inputPlaceholder" class="input"></STInputBox>
         <STInputBox v-else-if="answer.settings.type === RecordType.Textarea" :title="label" class="max" error-fields="input" :error-box="errors.errorBox">
-            <textarea v-model="textValue" :placeholder="inputPlaceholder" class="input" />
+            <textarea v-model="textValue" :placeholder="inputPlaceholder" class="input"/>
         </STInputBox>
-        <AddressInput v-else-if="answer.settings.type === RecordType.Address" v-model="addressValue" :title="label" :required="required" :validator="errors.validator" :nullable="true" />
-        <PhoneInput v-else-if="answer.settings.type === RecordType.Phone" v-model="textValue" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="errors.validator" :nullable="true" />
-        <EmailInput v-else-if="answer.settings.type === RecordType.Email" v-model="textValue" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="errors.validator" :nullable="true" />
+        <AddressInput v-else-if="answer.settings.type === RecordType.Address" v-model="addressValue" :title="label" :required="required" :validator="errors.validator" :nullable="true"/>
+        <PhoneInput v-else-if="answer.settings.type === RecordType.Phone" v-model="textValue" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="errors.validator" :nullable="true"/>
+        <EmailInput v-else-if="answer.settings.type === RecordType.Email" v-model="textValue" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="errors.validator" :nullable="true"/>
         <STInputBox v-else-if="answer.settings.type === RecordType.Date" :title="label" error-fields="input" :error-box="errors.errorBox">
-            <DateSelection v-model="dateValue" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
+            <DateSelection v-model="dateValue" :required="required" :validator="validator" :placeholder="inputPlaceholder"/>
         </STInputBox>
         <STInputBox v-else-if="answer.settings.type === RecordType.Price" :title="label" error-fields="input" :error-box="errors.errorBox">
-            <PriceInput v-model="integerValue" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
+            <PriceInput v-model="integerValue" :required="required" :validator="validator" :placeholder="inputPlaceholder"/>
         </STInputBox>
-        <ImageInput v-else-if="answer.settings.type === RecordType.Image" v-model="imageValue" :title="label" :required="required" :validator="errors.validator" :resolutions="record.resolutions" :is-private="true" />
-        <FileInput v-else-if="answer.settings.type === RecordType.File" v-model="fileValue" :accept="accept" :title="label" :required="required" :validator="errors.validator" :is-private="true" />
+        <ImageInput v-else-if="answer.settings.type === RecordType.Image" v-model="imageValue" :title="label" :required="required" :validator="errors.validator" :resolutions="record.resolutions" :is-private="true"/>
+        <FileInput v-else-if="answer.settings.type === RecordType.File" v-model="fileValue" :accept="accept" :title="label" :required="required" :validator="errors.validator" :is-private="true"/>
         <STInputBox v-else-if="answer.settings.type === RecordType.Integer" :title="label" error-fields="input" :error-box="errors.errorBox">
-            <NumberInput v-model="integerValue" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
+            <NumberInput v-model="integerValue" :required="required" :validator="validator" :placeholder="inputPlaceholder"/>
         </STInputBox>
 
         <p v-else class="error-box">
-            Niet ondersteund. Herlaad de app indien nodig en probeer opnieuw.
+            {{ $t('d9c8a136-7751-4e34-a885-a0e198e3cc4b') }}
         </p>
 
-        <!-- Comments if checkbox is selected -->
+        
         <div v-if="answer.settings.type === RecordType.Checkbox && selected && answer.settings.askComments" class="textarea-container">
-            <textarea v-model="comments" class="input small" :placeholder="inputPlaceholder" />
+            <textarea v-model="comments" class="input small" :placeholder="inputPlaceholder"/>
             <p v-if="answer.settings.commentsDescription" class="info-box">
                 {{ answer.settings.commentsDescription }}
             </p>
         </div>
 
-        <!-- Unhandled errors -->
-        <STErrorsDefault :error-box="errors.errorBox" />
+        
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
-        <!-- Footer description -->
+        
         <p v-if="answer.settings.type !== RecordType.Checkbox && answer.settings.description" class="style-description-small">
             {{ answer.settings.description }}
         </p>

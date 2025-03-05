@@ -1,54 +1,51 @@
 <template>
     <div id="settings-view" class="st-view background">
-        <STNavigationBar title="Activiteiten">
+        <STNavigationBar :title="$t(`Activiteiten`)">
             <template #right>
                 <button v-if="canWriteSomeEvent" type="button" class="button text navigation" @click="addEvent()">
-                    <span class="icon add" />
-                    <span>Nieuw</span>
+                    <span class="icon add"/>
+                    <span>{{ $t('a5ee3e2a-e3ee-4290-af56-85a7003d9fc8') }}</span>
                 </button>
             </template>
         </STNavigationBar>
 
         <main class="center">
             <h1>
-                Activiteiten
+                {{ $t('51964c91-40ec-4448-a032-c7f89ea6a22a') }}
             </h1>
 
             <div class="input-with-buttons">
                 <div>
                     <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                        <input v-model="searchQuery" class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
-                    </form>
+                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`83d986c4-e6c9-42ed-963a-8220c6d933e4`)"></form>
                 </div>
                 <div>
                     <button type="button" class="button text" @click="editFilter">
-                        <span class="icon filter" />
-                        <span class="hide-small">Filter</span>
-                        <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary" />
+                        <span class="icon filter"/>
+                        <span class="hide-small">{{ $t('52577565-f3ae-4d34-8e1a-14ca2507629e') }}</span>
+                        <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary"/>
                     </button>
                 </div>
             </div>
 
-            <ScrollableSegmentedControl v-model="selectedYear" :items="years" :labels="yearLabels" />
+            <ScrollableSegmentedControl v-model="selectedYear" :items="years" :labels="yearLabels"/>
 
             <template v-if="selectedYear === null && suggestionsGroup">
                 <Checkbox v-model="addSuggestions">
-                    Toon wekelijkse suggesties voor {{ suggestionsGroup.settings.name }}
+                    {{ $t('17385d0d-c15f-4a95-b06c-3a6c941b1ee5') }} {{ suggestionsGroup.settings.name }}
                 </Checkbox>
 
-                <hr>
-            </template>
+                <hr></template>
 
             <div v-for="(group, index) of groupedEvents" :key="group.title" class="container">
-                <hr v-if="index > 0">
-                <h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
+                <hr v-if="index > 0"><h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
 
                 <STList>
-                    <EventRow v-for="event of group.events" :key="event.id" :event="event" @click="onClickEvent(event)" />
+                    <EventRow v-for="event of group.events" :key="event.id" :event="event" @click="onClickEvent(event)"/>
                 </STList>
             </div>
 
-            <InfiniteObjectFetcherEnd empty-message="Geen activiteiten gevonden" :fetcher="fetcher" />
+            <InfiniteObjectFetcherEnd empty-message="Geen activiteiten gevonden" :fetcher="fetcher"/>
         </main>
     </div>
 </template>

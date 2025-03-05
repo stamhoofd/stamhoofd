@@ -1,8 +1,8 @@
 <template>
     <div class="st-menu st-view">
-        <STNavigationBar title="Groepen">
+        <STNavigationBar :title="$t(`c5bd564e-223a-4f7d-acfd-a93956d7b346`)">
             <template #right>
-                <button v-if="hasFullAccess" class="navigation button icon settings" type="button" @click="hasFullAccess && navigate(Routes.Tags)" />
+                <button v-if="hasFullAccess" class="navigation button icon settings" type="button" @click="hasFullAccess && navigate(Routes.Tags)"/>
             </template>
         </STNavigationBar>
 
@@ -11,43 +11,33 @@
 
             <div class="container">
                 <button type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.All) }" @click="navigate(Routes.All)">
-                    <span class="icon group" />
+                    <span class="icon group"/>
                     <span>
                         {{ $t("cd0975fc-75c4-4c1e-b80a-f611f0992caa") }}
                     </span>
                 </button>
             </div>
 
-            <hr>
-
-            <div v-for="(tag, index) in rootTags" :key="tag.id" class="container">
+            <hr><div v-for="(tag, index) in rootTags" :key="tag.id" class="container">
                 <div class="grouped">
                     <button type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.Tag, {properties: {tag}}) }" @click="navigateToTag(tag)">
-                        <span v-if="tag.type === OrganizationTagType.Tag" class="icon label" />
-                        <span v-else class="icon location" />
+                        <span v-if="tag.type === OrganizationTagType.Tag" class="icon label"/>
+                        <span v-else class="icon location"/>
 
                         <span>
                             {{ tag.name }}
                         </span>
-                        <span v-if="tag.childTags.length" class="button icon arrow-down-small right-icon rot" :class="{rot180: collapsed.isCollapsed(tag.id)}" @click.stop="collapsed.toggle(tag.id)" />
+                        <span v-if="tag.childTags.length" class="button icon arrow-down-small right-icon rot" :class="{rot180: collapsed.isCollapsed(tag.id)}" @click.stop="collapsed.toggle(tag.id)"/>
                     </button>
 
                     <div :class="{collapsable: true, hide: collapsed.isCollapsed(tag.id)}">
-                        <button
-                            v-for="childTag in tagIdsToTags(tag.childTags)"
-                            :key="childTag.id"
-                            class="menu-button button sub-button"
-                            :class="{ selected: checkRoute(Routes.Tag, {properties: {tag: childTag}}) }"
-                            type="button"
-                            @click="navigateToTag(childTag)"
-                        >
-                            <span class="icon" />
+                        <button v-for="childTag in tagIdsToTags(tag.childTags)" :key="childTag.id" class="menu-button button sub-button" :class="{ selected: checkRoute(Routes.Tag, {properties: {tag: childTag}}) }" type="button" @click="navigateToTag(childTag)">
+                            <span class="icon"/>
                             <span>{{ childTag.name }}</span>
                             <span class="count">{{ formatInteger(childTag.organizationCount) }}</span>
                         </button>
 
-                        <hr v-if="index < rootTags.length - 1 && tag.childTags.length">
-                    </div>
+                        <hr v-if="index < rootTags.length - 1 && tag.childTags.length"></div>
                 </div>
             </div>
         </main>

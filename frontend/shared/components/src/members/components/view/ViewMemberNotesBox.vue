@@ -1,11 +1,10 @@
 <template>
     <div v-if="notes">
         <div class="hover-box container">
-            <hr>
-            <h2 class="style-with-button">
-                <div>Notities</div>
+            <hr><h2 class="style-with-button">
+                <div>{{ $t('1433dd52-bddb-4a28-b217-b219111a6a1c') }}</div>
                 <div class="hover-show">
-                    <button v-if="hasWrite" type="button" class="button icon edit gray" @click.prevent="editThisMember" />
+                    <button v-if="hasWrite" type="button" class="button icon edit gray" @click.prevent="editThisMember"/>
                 </div>
             </h2>
             <p class="style-description-small notes">

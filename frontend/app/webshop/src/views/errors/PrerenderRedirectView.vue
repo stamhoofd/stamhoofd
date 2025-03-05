@@ -2,22 +2,21 @@
     <div class="st-view invalid-page-view">
         <main>
             <h1>
-                Doorverwijzen...
+                {{ $t('024b0957-571c-40c3-954e-a251bd0b257f') }}
             </h1>
 
-            <p>Bezig met doorverwijzen</p>
+            <p>{{ $t('49ee57ef-966d-4496-9e50-2e906788e3fd') }}</p>
         </main>
 
         <div class="legal-footer">
-            <hr class="style-hr">
-            <div>
+            <hr class="style-hr"><div>
                 <aside>
                     <a :href="'https://'+$domains.marketing" class="inline-link secundary" target="_blank">
                         {{ $t('9f1a0032-32dd-48fd-9d04-0b20bd86aefb') }}
                     </a>
                 </aside>
                 <div>
-                    <a :href="'https://'+$domains.marketing+'/webshops'">Webshop via <Logo /></a>
+                    <a :href="'https://'+$domains.marketing+'/webshops'">{{ $t('09d2ca27-b158-4d48-a36e-76bcbfcd6342') }} <Logo/></a>
                 </div>
             </div>
         </div>

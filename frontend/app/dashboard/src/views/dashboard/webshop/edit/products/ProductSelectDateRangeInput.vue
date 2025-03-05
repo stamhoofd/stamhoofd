@@ -3,27 +3,27 @@
         <STList v-if="dateRanges.length > 0">
             <STListItem v-for="_dateRange in dateRanges" :key="_dateRange.id" element-name="label" :selectable="true" class="left-center dateRange-selection">
                 <template #left>
-                    <Radio v-model="selectedDateRange" :value="_dateRange" @change="changeSelected" />
+                    <Radio v-model="selectedDateRange" :value="_dateRange" @change="changeSelected"/>
                 </template>
                 <h3>
                     {{ formatDate(_dateRange) }}
                 </h3>
                 <template #right>
-                    <button type="button" class="button icon gray edit" @click.stop="doEditDateRange(_dateRange)" />
+                    <button type="button" class="button icon gray edit" @click.stop="doEditDateRange(_dateRange)"/>
                 </template>
             </STListItem>
             <STListItem element-name="label" :selectable="true" class="left-center">
                 <template #left>
-                    <Radio v-model="selectedDateRange" :value="null" @change="changeSelected" />
+                    <Radio v-model="selectedDateRange" :value="null" @change="changeSelected"/>
                 </template>
-                Een andere datum/tijdstip
+                {{ $t('ae8de534-f96c-40d2-84b8-f8a438c31b5e') }}
             </STListItem>
         </STList>
         <p v-if="editingDateRange" class="warning-box">
-            Opgelet, alle tickets die deze datum/tijdstip hadden zullen worden gewijzigd. Kies 'Een andere datum/tijdstip' als je een nieuwe datum wilt invoeren.
+            {{ $t("53cf0d0b-7f16-47cd-b050-9834d903bc9a") }}
         </p>
-        <ProductDateRangeInput v-if="editingDateRange || selectedDateRange === null" v-model="editDateRange" :validator="internalValidator" />
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <ProductDateRangeInput v-if="editingDateRange || selectedDateRange === null" v-model="editDateRange" :validator="internalValidator"/>
+        <STErrorsDefault :error-box="errors.errorBox"/>
     </div>
 </template>
 

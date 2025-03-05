@@ -3,145 +3,111 @@
         <h1>
             {{ title }}
         </h1>
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <template v-if="paymentMethod === PaymentMethod.Transfer">
-            <STInputBox title="Begunstigde" error-fields="transferSettings.creditor" :error-box="errors.errorBox">
-                <input
-                    v-model="creditor"
-                    class="input"
-                    type="text"
-                    :placeholder="organization.name"
-                    autocomplete="off"
-                >
-            </STInputBox>
+            <STInputBox error-fields="transferSettings.creditor" :error-box="errors.errorBox" :title="$t(`f95defaa-5371-427d-9fa3-07be3e449a74`)">
+                <input v-model="creditor" class="input" type="text" :placeholder="organization.name" autocomplete="off"></STInputBox>
 
-            <IBANInput v-model="iban" title="Bankrekeningnummer" :validator="errors.validator" :required="true" />
+            <IBANInput v-model="iban" :validator="errors.validator" :required="true" :title="$t(`42e471ed-1172-4deb-92a7-770f53dfd645`)"/>
 
-            <STInputBox title="Soort mededeling" error-fields="transferSettings.type" :error-box="errors.errorBox" class="max">
+            <STInputBox error-fields="transferSettings.type" :error-box="errors.errorBox" class="max" :title="$t(`4cb06958-0fda-4abe-98ed-dec2d9c57763`)">
                 <STList>
                     <STListItem v-for="_type in transferTypes" :key="_type.value" :selectable="true" element-name="label">
                         <template #left>
-                            <Radio v-model="transferType" :value="_type.value" />
+                            <Radio v-model="transferType" :value="_type.value"/>
                         </template>
                         <h3 class="style-title-list">
                             {{ _type.name }}
                         </h3>
-                        <p v-if="transferType === _type.value" class="style-description pre-wrap" v-text="_type.description" />
+                        <p v-if="transferType === _type.value" class="style-description pre-wrap" v-text="_type.description"/>
                     </STListItem>
                 </STList>
             </STInputBox>
 
             <p v-if="transferType !== 'Structured'" class="warning-box">
-                <span>De mededeling kan niet gewijzigd worden door <span v-if="type === 'webshop'">bestellers</span><span v-else>leden</span> die betalen met een app. Voorzie dus zelf geen eigen vervangingen zoals <em class="style-em">bestelling + naam</em> waarbij je ervan uitgaat dat de betaler manueel de mededeling kan invullen en wijzigen. Gebruik in plaats daarvan de 'Vaste mededeling' met de beschikbare automatische vervangingen.</span>
+                <span>{{ $t('b7fc4adc-05d8-4772-a5ef-d9a266316c06') }} <span v-if="type === 'webshop'">{{ $t('bf84dd6d-82fd-4ae7-bb77-d2c3cbabd208') }}</span><span v-else>{{ $t('37abef6b-2123-433a-9ed1-2b430d9bf360') }}</span> {{ $t('48770c62-d873-4a83-add5-80fcaa484f66') }} <em class="style-em">{{ $t('d2d77824-f603-4bc5-ae5e-584bcd6597c7') }}</em> {{ $t("0c6ce5bb-ac90-4cc8-b888-f92cdad9d482") }}</span>
             </p>
 
-            <STInputBox v-if="transferType !== 'Structured'" :title="transferType === 'Fixed' ? 'Mededeling' : 'Voorvoegsel'" error-fields="transferSettings.prefix" :error-box="errors.errorBox">
-                <input
-                    v-model="prefix"
-                    class="input"
-                    type="text"
-                    :placeholder="transferType === 'Fixed' ? 'Mededeling' : (type === 'registration' ? 'Optioneel. Bv. Inschrijving' : 'Optioneel. Bv. Bestelling')"
-                    autocomplete="off"
-                >
-            </STInputBox>
+            <STInputBox v-if="transferType !== 'Structured'" :title="transferType === 'Fixed' ? $t(`fb7e4e6a-c7a6-4e1a-84ce-87bcf622f479`) : $t(`4d70b3f4-edc2-42c6-a855-7e1db2a69f99`)" error-fields="transferSettings.prefix" :error-box="errors.errorBox">
+                <input v-model="prefix" class="input" type="text" :placeholder="transferType === 'Fixed' ? $t(`fb7e4e6a-c7a6-4e1a-84ce-87bcf622f479`) : (type === 'registration' ? $t(`81f5f0fd-f73a-47fb-a50d-27a429bfee56`) : $t(`a93976c7-c035-4175-aad6-cbc5d82e4b2a`))" autocomplete="off"></STInputBox>
 
             <p v-if="transferExample && transferExample !== prefix" class="style-description-small">
-                Voorbeeld: <span class="style-em">{{ transferExample }}</span>
+                {{ $t('79dd3f16-544e-4992-ae89-897aab7cf1d5') }} <span class="style-em">{{ transferExample }}</span>
             </p>
 
             <p v-if="transferType === 'Fixed' && type === 'webshop'" class="style-description-small">
-                Gebruik automatische tekstvervangingen in de mededeling via <code v-copyable class="style-inline-code style-copyable" v-text="`{{naam}}`" />, <code v-copyable class="style-inline-code style-copyable" v-text="`{{email}}`" /> of <code v-copyable class="style-inline-code style-copyable" v-text="`{{nr}}`" />
+                {{ $t('8f872ab5-7565-4177-8784-b17f1f24359c') }} <code v-copyable class="style-inline-code style-copyable" v-text="`{{naam}}`"/>, <code v-copyable class="style-inline-code style-copyable" v-text="`{{email}}`"/> {{ $t('c8077f4f-684f-4669-8105-af63bde16322') }} <code v-copyable class="style-inline-code style-copyable" v-text="`{{nr}}`"/>
             </p>
             <p v-else-if="transferType === 'Fixed' && type === 'registration'" class="style-description-small">
-                Gebruik automatische tekstvervangingen in de mededeling via <code v-copyable class="style-inline-code style-copyable" v-text="`{{naam}}`" />
+                {{ $t('8f872ab5-7565-4177-8784-b17f1f24359c') }} <code v-copyable class="style-inline-code style-copyable" v-text="`{{naam}}`"/>
             </p>
 
-            <hr>
-            <h2>Instructies</h2>
-            <p>Op de betaalpagina worden automatisch instructies getoond om de overschrijving correct uit te voeren. Je kan eventueel andere instructies opgeven, bv. als je het toelaat om de overschrijving later uit te voeren.</p>
+            <hr><h2>{{ $t('93ee0ba6-f06e-48f7-bfd0-0a1e4ae54fee') }}</h2>
+            <p>{{ $t('bcfc8d29-6bb2-4abe-bcb6-f56645dd45f5') }}</p>
 
             <STInputBox title="" error-fields="infoDescription" :error-box="errors.errorBox" class="max">
-                <textarea
-                    v-model="infoDescription"
-                    class="input"
-                    type="text"
-                    placeholder="Optioneel. Indien niet ingevuld worden automatisch geschikte instructies getoond."
-                    autocomplete="off"
-                />
+                <textarea v-model="infoDescription" class="input" type="text" autocomplete="off" :placeholder="$t(`cf202718-08dc-44f8-88a6-eeba992864ab`)"/>
             </STInputBox>
 
-            <hr>
-            <h2>Geavanceerd</h2>
+            <hr><h2>{{ $t('2dfdb75f-fd62-45df-bc9f-a34a5570dd32') }}</h2>
         </template>
 
         <STList>
             <STListItem v-if="companiesOnly || auth.hasPlatformFullAccess()" key="companiesOnly" :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox v-model="companiesOnly" />
+                    <Checkbox v-model="companiesOnly"/>
                 </template>
 
                 <h3 class="style-title-list">
-                    Uitschakelen voor particulieren
+                    {{ $t('09bfdf4d-479d-4a47-b510-7a870447171c') }}
                 </h3>
             </STListItem>
 
             <STListItem key="useMinimumAmount" :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox v-model="useMinimumAmount" />
+                    <Checkbox v-model="useMinimumAmount"/>
                 </template>
 
                 <h3 class="style-title-list">
-                    Maak pas beschikbaar vanaf een minimum bedrag
+                    {{ $t('03c0d712-cfa3-4fd5-b2af-7a3a1b22bc0a') }}
                 </h3>
 
                 <div v-if="useMinimumAmount" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox title="Minimum bedrag" error-fields="minimumAmount" :error-box="errors.errorBox">
-                        <PriceInput v-model="minimumAmount" :min="2" :validator="errors.validator" />
+                    <STInputBox error-fields="minimumAmount" :error-box="errors.errorBox" :title="$t(`bea59ed7-0865-44ae-9e8f-7428ffb9c35f`)">
+                        <PriceInput v-model="minimumAmount" :min="2" :validator="errors.validator"/>
                     </STInputBox>
                 </div>
             </STListItem>
 
             <STListItem key="useWarning" :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox v-model="useWarning" />
+                    <Checkbox v-model="useWarning"/>
                 </template>
 
                 <h3 class="style-title-list">
-                    Waarschuwing tonen bij selectie van deze betaalmethode
+                    {{ $t('5cf7e71c-76ac-4169-aa84-08fef30f753e') }}
                 </h3>
 
                 <div v-if="useWarning" class="split-inputs option" @click.stop.prevent>
                     <STInputBox title="" error-fields="warningText" :error-box="errors.errorBox" class="max">
-                        <textarea
-                            v-model="warningText"
-                            class="input"
-                            type="text"
-                            placeholder="Waarschuwingstekst"
-                            autocomplete="off"
-                        />
+                        <textarea v-model="warningText" class="input" type="text" autocomplete="off" :placeholder="$t(`ec2d213d-35b7-4938-bd72-a05f8a4569b0`)"/>
                     </STInputBox>
                 </div>
             </STListItem>
 
             <STListItem v-if="useWarning" key="useWarningAmount" :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox v-model="useWarningAmount" />
+                    <Checkbox v-model="useWarningAmount"/>
                 </template>
 
                 <h3 class="style-title-list">
-                    Waarschuwing enkel tonen vanaf een minimum bedrag
+                    {{ $t('4dbafe0a-e04a-438a-b46a-22c519aca406') }}
                 </h3>
 
                 <div v-if="useWarningAmount" class="split-inputs option" @click.stop.prevent>
                     <STInputBox title="" error-fields="warningAmount" :error-box="errors.errorBox">
-                        <PriceInput
-                            v-model="warningAmount"
-                            class="input"
-                            type="text"
-                            :min="1"
-                            :validator="errors.validator"
-                        />
+                        <PriceInput v-model="warningAmount" class="input" type="text" :min="1" :validator="errors.validator"/>
                     </STInputBox>
                 </div>
             </STListItem>

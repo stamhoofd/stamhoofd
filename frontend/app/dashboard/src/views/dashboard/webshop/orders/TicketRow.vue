@@ -4,22 +4,22 @@
             {{ name }}
             <span v-if="ticket.getIndexText()" class="ticket-index">{{ ticket.getIndexText() }}</span>
         </h3>
-        <p v-if="isSingle && order" class="style-description-small" v-text="'Bestelling #'+order.number" />
-        <p v-if="isSingle && order" class="style-description-small" v-text="order.data.customer.name" />
+        <p v-if="isSingle && order" class="style-description-small" v-text="'Bestelling #'+order.number"/>
+        <p v-if="isSingle && order" class="style-description-small" v-text="order.data.customer.name"/>
         <p v-if="!isSingle && !cartItem" class="style-description-small">
-            <span class="style-tag error">Verwijderd ticket</span>
+            <span class="style-tag error">{{ $t('23ce62ef-a4bd-44f2-9681-69f35c92665f') }}</span>
         </p>
-        <p v-if="cartItem && cartItem.description" class="style-description-small pre-wrap" v-text="cartItem.description" />
-        <p v-if="cartItem && cartItem.product.location" class="style-description-small" v-text="cartItem.product.location.name" />
-        <p v-if="cartItem && cartItem.product.location && cartItem.product.location.address" class="style-description-small" v-text="cartItem.product.location.address" />
-        <p v-if="ticket.getIndexDescriptionString(webshop)" class="style-description-small pre-wrap" v-text="ticket.getIndexDescriptionString(webshop)" />
+        <p v-if="cartItem && cartItem.description" class="style-description-small pre-wrap" v-text="cartItem.description"/>
+        <p v-if="cartItem && cartItem.product.location" class="style-description-small" v-text="cartItem.product.location.name"/>
+        <p v-if="cartItem && cartItem.product.location && cartItem.product.location.address" class="style-description-small" v-text="cartItem.product.location.address"/>
+        <p v-if="ticket.getIndexDescriptionString(webshop)" class="style-description-small pre-wrap" v-text="ticket.getIndexDescriptionString(webshop)"/>
 
-        <p v-if="scannedAtDescription" class="style-description-small" v-text="scannedAtDescription" />
+        <p v-if="scannedAtDescription" class="style-description-small" v-text="scannedAtDescription"/>
 
         <template #right>
             <button class="button text" type="button" @click.stop="markAs">
                 <span :class="'style-tag '+statusColor">{{ statusName }}</span>
-                <span v-if="hasWrite" class="icon arrow-down-small" />
+                <span v-if="hasWrite" class="icon arrow-down-small"/>
             </button>
         </template>
     </STListItem>

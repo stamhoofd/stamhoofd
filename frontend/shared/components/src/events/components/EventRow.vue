@@ -1,7 +1,7 @@
 <template>
     <STListItem class="right-stack smartphone-wrap-left" :selectable="true">
         <template #left>
-            <EventImageBox :event="event" />
+            <EventImageBox :event="event"/>
         </template>
         <p v-if="levelPrefix" class="style-title-prefix-list style-limit-lines">
             {{ levelPrefix }}
@@ -14,7 +14,7 @@
         </p>
 
         <p v-if="prefix" class="style-description-small">
-            Voor {{ prefix }}
+            {{ $t('09af4818-dae5-440d-9182-f8a7a77e8ea7') }} {{ prefix }}
         </p>
 
         <p v-if="event.meta.location?.name || event.meta.location?.address?.city" class="style-description-small">
@@ -22,9 +22,9 @@
         </p>
 
         <p v-if="event.group" class="style-description-small">
-            <span v-if="event.group.notYetOpen">Inschrijvingen starten op {{ Formatter.date(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date()) }}</span>
-            <span v-else-if="event.group.closed">Inschrijvingen gesloten</span>
-            <span v-else>Inschrijvingen open</span>
+            <span v-if="event.group.notYetOpen">{{ $t('0abb7353-87f4-4acd-9756-214333bb9313') }} {{ Formatter.date(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date()) }}</span>
+            <span v-else-if="event.group.closed">{{ $t('cc6bb561-31b3-4f23-b273-ae4c7e12363b') }}</span>
+            <span v-else>{{ $t('d03f8abc-725f-41b4-9bad-63a9c6fab170') }}</span>
         </p>
 
         <p v-if="event.group && app !== 'registration'" class="style-description-small">
@@ -32,9 +32,9 @@
         </p>
 
         <template #right>
-            <span v-if="!event.meta.visible" v-tooltip="'Verborgen'" class="icon gray eye-off" />
-            <span v-if="event.id" class="icon arrow-right-small gray" />
-            <span v-else class="icon add gray" />
+            <span v-if="!event.meta.visible" v-tooltip="'Verborgen'" class="icon gray eye-off"/>
+            <span v-if="event.id" class="icon arrow-right-small gray"/>
+            <span v-else class="icon add gray"/>
         </template>
     </STListItem>
 </template>

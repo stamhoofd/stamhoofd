@@ -1,28 +1,27 @@
 <template>
-    <EditorView ref="editorView" class="mail-view" title="E-mail template" save-text="Opslaan" :replacements="replacements" @save="save">
-        <p v-if="prefix" class="style-title-prefix" v-text="prefix" />
+    <EditorView ref="editorView" class="mail-view" save-text="Opslaan" :replacements="replacements" @save="save" :title="$t(`a6bedc6d-0af9-41ce-99fb-1f75e8f784c8`)">
+        <p v-if="prefix" class="style-title-prefix" v-text="prefix"/>
         <h1 v-if="isNew" class="style-navigation-title">
-            Nieuw sjabloon
+            {{ $t('cf266c0a-ad15-408f-a3db-02eeb48c4d8e') }}
         </h1>
         <h1 v-else class="style-navigation-title">
-            Wijzig sjabloon
+            {{ $t('5b8baab0-d039-4472-b566-3b7028fd2ca6') }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
-        <!-- List -->
+        
         <template #list>
             <STListItem class="no-padding">
                 <div class="list-input-box">
-                    <span>Type:</span>
+                    <span>{{ $t('837069bc-6013-4bb6-9161-ceefa88400ad') }}</span>
                     <span class="list-input">{{ EmailTemplate.getTypeTitle(emailTemplate.type) }}</span>
                 </div>
             </STListItem>
             <STListItem class="no-padding" element-name="label">
                 <div class="list-input-box">
-                    <span>Onderwerp:</span>
-                    <input id="mail-subject" v-model="subject" class="list-input" type="text" placeholder="Typ hier het onderwerp van je e-mail">
-                </div>
+                    <span>{{ $t('efc766be-14ad-4d3c-8650-e3c47116f32d') }}</span>
+                    <input id="mail-subject" v-model="subject" class="list-input" type="text" :placeholder="$t(`f1e8adc7-c865-4fcf-98d7-a52937ab7872`)"></div>
             </STListItem>
         </template>
     </EditorView>

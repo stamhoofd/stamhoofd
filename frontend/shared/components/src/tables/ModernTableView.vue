@@ -2,13 +2,13 @@
     <div class="modern st-view table-view background">
         <STNavigationBar :add-shadow="wrapColumns" :title="title" :disable-pop="true">
             <template #left>
-                <button v-if="canLeaveSelectionMode && isMobile && showSelection && !isIOS" type="button" class="button icon navigation close" @click="setShowSelection(false)" />
+                <button v-if="canLeaveSelectionMode && isMobile && showSelection && !isIOS" type="button" class="button icon navigation close" @click="setShowSelection(false)"/>
                 <button v-else-if="canLeaveSelectionMode && showSelection && isIOS" type="button" class="button navigation" @click="isAllSelected = !isAllSelected">
                     <template v-if="isAllSelected">
-                        Deselecteer alles
+                        {{ $t('3607c7b1-5241-4490-b890-96f68193fd2d') }}
                     </template>
                     <template v-else>
-                        Selecteer alles
+                        {{ $t('9c4f5fe7-75c9-43c3-88e1-b2f7bb99424f') }}
                     </template>
                 </button>
                 <BackButton v-else-if="canPop" @click="pop">
@@ -17,18 +17,18 @@
             </template>
             <template #right>
                 <template v-if="!(isIOS && showSelection)">
-                    <button v-for="(action, index) of filteredActions" :key="index" v-tooltip="action.tooltip" type="button" :class="'button icon navigation '+action.icon" :disabled="action.needsSelection && ((showSelection && isMobile) || !action.allowAutoSelectAll) && !hasSelection" @click="handleAction(action, $event)" />
+                    <button v-for="(action, index) of filteredActions" :key="index" v-tooltip="action.tooltip" type="button" :class="'button icon navigation '+action.icon" :disabled="action.needsSelection && ((showSelection && isMobile) || !action.allowAutoSelectAll) && !hasSelection" @click="handleAction(action, $event)"/>
                 </template>
 
                 <template v-if="showSelection && isIOS && canLeaveSelectionMode">
                     <button v-if="canLeaveSelectionMode" key="iOSDone" type="button" class="button navigation highlight" @click="setShowSelection(false)">
-                        Gereed
+                        {{ $t('9466fb11-93e1-465c-b263-11be53a01f70') }}
                     </button>
                 </template>
                 <button v-else-if="!showSelection && isIOS && false" key="iOSSelect" type="button" class="button navigation" @click="setShowSelection(true)">
-                    Selecteer
+                    {{ $t('e9b221cb-5696-4faa-98a6-6ac1ef6902ad') }}
                 </button>
-                <button v-else key="actions" v-long-press="(e) => showActions(true, e)" type="button" class="button icon more navigation" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)" />
+                <button v-else key="actions" v-long-press="(e) => showActions(true, e)" type="button" class="button icon more navigation" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)"/>
             </template>
         </STNavigationBar>
 
@@ -40,19 +40,18 @@
                         {{ titleSuffix }}
                     </span>
                 </h1>
-                <slot />
+                <slot/>
 
                 <div class="input-with-buttons">
                     <div>
                         <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                            <input v-model="searchQuery" class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
-                        </form>
+                            <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`83d986c4-e6c9-42ed-963a-8220c6d933e4`)"></form>
                     </div>
                     <div v-if="canFilter">
                         <button type="button" class="button text" @click="editFilter">
-                            <span class="icon filter" />
-                            <span class="hide-small">Filter</span>
-                            <span v-if="!isEmptyFilter(tableObjectFetcher.baseFilter)" class="icon dot primary" />
+                            <span class="icon filter"/>
+                            <span class="hide-small">{{ $t('52577565-f3ae-4d34-8e1a-14ca2507629e') }}</span>
+                            <span v-if="!isEmptyFilter(tableObjectFetcher.baseFilter)" class="icon dot primary"/>
                         </button>
                     </div>
                 </div>
@@ -62,7 +61,7 @@
                 <div class="inner-size" :style="!wrapColumns ? { height: (totalHeight+50)+'px', width: totalRenderWidth+'px'} : {}">
                     <div class="table-head" @contextmenu.prevent="onTableHeadRightClick($event)">
                         <div v-if="showSelection" class="selection-column">
-                            <Checkbox v-model="isAllSelected" />
+                            <Checkbox v-model="isAllSelected"/>
                         </div>
 
                         <div class="columns">
@@ -70,17 +69,13 @@
                                 <button type="button" @mouseup.left="toggleSort(column)" @mousedown.left="(event) => columnDragStart(event, column)" @touchstart="(event) => columnDragStart(event, column)">
                                     <span>{{ column.name }}</span>
 
-                                    <span
-                                        v-if="sortBy === column"
-                                        class="sort-arrow icon"
-                                        :class="{
+                                    <span v-if="sortBy === column" class="sort-arrow icon" :class="{
                                             'arrow-up-small': sortDirection === 'ASC',
                                             'arrow-down-small': sortDirection === 'DESC',
-                                        }"
-                                    />
+                                        }"/>
                                 </button>
-                                <span v-if="index < columns.length - 1" class="drag-handle-container"><span class="drag-handle" @mousedown="(event) => handleDragStart(event, column)" @touchstart="(event) => handleDragStart(event, column)" /></span>
-                                <button v-else-if="canCollapse" v-tooltip="'Pas kolommen op het scherm'" type="button" class="button light-gray icon collapse-left" @click="collapse" />
+                                <span v-if="index < columns.length - 1" class="drag-handle-container"><span class="drag-handle" @mousedown="(event) => handleDragStart(event, column)" @touchstart="(event) => handleDragStart(event, column)"/></span>
+                                <button v-else-if="canCollapse" v-tooltip="'Pas kolommen op het scherm'" type="button" class="button light-gray icon collapse-left" @click="collapse"/>
                             </div>
                         </div>
                     </div>
@@ -88,17 +83,17 @@
                     <div ref="tableBody" class="table-body" :style="{ height: totalHeight+'px' }">
                         <div v-for="row of visibleRows" :key="row.id" v-long-press="(e) => onRightClickRow(row, e)" class="table-row" :class="{focused: isRowFocused(row) }" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }" @click="onClickRow(row, $event)" @contextmenu.prevent="(event) => onRightClickRow(row, event)">
                             <label v-if="showSelection" class="selection-column" @click.stop>
-                                <Checkbox v-if="row.value" :key="row.value.id" :model-value="row.cachedSelectionValue" @update:model-value="setSelectionValue(row, $event)" />
-                                <Checkbox v-else :model-value="isAllSelected" />
+                                <Checkbox v-if="row.value" :key="row.value.id" :model-value="row.cachedSelectionValue" @update:model-value="setSelectionValue(row, $event)"/>
+                                <Checkbox v-else :model-value="isAllSelected"/>
                             </label>
                             <div v-if="showPrefix && prefixColumn" class="prefix-column" :data-style="prefixColumn.getStyleFor(row.value, true)" :data-align="prefixColumn.align">
-                                <span v-if="row.value" v-text="prefixColumn.getFormattedValue(row.value)" />
-                                <span v-else class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage*100) + '%'}" />
+                                <span v-if="row.value" v-text="prefixColumn.getFormattedValue(row.value)"/>
+                                <span v-else class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage*100) + '%'}"/>
                             </div>
                             <div class="columns">
                                 <div v-for="column of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order' }" :data-style="column.getStyleFor(row.value)" :data-align="column.align">
-                                    <span v-if="row.value" v-text="column.getFormattedValue(row.value)" />
-                                    <span v-else class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage*(Math.min((!wrapColumns && column.width) ? column.width : 200, column.recommendedWidth)-30))+'px'}" />
+                                    <span v-if="row.value" v-text="column.getFormattedValue(row.value)"/>
+                                    <span v-else class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage*(Math.min((!wrapColumns && column.width) ? column.width : 200, column.recommendedWidth)-30))+'px'}"/>
                                 </div>
                             </div>
                         </div>
@@ -110,29 +105,29 @@
                 {{ errorMessage }}
 
                 <button class="button text" type="button" @click="refresh">
-                    Opnieuw
+                    {{ $t('9f51c413-5080-409c-91ac-d39a16501663') }}
                 </button>
             </p>
 
             <p v-else-if="totalFilteredCount === 0 && totalItemsCount === 0" class="info-box">
-                <slot name="empty" />
+                <slot name="empty"/>
             </p>
             <p v-else-if="totalFilteredCount === 0" class="info-box with-button">
-                Geen resultaten gevonden
+                {{ $t('f57859c2-70b7-44ef-9d31-ca89a0a76dc6') }}
 
                 <button class="button text" type="button" @click="resetFilter">
-                    Reset
+                    {{ $t('b09e88a7-a60a-43ac-8368-04fcb56ed0e7') }}
                 </button>
             </p>
         </main>
 
         <STButtonToolbar v-if="isIOS && isMobile && showSelection && filteredActions.length">
             <button v-for="(action, index) of filteredActions" :key="index" type="button" class="button text small column selected" :disabled="action.needsSelection && (showSelection || !action.allowAutoSelectAll) && !hasSelection" @click="action.needsSelection && (showSelection || !action.allowAutoSelectAll) && !hasSelection ? undefined : handleAction(action, $event)">
-                <span :class="'icon '+action.icon" />
+                <span :class="'icon '+action.icon"/>
             </button>
 
             <button v-long-press="(e) => showActions(false, e)" type="button" class="button text small column selected" @click="showActions(false, $event)">
-                <span class="icon more" />
+                <span class="icon more"/>
             </button>
         </STButtonToolbar>
     </div>

@@ -7,34 +7,23 @@
         <STList class="payment-selection-list">
             <STListItem v-for="paymentMethod in sortedPaymentMethods" :key="paymentMethod" :selectable="true" element-name="label" class="right-stack left-center">
                 <template #left>
-                    <Radio v-model="selectedPaymentMethod" name="choose-payment-method" :value="paymentMethod" />
+                    <Radio v-model="selectedPaymentMethod" name="choose-payment-method" :value="paymentMethod"/>
                 </template>
 
                 <h2 :class="{ 'style-title-list': !!getDescription(paymentMethod) }">
                     {{ getName(paymentMethod) }}
 
-                    <span v-if="paymentMethod === 'Payconiq' && hasNonPayconiq" class="style-tag inline-first">Meest gebruikt</span>
+                    <span v-if="paymentMethod === 'Payconiq' && hasNonPayconiq" class="style-tag inline-first">{{ $t('10a934c4-1430-4e1e-b095-68223310a546') }}</span>
                 </h2>
                 <p v-if="getDescription(paymentMethod)" class="style-description-small">
                     {{ getDescription(paymentMethod) }}
                 </p>
 
                 <div v-if="paymentMethod === 'Payconiq'" class="payment-app-banner">
-                    <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/payconiq/app.svg">
-                    <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/kbc/app.svg">
-                    <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/ing/app.svg">
-                    <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/belfius/app.svg">
-                    <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/bnp/app.png">
-                    <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/hello-bank/app.png">
-                    <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/argenta/app.png">
-                </div>
+                    <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/payconiq/app.svg"><img class="payment-app-logo" src="@stamhoofd/assets/images/partners/kbc/app.svg"><img class="payment-app-logo" src="@stamhoofd/assets/images/partners/ing/app.svg"><img class="payment-app-logo" src="@stamhoofd/assets/images/partners/belfius/app.svg"><img class="payment-app-logo" src="@stamhoofd/assets/images/partners/bnp/app.png"><img class="payment-app-logo" src="@stamhoofd/assets/images/partners/hello-bank/app.png"><img class="payment-app-logo" src="@stamhoofd/assets/images/partners/argenta/app.png"></div>
 
                 <template #right>
-                    <PaymentMethodIcon
-                        v-if="(!$isMobile || paymentMethod !== 'Payconiq')"
-                        :method="paymentMethod"
-                        :type="PaymentType.Payment"
-                    />
+                    <PaymentMethodIcon v-if="(!$isMobile || paymentMethod !== 'Payconiq')" :method="paymentMethod" :type="PaymentType.Payment"/>
                 </template>
             </STListItem>
         </STList>

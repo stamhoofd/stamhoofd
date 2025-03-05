@@ -1,13 +1,13 @@
 <template>
     <header class="st-navigation-bar-container">
         <div v-if="!hasLeft && !hasRight && !popup" class="st-navigation-bar-background" :class="{ scrolled, large }">
-            <InheritComponent name="tabbar-replacement" />
+            <InheritComponent name="tabbar-replacement"/>
         </div>
         <div class="st-navigation-bar" :class="{ scrolled, large, 'show-title': showTitle}" :style="{'grid-template-columns': templateColumns}">
             <div v-if="hasLeft || hasRight" class="left">
-                <BackButton v-if="canPop && !disablePop" @click="pop()" />
-                <button v-else-if="canDismiss && !disableDismiss && $isAndroid" class="button navigation icon close" type="button" @click="dismiss()" />
-                <slot name="left" />
+                <BackButton v-if="canPop && !disablePop" @click="pop()"/>
+                <button v-else-if="canDismiss && !disableDismiss && $isAndroid" class="button navigation icon close" type="button" @click="dismiss()"/>
+                <slot name="left"/>
             </div>
 
             <slot v-if="hasMiddle" name="middle">
@@ -17,11 +17,11 @@
             </slot>
 
             <div v-if="hasRight || hasRight" class="right">
-                <slot name="right" />
+                <slot name="right"/>
                 <button v-if="canDismiss && !disableDismiss && $isIOS" class="button navigation" type="button" @click="dismiss()">
-                    Sluiten
+                    {{ $t('08919911-1157-400d-b89c-265233590019') }}
                 </button>
-                <button v-else-if="canDismiss && !disableDismiss && !$isAndroid" class="button navigation icon close" type="button" @click="dismiss()" />
+                <button v-else-if="canDismiss && !disableDismiss && !$isAndroid" class="button navigation icon close" type="button" @click="dismiss()"/>
             </div>
         </div>
     </header>

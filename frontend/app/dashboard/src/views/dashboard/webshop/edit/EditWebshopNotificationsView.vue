@@ -1,29 +1,29 @@
 <template>
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
-        <p>Voeg e-mailadressen toe waarop je automatisch een e-mail wilt ontvangen als er nieuwe bestellingen binnen komen. Gebruik deze functie alleen als je geen grote aantallen bestellingen per dag verwacht.</p>
+        <p>{{ $t('af254b4d-e447-42e2-90ce-601bcb4c2a13') }}</p>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
-        <EmailInput v-for="n in emailCount" :key="n" :title="'E-mailadres '+n" :model-value="getEmail(n - 1)" placeholder="E-mailadres" :validator="errors.validator" @update:model-value="setEmail(n - 1, $event)">
+        <EmailInput v-for="n in emailCount" :key="n" :title="$t(`0be79160-b242-44dd-94f0-760093f7f9f2`) + ' '+n" :model-value="getEmail(n - 1)" :validator="errors.validator" @update:model-value="setEmail(n - 1, $event)" :placeholder="$t(`0be79160-b242-44dd-94f0-760093f7f9f2`)">
             <template #right>
-                <span v-if="isBlocked(n-1)" v-tooltip="getInvalidEmailDescription(n-1)" class="icon warning yellow" />
-                <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" />
+                <span v-if="isBlocked(n-1)" v-tooltip="getInvalidEmailDescription(n-1)" class="icon warning yellow"/>
+                <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)"/>
             </template>
         </EmailInput>
 
         <p v-if="emailCount === 0" class="info-box">
-            Er zijn nog geen e-mailadressen ingesteld die een e-mail ontvangen bij nieuwe bestellingen.
+            {{ $t('fe82512f-4632-49d7-80bf-159a1f376c73') }}
         </p>
 
         <button v-for="suggestion in suggestions" :key="suggestion" class="button text" type="button" @click="addEmail(suggestion)">
-            <span class="icon add" />
+            <span class="icon add"/>
             <span>{{ suggestion }}</span>
         </button>
 
         <button class="button text" type="button" @click="addEmail('')">
-            <span class="icon add" />
-            <span>Ander e-mailadres</span>
+            <span class="icon add"/>
+            <span>{{ $t('c0943bd7-913c-4953-b5d2-f70e10c4aaf4') }}</span>
         </button>
     </SaveView>
 </template>

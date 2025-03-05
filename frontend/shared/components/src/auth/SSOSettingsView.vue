@@ -1,60 +1,30 @@
 <template>
-    <SaveView :loading-view="!ssoConfiguration" :loading="saving" title="Single-Sign-On" :disabled="!hasChanges" :error-box="errors.errorBox" @save="save">
+    <SaveView :loading-view="!ssoConfiguration" :loading="saving" :disabled="!hasChanges" :error-box="errors.errorBox" @save="save" :title="$t(`e0a3fd15-c83a-44bb-8c27-9d97773d27f6`)">
         <h1>
-            Single-Sign-On ({{ provider }})
+            {{ $t('17cc7c9a-7dd0-40a5-be9b-8dbe825c1aef') }}{{ provider }})
         </h1>
         <p>
-            Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Stamhoofd. Voor Microsoft kan je <a href="https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app" target="_blank" class="inline-link">deze</a> handleiding volgen.
+            {{ $t('4388e081-0206-4b64-9697-d37b462a3bbe') }} <a href="https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app" target="_blank" class="inline-link">{{ $t('f3831259-217f-4dc7-b857-c8e4aa7488e8') }}</a> {{ $t('46eb72ba-bcd5-4759-b22b-23d5fe285bd7') }}
         </p>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
-        <STInputBox title="Issuer" error-fields="issuer" :error-box="errors.errorBox" class="max">
-            <input
-                ref="firstInput"
-                v-model="issuer"
-                class="input"
-                type="text"
-                placeholder="bv. https://login.microsoftonline.com/contoso.onmicrosoft.com/v2.0"
-                autocomplete="off"
-            >
-        </STInputBox>
+        <STInputBox error-fields="issuer" :error-box="errors.errorBox" class="max" :title="$t(`7aa443d3-138a-4dc5-a64e-68492f807bc5`)">
+            <input ref="firstInput" v-model="issuer" class="input" type="text" autocomplete="off" :placeholder="$t(`84412729-6ef1-4226-90ad-e9c1c7b1a707`)"></STInputBox>
 
-        <STInputBox title="Client ID" error-fields="clientId" :error-box="errors.errorBox" class="max">
-            <input
-                v-model="clientId"
-                class="input"
-                type="text"
-                placeholder="bv. 12345678-1234-1234-1234-123456789012"
-                autocomplete="off"
-            >
-        </STInputBox>
+        <STInputBox error-fields="clientId" :error-box="errors.errorBox" class="max" :title="$t(`22220280-b5bd-47c9-bdf3-dc6120c0a560`)">
+            <input v-model="clientId" class="input" type="text" autocomplete="off" :placeholder="$t(`4b6e96bc-9298-4329-b762-2ded076cdaa3`)"></STInputBox>
 
-        <STInputBox title="Client Secret" error-fields="clientSecret" :error-box="errors.errorBox" class="max">
-            <input
-                v-model="clientSecret"
-                class="input"
-                type="text"
-                placeholder="bv. 12345678-1234-1234-1234-123456789012"
-                autocomplete="off"
-            >
-        </STInputBox>
+        <STInputBox error-fields="clientSecret" :error-box="errors.errorBox" class="max" :title="$t(`b0205f8a-ba20-4c89-86a9-c72cecd417c9`)">
+            <input v-model="clientSecret" class="input" type="text" autocomplete="off" :placeholder="$t(`4b6e96bc-9298-4329-b762-2ded076cdaa3`)"></STInputBox>
 
-        <STInputBox title="Redirect URI" :error-box="errors.errorBox" class="max">
-            <input
-                v-model="redirectUri"
-                :placeholder="defaultRedirectUri"
-                class="input"
-                type="text"
-                autocomplete="off"
-            >
-
-            <template #right>
-                <button v-copyable="redirectUri || defaultRedirectUri" class="button icon copy small" type="button" />
+        <STInputBox :error-box="errors.errorBox" class="max" :title="$t(`19f32b17-e40a-4aba-9509-39ed3bfed1ec`)">
+            <input v-model="redirectUri" :placeholder="defaultRedirectUri" class="input" type="text" autocomplete="off"><template #right>
+                <button v-copyable="redirectUri || defaultRedirectUri" class="button icon copy small" type="button"/>
             </template>
         </STInputBox>
         <p class="style-description-small">
-            De redirect URI behoud je best op de voorgestelde waarde.
+            {{ $t('f4d97bc0-5345-4330-8886-bda4ccb0b676') }}
         </p>
     </SaveView>
 </template>

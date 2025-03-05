@@ -1,10 +1,10 @@
 <template>
     <STListItem class="right-stack" :selectable="canEdit" @click="canEdit ? editMe() : undefined">
         <template v-if="showGroup" #left>
-            <GroupIconWithWaitingList :group="item.group" :icon="item.replaceRegistrations.length ? 'sync' : ''" />
+            <GroupIconWithWaitingList :group="item.group" :icon="item.replaceRegistrations.length ? 'sync' : ''"/>
         </template>
         <template v-else #left>
-            <MemberIcon :member="item.member" :icon="item.group.type === GroupType.WaitingList ? 'clock' : (item.replaceRegistrations.length ? 'sync' : '')" />
+            <MemberIcon :member="item.member" :icon="item.group.type === GroupType.WaitingList ? 'clock' : (item.replaceRegistrations.length ? 'sync' : '')"/>
         </template>
 
         <template v-if="showGroup">
@@ -27,15 +27,15 @@
             </h3>
         </template>
 
-        <p v-if="item.description" class="style-description-small pre-wrap" v-text="item.description" />
+        <p v-if="item.description" class="style-description-small pre-wrap" v-text="item.description"/>
 
         <template v-if="item.totalPrice !== 0">
             <footer v-if="item.checkout.isAdminFromSameOrganization">
                 <p v-if="item.totalPrice >= 0" class="style-price">
-                    Openstaand bedrag stijgt met {{ formatPrice(item.totalPrice) }}
+                    {{ $t('f769489e-c02b-48fe-a880-70defcdbd1bf') }} {{ formatPrice(item.totalPrice) }}
                 </p>
                 <p v-else class="style-price">
-                    Openstaand bedrag daalt met {{ formatPrice(-item.totalPrice) }}
+                    {{ $t('fedf444d-054a-47d1-90f8-e39c78fca437') }} {{ formatPrice(-item.totalPrice) }}
                 </p>
             </footer>
             <footer v-else>
@@ -48,7 +48,7 @@
         <template v-if="item.calculatedPriceDueLater > 0">
             <footer>
                 <p class="style-price">
-                    {{ formatPrice(item.calculatedPriceDueLater) }} later te betalen
+                    {{ formatPrice(item.calculatedPriceDueLater) }} {{ $t('497c22b7-4640-4d42-9761-87caf6eefc41') }}
                 </p>
             </footer>
         </template>
@@ -57,14 +57,14 @@
             {{ item.cartError.getHuman() }}
 
             <span v-if="canEdit" class="button text">
-                <span>Corrigeren</span>
-                <span class="icon arrow-right-small" />
+                <span>{{ $t('1bac2b8d-a401-4893-baa4-7cc1697d1c4b') }}</span>
+                <span class="icon arrow-right-small"/>
             </span>
         </p>
 
         <template #right>
-            <button class="button icon trash gray" type="button" @click.stop="deleteMe()" />
-            <button v-if="canEdit" class="button icon edit gray" type="button" />
+            <button class="button icon trash gray" type="button" @click.stop="deleteMe()"/>
+            <button v-if="canEdit" class="button icon edit gray" type="button"/>
         </template>
     </STListItem>
 </template>

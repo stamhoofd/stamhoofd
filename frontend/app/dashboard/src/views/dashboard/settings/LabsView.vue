@@ -1,134 +1,126 @@
 <template>
-    <SaveView :loading="saving" title="Experimenten" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChanges" @save="save" :title="$t(`Experimenten`)">
         <h1>
-            Experimenten
+            {{ $t('361fe588-e3b6-41d0-a0fa-b10382b21ae9') }}
         </h1>
 
-        <p>Hier kan je functies aanzetten die we nog aan het uittesten zijn, of functies die enkel voor geavanceerdere gebruikers nodig zijn.</p>
+        <p>{{ $t('d98017d4-cff4-4baf-a22b-8cf1bad1b56e') }}</p>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox"/>
 
-        <hr>
-        <h2>Ontwikkelaars</h2>
+        <hr><h2>{{ $t('2eeabef1-4dae-4639-8048-1930b2d3842f') }}</h2>
 
         <STList class="illustration-list">
             <STListItem :selectable="true" class="left-center" @click="openApiUsers(true)">
                 <template #left>
-                    <img src="@stamhoofd/assets/images/illustrations/laptop.svg">
-                </template>
+                    <img src="@stamhoofd/assets/images/illustrations/laptop.svg"></template>
                 <h2 class="style-title-list">
-                    API-keys
+                    {{ $t('b97d8955-5ce5-435f-ba7d-f3899afb953f') }}
                 </h2>
                 <p class="style-description">
                     {{ $t('4d995169-f792-40f5-addf-60d8aed00362') }}
                 </p>
                 <template #right>
-                    <span class="icon arrow-right-small gray" />
+                    <span class="icon arrow-right-small gray"/>
                 </template>
             </STListItem>
 
             <STListItem v-if="isStamhoofd" :selectable="true" class="left-center" @click="downloadSettings(true)">
                 <template #left>
-                    <img src="@stamhoofd/assets/images/illustrations/box-download.svg">
-                </template>
+                    <img src="@stamhoofd/assets/images/illustrations/box-download.svg"></template>
                 <h2 class="style-title-list">
-                    Exporteer instellingen
+                    {{ $t('eef6ca01-e35d-4483-a34d-6d39def71332') }}
                 </h2>
                 <p class="style-description">
-                    Maak een kopie van de instellingen van jouw vereniging.
+                    {{ $t('6006f5f2-a630-460b-8fe2-9a782afd1880') }}
                 </p>
                 <template #right>
                     <LoadingButton :loading="downloadingSettings">
-                        <span class="icon download gray" />
+                        <span class="icon download gray"/>
                     </LoadingButton>
                 </template>
             </STListItem>
 
             <STListItem v-if="isStamhoofd" :selectable="true" class="left-center" @click="uploadSettings(true)">
                 <template #left>
-                    <img src="@stamhoofd/assets/images/illustrations/box-upload.svg">
-                </template>
+                    <img src="@stamhoofd/assets/images/illustrations/box-upload.svg"></template>
                 <h2 class="style-title-list">
-                    Importeer instellingen
+                    {{ $t('07f69aa9-16c2-467e-ab30-e0c5a25012d6') }}
                 </h2>
                 <p class="style-description">
-                    Overschrijf alle instellingen.
+                    {{ $t('990305de-65df-4625-93fc-f013e561620b') }}
                 </p>
                 <template #right>
                     <LoadingButton :loading="uploadingSettings">
-                        <span class="icon upload gray" />
+                        <span class="icon upload gray"/>
                     </LoadingButton>
                 </template>
             </STListItem>
         </STList>
 
-        <hr>
-        <h2>Geavanceerde instellingen</h2>
+        <hr><h2>{{ $t('b63ed24b-7398-4ddf-afb4-38cb55e2269c') }}</h2>
 
         <STList>
             <STListItem v-if="!enableBuckaroo && false" :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox v-model="forceMollie" />
+                    <Checkbox v-model="forceMollie"/>
                 </template>
 
                 <h3 class="style-title-list">
-                    Mollie (betaalprovider)
+                    {{ $t('a834e978-63ab-4409-b1ff-99206551eedf') }}
                 </h3>
 
                 <p class="style-description-small">
-                    Hou er rekening mee dat de tarieven van Mollie anders zijn dan die van Stripe. <a :href="$domains.getDocs('transactiekosten')" class="inline-link" target="_blank">Meer info</a>
+                    {{ $t('a1829d0f-6a34-4906-aef3-6bc4079732fb') }} <a :href="$domains.getDocs('transactiekosten')" class="inline-link" target="_blank">{{ $t('34099e11-aafe-435c-bd11-5b681610008e') }}</a>
                 </p>
             </STListItem>
 
             <STListItem v-if="!enableBuckaroo" :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox :model-value="getFeatureFlag('webshop-discounts')" @update:model-value="setFeatureFlag('webshop-discounts', !!$event)" />
+                    <Checkbox :model-value="getFeatureFlag('webshop-discounts')" @update:model-value="setFeatureFlag('webshop-discounts', !!$event)"/>
                 </template>
 
                 <h3 class="style-title-list">
-                    Kortingen en kortingscodes in webshops
+                    {{ $t('ded66dc6-f0b5-43e3-a58a-6914749d1ba3') }}
                 </h3>
 
                 <p class="style-description-small">
-                    Volg de ontwikkeling van kortingen op webshops via <a href="https://feedback.stamhoofd.app/48" class="inline-link" target="_blank">de feedback tool</a>
+                    {{ $t('315d10a0-732d-4d15-88ba-58e1a4fc90d3') }} <a href="https://feedback.stamhoofd.app/48" class="inline-link" target="_blank">{{ $t('495913cb-41a9-4e02-a161-033377806d35') }}</a>
                 </p>
             </STListItem>
         </STList>
 
         <div v-if="isStamhoofd" key="stamhoofd-settings" class="container">
-            <hr>
-            <h2>
-                Platforminstellingen (enkel voor platformbeheerders)
+            <hr><h2>
+                {{ $t('cabf766a-9ac8-4622-9066-47a52270b0b0') }}
             </h2>
 
             <Checkbox v-model="useTestPayments">
-                Activeer test-modus voor betalingen
+                {{ $t('7edd7721-1b57-48fd-b200-2cbbdbc22ecf') }}
             </Checkbox>
 
             <Checkbox :model-value="getFeatureFlag('documents')" @update:model-value="setFeatureFlag('documents', !!$event)">
-                Documenten
+                {{ $t('eeb261d4-2a8d-46f3-ae06-f294fa1721a6') }}
             </Checkbox>
 
             <Checkbox :model-value="getFeatureFlag('cached-outstanding-balances')" @update:model-value="setFeatureFlag('cached-outstanding-balances', !!$event)">
-                Openstaande bedragen
+                {{ $t('adc95cc6-1847-4148-a5c6-0dcfb8b5f9d9') }}
             </Checkbox>
 
             <Checkbox :model-value="getFeatureFlag('sso')" @update:model-value="setFeatureFlag('sso', !!$event)">
-                Single-Sign-On
+                {{ $t('e0a3fd15-c83a-44bb-8c27-9d97773d27f6') }}
             </Checkbox>
 
             <Checkbox :model-value="getFeatureFlag('webshop-auth')" @update:model-value="setFeatureFlag('webshop-auth', !!$event)">
-                Webshop auth
+                {{ $t('1e20bd1c-c7cd-4d6a-9434-da95ec121bc6') }}
             </Checkbox>
 
             <Checkbox :model-value="getFeatureFlag('organization-receivable-balances')" @update:model-value="setFeatureFlag('organization-receivable-balances', !!$event)">
-                Openstaande bedragen tussen verenigingen
+                {{ $t('d441508b-c8a4-4de8-b23e-8edfe4157568') }}
             </Checkbox>
 
-            <hr>
-
-            <button class="button text" type="button" @click="applyDiscountCode">
-                <span class="icon gift" /><span>Kortingscode toepassen</span>
+            <hr><button class="button text" type="button" @click="applyDiscountCode">
+                <span class="icon gift"/><span>{{ $t('15f84aba-e6d8-4d20-8c28-2195fd0e4abe') }}</span>
             </button>
         </div>
     </SaveView>

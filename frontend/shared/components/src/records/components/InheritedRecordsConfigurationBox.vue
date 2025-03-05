@@ -2,26 +2,26 @@
     <STList>
         <STListItem element-name="label" :selectable="!dataPermissions.locked.value">
             <template #left>
-                <Checkbox v-model="dataPermissions.enabled.value" v-tooltip="dataPermissions.locked.value ? 'Verplicht op een hoger niveau' : ''" :disabled="dataPermissions.locked.value" />
+                <Checkbox v-model="dataPermissions.enabled.value" v-tooltip="dataPermissions.locked.value ? 'Verplicht op een hoger niveau' : ''" :disabled="dataPermissions.locked.value"/>
             </template>
             <p class="style-title-list">
-                Toestemming gegevensverzameling
+                {{ $t('584a8a6a-a446-4d6c-be89-41ee5713f4cd') }}
             </p>
         </STListItem>
 
         <STListItem element-name="label" :selectable="!financialSupport.locked.value" class="right-stack">
             <template #left>
-                <Checkbox v-model="financialSupport.enabled.value" v-tooltip="dataPermissions.locked.value ? 'Verplicht op een hoger niveau' : ''" :disabled="financialSupport.locked.value" />
+                <Checkbox v-model="financialSupport.enabled.value" v-tooltip="dataPermissions.locked.value ? 'Verplicht op een hoger niveau' : ''" :disabled="financialSupport.locked.value"/>
             </template>
             <p class="style-title-list">
                 {{ financialSupportSettings.title }}
-                <span v-tooltip="'Vereist toestemming voor gegevensverzameling'" class="gray small icon privacy" />
+                <span v-tooltip="'Vereist toestemming voor gegevensverzameling'" class="gray small icon privacy"/>
             </p>
         </STListItem>
 
         <STListItem v-for="property of properties" :key="property.value.title" element-name="label" :selectable="!property.value.locked">
             <template #left>
-                <Checkbox v-model="property.value.enabled" v-tooltip="property.value.locked ? 'Verplicht op een hoger niveau' : ''" :disabled="property.value.locked" />
+                <Checkbox v-model="property.value.enabled" v-tooltip="property.value.locked ? 'Verplicht op een hoger niveau' : ''" :disabled="property.value.locked"/>
             </template>
 
             <p v-if="property.value.configuration" class="style-title-prefix-list">
@@ -40,13 +40,13 @@
             </p>
 
             <template v-if="!property.value.locked && property.value.enabled" #right>
-                <button class="button gray icon settings" type="button" @click.stop="property.value.edit" />
+                <button class="button gray icon settings" type="button" @click.stop="property.value.edit"/>
             </template>
         </STListItem>
 
         <STListItem v-for="category of inheritedRecordsConfiguration?.recordCategories ?? []" :key="category.id" element-name="label" :selectable="!getRefForInheritedCategory(category.id).value.locked" class="right-stack">
             <template #left>
-                <Checkbox v-model="getRefForInheritedCategory(category.id).value.enabled" v-tooltip="getRefForInheritedCategory(category.id).value.locked ? 'Verplicht op een hoger niveau' : ''" :disabled="getRefForInheritedCategory(category.id).value.locked" />
+                <Checkbox v-model="getRefForInheritedCategory(category.id).value.enabled" v-tooltip="getRefForInheritedCategory(category.id).value.locked ? 'Verplicht op een hoger niveau' : ''" :disabled="getRefForInheritedCategory(category.id).value.locked"/>
             </template>
 
             <p v-if="getRefForInheritedCategory(category.id).value.configuration" class="style-title-prefix-list">
@@ -54,11 +54,11 @@
             </p>
             <p class="style-title-list">
                 {{ getRefForInheritedCategory(category.id).value.title }}
-                <span v-if="getRefForInheritedCategory(category.id).value.requiresDataPermissions" v-tooltip="'Vereist toestemming voor gegevensverzameling'" class="gray icon privacy small" />
+                <span v-if="getRefForInheritedCategory(category.id).value.requiresDataPermissions" v-tooltip="'Vereist toestemming voor gegevensverzameling'" class="gray icon privacy small"/>
             </p>
             <template #right>
-                <button class="button gray icon eye" type="button" @click.stop="previewCategory(category)" />
-                <button v-if="!getRefForInheritedCategory(category.id).value.locked && getRefForInheritedCategory(category.id).value.enabled" class="button gray icon settings" type="button" @click.stop="getRefForInheritedCategory(category.id).value.edit" />
+                <button class="button gray icon eye" type="button" @click.stop="previewCategory(category)"/>
+                <button v-if="!getRefForInheritedCategory(category.id).value.locked && getRefForInheritedCategory(category.id).value.enabled" class="button gray icon settings" type="button" @click.stop="getRefForInheritedCategory(category.id).value.edit"/>
             </template>
         </STListItem>
     </STList>

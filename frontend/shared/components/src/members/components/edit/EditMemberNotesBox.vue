@@ -1,19 +1,11 @@
 <template>
     <div class="container">
-        <Title v-bind="$attrs" title="Notities" />
+        <Title v-bind="$attrs" :title="$t(`1433dd52-bddb-4a28-b217-b219111a6a1c`)"/>
 
-        <STErrorsDefault :error-box="parentErrorBox" />
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="parentErrorBox"/>
+        <STErrorsDefault :error-box="errors.errorBox"/>
         <STInputBox title="" error-fields="notes" :error-box="errors.errorBox" class="max">
-            <textarea
-                v-model="notes"
-                class="input"
-                type="text"
-                placeholder="Bijkomende informatie over dit lid (onzichtbaar voor het lid)."
-                autocomplete="off"
-                enterkeyhint="next"
-                :maxlength="maxLength"
-            />
+            <textarea v-model="notes" class="input" type="text" autocomplete="off" enterkeyhint="next" :maxlength="maxLength" :placeholder="$t(`62b90a19-2a92-4780-b901-efcf79839f04`)"/>
         </STInputBox>
     </div>
 </template>

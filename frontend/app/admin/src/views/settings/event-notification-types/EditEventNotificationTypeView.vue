@@ -4,67 +4,51 @@
             {{ viewTitle }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <div class="split-inputs">
             <STInputBox :title="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') " error-fields="title" :error-box="errors.errorBox">
-                <input
-                    v-model="title"
-                    class="input"
-                    type="text"
-                    :placeholder="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') "
-                >
-            </STInputBox>
+                <input v-model="title" class="input" type="text" :placeholder="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') "></STInputBox>
         </div>
 
         <STInputBox :title="$t('688fc9a3-68af-4aa3-ae6c-7d35a5f954ad')" error-fields="description" :error-box="errors.errorBox" class="max">
-            <textarea
-                v-model="description"
-                class="input"
-                type="text"
-                :placeholder="$t('68bd7b1d-9492-40ca-89f5-917143932218')"
-                autocomplete="off"
-            />
+            <textarea v-model="description" class="input" type="text" :placeholder="$t('68bd7b1d-9492-40ca-89f5-917143932218')" autocomplete="off"/>
         </STInputBox>
 
         <STInputBox :title="$t('51850490-5d94-4e0b-a415-9b84e07d86f2')" error-fields="eventTypeIds" :error-box="errors.errorBox" class="max">
-            <EventTypeIdsInput v-model="eventTypeIds" />
+            <EventTypeIdsInput v-model="eventTypeIds"/>
         </STInputBox>
 
-        <hr>
-        <h2>{{ $t('1a559b46-1863-4782-8cb5-ee6517a2e91d') }}</h2>
+        <hr><h2>{{ $t('1a559b46-1863-4782-8cb5-ee6517a2e91d') }}</h2>
         <p>
-            Lees <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
+            {{ $t('1ee2ff5c-bcc6-4af9-b47f-0ca10a4023c9') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('b93acd89-a91e-4216-b1dd-a8808a50aa78') }}</a> {{ $t('9e648bd2-b289-4a31-ad40-97c8d02dd46d') }}
         </p>
 
-        <EditRecordCategoriesBox :categories="patched.recordCategories" :settings="editorSettings" @patch:categories="addPatch({recordCategories: $event})" />
+        <EditRecordCategoriesBox :categories="patched.recordCategories" :settings="editorSettings" @patch:categories="addPatch({recordCategories: $event})"/>
 
-        <hr>
-        <h2>Deadlines</h2>
-        <p>Via deadlines kan je instellen wanneer de leiding een kampmelding moet invullen.</p>
+        <hr><h2>{{ $t('b7c8df67-2209-4e12-8372-6529c1309026') }}</h2>
+        <p>{{ $t('ecbae726-21eb-4a4c-8dcc-edf2b0c643e9') }}</p>
 
         <STList v-if="patched.deadlines.length">
-            <EventNotificationDeadlineRow v-for="deadline in patched.deadlines" :key="deadline.id" :deadline="deadline" @click="editDeadline(deadline)" />
+            <EventNotificationDeadlineRow v-for="deadline in patched.deadlines" :key="deadline.id" :deadline="deadline" @click="editDeadline(deadline)"/>
         </STList>
 
         <p>
             <button class="button text" type="button" @click="addDeadline">
-                <span class="icon add" />
+                <span class="icon add"/>
                 <span>{{ $t('59eba98e-b382-4075-af33-f8bf30b1042c') }}</span>
             </button>
         </p>
 
         <div class="container">
-            <hr>
-            <h2>{{ $t('35c08279-a7ce-4536-a201-985bb882a6cf') }}</h2>
+            <hr><h2>{{ $t('35c08279-a7ce-4536-a201-985bb882a6cf') }}</h2>
             <p>{{ $t('8b9ef669-554d-4ee2-b3bd-2ea12f85fa26') }}</p>
 
-            <MultipleChoiceInput v-model="contactResponsibilityIds" :items="responsibilities.map(r => ({value: r.id, name: r.name}))" :nullable="false" />
+            <MultipleChoiceInput v-model="contactResponsibilityIds" :items="responsibilities.map(r => ({value: r.id, name: r.name}))" :nullable="false"/>
         </div>
 
         <div class="container">
-            <hr>
-            <h2>{{ $t('95e5b391-4399-40ae-8e58-aed3b822e65a') }}</h2>
+            <hr><h2>{{ $t('95e5b391-4399-40ae-8e58-aed3b822e65a') }}</h2>
             <p>{{ $t('f4b0aed8-5223-471c-81e3-1b580d359f66') }}</p>
         </div>
     </SaveView>

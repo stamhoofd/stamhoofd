@@ -1,25 +1,24 @@
 <template>
-    <SaveView :title="isNew ? 'Prijskeuze toevoegen' : 'Prijskeuze bewerken'" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`Prijskeuze toevoegen`) : $t(`Prijskeuze bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            Prijskeuze toevoegen
+            {{ $t('01484542-f7d3-4f79-8e10-f402731333de') }}
         </h1>
         <h1 v-else>
-            Prijskeuze bewerken
+            {{ $t('0b5c258d-6bdc-4c11-9c67-dda6e3c3f755') }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
-        <ProductPriceBox :product-price="patchedProductPrice" :product="patched" :error-box="errors.errorBox" @patch="addPatch($event)" />
+        <ProductPriceBox :product-price="patchedProductPrice" :product="patched" :error-box="errors.errorBox" @patch="addPatch($event)"/>
 
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Verwijder deze prijskeuze
+            <hr><h2>
+                {{ $t('e416e656-f833-493b-915f-8b44060bd07c') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span class="icon trash"/>
+                <span>{{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}</span>
             </button>
         </div>
     </SaveView>

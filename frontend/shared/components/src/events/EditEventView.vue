@@ -4,25 +4,14 @@
             {{ title }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <div class="split-inputs">
             <STInputBox :title="$t('c0a0c0f7-1282-40be-85fc-320d136d34ab')" error-fields="name" :error-box="errors.errorBox">
-                <input
-                    ref="firstInput"
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    :placeholder="$t('c0a0c0f7-1282-40be-85fc-320d136d34ab')"
-                    autocomplete="off"
-                    enterkeyhint="next"
-                >
-            </STInputBox>
+                <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('c0a0c0f7-1282-40be-85fc-320d136d34ab')" autocomplete="off" enterkeyhint="next"></STInputBox>
 
-            <STInputBox v-if="platform.config.eventTypes.length" title="Type" error-fields="type" :error-box="errors.errorBox">
-                <Dropdown
-                    v-model="typeId"
-                >
+            <STInputBox v-if="platform.config.eventTypes.length" error-fields="type" :error-box="errors.errorBox" :title="$t(`b610d465-2901-4b54-97ae-dbeab72e4762`)">
+                <Dropdown v-model="typeId">
                     <option v-for="t of platform.config.eventTypes" :key="t.id" :value="t.id">
                         {{ t.name }}
                     </option>
@@ -34,16 +23,13 @@
         </p>
 
         <STInputBox :title="$t('561e9ebb-ae0c-48f3-a10d-921c2a59d5a4')" error-fields="meta.description" :error-box="errors.errorBox" class="max">
-            <WYSIWYGTextInput
-                v-model="description"
-                :placeholder="$t('2cb56415-5e16-4a75-9012-8971be8dbc6a')"
-            />
+            <WYSIWYGTextInput v-model="description" :placeholder="$t('2cb56415-5e16-4a75-9012-8971be8dbc6a')"/>
         </STInputBox>
 
         <STList>
             <STListItem :selectable="true" element-name="button" @click="addRegistrations">
                 <template #left>
-                    <span class="icon gray" :class="patched.group ? 'edit' : 'add'" />
+                    <span class="icon gray" :class="patched.group ? 'edit' : 'add'"/>
                 </template>
 
                 <h3 class="style-title-list">
@@ -56,35 +42,33 @@
             </STListItem>
         </STList>
 
-        <hr>
-        <h2>{{ $t('112b7686-dffc-4ae9-9706-e3efcd34898f') }}</h2>
+        <hr><h2>{{ $t('112b7686-dffc-4ae9-9706-e3efcd34898f') }}</h2>
 
         <Checkbox v-if="!type || (type.maximumDays !== 1 && (type.minimumDays ?? 1) <= 1)" v-model="multipleDays">
             {{ $t('f001f5c4-f3ea-46c0-bd0c-0b30ad8098f5') }}
         </Checkbox>
 
         <div class="split-inputs">
-            <STInputBox :title="multipleDays ? 'Startdatum' : 'Datum'" error-fields="startDate" :error-box="errors.errorBox">
-                <DateSelection v-model="startDate" />
+            <STInputBox :title="multipleDays ? $t(`5eb46bbe-816e-4c92-9bde-09777c924326`) : $t(`8220c98a-c396-48a7-9575-7e341df69429`)" error-fields="startDate" :error-box="errors.errorBox">
+                <DateSelection v-model="startDate"/>
             </STInputBox>
-            <TimeInput v-if="multipleDays" v-model="startDate" :title="$t('5dd84548-b16f-415b-8dbd-d96aeecedc3e')" :validator="errors.validator" />
+            <TimeInput v-if="multipleDays" v-model="startDate" :title="$t('5dd84548-b16f-415b-8dbd-d96aeecedc3e')" :validator="errors.validator"/>
         </div>
 
         <div class="split-inputs">
-            <STInputBox v-if="multipleDays || (type && type.minimumDays !== null && type.minimumDays > 1)" title="Einddatum" error-fields="endDate" :error-box="errors.errorBox">
-                <DateSelection v-model="endDate" />
+            <STInputBox v-if="multipleDays || (type && type.minimumDays !== null && type.minimumDays > 1)" error-fields="endDate" :error-box="errors.errorBox" :title="$t(`f8aa75e4-d41f-4264-a273-8ac100dfd543`)">
+                <DateSelection v-model="endDate"/>
             </STInputBox>
-            <TimeInput v-else v-model="startDate" :title="$t('5dd84548-b16f-415b-8dbd-d96aeecedc3e')" :validator="errors.validator" />
-            <TimeInput v-model="endDate" title="Tot" :validator="errors.validator" />
+            <TimeInput v-else v-model="startDate" :title="$t('5dd84548-b16f-415b-8dbd-d96aeecedc3e')" :validator="errors.validator"/>
+            <TimeInput v-model="endDate" :validator="errors.validator" :title="$t(`e1e3f121-d608-4a82-a733-028b819d6231`)"/>
         </div>
 
-        <hr>
-        <h2>Beschikbaarheid</h2>
+        <hr><h2>{{ $t('bdbaebf3-eae4-4736-959b-97b90f979a8d') }}</h2>
 
         <STList>
             <STListItem v-if="canSetNationalActivity || isNationalActivity" :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox v-model="isNationalActivity" />
+                    <Checkbox v-model="isNationalActivity"/>
                 </template>
 
                 <h3 class="style-title-list">
@@ -94,7 +78,7 @@
 
             <STListItem :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox v-model="visible" />
+                    <Checkbox v-model="visible"/>
                 </template>
 
                 <h3 class="style-title-list">
@@ -104,14 +88,13 @@
         </STList>
 
         <template v-if="canSetNationalActivity && externalOrganization">
-            <hr>
-            <h2>{{ $t('113f3407-9b00-4e86-bedd-e61614e78a0b') }}</h2>
+            <hr><h2>{{ $t('113f3407-9b00-4e86-bedd-e61614e78a0b') }}</h2>
             <p>{{ $t('2662a425-f996-479b-a1fc-8498f068ea97') }}</p>
 
             <STList>
                 <STListItem v-if="externalOrganization" :selectable="true" @click="chooseOrganizer('Kies een organisator', canSelectOrganization)">
                     <template #left>
-                        <OrganizationAvatar :organization="externalOrganization" />
+                        <OrganizationAvatar :organization="externalOrganization"/>
                     </template>
 
                     <h3 class="style-title-list">
@@ -119,48 +102,42 @@
                     </h3>
 
                     <template #right>
-                        <span class="icon arrow-right-small gray" />
+                        <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
             </STList>
         </template>
 
         <JumpToContainer :visible="isNationalActivity && organizationTagIds !== null">
-            <hr>
-
-            <h2 class="style-with-button">
-                <div>Regio</div>
+            <hr><h2 class="style-with-button">
+                <div>{{ $t('eeca0e3b-f84c-4f8c-8534-afbaae53e018') }}</div>
                 <div>
-                    <button v-if="!hasTagRestrictions" type="button" class="button icon trash" @click="deleteTagRestriction" />
+                    <button v-if="!hasTagRestrictions" type="button" class="button icon trash" @click="deleteTagRestriction"/>
                 </div>
             </h2>
-            <p>Kies voor welke groepen deze activiteit zichtbaar is.</p>
+            <p>{{ $t('0b1f2587-7f28-4e8e-9263-fdddee8a944d') }}</p>
 
-            <TagIdsInput v-model="organizationTagIds" :is-tag-enabled-predicate="isTagEnabledPredicate" :validator="errors.validator" />
+            <TagIdsInput v-model="organizationTagIds" :is-tag-enabled-predicate="isTagEnabledPredicate" :validator="errors.validator"/>
         </JumpToContainer>
 
         <JumpToContainer :visible="defaultAgeGroupIds !== null">
-            <hr>
-
-            <h2 class="style-with-button">
+            <hr><h2 class="style-with-button">
                 <div>{{ $t('9af957c4-5dea-47ee-a30f-1ef5802a9437') }}</div>
                 <div>
-                    <button type="button" class="button icon trash" @click="deleteDefaultAgeGroupRestriction" />
+                    <button type="button" class="button icon trash" @click="deleteDefaultAgeGroupRestriction"/>
                 </div>
             </h2>
 
             <p>{{ $t('712c3597-d7c9-459c-9e92-ff32de445642') }}</p>
 
-            <DefaultAgeGroupIdsInput v-model="defaultAgeGroupIds" :validator="errors.validator" />
+            <DefaultAgeGroupIdsInput v-model="defaultAgeGroupIds" :validator="errors.validator"/>
         </JumpToContainer>
 
         <JumpToContainer :visible="groups !== null">
-            <hr>
-
-            <h2 class="style-with-button">
+            <hr><h2 class="style-with-button">
                 <div>{{ $t('efeed776-7b4a-4f06-b755-04b1c615ff2d') }}</div>
                 <div>
-                    <button v-if="!hasGroupRestrictions" type="button" class="button icon trash" @click="deleteGroupsRestriction" />
+                    <button v-if="!hasGroupRestrictions" type="button" class="button icon trash" @click="deleteGroupsRestriction"/>
                 </div>
             </h2>
 
@@ -169,55 +146,42 @@
             <p v-if="!organization || !externalOrganization || externalOrganization?.id !== organization.id" class="info-box">
                 {{ $t('fb25250b-2b50-4fb4-babc-020b9fe80dfc') }}
             </p>
-            <GroupsInput v-else v-model="groups" :date="startDate" :is-group-enabled-operator="isGroupEnabledOperator" />
+            <GroupsInput v-else v-model="groups" :date="startDate" :is-group-enabled-operator="isGroupEnabledOperator"/>
         </JumpToContainer>
 
         <JumpToContainer :visible="!!location">
-            <hr>
-            <h2 class="style-with-button">
+            <hr><h2 class="style-with-button">
                 <div>{{ $t('8922afd5-4566-4998-9c6f-d7a6143f29a2') }}</div>
                 <div>
-                    <button type="button" class="button icon trash" @click="deleteLocation" />
+                    <button type="button" class="button icon trash" @click="deleteLocation"/>
                 </div>
             </h2>
 
             <STInputBox :title="$t('3db5bf3f-3eb5-4cfc-ba9b-429fab43c540')" error-fields="location.name" :error-box="errors.errorBox">
-                <input
-                    ref="firstInput"
-                    v-model="locationName"
-                    class="input"
-                    type="text"
-                    placeholder="bv. Gemeentelijke feestzaal"
-                    autocomplete="off"
-                    enterkeyhint="next"
-                >
-            </STInputBox>
+                <input ref="firstInput" v-model="locationName" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`bf6480b4-c52b-448f-84ec-a7c388c0f871`)"></STInputBox>
 
-            <AddressInput v-model="locationAddress" title="Adres (optioneel)" :nullable="true" :required="isLocationRequired" :validator="errors.validator" />
+            <AddressInput v-model="locationAddress" :nullable="true" :required="isLocationRequired" :validator="errors.validator" :title="$t(`09698467-c3c4-4e2e-876d-4697f91499fd`)"/>
         </JumpToContainer>
 
         <JumpToContainer :visible="!!coverPhoto">
-            <hr>
-            <h2 class="style-with-button">
+            <hr><h2 class="style-with-button">
                 <div>{{ $t('17d579e1-518b-4dd4-98d8-f8184b7287be') }}</div>
                 <div>
                     <button v-if="coverPhoto" type="button" class="button text only-icon-smartphone" @click="coverPhoto = null">
-                        <span class="icon trash" />
+                        <span class="icon trash"/>
                         <span>{{ $t('ffef2405-f472-416b-b8fa-372fdf694797') }}</span>
                     </button>
-                    <UploadButton v-model="coverPhoto" :text="coverPhoto ? 'Vervangen' : 'Uploaden'" :resolutions="resolutions" />
+                    <UploadButton v-model="coverPhoto" :text="coverPhoto ? $t(`c01d3d4e-ad4e-45ec-abac-431462c194cf`) : $t(`3370bb72-2817-4096-83ce-318993436513`)" :resolutions="resolutions"/>
                 </div>
             </h2>
 
-            <ImageComponent :image="coverPhoto" :auto-height="true" />
+            <ImageComponent :image="coverPhoto" :auto-height="true"/>
         </JumpToContainer>
 
-        <hr>
-
-        <STList>
+        <hr><STList>
             <STListItem v-if="defaultAgeGroupIds === null && isNationalActivity" :selectable="true" element-name="button" @click="addDefaultAgeGroupRestriction">
                 <template #left>
-                    <span class="icon add gray" />
+                    <span class="icon add gray"/>
                 </template>
 
                 <h3 class="style-title-list">
@@ -227,7 +191,7 @@
 
             <STListItem v-if="!isNationalActivity && externalOrganization && organization && organization.id === externalOrganization.id && groups === null && !hasGroupRestrictions" :selectable="true" element-name="button" @click="addGroupsRestriction">
                 <template #left>
-                    <span class="icon add gray" />
+                    <span class="icon add gray"/>
                 </template>
 
                 <h3 class="style-title-list">
@@ -237,7 +201,7 @@
 
             <STListItem v-if="isNationalActivity && organizationTagIds === null" :selectable="true" element-name="button" @click="addTagRestriction">
                 <template #left>
-                    <span class="icon add gray" />
+                    <span class="icon add gray"/>
                 </template>
 
                 <h3 class="style-title-list">
@@ -247,7 +211,7 @@
 
             <STListItem v-if="!location" :selectable="true" element-name="button" @click="addLocation">
                 <template #left>
-                    <span class="icon location gray" />
+                    <span class="icon location gray"/>
                 </template>
 
                 <h3 class="style-title-list">
@@ -257,7 +221,7 @@
 
             <STListItem v-if="!coverPhoto" :selectable="true" element-name="label" class="button">
                 <template #left>
-                    <span class="icon camera gray" />
+                    <span class="icon camera gray"/>
                 </template>
 
                 <UploadButton v-model="coverPhoto" :resolutions="resolutions" element-name="div">

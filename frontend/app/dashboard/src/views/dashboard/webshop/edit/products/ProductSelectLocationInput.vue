@@ -3,7 +3,7 @@
         <STList v-if="locations.length > 0">
             <STListItem v-for="_location in locations" :key="_location.id" element-name="label" :selectable="true" class="left-center location-selection">
                 <template #left>
-                    <Radio v-model="selectedLocation" :value="_location" @change="changeSelected" />
+                    <Radio v-model="selectedLocation" :value="_location" @change="changeSelected"/>
                 </template>
                 <h3 class="style-title-list">
                     {{ _location.name }}
@@ -12,21 +12,21 @@
                     {{ _location.address }}
                 </p>
                 <template #right>
-                    <button type="button" class="button icon gray edit" @click.stop="doEditLocation(_location)" />
+                    <button type="button" class="button icon gray edit" @click.stop="doEditLocation(_location)"/>
                 </template>
             </STListItem>
             <STListItem element-name="label" :selectable="true" class="left-center">
                 <template #left>
-                    <Radio v-model="selectedLocation" :value="null" @change="changeSelected" />
+                    <Radio v-model="selectedLocation" :value="null" @change="changeSelected"/>
                 </template>
-                Een andere locatie
+                {{ $t('980736d6-77fa-4a34-9888-d4ded6e36a8e') }}
             </STListItem>
         </STList>
         <p v-if="editingLocation" class="warning-box">
-            Opgelet, alle tickets met deze locatie zullen worden gewijzigd. Kies 'Een andere locatie' als je een nieuwe locatie wilt invoeren.
+            {{ $t("2644f791-099c-4b1b-9bc4-4481b5b06fd4") }}
         </p>
-        <ProductLocationInput v-if="editingLocation || selectedLocation === null" v-model="editLocation" :validator="internalValidator" />
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <ProductLocationInput v-if="editingLocation || selectedLocation === null" v-model="editLocation" :validator="internalValidator"/>
+        <STErrorsDefault :error-box="errors.errorBox"/>
     </div>
 </template>
 

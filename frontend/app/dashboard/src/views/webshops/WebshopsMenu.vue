@@ -1,61 +1,49 @@
 <template>
     <div class="st-menu st-view">
-        <STNavigationBar title="Verkoop" />
+        <STNavigationBar :title="$t(`dc27b6b9-e49c-4c8b-b5e4-cb27cb1e2b5d`)"/>
         <main>
-            <h1>Webshops</h1>
+            <h1>{{ $t('c280fdd0-fa09-4a5e-a6b1-6bc0aa152e53') }}</h1>
 
             <p class="info-box" v-if="visibleWebshops.length === 0">
-                Je hebt nog geen webshops gemaakt
+                {{ $t('33590d9d-7d95-47c2-8ddb-90d39c349e97') }}
             </p>
 
             <STList v-if="visibleWebshops.length > 0">
-                <STListItem
-                    v-for="webshop in visibleWebshops" :key="webshop.id" element-name="button"
-                    :selectable="true" :class="{
+                <STListItem v-for="webshop in visibleWebshops" :key="webshop.id" element-name="button" :selectable="true" :class="{
                         selected: isSelected('webshop-' + webshop.id),
-                    }" @click="openWebshop(webshop)"
-                >
+                    }" @click="openWebshop(webshop)">
                     <h2 class="style-title-list">
                         {{ webshop.meta.name }}
                     </h2>
                     <template #right>
-                        <span
-                            v-if="isWebshopOpen(webshop)"
-                            class="icon dot green right-icon small"
-                        />
+                        <span v-if="isWebshopOpen(webshop)" class="icon dot green right-icon small"/>
                     </template>
                 </STListItem>
             </STList>
 
-            <!-- other -->
-            <template
-                v-if="
+            
+            <template v-if="
                     enableWebshopModule &&
                         ((fullAccess && hasWebshopArchive) || canCreateWebshops)
-                "
-            >
-                <hr>
-                <STList>
-                    <!-- archive -->
-                    <STListItem
-                        v-if="fullAccess && hasWebshopArchive" element-name="button" :selectable="true"
-                        :class="{ selected: isSelected(Button.Archive) }" @click="$navigate(Routes.Archive)"
-                    >
+                ">
+                <hr><STList>
+                    
+                    <STListItem v-if="fullAccess && hasWebshopArchive" element-name="button" :selectable="true" :class="{ selected: isSelected(Button.Archive) }" @click="$navigate(Routes.Archive)">
                         <template #left>
-                            <span class="icon archive" />
+                            <span class="icon archive"/>
                         </template>
                         <h2 class="style-title-list">
-                            Archief
+                            {{ $t('f8e18afd-9ec9-4695-adc5-d6f2351d8dc3') }}
                         </h2>
                     </STListItem>
 
-                    <!-- add webshop -->
+                    
                     <STListItem v-if="canCreateWebshops" element-name="button" :selectable="true" @click="addWebshop()">
                         <template #left>
-                            <span class="icon add" />
+                            <span class="icon add"/>
                         </template>
                         <h2 class="style-title-list">
-                            Webshop
+                            {{ $t('047179b8-f6d9-4517-9f03-ef79e448a23e') }}
                         </h2>
                     </STListItem>
                 </STList>

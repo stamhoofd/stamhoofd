@@ -1,9 +1,9 @@
 <template>
     <a alt="Stamhoofd" :href="'https://'+$domains.marketing+''" rel="noopener" class="platform-logo" :class="{expand: platform.config.expandLogo}">
-        <ImageComponent v-if="logo" :image="logo" :image-dark="logoDark" />
+        <ImageComponent v-if="logo" :image="logo" :image-dark="logoDark"/>
         <template v-else>
-            <Logo class="responsive" />
-            <span v-if="!isPlatform" class="logo-text horizontal hide-medium">Beheerders</span>
+            <Logo class="responsive"/>
+            <span v-if="!isPlatform" class="logo-text horizontal hide-medium">{{ $t('efd3248e-bb26-4d50-8dd9-35bac8f44656') }}</span>
         </template>
     </a>
 </template>

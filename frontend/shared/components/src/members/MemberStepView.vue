@@ -1,25 +1,23 @@
 <template>
     <SaveView :title="title" :loading="loading" :save-text="isDuplicate ? 'Doorgaan' : saveText" @save="save">
         <template v-if="isDuplicate">
-            <h1>Krijg toegang tot de gegevens van {{ cloned.patchedMember.details.firstName }}</h1>
-            <p>{{ cloned.patchedMember.details.firstName }} is al gekend in ons systeem, maar jouw e-mailadres niet. Om toegang te krijgen heb je de beveiligingscode nodig.</p>
+            <h1>{{ $t('fb429eae-7cd9-4250-b5bd-8863ae5a56fb') }} {{ cloned.patchedMember.details.firstName }}</h1>
+            <p>{{ cloned.patchedMember.details.firstName }} {{ $t('b5c43411-0097-48fe-a7a7-13128feef887') }}</p>
 
-            <STErrorsDefault :error-box="errors.errorBox" />
+            <STErrorsDefault :error-box="errors.errorBox"/>
 
-            <STInputBox title="Beveiligingscode" error-fields="code" :error-box="errors.errorBox" class="max">
-                <CodeInput v-model="code" :code-length="16" :space-length="4" :numbers-only="false" @complete="save" />
+            <STInputBox error-fields="code" :error-box="errors.errorBox" class="max" :title="$t(`188afef4-7116-41b8-ab40-ccb879da1756`)">
+                <CodeInput v-model="code" :code-length="16" :space-length="4" :numbers-only="false" @complete="save"/>
             </STInputBox>
 
-            <hr>
-            <h2>Waar vind ik deze code?</h2>
+            <hr><h2>{{ $t('135914ca-9806-4523-b998-2f9b69aa509f') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem class="left-center">
                     <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/communication.svg">
-                    </template>
+                        <img src="@stamhoofd/assets/images/illustrations/communication.svg"></template>
                     <h2 class="style-title-list">
-                        Vraag de code aan jouw leiding
+                        {{ $t('2df03d52-7009-405e-a88b-6ad6bcd0f5b0') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('f5229cc1-c908-4409-855a-1dba40371815') }}
@@ -28,18 +26,17 @@
 
                 <STListItem class="left-center">
                     <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/email.svg">
-                    </template>
+                        <img src="@stamhoofd/assets/images/illustrations/email.svg"></template>
                     <h2 class="style-title-list">
-                        Zoek de code onderaan een e-mail die je van ons kreeg
+                        {{ $t('d5bbc83f-5a72-47c4-8d7d-f4fbb348ff18') }}
                     </h2>
                     <p class="style-description">
-                        Zoek de laatste (recente) e-mail die je van ons kreeg op een e-mailadres die we wél kennen. Daar vind je normaal een beveiligingscode.
+                        {{ $t('555ac347-3ce0-4b3d-ba4f-5aefb57c44de') }}
                     </p>
                 </STListItem>
             </STList>
         </template>
-        <component :is="component" v-else :validator="errors.validator" :parent-error-box="errors.errorBox" :member="cloned" :will-mark-reviewed="willMarkReviewed" v-bind="$attrs" :level="1" />
+        <component :is="component" v-else :validator="errors.validator" :parent-error-box="errors.errorBox" :member="cloned" :will-mark-reviewed="willMarkReviewed" v-bind="$attrs" :level="1"/>
     </SaveView>
 </template>
 

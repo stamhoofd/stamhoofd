@@ -1,7 +1,7 @@
 <template>
     <STListItem :selectable="true">
         <template #left>
-            <GroupIconWithWaitingList :group="group" :icon="groupIcon" />
+            <GroupIconWithWaitingList :group="group" :icon="groupIcon"/>
         </template>
 
         <h3 class="style-title-list">
@@ -9,15 +9,15 @@
         </h3>
 
         <STListItemGrid>
-            <STListItemGridRow label="Tarief" :value="prices" />
-            <STListItemGridRow label="Leeftijd" :value="ageRestriction" />
-            <STListItemGridRow label="Geslacht" :value="genderRestriction" />
-            <STListItemGridRow v-if="$defaultAgeGroups.length" label="Aansluiting" :value="defaultAgeGroupName" />
-            <STListItemGridRow label="Status" :value="status" />
+            <STListItemGridRow :value="prices" :label="$t(`19e17ff3-bd33-4b19-9803-91a975367519`)"/>
+            <STListItemGridRow :value="ageRestriction" :label="$t(`fd0fc1f2-5cbf-4498-a920-3413afd2f482`)"/>
+            <STListItemGridRow :value="genderRestriction" :label="$t(`620baefd-58fd-4f7d-a698-62e12b4eca23`)"/>
+            <STListItemGridRow v-if="$defaultAgeGroups.length" :value="defaultAgeGroupName" :label="$t(`8ad3a6b5-20e9-4858-ab57-f6d524ef50af`)"/>
+            <STListItemGridRow :value="status" :label="$t(`38b75e19-10cb-4641-88a8-f4e2e9be7576`)"/>
         </STListItemGrid>
 
         <template #right>
-            <span class="icon arrow-right-small gray" />
+            <span class="icon arrow-right-small gray"/>
         </template>
     </STListItem>
 </template>

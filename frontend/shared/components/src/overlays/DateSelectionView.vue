@@ -2,7 +2,7 @@
     <ContextMenuView v-bind="$attrs" :auto-dismiss="autoDismiss">
         <aside ref="aside" class="date-selection-view">
             <header>
-                <button type="button" class="button icon gray arrow-left" @click="previousMonth" />
+                <button type="button" class="button icon gray arrow-left" @click="previousMonth"/>
                 <h1>
                     <div class="input-icon-container right icon arrow-down-small gray">
                         <select v-model="month" @mousedown.stop>
@@ -20,17 +20,17 @@
                         </select>
                     </div>
                 </h1>
-                <button type="button" class="button icon gray arrow-right" @click="nextMonth" />
+                <button type="button" class="button icon gray arrow-right" @click="nextMonth"/>
             </header>
             <div class="days">
                 <div class="days">
-                    <div>Ma</div>
-                    <div>Di</div>
-                    <div>Wo</div>
-                    <div>Do</div>
-                    <div>Vr</div>
-                    <div>Za</div>
-                    <div>Zo</div>
+                    <div>{{ $t('5b4fc512-073a-4869-bab5-db8013206219') }}</div>
+                    <div>{{ $t('4f6c200b-9f81-4cd7-921d-802ed8d90603') }}</div>
+                    <div>{{ $t('dfe7701d-b87f-4083-ad09-81aaee54fee6') }}</div>
+                    <div>{{ $t('8d8c5343-f79f-4eaf-8bed-37b4b345d469') }}</div>
+                    <div>{{ $t('6bf9fe12-320a-4f4a-b66a-feefe88bb575') }}</div>
+                    <div>{{ $t('72c51d37-aca8-475c-8246-e18db092c896') }}</div>
+                    <div>{{ $t('de249ffc-a3f6-4852-86e8-421a2007adf0') }}</div>
                 </div>
                 <div v-for="(week, index) in weeks" :key="index" class="row">
                     <button v-for="day in week" :key="day.number" type="button" :class="{selected: day.selected, 'other-month': day.otherMonth}" :disabled="isDisabled(day)" @click="onSelect(day)">
@@ -40,10 +40,10 @@
             </div>
             <footer>
                 <button v-if="allowClear" type="button" class="button text" @click="clear">
-                    Leegmaken
+                    {{ $t('3932e528-79c6-41ac-9dac-acaf046e9e22') }}
                 </button>
                 <button v-if="!isDisabled({value: new Date()})" type="button" class="button text" @click="setToday">
-                    Vandaag
+                    {{ $t('ac201fe7-6eb7-4a01-88f2-7f33506ec890') }}
                 </button>
             </footer>
         </aside>

@@ -4,43 +4,30 @@
             {{ title }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <div class="split-inputs">
             <STInputBox :title="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') " error-fields="name" :error-box="errors.errorBox">
-                <input
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    :placeholder="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') "
-                >
-            </STInputBox>
+                <input v-model="name" class="input" type="text" :placeholder="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') "></STInputBox>
         </div>
 
         <STInputBox :title="$t('688fc9a3-68af-4aa3-ae6c-7d35a5f954ad')" error-fields="description" :error-box="errors.errorBox" class="max">
-            <textarea
-                v-model="description"
-                class="input"
-                type="text"
-                :placeholder="$t('37739daf-2424-4f6e-a316-d4ac6bdaef85')"
-                autocomplete="off"
-            />
+            <textarea v-model="description" class="input" type="text" :placeholder="$t('37739daf-2424-4f6e-a316-d4ac6bdaef85')" autocomplete="off"/>
         </STInputBox>
 
-        <hr>
-        <h2>{{ $t('1d742718-992d-4487-9c5e-a4ac46841a27') }}</h2>
+        <hr><h2>{{ $t('1d742718-992d-4487-9c5e-a4ac46841a27') }}</h2>
 
         <p class="style-description-small">
-            Stel optioneel limieten voor het aantal lokalen van deze soort per groep in.
+            {{ $t('957cce85-9d2b-4a14-a319-6da31617537a') }}
         </p>
 
         <div class="split-inputs">
             <STInputBox :title="$t('87bd59dd-77fa-4519-9fab-abf46707e51f')" error-fields="minimumDays" :error-box="errors.errorBox">
-                <NumberInput v-model="min" :placeholder="$t('e41660ea-180a-45ef-987c-e780319c4331')" :required="false" />
+                <NumberInput v-model="min" :placeholder="$t('e41660ea-180a-45ef-987c-e780319c4331')" :required="false"/>
             </STInputBox>
 
             <STInputBox :title="$t('94f1f064-808e-4447-9813-d1c2d9a0375a')" error-fields="maximumDays" :error-box="errors.errorBox">
-                <NumberInput v-model="max" :placeholder="$t('104dca1f-f6eb-4193-ae27-5e5f96e4e481')" :required="false" />
+                <NumberInput v-model="max" :placeholder="$t('104dca1f-f6eb-4193-ae27-5e5f96e4e481')" :required="false"/>
             </STInputBox>
         </div>
     </SaveView>

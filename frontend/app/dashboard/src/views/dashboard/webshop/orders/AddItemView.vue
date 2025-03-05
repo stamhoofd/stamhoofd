@@ -1,13 +1,13 @@
 <template>
     <div class="st-view add-item-view">
-        <STNavigationBar title="Producten" />
+        <STNavigationBar :title="$t(`Producten`)"/>
         <main>
             <h1>
-                Producten
+                {{ $t('2333a4d1-147d-44b7-9c1b-0d96ac103769') }}
             </h1>
 
-            <CategoryBox v-for="(category, index) in webshop.categories" :key="category.id" :category="category" :webshop="webshop" :checkout="checkout" :save-handler="saveHandler" :is-last="index === webshop.categories.length - 1" :admin="true" />
-            <ProductGrid v-if="webshop.categories.length === 0" :products="webshop.products" :webshop="webshop" :checkout="checkout" :save-handler="saveHandler" :admin="true" />
+            <CategoryBox v-for="(category, index) in webshop.categories" :key="category.id" :category="category" :webshop="webshop" :checkout="checkout" :save-handler="saveHandler" :is-last="index === webshop.categories.length - 1" :admin="true"/>
+            <ProductGrid v-if="webshop.categories.length === 0" :products="webshop.products" :webshop="webshop" :checkout="checkout" :save-handler="saveHandler" :admin="true"/>
         </main>
     </div>
 </template>

@@ -1,28 +1,26 @@
 <template>
-    <SaveView title="Jouw gegevens" :loading="loading" save-icon-right="arrow-right" save-text="Doorgaan" data-submit-last-field @save="goNext">
-        <h1>Jouw gegevens</h1>
+    <SaveView :loading="loading" save-icon-right="arrow-right" save-text="Doorgaan" data-submit-last-field @save="goNext" :title="$t(`Jouw gegevens`)">
+        <h1>{{ $t('59da4f9d-b727-4ccd-ab74-219bd84c935b') }}</h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <template v-if="!isLoggedIn">
-            <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errors.errorBox">
+            <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`c0b0a159-8e96-40bb-84f6-dd40f579fef5`)">
                 <div class="input-group">
                     <div>
-                        <input v-model="firstName" class="input" name="fname" type="text" placeholder="Voornaam" required autocomplete="given-name">
-                    </div>
+                        <input v-model="firstName" class="input" name="fname" type="text" required autocomplete="given-name" :placeholder="$t(`883f9695-e18f-4df6-8c0d-651c6dd48e59`)"></div>
                     <div>
-                        <input v-model="lastName" class="input" name="lname" type="text" placeholder="Achternaam" required autocomplete="family-name">
-                    </div>
+                        <input v-model="lastName" class="input" name="lname" type="text" required autocomplete="family-name" :placeholder="$t(`f89d8bfa-6b5d-444d-a40f-ec17b3f456ee`)"></div>
                 </div>
             </STInputBox>
 
-            <EmailInput v-model="email" title="E-mailadres" name="email" :validator="errors.validator" :placeholder="emailPlaceholder" autocomplete="email" />
-            <p v-if="emailDescription" class="style-description-small" v-text="emailDescription" />
+            <EmailInput v-model="email" name="email" :validator="errors.validator" :placeholder="emailPlaceholder" autocomplete="email" :title="$t(`0be79160-b242-44dd-94f0-760093f7f9f2`)"/>
+            <p v-if="emailDescription" class="style-description-small" v-text="emailDescription"/>
         </template>
 
-        <PhoneInput v-if="phoneEnabled" v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34' )" name="mobile" :validator="errors.validator" placeholder="Voor dringende info" autocomplete="tel" />
+        <PhoneInput v-if="phoneEnabled" v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34' )" name="mobile" :validator="errors.validator" autocomplete="tel" :placeholder="$t(`638120ac-6591-4dda-9c96-f3b54cbe4c5f`)"/>
 
-        <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="checkoutManager.checkout.fieldAnswers" :error-box="errors.errorBox" />
+        <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="checkoutManager.checkout.fieldAnswers" :error-box="errors.errorBox"/>
     </SaveView>
 </template>
 

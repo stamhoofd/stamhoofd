@@ -1,9 +1,9 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="title" />
+        <STNavigationBar :title="title"/>
         <main ref="main">
-            <h1>Inhoud</h1>
-            <iframe ref="iframeRef" sandbox="" />
+            <h1>{{ $t('9e34e602-e5e4-4fb4-87df-58e7a560f8d7') }}</h1>
+            <iframe ref="iframeRef" sandbox=""/>
         </main>
     </div>
 </template>

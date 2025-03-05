@@ -2,9 +2,9 @@
     <div class="st-view">
         <STNavigationBar :title="title">
             <template #right>
-                <button v-if="hasWrite" v-tooltip="'Bewerken'" class="button icon navigation edit" type="button" @click="editOrganization" />
-                <button v-if="hasPrevious || hasNext" v-tooltip="'Ga naar vorige groep'" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" v-tooltip="'Ga naar volgende groep'" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goForward" />
+                <button v-if="hasWrite" v-tooltip="'Bewerken'" class="button icon navigation edit" type="button" @click="editOrganization"/>
+                <button v-if="hasPrevious || hasNext" v-tooltip="'Ga naar vorige groep'" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack"/>
+                <button v-if="hasNext || hasPrevious" v-tooltip="'Ga naar volgende groep'" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goForward"/>
             </template>
         </STNavigationBar>
 
@@ -17,7 +17,7 @@
             </h1>
 
             <p v-if="!organization.active" class="error-box">
-                Deze groep is inactief. Deze kan niet meer gebruikt worden en bestaat enkel nog voor archiveringsdoeleinden.
+                {{ $t('784c890a-17c9-4bb3-9245-34b4fb4ffd5e') }}
             </p>
 
             <STList class="info">
@@ -38,13 +38,13 @@
                         {{ company.name }}
                     </p>
                     <p v-if="company.VATNumber" v-copyable class="style-description-small style-copyable">
-                        {{ company.VATNumber }} (BTW-plichtig)
+                        {{ company.VATNumber }} {{ $t('4023e307-cbc4-48e4-a5dc-277cf74db1e3') }}
                     </p>
                     <p v-else-if="company.companyNumber" v-copyable class="style-description-small style-copyable">
                         {{ company.companyNumber }}
                     </p>
                     <p v-else class="style-description-small">
-                        Feitelijke vereniging
+                        {{ $t('522b4446-bd3d-4d53-a95a-e82f0de07d5e') }}
                     </p>
 
                     <p v-if="company.address" v-copyable class="style-description-small style-copyable">
@@ -61,7 +61,7 @@
                     </p>
 
                     <template #right>
-                        <button class="button icon external" type="button" />
+                        <button class="button icon external" type="button"/>
                     </template>
                 </STListItem>
 
@@ -92,7 +92,7 @@
                     </p>
 
                     <template #right>
-                        <span v-if="hasWrite" class="icon edit gray" />
+                        <span v-if="hasWrite" class="icon edit gray"/>
                     </template>
                 </STListItem>
 
@@ -101,31 +101,26 @@
                         {{ $t('Aantal leden' ) }}
                     </h3>
                     <p v-copyable class="style-definition-text">
-                        <MemberCountSpan
-                            :filter="{
+                        <MemberCountSpan :filter="{
                                 registrations: {
                                     $elemMatch: {
                                         organizationId: organization.id,
                                         periodId: platform.period.id
                                     }
                                 }
-                            }"
-                        />
+                            }"/>
                     </p>
                 </STListItem>
             </STList>
 
-            <hr>
-
-            <h2>{{ $t('f18beb62-a9e8-4881-865c-28ad534b6f24') }}</h2>
+            <hr><h2>{{ $t('f18beb62-a9e8-4881-865c-28ad534b6f24') }}</h2>
 
             <p>{{ $t('Deze functies verhuizen in de toekomst grotendeels naar het administratieportaal zelf. Voorlopig zijn de acties bereikbaar via het beheerdersportaal.' ) }}</p>
 
             <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center right-stack" element-name="a" :href="'/beheerders/' + organization.uri + '/instellingen'" :target="$isMobile ? undefined : '_blank'">
                     <template #left>
-                        <img src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
-                    </template>
+                        <img src="~@stamhoofd/assets/images/illustrations/edit-data.svg"></template>
                     <h2 class="style-title-list">
                         {{ $t('9a6474d8-0bb5-4760-8dca-e85ba79035ce') }}
                     </h2>
@@ -133,14 +128,13 @@
                         {{ $t('a5b61d4d-207f-485c-8748-cbb04fcb2d23') }}
                     </p>
                     <template #right>
-                        <span class="icon external gray" />
+                        <span class="icon external gray"/>
                     </template>
                 </STListItem>
 
                 <STListItem :selectable="true" class="left-center right-stack" element-name="a" :href="'/beheerders/' + organization.uri + '/leden'" :target="$isMobile ? undefined : '_blank'">
                     <template #left>
-                        <img src="~@stamhoofd/assets/images/illustrations/group.svg">
-                    </template>
+                        <img src="~@stamhoofd/assets/images/illustrations/group.svg"></template>
                     <h2 class="style-title-list">
                         {{ $t('c3158561-e0dc-4dd5-8581-d2d861238946') }}
                     </h2>
@@ -148,14 +142,13 @@
                         {{ $t('eb91fb5c-72fc-44d4-9b84-4c9f7791e27a') }}
                     </p>
                     <template #right>
-                        <span class="icon external gray" />
+                        <span class="icon external gray"/>
                     </template>
                 </STListItem>
 
                 <STListItem :selectable="true" class="left-center right-stack" element-name="a" :href="'/beheerders/' + organization.uri" :target="$isMobile ? undefined : '_blank'">
                     <template #left>
-                        <img src="~@stamhoofd/assets/images/illustrations/laptop-key.svg">
-                    </template>
+                        <img src="~@stamhoofd/assets/images/illustrations/laptop-key.svg"></template>
                     <h2 class="style-title-list">
                         {{ $t('bda3721a-3b39-4409-9407-e0b3abde0009') }}
                     </h2>
@@ -163,27 +156,25 @@
                         {{ $t('2300284a-a015-4c97-8ad1-6c9f2bbde174') }}
                     </p>
                     <template #right>
-                        <span class="icon external gray" />
+                        <span class="icon external gray"/>
                     </template>
                 </STListItem>
             </STList>
 
-            <ViewOrganizationRecordCategoriesBox :organization="organization" />
+            <ViewOrganizationRecordCategoriesBox :organization="organization"/>
 
             <div v-if="setupSteps.steps.size" class="container">
-                <hr>
-                <h2>{{ $t('6355a1b9-7b98-48c4-9aca-91df9a22d66e') }}</h2>
-                <SetupStepRows :steps="setupSteps" list-type="review" />
+                <hr><h2>{{ $t('6355a1b9-7b98-48c4-9aca-91df9a22d66e') }}</h2>
+                <SetupStepRows :steps="setupSteps" list-type="review"/>
             </div>
 
-            <hr>
-            <h2>
+            <hr><h2>
                 {{ $t('f477755c-2d6e-473c-b9b9-2ebe0af173f3') }}
             </h2>
 
             <LoadingButton :loading="deleting">
                 <button class="button secundary danger" type="button" @click="deleteMe">
-                    <span class="icon trash" />
+                    <span class="icon trash"/>
                     <span>{{ $t('838cae8b-92a5-43d2-82ba-01b8e830054b') }}</span>
                 </button>
             </LoadingButton>

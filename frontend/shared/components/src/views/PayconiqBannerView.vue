@@ -1,13 +1,12 @@
 <template>
     <div class="payconiq-banner-view">
-        <button class="payconiq-close button icon close white" type="button" @click="close" />
-        <h1>Scan en betaal met Payconiq by Bancontact</h1>
+        <button class="payconiq-close button icon close white" type="button" @click="close"/>
+        <h1>{{ $t('932dca4f-7ed6-47aa-b13e-28d76c0113d9') }}</h1>
 
-        <div class="payconiq-logo" />
+        <div class="payconiq-logo"/>
 
         <div class="qr-code" :class="{ scanned: payment.status === 'Pending'}">
-            <img v-if="payment.status === 'Pending' || payment.status === 'Created'" :src="qrCodeSrc">
-        </div>
+            <img v-if="payment.status === 'Pending' || payment.status === 'Created'" :src="qrCodeSrc"></div>
 
         <LoadingButton :loading="payment && payment.status === 'Pending'" class="price-loading">
             <p class="price">
@@ -15,7 +14,7 @@
             </p>
         </LoadingButton>
 
-        <p>Of scan met een ondersteunende bank app</p>
+        <p>{{ $t('05f8a060-bd1f-4830-8d19-cedc9fe4a7dd') }}</p>
     </div>
 </template>
 

@@ -1,31 +1,29 @@
 <template>
     <form id="signup-account-view" class="st-view" @submit.prevent="goNext">
-        <STNavigationBar title="Maak jouw account" />
+        <STNavigationBar :title="$t(`Maak jouw account`)"/>
 
         <main>
             <h1>
-                Maak jouw account
+                {{ $t('924a46e9-458b-4182-b888-c09b0b8da88c') }}
             </h1>
             <p>
-                Je kan later nog andere beheerders toevoegen, dus kies een persoonlijk e-mailadres en wachtwoord dat niet gedeeld wordt.
+                {{ $t('e8f8a00d-ee08-46bc-9322-984755e7a627') }}
             </p>
 
-            <STErrorsDefault :error-box="errorBox" />
+            <STErrorsDefault :error-box="errorBox"/>
 
             <div class="split-inputs">
                 <div>
-                    <EmailInput v-model="email" title="Persoonlijk e-mailadres" name="username" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
+                    <EmailInput v-model="email" name="username" :validator="validator" autocomplete="username" :title="$t(`d99eda85-0c3d-4669-a389-ace3b4e50708`)" :placeholder="$t(`0a65c7be-dcc1-4bf7-9c6e-560085de9052`)"/>
                 </div>
 
                 <div>
-                    <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errorBox">
+                    <STInputBox error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`c0b0a159-8e96-40bb-84f6-dd40f579fef5`)">
                         <div class="input-group">
                             <div>
-                                <input v-model="firstName" name="given-name" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
-                            </div>
+                                <input v-model="firstName" name="given-name" class="input" type="text" autocomplete="given-name" :placeholder="$t(`883f9695-e18f-4df6-8c0d-651c6dd48e59`)"></div>
                             <div>
-                                <input v-model="lastName" name="family-name" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
-                            </div>
+                                <input v-model="lastName" name="family-name" class="input" type="text" autocomplete="family-name" :placeholder="$t(`f89d8bfa-6b5d-444d-a40f-ec17b3f456ee`)"></div>
                         </div>
                     </STInputBox>
                 </div>
@@ -33,30 +31,28 @@
 
             <div class="split-inputs">
                 <div>
-                    <STInputBox title="Kies een persoonlijk wachtwoord" error-fields="password" :error-box="errorBox">
-                        <input v-model="password" name="new-password" class="input" placeholder="Kies een wachtwoord" autocomplete="new-password" type="password">
-                    </STInputBox>
-                    <STInputBox title="Herhaal wachtwoord" error-fields="passwordRepeat" :error-box="errorBox">
-                        <input v-model="passwordRepeat" name="confirm-password" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
-                    </STInputBox>
+                    <STInputBox error-fields="password" :error-box="errorBox" :title="$t(`64d765de-1861-48c5-a279-e8b7afd7cc04`)">
+                        <input v-model="password" name="new-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`418c9ab2-77de-441b-b9ab-af7bd55558ef`)"></STInputBox>
+                    <STInputBox error-fields="passwordRepeat" :error-box="errorBox" :title="$t(`64bc8c3c-4feb-4fb4-b5bf-71726f2b6609`)">
+                        <input v-model="passwordRepeat" name="confirm-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`91317163-c535-47be-a080-0f2b4f055dcc`)"></STInputBox>
                 </div>
 
                 <div>
-                    <PasswordStrength v-model="password" />
+                    <PasswordStrength v-model="password"/>
                 </div>
             </div>
 
             <div class="checkbox-box">
                 <Checkbox v-model="acceptPrivacy" class="long-text">
-                    Ik heb kennis genomen van <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/privacy'" target="_blank">het privacybeleid</a>.
+                    {{ $t('5640d1b2-0dfa-4fb3-a5ea-71214bf2947b') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/privacy'" target="_blank">{{ $t('96072da2-bd1e-4bd8-99c9-0cd572f8c83f') }}</a>.
                 </Checkbox>
 
                 <Checkbox v-model="acceptTerms" class="long-text">
-                    Ik heb <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/algemene-voorwaarden'" target="_blank">de algemene voorwaarden</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
+                    {{ $t('a689c709-899c-4e83-aed4-2d22ebb52f18') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/algemene-voorwaarden'" target="_blank">{{ $t('31101e24-f2d3-4f54-af0a-7fadd2177236') }}</a> {{ $t('2a42726d-41b7-494a-be4f-0497471ba621') }}
                 </Checkbox>
 
                 <Checkbox v-model="acceptDataAgreement" class="long-text">
-                    Ik heb <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/verwerkersovereenkomst'" target="_blank">de verwerkersovereenkomst</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
+                    {{ $t('a689c709-899c-4e83-aed4-2d22ebb52f18') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/verwerkersovereenkomst'" target="_blank">{{ $t('7add8ff4-5d9b-48a5-85d9-54580fda3a4b') }}</a> {{ $t('2a42726d-41b7-494a-be4f-0497471ba621') }}
                 </Checkbox>
             </div>
         </main>
@@ -65,7 +61,7 @@
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" @click.prevent="goNext">
-                        Account aanmaken
+                        {{ $t('37a0bd14-62bc-45a4-b431-8dd5101de534') }}
                     </button>
                 </LoadingButton>
             </template>

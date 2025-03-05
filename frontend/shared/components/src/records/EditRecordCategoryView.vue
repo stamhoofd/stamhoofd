@@ -5,129 +5,110 @@
         </h1>
 
         <p v-if="allowChildCategories && type === RecordEditorType.PlatformMember" class="style-description">
-            Een vragenlijst bevat één of meerdere persoonsgegevens, eventueel opgedeeld in categorieën. Lees <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
+            {{ $t('b2a40548-eb66-41d6-a12e-29c0044c9441') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('b93acd89-a91e-4216-b1dd-a8808a50aa78') }}</a> {{ $t('9e648bd2-b289-4a31-ad40-97c8d02dd46d') }}
         </p>
         <p v-else class="style-description">
-            Lees <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
+            {{ $t('1ee2ff5c-bcc6-4af9-b47f-0ca10a4023c9') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('b93acd89-a91e-4216-b1dd-a8808a50aa78') }}</a> {{ $t('9e648bd2-b289-4a31-ad40-97c8d02dd46d') }}
         </p>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <div class="split-inputs">
-            <STInputBox title="Titel" error-fields="name" :error-box="errors.errorBox">
-                <input
-                    ref="firstInput"
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    placeholder="Titel"
-                    autocomplete="off"
-                    enterkeyhint="next"
-                >
-            </STInputBox>
+            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`04043e8a-6a58-488e-b538-fea133738532`)">
+                <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`04043e8a-6a58-488e-b538-fea133738532`)"></STInputBox>
         </div>
 
-        <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox" class="max">
-            <textarea
-                v-model="description"
-                class="input"
-                type="text"
-                placeholder="Optioneel"
-                autocomplete="off"
-            />
+        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`f72f5546-ed6c-4c93-9b0d-9718f0cc9626`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`e64a0d25-fe5a-4c87-a087-97ad30b2b12b`)"/>
         </STInputBox>
 
         <STList v-if="(settings.toggleDefaultEnabled && allowChildCategories) || !patchedCategory.defaultEnabled">
             <STListItem :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox v-model="defaultEnabled" />
+                    <Checkbox v-model="defaultEnabled"/>
                 </template>
 
                 <h3 v-if="app === 'admin'" class="style-title-list">
-                    Verplicht ingeschakeld voor alle leden ingeschreven bij minstens één standaard-leeftijdsgroep
+                    {{ $t('2da66c73-9822-464b-9c05-94f667b223eb') }}
                 </h3>
                 <h3 v-else class="style-title-list">
-                    Verplicht ingeschakeld voor alle leden (behalve wachtlijsten en activiteiten)
+                    {{ $t('c45a7676-211a-4977-a977-acfe92aaaf69') }}
                 </h3>
 
                 <p class="style-description-small">
-                    Schakel je dit uit, dan staat deze vragenlijst standaard uit maar kan deze op lagere niveau's worden ingeschakeld. Zo behoud je maximale flexibiliteit.
+                    {{ $t("c81b9f91-c813-4d2d-9111-1eba2f557aa9") }}
                 </p>
             </STListItem>
         </STList>
 
-        <hr>
-
-        <p v-if="records.length === 0 && categories.length === 0" class="info-box">
-            Deze vragenlijst is leeg en zal nog niet getoond worden.
+        <hr><p v-if="records.length === 0 && categories.length === 0" class="info-box">
+            {{ $t('94367e16-fc8e-4549-9331-59759161cbb1') }}
         </p>
 
         <STList :model-value="getDraggableRecords(patchedCategory).computed.value" :draggable="true" @update:model-value="newValue => getDraggableRecords(patchedCategory).computed.value = newValue!">
             <template #item="{item: record}">
-                <RecordRow :record="record" :category="patchedCategory" :root-categories="patchedRootCategories" :selectable="true" :settings="settings" @patch="addRootCategoriesPatch" @edit="editRecord($event)" />
+                <RecordRow :record="record" :category="patchedCategory" :root-categories="patchedRootCategories" :selectable="true" :settings="settings" @patch="addRootCategoriesPatch" @edit="editRecord($event)"/>
             </template>
         </STList>
 
         <p class="style-button-bar">
             <button class="button text" type="button" @click="addRecord()">
-                <span class="icon add" />
-                <span v-if="categories.length === 0">Vraag</span>
-                <span v-else>Algemene vraag</span>
+                <span class="icon add"/>
+                <span v-if="categories.length === 0">{{ $t('86af0bdf-a077-4601-85ea-8eebf9562f75') }}</span>
+                <span v-else>{{ $t('e39bfacf-0755-4a86-9da8-8b5746f57c46') }}</span>
             </button>
 
             <button v-if="allowChildCategories" class="button text" type="button" @click="addCategory()">
-                <span class="icon add" />
-                <span>Categorie</span>
+                <span class="icon add"/>
+                <span>{{ $t('f6d92a65-1430-417a-9e10-7aa2b10c9a57') }}</span>
             </button>
         </p>
 
         <div v-for="c in categories" :key="c.id" class="container">
-            <hr>
-            <h2 class="style-with-button with-list">
+            <hr><h2 class="style-with-button with-list">
                 <div>
                     {{ c.name }}
                 </div>
                 <div>
-                    <button class="icon add button gray" type="button" @click="addRecord(c)" />
-                    <button class="icon more button gray" type="button" @click="showCategoryMenu($event, c)" />
+                    <button class="icon add button gray" type="button" @click="addRecord(c)"/>
+                    <button class="icon more button gray" type="button" @click="showCategoryMenu($event, c)"/>
                 </div>
             </h2>
             <p v-if="c.filter" class="info-box selectable with-icon" @click="editCategory(c)">
                 {{ propertyFilterToString(c.filter, filterBuilder) }}
-                <button type="button" class="button icon edit" />
+                <button type="button" class="button icon edit"/>
             </p>
 
             <p v-if="c.records.length === 0" class="info-box">
-                Deze categorie bevat nog geen vragen.
+                {{ $t('d628617b-a25b-4d01-972b-54b64cea81b7') }}
             </p>
 
-            <p v-if="c.description" class="style-description-block style-em pre-wrap" v-text="c.description" />
+            <p v-if="c.description" class="style-description-block style-em pre-wrap" v-text="c.description"/>
 
             <STList :model-value="getDraggableRecords(c).computed.value" :draggable="true" @update:model-value="newValue => getDraggableRecords(c).computed.value = newValue!">
                 <template #item="{item: record}">
-                    <RecordRow :record="record" :category="c" :root-categories="patchedRootCategories" :settings="settings" :selectable="true" @patch="addRootCategoriesPatch" @edit="editRecord($event, c)" />
+                    <RecordRow :record="record" :category="c" :root-categories="patchedRootCategories" :settings="settings" :selectable="true" @patch="addRootCategoriesPatch" @edit="editRecord($event, c)"/>
                 </template>
             </STList>
         </div>
 
         <div v-if="defaultEnabled && (hasFilters || (allowChildCategories && patchedCategory.getAllRecords().length > 1))" class="container">
-            <hr>
-            <h2>Slim in- en uitschakelen</h2>
+            <hr><h2>{{ $t('41e5ea73-e54f-4ede-8bd7-c012ef3407af') }}</h2>
             <p v-if="!hasFilters">
-                Je kan kiezen wanneer deze stap overgeslagen kan worden.
+                {{ $t('684c9555-237e-4329-9a61-c30e228cf6be') }}
             </p>
             <p v-else-if="allowChildCategories && patchedCategory.getAllRecords().length > 1">
-                Je kan kiezen wanneer deze vragen van toepassing zijn, en of deze stap overgeslagen kan worden.
+                {{ $t('d3741ac2-8cb8-4064-9d65-29b3f1247399') }}
             </p>
             <p v-else>
-                Je kan kiezen wanneer deze vragen van toepassing zijn.
+                {{ $t('f0e851a5-7903-4e68-9e55-ac8219b013fb') }}
             </p>
 
-            <PropertyFilterInput v-model="filter" :allow-optional="allowChildCategories && patchedCategory.getAllRecords().length > 1" :builder="filterBuilder" />
+            <PropertyFilterInput v-model="filter" :allow-optional="allowChildCategories && patchedCategory.getAllRecords().length > 1" :builder="filterBuilder"/>
         </div>
 
         <template #toolbar>
-            <button v-tooltip="$t('ee2852cb-6458-4127-8ad0-3281cc286884')" class="button icon eye" type="button" @click="showExample" />
+            <button v-tooltip="$t('ee2852cb-6458-4127-8ad0-3281cc286884')" class="button icon eye" type="button" @click="showExample"/>
         </template>
     </SaveView>
 </template>

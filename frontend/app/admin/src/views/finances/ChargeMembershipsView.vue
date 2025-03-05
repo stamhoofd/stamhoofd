@@ -1,28 +1,26 @@
 <template>
     <LoadingViewTransition :error-box="loadingOrganizationErrorBox">
         <div v-if="!loadingOrganization" class="st-view charge-memberships-view">
-            <STNavigationBar title="Aansluitingen aanrekenen" />
+            <STNavigationBar :title="$t(`Aansluitingen aanrekenen`)"/>
 
             <main class="center">
                 <h1>
                     {{ $t('fb8c1c30-2108-4a1b-a412-0381263e860e') }}
                 </h1>
 
-                <STErrorsDefault :error-box="errors.errorBox" />
+                <STErrorsDefault :error-box="errors.errorBox"/>
 
                 <p v-if="summary && summary.running" class="info-box icon clock">
-                    Er is momenteel een aanrekening bezig. Wacht tot deze is afgelopen.
+                    {{ $t('7e1af493-9d03-427c-93fd-b798c47e6e7e') }}
                 </p>
                 <template v-else>
                     <template v-if="membershipOrganization">
-                        <hr>
-                        <h2>Boekhouding {{ membershipOrganization.name }}</h2>
+                        <hr><h2>{{ $t('dd4005f0-77d2-4eba-ad52-170c4b32cc12') }} {{ membershipOrganization.name }}</h2>
 
                         <STList class="illustration-list">
                             <STListItem :selectable="true" class="left-center" element-name="a" :href="'/beheerders/' + membershipOrganization.uri + '/boekhouding/exporteren'">
                                 <template #left>
-                                    <img src="@stamhoofd/assets/images/illustrations/calculator.svg">
-                                </template>
+                                    <img src="@stamhoofd/assets/images/illustrations/calculator.svg"></template>
                                 <h2 class="style-title-list">
                                     {{ $t('77e1bb0a-166c-4d37-9dd6-c5ad10a9d91b') }}
                                 </h2>
@@ -30,14 +28,13 @@
                                     {{ $t("64633f7b-2d6e-4ad2-abb1-e9dd77d9a81f") }}
                                 </p>
                                 <template #right>
-                                    <span class="icon external gray" />
+                                    <span class="icon external gray"/>
                                 </template>
                             </STListItem>
 
                             <STListItem :selectable="true" class="left-center" element-name="a" :href="'/beheerders/' + membershipOrganization.uri + '/boekhouding/overschrijvingen'">
                                 <template #left>
-                                    <img src="@stamhoofd/assets/images/illustrations/check-transfer.svg">
-                                </template>
+                                    <img src="@stamhoofd/assets/images/illustrations/check-transfer.svg"></template>
                                 <h2 class="style-title-list">
                                     {{ $t('35f1db1d-e8bd-4a0c-8141-97b8c716ec17') }}
                                 </h2>
@@ -45,14 +42,13 @@
                                     {{ $t('143d3f17-d547-47ff-9b83-f8587bcbc16c') }}
                                 </p>
                                 <template #right>
-                                    <span class="icon external gray" />
+                                    <span class="icon external gray"/>
                                 </template>
                             </STListItem>
 
                             <STListItem :selectable="true" class="left-center" element-name="a" :href="'/beheerders/' + membershipOrganization.uri + '/boekhouding/betalingen'">
                                 <template #left>
-                                    <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
-                                </template>
+                                    <img src="@stamhoofd/assets/images/illustrations/creditcards.svg"></template>
                                 <h2 class="style-title-list">
                                     {{ $t('9ac518c6-00fc-47c1-bd01-2f1f6fa17613') }}
                                 </h2>
@@ -60,14 +56,13 @@
                                     {{ $t('67433a1e-efe1-48a1-9b4c-84dea499c5b9') }}
                                 </p>
                                 <template #right>
-                                    <span class="icon external gray" />
+                                    <span class="icon external gray"/>
                                 </template>
                             </STListItem>
 
                             <STListItem :selectable="true" class="left-center" element-name="a" :href="'/beheerders/' + membershipOrganization.uri + '/boekhouding/openstaande-bedragen'">
                                 <template #left>
-                                    <img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg">
-                                </template>
+                                    <img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg"></template>
                                 <h2 class="style-title-list">
                                     {{ $t('231f28d7-292a-43bc-877b-751012b6ae48') }}
                                 </h2>
@@ -75,50 +70,49 @@
                                     {{ $t('f1248bd5-36f4-40fd-9467-08bda59127d6', {name: membershipOrganization!.name}) }}
                                 </p>
                                 <template #right>
-                                    <span class="icon external gray" />
+                                    <span class="icon external gray"/>
                                 </template>
                             </STListItem>
                         </STList>
                     </template>
-                    <hr>
-                    <h2>
-                        Aansluitingen aanrekenen
+                    <hr><h2>
+                        {{ $t('38f2d231-272a-46c9-8de1-f6e8a4f086dc') }}
                     </h2>
                     <p>
                         {{ $t("4a2a630f-3396-404f-9316-d660df9935a9") }}
                     </p>
 
                     <div class="style-stats-grid">
-                        <STInputBox title="Nieuwe aansluitingen">
+                        <STInputBox :title="$t(`b5050619-4600-47c2-b2fc-ecb8bfa82e85`)">
                             <p class="style-price-big">
-                                <span v-if="!summary" class="style-placeholder-skeleton" />
+                                <span v-if="!summary" class="style-placeholder-skeleton"/>
                                 <span v-else>
                                     {{ formatInteger(summary.memberships) }}
                                 </span>
                             </p>
                         </STInputBox>
 
-                        <STInputBox title="Unieke leden">
+                        <STInputBox :title="$t(`b53c320d-1821-4002-a986-2b6701f87755`)">
                             <p class="style-price-big">
-                                <span v-if="!summary" class="style-placeholder-skeleton" />
+                                <span v-if="!summary" class="style-placeholder-skeleton"/>
                                 <span v-else>
                                     {{ formatInteger(summary.members) }}
                                 </span>
                             </p>
                         </STInputBox>
 
-                        <STInputBox title="Totaal bedrag">
+                        <STInputBox :title="$t(`133e92d6-ae02-41e9-8d57-8727e7964558`)">
                             <p class="style-price-big">
-                                <span v-if="!summary" class="style-placeholder-skeleton" />
+                                <span v-if="!summary" class="style-placeholder-skeleton"/>
                                 <span v-else>
                                     {{ formatPrice(summary.price) }}
                                 </span>
                             </p>
                         </STInputBox>
 
-                        <STInputBox title="Unieke groepen">
+                        <STInputBox :title="$t(`66d75280-0469-4940-b816-624f6b5b7e89`)">
                             <p class="style-price-big">
-                                <span v-if="!summary" class="style-placeholder-skeleton" />
+                                <span v-if="!summary" class="style-placeholder-skeleton"/>
                                 <span v-else>
                                     {{ formatInteger(summary.organizations) }}
                                 </span>
@@ -137,8 +131,7 @@
                         {{ $t('ffd221f8-0f55-4b66-99f4-d43916f55f90') }}
                     </p>
 
-                    <hr>
-                    <h2>
+                    <hr><h2>
                         {{ $t('5e9e86f7-81f6-4ffe-9cda-95982de2b4cb') }}
                     </h2>
                     <p>
@@ -152,7 +145,7 @@
                     <STList v-if="membershipOrganization">
                         <STListItem :selectable="true" @click="chooseMembershipOrganization">
                             <template #left>
-                                <OrganizationAvatar :organization="membershipOrganization" />
+                                <OrganizationAvatar :organization="membershipOrganization"/>
                             </template>
 
                             <h3 class="style-title-list">
@@ -162,7 +155,7 @@
                             <template #right>
                                 <span class="button text">
                                     {{ $t('6c9746ca-285b-444a-89d3-4052897e2dc2') }}
-                                    <span class="icon arrow-right-small" />
+                                    <span class="icon arrow-right-small"/>
                                 </span>
                             </template>
                         </STListItem>
@@ -184,13 +177,12 @@
                     </p>
 
                     <div v-if="summary && summary?.trials.members > 0" class="container">
-                        <hr>
-                        <h2>{{ $t('cc3d3da6-27ce-4f32-a696-4e08d649a7bc') }}</h2>
+                        <hr><h2>{{ $t('cc3d3da6-27ce-4f32-a696-4e08d649a7bc') }}</h2>
 
                         <div class="style-stats-grid">
                             <STInputBox :title="$t('faa31f24-a42f-454b-9ceb-417c46dcee0d')">
                                 <p class="style-price-big">
-                                    <span v-if="!summary" class="style-placeholder-skeleton" />
+                                    <span v-if="!summary" class="style-placeholder-skeleton"/>
                                     <span v-else>
                                         {{ formatInteger(summary.trials.memberships) }}
                                     </span>
@@ -199,7 +191,7 @@
 
                             <STInputBox :title="$t('8e0924af-042c-42ab-85e1-dda0a2106b98')">
                                 <p class="style-price-big">
-                                    <span v-if="!summary" class="style-placeholder-skeleton" />
+                                    <span v-if="!summary" class="style-placeholder-skeleton"/>
                                     <span v-else>
                                         {{ formatInteger(summary.trials.members) }}
                                     </span>
@@ -208,7 +200,7 @@
 
                             <STInputBox :title="$t('e886fb7a-9312-4e74-b426-5acb694fe009')">
                                 <p class="style-price-big">
-                                    <span v-if="!summary" class="style-placeholder-skeleton" />
+                                    <span v-if="!summary" class="style-placeholder-skeleton"/>
                                     <span v-else>
                                         {{ formatPrice(summary.trials.price) }}
                                     </span>
@@ -217,7 +209,7 @@
 
                             <STInputBox :title="$t('b789017f-58d2-438b-b73a-2a4d075e3c5b')">
                                 <p class="style-price-big">
-                                    <span v-if="!summary" class="style-placeholder-skeleton" />
+                                    <span v-if="!summary" class="style-placeholder-skeleton"/>
                                     <span v-else>
                                         {{ formatInteger(summary.trials.organizations) }}
                                     </span>
@@ -227,13 +219,12 @@
                     </div>
 
                     <div v-for="type of platform.config.membershipTypes" :key="type.id" class="container">
-                        <hr>
-                        <h2>{{ $t('ed995f5d-eeff-44ad-ac35-f518b2892524') }} "{{ type.name }}"</h2>
+                        <hr><h2>{{ $t('ed995f5d-eeff-44ad-ac35-f518b2892524') }} "{{ type.name }}"</h2>
 
                         <div class="style-stats-grid">
                             <STInputBox :title="$t('faa31f24-a42f-454b-9ceb-417c46dcee0d')">
                                 <p class="style-price-big">
-                                    <span v-if="!summary" class="style-placeholder-skeleton" />
+                                    <span v-if="!summary" class="style-placeholder-skeleton"/>
                                     <span v-else>
                                         {{ formatInteger(getSummaryForType(type).memberships) }}
                                     </span>
@@ -242,7 +233,7 @@
 
                             <STInputBox :title="$t('8e0924af-042c-42ab-85e1-dda0a2106b98')">
                                 <p class="style-price-big">
-                                    <span v-if="!summary" class="style-placeholder-skeleton" />
+                                    <span v-if="!summary" class="style-placeholder-skeleton"/>
                                     <span v-else>
                                         {{ formatInteger(getSummaryForType(type).members) }}
                                     </span>
@@ -251,7 +242,7 @@
 
                             <STInputBox :title="$t('e886fb7a-9312-4e74-b426-5acb694fe009')">
                                 <p class="style-price-big">
-                                    <span v-if="!summary" class="style-placeholder-skeleton" />
+                                    <span v-if="!summary" class="style-placeholder-skeleton"/>
                                     <span v-else>
                                         {{ formatPrice(getSummaryForType(type).price) }}
                                     </span>
@@ -260,7 +251,7 @@
 
                             <STInputBox :title="$t('b789017f-58d2-438b-b73a-2a4d075e3c5b')">
                                 <p class="style-price-big">
-                                    <span v-if="!summary" class="style-placeholder-skeleton" />
+                                    <span v-if="!summary" class="style-placeholder-skeleton"/>
                                     <span v-else>
                                         {{ formatInteger(getSummaryForType(type).organizations) }}
                                     </span>

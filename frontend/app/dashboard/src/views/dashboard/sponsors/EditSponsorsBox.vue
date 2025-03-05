@@ -1,13 +1,13 @@
 <template>
     <div class="container">
         <h2 class="style-with-button">
-            <div>Sponsors</div>
+            <div>{{ $t('190073b3-d692-46a7-925d-908f99a1139b') }}</div>
             <div>
-                <button type="button" class="button icon add" @click="addSponsor" />
+                <button type="button" class="button icon add" @click="addSponsor"/>
             </div>
         </h2>
 
-        <p>Het is mogelijk om het logo van sponsors op je tickets te plaatsen.</p>
+        <p>{{ $t('398c833d-d2af-477f-bed7-4862cd5dc9a7') }}</p>
 
         <STList v-model="draggableSponsors" :draggable="true">
             <template #item="{item: sponsor}">
@@ -16,12 +16,12 @@
                         {{ sponsor.name || 'Naamloos' }}
                     </h3>
                     <p v-if="sponsor.onTickets" class="style-description-small">
-                        Op tickets
+                        {{ $t('8ecdf993-08e2-4f13-99c4-2121b56ee23a') }}
                     </p>
 
                     <template #right>
-                        <span class="button icon drag gray" @click.stop @contextmenu.stop />
-                        <span class="icon arrow-right-small gray" />
+                        <span class="button icon drag gray" @click.stop @contextmenu.stop/>
+                        <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
             </template>

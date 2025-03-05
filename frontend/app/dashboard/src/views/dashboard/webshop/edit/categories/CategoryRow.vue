@@ -5,18 +5,18 @@
         </h2>
 
         <p v-if="!category.productIds.length" class="style-description">
-            Leeg
+            {{ $t('c4ef3803-02b2-4e6d-a71b-8dcc387e4a39') }}
         </p>
         <p v-else-if="category.productIds.length === 1" class="style-description">
-            Eén artikel
+            {{ $t('39310bc8-cec0-4d93-8452-56718fc2619f') }}
         </p>
         <p v-else class="style-description">
-            {{ category.productIds.length }} artikels
+            {{ category.productIds.length }} {{ $t('584a623a-a817-46ec-9fdb-91ad68de3926') }}
         </p>
 
         <template #right>
-            <span class="button icon drag gray" @click.stop @contextmenu.stop />
-            <span class="icon arrow-right-small gray" />
+            <span class="button icon drag gray" @click.stop @contextmenu.stop/>
+            <span class="icon arrow-right-small gray"/>
         </template>
     </STListItem>
 </template>

@@ -1,24 +1,23 @@
 <template>
     <div v-if="filteredItems.length !== 0 || !showName" class="container">
-        <hr>
-        <h2>
-            Openstaand<template v-if="showName">
-                bij {{ item.organization.name }}
+        <hr><h2>
+            {{ $t('e9d3c76c-a2c8-49ae-aad6-0154167bd66d') }}<template v-if="showName">
+                {{ $t('7e823b8e-4406-400e-bf02-9ecd3ed44806') }} {{ item.organization.name }}
             </template>
         </h2>
 
         <p v-if="filteredItems.length === 0" class="info-box">
-            Je hebt geen openstaande schulden
+            {{ $t('1486b9e9-f849-4ace-b5bc-6abce263bfd3') }}
         </p>
         <template v-else>
-            <GroupedBalanceList :item="item" />
+            <GroupedBalanceList :item="item"/>
 
-            <BalancePriceBreakdown :item="item" />
+            <BalancePriceBreakdown :item="item"/>
 
             <p class="style-button-bar right-align">
                 <button class="button primary" type="button" @click="checkout">
-                    <span>Betalen</span>
-                    <span class="icon arrow-right" />
+                    <span>{{ $t('627c742f-ce38-4b13-be64-314727b98608') }}</span>
+                    <span class="icon arrow-right"/>
                 </button>
             </p>
         </template>

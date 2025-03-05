@@ -1,6 +1,6 @@
 <template>
     <form class="st-view filter-editor" @submit.prevent="save">
-        <STNavigationBar :title="title" />
+        <STNavigationBar :title="title"/>
 
         <main>
             <h1>
@@ -13,18 +13,18 @@
             <p class="warning-box" v-if="options?.warning">
                 {{ options.warning }}
             </p>
-            <!-- Todo: hier selector: nieuwe filter maken of bestaande filter bewerken, of opslaan als niewue filter -->
+            
 
-            <PropertyFilterInput v-model="editingConfiguration" :builder="builder" />
+            <PropertyFilterInput v-model="editingConfiguration" :builder="builder"/>
         </main>
 
         <STToolbar>
             <template #right>
                 <button class="button secundary" type="button" @click="cancel">
-                    Annuleren
+                    {{ $t('9e721cec-a0bf-466e-b4dd-b8369369cebc') }}
                 </button>
                 <button class="button primary" type="button" @click="save">
-                    Opslaan
+                    {{ $t('bd7fc57f-7ba8-4011-8557-a720a55ecc6f') }}
                 </button>
             </template>
         </STToolbar>

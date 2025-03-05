@@ -1,9 +1,7 @@
 <template>
     <STInputBox :title="title" error-fields="nationalRegisterNumber" :error-box="errors.errorBox" :class="class">
-        <input v-if="value === NationalRegisterNumberOptOut" :disabled="true" :value="'Geen Belgische nationaliteit'" class="input">
-        <input v-else v-model="nrrRaw" v-format-input="DataValidator.getBelgianNationalNumberInputFormatter()" :placeholder="placeholder || (!required ? 'Optioneel' : 'JJ.MM.DD-XXX.XX')" class="input" type="text" :class="{placeholder: isSuggestion}" :disabled="disabled" v-bind="$attrs" @change="validate(false)" @input="(event: any) => {nrrRaw = event.currentTarget.value; onTyping();}">
-        <template #right>
-            <slot name="right" />
+        <input v-if="value === NationalRegisterNumberOptOut" :disabled="true" :value="'Geen Belgische nationaliteit'" class="input"><input v-else v-model="nrrRaw" v-format-input="DataValidator.getBelgianNationalNumberInputFormatter()" :placeholder="placeholder || (!required ? $t(`e64a0d25-fe5a-4c87-a087-97ad30b2b12b`) : $t(`56f83594-082c-47a8-8844-1a407c52b4d4`))" class="input" type="text" :class="{placeholder: isSuggestion}" :disabled="disabled" v-bind="$attrs" @change="validate(false)" @input="(event: any) => {nrrRaw = event.currentTarget.value; onTyping();}"><template #right>
+            <slot name="right"/>
         </template>
     </STInputBox>
 </template>

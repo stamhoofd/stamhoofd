@@ -2,7 +2,7 @@
     <form class="st-view" data-submit-last-field @submit.prevent="applyFilter">
         <STNavigationBar v-if="!popup || canDelete || canPop" :title="capitalizeFirstLetter(filter.name ? filter.name : filter.builder.name)" :disable-dismiss="canPop">
             <template v-if="canDelete" #right>
-                <button class="button icon trash" type="button" @click="deleteFilter" />
+                <button class="button icon trash" type="button" @click="deleteFilter"/>
             </template>
         </STNavigationBar>
 
@@ -11,13 +11,13 @@
                 {{ capitalizeFirstLetter(filter.name ? filter.name : filter.builder.name) }}
             </h1>
 
-            <FramedComponent :root="filterComponent" />
+            <FramedComponent :root="filterComponent"/>
         </main>
 
         <STToolbar v-if="!live || !popup">
             <template #right>
                 <button class="button primary full" type="button" @click="applyFilter">
-                    Toepassen
+                    {{ $t('e9b917d5-d251-4afa-ae7c-ce1f3b799c7d') }}
                 </button>
             </template>
         </STToolbar>

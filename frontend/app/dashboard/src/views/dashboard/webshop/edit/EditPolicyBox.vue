@@ -1,48 +1,33 @@
 <template>
     <div class="container">
-        <hr>
-        <h2 class="style-with-button">
-            <div>Externe link: {{ policy.name || "Naamloos" }}</div>
+        <hr><h2 class="style-with-button">
+            <div>{{ $t('21844c74-0d66-4d5a-8d90-06502b2a7955') }} {{ policy.name || "Naamloos" }}</div>
             <div>
                 <button class="button text only-icon-smartphone" type="button" @click="emits('delete')">
-                    <span class="icon trash" />
-                    <span>Verwijderen</span>
+                    <span class="icon trash"/>
+                    <span>{{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}</span>
                 </button>
             </div>
         </h2>
 
-        <STInputBox title="Naam">
-            <input
-                ref="firstInput"
-                v-model="name"
-                class="input"
-                type="text"
-                :placeholder="'bv. Contact'"
-                autocomplete="off"
-            >
-        </STInputBox>
+        <STInputBox :title="$t(`d32893b7-c9b0-4ea3-a311-90d29f2c0cf3`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t(`8706b706-b967-4136-88ba-e96838fd95b3`)" autocomplete="off"></STInputBox>
 
-        <STInputBox title="Naar waar wijst deze link?" error-fields="privacy" :error-box="errorBox" class="max">
+        <STInputBox error-fields="privacy" :error-box="errorBox" class="max" :title="$t(`8e34f68e-607c-4cb5-9a74-70c4984c0226`)">
             <RadioGroup>
                 <Radio v-model="selectedType" value="website">
-                    Naar een website
+                    {{ $t('e6445264-fcbf-4ff8-b7cb-9b08338e2a0c') }}
                 </Radio>
                 <Radio v-model="selectedType" value="file">
-                    Naar een PDF-bestand
+                    {{ $t('b503f475-efd9-4413-a792-8230b0663d84') }}
                 </Radio>
             </RadioGroup>
         </STInputBox>
 
-        <STInputBox v-if="selectedType === 'website'" key="website" title="Volledige link" error-fields="url" :error-box="errorBox">
-            <input
-                v-model="url"
-                class="input"
-                type="url"
-                :placeholder="$t('daf8a992-77cd-4c20-8bca-5c692fd1e431')"
-            >
-        </STInputBox>
+        <STInputBox v-if="selectedType === 'website'" key="website" error-fields="url" :error-box="errorBox" :title="$t(`82530bca-53e8-4dc7-b04b-dc520853efc8`)">
+            <input v-model="url" class="input" type="url" :placeholder="$t('daf8a992-77cd-4c20-8bca-5c692fd1e431')"></STInputBox>
 
-        <FileInput v-if="selectedType === 'file'" key="file" v-model="file" title="Kies een bestand" :validator="validator" :required="false" />
+        <FileInput v-if="selectedType === 'file'" key="file" v-model="file" :validator="validator" :required="false" :title="$t(`6ef890af-c906-448d-9e38-a65643a0501e`)"/>
     </div>
 </template>
 

@@ -1,17 +1,17 @@
 <template>
     <div v-if="isAdmin" class="container">
-        <Title v-bind="$attrs" :title="title" />
+        <Title v-bind="$attrs" :title="title"/>
 
-        <STErrorsDefault :error-box="parentErrorBox" />
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="parentErrorBox"/>
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <Checkbox v-model="dataPermissions" :indeterminate="!dataPermissionsChangeDate">
-            Er werd toestemming gegeven
+            {{ $t('8015df59-5a9f-4fda-808c-9fa47ab12ada') }}
         </Checkbox>
 
         <p v-if="!willMarkReviewed && dataPermissionsChangeDate" class="style-description-small">
-            Laatst nagekeken op {{ formatDate(dataPermissionsChangeDate) }}. <button v-tooltip="'Het lid zal deze stap terug moeten doorlopen via het ledenportaal'" type="button" class="inline-link" @click="clear">
-                Wissen
+            {{ $t('169a6691-dd2e-41a1-b10a-2442330dffbf') }} {{ formatDate(dataPermissionsChangeDate) }}. <button v-tooltip="'Het lid zal deze stap terug moeten doorlopen via het ledenportaal'" type="button" class="inline-link" @click="clear">
+                {{ $t('56bcb109-f47d-4f8b-8bd5-59cb085096bc') }}
             </button>.
         </p>
         <p v-if="!dataPermissionsChangeDate" class="style-description-small">
@@ -23,10 +23,10 @@
         </p>
     </div>
     <div v-else class="container">
-        <Title v-bind="$attrs" :title="title" />
-        <p class="style-description pre-wrap" v-text="description" />
-        <STErrorsDefault :error-box="parentErrorBox" />
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <Title v-bind="$attrs" :title="title"/>
+        <p class="style-description pre-wrap" v-text="description"/>
+        <STErrorsDefault :error-box="parentErrorBox"/>
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <Checkbox v-model="dataPermissions">
             {{ checkboxLabel }}

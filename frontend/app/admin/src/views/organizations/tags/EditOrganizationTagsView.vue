@@ -3,18 +3,18 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
-        <p>Je kan groepen onderverdelen in een hiërachie via tags, verbonden, gewesten en/of gouwen. Elke groep kan meerdere tags krijgen volgens de regels die je instelt bij elke tag.</p>
+        <p>{{ $t('ba0da10b-2a56-4e95-ac24-d0a350727126') }}</p>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <STList v-model="draggableTags" :draggable="true">
             <template #item="{item: tag}">
-                <TagRow :tag="tag" :all-tags="tags" @click="editTag(tag)" @patch:all-tags="addArrayPatch" />
+                <TagRow :tag="tag" :all-tags="tags" @click="editTag(tag)" @patch:all-tags="addArrayPatch"/>
             </template>
         </STList>
         <p>
             <button class="button text" type="button" @click="addTag">
-                <span class="icon add" />
+                <span class="icon add"/>
                 <span>{{ $t('f87ed463-4821-4877-96db-03c693f46013') }}</span>
             </button>
         </p>

@@ -1,17 +1,17 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Nieuw werkjaar" />
+        <STNavigationBar :title="$t(`c17d34c1-757d-40ca-b23d-997d7dfc8843`)"/>
 
         <main>
             <h1>{{ period.name }}</h1>
             <p>{{ $t('b5f857ee-6c3b-43df-866c-99e7e0954eb1') }} </p>
-            <STErrorsDefault :error-box="errors.errorBox" />
+            <STErrorsDefault :error-box="errors.errorBox"/>
 
             <ul class="style-list">
-                <li>De structuur van jouw leeftijdsgroepen blijft behouden, maar je moet zelf nog de prijs en datums goed zetten. Vergeet dit niet.</li>
+                <li>{{ $t('dcde3300-62fe-4fb5-8edd-fb4c1ab3d744') }}</li>
                 <li>{{ $t('c5d21881-b70a-489e-bce9-5bb3d24b6f76') }}</li>
-                <li>Je kan nog steeds aan de gegevens van vorig jaar</li>
-                <li>Alle leiding en leden verliezen hun functies en moet je opnieuw instellen</li>
+                <li>{{ $t('7b0cbfb8-c2f4-4b0e-b29b-38ca5b7944e6') }}</li>
+                <li>{{ $t('099f075f-9ac2-4735-be99-36ec222840f1') }}</li>
             </ul>
         </main>
 
@@ -19,7 +19,7 @@
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" @click="start">
-                        Starten
+                        {{ $t('13842f4e-0c55-4751-ab34-6c015fe4337c') }}
                     </button>
                 </LoadingButton>
             </template>

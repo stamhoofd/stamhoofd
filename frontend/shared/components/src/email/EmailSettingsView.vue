@@ -1,13 +1,13 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="E-mailadressen" />
+        <STNavigationBar :title="$t(`E-mailadressen`)"/>
 
         <main>
             <h1>
-                E-mailadressen
+                {{ $t('94a15216-0f44-457e-83a7-0052c1526a01') }}
             </h1>
 
-            <p>Wijzig de e-mailadressen waarmee je e-mails kan versturen. Alle informatie over e-mailadressen en e-mails vind je op <a class="inline-link" :href="$domains.getDocs('e-mailadressen-instellen')" target="_blank">deze pagina</a>.</p>
+            <p>{{ $t('1ce9e0f3-d682-42a9-9280-7587b1c36e9d') }} <a class="inline-link" :href="$domains.getDocs('e-mailadressen-instellen')" target="_blank">{{ $t('7fd04b13-e600-49b1-bafb-e4f642154bcd') }}</a>.</p>
 
             <STList>
                 <STListItem v-for="email in emails" :key="email.id" :selectable="true" class="right-stack" @click="editEmail(email)">
@@ -19,22 +19,22 @@
                     </p>
 
                     <template #right>
-                        <span v-if="email.default" class="style-tag">Standaard</span>
-                        <span class="icon arrow-right-small gray" />
+                        <span v-if="email.default" class="style-tag">{{ $t('fe31f384-8acb-49db-95a5-d5a882a84b13') }}</span>
+                        <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
             </STList>
 
             <p v-if="emails.length === 0" class="info-box">
-                Je hebt nog geen e-mailadressen toegevoegd. 
+                {{ $t('f42341e8-9ffe-4a18-a8c8-4238c8b807c0') }} 
             </p>
         </main>
 
         <STToolbar>
             <template #right>
                 <button class="button primary" type="button" @click="addEmail">
-                    <span class="icon add" />
-                    <span>E-mailadres toevoegen</span>
+                    <span class="icon add"/>
+                    <span>{{ $t('7b7b7b9e-ec24-4e5d-920d-1ac8b4e05e81') }}</span>
                 </button>
             </template>
         </STToolbar>

@@ -2,17 +2,17 @@
     <STList>
         <STListItem v-for="item in filteredBalanceItems" :key="item.id" element-name="label" :selectable="true" class="right-stack no-margin">
             <template #left>
-                <Checkbox :model-value="isItemSelected(item)" :disabled="isPayable && item.priceOpen < 0" @update:model-value="setItemSelected(item, $event)" />
+                <Checkbox :model-value="isItemSelected(item)" :disabled="isPayable && item.priceOpen < 0" @update:model-value="setItemSelected(item, $event)"/>
             </template>
 
-            <BalanceItemTitleBox :item="item" :is-payable="isPayable" />
+            <BalanceItemTitleBox :item="item" :is-payable="isPayable"/>
 
             <template #right>
                 <div v-if="isItemSelected(item)">
                     <p v-if="isPayable && getItemPrice(item) < 0" class="style-price-base">
                         {{ formatPrice(getItemPrice(item)) }}
                     </p>
-                    <PriceInput v-else :model-value="getItemPrice(item)" placeholder="0 euro" :min="item.priceOpen < 0 ? item.priceOpen : 0" :max="item.priceOpen >= 0 ? item.priceOpen : 0" @update:model-value="setItemPrice(item, $event)" />
+                    <PriceInput v-else :model-value="getItemPrice(item)" :min="item.priceOpen < 0 ? item.priceOpen : 0" :max="item.priceOpen >= 0 ? item.priceOpen : 0" @update:model-value="setItemPrice(item, $event)" :placeholder="$t(`6281a9a8-6450-4956-b451-3fd128adbb3d`)"/>
                 </div>
                 <template v-else>
                     <p class="style-discount-old-price disabled">
@@ -23,7 +23,7 @@
         </STListItem>
     </STList>
 
-    <PriceBreakdownBox :price-breakdown="priceBreakdown" />
+    <PriceBreakdownBox :price-breakdown="priceBreakdown"/>
 </template>
 
 <script setup lang="ts">

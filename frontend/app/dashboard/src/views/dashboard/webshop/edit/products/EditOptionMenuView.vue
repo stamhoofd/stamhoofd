@@ -1,53 +1,43 @@
 <template>
-    <SaveView :title="isNew ? 'Keuzemenu toevoegen' : 'Keuzemenu bewerken'" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`Keuzemenu toevoegen`) : $t(`Keuzemenu bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            Keuzemenu toevoegen
+            {{ $t('dd2d4bf5-5ca9-4516-b0ac-0b62e8a37a0c') }}
         </h1>
         <h1 v-else>
-            Keuzemenu bewerken
+            {{ $t('57d2c651-5905-4b05-b0b9-2bdace7a8a5c') }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
-            <input
-                ref="firstInput"
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="bv. Kies je extra's"
-                autocomplete="off"
-            >
-        </STInputBox>
+        <STErrorsDefault :error-box="errors.errorBox"/>
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`d32893b7-c9b0-4ea3-a311-90d29f2c0cf3`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`8378485f-a62b-4c81-8355-271306ed6968`)"></STInputBox>
 
         <Checkbox v-model="multipleChoice">
-            Meerkeuze
+            {{ $t('14902f38-96a6-48b1-85ea-65992b8dcd3f') }}
         </Checkbox>
         <p class="style-description">
-            Bij meerkeuze kunnen bestellers geen, één of meerdere keuzes aanduiden. In het andere geval moet er exact één keuze gemaakt worden (of je voegt nog een extra optie 'geen' toe).
+            {{ $t("60883f08-6117-4a37-b7a0-0279863229d6") }}
         </p>
 
-        <hr>
-        <h2 class="style-with-button">
-            <div>Keuzes</div>
+        <hr><h2 class="style-with-button">
+            <div>{{ $t('24dec8c3-16e8-4dc9-b71a-d0a4adce2c8d') }}</div>
             <div>
                 <button class="button text only-icon-smartphone" type="button" @click="addOption">
-                    <span class="icon add" />
-                    <span>Keuze</span>
+                    <span class="icon add"/>
+                    <span>{{ $t('7eb44f10-ac07-4174-adc0-ae3ffb1e4f6e') }}</span>
                 </button>
             </div>
         </h2>
 
-        <OptionMenuOptions :option-menu="patchedOptionMenu" @patch="addOptionMenuPatch" />
+        <OptionMenuOptions :option-menu="patchedOptionMenu" @patch="addOptionMenuPatch"/>
 
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Verwijder dit keuzemenu
+            <hr><h2>
+                {{ $t('5704f4fc-1f24-42b6-81c8-471cd0892e99') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span class="icon trash"/>
+                <span>{{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}</span>
             </button>
         </div>
     </SaveView>

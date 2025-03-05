@@ -3,19 +3,19 @@
         <figure>
             <div v-color="$user.memberId" class="letter-logo" :data-length="letters.length">
                 {{ letters }}
-                <span v-if="!letters" class="icon user" />
+                <span v-if="!letters" class="icon user"/>
             </div>
 
             <span>
                 <span class="hide-medium">{{ $user.name || 'Account' }}</span>
-                <span class="icon arrow-down-small" />
+                <span class="icon arrow-down-small"/>
             </span>
         </figure>
     </button>
     <template v-else-if="!isNative">
         <a class="button text only-icon-smartphone" :href="'https://'+$domains.marketing+''" rel="noopener">
-            <span class="icon external" />
-            <span>Terug naar website</span>
+            <span class="icon external"/>
+            <span>{{ $t('521853e8-2370-4977-baaf-4d8754c14621') }}</span>
         </a>
 
         <a v-if="!isPlatform" class="button primary" href="/aansluiten" @click.prevent="$navigate('join')">

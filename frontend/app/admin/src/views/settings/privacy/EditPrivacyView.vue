@@ -3,20 +3,20 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
-        <p>Voeg voorwaarden toe die bij het registereren staan vermeldt of geaccepteerd moeten worden.</p>
+        <p>{{ $t('9a2d0c71-1286-4e6d-9541-abfc292be5b8') }}</p>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <STList v-model="draggablePolicies" :draggable="true">
             <template #item="{item: policy}">
-                <PolicyRow :policy="policy" @click="editPolicy(policy)" />
+                <PolicyRow :policy="policy" @click="editPolicy(policy)"/>
             </template>
         </STList>
 
         <p>
             <button class="button text" type="button" @click="addPolicy">
-                <span class="icon add" />
-                <span>Voorwaarden</span>
+                <span class="icon add"/>
+                <span>{{ $t('5422b5ab-9f2e-4dd9-b346-0f9f5165214b') }}</span>
             </button>
         </p>
     </SaveView>

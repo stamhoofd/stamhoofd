@@ -1,34 +1,25 @@
 <template>
-    <SaveView :loading="saving" title="Algemeen" :disabled="!hasSomeChanges" @save="save">
+    <SaveView :loading="saving" :disabled="!hasSomeChanges" @save="save" :title="$t(`f8ce21aa-06de-4373-874c-ddad1629cad8`)">
         <h1>
             {{ title }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <div v-if="isReview" class="container">
-            <ReviewCheckbox :data="$reviewCheckboxData" />
+            <ReviewCheckbox :data="$reviewCheckboxData"/>
         </div>
 
         <div v-else class="split-inputs">
             <div>
                 <STInputBox :title="$t('840ac72d-d4b3-40ea-afb4-b0109e88c640')" error-fields="name" :error-box="errors.errorBox">
-                    <input
-                        id="organization-name"
-                        ref="firstInput"
-                        v-model="name"
-                        class="input"
-                        type="text"
-                        :placeholder="$t('cb51b737-c4cf-4ea7-aeb5-b5736a43c333')"
-                        autocomplete="organization"
-                    >
-                </STInputBox>
+                    <input id="organization-name" ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('cb51b737-c4cf-4ea7-aeb5-b5736a43c333')" autocomplete="organization"></STInputBox>
 
-                <AddressInput v-model="address" :title="$t('68c40b9e-30d7-4ce5-8069-f7ca93221906')" :validator="errors.validator" :link-country-to-locale="true" />
+                <AddressInput v-model="address" :title="$t('68c40b9e-30d7-4ce5-8069-f7ca93221906')" :validator="errors.validator" :link-country-to-locale="true"/>
             </div>
 
             <div>
-                <UrlInput v-model="website" :title="$t('0e17f20e-e0a6-4fa0-8ec4-378e4325bea5')" :placeholder="$t('5d75775a-a4b5-426a-aea9-b1e75ee5f055')" :validator="errors.validator" :required="false" />
+                <UrlInput v-model="website" :title="$t('0e17f20e-e0a6-4fa0-8ec4-378e4325bea5')" :placeholder="$t('5d75775a-a4b5-426a-aea9-b1e75ee5f055')" :validator="errors.validator" :required="false"/>
 
                 <p class="style-description-small">
                     {{ $t('ffdbd596-e9c8-4c67-bfdf-41a5199de133') }}
@@ -36,40 +27,38 @@
             </div>
         </div>
 
-        <hr>
-
-        <h2>Facturatiegegevens</h2>
-        <p>Voeg één of meerdere juridische entiteiten toe. Als je zowel een feitelijke vereniging als een VZW hebt, voeg ze dan beide toe. De eerste in de lijst wordt standaard gebruikt als je betalingen uitvoert.</p>
+        <hr><h2>{{ $t('add6177f-a067-4e79-b7b9-aee2070375f6') }}</h2>
+        <p>{{ $t('fd66e094-1ffa-427e-a86a-4063896a7edf') }}</p>
 
         <p v-if="draggableCompanies.length === 0" class="info-box">
-            Geen facturatiegegevens toegevoegd
+            {{ $t('75b646d2-a269-446a-99c6-1de8781fddd3') }}
         </p>
 
         <STList v-else v-model="draggableCompanies" :draggable="true">
             <template #item="{item: company, index}">
                 <STListItem :selectable="true" class="right-stack" @click="editCompany(company)">
                     <template #left>
-                        <span class="icon email" />
+                        <span class="icon email"/>
                     </template>
                     <h3 class="style-title-list">
                         {{ company.name || 'Naamloos' }}
                     </h3>
 
                     <p v-if="company.VATNumber" class="style-description-small">
-                        {{ company.VATNumber }} (BTW-plichtig)
+                        {{ company.VATNumber }} {{ $t('4023e307-cbc4-48e4-a5dc-277cf74db1e3') }}
                     </p>
                     <p v-else-if="company.companyNumber" class="style-description-small">
                         {{ company.companyNumber }}
                     </p>
                     <p v-else class="style-description-small">
-                        Feitelijke vereniging
+                        {{ $t('522b4446-bd3d-4d53-a95a-e82f0de07d5e') }}
                     </p>
 
                     <p v-if="company.address" class="style-description-small">
                         {{ company.address.shortString() }}
                     </p>
                     <p v-else class="style-description-small">
-                        <span class="style-tag error">Adres ontbreekt</span>
+                        <span class="style-tag error">{{ $t('71cb9967-674e-4922-8791-76b0590c5f35') }}</span>
                     </p>
 
                     <p v-if="company.administrationEmail" class="style-description-small">
@@ -78,10 +67,10 @@
 
                     <template #right>
                         <span v-if="index === 0" class="style-tag">
-                            Standaard
+                            {{ $t('fe31f384-8acb-49db-95a5-d5a882a84b13') }}
                         </span>
-                        <span class="button icon drag gray" @click.stop @contextmenu.stop />
-                        <span class="icon arrow-right-small gray" />
+                        <span class="button icon drag gray" @click.stop @contextmenu.stop/>
+                        <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
             </template>
@@ -89,15 +78,14 @@
 
         <p class="style-button-bar">
             <button class="button text" type="button" @click="addCompany">
-                <span class="icon add" />
-                <span>Toevoegen</span>
+                <span class="icon add"/>
+                <span>{{ $t('73b74929-78f4-4cfa-8a20-92a071a84ec5') }}</span>
             </button>
         </p>
 
         <div v-if="!isReview">
             <div v-for="category of recordCategories" :key="category.id" class="container">
-                <hr>
-                <FillRecordCategoryBox :category="category" :value="patched" :validator="errors.validator" :level="2" :all-optional="false" :force-mark-reviewed="true" @patch="patchAnswers" />
+                <hr><FillRecordCategoryBox :category="category" :value="patched" :validator="errors.validator" :level="2" :all-optional="false" :force-mark-reviewed="true" @patch="patchAnswers"/>
             </div>
         </div>
     </SaveView>

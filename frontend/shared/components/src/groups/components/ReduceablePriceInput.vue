@@ -1,25 +1,25 @@
 <template>
-    <STErrorsDefault :error-box="ownErrors.errorBox" />
+    <STErrorsDefault :error-box="ownErrors.errorBox"/>
     <div class="split-inputs">
         <STInputBox :title="title" error-fields="price" :error-box="errorBox">
-            <PriceInput v-model="price" placeholder="Gratis" :min="min" />
+            <PriceInput v-model="price" :min="min" :placeholder="$t(`74de7e46-000a-4f52-aa70-3365e88fec05`)"/>
             <p v-if="defaultMembershipTypeId" class="style-description-small">
                 {{ formatPriceForPlatform(defaultPrice, defaultPriceNow) }}
             </p>
         </STInputBox>
 
         <STInputBox v-if="$showReducedPrice" :title="financialSupportSettings.priceName" error-fields="price" :error-box="errorBox">
-            <PriceInput v-model="reducedPrice" :placeholder="formatPrice(price)" :min="min" :required="false" />
+            <PriceInput v-model="reducedPrice" :placeholder="formatPrice(price)" :min="min" :required="false"/>
             <p v-if="defaultMembershipTypeId" class="style-description-small">
                 {{ formatPriceForPlatform(defaultReducedPrice, defaultReducedPriceNow) }}
             </p>
         </STInputBox>
 
-        <slot v-else-if="$slots.end" name="end" />
+        <slot v-else-if="$slots.end" name="end"/>
     </div>
 
     <div v-if="$slots.end && $showReducedPrice" class="split-inputs">
-        <slot name="end" />
+        <slot name="end"/>
     </div>
 </template>
 

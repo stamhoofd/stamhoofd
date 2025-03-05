@@ -1,29 +1,29 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Betaling" />
+        <STNavigationBar :title="$t(`1cd57a56-7d3c-4435-ba60-1688b3bfa2e5`)"/>
 
         <main v-if="payment && payment.status === 'Pending' && payment.method === 'DirectDebit'">
-            <h1>Betaling in verwerking</h1>
-            <p>Jouw betaling is aangevraagd via jouw bank. Het kan tot 5 werkdagen duren voor we een bevestiging van de betaling ontvangen. In tussentijd blijft de betaling de status 'in verwerking' behouden.</p>
+            <h1>{{ $t('e7772c32-4512-4b9a-bcc1-624d7f6e6259') }}</h1>
+            <p>{{ $t("96dffb93-3dc1-468c-bfe7-41273749a4ac") }}</p>
         </main>
 
         <main v-else-if="!payment || payment.status !== 'Failed'">
-            <h1>Wachten op betaalbevestiging...</h1>
-            <p>We wachten op de betaalbevestiging van de bank. Verlaat deze pagina niet. Dit duurt hooguit 5 minuten.</p>
+            <h1>{{ $t('f2729f97-b278-415b-8d11-ea8b8e93f143') }}</h1>
+            <p>{{ $t('cec4261e-53e9-485d-bf86-249fcc901677') }}</p>
 
-            <Spinner />
+            <Spinner/>
         </main>
 
         <main v-else>
-            <h1>Betaling mislukt</h1>
-            <p>De betaling werd geannuleerd of door de bank geweigerd.</p>
+            <h1>{{ $t('2a2dac34-253a-457f-b12f-5b8d955a761d') }}</h1>
+            <p>{{ $t('714c5044-e5a1-451c-97ed-c905852b0a1e') }}</p>
         </main>
 
         <STToolbar v-if="payment && (payment.status === 'Failed' || payment.method === 'Payconiq')">
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" @click="retry">
-                        <span>Opnieuw proberen</span>
+                        <span>{{ $t('bb3e7bd9-eead-4baa-a445-78f35b0d7c56') }}</span>
                     </button>
                 </LoadingButton>
             </template>

@@ -1,24 +1,23 @@
 <template>
     <div class="container">
-        <hr>
-        <h2 class="style-with-button">
+        <hr><h2 class="style-with-button">
             <div>
                 {{ title }}
             </div>
             <div>
                 <button class="button text" type="button" @click="addTimeSlot">
-                    <span class="icon add" />
-                    <span>Keuze</span>
+                    <span class="icon add"/>
+                    <span>{{ $t('7eb44f10-ac07-4174-adc0-ae3ffb1e4f6e') }}</span>
                 </button>
             </div>
         </h2>
-        <slot />
+        <slot/>
 
         <p v-if="timeSlots.timeSlots.length === 0" class="info-box">
-            Je hebt geen intervallen toegevoegd, dus er moet geen keuze gemaakt worden.
+            {{ $t('dd257be5-2786-40ac-88cc-c0faf569be95') }}
         </p>
         <p v-if="timeSlots.timeSlots.length === 1" class="info-box">
-            Er is maar één keuze, dus we communiceren dit interval i.v.p. een keuze te geven.
+            {{ $t('862426f7-eb7d-47e3-a8f7-3dca3d5f084d') }}
         </p>
 
         <STList>
@@ -34,7 +33,7 @@
                 <template #right>
                     <span v-if="timeSlot.maxOrders" class="style-tag">{{ timeSlot.usedOrders }} / {{ timeSlot.maxOrders }}</span>
                     <span v-if="timeSlot.maxPersons" class="style-tag">{{ timeSlot.usedPersons }} / {{ timeSlot.maxPersons }}p</span>
-                    <span class="icon arrow-right-small gray" />
+                    <span class="icon arrow-right-small gray"/>
                 </template>
             </STListItem>
         </STList>

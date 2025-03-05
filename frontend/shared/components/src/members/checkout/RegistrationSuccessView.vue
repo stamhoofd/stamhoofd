@@ -1,32 +1,32 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="title" />
+        <STNavigationBar :title="title"/>
         <main>
             <h1>{{ title }}</h1>
 
             <template v-if="!checkout || !checkout.isAdminFromSameOrganization">
                 <p v-if="names.length > 0">
-                    Je ontvangt een extra bevestiging via e-mail. Als er in de toekomst gegevens wijzigen kan je die vanaf nu beheren via het ledenportaal.
+                    {{ $t('9994ba06-1a78-4e7f-b35e-cb3b87760f0e') }}
                 </p>
 
                 <p v-else-if="waitingListNames.length > 0">
-                    We houden je op de hoogte van jouw status op de wachtlijst.
+                    {{ $t('4357a189-ec02-4c56-ac31-d265c3764a69') }}
                 </p>
 
                 <p v-else>
-                    Jouw betaling is gelukt.
+                    {{ $t('170bd2f3-198e-434e-8f6e-b6f7bcca4444') }}
                 </p>
             </template>
             <p v-else>
-                Er werden mogelijks automatische e-mails uitgestuurd als die ingesteld stonden.
+                {{ $t('539a8051-be80-4b9c-9c47-008d80cd53d8') }}
             </p>
         </main>
 
         <STToolbar>
             <template #right>
                 <button class="button primary" type="button" @click="dismiss({ force: true })">
-                    <span>Sluiten</span>
-                    <span class="icon arrow-right" />
+                    <span>{{ $t('08919911-1157-400d-b89c-265233590019') }}</span>
+                    <span class="icon arrow-right"/>
                 </button>
             </template>
         </STToolbar>

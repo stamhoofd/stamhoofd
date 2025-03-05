@@ -2,7 +2,7 @@
     <div class="st-view">
         <STNavigationBar :title="title">
             <template #right>
-                <button v-if="isReviewer" v-long-press="(e) => showContextMenu(e)" class="button icon navigation more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
+                <button v-if="isReviewer" v-long-press="(e) => showContextMenu(e)" class="button icon navigation more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu"/>
             </template>
         </STNavigationBar>
 
@@ -12,7 +12,7 @@
             </h1>
             <p>{{ type.description }}</p>
 
-            <STErrorsDefault :error-box="errors.errorBox" />
+            <STErrorsDefault :error-box="errors.errorBox"/>
 
             <STList class="info">
                 <STListItem :selectable="notification.events.length === 1" @click="isReviewer && notification.events.length === 1 && openEvent(null)">
@@ -23,11 +23,11 @@
                         <span>{{ notification.events.map(e => e.name).join(', ') }}</span>
                     </p>
                     <p v-if="notification.events.length === 0" class="style-definition-text style-em">
-                        Geen
+                        {{ $t('039ea891-15aa-42d4-8513-7f29d0743514') }}
                     </p>
 
                     <template v-if="isReviewer && notification.events.length === 1" #right>
-                        <span class="icon arrow-right-small gray" />
+                        <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
 
@@ -42,7 +42,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        Wanneer
+                        {{ $t('c1e1b64c-5817-431f-95fb-e8a29b074e6f') }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ capitalizeFirstLetter(formatDateRange(notification.startDate, notification.endDate, undefined, false)) }}</span>
@@ -51,13 +51,13 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        Status
+                        {{ $t('38b75e19-10cb-4641-88a8-f4e2e9be7576') }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ capitalizeFirstLetter(EventNotificationStatusHelper.getName(notification.status)) }}</span>
-                        <span v-if="notification.status === EventNotificationStatus.Pending" class="icon clock" />
-                        <span v-if="notification.status === EventNotificationStatus.Rejected" class="icon error red" />
-                        <span v-if="notification.status === EventNotificationStatus.Accepted" class="icon success green" />
+                        <span v-if="notification.status === EventNotificationStatus.Pending" class="icon clock"/>
+                        <span v-if="notification.status === EventNotificationStatus.Rejected" class="icon error red"/>
+                        <span v-if="notification.status === EventNotificationStatus.Accepted" class="icon success green"/>
                     </p>
 
                     <p v-if="notification.submittedBy && notification.submittedAt" class="style-description-small">
@@ -69,26 +69,25 @@
                     <h3 class="style-definition-label">
                         {{ $t('e4017a21-58c1-4cea-824c-8cef6a7ab019') }}
                     </h3>
-                    <p class="style-definition-text pre-wrap style-em" v-text="notification.feedbackText" />
+                    <p class="style-definition-text pre-wrap style-em" v-text="notification.feedbackText"/>
 
                     <template v-if="isReviewer" #right>
-                        <span class="icon edit gray" />
+                        <span class="icon edit gray"/>
                     </template>
                 </STListItem>
             </STList>
 
             <template v-if="notification.status === EventNotificationStatus.Draft">
-                <hr>
-                <h2>Gegevens</h2>
-                <p>Vul de gegevens hieronder aan voor je de kampmelding indient.</p>
+                <hr><h2>{{ $t('4596bd3a-5be6-4cd3-a489-8f3a566b9302') }}</h2>
+                <p>{{ $t('fdd5879b-03b5-498f-aeae-b970ea6a6401') }}</p>
 
-                <!-- For each record category: a new view -->
+                
                 <STList>
                     <STListItem v-for="category of recordCategories" :key="category.id" :selectable="isEnabled(category)" :disabled="!isEnabled(category)" @click="editRecordCategory(category)">
                         <template #left>
                             <IconContainer :icon="'file-filled'" :class="getRecordCategoryProgress(category) === 1 ? 'success' : 'gray'">
                                 <template #aside>
-                                    <ProgressIcon :icon="getRecordCategoryProgress(category) === 1 ? 'success' : undefined" :progress="getRecordCategoryProgress(category)" />
+                                    <ProgressIcon :icon="getRecordCategoryProgress(category) === 1 ? 'success' : undefined" :progress="getRecordCategoryProgress(category)"/>
                                 </template>
                             </IconContainer>
                         </template>
@@ -96,17 +95,17 @@
                             {{ category.name }}
                         </h3>
                         <p v-if="getRecordCategoryProgress(category) === 0" class="style-description">
-                            Nog niet ingevuld
+                            {{ $t('c8489e66-b852-4634-800a-c128d04f310c') }}
                         </p>
                         <p v-else-if="getRecordCategoryProgress(category) === 1" class="style-description">
-                            Volledig ingevuld
+                            {{ $t('9ae32bf8-5e1b-4915-a264-25dc3d9fc1f8') }}
                         </p>
                         <p v-else class="style-description">
-                            Onvolledig
+                            {{ $t('edfe0b87-4b2d-4b2d-a2cf-2df5699b52fa') }}
                         </p>
 
                         <template #right>
-                            <span v-if="isEnabled(category)" class="icon arrow-right-small gray" />
+                            <span v-if="isEnabled(category)" class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
                 </STList>
@@ -115,33 +114,32 @@
             <template v-else>
                 <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="notification">
                     <template v-if="isReviewer || notification.status === EventNotificationStatus.Rejected" #buttons>
-                        <button type="button" class="button icon edit" @click="editRecordCategory(category)" />
+                        <button type="button" class="button icon edit" @click="editRecordCategory(category)"/>
                     </template>
                 </ViewRecordCategoryAnswersBox>
             </template>
 
             <div v-if="notification.status === EventNotificationStatus.Pending && isComplete && isReviewer" class="container">
-                <hr>
-                <h2>Beslissing</h2>
+                <hr><h2>{{ $t('0c7ca5f0-7d4c-4db4-8790-54e9b29f3211') }}</h2>
 
                 <STList>
                     <STListItem :selectable="true" element-name="button" @click="doAccept">
                         <template #left>
                             <IconContainer icon="notification" class="success">
                                 <template #aside>
-                                    <span class="icon success small" />
+                                    <span class="icon success small"/>
                                 </template>
                             </IconContainer>
                         </template>
                         <h3 class="style-title-list">
-                            Goedkeuren
+                            {{ $t('75c5cff8-cbd9-45d6-95ce-e156d7be17ee') }}
                         </h3>
                         <p class="style-description-small">
-                            Keur deze melding goed.
+                            {{ $t('c368c82b-8367-47bb-9343-bbccc7359269') }}
                         </p>
 
                         <template #right>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
 
@@ -149,20 +147,20 @@
                         <template #left>
                             <IconContainer icon="notification" class="error">
                                 <template #aside>
-                                    <span class="icon canceled small" />
+                                    <span class="icon canceled small"/>
                                 </template>
                             </IconContainer>
                         </template>
 
                         <h3 class="style-title-list">
-                            Afkeuren
+                            {{ $t('730c48eb-5ba4-4c8e-b0a3-40b55f624358') }}
                         </h3>
                         <p class="style-description-small">
-                            Hierna zijn er terug wijzigingen mogelijk. Laat eventueel een opmerking achter.
+                            {{ $t('6c9efcd5-465c-4001-9fc6-c9f96ae74cf6') }}
                         </p>
 
                         <template #right>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
                 </STList>
@@ -173,11 +171,11 @@
             <template #right>
                 <LoadingButton :loading="isSaving">
                     <button class="button primary" :disabled="!isComplete" type="button" @click="doSubmit">
-                        <span v-if="notification.status === EventNotificationStatus.Rejected" class="icon retry" />
-                        <span v-else class="icon success" />
+                        <span v-if="notification.status === EventNotificationStatus.Rejected" class="icon retry"/>
+                        <span v-else class="icon success"/>
 
-                        <span v-if="notification.status === EventNotificationStatus.Rejected">Opnieuw indienen</span>
-                        <span v-else>Indienen</span>
+                        <span v-if="notification.status === EventNotificationStatus.Rejected">{{ $t('71bef82c-78e7-4d75-85e4-e88d8db5dbf9') }}</span>
+                        <span v-else>{{ $t('5a00361c-71ff-43e1-85db-b8afdf804ef7') }}</span>
                     </button>
                 </LoadingButton>
             </template>

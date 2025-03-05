@@ -1,12 +1,12 @@
 <template>
     <div class="product-selector-box">
-        <STInputBox title="Artikel" error-fields="productId" :error-box="errors.errorBox" class="max">
+        <STInputBox error-fields="productId" :error-box="errors.errorBox" class="max" :title="$t(`f95dd046-6f79-40ce-9bf0-432f7975e5a0`)">
             <div class="style-input-box" @click="changeProduct">
                 <STList v-if="product">
                     <STListItem :selectable="true">
                         <template #left>
                             <div v-if="product.images[0]" class="product-selector-image-preview">
-                                <ImageComponent :image="product.images[0]" :auto-height="true" />
+                                <ImageComponent :image="product.images[0]" :auto-height="true"/>
                             </div>
                         </template>
 
@@ -15,21 +15,21 @@
                         </h2>
 
                         <template #right>
-                            <span class="icon arrow-down-small gray" />
+                            <span class="icon arrow-down-small gray"/>
                         </template>
                     </STListItem>
                 </STList>
                 <div v-else>
-                    Onbekend artikel
+                    {{ $t('c3a21ae7-c89a-4c22-847e-00af55eca36a') }}
                 </div>
             </div>
         </STInputBox>
 
-        <STInputBox v-if="product && product.prices.length > 1" title="Prijskeuzes" error-fields="productPriceIds" :error-box="errors.errorBox" class="max">
+        <STInputBox v-if="product && product.prices.length > 1" error-fields="productPriceIds" :error-box="errors.errorBox" class="max" :title="$t(`fb734ada-d1ae-4b37-9afb-84d6c8a22ea5`)">
             <STList>
                 <STListItem v-for="price of product.prices" :key="price.id" :selectable="true" element-name="label">
                     <template #left>
-                        <Checkbox :model-value="isPriceSelected(price)" @update:model-value="setPriceSelected(price, $event)" />
+                        <Checkbox :model-value="isPriceSelected(price)" @update:model-value="setPriceSelected(price, $event)"/>
                     </template>
 
                     <h2 class="style-title-list">
@@ -39,11 +39,11 @@
             </STList>
         </STInputBox>
 
-        <STInputBox v-for="optionMenu of product.optionMenus" :key="optionMenu.id" :title="optionMenu.name || 'Naamloos'" :error-fields="'optionMenu.'+optionMenu.id" :error-box="errors.errorBox" class="max">
+        <STInputBox v-for="optionMenu of product.optionMenus" :key="optionMenu.id" :title="optionMenu.name || $t(`98719c26-a227-4446-b95a-4234a445824d`)" :error-fields="'optionMenu.'+optionMenu.id" :error-box="errors.errorBox" class="max">
             <STList>
                 <STListItem v-for="option of optionMenu.options" :key="option.id" :selectable="true" element-name="label">
                     <template #left>
-                        <Checkbox :model-value="isOptionSelected(optionMenu, option)" @update:model-value="setOptionSelected(optionMenu, option, $event)" />
+                        <Checkbox :model-value="isOptionSelected(optionMenu, option)" @update:model-value="setOptionSelected(optionMenu, option, $event)"/>
                     </template>
 
                     <h2 class="style-title-list">
@@ -53,7 +53,7 @@
                     <template #right>
                         <button v-if="optionMenu.multipleChoice" class="button text" type="button" @click.stop.prevent="showRequirementMenu(optionMenu, option, $event)">
                             <span>{{ getRequirementName(getOptionRequirement(optionMenu, option)) }}</span>
-                            <span class="icon arrow-down-small" />
+                            <span class="icon arrow-down-small"/>
                         </button>
                     </template>
                 </STListItem>

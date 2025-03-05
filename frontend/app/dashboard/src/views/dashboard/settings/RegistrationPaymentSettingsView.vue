@@ -4,25 +4,15 @@
             {{ title }}
         </h1>
 
-        <p>Alle informatie over de verschillen tussen elke betaalmethode vind je op <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-inschrijvingen-instellen')" target="_blank">deze pagina</a>.</p>
+        <p>{{ $t('ea125318-1334-46ea-88d4-3177063d7009') }} <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-inschrijvingen-instellen')" target="_blank">{{ $t('7fd04b13-e600-49b1-bafb-e4f642154bcd') }}</a>.</p>
 
         <div v-if="isReview" class="container">
-            <ReviewCheckbox :data="review.$reviewCheckboxData" />
-            <hr>
-        </div>
+            <ReviewCheckbox :data="review.$reviewCheckboxData"/>
+            <hr></div>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox"/>
 
-        <EditPaymentMethodsBox
-            type="registration"
-            :organization="organization"
-
-            :config="config"
-            :private-config="privateConfig"
-            :validator="validator"
-            @patch:config="patchConfig($event)"
-            @patch:private-config="patchPrivateConfig($event)"
-        />
+        <EditPaymentMethodsBox type="registration" :organization="organization" :config="config" :private-config="privateConfig" :validator="validator" @patch:config="patchConfig($event)" @patch:private-config="patchPrivateConfig($event)"/>
     </SaveView>
 </template>
 

@@ -1,32 +1,30 @@
 <template>
     <div class="container">
-        <Title v-bind="$attrs" :title="title" />
+        <Title v-bind="$attrs" :title="title"/>
 
-        <STErrorsDefault :error-box="parentErrorBox" />
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="parentErrorBox"/>
+        <STErrorsDefault :error-box="errors.errorBox"/>
         <div class="split-inputs">
             <div>
-                <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errors.errorBox">
+                <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`d32893b7-c9b0-4ea3-a311-90d29f2c0cf3`)">
                     <div class="input-group">
                         <div>
-                            <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
-                        </div>
+                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`883f9695-e18f-4df6-8c0d-651c6dd48e59`)"></div>
                         <div>
-                            <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
-                        </div>
+                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :placeholder="$t(`f89d8bfa-6b5d-444d-a40f-ec17b3f456ee`)"></div>
                     </div>
                 </STInputBox>
 
-                <BirthDayInput v-if="isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay') ? 'Geboortedatum' : 'Geboortedatum (optioneel)'" :validator="validator" :required="isPropertyRequired('birthDay')">
+                <BirthDayInput v-if="isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay') ? $t(`64bdba26-b42f-4a9a-80f7-9e64b062852c`) : $t(`3c8a3b69-a643-40cb-a6c0-2c74b9500f44`)" :validator="validator" :required="isPropertyRequired('birthDay')">
                     <template v-if="!trackingYear && isAdmin" #right>
-                        <button class="button icon more-horizontal small gray" type="button" @click="showBirthDayMenu" />
+                        <button class="button icon more-horizontal small gray" type="button" @click="showBirthDayMenu"/>
                     </template>
                 </BirthDayInput>
 
                 <template v-if="isAdmin && trackingYear">
                     <TrackingYearInput v-model="trackingYear" :required="false" :validator="validator">
                         <template #right>
-                            <button v-tooltip="'Volgjaar verwijderen'" class="button icon trash small gray" type="button" @click="deleteTrackingYear" />
+                            <button v-tooltip="'Volgjaar verwijderen'" class="button icon trash small gray" type="button" @click="deleteTrackingYear"/>
                         </template>
                     </TrackingYearInput>
                     <p class="style-description-small">
@@ -34,80 +32,71 @@
                     </p>
                 </template>
 
-                <STInputBox v-if="isPropertyEnabled('gender') || gender !== Gender.Other" title="Identificeert zich als..." error-fields="gender" :error-box="errors.errorBox">
+                <STInputBox v-if="isPropertyEnabled('gender') || gender !== Gender.Other" error-fields="gender" :error-box="errors.errorBox" :title="$t(`da97feef-1aeb-405a-9637-67036597805e`)">
                     <RadioGroup>
                         <Radio v-model="gender" :value="Gender.Male" autocomplete="sex" name="sex">
-                            Man
+                            {{ $t('733002b7-217f-4917-bad2-a74fabb3c3e9') }}
                         </Radio>
                         <Radio v-model="gender" :value="Gender.Female" autocomplete="sex" name="sex">
-                            Vrouw
+                            {{ $t('14d4fedb-fb49-4f81-844c-a14664ce389f') }}
                         </Radio>
                         <Radio v-model="gender" :value="Gender.Other" autocomplete="sex" name="sex">
-                            Andere
+                            {{ $t('f155bd72-de32-4a15-8627-bd185718a14e') }}
                         </Radio>
                     </RadioGroup>
                 </STInputBox>
 
-                <PhoneInput v-if="!member.isNew && (isPropertyEnabled('phone') || phone)" v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
-                <EmailInput v-if="(!member.isNew || birthDay) && (isPropertyEnabled('emailAddress') || email)" v-model="email" :required="isPropertyRequired('emailAddress')" :title="'E-mailadres' + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :validator="validator">
+                <PhoneInput v-if="!member.isNew && (isPropertyEnabled('phone') || phone)" v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? $t(`a7b55eb1-cade-40dd-81db-d0045a187892`): $t(`2df5a373-2545-4bb7-bf80-0750ae06c7ba`)"/>
+                <EmailInput v-if="(!member.isNew || birthDay) && (isPropertyEnabled('emailAddress') || email)" v-model="email" :required="isPropertyRequired('emailAddress')" :title="$t(`0be79160-b242-44dd-94f0-760093f7f9f2`) + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? $t(`a7b55eb1-cade-40dd-81db-d0045a187892`): $t(`2df5a373-2545-4bb7-bf80-0750ae06c7ba`)" :validator="validator">
                     <template #right>
-                        <button v-tooltip="'Alternatief e-mailadres toevoegen'" class="button icon add small gray" type="button" @click="addEmail" />
+                        <button v-tooltip="'Alternatief e-mailadres toevoegen'" class="button icon add small gray" type="button" @click="addEmail"/>
                     </template>
                 </EmailInput>
-                <EmailInput
-                    v-for="n in alternativeEmails.length"
-                    :key="n"
-                    :model-value="getEmail(n - 1)"
-                    :required="true"
-                    :title="'Alternatief e-mailadres ' + (alternativeEmails.length > 1 ? n : '') "
-                    :placeholder="'Enkel van lid zelf'"
-                    :validator="validator"
-                    @update:model-value="setEmail(n - 1, $event)"
-                >
+                <EmailInput v-for="n in alternativeEmails.length" :key="n" :model-value="getEmail(n - 1)" :required="true" :title="$t(`bfb03263-25f0-41d6-a68d-8946a3a5dd8a`) + ' ' + (alternativeEmails.length > 1 ? n : '') " :placeholder="$t(`a7b55eb1-cade-40dd-81db-d0045a187892`)" :validator="validator" @update:model-value="setEmail(n - 1, $event)">
                     <template #right>
-                        <button class="button icon trash small gray" type="button" @click="deleteEmail(n - 1)" />
+                        <button class="button icon trash small gray" type="button" @click="deleteEmail(n - 1)"/>
                     </template>
                 </EmailInput>
                 <div v-if="!member.isNew && (isPropertyEnabled('emailAddress') || email) && member.patchedMember.details.canHaveOwnAccount">
                     <p v-if="member.patchedMember.details.parentsHaveAccess" class="style-description-small">
-                        {{ member.patchedMember.firstName }} kan zelf inloggen of registreren op <template v-if="alternativeEmails.length">
-                            één van de ingevoerde e-mailadressen.
+                        {{ member.patchedMember.firstName }} {{ $t('86fec6f3-a092-45b7-8acf-acf850bda840') }} <template v-if="alternativeEmails.length">
+                            {{ $t('abaefd64-a9cf-45b6-9ad0-f7d68178e179') }}
                         </template><template v-else>
-                            het ingevoerde e-mailadres.
-                        </template> Daarnaast kan je in één van de volgende stappen één of meerdere ouders toevoegen, met een e-mailadres, die ook toegang krijgen. Vul hier enkel een e-mailadres van {{ member.patchedMember.firstName }} zelf in.
+                            {{ $t('13844a29-c6ea-4a6e-8234-287e6c2228d9') }}
+                        </template> {{ $t('4fcaa9e8-f43b-46cd-a2ec-c85f125b5214') }} {{ member.patchedMember.firstName }} {{ $t('f6327d3c-87c1-4b4e-ad4f-0f248213c287') }}
                     </p>
                     <p v-else class="style-description-small">
-                        {{ member.patchedMember.firstName }} kan zelf inloggen of registreren op <template v-if="alternativeEmails.length">
-                            één van de ingevoerde e-mailadressen
+                        {{ member.patchedMember.firstName }} {{ $t('86fec6f3-a092-45b7-8acf-acf850bda840') }} <template v-if="alternativeEmails.length">
+                            {{ $t('3c5deb93-94f1-4104-b690-d805813157e0') }}
                         </template><template v-else>
-                            het ingevoerde e-mailadres
-                        </template>. Vul enkel een e-mailadres van {{ member.patchedMember.firstName }} zelf in.
+                            {{ $t('652bf35d-8557-42a8-8307-df3c640346cc') }}
+                        </template>{{ $t('f5e394e3-36dd-43ef-ad9d-75eef4ab119e') }} {{ member.patchedMember.firstName }} {{ $t('f6327d3c-87c1-4b4e-ad4f-0f248213c287') }}
                     </p>
                 </div>
 
                 <div v-if="!member.isNew && (nationalRegisterNumber || isPropertyEnabled('nationalRegisterNumber') )">
-                    <NRNInput v-model="nationalRegisterNumber" :title="'Rijksregisternummer' + lidSuffix" :required="isPropertyRequired('nationalRegisterNumber')" :nullable="true" :validator="validator" :birth-day="birthDay" />
+                    <NRNInput v-model="nationalRegisterNumber" :title="$t(`642e4034-71e5-4d00-a6f4-b7dbcc39aac0`) + lidSuffix" :required="isPropertyRequired('nationalRegisterNumber')" :nullable="true" :validator="validator" :birth-day="birthDay"/>
                     <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
-                        Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. Heeft {{ firstName || 'dit lid' }} geen Belgische nationaliteit, <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
-                            klik dan hier
+                        {{ $t('f2a92145-3e48-4bd4-ab7f-c36624cc7f76') }} {{ firstName || 'dit lid' }} {{ $t('db74359d-7094-4e58-ac75-22f3bf318763') }} <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
+                            {{ $t('0af2c851-cf7e-4821-8e18-386150f9b7a8') }}
                         </button>.
                     </p>
                     <p v-else class="style-description-small">
-                        Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit, <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
-                            klik dan hier
+                        {{ $t('d8e665a4-2cc3-4787-a83c-6c232bb269c5') }} <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
+                            {{ $t('0af2c851-cf7e-4821-8e18-386150f9b7a8') }}
                         </button>.
                     </p>
                 </div>
             </div>
 
             <div v-if="!member.isNew">
-                <SelectionAddressInput v-if="address || isPropertyEnabled('address')" v-model="address" :addresses="availableAddresses" :required="isPropertyRequired('address')" :title="'Adres' + lidSuffix + (isPropertyRequired('address') ? '' : ' (optioneel)')" :validator="validator" />
+                <SelectionAddressInput v-if="address || isPropertyEnabled('address')" v-model="address" :addresses="availableAddresses" :required="isPropertyRequired('address')" :title="$t(`e6dc987c-457b-4253-9eef-db9ccdb774f1`) + lidSuffix + (isPropertyRequired('address') ? '' : ' ' + $t(`6ec5beb6-0b75-4875-8622-11940bbc509b`))" :validator="validator"/>
             </div>
         </div>
 
         <p v-if="!willMarkReviewed && reviewDate && isAdmin" class="style-description-small">
-            Laatst nagekeken op {{ formatDate(reviewDate) }}. <button v-tooltip="'Het lid zal deze stap terug moeten doorlopen via het ledenportaal'" type="button" class="inline-link" @click="clear">
-                Wissen
+            {{ $t('169a6691-dd2e-41a1-b10a-2442330dffbf') }} {{ formatDate(reviewDate) }}. <button v-tooltip="'Het lid zal deze stap terug moeten doorlopen via het ledenportaal'" type="button" class="inline-link" @click="clear">
+                {{ $t('56bcb109-f47d-4f8b-8bd5-59cb085096bc') }}
             </button>.
         </p>
     </div>

@@ -6,44 +6,25 @@
         </p>
 
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
         
         <div v-for="{title: groupTitle, roles: groupRoles} in groupedResponsibilites" :key="groupTitle" class="container">
-            <hr>
-            <h2>{{ groupTitle }}</h2>
+            <hr><h2>{{ groupTitle }}</h2>
 
             <STList>
-                <ResourcePermissionRow 
-                    v-for="{role, inheritedRole, patch} in groupRoles" 
-                    :key="role.id" 
-                    :role="role" 
-                    :inherited-roles="inheritedRole ? [inheritedRole] : []"
-                    :resource="resource" 
-                    :configurable-access-rights="configurableAccessRights"
-                    type="role" 
-                    @patch:role="patch" 
-                />
+                <ResourcePermissionRow v-for="{role, inheritedRole, patch} in groupRoles" :key="role.id" :role="role" :inherited-roles="inheritedRole ? [inheritedRole] : []" :resource="resource" :configurable-access-rights="configurableAccessRights" type="role" @patch:role="patch"/>
             </STList>
         </div>
 
-        <hr>
-        <h2>Externe beheerdersrollen</h2>
-        <p>Je kan toegang geven aan externe beheerders (beheerders die geen lid zijn) via externe beheerdersrollen.</p>
+        <hr><h2>{{ $t('748cdc4a-0915-42bb-b0e4-eb26d6659b35') }}</h2>
+        <p>{{ $t('e3d31fcb-d4f8-43bb-94c9-426e91971486') }}</p>
 
         <p v-if="roles.length === 0" class="info-box">
-            Je hebt nog geen beheerdersrollen aangemaakt. Hoofdbeheerders kunnen beheerdersrollen wijzigen via Instellingen → Beheerders. Daarna kan je de toegang hier verdelen.
+            {{ $t('c1d4f852-8e69-4991-8af9-d6ff7ac33745') }}
         </p>
 
         <STList>
-            <ResourcePermissionRow 
-                v-for="role in roles" 
-                :key="role.id" 
-                :role="role" 
-                :resource="resource" 
-                :configurable-access-rights="configurableAccessRights"
-                type="role" 
-                @patch:role="addPatch" 
-            />
+            <ResourcePermissionRow v-for="role in roles" :key="role.id" :role="role" :resource="resource" :configurable-access-rights="configurableAccessRights" type="role" @patch:role="addPatch"/>
         </STList>
     </SaveView>
 </template>

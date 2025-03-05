@@ -2,9 +2,9 @@
     <STListItem class="cart-item-row" :selectable="editable" @click="editItem()">
         <h3>
             <span>{{ cartItem.product.name }}</span>
-            <span v-if="editable" class="icon arrow-right-small gray" />
+            <span v-if="editable" class="icon arrow-right-small gray"/>
         </h3>
-        <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
+        <p v-if="cartItem.description" class="description" v-text="cartItem.description"/>
 
         <p v-if="labels.length > 0" class="discount-tags">
             <span v-for="discount of labels" :key="discount.id" class="style-tag discount">
@@ -22,8 +22,8 @@
             </p>
             <div @click.stop>
                 <span v-if="cartItem.formattedAmount" class="amount">{{ cartItem.formattedAmount }}</span>
-                <StepperInput v-if="editable && !cartItem.cartError && cartItem.seats.length === 0 && (maximumRemaining === null || maximumRemaining > 1)" v-model="amount" :min="1" :max="maximumRemaining" @click.native.stop />
-                <button v-if="editable" class="button icon trash" type="button" @click="deleteItem()" />
+                <StepperInput v-if="editable && !cartItem.cartError && cartItem.seats.length === 0 && (maximumRemaining === null || maximumRemaining > 1)" v-model="amount" :min="1" :max="maximumRemaining" @click.native.stop/>
+                <button v-if="editable" class="button icon trash" type="button" @click="deleteItem()"/>
             </div>
         </footer>
 
@@ -31,13 +31,13 @@
             {{ cartItem.cartError.getHuman() }}
 
             <span v-if="editable" class="button text">
-                <span>Corrigeren</span>
-                <span class="icon arrow-right-small" />
+                <span>{{ $t('1bac2b8d-a401-4893-baa4-7cc1697d1c4b') }}</span>
+                <span class="icon arrow-right-small"/>
             </span>
         </p>
 
         <figure v-if="cartItem.product.images[0]" slot="right">
-            <ImageComponent :image="cartItem.product.images[0]" :auto-height="true" />
+            <ImageComponent :image="cartItem.product.images[0]" :auto-height="true"/>
         </figure>
     </STListItem>
 </template>

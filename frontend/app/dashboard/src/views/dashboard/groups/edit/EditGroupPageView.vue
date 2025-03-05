@@ -4,43 +4,39 @@
             {{ title }}
         </h1>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox"/>
 
-        <hr>
-        <h2 class="style-with-button">
-            <div>Omslagfoto</div>
+        <hr><h2 class="style-with-button">
+            <div>{{ $t('e4a90efd-a536-472b-8f3f-cbd0fac0ba82') }}</div>
             <div>
                 <button v-if="coverPhoto" class="button text only-icon-smartphone" type="button" @click="coverPhoto = null">
-                    <span class="icon trash" />
-                    <span>Verwijderen</span>
+                    <span class="icon trash"/>
+                    <span>{{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}</span>
                 </button>
-                <UploadButton v-model="coverPhoto" :text="coverPhoto ? 'Vervangen' : 'Uploaden'" :resolutions="hs" />
+                <UploadButton v-model="coverPhoto" :text="coverPhoto ? $t(`c01d3d4e-ad4e-45ec-abac-431462c194cf`) : $t(`3370bb72-2817-4096-83ce-318993436513`)" :resolutions="hs"/>
             </div>
         </h2>
 
-        <p>Deze foto wordt getoond met een grootte van 1800 x 750 pixels, bovenaan de informatiepagina van deze groep.</p>
+        <p>{{ $t('745fdf86-28e4-4448-8012-b2959a873b12') }}</p>
 
         <figure v-if="coverPhotoSrc" class="cover-photo">
-            <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight">
-        </figure>
+            <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight"></figure>
 
-        <hr>
-        <h2 class="style-with-button">
-            <div>Vierkante foto of icoontje</div>
+        <hr><h2 class="style-with-button">
+            <div>{{ $t('0d984a81-9f69-4ba0-ad93-2706027fe78d') }}</div>
             <div>
                 <button v-if="squarePhoto" class="button text only-icon-smartphone" type="button" @click="squarePhoto = null">
-                    <span class="icon trash" />
-                    <span>Verwijderen</span>
+                    <span class="icon trash"/>
+                    <span>{{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}</span>
                 </button>
-                <UploadButton v-model="squarePhoto" :text="squarePhoto ? 'Vervangen' : 'Uploaden'" :resolutions="hsSquare" />
+                <UploadButton v-model="squarePhoto" :text="squarePhoto ? $t(`c01d3d4e-ad4e-45ec-abac-431462c194cf`) : $t(`3370bb72-2817-4096-83ce-318993436513`)" :resolutions="hsSquare"/>
             </div>
         </h2>
 
-        <p>Deze foto wordt getoond in het overzicht bij de keuze tussen alle groepen. Upload bij voorkeur een foto groter dan 200 x 200 pixels. Als je deze niet uploadt gebruiken we gewoon de omslagfoto (als die er is). Je hoeft dus niet dezelfde foto nog eens te uploaden.</p>
+        <p>{{ $t('4c3114b0-b806-4da3-a581-f9c2e285bcc8') }}</p>
 
         <figure v-if="squarePhotoSrc" class="square-photo">
-            <img :src="squarePhotoSrc">
-        </figure>
+            <img :src="squarePhotoSrc"></figure>
     </SaveView>
 </template>
 

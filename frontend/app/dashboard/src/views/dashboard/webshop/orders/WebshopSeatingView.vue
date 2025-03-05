@@ -1,42 +1,31 @@
 <template>
     <LoadingViewTransition>
         <div v-if="!loading && seatingPlan" class="st-view webshop-seating-view">
-            <STNavigationBar title="Zaaloverzicht">
+            <STNavigationBar :title="$t(`Zaaloverzicht`)">
                 <template v-if="hasFullPermissions" #right>
-                    <button class="icon navigation edit button" type="button" @click="editSeatingPlan" />
+                    <button class="icon navigation edit button" type="button" @click="editSeatingPlan"/>
                 </template>
             </STNavigationBar>
 
             <main>
                 <h1 class="style-navigation-title">
-                    Zaaloverzicht
+                    {{ $t('274e3def-240a-465c-b2e2-7fe2edac2dc5') }}
                 </h1>
 
                 <button v-if="selectedProduct && availableProducts.length > 1" class="button text inline" type="button" @click="chooseProduct">
                     <span>{{ selectedProduct.name }}</span>
-                    <span class="icon arrow-down-small" />
+                    <span class="icon arrow-down-small"/>
                 </button>
 
                 <p v-if="webshop !== null && selectedProduct && duplicateSeats.length" class="error-box">
-                    Dubbele boekingen gedetecteerd voor plaatsen: {{ duplicateSeats.map(s => s.getNameString(webshop!, selectedProduct!)).join(', ') }}
+                    {{ $t('f4a81ff4-6d86-49b5-8889-ed5667203dca') }} {{ duplicateSeats.map(s => s.getNameString(webshop!, selectedProduct!)).join(', ') }}
                 </p>
 
                 <div v-for="section of sections" :key="section.id" class="container">
-                    <hr>
-                    <h2>{{ section.name }}</h2>
+                    <hr><h2>{{ section.name }}</h2>
 
                     <div>
-                        <SeatSelectionBox
-                            v-if="seatingPlan && section"
-                            :seating-plan="seatingPlan"
-                            :seating-plan-section="section"
-                            :reserved-seats="reservedSeats"
-                            :seats="highlightedSeats"
-                            :highlight-seats="scannedSeats"
-                            :on-click-seat="onClickSeat"
-                            :on-hover-seat="onHoverSeat"
-                            :admin="true"
-                        />
+                        <SeatSelectionBox v-if="seatingPlan && section" :seating-plan="seatingPlan" :seating-plan-section="section" :reserved-seats="reservedSeats" :seats="highlightedSeats" :highlight-seats="scannedSeats" :on-click-seat="onClickSeat" :on-hover-seat="onHoverSeat" :admin="true"/>
                     </div>
                 </div>
             </main>

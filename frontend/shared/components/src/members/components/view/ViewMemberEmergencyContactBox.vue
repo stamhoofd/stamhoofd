@@ -1,12 +1,11 @@
 <template>
     <div class="hover-box container">
-        <hr>
-        <h2 class="style-with-button">
+        <hr><h2 class="style-with-button">
             <div>{{ emergencyContact.title || emergencyContact.name }}</div>
         </h2>
 
         <dl class="details-grid hover">
-            <dt>Naam</dt>
+            <dt>{{ $t('d32893b7-c9b0-4ea3-a311-90d29f2c0cf3') }}</dt>
             <dd v-copyable>
                 {{ emergencyContact.name }}
             </dd>

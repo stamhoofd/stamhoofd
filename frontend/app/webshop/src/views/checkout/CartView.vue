@@ -1,42 +1,42 @@
 <template>
     <div class="st-view cart-view">
-        <STNavigationBar :title="title" />
+        <STNavigationBar :title="title"/>
         <main class="flex">
             <h1 class="style-navigation-title">
                 {{ title }}
             </h1>
 
             <p v-if="cart.items.length === 0" class="info-box">
-                Jouw winkelmandje is leeg. Ga terug en klik op een product om iets toe te voegen.
+                {{ $t('34af2fbe-204c-4ff3-8be8-970c886f3f1b') }}
             </p>
 
             <p v-for="code of checkout.discountCodes" :key="code.id" class="discount-box icon label">
-                <span>Kortingscode <span class="style-discount-code">{{ code.code }}</span></span>
+                <span>{{ $t('2f4e2886-2c75-47d7-8bc4-5ace1a8d3a33') }} <span class="style-discount-code">{{ code.code }}</span></span>
 
-                <button class="button icon trash" type="button" @click="deleteCode(code)" />
+                <button class="button icon trash" type="button" @click="deleteCode(code)"/>
             </p>
 
-            <STErrorsDefault :error-box="errors.errorBox" />
+            <STErrorsDefault :error-box="errors.errorBox"/>
 
             <STList>
-                <CartItemRow v-for="cartItem of cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="cart" :webshop="webshop" :editable="true" :admin="false" @edit="editCartItem(cartItem)" @delete="deleteItem(cartItem)" @amount="setCartItemAmount(cartItem, $event)" />
+                <CartItemRow v-for="cartItem of cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="cart" :webshop="webshop" :editable="true" :admin="false" @edit="editCartItem(cartItem)" @delete="deleteItem(cartItem)" @amount="setCartItemAmount(cartItem, $event)"/>
             </STList>
 
-            <AddDiscountCodeBox v-if="webshop.meta.allowDiscountCodeEntry" :apply-code="applyCode" />
-            <PriceBreakdownBox :price-breakdown="checkout.priceBreakown" />
+            <AddDiscountCodeBox v-if="webshop.meta.allowDiscountCodeEntry" :apply-code="applyCode"/>
+            <PriceBreakdownBox :price-breakdown="checkout.priceBreakown"/>
         </main>
 
         <STToolbar>
             <template #right>
                 <button type="button" class="button secundary" @click="() => pop()">
-                    <span class="icon add" />
-                    <span v-if="cart.items.length > 0">Meer toevoegen</span>
-                    <span v-else>Iets toevoegen</span>
+                    <span class="icon add"/>
+                    <span v-if="cart.items.length > 0">{{ $t('0be414ce-d191-4677-b0f8-cae7931330eb') }}</span>
+                    <span v-else>{{ $t('a5bed4b6-36cd-4c88-b76d-23b82725c266') }}</span>
                 </button>
                 <LoadingButton v-if="cart.items.length > 0" :loading="loading">
                     <button class="button primary" type="button" @click="goToCheckout">
-                        <span class="icon flag" />
-                        <span>Bestellen</span>
+                        <span class="icon flag"/>
+                        <span>{{ $t('ba3a2564-068f-46fd-b2f4-00c0cb971018') }}</span>
                     </button>
                 </LoadingButton>
             </template>

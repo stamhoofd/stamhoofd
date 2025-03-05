@@ -1,27 +1,27 @@
 <template>
     <div id="settings-view" class="st-view background">
-        <STNavigationBar title="Logboek" />
+        <STNavigationBar :title="$t(`Logboek`)"/>
 
         <main class="center">
             <h1>
-                Logboek
+                {{ $t('b6df110f-d39b-40e5-9b9e-26fb7826cc60') }}
             </h1>
-            <p>In het logboek worden alle gebeurtenissen geregistreerd. Enkel hoofdbeheerders hebben toegang tot het logboek.</p>
+            <p>{{ $t('26b1f782-f694-4374-9e96-705bc2c5fe80') }}</p>
 
             <div class="input-with-buttons">
                 <div>
                     <div class="split-inputs">
-                        <STInputBox title="Vanaf" error-fields="startDate" :error-box="errors.errorBox">
-                            <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" placeholder="Begin" :required="false" />
+                        <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`cb8367e9-6497-483f-9d61-a595d1f5f441`)">
+                            <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" :required="false" :placeholder="$t(`5415d8bd-157a-40dc-859b-229f5fd6489d`)"/>
                         </STInputBox>
 
-                        <STInputBox title="Tot en met" error-fields="endDate" :error-box="errors.errorBox">
-                            <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" placeholder="Nu" :required="false" />
+                        <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t(`c0ab1bdb-143d-45cc-86f3-90ced04addad`)">
+                            <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" :required="false" :placeholder="$t(`92390555-fcfb-4f28-ac8b-6ca7c2453cad`)"/>
                         </STInputBox>
                     </div>
 
                     <p class="style-description-small">
-                        Snel selecteren: <span v-for="(suggestion, index) in dateRangeSuggestions" :key="suggestion.name">
+                        {{ $t('89466cd6-b1d8-4fb7-be92-1a4ee972530e') }} <span v-for="(suggestion, index) in dateRangeSuggestions" :key="suggestion.name">
                             <button type="button" class="inline-link" :class="isSuggestionSelected(suggestion) ? {secundary: false} : {secundary: true}" @click="selectSuggestion(suggestion)">
                                 {{ suggestion.name }}
                             </button><template v-if="index < dateRangeSuggestions.length - 1">, </template>
@@ -30,25 +30,22 @@
                 </div>
                 <div>
                     <button type="button" class="button text" @click="editFilter">
-                        <span class="icon filter" />
-                        <span class="hide-small">Filter</span>
-                        <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary" />
+                        <span class="icon filter"/>
+                        <span class="hide-small">{{ $t('52577565-f3ae-4d34-8e1a-14ca2507629e') }}</span>
+                        <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary"/>
                     </button>
                 </div>
             </div>
 
-            <hr>
-
-            <div v-for="(group, index) of groupedLogs" :key="group.title" class="container">
-                <hr v-if="index > 0">
-                <h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
+            <hr><div v-for="(group, index) of groupedLogs" :key="group.title" class="container">
+                <hr v-if="index > 0"><h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
 
                 <STList>
-                    <AuditLogRow v-for="log of group.logs" :key="log.id" :log="log" />
+                    <AuditLogRow v-for="log of group.logs" :key="log.id" :log="log"/>
                 </STList>
             </div>
 
-            <InfiniteObjectFetcherEnd empty-message="Geen logs gevonden" :fetcher="fetcher" />
+            <InfiniteObjectFetcherEnd empty-message="Geen logs gevonden" :fetcher="fetcher"/>
         </main>
     </div>
 </template>

@@ -4,59 +4,45 @@
             {{ title }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <div class="split-inputs">
             <STInputBox :title="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') ">
-                <input
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    :placeholder="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') "
-                >
-            </STInputBox>
-            <STInputBox title="Type" error-fields="behaviour" :error-box="errors.errorBox">
+                <input v-model="name" class="input" type="text" :placeholder="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') "></STInputBox>
+            <STInputBox error-fields="behaviour" :error-box="errors.errorBox" :title="$t(`b610d465-2901-4b54-97ae-dbeab72e4762`)">
                 <Dropdown v-model="behaviour">
                     <option :value="PlatformMembershipTypeBehaviour.Period">
-                        Vaste periode
+                        {{ $t('9abcd744-e4da-4bf6-8940-b125a01e240c') }}
                     </option>
                     <option :value="PlatformMembershipTypeBehaviour.Days">
-                        Per dag
+                        {{ $t('11147585-c48c-4b11-aa06-a49c08063053') }}
                     </option>
                 </Dropdown>
             </STInputBox>
         </div>
 
         <STInputBox :title="$t('1c338881-0940-429b-a47e-7c9d3055f533')" error-fields="settings.description" :error-box="errors.errorBox" class="max">
-            <textarea
-                v-model="description"
-                class="input"
-                type="text"
-                :placeholder="$t('3db64326-c892-4fdb-8293-3d713453383a')"
-                autocomplete="off"
-            />
+            <textarea v-model="description" class="input" type="text" :placeholder="$t('3db64326-c892-4fdb-8293-3d713453383a')" autocomplete="off"/>
         </STInputBox>
 
-        <hr>
-        <h2>{{ $t('3754b38e-3938-4589-801a-450ba0844990') }}</h2>
+        <hr><h2>{{ $t('3754b38e-3938-4589-801a-450ba0844990') }}</h2>
         <p>{{ $t('8004af94-7b57-4ce2-aa9b-a6658684116d') }}</p>
 
         <p v-if="sortedPeriods.length === 0" class="info-box">
-            Je hebt nog geen instellingen toegevoegd.
+            {{ $t('6f90796d-f2cb-48c7-80ec-306a2b31c75c') }}
         </p>
         <STList v-else>
-            <PlatformMembershipTypeConfigRow v-for="{period, config} of sortedPeriods" :key="period.id" :config="config" :period="period" :type="type" @click="editPeriod(config, period)" />
+            <PlatformMembershipTypeConfigRow v-for="{period, config} of sortedPeriods" :key="period.id" :config="config" :period="period" :type="type" @click="editPeriod(config, period)"/>
         </STList>
 
         <p>
             <button class="button text" type="button" @click="addConfig">
-                <span class="icon add" />
+                <span class="icon add"/>
                 <span>{{ $t('0b7c21d5-b9ed-4ddc-9370-7f58255f4eba') }}</span>
             </button>
         </p>
 
-        <hr>
-        <h2>{{ $t("db085652-c3d0-4d2c-aa4b-53ef4234d480") }}</h2>
+        <hr><h2>{{ $t("db085652-c3d0-4d2c-aa4b-53ef4234d480") }}</h2>
 
         <Checkbox v-model="requiredTagIdsEnabled">
             {{ $t("5fe7a400-8c6a-42ba-b920-c8518e60e091") }}
@@ -67,31 +53,27 @@
         </Checkbox>
 
         <JumpToContainer :visible="requiredTagIds !== null">
-            <hr>
-
-            <h2 class="style-with-button">
+            <hr><h2 class="style-with-button">
                 <div>{{ $t("02017e6d-47b0-4867-b590-be85a9b72008") }}</div>
                 <div>
-                    <button type="button" class="button icon trash" @click="() => requiredTagIds = null" />
+                    <button type="button" class="button icon trash" @click="() => requiredTagIds = null"/>
                 </div>
             </h2>
             <p>{{ $t("5fe7a400-8c6a-42ba-b920-c8518e60e091") }}</p>
 
-            <TagIdsInput v-model="requiredTagIds" :validator="errors.validator" />
+            <TagIdsInput v-model="requiredTagIds" :validator="errors.validator"/>
         </JumpToContainer>
 
         <JumpToContainer :visible="requiredDefaultAgeGroupIds !== null">
-            <hr>
-
-            <h2 class="style-with-button">
+            <hr><h2 class="style-with-button">
                 <div>{{ $t("3a75616e-f4ef-4dbd-8e35-8fe74571e442") }}</div>
                 <div>
-                    <button type="button" class="button icon trash" @click="() => requiredDefaultAgeGroupIds = null" />
+                    <button type="button" class="button icon trash" @click="() => requiredDefaultAgeGroupIds = null"/>
                 </div>
             </h2>
             <p>{{ $t("37d201fd-287d-4957-b559-b882744ea886") }}</p>
 
-            <DefaultAgeGroupIdsInput v-model="requiredDefaultAgeGroupIds" :validator="errors.validator" :should-select-at-least-one="true" />
+            <DefaultAgeGroupIdsInput v-model="requiredDefaultAgeGroupIds" :validator="errors.validator" :should-select-at-least-one="true"/>
         </JumpToContainer>
     </SaveView>
 </template>

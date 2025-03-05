@@ -1,90 +1,86 @@
 <template>
     <form class="st-view login-view" data-submit-last-field @submit.prevent="submit">
-        <STNavigationBar :large="true" title="Inloggen" class="transparent" />
+        <STNavigationBar :large="true" class="transparent" :title="$t(`Inloggen`)"/>
 
         <main class="center small flex">
             <div class="st-view-vertical-center">
                 <div class="container">
                     <h1>{{ $t('d54c9b23-2d3c-49cd-b1fc-7e821d36fd41') }}</h1>
 
-                    <STErrorsDefault :error-box="errors.errorBox" />
+                    <STErrorsDefault :error-box="errors.errorBox"/>
 
                     <template v-if="passwordConfig">
-                        <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="!initialEmail" enterkeyhint="next" class="max" name="username" title="E-mailadres" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
+                        <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="!initialEmail" enterkeyhint="next" class="max" name="username" :validator="errors.validator" autocomplete="username" :disabled="lock !== null" :title="$t(`0be79160-b242-44dd-94f0-760093f7f9f2`)" :placeholder="$t(`0a65c7be-dcc1-4bf7-9c6e-560085de9052`)"/>
                         <p v-if="lock" class="style-description-small">
                             {{ lock }}
                         </p>
 
-                        <STInputBox title="Wachtwoord" class="max">
+                        <STInputBox class="max" :title="$t(`032759a7-e6d6-429e-b4f0-5b8c6b1ae6dd`)">
                             <template #right>
                                 <button class="button text" type="button" tabindex="-1" @click.prevent="gotoPasswordForgot">
-                                    <span>Vergeten</span>
-                                    <span class="icon help" />
+                                    <span>{{ $t('c62d31cd-a064-483a-84d5-97f6f479bc15') }}</span>
+                                    <span class="icon help"/>
                                 </button>
                             </template>
-                            <input id="password" v-model="password" :autofocus="!!initialEmail" enterkeyhint="go" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="(event) => password = event.target.value" @change="(event) => password = event.target.value">
-                        </STInputBox>
-                        <VersionFooter v-if="showVersionFooter" />
+                            <input id="password" v-model="password" :autofocus="!!initialEmail" enterkeyhint="go" class="input" name="current-password" autocomplete="current-password" type="password" @input="(event) => password = event.target.value" @change="(event) => password = event.target.value" :placeholder="$t(`0f6aae79-7c28-4214-9acf-69693ca82e48`)"></STInputBox>
+                        <VersionFooter v-if="showVersionFooter"/>
                         <div v-else class="style-form-buttons ">
                             <LoadingButton :loading="loading" class="block">
                                 <button id="submit" class="button primary full" type="submit">
-                                    <span class="lock icon" />
-                                    <span>Inloggen</span>
+                                    <span class="lock icon"/>
+                                    <span>{{ $t('e146434b-e70f-44de-85d3-6b80dbc21041') }}</span>
                                 </button>
                             </LoadingButton>
 
                             <template v-if="googleConfig">
                                 <button class="button secundary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.Google)">
                                     <span class="icon">
-                                        <img src="@stamhoofd/assets/images/partners/icons/google.svg">
-                                    </span>
+                                        <img src="@stamhoofd/assets/images/partners/icons/google.svg"></span>
                                     <span v-if="googleConfig.loginButtonText">{{ googleConfig.loginButtonText }}</span>
-                                    <span v-else>Inloggen met Google</span>
+                                    <span v-else>{{ $t('fb69a88f-1fc4-4618-bab0-f348386df91d') }}</span>
                                 </button>
                             </template>
 
                             <template v-if="ssoConfig">
                                 <button class="button secundary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.SSO)">
                                     <span v-if="ssoConfig.loginButtonText">{{ ssoConfig.loginButtonText }}</span>
-                                    <span v-else-if="!passwordConfig">Inloggen</span>
-                                    <span v-else>Inloggen via SSO</span>
+                                    <span v-else-if="!passwordConfig">{{ $t('e146434b-e70f-44de-85d3-6b80dbc21041') }}</span>
+                                    <span v-else>{{ $t('72e793f4-d1e6-4e81-9c7d-4f0d1bee3d00') }}</span>
                                 </button>
                             </template>
                         </div>
 
-                        <hr>
-                        <p class="style-description-small">
-                            Of maak een nieuw account aan als je nog geen account hebt. Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.
+                        <hr><p class="style-description-small">
+                            {{ $t('604ceb81-8c3e-4afc-afd2-d844eb4b5861') }}
                         </p>
 
                         <button class="button text selected" type="button" tabindex="-1" @click="openSignup">
-                            <span>Account aanmaken</span>
-                            <span class="icon arrow-right-small" />
+                            <span>{{ $t('37a0bd14-62bc-45a4-b431-8dd5101de534') }}</span>
+                            <span class="icon arrow-right-small"/>
                         </button>
                     </template>
                     <template v-else>
                         <p class="style-description-block">
-                            Log in via de knop hieronder.
+                            {{ $t('2c09d899-fb28-436e-8889-8316a86ae6c2') }}
                         </p>
 
                         <div class="style-form-buttons">
                             <button v-if="ssoConfig" class="button primary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.SSO)">
                                 <span v-if="ssoConfig.loginButtonText">{{ ssoConfig.loginButtonText }}</span>
-                                <span v-else>Inloggen</span>
+                                <span v-else>{{ $t('e146434b-e70f-44de-85d3-6b80dbc21041') }}</span>
                             </button>
                             <button v-if="googleConfig" class="button secundary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.Google)">
                                 <span class="icon">
-                                    <img src="@stamhoofd/assets/images/partners/icons/google.svg">
-                                </span>
+                                    <img src="@stamhoofd/assets/images/partners/icons/google.svg"></span>
                                 <span v-if="googleConfig.loginButtonText">{{ googleConfig.loginButtonText }}</span>
-                                <span v-else>Inloggen met Google</span>
+                                <span v-else>{{ $t('fb69a88f-1fc4-4618-bab0-f348386df91d') }}</span>
                             </button>
                         </div>
                     </template>
                 </div>
             </div>
 
-            <PlatformFooter />
+            <PlatformFooter/>
         </main>
     </form>
 </template>

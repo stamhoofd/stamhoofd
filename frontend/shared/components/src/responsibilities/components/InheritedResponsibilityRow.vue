@@ -2,19 +2,19 @@
     <STListItem :selectable="true" class="right-stack">
         <template #left>
             <span v-if="mergedRole.hasAccess(PermissionLevel.Full)" class="icon layered">
-                <span class="icon user-admin-layer-1" />
-                <span class="icon user-admin-layer-2 yellow" />
+                <span class="icon user-admin-layer-1"/>
+                <span class="icon user-admin-layer-2 yellow"/>
             </span>
             <span v-else-if="mergedRole.isEmpty" v-tooltip="'Heeft geen rol'" class="icon layered">
-                <span class="icon user-blocked-layer-1" />
-                <span class="icon user-blocked-layer-2 red" />
+                <span class="icon user-blocked-layer-1"/>
+                <span class="icon user-blocked-layer-2 red"/>
             </span>
-            <span v-else class="icon user" />
+            <span v-else class="icon user"/>
         </template>
 
         <h2 class="style-title-list">
             {{ responsibility.name }} <template v-if="group">
-                van {{ group.settings.name }}
+                {{ $t('e05ace0a-b0d8-4df5-982a-d10c43929d9d') }} {{ group.settings.name }}
             </template>
         </h2>
         <p class="style-description-small">
@@ -22,11 +22,11 @@
         </p>
 
         <p class="style-description-small">
-            Rechten: {{ capitalizeFirstLetter(roleDescription) }}
+            {{ $t('c69efe99-92e9-4f56-9d1b-9f47f2dd28a7') }} {{ capitalizeFirstLetter(roleDescription) }}
         </p>
 
         <template #right>
-            <span class="icon arrow-right-small gray" />
+            <span class="icon arrow-right-small gray"/>
         </template>
     </STListItem>
 </template>

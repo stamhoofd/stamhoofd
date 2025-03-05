@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="title" />
+        <STNavigationBar :title="title"/>
 
         <main>
             <h1>
@@ -8,30 +8,30 @@
             </h1>
 
             <p>
-                Deze inschrijvingsgroepen werden verwijderd. Je kan ze terugzetten door ze aan te klikken.
+                {{ $t('c7b3847b-4458-4701-a9a9-c53edc13e768') }}
             </p>
 
-            <Spinner v-if="loadingGroups" />
+            <Spinner v-if="loadingGroups"/>
             <STList v-else-if="groups.length">
                 <STListItem v-for="group in groups" :key="group.id" :selectable="true" @click="restoreGroup($event, group)">
                     <template #left>
-                        <GroupAvatar #left :group="group" />
+                        <GroupAvatar #left :group="group"/>
                     </template>
 
                     <h2 class="style-title-list">
                         {{ group.settings.name }}
                     </h2>
                     <p v-if="group.deletedAt" class="style-description-small">
-                        Verwijderd op {{ formatDate(group.deletedAt) }}
+                        {{ $t('6999ff92-4256-46aa-8555-d0786834ef51') }} {{ formatDate(group.deletedAt) }}
                     </p>
 
                     <template #right>
-                        <span class="icon undo gray" />
+                        <span class="icon undo gray"/>
                     </template>
                 </STListItem>
             </STList>
             <p v-else class="info-box">
-                De prullenmand is leeg.
+                {{ $t('4210445f-3358-4c26-b884-e6cfa45ae29a') }}
             </p>
         </main>
     </div>

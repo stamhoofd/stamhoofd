@@ -1,65 +1,48 @@
 <template>
-    <SaveView :title="isNew ? 'Categorie toevoegen' : name+' bewerken'" :disabled="!hasChanges" @save="save">
+    <SaveView :title="isNew ? $t(`Categorie toevoegen`) : name+' ' + $t(`bewerken`)" :disabled="!hasChanges" @save="save">
         <h1 v-if="isNew">
-            Categorie toevoegen
+            {{ $t('127967a5-502a-4e42-be8b-562cd96953d8') }}
         </h1>
         <h1 v-else>
-            {{ name || 'Categorie' }} bewerken
+            {{ name || 'Categorie' }} {{ $t('67c5998c-da2a-4c23-b089-86cc90f011e0') }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
-            <input
-                ref="firstInput"
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="Naam van deze categorie"
-                autocomplete="off"
-                enterkeyhint="next"
-            >
+        <STErrorsDefault :error-box="errors.errorBox"/>
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`d32893b7-c9b0-4ea3-a311-90d29f2c0cf3`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`810b66b7-f60a-4585-8cfb-ea911546a1b2`)"></STInputBox>
+
+        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`a8f50d56-fbb4-4117-bbb2-6fe5737a797c`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`c415a97f-fc4b-41f7-9d6e-c27917d986cf`)"/>
         </STInputBox>
 
-        <STInputBox title="Beschrijving (optioneel)" error-fields="description" :error-box="errors.errorBox" class="max">
-            <textarea
-                v-model="description"
-                class="input"
-                type="text"
-                placeholder="Optioneel wat extra uitleg onder de titel van de categorie"
-                autocomplete="off"
-            />
-        </STInputBox>
-
-        <hr>
-        <h2 v-if="isTickets">
-            Tickets
+        <hr><h2 v-if="isTickets">
+            {{ $t('f3005a87-5877-435d-bc0e-5b4883e7ca11') }}
         </h2>
         <h2 v-else>
-            Artikels
+            {{ $t('28dd11fe-b753-4579-bc3e-4ba626fef6b4') }}
         </h2>
         <STList v-model="draggableProducts" :draggable="true">
             <template #item="{item: product}">
-                <ProductRow :product="product" :category="patchedCategory" :webshop="patched" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
+                <ProductRow :product="product" :category="patchedCategory" :webshop="patched" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)"/>
             </template>
         </STList>
 
         <p>
             <button class="button text" type="button" @click="addProduct">
-                <span class="icon add" />
-                <span v-if="isTickets">Ticket toevoegen</span>
-                <span v-else>Artikel toevoegen</span>
+                <span class="icon add"/>
+                <span v-if="isTickets">{{ $t('f0949a12-7b87-41cf-b2e1-e3bfacda8894') }}</span>
+                <span v-else>{{ $t('3c2b0f17-52bd-4b6b-8a83-d88218682a72') }}</span>
             </button>
         </p>
 
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Verwijder deze categorie
+            <hr><h2>
+                {{ $t('143eea60-461e-44d9-8536-dd90e3e99413') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span class="icon trash"/>
+                <span>{{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}</span>
             </button>
         </div>
     </SaveView>

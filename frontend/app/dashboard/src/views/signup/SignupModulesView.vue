@@ -1,25 +1,25 @@
 <template>
     <form class="st-view" @submit.prevent="goNext">
-        <STNavigationBar title="Functies uitproberen" />
+        <STNavigationBar :title="$t(`5aad49ab-206d-4906-a712-e99a20555a9e`)"/>
 
         <main>
             <h1>
-                Kies de functies die je wilt uitproberen
+                {{ $t('9bb1f299-8215-42dd-8e14-29026de871ae') }}
             </h1>
             <p>
-                Test de functies eerst rustig uit voor je beslist om een pakket te kopen. Je hoeft geen betaalgegevens in te geven.
+                {{ $t('f26e4597-353d-434b-a901-6331511997ef') }}
             </p>
 
-            <ModuleSettingsBox />
+            <ModuleSettingsBox/>
         </main>
 
         <STToolbar>
             <template #left>
-                Je kan later deze functies wijzigingen via het instellingen menu.
+                {{ $t('80c5fe65-1f6f-4a79-975a-dbdead7894db') }}
             </template>
             <template #right>
                 <button class="button primary" type="submit">
-                    Aan de slag
+                    {{ $t('8960f2e2-2445-484d-af2d-94eb94ae684e') }}
                 </button>
             </template>
         </STToolbar>

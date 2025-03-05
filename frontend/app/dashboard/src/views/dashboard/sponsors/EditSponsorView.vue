@@ -1,75 +1,64 @@
 <template>
-    <SaveView :title="isNew ? 'Sponsor toevoegen' : 'Sponsor bewerken'" :disabled="!hasChanges && !isNew" class="edit-sponsor-view" @save="save">
+    <SaveView :title="isNew ? $t(`Sponsor toevoegen`) : $t(`Sponsor bewerken`)" :disabled="!hasChanges && !isNew" class="edit-sponsor-view" @save="save">
         <h1 v-if="isNew">
-            Sponsor toevoegen
+            {{ $t('afd7f307-e904-46c5-aa17-4461e674628f') }}
         </h1>
         <h1 v-else>
-            Sponsor bewerken
+            {{ $t('eb7003af-4252-411a-b3a3-e05174afb79f') }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
-            <input
-                ref="firstInput"
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="Naam van deze sponsor"
-                autocomplete="off"
-            >
-        </STInputBox>
+        <STErrorsDefault :error-box="errors.errorBox"/>
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`d32893b7-c9b0-4ea3-a311-90d29f2c0cf3`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`5a7edf17-72e9-4c7d-ab5a-ffad19012204`)"></STInputBox>
 
-        <UrlInput v-model="url" :title="$t('0e17f20e-e0a6-4fa0-8ec4-378e4325bea5')" :validator="errors.validator" :required="false" />
+        <UrlInput v-model="url" :title="$t('0e17f20e-e0a6-4fa0-8ec4-378e4325bea5')" :validator="errors.validator" :required="false"/>
 
         <p class="style-description-small">
-            Op plaatsen waar technisch mogelijk, kan men op het logo klikken om de website te bezoeken.
+            {{ $t('5e9dbfe8-13fd-4c94-a8d6-0f2c9c1832d2') }}
         </p>
 
         <STList>
             <STListItem element-name="label" :selectable="true">
                 <template #left>
-                    <Checkbox v-model="onTickets" />
+                    <Checkbox v-model="onTickets"/>
                 </template>
 
                 <h3 class="style-title-list">
-                    Toon op tickets
+                    {{ $t('57e60d76-c869-4d4f-b72e-8087adddee70') }}
                 </h3>
             </STListItem>
         </STList>
 
-        <hr>
-        <h2 class="style-with-button">
-            <div>Logo</div>
+        <hr><h2 class="style-with-button">
+            <div>{{ $t('f1b4c303-d49b-4e3f-849c-589bb8b8348a') }}</div>
             <div>
-                <button v-if="logo" type="button" class="button icon trash" @click="logo = null" />
-                <UploadButton v-model="logo" :text="logo ? 'Vervangen' : 'Uploaden'" :resolutions="logoResolutions" />
+                <button v-if="logo" type="button" class="button icon trash" @click="logo = null"/>
+                <UploadButton v-model="logo" :text="logo ? $t(`c01d3d4e-ad4e-45ec-abac-431462c194cf`) : $t(`3370bb72-2817-4096-83ce-318993436513`)" :resolutions="logoResolutions"/>
             </div>
         </h2>
         <p>{{ $t('df8e9385-314f-4403-b0d5-e5893f68d442') }}</p>
 
-        <ImageComponent v-if="logo" :image="logo" :max-height="150" :auto-height="true" />
+        <ImageComponent v-if="logo" :image="logo" :max-height="150" :auto-height="true"/>
 
-        <hr>
-        <h2 class="style-with-button">
-            <div>Banner</div>
+        <hr><h2 class="style-with-button">
+            <div>{{ $t('5859e892-0c56-4bb0-81d9-95ffe3697ee7') }}</div>
             <div>
-                <button v-if="banner" type="button" class="button icon trash" @click="logo = null" />
-                <UploadButton v-model="banner" :text="banner ? 'Vervangen' : 'Uploaden'" :resolutions="resolutions" />
+                <button v-if="banner" type="button" class="button icon trash" @click="logo = null"/>
+                <UploadButton v-model="banner" :text="banner ? $t(`c01d3d4e-ad4e-45ec-abac-431462c194cf`) : $t(`3370bb72-2817-4096-83ce-318993436513`)" :resolutions="resolutions"/>
             </div>
         </h2>
         <p>{{ $t('b375f5be-879c-4696-8ccf-0e7066e3f5f4') }}</p>
 
-        <ImageComponent v-if="banner" :image="banner" :max-height="150" :auto-height="true" />
+        <ImageComponent v-if="banner" :image="banner" :max-height="150" :auto-height="true"/>
 
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Verwijder deze sponsor
+            <hr><h2>
+                {{ $t('06bd2a20-1b5d-4278-852d-e439f5fca210') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span class="icon trash"/>
+                <span>{{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}</span>
             </button>
         </div>
     </SaveView>

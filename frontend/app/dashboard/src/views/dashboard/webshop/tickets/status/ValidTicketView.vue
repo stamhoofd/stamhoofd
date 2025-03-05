@@ -1,58 +1,51 @@
 <template>
     <div ref="root" class="st-view valid-ticket-view">
-        <STNavigationBar title="Geldig ticket" />
+        <STNavigationBar :title="$t(`ae334d5a-264a-45bc-afb7-e810e6eaf60b`)"/>
 
         <main v-if="!publicTicket.isSingle">
             <h1>
-                <span class="icon green success" />
-                <span>Bestelling #{{ order.number }}</span>
+                <span class="icon green success"/>
+                <span>{{ $t('54329610-7189-4499-9616-aae8fdab62f8') }}{{ order.number }}</span>
             </h1>
 
             <p v-if="order.pricePaid < order.totalToPay" class="warning-box">
-                Deze bestelling werd nog niet (volledig) betaald.
+                {{ $t('c37d0f21-32d5-48a9-a26d-6c165db89bff') }}
             </p>
             <p v-if="order.pricePaid > order.totalToPay" class="warning-box">
-                Er werd te veel betaald voor de bestelling (waarschijnlijk gewijzigd na betaling). Er is een terugbetaling nodig.
+                {{ $t('9634ffcf-8d0b-44bd-b5f7-3ea3ab5a414b') }}
             </p>
 
             <p v-if="order.status === 'Completed'" class="warning-box">
-                Deze bestelling werd al als voltooid gemarkeerd
+                {{ $t('c81b7cbd-9e15-4136-b473-5285ab27c1de') }}
             </p>
             <p v-if="order.status === 'Canceled'" class="error-box">
-                Deze bestelling werd geannuleerd
+                {{ $t('3d4e2887-7206-44a3-ba1b-cfca36cfcec2') }}
             </p>
 
             <button v-if="order.pricePaid !== order.totalToPay && hasPaymentsWrite && isMissingPayments" class="button text" type="button" @click="createPayment">
-                <span class="icon add" />
-                <span>Betaling / terugbetaling registreren</span>
+                <span class="icon add"/>
+                <span>{{ $t('110d8149-49f6-45bb-87d5-f8f700809594') }}</span>
             </button>
 
             <div v-if="hasWarnings" class="hover-box container">
-                <hr>
-                <ul class="member-records">
-                    <li
-                        v-for="warning in sortedWarnings"
-                        :key="warning.id"
-                        :class="{ [warning.type]: true }"
-                    >
-                        <span :class="'icon '+warning.icon" />
+                <hr><ul class="member-records">
+                    <li v-for="warning in sortedWarnings" :key="warning.id" :class="{ [warning.type]: true }">
+                        <span :class="'icon '+warning.icon"/>
                         <span class="text">{{ warning.text }}</span>
                     </li>
                 </ul>
-                <hr>
-            </div>
+                <hr></div>
 
             <STList>
-                <CartItemRow v-for="cartItem of order.data.cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="order.data.cart" :webshop="webshop" :editable="false" :admin="true" />
+                <CartItemRow v-for="cartItem of order.data.cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="order.data.cart" :webshop="webshop" :editable="false" :admin="true"/>
             </STList>
 
-            <hr>
-            <h2>Informatie</h2>
+            <hr><h2>{{ $t('52a67f69-e521-4d32-a797-f4a732ae2036') }}</h2>
 
             <STList>
                 <STListItem v-if="order.totalToPay || !webshop?.isAllFree">
                     <h3 class="style-definition-label">
-                        Totaal te betalen
+                        {{ $t('e3a23f0a-f906-4433-96b1-783ab32d6e42') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(order.totalToPay) }}
@@ -61,7 +54,7 @@
 
                 <STListItem v-if="(order.totalToPay || !webshop?.isAllFree) && (order.pricePaid > 0 && order.pricePaid !== order.totalToPay)">
                     <h3 class="style-definition-label">
-                        Betaald bedrag
+                        {{ $t('2e9f80c0-51e5-4c86-a5b8-9094d8967bd2') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(order.pricePaid) }}
@@ -70,7 +63,7 @@
 
                 <STListItem v-if="order.validAt !== null">
                     <h3 class="style-definition-label">
-                        Geplaatst op
+                        {{ $t('4a9ae395-aad5-4d47-abaf-3e1b90438f5e') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ capitalizeFirstLetter(formatDateTime(order.validAt)) }}
@@ -79,66 +72,59 @@
 
                 <STListItem v-long-press="(e: Event) => (hasWrite ? markAs(e) : null)" class="right-description right-stack" :selectable="hasWrite" @click="hasWrite ? markAs($event) : null">
                     <h3 :class="'style-definition-label '+statusColor">
-                        Status
+                        {{ $t('38b75e19-10cb-4641-88a8-f4e2e9be7576') }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ statusName }}</span>
-                        <span v-if="isCanceled" class="icon canceled" />
+                        <span v-if="isCanceled" class="icon canceled"/>
                     </p>
                     <template v-if="hasWrite" #right>
-                        <span class="icon arrow-down-small gray" />
+                        <span class="icon arrow-down-small gray"/>
                     </template>
                 </STListItem>
 
-                <STListItem
-                    v-for="(payment, index) in order.payments"
-                    :key="payment.id"
-                    v-long-press="(e: MouseEvent) => (hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite"
-                    class="right-description" @click="openPayment(payment)"
-                    @contextmenu.prevent="hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus($event) : null"
-                >
+                <STListItem v-for="(payment, index) in order.payments" :key="payment.id" v-long-press="(e: MouseEvent) => (hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite" class="right-description" @click="openPayment(payment)" @contextmenu.prevent="hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus($event) : null">
                     <h3 class="style-definition-label">
                         {{ payment.price >= 0 ? 'Betaling' : 'Terugbetaling' }} {{ order.payments.length > 1 ? index + 1 : '' }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ getName(payment.method) }}</span>
-                        <span v-if="payment.status === 'Succeeded'" class="icon primary success" />
-                        <span v-else class="icon clock" />
+                        <span v-if="payment.status === 'Succeeded'" class="icon primary success"/>
+                        <span v-else class="icon clock"/>
                     </p>
 
                     <template v-if="order.payments.length > 1 || hasPaymentsWrite" #right>
                         <span v-if="order.payments.length > 1">{{ formatPrice(payment.price) }}</span>
-                        <span v-if="hasPaymentsWrite" class="icon arrow-right-small gray" />
+                        <span v-if="hasPaymentsWrite" class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
             </STList>
 
             <template v-if="order.data.checkoutMethod">
-                <hr>
-                <h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
-                    Afhalen
+                <hr><h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
+                    {{ $t('98fa89b2-22a5-4c47-83e0-f92da0e55b21') }}
                 </h2>
                 <h2 v-else-if="order.data.checkoutMethod.type === 'Delivery'">
-                    Levering
+                    {{ $t('f3e8dcfc-849d-46ba-a59c-4b342d208123') }}
                 </h2>
                 <h2 v-else-if="order.data.checkoutMethod.type === 'OnSite'">
-                    Ter plaatse consumeren
+                    {{ $t('2cb37d0b-002c-434c-8334-729f3c53508c') }}
                 </h2>
                 <h2 v-else>
-                    Onbekende methode
+                    {{ $t('2e165a6e-64c1-4757-9fc1-0092f32c4a8f') }}
                 </h2>
 
                 <STList class="info">
                     <STListItem v-if="order.data.checkoutMethod.name" class="right-description">
                         <h3 class="style-definition-label">
                             <template v-if="order.data.checkoutMethod.type === 'Takeout'">
-                                Afhaallocatie
+                                {{ $t('88fe8d3f-bdf7-435e-9974-603d08445be5') }}
                             </template>
                             <template v-else-if="order.data.checkoutMethod.type === 'OnSite'">
-                                Locatie
+                                {{ $t('257a3fd5-bd2f-4430-b268-1c85e99db41a') }}
                             </template>
                             <template v-else>
-                                Leveringsmethode
+                                {{ $t('95b80805-567d-4ec0-92ed-cbbcd1564c83') }}
                             </template>
                         </h3>
 
@@ -148,7 +134,7 @@
                     </STListItem>
                     <STListItem v-if="(order.data.checkoutMethod as any).address" class="right-description">
                         <h3 class="style-definition-label">
-                            Adres
+                            {{ $t('e6dc987c-457b-4253-9eef-db9ccdb774f1') }}
                         </h3>
 
                         <p class="style-definition-text">
@@ -157,7 +143,7 @@
                     </STListItem>
                     <STListItem v-if="order.data.address" class="right-description">
                         <h3 class="style-definition-label">
-                            Leveringsadres
+                            {{ $t('b8166ba4-b8fb-48fe-83de-6a16572d8fc9') }}
                         </h3>
 
                         <p class="style-definition-text">
@@ -167,23 +153,22 @@
                     <STListItem v-if="order.data.timeSlot" class="right-description">
                         <h3 class="style-definition-label">
                             <template v-if="order.data.checkoutMethod.type === 'Takeout'">
-                                Wanneer afhalen?
+                                {{ $t('27c71009-1a4c-4fbb-be8b-a148c43342ef') }}
                             </template>
                             <template v-else-if="order.data.checkoutMethod.type === 'OnSite'">
-                                Wanneer?
+                                {{ $t('999b580a-c487-468b-9527-e1812d170df6') }}
                             </template>
                             <template v-else>
-                                Wanneer leveren?
+                                {{ $t('dab5534b-d17c-4865-ad18-7fb658c35b1f') }}
                             </template>
                         </h3>
 
                         <p class="style-definition-text">
-                            {{ capitalizeFirstLetter(formatDate(order.data.timeSlot.date)) }}<br>{{ formatMinutes(order.data.timeSlot.startTime) }} - {{ formatMinutes(order.data.timeSlot.endTime) }}
-                        </p>
+                            {{ capitalizeFirstLetter(formatDate(order.data.timeSlot.date)) }}<br></p>
                     </STListItem>
                     <STListItem v-if="order.data.deliveryPrice > 0" class="right-description">
                         <h3 class="style-definition-label">
-                            Leveringskost
+                            {{ $t('c9b5231b-4f72-4afd-8be3-54a4b92bc3e4') }}
                         </h3>
 
                         <p class="style-definition-text">
@@ -192,7 +177,7 @@
                     </STListItem>
                     <STListItem v-if="order.data.administrationFee > 0" class="right-description">
                         <h3 class="style-definition-label">
-                            Administratiekosten
+                            {{ $t('d0b159d0-ae10-4afc-87e5-84b6342c7468') }}
                         </h3>
 
                         <p class="style-definition-text">
@@ -202,13 +187,12 @@
                 </STList>
             </template>
 
-            <hr>
-            <h2>Gegevens</h2>
+            <hr><h2>{{ $t('4596bd3a-5be6-4cd3-a489-8f3a566b9302') }}</h2>
 
             <STList class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        Naam
+                        {{ $t('d32893b7-c9b0-4ea3-a311-90d29f2c0cf3') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ order.data.customer.name }}
@@ -217,7 +201,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        E-mailadres
+                        {{ $t('0be79160-b242-44dd-94f0-760093f7f9f2') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ order.data.customer.email }}
@@ -244,33 +228,31 @@
                 </STListItem>
             </STList>
 
-            <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="order.data" />
+            <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="order.data"/>
 
             <div v-if="order.data.comments" class="container">
-                <hr>
-                <h2>
-                    Notities
+                <hr><h2>
+                    {{ $t('1433dd52-bddb-4a28-b217-b219111a6a1c') }}
                 </h2>
 
-                <p class="pre-wrap" v-text="order.data.comments" />
+                <p class="pre-wrap" v-text="order.data.comments"/>
             </div>
 
             <div v-if="order.data.checkoutMethod && order.data.checkoutMethod.description" class="container">
-                <hr>
-                <h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
-                    Afhaalopmerkingen
+                <hr><h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
+                    {{ $t('8252906e-b116-4920-b62a-a83e9f05aca0') }}
                 </h2>
                 <h2 v-else>
-                    Leveringsopmerkingen
+                    {{ $t('4b594046-78a6-4928-a5cd-1fb7db4a6beb') }}
                 </h2>
 
-                <p class="pre-wrap" v-text="order.data.checkoutMethod.description" />
+                <p class="pre-wrap" v-text="order.data.checkoutMethod.description"/>
             </div>
         </main>
 
         <main v-else-if="item">
             <h1>
-                <span class="icon green success" />
+                <span class="icon green success"/>
                 <span>{{ item.product.name }}</span>
             </h1>
             <p class="ticket-secret">
@@ -278,11 +260,11 @@
             </p>
 
             <p v-if="order.status === 'Canceled'" class="error-box">
-                Deze bestelling werd geannuleerd
+                {{ $t('3d4e2887-7206-44a3-ba1b-cfca36cfcec2') }}
             </p>
 
             <p v-if="order.payment && order.payment.status !== 'Succeeded'" class="warning-box">
-                Opgelet: deze bestelling werd nog niet betaald.
+                {{ $t('6632fae1-3628-4509-9cd8-7f7816b8f398') }}
             </p>
 
             <p v-if="changedSeatString" class="warning-box">
@@ -290,24 +272,18 @@
             </p>
 
             <div v-if="hasWarnings" class="hover-box container">
-                <hr>
-                <ul class="member-records">
-                    <li
-                        v-for="warning in sortedWarnings"
-                        :key="warning.id"
-                        :class="{ [warning.type]: true }"
-                    >
-                        <span :class="'icon '+warning.icon" />
+                <hr><ul class="member-records">
+                    <li v-for="warning in sortedWarnings" :key="warning.id" :class="{ [warning.type]: true }">
+                        <span :class="'icon '+warning.icon"/>
                         <span class="text">{{ warning.text }}</span>
                     </li>
                 </ul>
-                <hr>
-            </div>
+                <hr></div>
 
             <STList class="info">
                 <STListItem v-if="item.product.dateRange">
                     <h3 class="style-definition-label">
-                        Wanneer?
+                        {{ $t('999b580a-c487-468b-9527-e1812d170df6') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDateRange(item.product.dateRange) }}
@@ -353,14 +329,14 @@
 
                 <STListItem :selectable="true" @click="openOrder">
                     <h3 class="style-definition-label">
-                        Bestelling
+                        {{ $t('a94d3ec8-d302-4562-948b-c9b8c643295c') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ order.number }}
                     </p>
 
                     <template #right>
-                        <span class="icon arrow-right-small gray" />
+                        <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
             </STList>
@@ -368,19 +344,19 @@
 
         <main v-else>
             <h1>
-                Leeg ticket?
+                {{ $t('162c6c06-d097-496a-a81b-485bc3124ffc') }}
             </h1>
-            <p>Er ging iets mis bij het lezen van de inhoud van dit ticket.</p>
+            <p>{{ $t('5620a10d-6800-4410-8508-6dc85521ae06') }}</p>
         </main>
 
         <STToolbar>
             <template #right>
                 <button v-if="ticket.scannedAt" class="button secundary" type="button" @click="cancelScan">
-                    Markering ongedaan maken
+                    {{ $t('2ceec9da-70de-497d-9199-5e9e21306096') }}
                 </button>
                 <button class="button primary" type="button" @click="markScanned">
-                    <span class="icon qr-code" />
-                    <span>Markeer als gescand</span>
+                    <span class="icon qr-code"/>
+                    <span>{{ $t('8322edad-eb33-4b2b-b413-457557c9a53e') }}</span>
                 </button>
             </template>
         </STToolbar>

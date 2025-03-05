@@ -9,9 +9,9 @@
         </p>
 
         <template #right>
-            <span v-if="config.prices[0] && type.behaviour === PlatformMembershipTypeBehaviour.Days" class="style-description-small">{{ formatPrice(config.prices[0].pricePerDay) }} per dag</span>
+            <span v-if="config.prices[0] && type.behaviour === PlatformMembershipTypeBehaviour.Days" class="style-description-small">{{ formatPrice(config.prices[0].pricePerDay) }} {{ $t('23ff043d-444e-458f-aef4-43a021a0fa31') }}</span>
             <span v-if="config.prices[0] && type.behaviour === PlatformMembershipTypeBehaviour.Period" class="style-description-small">{{ $price !== undefined ? formatPrice($price) : '?' }}</span>
-            <span class="icon arrow-right-small gray" />
+            <span class="icon arrow-right-small gray"/>
         </template>
     </STListItem>
 </template>

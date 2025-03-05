@@ -1,25 +1,24 @@
 <template>
     <div v-if="hasResponsibilities && (sortedResponsibilities.length || auth.hasFullAccess())" class="hover-box container">
-        <hr>
-        <h2 class="style-with-button">
-            <div>Functies</div>
+        <hr><h2 class="style-with-button">
+            <div>{{ $t('dcfe513c-e190-471a-b989-e9315dbc0a4a') }}</div>
             <div class="hover-show">
-                <button v-if="auth.hasFullAccess()" type="button" class="button icon edit gray" @click.prevent="editResponsibilities" />
+                <button v-if="auth.hasFullAccess()" type="button" class="button icon edit gray" @click.prevent="editResponsibilities"/>
             </div>
         </h2>
 
 
 
         <button v-if="sortedResponsibilities.length === 0" class="info-box selectable with-button" type="button" @click="editResponsibilities">
-            {{ props.member.patchedMember.details.firstName }} heeft geen functies
+            {{ props.member.patchedMember.details.firstName }} {{ $t('c338b4e5-2100-40c9-a901-ea252c24a68a') }}
 
             <span class="button text">
-                Bewerken
+                {{ $t('f5783f4e-6515-4988-9622-3d0b0f4290f4') }}
             </span>
         </button>
 
         <STList v-else>
-            <ViewMemberResponsibilityRow v-for="responsibility in sortedResponsibilities" :key="responsibility.id" :member="member" :responsibility="responsibility" />
+            <ViewMemberResponsibilityRow v-for="responsibility in sortedResponsibilities" :key="responsibility.id" :member="member" :responsibility="responsibility"/>
         </STList>
     </div>
 </template>

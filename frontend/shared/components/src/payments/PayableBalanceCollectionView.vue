@@ -1,31 +1,29 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Betalingen" />
+        <STNavigationBar :title="$t(`Betalingen`)"/>
 
         <main>
-            <h1>Betalingen</h1>
+            <h1>{{ $t('e8b43c8b-cc18-46bd-bc0c-d40f2dfc306c') }}</h1>
 
-            <PayableBalanceTable v-for="item in collection.organizations" :key="item.organization.id" :item="item" :show-name="!singleOrganization" />
+            <PayableBalanceTable v-for="item in collection.organizations" :key="item.organization.id" :item="item" :show-name="!singleOrganization"/>
 
             <template v-if="pendingPayments.length > 0">
-                <hr>
-                <h2>In verwerking</h2>
-                <p>Bij betalingen via overschrijving of domiciliëring kan het even duren voor we een betaling ontvangen en bevestigen. Je kan hier de status opvolgen.</p>
+                <hr><h2>{{ $t('8083d1d7-7325-4b2c-a708-9ddf0c5d38c8') }}</h2>
+                <p>{{ $t('b06fe417-326d-471f-a8a7-936d4e8e9677') }}</p>
 
                 <STList>
-                    <PaymentRow v-for="payment of pendingPayments" :key="payment.id" :payments="pendingPayments" :payment="payment" />
+                    <PaymentRow v-for="payment of pendingPayments" :key="payment.id" :payments="pendingPayments" :payment="payment"/>
                 </STList>
             </template>
 
-            <hr>
-            <h2>Betalingen</h2>
+            <hr><h2>{{ $t('e8b43c8b-cc18-46bd-bc0c-d40f2dfc306c') }}</h2>
 
             <p v-if="succeededPayments.length === 0" class="info-box">
-                Je hebt nog geen betalingen gedaan
+                {{ $t('21f2f969-321e-4ced-b286-bf0e8caa64d7') }}
             </p>
 
             <STList v-else>
-                <PaymentRow v-for="payment of succeededPayments" :key="payment.id" :payment="payment" :payments="succeededPayments" />
+                <PaymentRow v-for="payment of succeededPayments" :key="payment.id" :payment="payment" :payments="succeededPayments"/>
             </STList>
         </main>
     </div>

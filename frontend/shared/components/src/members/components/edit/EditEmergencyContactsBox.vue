@@ -1,22 +1,22 @@
 <template>
     <div class="container">
-        <Title v-bind="$attrs" title="Noodcontactpersonen" />
+        <Title v-bind="$attrs" :title="$t(`e15c88bd-63b3-4b9f-b8e9-336c03b9c5a2`)"/>
 
         <p v-if="member.isPropertyEnabled('parents')" class="style-description-block">
-            Voeg geen ouders toe als noodcontactpersoon. Ouders worden altijd als eerste gecontacteerd in geval van nood.
+            {{ $t('200052d8-ee09-4f1d-9a48-147da9496f0d') }}
         </p>
 
-        <STErrorsDefault :error-box="parentErrorBox" />
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="parentErrorBox"/>
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <p v-if="visibleContacts.length === 0" class="info-box">
-            Er zijn nog geen noodcontactpersonen toegevoegd. Voeg een noodcontact van {{ member.patchedMember.details.firstName }} toe via de knop hieronder.
+            {{ $t('53e20c11-a95c-4ba0-9710-6a55215e2535') }} {{ member.patchedMember.details.firstName }} {{ $t('0ec27ae4-5876-4ab3-8189-0194fc72224a') }}
         </p>
 
         <STList v-if="visibleContacts.length > 0" :with-animation="true">
             <STListItem v-for="contact in visibleContacts" :key="contact.id" :selectable="true" element-name="label" class="right-stack">
                 <template #left>
-                    <Checkbox :model-value="isContactSelected(contact)" @update:model-value="setContactSelected(contact, $event)" />
+                    <Checkbox :model-value="isContactSelected(contact)" @update:model-value="setContactSelected(contact, $event)"/>
                 </template>
 
                 <h2 class="style-title-list">
@@ -28,13 +28,13 @@
 
                 <template #right>
                     <span v-if="!isContactSelected(contact)" class="button text limit-space">
-                        <span class="icon add" />
-                        <span>Toevoegen</span>
+                        <span class="icon add"/>
+                        <span>{{ $t('73b74929-78f4-4cfa-8a20-92a071a84ec5') }}</span>
                     </span>
 
                     <button v-else class="button text limit-space" type="button" @click.stop="editContact(contact)">
-                        <span class="icon edit" />
-                        <span>Bewerken</span>
+                        <span class="icon edit"/>
+                        <span>{{ $t('f5783f4e-6515-4988-9622-3d0b0f4290f4') }}</span>
                     </button>
                 </template>
             </STListItem>
@@ -42,8 +42,8 @@
 
         <div class="style-button-bar">
             <button type="button" class="button text" :class="{selected: visibleContacts.length <= 0}" @click="addContact()">
-                <span class="icon add" />
-                <span>Contact toevoegen</span>
+                <span class="icon add"/>
+                <span>{{ $t('fab6c1e3-2028-4750-820e-12497a55a0c2') }}</span>
             </button>
         </div>
     </div>

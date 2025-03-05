@@ -4,10 +4,10 @@
             {{ title }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
         <div class="split-inputs">
             <div>
-                <STInputBox title="Titel" error-fields="type" :error-box="errors.errorBox">
+                <STInputBox error-fields="type" :error-box="errors.errorBox" :title="$t(`04043e8a-6a58-488e-b538-fea133738532`)">
                     <Dropdown v-model="type">
                         <option v-for="t in parentTypes" :key="t" :value="t">
                             {{ formatParentType(t) }}
@@ -15,81 +15,70 @@
                     </Dropdown>
                 </STInputBox>
 
-                <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errors.errorBox">
+                <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`d32893b7-c9b0-4ea3-a311-90d29f2c0cf3`)">
                     <div class="input-group">
                         <div>
-                            <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
-                        </div>
+                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`883f9695-e18f-4df6-8c0d-651c6dd48e59`)"></div>
                         <div>
-                            <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
-                        </div>
+                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :placeholder="$t(`f89d8bfa-6b5d-444d-a40f-ec17b3f456ee`)"></div>
                     </div>
                 </STInputBox>
 
-                <PhoneInput v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34')" :validator="errors.validator" :placeholder="$t('7f30db7e-4851-4aa6-b731-2c898054f707')" :required="app === 'registration'" />
+                <PhoneInput v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34')" :validator="errors.validator" :placeholder="$t('7f30db7e-4851-4aa6-b731-2c898054f707')" :required="app === 'registration'"/>
 
-                <EmailInput v-model="email" :required="app === 'registration'" :title="'E-mailadres' " placeholder="E-mailadres van ouder" :validator="errors.validator">
+                <EmailInput v-model="email" :required="app === 'registration'" :title="$t(`0be79160-b242-44dd-94f0-760093f7f9f2`) " :validator="errors.validator" :placeholder="$t(`8e30c7ef-2780-4433-b194-963fe24bb8c8`)">
                     <template #right>
-                        <button v-tooltip="'Alternatief e-mailadres toevoegen'" class="button icon add gray" type="button" @click="addEmail" />
+                        <button v-tooltip="'Alternatief e-mailadres toevoegen'" class="button icon add gray" type="button" @click="addEmail"/>
                     </template>
                 </EmailInput>
-                <EmailInput
-                    v-for="n in alternativeEmails.length"
-                    :key="n"
-                    :model-value="getEmail(n - 1)"
-                    :required="true"
-                    :title="'Alternatief e-mailadres ' + (alternativeEmails.length > 1 ? n : '') "
-                    placeholder="E-mailadres van ouder"
-                    :validator="errors.validator"
-                    @update:model-value="setEmail(n - 1, $event)"
-                >
+                <EmailInput v-for="n in alternativeEmails.length" :key="n" :model-value="getEmail(n - 1)" :required="true" :title="$t(`bfb03263-25f0-41d6-a68d-8946a3a5dd8a`) + ' ' + (alternativeEmails.length > 1 ? n : '') " :validator="errors.validator" @update:model-value="setEmail(n - 1, $event)" :placeholder="$t(`8e30c7ef-2780-4433-b194-963fe24bb8c8`)">
                     <template #right>
-                        <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" />
+                        <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)"/>
                     </template>
                 </EmailInput>
 
                 <p v-if="email && member && member.patchedMember.details.parentsHaveAccess && app !== 'registration'" class="style-description-small">
-                    Deze ouder kan inloggen of registreren op <template v-if="alternativeEmails.length">
-                        één van de ingevoerde e-mailadressen
+                    {{ $t('b677a5cb-9029-4604-8d15-2a666f1803e9') }} <template v-if="alternativeEmails.length">
+                        {{ $t('3c5deb93-94f1-4104-b690-d805813157e0') }}
                     </template><template v-else>
-                        het ingevoerde e-mailadres
-                    </template> en krijgt dan automatisch toegang tot de gegevens van {{ member.patchedMember.firstName }} en het ledenportaal.
+                        {{ $t('652bf35d-8557-42a8-8307-df3c640346cc') }}
+                    </template> {{ $t('240e4f2b-685b-4bb1-bde4-73f2c8f17bbc') }} {{ member.patchedMember.firstName }} {{ $t('0c8e0d14-2c0d-44ed-ae64-500b5897ffeb') }}
                 </p>
                 <p v-else-if="firstName && email && member && member.patchedMember.details.parentsHaveAccess" class="style-description-small">
-                    {{ firstName }} kan inloggen of registreren op <template v-if="alternativeEmails.length">
-                        één van de ingevoerde e-mailadressen
+                    {{ firstName }} {{ $t('10d395dc-0975-4a4a-8fa8-37fd53bf749f') }} <template v-if="alternativeEmails.length">
+                        {{ $t('3c5deb93-94f1-4104-b690-d805813157e0') }}
                     </template><template v-else>
-                        het ingevoerde e-mailadres
-                    </template> en krijgt dan automatisch toegang tot de gegevens van {{ member.patchedMember.firstName }} en het ledenportaal.
+                        {{ $t('652bf35d-8557-42a8-8307-df3c640346cc') }}
+                    </template> {{ $t('240e4f2b-685b-4bb1-bde4-73f2c8f17bbc') }} {{ member.patchedMember.firstName }} {{ $t('0c8e0d14-2c0d-44ed-ae64-500b5897ffeb') }}
                 </p>
 
                 <p v-if="alternativeEmails.length && member && member.patchedMember.details.parentsHaveAccess" class="style-description-small">
                     <template v-if="app !== 'registration'">
-                        De ouder ontvangt enkel communicatie op het eerste e-mailadres.
+                        {{ $t('0cc70fe1-6288-4a96-a4cf-3bb6c54d3f61') }}
                     </template>
                     <template v-else>
-                        {{ firstName }} ontvangt enkel communicatie op het eerste e-mailadres.
+                        {{ firstName }} {{ $t('845f7455-7d78-42c2-a4ab-71cfc562c8af') }}
                     </template>
                 </p>
 
                 <template v-if="(isPropertyEnabled('parents.nationalRegisterNumber') || nationalRegisterNumber)">
-                    <NRNInput v-model="nationalRegisterNumber" :title="'Rijksregisternummer'" :required="isNRNRequiredForThisParent" :nullable="true" :validator="errors.validator" />
+                    <NRNInput v-model="nationalRegisterNumber" :title="$t(`642e4034-71e5-4d00-a6f4-b7dbcc39aac0`)" :required="isNRNRequiredForThisParent" :nullable="true" :validator="errors.validator"/>
                     <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
-                        Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
-                            Vul het bij minstens één ouder in, deze ouder zal vermeld worden op de attesten.
-                        </template> Heeft {{ firstName || 'deze ouder' }} geen Belgische nationaliteit, <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
-                            klik dan hier
+                        {{ $t('0db38003-5407-4a39-84f3-d0d918afc2d2') }} <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
+                            {{ $t('b12e346f-0928-4f98-8586-c983c0a17568') }}
+                        </template> {{ $t('d4b0ef8c-5ffe-40f1-bc27-e2ff608f5474') }} {{ firstName || 'deze ouder' }} {{ $t('db74359d-7094-4e58-ac75-22f3bf318763') }} <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
+                            {{ $t('0af2c851-cf7e-4821-8e18-386150f9b7a8') }}
                         </button>.
                     </p>
                     <p v-else class="style-description-small">
-                        Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit, <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
-                            klik dan hier
+                        {{ $t('d8e665a4-2cc3-4787-a83c-6c232bb269c5') }} <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
+                            {{ $t('0af2c851-cf7e-4821-8e18-386150f9b7a8') }}
                         </button>.
                     </p>
                 </template>
             </div>
 
-            <SelectionAddressInput v-model="address" :addresses="availableAddresses" :validator="errors.validator" :required="app === 'registration'" />
+            <SelectionAddressInput v-model="address" :addresses="availableAddresses" :validator="errors.validator" :required="app === 'registration'"/>
         </div>
     </SaveView>
 </template>

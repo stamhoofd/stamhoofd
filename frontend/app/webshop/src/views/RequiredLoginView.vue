@@ -3,13 +3,13 @@
         <section v-if="!loading" class="st-view box-shade">
             <STNavigationBar :large="true">
                 <template #left>
-                    <OrganizationLogo :organization="organization" />
+                    <OrganizationLogo :organization="organization"/>
                 </template>
 
                 <template #right>
                     <a v-if="organization.website" class="button text limit-space" :href="organization.website" target="_blank" rel="nofollow noreferrer noopener">
-                        <span class="icon external" />
-                        <span>Terug naar website</span>
+                        <span class="icon external"/>
+                        <span>{{ $t('521853e8-2370-4977-baaf-4d8754c14621') }}</span>
                     </a>
                 </template>
             </STNavigationBar>
@@ -17,14 +17,14 @@
             <main>
                 <div class="box">
                     <main>
-                        <h1>Inloggen</h1>
+                        <h1>{{ $t('e146434b-e70f-44de-85d3-6b80dbc21041') }}</h1>
                         <p>
-                            Om deze pagina te bekijken moet je eerst inloggen via onderstaande knop.
+                            {{ $t('90025d53-7da9-4717-a8d0-395545fece7a') }}
                         </p>
 
                         <p>
                             <button type="button" class="button primary" @click="login">
-                                Inloggen
+                                {{ $t('e146434b-e70f-44de-85d3-6b80dbc21041') }}
                             </button>
                         </p>
                     </main>

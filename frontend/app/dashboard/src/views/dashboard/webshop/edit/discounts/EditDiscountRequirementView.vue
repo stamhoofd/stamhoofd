@@ -1,33 +1,28 @@
 <template>
-    <SaveView :title="isNew ? 'Kortingvoorwaarde toevoegen' : 'Kortingvoorwaarde bewerken'" :disabled="!hasChanges && !isNew" class="product-edit-view" @save="save">
+    <SaveView :title="isNew ? $t(`Kortingvoorwaarde toevoegen`) : $t(`Kortingvoorwaarde bewerken`)" :disabled="!hasChanges && !isNew" class="product-edit-view" @save="save">
         <h1 v-if="isNew">
-            Kortingvoorwaarde toevoegen
+            {{ $t('e31da09b-7ede-4aec-b65a-d31440413bc9') }}
         </h1>
         <h1 v-else>
-            Kortingvoorwaarde bewerken
+            {{ $t('3a50d90a-5780-46a9-8551-7dcec9ddb2de') }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
-        <ProductSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="errors.validator" @patch="patchProductSelector" />
+        <ProductSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="errors.validator" @patch="patchProductSelector"/>
 
-        <STInputBox title="Aantal" error-fields="amount" :error-box="errors.errorBox" class="max">
-            <NumberInput
-                v-model="amount"
-                :min="1"
-                :stepper="true"
-            />
+        <STInputBox error-fields="amount" :error-box="errors.errorBox" class="max" :title="$t(`ab09a97a-20f7-4a90-8482-58be993bb12e`)">
+            <NumberInput v-model="amount" :min="1" :stepper="true"/>
         </STInputBox>
 
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Verwijder deze voorwaarde
+            <hr><h2>
+                {{ $t('c567e65b-1fdd-4e0e-bf28-2cf3c1ab8e25') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span class="icon trash"/>
+                <span>{{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}</span>
             </button>
         </div>
     </SaveView>

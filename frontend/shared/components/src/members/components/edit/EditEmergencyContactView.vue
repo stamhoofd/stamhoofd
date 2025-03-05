@@ -4,40 +4,38 @@
             {{ title }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
         <div class="split-inputs">
             <div>
-                <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
-                    <input v-model="name" class="input" nmae="name" type="text" placeholder="Naam" autocomplete="name">
-                </STInputBox>
+                <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`d32893b7-c9b0-4ea3-a311-90d29f2c0cf3`)">
+                    <input v-model="name" class="input" nmae="name" type="text" autocomplete="name" :placeholder="$t(`d32893b7-c9b0-4ea3-a311-90d29f2c0cf3`)"></STInputBox>
 
-                <STInputBox title="Relatie*" error-fields="title" :error-box="errors.errorBox">
-                    <input v-model="contactTitle" list="emergency-contact-types" class="input" name="type" type="text" placeholder="Bv. buurman">
-                    <datalist id="emergency-contact-types">
-                        <option v-if="details && details.parents.length === 0" value="Vader" />
-                        <option v-if="details && details.parents.length === 0" value="Moeder" />
-                        <option v-if="details && details.parents.length === 0" value="Ouder" />
-                        <option v-if="details && details.defaultAge < 30" value="Oma" />
-                        <option v-if="details && details.defaultAge < 30" value="Opa" />
-                        <option v-if="details && details.defaultAge < 30" value="Tante" />
-                        <option v-if="details && details.defaultAge < 30" value="Oom" />
-                        <option value="Buurvrouw" />
-                        <option value="Buurman" />
-                        <option value="Vriend" />
-                        <option v-if="details && details.defaultAge < 30" value="Nonkel" />
-                        <option v-if="details && details.defaultAge < 30" value="Pepe" />
-                        <option v-if="details && details.defaultAge < 30" value="Meme" />
-                        <option v-if="details && details.defaultAge < 30" value="Grootvader" />
-                        <option v-if="details && details.defaultAge < 30" value="Grootmoeder" />
+                <STInputBox error-fields="title" :error-box="errors.errorBox" :title="$t(`c4ff0c59-32b0-40f9-9fb1-57fd8842350d`)">
+                    <input v-model="contactTitle" list="emergency-contact-types" class="input" name="type" type="text" :placeholder="$t(`9b753a06-5e99-4c99-b801-92e321560bfc`)"><datalist id="emergency-contact-types">
+                        <option v-if="details && details.parents.length === 0" value="Vader"/>
+                        <option v-if="details && details.parents.length === 0" value="Moeder"/>
+                        <option v-if="details && details.parents.length === 0" value="Ouder"/>
+                        <option v-if="details && details.defaultAge < 30" value="Oma"/>
+                        <option v-if="details && details.defaultAge < 30" value="Opa"/>
+                        <option v-if="details && details.defaultAge < 30" value="Tante"/>
+                        <option v-if="details && details.defaultAge < 30" value="Oom"/>
+                        <option value="Buurvrouw"/>
+                        <option value="Buurman"/>
+                        <option value="Vriend"/>
+                        <option v-if="details && details.defaultAge < 30" value="Nonkel"/>
+                        <option v-if="details && details.defaultAge < 30" value="Pepe"/>
+                        <option v-if="details && details.defaultAge < 30" value="Meme"/>
+                        <option v-if="details && details.defaultAge < 30" value="Grootvader"/>
+                        <option v-if="details && details.defaultAge < 30" value="Grootmoeder"/>
                     </datalist>
                 </STInputBox>
                 <p class="style-description-small">
-                    *Vul gelijk welke benaming in met het toetsenbord of kies één uit de lijst.
+                    {{ $t('abc6823f-40a9-4414-b40e-3759f4449ab6') }}
                 </p>
             </div>
 
             <div>
-                <PhoneInput v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34')" :validator="errors.validator" :placeholder="$t('90d84282-3274-4d85-81cd-b2ae95429c34')" :required="true" />
+                <PhoneInput v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34')" :validator="errors.validator" :placeholder="$t('90d84282-3274-4d85-81cd-b2ae95429c34')" :required="true"/>
             </div>
         </div>
     </SaveView>

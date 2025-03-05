@@ -1,16 +1,16 @@
 <template>
     <div v-if="isAdmin" class="container">
-        <Title v-bind="$attrs" :title="title" />
+        <Title v-bind="$attrs" :title="title"/>
 
-        <STErrorsDefault :error-box="parentErrorBox" />
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="parentErrorBox"/>
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <template v-if="hasKansenTarief">
             <Checkbox :model-value="true" :disabled="true">
                 {{ checkboxLabel }}
             </Checkbox>
             <p class="style-description-small">
-                Dit lid heeft recht op het kansentarief van de UiTPAS.
+                {{ $t('76cd3541-2428-434f-a6af-1afda2893d44') }}
             </p>
         </template>
         <Checkbox v-else v-model="requiresFinancialSupport" :indeterminate="!dataPermissionsChangeDate">
@@ -18,8 +18,8 @@
         </Checkbox>
 
         <p v-if="!willMarkReviewed && dataPermissionsChangeDate" class="style-description-small">
-            Laatst nagekeken op {{ formatDate(dataPermissionsChangeDate) }}. <button v-tooltip="'Het lid zal deze stap terug moeten doorlopen via het ledenportaal'" type="button" class="inline-link" @click="clear">
-                Wissen
+            {{ $t('169a6691-dd2e-41a1-b10a-2442330dffbf') }} {{ formatDate(dataPermissionsChangeDate) }}. <button v-tooltip="'Het lid zal deze stap terug moeten doorlopen via het ledenportaal'" type="button" class="inline-link" @click="clear">
+                {{ $t('56bcb109-f47d-4f8b-8bd5-59cb085096bc') }}
             </button>.
         </p>
 
@@ -28,18 +28,18 @@
         </p>
     </div>
     <div v-else class="container">
-        <Title v-bind="$attrs" :title="title" />
-        <p class="style-description pre-wrap" v-text="description" />
+        <Title v-bind="$attrs" :title="title"/>
+        <p class="style-description pre-wrap" v-text="description"/>
 
-        <STErrorsDefault :error-box="parentErrorBox" />
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="parentErrorBox"/>
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <template v-if="hasKansenTarief">
             <Checkbox :model-value="true" :disabled="true">
                 {{ checkboxLabel }}
             </Checkbox>
             <p class="style-description-small">
-                Je hebt recht op het kansentarief van de UiTPAS.
+                {{ $t('0f76715a-7c55-4766-988d-bd48b205202d') }}
             </p>
         </template>
         <Checkbox v-else v-model="requiresFinancialSupport" :disabled="hasKansenTarief">

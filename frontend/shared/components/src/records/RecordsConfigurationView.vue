@@ -4,10 +4,9 @@
             {{ $t('69a7751b-c316-42cd-a766-98e7e11fe3d6') }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
-        <hr>
-        <h2 v-if="app === 'admin'">
+        <hr><h2 v-if="app === 'admin'">
             {{ $t('0581e6ae-5695-4132-89d3-7f1c542d44f4') }}
         </h2>
         <h2 v-else>
@@ -29,10 +28,9 @@
             {{ $t('0ad0ab12-37bf-425e-871c-b91161ee45f8') }}
         </p>
 
-        <InheritedRecordsConfigurationBox :inherited-records-configuration="props.inheritedRecordsConfiguration" :records-configuration="patched" @patch:records-configuration="addPatch" />
+        <InheritedRecordsConfigurationBox :inherited-records-configuration="props.inheritedRecordsConfiguration" :records-configuration="patched" @patch:records-configuration="addPatch"/>
 
-        <hr>
-        <h2 v-if="app === 'admin'">
+        <hr><h2 v-if="app === 'admin'">
             {{ $t('4e842082-57fa-49ed-a806-6861cc913d12') }}
         </h2>
         <h2 v-else>
@@ -46,14 +44,14 @@
             {{ $t('07d18e1b-2935-4945-9595-50e16a929b19') }}
         </p>
         <p class="style-description-block">
-            Lees <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
+            {{ $t('1ee2ff5c-bcc6-4af9-b47f-0ca10a4023c9') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('b93acd89-a91e-4216-b1dd-a8808a50aa78') }}</a> {{ $t('9e648bd2-b289-4a31-ad40-97c8d02dd46d') }}
         </p>
 
         <p class="info-box">
             {{ $t(`b4cd468d-e3fd-47d2-b59c-cf19b1d3aee0`) }}
         </p>
 
-        <EditRecordCategoriesBox :categories="patched.recordCategories" :settings="settings" @patch:categories="addCategoriesPatch" />
+        <EditRecordCategoriesBox :categories="patched.recordCategories" :settings="settings" @patch:categories="addCategoriesPatch"/>
     </SaveView>
 </template>
 

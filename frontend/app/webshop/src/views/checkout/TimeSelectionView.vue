@@ -5,30 +5,30 @@
         </h1>
 
         <p v-if="checkoutMethod.type === 'Takeout'">
-            Afhaallocatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ (checkoutMethod as any).address }}
+            {{ $t('1681f67a-bada-4fda-aa20-3ee10bab1366') }} {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ (checkoutMethod as any).address }}
         </p>
 
         <p v-if="checkoutMethod.type === 'OnSite'">
-            Locatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ (checkoutMethod as any).address }}
+            {{ $t('7435ae54-2b20-4ee7-834d-66764cfdc55b') }} {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ (checkoutMethod as any).address }}
         </p>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <STList>
             <STListItem v-for="(slot, index) in timeSlots" :key="index" :selectable="true" element-name="label" class="right-stack left-center">
                 <template #left>
-                    <Radio v-model="selectedSlot" name="choose-time-slot" :value="slot" />
+                    <Radio v-model="selectedSlot" name="choose-time-slot" :value="slot"/>
                 </template>
                 <h2 class="style-title-list">
                     {{ formatDateWithDay(slot.date) }}
                 </h2>
                 <p class="style-description">
-                    Tussen {{ formatMinutes(slot.startTime) }} - {{ formatMinutes(slot.endTime) }}
+                    {{ $t('31c33c73-57e4-4c3d-b2bd-05e106a1ebf6') }} {{ formatMinutes(slot.startTime) }} - {{ formatMinutes(slot.endTime) }}
                 </p>
 
                 <template #right>
-                    <span v-if="slot.listedRemainingStock === 0" class="style-tag error">Volzet</span>
-                    <span v-else-if="slot.listedRemainingStock !== null" class="style-tag">Nog {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock === 1 ? "persoon" : "personen") : (slot.listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
+                    <span v-if="slot.listedRemainingStock === 0" class="style-tag error">{{ $t('ed9400bf-ff8e-4180-932f-3fe0347201a4') }}</span>
+                    <span v-else-if="slot.listedRemainingStock !== null" class="style-tag">{{ $t('6878be1d-f7ca-4c4c-b6fa-de59c8028cd7') }} {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock === 1 ? "persoon" : "personen") : (slot.listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
                 </template>
             </STListItem>
         </STList>

@@ -3,43 +3,43 @@
         <template #item="{item: child, index}">
             <STListItem :selectable="!isGroup(child)" class="right-stack group-ui-filter-row" :class="{isLast: index === filters.length - 1, isFirst: index === 0}" @click="isGroup(child) ? undefined : editFilter(index, child)">
                 <template v-if="isGroup(child)" #left>
-                    <span class="group-ui-filter-child-line" />
+                    <span class="group-ui-filter-child-line"/>
                 </template>
 
                 <div v-if="!isGroup(child)">
                     <template v-for="(s, i) in child.styledDescription" :key="i">
                         <span v-if="s.choices?.length" class="button text inline margin-space" :class="s.style" type="button" @click.stop.prevent="$event => showChoices($event, s.choices!)">
-                            <span v-text="getSelectedChoiceText(s.choices)" />
-                            <span class="icon arrow-down-small" />
+                            <span v-text="getSelectedChoiceText(s.choices)"/>
+                            <span class="icon arrow-down-small"/>
                         </span>
-                        <span v-else class="styled-description" :class="s.style" v-text="s.text" />
+                        <span v-else class="styled-description" :class="s.style" v-text="s.text"/>
                     </template>
                 </div>
                 <div v-else>
-                    <GroupUIFilterList :filter="child" @click.stop @replace="setFilter(index, child, $event)" />
+                    <GroupUIFilterList :filter="child" @click.stop @replace="setFilter(index, child, $event)"/>
                 </div>
 
                 <div v-if="index < filters.length - 1" class="group-ui-filter-mode" @click.stop>
                     <Dropdown :model-value="filter.mode" @update:model-value="setFilterMode($event, index)">
                         <option :value="GroupUIFilterMode.And">
-                            En
+                            {{ $t('c5fc226e-1bf7-4677-ab03-3775d488d0bd') }}
                         </option>
                         <option :value="GroupUIFilterMode.Or">
-                            Of
+                            {{ $t('638398d0-a058-42ff-9aee-08de53614a94') }}
                         </option>
                     </Dropdown>
                 </div>
 
                 <template v-if="!isGroup(child)" #right>
-                    <button class="button icon trash gray" type="button" @click="deleteFilter(index, child)" />
-                    <span class="icon edit gray" />
-                    <span v-if="filters.length > 1" class="button icon drag gray" @click.stop @contextmenu.stop />
+                    <button class="button icon trash gray" type="button" @click="deleteFilter(index, child)"/>
+                    <span class="icon edit gray"/>
+                    <span v-if="filters.length > 1" class="button icon drag gray" @click.stop @contextmenu.stop/>
                 </template>
             </STListItem>
         </template>
     </STList>
     <p v-else>
-        Geen filters
+        {{ $t('9ea904c8-1179-4da2-8c63-6832033bddb4') }}
     </p>
 </template>
 

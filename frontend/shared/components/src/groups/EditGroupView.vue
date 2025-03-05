@@ -5,29 +5,21 @@
                 {{ title }}
             </h1>
 
-            <STErrorsDefault :error-box="errors.errorBox" />
+            <STErrorsDefault :error-box="errors.errorBox"/>
 
             <template v-if="type === GroupType.Membership">
                 <p v-if="isNew" class="info-box">
-                    Maak gebruik van de activiteitenmodule om leden in te schrijven voor activiteiten. Maak daarvoor geen inschrijvingsgroep aan.
+                    {{ $t('e3c64a16-6361-40ed-85f8-600d03884acd') }}
                 </p>
 
                 <div class="split-inputs">
-                    <STInputBox title="Naam" error-fields="settings.name" :error-box="errors.errorBox">
-                        <input
-                            ref="firstInput"
-                            v-model="name"
-                            class="input"
-                            type="text"
-                            placeholder="Naam van deze groep"
-                            autocomplete="off"
-                        >
-                    </STInputBox>
+                    <STInputBox error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`d32893b7-c9b0-4ea3-a311-90d29f2c0cf3`)">
+                        <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`b83e4300-a275-4c66-9442-9a3acdd85d02`)"></STInputBox>
 
                     <STInputBox v-if="defaultAgeGroupsFiltered.length" :title="$t('528545c4-028b-4711-9b16-f6fa990c3130')" error-fields="settings.defaultAgeGroupId" :error-box="errors.errorBox">
                         <Dropdown v-model="defaultAgeGroupId">
                             <option :value="null">
-                                Geen automatische aansluiting of verzekeringen (!)
+                                {{ $t('9021f693-688f-44aa-a6b6-d05252361bf9') }}
                             </option>
                             <option v-for="ageGroup of defaultAgeGroupsFiltered" :key="ageGroup.id" :value="ageGroup.id">
                                 {{ getAgeGroupSelectionText(ageGroup) }}
@@ -42,44 +34,29 @@
 
             <template v-if="type === GroupType.WaitingList">
                 <div class="split-inputs">
-                    <STInputBox title="Naam" error-fields="settings.name" :error-box="errors.errorBox">
-                        <input
-                            ref="firstInput"
-                            v-model="name"
-                            class="input"
-                            type="text"
-                            placeholder="bv. Wachtlijst nieuwe leden"
-                            autocomplete="off"
-                        >
-                    </STInputBox>
+                    <STInputBox error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`d32893b7-c9b0-4ea3-a311-90d29f2c0cf3`)">
+                        <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`1cab25d2-a4c7-43de-9b7e-836ab3980dd2`)"></STInputBox>
                 </div>
             </template>
 
-            <STInputBox title="Beschrijving" error-fields="settings.description" :error-box="errors.errorBox" class="max">
-                <textarea
-                    v-model="description"
-                    class="input"
-                    type="text"
-                    placeholder="Zichtbaar voor leden tijdens het inschrijven. Hier kan je bijvoorbeeld inschrijvinginstructies kwijt, of informatie geven over prijzen."
-                    autocomplete="off"
-                />
+            <STInputBox error-fields="settings.description" :error-box="errors.errorBox" class="max" :title="$t(`f72f5546-ed6c-4c93-9b0d-9718f0cc9626`)">
+                <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`d7f8a872-3080-4e6e-b960-b1da77bf1a35`)"/>
             </STInputBox>
             <p v-if="patched.type === GroupType.EventRegistration" class="style-description-small">
-                De beschrijving is zichtbaar als leden doorklikken om in te schrijven voor de activiteit.
+                {{ $t('f0627778-1b9c-4458-b6b6-35909ab7a969') }}
             </p>
 
             <template v-if="patched.type === GroupType.EventRegistration && !organization && isMultiOrganization">
-                <hr>
-                <h2>Organisator</h2>
-                <p>Voor nationale activiteiten moet je kiezen via welke groep alle betalingen verlopen. De betaalinstellingen van die groep worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die groep.</p>
+                <hr><h2>{{ $t('19d25fae-7429-4058-8068-2869b2134492') }}</h2>
+                <p>{{ $t('c73b0a9d-7d03-4c0f-92cb-b2b76fc83ad8') }}</p>
                 <p class="style-description-block">
-                    Daarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.
+                    {{ $t('d9291b24-3054-4628-be25-da49207a45e7') }}
                 </p>
 
                 <STList>
                     <STListItem v-if="externalOrganization" :selectable="isNew" @click="isNew ? chooseOrganizer('Kies een organisator') : undefined">
                         <template #left>
-                            <OrganizationAvatar :organization="externalOrganization" />
+                            <OrganizationAvatar :organization="externalOrganization"/>
                         </template>
 
                         <h3 class="style-title-list">
@@ -90,19 +67,18 @@
                         </p>
 
                         <template v-if="isNew" #right>
-                            <span class="icon arrow-right-small gray" />
+                            <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
                 </STList>
             </template>
 
             <div v-if="type !== GroupType.WaitingList || patched.settings.prices.length !== 1 || patched.settings.prices[0]?.price.price" class="container">
-                <hr>
-                <h2 class="style-with-button">
+                <hr><h2 class="style-with-button">
                     <div>{{ $t('0fb1a3a9-4ced-4097-b931-e865b3173cf9') }}</div>
                     <div>
                         <button class="button text only-icon-smartphone" type="button" @click="addGroupPrice">
-                            <span class="icon add" />
+                            <span class="icon add"/>
                             <span>{{ $t('a5ecc2e0-c1f2-4cfb-b4b2-8a17782787bc') }}</span>
                         </button>
                     </div>
@@ -117,7 +93,7 @@
                             </h3>
 
                             <p class="style-description-small">
-                                Prijs: {{ formatPrice(price.price.price) }}
+                                {{ $t('d7ac5b53-cbd9-4ac8-86f1-99df85c017fa') }} {{ formatPrice(price.price.price) }}
                             </p>
 
                             <p v-if="price.price.reducedPrice !== null" class="style-description-small">
@@ -125,96 +101,92 @@
                             </p>
 
                             <p v-if="price.isSoldOut(patched)" class="style-description-small">
-                                Uitverkocht
+                                {{ $t('4c249834-df40-4c1f-9c79-c56864100c36') }}
                             </p>
                             <p v-else-if="price.stock" class="style-description-small">
-                                Nog {{ pluralText(price.getRemainingStock(patched) ?? 0, 'stuk', 'stuks') }} beschikbaar
+                                {{ $t('6878be1d-f7ca-4c4c-b6fa-de59c8028cd7') }} {{ pluralText(price.getRemainingStock(patched) ?? 0, 'stuk', 'stuks') }} {{ $t('79828b21-b66f-4e18-bb1e-bb46ee12a8af') }}
                             </p>
 
                             <template #right>
-                                <span v-if="price.hidden" v-tooltip="$t('aff982ed-0f1a-4838-af79-9e00cd53131b')" class="icon gray eye-off" />
-                                <span class="button icon drag gray" @click.stop @contextmenu.stop />
-                                <span class="icon arrow-right-small gray" />
+                                <span v-if="price.hidden" v-tooltip="$t('aff982ed-0f1a-4838-af79-9e00cd53131b')" class="icon gray eye-off"/>
+                                <span class="button icon drag gray" @click.stop @contextmenu.stop/>
+                                <span class="icon arrow-right-small gray"/>
                             </template>
                         </STListItem>
                     </template>
                 </STList>
-                <GroupPriceBox v-else :price="patched.settings.prices[0]" :group="patched" :errors="errors" :default-membership-type-id="defaultMembershipTypeId" @patch:price="addPricePatch" />
+                <GroupPriceBox v-else :price="patched.settings.prices[0]" :group="patched" :errors="errors" :default-membership-type-id="defaultMembershipTypeId" @patch:price="addPricePatch"/>
             </div>
 
             <div v-for="optionMenu of patched.settings.optionMenus" :key="optionMenu.id" class="container">
-                <hr>
-                <GroupOptionMenuBox :option-menu="optionMenu" :group="patched" :errors="errors" :level="2" @patch:group="addPatch" @patch:option-menu="addOptionMenuPatch" @delete="addOptionMenuDelete(optionMenu.id)" />
+                <hr><GroupOptionMenuBox :option-menu="optionMenu" :group="patched" :errors="errors" :level="2" @patch:group="addPatch" @patch:option-menu="addOptionMenuPatch" @delete="addOptionMenuDelete(optionMenu.id)"/>
             </div>
 
-            <hr>
-
-            <STList>
+            <hr><STList>
                 <STListItem :selectable="true" element-name="button" @click="addGroupOptionMenu()">
                     <template #left>
-                        <span class="icon add gray" />
+                        <span class="icon add gray"/>
                     </template>
 
                     <h3 class="style-title-list">
-                        Vraag of keuzemenu toevoegen
+                        {{ $t('af9f5e45-d2ab-41f8-a8ed-1d00ebe6049f') }}
                     </h3>
                 </STListItem>
             </STList>
 
-            <hr>
-            <h2>Inschrijvingen via ledenportaal</h2>
-            <p>Leden kunnen zelf inschrijven via het ledenportaal als je deze optie open zet. Ze betalen het opgegeven tarief dan zelf via de betaalmethodes die je hebt ingesteld bij de instellingen van jouw groep.</p>
+            <hr><h2>{{ $t('a6b62b7f-cd57-4027-a37c-bffd9f1b305f') }}</h2>
+            <p>{{ $t('6a12e19c-2e37-44ab-93c0-c94d17616095') }}</p>
 
             <STList>
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
-                        <Radio v-model="virtualOpenStatus" :value="GroupStatus.Closed" />
+                        <Radio v-model="virtualOpenStatus" :value="GroupStatus.Closed"/>
                     </template>
 
                     <h3 class="style-title-list">
-                        Gesloten
+                        {{ $t('7c1bfb0d-50b0-4848-9c22-c67b531e5cf2') }}
                     </h3>
                     <p class="style-description-small">
-                        De inschrijvingen zijn gesloten en openen niet automatisch.
+                        {{ $t('286d8656-c88e-45d4-998f-69ad0b69ea16') }}
                     </p>
                 </STListItem>
 
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
-                        <Radio v-model="virtualOpenStatus" value="RegistrationStartDate" />
+                        <Radio v-model="virtualOpenStatus" value="RegistrationStartDate"/>
                     </template>
 
                     <h3 class="style-title-list">
-                        Vanaf datum
+                        {{ $t('533d87c9-cada-4b7e-9869-11c1ae02fe78') }}
                     </h3>
                     <p class="style-description-small">
-                        De inschrijvingen openen pas vanaf een bepaalde datum.
+                        {{ $t('10e8c46d-26ff-4558-bd66-f5a9a21c4143') }}
                     </p>
 
                     <div v-if="virtualOpenStatus === 'RegistrationStartDate'" class="split-inputs option" @click.stop.prevent>
                         <STInputBox :title="$t('4f7cef46-0b46-4225-839e-510d8a8b95bc')" error-fields="settings.registrationStartDate" :error-box="errors.errorBox">
-                            <DateSelection v-model="registrationStartDate" />
+                            <DateSelection v-model="registrationStartDate"/>
                         </STInputBox>
-                        <TimeInput v-if="registrationStartDate" v-model="registrationStartDate" :title="$t('1e43813a-f48e-436c-bb49-e9ebb0f27f58')" :validator="errors.validator" />
+                        <TimeInput v-if="registrationStartDate" v-model="registrationStartDate" :title="$t('1e43813a-f48e-436c-bb49-e9ebb0f27f58')" :validator="errors.validator"/>
                     </div>
                 </STListItem>
 
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
-                        <Radio v-model="virtualOpenStatus" :value="GroupStatus.Open" />
+                        <Radio v-model="virtualOpenStatus" :value="GroupStatus.Open"/>
                     </template>
 
                     <h3 class="style-title-list">
-                        Open
+                        {{ $t('e8ddc6ce-fe87-42dd-847a-892d17a029a0') }}
                     </h3>
                     <p class="style-description-small">
-                        De inschrijvingen zijn open
+                        {{ $t('1419d42e-bc69-4072-a52f-4daf79592672') }}
                     </p>
                 </STListItem>
 
                 <STListItem v-if="virtualOpenStatus !== GroupStatus.Closed" :selectable="true" element-name="label">
                     <template #left>
-                        <Checkbox v-model="useRegistrationEndDate" />
+                        <Checkbox v-model="useRegistrationEndDate"/>
                     </template>
 
                     <h3 class="style-title-list">
@@ -223,39 +195,38 @@
 
                     <div v-if="useRegistrationEndDate" class="split-inputs option" @click.stop.prevent>
                         <STInputBox :title="$t('6905dd1f-fe82-4ddc-bc6c-9ad496d34a71')" error-fields="settings.registrationEndDate" :error-box="errors.errorBox">
-                            <DateSelection v-model="registrationEndDate" />
+                            <DateSelection v-model="registrationEndDate"/>
                         </STInputBox>
-                        <TimeInput v-if="registrationEndDate" v-model="registrationEndDate" :title="$t('1617abfe-8657-4a9f-9fe3-6e6d896c4ef6')" :validator="errors.validator" />
+                        <TimeInput v-if="registrationEndDate" v-model="registrationEndDate" :title="$t('1617abfe-8657-4a9f-9fe3-6e6d896c4ef6')" :validator="errors.validator"/>
                     </div>
                 </STListItem>
             </STList>
 
             <div v-if="patched.type === GroupType.Membership" class="container">
-                <hr>
-                <h2>Restricties</h2>
+                <hr><h2>{{ $t('3b7dc7d0-ebb2-4951-87a3-fc69cc6dcf62') }}</h2>
 
                 <template v-if="isPropertyEnabled('birthDay')">
                     <div class="split-inputs">
-                        <STInputBox title="Minimum leeftijd* (optioneel)" error-fields="settings.minAge" :error-box="errors.errorBox">
-                            <AgeInput v-model="minAge" :year="period.startDate.getFullYear()" placeholder="Onbeperkt" :nullable="true" />
+                        <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`2d5fbb4b-06c0-4584-b42e-d5df9e5a5c88`)">
+                            <AgeInput v-model="minAge" :year="period.startDate.getFullYear()" :nullable="true" :placeholder="$t(`948ef7e2-171d-4e02-89ce-ea3de1ab7e06`)"/>
                         </STInputBox>
 
-                        <STInputBox title="Maximum leeftijd* (optioneel)" error-fields="settings.maxAge" :error-box="errors.errorBox">
-                            <AgeInput v-model="maxAge" :year="period.startDate.getFullYear()" placeholder="Onbeperkt" :nullable="true" />
+                        <STInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`e226583e-bda3-4142-8e51-e2f872f6074c`)">
+                            <AgeInput v-model="maxAge" :year="period.startDate.getFullYear()" :nullable="true" :placeholder="$t(`948ef7e2-171d-4e02-89ce-ea3de1ab7e06`)"/>
                         </STInputBox>
                     </div>
                     <p class="st-list-description">
-                        *Hoe oud het lid is op 31/12/{{ period.startDate.getFullYear() }}.<template v-if="externalOrganization?.address.country === Country.Belgium">
-                            Ter referentie: leden uit het eerste leerjaar zijn 6 jaar op 31 december. Leden uit het eerste secundair zijn 12 jaar op 31 december.
+                        {{ $t('013bc6a4-4566-4648-b4ff-4c3aa2252156') }}{{ period.startDate.getFullYear() }}.<template v-if="externalOrganization?.address.country === Country.Belgium">
+                            {{ $t('40b8fd02-5fa4-4d71-92a1-551026c63410') }}
                         </template>
                     </p>
                 </template>
 
-                <STInputBox v-if="isPropertyEnabled('gender')" title="Jongens en meisjes" error-fields="genderType" :error-box="errors.errorBox" class="max">
+                <STInputBox v-if="isPropertyEnabled('gender')" error-fields="genderType" :error-box="errors.errorBox" class="max" :title="$t(`305afb02-56fb-4e46-889a-fc9b63ad23dd`)">
                     <STList>
                         <STListItem v-for="_genderType in genderTypes" :key="_genderType.value" element-name="label" :selectable="true">
                             <template #left>
-                                <Radio v-model="genderType" :value="_genderType.value" />
+                                <Radio v-model="genderType" :value="_genderType.value"/>
                             </template>
 
                             <h3 class="style-title-list">
@@ -265,57 +236,56 @@
                     </STList>
                 </STInputBox>
 
-                <STInputBox title="Aansluiting" error-fields="requirePlatformMembershipOnRegistrationDate" :error-box="errors.errorBox" class="max">
+                <STInputBox error-fields="requirePlatformMembershipOnRegistrationDate" :error-box="errors.errorBox" class="max" :title="$t(`8ad3a6b5-20e9-4858-ab57-f6d524ef50af`)">
                     <STList>
                         <STListItem :selectable="true" element-name="label">
                             <template #left>
-                                <Checkbox v-model="requirePlatformMembershipOnRegistrationDate" />
+                                <Checkbox v-model="requirePlatformMembershipOnRegistrationDate"/>
                             </template>
 
                             <h3 class="style-title-list">
-                                Aansluiting is verplicht
+                                {{ $t('464cedfe-4ec9-4a13-a075-7cad1e9f5926') }}
                             </h3>
                             <p class="style-description-small">
-                                Een lid moet een aansluiting hebben op de dag van de inschrijving.
+                                {{ $t('c398fce5-6abe-42d0-99ca-8a858547861b') }}
                             </p>
                         </STListItem>
                     </STList>
                 </STInputBox>
 
                 <button v-if="requireGroupIds.length === 0" type="button" class="button text only-icon-smartphone" @click="addRequireGroupIds">
-                    <span class="icon add" />
-                    <span>Verplicht andere inschrijving</span>
+                    <span class="icon add"/>
+                    <span>{{ $t('f225cf9e-ea57-416a-a8f7-e94bff73c195') }}</span>
                 </button>
             </div>
 
             <div v-if="showAllowRegistrationsByOrganization || showEnableMaxMembers" class="container">
-                <hr>
-                <h2>Beschikbaarheid</h2>
+                <hr><h2>{{ $t('bdbaebf3-eae4-4736-959b-97b90f979a8d') }}</h2>
                 <STList>
                     <STListItem v-if="showAllowRegistrationsByOrganization" :selectable="true" element-name="label">
                         <template #left>
-                            <Checkbox v-model="allowRegistrationsByOrganization" />
+                            <Checkbox v-model="allowRegistrationsByOrganization"/>
                         </template>
                         <h3 class="style-title-list">
-                            Groepinschrijvingen
+                            {{ $t('06e1c238-546a-409a-9a0d-184edeb37b33') }}
                         </h3>
                         <p class="style-description-small">
-                            Een hoofdbeheerder van een groep kan meerdere leden inschrijven en schiet de betaling voor. De leden betalen vervolgens via een openstaand bedrag het geld terug aan hun groep.
+                            {{ $t('53172b47-ab22-43df-b545-890f4e963d6f') }}
                         </p>
                     </STListItem>
                     <STListItem v-if="showEnableMaxMembers" :selectable="true" element-name="label">
                         <template #left>
-                            <Checkbox v-model="enableMaxMembers" />
+                            <Checkbox v-model="enableMaxMembers"/>
                         </template>
                         <h3 class="style-title-list">
-                            Limiteer maximum aantal inschrijvingen (waarvan nu {{ usedStock }} ingenomen of gereserveerd)
+                            {{ $t('1a0d6811-3df9-4f17-b9c1-3a589483a59d') }} {{ usedStock }} {{ $t('dd8428ad-8fdd-4fc5-ac64-08ededeba0f1') }}
                         </h3>
                         <div v-if="enableMaxMembers" class="option" @click.stop.prevent>
                             <STInputBox title="" error-fields="maxMembers" :error-box="errors.errorBox">
-                                <NumberInput v-model="maxMembers" :min="0" suffix="leden" suffix-singular="lid" />
+                                <NumberInput v-model="maxMembers" :min="0" suffix="leden" suffix-singular="lid"/>
                             </STInputBox>
                             <p class="style-description-small">
-                                Als er een wachtlijst is ingesteld kunnen de leden op de wachtlijst inschrijven als de groep volzet is.
+                                {{ $t('bdf98b08-c915-4548-9b87-bbc16a01f5ad') }}
                             </p>
                         </div>
                     </STListItem>
@@ -323,27 +293,26 @@
             </div>
 
             <div v-if="patched.waitingList || enableMaxMembers" class="container">
-                <hr>
-                <h2>Wachtlijst</h2>
-                <p>Je kan een wachtlijst delen tussen verschillende leeftijdsgroepen. Op die manier kan je de wachtlijst makkelijk meerdere jaren aanhouden. Kies hieronder welke wachtlijst van toepassing is voor deze groep.</p>
+                <hr><h2>{{ $t('505f83e9-65b8-4484-9595-9cdac499a9d2') }}</h2>
+                <p>{{ $t('27ccea53-8836-4db9-affe-fa1d0cbc2913') }}</p>
                 <p class="style-description-block">
-                    Je kan indien gewenst ook nog vragen stellen aan leden die op de wachtlijst willen inschrijven.
+                    {{ $t('34e7fb98-7e8a-4520-ba91-11333236e043') }}
                 </p>
 
                 <STList v-if="availableWaitingLists.length">
                     <STListItem :selectable="true" element-name="label">
                         <template #left>
-                            <Radio v-model="waitingList" :value="null" />
+                            <Radio v-model="waitingList" :value="null"/>
                         </template>
 
                         <h3 class="style-title-list">
-                            Geen wachtlijst
+                            {{ $t('b2f76715-37d5-40c0-893d-b15255a3c47a') }}
                         </h3>
                     </STListItem>
 
                     <STListItem v-for="{list, description: waitingListDescription} of availableWaitingLists" :key="list.id" :selectable="true" element-name="label">
                         <template #left>
-                            <Radio v-model="waitingList" :value="list" />
+                            <Radio v-model="waitingList" :value="list"/>
                         </template>
 
                         <h3 class="style-title-list">
@@ -354,26 +323,25 @@
                         </p>
 
                         <template #right>
-                            <button class="button icon edit gray" type="button" @click="editWaitingList(list)" />
+                            <button class="button icon edit gray" type="button" @click="editWaitingList(list)"/>
                         </template>
                     </STListItem>
                 </STList>
                 <p v-else class="info-box">
-                    Er zijn nog geen wachtlijsten aangemaakt.
+                    {{ $t('6ddd377b-57cf-4856-b4f6-1b7a742e70da') }}
                 </p>
 
                 <p class="style-button-bar">
                     <button type="button" class="button text" @click="addWaitingList">
-                        <span class="icon add" />
-                        <span>Nieuwe wachtlijst maken</span>
+                        <span class="icon add"/>
+                        <span>{{ $t('f513024c-8771-49e2-b502-36f5bf4d7f41') }}</span>
                     </button>
                 </p>
             </div>
 
             <template v-if="waitingListType !== WaitingListType.None || (enableMaxMembers && type === GroupType.Membership)">
-                <hr>
-                <h2>Voorrangsregeling online inschrijvingen</h2>
-                <p>Zorg ervoor dat bestaande leden voorrang krijgen op inschrijvingen (vooral als je met wachtlijsten werkt).</p>
+                <hr><h2>{{ $t('eebded7c-75d1-4b94-a5c7-1e9816ce99bb') }}</h2>
+                <p>{{ $t('2c474df7-27e6-4d11-b441-2c7f187fbb9e') }}</p>
 
                 <p v-if="waitingListType === WaitingListType.PreRegistrations || waitingListType === WaitingListType.ExistingMembersFirst" class="info-box">
                     {{ $t('e2130593-e64d-4f3a-bb16-75ba4ed7604e') }}
@@ -382,84 +350,84 @@
                 <STList>
                     <STListItem :selectable="true" element-name="label">
                         <template #left>
-                            <Radio v-model="waitingListType" :value="WaitingListType.None" />
+                            <Radio v-model="waitingListType" :value="WaitingListType.None"/>
                         </template>
 
                         <h3 class="style-title-list">
-                            Iedereen kan gelijk starten met inschrijven (tot het maximum)
+                            {{ $t('d7188e4d-0f48-40a5-b570-53094e4338a5') }}
                         </h3>
                     </STListItem>
 
                     <STListItem :selectable="true" element-name="label" :disabled="!waitingList">
                         <template #left>
-                            <Radio v-model="waitingListType" :value="WaitingListType.ExistingMembersFirst" :disabled="!waitingList" />
+                            <Radio v-model="waitingListType" :value="WaitingListType.ExistingMembersFirst" :disabled="!waitingList"/>
                         </template>
 
                         <h3 class="style-title-list">
-                            Alle nieuwe leden op wachtlijst
+                            {{ $t('b8e99c4f-1f32-49bf-9dd1-ab9bb0605098') }}
                         </h3>
 
                         <p class="style-description-small">
-                            Bestaande leden kunnen meteen inschrijven (tot het maximum). De rest en nieuwe leden kunnen inschrijven op de wachtlijst.
+                            {{ $t('5b0f22c8-6241-4ac6-84b2-e8455fac50d2') }}
                         </p>
 
                         <p v-if="!waitingList" class="style-description-small">
-                            Maak eerst een wachtlijst aan om deze optie te gebruiken.
+                            {{ $t('f14b12c3-60f8-4444-ab1a-6cd86fbdd8ca') }}
                         </p>
 
                         <div v-if="waitingListType === WaitingListType.ExistingMembersFirst" class="option">
                             <Checkbox v-model="priorityForFamily">
-                                Ook gezinsleden van bestaande leden rechtstreeks laten inschrijven
+                                {{ $t('79edddae-646f-4900-a415-131c59791210') }}
                             </Checkbox>
                         </div>
                     </STListItem>
 
                     <STListItem :selectable="true" element-name="label" :disabled="!waitingList">
                         <template #left>
-                            <Radio v-model="waitingListType" :value="WaitingListType.All" :disabled="!waitingList" />
+                            <Radio v-model="waitingListType" :value="WaitingListType.All" :disabled="!waitingList"/>
                         </template>
 
                         <h3 class="style-title-list">
-                            Iedereen op wachtlijst
+                            {{ $t('6d0211d9-5f66-4ac6-8412-b8b4b887765e') }}
                         </h3>
 
                         <p class="style-description-small">
-                            Iedereen moet manueel worden goedgekeurd. Betaling gebeurt pas bij de definitieve inschrijving.
+                            {{ $t('1eaf316b-a9b1-486f-8eb9-02a166c91d1c') }}
                         </p>
 
                         <p v-if="!waitingList" class="style-description-small">
-                            Maak eerst een wachtlijst aan om deze optie te gebruiken.
+                            {{ $t('f14b12c3-60f8-4444-ab1a-6cd86fbdd8ca') }}
                         </p>
                     </STListItem>
 
                     <STListItem :selectable="true" element-name="label" :for="WaitingListType.PreRegistrations" :disabled="(!registrationStartDate)">
                         <template #left>
-                            <Radio :id="WaitingListType.PreRegistrations" v-model="waitingListType" :value="WaitingListType.PreRegistrations" :disabled="(!registrationStartDate)" />
+                            <Radio :id="WaitingListType.PreRegistrations" v-model="waitingListType" :value="WaitingListType.PreRegistrations" :disabled="(!registrationStartDate)"/>
                         </template>
 
                         <h3 class="style-title-list">
-                            Voorinschrijvingen gebruiken
+                            {{ $t('60f30a3b-ec31-42ca-9a40-e39448f9568a') }}
                         </h3>
 
                         <p class="style-description-small">
-                            Bestaande leden kunnen al vroeger beginnen met inschrijven.
+                            {{ $t('9580d49f-cb58-41c8-a339-1d21b67e25ed') }}
                         </p>
 
                         <p v-if="!registrationStartDate" class="style-description-small">
-                            Stel eerst een startdatum in voor de inschrijvingen om deze optie te kunnen gebruiken.
+                            {{ $t('7edeb9ef-964b-4304-827a-27fff8997ae7') }}
                         </p>
 
                         <div v-if="waitingListType === WaitingListType.PreRegistrations" class="option">
                             <div class="split-inputs">
-                                <STInputBox title="Begindatum voorinschrijvingen" error-fields="settings.preRegistrationsDate" :error-box="errors.errorBox">
-                                    <DateSelection v-model="preRegistrationsDate" />
+                                <STInputBox error-fields="settings.preRegistrationsDate" :error-box="errors.errorBox" :title="$t(`0378aa93-9655-4bac-822b-6e6c503e6573`)">
+                                    <DateSelection v-model="preRegistrationsDate"/>
                                 </STInputBox>
 
-                                <TimeInput v-model="preRegistrationsDate" title="Vanaf" :validator="errors.validator" />
+                                <TimeInput v-model="preRegistrationsDate" :validator="errors.validator" :title="$t(`cb8367e9-6497-483f-9d61-a595d1f5f441`)"/>
                             </div>
 
                             <Checkbox v-model="priorityForFamily">
-                                Ook gezinsleden van bestaande leden vroeger laten inschrijven
+                                {{ $t('438a893d-d84b-4079-b6ae-608b7b93a08d') }}
                             </Checkbox>
                         </div>
                     </STListItem>
@@ -467,24 +435,23 @@
             </template>
 
             <JumpToContainer v-if="patched.type === GroupType.Membership" class="container" :visible="forceShowRequireGroupIds || !!requireGroupIds.length">
-                <GroupIdsInput v-model="requireGroupIds" :default-period-id="patched.periodId" title="Verplichte andere inschrijvingen" />
+                <GroupIdsInput v-model="requireGroupIds" :default-period-id="patched.periodId" :title="$t(`45ea18e0-dffa-44ea-a6a8-2cb2ce3ca29a`)"/>
             </JumpToContainer>
 
             <template v-if="$feature('member-trials')">
                 <template v-if="patched.type === GroupType.Membership && (!defaultMembershipConfig || defaultMembershipConfig.trialDays)">
-                    <hr>
-                    <h2>{{ $t('8265d9e0-32c1-453c-ab2f-d31f1eb244c3') }}</h2>
+                    <hr><h2>{{ $t('8265d9e0-32c1-453c-ab2f-d31f1eb244c3') }}</h2>
                     <p>{{ $t('89a760d7-8995-458c-9635-da104971e95c') }}</p>
 
                     <STInputBox :title="$t('f0ceba51-bad2-4454-9a9b-4b12f0983c82')" error-fields="settings.trialDays" :error-box="errors.errorBox">
-                        <NumberInput v-model="trialDays" suffix="dagen" suffix-singular="dag" :min="0" :max="defaultMembershipConfig?.trialDays ?? null" />
+                        <NumberInput v-model="trialDays" suffix="dagen" suffix-singular="dag" :min="0" :max="defaultMembershipConfig?.trialDays ?? null"/>
                     </STInputBox>
                     <p v-if="defaultMembershipConfig && defaultMembershipConfig.trialDays" class="style-description-small">
                         {{ $t('d68a6d63-d782-49e2-84a5-4f77dbfa2977', {days: Formatter.days(defaultMembershipConfig.trialDays)}) }}
                     </p>
 
                     <STInputBox :title="$t('5ecd5e10-f233-4a6c-8acd-c1abff128a21')" error-fields="settings.startDate" :error-box="errors.errorBox">
-                        <DateSelection v-model="startDate" :placeholder="formatDate(patched.settings.startDate, true)" :min="period?.startDate" :max="period?.endDate" />
+                        <DateSelection v-model="startDate" :placeholder="formatDate(patched.settings.startDate, true)" :min="period?.startDate" :max="period?.endDate"/>
                     </STInputBox>
                     <p class="style-description-small">
                         {{ $t('db636f2c-371d-4209-bd44-eaa6984c2813') }}
@@ -492,25 +459,23 @@
                 </template>
             </template>
 
-            <hr>
-            <h2>Persoonsgegevens verzamelen</h2>
-            <p>Deze persoonsgegevens zijn verplicht (soms optioneel) in te vullen voor leden die inschrijven. Let erop dat deze gegevens gedeeld zijn met andere inschrijvingen. Als dezelfde gegevens dus voor meerdere inschrijvingen verzameld worden, dan worden ze maar één keer gevraagd (anders kunnen leden de gegevens wel nog nakijken als het al even geleden werd ingevuld) en kan je niet per inschrijving andere gegevens invullen. Gebruik ze dus niet voor tijdelijke vragen.</p>
+            <hr><h2>{{ $t('4fa037eb-6d01-4983-aa12-c642d01b1f83') }}</h2>
+            <p>{{ $t('85230d87-fba2-4acb-9394-f489678f8055') }}</p>
             <p v-if="auth.hasFullAccess()" class="info-box">
-                Voeg nieuwe persoonsgegevens toe via Instellingen → Persoonsgegevens van leden.
+                {{ $t('a8a8a0b0-c74c-4374-bf51-a85a9c605902') }}
             </p>
-            <InheritedRecordsConfigurationBox :group-level="true" :override-organization="externalOrganization" :inherited-records-configuration="inheritedRecordsConfiguration" :records-configuration="recordsConfiguration" @patch:records-configuration="patchRecordsConfiguration" />
+            <InheritedRecordsConfigurationBox :group-level="true" :override-organization="externalOrganization" :inherited-records-configuration="inheritedRecordsConfiguration" :records-configuration="recordsConfiguration" @patch:records-configuration="patchRecordsConfiguration"/>
 
-            <hr>
-            <h2>Eénmalige vragen</h2>
-            <p>Deze vragen zijn enkel van toepassing op deze specifieke inschrijving en gaan daarna verloren. <strong class="style-strong">Bij elke inschrijving moeten ze opnieuw worden ingegeven:</strong> het antwoord hangt dus vast aan de inschrijving, niet het lid zelf. De antwoorden zijn enkel zichtbaar in de context van een inschrijving, niet tussen de gegevens van een lid.</p>
+            <hr><h2>{{ $t('2b8ed342-6e9b-4ffa-85cb-6a665fb9881b') }}</h2>
+            <p>{{ $t('e02e1f2d-5b28-4a8e-8e8b-4d37af6f235f') }} <strong class="style-strong">{{ $t('c226101b-c183-4051-85d6-e5f0b687ae47') }}</strong> {{ $t('7c90f9d1-4776-4fad-9299-08c395dd2147') }}</p>
 
             <p class="warning-box">
                 <span>
-                    Gebruik dit <strong class="style-strong style-underline">NIET</strong> om persoonsgegevens van leden te verzamelen (bv. GEEN allergieën, al dan niet kunnen zwemmen, dieetvoorkeur...) - anders moeten ze dit per inschrijving en elk jaar opnieuw ingeven en is het niet duidelijk welke gegevens nu de juiste zijn. Voeg hier enkel vragen toe die je éénmalig nodig hebt specifiek voor deze activiteit.
+                    {{ $t('28bc0ab2-a546-4a2e-b0b7-f59342efb513') }} <strong class="style-strong style-underline">{{ $t('35c89e42-1155-4906-b7b3-0b5bdf004211') }}</strong> {{ $t('484adbe6-77d5-49c4-8793-6ad67439b693') }}
                 </span>
             </p>
 
-            <EditRecordCategoriesBox :categories="patched.settings.recordCategories" :settings="recordEditorSettings" @patch:categories="addRecordCategoriesPatch" />
+            <EditRecordCategoriesBox :categories="patched.settings.recordCategories" :settings="recordEditorSettings" @patch:categories="addRecordCategoriesPatch"/>
         </SaveView>
     </LoadingViewTransition>
 </template>

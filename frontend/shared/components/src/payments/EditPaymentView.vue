@@ -4,11 +4,11 @@
             {{ title }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <div class="split-inputs">
             <div>
-                <STInputBox title="Type" error-fields="type" :error-box="errors.errorBox">
+                <STInputBox error-fields="type" :error-box="errors.errorBox" :title="$t(`b610d465-2901-4b54-97ae-dbeab72e4762`)">
                     <Dropdown v-model="type">
                         <option v-for="m in availableTypes" :key="m" :value="m">
                             {{ capitalizeFirstLetter(PaymentTypeHelper.getName(m)) }}
@@ -16,7 +16,7 @@
                     </Dropdown>
                 </STInputBox>
 
-                <STInputBox :title="type === PaymentType.Payment ? 'Betaalmethode' : 'Terugbetaalmethode'" error-fields="method" :error-box="errors.errorBox">
+                <STInputBox :title="type === PaymentType.Payment ? $t(`d880e10c-63f5-4a84-a994-97bbfcb04f4f`) : $t(`c7db7d15-2dcd-4dfc-b7cd-34d6beef1bcf`)" error-fields="method" :error-box="errors.errorBox">
                     <Dropdown v-model="method">
                         <option v-for="m in availableMethods" :key="m" :value="m">
                             {{ PaymentMethodHelper.getNameCapitalized(m) }}
@@ -24,7 +24,7 @@
                     </Dropdown>
                 </STInputBox>
 
-                <STInputBox v-if="!isNew" title="Status" error-fields="status" :error-box="errors.errorBox">
+                <STInputBox v-if="!isNew" error-fields="status" :error-box="errors.errorBox" :title="$t(`38b75e19-10cb-4641-88a8-f4e2e9be7576`)">
                     <Dropdown v-model="status">
                         <option v-for="m in availableStatuses" :key="m" :value="m">
                             {{ PaymentStatusHelper.getNameCapitalized(m) }}
@@ -33,78 +33,61 @@
                 </STInputBox>
             </div>
             <div>
-                <STInputBox v-if="status === 'Succeeded'" :title="type === PaymentType.Payment ? 'Ontvangen op' : 'Terugbetaald op'" error-fields="paidAt" :error-box="errors.errorBox">
-                    <DateSelection v-model="paidAt" />
+                <STInputBox v-if="status === 'Succeeded'" :title="type === PaymentType.Payment ? $t(`e9a05ee4-cfd3-47bb-8f2e-0ad3731a417a`) : $t(`a88dacba-5ef8-489e-bd63-b8ecde75944d`)" error-fields="paidAt" :error-box="errors.errorBox">
+                    <DateSelection v-model="paidAt"/>
                 </STInputBox>
             </div>
         </div>
 
         <template v-if="method === PaymentMethod.Transfer">
-            <hr>
-            <h2 v-if="type === PaymentType.Payment">
-                Overschrijvingsdetails
+            <hr><h2 v-if="type === PaymentType.Payment">
+                {{ $t('4d474b6c-8224-416b-a1a3-72ccbaed8369') }}
             </h2>
             <h2 v-else>
-                Overgeschreven via
+                {{ $t('968bb234-03b6-46cb-8666-175b8fd07f51') }}
             </h2>
 
-            <STInputBox :title="type === PaymentType.Payment ? 'Begunstigde' : 'Naam rekening'" error-fields="transferSettings.creditor" :error-box="errors.errorBox">
-                <input
-                    v-model="creditor"
-                    class="input"
-                    type="text"
-                    placeholder="Naam bankrekeningnummer"
-                    autocomplete="off"
-                >
-            </STInputBox>
+            <STInputBox :title="type === PaymentType.Payment ? $t(`f95defaa-5371-427d-9fa3-07be3e449a74`) : $t(`901a6bec-7c99-4c38-8873-866862040a12`)" error-fields="transferSettings.creditor" :error-box="errors.errorBox">
+                <input v-model="creditor" class="input" type="text" autocomplete="off" :placeholder="$t(`03ffa196-1d54-4020-9563-7d647592d659`)"></STInputBox>
 
-            <IBANInput v-model="iban" title="Bankrekeningnummer" placeholder="Op deze rekening schrijft men over" :validator="errors.validator" :required="false" />
+            <IBANInput v-model="iban" :validator="errors.validator" :required="false" :title="$t(`42e471ed-1172-4deb-92a7-770f53dfd645`)" :placeholder="$t(`47650796-a3c4-43c7-b687-7898856d6644`)"/>
 
-            <STInputBox title="Mededeling" error-fields="transferDescription" :error-box="errors.errorBox">
-                <input
-                    ref="firstInput"
-                    v-model="transferDescription"
-                    class="input"
-                    type="text"
-                    placeholder="Bv. Aankoop x"
-                    autocomplete="off"
-                >
-            </STInputBox>
+            <STInputBox error-fields="transferDescription" :error-box="errors.errorBox" :title="$t(`fb7e4e6a-c7a6-4e1a-84ce-87bcf622f479`)">
+                <input ref="firstInput" v-model="transferDescription" class="input" type="text" autocomplete="off" :placeholder="$t(`acd39d2e-3080-42cb-a488-43e1895d1f91`)"></STInputBox>
         </template>
 
-        <hr>
-        <h2>Wat en hoeveel?</h2>
+        <hr><h2>{{ $t('dfbe6605-b275-4d45-b6d9-4985a9c9ed37') }}</h2>
         <p v-if="patchedPayment.type === PaymentType.Payment">
-            Kies hieronder wat er precies betaald werd - en pas eventueel aan hoeveel. Dit is nodig om de boekhouding correct te houden en elke betaling te koppelen aan specifieke items.
+            {{ $t('0c8b247a-9b71-467c-afdc-9943448127f3') }}
         </p>
         <p v-else-if="patchedPayment.type === PaymentType.Reallocation">
-            Bouw hieronder een balans op zodat het totaalbedrag 0 euro bedraagt.
+            {{ $t('d33a5c1b-850f-40bd-8c16-2d749a7410dd') }}
         </p>
         <p v-else>
             {{ $t('f24d4ba4-4b42-4fa1-b99f-4b90dd1a3208') }}
         </p>
 
-        <SelectBalanceItemsList :items="balanceItems" :list="patchedPayment.balanceItemPayments" :is-payable="false" @patch="addPatch({balanceItemPayments: $event})" />
+        <SelectBalanceItemsList :items="balanceItems" :list="patchedPayment.balanceItemPayments" :is-payable="false" @patch="addPatch({balanceItemPayments: $event})"/>
 
         <STList v-if="createBalanceItem">
             <STListItem :selectable="true" element-name="button" @click="createBalanceItem">
                 <template #left>
                     <IconContainer icon="box">
                         <template #aside>
-                            <span class="icon add small primary" />
+                            <span class="icon add small primary"/>
                         </template>
                     </IconContainer>
                 </template>
                 <h3 class="style-title-list">
-                    Item toevoegen
+                    {{ $t('fa974919-91ab-4005-930c-5df57de4532f') }}
                 </h3>
 
                 <p class="style-description-small">
-                    Voeg een item toe aan het openstaand bedrag of geef een tegoed
+                    {{ $t('ffbb5f15-84cb-48be-98f4-cf392fd6f227') }}
                 </p>
 
                 <template #right>
-                    <span class="icon arrow-right-small gray" />
+                    <span class="icon arrow-right-small gray"/>
                 </template>
             </STListItem>
         </STList>

@@ -1,22 +1,22 @@
 <template>
     <SaveView :title="title" :loading="loading" save-text="Bestelling bevestigen" :prefer-large-button="true" @save="goNext">
         <template v-if="checkout.totalPrice > 0" #left>
-            <span>Totaal: {{ formatPrice(checkout.totalPrice) }}</span>
+            <span>{{ $t('6cbde4da-3770-4726-8ea4-9a53b785a66e') }} {{ formatPrice(checkout.totalPrice) }}</span>
         </template>
 
         <h1>{{ title }}</h1>
 
         <p v-if="isTrial" class="warning-box">
-            Dit is een demo webshop. Bestellingen zijn fictief.
+            {{ $t('4411c14c-b7d3-4798-ae80-576dd4df288b') }}
         </p>
 
         <template v-if="checkout.totalPrice > 0">
-            <STErrorsDefault :error-box="errors.errorBox" />
-            <PaymentSelectionList v-model="selectedPaymentMethod" :payment-configuration="paymentConfiguration" :amount="checkout.totalPrice" :organization="organization" :context="paymentContext" />
+            <STErrorsDefault :error-box="errors.errorBox"/>
+            <PaymentSelectionList v-model="selectedPaymentMethod" :payment-configuration="paymentConfiguration" :amount="checkout.totalPrice" :organization="organization" :context="paymentContext"/>
         </template>
         <template v-else>
-            <p>Jouw bestelling zal worden geplaatst als je verder gaat.</p>
-            <STErrorsDefault :error-box="errors.errorBox" />
+            <p>{{ $t('85419eed-40f0-4829-ab24-7fef6ec860cc') }}</p>
+            <STErrorsDefault :error-box="errors.errorBox"/>
         </template>
     </SaveView>
 </template>

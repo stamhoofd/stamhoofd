@@ -1,21 +1,21 @@
 <template>
-    <SaveView :loading="saving" title="Notificaties" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChanges" @save="save" :title="$t(`79b0e969-d322-4205-a441-3eff602805b6`)">
         <h1>
             {{ $t('ac0594f0-af79-465b-84d5-568da90af8b6') }}
         </h1>
 
         <p>{{ $t('ed98b821-ac81-47ab-8149-10cb71119bbb') }}</p>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <STList>
             <STListItem :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox v-model="enabled" />
+                    <Checkbox v-model="enabled"/>
                 </template>
 
                 <h3 class="style-title-list">
-                    Inschakelen
+                    {{ $t('60d3c312-267a-40e5-abbd-574e5920ee4f') }}
                 </h3>
 
                 <p class="style-description-small">
@@ -26,23 +26,22 @@
 
         <template v-if="enabled">
             <div v-if="(patched.privateMeta?.emails ?? []).length" class="container">
-                <hr>
-                <h2>E-mailadres</h2>
-                <p>Kies een e-mailadres vanwaar je de e-mails wilt versturen. Je kan extra e-mailadressen toevoegen via de instellingen van e-mailadressen.</p>
+                <hr><h2>{{ $t('0be79160-b242-44dd-94f0-760093f7f9f2') }}</h2>
+                <p>{{ $t('f36815bd-5308-4046-8626-e3cadb2906cf') }}</p>
 
                 <STList>
                     <STListItem :selectable="true" element-name="label">
                         <template #left>
-                            <Radio v-model="emailId" :value="null" />
+                            <Radio v-model="emailId" :value="null"/>
                         </template>
 
                         <h3 class="style-title-list">
-                            Standaard e-mailadres
+                            {{ $t('2d92d24a-aa10-46b2-be8a-569378673d0a') }}
                         </h3>
                     </STListItem>
                     <STListItem v-for="email in patched.privateMeta?.emails ?? []" :key="email.id" :selectable="true" element-name="label">
                         <template #left>
-                            <Radio v-model="emailId" :value="email.id" />
+                            <Radio v-model="emailId" :value="email.id"/>
                         </template>
 
                         <h3 class="style-title-list">
@@ -57,37 +56,23 @@
             </div>
 
             <div class="container">
-                <hr>
-                <h2>Geavanceerd</h2>
+                <hr><h2>{{ $t('2dfdb75f-fd62-45df-bc9f-a34a5570dd32') }}</h2>
                 <p>{{ $t('18cbfdea-798d-4efc-aad8-f6897c9efb2c') }}</p>
 
-                <STInputBox title="Minimum dagen tussen herinneringmails" error-fields="price" :error-box="errors.errorBox">
-                    <NumberInput
-                        v-model="minimumDaysBetween" placeholder=""
-                        suffix="dagen"
-                        suffix-singular="dag"
-                        :min="1"
-                        :stepper="true"
-                    />
+                <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`1f8c6e35-864d-4a0c-96a1-97a1af6d030d`)">
+                    <NumberInput v-model="minimumDaysBetween" placeholder="" suffix="dagen" suffix-singular="dag" :min="1" :stepper="true"/>
                 </STInputBox>
 
-                <STInputBox title="Maximum e-mails" error-fields="price" :error-box="errors.errorBox">
-                    <NumberInput
-                        v-model="maximumReminderEmails" placeholder=""
-                        suffix="e-mails"
-                        suffix-singular="e-mail"
-                        :min="1"
-                        :stepper="true"
-                    />
+                <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`c4142504-7da9-4c3a-a4e0-cd08c28b0f5a`)">
+                    <NumberInput v-model="maximumReminderEmails" placeholder="" suffix="e-mails" suffix-singular="e-mail" :min="1" :stepper="true"/>
                 </STInputBox>
             </div>
 
             <div v-if="$feature('organization-receivable-balances')" class="container">
-                <hr>
-                <h2>{{ $t('6b39d554-a4a7-489c-84b5-3f430457dd50') }}</h2>
+                <hr><h2>{{ $t('6b39d554-a4a7-489c-84b5-3f430457dd50') }}</h2>
                 <p>{{ $t('0998a455-9ffc-4222-8432-ef7681908ad7') }}</p>
 
-                <MultipleChoiceInput v-model="selectedResponsibilityIds" :items="responsibilities.map(r => ({value: r.id, name: r.name}))" :nullable="false" />
+                <MultipleChoiceInput v-model="selectedResponsibilityIds" :items="responsibilities.map(r => ({value: r.id, name: r.name}))" :nullable="false"/>
             </div>
         </template>
     </SaveView>

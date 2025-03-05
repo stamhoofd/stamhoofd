@@ -1,119 +1,93 @@
 <template>
-    <SaveView :title="isNew ? typeName+' toevoegen' : name+' bewerken'" :disabled="!hasChanges" class="product-edit-view" @save="save">
+    <SaveView :title="isNew ? typeName+' ' + $t(`toevoegen`) : name+' ' + $t(`bewerken`)" :disabled="!hasChanges" class="product-edit-view" @save="save">
         <h1 v-if="isNew">
-            {{ typeName }} toevoegen
+            {{ typeName }} {{ $t('9523b774-a33e-40f8-900d-923f4aaa71db') }}
         </h1>
         <h1 v-else>
-            {{ name || typeName }} bewerken
+            {{ name || typeName }} {{ $t('67c5998c-da2a-4c23-b089-86cc90f011e0') }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <div class="split-inputs">
-            <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
-                <input
-                    ref="firstInput"
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    :placeholder="'Naam '+typeName"
-                    autocomplete="off"
-                    enterkeyhint="next"
-                >
-            </STInputBox>
-            <STInputBox v-if="isTicket" title="Type" error-fields="type" :error-box="errors.errorBox">
-                <Dropdown
-                    v-model="type"
-                >
+            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`d32893b7-c9b0-4ea3-a311-90d29f2c0cf3`)">
+                <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t(`d32893b7-c9b0-4ea3-a311-90d29f2c0cf3`) + ' '+typeName" autocomplete="off" enterkeyhint="next"></STInputBox>
+            <STInputBox v-if="isTicket" error-fields="type" :error-box="errors.errorBox" :title="$t(`b610d465-2901-4b54-97ae-dbeab72e4762`)">
+                <Dropdown v-model="type">
                     <option value="Ticket">
-                        Ticket
+                        {{ $t('57c98fd7-1432-4b03-99f7-452b6c95a7f1') }}
                     </option>
                     <option value="Voucher">
-                        Voucher
+                        {{ $t('e21e14ae-e857-49f7-921d-b064ab3c826b') }}
                     </option>
                 </Dropdown>
             </STInputBox>
 
-            <STInputBox v-else title="Type" error-fields="type" :error-box="errors.errorBox">
-                <Dropdown
-                    v-model="type"
-                >
+            <STInputBox v-else error-fields="type" :error-box="errors.errorBox" :title="$t(`b610d465-2901-4b54-97ae-dbeab72e4762`)">
+                <Dropdown v-model="type">
                     <option value="Product">
-                        Stuks
+                        {{ $t('8a4ce329-d112-4a5c-b918-be7510c1120d') }}
                     </option>
                     <option value="Person">
-                        Personen
+                        {{ $t('23b76c2e-9167-4adc-8797-f6c9bb261b47') }}
                     </option>
                 </Dropdown>
             </STInputBox>
         </div>
 
-        <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox" class="max">
-            <textarea
-                v-model="description"
-                class="input"
-                type="text"
-                placeholder="Beschrijving van dit artikel"
-                autocomplete="off"
-                enterkeyhint="next"
-            />
+        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`f72f5546-ed6c-4c93-9b0d-9718f0cc9626`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`31ac5f55-59bc-4c22-819d-8187bf02fb5c`)"/>
         </STInputBox>
 
         <template v-if="isTicket">
-            <hr>
-            <h2>Locatie</h2>
-            <ProductSelectLocationInput v-model="location" :locations="allLocations" :validator="errors.validator" @modify="modifyLocation" />
+            <hr><h2>{{ $t('257a3fd5-bd2f-4430-b268-1c85e99db41a') }}</h2>
+            <ProductSelectLocationInput v-model="location" :locations="allLocations" :validator="errors.validator" @modify="modifyLocation"/>
 
-            <hr>
-            <h2>Datum en tijd</h2>
-            <ProductSelectDateRangeInput v-model="dateRange" :date-ranges="allDateRanges" :validator="errors.validator" @modify="modifyDateRange" />
+            <hr><h2>{{ $t('b9e08142-f34f-4bf1-8a6f-016477b415db') }}</h2>
+            <ProductSelectDateRangeInput v-model="dateRange" :date-ranges="allDateRanges" :validator="errors.validator" @modify="modifyDateRange"/>
         </template>
 
-        <hr>
-        <h2 class="style-with-button">
-            <div>Prijzen</div>
+        <hr><h2 class="style-with-button">
+            <div>{{ $t('c550bae6-012f-44f1-963d-877319d34500') }}</div>
             <div>
                 <button class="button text only-icon-smartphone" type="button" @click="addProductPrice">
-                    <span class="icon add" />
-                    <span>Prijs</span>
+                    <span class="icon add"/>
+                    <span>{{ $t('e9f3660d-ab54-4f29-8c3f-85c756ac2ce0') }}</span>
                 </button>
             </div>
         </h2>
-        <p>Je kan een artikel meerdere prijzen geven en aan elke prijs een naam geven. Bv. small, medium en large. Naast meerdere prijzen kan je ook meerdere keuzemenu's toevoegen (zie onder).</p>
+        <p>{{ $t("8e14f168-77ad-4f01-8316-1e6af8ab9777") }}</p>
 
-        <ProductPriceBox v-if="patchedProduct.prices.length === 1" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errors.errorBox" @patch="addProductPatch($event)" />
+        <ProductPriceBox v-if="patchedProduct.prices.length === 1" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errors.errorBox" @patch="addProductPatch($event)"/>
 
         <STList v-else v-model="draggablePrices" :draggable="true">
             <template #item="{item: price}">
-                <ProductPriceRow :product-price="price" :product="patchedProduct" @patch="addProductPatch" @move-up="movePriceUp(price)" @move-down="movePriceDown(price)" />
+                <ProductPriceRow :product-price="price" :product="patchedProduct" @patch="addProductPatch" @move-up="movePriceUp(price)" @move-down="movePriceDown(price)"/>
             </template>
         </STList>
 
-        <OptionMenuSection v-for="optionMenu in patchedProduct.optionMenus" :key="optionMenu.id" :option-menu="optionMenu" :product="patchedProduct" @patch="addProductPatch" />
+        <OptionMenuSection v-for="optionMenu in patchedProduct.optionMenus" :key="optionMenu.id" :option-menu="optionMenu" :product="patchedProduct" @patch="addProductPatch"/>
 
         <template v-if="fields.length">
-            <hr>
-            <h2 class="style-with-button">
-                <div>Tekstvelden / open vragen</div>
+            <hr><h2 class="style-with-button">
+                <div>{{ $t('6e218284-fd5c-49f0-862f-060ac8ddc731') }}</div>
                 <div>
-                    <button class="button icon add" type="button" @click="addField" />
+                    <button class="button icon add" type="button" @click="addField"/>
                 </div>
             </h2>
 
-            <p>Open vragen zijn vragen (bv. 'naam op de trui') waarbij bestellers zelf tekst kunnen intypen. Let op: voeg hier geen vragen toe die op bestelniveau moeten komen (want dan moet de gebruiker die meerdere keren beantwoorden), dat kan je doen in de instellingen van de webshop zelf.</p>
+            <p>{{ $t("277dee72-2f32-4bf2-835c-99f05125ce86") }}</p>
 
-            <WebshopFieldsBox :fields="fields" @patch="addFieldsPatch" />
+            <WebshopFieldsBox :fields="fields" @patch="addFieldsPatch"/>
         </template>
 
-        <hr>
-
-        <STList>
+        <hr><STList>
             <STListItem v-if="seatingPlan" :selectable="true" element-name="button" @click="chooseSeatingPlan">
                 <template #left>
-                    <span class="icon seat gray" />
+                    <span class="icon seat gray"/>
                 </template>
                 <h3 class="style-title-list">
-                    Zaalplan
+                    {{ $t('72cec47d-ea5a-4e4f-a712-d80e51fde1db') }}
                 </h3>
 
                 <p class="style-description-small">
@@ -121,214 +95,211 @@
                 </p>
 
                 <template #right>
-                    <span class="icon success primary" />
-                    <span class="icon arrow-right-small gray" />
+                    <span class="icon success primary"/>
+                    <span class="icon arrow-right-small gray"/>
                 </template>
             </STListItem>
 
             <STListItem :selectable="true" element-name="button" @click="addOptionMenu">
                 <template #left>
-                    <span class="icon add gray" />
+                    <span class="icon add gray"/>
                 </template>
 
                 <h3 class="style-title-list">
-                    Keuzemenu
+                    {{ $t('430f54c5-a9be-4009-bdae-70fe34cad7fc') }}
                 </h3>
                 <p class="style-description-small">
-                    Laat bestellers een keuze maken uit een lijst met opties, al dan niet met een meerprijs. Bv. "Kies je extra's" met daarin bijvoorbeeld "Kaas op je spaghetti"
+                    {{ $t(`88023b41-1bf3-4aee-aa80-dc2052572d2e`) }}
                 </p>
             </STListItem>
 
             <STListItem :selectable="true" element-name="button" @click="addField">
                 <template #left>
-                    <span class="icon add gray" />
+                    <span class="icon add gray"/>
                 </template>
 
                 <h3 class="style-title-list">
-                    Tekstveld (open vraag)
+                    {{ $t('752914e7-9cd0-444d-9729-0a889323a1dd') }}
                 </h3>
                 <p class="style-description-small">
-                    Stel een open vraag (bv. 'naam op de trui') waarbij men zelf tekst kan intypen. Let op: voeg hier geen vragen toe die op bestelniveau moeten komen (want dan moet de gebruiker die meerdere keren beantwoorden), dat kan je doen in de instellingen van de webshop zelf.
+                    {{ $t("18336649-a9a3-49a8-a332-1a0e3f8a35ab") }}
                 </p>
             </STListItem>
 
             <STListItem v-if="isTicket && !seatingPlan" :selectable="true" element-name="button" @click="chooseSeatingPlan">
                 <template #left>
-                    <span class="icon seat gray" />
+                    <span class="icon seat gray"/>
                 </template>
                 <h3 class="style-title-list">
-                    Zetelselectie instellen
+                    {{ $t('44040701-ed34-418d-b9d5-9e531abdd9a2') }}
                 </h3>
                 <p class="style-description-small">
-                    Laat bestellers hun zetel kiezen bij het bestellen. Ideaal voor bijvoorbeeld een dansvoorstelling met vaste plaatsen.
+                    {{ $t('dd2707b6-99b7-4fbf-bfb6-632404087e6b') }}
                 </p>
             </STListItem>
 
             <STListItem v-if="!image" :selectable="true" element-name="label" class="button">
                 <template #left>
-                    <span class="icon camera gray" />
+                    <span class="icon camera gray"/>
                 </template>
 
                 <UploadButton v-model="image" :resolutions="resolutions" element-name="div">
                     <h3 class="style-title-list">
-                        Foto toevoegen
+                        {{ $t('542c7a86-e64b-4c08-a9f9-3b3db08876e1') }}
                     </h3>
                     <p class="style-description-small">
-                        Voeg een foto toe aan dit artikel. Knip bij voorkeur zelf je foto's wat bij zodat ze mooi weergegeven worden voor je ze uploadt.
+                        {{ $t("13e1bb77-35c0-457c-bd23-4ba75ae1f5bb") }}
                     </p>
                 </UploadButton>
             </STListItem>
         </STList>
 
         <template v-if="image">
-            <hr>
-            <h2 class="style-with-button">
-                <div>Foto</div>
+            <hr><h2 class="style-with-button">
+                <div>{{ $t('dae08418-fb55-421d-b61d-491e4530fc71') }}</div>
                 <div>
                     <button v-if="image" type="button" class="button text only-icon-smartphone" @click="image = null">
-                        <span class="icon trash" />
-                        <span>Verwijderen</span>
+                        <span class="icon trash"/>
+                        <span>{{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}</span>
                     </button>
-                    <UploadButton v-model="image" :text="image ? 'Vervangen' : 'Uploaden'" :resolutions="resolutions" />
+                    <UploadButton v-model="image" :text="image ? $t(`c01d3d4e-ad4e-45ec-abac-431462c194cf`) : $t(`3370bb72-2817-4096-83ce-318993436513`)" :resolutions="resolutions"/>
                 </div>
             </h2>
 
             <div class="image-box">
-                <img v-if="image" :src="imageSrc ?? undefined" class="image">
-            </div>
+                <img v-if="image" :src="imageSrc ?? undefined" class="image"></div>
         </template>
 
-        <hr>
-        <h2>
-            Beschikbaarheid
-            <span v-if="remainingStock !== null" class="title-suffix">nog {{ remainingStock }} beschikbaar</span>
+        <hr><h2>
+            {{ $t('bdbaebf3-eae4-4736-959b-97b90f979a8d') }}
+            <span v-if="remainingStock !== null" class="title-suffix">{{ $t('6e14c628-5de5-4e2f-891d-dcb6badaa80f') }} {{ remainingStock }} {{ $t('79828b21-b66f-4e18-bb1e-bb46ee12a8af') }}</span>
         </h2>
 
         <STList>
             <STListItem :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox v-model="hidden" />
+                    <Checkbox v-model="hidden"/>
                 </template>
 
                 <h3 class="style-title-list">
-                    Verbergen op webshop
+                    {{ $t('2cc2832f-7415-404c-9baf-b91ae0da4a77') }}
                 </h3>
                 <p v-if="hidden" class="style-description-small">
-                    Dit artikel wordt onzichtbaar op de webshop en is enkel te bestellen door manueel een bestelling in te geven als beheerder.
+                    {{ $t('50b5913a-eef7-445a-aefb-24b5e5d17cc8') }}
                 </p>
             </STListItem>
 
             <template v-if="!hidden">
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
-                        <Checkbox v-model="disabled" />
+                        <Checkbox v-model="disabled"/>
                     </template>
 
                     <h3 class="style-title-list">
-                        Onbeschikbaar
+                        {{ $t('b189bb90-5982-48e6-a752-bb673d261bad') }}
                     </h3>
                     <p v-if="disabled" class="style-description-small">
-                        Zichtbaar op de webshop, maar niet mogelijk om te bestellen.
+                        {{ $t('43d513ae-2553-451f-a327-a1f72ca9938f') }}
                     </p>
                 </STListItem>
 
                 <template v-if="!disabled">
                     <STListItem :selectable="true" :element-name="useEnableAfter ? 'div' : 'label'">
                         <template #left>
-                            <Checkbox v-model="useEnableAfter" />
+                            <Checkbox v-model="useEnableAfter"/>
                         </template>
 
                         <h3 class="style-title-list">
-                            Beschikbaar vanaf datum
+                            {{ $t('3eb0782d-6822-48a3-b5f1-9c45a72278bb') }}
                         </h3>
                         <p v-if="useEnableAfter" class="style-description-small">
-                            Zichtbaar op de webshop, maar pas te bestellen vanaf een bepaalde datum.
+                            {{ $t('cd1553b9-55fb-4d9b-8ce4-ae05caf5157c') }}
                         </p>
 
                         <div v-if="useEnableAfter" class="split-inputs option">
                             <STInputBox title="" error-fields="enableAfter" :error-box="errors.errorBox">
-                                <DateSelection v-model="enableAfter" />
+                                <DateSelection v-model="enableAfter"/>
                             </STInputBox>
-                            <TimeInput v-model="enableAfter" title="" :validator="errors.validator" />
+                            <TimeInput v-model="enableAfter" title="" :validator="errors.validator"/>
                         </div>
                     </STListItem>
 
                     <STListItem :selectable="true" :element-name="useDisableAfter ? 'div' : 'label'">
                         <template #left>
-                            <Checkbox v-model="useDisableAfter" />
+                            <Checkbox v-model="useDisableAfter"/>
                         </template>
 
                         <h3 class="style-title-list">
-                            Onbeschikbaar na datum
+                            {{ $t('771ae599-9b27-424c-91ae-d6982db69f69') }}
                         </h3>
                         <p v-if="useDisableAfter" class="style-description-small">
-                            Zichtbaar op de webshop, maar niet meer te bestellen na een bepaalde datum.
+                            {{ $t('7620319e-af6c-4834-88f1-de1a677f1828') }}
                         </p>
 
                         <div v-if="useDisableAfter" class="split-inputs option">
                             <STInputBox title="" error-fields="disableAfter" :error-box="errors.errorBox">
-                                <DateSelection v-model="disableAfter" />
+                                <DateSelection v-model="disableAfter"/>
                             </STInputBox>
-                            <TimeInput v-model="disableAfter" title="" :validator="errors.validator" />
+                            <TimeInput v-model="disableAfter" title="" :validator="errors.validator"/>
                         </div>
                     </STListItem>
 
                     <STListItem :selectable="true" element-name="label">
                         <template #left>
-                            <Checkbox v-model="useStock" />
+                            <Checkbox v-model="useStock"/>
                         </template>
 
                         <h3 class="style-title-list">
-                            Beperk het beschikbare aantal stuks (waarvan nu {{ usedStock }} verkocht of gereserveerd)
+                            {{ $t('083ceff7-ae68-4bd8-871a-6e4002991513') }} {{ usedStock }} {{ $t('e284d77b-c88c-4c0f-8464-58c4fe12eda8') }}
                         </h3>
 
                         <p v-if="useStock" class="style-description-small">
-                            Geannuleerde en verwijderde bestellingen worden niet meegerekend.
+                            {{ $t('7ce15ac4-bde4-4893-8db7-e0d0ab030c79') }}
                         </p>
 
                         <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
                             <STInputBox title="" error-fields="stock" :error-box="errors.errorBox">
-                                <NumberInput v-model="stock" />
+                                <NumberInput v-model="stock"/>
                             </STInputBox>
                         </div>
                     </STListItem>
 
                     <STListItem v-if="false && useStock" :selectable="true" element-name="label">
                         <template #left>
-                            <Checkbox v-model="resetStock" />
+                            <Checkbox v-model="resetStock"/>
                         </template>
 
                         <h3 class="style-title-list">
-                            Wijzig aantal verkochte stuks manueel (nu {{ usedStock }} verkocht)
+                            {{ $t('ee593d68-4ee8-4bb8-a2ba-d606b8ec75d6') }} {{ usedStock }} {{ $t('0eb5e141-967d-477f-abf2-11d33ad6cc0b') }}
                         </h3>
 
                         <div v-if="resetStock" class="split-inputs option" @click.stop.prevent>
                             <STInputBox title="" error-fields="usedStock" :error-box="errors.errorBox">
-                                <NumberInput v-model="usedStock" />
+                                <NumberInput v-model="usedStock"/>
                             </STInputBox>
                         </div>
 
                         <p class="style-description">
-                            Geannuleerde en verwijderde bestellingen worden niet meegerekend.
+                            {{ $t('7ce15ac4-bde4-4893-8db7-e0d0ab030c79') }}
                         </p>
                     </STListItem>
 
                     <STListItem :selectable="true" element-name="label">
                         <template #left>
-                            <Checkbox v-model="useMaxPerOrder" />
+                            <Checkbox v-model="useMaxPerOrder"/>
                         </template>
 
                         <h3 class="style-title-list">
-                            Beperk het maximaal aantal stuks per bestelling
+                            {{ $t('4c1a14d8-0ce1-4a43-b9e4-09a2c156fd94') }}
                         </h3>
 
                         <p v-if="useMaxPerOrder" class="style-description-small">
-                            Het aantal stuks wordt geteld over alle mogelijke keuzes heen en wordt niet gecommuniceerd tenzij men over de limiet gaat.
+                            {{ $t('0ae7af1e-ae90-4c99-9a6c-b05f6cd5528a') }}
                         </p>
 
                         <div v-if="useMaxPerOrder" class="split-inputs option" @click.stop.prevent>
                             <STInputBox title="" error-fields="maxPerOrder" :error-box="errors.errorBox">
-                                <NumberInput v-model="maxPerOrder" :min="1" />
+                                <NumberInput v-model="maxPerOrder" :min="1"/>
                             </STInputBox>
                         </div>
                     </STListItem>
@@ -337,27 +308,26 @@
 
             <STListItem :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox v-model="notAllowMultiple" />
+                    <Checkbox v-model="notAllowMultiple"/>
                 </template>
 
                 <h3 class="style-title-list">
-                    Keuze voor aantal stuks verbergen
+                    {{ $t('a51c2430-4f65-4ff3-a62d-c2fce085ea43') }}
                 </h3>
                 <p class="style-description-small">
-                    Als je dit aanzet kan er maar één stuk besteld worden per unieke combinatie van keuzes en open vragen.
+                    {{ $t('6774b7bd-2f17-4f36-b1a2-0b417537bb1f') }}
                 </p>
             </STListItem>
         </STList>
 
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Verwijder dit artikel
+            <hr><h2>
+                {{ $t('01e546e1-a416-4843-8f4b-06effbeaef57') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span class="icon trash"/>
+                <span>{{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}</span>
             </button>
         </div>
     </SaveView>

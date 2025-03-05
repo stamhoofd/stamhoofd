@@ -1,19 +1,19 @@
 <template>
     <div class="st-view background">
-        <STNavigationBar title="Webshop archief" />
+        <STNavigationBar :title="$t(`Webshop archief`)"/>
 
         <main>
             <h1>
-                Webshop archief
+                {{ $t('f8cfe2df-ca47-4975-a904-bea4e238c11c') }}
             </h1>
-            <p>Deze webshops werden gearchiveerd en zijn niet langer actief.</p>
+            <p>{{ $t('4e08ceea-e1cb-4cfa-b0d3-13dc7a0df9f4') }}</p>
 
             <STList>
                 <STListItem v-for="webshop in webshops" :key="webshop.id" :selectable="true" @click="openWebshop(webshop)">
                     {{ webshop.meta.name }}
 
                     <template #right>
-                        <span class="icon arrow-right-small gray" />
+                        <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
             </STList>

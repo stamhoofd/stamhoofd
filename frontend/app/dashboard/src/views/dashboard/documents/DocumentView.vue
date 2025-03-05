@@ -1,42 +1,37 @@
 <template>
     <div class="st-view document-view">
-        <STNavigationBar :title="'Document'">
+        <STNavigationBar :title="$t(`Document`)">
             <template #right>
-                <button v-if="hasPrevious || hasNext" v-tooltip="'Ga naar vorig document'" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" v-tooltip="'Ga naar volgende document'" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goForward" />
-                <button v-long-press="(e: MouseEvent) => showContextMenu(e)" class="button icon navigation more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
+                <button v-if="hasPrevious || hasNext" v-tooltip="'Ga naar vorig document'" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack"/>
+                <button v-if="hasNext || hasPrevious" v-tooltip="'Ga naar volgende document'" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goForward"/>
+                <button v-long-press="(e: MouseEvent) => showContextMenu(e)" class="button icon navigation more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu"/>
             </template>
         </STNavigationBar>
         <main>
             <h1>
-                Document
+                {{ $t('754c441a-b848-4d84-ae32-fe5c7cc575a7') }}
             </h1>
 
             <p v-if="unlinkedAnswers.length" class="info-box">
                 {{ $t('719f31f6-cae0-41b0-97e6-ab8f5ff01d19', { unlinkedAnswersText }) }}
                 <button class="button text" type="button" @click="resetDocument">
-                    Reset
+                    {{ $t('b09e88a7-a60a-43ac-8368-04fcb56ed0e7') }}
                 </button>
             </p>
 
             <div v-if="hasWarnings" class="hover-box container">
                 <ul class="member-records">
-                    <li
-                        v-for="warning in sortedWarnings"
-                        :key="warning.id"
-                        :class="{ [warning.type]: true }"
-                    >
-                        <span :class="'icon '+warning.icon" />
+                    <li v-for="warning in sortedWarnings" :key="warning.id" :class="{ [warning.type]: true }">
+                        <span :class="'icon '+warning.icon"/>
                         <span class="text">{{ warning.text }}</span>
                     </li>
                 </ul>
-                <hr>
-            </div>
+                <hr></div>
 
             <STList class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        Naam
+                        {{ $t('d32893b7-c9b0-4ea3-a311-90d29f2c0cf3') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ document.data.name }}
@@ -45,7 +40,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        Beschrijving
+                        {{ $t('f72f5546-ed6c-4c93-9b0d-9718f0cc9626') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ document.data.description }}
@@ -54,7 +49,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        Volgnummer
+                        {{ $t('1fbc7bea-24e0-4ef5-a0bb-6f9e1e4ecaf5') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ document.id }} ({{ document.number || 'Zonder nummer' }})
@@ -63,7 +58,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        Aangemaakt op
+                        {{ $t('25981b4f-4483-47f9-8c3a-ac5e7bdc1a69') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ capitalizeFirstLetter(formatDateTime(document.createdAt)) }}
@@ -72,7 +67,7 @@
 
                 <STListItem>
                     <h3 :class="'style-definition-label '+statusColor">
-                        Status
+                        {{ $t('38b75e19-10cb-4641-88a8-f4e2e9be7576') }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ statusName }}</span>
@@ -80,7 +75,7 @@
                 </STListItem>
             </STList>
 
-            <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="document" />
+            <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="document"/>
         </main>
     </div>
 </template>

@@ -1,19 +1,18 @@
 <template>
     <div v-if="familyMembers.length > 0" class="hover-box container">
-        <hr>
-        <h2>
+        <hr><h2>
             <template v-if="member.patchedMember.details.defaultAge <= 30 && Math.abs(maxFamilyAge - member.patchedMember.details.defaultAge) <= 14">
-                Broers &amp; zussen
+                {{ $t('0eed9fbb-161f-4b25-849d-ed73c1a40be1') }}
             </template>
             <template v-else>
-                Familie
+                {{ $t('57a1a686-6b86-4b07-99a9-0326ad50b2d0') }}
             </template>
         </h2>
 
         <STList>
             <STListItem v-for="familyMember in familyMembers" :key="familyMember.id" :selectable="true" @click="gotoMember(familyMember)">
                 <template #left>
-                    <span class="icon user small" />
+                    <span class="icon user small"/>
                 </template>
                 <h3 class="style-title-list">
                     {{ familyMember.patchedMember.firstName }} {{ familyMember.patchedMember.details ? familyMember.patchedMember.details.lastName : "" }}
@@ -22,7 +21,7 @@
                     {{ familyMember.groups.map(g => g.settings.name).join(", ") }}
                 </p>
                 <template #right>
-                    <span class="icon arrow-right-small gray" />
+                    <span class="icon arrow-right-small gray"/>
                 </template>
             </STListItem>
         </STList>

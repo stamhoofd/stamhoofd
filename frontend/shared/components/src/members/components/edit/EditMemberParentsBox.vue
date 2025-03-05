@@ -1,18 +1,18 @@
 <template>
     <div class="container">
-        <Title v-bind="$attrs" title="Ouders" />
+        <Title v-bind="$attrs" :title="$t(`41afae13-62ec-4cc7-ba58-c8c1a4db2589`)"/>
 
-        <STErrorsDefault :error-box="parentErrorBox" />
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="parentErrorBox"/>
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <p v-if="visibleParents.length === 0" class="info-box">
-            Nog geen ouders toegevoegd. Voeg een ouder van {{ member.patchedMember.details.firstName }} toe via de knop hieronder.
+            {{ $t('e9380d7b-ccc7-463d-a46b-95863d592ea1') }} {{ member.patchedMember.details.firstName }} {{ $t('0ec27ae4-5876-4ab3-8189-0194fc72224a') }}
         </p>
 
         <STList v-else :with-animation="true">
             <STListItem v-for="parent in visibleParents" :key="parent.id" :selectable="true" element-name="label" class="right-stack left-center">
                 <template #left>
-                    <Checkbox :model-value="isParentSelected(parent)" @update:model-value="setParentSelected(parent, $event)" />
+                    <Checkbox :model-value="isParentSelected(parent)" @update:model-value="setParentSelected(parent, $event)"/>
                 </template>
 
                 <h3 class="style-title-list">
@@ -28,18 +28,18 @@
                     {{ parent.address }}
                 </p>
                 <p v-if="parent.nationalRegisterNumber && parent.nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
-                    RRN: {{ parent.nationalRegisterNumber }}
+                    {{ $t('157725fc-4be3-4b8c-9073-486bfd29a94b') }} {{ parent.nationalRegisterNumber }}
                 </p>
 
                 <template #right>
                     <span v-if="!isParentSelected(parent)" class="button text limit-space">
-                        <span class="icon add" />
-                        <span>Toevoegen</span>
+                        <span class="icon add"/>
+                        <span>{{ $t('73b74929-78f4-4cfa-8a20-92a071a84ec5') }}</span>
                     </span>
 
                     <button v-else class="button text limit-space" type="button" @click.stop="editParent(parent)">
-                        <span class="icon edit" />
-                        <span>Bewerken</span>
+                        <span class="icon edit"/>
+                        <span>{{ $t('f5783f4e-6515-4988-9622-3d0b0f4290f4') }}</span>
                     </button>
                 </template>
             </STListItem>
@@ -47,14 +47,14 @@
 
         <div class="style-button-bar">
             <button type="button" class="button text" :class="{selected: visibleParents.length <= 1}" @click="addParent()">
-                <span class="icon add" />
-                <span>Ouder toevoegen</span>
+                <span class="icon add"/>
+                <span>{{ $t('56ae7d01-609f-40a5-b625-d36f3d0bcc49') }}</span>
             </button>
         </div>
 
         <p v-if="!willMarkReviewed && reviewDate && isAdmin" class="style-description-small">
-            Laatst nagekeken op {{ formatDate(reviewDate) }}. <button v-tooltip="'Het lid zal deze stap terug moeten doorlopen via het ledenportaal'" type="button" class="inline-link" @click="clear">
-                Wissen
+            {{ $t('169a6691-dd2e-41a1-b10a-2442330dffbf') }} {{ formatDate(reviewDate) }}. <button v-tooltip="'Het lid zal deze stap terug moeten doorlopen via het ledenportaal'" type="button" class="inline-link" @click="clear">
+                {{ $t('56bcb109-f47d-4f8b-8bd5-59cb085096bc') }}
             </button>.
         </p>
     </div>

@@ -1,20 +1,8 @@
 <template>
     <LoadingViewTransition>
-        <ModernTableView
-            v-if="!loading"
-            ref="modernTableView"
-            :table-object-fetcher="tableObjectFetcher"
-            :filter-builders="filterBuilders"
-            :title="title"
-            :column-configuration-id="configurationId"
-            :default-filter="defaultFilter"
-            :actions="actions"
-            :all-columns="allColumns"
-            :estimated-rows="estimatedRows"
-            :Route="Route"
-        >
+        <ModernTableView v-if="!loading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :estimated-rows="estimatedRows" :Route="Route">
             <template #empty>
-                Geen leden ingeschreven
+                {{ $t('8590f76c-62ac-40ef-8d91-43fc8b5b8ce8') }}
             </template>
         </ModernTableView>
     </LoadingViewTransition>

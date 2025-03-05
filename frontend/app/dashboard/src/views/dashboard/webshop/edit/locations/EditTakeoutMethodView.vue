@@ -1,58 +1,43 @@
 <template>
     <SaveView :title="locationTitleName" :disabled="!hasChanges" @save="save">
         <h1 v-if="isNew">
-            {{ locationTitleName }} toevoegen
+            {{ locationTitleName }} {{ $t('9523b774-a33e-40f8-900d-923f4aaa71db') }}
         </h1>
         <h1 v-else>
-            {{ locationTitleName }} bewerken
+            {{ locationTitleName }} {{ $t('67c5998c-da2a-4c23-b089-86cc90f011e0') }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <div class="split-inputs">
             <div>
-                <STInputBox title="Locatienaam" error-fields="name" :error-box="errors.errorBox">
-                    <input
-                        ref="firstInput"
-                        v-model="name"
-                        class="input"
-                        type="text"
-                        placeholder="bv. kantine"
-                        autocomplete="off"
-                    >
-                </STInputBox>
+                <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`64e33410-9d9e-4a76-844c-be42b94e134b`)">
+                    <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`77c758e8-d3cc-4893-a792-b96d74f04048`)"></STInputBox>
 
-                <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox" class="max">
-                    <textarea
-                        v-model="description"
-                        class="input"
-                        type="text"
-                        placeholder="Hier kan je eventeel afhaalinstructies kwijt (optioneel)"
-                        autocomplete="off"
-                    />
+                <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`f72f5546-ed6c-4c93-9b0d-9718f0cc9626`)">
+                    <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`71db27dd-c5bc-4a4b-8ff6-16ba6a67de21`)"/>
                 </STInputBox>
             </div>
             <div>
-                <AddressInput v-model="address" title="Adres" :validator="errors.validator" :required="true" />
+                <AddressInput v-model="address" :validator="errors.validator" :required="true" :title="$t(`e6dc987c-457b-4253-9eef-db9ccdb774f1`)"/>
             </div>
         </div>
 
-        <EditTimeSlotsSection v-if="isTakeout" :webshop="webshop" :time-slots="patchedTakeoutMethod.timeSlots" title="Datum en tijd + keuze uit afhaalintervallen" @patch="patchTimeSlots">
-            <p>Je kan tijdsintervallen toevoegen waartussen men de bestelling kan afhalen. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (bv. als je het elke week kan afhalen na activiteiten). Als je afhalen organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).</p>
+        <EditTimeSlotsSection v-if="isTakeout" :webshop="webshop" :time-slots="patchedTakeoutMethod.timeSlots" @patch="patchTimeSlots" :title="$t(`d254d685-ef46-4104-a88a-600066e8fe0a`)">
+            <p>{{ $t('42a10e3a-f03a-49b9-bc68-b3f69cc5e764') }}</p>
         </EditTimeSlotsSection>
-        <EditTimeSlotsSection v-else :webshop="webshop" :time-slots="patchedTakeoutMethod.timeSlots" title="Datum en tijd + keuze uit shiften" @patch="patchTimeSlots">
-            <p>Je kan tijdsintervallen toevoegen waartussen men de bestelling ter plaatse kan consumeren. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (afgeraden). Als je jouw evenement organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).</p>
+        <EditTimeSlotsSection v-else :webshop="webshop" :time-slots="patchedTakeoutMethod.timeSlots" @patch="patchTimeSlots" :title="$t(`5ccb0242-e879-424f-a3b9-b6e63d9d304a`)">
+            <p>{{ $t('21893786-1c17-42b4-b773-757282826b28') }}</p>
         </EditTimeSlotsSection>
 
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Verwijderen
+            <hr><h2>
+                {{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span class="icon trash"/>
+                <span>{{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}</span>
             </button>
         </div>
     </SaveView>

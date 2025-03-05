@@ -1,20 +1,19 @@
 <template>
     <div class="st-view search-organization-view">
-        <STNavigationBar :title="$t('857e22fa-a4ac-4306-a631-d5133b6c8834')" />
+        <STNavigationBar :title="$t('857e22fa-a4ac-4306-a631-d5133b6c8834')"/>
 
         <main>
             <h1>{{ title }}</h1>
-            <p v-if="description" class="style-description-block pre-wrap" v-text="description" />
+            <p v-if="description" class="style-description-block pre-wrap" v-text="description"/>
 
             <form class="search-box input-icon-container icon search gray" @submit.prevent>
-                <input ref="input" v-model="query" :autofocus="true" class="input" placeholder="Zoek op naam of postcode" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
-            </form>
+                <input ref="input" v-model="query" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`e587899d-5b86-411f-a1e9-7fe5b4231d61`)"></form>
 
-            <Spinner v-if="loadingResults" class="gray center" />
+            <Spinner v-if="loadingResults" class="gray center"/>
             <STList v-else>
                 <STListItem v-for="organization in results" :key="organization.id" :selectable="true" @click="selectOrganization(organization, navigationActions)">
                     <template #left>
-                        <OrganizationAvatar :organization="organization" />
+                        <OrganizationAvatar :organization="organization"/>
                     </template>
 
                     <h2>{{ organization.name }}</h2>

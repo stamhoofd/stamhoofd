@@ -3,9 +3,9 @@
         <div class="input birth-day-selection">
             <div class="input-icon-container right icon arrow-down-small gray">
                 <select v-model="day" autocomplete="bday-day" name="bday-day" @change="updateDate">
-                    <!-- name is needed for autocomplete in safari -->
+                    
                     <option :disabled="required" :value="null">
-                        Dag
+                        {{ $t('bcfe087a-b9ba-4fe2-90de-849527c0a80a') }}
                     </option>
                     <option v-for="day in 31" :key="day" :value="day" autocomplete="bday-day">
                         {{ day }}
@@ -16,7 +16,7 @@
             <div class="input-icon-container right icon arrow-down-small gray">
                 <select v-model="month" autocomplete="bday-month" name="bday-month" @change="updateDate">
                     <option :disabled="required" :value="null">
-                        Maand
+                        {{ $t('fccee67b-56b2-47c7-befe-e937754a2797') }}
                     </option>
                     <option v-for="month in 12" :key="month" :value="month" autocomplete="bday-month">
                         {{ monthText(month) }}
@@ -27,7 +27,7 @@
             <div class="input-icon-container right icon arrow-down-small gray">
                 <select v-model="year" autocomplete="bday-year" name="bday-year" @change="updateDate">
                     <option :disabled="required" :value="null">
-                        Jaar
+                        {{ $t('b3e60d5d-c072-4bb8-9fdc-00899f772ea1') }}
                     </option>
                     <option v-for="year in 100" :key="year" :value="currentYear - year + 1" autocomplete="bday-year">
                         {{ currentYear - year + 1 }}
@@ -36,7 +36,7 @@
             </div>
         </div>
         <template #right>
-            <slot name="right" />
+            <slot name="right"/>
         </template>
     </STInputBox>
 </template>

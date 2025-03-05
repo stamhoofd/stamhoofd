@@ -1,45 +1,44 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Tickets scannen" />
+        <STNavigationBar :title="$t(`Tickets scannen`)"/>
 
         <main>
             <h1>
-                Tickets scannen
+                {{ $t('94e9b230-68f2-486b-8e1e-3f378b502a63') }}
             </h1>
 
-            <Spinner v-if="(isLoading && shouldFilter) || isChecking" />
+            <Spinner v-if="(isLoading && shouldFilter) || isChecking"/>
             <p v-else-if="shouldFilter && !isLoading && (ticketProducts.length > 1 || disabledProducts.length)">
-                Vink hieronder de tickets aan die je wilt scannen en klik op "starten". Zo scan je niet per ongeluk een ongeldig ticket als je verschillende scanpunten hebt op je evenement (bv. drankkaarten en inkomtickets apart).
+                {{ $t(`ec9fa3ca-23ba-4d2b-99a6-e9975980c997`) }}
             </p>
             <p v-else>
-                Klik op "starten" om te beginnen.
+                {{ $t(`84be55eb-8cb0-4e7c-93b9-97734fbaead5`) }}
             </p>
 
             <p v-if="noDatabaseSupport" class="error-box">
-                Dit appartaat ondersteunt de scanner niet. Probeer in een moderne browser, op een smartphone en zorg ervoor dat je niet in privé modus surft (dat voorkomt de noodzakelijk opslag van tickets als het internet wegvalt).
+                {{ $t('77ba53e4-f1ef-4305-9e9b-df45328bf7f2') }}
             </p>
 
             <a class="info-box icon download selectable" href="https://files.stamhoofd.be/website/docs/tickets-checklist.pdf" download="tickets-checklist.pdf" target="_blank">
-                Download de checklist voor het scannen van tickets
+                {{ $t('1d161fc9-5c82-4725-8454-d3ef0a37f21c') }}
             </a>
 
             <template v-if="shouldFilter && !isLoading && (ticketProducts.length > 1 || disabledProducts.length)">
                 <div v-for="category of categories" :key="category.id" class="container">
-                    <hr v-if="categories.length > 1">
-                    <h2 v-if="categories.length > 1">
+                    <hr v-if="categories.length > 1"><h2 v-if="categories.length > 1">
                         {{ category.name }}
                     </h2>
                     <STList>
                         <STListItem v-for="product in getCategoryProducts(category)" :key="product.id" :selectable="true" element-name="label">
                             <template #left>
-                                <Checkbox :model-value="isProductSelected(product)" @update:model-value="setProductSelected(product, $event)" />
+                                <Checkbox :model-value="isProductSelected(product)" @update:model-value="setProductSelected(product, $event)"/>
                             </template>
 
                             <h3 class="style-title-list">
                                 {{ product.name }}
                             </h3>
-                            <p v-if="(product.type === 'Ticket' || product.type === 'Voucher') && product.location" class="style-description-small" v-text="product.location.name" />
-                            <p v-if="(product.type === 'Ticket' || product.type === 'Voucher') && product.dateRange" class="style-description-small" v-text="formatDateRange(product.dateRange)" />
+                            <p v-if="(product.type === 'Ticket' || product.type === 'Voucher') && product.location" class="style-description-small" v-text="product.location.name"/>
+                            <p v-if="(product.type === 'Ticket' || product.type === 'Voucher') && product.dateRange" class="style-description-small" v-text="formatDateRange(product.dateRange)"/>
                         </STListItem>
                     </STList>
                 </div>
@@ -49,8 +48,8 @@
         <STToolbar v-if="!noDatabaseSupport">
             <template #right>
                 <button class="button primary" type="button" @click="start">
-                    <span class="icon play" />
-                    <span>Starten</span>
+                    <span class="icon play"/>
+                    <span>{{ $t('13842f4e-0c55-4751-ab34-6c015fe4337c') }}</span>
                 </button>
             </template>
         </STToolbar>

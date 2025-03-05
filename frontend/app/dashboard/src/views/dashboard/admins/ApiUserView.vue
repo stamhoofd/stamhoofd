@@ -4,27 +4,24 @@
             {{ title }}
         </h1>
 
-        <STErrorsDefault :error-box="errorBox" />
-        <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
-            <input v-model="name" enterkeyhint="next" class="input" type="text" placeholder="Naam">
-        </STInputBox>
+        <STErrorsDefault :error-box="errorBox"/>
+        <STInputBox error-fields="name" :error-box="errorBox" :title="$t(`d32893b7-c9b0-4ea3-a311-90d29f2c0cf3`)">
+            <input v-model="name" enterkeyhint="next" class="input" type="text" :placeholder="$t(`d32893b7-c9b0-4ea3-a311-90d29f2c0cf3`)"></STInputBox>
 
         <div class="container">
-            <hr>
-            <h2>Rollen</h2>
-            <p>Je kan een API-key verschillende rollen geven, net zoals een beheerder. Hiermee kan je jouw key beter beveiligen en enkel toegang geven waarvoor je het nodig hebt.</p>
+            <hr><h2>{{ $t('636533d6-2213-42e8-a29e-b7047fe6ad1a') }}</h2>
+            <p>{{ $t('215c059c-e3a7-4bce-8617-a2851bc846fe') }}</p>
 
-            <EditUserPermissionsBox :user="patchedUser" @patch:user="addPatch($event)" />
+            <EditUserPermissionsBox :user="patchedUser" @patch:user="addPatch($event)"/>
         </div>
 
-        <hr v-if="!isNew">
-        <h2 v-if="!isNew">
-            Verwijderen
+        <hr v-if="!isNew"><h2 v-if="!isNew">
+            {{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}
         </h2>
 
         <button v-if="!isNew" class="button secundary danger" type="button" @click="deleteMe">
-            <span class="icon trash" />
-            <span>Verwijderen</span>
+            <span class="icon trash"/>
+            <span>{{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}</span>
         </button>
     </SaveView>
 </template>

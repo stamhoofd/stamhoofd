@@ -8,9 +8,9 @@
         </p>
 
         <template #right>
-            <span v-if="isCurrent" class="style-tag">Huidige</span>
-            <span v-if="period.locked" class="icon lock gray" />
-            <span class="icon arrow-right-small gray" />
+            <span v-if="isCurrent" class="style-tag">{{ $t('ed6356b2-5d2a-465f-b578-a629b5ede437') }}</span>
+            <span v-if="period.locked" class="icon lock gray"/>
+            <span class="icon arrow-right-small gray"/>
         </template>
     </STListItem>
 </template>

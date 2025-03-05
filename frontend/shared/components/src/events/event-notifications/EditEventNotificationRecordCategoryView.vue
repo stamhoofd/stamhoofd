@@ -1,20 +1,12 @@
 <template>
     <SaveView :title="title" :loading="saving" :prefer-large-button="true" @save="save">
-        <FillRecordCategoryBox
-            :category="category"
-            :value="patched"
-            :validator="errors.validator"
-            :level="1"
-            :all-optional="false"
-            :force-mark-reviewed="true"
-            @patch="addPatch({recordAnswers: $event})"
-        >
-            <STErrorsDefault :error-box="errors.errorBox" />
+        <FillRecordCategoryBox :category="category" :value="patched" :validator="errors.validator" :level="1" :all-optional="false" :force-mark-reviewed="true" @patch="addPatch({recordAnswers: $event})">
+            <STErrorsDefault :error-box="errors.errorBox"/>
         </FillRecordCategoryBox>
 
         <template v-if="canSaveDraft" #toolbar>
             <button class="button secundary" type="button" @click="saveDraft">
-                Opslaan als klad
+                {{ $t('4a165c31-3403-4aba-aea4-ca05a20d8803') }}
             </button>
         </template>
     </SaveView>

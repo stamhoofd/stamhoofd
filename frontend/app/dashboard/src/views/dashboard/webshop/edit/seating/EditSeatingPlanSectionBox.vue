@@ -1,99 +1,47 @@
 <template>
     <div ref="root" class="edit-seating-plan-section-box" data-disable-enter-focus>
         <div class="undo-buttons">
-            <button v-tooltip="'Spiegel verticaal'" type="button" class="button icon flip-vertical gray" @click="flip" />
-            <button type="button" class="button icon undo gray" :disabled="!canUndo()" @click="undo" />
-            <button type="button" class="button icon redo gray" :disabled="!canRedo()" @click="redo" />
+            <button v-tooltip="'Spiegel verticaal'" type="button" class="button icon flip-vertical gray" @click="flip"/>
+            <button type="button" class="button icon undo gray" :disabled="!canUndo()" @click="undo"/>
+            <button type="button" class="button icon redo gray" :disabled="!canRedo()" @click="redo"/>
         </div>
         <div class="seating-plan-section">
             <div class="padding-box">
                 <p class="button-row">
                     <button class="button text" type="button" @click="addRow($event, false)">
-                        <span class="icon add" />
-                        <span>Rij</span>
+                        <span class="icon add"/>
+                        <span>{{ $t('68f3b40e-3866-46e6-9792-0d7bd93b7dfb') }}</span>
                     </button>
 
                     <button class="button text" type="button" @click="addRow($event, true)">
-                        <span class="icon add" />
-                        <span>Gang</span>
+                        <span class="icon add"/>
+                        <span>{{ $t('6484e1b0-161d-41e5-aa91-2b7cfa842f75') }}</span>
                     </button>
                 </p>
 
-                <div
-                    class="seating-plan-seats"
-                    :style="{
+                <div class="seating-plan-seats" :style="{
                         '--sw': size.width + 'px',
                         '--sh': size.height + 'px',
-                    }"
-                >
-                    <div
-                        v-for="row of rows"
-                        :key="row.uuid"
-                        :ref="'row-' + row.uuid"
-                        class="seating-plan-row"
-                        :style="{
+                    }">
+                    <div v-for="row of rows" :key="row.uuid" :ref="'row-' + row.uuid" class="seating-plan-row" :style="{
                             '--rw': row.width + 'px',
                             '--rh': row.height + 'px',
                             '--rx': row.x + 'px',
                             '--ry': row.y + 'px',
-                        }"
-                    >
-                        <input
-                            v-model="row.label"
-                            class="row-label left"
-                            :class="{error: isRowInvalid(row)}"
-                            @click.prevent="selectInput"
-                            @input="emitChange()"
-                        >
-                        <input
-                            v-model="row.label"
-                            class="row-label right"
-                            :class="{error: isRowInvalid(row)}"
-                            @click.prevent="selectInput"
-                            @input="emitChange()"
-                        >
-                        <button
-                            v-if="isRowSelected(row) || row.seats.length === 0"
-                            class="left add-seat-button button icon add gray hover-show"
-                            type="button"
-                            @click.prevent="addLeftSeat(row)"
-                        />
+                        }">
+                        <input v-model="row.label" class="row-label left" :class="{error: isRowInvalid(row)}" @click.prevent="selectInput" @input="emitChange()"><input v-model="row.label" class="row-label right" :class="{error: isRowInvalid(row)}" @click.prevent="selectInput" @input="emitChange()"><button v-if="isRowSelected(row) || row.seats.length === 0" class="left add-seat-button button icon add gray hover-show" type="button" @click.prevent="addLeftSeat(row)"/>
 
-                        <button
-                            v-if="isRowSelected(row) || row.seats.length === 0"
-                            class="right add-seat-button button icon add gray hover-show"
-                            type="button"
-                            @click.prevent="addRightSeat(row)"
-                        />
+                        <button v-if="isRowSelected(row) || row.seats.length === 0" class="right add-seat-button button icon add gray hover-show" type="button" @click.prevent="addRightSeat(row)"/>
 
                         <div>
-                            <div
-                                v-for="seat of row.seats"
-                                :key="seat.uuid"
-                                v-long-press="(e: MouseEvent | TouchEvent) => openContextMenu(e, seat)"
-                                class="seat"
-                                :class="{error: isSeatInvalid(row, seat), space: seat.isSpace, disabledPerson: isDisabledPersonSeat(seat), selected: isSeatSelected(seat)}"
-                                :style="{
+                            <div v-for="seat of row.seats" :key="seat.uuid" v-long-press="(e: MouseEvent | TouchEvent) => openContextMenu(e, seat)" class="seat" :class="{error: isSeatInvalid(row, seat), space: seat.isSpace, disabledPerson: isDisabledPersonSeat(seat), selected: isSeatSelected(seat)}" :style="{
                                     '--w': seat.width + 'px',
                                     '--h': seat.height + 'px',
                                     '--x': seat.x + 'px',
                                     '--y': seat.y + 'px',
                                     '--color': getSeatColor(seat)
-                                }"
-                                @click.left="selectSeat(seat, $event)"
-                                @pointerdown.left="preventIfNotSelected(seat, $event)"
-                                @contextmenu.prevent.stop="openContextMenu($event, seat)"
-                            >
-                                <input
-                                    :ref="(el) => storeSeatEl(el as HTMLInputElement | null, seat.uuid)"
-                                    :data-uuid="seat.uuid"
-                                    data-seat="true"
-                                    :value="seat.label"
-                                    :class="{error: isSeatInvalid(row, seat), space: seat.isSpace, disabledPerson: isDisabledPersonSeat(seat), selected: isSeatSelected(seat)}"
-                                    @input="setSeat(row, seat, ($event as any).target.value)"
-                                    @keydown.enter.prevent.stop="insertSeat(row, seat, $event)"
-                                >
-                                <span v-if="isDisabledPersonSeat(seat)" class="icon disabled-person" />
+                                }" @click.left="selectSeat(seat, $event)" @pointerdown.left="preventIfNotSelected(seat, $event)" @contextmenu.prevent.stop="openContextMenu($event, seat)">
+                                <input :ref="(el) => storeSeatEl(el as HTMLInputElement | null, seat.uuid)" :data-uuid="seat.uuid" data-seat="true" :value="seat.label" :class="{error: isSeatInvalid(row, seat), space: seat.isSpace, disabledPerson: isDisabledPersonSeat(seat), selected: isSeatSelected(seat)}" @input="setSeat(row, seat, ($event as any).target.value)" @keydown.enter.prevent.stop="insertSeat(row, seat, $event)"><span v-if="isDisabledPersonSeat(seat)" class="icon disabled-person"/>
                             </div>
                         </div>
                     </div>
@@ -101,25 +49,25 @@
 
                 <p class="button-row">
                     <button class="button text" type="button" @click="addRowBottom($event, false)">
-                        <span class="icon add" />
-                        <span>Rij</span>
+                        <span class="icon add"/>
+                        <span>{{ $t('68f3b40e-3866-46e6-9792-0d7bd93b7dfb') }}</span>
                     </button>
 
                     <button class="button text" type="button" @click="addRowBottom($event, true)">
-                        <span class="icon add" />
-                        <span>Gang</span>
+                        <span class="icon add"/>
+                        <span>{{ $t('6484e1b0-161d-41e5-aa91-2b7cfa842f75') }}</span>
                     </button>
                 </p>
             </div>
         </div>
         <p v-if="!isMobile" class="style-description-small">
-            Voeg rijen en gangen toe. Binnen een rij kan je verticale gangen maken door een stoel aan te klikken met je rechtermuisknop en een gang links of rechts in te voegen. Je kan ook een stoel selecteren en wijzigen in een gang. Je kan tekst in een gang plaatsen ter informatie, bijvoorbeeld om ingangen en het podium aan te geven. Je kan de breedte van een gang of stoel wijzigen met je rechtermuisknop. Hou <template v-if="$isMac || $isIOS">
-                Command(⌘)
+            {{ $t('f9c3b053-8daf-4e5c-b45a-1e6bbbc12052') }} <template v-if="$isMac || $isIOS">
+                {{ $t('a1704d88-c6a1-4496-ae38-fce37a863f78') }}
             </template><template v-else>
-                Ctrl
-            </template> en/of Shift(⇧) ingedrukt om meerdere stoelen te selecteren. Gebruik de Enter(⏎) toetst om snel stoelen toe te voegen. Gebruik Backspace(⌫) om een stoel of rij te verwijderen. Gebruik de pijltjestoetsen om snel te navigeren.
+                {{ $t('2e6254af-39bb-4cd4-930e-d6d49c4fd8f0') }}
+            </template> {{ $t('7c4971da-0312-4cc9-9854-c2993d39886d') }}
         </p>
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
     </div>
 </template>
 

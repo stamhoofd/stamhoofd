@@ -1,42 +1,42 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="DNS-instellingen" />
+        <STNavigationBar :title="$t(`9437ee62-e33c-4660-80f8-d738123ceed1`)"/>
 
         <main>
             <h1>
-                Pas de volgende instellingen aan
+                {{ $t('b7537bc6-0373-4754-941c-71d6dbb1904b') }}
             </h1>
 
             <p class="st-list-description">
-                Stel de volgende DNS-instellingen in voor jouw domeinnaam. Dit kan je meestal doen in het klantenpaneel van jouw registrar (bv. Combell, Versio, Transip, One.com, GoDaddy...) waar je je domeinnaam hebt gekocht.
+                {{ $t('efd1964f-1503-43b6-aeac-8338e3c8dba6') }}
             </p>
 
-            <STErrorsDefault :error-box="errors.errorBox" />
+            <STErrorsDefault :error-box="errors.errorBox"/>
 
             <p v-if="isComplete" class="success-box">
-                Alles is correct ingesteld.
+                {{ $t('2e94f6cd-560a-4e09-8f74-c5f1cdfca1f3') }}
             </p>
 
             <div v-for="record in records" :key="record.id">
-                <DNSRecordBox :record="record" />
+                <DNSRecordBox :record="record"/>
             </div>
 
             <p v-if="!isComplete" class="warning-box">
-                Kijk alles goed na voor je aanpassingen maakt, verwijder zeker geen bestaande DNS-records. Als je DNS-records verwijdert, kan jouw huidige website onbereikbaar worden.
+                {{ $t('5942fcf3-8e50-4fbe-a935-7608a8652ec0') }}
             </p>
             <p v-if="!isComplete" class="warning-box">
-                Het kan tot 24 uur duren tot de aanpassingen zijn doorgevoerd, in de meeste gevallen zou het binnen 1 uur al in orde moeten zijn. Je mag dit scherm sluiten als je de aanpassingen hebt gemaakt, we blijven op de achtergrond proberen en sturen jou een mailtje als alles in orde is.
+                {{ $t('a3f763c0-7268-48c1-8f49-1a857b28ff6f') }}
             </p>
         </main>
 
         <STToolbar>
             <template #right>
                 <button class="button secundary" type="button" @click="skip">
-                    Overslaan
+                    {{ $t('3d9aefba-e4e1-4af8-a4cb-e1ff7bb9e351') }}
                 </button>
                 <LoadingButton :loading="saving">
                     <button class="button primary" type="button" @click="validate">
-                        Ik heb het ingesteld
+                        {{ $t('b445c285-9b64-4b1d-9033-3a2cdd2c743d') }}
                     </button>
                 </LoadingButton>
             </template>

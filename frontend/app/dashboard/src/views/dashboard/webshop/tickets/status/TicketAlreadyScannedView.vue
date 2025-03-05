@@ -1,23 +1,23 @@
 <template>
     <div ref="root" class="st-view ticket-already-scanned-view">
-        <STNavigationBar title="Ticket al gescand" />
+        <STNavigationBar :title="$t(`Ticket al gescand`)"/>
 
         <main>
             <h1>
-                <span class="icon warning yellow" />
-                <span>Ticket al gescand</span>
+                <span class="icon warning yellow"/>
+                <span>{{ $t('968306a5-da56-4e8c-9d3d-7499f5509e29') }}</span>
             </h1>
             <p class="ticket-secret">
                 {{ ticket.secret }}
             </p>
             <p class="style-description">
-                Let op dat je hetzelfde ticket niet meerdere keren scant en zo hergebruik van een ticket mogelijk maakt.
+                {{ $t('e9af6779-3c45-4544-b4db-01137ea02f67') }}
             </p>
 
             <STList class="info">
                 <STListItem v-if="ticket.scannedAt">
                     <h3 class="style-definition-label">
-                        Tijdstip
+                        {{ $t('93a310d9-c446-46ac-b2b6-663bfab3a0ad') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDateTime(ticket.scannedAt) }}
@@ -26,7 +26,7 @@
 
                 <STListItem v-if="ticket.scannedBy">
                     <h3 class="style-definition-label">
-                        Gescand door
+                        {{ $t('043d671b-5437-4cf2-a0b9-843fda088fc2') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ ticket.scannedBy }}
@@ -38,10 +38,10 @@
         <STToolbar>
             <template #right>
                 <button class="button secundary" type="button" @click="viewTicket">
-                    Ticket toch bekijken
+                    {{ $t('d1fa8d14-8807-4bf5-988e-41f4cf5bd3b6') }}
                 </button>
                 <button class="button primary" type="button" @click="() => pop()">
-                    Terug
+                    {{ $t('7997eb1c-d686-4a83-9885-ed46d0da34c5') }}
                 </button>
             </template>
         </STToolbar>

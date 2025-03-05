@@ -1,7 +1,7 @@
 <template>
     <STListItem v-long-press="(e: MouseEvent) => showContextMenu(e)" :selectable="true" class="right-stack" @click="editCategory()" @contextmenu.prevent="showContextMenu">
         <template v-if="settings.toggleDefaultEnabled" #left>
-            <Checkbox :model-value="category.defaultEnabled" :disabled="true" />
+            <Checkbox :model-value="category.defaultEnabled" :disabled="true"/>
         </template>
 
         <h3 class="style-title-list">
@@ -11,14 +11,14 @@
             {{ filterDescription }}
         </p>
         <p v-if="!category.childCategories.length && !category.records.length" class="style-description-small">
-            Leeg
+            {{ $t('c4ef3803-02b2-4e6d-a71b-8dcc387e4a39') }}
         </p>
         <p v-else class="style-description-small">
             <template v-if="category.records.length">
                 {{ category.records.length }} {{ category.records.length === 1 ? "vraag" : "vragen" }}
             </template>
             <template v-if="category.childCategories.length && category.records.length">
-                en
+                {{ $t('751da9ce-b82a-4ad1-9306-295fb9c94857') }}
             </template>
             <template v-if="category.childCategories.length">
                 {{ category.childCategories.length }} {{ category.childCategories.length === 1 ? "categorie" : "categorieën" }}
@@ -26,10 +26,10 @@
         </p>
 
         <template #right>
-            <span v-if="category.containsSensitiveData" v-tooltip="'Vereist toestemming gegevensverzameling'" class="icon privacy gray" />
+            <span v-if="category.containsSensitiveData" v-tooltip="'Vereist toestemming gegevensverzameling'" class="icon privacy gray"/>
 
-            <span class="button icon drag gray" @click.stop @contextmenu.stop />
-            <span class="icon arrow-right-small gray" />
+            <span class="button icon drag gray" @click.stop @contextmenu.stop/>
+            <span class="icon arrow-right-small gray"/>
         </template>
     </STListItem>
 </template>

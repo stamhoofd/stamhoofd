@@ -1,40 +1,39 @@
 <template>
-    <SaveView :title="isNew ? 'Productkorting toevoegen' : 'Productkorting bewerken'" :disabled="!hasChanges && !isNew" class="product-edit-view" @save="save">
+    <SaveView :title="isNew ? $t(`Productkorting toevoegen`) : $t(`Productkorting bewerken`)" :disabled="!hasChanges && !isNew" class="product-edit-view" @save="save">
         <h1 v-if="isNew">
-            Productkorting toevoegen
+            {{ $t('9f2324d2-2e98-446d-84b8-783f137945d6') }}
         </h1>
         <h1 v-else>
-            Productkorting bewerken
+            {{ $t('11ecb8e4-9d2b-419a-a2c5-96f9636ef1ae') }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
-        <ProductSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="errors.validator" @patch="patchProductSelector" />
+        <ProductSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="errors.validator" @patch="patchProductSelector"/>
 
-        <hr>
-        <h2>Korting</h2>
+        <hr><h2>{{ $t('7cfe6205-1f1c-42b4-82ce-8e6d8869e253') }}</h2>
         <p v-if="discounts.length > 1">
-            De kortingen worden toegepast van hoog naar lage prijs. Dus het eerste stuk is het artikel met de hoogste prijs (als er prijs verschillen zijn binnenin hetzelfde artikel door bijvoorbeeld keuzemenu's). Als de korting per stuk groter is dan de prijs van een stuk, is het stuk gratis en wordt de korting niet overgedragen.
+            {{ $t("ce279ec5-0673-4091-b306-9e88765e5f54") }}
         </p>
 
         <div v-for="(d, index) in discounts" :key="d.id">
-            <STInputBox :title="discounts.length === 1 ? 'Korting' : 'Korting op '+(index+1)+'e stuk' + ((repeatBehaviour === 'RepeatLast' && index === discounts.length - 1) ? ' en verder' : '')" :error-box="errors.errorBox" class="max">
+            <STInputBox :title="discounts.length === 1 ? $t(`Korting`) : $t(`939bd7e3-ee2d-4c46-9841-4be436c47095`) + ' '+(index+1)+$t(`eced09d7-8a02-4c69-93f9-d88f7dad092e`) + ((repeatBehaviour === 'RepeatLast' && index === discounts.length - 1) ? ' ' + $t(`97d81f21-16f0-4d33-afb1-acf2c6777567`) : '')" :error-box="errors.errorBox" class="max">
                 <template v-if="discounts.length > 1" #right>
-                    <button class="button icon trash gray" type="button" @click="removeDiscount(d)" />
+                    <button class="button icon trash gray" type="button" @click="removeDiscount(d)"/>
                 </template>
 
                 <div class="split-inputs">
                     <div>
-                        <PriceInput v-if="getDiscountType(d) === 'discountPerPiece'" :model-value="getDiscountDiscountPerPiece(d)" :min="0" :required="true" @update:model-value="setDiscountDiscountPerPiece(d, $event)" />
-                        <PermyriadInput v-else :model-value="getDiscountPercentageDiscount(d)" :required="true" @update:model-value="setDiscountPercentageDiscount(d, $event)" />
+                        <PriceInput v-if="getDiscountType(d) === 'discountPerPiece'" :model-value="getDiscountDiscountPerPiece(d)" :min="0" :required="true" @update:model-value="setDiscountDiscountPerPiece(d, $event)"/>
+                        <PermyriadInput v-else :model-value="getDiscountPercentageDiscount(d)" :required="true" @update:model-value="setDiscountPercentageDiscount(d, $event)"/>
                     </div>
                     <div>
                         <Dropdown :model-value="getDiscountType(d)" @update:model-value="setDiscountType(d, $event)">
                             <option value="percentageDiscount">
-                                Percentage
+                                {{ $t('2041e6a0-2f90-485e-8144-4169e0f7ff31') }}
                             </option>
                             <option value="discountPerPiece">
-                                Bedrag
+                                {{ $t('ec09a8ac-1c47-4b41-b974-fbdb91bd5477') }}
                             </option>
                         </Dropdown>
                     </div>
@@ -44,85 +43,70 @@
 
         <p>
             <button class="button text" type="button" @click="addDiscount">
-                <span class="icon add" />
-                <span v-if="discounts.length === 1">Andere korting op tweede stuk</span>
-                <span v-else>Toevoegen</span>
+                <span class="icon add"/>
+                <span v-if="discounts.length === 1">{{ $t('4c7baa48-c217-4875-8168-6f358b7498d5') }}</span>
+                <span v-else>{{ $t('73b74929-78f4-4cfa-8a20-92a071a84ec5') }}</span>
             </button>
         </p>
 
-        <!--<STInputBox title="Kortingpercentage" error-fields="percentageDiscount" :error-box="errors.errorBox" class="max">
-            <PermyriadInput
-                v-model="percentageDiscount"
-                :required="true"
-            />
-        </STInputBox>-->
+        
 
-        <hr>
-        <h2>Herhalen</h2>
+        <hr><h2>{{ $t('7de621c8-b77a-481e-ac3c-87398826ac5d') }}</h2>
 
         <STList>
             <STListItem :selectable="true" element-name="label" class="left-center">
                 <template #left>
-                    <Radio v-model="repeatBehaviour" value="Once" />
+                    <Radio v-model="repeatBehaviour" value="Once"/>
                 </template>
                 <h3 class="style-title-list">
-                    Niet herhalen
+                    {{ $t('aa2edfd6-c02a-4471-8aad-07b52b4e4b24') }}
                 </h3>
                 <p class="style-description">
-                    De korting wordt maar één keer toegepast.
+                    {{ $t('5fc5b1c5-9233-4277-9dd8-5df0a138ce38') }}
                 </p>
             </STListItem>
             <STListItem :selectable="true" element-name="label" class="left-center">
                 <template #left>
-                    <Radio v-model="repeatBehaviour" value="RepeatLast" />
+                    <Radio v-model="repeatBehaviour" value="RepeatLast"/>
                 </template>
                 <h3 v-if="discounts.length > 1 || repeatBehaviour === 'RepeatPattern'" class="style-title-list">
-                    Laatste korting herhalen
+                    {{ $t('cae72370-67c9-4cad-8e40-2fcd58807a18') }}
                 </h3>
                 <h3 v-else>
-                    Herhalen
+                    {{ $t('7de621c8-b77a-481e-ac3c-87398826ac5d') }}
                 </h3>
                 <p class="style-description">
-                    De laatste korting uit de lijst wordt toegepast als er nog meer stuks zijn.
+                    {{ $t('2ba4ac5e-c236-4da8-8c35-a55e4316d2f8') }}
                 </p>
             </STListItem>
 
             <STListItem v-if="discounts.length > 1 || repeatBehaviour === 'RepeatPattern'" :selectable="true" element-name="label" class="left-center">
                 <template #left>
-                    <Radio v-model="repeatBehaviour" value="RepeatPattern" />
+                    <Radio v-model="repeatBehaviour" value="RepeatPattern"/>
                 </template>
                 <h3 class="style-title-list">
-                    Patroon herhalen
+                    {{ $t('ec1fcafa-fb60-456f-b1ec-b4a497e008b4') }}
                 </h3>
                 <p class="style-description">
-                    Als er meer stuks zijn wordt de eerste korting terug toegepast, daarna de tweede...
+                    {{ $t('6e7e7b1e-67db-46f8-a75d-4e1ffa9cc5c9') }}
                 </p>
             </STListItem>
         </STList>
 
-        <hr>
-        <h2>Zichtbaarheid (optioneel)</h2>
-        <p>Als deze korting wordt toegepast op een item in een winkelmandje kan je bij dat item een label tonen (bv. 'BLACK FRIDAY'). Hou dit label kort, bij voorkeur 1 woord.</p>
+        <hr><h2>{{ $t('430c2347-afbf-4caa-adbc-bffc294907ad') }}</h2>
+        <p>{{ $t("0388c7cf-5df1-44d0-99c2-a6986cc77fe9") }}</p>
 
-        <STInputBox title="Label" error-fields="cartLabel" :error-box="errors.errorBox">
-            <input
-                v-model="cartLabel"
-                class="input"
-                type="text"
-                placeholder="Optioneel"
-                autocomplete="off"
-            >
-        </STInputBox>
+        <STInputBox error-fields="cartLabel" :error-box="errors.errorBox" :title="$t(`bd10ebec-0d61-4b2d-9d76-4c60d8884aea`)">
+            <input v-model="cartLabel" class="input" type="text" autocomplete="off" :placeholder="$t(`e64a0d25-fe5a-4c87-a087-97ad30b2b12b`)"></STInputBox>
 
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Verwijder deze korting
+            <hr><h2>
+                {{ $t('a9c5cb42-61c2-452f-957d-08fd61175f56') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span class="icon trash"/>
+                <span>{{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}</span>
             </button>
         </div>
     </SaveView>

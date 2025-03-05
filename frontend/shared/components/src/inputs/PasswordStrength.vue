@@ -1,28 +1,28 @@
 <template>
-    <STInputBox title="Wachtwoord sterkte">
+    <STInputBox :title="$t(`439eff64-59e0-48b1-9e01-c3765e260c1e`)">
         <div class="password-strength">
-            <div :style="{ width: strength+'%' }" :class="type" />
+            <div :style="{ width: strength+'%' }" :class="type"/>
         </div>
         <p v-if="!modelValue" class="style-description-small">
-            Gebruik bij voorkeur de wachtwoord-beheerder van jouw browser
+            {{ $t('03686691-b3fb-47f9-94d5-c02dccd1cb09') }}
         </p>
         <p v-else-if="warning.length > 0" class="style-description-small">
             {{ warning }}
         </p>
         <p v-else-if="duration <= 60*60" class="style-description-small">
-            Kan in enkele minuten worden geraden door een computer
+            {{ $t('641f4898-3bf5-4292-8688-527e3dd91f8d') }}
         </p>
         <p v-else-if="duration <= 60*60*24" class="style-description-small">
-            Kan in enkele uren worden geraden door een computer
+            {{ $t('f0f0bf80-c31e-484c-919e-2031f694d3e7') }}
         </p>
         <p v-else-if="duration <= 60*60*24*30" class="style-description-small">
-            Kan in enkele dagen worden geraden door een computer
+            {{ $t('8524454f-d601-4315-9cee-df640bce1c5b') }}
         </p>
         <p v-else-if="duration <= 60*60*24*30*12" class="style-description-small">
-            Kan binnen het jaar worden geraden door een computer
+            {{ $t('fe1abd25-9987-451a-92a1-de8c8ae7cffa') }}
         </p>
         <p v-else class="style-description-small">
-            Jouw wachtwoord ziet er goed uit
+            {{ $t('1199741c-7541-4d7b-93d3-e8a75a562079') }}
         </p>
 
         <template #right>

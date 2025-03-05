@@ -5,32 +5,32 @@
                 {{ record.name }}
             </h3>
             <p v-if="!answer" class="style-definition-text">
-                <span>Niet ingevuld</span>
+                <span>{{ $t('2c24cc12-57a7-411d-8172-8e24c3fb21d6') }}</span>
             </p>
             <template v-else-if="recordCheckboxAnswer">
                 <p class="style-definition-text">
-                    <span v-if="recordCheckboxAnswer.selected" class="icon success primary" />
-                    <span v-else class="icon canceled gray" />
-                    <span v-if="recordCheckboxAnswer.comments" v-copyable class="pre-wrap style-copyable" v-text="recordCheckboxAnswer.comments" />
+                    <span v-if="recordCheckboxAnswer.selected" class="icon success primary"/>
+                    <span v-else class="icon canceled gray"/>
+                    <span v-if="recordCheckboxAnswer.comments" v-copyable class="pre-wrap style-copyable" v-text="recordCheckboxAnswer.comments"/>
                 </p>
             </template>
             <p v-else-if="recordFileAnswer" class="style-definition-text">
-                <span v-if="!recordFileAnswer.file">Leeg</span>
+                <span v-if="!recordFileAnswer.file">{{ $t('c4ef3803-02b2-4e6d-a71b-8dcc387e4a39') }}</span>
                 <template v-else>
                     <a :href="recordFileAnswer.file?.getPublicPath()" target="_blank" class="button text">
-                        <span class="icon download" />
+                        <span class="icon download"/>
                         <span>{{ recordFileAnswer.file.name }}</span>
                     </a>
                 </template>
             </p>
-            <p v-else v-copyable class="style-definition-text pre-wrap style-copyable" v-text="answer.stringValue" />
+            <p v-else v-copyable class="style-definition-text pre-wrap style-copyable" v-text="answer.stringValue"/>
         </STListItem>
 
         <STListItem v-for="cc of childCategories" :key="cc.id">
             <h3 class="style-definition-label">
                 {{ cc.name }}
             </h3>
-            <RecordCategoryAnswersBox :value="value" :category="cc" :compact="true" />
+            <RecordCategoryAnswersBox :value="value" :category="cc" :compact="true"/>
         </STListItem>
     </STList>
 
@@ -39,10 +39,10 @@
             <p class="style-definition-text">
                 {{ record.name }}
             </p>
-            <p v-if="recordCheckboxAnswer?.comments" v-copyable class="style-description-small pre-wrap" v-text="recordCheckboxAnswer.comments" />
+            <p v-if="recordCheckboxAnswer?.comments" v-copyable class="style-description-small pre-wrap" v-text="recordCheckboxAnswer.comments"/>
         </template>
         <p v-if="recordsWithAnswers.filter(({recordCheckboxAnswer}) => recordCheckboxAnswer?.selected).length === 0" class="style-description">
-            Geen
+            {{ $t('039ea891-15aa-42d4-8513-7f29d0743514') }}
         </p>
     </template>
 
@@ -56,12 +56,12 @@
             </dd>
             <template v-else-if="recordCheckboxAnswer">
                 <dd>
-                    <span v-if="recordCheckboxAnswer.selected" class="icon success primary" />
-                    <span v-else class="icon canceled gray" />
+                    <span v-if="recordCheckboxAnswer.selected" class="icon success primary"/>
+                    <span v-else class="icon canceled gray"/>
                 </dd>
-                <dd v-if="recordCheckboxAnswer.comments" :key="'dd-description-'+record.id" v-copyable class="description pre-wrap style-copyable" v-text="recordCheckboxAnswer.comments" />
+                <dd v-if="recordCheckboxAnswer.comments" :key="'dd-description-'+record.id" v-copyable class="description pre-wrap style-copyable" v-text="recordCheckboxAnswer.comments"/>
             </template>
-            <dd v-else v-copyable class="pre-wrap style-copyable" v-text="answer.stringValue" />
+            <dd v-else v-copyable class="pre-wrap style-copyable" v-text="answer.stringValue"/>
         </template>
     </dl>
 </template>

@@ -1,143 +1,124 @@
 <template>
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" class="webshop-view-page" @save="save">
         <h1>{{ viewTitle }}</h1>
-        <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox title="Titel" error-fields="meta.title" :error-box="errors.errorBox">
-            <input
-                v-model="title"
-                class="input"
-                type="text"
-                placeholder="bv. Bestel je wafels"
-                autocomplete="off"
-            >
+        <STErrorsDefault :error-box="errors.errorBox"/>
+        <STInputBox error-fields="meta.title" :error-box="errors.errorBox" :title="$t(`04043e8a-6a58-488e-b538-fea133738532`)">
+            <input v-model="title" class="input" type="text" autocomplete="off" :placeholder="$t(`bce04920-960b-4ca2-98f0-b8bf9d6bd931`)"></STInputBox>
+
+        <STInputBox error-fields="meta.description" :error-box="errors.errorBox" class="max" :title="$t(`f72f5546-ed6c-4c93-9b0d-9718f0cc9626`)">
+            <WYSIWYGTextInput v-model="description" :color="color || defaultColor" :placeholder="$t(`e9dc4086-e5ff-448b-9b48-ccef46fd3526`)"/>
         </STInputBox>
 
-        <STInputBox title="Beschrijving" error-fields="meta.description" :error-box="errors.errorBox" class="max">
-            <WYSIWYGTextInput
-                v-model="description"
-                placeholder="Beschrijving die op jouw webshop staat"
-                :color="color || defaultColor"
-            />
-        </STInputBox>
-
-        <hr>
-        <h2>Layout</h2>
+        <hr><h2>{{ $t('220faaac-3fbe-417b-8489-d39e9ca0cb9a') }}</h2>
 
         <STList>
             <STListItem :selectable="true" element-name="label" class="left-center">
                 <template #left>
-                    <Radio v-model="layout" :value="WebshopLayout.Split" />
+                    <Radio v-model="layout" :value="WebshopLayout.Split"/>
                 </template>
                 <h3 class="style-title-list">
-                    Naast elkaar
+                    {{ $t('7cc86462-1d1b-4c15-bdef-0c5d4f7f1072') }}
                 </h3>
                 <p class="style-description">
-                    Indien er voldoende plaats is. Meerdere artikels worden in lijstweergave getoond.
+                    {{ $t('a0ca5829-ca61-47d3-a8ee-aab42fb22a11') }}
                 </p>
             </STListItem>
             <STListItem :selectable="true" element-name="label" class="left-center">
                 <template #left>
-                    <Radio v-model="layout" :value="WebshopLayout.Default" />
+                    <Radio v-model="layout" :value="WebshopLayout.Default"/>
                 </template>
                 <h3 class="style-title-list">
-                    Onder elkaar
+                    {{ $t('8a693f43-cb17-4f47-ba29-56a2b0649e07') }}
                 </h3>
                 <p class="style-description">
-                    Meerdere artikels worden in vakjes getoond, indien er voldoende plaats is.
+                    {{ $t('f3c29565-754d-40c4-992c-15f90bd5b9a4') }}
                 </p>
             </STListItem>
         </STList>
 
-        <hr>
-        <h2 class="style-with-button">
-            <div>Omslagfoto</div>
+        <hr><h2 class="style-with-button">
+            <div>{{ $t('e4a90efd-a536-472b-8f3f-cbd0fac0ba82') }}</div>
             <div>
                 <button v-if="coverPhoto" type="button" class="button text only-icon-smartphone" @click="coverPhoto = null">
-                    <span class="icon trash" />
-                    <span>Verwijderen</span>
+                    <span class="icon trash"/>
+                    <span>{{ $t('33cdae8a-e6f1-4371-9d79-955a16c949cb') }}</span>
                 </button>
-                <UploadButton v-model="coverPhoto" :text="coverPhoto ? 'Vervangen' : 'Uploaden'" :resolutions="hs" />
+                <UploadButton v-model="coverPhoto" :text="coverPhoto ? $t(`c01d3d4e-ad4e-45ec-abac-431462c194cf`) : $t(`3370bb72-2817-4096-83ce-318993436513`)" :resolutions="hs"/>
             </div>
         </h2>
 
-        <p>We raden aan om een foto van minstens 1600 pixels breed up te loaden. De foto zal volledig zichtbaar zijn, knip dus indien nodig bij voor het uploaden.</p>
+        <p>{{ $t('52324943-6f81-4989-b599-b1a98b249a3b') }}</p>
 
         <figure v-if="coverPhotoSrc" class="webshop-banner">
-            <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight">
-        </figure>
+            <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight"></figure>
 
-        <EditPolicyBox v-for="policy in policies" :key="policy.id" :policy="policy" :validator="errors.validator" :error-box="errors.errorBox" @patch="patchPolicy(policy, $event)" @delete="deletePolicy(policy)" />
+        <EditPolicyBox v-for="policy in policies" :key="policy.id" :policy="policy" :validator="errors.validator" :error-box="errors.errorBox" @patch="patchPolicy(policy, $event)" @delete="deletePolicy(policy)"/>
 
-        <hr>
-        <h2 class="style-with-button">
-            <div>Externe links</div>
+        <hr><h2 class="style-with-button">
+            <div>{{ $t('6fc43483-40b4-4444-9824-6d2ffd4813de') }}</div>
             <div>
-                <button type="button" class="button icon add" @click="addPolicy" />
+                <button type="button" class="button icon add" @click="addPolicy"/>
             </div>
         </h2>
-        <p>Soms wil je ook jouw algemene voorwaarden, retourbeleid, contactformulier en privacyvoorwaarden op jouw webshop vermelden. Als je online betaalmethodes wilt gebruiken, kan dit noodzakelijk zijn. Deze links worden dan onderaan jouw webshop toegevoegd.</p>
+        <p>{{ $t('e5189e3f-47eb-4dce-9761-1e99c86a0491') }}</p>
 
         <p v-if="policies.length === 0" class="info-box">
-            Je hebt momenteel geen externe links toegevoegd.
+            {{ $t('b395c7be-7fa9-4704-ac91-531101fa9dda') }}
         </p>
         <p v-if="policies.length > 0 && (organization?.meta.privacyPolicyFile || organization?.meta.privacyPolicyUrl)" class="warning-box">
-            De privacyvoorwaarden die je bij de algemene instellingen hebt ingesteld, worden niet weergegeven in deze webshop. Voeg deze ook toe als externe link als je dezelfde privacy voorwaarden op deze webshop wilt vermelden.
+            {{ $t('cc66a8ee-03a0-4629-854b-a20931ba8ddb') }}
         </p>
 
-        <hr>
-        <h2>Kleuren</h2>
+        <hr><h2>{{ $t('aeaee12f-20ab-44fa-b7e4-ab1582f7150c') }}</h2>
         <p>
-            Je kan de hoofdkleur voor al je webshops instellen via de algemene instellingen → Personaliseren. Dan hoef je het niet voor elke webshop apart in te stellen. Het kleur hier invullen heeft enkel nut als je het bewust anders wilt instellen.
+            {{ $t('f0c7b7ce-2365-4b8f-83e1-0d9c5822d6e7') }}
         </p>
 
-        <ColorInput v-model="color" title="Hoofdkleur (optioneel)" :validator="errors.validator" placeholder="Standaardkleur" :required="false" :disallowed="['#FFFFFF']" />
+        <ColorInput v-model="color" :validator="errors.validator" :required="false" :disallowed="['#FFFFFF']" :title="$t(`14a3d334-8815-495c-8941-cd6842b1a88e`)" :placeholder="$t(`cc6fc88a-f1e0-4e0e-b114-8ca89d0f7abf`)"/>
         <p class="style-description-small">
-            Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om de kleur van je vereniging te behouden (bij algemene instellingen > personalisatie).
+            {{ $t('7c796093-d146-4972-98ba-c01d164afae4') }}
         </p>
 
-        <STInputBox title="Donkere mode" error-fields="meta.darkMode" :error-box="errors.errorBox" class="max">
+        <STInputBox error-fields="meta.darkMode" :error-box="errors.errorBox" class="max" :title="$t(`3de59df8-f514-49b6-bafd-30bb5ec8d099`)">
             <RadioGroup>
                 <Radio v-model="darkMode" :value="'Off'">
-                    Uit
+                    {{ $t('0e218b0a-a928-44ae-b929-7fa18622d24c') }}
                 </Radio>
                 <Radio v-model="darkMode" :value="'On'">
-                    Aan
+                    {{ $t('7345a83c-bd68-4d70-90fa-eaa75922cd43') }}
                 </Radio>
                 <Radio v-model="darkMode" :value="'Auto'">
-                    Automatisch
+                    {{ $t('333ca484-4ab6-40a2-bc61-e77313ac96bd') }}
                 </Radio>
             </RadioGroup>
         </STInputBox>
         <p v-if="darkMode !== 'Off'" class="style-description-small">
-            Test zeker het contrast van jouw gekozen kleur en logo als je voor een donkere modus kiest.
+            {{ $t('9c8b8fdf-ed2d-4743-92ee-7b67069564dd') }}
         </p>
 
-        <hr>
-        <h2>Logo</h2>
+        <hr><h2>{{ $t('f1b4c303-d49b-4e3f-849c-589bb8b8348a') }}</h2>
         <p>
-            Je kan een logo voor al je webshops instellen via de algemene instellingen > personalisatie. Dan hoef je het niet voor elke webshop apart in te stellen.
+            {{ $t('5dd1a323-20a1-4c5a-b978-1c063a086f6a') }}
         </p>
 
         <Checkbox v-model="useLogo">
-            Logo van vereniging gebruiken
+            {{ $t('1f2ece8a-d98c-4d15-840d-cdd8b73a8b53') }}
         </Checkbox>
 
-        <LogoEditor v-if="!useLogo" :meta-data="webshop.meta" :validator="errors.validator" :dark-mode="darkMode" @patch="addMetaPatch" />
+        <LogoEditor v-if="!useLogo" :meta-data="webshop.meta" :validator="errors.validator" :dark-mode="darkMode" @patch="addMetaPatch"/>
 
         <template v-if="hasTickets">
-            <hr>
-            <EditSponsorsBox :config="sponsorConfig" @patch="patchSponsorConfig" />
+            <hr><EditSponsorsBox :config="sponsorConfig" @patch="patchSponsorConfig"/>
 
             <p class="style-button-bar">
                 <button type="button" class="button text" @click="previewTicket">
-                    <span class="icon eye" /><span>Ticketvoorbeeld</span>
+                    <span class="icon eye"/><span>{{ $t('d5ccda07-464d-470b-a76e-720740744f66') }}</span>
                 </button>
             </p>
         </template>
 
         <template v-if="STAMHOOFD.platformName === 'stamhoofd'">
-            <hr>
-            <h2>{{ $t("405a811e-ebb1-4948-84cd-8fb5860104e6") }}</h2>
+            <hr><h2>{{ $t("405a811e-ebb1-4948-84cd-8fb5860104e6") }}</h2>
             <p>
                 {{ $t('768afe13-5f57-4a82-a6ac-77c8999b8aeb') }}
             </p>
