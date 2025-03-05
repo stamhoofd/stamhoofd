@@ -263,7 +263,7 @@ export default class EditorView extends Vue {
             return
         }
 
-        this.editor.chain().focus().setLink({ href: cleanedUrl }).focus().run()
+        this.editor.chain().focus().extendMarkRange('link').setLink({ href: cleanedUrl }).focus().run()
         this.$nextTick(() => {
             this.showLinkEditor = false
         })
