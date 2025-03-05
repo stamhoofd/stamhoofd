@@ -5,6 +5,7 @@ import {
     SchemaType,
 } from "@google/generative-ai";
 import { globals } from "../globals";
+import { PromiseQueue } from "../queueTest";
 import { TranslationManager } from "../TranslationManager";
 import { Translator } from "./Translator";
 
@@ -12,6 +13,7 @@ export class GoogleTranslator extends Translator {
     private readonly genAI: GoogleGenerativeAI;
     private readonly model: GenerativeModel;
     protected readonly maxBatchLength = 15000;
+    protected readonly queue = new PromiseQueue<(string | null)[]>(3, 500);
 
     constructor(manager: TranslationManager) {
         super(manager);

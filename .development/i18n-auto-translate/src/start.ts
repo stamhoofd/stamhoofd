@@ -1,12 +1,9 @@
-
 /**
  * TODO:
- * - add max async calls
  * - improve prompt
  * - provide context?
  * - context caching?
  * - add feedback while translating (if it takes a long time for example)
- * - keep log of prompts and results?
  */
 
 import { AutoTranslator } from "./AutoTranslator";
@@ -19,4 +16,3 @@ export async function start() {
     const autoTranslator = new AutoTranslator(translator, manager);
     await autoTranslator.start();
 }
-

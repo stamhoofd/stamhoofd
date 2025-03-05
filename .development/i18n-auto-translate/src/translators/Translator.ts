@@ -2,6 +2,7 @@ import chalk from "chalk";
 import { cliArguments, CliArguments } from "../CliArguments";
 import { validateTranslations } from "../helpers/validate-translations";
 import { promptLogger } from "../PromptLogger";
+import { PromiseQueue } from "../queueTest";
 import { TranslationManager } from "../TranslationManager";
 import { Translations } from "../types/Translations";
 import { ITranslator } from "./ITranslator";
@@ -10,10 +11,14 @@ export abstract class Translator implements ITranslator {
     // Max amount of characters in a batch
     protected abstract readonly maxBatchLength: number;
 
+    // Do not send all prompts at once because api can block requests if too many in short period
+    protected abstract readonly queue: PromiseQueue<(string | null)[]>;
+
     constructor(
         protected readonly manager: TranslationManager,
         protected readonly cliArgs: CliArguments = cliArguments,
-    ) {}
+    ) {
+    }
 
     protected abstract generateResponse(prompt: string): Promise<string>;
 
@@ -137,35 +142,39 @@ export abstract class Translator implements ITranslator {
 
         const promises: Promise<(string | null)[]>[] = batches.map(
             async (batch, i) => {
-                const batchNumber = i + 1;
-                const totalBatches = batches.length;
 
-                try {
-                    console.log(
-                        chalk.gray(
-                            `Start translating batch ${batchNumber} of ${totalBatches}`,
-                        ),
-                    );
-                    const result = await this.translateBatch(batch, {
-                        originalLocal,
-                        targetLocal,
-                        consistentWords,
-                        namespace,
-                        batchNumber,
-                        totalBatches,
-                    });
-                    console.log(
-                        chalk.gray(
-                            `Finished translating batch ${batchNumber} of ${totalBatches}`,
-                        ),
-                    );
-                    return result;
-                } catch (error) {
-                    const errorMessage = `Failed translating batch ${batchNumber} of ${totalBatches} (from ${originalLocal} to ${targetLocal}, namespace: ${namespace}): ${error.message}`;
-                    console.error(errorMessage);
-                    promptLogger.error(errorMessage);
-                    return batch.map(() => null);
-                }
+                return this.queue.add(async () => {
+                    const batchNumber = i + 1;
+                    const totalBatches = batches.length;
+    
+                    try {
+                        console.log(
+                            chalk.gray(
+                                `Start translating batch ${batchNumber} of ${totalBatches}`,
+                            ),
+                        );
+                        const result = await this.translateBatch(batch, {
+                            originalLocal,
+                            targetLocal,
+                            consistentWords,
+                            namespace,
+                            batchNumber,
+                            totalBatches,
+                        });
+                        console.log(
+                            chalk.gray(
+                                `Finished translating batch ${batchNumber} of ${totalBatches}`,
+                            ),
+                        );
+                        return result;
+                    } catch (error) {
+                        const errorMessage = `Failed translating batch ${batchNumber} of ${totalBatches} (from ${originalLocal} to ${targetLocal}, namespace: ${namespace}): ${error.message}`;
+                        console.error(errorMessage);
+                        promptLogger.error(errorMessage);
+                        return batch.map(() => null);
+                    }
+                })
+               
             },
         );
 
@@ -196,8 +205,8 @@ export abstract class Translator implements ITranslator {
         translations: Translations,
         args: { originalLocal: string; targetLocal: string; namespace: string },
     ): Promise<Translations> {
-        const targetLocal =
-            args.targetLocal === "es" ? "es-CO" : args.targetLocal;
+        const targetLocal = args.targetLocal;
+
         console.log(
             chalk.white(
                 `Start translate ${Object.keys(translations).length} items from ${args.originalLocal} to ${targetLocal} for namespace ${args.namespace}`,
@@ -222,6 +231,7 @@ export abstract class Translator implements ITranslator {
             consistentWords,
             namespace: args.namespace,
         });
+
         console.log(
             chalk.green(
                 `Finished translate ${Object.keys(translations).length} items from ${args.originalLocal} to ${targetLocal} for namespace ${args.namespace}`,
@@ -249,9 +259,9 @@ export abstract class Translator implements ITranslator {
             return false;
         }
 
-        const orginalMap = this.createArgumentOccurrencMap(originalArguments);
+        const orginalMap = this.createArgumentOccurrenceMap(originalArguments);
         const translationMap =
-            this.createArgumentOccurrencMap(translationArguments);
+            this.createArgumentOccurrenceMap(translationArguments);
 
         for (const [argument, count] of orginalMap.entries()) {
             const translationCount = translationMap.get(argument);
@@ -266,7 +276,7 @@ export abstract class Translator implements ITranslator {
         return true;
     }
 
-    private createArgumentOccurrencMap(array: string[]): Map<string, number> {
+    private createArgumentOccurrenceMap(array: string[]): Map<string, number> {
         const map = new Map<string, number>();
 
         array.forEach((item) => {
