@@ -1073,8 +1073,8 @@ export class PlatformMember implements ObjectWithRecords {
         return cloned as this;
     }
 
-    getResponsibilities(organization?: Organization | null) {
+    getResponsibilities(filter?: { organization?: Organization | null | undefined }) {
         return this.patchedMember.responsibilities
-            .filter(r => r.isActive && (organization ? r.organizationId === organization.id : r.organizationId === null));
+            .filter(r => r.isActive && (filter?.organization === undefined || (filter.organization ? r.organizationId === filter.organization.id : r.organizationId === null)));
     }
 }

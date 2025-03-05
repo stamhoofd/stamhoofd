@@ -156,7 +156,7 @@ export function useAdmins() {
             });
 
             for (const m of adminMembers) {
-                if (m.getResponsibilities(organization.value).length === 0) {
+                if (m.getResponsibilities({ organization: organization.value }).length === 0) {
                     continue;
                 }
                 if (!members.has(m.id)) {

@@ -267,7 +267,7 @@ const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string[]>({
         name: 'Functies',
         allowSorting: false,
-        getValue: member => member.getResponsibilities(organization.value ?? null).map(l => l.getName(member, false)),
+        getValue: member => member.getResponsibilities({ organization: organization.value ?? undefined }).map(l => l.getName(member, false)),
         format: (list) => {
             if (list.length === 0) {
                 return 'Geen';
