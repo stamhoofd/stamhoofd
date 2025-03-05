@@ -6,7 +6,7 @@
                 <input v-model="postalCode" class="input" type="text" placeholder="Postcode" name="postal-code" autocomplete="postal-code" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur">
             </div>
             <div>
-                <input v-model="city" class="input" type="text" placeholder="Gemeente" name="city" autocomplete="address-level2" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur"> <!-- name needs to be city for safari autocomplete -->
+                <input v-model="city" class="input" type="text" :placeholder="$t('shared.Gemeente')" name="city" autocomplete="address-level2" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur"> <!-- name needs to be city for safari autocomplete -->
             </div>
         </div>
 
@@ -35,35 +35,35 @@ import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 })
 export default class AddressInput extends Vue {
     @Prop({ default: "" }) 
-    title: string;
+        title: string;
 
     /**
      * Assign a validator if you want to offload the validation to components
      */
     @Prop({ default: null }) 
-    validator: Validator | null
+        validator: Validator | null
 
     errorBox: ErrorBox | null = null
     pendingErrorBox: ErrorBox | null = null
     
     @Prop({ default: null })
-    value: Address | ValidatedAddress | null
+        value: Address | ValidatedAddress | null
 
     /**
      * Validate on the server or not? -> will return a ValidatedAddress if this is true
      */
     @Prop({ default: null })
-    validateServer: Server | null
+        validateServer: Server | null
 
     @Prop({ default: true })
-    required: boolean
+        required: boolean
 
     /**
      * Whether the value can be set to null if it is empty (even when it is required, will still be invalid)
      * Only used if required = false
      */
     @Prop({ default: false })
-    nullable!: boolean
+        nullable!: boolean
 
     addressLine1 = ""
     city = ""
@@ -71,7 +71,7 @@ export default class AddressInput extends Vue {
     country = this.getDefaultCountry()
 
     @Prop({ default: false })
-    linkCountryToLocale: boolean
+        linkCountryToLocale: boolean
 
     getDefaultCountry() {
         return I18nController.shared?.country ?? Country.Belgium

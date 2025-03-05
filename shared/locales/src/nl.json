@@ -1,5 +1,6 @@
 {
   "shared": {
+    "Gemeente": "Gemeente",
     "login": "Inloggen",
     "transferTypes": {
       "structured": "Gestructureerde mededeling"
