@@ -7,6 +7,7 @@ import { PermissionLevel, Permissions } from '@stamhoofd/structures';
 import { PatchUserMembersEndpoint } from '../../src/endpoints/global/registration/PatchUserMembersEndpoint';
 import { testServer } from '../helpers/TestServer';
 import { GetUserMembersEndpoint } from '../../src/endpoints/global/registration/GetUserMembersEndpoint';
+import { FileSignService } from '../../src/services/FileSignService';
 
 const baseUrl = `/v${Version}/members`;
 const endpoint = new PatchUserMembersEndpoint();
@@ -411,6 +412,181 @@ describe('E2E.PrivateFiles', () => {
         expect(answer.file!.isPrivate).toBe(true);
         expect(answer.file!.signedUrl).toBeString();
         expect(answer.file!.signedUrl).not.toEqual('https://test.com/test.exe'); // It got replaced with a proper signed url
+    });
+
+    describe('fillSignedUrlsForStruct', () => {
+        test('Can handle circular references', async () => {
+            // A malicious user could try to set a private file to a member in order to get
+            // access to the signed URL. This should not be possible without a valid signature
+            const privateFile = new File({
+                id: 'test',
+                server: 'test.com',
+                path: 'test.txt',
+                size: 100,
+                isPrivate: true,
+            });
+            await privateFile.sign();
+
+            const data = {
+                hello: 'true',
+                world: 'false',
+                circular: {
+                    data: {
+                        here: null as any,
+                    },
+                    file: privateFile,
+                },
+            };
+
+            data.circular.data.here = data;
+
+            await FileSignService.fillSignedUrlsForStruct(data);
+            expect(data.circular.file.signedUrl).toBeString();
+        });
+
+        test('Can handle duplicate files', async () => {
+            // A malicious user could try to set a private file to a member in order to get
+            // access to the signed URL. This should not be possible without a valid signature
+            const privateFile = new File({
+                id: 'test',
+                server: 'test.com',
+                path: 'test.txt',
+                size: 100,
+                isPrivate: true,
+            });
+            await privateFile.sign();
+
+            const data = {
+                hello: 'true',
+                world: 'false',
+                circular: {
+                    file1: privateFile,
+                    file2: privateFile,
+                },
+                arr: [
+                    privateFile,
+                    privateFile,
+                ],
+            };
+
+            await FileSignService.fillSignedUrlsForStruct(data);
+            expect(data.circular.file1.signedUrl).toBeString();
+            expect(data.circular.file2.signedUrl).toBeString();
+            expect(data.arr[0].signedUrl).toBeString();
+            expect(data.arr[1].signedUrl).toBeString();
+        });
+    });
+
+    describe('verifyFilesInStruct', () => {
+        test('Can handle circular references that are properly signed', async () => {
+            // A malicious user could try to set a private file to a member in order to get
+            // access to the signed URL. This should not be possible without a valid signature
+            const privateFile = new File({
+                id: 'test',
+                server: 'test.com',
+                path: 'test.txt',
+                size: 100,
+                isPrivate: true,
+            });
+            await privateFile.sign();
+
+            const data = {
+                hello: 'true',
+                world: 'false',
+                circular: {
+                    data: {
+                        here: null as any,
+                    },
+                    file: privateFile,
+                },
+            };
+
+            data.circular.data.here = data;
+
+            await expect(FileSignService.verifyFilesInStruct(data)).toResolve();
+        });
+
+        test('Can handle duplicate files that are properly signed', async () => {
+            // A malicious user could try to set a private file to a member in order to get
+            // access to the signed URL. This should not be possible without a valid signature
+            const privateFile = new File({
+                id: 'test',
+                server: 'test.com',
+                path: 'test.txt',
+                size: 100,
+                isPrivate: true,
+            });
+            await privateFile.sign();
+
+            const data = {
+                hello: 'true',
+                world: 'false',
+                circular: {
+                    file1: privateFile,
+                    file2: privateFile,
+                },
+                arr: [
+                    privateFile,
+                    privateFile,
+                ],
+            };
+
+            await expect(FileSignService.verifyFilesInStruct(data)).toResolve();
+        });
+
+        test('Can handle circular references with files that are not signed', async () => {
+            // A malicious user could try to set a private file to a member in order to get
+            // access to the signed URL. This should not be possible without a valid signature
+            const privateFile = new File({
+                id: 'test',
+                server: 'test.com',
+                path: 'test.txt',
+                size: 100,
+                isPrivate: true,
+            });
+
+            const data = {
+                hello: 'true',
+                world: 'false',
+                circular: {
+                    data: {
+                        here: null as any,
+                    },
+                    file: privateFile,
+                },
+            };
+
+            data.circular.data.here = data;
+
+            await expect(FileSignService.verifyFilesInStruct(data)).rejects.toThrow(/Invalid signature for file/);
+        });
+
+        test('Can handle duplicate files that are not signed', async () => {
+            // A malicious user could try to set a private file to a member in order to get
+            // access to the signed URL. This should not be possible without a valid signature
+            const privateFile = new File({
+                id: 'test',
+                server: 'test.com',
+                path: 'test.txt',
+                size: 100,
+                isPrivate: true,
+            });
+
+            const data = {
+                hello: 'true',
+                world: 'false',
+                circular: {
+                    file1: privateFile,
+                    file2: privateFile,
+                },
+                arr: [
+                    privateFile,
+                    privateFile,
+                ],
+            };
+
+            await expect(FileSignService.verifyFilesInStruct(data)).rejects.toThrow(/Invalid signature for file/);
+        });
     });
 
     /**

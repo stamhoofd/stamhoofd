@@ -70,7 +70,9 @@ export class FileSignService {
                 if (e instanceof jose.errors.JWSSignatureVerificationFailed) {
                     return false;
                 }
-                console.error('Failed to verify file signature:', e);
+                if (STAMHOOFD.environment !== 'test') {
+                    console.error('Failed to verify file signature:', e);
+                }
                 return false;
             }
         };
@@ -120,15 +122,19 @@ export class FileSignService {
         }
     }
 
-    static async fillSignedUrlsForStruct(data: any) {
+    static async fillSignedUrlsForStruct(data: any, looped = new Set()) {
         if (data instanceof File) {
             return (await data.withSignedUrl()) ?? undefined; // never return null if it fails because we'll want to use the original file in that case
         }
+        if (looped.has(data)) {
+            return;
+        }
+        looped.add(data);
 
         if (Array.isArray(data)) {
             for (let i = 0; i < data.length; i++) {
                 const value = data[i];
-                const r = await this.fillSignedUrlsForStruct(value);
+                const r = await this.fillSignedUrlsForStruct(value, looped);
                 if (r !== undefined) {
                     data[i] = r;
                 }
@@ -138,7 +144,7 @@ export class FileSignService {
 
         if (data instanceof Map) {
             for (const [key, value] of data.entries()) {
-                const r = await this.fillSignedUrlsForStruct(value);
+                const r = await this.fillSignedUrlsForStruct(value, looped);
 
                 if (r !== undefined) {
                     data.set(key, r);
@@ -151,7 +157,7 @@ export class FileSignService {
         // Loop all keys and search for File objects + replace them with the signed variant
         if (typeof data === 'object' && data !== null) {
             for (const key in data) {
-                const r = await this.fillSignedUrlsForStruct(data[key]);
+                const r = await this.fillSignedUrlsForStruct(data[key], looped);
                 if (r !== undefined) {
                     data[key] = r;
                 }
@@ -160,7 +166,12 @@ export class FileSignService {
         }
     }
 
-    static async verifyFilesInStruct(data: any) {
+    static async verifyFilesInStruct(data: any, looped = new Set()) {
+        if (looped.has(data)) {
+            return;
+        }
+        looped.add(data);
+
         if (data instanceof File) {
             if (!data.isPrivate) {
                 return;
@@ -183,14 +194,14 @@ export class FileSignService {
 
         if (Array.isArray(data)) {
             for (const value of data) {
-                await this.verifyFilesInStruct(value);
+                await this.verifyFilesInStruct(value, looped);
             }
             return;
         }
 
         if (data instanceof Map) {
             for (const [key, value] of data.entries()) {
-                await this.verifyFilesInStruct(value);
+                await this.verifyFilesInStruct(value, looped);
             }
             return;
         }
@@ -198,7 +209,7 @@ export class FileSignService {
         // Loop all keys and search for File objects + replace them with the signed variant
         if (typeof data === 'object' && data !== null) {
             for (const key in data) {
-                await this.verifyFilesInStruct(data[key]);
+                await this.verifyFilesInStruct(data[key], looped);
             }
             return;
         }
