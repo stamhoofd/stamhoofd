@@ -10,36 +10,47 @@ function formatDuration(durationMs: number): string {
     return `${ms}ms`;
 }
 
-      const timerFormat = winston.format.printf(
-        ({ durationMs, message }: any) => {
-            const durationText = formatDuration(durationMs);
-            return `${message}
+const timerFormat = winston.format.printf(({ durationMs, message }: any) => {
+    const durationText = formatDuration(durationMs);
+    return `${message}
 
-- Completion time: ${durationText}`
-        }
-      );
+- Completion time: ${durationText}`;
+});
 
 class PromptLogger {
     private readonly winstonPromptLogger = winston.createLogger({
-        level: 'info',
+        level: "info",
         format: winston.format.json(),
         transports: [
-          new winston.transports.File({ filename: 'prompts.log',  format: timerFormat,
-            options: { flags: "w" }, }),
+            new winston.transports.File({
+                filename: "prompts.log",
+                format: timerFormat,
+                options: { flags: "w" },
+            }),
         ],
-      });
+    });
 
-      private readonly winstonErrorLogger = winston.createLogger({
-        level: 'error',
+    private readonly winstonErrorLogger = winston.createLogger({
+        level: "error",
         transports: [
-          new winston.transports.File({ filename: 'errors.log',
-            options: { flags: "w" }, }),
+            new winston.transports.File({
+                filename: "errors.log",
+                options: { flags: "w" },
+            }),
         ],
-      });
+    });
 
-      prompt(prompt: string, args: { originalLocal: string; targetLocal: string; namespace: string; batchNumber: number, totalBatches: number}) {
+    prompt(
+        prompt: string,
+        args: {
+            originalLocal: string;
+            targetLocal: string;
+            namespace: string;
+            batchNumber: number;
+            totalBatches: number;
+        },
+    ) {
         const now = new Date();
-
 
         const promptString = `[PROMPT]
 ${prompt}`;
@@ -60,13 +71,13 @@ ${promptString}
 
 ${resultString}`;
 
-            profiler.done({ message: message })
-        }
-      }
+            profiler.done({ message: message });
+        };
+    }
 
-      error(message: string) {
+    error(message: string) {
         this.winstonErrorLogger.error(message);
-      }
+    }
 }
 
 export const promptLogger = new PromptLogger();

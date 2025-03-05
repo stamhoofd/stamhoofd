@@ -316,27 +316,25 @@ const locales = new Set([
     "zh-MO",
     "zh-SG",
     "zh-TW",
-    "zu"
-  ]);
-
+    "zu",
+]);
 
 export function isValidLocale(locale: string): boolean {
     return locales.has(locale);
 }
 
-export function isLanguage(value:string): boolean {
-    if(value.includes("-")) {
+export function isLanguage(value: string): boolean {
+    if (value.includes("-")) {
         return false;
     }
 
     return locales.has(value);
 }
 
-export function isLocale(value:string): boolean {
-    if(value.includes("-")) {
+export function isLocale(value: string): boolean {
+    if (value.includes("-")) {
         return locales.has(value);
     }
 
     return false;
 }
-
