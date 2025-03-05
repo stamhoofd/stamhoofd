@@ -37,6 +37,7 @@
 
 <script lang="ts">
 import { RichText } from "@stamhoofd/structures";
+import { DataValidator } from "@stamhoofd/utility";
 import Heading from '@tiptap/extension-heading';
 import Link from '@tiptap/extension-link';
 import Typography from "@tiptap/extension-typography";
@@ -134,6 +135,7 @@ export default class WYSIWYGTextInput extends Vue {
                 Typography.configure({}),
                 Link.configure({
                     openOnClick: false,
+                    protocols: ['mailto'],
                 }),
                 Underline
             ],
@@ -240,6 +242,15 @@ export default class WYSIWYGTextInput extends Vue {
     }
 
     isValidHttpUrl(string: string) {
+        if (string.startsWith("mailto:")) {
+            // Strip mailto and validate email address
+            string = string.substring(7);
+            if (DataValidator.isEmailValid(string)) {
+                return true
+            }
+            return false;
+        }
+
         let url;
         
         try {
@@ -259,7 +270,7 @@ export default class WYSIWYGTextInput extends Vue {
             return
         }
 
-        if (!cleanedUrl.startsWith("http://") && !cleanedUrl.startsWith("https://")) {
+        if (!this.isValidHttpUrl(cleanedUrl) && this.isValidHttpUrl("http://" + cleanedUrl)) {
             cleanedUrl = "http://" + cleanedUrl
         }
 

@@ -100,6 +100,7 @@
 
 <script lang="ts">
 import { Image, ResolutionRequest } from "@stamhoofd/structures"
+import { DataValidator } from "@stamhoofd/utility";
 import { Content, JSONContent } from '@tiptap/core'
 import { Image as ImageExtension } from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
@@ -225,6 +226,15 @@ export default class EditorView extends Vue {
     }
 
     isValidHttpUrl(string: string) {
+        if (string.startsWith("mailto:")) {
+            // Strip mailto and validate email address
+            string = string.substring(7);
+            if (DataValidator.isEmailValid(string)) {
+                return true
+            }
+            return false;
+        }
+
         let url;
         
         try {
@@ -244,7 +254,7 @@ export default class EditorView extends Vue {
             return
         }
 
-        if (!cleanedUrl.startsWith("http://") && !cleanedUrl.startsWith("https://")) {
+        if (!this.isValidHttpUrl(cleanedUrl) && this.isValidHttpUrl("http://" + cleanedUrl)) {
             cleanedUrl = "http://" + cleanedUrl
         }
 
@@ -402,6 +412,7 @@ export default class EditorView extends Vue {
                 }),
                 Link.configure({
                     openOnClick: false,
+                    protocols: ['mailto'],
                 }),
                 Underline,
                 DescriptiveText,
