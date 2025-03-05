@@ -7,19 +7,19 @@ import { validateTranslations } from "./helpers/validate-translations";
 import { Translations, TranslationsWithConfig } from "./types/Translations";
 
 export class TranslationManager {
-    readonly defaultLocale: string;
+    // readonly defaultLocale: string;
     readonly namespaces: string[];
     readonly locales: string[];
-    readonly otherLanguages: Set<string>;
+    // readonly otherLanguages: Set<string>;
     static readonly SUFFIX_AI = "ai";
 
     constructor() {
-        this.defaultLocale = `${globals.DEFAULT_LANGUAGE}-${globals.DEFAULT_COUNTRY}`;
+        // this.defaultLocale = globals.DEFAULT_LOCALE;
         this.locales = this.getAllLocalesInProject();
         this.namespaces = this.getAllNamespacesInProject();
-        this.otherLanguages = this.getAllLanguagesInProject([
-            globals.DEFAULT_LANGUAGE,
-        ]);
+        // this.otherLanguages = this.getAllLanguagesInProject([
+        //     globals.DEFAULT_LOCALE,
+        // ]);
     }
 
     private getSourcePath(locale: string, namespace?: string, suffix?: string) {
@@ -72,32 +72,38 @@ export class TranslationManager {
     private getAllNamespacesInProject(): string[] {
         const localesDir = globals.I18NUUID_LOCALES_DIR;
         const exclude = ["platforms"];
-        return getChildDirectories(localesDir).filter(
+        const result = getChildDirectories(localesDir).filter(
             (name) => !exclude.includes(name),
         );
-    }
 
-    private getAllLanguagesInProject(exclude?: string[]): Set<string> {
-        const localesDir = globals.I18NUUID_LOCALES_DIR;
-
-        const jsonFiles = getChildFiles(localesDir).filter((file) =>
-            file.endsWith(".json"),
-        );
-        const jsonFileNames = jsonFiles.map((file) =>
-            file.substring(0, file.length - 5),
-        );
-        const result = new Set(
-            jsonFileNames.filter((name) => isLanguage(name)),
-        );
-        if (exclude) {
-            exclude.forEach((item) => result.delete(item));
+        if(!result.includes(globals.DEFAULT_NAMESPACE)) {
+            result.push(globals.DEFAULT_NAMESPACE);
         }
+
         return result;
     }
 
-    getLocalesForLanguage(language: string) {
-        return this.locales.filter((locale) => locale.startsWith(language));
-    }
+    // private getAllLanguagesInProject(exclude?: string[]): Set<string> {
+    //     const localesDir = globals.I18NUUID_LOCALES_DIR;
+
+    //     const jsonFiles = getChildFiles(localesDir).filter((file) =>
+    //         file.endsWith(".json"),
+    //     );
+    //     const jsonFileNames = jsonFiles.map((file) =>
+    //         file.substring(0, file.length - 5),
+    //     );
+    //     const result = new Set(
+    //         jsonFileNames.filter((name) => isLanguage(name)),
+    //     );
+    //     if (exclude) {
+    //         exclude.forEach((item) => result.delete(item));
+    //     }
+    //     return result;
+    // }
+
+    // getLocalesForLanguage(language: string) {
+    //     return this.locales.filter((locale) => locale.startsWith(language));
+    // }
 
     readSource(
         locale: string,
@@ -111,6 +117,14 @@ export class TranslationManager {
                 allowedObjects,
             ) ?? {}
         );
+    }
+
+    readAi(
+        locale: string,
+        namespace?: string,
+        allowedObjects?: string[] | null,
+    ): TranslationsWithConfig {
+        return this.readSource(locale, namespace, TranslationManager.SUFFIX_AI, allowedObjects);
     }
 
     readDist(
@@ -196,12 +210,14 @@ export class TranslationManager {
         language: string,
         namespace?: string,
     ): Record<string, string> | null {
-        if (isLocale(language)) {
-            throw new Error(
-                "A locale containing a country is currently not supported: " +
-                    language,
-            );
-        }
+        // todo!!!!!!
+
+        // if (isLocale(language)) {
+        //     throw new Error(
+        //         "A locale containing a country is currently not supported: " +
+        //             language,
+        //     );
+        // }
 
         // first get default consistent words for locale
         const result =

@@ -1,5 +1,6 @@
 /**
  * TODO:
+ * - rename env variables
  * - improve prompt
  * - provide context?
  * - context caching?

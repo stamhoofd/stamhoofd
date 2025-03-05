@@ -1,8 +1,8 @@
 import chalk from "chalk";
 import { cliArguments, CliArguments } from "../CliArguments";
 import { validateTranslations } from "../helpers/validate-translations";
+import { PromiseQueue } from "../PromiseQueue";
 import { promptLogger } from "../PromptLogger";
-import { PromiseQueue } from "../queueTest";
 import { TranslationManager } from "../TranslationManager";
 import { Translations } from "../types/Translations";
 import { ITranslator } from "./ITranslator";

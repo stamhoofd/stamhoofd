@@ -108,22 +108,3 @@ class PromiseQueueItem<T> {
         return result;
     }
 }
-
-export async function testPromiseQueue() {
-    const queue = new PromiseQueue<void>(3, 200);
-    const promises: Promise<void>[] = [];
-
-    for(let i = 0; i <= 12; i++) {
-        const promise = queue.add(async () => {
-            console.log(`Execute ${i}`);
-
-            await new Promise<void>(resolve => {
-                setTimeout(resolve, 1000);
-            })
-        });
-
-        promises.push(promise);
-    }
-
-    await Promise.all(promises)
-}

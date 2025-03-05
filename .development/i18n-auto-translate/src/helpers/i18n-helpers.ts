@@ -332,9 +332,5 @@ export function isLanguage(value: string): boolean {
 }
 
 export function isLocale(value: string): boolean {
-    if (value.includes("-")) {
-        return locales.has(value);
-    }
-
-    return false;
+    return locales.has(value);
 }

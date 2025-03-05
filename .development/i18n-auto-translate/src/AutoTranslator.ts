@@ -1,3 +1,4 @@
+import { globals } from "./globals";
 import {
     MissingTranslationFinder,
     TextToTranslateRef,
@@ -27,7 +28,7 @@ export class AutoTranslator {
             allTranslationRefs: Array.from(
                 missingTranslationsOutput.allTranslationRefs,
             ),
-            originalLocal: this.manager.defaultLocale,
+            originalLocal: globals.DEFAULT_LOCALE,
         });
 
         // add the existing and new translations to the source of the locale/namespace combination
@@ -51,7 +52,7 @@ export class AutoTranslator {
         Array.from(missingTranslationsOutput.allTranslationRefs)
             .filter((x) => x.didTry && !x.isTranslated)
             .forEach((translationRef) => {
-                const errorMessage = `Failed to translate ${translationRef.id} in ${translationRef.language}: ${translationRef.text}`;
+                const errorMessage = `Failed to translate ${translationRef.id} in ${translationRef.locale}: ${translationRef.text}`;
                 promptLogger.error(errorMessage);
             });
     }
@@ -94,19 +95,19 @@ export class AutoTranslator {
         const map = new Map<string, Map<string, TextToTranslateRef[]>>();
 
         for (const translationRef of allTranslationRefs) {
-            const language = translationRef.language;
+            const locale = translationRef.locale;
             const namespace = translationRef.namespace;
 
-            let languageMap = map.get(language);
-            if (!languageMap) {
-                languageMap = new Map();
-                map.set(language, languageMap);
+            let localeMap = map.get(locale);
+            if (!localeMap) {
+                localeMap = new Map();
+                map.set(locale, localeMap);
             }
 
-            let array = languageMap.get(namespace);
+            let array = localeMap.get(namespace);
             if (!array) {
                 array = [];
-                languageMap.set(namespace, array);
+                localeMap.set(namespace, array);
             }
 
             array.push(translationRef);

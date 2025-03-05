@@ -1,5 +1,6 @@
 import { globals } from "./globals";
 import { TranslationManager } from "./TranslationManager";
+import { TranslationsWithConfig } from "./types/Translations";
 
 type Language = string;
 type Namespace = string;
@@ -40,7 +41,7 @@ export class TextToTranslateRef {
     }
 
     constructor(
-        readonly language: string,
+        readonly locale: string,
         readonly namespace: string,
         readonly id: string,
         readonly text: string,
@@ -68,107 +69,45 @@ export class MissingTranslationFinder {
             options.translationManager ?? new TranslationManager();
     }
 
-    private async search({
-        language,
-        locale,
-        namespace,
-    }: {
-        language: string;
-        locale: string;
-        namespace?: string;
-    }): Promise<SearchResult> {
-        const sourceTranslations = this.translationManager.readSource(
-            locale,
-            namespace,
-        );
-        const distTranslations = this.translationManager.readDist(
-            locale,
-            namespace,
-        );
-        const missingTranslations = this.getMissingTranslations(
-            sourceTranslations,
-            distTranslations,
+    async findAll(): Promise<MissingTranslationsOutput> {
+        this.init();
+
+        const searchResults: SearchResult[] = [];
+
+        const otherLocales = this.translationManager.locales.filter(
+            (locale) => locale !== globals.DEFAULT_LOCALE,
         );
 
-        const searchResult = this.getSearchResult({
-            language,
-            locale,
-            namespace,
-            missingTranslations,
+        const namespaces = this.translationManager.namespaces.sort((a, b) => {
+            if (a === b) {
+                return 0;
+            }
+
+            // default namespace should come first
+            if (a === globals.DEFAULT_NAMESPACE) {
+                return -1;
+            }
+
+            if (b === globals.DEFAULT_NAMESPACE) {
+                return 1;
+            }
+
+            return 0;
         });
 
-        return searchResult;
-    }
+        for (const namespace of namespaces) {
+            for (const locale of otherLocales) {
+                if (this.getMappedLocale(locale) === globals.DEFAULT_LOCALE) {
+                    continue;
+                }
 
-    private async getSearchResultsForLanguage(
-        language: string,
-    ): Promise<SearchResult[]> {
-        const results: SearchResult[] = [];
-
-        if (language !== globals.DEFAULT_LANGUAGE) {
-            results.push(await this.search({ language, locale: language }));
-        }
-
-        const locales = this.translationManager.getLocalesForLanguage(language);
-
-        for (const locale of locales) {
-            results.push(await this.search({ language, locale }));
-        }
-
-        for (const namespace of this.translationManager.namespaces) {
-            if (language !== globals.DEFAULT_LANGUAGE) {
-                results.push(
+                searchResults.push(
                     await this.search({
-                        language,
-                        locale: language,
+                        locale,
                         namespace,
                     }),
                 );
             }
-
-            for (const locale of locales) {
-                results.push(
-                    await this.search({ language, locale, namespace }),
-                );
-            }
-        }
-
-        return results;
-    }
-
-    private init() {
-        this.allTranslationRefs.clear();
-        this.dictionary.clear();
-        const allNamespaces = [
-            globals.DEFAULT_NAMESPACE,
-            ...this.translationManager.namespaces,
-        ];
-
-        for (const namespace of allNamespaces) {
-            const toAdd = this.translationManager.readDist(
-                this.translationManager.defaultLocale,
-                namespace,
-            );
-            this.addToDictionary({
-                language: globals.DEFAULT_LANGUAGE,
-                namespace,
-                toAdd,
-            });
-        }
-    }
-
-    async findAll(): Promise<MissingTranslationsOutput> {
-        this.init();
-
-        // first check default country
-        const searchResults = await this.getSearchResultsForLanguage(
-            globals.DEFAULT_LANGUAGE,
-        );
-
-        for (const language of this.translationManager.otherLanguages) {
-            searchResults.push(
-                ...(await this.getSearchResultsForLanguage(language)),
-            );
         }
 
         return {
@@ -177,25 +116,82 @@ export class MissingTranslationFinder {
         };
     }
 
+    private async search({
+        locale,
+        namespace,
+    }: {
+        locale: string;
+        namespace?: string;
+    }): Promise<SearchResult> {
+        const sourceTranslations = this.translationManager.readSource(
+            locale,
+            namespace,
+        );
+        const aiTranslations = this.translationManager.readAi(
+            locale,
+            namespace,
+        );
+
+        const baseTranslations = Object.fromEntries(
+            Object.entries(aiTranslations).concat(
+                Object.entries(sourceTranslations),
+            ),
+        ) as TranslationsWithConfig;
+
+        const distTranslations = this.translationManager.readDist(
+            locale,
+            namespace,
+        );
+        const missingTranslations = this.getMissingTranslations(
+            baseTranslations,
+            distTranslations,
+        );
+
+        const searchResult = this.getSearchResult({
+            locale,
+            namespace,
+            missingTranslations,
+        });
+
+        return searchResult;
+    }
+
+    private init() {
+        this.allTranslationRefs.clear();
+        this.dictionary.clear();
+
+        for (const namespace of this.translationManager.namespaces) {
+            const toAdd = this.translationManager.readDist(
+                globals.DEFAULT_LOCALE,
+                namespace,
+            );
+            this.addToDictionary({
+                locale: globals.DEFAULT_LOCALE,
+                namespace,
+                toAdd,
+            });
+        }
+    }
+
     private addToDictionary(args: {
-        language: Language;
+        locale: string;
         namespace?: Namespace;
         toAdd: Translations | TextToTranslateRef[];
     }) {
-        const language = args.language;
+        const locale = args.locale;
         const toAdd = args.toAdd;
         const namespace = args.namespace ?? globals.DEFAULT_NAMESPACE;
 
-        let languageMap = this.dictionary.get(language);
-        if (!languageMap) {
-            languageMap = new Map();
-            this.dictionary.set(language, languageMap);
+        let localeMap = this.dictionary.get(locale);
+        if (!localeMap) {
+            localeMap = new Map();
+            this.dictionary.set(locale, localeMap);
         }
 
-        let namespaceMap = languageMap.get(namespace);
+        let namespaceMap = localeMap.get(namespace);
         if (!namespaceMap) {
             namespaceMap = new Map();
-            languageMap.set(namespace, namespaceMap);
+            localeMap.set(namespace, namespaceMap);
         }
 
         if (Array.isArray(toAdd)) {
@@ -210,19 +206,17 @@ export class MissingTranslationFinder {
     }
 
     private getExistingTranslation(args: {
-        language: Language;
-        namespace?: Namespace;
+        locale: string;
+        namespace: Namespace;
         id: TranslationId;
         value: string;
     }): string | TextToTranslateRef | null {
-        const languageMap = this.dictionary.get(args.language);
-        if (!languageMap || languageMap.size === 0) {
+        const localeMap = this.dictionary.get(args.locale);
+        if (!localeMap || localeMap.size === 0) {
             return null;
         }
 
-        const namespace = args.namespace ?? globals.DEFAULT_NAMESPACE;
-
-        const namespaceMap = languageMap.get(namespace);
+        const namespaceMap = localeMap.get(args.namespace);
         if (namespaceMap) {
             const existingTranslation = namespaceMap.get(args.id);
             if (existingTranslation) {
@@ -233,8 +227,8 @@ export class MissingTranslationFinder {
         for (const [
             currentNamespace,
             currentNamespaceMap,
-        ] of languageMap.entries()) {
-            if (currentNamespace === namespace) {
+        ] of localeMap.entries()) {
+            if (currentNamespace === args.namespace) {
                 continue;
             }
 
@@ -257,18 +251,42 @@ export class MissingTranslationFinder {
         return null;
     }
 
+    private getMappedLocale(locale: string): string {
+        const parts = locale.split("-");
+        const language = parts[0];
+        const country = parts[1];
+
+        const dict = globals.DEFAULT_LOCALES[language];
+
+        if (!dict) {
+            return language;
+        }
+
+        if (dict.countries) {
+            for (const [defaultCountry, countryList] of Object.entries(
+                dict.countries,
+            )) {
+                if (countryList.includes(country)) {
+                    return language + "-" + defaultCountry;
+                }
+            }
+        }
+
+        return language + "-" + dict.default;
+    }
+
     private getSearchResult(args: {
-        language: Language;
         locale: string;
         namespace?: string;
         missingTranslations: Translations;
     }): SearchResult {
         const {
-            language,
             locale,
             namespace = globals.DEFAULT_NAMESPACE,
             missingTranslations,
         } = args;
+
+        const mappedLocale = this.getMappedLocale(locale);
 
         const existingTranslationsToAdd: Translations = {};
         const translationRefs: TextToTranslateRef[] = [];
@@ -276,7 +294,7 @@ export class MissingTranslationFinder {
 
         for (const [id, text] of Object.entries(missingTranslations)) {
             const existingTranslation = this.getExistingTranslation({
-                language,
+                locale: mappedLocale,
                 namespace,
                 id,
                 value: text,
@@ -292,7 +310,7 @@ export class MissingTranslationFinder {
             }
 
             const newTranslationRef = new TextToTranslateRef(
-                language,
+                mappedLocale,
                 namespace,
                 id,
                 text,
@@ -304,7 +322,7 @@ export class MissingTranslationFinder {
         }
 
         this.addToDictionary({
-            language,
+            locale: mappedLocale,
             namespace,
             toAdd: newTranslationRefs,
         });
@@ -318,13 +336,12 @@ export class MissingTranslationFinder {
     }
 
     private getMissingTranslations(
-        sourceTranslations: Translations,
+        baseTranslations: Translations,
         distTranslations: Translations,
     ): Translations {
         return Object.fromEntries(
             Object.entries(distTranslations).filter(
-                (entry) =>
-                    sourceTranslations.hasOwnProperty(entry[0]) === false,
+                (entry) => baseTranslations.hasOwnProperty(entry[0]) === false,
             ),
         );
     }

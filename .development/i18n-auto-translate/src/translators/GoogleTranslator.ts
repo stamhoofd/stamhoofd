@@ -5,7 +5,7 @@ import {
     SchemaType,
 } from "@google/generative-ai";
 import { globals } from "../globals";
-import { PromiseQueue } from "../queueTest";
+import { PromiseQueue } from "../PromiseQueue";
 import { TranslationManager } from "../TranslationManager";
 import { Translator } from "./Translator";
 

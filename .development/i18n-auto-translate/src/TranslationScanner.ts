@@ -56,7 +56,7 @@ export class TranslationScanner {
     scanConsistentWords(): string {
         return JSON.stringify(
             Object.fromEntries(
-                this.scanFrequentlyUsedWords(globals.DEFAULT_LANGUAGE).map(
+                this.scanFrequentlyUsedWords(globals.DEFAULT_LOCALE).map(
                     (word) => [word[0], ""],
                 ),
             ),
