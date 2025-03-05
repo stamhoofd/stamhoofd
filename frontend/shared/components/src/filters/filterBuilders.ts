@@ -439,7 +439,6 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
                         new MultipleChoiceUIFilterOption($t('c5235739-b78a-4add-ab2f-515aef40073d'), true),
                         new MultipleChoiceUIFilterOption($t('539dc5d4-c221-412b-bc33-fe28f85625c4'), false),
                     ],
-                    allowCreation: hasPlatformPermissions,
                     wrapFilter: (f: StamhoofdFilter) => {
                         const choices = Array.isArray(f) ? f : [f];
 
