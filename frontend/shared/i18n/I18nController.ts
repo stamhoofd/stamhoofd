@@ -2,7 +2,7 @@
 import { HistoryManager } from '@simonbackx/vue-app-navigation';
 import { countries, languages } from '@stamhoofd/locales';
 import { SessionContext, Storage, UrlHelper } from '@stamhoofd/networking';
-import { Address, Country, CountryCode, countryToCode } from '@stamhoofd/structures';
+import { Country, CountryCode, countryToCode } from '@stamhoofd/structures';
 import { I18n } from './I18n';
 
 export function useTranslate(): typeof I18n.prototype.$t {
@@ -135,6 +135,7 @@ export class I18nController {
         const validLocales: Record<string, undefined | string[]> = {
             [Country.Belgium]: ['nl', 'en'],
             [Country.Netherlands]: ['nl', 'en'],
+            ['CO']: ['es'],
         };
 
         if (!(this.countryCode in validLocales)) {
