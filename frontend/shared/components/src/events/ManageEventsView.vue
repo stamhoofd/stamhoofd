@@ -261,6 +261,12 @@ async function addEvent(template?: Event) {
     event.id = Event.create({}).id;
     event.organizationId = organization.value?.id ?? null;
 
+    const defaultStartDate = Formatter.luxon().plus({ days: 1 }).set({ hour: 12, minute: 0, second: 0, millisecond: 0 });
+    const defaultEndDate = Formatter.luxon().plus({ days: 1 }).set({ hour: 14, minute: 0, second: 0, millisecond: 0 });
+
+    event.startDate = defaultStartDate.toJSDate();
+    event.endDate = defaultEndDate.toJSDate();
+
     await present({
         modalDisplayStyle: 'popup',
         components: [
