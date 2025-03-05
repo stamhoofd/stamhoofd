@@ -298,8 +298,13 @@ async function saveLink() {
         return;
     }
 
-    if (!isValidHttpUrl(cleanedUrl) && isValidHttpUrl('http://' + cleanedUrl)) {
-        cleanedUrl = 'http://' + cleanedUrl;
+    if (!isValidHttpUrl(cleanedUrl)) {
+        if (!cleanedUrl.startsWith('mailto:') && !cleanedUrl.startsWith('http://') && !cleanedUrl.startsWith('https://') && DataValidator.isEmailValid(cleanedUrl)) {
+            cleanedUrl = 'mailto:' + cleanedUrl;
+        }
+        else if (isValidHttpUrl('http://' + cleanedUrl)) {
+            cleanedUrl = 'http://' + cleanedUrl;
+        }
     }
 
     if (!isValidHttpUrl(cleanedUrl)) {

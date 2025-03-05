@@ -295,8 +295,12 @@ export default class WYSIWYGTextInput extends VueComponent {
             return;
         }
 
-        if (!this.isValidHttpUrl(cleanedUrl) && this.isValidHttpUrl('http://' + cleanedUrl)) {
-            cleanedUrl = 'http://' + cleanedUrl;
+        if (!this.isValidHttpUrl(cleanedUrl)) {
+            if (!cleanedUrl.startsWith('mailto:') && !cleanedUrl.startsWith('http://') && !cleanedUrl.startsWith('https://') && DataValidator.isEmailValid(cleanedUrl)) {
+                cleanedUrl = 'mailto:' + cleanedUrl;
+            } else if (this.isValidHttpUrl('http://' + cleanedUrl)) {
+                cleanedUrl = 'http://' + cleanedUrl;
+            }
         }
 
         if (!this.isValidHttpUrl(cleanedUrl)) {
