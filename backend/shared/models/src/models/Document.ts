@@ -147,7 +147,7 @@ export class Document extends QueryableModel {
             if (member) {
                 const organizationIds = Formatter.uniqueArray(member.registrations.map(r => r.organizationId));
                 for (const organizationId of organizationIds) {
-                    await this.updateForRegistrations(member.registrations.map(r => r.id), organizationId);
+                    await this.updateForRegistrations(member.registrations.filter(r => r.organizationId === organizationId).map(r => r.id), organizationId);
                 }
             }
         }
@@ -190,7 +190,7 @@ export class Document extends QueryableModel {
             return;
         }
         try {
-            console.log('Updating documents for updateForRegistrations', registrationIds);
+            console.log('Updating documents for updateForRegistrations', registrationIds, organizationId);
 
             const DocumentTemplate = (await import('./DocumentTemplate')).DocumentTemplate;
             const templates = await DocumentTemplate.where({ updatesEnabled: 1, organizationId });
