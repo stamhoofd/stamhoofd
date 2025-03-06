@@ -84,7 +84,9 @@ const actions = computed(() => {
             },
         }),
 
-        ...builder.getActions(),
+        ...builder.getActions({
+            includeAdd: true,
+        }),
     ];
 });
 

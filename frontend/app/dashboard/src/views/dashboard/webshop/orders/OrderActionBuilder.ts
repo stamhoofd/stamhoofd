@@ -106,15 +106,15 @@ export class OrderActionBuilder {
         ];
     }
 
-    getActions(): TableAction<PrivateOrderWithTickets>[] {
+    getActions(options?: { includeAdd: boolean }): TableAction<PrivateOrderWithTickets>[] {
         return [
             new InMemoryTableAction({
                 name: 'Bestelling toevoegen',
-                enabled: this.webshopManager.hasWrite,
                 icon: 'add',
                 priority: 1,
                 groupIndex: 2,
                 needsSelection: false,
+                enabled: this.webshopManager.hasWrite && (options?.includeAdd ?? false),
                 handler: async () => {
                     await this.createOrder();
                 },
