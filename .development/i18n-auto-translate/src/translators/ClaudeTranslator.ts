@@ -2,11 +2,12 @@ import Anthropic from '@anthropic-ai/sdk';
 import chalk from 'chalk';
 import { PromiseQueue } from "../PromiseQueue";
 import { TranslationManager } from "../TranslationManager";
+import { Batch } from '../types/Batch';
 import { Translator } from "./Translator";
 
 export class ClaudeTranslator extends Translator {
     protected readonly maxBatchLength = 3000;
-    protected readonly queue = new PromiseQueue<(string | null)[]>(3, 500);
+    protected readonly queue = new PromiseQueue<Batch>(3, 500);
     protected readonly anthropic: Anthropic;
 
     constructor(manager: TranslationManager) {

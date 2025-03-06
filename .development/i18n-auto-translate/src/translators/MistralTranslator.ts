@@ -3,13 +3,14 @@ import chalk from 'chalk';
 import { globals } from "../globals";
 import { PromiseQueue } from "../PromiseQueue";
 import { TranslationManager } from "../TranslationManager";
+import { Batch } from '../types/Batch';
 import { Translator } from "./Translator";
 
 export class MistralTranslator extends Translator {
     protected readonly maxBatchLength = 3000;
 
     // Mistral current Requests per second: 1 rps -> 1200ms (with extrta margin)
-    protected readonly queue = new PromiseQueue<(string | null)[]>(3, 1200);
+    protected readonly queue = new PromiseQueue<Batch>(3, 1200);
     private readonly client: Mistral;
 
     constructor(manager: TranslationManager) {

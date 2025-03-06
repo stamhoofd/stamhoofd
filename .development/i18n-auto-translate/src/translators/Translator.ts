@@ -4,26 +4,26 @@ import { validateTranslations } from "../helpers/validate-translations";
 import { PromiseQueue } from "../PromiseQueue";
 import { promptLogger } from "../PromptLogger";
 import { TranslationManager } from "../TranslationManager";
+import { Batch } from "../types/Batch";
+import { PromptBatch } from "../types/PromptBatch";
 import { Translations } from "../types/Translations";
 import { ITranslator } from "./ITranslator";
-
 export abstract class Translator implements ITranslator {
     // Max amount of characters in a batch
     protected abstract readonly maxBatchLength: number;
 
     // Do not send all prompts at once because api can block requests if too many in short period
-    protected abstract readonly queue: PromiseQueue<(string | null)[]>;
+    protected abstract readonly queue: PromiseQueue<Batch>;
 
     constructor(
         protected readonly manager: TranslationManager,
         protected readonly cliArgs: CliArguments = cliArguments,
-    ) {
-    }
+    ) {}
 
     protected abstract generateResponse(prompt: string): Promise<string>;
 
     private fakeGenerateResponse(
-        textArray: string[],
+        batch: PromptBatch,
         {
             originalLocal,
             targetLocal,
@@ -32,13 +32,20 @@ export abstract class Translator implements ITranslator {
     ): Promise<string> {
         const infoText = `Fake translated from ${originalLocal} to ${targetLocal} for namespace ${namespace}: `;
         return Promise.resolve(
-            JSON.stringify(textArray.map((text) => infoText + text)),
+            JSON.stringify(
+                batch.map(({ id, value }) => {
+                    return {
+                        id,
+                        value: infoText + value,
+                    };
+                }),
+            ),
         );
     }
 
     // override if necessary
     protected createPrompt(
-        textArray: string[],
+        batch: PromptBatch,
         {
             originalLocal,
             targetLocal,
@@ -57,17 +64,17 @@ export abstract class Translator implements ITranslator {
               "."
             : "";
 
-        const prompt = `Translate the values of the json array from ${originalLocal} to ${targetLocal}. Keep the original order.${consistentWordsText}
+        const prompt = `Translate the values of the json array from ${originalLocal} to ${targetLocal}.${consistentWordsText}
 
 Important: do not translate words between curly brackets (even if it is a consistent word). For example {vereniging} must remain {vereniging}.
 
-Translate this array: ${JSON.stringify(textArray)}`;
+Translate this array: ${JSON.stringify(batch)}`;
 
         return prompt;
     }
 
     protected async getTextFromApi(
-        textArray: string[],
+        batch: PromptBatch,
         args: {
             originalLocal: string;
             targetLocal: string;
@@ -77,12 +84,12 @@ Translate this array: ${JSON.stringify(textArray)}`;
             totalBatches: number;
         },
     ): Promise<string> {
-        const prompt = this.createPrompt(textArray, args);
+        const prompt = this.createPrompt(batch, args);
 
         const logResult = promptLogger.prompt(prompt, args);
 
         const text = this.cliArgs.fake
-            ? await this.fakeGenerateResponse(textArray, args)
+            ? await this.fakeGenerateResponse(batch, args)
             : await this.generateResponse(prompt);
 
         logResult(text);
@@ -90,33 +97,33 @@ Translate this array: ${JSON.stringify(textArray)}`;
         return text;
     }
 
-    private splitTranslationInBatches(translations: Translations): string[][] {
-        const batches: string[][] = [];
+    private splitTranslationInBatches(translations: Translations): Batch[] {
+        const batches: Batch[] = [];
 
-        let currentLength = 0;
         let currentIndex = 0;
 
-        for (const [id, text] of Object.entries(translations)) {
-            if (currentLength > this.maxBatchLength) {
+        for (const [uuid, value] of Object.entries(translations)) {
+            const item = {value, uuid};
+            const batchIfNewItem = (batches[currentIndex] ?? []).concat([item]);
+            
+            if (JSON.stringify(batchIfNewItem).length > this.maxBatchLength) {
                 currentIndex = currentIndex + 1;
-                currentLength = 0;
             }
 
-            let array = batches[currentIndex];
-            if (!array) {
-                array = [];
-                batches[currentIndex] = array;
+            let batch = batches[currentIndex];
+            if (!batch) {
+                batch = [];
+                batches[currentIndex] = batch;
             }
 
-            array.push(text);
-            currentLength += text.length;
+            batch.push(item);
         }
 
         return batches;
     }
 
     protected async translateBatch(
-        batch: string[],
+        batch: Batch,
         args: {
             originalLocal: string;
             targetLocal: string;
@@ -125,19 +132,26 @@ Translate this array: ${JSON.stringify(textArray)}`;
             batchNumber: number;
             totalBatches: number;
         },
-    ): Promise<string[]> {
-        const text = await this.getTextFromApi(batch, args);
+    ): Promise<Batch> {
+        const promptBatch: PromptBatch = batch.map(({ value }, id) => {
+            return {
+                id,
+                value,
+            };
+        });
+
+        const text = await this.getTextFromApi(promptBatch, args);
         const json = this.textToJson(text);
 
-        if (json.length !== batch.length) {
-            throw new Error("Json length does not match batch length.");
-        }
-
-        return json;
+        return json.map(({ id, value }) => {
+            // the id is the index of the translation in the batch
+            const uuid = batch[id].uuid;
+            return { uuid, value };
+        });
     }
 
     private async translateBatches(
-        batches: string[][],
+        batches: Batch[],
         {
             originalLocal,
             targetLocal,
@@ -152,68 +166,53 @@ Translate this array: ${JSON.stringify(textArray)}`;
             namespace: string;
         },
     ): Promise<Translations> {
-        const result: Translations = {};
-        const translationEntries = Object.entries(translations);
+        const promises: Promise<Batch>[] = batches.map(async (batch, i) => {
+            return this.queue.add(async () => {
+                const batchNumber = i + 1;
+                const totalBatches = batches.length;
 
-        const promises: Promise<(string | null)[]>[] = batches.map(
-            async (batch, i) => {
-
-                return this.queue.add(async () => {
-                    const batchNumber = i + 1;
-                    const totalBatches = batches.length;
-    
-                    try {
-                        console.log(
-                            chalk.gray(
-                                `Start translating batch ${batchNumber} of ${totalBatches}`,
-                            ),
-                        );
-                        const result = await this.translateBatch(batch, {
-                            originalLocal,
-                            targetLocal,
-                            consistentWords,
-                            namespace,
-                            batchNumber,
-                            totalBatches,
-                        });
-                        console.log(
-                            chalk.gray(
-                                `Finished translating batch ${batchNumber} of ${totalBatches}`,
-                            ),
-                        );
-                        return result;
-                    } catch (error) {
-                        const errorMessage = `Failed translating batch ${batchNumber} of ${totalBatches} (from ${originalLocal} to ${targetLocal}, namespace: ${namespace}): ${error.message}`;
-                        console.error(errorMessage);
-                        promptLogger.error(errorMessage);
-                        return batch.map(() => null);
-                    }
-                })
-               
-            },
-        );
-
-        const translatedText = await Promise.all(promises);
-
-        translatedText
-            .flatMap((x) => x)
-            .forEach((translation, i) => {
-                if (translation === null) {
-                    return;
-                }
-
-                const [id, text] = translationEntries[i];
-                const isTranslationValid = this.validateTranslation(
-                    text,
-                    translation,
-                );
-
-                if (isTranslationValid) {
-                    result[id] = translation;
+                try {
+                    console.log(
+                        chalk.gray(
+                            `Start translating batch ${batchNumber} of ${totalBatches}`,
+                        ),
+                    );
+                    const translatedBatch = await this.translateBatch(batch, {
+                        originalLocal,
+                        targetLocal,
+                        consistentWords,
+                        namespace,
+                        batchNumber,
+                        totalBatches,
+                    });
+                    console.log(
+                        chalk.gray(
+                            `Finished translating batch ${batchNumber} of ${totalBatches}`,
+                        ),
+                    );
+                    return translatedBatch;
+                } catch (error) {
+                    const errorMessage = `Failed translating batch ${batchNumber} of ${totalBatches} (from ${originalLocal} to ${targetLocal}, namespace: ${namespace}): ${error.message}`;
+                    console.error(errorMessage);
+                    promptLogger.error(errorMessage);
+                    return [];
                 }
             });
+        });
 
-        return result;
+        const translatedBatches = await Promise.all(promises);
+
+        return Object.fromEntries(
+            translatedBatches
+                .flatMap((x) => x)
+                .filter(({ uuid, value }) => {
+                    const original = translations[uuid];
+                    return this.validateTranslation(original, value);
+                })
+                .map(({ uuid, value }) => {
+                    return [uuid, value];
+                }),
+        );
     }
 
     async translateAll(
@@ -307,7 +306,7 @@ Translate this array: ${JSON.stringify(textArray)}`;
         return parsedJson;
     }
 
-    private textToJson(result: string): string[] {
+    private textToJson(result: string): PromptBatch {
         const json = JSON.parse(result);
         const { isValid, message } = this.validateJson(json);
 
@@ -333,10 +332,24 @@ Translate this array: ${JSON.stringify(textArray)}`;
             };
         }
 
-        if (json.some((item) => typeof item !== "string")) {
+        if (
+            json.some((item) => {
+                if (typeof item !== "object") {
+                    return true;
+                }
+                if (typeof item["id"] !== "number") {
+                    return true;
+                }
+                if (typeof item["value"] !== "string") {
+                    return true;
+                }
+                return false;
+            })
+        ) {
             return {
                 isValid: false,
-                message: "Json is not an array of strings.",
+                message:
+                    "Json is not an array of objects with a number id and a string value.",
             };
         }
 

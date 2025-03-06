@@ -3,11 +3,12 @@ import OpenAI from "openai";
 import { globals } from "../globals";
 import { PromiseQueue } from "../PromiseQueue";
 import { TranslationManager } from "../TranslationManager";
+import { Batch } from "../types/Batch";
 import { Translator } from "./Translator";
 
 export class OpenAiTranslator extends Translator {
     protected readonly maxBatchLength = 3000;
-    protected readonly queue = new PromiseQueue<(string | null)[]>(3, 500);
+    protected readonly queue = new PromiseQueue<Batch>(3, 500);
     protected readonly openai: OpenAI;
 
     constructor(manager: TranslationManager) {
