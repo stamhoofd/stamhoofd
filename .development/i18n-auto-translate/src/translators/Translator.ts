@@ -287,6 +287,11 @@ export abstract class Translator implements ITranslator {
         return map;
     }
 
+    // to override if necessary
+    protected transformParsedJson<T>(parsedJson: T): T {
+        return parsedJson;
+    }
+
     private textToJson(result: string): string[] {
         const json = JSON.parse(result);
         const { isValid, message } = this.validateJson(json);
@@ -295,7 +300,7 @@ export abstract class Translator implements ITranslator {
             throw new Error(message);
         }
 
-        return json;
+        return this.transformParsedJson(json);
     }
 
     private validateJson(json: any): { isValid: boolean; message?: string } {

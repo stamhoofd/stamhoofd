@@ -12,7 +12,7 @@ import { Translator } from "./Translator";
 export class GoogleTranslator extends Translator {
     private readonly genAI: GoogleGenerativeAI;
     private readonly model: GenerativeModel;
-    protected readonly maxBatchLength = 15000;
+    protected readonly maxBatchLength = 3000;
     protected readonly queue = new PromiseQueue<(string | null)[]>(3, 500);
 
     constructor(manager: TranslationManager) {
@@ -41,6 +41,20 @@ export class GoogleTranslator extends Translator {
         return apiResult.response.text();
     }
 
+    protected override transformParsedJson<T>(parsedJson: T): T {
+        if(Array.isArray(parsedJson)) {
+            return parsedJson.map(value => {
+                if(typeof value === 'string' && value.trim().length === 0) {
+                    return null;
+                }
+
+                return value;
+            }) as T;
+        }
+
+        return parsedJson;
+    }
+
     protected createPrompt(
         textArray: string[],
         {
@@ -55,17 +69,17 @@ export class GoogleTranslator extends Translator {
             namespace: string;
         },
     ): string {
-        // - Try to use the same word for things you referenced in other translations to. E.g. 'vereniging' should be 'organization' everywhere.
-        // - Be consistent and copy the caps and punctuation of the original language unless a capital letter is required in English (e.g. weekdays)
-        // - Do not change inline replacement values, which are recognizable by either the # prefix or surrounding curly brackets: #groep, {name}
-
         const consistentWordsText = consistentWords
             ? ` Use this dictionary of translations for consistency: ` +
               JSON.stringify(consistentWords) +
               "."
             : "";
 
-        const prompt = `Translate the values of the json array from ${originalLocal} to ${targetLocal}. Do not translate text between curly brackets. Keep the original order.${consistentWordsText} This is the array: ${JSON.stringify(textArray)}`;
+        const prompt = `Translate the values of the json array from ${originalLocal} to ${targetLocal}. Keep the original order.${consistentWordsText}
+
+Important: do not translate words between curly brackets (even if it is a consistent word). For example {vereniging} must remain {vereniging}.
+
+Translate this array: ${JSON.stringify(textArray)}`;
 
         return prompt;
     }
