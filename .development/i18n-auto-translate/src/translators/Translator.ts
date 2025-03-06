@@ -7,7 +7,9 @@ import { TranslationManager } from "../TranslationManager";
 import { Batch } from "../types/Batch";
 import { PromptBatch } from "../types/PromptBatch";
 import { Translations } from "../types/Translations";
-import { ITranslator } from "./ITranslator";
+import { AfterBatchTranslatedCallback, ITranslator } from "./ITranslator";
+
+
 export abstract class Translator implements ITranslator {
     // Max amount of characters in a batch
     protected abstract readonly maxBatchLength: number;
@@ -158,12 +160,14 @@ Translate this array: ${JSON.stringify(batch)}`;
             translations,
             consistentWords,
             namespace,
+            afterBatchTranslated
         }: {
             originalLocal: string;
             targetLocal: string;
             translations: Translations;
             consistentWords: Record<string, string> | null;
             namespace: string;
+            afterBatchTranslated?: AfterBatchTranslatedCallback;
         },
     ): Promise<Translations> {
         const promises: Promise<Batch>[] = batches.map(async (batch, i) => {
@@ -185,12 +189,23 @@ Translate this array: ${JSON.stringify(batch)}`;
                         batchNumber,
                         totalBatches,
                     });
+
                     console.log(
                         chalk.gray(
                             `Finished translating batch ${batchNumber} of ${totalBatches}`,
                         ),
                     );
-                    return translatedBatch;
+
+                    const validatedBatch = translatedBatch.filter(({ uuid, value }) => {
+                        const original = translations[uuid];
+                        return this.validateTranslation(original, value);
+                    });
+
+                    if (afterBatchTranslated) {
+                        afterBatchTranslated(validatedBatch);
+                    }
+
+                    return validatedBatch;
                 } catch (error) {
                     const errorMessage = `Failed translating batch ${batchNumber} of ${totalBatches} (from ${originalLocal} to ${targetLocal}, namespace: ${namespace}): ${error.message}`;
                     console.error(errorMessage);
@@ -205,10 +220,6 @@ Translate this array: ${JSON.stringify(batch)}`;
         return Object.fromEntries(
             translatedBatches
                 .flatMap((x) => x)
-                .filter(({ uuid, value }) => {
-                    const original = translations[uuid];
-                    return this.validateTranslation(original, value);
-                })
                 .map(({ uuid, value }) => {
                     return [uuid, value];
                 }),
@@ -217,7 +228,7 @@ Translate this array: ${JSON.stringify(batch)}`;
 
     async translateAll(
         translations: Translations,
-        args: { originalLocal: string; targetLocal: string; namespace: string },
+        args: { originalLocal: string; targetLocal: string; namespace: string, afterBatchTranslated?: AfterBatchTranslatedCallback },
     ): Promise<Translations> {
         const targetLocal = args.targetLocal;
 
@@ -244,6 +255,7 @@ Translate this array: ${JSON.stringify(batch)}`;
             translations,
             consistentWords,
             namespace: args.namespace,
+            afterBatchTranslated: args.afterBatchTranslated
         });
 
         console.log(
