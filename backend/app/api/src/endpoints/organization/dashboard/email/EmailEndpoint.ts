@@ -195,6 +195,32 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
         }
 
         const email = request.body
+        
+        const replacement = '{{unsubscribeUrl}}'
+
+        if (email.html) {
+            // Check email contains an unsubscribe button
+            if (!email.html.includes(replacement)) {
+                throw new SimpleError({
+                    code: "missing_unsubscribe_button",
+                    message: "Missing unsubscribe button",
+                    human: "Je moet een ‘uitschrijven’-knop of link toevoegen onderaan je e-mail. Klik daarvoor onderaan op het ‘toverstaf’ icoontje en kies voor ‘Knop om uit te schrijven voor e-mails’. Dit is verplicht volgens de GDPR-wetgeving, maar het zorgt ook voor een betere e-mail reputatie omdat minder e-mails als spam worden gemarkeerd.",
+                    field: "html"
+                })
+            }
+        }
+        
+        if (email.text) {
+            // Check email contains an unsubscribe button
+            if (!email.text.includes(replacement)) {
+                throw new SimpleError({
+                    code: "missing_unsubscribe_button",
+                    message: "Missing unsubscribe button",
+                    human: "Je moet een ‘uitschrijven’-knop of link toevoegen onderaan je e-mail. Klik daarvoor onderaan op het ‘toverstaf’ icoontje en kies voor ‘Knop om uit te schrijven voor e-mails’. Dit is verplicht volgens de GDPR-wetgeving, maar het zorgt ook voor een betere e-mail reputatie omdat minder e-mails als spam worden gemarkeerd.",
+                    field: "text"
+                })
+            }
+        }
 
         // Create e-mail builder
         const builder = await getEmailBuilder(organization, {

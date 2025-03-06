@@ -387,7 +387,7 @@ export default class MailView extends Mixins(NavigationMixin) {
 
     get smartButtons() {
         const buttons: EditorSmartButton[] = []
-        if (this.hasAllUsers && this.members.length > 0) {
+        if (this.members.length > 0) {
             buttons.push(new EditorSmartButton({
                 id: "signInUrl",
                 name: "Knop om in te loggen",
@@ -709,22 +709,92 @@ export default class MailView extends Mixins(NavigationMixin) {
         // Insert <hr> and content
         // Warning: due to a bug in Safari, we cannot add the <hr> as the first element, because that will cause the whole view to offset to the top for an unknown reason
         //const content2 = `<p class="description"><em>Log in het ledenportaal altijd in met <strong><span data-type="smartVariable" data-id="email"></span></strong>. Anders heb je geen toegang tot jouw gegevens.</em></p>`;
-        this.editor.chain().insertContentAt(this.editor.state.doc.content.size, [
+        this.editor.chain().insertContentAt(0, [
             {
-                type: "paragraph",
-                content: []
+                "type": "paragraph",
+                "content": [
+                    {
+                        "text": "Dag ",
+                        "type": "text"
+                    },
+                    {
+                        "type": "smartVariable",
+                        "attrs": {
+                            "id": "firstName"
+                        }
+                    },
+                    {
+                        "text": ",",
+                        "type": "text"
+                    }
+                ]
             },
             {
-                type: "horizontalRule",
+                "type": "paragraph"
             },
             {
-                type: "paragraph",
-                content: []
+                "type": "paragraph"
             },
-        ], { updateSelection: true }).insertSmartButton(this.smartButtons[0], { updateSelection: true }).insertSmartVariable(this.smartVariables.find(s => s.id === 'loginDetails')!, { updateSelection: false }).setTextSelection(0)/*.focus()*/.run()
-
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        //this.editor.state.tr.setSelection(TextSelection.create(this.editor.state.tr.doc, position))
+            {
+                "type": "paragraph"
+            },
+            {
+                "type": "paragraph"
+            },
+            {
+                "type": "paragraph"
+            },
+            {
+                "type": "smartButton",
+                "attrs": {
+                    "id": "signInUrl"
+                },
+                "content": [
+                    {
+                        "text": "Open ledenportaal",
+                        "type": "text"
+                    }
+                ]
+            },
+            {
+                "type": "smartVariableBlock",
+                "attrs": {
+                    "id": "loginDetails"
+                }
+            },
+            {
+                "type": "paragraph"
+            },
+            {
+                "type": "horizontalRule"
+            },
+            {
+                "type": "descriptiveText",
+                "content": [
+                    {
+                        "text": "Wil je geen e-mails van "+this.organization.name+" meer ontvangen? ",
+                        "type": "text"
+                    },
+                    {
+                        "type": "smartButtonInline",
+                        "attrs": {
+                            "id": "unsubscribeUrl"
+                        },
+                        "content": [
+                            {
+                                "text": "Klik dan hier om uit te schrijven",
+                                "type": "text"
+                            }
+                        ]
+                    },
+                    {
+                        "text": ".",
+                        "type": "text"
+                    }
+                ]
+            }
+        ], { updateSelection: true })
+            .setTextSelection(0)/*.focus()*/.run()
     }
 
     get orderButtonType() {
@@ -762,22 +832,97 @@ export default class MailView extends Mixins(NavigationMixin) {
     insertOrderButton() {
         this.didInsertButton = true
 
-        // Insert <hr> and content
-        // Warning: due to a bug in Safari, we cannot add the <hr> as the first element, because that will cause the whole view to offset to the top for an unknown reason
-        const content2 = `<p></p><p class="description"><em>${this.orderButtonDescription}</em></p>`;
-        this.editor.chain().insertContentAt(this.editor.state.doc.content.size, [
+        this.editor.chain().insertContentAt(0, [
             {
-                type: "paragraph",
-                content: []
+                "type": "paragraph",
+                "content": [
+                    {
+                        "text": "Dag ",
+                        "type": "text"
+                    },
+                    {
+                        "type": "smartVariable",
+                        "attrs": {
+                            "id": "firstName"
+                        }
+                    },
+                    {
+                        "text": ",",
+                        "type": "text"
+                    }
+                ]
             },
             {
-                type: "horizontalRule",
+                "type": "paragraph"
             },
             {
-                type: "paragraph",
-                content: []
+                "type": "paragraph"
             },
-        ], { updateSelection: true }).insertSmartButton(this.smartButtons[0], { updateSelection: true }).insertContent(content2, { updateSelection: false }).setTextSelection(0)/*.focus()*/.run()
+            {
+                "type": "paragraph"
+            },
+            {
+                "type": "paragraph"
+            },
+            {
+                "type": "smartButton",
+                "attrs": {
+                    "id": "orderUrl"
+                },
+                "content": [
+                    {
+                        "text": this.orderButtonText,
+                        "type": "text"
+                    }
+                ]
+            },
+            {
+                "type": "descriptiveText",
+                "content": [
+                    {
+                        "text": this.orderButtonDescription,
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "italic"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "type": "paragraph"
+            },
+            {
+                "type": "horizontalRule"
+            },
+            {
+                "type": "descriptiveText",
+                "content": [
+                    {
+                        "text": "Wil je geen e-mails van "+this.organization.name+" meer ontvangen? ",
+                        "type": "text"
+                    },
+                    {
+                        "type": "smartButtonInline",
+                        "attrs": {
+                            "id": "unsubscribeUrl"
+                        },
+                        "content": [
+                            {
+                                "text": "Klik dan hier om uit te schrijven",
+                                "type": "text"
+                            }
+                        ]
+                    },
+                    {
+                        "text": ".",
+                        "type": "text"
+                    }
+                ]
+            }
+        ], { updateSelection: true })
+            .setTextSelection(0)/*.focus()*/.run();
     }
 
     insertPaymentDefault() {
@@ -922,8 +1067,42 @@ export default class MailView extends Mixins(NavigationMixin) {
                 chain = chain.insertContent("<p></p><h3>Totaal: </h3>").insertSmartVariable(pricePaid).insertContent(" (betaald)");
             }
         }
+
+        chain = chain.insertContent([
+            {
+                "type": "paragraph"
+            },
+            {
+                "type": "horizontalRule"
+            },
+            {
+                "type": "descriptiveText",
+                "content": [
+                    {
+                        "text": "Wil je geen e-mails van "+this.organization.name+" meer ontvangen? ",
+                        "type": "text"
+                    },
+                    {
+                        "type": "smartButtonInline",
+                        "attrs": {
+                            "id": "unsubscribeUrl"
+                        },
+                        "content": [
+                            {
+                                "text": "Klik dan hier om uit te schrijven",
+                                "type": "text"
+                            }
+                        ]
+                    },
+                    {
+                        "text": ".",
+                        "type": "text"
+                    }
+                ]
+            }
+        ])
         
-        chain.run()
+        chain.setTextSelection(0).run()
     }
 
     get hasParentsOrMembers() {
@@ -946,23 +1125,15 @@ export default class MailView extends Mixins(NavigationMixin) {
                     this.parentFilter = ParentFilter.None
                 }
             }
+            this.insertSignInButton()
 
             // Check if all the parents + members already have access (and an account) when they should have access
-            MemberManager.updateMembersAccess(this.members).then(() => {
-                // We created some users, so we might check the button again
-                if (this.hasAllUsers && !this.didInsertButton) {
-                    this.insertSignInButton()
-                } else {
-                    console.info("doent insert button")
-                }
-            }).catch(e => {
+            MemberManager.updateMembersAccess(this.members).catch(e => {
                 Toast.fromError(e).show()
             })
         } else if (this.orders.length > 0 && !this.didInsertButton) {
             this.insertOrderButton()
-        }
-
-        if (this.hasFirstName) {
+        } else if (this.hasFirstName) {
             // Insert "Dag <naam>," into editor
             this.editor.chain().setTextSelection(0).insertContent("Dag ").insertSmartVariable(this.smartVariables[0]).insertContent(",<p></p><p></p>")/*.focus()*/.run()
         }
