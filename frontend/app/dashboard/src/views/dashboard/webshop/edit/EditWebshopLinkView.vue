@@ -302,7 +302,7 @@ async function checkUriAvailability() {
             path: '/webshop/' + webshop.value.id + '/check-uri',
             method: 'GET',
             query: {
-                uri,
+                uri: uri.value,
             },
             decoder: WebshopUriAvailabilityResponse as Decoder<WebshopUriAvailabilityResponse>,
             owner: requestOwner,
@@ -424,10 +424,11 @@ const dnsRecords = computed(() => {
     }
     try {
         return webshop.value.buildDNSRecords();
-    } catch (e) {
-        Toast.fromError(e).show()
     }
-    return []
+    catch (e) {
+        Toast.fromError(e).show();
+    }
+    return [];
 });
 
 async function copyLink(event: MouseEvent) {
