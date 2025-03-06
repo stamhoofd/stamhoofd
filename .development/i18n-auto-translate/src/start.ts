@@ -9,12 +9,11 @@
  */
 
 import { AutoTranslator } from "./AutoTranslator";
+import { globals } from "./globals";
 import { TranslationManager } from "./TranslationManager";
-import { GoogleTranslator } from "./translators/GoogleTranslator";
 
 export async function start() {
     const manager = new TranslationManager();
-    const translator = new GoogleTranslator(manager);
-    const autoTranslator = new AutoTranslator(translator, manager);
+    const autoTranslator = new AutoTranslator(globals.TRANSLATOR, manager);
     await autoTranslator.start();
 }

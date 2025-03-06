@@ -10,7 +10,7 @@ import { TranslationManager } from "../TranslationManager";
 import { Batch } from "../types/Batch";
 import { Translator } from "./Translator";
 
-export class GoogleTranslator extends Translator {
+export class GoogleGeminiTranslator extends Translator {
     private readonly genAI: GoogleGenerativeAI;
     private readonly model: GenerativeModel;
     protected readonly maxBatchLength = 15000;

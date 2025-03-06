@@ -1,6 +1,9 @@
 import { config } from "dotenv";
 import path from "node:path";
+import { cliArguments } from "./CliArguments";
+import { TranslatorType } from "./enums/TranslatorType";
 import { isLanguage, isLocale } from "./helpers/i18n-helpers";
+import { isTranslatorType } from "./helpers/validate-translator-type";
 
 config();
 
@@ -18,6 +21,7 @@ type EnvVariables = {
     // Directories that should be ignored
     readonly I18NUUID_EXCLUDE_DIRS_ARRAY: string[];
     readonly DEFAULT_LOCALES: DefaultLocalesDict;
+    readonly  TRANSLATOR: TranslatorType;
 
     // API Keys
     readonly GEMINI_API_KEY: string;
@@ -52,6 +56,7 @@ function getVariables(): EnvVariables {
         // This is the only environment variable we'll read for now, because the other once should always stay the same
         I18NUUID_EXCLUDE_DIRS_ARRAY: ["dist", "esm", "node_modules"],
         DEFAULT_LOCALES: getDefaultLocales(),
+        TRANSLATOR: getTranslatorType(),
 
         // API Keys
         GEMINI_API_KEY: process.env.GEMINI_API_KEY ?? "",
@@ -125,6 +130,26 @@ function getDefaultLocales(): DefaultLocalesDict {
     }
 
     return parsed;
+}
+
+function getTranslatorType(): TranslatorType {
+    const cliTranslator = cliArguments.translatorType;
+
+    if(cliTranslator !== undefined) {
+        return cliTranslator;
+    }
+    
+    const translator = process.env.TRANSLATOR;
+
+    if(translator === undefined) {
+        return TranslatorType.GoogleGemini;
+    }
+
+    if(!isTranslatorType(translator)) {
+        throw new Error('Unknown translator type: ' + translator);
+    }
+
+    return translator as TranslatorType;
 }
 
 export const globals: EnvVariables = getVariables();
