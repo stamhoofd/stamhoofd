@@ -18,6 +18,16 @@ export class MistralTranslator extends Translator {
         this.client = new Mistral({apiKey: globals.MISTRAL_API_KEY});
     }
 
+    protected override canRetryBatch(error: any): boolean {
+
+        if(error?.statusCode === 429 || error?.body?.includes('Requests rate limit exceeded')) {
+            // Requests rate limit exceeded
+            return true;
+        }
+
+        return false;
+    }
+
     protected async generateResponse(prompt: string): Promise<string> {
         const chatResponse = await this.client.chat.complete({
             // model: 'mistral-large-latest',
