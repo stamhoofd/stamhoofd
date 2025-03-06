@@ -36,7 +36,8 @@ export abstract class Translator implements ITranslator {
         );
     }
 
-    protected abstract createPrompt(
+    // override if necessary
+    protected createPrompt(
         textArray: string[],
         {
             originalLocal,
@@ -49,7 +50,21 @@ export abstract class Translator implements ITranslator {
             consistentWords: Record<string, string> | null;
             namespace: string;
         },
-    ): string;
+    ): string {
+        const consistentWordsText = consistentWords
+            ? ` Use this dictionary of translations for consistency: ` +
+              JSON.stringify(consistentWords) +
+              "."
+            : "";
+
+        const prompt = `Translate the values of the json array from ${originalLocal} to ${targetLocal}. Keep the original order.${consistentWordsText}
+
+Important: do not translate words between curly brackets (even if it is a consistent word). For example {vereniging} must remain {vereniging}.
+
+Translate this array: ${JSON.stringify(textArray)}`;
+
+        return prompt;
+    }
 
     protected async getTextFromApi(
         textArray: string[],
