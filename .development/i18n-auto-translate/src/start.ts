@@ -1,6 +1,8 @@
 /**
  * TODO:
- * - rename env variables
+ * - send indeces?
+ * - calcualte tokens
+ * - calculate estimated price?
  * - improve prompt
  * - provide context?
  * - context caching?
