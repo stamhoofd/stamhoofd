@@ -1,6 +1,5 @@
 /**
  * TODO:
- * - send indeces?
  * - calcualte tokens
  * - calculate estimated price?
  * - improve prompt

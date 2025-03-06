@@ -1,4 +1,3 @@
-
 export class PromiseQueue<T> {
     private itemsWaiting: PromiseQueueItem<T>[] = [];
     private itemsNext: PromiseQueueItem<T>[] = [];
@@ -11,18 +10,18 @@ export class PromiseQueue<T> {
 
     constructor(
         private readonly maxConcurrentItems: number,
-        private readonly msInterval?: number
+        private readonly msInterval?: number,
     ) {}
 
     async add(callback: () => Promise<any>): Promise<T> {
         const item = new PromiseQueueItem(callback);
 
-        if(this.concurrentItemsCount < this.maxConcurrentItems) {
+        if (this.concurrentItemsCount < this.maxConcurrentItems) {
             this.itemsNext.push(item);
         } else {
             this.itemsWaiting.push(item);
         }
-        
+
         this.start();
         return await item.getResult();
     }
@@ -72,10 +71,16 @@ export class PromiseQueue<T> {
 
         if (next) {
             this.itemsInProgress.push(next);
-            next.execute().finally(() => {
-                this.itemsInProgress = this.itemsInProgress.filter(i => i !== next)
-                this.check();
-            });
+            next.execute()
+                .catch((error) => {
+                    next.reject(error);
+                })
+                .finally(() => {
+                    this.itemsInProgress = this.itemsInProgress.filter(
+                        (i) => i !== next,
+                    );
+                    this.check();
+                });
         }
     }
 }
@@ -83,6 +88,7 @@ export class PromiseQueue<T> {
 class PromiseQueueItem<T> {
     private readonly promise: Promise<T>;
     private _resolve: ((value: T | PromiseLike<T>) => void) | null = null;
+    private _reject: ((reason?: any) => void) | null = null;
     private _isCalled = false;
 
     get isCalled() {
@@ -90,9 +96,10 @@ class PromiseQueueItem<T> {
     }
 
     constructor(readonly callback: () => Promise<T>) {
-        this.promise = new Promise<T>(resolve => {
+        this.promise = new Promise<T>((resolve, reject) => {
             this._resolve = resolve;
-        })
+            this._reject = reject;
+        });
     }
 
     async getResult(): Promise<T> {
@@ -104,5 +111,11 @@ class PromiseQueueItem<T> {
         const result = await this.callback();
         this._resolve!(result);
         return result;
+    }
+
+    reject(reason?: any) {
+        if (this._reject) {
+            this._reject(reason);
+        }
     }
 }
