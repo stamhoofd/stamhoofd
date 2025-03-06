@@ -9,6 +9,7 @@
         "start": "yarn build && node ./dist/index.js"
     },
     "dependencies": {
+        "@anthropic-ai/sdk": "^0.39.0",
         "@google/generative-ai": "^0.22.0",
         "chalk": "4",
         "dotenv": "^16.4.5",
