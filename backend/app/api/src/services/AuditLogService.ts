@@ -78,7 +78,6 @@ export class AuditLogService {
             }
 
             if (this.isDisabled()) {
-                console.log('Audit log disabled');
                 return;
             }
 
