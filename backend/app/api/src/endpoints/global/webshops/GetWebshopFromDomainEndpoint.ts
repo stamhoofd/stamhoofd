@@ -11,8 +11,8 @@ class Query extends AutoEncoder {
     @field({ decoder: StringDecoder })
     domain: string;
 
-    @field({ decoder: StringDecoder, nullable: true })
-    uri: string | null;
+    @field({ decoder: StringDecoder, optional: true })
+    uri = '';
 }
 
 type Body = undefined;
