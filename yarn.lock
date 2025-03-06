@@ -3203,10 +3203,10 @@
   dependencies:
     chalk "^4.1.2"
 
-"@simonbackx/simple-networking@1.17.0":
-  version "1.17.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.17.0.tgz#ccc7d55475b3c471129996964e2ce2a36febced5"
-  integrity sha512-BZypSfxPMTCBbU4AP12w2f9Cpleqezn6nQ9f9J04DeFTQmjBS5nXTwYXqJeL2tSq1bvDj7VsMXOXrW6/Zt5A/w==
+"@simonbackx/simple-networking@1.18.0":
+  version "1.18.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.18.0.tgz#d9488f91dc3090dec6db0ba3bcbdae722d0a9824"
+  integrity sha512-O5VP1ECjQcsveW+bcMC1xCWZbooEleh750q/2tEN2/ymg2mZsXohDAKV2FDzE0fEwDRBL8YkuzFEtjXq8FXR1w==
 
 "@simonbackx/vue-app-navigation@2.8.2":
   version "2.8.2"

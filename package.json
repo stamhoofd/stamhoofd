@@ -45,7 +45,7 @@
         "@babel/runtime": "^7.15.4",
         "@simonbackx/simple-encoding": "2.21.0",
         "@simonbackx/simple-errors": "^1.4.0",
-        "@simonbackx/simple-networking": "1.17.0",
+        "@simonbackx/simple-networking": "1.18.0",
         "@simonbackx/vue-app-navigation": "2.8.2",
         "@types/sortablejs": "^1.15.8",
         "@zxcvbn-ts/core": "^0.3.0",
