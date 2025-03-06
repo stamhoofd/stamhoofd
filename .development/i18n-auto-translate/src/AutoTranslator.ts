@@ -1,28 +1,39 @@
+import chalk from "chalk";
+import { TranslatorType } from "./enums/TranslatorType";
 import { globals } from "./globals";
 import {
     MissingTranslationFinder,
     TextToTranslateRef,
 } from "./MissingTranslationFinder";
 import { TranslationManager } from "./TranslationManager";
+import { ClaudeTranslator } from "./translators/ClaudeTranslator";
+import { GoogleGeminiTranslator } from "./translators/GoogleGeminiTranslator";
 import {
     AfterBatchTranslatedCallback,
     ITranslator,
 } from "./translators/ITranslator";
+import { MistralTranslator } from "./translators/MistralTranslator";
+import { OpenAiTranslator } from "./translators/OpenAiTranslator";
 import { Translations } from "./types/Translations";
 
 export class AutoTranslator {
     private readonly finder: MissingTranslationFinder;
+    private readonly translator: ITranslator;
 
     constructor(
-        private readonly translator: ITranslator,
+        private readonly type: TranslatorType,
         private readonly manager: TranslationManager,
     ) {
         this.finder = new MissingTranslationFinder({
             translationManager: manager,
         });
+
+        this.translator = this.createTranslator();
     }
 
     async start() {
+        console.log(chalk.blue(`Start auto translate (translator: ${this.type})`));
+
         const missingTranslationsOutput = await this.finder.findAll();
 
         // add the existing to the source of the locale/namespace combination
@@ -53,7 +64,7 @@ export class AutoTranslator {
                     namespace: searchResult.namespace,
                 });
             }
-        }
+        };
 
         // translate all translation refs
         await this.translate({
@@ -160,9 +171,11 @@ export class AutoTranslator {
                 targetLocal,
                 namespace,
                 afterBatchTranslated: (batch) => {
-                    const dict = Object.fromEntries(batch.map(({ uuid, value }) => {
-                        return [uuid, value];
-                    }));
+                    const dict = Object.fromEntries(
+                        batch.map(({ uuid, value }) => {
+                            return [uuid, value];
+                        }),
+                    );
 
                     for (const translationRef of allTranslationRefs) {
                         const id = translationRef.id;
@@ -186,6 +199,19 @@ export class AutoTranslator {
                 translationRef.setTranslation(translation);
             }
             translationRef.markDidTry();
+        }
+    }
+
+    private createTranslator(): ITranslator {
+        switch (this.type) {
+            case TranslatorType.Mistral:
+                return new MistralTranslator(this.manager);
+            case TranslatorType.GoogleGemini:
+                return new GoogleGeminiTranslator(this.manager);
+            case TranslatorType.OpenAi:
+                return new OpenAiTranslator(this.manager);
+            case TranslatorType.Claude:
+                return new ClaudeTranslator(this.manager);
         }
     }
 }
