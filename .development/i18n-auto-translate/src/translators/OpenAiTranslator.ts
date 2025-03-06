@@ -31,33 +31,4 @@ export class OpenAiTranslator extends Translator {
 
         return result.choices[0].message.content ?? "";
     }
-
-    protected createPrompt(
-        textArray: string[],
-        {
-            originalLocal,
-            targetLocal,
-            consistentWords,
-            namespace,
-        }: {
-            originalLocal: string;
-            targetLocal: string;
-            consistentWords: Record<string, string> | null;
-            namespace: string;
-        },
-    ): string {
-        const consistentWordsText = consistentWords
-            ? ` Use this dictionary of translations for consistency: ` +
-              JSON.stringify(consistentWords) +
-              "."
-            : "";
-
-        const prompt = `Translate the values of the json array from ${originalLocal} to ${targetLocal}. Keep the original order.${consistentWordsText}
-
-Important: do not translate words between curly brackets (even if it is a consistent word). For example {vereniging} must remain {vereniging}.
-
-Translate this array: ${JSON.stringify(textArray)}`;
-
-        return prompt;
-    }
 }
