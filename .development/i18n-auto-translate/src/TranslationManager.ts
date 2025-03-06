@@ -204,20 +204,13 @@ export class TranslationManager {
             exec(command, resolve);
         });
     }
-
-    // Currently the locale will always be a language!
+    
     getConsistentWords(
-        language: string,
+        locale: string,
         namespace?: string,
     ): Record<string, string> | null {
-        // todo!!!!!!
-
-        // if (isLocale(language)) {
-        //     throw new Error(
-        //         "A locale containing a country is currently not supported: " +
-        //             language,
-        //     );
-        // }
+        // for now the consistent-words are saved in the source ai file of the language
+        const language = locale.split('-')[0];
 
         // first get default consistent words for locale
         const result =
