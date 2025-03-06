@@ -5,7 +5,11 @@ import {
 } from "./MissingTranslationFinder";
 import { promptLogger } from "./PromptLogger";
 import { TranslationManager } from "./TranslationManager";
-import { ITranslator } from "./translators/ITranslator";
+import {
+    AfterBatchTranslatedCallback,
+    ITranslator,
+} from "./translators/ITranslator";
+import { Translations } from "./types/Translations";
 
 export class AutoTranslator {
     private readonly finder: MissingTranslationFinder;
@@ -22,6 +26,36 @@ export class AutoTranslator {
     async start() {
         const missingTranslationsOutput = await this.finder.findAll();
 
+        // add the existing to the source of the locale/namespace combination
+        for (const searchResult of missingTranslationsOutput.searchResults) {
+            const translationsToAdd = searchResult.existingTranslationsToAdd;
+
+            this.manager.addMachineTranslations(translationsToAdd, {
+                locale: searchResult.locale,
+                namespace: searchResult.namespace,
+            });
+        }
+
+        // after each batch -> check new translations
+
+        const writeIntermediateResult = () => {
+            for (const searchResult of missingTranslationsOutput.searchResults) {
+                const translationsToAdd: Translations = {};
+
+                for (const translationRef of searchResult.translationRefs) {
+                    if (translationRef.isTranslated) {
+                        translationsToAdd[translationRef.id] =
+                            translationRef.translation;
+                    }
+                }
+
+                this.manager.addMachineTranslations(translationsToAdd, {
+                    locale: searchResult.locale,
+                    namespace: searchResult.namespace,
+                });
+            }
+        }
+
         // translate all translation refs
         await this.translate({
             translator: this.translator,
@@ -29,24 +63,10 @@ export class AutoTranslator {
                 missingTranslationsOutput.allTranslationRefs,
             ),
             originalLocal: globals.DEFAULT_LOCALE,
+            afterBatchTranslated: () => writeIntermediateResult(),
         });
 
-        // add the existing and new translations to the source of the locale/namespace combination
-        for (const searchResult of missingTranslationsOutput.searchResults) {
-            const translationsToAdd = searchResult.existingTranslationsToAdd;
-
-            for (const translationRef of searchResult.translationRefs) {
-                if (translationRef.isTranslated) {
-                    translationsToAdd[translationRef.id] =
-                        translationRef.translation;
-                }
-            }
-
-            this.manager.addMachineTranslations(translationsToAdd, {
-                locale: searchResult.locale,
-                namespace: searchResult.namespace,
-            });
-        }
+        writeIntermediateResult();
 
         // log failed translations
         Array.from(missingTranslationsOutput.allTranslationRefs)
@@ -61,10 +81,12 @@ export class AutoTranslator {
         translator,
         allTranslationRefs,
         originalLocal,
+        afterBatchTranslated,
     }: {
         translator: ITranslator;
         allTranslationRefs: TextToTranslateRef[];
         originalLocal: string;
+        afterBatchTranslated?: AfterBatchTranslatedCallback;
     }) {
         const map = this.groupTranslationRefs(allTranslationRefs);
 
@@ -78,6 +100,7 @@ export class AutoTranslator {
                     originalLocal,
                     targetLocal: language,
                     namespace,
+                    afterBatchTranslated,
                 });
                 promises.push(promise);
             }
@@ -122,12 +145,14 @@ export class AutoTranslator {
         originalLocal,
         targetLocal,
         namespace,
+        afterBatchTranslated,
     }: {
         translator: ITranslator;
         allTranslationRefs: TextToTranslateRef[];
         originalLocal: string;
         targetLocal: string;
         namespace: string;
+        afterBatchTranslated?: AfterBatchTranslatedCallback;
     }) {
         const tempTranslationObject = {};
 
@@ -143,13 +168,30 @@ export class AutoTranslator {
                 originalLocal,
                 targetLocal,
                 namespace,
+                afterBatchTranslated: (batch) => {
+                    const dict = Object.fromEntries(batch.map(({ uuid, value }) => {
+                        return [uuid, value];
+                    }));
+
+                    for (const translationRef of allTranslationRefs) {
+                        const id = translationRef.id;
+                        const translation = dict[id];
+                        if (translation && !translationRef.isTranslated) {
+                            translationRef.setTranslation(translation);
+                        }
+                    }
+
+                    if (afterBatchTranslated) {
+                        afterBatchTranslated(batch);
+                    }
+                },
             },
         );
 
         for (const translationRef of allTranslationRefs) {
             const id = translationRef.id;
             const translation = translations[id];
-            if (translation) {
+            if (translation && !translationRef.isTranslated) {
                 translationRef.setTranslation(translation);
             }
             translationRef.markDidTry();

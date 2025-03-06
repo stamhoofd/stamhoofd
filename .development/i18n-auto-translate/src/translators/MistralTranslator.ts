@@ -7,10 +7,10 @@ import { Batch } from '../types/Batch';
 import { Translator } from "./Translator";
 
 export class MistralTranslator extends Translator {
-    protected readonly maxBatchLength = 3000;
+    protected readonly maxBatchLength = 15000;
 
     // Mistral current Requests per second: 1 rps -> 1200ms (with extrta margin)
-    protected readonly queue = new PromiseQueue<Batch>(3, 1200);
+    protected readonly queue = new PromiseQueue<Batch>(20, 1200);
     private readonly client: Mistral;
 
     constructor(manager: TranslationManager) {
