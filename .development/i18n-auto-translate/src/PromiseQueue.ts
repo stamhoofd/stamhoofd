@@ -11,7 +11,7 @@ export class PromiseQueue<T> {
 
     constructor(
         private readonly maxConcurrentItems: number,
-        private readonly msInterval?: number,
+        private readonly msInterval?: number
     ) {}
 
     async add(callback: () => Promise<any>): Promise<T> {
@@ -76,8 +76,6 @@ export class PromiseQueue<T> {
                 this.itemsInProgress = this.itemsInProgress.filter(i => i !== next)
                 this.check();
             });
-        } else {
-            this.stop();
         }
     }
 }
