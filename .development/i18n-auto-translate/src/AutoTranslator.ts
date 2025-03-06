@@ -3,7 +3,6 @@ import {
     MissingTranslationFinder,
     TextToTranslateRef,
 } from "./MissingTranslationFinder";
-import { promptLogger } from "./PromptLogger";
 import { TranslationManager } from "./TranslationManager";
 import {
     AfterBatchTranslatedCallback,
@@ -67,14 +66,6 @@ export class AutoTranslator {
         });
 
         writeIntermediateResult();
-
-        // log failed translations
-        Array.from(missingTranslationsOutput.allTranslationRefs)
-            .filter((x) => x.didTry && !x.isTranslated)
-            .forEach((translationRef) => {
-                const errorMessage = `Failed to translate ${translationRef.id} in ${translationRef.locale}: ${translationRef.text}`;
-                promptLogger.error(errorMessage);
-            });
     }
 
     private async translate({
