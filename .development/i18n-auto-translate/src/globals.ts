@@ -17,8 +17,12 @@ type EnvVariables = {
     readonly DEFAULT_NAMESPACE: string;
     // Directories that should be ignored
     readonly I18NUUID_EXCLUDE_DIRS_ARRAY: string[];
-    readonly GEMINI_API_KEY: string;
     readonly DEFAULT_LOCALES: DefaultLocalesDict;
+
+    // API Keys
+    readonly GEMINI_API_KEY: string;
+    readonly OPENAI_API_KEY: string;
+    readonly MISTRAL_API_KEY: string;
 };
 
 type DefaultLocalesDict = Record<
@@ -47,8 +51,12 @@ function getVariables(): EnvVariables {
         DEFAULT_NAMESPACE: process.env.DEFAULT_NAMESPACE ?? "stamhoofd",
         // This is the only environment variable we'll read for now, because the other once should always stay the same
         I18NUUID_EXCLUDE_DIRS_ARRAY: ["dist", "esm", "node_modules"],
-        GEMINI_API_KEY: process.env.GEMINI_API_KEY ?? "",
         DEFAULT_LOCALES: getDefaultLocales(),
+
+        // API Keys
+        GEMINI_API_KEY: process.env.GEMINI_API_KEY ?? "",
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY ?? "",
+        MISTRAL_API_KEY: process.env.MISTRAL_API_KEY ?? ""
     };
 
     if (!isLocale(emptyVariables.DEFAULT_LOCALE)) {
