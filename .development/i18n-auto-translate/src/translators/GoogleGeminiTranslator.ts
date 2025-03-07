@@ -14,7 +14,7 @@ export class GoogleGeminiTranslator extends Translator {
     private readonly genAI: GoogleGenerativeAI;
     private readonly model: GenerativeModel;
     protected readonly maxBatchLength = 15000;
-    protected readonly queue = new PromiseQueue<Batch>(100, 500);
+    protected readonly queue = new PromiseQueue<Batch>(5, 500);
 
     constructor(manager: TranslationManager) {
         super(manager);

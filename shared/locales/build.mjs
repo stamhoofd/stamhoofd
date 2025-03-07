@@ -13,6 +13,7 @@ async function fileExists(file) {
     return false;
 }
 
+const translatorType = 'MistralSmall';
 const namespaces = ['stamhoofd', 'digit', 'keeo', 'landelijke-gilden'];
 
 for (const namespace of namespaces) {
@@ -159,9 +160,10 @@ async function build(country, language, namespace, skipFallbackLanguages, skipNa
         json = mergeObjects(json, specifics);
     }
 
-    // ai translations of language file
-    if (await fileExists(folder + '/' + language + '-ai.json')) {
-        const specifics = JSON.parse(await fs.readFile(folder + '/' + language + '-ai.json'));
+    // machine translations of language file
+    const machineLanguageFile = `${folder}/machine-${translatorType}-${language}.json`;
+    if (await fileExists(machineLanguageFile)) {
+        const specifics = await readMachineTranslations(machineLanguageFile);
         json = mergeObjects(json, specifics);
     }
 
@@ -171,9 +173,10 @@ async function build(country, language, namespace, skipFallbackLanguages, skipNa
         json = mergeObjects(json, specifics);
     }
 
-    // ai translations of locale file
-    if (await fileExists(folder + '/' + locale + '-ai.json')) {
-        const specifics = JSON.parse(await fs.readFile(folder + '/' + locale + '-ai.json'));
+    // machine translations of locale file
+    const machineLocaleFile = `${folder}/machine-${translatorType}-${locale}.json`;
+    if (await fileExists(machineLocaleFile)) {
+        const specifics = await readMachineTranslations(machineLocaleFile);
         json = mergeObjects(json, specifics);
     }
 
@@ -230,4 +233,15 @@ for (const country of countries) {
             }
         }
     }
+}
+
+async function readMachineTranslations(machineLanguageFile) {
+    const dictonary = JSON.parse(await fs.readFile(machineLanguageFile));
+    return Object.fromEntries(
+        Object.entries(
+            dictonary,
+        ).map(([key, value]) => {
+            return [key, value.translation];
+        }),
+    );
 }

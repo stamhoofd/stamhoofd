@@ -1,5 +1,4 @@
 import { Mistral } from '@mistralai/mistralai';
-import chalk from 'chalk';
 import { globals } from "../globals";
 import { PromiseQueue } from "../PromiseQueue";
 import { TranslationManager } from "../TranslationManager";
@@ -20,7 +19,6 @@ abstract class MistralTranslator extends Translator {
     }
 
     protected override canRetryBatch(error: any): boolean {
-
         if(error?.statusCode === 429 || error?.body?.includes('Requests rate limit exceeded')) {
             // Requests rate limit exceeded
             return true;
@@ -36,8 +34,6 @@ abstract class MistralTranslator extends Translator {
           });
 
           const text = chatResponse.choices?.[0].message.content?.toString() ?? '';
-          
-          console.log(chalk.blue('Chat:', chatResponse.choices?.[0].message.content));
 
           return this.extractJsonArrayFromResponse(text);
     }
