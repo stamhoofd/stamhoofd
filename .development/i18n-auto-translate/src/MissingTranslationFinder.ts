@@ -1,9 +1,8 @@
 import chalk from "chalk";
-import { cliArguments } from "./CliArguments";
 import { TranslatorType } from "./enums/TranslatorType";
 import { globals } from "./globals";
 import { TranslationManager } from "./TranslationManager";
-import { TranslationsWithConfig } from "./types/Translations";
+import { TranslationDictionary } from "./types/TranslationDictionary";
 
 type Language = string;
 type Namespace = string;
@@ -14,7 +13,7 @@ type Translations = Record<string, string>;
 interface SearchResult {
     locale: string;
     namespace: string;
-    existingTranslationsToAdd: Translations;
+    existingTranslationsToAdd: TranslationDictionary;
     translationRefs: TextToTranslateRef[];
 }
 
@@ -72,24 +71,31 @@ export class MissingTranslationFinder {
             options.translationManager ?? new TranslationManager();
     }
 
-    async findAll(translator: TranslatorType, locales?: string[]): Promise<MissingTranslationsOutput> {
-        console.log(chalk.blue(`Start finding missing translations for ${locales ? locales?.join(' ') : 'all locales'}`));
+    async findAll(
+        translator: TranslatorType,
+        locales?: string[],
+    ): Promise<MissingTranslationsOutput> {
+        console.log(
+            chalk.blue(
+                `Start finding missing translations for ${locales ? locales?.join(" ") : "all locales"}`,
+            ),
+        );
         this.init();
 
         const searchResults: SearchResult[] = [];
 
         const otherLocales = this.translationManager.locales.filter(
             (locale) => {
-                if(locale === globals.DEFAULT_LOCALE) {
+                if (locale === globals.DEFAULT_LOCALE) {
                     return false;
                 }
 
-                if(locales) {
+                if (locales) {
                     return locales.includes(locale);
                 }
 
                 return true;
-            } ,
+            },
         );
 
         const namespaces = this.translationManager.namespaces.sort((a, b) => {
@@ -138,29 +144,48 @@ export class MissingTranslationFinder {
     }: {
         translator: TranslatorType;
         locale: string;
-        namespace?: string;
+        namespace: string;
     }): Promise<SearchResult> {
+        // let baseTranslations: Translations;
 
-        let baseTranslations: TranslationsWithConfig;
+        // if(cliArguments.isTestCompare) {
+        //     // baseTranslations = this.translationManager.readCompare(translator, locale, namespace);
+        // } else {
+        //     const sourceTranslations = this.translationManager.readSource(
+        //         locale,
+        //         namespace,
+        //     );
 
-        if(cliArguments.isTestCompare) {
-            baseTranslations = this.translationManager.readCompare(translator, locale, namespace);
-        } else {
-            const sourceTranslations = this.translationManager.readSource(
+        //     const machineTranslations = this.translationManager.readMachineTranslations(
+        //         translator,
+        //         locale,
+        //         namespace,
+        //     );
+
+        //      baseTranslations = Object.fromEntries(
+        //         Object.entries(machineTranslations).concat(
+        //             Object.entries(sourceTranslations),
+        //         ),
+        //     ) as Translations;
+        // }
+
+        const sourceTranslations = this.translationManager.readSource(
+            locale,
+            namespace,
+        );
+
+        const machineTranslations =
+            this.translationManager.readMachineTranslations(
+                translator,
                 locale,
                 namespace,
             );
-            const aiTranslations = this.translationManager.readAi(
-                locale,
-                namespace,
-            );
-    
-             baseTranslations = Object.fromEntries(
-                Object.entries(aiTranslations).concat(
-                    Object.entries(sourceTranslations),
-                ),
-            ) as TranslationsWithConfig;
-        }
+
+        const baseTranslations: Translations = Object.fromEntries(
+            Object.entries(machineTranslations).concat(
+                Object.entries(sourceTranslations),
+            ),
+        );
 
         const distTranslations = this.translationManager.readDist(
             locale,
@@ -312,7 +337,7 @@ export class MissingTranslationFinder {
 
         const mappedLocale = this.getMappedLocale(locale);
 
-        const existingTranslationsToAdd: Translations = {};
+        const existingTranslationsToAdd: TranslationDictionary = {};
         const translationRefs: TextToTranslateRef[] = [];
         const newTranslationRefs: TextToTranslateRef[] = [];
 
@@ -329,7 +354,10 @@ export class MissingTranslationFinder {
                     continue;
                 }
 
-                existingTranslationsToAdd[id] = existingTranslation;
+                existingTranslationsToAdd[id] = {
+                    original: text,
+                    translation: existingTranslation,
+                };
                 continue;
             }
 

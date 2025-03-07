@@ -278,6 +278,7 @@ ${error}`;
                 `Start translate ${Object.keys(translations).length} items from ${args.originalLocal} to ${targetLocal} for namespace ${args.namespace}`,
             ),
         );
+
         const { valid, message } = validateTranslations(translations);
         if (!valid) {
             throw new Error(message);
@@ -304,6 +305,7 @@ ${error}`;
                 `Finished translate ${Object.keys(translations).length} items from ${args.originalLocal} to ${targetLocal} for namespace ${args.namespace}`,
             ),
         );
+        
         return result;
     }
 

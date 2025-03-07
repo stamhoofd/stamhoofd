@@ -16,7 +16,7 @@ import {
 import { MistralLargeTranslator, MistralSmallTranslator } from "./translators/MistralTranslator";
 import { OpenAiTranslator } from "./translators/OpenAiTranslator";
 import { Translator } from "./translators/Translator";
-import { Translations } from "./types/Translations";
+import { TranslationDictionary } from "./types/TranslationDictionary";
 
 export class AutoTranslator {
     private readonly finder: MissingTranslationFinder;
@@ -40,9 +40,9 @@ export class AutoTranslator {
 
         // add the existing to the source of the locale/namespace combination
         for (const searchResult of missingTranslationsOutput.searchResults) {
-            const translationsToAdd = searchResult.existingTranslationsToAdd;
+            const dictionaryToAdd = searchResult.existingTranslationsToAdd;
 
-            this.manager.addMachineTranslations(translationsToAdd, {
+            this.manager.addMachineTranslationDictionary(dictionaryToAdd, {
                 translator: this.type,
                 locale: searchResult.locale,
                 namespace: searchResult.namespace,
@@ -52,16 +52,16 @@ export class AutoTranslator {
         // after each batch -> check new translations
         const writeIntermediateResult = () => {
             for (const searchResult of missingTranslationsOutput.searchResults) {
-                const translationsToAdd: Translations = {};
+                const dictionaryToAdd: TranslationDictionary = {};
 
                 for (const translationRef of searchResult.translationRefs) {
                     if (translationRef.isTranslated) {
-                        translationsToAdd[translationRef.id] =
-                            translationRef.translation;
+                        dictionaryToAdd[translationRef.id] =
+                            {original: translationRef.text, translation: translationRef.translation};
                     }
                 }
 
-                this.manager.addMachineTranslations(translationsToAdd, {
+                this.manager.addMachineTranslationDictionary(dictionaryToAdd, {
                     translator: this.type,
                     locale: searchResult.locale,
                     namespace: searchResult.namespace,

@@ -1,8 +1,8 @@
+import { TranslationDictionary } from "../types/TranslationDictionary";
 import { Translations } from "../types/Translations";
 
 export function validateTranslations(
-    translations: Translations,
-    allowedObjects: string[] | null = [],
+    translations: Translations
 ): { valid: boolean; message?: string } {
     if (typeof translations !== "object" || Array.isArray(translations)) {
         return {
@@ -30,20 +30,7 @@ export function validateTranslations(
             continue;
         }
 
-        if (key === "consistent-words") {
-            const validationResult = validateConsistentWords(value);
-
-            if (validationResult.valid === false) {
-                return validationResult;
-            }
-            continue;
-        }
-
         if (typeof value !== "string") {
-            if (allowedObjects === null || allowedObjects.includes(key)) {
-                continue;
-            }
-
             return {
                 valid: false,
                 message: `translations.${key} must be a string`,
@@ -104,7 +91,7 @@ function validateExtends(extendsArray: any): {
     };
 }
 
-function validateConsistentWords(consistentWordsRecord: any): {
+export function validateConsistentWords(consistentWordsRecord: any): {
     valid: boolean;
     message?: string;
 } {
@@ -145,6 +132,52 @@ function validateConsistentWords(consistentWordsRecord: any): {
                 valid: false,
                 message: `consistent-words.${key} must be at least 1 character long`,
             };
+        }
+    }
+
+    return {
+        valid: true,
+    };
+}
+
+export function validateTranslationDictionary(dictionary: TranslationDictionary): { valid: boolean; message?: string } {
+    if (typeof dictionary !== "object" || Array.isArray(dictionary)) {
+        return {
+            valid: false,
+            message: "translation dictionary must be an object",
+        };
+    }
+
+    for (const [key, value] of Object.entries(dictionary)) {
+        if(typeof key !== "string") {
+            return {
+                valid: false,
+                message: `translation dictionary key ${key} must be a string`,
+            };
+        }
+
+        if (typeof value !== "object" || Array.isArray(value)) {
+            return {
+                valid: false,
+                message: "translation dictionary value must be an object",
+            };
+        }
+
+        for(const [key2, value2] of Object.entries(value)) {
+            if(key2 === 'original' || key2 === 'translation') {
+                if(typeof value2 !== "string") {
+                    return {
+                        valid: false,
+                        message: `translation dictionary ${key2} must be a string for key ${key}`,
+                    };
+                }
+                continue;
+            }
+
+            return {
+                valid: false,
+                message: `Unknown translation dictionary key ${key2} for key ${key}`,
+            }
         }
     }
 
