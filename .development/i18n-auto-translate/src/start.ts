@@ -9,11 +9,18 @@
  */
 
 import { AutoTranslator } from "./AutoTranslator";
+import { cliArguments } from "./CliArguments";
 import { globals } from "./globals";
+import { MachineTranslationComparer } from "./MachineTranslationComparer";
 import { TranslationManager } from "./TranslationManager";
 
 export async function start() {
     const manager = new TranslationManager();
     const autoTranslator = new AutoTranslator(globals.TRANSLATOR, manager);
     await autoTranslator.start();
+
+    if(cliArguments.isTestCompare) {
+        const comparer = new MachineTranslationComparer(manager);
+        comparer.createComparisons();
+    }
 }

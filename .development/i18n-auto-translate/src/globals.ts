@@ -22,6 +22,7 @@ type EnvVariables = {
     readonly I18NUUID_EXCLUDE_DIRS_ARRAY: string[];
     readonly DEFAULT_LOCALES: DefaultLocalesDict;
     readonly  TRANSLATOR: TranslatorType;
+    readonly COMPARE_OUTPUT_DIR: string;
 
     // API Keys
     readonly GEMINI_API_KEY: string;
@@ -57,6 +58,7 @@ function getVariables(): EnvVariables {
         I18NUUID_EXCLUDE_DIRS_ARRAY: ["dist", "esm", "node_modules"],
         DEFAULT_LOCALES: getDefaultLocales(),
         TRANSLATOR: getTranslatorType(),
+        COMPARE_OUTPUT_DIR: process.env.COMPARE_OUTPUT_DIR ?? "",
 
         // API Keys
         GEMINI_API_KEY: process.env.GEMINI_API_KEY ?? "",

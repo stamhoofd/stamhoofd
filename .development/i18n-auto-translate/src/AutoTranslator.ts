@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import { cliArguments } from "./CliArguments";
 import { TranslatorType } from "./enums/TranslatorType";
 import { globals } from "./globals";
 import {
@@ -34,20 +35,20 @@ export class AutoTranslator {
     async start() {
         console.log(chalk.blue(`Start auto translate (translator: ${this.type})`));
 
-        const missingTranslationsOutput = await this.finder.findAll();
+        const missingTranslationsOutput = await this.finder.findAll(this.type, cliArguments.locales);
 
         // add the existing to the source of the locale/namespace combination
         for (const searchResult of missingTranslationsOutput.searchResults) {
             const translationsToAdd = searchResult.existingTranslationsToAdd;
 
             this.manager.addMachineTranslations(translationsToAdd, {
+                translator: this.type,
                 locale: searchResult.locale,
                 namespace: searchResult.namespace,
             });
         }
 
         // after each batch -> check new translations
-
         const writeIntermediateResult = () => {
             for (const searchResult of missingTranslationsOutput.searchResults) {
                 const translationsToAdd: Translations = {};
@@ -60,6 +61,7 @@ export class AutoTranslator {
                 }
 
                 this.manager.addMachineTranslations(translationsToAdd, {
+                    translator: this.type,
                     locale: searchResult.locale,
                     namespace: searchResult.namespace,
                 });
@@ -203,15 +205,18 @@ export class AutoTranslator {
     }
 
     private createTranslator(): ITranslator {
-        switch (this.type) {
-            case TranslatorType.Mistral:
+        switch (this.type.toLowerCase()) {
+            case TranslatorType.Mistral.toLowerCase():
                 return new MistralTranslator(this.manager);
-            case TranslatorType.GoogleGemini:
+            case TranslatorType.GoogleGemini.toLowerCase():
                 return new GoogleGeminiTranslator(this.manager);
-            case TranslatorType.OpenAi:
+            case TranslatorType.OpenAi.toLowerCase():
                 return new OpenAiTranslator(this.manager);
-            case TranslatorType.Claude:
+            case TranslatorType.Claude.toLowerCase():
                 return new ClaudeTranslator(this.manager);
+            default: {
+                throw Error(`Unknown translator type: ${this.type}`);
+            }
         }
     }
 }
