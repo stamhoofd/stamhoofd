@@ -9,6 +9,10 @@ function logRequestDetails(request: Request) {
         if (json && json.password) {
             json.password = '*******'
         }
+
+        if (json && json.clientSecret) {
+            json.clientSecret = '*******'
+        }
         logger.error(
             ...requestPrefix(request, 'query'),
             "Request query was ",
@@ -25,6 +29,10 @@ function logRequestDetails(request: Request) {
             if (Array.isArray(json) || Object.keys(json).length) {
                 if (json && json.password) {
                     json.password = '*******'
+                }
+
+                if (json && json.clientSecret) {
+                    json.clientSecret = '*******'
                 }
 
                 logger.error(
