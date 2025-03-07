@@ -6,12 +6,13 @@ import { TranslationManager } from "../TranslationManager";
 import { Batch } from '../types/Batch';
 import { Translator } from "./Translator";
 
-export class MistralTranslator extends Translator {
+abstract class MistralTranslator extends Translator {
     protected readonly maxBatchLength = 15000;
 
     // Mistral current Requests per second: 1 rps -> 1200ms (with extrta margin)
     protected readonly queue = new PromiseQueue<Batch>(20, 1200);
     private readonly client: Mistral;
+    protected abstract readonly model: string;
 
     constructor(manager: TranslationManager) {
         super(manager);
@@ -30,8 +31,7 @@ export class MistralTranslator extends Translator {
 
     protected async generateResponse(prompt: string): Promise<string> {
         const chatResponse = await this.client.chat.complete({
-            // model: 'mistral-large-latest',
-            model: 'mistral-small-latest',
+            model: this.model,
             messages: [{role: 'user', content: prompt}],
           });
 
@@ -54,4 +54,12 @@ export class MistralTranslator extends Translator {
 
         return jsonString;
     }
+}
+
+export class MistralSmallTranslator extends MistralTranslator {
+    protected readonly model = 'mistral-small-latest';
+}
+
+export class MistralLargeTranslator extends MistralTranslator {
+    protected readonly model = 'mistral-large-latest';
 }

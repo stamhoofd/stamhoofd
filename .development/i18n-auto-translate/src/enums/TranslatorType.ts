@@ -1,6 +1,7 @@
 export enum TranslatorType {
     GoogleGemini = "GoogleGemini",
-    Mistral = 'Mistral',
+    MistralLarge = 'MistralLarge',
+    MistralSmall = 'MistralSmall',
     OpenAi = 'OpenAi',
     Claude = 'Claude'
 }
