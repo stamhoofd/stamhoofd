@@ -171,6 +171,11 @@ export class ContextPermissions {
             return true;
         }
 
+        if (this.getPlatformAccessibleOrganizationTags(permissionLevel) === 'all') {
+            // Can access all members: even members without any registration
+            return true;
+        }
+
         for (const registration of member.filterRegistrations({ currentPeriod: true })) {
             const organization = member.family.getOrganization(registration.organizationId);
             if (organization) {
