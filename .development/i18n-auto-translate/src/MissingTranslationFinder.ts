@@ -1,3 +1,6 @@
+import chalk from "chalk";
+import { cliArguments } from "./CliArguments";
+import { TranslatorType } from "./enums/TranslatorType";
 import { globals } from "./globals";
 import { TranslationManager } from "./TranslationManager";
 import { TranslationsWithConfig } from "./types/Translations";
@@ -69,13 +72,24 @@ export class MissingTranslationFinder {
             options.translationManager ?? new TranslationManager();
     }
 
-    async findAll(): Promise<MissingTranslationsOutput> {
+    async findAll(translator: TranslatorType, locales?: string[]): Promise<MissingTranslationsOutput> {
+        console.log(chalk.blue(`Start finding missing translations for ${locales ? locales?.join(' ') : 'all locales'}`));
         this.init();
 
         const searchResults: SearchResult[] = [];
 
         const otherLocales = this.translationManager.locales.filter(
-            (locale) => locale !== globals.DEFAULT_LOCALE,
+            (locale) => {
+                if(locale === globals.DEFAULT_LOCALE) {
+                    return false;
+                }
+
+                if(locales) {
+                    return locales.includes(locale);
+                }
+
+                return true;
+            } ,
         );
 
         const namespaces = this.translationManager.namespaces.sort((a, b) => {
@@ -103,6 +117,7 @@ export class MissingTranslationFinder {
 
                 searchResults.push(
                     await this.search({
+                        translator,
                         locale,
                         namespace,
                     }),
@@ -117,26 +132,35 @@ export class MissingTranslationFinder {
     }
 
     private async search({
+        translator,
         locale,
         namespace,
     }: {
+        translator: TranslatorType;
         locale: string;
         namespace?: string;
     }): Promise<SearchResult> {
-        const sourceTranslations = this.translationManager.readSource(
-            locale,
-            namespace,
-        );
-        const aiTranslations = this.translationManager.readAi(
-            locale,
-            namespace,
-        );
 
-        const baseTranslations = Object.fromEntries(
-            Object.entries(aiTranslations).concat(
-                Object.entries(sourceTranslations),
-            ),
-        ) as TranslationsWithConfig;
+        let baseTranslations: TranslationsWithConfig;
+
+        if(cliArguments.isTestCompare) {
+            baseTranslations = this.translationManager.readCompare(translator, locale, namespace);
+        } else {
+            const sourceTranslations = this.translationManager.readSource(
+                locale,
+                namespace,
+            );
+            const aiTranslations = this.translationManager.readAi(
+                locale,
+                namespace,
+            );
+    
+             baseTranslations = Object.fromEntries(
+                Object.entries(aiTranslations).concat(
+                    Object.entries(sourceTranslations),
+                ),
+            ) as TranslationsWithConfig;
+        }
 
         const distTranslations = this.translationManager.readDist(
             locale,
