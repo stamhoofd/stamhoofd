@@ -22,7 +22,31 @@ export class TranslationManager {
         this.namespaces = this.getAllNamespacesInProject();
     }
 
-    readSource(locale: string, namespace?: string): Translations {
+    getMappedLocale(locale: string): string {
+        const parts = locale.split("-");
+        const language = parts[0];
+        const country = parts[1];
+
+        const dict = globals.DEFAULT_LOCALES[language];
+
+        if (!dict) {
+            return language;
+        }
+
+        if (dict.countries) {
+            for (const [defaultCountry, countryList] of Object.entries(
+                dict.countries,
+            )) {
+                if (countryList.includes(country)) {
+                    return language + "-" + defaultCountry;
+                }
+            }
+        }
+
+        return language + "-" + dict.default;
+    }
+
+    readSource(locale: string, namespace: string): Translations {
         return (
             this.readTranslationsAllowNull(
                 this.getSourcePath(locale, namespace),
@@ -39,33 +63,33 @@ export class TranslationManager {
         return this.readTranslationDictionaryAllowNull(filePath) ?? {};
     }
 
-    readMachineTranslations(
-        translatorType: TranslatorType,
-        locale: string,
-        namespace: string,
+    static convertMachineTranslationDictionaryToTranslations(
+        dictionary: TranslationDictionary,
     ): Translations {
         return Object.fromEntries(
-            Object.entries(
-                this.readMachineTranslationDictionary(
-                    translatorType,
-                    locale,
-                    namespace,
-                ),
-            ).map(([key, value]) => {
+            Object.entries(dictionary).map(([key, value]) => {
                 return [key, value.translation];
             }),
         );
     }
 
-    readDist(
+    readMachineTranslations(
+        translatorType: TranslatorType,
         locale: string,
-        namespace: string = globals.DEFAULT_NAMESPACE,
+        namespace: string,
     ): Translations {
-        return (
-            this.readTranslationsAllowNull(
-                this.getDistPath(locale, namespace),
-            ) ?? {}
+        return TranslationManager.convertMachineTranslationDictionaryToTranslations(
+            this.readMachineTranslationDictionary(
+                translatorType,
+                locale,
+                namespace,
+            ),
         );
+    }
+
+    readDist(locale: string, namespace: string): Translations {
+        const path = this.getDistPath(locale, namespace);
+        return this.readTranslationsAllowNull(path) ?? {};
     }
 
     // readCompare(
@@ -84,6 +108,21 @@ export class TranslationManager {
         dictionary: TranslationDictionary,
         args: { translator: TranslatorType; locale: string; namespace: string },
     ) {
+        const existingDictionary = this.readMachineTranslationDictionary(
+            args.translator,
+            args.locale,
+            args.namespace,
+        );
+
+        const mergedDictionary = { ...existingDictionary, ...dictionary };
+
+        this.setMachineTranslationDictionary(mergedDictionary, args);
+    }
+
+    setMachineTranslationDictionary(
+        dictionary: TranslationDictionary,
+        args: { translator: TranslatorType; locale: string; namespace: string },
+    ) {
         const isValid = validateTranslationDictionary(dictionary);
         if (isValid.valid === false) {
             throw new Error(
@@ -97,15 +136,7 @@ export class TranslationManager {
             args.namespace,
         );
 
-        const existingDictionary = this.readMachineTranslationDictionary(
-            args.translator,
-            args.locale,
-            args.namespace,
-        );
-
-        const mergedDictionary = { ...existingDictionary, ...dictionary };
-
-        fs.writeFileSync(filePath, JSON.stringify(mergedDictionary, null, 2));
+        fs.writeFileSync(filePath, JSON.stringify(dictionary, null, 2));
     }
 
     // setComparison(comparison: MachineTranslationComparison, {locale, namespace}: {locale: string, namespace: string}) {
@@ -193,17 +224,14 @@ export class TranslationManager {
     //     fs.writeFileSync(filePath, JSON.stringify(translations, null, 2));
     // }
 
-    private getSourceDir(namespace?: string): string {
-        if (namespace === globals.DEFAULT_NAMESPACE) {
-            namespace = undefined;
-        }
-
-        const namespacePart = namespace ? "/" + namespace : "";
+    private getSourceDir(namespace: string): string {
+        const namespacePart =
+            namespace === globals.DEFAULT_NAMESPACE ? "" : "/" + namespace;
 
         return globals.I18NUUID_LOCALES_DIR + namespacePart;
     }
 
-    private getSourcePath(locale: string, namespace?: string): string {
+    private getSourcePath(locale: string, namespace: string): string {
         return `${this.getSourceDir(namespace)}/${locale}.json`;
     }
 

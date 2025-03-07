@@ -31,12 +31,12 @@ export abstract class Translator implements ITranslator {
             namespace,
         }: { originalLocal: string; targetLocal: string; namespace: string },
     ): Promise<string> {
-        const randomNumber = Math.random() * 100;
-        if (randomNumber < 20) {
-            throw new Error(
-                `Random fail of fake tranlation (random number: ${randomNumber})`,
-            );
-        }
+        // const randomNumber = Math.random() * 100;
+        // if (randomNumber < 20) {
+        //     throw new Error(
+        //         `Random fail of fake tranlation (random number: ${randomNumber})`,
+        //     );
+        // }
 
         const infoText = `Fake translated from ${originalLocal} to ${targetLocal} for namespace ${namespace}: `;
         return Promise.resolve(
@@ -279,6 +279,8 @@ ${error}`;
             ),
         );
 
+        // console.log(chalk.cyan(JSON.stringify(translations)))
+
         const { valid, message } = validateTranslations(translations);
         if (!valid) {
             throw new Error(message);
@@ -305,7 +307,7 @@ ${error}`;
                 `Finished translate ${Object.keys(translations).length} items from ${args.originalLocal} to ${targetLocal} for namespace ${args.namespace}`,
             ),
         );
-        
+
         return result;
     }
 

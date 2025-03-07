@@ -66,9 +66,9 @@ export class MissingTranslationFinder {
     private readonly allTranslationRefs: Set<TextToTranslateRef> = new Set();
     private readonly translationManager: TranslationManager;
 
-    constructor(options: { translationManager?: TranslationManager } = {}) {
+    constructor(options: { translationManager: TranslationManager }) {
         this.translationManager =
-            options.translationManager ?? new TranslationManager();
+            options.translationManager;
     }
 
     async findAll(
@@ -117,7 +117,7 @@ export class MissingTranslationFinder {
 
         for (const namespace of namespaces) {
             for (const locale of otherLocales) {
-                if (this.getMappedLocale(locale) === globals.DEFAULT_LOCALE) {
+                if (this.translationManager.getMappedLocale(locale) === globals.DEFAULT_LOCALE) {
                     continue;
                 }
 
@@ -151,23 +151,6 @@ export class MissingTranslationFinder {
         // if(cliArguments.isTestCompare) {
         //     // baseTranslations = this.translationManager.readCompare(translator, locale, namespace);
         // } else {
-        //     const sourceTranslations = this.translationManager.readSource(
-        //         locale,
-        //         namespace,
-        //     );
-
-        //     const machineTranslations = this.translationManager.readMachineTranslations(
-        //         translator,
-        //         locale,
-        //         namespace,
-        //     );
-
-        //      baseTranslations = Object.fromEntries(
-        //         Object.entries(machineTranslations).concat(
-        //             Object.entries(sourceTranslations),
-        //         ),
-        //     ) as Translations;
-        // }
 
         const sourceTranslations = this.translationManager.readSource(
             locale,
@@ -191,10 +174,24 @@ export class MissingTranslationFinder {
             locale,
             namespace,
         );
-        const missingTranslations = this.getMissingTranslations(
+
+        const defaultDistTranslations = this.translationManager.readDist(
+            globals.DEFAULT_LOCALE,
+            namespace
+        );
+
+        const missingTranslationIds = this.getMissingTranslationIds(
             baseTranslations,
             distTranslations,
         );
+
+        const missingTranslations: Translations = Object.fromEntries(missingTranslationIds.map((id) => {
+            const text = defaultDistTranslations[id];
+            if(text === undefined) {
+                throw new Error(`Missing default translation for ${id} (namespace: ${namespace})`);
+            }
+            return [id, text] as [string, string];
+        }));
 
         const searchResult = this.getSearchResult({
             locale,
@@ -300,30 +297,6 @@ export class MissingTranslationFinder {
         return null;
     }
 
-    private getMappedLocale(locale: string): string {
-        const parts = locale.split("-");
-        const language = parts[0];
-        const country = parts[1];
-
-        const dict = globals.DEFAULT_LOCALES[language];
-
-        if (!dict) {
-            return language;
-        }
-
-        if (dict.countries) {
-            for (const [defaultCountry, countryList] of Object.entries(
-                dict.countries,
-            )) {
-                if (countryList.includes(country)) {
-                    return language + "-" + defaultCountry;
-                }
-            }
-        }
-
-        return language + "-" + dict.default;
-    }
-
     private getSearchResult(args: {
         locale: string;
         namespace?: string;
@@ -335,7 +308,7 @@ export class MissingTranslationFinder {
             missingTranslations,
         } = args;
 
-        const mappedLocale = this.getMappedLocale(locale);
+        const mappedLocale = this.translationManager.getMappedLocale(locale);
 
         const existingTranslationsToAdd: TranslationDictionary = {};
         const translationRefs: TextToTranslateRef[] = [];
@@ -387,14 +360,12 @@ export class MissingTranslationFinder {
         };
     }
 
-    private getMissingTranslations(
+    private getMissingTranslationIds(
         baseTranslations: Translations,
         distTranslations: Translations,
-    ): Translations {
-        return Object.fromEntries(
-            Object.entries(distTranslations).filter(
-                (entry) => baseTranslations.hasOwnProperty(entry[0]) === false,
-            ),
-        );
+    ): string[] {
+        return Object.entries(distTranslations).filter(
+            (entry) => baseTranslations.hasOwnProperty(entry[0]) === false,
+        ).map((entry) => entry[0]);
     }
 }
