@@ -4,13 +4,17 @@ import { LoginProviderType } from "./User";
 
 export class OpenIDClientConfiguration extends AutoEncoder {
     @field({decoder: StringDecoder})
-    issuer: string
+    issuer = '';
 
     @field({decoder: StringDecoder})
-    clientId
+    clientId = ''
 
     @field({decoder: StringDecoder})
-    clientSecret
+    clientSecret = ''
+
+    static get placeholderClientSecret() {
+        return '••••';
+    }
 }
 
 

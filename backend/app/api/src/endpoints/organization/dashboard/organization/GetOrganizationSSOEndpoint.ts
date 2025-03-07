@@ -33,11 +33,18 @@ export class GetOrganizationSSOEndpoint extends Endpoint<Params, Query, Body, Re
         if (!Context.auth.canManageSSOSettings()) {
             throw Context.auth.error()
         }
-        
-        return new Response(organization.serverMeta.ssoConfiguration ?? OpenIDClientConfiguration.create({
+
+        const configuration = (organization.serverMeta.ssoConfiguration ?? OpenIDClientConfiguration.create({
             clientId: "",
             clientSecret: "",
             issuer: ""
-        }));
+        })).clone()
+
+        // Remove secret by placeholder asterisks
+        if (configuration.clientSecret.length > 0) {
+            configuration.clientSecret = OpenIDClientConfiguration.placeholderClientSecret;
+        }
+        
+        return new Response(configuration);
     }
 }

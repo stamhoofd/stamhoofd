@@ -1,5 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
+import { SimpleError } from '@simonbackx/simple-errors';
 import { OpenIDClientConfiguration } from "@stamhoofd/structures";
 
 import { Context } from '../../../../helpers/Context';
@@ -38,13 +39,35 @@ export class SetOrganizationSSOEndpoint extends Endpoint<Params, Query, Body, Re
             throw Context.auth.error()
         }
 
-        // Validate configuration
-        const helper = new OpenIDConnectHelper(organization, request.body)
-        await helper.getClient()
+        const body = request.body.clone()
 
-        organization.serverMeta.ssoConfiguration = request.body
+        if (request.body.clientSecret === OpenIDClientConfiguration.placeholderClientSecret) {
+            body.clientSecret = organization.serverMeta.ssoConfiguration?.clientSecret ?? ""
+        }
+
+        // Validate configuration
+        try {
+            const helper = new OpenIDConnectHelper(organization, body)
+            await helper.getClient()
+        } catch (e) {
+            console.error(e)
+            throw new SimpleError({
+                code: 'invalid_configuration',
+                message: 'Invalid configuration',
+                human: 'Deze configuratie is ongeldig. Controleer of de gegevens correct zijn ingevuld.',
+            })
+        }
+
+        organization.serverMeta.ssoConfiguration = body
         await organization.save()
 
-        return new Response(request.body);
+        const response = body.clone()
+
+         // Remove secret by placeholder asterisks
+        if (response.clientSecret.length > 0) {
+            response.clientSecret = OpenIDClientConfiguration.placeholderClientSecret;
+        }
+
+        return new Response(response);
     }
 }
