@@ -13,8 +13,9 @@ import {
     AfterBatchTranslatedCallback,
     ITranslator,
 } from "./translators/ITranslator";
-import { MistralTranslator } from "./translators/MistralTranslator";
+import { MistralLargeTranslator, MistralSmallTranslator } from "./translators/MistralTranslator";
 import { OpenAiTranslator } from "./translators/OpenAiTranslator";
+import { Translator } from "./translators/Translator";
 import { Translations } from "./types/Translations";
 
 export class AutoTranslator {
@@ -205,18 +206,22 @@ export class AutoTranslator {
     }
 
     private createTranslator(): ITranslator {
-        switch (this.type.toLowerCase()) {
-            case TranslatorType.Mistral.toLowerCase():
-                return new MistralTranslator(this.manager);
-            case TranslatorType.GoogleGemini.toLowerCase():
-                return new GoogleGeminiTranslator(this.manager);
-            case TranslatorType.OpenAi.toLowerCase():
-                return new OpenAiTranslator(this.manager);
-            case TranslatorType.Claude.toLowerCase():
-                return new ClaudeTranslator(this.manager);
-            default: {
-                throw Error(`Unknown translator type: ${this.type}`);
+        const dict: [TranslatorType, typeof Translator][] = [
+            [TranslatorType.MistralLarge, MistralLargeTranslator],
+            [TranslatorType.MistralSmall, MistralSmallTranslator],
+            [TranslatorType.GoogleGemini, GoogleGeminiTranslator],
+            [TranslatorType.OpenAi, OpenAiTranslator],
+            [TranslatorType.Claude, ClaudeTranslator],
+        ];
+
+        const type = this.type.toLowerCase();
+
+        for(const [translatorType, translator] of dict) {
+            if(translatorType === type) {
+                return new (translator as any)(this.manager);
             }
         }
+
+        throw Error(`Unknown translator type: ${type}`);
     }
 }
