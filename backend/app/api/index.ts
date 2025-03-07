@@ -1,5 +1,5 @@
 import backendEnv from '@stamhoofd/backend-env';
-backendEnv.load();
+backendEnv.load({ service: 'api' });
 
 import { Column, Database, Migration } from '@simonbackx/simple-database';
 import { CORSPreflightEndpoint, Router, RouterServer } from '@simonbackx/simple-endpoints';
