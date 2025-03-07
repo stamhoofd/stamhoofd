@@ -6,6 +6,7 @@ import {
     MissingTranslationFinder,
     TextToTranslateRef,
 } from "./MissingTranslationFinder";
+import { OutdatedTranslationFinder } from "./OutdatedTranslationFinder";
 import { TranslationManager } from "./TranslationManager";
 import { ClaudeTranslator } from "./translators/ClaudeTranslator";
 import { GoogleGeminiTranslator } from "./translators/GoogleGeminiTranslator";
@@ -19,14 +20,19 @@ import { Translator } from "./translators/Translator";
 import { TranslationDictionary } from "./types/TranslationDictionary";
 
 export class AutoTranslator {
-    private readonly finder: MissingTranslationFinder;
+    private readonly missingTranslationFinder: MissingTranslationFinder;
+    private readonly outdatedTranslationFinder: OutdatedTranslationFinder;
     private readonly translator: ITranslator;
 
     constructor(
         private readonly type: TranslatorType,
         private readonly manager: TranslationManager,
     ) {
-        this.finder = new MissingTranslationFinder({
+        this.missingTranslationFinder = new MissingTranslationFinder({
+            translationManager: manager,
+        });
+
+        this.outdatedTranslationFinder = new OutdatedTranslationFinder({
             translationManager: manager,
         });
 
@@ -36,7 +42,11 @@ export class AutoTranslator {
     async start() {
         console.log(chalk.blue(`Start auto translate (translator: ${this.type})`));
 
-        const missingTranslationsOutput = await this.finder.findAll(this.type, cliArguments.locales);
+        const locales = cliArguments.locales;
+
+        this.outdatedTranslationFinder.removeOutdatedTranslations(this.type, locales);
+
+        const missingTranslationsOutput = await this.missingTranslationFinder.findAll(this.type, locales);
 
         // add the existing to the source of the locale/namespace combination
         for (const searchResult of missingTranslationsOutput.searchResults) {
