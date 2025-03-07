@@ -217,7 +217,7 @@ export class AutoTranslator {
         const type = this.type.toLowerCase();
 
         for(const [translatorType, translator] of dict) {
-            if(translatorType === type) {
+            if(translatorType.toLowerCase() === type) {
                 return new (translator as any)(this.manager);
             }
         }
