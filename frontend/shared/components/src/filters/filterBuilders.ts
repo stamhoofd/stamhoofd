@@ -1517,6 +1517,7 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
 
     const groupFilter = new MultipleChoiceFilterBuilder({
         name: 'Inschrijvingsgroep',
+        allowCreation: organizations.length > 0,
         options: [
             new MultipleChoiceUIFilterOption('Iedereen', null),
             ...organizations
