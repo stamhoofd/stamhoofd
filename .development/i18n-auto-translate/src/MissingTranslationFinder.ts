@@ -146,12 +146,6 @@ export class MissingTranslationFinder {
         locale: string;
         namespace: string;
     }): Promise<SearchResult> {
-        // let baseTranslations: Translations;
-
-        // if(cliArguments.isTestCompare) {
-        //     // baseTranslations = this.translationManager.readCompare(translator, locale, namespace);
-        // } else {
-
         const sourceTranslations = this.translationManager.readSource(
             locale,
             namespace,

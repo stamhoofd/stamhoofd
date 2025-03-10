@@ -9,6 +9,7 @@ import {
     validateTranslationDictionary,
     validateTranslations,
 } from "./helpers/validate-translations";
+import { MachineTranslationComparison } from "./MachineTranslationComparer";
 import { ConsistentWords } from "./types/ConsistentWords";
 import { TranslationDictionary } from "./types/TranslationDictionary";
 import { Translations } from "./types/Translations";
@@ -92,18 +93,6 @@ export class TranslationManager {
         return this.readTranslationsAllowNull(path) ?? {};
     }
 
-    // readCompare(
-    //     translator: TranslatorType,
-    //     locale: string,
-    //     namespace?: string,
-    // ): TranslationsWithConfig {
-    //     return (
-    //         this.readTranslationsAllowNull(
-    //             this.getComparePath(translator, locale, namespace),
-    //         ) ?? {}
-    //     );
-    // }
-
     addMachineTranslationDictionary(
         dictionary: TranslationDictionary,
         args: { translator: TranslatorType; locale: string; namespace: string },
@@ -139,11 +128,14 @@ export class TranslationManager {
         fs.writeFileSync(filePath, JSON.stringify(dictionary, null, 2));
     }
 
-    // setComparison(comparison: MachineTranslationComparison, {locale, namespace}: {locale: string, namespace: string}) {
-    //     const dir = this.getCompareDir();
-    //     const path = `${dir}/comparison-${namespace}-${locale}.json`;
-    //     fs.writeFileSync(path, JSON.stringify(comparison, null, 2));
-    // }
+    setComparison(comparison: MachineTranslationComparison, {locale, namespace}: {locale: string, namespace: string}) {
+        if(globals.COMPARE_OUTPUT_DIR.length === 0) {
+            throw new Error('No COMPARE_OUTPUT_DIR set');
+        }
+        const dir = globals.COMPARE_OUTPUT_DIR;
+        const path = `${dir}/comparison-${namespace}-${locale}.json`;
+        fs.writeFileSync(path, JSON.stringify(comparison, null, 2));
+    }
 
     async buildTranslations() {
         console.log("Building translations...");
@@ -185,45 +177,6 @@ export class TranslationManager {
         return result;
     }
 
-    // will merge translations with existing file
-    // private addTranslations(
-    //     translations: Translations,
-    //     args: {
-    //         locale: string;
-    //         namespace?: string;
-    //         allowedObjects?: string[] | null;
-    //     },
-    // ) {
-    //     const existingTranslations = this.readSource(
-    //         args.locale,
-    //         args.namespace,
-    //         args.allowedObjects,
-    //     );
-    //     const mergedTranslations = { ...existingTranslations, ...translations };
-    //     this.setTranslations(mergedTranslations, args);
-    // }
-
-    // will overwrite all translations in file
-    // private setTranslations(
-    //     translations: Translations,
-    //     args: {
-    //         locale: string;
-    //         namespace?: string;
-    //         allowedObjects?: string[] | null;
-    //     },
-    // ) {
-    //     const isValid = validateTranslations(translations, args.allowedObjects);
-    //     if (isValid.valid === false) {
-    //         throw new Error(`Failed to write translations: ${isValid.message}`);
-    //     }
-
-    //     const filePath = this.getSourcePath(
-    //         args.locale,
-    //         args.namespace,
-    //     );
-    //     fs.writeFileSync(filePath, JSON.stringify(translations, null, 2));
-    // }
-
     private getSourceDir(namespace: string): string {
         const namespacePart =
             namespace === globals.DEFAULT_NAMESPACE ? "" : "/" + namespace;
@@ -253,18 +206,6 @@ export class TranslationManager {
     ): string {
         return `${this.getSourceDir(namespace)}/machine-${translatorType}-${locale}.json`;
     }
-
-    // private getCompareDir() {
-    //     if(globals.COMPARE_OUTPUT_DIR.length === 0) {
-    //         throw new Error('No COMPARE_OUTPUT_DIR set');
-    //     }
-
-    //     return globals.COMPARE_OUTPUT_DIR;
-    // }
-
-    // private getComparePath(translator: TranslatorType, locale: string, namespace?: string) {
-    //     return `${this.getCompareDir()}/${translator}-${namespace ?? globals.DEFAULT_NAMESPACE}-${locale}.json`;
-    // }
 
     private getAllLocalesInProject(): string[] {
         const localesDir = globals.I18NUUID_LOCALES_DIR;
