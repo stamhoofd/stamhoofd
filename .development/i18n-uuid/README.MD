@@ -1,22 +1,39 @@
-# i18n Replace Text
+# i18n uuid
+This module:
+- finds untranslated text in Vue templates and replaces them with a translation function
+- searches translation keys, replaces the key with an uuid key and adds the key to the translations
+- finds missing or changed translations and translates them with an Ai-model
+- creates a comparison of the machine translations for each locale and writes the comparison in the directory that is specified in the environment
 
-This module searches and translates untranslated text in Vue templates.
+## commands
 
-## Cli arguments
-- `--dry-run`: if true the files will not be written
-- `--prompt`: if true the cli will ask to verify every translation
-- `--fix`: if true the written files will be fixed with eslint
-- `--changes` if true only the changed lines will be translated
-- `--compare <commitId1> <commmitId2>`: specify the git commits to compare
-- `--attribute-white-list <jsonStringArray>`: specify the attribute names to whitelist, for example: '["title", "placeholder"]'
+### start
+Executes all commands in order. The arguments of each command can be passed.
 
-# i18n Auto Translate
+### replace-text
+Search untranslated text in Vue templates and replaces them with a translation function.
 
-This module finds missing translations and translates them with an ai api.
+#### arguments
+- `--compare <commits...>`: Git commits to compare
+- `-c, --changes`: Only the changed files will be checked.
+- `--attribute-white-list <attributes...>`: Array of html attributes to white list. Text of other attributes will not be checked.
+- `--dry-run`: Do not write the translated files.
+- `-p, --prompt`: The prompt will show the code before and after the replacement and ask to accept the change.
+- `-f, --fix`: Fix the changed files with ESLint (can be slow).
 
-## Cli arguments
-- `--fake`: add fake translations without calling the api (for testing)
-- `--translator`: the translator to use, options: GoogleGemini, MistralLarge, MistralSmall, OpenAi or Claude
+### replace-keys
+Search translation keys, replace the key with an uuid key and add the key to the translations.
+
+### auto-translate
+Finds missing or changed translations and translate with an Ai-model.
+
+#### arguments
+- `--fake`: Translate the misssing translations with a fake translation (for testing purposes).
+- `--translator <translator-type>`: The translator type (GoogleGemini, MistralLarge, MistralSmall, OpenAi or Claude).
+- `--locales <locales...>`: Specify the locals to translate (by default translations for all locals will be added).
+
+### create-comparison
+Create a comparison of the machine translations for each locale and write the comparison in the directory that is specified in the environment.
 
 ## Environment variables
 - `I18NUUID_ROOT`: the path to the root of the project

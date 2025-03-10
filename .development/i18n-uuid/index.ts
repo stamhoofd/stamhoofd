@@ -7,7 +7,7 @@ import { replaceText } from "./src/replace-text/replace-text";
 const program = new Command();
 
 const replaceTextOptions: [string, string][] = [
-    ["--compare <commits...>", "Commits to compare"],
+    ["--compare <commits...>", "Git commits to compare"],
     ["-c, --changes", "Only the changed files will be checked."],
     [
         "--attribute-white-list <attributes...>",
@@ -21,7 +21,7 @@ const replaceTextOptions: [string, string][] = [
     ["-f, --fix", "Fix the changed files with ESLint (can be slow)."],
 ];
 
-const replaceKeysOptions: [string, string][] = [
+const autoTranslateOptions: [string, string][] = [
     [
         "--fake",
         "Translate the misssing translations with a fake translation (for testing purposes).",
@@ -36,7 +36,7 @@ const replaceKeysOptions: [string, string][] = [
     ],
 ];
 
-const startOptions = replaceTextOptions.concat(replaceKeysOptions);
+const startOptions = replaceTextOptions.concat(autoTranslateOptions);
 
 const startCommand = program.command("start").action(async (args) => {
     // replace text
@@ -67,14 +67,14 @@ replaceTextOptions.forEach(([flags, description]) =>
 
 program.command("replace-keys").action(() => replaceKeys());
 
-const replaceKeysCommand = program
+const autoTranslateCommand = program
     .command("auto-translate")
     .action(async (args) => {
         await autoTranslate(args);
     });
 
-replaceKeysOptions.forEach(([flags, description]) =>
-    replaceKeysCommand.option(flags, description),
+autoTranslateOptions.forEach(([flags, description]) =>
+    autoTranslateCommand.option(flags, description),
 );
 
 program
