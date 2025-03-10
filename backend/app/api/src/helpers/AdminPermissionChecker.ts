@@ -344,6 +344,11 @@ export class AdminPermissionChecker {
      * Note: only checks admin permissions. Users that 'own' this member can also access it but that does not use the AdminPermissionChecker
      */
     async canAccessRegistration(registration: Registration, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+        if (registration.deactivatedAt || !registration.registeredAt) {
+            // No full access: cannot access deactivated registrations
+            return false;
+        }
+
         const organizationPermissions = await this.getOrganizationPermissions(registration.organizationId);
 
         if (!organizationPermissions) {
@@ -353,11 +358,6 @@ export class AdminPermissionChecker {
         if (organizationPermissions.hasAccess(PermissionLevel.Full)) {
             // Only full permissions; because non-full doesn't have access to other periods
             return true;
-        }
-
-        if (registration.deactivatedAt || !registration.registeredAt) {
-            // No full access: cannot access deactivated registrations
-            return false;
         }
 
         const allGroups = await this.getOrganizationGroups(registration.organizationId);
