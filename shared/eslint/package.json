@@ -1,6 +1,6 @@
 {
     "name": "eslint-plugin-stamhoofd",
-    "version": "2.79.5",
+    "version": "2.79.6",
     "main": "./src/index.js",
     "license": "UNLICENCED",
     "sideEffects": false,
