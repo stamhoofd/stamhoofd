@@ -16,7 +16,6 @@ export async function startCheckout({ checkout, context, displayOptions, admin, 
     checkout.validate({});
 
     const steps: ViewStep[] = [
-        new PassRegistrationFeeStep(checkout),
         new FreeContributionStep(checkout),
         new PaymentCustomerStep(checkout),
         new PaymentSelectionStep(checkout),
