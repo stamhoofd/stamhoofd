@@ -8,7 +8,7 @@ import { useOrganization } from '../../hooks';
 import { SearchOrganizationView } from '../../members';
 import { NavigationActions } from '../../types/NavigationActions';
 
-export function useExternalOrganization(organizationId: Ref<string | null>) {
+export function useExternalOrganization(organizationId: Ref<string | null>, organizationHint?: Organization | null) {
     const organization = useOrganization();
     const loadedOrganization = ref(null) as Ref<Organization | null>;
     const errorBox = ref(null) as Ref<ErrorBox | null>;
@@ -26,6 +26,10 @@ export function useExternalOrganization(organizationId: Ref<string | null>) {
 
         if (organizationId.value === organization.value?.id) {
             return organization.value;
+        }
+
+        if (organizationHint && organizationHint.id === organizationId.value) {
+            return organizationHint;
         }
 
         return loadedOrganization.value;

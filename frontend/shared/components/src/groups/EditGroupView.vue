@@ -520,7 +520,7 @@ import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/sim
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AgeInput, DateSelection, Dropdown, EditGroupView, EditRecordCategoriesBox, ErrorBox, GroupIdsInput, InheritedRecordsConfigurationBox, LoadingViewTransition, NumberInput, OrganizationAvatar, RecordEditorSettings, RecordEditorType, TimeInput, useRegisterItemFilterBuilders } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { BooleanStatus, Country, DefaultAgeGroup, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupStatus, GroupType, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, Platform, PlatformFamily, PlatformMember, RecordCategory, RegisterItem, Registration, WaitingListType, type MemberProperty } from '@stamhoofd/structures';
+import { BooleanStatus, Country, DefaultAgeGroup, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupStatus, GroupType, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, Platform, PlatformFamily, PlatformMember, RecordCategory, RegisterItem, Registration, WaitingListType, type MemberProperty } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
@@ -542,11 +542,13 @@ const props = withDefaults(
         saveHandler: (group: AutoEncoderPatchType<Group>) => Promise<void>;
         deleteHandler?: (() => Promise<void>) | null;
         showToasts?: boolean;
+        organizationHint?: Organization | null;
     }>(),
     {
         deleteHandler: null,
         showToasts: true,
         isMultiOrganization: false,
+        organizationHint: null,
     },
 );
 
@@ -569,6 +571,7 @@ const { externalOrganization: externalOrganization, choose: chooseOrganizer, loa
             organizationId,
         }),
     }),
+    props.organizationHint
 );
 
 const patchPricesArray = (prices: PatchableArrayAutoEncoder<GroupPrice>) => {
@@ -1153,6 +1156,7 @@ async function addWaitingList() {
                 group: waitingList,
                 isNew: true,
                 showToasts: false,
+                organizationHint: externalOrganization.value,
                 saveHandler: (patch: AutoEncoderPatchType<Group>) => {
                     addPatch({
                         waitingList: waitingList.patch(patch),
@@ -1184,6 +1188,7 @@ async function editWaitingList(waitingList: Group) {
                 group: waitingList,
                 isNew: false,
                 showToasts: false,
+                organizationHint: externalOrganization.value,
                 saveHandler: (patch: AutoEncoderPatchType<Group>) => {
                     addPatch({
                         waitingList: patch,
@@ -1260,18 +1265,8 @@ const family = new PlatformFamily({
     contextOrganization: organization.value,
 });
 
-const recordEditorSettings = new RecordEditorSettings({
-    type: RecordEditorType.Registration,
-    dataPermission: false,
-    toggleDefaultEnabled: false,
-    filterBuilder: (recordCategories: RecordCategory[]) => {
-        return getRegisterItemFilterBuilders(patched.value.patch({
-            settings: GroupSettings.patch({
-                recordCategories: recordCategories as any,
-            }),
-        }))[0];
-    },
-    exampleValue: RegisterItem.defaultFor(new PlatformMember({
+const recordEditorSettings = computed(() => {
+    const exampleMember = new PlatformMember({
         member: MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({
                 firstName: 'Voorbeeld',
@@ -1284,8 +1279,24 @@ const recordEditorSettings = new RecordEditorSettings({
         }),
         isNew: true,
         family,
-    }), patched.value, externalOrganization.value!),
-});
+    });
+
+    return new RecordEditorSettings({
+        type: RecordEditorType.Registration,
+        dataPermission: false,
+        toggleDefaultEnabled: false,
+        filterBuilder: (recordCategories: RecordCategory[]) => {
+            return getRegisterItemFilterBuilders(patched.value.patch({
+                settings: GroupSettings.patch({
+                    recordCategories: recordCategories as any,
+                }),
+            }))[0];
+        },
+        exampleValue: RegisterItem.defaultFor(exampleMember, patched.value, externalOrganization.value ?? Organization.create({
+            id: patched.value.organizationId
+        })),
+    });
+})
 
 defineExpose({
     shouldNavigateAway,

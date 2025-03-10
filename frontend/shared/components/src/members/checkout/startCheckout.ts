@@ -16,6 +16,7 @@ export async function startCheckout({ checkout, context, displayOptions, admin, 
     checkout.validate({});
 
     const steps: ViewStep[] = [
+        new PassRegistrationFeeStep(checkout),
         new FreeContributionStep(checkout),
         new PaymentCustomerStep(checkout),
         new PaymentSelectionStep(checkout),
@@ -59,7 +60,7 @@ async function register({ checkout, context, admin, members }: { checkout: Regis
     const registrations = response.data.registrations;
 
     // Copy data to members
-    PlatformFamily.updateFromBlob([...(members ?? []), ...checkout.cart.items.map(i => i.member)], response.data.members)
+    PlatformFamily.updateFromBlob([...(members ?? []), ...checkout.cart.items.map(i => i.member)], response.data.members);
     updateContextFromMembersBlob(context, response.data.members);
 
     const clearAndEmit = () => {

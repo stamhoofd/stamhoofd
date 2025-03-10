@@ -1,163 +1,165 @@
 <template>
-    <ExternalOrganizationContainer v-slot="{externalOrganization: eventOrganization}" :organization-id="event.organizationId" @update="setOrganization">
-        <div class="st-view event-overview">
-            <STNavigationBar :title="title" />
+    <ExternalOrganizationContainer :organization-id="event.organizationId" @update="setOrganization">
+        <ExternalOrganizationContainer :organization-id="event.group?.organizationId ?? null" :organization-hint="eventOrganization" @update="setGroupOrganization">
+            <div class="st-view event-overview">
+                <STNavigationBar :title="title" />
 
-            <main class="center">
-                <ImageComponent v-if="event.meta.coverPhoto" :image="event.meta.coverPhoto" :auto-height="true" class="style-cover-photo" />
+                <main class="center">
+                    <ImageComponent v-if="event.meta.coverPhoto" :image="event.meta.coverPhoto" :auto-height="true" class="style-cover-photo" />
 
-                <p class="style-title-prefix">
-                    {{ levelPrefix }}
-                </p>
-                <h1 class="style-navigation-title">
-                    {{ title }}
-                </h1>
+                    <p class="style-title-prefix">
+                        {{ levelPrefix }}
+                    </p>
+                    <h1 class="style-navigation-title">
+                        {{ title }}
+                    </h1>
 
-                <template v-if="event.meta.description.html">
-                    <div class="description style-wysiwyg gray large" v-html="event.meta.description.html" />
-                </template>
-
-                <EventInfoTable :event="event">
-                    <template v-if="event.group && (!organization || event.group.organizationId === organization.id || event.group.settings.allowRegistrationsByOrganization)">
-                        <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.Registrations)">
-                            <template #left>
-                                <span class="icon group" />
-                            </template>
-
-                            <h2 class="style-title-list">
-                                Ingeschreven leden
-                            </h2>
-                            <p class="style-description">
-                                Bekijk, beheer, exporteer of e-mail ingeschreven leden.
-                            </p>
-                            <template #right>
-                                <span v-if="event.group.getMemberCount() !== null" class="style-description-small">{{ formatInteger(event.group.getMemberCount()!) }}</span>
-                                <span class="icon arrow-right-small gray" />
-                            </template>
-                        </STListItem>
-
-                        <STListItem v-if="event.group.waitingList && (!organization || event.group.organizationId === organization.id || event.group.waitingList.settings.allowRegistrationsByOrganization)" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.WaitingList)">
-                            <template #left>
-                                <span class="icon clock" />
-                            </template>
-
-                            <h2 class="style-title-list">
-                                {{ event.group.waitingList.settings.name }}
-                            </h2>
-                            <p class="style-description">
-                                Bekijk leden op de wachtlijst
-                            </p>
-                            <template #right>
-                                <span v-if="event.group.waitingList.getMemberCount() !== null" class="style-description-small">{{ formatInteger(event.group.waitingList.getMemberCount()!) }}</span>
-                                <span class="icon arrow-right-small gray" />
-                            </template>
-                        </STListItem>
+                    <template v-if="event.meta.description.html">
+                        <div class="description style-wysiwyg gray large" v-html="event.meta.description.html" />
                     </template>
-                </EventInfoTable>
 
-                <div v-if="canWriteEvent" class="container">
-                    <hr>
-                    <h2>
-                        Instellingen
-                    </h2>
+                    <EventInfoTable :event="event">
+                        <template v-if="event.group && (!organization || event.group.organizationId === organization.id || event.group.settings.allowRegistrationsByOrganization)">
+                            <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.Registrations)">
+                                <template #left>
+                                    <span class="icon group" />
+                                </template>
 
-                    <STList class="illustration-list">
-                        <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Edit)">
-                            <template #left>
-                                <img src="@stamhoofd/assets/images/illustrations/flag.svg">
-                            </template>
-                            <h2 class="style-title-list">
-                                Algemeen
-                            </h2>
-                            <p class="style-description">
-                                Wijzig de naam, beschrijving, datum en beschikbaarheid.
-                            </p>
-                            <template #right>
-                                <span class="icon arrow-right-small gray" />
-                            </template>
-                        </STListItem>
+                                <h2 class="style-title-list">
+                                    Ingeschreven leden
+                                </h2>
+                                <p class="style-description">
+                                    Bekijk, beheer, exporteer of e-mail ingeschreven leden.
+                                </p>
+                                <template #right>
+                                    <span v-if="event.group.getMemberCount() !== null" class="style-description-small">{{ formatInteger(event.group.getMemberCount()!) }}</span>
+                                    <span class="icon arrow-right-small gray" />
+                                </template>
+                            </STListItem>
 
-                        <STListItem v-if="event.group" :selectable="true" class="left-center" @click="$navigate(Routes.EditGroup)">
-                            <template #left>
-                                <img src="@stamhoofd/assets/images/illustrations/list.svg">
-                            </template>
-                            <h2 class="style-title-list">
-                                Inschrijvingsinstellingen
-                            </h2>
-                            <p class="style-description">
-                                Wijzig hoe leden kunnen inschrijven, de tarieven en de verzamelde gegevens.
-                            </p>
-                            <template #right>
-                                <span class="icon arrow-right-small gray" />
-                            </template>
-                        </STListItem>
+                            <STListItem v-if="event.group.waitingList && (!organization || event.group.organizationId === organization.id || event.group.waitingList.settings.allowRegistrationsByOrganization)" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.WaitingList)">
+                                <template #left>
+                                    <span class="icon clock" />
+                                </template>
 
-                        <STListItem v-if="event.group" :selectable="true" class="left-center" @click="$navigate(Routes.EditEmails)">
-                            <template #left>
-                                <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
-                            </template>
-                            <h2 class="style-title-list">
-                                E-mailsjablonen
-                            </h2>
-                            <p class="style-description">
-                                Wijzig de inhoud van automatische e-mails naar leden die zijn of worden ingeschreven voor deze activiteit.
-                            </p>
-                            <template #right>
-                                <span class="icon arrow-right-small gray" />
-                            </template>
-                        </STListItem>
-
-                        <template v-if="eventOrganization">
-                            <EventNotificationRow v-for="type of event.eventNotificationTypes" :key="type.id" class="container" :type="type" :event="event" :organization="eventOrganization" />
+                                <h2 class="style-title-list">
+                                    {{ event.group.waitingList.settings.name }}
+                                </h2>
+                                <p class="style-description">
+                                    Bekijk leden op de wachtlijst
+                                </p>
+                                <template #right>
+                                    <span v-if="event.group.waitingList.getMemberCount() !== null" class="style-description-small">{{ formatInteger(event.group.waitingList.getMemberCount()!) }}</span>
+                                    <span class="icon arrow-right-small gray" />
+                                </template>
+                            </STListItem>
                         </template>
-                    </STList>
-                </div>
-                <hr>
-                <h2>Link kopiëren</h2>
-                <p>{{ $t("40b31f32-5a02-488d-beb3-d987ea5c9315") }}</p>
+                    </EventInfoTable>
 
-                <div class="input-with-buttons">
-                    <div>
-                        <input class="input" :value="link" readonly>
-                    </div>
-                    <div>
-                        <button v-copyable="link" type="button" class="button text">
-                            <span class="icon copy" />
-                            <span class="hide-small">Kopiëren</span>
-                        </button>
-                    </div>
-                </div>
+                    <div v-if="canWriteEvent" class="container">
+                        <hr>
+                        <h2>
+                            Instellingen
+                        </h2>
 
-                <template v-if="event.group && auth.canRegisterMembersInGroup(event.group)">
+                        <STList class="illustration-list">
+                            <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Edit)">
+                                <template #left>
+                                    <img src="@stamhoofd/assets/images/illustrations/flag.svg">
+                                </template>
+                                <h2 class="style-title-list">
+                                    Algemeen
+                                </h2>
+                                <p class="style-description">
+                                    Wijzig de naam, beschrijving, datum en beschikbaarheid.
+                                </p>
+                                <template #right>
+                                    <span class="icon arrow-right-small gray" />
+                                </template>
+                            </STListItem>
+
+                            <STListItem v-if="event.group" :selectable="true" class="left-center" @click="$navigate(Routes.EditGroup)">
+                                <template #left>
+                                    <img src="@stamhoofd/assets/images/illustrations/list.svg">
+                                </template>
+                                <h2 class="style-title-list">
+                                    Inschrijvingsinstellingen
+                                </h2>
+                                <p class="style-description">
+                                    Wijzig hoe leden kunnen inschrijven, de tarieven en de verzamelde gegevens.
+                                </p>
+                                <template #right>
+                                    <span class="icon arrow-right-small gray" />
+                                </template>
+                            </STListItem>
+
+                            <STListItem v-if="event.group" :selectable="true" class="left-center" @click="$navigate(Routes.EditEmails)">
+                                <template #left>
+                                    <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
+                                </template>
+                                <h2 class="style-title-list">
+                                    E-mailsjablonen
+                                </h2>
+                                <p class="style-description">
+                                    Wijzig de inhoud van automatische e-mails naar leden die zijn of worden ingeschreven voor deze activiteit.
+                                </p>
+                                <template #right>
+                                    <span class="icon arrow-right-small gray" />
+                                </template>
+                            </STListItem>
+
+                            <template v-if="eventOrganization">
+                                <EventNotificationRow v-for="type of event.eventNotificationTypes" :key="type.id" class="container" :type="type" :event="event" :organization="eventOrganization" />
+                            </template>
+                        </STList>
+                    </div>
                     <hr>
-                    <h2>Handmatig leden inschrijven</h2>
+                    <h2>Link kopiëren</h2>
+                    <p>{{ $t("40b31f32-5a02-488d-beb3-d987ea5c9315") }}</p>
 
-                    <p v-if="organization && event.organizationId === organization.id">
-                        {{ $t('3f4666f9-59b5-4a24-b1a7-9f820275c042') }}
-                    </p>
-                    <p v-else-if="!event.group.settings.isFree">
-                        {{ $t('3ab07939-121b-47f9-956f-a573c57ec008') }}
-                    </p>
-                    <p v-else>
-                        {{ $t('7cac9136-10b5-4f1c-b9a4-0fb3f8410a9b') }}
-                    </p>
+                    <div class="input-with-buttons">
+                        <div>
+                            <input class="input" :value="link" readonly>
+                        </div>
+                        <div>
+                            <button v-copyable="link" type="button" class="button text">
+                                <span class="icon copy" />
+                                <span class="hide-small">Kopiëren</span>
+                            </button>
+                        </div>
+                    </div>
 
-                    <p class="style-button-bar">
-                        <button class="button primary" type="button" @click="addMembers">
-                            <span class="icon add" />
-                            <span>Leden inschrijven</span>
-                        </button>
-                    </p>
-                </template>
-            </main>
-        </div>
+                    <template v-if="event.group && auth.canRegisterMembersInGroup(event.group)">
+                        <hr>
+                        <h2>Handmatig leden inschrijven</h2>
+
+                        <p v-if="organization && event.organizationId === organization.id">
+                            {{ $t('3f4666f9-59b5-4a24-b1a7-9f820275c042') }}
+                        </p>
+                        <p v-else-if="!event.group.settings.isFree">
+                            {{ $t('3ab07939-121b-47f9-956f-a573c57ec008') }}
+                        </p>
+                        <p v-else>
+                            {{ $t('7cac9136-10b5-4f1c-b9a4-0fb3f8410a9b') }}
+                        </p>
+
+                        <p class="style-button-bar">
+                            <button class="button primary" type="button" @click="addMembers">
+                                <span class="icon add" />
+                                <span>Leden inschrijven</span>
+                            </button>
+                        </p>
+                    </template>
+                </main>
+            </div>
+        </ExternalOrganizationContainer>
     </ExternalOrganizationContainer>
 </template>
 
 <script setup lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
-import { EmailTemplateType, Event, Group, Organization, PermissionLevel } from '@stamhoofd/structures';
+import { EmailTemplateType, Event, Group, Organization } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, Ref, ref } from 'vue';
 import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';
@@ -190,6 +192,12 @@ function setOrganization(o: Organization) {
     eventOrganization.value = o;
 }
 
+const groupOrganization: Ref<Organization | null> = ref(null);
+
+function setGroupOrganization(o: Organization) {
+    groupOrganization.value = o;
+}
+
 const canWriteEvent = computed(() => auth.canWriteEventForOrganization(props.event, eventOrganization.value));
 
 const levelPrefix = computed(() => {
@@ -214,7 +222,13 @@ const levelPrefix = computed(() => {
         }
     }
 
-    return Formatter.joinLast(prefixes, ', ', ' en ');
+    const base = Formatter.joinLast(prefixes, ', ', ' en ');
+
+    if (groupOrganization.value && props.event.organizationId === null) {
+        return `${base} (via ${groupOrganization.value.name})`;
+    }
+
+    return base;
 });
 
 const link = computed(() => {
@@ -277,6 +291,7 @@ defineRoutes([
             return {
                 group: props.event.group,
                 isMultiOrganization: !props.event.organizationId,
+                organizationHint: eventOrganization.value ?? groupOrganization.value,
                 isNew: false,
                 showToasts: true,
                 saveHandler: async (patch: AutoEncoderPatchType<Group>) => {

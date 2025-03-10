@@ -747,6 +747,7 @@ async function addRegistrations() {
                                             isNew: true,
                                             isMultiOrganization: isNationalActivity.value,
                                             showToasts: false,
+                                            organizationHint: organization,
                                             saveHandler: (patch: AutoEncoderPatchType<Group>) => {
                                                 addPatch({
                                                     group: group.patch(patch),
@@ -771,6 +772,7 @@ async function addRegistrations() {
                     group: group,
                     isNew: true,
                     isMultiOrganization: isNationalActivity.value,
+                    organizationHint: externalOrganization.value,
                     showToasts: false,
                     saveHandler: (patch: AutoEncoderPatchType<Group>) => {
                         addPatch({
