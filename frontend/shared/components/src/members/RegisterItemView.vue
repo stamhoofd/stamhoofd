@@ -32,6 +32,10 @@
             {{ validationWarning }}
         </p>
 
+        <p v-if="item.totalPrice && contextOrganization && checkout.asOrganizationId && !checkout.isAdminFromSameOrganization" class="warning-box">
+            Je betaalt deze inschrijving in naam van {{ contextOrganization.name }}. Je moet zelf de kosten aan je leden doorrekenen indien gewenst.
+        </p>
+
         <template v-if="item.replaceRegistrations.length === 0">
             <p v-if="item.group.settings.description" class="style-description-block" v-text="item.group.settings.description" />
             <p v-else class="style-description-block" v-text="'Schrijf ' +item.member.patchedMember.firstName+ ' hier in. Voeg de inschrijving toe aan je winkelmandje en reken daarna alle inschrijvingen in één keer af.' " />
@@ -140,7 +144,7 @@
 <script setup lang="ts">
 import { patchObject } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CheckboxListItem, DateSelection, ErrorBox, ImageComponent, NavigationActions, NumberInput, PriceBreakdownBox, STList, useErrors, useNavigationActions } from '@stamhoofd/components';
+import { CheckboxListItem, DateSelection, ErrorBox, ImageComponent, NavigationActions, NumberInput, PriceBreakdownBox, STList, useErrors, useNavigationActions, useOrganization } from '@stamhoofd/components';
 import { GroupOption, GroupOptionMenu, GroupType, PatchAnswers, RegisterItem, RegisterItemOption } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, Ref, ref, watch } from 'vue';
@@ -160,6 +164,7 @@ const isInCart = computed(() => checkout.value.cart.contains(props.item));
 const pop = usePop();
 const admin = computed(() => checkout.value.isAdminFromSameOrganization);
 const validationWarning = ref(null) as Ref<string | null>;
+const contextOrganization = useOrganization();
 
 function addRecordAnswersPatch(patch: PatchAnswers) {
     props.item.recordAnswers = patchObject(props.item.recordAnswers, patch);

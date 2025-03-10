@@ -17,6 +17,10 @@
             De kosten zullen aan het openstaande bedrag van elk lid worden toegevoegd. Leden kunnen dit betalen via het ledenportaal.
         </p>
 
+        <p v-if="checkout.totalPrice && contextOrganization && checkout.asOrganizationId && !checkout.isAdminFromSameOrganization" class="warning-box">
+            Je betaalt deze inschrijvingen in naam van {{ contextOrganization.name }}. Je moet zelf de kosten aan je leden doorrekenen indien gewenst.
+        </p>
+
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <STList>

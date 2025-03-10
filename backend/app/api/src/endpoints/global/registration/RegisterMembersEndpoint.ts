@@ -457,41 +457,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             balanceItem.organizationId = organization.id;
 
             // Who is responsible for payment?
-            let balanceItem2: BalanceItem | null = null;
             if (registration.payingOrganizationId) {
-                // Create a separate balance item for this meber to pay back the paying organization
-                // this is not yet associated with a payment but will be added to the outstanding balance of the member
-
+                // We no longer also charge the member. This has been removed, ref STA-288
                 balanceItem.payingOrganizationId = registration.payingOrganizationId;
-
-                balanceItem2 = new BalanceItem();
-
-                // NOTE: we don't connect the registrationId here
-                // because otherwise the total price and pricePaid for the registration would be incorrect
-                // balanceItem2.registrationId = registration.id;
-
-                balanceItem2.unitPrice = unitPrice;
-                balanceItem2.amount = amount ?? 1;
-                balanceItem2.description = description;
-                balanceItem2.relations = relations;
-                balanceItem2.type = type;
-
-                // Who needs to receive this money?
-                balanceItem2.organizationId = registration.payingOrganizationId;
-
-                // Who is responsible for payment?
-                balanceItem2.memberId = registration.memberId;
-
-                if (registration.trialUntil) {
-                    balanceItem2.dueAt = registration.trialUntil;
-                }
-
-                // If the paying organization hasn't paid yet, this should be hidden and move to pending as soon as the paying organization has paid
-                balanceItem2.status = BalanceItemStatus.Hidden;
-                await balanceItem2.save();
-
-                // do not add to createdBalanceItems array because we don't want to add this to the payment if we create a payment
-                unrelatedCreatedBalanceItems.push(balanceItem2);
             }
             else {
                 balanceItem.memberId = registration.memberId;
@@ -500,9 +468,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             balanceItem.status = BalanceItemStatus.Hidden;
             balanceItem.pricePaid = 0;
-
-            // Connect the 'pay back' balance item to this balance item. As soon as this balance item is paid, we'll mark the other one as pending so the outstanding balance for the member increases
-            balanceItem.dependingBalanceItemId = balanceItem2?.id ?? null;
 
             if (registration.trialUntil) {
                 balanceItem.dueAt = registration.trialUntil;
