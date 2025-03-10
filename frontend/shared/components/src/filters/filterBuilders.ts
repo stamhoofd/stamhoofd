@@ -1470,7 +1470,7 @@ export function useEventUIFilterBuilders({ platform, organizations, app }: { pla
 function getEventUIFilterBuilders({ platform, organizations, app, permissions }: { platform: Platform; organizations: Organization[]; app: AppType | 'auto'; permissions: LoadedPermissions | null | undefined }) {
     const all: UIFilterBuilder<UIFilter>[] = [];
 
-    const groupFilter = new MultipleChoiceFilterBuilder({
+    const organizationFilter = new MultipleChoiceFilterBuilder({
         name: 'Lokale groep',
         options: [
             new MultipleChoiceUIFilterOption('Nationale activiteiten', null),
@@ -1482,7 +1482,7 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
             },
         },
     });
-    all.push(groupFilter);
+    all.push(organizationFilter);
 
     const tagsFilter = new MultipleChoiceFilterBuilder({
         name: 'Regio',
@@ -1515,24 +1515,22 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
     });
     all.push(defaultAgeGroupFilter);
 
-    if (organizations.length > 0) {
-        const groupFilter = new MultipleChoiceFilterBuilder({
-            name: 'Inschrijvingsgroep',
-            options: [
-                new MultipleChoiceUIFilterOption('Iedereen', null),
-                ...organizations
-                    .flatMap(organization => organization.period.getCategoryTree({ permissions }).getAllGroups().map((g) => {
-                        return new MultipleChoiceUIFilterOption((organizations.length > 1 ? (organization.name + ' - ') : '') + g.settings.name, g.id);
-                    })),
-            ],
-            wrapper: {
-                groupIds: {
-                    $in: FilterWrapperMarker,
-                },
+    const groupFilter = new MultipleChoiceFilterBuilder({
+        name: 'Inschrijvingsgroep',
+        options: [
+            new MultipleChoiceUIFilterOption('Iedereen', null),
+            ...organizations
+                .flatMap(organization => organization.period.getCategoryTree({ permissions }).getAllGroups().map((g) => {
+                    return new MultipleChoiceUIFilterOption((organizations.length > 1 ? (organization.name + ' - ') : '') + g.settings.name, g.id);
+                })),
+        ],
+        wrapper: {
+            groupIds: {
+                $in: FilterWrapperMarker,
             },
-        });
-        all.push(groupFilter);
-    }
+        },
+    });
+    all.push(groupFilter);
 
     if (app !== 'registration') {
         const typeFilter = new MultipleChoiceFilterBuilder({
