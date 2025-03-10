@@ -1,18 +1,17 @@
 import { column } from '@simonbackx/simple-database';
-import { EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, EmailTemplateType, getExampleRecipient, LimitedFilteredRequest, PaginatedResponse, Recipient, Replacement, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
+import { EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, EmailTemplateType, getExampleRecipient, LimitedFilteredRequest, PaginatedResponse, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AnyDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
-import { Email as EmailClass } from '@stamhoofd/email';
+import { Email as EmailClass, EmailInterfaceRecipient } from '@stamhoofd/email';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel, SQL, SQLWhereSign } from '@stamhoofd/sql';
-import { Formatter } from '@stamhoofd/utility';
 import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder } from '../helpers/EmailBuilder';
 import { EmailRecipient } from './EmailRecipient';
-import { Organization } from './Organization';
 import { EmailTemplate } from './EmailTemplate';
+import { Organization } from './Organization';
 
 export class Email extends QueryableModel {
     static table = 'emails';
@@ -183,33 +182,35 @@ export class Email extends QueryableModel {
 
     getFromAddress() {
         if (!this.fromName) {
-            return this.fromAddress!;
+            return {
+                email: this.fromAddress!,
+            };
         }
 
-        const cleanedName = Formatter.emailSenderName(this.fromName);
-        if (cleanedName.length < 2) {
-            return this.fromAddress!;
-        }
-        return '"' + cleanedName + '" <' + this.fromAddress + '>';
+        return {
+            name: this.fromName,
+            email: this.fromAddress!,
+        };
     }
 
-    getDefaultFromAddress(organization?: Organization | null): string {
+    getDefaultFromAddress(organization?: Organization | null): EmailInterfaceRecipient {
         const i18n = new I18n($getLanguage(), $getCountry());
-        let address = 'noreply@' + i18n.localizedDomains.defaultBroadcastEmail();
+        let address: EmailInterfaceRecipient = {
+            email: 'noreply@' + i18n.localizedDomains.defaultBroadcastEmail(),
+        };
 
         if (organization) {
-            address = organization.getDefaultFrom(organization.i18n, false, 'broadcast');
+            address = organization.getDefaultFrom(organization.i18n, 'broadcast');
         }
 
         if (!this.fromName) {
             return address;
         }
 
-        const cleanedName = Formatter.emailSenderName(this.fromName);
-        if (cleanedName.length < 2) {
-            return address;
-        }
-        return '"' + cleanedName + '" <' + address + '>';
+        return {
+            name: this.fromName,
+            email: address.email,
+        };
     }
 
     async setFromTemplate(type: EmailTemplateType) {
@@ -274,7 +275,7 @@ export class Email extends QueryableModel {
             upToDate.throwIfNotReadyToSend();
 
             let from = upToDate.getDefaultFromAddress(organization);
-            let replyTo: string | null = upToDate.getFromAddress();
+            let replyTo: EmailInterfaceRecipient | null = upToDate.getFromAddress();
 
             if (!from) {
                 throw new SimpleError({
@@ -679,7 +680,8 @@ export class Email extends QueryableModel {
 
         await fillRecipientReplacements(virtualRecipient, {
             organization: this.organizationId ? (await Organization.getByID(this.organizationId))! : null,
-            fromAddress: this.fromAddress,
+            from: this.getFromAddress(),
+            replyTo: null,
         });
 
         recipientRow.replacements = virtualRecipient.replacements;

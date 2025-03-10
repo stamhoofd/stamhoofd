@@ -107,7 +107,9 @@
                             </template>
                         </STListItem>
 
-                        <EventNotificationRow v-for="type of event.eventNotificationTypes" v-if="eventOrganization" :key="type.id" class="container" :type="type" :event="event" :organization="eventOrganization" />
+                        <template v-if="eventOrganization">
+                            <EventNotificationRow v-for="type of event.eventNotificationTypes" :key="type.id" class="container" :type="type" :event="event" :organization="eventOrganization" />
+                        </template>
                     </STList>
                 </div>
                 <hr>
@@ -126,7 +128,7 @@
                     </div>
                 </div>
 
-                <template v-if="event.group && (!organization || event.organizationId === organization.id || (event.group.settings.allowRegistrationsByOrganization && !event.group.closed))">
+                <template v-if="event.group && auth.canRegisterMembersInGroup(event.group)">
                     <hr>
                     <h2>Handmatig leden inschrijven</h2>
 
@@ -155,7 +157,7 @@
 <script setup lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
-import { EmailTemplateType, Event, Group, Organization } from '@stamhoofd/structures';
+import { EmailTemplateType, Event, Group, Organization, PermissionLevel } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, Ref, ref } from 'vue';
 import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';

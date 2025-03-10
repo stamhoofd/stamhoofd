@@ -68,7 +68,7 @@
                 De beschrijving is zichtbaar als leden doorklikken om in te schrijven voor de activiteit.
             </p>
 
-            <template v-if="patched.type === GroupType.EventRegistration && !organization && isMultiOrganization">
+            <template v-if="patched.type === GroupType.EventRegistration && isMultiOrganization">
                 <hr>
                 <h2>Organisator</h2>
                 <p>Voor nationale activiteiten moet je kiezen via welke groep alle betalingen verlopen. De betaalinstellingen van die groep worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die groep.</p>
@@ -520,7 +520,7 @@ import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/sim
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AgeInput, DateSelection, Dropdown, EditGroupView, EditRecordCategoriesBox, ErrorBox, GroupIdsInput, InheritedRecordsConfigurationBox, LoadingViewTransition, NumberInput, OrganizationAvatar, RecordEditorSettings, RecordEditorType, TimeInput, useRegisterItemFilterBuilders } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Country, DefaultAgeGroup, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupStatus, GroupType, OrganizationRecordsConfiguration, RecordCategory, Registration, WaitingListType, type MemberProperty } from '@stamhoofd/structures';
+import { BooleanStatus, Country, DefaultAgeGroup, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupStatus, GroupType, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, Platform, PlatformFamily, PlatformMember, RecordCategory, RegisterItem, Registration, WaitingListType, type MemberProperty } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
@@ -627,7 +627,7 @@ const present = usePresent();
 const didSetAutomaticGroup = ref(false);
 
 const availableWaitingLists = computed(() => {
-    let base = externalOrganization?.value?.period?.groups.flatMap(g => g.waitingList ? [g.waitingList] : []) ?? [];
+    let base = externalOrganization?.value?.period?.waitingLists ?? [];
 
     // Replace patched waiting lists
     base = base.map((list) => {
@@ -1255,6 +1255,11 @@ function getAgeGroupSelectionText(ageGroup: DefaultAgeGroup) {
 
 const getRegisterItemFilterBuilders = useRegisterItemFilterBuilders();
 
+const family = new PlatformFamily({
+    platform: Platform.shared,
+    contextOrganization: organization.value,
+});
+
 const recordEditorSettings = new RecordEditorSettings({
     type: RecordEditorType.Registration,
     dataPermission: false,
@@ -1266,11 +1271,20 @@ const recordEditorSettings = new RecordEditorSettings({
             }),
         }))[0];
     },
-    exampleValue: Registration.create({
-        group: patched.value,
-        groupPrice: patched.value.settings.prices[0],
-        organizationId: patched.value.organizationId,
-    }),
+    exampleValue: RegisterItem.defaultFor(new PlatformMember({
+        member: MemberWithRegistrationsBlob.create({
+            details: MemberDetails.create({
+                firstName: 'Voorbeeld',
+                lastName: 'Lid',
+                dataPermissions: BooleanStatus.create({ value: true }),
+                birthDay: new Date('2020-01-01'),
+            }),
+            users: [],
+            registrations: [],
+        }),
+        isNew: true,
+        family,
+    }), patched.value, externalOrganization.value!),
 });
 
 defineExpose({

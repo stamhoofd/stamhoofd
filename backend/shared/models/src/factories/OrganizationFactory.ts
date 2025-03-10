@@ -14,6 +14,7 @@ class Options {
     city?: string;
     roles?: PermissionRoleDetailed[];
     period?: RegistrationPeriod;
+    tags?: string[];
 }
 
 export class OrganizationFactory extends Factory<Options, Organization> {
@@ -43,6 +44,10 @@ export class OrganizationFactory extends Factory<Options, Organization> {
 
         if (this.options.roles) {
             organization.privateMeta.roles = this.options.roles;
+        }
+
+        if (this.options.tags) {
+            organization.meta.tags = this.options.tags;
         }
 
         await organization.save();

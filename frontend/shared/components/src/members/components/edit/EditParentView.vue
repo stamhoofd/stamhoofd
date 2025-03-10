@@ -48,14 +48,14 @@
                     </template>
                 </EmailInput>
 
-                <p v-if="email && member && member.patchedMember.details.parentsHaveAccess && app !== 'registration'" class="style-description-small">
+                <p v-if="email && member && app !== 'registration'" class="style-description-small">
                     Deze ouder kan inloggen of registreren op <template v-if="alternativeEmails.length">
                         één van de ingevoerde e-mailadressen
                     </template><template v-else>
                         het ingevoerde e-mailadres
                     </template> en krijgt dan automatisch toegang tot de gegevens van {{ member.patchedMember.firstName }} en het ledenportaal.
                 </p>
-                <p v-else-if="firstName && email && member && member.patchedMember.details.parentsHaveAccess" class="style-description-small">
+                <p v-else-if="firstName && email && member" class="style-description-small">
                     {{ firstName }} kan inloggen of registreren op <template v-if="alternativeEmails.length">
                         één van de ingevoerde e-mailadressen
                     </template><template v-else>
@@ -63,7 +63,7 @@
                     </template> en krijgt dan automatisch toegang tot de gegevens van {{ member.patchedMember.firstName }} en het ledenportaal.
                 </p>
 
-                <p v-if="alternativeEmails.length && member && member.patchedMember.details.parentsHaveAccess" class="style-description-small">
+                <p v-if="alternativeEmails.length && member" class="style-description-small">
                     <template v-if="app !== 'registration'">
                         De ouder ontvangt enkel communicatie op het eerste e-mailadres.
                     </template>
@@ -97,9 +97,9 @@
 <script setup lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { Address, Country, NationalRegisterNumberOptOut, Parent, ParentType, ParentTypeHelper, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
+import { Address, NationalRegisterNumberOptOut, Parent, ParentType, ParentTypeHelper, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { useErrors } from '../../../errors/useErrors';
@@ -126,7 +126,7 @@ const props = withDefaults(defineProps<{
 });
 
 const family = props.family || props.member!.family;
-const { patched, addPatch, hasChanges } = usePatch(props.parent);
+const { patched, addPatch, hasChanges, patch } = usePatch(props.parent);
 const errors = useErrors();
 const pop = usePop();
 const loading = ref(false);
@@ -299,6 +299,14 @@ async function save() {
             await modifyAddress(old, updated);
         }
 
+        // Mark this parent as updated (not the same as reviewed, this helps merge duplicate parents correctly)
+        addPatch({
+            updatedAt: new Date(),
+        });
+
+        // Await patched.value to be updated
+        await nextTick();
+
         if (props.member && props.isNew) {
             const minorMembers = family.members.filter(m => m.id !== props.member!.id && m.isPropertyEnabled('parents'));
 
@@ -313,7 +321,12 @@ async function save() {
             }
         }
         else {
-            family.updateParent(patched.value);
+            if (props.member) {
+                props.member.patchParent(patch.value);
+            }
+            else if (props.family) {
+                props.family.patchParent(patch.value);
+            }
         }
 
         if (props.saveHandler) {

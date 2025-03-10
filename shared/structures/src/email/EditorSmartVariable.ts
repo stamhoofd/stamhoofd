@@ -46,7 +46,7 @@ export class EditorSmartVariable extends AutoEncoder {
                 return true;
             }
 
-            const replacement = replacements.find(r => r.token === variable.id && (r.value.length > 0 || r.html !== undefined));
+            const replacement = replacements.find(r => r.token === variable.id && (r.value || r.html));
             if (!replacement) {
                 // Not found
                 return false;
@@ -97,6 +97,10 @@ export class EditorSmartVariable extends AutoEncoder {
             EditorSmartVariable.create({
                 id: 'fromAddress',
                 name: 'E-mailadres verstuurder',
+            }),
+            EditorSmartVariable.create({
+                id: 'fromName',
+                name: 'Naam verstuurder',
             }),
             EditorSmartVariable.create({
                 id: 'firstNameMember',

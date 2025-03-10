@@ -11,7 +11,7 @@ export class Formatter {
     }
 
     static emailSenderName(name: string): string {
-        return this.removeAccents(name).replace(/[^A-Za-z]+/g, ' ').trim();
+        return this.removeAccents(name).replace(/[^A-Za-z0-9-_]+/g, ' ').trim();
     }
 
     static slug(name: string): string {

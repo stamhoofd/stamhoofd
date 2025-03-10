@@ -130,7 +130,7 @@ export class SSOService {
 
     static async fromContext(provider: LoginProviderType) {
         const organization = Context.organization;
-        const platform = await Platform.getShared();
+        const platform = await Platform.getForEditing();
 
         const service = new SSOService({ provider, platform, organization });
         service.validateConfiguration();

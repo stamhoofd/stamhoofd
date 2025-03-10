@@ -1,7 +1,8 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, StringDecoder, field } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { Group, GroupStatus } from './Group.js';
 import { GroupCategory, GroupCategorySettings, GroupCategoryTree } from './GroupCategory.js';
+import { GroupType } from './GroupType.js';
 import { Organization } from './Organization.js';
 import { RegistrationPeriodBase } from './RegistrationPeriodBase.js';
 import { SetupSteps } from './SetupSteps.js';
@@ -80,7 +81,7 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
     }
 
     get waitingLists(): Group[] {
-        return (this.groups.map(g => g.waitingList).filter(g => g !== null)).filter((value, index, self) => self.findIndex(v => value.id === v.id) === index);
+        return this.groups.filter(g => g.type === GroupType.WaitingList);
     }
 
     get rootCategory() {

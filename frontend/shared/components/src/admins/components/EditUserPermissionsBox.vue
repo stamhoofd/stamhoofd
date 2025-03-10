@@ -37,17 +37,17 @@
 import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { useEmitPatch } from '@stamhoofd/components';
-import { PermissionLevel, PermissionRole, Permissions, User } from '@stamhoofd/structures';
+import { ApiUser, PermissionLevel, PermissionRole, Permissions, User } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import RolesView from '../RolesView.vue';
 import { useAdmins } from '../hooks/useAdmins';
 import { useRoles } from '../hooks/useRoles';
 
 const props = defineProps<{
-    user: User;
+    user: User | ApiUser;
 }>();
 const emit = defineEmits(['patch:user']);
-const { patched, addPatch } = useEmitPatch<User>(props, emit, 'user');
+const { patched, addPatch } = useEmitPatch<User | ApiUser>(props, emit, 'user');
 
 const roles = useRoles();
 const present = usePresent();

@@ -79,6 +79,7 @@ const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTa
 const auth = useAuth();
 const organization = useOrganization();
 const platform = usePlatform();
+const filterPeriodId = props.periodId ?? props.group?.periodId ?? organization?.value?.period?.period?.id ?? platform.value.period.id;
 const defaultFilter = app === 'admin' && !props.group
     ? {
             platformMemberships: {
@@ -267,7 +268,7 @@ const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string[]>({
         name: 'Functies',
         allowSorting: false,
-        getValue: member => member.getResponsibilities(organization.value ?? null).map(l => l.getName(member, false)),
+        getValue: member => member.getResponsibilities({ organization: organization.value ?? undefined }).map(l => l.getName(member, false)),
         format: (list) => {
             if (list.length === 0) {
                 return 'Geen';
@@ -363,7 +364,7 @@ if (props.group) {
                     getStyle: answer => answer === null || answer.isEmpty ? 'gray' : '',
                     minimumWidth: 100,
                     recommendedWidth: 200,
-                    enabled: false
+                    enabled: false,
                 }),
             );
         }
@@ -431,7 +432,7 @@ if (groups.length) {
             getStyle: prices => prices.length === 0 ? 'gray' : '',
             minimumWidth: 100,
             recommendedWidth: 300,
-            enabled: false
+            enabled: false,
         }),
     );
 }
@@ -442,7 +443,7 @@ if (app === 'admin' || (props.group && props.group.settings.requireOrganizationI
             id: 'organization',
             allowSorting: false,
             name: $t('2f325358-6e2f-418c-9fea-31a14abbc17a'),
-            getValue: member => member.filterOrganizations({ periodId: props.periodId ?? props.group?.periodId ?? platform.value.period.id, types: [GroupType.Membership] }),
+            getValue: member => member.filterOrganizations({ periodId: filterPeriodId, types: [GroupType.Membership] }),
             format: organizations => Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' en ') || $t('1a16a32a-7ee4-455d-af3d-6073821efa8f'),
             getStyle: organizations => organizations.length === 0 ? 'gray' : '',
             minimumWidth: 100,
@@ -455,7 +456,7 @@ if (app === 'admin' || (props.group && props.group.settings.requireOrganizationI
             id: 'uri',
             allowSorting: false,
             name: $t('9d283cbb-7ba2-4a16-88ec-ff0c19f39674'),
-            getValue: member => member.filterOrganizations({ periodId: props.periodId ?? props.group?.periodId ?? platform.value.period.id, types: [GroupType.Membership] }),
+            getValue: member => member.filterOrganizations({ periodId: filterPeriodId, types: [GroupType.Membership] }),
             format: organizations => Formatter.joinLast(organizations.map(o => o.uri).sort(), ', ', ' en ') || $t('e41660ea-180a-45ef-987c-e780319c4331'),
             getStyle: organizations => organizations.length === 0 ? 'gray' : '',
             minimumWidth: 100,
@@ -472,7 +473,7 @@ if (app === 'admin' || (props.group && props.group.settings.requireOrganizationI
                 allowSorting: false,
                 name: $t('7289b10e-a284-40ea-bc57-8287c6566a82'),
                 getValue: (member) => {
-                    const registrations = member.filterRegistrations({ groups, periodId: props.periodId ?? props.group?.periodId ?? '' });
+                    const registrations = member.filterRegistrations({ groups, periodId: filterPeriodId });
                     if (registrations.find(r => r.payingOrganizationId)) {
                         const organization = member.organizations.find(o => o.id === registrations[0].payingOrganizationId);
                         return organization ? organization.name : 'Onbekend';
@@ -527,7 +528,7 @@ allColumns.push(
         name: 'Startdatum',
         allowSorting: false,
         getValue: (v) => {
-            const registrations = v.filterRegistrations({ groups, periodId: props.periodId ?? props.group?.periodId ?? '' });
+            const registrations = v.filterRegistrations({ groups, periodId: filterPeriodId });
 
             if (registrations.length === 0) {
                 return null;
@@ -553,7 +554,7 @@ allColumns.push(
         name: waitingList.value ? 'Sinds' : 'Inschrijvingsdatum',
         allowSorting: false,
         getValue: (v) => {
-            const registrations = v.filterRegistrations({ groups, periodId: props.periodId ?? props.group?.periodId ?? '' });
+            const registrations = v.filterRegistrations({ groups, periodId: filterPeriodId });
 
             if (registrations.length === 0) {
                 return null;
@@ -627,7 +628,7 @@ if (props.category) {
                     return [];
                 }
                 const groups = props.category.getAllGroups();
-                const memberGroups = member.filterGroups({ groups: groups, periodId: props.periodId ?? props.group?.periodId ?? '' });
+                const memberGroups = member.filterGroups({ groups: groups, periodId: filterPeriodId });
                 const getIndex = g => groups.findIndex(_g => _g.id === g.id);
                 return memberGroups.sort((a, b) => Sorter.byNumberValue(getIndex(b), getIndex(a)));
             },
@@ -640,7 +641,7 @@ if (props.category) {
             getStyle: groups => groups.length === 0 ? 'gray' : '',
             minimumWidth: 100,
             recommendedWidth: 300,
-            enabled: false
+            enabled: false,
         }),
     );
 }
@@ -652,9 +653,9 @@ if (!props.group && !props.category) {
             allowSorting: false,
             name: $t('b467444b-879a-4bce-b604-f7e890008c4f'),
             getValue: (member) => {
-                let memberGroups = member.filterGroups({ periodId: props.periodId ?? props.group?.periodId ?? '', types: [GroupType.Membership, GroupType.WaitingList] });
+                let memberGroups = member.filterGroups({ periodId: filterPeriodId, types: [GroupType.Membership, GroupType.WaitingList] });
                 if (app === 'admin') {
-                    memberGroups = memberGroups.filter(g => g.defaultAgeGroupId !== null)
+                    memberGroups = memberGroups.filter(g => g.defaultAgeGroupId !== null);
                 }
                 return memberGroups.sort((a, b) => Sorter.byStringValue(a.settings.name, b.settings.name));
             },
@@ -667,7 +668,7 @@ if (!props.group && !props.category) {
             getStyle: groups => groups.length === 0 ? 'gray' : '',
             minimumWidth: 100,
             recommendedWidth: 300,
-            enabled: false
+            enabled: false,
         }),
     );
 }
@@ -685,6 +686,11 @@ const actionBuilder = useDirectMemberActions({
 });
 
 const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup();
+let canAdd = (props.group ? auth.canRegisterMembersInGroup(props.group) : false);
+if (!organization.value) {
+    // For now not possible via admin panel
+    canAdd = false;
+}
 
 const actions: TableAction<ObjectType>[] = [
     new InMemoryTableAction({
@@ -693,7 +699,7 @@ const actions: TableAction<ObjectType>[] = [
         priority: 0,
         groupIndex: 1,
         needsSelection: false,
-        enabled: (props.group && organization.value ? props.group.hasWriteAccess(auth.permissions, organization.value.period.settings.categories) : false),
+        enabled: canAdd,
         handler: async () => {
             await chooseOrganizationMembersForGroup({
                 members: [],

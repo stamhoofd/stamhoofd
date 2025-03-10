@@ -1,19 +1,22 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { AccessRight, PayableBalanceCollection } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import { computed, ref, Ref, unref } from 'vue';
+import { Formatter, Sorter } from '@stamhoofd/utility';
+import { computed, onActivated, onMounted, ref, Ref, unref } from 'vue';
 import { useContextOptions } from '../../context';
 import PlatformAvatar from '../../context/PlatformAvatar.vue';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { useErrors } from '../../errors/useErrors';
 import { GlobalEventBus } from '../../EventBus';
-import { useAuth, useContext } from '../../hooks';
+import { useAuth, useContext, usePlatform } from '../../hooks';
 import { mergeErrorBox, QuickAction, QuickActions } from '../classes/QuickActions';
 import { useRegistrationQuickActions } from './useRegistrationQuickActions';
 
 import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstanding-amount.svg';
+import tentSvg from '@stamhoofd/assets/images/illustrations/tent.svg';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { useVisibilityChange } from '../../composables';
+import { Toast } from '../../overlays/Toast';
 
 export function useDashboardQuickActions(): QuickActions {
     const registrationQuickActions = useRegistrationQuickActions();
@@ -23,10 +26,11 @@ export function useDashboardQuickActions(): QuickActions {
     const errors = useErrors();
     const auth = useAuth();
     const $t = useTranslate();
+    const platform = usePlatform();
 
     // Load outstanding amount
     const outstandingBalance = ref(null) as Ref<PayableBalanceCollection | null>;
-    updateBalance().catch(console.error);
+    let lastLoadedBalance = new Date(0);
 
     // Fetch balance
     async function updateBalance() {
@@ -34,6 +38,11 @@ export function useDashboardQuickActions(): QuickActions {
             outstandingBalance.value = PayableBalanceCollection.create({});
             return;
         }
+
+        if (lastLoadedBalance.getTime() > new Date().getTime() - 5 * 60 * 1000) {
+            return;
+        }
+        lastLoadedBalance = new Date();
 
         try {
             const response = await context.value.authenticatedServer.request({
@@ -51,6 +60,18 @@ export function useDashboardQuickActions(): QuickActions {
             errors.errorBox = new ErrorBox(e);
         }
     }
+
+    onMounted(() => {
+        updateBalance().catch(console.error);
+    });
+
+    onActivated(() => {
+        updateBalance().catch(console.error);
+    });
+
+    useVisibilityChange(() => {
+        updateBalance().catch(console.error);
+    });
 
     return {
         actions: computed(() => {
@@ -86,6 +107,26 @@ export function useDashboardQuickActions(): QuickActions {
                         await GlobalEventBus.sendEvent('selectTabByName', 'boekhouding');
                     },
                 });
+            }
+
+            for (const notificationType of platform.value.config.eventNotificationTypes) {
+                if (!auth.permissions?.hasAccessRightForSomeResource(AccessRight.EventWrite)) {
+                    continue;
+                }
+                const deadline = notificationType.deadlines.filter(d => d.deadline > new Date() && (d.reminderFrom === null || d.reminderFrom <= new Date())).sort((a, b) => Sorter.byDateValue(b.deadline, a.deadline))[0];
+                if (deadline) {
+                    arr.push({
+                        illustration: tentSvg,
+                        title: deadline.reminderTitle || notificationType.title,
+                        description: deadline.reminderText ?? '',
+                        action: async () => {
+                            await GlobalEventBus.sendEvent('selectTabByName', 'activiteiten');
+                            if (deadline.reminderText) {
+                                new Toast(deadline.reminderText, 'info').setHide(20_000).show();
+                            }
+                        },
+                    });
+                }
             }
 
             return arr;

@@ -1,4 +1,4 @@
-import { EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailRecipientSubfilter, EmailStatus, LimitedFilteredRequest, PaginatedResponse } from '@stamhoofd/structures';
+import { EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailRecipientSubfilter, EmailStatus, LimitedFilteredRequest, OrganizationMetaData, PaginatedResponse } from '@stamhoofd/structures';
 import { Email } from './Email';
 import { EmailRecipient } from './EmailRecipient';
 import { EmailMocker } from '@stamhoofd/email';
@@ -43,7 +43,7 @@ async function buildEmail(data: {
     model.status = data.status ?? EmailStatus.Draft;
     model.attachments = [];
     model.fromAddress = data.fromAddress ?? 'test@stamhoofd.be';
-    model.fromName = data.fromName ?? 'Stamhoofd Test Suite';
+    model.fromName = data.fromName ?? null;
 
     await model.save();
 
@@ -493,10 +493,9 @@ describe('Model.Email', () => {
             },
         });
 
-        const organization = await new OrganizationFactory({
-        }).create();
+        const organization = await new OrganizationFactory({}).create();
 
-        const platform = await Platform.getShared();
+        const platform = await Platform.getForEditing();
         platform.membershipOrganizationId = organization.id;
         await platform.save();
 
@@ -530,4 +529,217 @@ describe('Model.Email', () => {
             replyTo: undefined,
         });
     }, 15_000);
+
+    describe('Replacements', () => {
+        it('[Regression] When sending an email the organization fromAddress is replaced to the reply-to if it is not allowed to be sent from', async () => {
+            TestUtils.setEnvironment('domains', {
+                ...STAMHOOFD.domains,
+                defaultTransactionalEmail: {
+                    '': 'my-platform.com',
+                },
+                defaultBroadcastEmail: {
+                    '': 'broadcast.my-platform.com',
+                },
+            });
+
+            const organization = await new OrganizationFactory({}).create();
+
+            const model = await buildEmail({
+                organizationId: organization.id,
+                recipients: [
+                    EmailRecipientStruct.create({
+                        email: 'example@domain.be',
+                    }),
+                ],
+                fromAddress: 'custom@customdomain.com',
+                fromName: 'Custom Name',
+                html: '{{fromAddress}}',
+                text: '{{fromAddress}}',
+                subject: '{{fromAddress}}',
+            });
+
+            await model.send();
+            await model.refresh();
+
+            // Check if it was sent correctly
+            expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
+            expect(model.recipientCount).toBe(1);
+            expect(model.status).toBe(EmailStatus.Sent);
+
+            // Both have succeeded
+            expect(EmailMocker.broadcast.getSucceededCount()).toBe(1);
+            expect(EmailMocker.broadcast.getFailedCount()).toBe(0);
+
+            // Check to header
+            expect(EmailMocker.broadcast.getSucceededEmail(0)).toMatchObject({
+                to: 'example@domain.be',
+                from: '"Custom Name" <noreply-' + organization.uri + '@broadcast.my-platform.com>',
+                replyTo: '"Custom Name" <custom@customdomain.com>', // domain has changed here
+                subject: 'custom@customdomain.com',
+                html: 'custom@customdomain.com',
+                text: 'custom@customdomain.com',
+            });
+        }, 15_000);
+
+        it('Default organization replacements work as expected', async () => {
+            TestUtils.setEnvironment('domains', {
+                ...STAMHOOFD.domains,
+                defaultTransactionalEmail: {
+                    '': 'my-platform.com',
+                },
+                defaultBroadcastEmail: {
+                    '': 'broadcast.my-platform.com',
+                },
+            });
+
+            const brightYellow = '#FFD700';
+            const expectedContrastColor = '#000'; // black
+
+            const organization = await new OrganizationFactory({
+                meta: OrganizationMetaData.create({
+                    color: brightYellow,
+                }),
+            }).create();
+
+            const model = await buildEmail({
+                organizationId: organization.id,
+                recipients: [
+                    EmailRecipientStruct.create({
+                        email: 'example@domain.be',
+                    }),
+                ],
+                fromAddress: 'custom@customdomain.com',
+                html: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
+                text: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
+                subject: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
+            });
+
+            await model.send();
+            await model.refresh();
+
+            // Check if it was sent correctly
+            expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
+            expect(model.recipientCount).toBe(1);
+            expect(model.status).toBe(EmailStatus.Sent);
+
+            // Both have succeeded
+            expect(EmailMocker.broadcast.getSucceededCount()).toBe(1);
+            expect(EmailMocker.broadcast.getFailedCount()).toBe(0);
+
+            // Check to header
+            expect(EmailMocker.broadcast.getSucceededEmail(0)).toMatchObject({
+                subject: `${brightYellow};${expectedContrastColor};${organization.name};${organization.name}`,
+                html: `${brightYellow};${expectedContrastColor};${organization.name};${organization.name}`,
+                text: `${brightYellow};${expectedContrastColor};${organization.name};${organization.name}`,
+            });
+        }, 15_000);
+
+        it('Organization replacements default to platform replacements if not set', async () => {
+            TestUtils.setEnvironment('domains', {
+                ...STAMHOOFD.domains,
+                defaultTransactionalEmail: {
+                    '': 'my-platform.com',
+                },
+                defaultBroadcastEmail: {
+                    '': 'broadcast.my-platform.com',
+                },
+            });
+
+            const brightBlue = '#0000FF';
+            const expectedContrastColor = '#fff'; // white
+
+            const platform = await Platform.getForEditing();
+            platform.config.color = brightBlue;
+            await platform.save();
+
+            const organization = await new OrganizationFactory({
+                meta: OrganizationMetaData.create({
+                    color: null,
+                }),
+            }).create();
+
+            const model = await buildEmail({
+                organizationId: organization.id,
+                recipients: [
+                    EmailRecipientStruct.create({
+                        email: 'example@domain.be',
+                    }),
+                ],
+                fromAddress: 'custom@customdomain.com',
+                fromName: 'Custom Name',
+                html: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
+                text: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
+                subject: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
+            });
+
+            await model.send();
+            await model.refresh();
+
+            // Check if it was sent correctly
+            expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
+            expect(model.recipientCount).toBe(1);
+            expect(model.status).toBe(EmailStatus.Sent);
+
+            // Both have succeeded
+            expect(EmailMocker.broadcast.getSucceededCount()).toBe(1);
+            expect(EmailMocker.broadcast.getFailedCount()).toBe(0);
+
+            // Check to header
+            expect(EmailMocker.broadcast.getSucceededEmail(0)).toMatchObject({
+                subject: `${brightBlue};${expectedContrastColor};${organization.name};Custom Name`,
+                html: `${brightBlue};${expectedContrastColor};${organization.name};Custom Name`,
+                text: `${brightBlue};${expectedContrastColor};${organization.name};Custom Name`,
+            });
+        }, 15_000);
+
+        it('Platform replacements are used for platform level emails', async () => {
+            TestUtils.setEnvironment('domains', {
+                ...STAMHOOFD.domains,
+                defaultTransactionalEmail: {
+                    '': 'my-platform.com',
+                },
+                defaultBroadcastEmail: {
+                    '': 'broadcast.my-platform.com',
+                },
+            });
+
+            const darkRed = '#8B0000';
+            const expectedContrastColor = '#fff'; // white
+
+            const platform = await Platform.getForEditing();
+            platform.config.color = darkRed;
+            await platform.save();
+
+            const model = await buildEmail({
+                recipients: [
+                    EmailRecipientStruct.create({
+                        email: 'example@domain.be',
+                    }),
+                ],
+                fromAddress: 'custom@customdomain.com',
+                html: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
+                text: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
+                subject: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
+            });
+
+            await model.send();
+            await model.refresh();
+
+            // Check if it was sent correctly
+            expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
+            expect(model.recipientCount).toBe(1);
+            expect(model.status).toBe(EmailStatus.Sent);
+
+            // Both have succeeded
+            expect(EmailMocker.broadcast.getSucceededCount()).toBe(1);
+            expect(EmailMocker.broadcast.getFailedCount()).toBe(0);
+
+            // Check to header
+            expect(EmailMocker.broadcast.getSucceededEmail(0)).toMatchObject({
+                subject: `${darkRed};${expectedContrastColor};${platform.config.name};${platform.config.name}`,
+                html: `${darkRed};${expectedContrastColor};${platform.config.name};${platform.config.name}`,
+                text: `${darkRed};${expectedContrastColor};${platform.config.name};${platform.config.name}`,
+            });
+        }, 15_000);
+    });
 });

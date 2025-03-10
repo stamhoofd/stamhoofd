@@ -2,7 +2,7 @@ export { Organization } from './Organization';
 export { User } from './User';
 export { Payment } from './Payment';
 export { Registration } from './Registration';
-export { Member, RegistrationWithMember, MemberWithRegistrations } from './Member';
+export * from './Member';
 export { MergedMember } from './MergedMember';
 
 export * from './EmailVerificationCode';

@@ -1,6 +1,8 @@
 {
     "replacements": {
-        "GSM-nummer": "Mobiel nummer"
+        "GSM-nummer": "Mobiel nummer",
+        "Gemeente": "Woonplaats",
+        "gemeente": "woonplaats"
     },
     "daf8a992-77cd-4c20-8bca-5c692fd1e431": "bv. https://www.vereniging.nl/privacy",
     "e06f1e9b-dc4c-4b3b-8ab7-52cd8048d894": "bv. shop.domeinnaam.nl/snoepen",

@@ -2,10 +2,10 @@ import { Formatter } from '@stamhoofd/utility';
 import { AccessRight, AccessRightHelper } from './AccessRight.js';
 import { MemberResponsibility } from './MemberResponsibility.js';
 import { MemberResponsibilityRecordBase } from './members/MemberResponsibilityRecord.js';
-import { PermissionLevel, getPermissionLevelNumber } from './PermissionLevel.js';
+import { getPermissionLevelNumber, PermissionLevel } from './PermissionLevel.js';
 import { PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole.js';
 import { Permissions } from './Permissions.js';
-import { getPermissionResourceTypeName, PermissionsResourceType } from './PermissionsResourceType.js';
+import { PermissionsResourceType } from './PermissionsResourceType.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 
 /**
@@ -28,7 +28,7 @@ export class LoadedPermissions {
         return LoadedPermissions.create({
             level: permissions.level,
             resources: new Map(),
-            accessRights: permissions.accessRights,
+            accessRights: [...permissions.accessRights],
         });
     }
 
@@ -36,7 +36,7 @@ export class LoadedPermissions {
         const permissions = LoadedPermissions.create({
             level: this.level,
             resources: new Map(),
-            accessRights: this.accessRights,
+            accessRights: [...this.accessRights],
         });
 
         for (const [type, r] of this.resources) {
@@ -55,7 +55,7 @@ export class LoadedPermissions {
         const permissions = LoadedPermissions.create({
             level: role.level,
             resources: new Map(),
-            accessRights: role.accessRights,
+            accessRights: [...role.accessRights],
         });
 
         for (const [type, r] of role.resources) {
@@ -224,7 +224,25 @@ export class LoadedPermissions {
         return this.hasResourceAccessRight(type, '', right);
     }
 
-    hasAccessRightForSomeResource(type: PermissionsResourceType, right: AccessRight): boolean {
+    hasAccessRightForSomeResource(right: AccessRight): boolean {
+        if (this.hasAccessRight(right)) {
+            return true;
+        }
+
+        for (const resource of this.resources.values()) {
+            if (resource) {
+                for (const r of resource.values()) {
+                    if (r.hasAccessRight(right)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    hasAccessRightForSomeResourceOfType(type: PermissionsResourceType, right: AccessRight): boolean {
         if (this.hasAccessRight(right)) {
             return true;
         }
@@ -344,24 +362,7 @@ export class LoadedPermissions {
             stack.push(AccessRightHelper.getDescription(right));
         }
 
-        for (const [type, resources] of this.resources) {
-            let count = 0;
-
-            if (resources.has('')) {
-                stack.push('alle ' + getPermissionResourceTypeName(type, true));
-                continue;
-            }
-
-            for (const resource of resources.values()) {
-                if (resource.hasAccess(PermissionLevel.Read) || resource.accessRights.length > 0) {
-                    count += 1;
-                }
-            }
-
-            if (count > 0) {
-                stack.push(count + ' ' + getPermissionResourceTypeName(type, count > 1));
-            }
-        }
+        stack.push(...ResourcePermissions.getMapDescription(this.resources));
 
         if (stack.length === 0) {
             return 'geen rechten';

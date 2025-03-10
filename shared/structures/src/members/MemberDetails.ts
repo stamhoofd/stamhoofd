@@ -1,5 +1,5 @@
 import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, PatchableArray, PatchableArrayAutoEncoder, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
-import { DataValidator, Formatter, StringCompare } from '@stamhoofd/utility';
+import { DataValidator, Formatter, Sorter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address.js';
 import { Replacement } from '../endpoints/EmailRequest.js';
@@ -91,9 +91,6 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 277 })
     alternativeEmails: string[] = [];
 
-    /**
-     * These emails will get access to the member if parentsHaveAccess is true
-     */
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 304 })
     unverifiedEmails: string[] = [];
 
@@ -361,6 +358,9 @@ export class MemberDetails extends AutoEncoder {
     }
 
     isEqual(other: MemberDetails): boolean {
+        this.cleanData();
+        other.cleanData();
+
         if (!this.firstName || !other.firstName) {
             // Not possible to compare
             return false;
@@ -540,86 +540,25 @@ export class MemberDetails extends AutoEncoder {
     }
 
     updateAddressPatch(oldValue: Address, newValue: Address): AutoEncoderPatchType<MemberDetails> | null {
+        if (newValue.toString() === oldValue.toString()) {
+            return null;
+        }
+
         const str = oldValue.toString();
         let patch = MemberDetails.patch({});
         let changed = false;
 
-        if (this.address && this.address.toString() == str) {
+        if (this.address && this.address.toString() === str) {
             patch = patch.patch({ address: newValue });
             changed = true;
         }
 
         for (const parent of this.parents) {
-            if (parent.address && parent.address.toString() == str) {
+            if (parent.address && parent.address.toString() === str) {
                 // parent.address = newValue
                 const arr = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
                 arr.addPatch(Parent.patch({ id: parent.id, address: newValue }));
                 patch = patch.patch({ parents: arr });
-                changed = true;
-            }
-        }
-
-        if (changed) {
-            return patch;
-        }
-        return null;
-    }
-
-    /**
-     * This will SET the parent
-     */
-    updateParent(parent: Parent) {
-        for (const [index, _parent] of this.parents.entries()) {
-            if (_parent.id == parent.id || _parent.isEqual(parent)) {
-                this.parents[index] = parent;
-            }
-        }
-    }
-
-    /**
-     * This will SET the parent
-     */
-    updateParentPatch(parent: Parent): AutoEncoderPatchType<MemberDetails> | null {
-        let patch = MemberDetails.patch({});
-        let changed = false;
-
-        for (const [index, _parent] of this.parents.entries()) {
-            if (_parent.id == parent.id || _parent.isEqual(parent)) {
-                const arr = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
-
-                // Assure we auto correct possible duplicates
-                arr.addDelete(_parent.id);
-                arr.addDelete(_parent.id);
-
-                arr.addPut(parent);
-                patch = patch.patch({ parents: arr });
-                changed = true;
-            }
-        }
-
-        if (changed) {
-            return patch;
-        }
-        return null;
-    }
-
-    /**
-     * This will SET the parent
-     */
-    updateEmergencyContactPatch(emergencyContact: EmergencyContact): AutoEncoderPatchType<MemberDetails> | null {
-        let patch = MemberDetails.patch({});
-        let changed = false;
-
-        for (const [index, _emergencyContact] of this.emergencyContacts.entries()) {
-            if (_emergencyContact.id == emergencyContact.id || _emergencyContact.isEqual(emergencyContact)) {
-                const arr = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
-
-                // Assure we auto correct possible duplicates
-                arr.addDelete(_emergencyContact.id);
-                arr.addDelete(_emergencyContact.id);
-
-                arr.addPut(emergencyContact);
-                patch = patch.patch({ emergencyContacts: arr });
                 changed = true;
             }
         }
@@ -686,14 +625,6 @@ export class MemberDetails extends AutoEncoder {
 
     getShortCode(maxLength: number) {
         return Formatter.firstLetters(this.firstName, maxLength);
-    }
-
-    get canHaveOwnAccount() {
-        return (this.age === null || (this.age >= 12));
-    }
-
-    get parentsHaveAccess() {
-        return (this.age && (this.age < 18));
     }
 
     /**
@@ -816,7 +747,7 @@ export class MemberDetails extends AutoEncoder {
     }
 
     getParentEmails() {
-        return this.parents.flatMap(p => p.email ? [p.email, ...p.alternativeEmails] : p.alternativeEmails);
+        return this.parents.flatMap(p => p.getEmails());
     }
 
     hasEmail(email: string) {
@@ -846,12 +777,116 @@ export class MemberDetails extends AutoEncoder {
         return addresses;
     }
 
-    hasAllCountry(country: Country) {
-        const aa = this.getAllAddresses();
+    static mergeParents(members: MemberDetails[], allowOverrides = true) {
+        return MemberDetails.mergeRelations(members, 'parents', allowOverrides);
+    }
 
-        if (aa.length === 0) {
-            return false;
+    static mergeEmergencyContacts(members: MemberDetails[], allowOverrides = true) {
+        return MemberDetails.mergeRelations(members, 'emergencyContacts', allowOverrides);
+    }
+
+    private static mergeRelations(members: MemberDetails[], type: 'parents' | 'emergencyContacts', allowOverrides = true) {
+        type T = Parent | EmergencyContact;
+        type RelationGroup = { object: T; reviewDate?: Date; createdAt: Date; setObject: (object: T) => void }[];
+
+        const allGroups: RelationGroup[] = [];
+        const parentsGroupByName: Map<string, RelationGroup> = new Map();
+        const parentsGroupById: Map<string, RelationGroup> = new Map();
+        const mergeIdMap: Map<string, string> = new Map();
+
+        for (const member of members) {
+            for (const [index, object] of (member[type] as T[]).entries()) {
+                if (object.name.length <= 3) {
+                    continue;
+                }
+
+                // First find group by ID, then name
+                let group = parentsGroupById.get(object.id) ?? parentsGroupByName.get(object.name);
+                if (!group) {
+                    group = [];
+                    allGroups.push(group);
+                }
+
+                // Save name and id groups
+                if (!parentsGroupByName.has(object.name)) {
+                    parentsGroupByName.set(object.name, group);
+                }
+                if (!parentsGroupById.has(object.id)) {
+                    parentsGroupById.set(object.id, group);
+                }
+
+                group.push({
+                    object: object,
+                    setObject(object: T) {
+                        member[type][index] = object;
+                    },
+                    reviewDate: object.updatedAt ?? member.reviewTimes.getLastReview(type) ?? object.createdAt,
+                    createdAt: object.createdAt,
+                });
+            }
         }
-        return aa.every(a => a.country === country);
+
+        // Sort each parent by review date and merge
+        for (const parents of allGroups) {
+            if (parents.length >= 2) {
+                // Fetch parent with oldest createdAt
+                // This is so we can keep the oldest createdAt and oldest id
+                parents.sort((a, b) => Sorter.byDateValue(
+                    b.createdAt,
+                    a.createdAt,
+                ));
+                const oldestParent = parents[0].object;
+
+                // Sort from oldest reviewed to latest reviewed
+                parents.sort((a, b) => Sorter.byDateValue(b.reviewDate ?? new Date(0), a.reviewDate ?? new Date(0)));
+
+                // Parents with the same id override each other, while parents with different ids merge while maintaining as much data as possible
+                // this happens in groups
+                let mergeTo = parents[0].object.clone();
+                const remaining = parents.slice(1);
+                let allowSet = true; // Only the first 'streak' of parents with the same id override mergeTo
+
+                for (const [index, { object }] of remaining.entries()) {
+                    if (allowSet && object.id === mergeTo.id && allowOverrides) {
+                        mergeTo = object.clone();
+                        continue;
+                    }
+                    else {
+                        allowSet = false;
+                    }
+                    if (allowOverrides) {
+                        if (index < remaining.length - 1) {
+                            const nextParent = remaining[index + 1].object;
+                            // If the next parent has the same id, we'll simply ignore this parent because it is out of date.
+                            // This is different from setting mergeTo because we'll still merge with the previous parents that had a different id
+                            if (object.id === nextParent.id) {
+                                continue;
+                            }
+                        }
+                    }
+
+                    // TypeScript does not understand the complexity here, so'll need to help it understand mergeTo is always the same type as object
+                    mergeTo.merge(object as EmergencyContact & Parent);
+                }
+
+                // Force set id + createdAt
+                mergeTo.id = oldestParent.id;
+                mergeTo.createdAt = oldestParent.createdAt;
+
+                for (const { object, setObject } of parents) {
+                    if (object.id !== mergeTo.id) {
+                        mergeIdMap.set(object.id, mergeTo.id);
+                    }
+                    setObject(mergeTo);
+                }
+
+                // Remove duplicate parents by id for each member
+                for (const member of members) {
+                    member[type] = member[type].filter((p, i, self) => self.findIndex(p2 => p2.id === p.id) === i) as any;
+                }
+            }
+        }
+
+        return mergeIdMap;
     }
 }

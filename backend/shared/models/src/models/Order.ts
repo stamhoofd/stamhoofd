@@ -253,29 +253,6 @@ export class Order extends QueryableModel {
             if (webshop) {
                 await this.setRelation(Order.webshop, webshop).updateTickets();
             }
-
-            // Send an email if the payment failed after 15 minutes being pending
-            // const difference = new Date().getTime() - this.createdAt.getTime()
-            // if (difference > 1000 * 60 * 30 && difference < 1000 * 60 * 60 * 24) {
-            //    if (payment && payment.method !== PaymentMethod.Transfer && payment.method !== PaymentMethod.PointOfSale) {
-            //        console.log('Marked order '+this.id+' as payment failed after ' + (difference / 1000 / 60).toFixed(1) + ' mins. Sending email.')
-            //        const webshop = await Webshop.getByID(this.webshopId)
-            //        if (!webshop) {
-            //            console.error("Missing organization or webshop for order "+this.id)
-            //            return
-            //        }
-            //        const { from, replyTo } = organization.getEmail(webshop.privateMeta.defaultEmailId, true)
-            //        await this.setRelation(Order.webshop, webshop.setRelation(Order.organization, organization)).sendEmailTemplate({
-            //            type: EmailTemplateType.OrderOnlinePaymentFailed,
-            //            from,
-            //            replyTo
-            //        })
-            //    } else {
-            //        console.log('Marked order '+this.id+' as payment failed after ' + (difference / 1000 / 60).toFixed(1) + ' mins. Payment method not matching.')
-            //    }
-            // } else {
-            //     console.log('Marked order '+this.id+' as payment failed after ' + (difference / 1000 / 60).toFixed(1) + ' mins. Not sending email.')
-            // }
         }
         else {
             this.markUpdated();
@@ -763,28 +740,18 @@ export class Order extends QueryableModel {
     }
 
     async sendPaidMail(this: Order & { webshop: Webshop & { organization: Organization } }) {
-        const organization = this.webshop.organization;
-        const { from, replyTo } = organization.getEmail(this.webshop.privateMeta.defaultEmailId, true);
-
         // For a tickets webshop, where the order was marked as paid / non-paid, we should still send the tickets email
         // - because the normal email is not editable
         const hasTickets = this.webshop.meta.hasTickets;
 
         await this.sendEmailTemplate({
             type: hasTickets ? EmailTemplateType.TicketsReceivedTransfer : EmailTemplateType.OrderReceivedTransfer,
-            from,
-            replyTo,
         });
     }
 
     async sendTickets(this: Order & { webshop: Webshop & { organization: Organization } }) {
-        const organization = this.webshop.organization;
-        const { from, replyTo } = organization.getEmail(this.webshop.privateMeta.defaultEmailId, true);
-
         await this.sendEmailTemplate({
             type: EmailTemplateType.TicketsReceivedTransfer,
-            from,
-            replyTo,
         });
     }
 
@@ -894,8 +861,6 @@ export class Order extends QueryableModel {
 
     async sendEmailTemplate(this: Order & { webshop: Webshop & { organization: Organization } }, data: {
         type: EmailTemplateType;
-        from: string;
-        replyTo?: string;
         to?: Recipient;
     }) {
         // Never send an email for archived webshops
@@ -970,25 +935,16 @@ export class Order extends QueryableModel {
         await this.save();
 
         if (this.data.customer.email.length > 0) {
-            const webshop = this.webshop;
-            const organization = webshop.organization;
-
-            const { from, replyTo } = organization.getEmail(webshop.privateMeta.defaultEmailId, true);
-
             if (tickets.length > 0) {
                 // Also send a copy
                 if (payment && payment.method === PaymentMethod.PointOfSale) {
                     await this.sendEmailTemplate({
                         type: EmailTemplateType.TicketsConfirmationPOS,
-                        from,
-                        replyTo,
                     });
                 }
                 else {
                     await this.sendEmailTemplate({
                         type: EmailTemplateType.TicketsConfirmation,
-                        from,
-                        replyTo,
                     });
                 }
             }
@@ -998,31 +954,23 @@ export class Order extends QueryableModel {
                         // Also send a copy
                         await this.sendEmailTemplate({
                             type: EmailTemplateType.OrderConfirmationTransfer,
-                            from,
-                            replyTo,
                         });
                     }
                     else if (payment && payment.method === PaymentMethod.PointOfSale) {
                         await this.sendEmailTemplate({
                             type: EmailTemplateType.OrderConfirmationPOS,
-                            from,
-                            replyTo,
                         });
                     }
                     else {
                         // Also send a copy
                         await this.sendEmailTemplate({
                             type: EmailTemplateType.OrderConfirmationOnline,
-                            from,
-                            replyTo,
                         });
                     }
                 }
                 else {
                     await this.sendEmailTemplate({
                         type: EmailTemplateType.TicketsConfirmationTransfer,
-                        from,
-                        replyTo,
                     });
                 }
             }
@@ -1031,7 +979,6 @@ export class Order extends QueryableModel {
         if (this.webshop.privateMeta.notificationEmails) {
             const webshop = this.webshop;
             const organization = webshop.organization;
-            const { from, replyTo } = organization.getEmail(webshop.privateMeta.defaultEmailId, true);
             const i18n = organization.i18n;
 
             const webshopDashboardUrl = 'https://' + (STAMHOOFD.domains.dashboard ?? 'stamhoofd.app') + '/' + i18n.locale + '/webshops/' + Formatter.slug(webshop.meta.name) + '/orders';
@@ -1040,8 +987,6 @@ export class Order extends QueryableModel {
             for (const email of this.webshop.privateMeta.notificationEmails) {
                 await this.sendEmailTemplate({
                     type: EmailTemplateType.OrderNotification,
-                    from,
-                    replyTo,
                     to: Recipient.create({
                         email,
                         replacements: [

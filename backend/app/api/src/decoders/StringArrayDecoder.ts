@@ -8,6 +8,9 @@ export class StringArrayDecoder<T> implements Decoder<T[]> {
     }
 
     decode(data: Data): T[] {
+        if (Array.isArray(data.value)) {
+            return data.array(this.decoder);
+        }
         const strValue = data.string;
 
         // Split on comma

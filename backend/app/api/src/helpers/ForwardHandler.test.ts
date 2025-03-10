@@ -34,7 +34,9 @@ describe('ForwardHandler', () => {
                 },
             ],
             subject: 'Hello',
-            replyTo: 'someone@example.com',
+            replyTo: {
+                email: 'someone@example.com',
+            },
         });
         expect(options!.text).toContain('Content hier');
     });
@@ -67,7 +69,9 @@ describe('ForwardHandler', () => {
                 },
             ],
             subject: 'Hello',
-            replyTo: 'someone@example.com',
+            replyTo: {
+                email: 'someone@example.com',
+            },
         });
         expect(options!.text).toContain('Content hier');
     });
@@ -92,7 +96,9 @@ describe('ForwardHandler', () => {
                 },
             ],
             subject: 'Hello',
-            replyTo: 'someone@example.com',
+            replyTo: {
+                email: 'someone@example.com',
+            },
         });
         expect(options!.text).toContain('Content hier');
 
@@ -119,7 +125,9 @@ describe('ForwardHandler', () => {
 
         expect(options).toMatchObject({
             subject: 'Hello',
-            replyTo: 'someone@example.com',
+            replyTo: {
+                email: 'someone@example.com',
+            },
         });
         expect(options!.to).toIncludeAllMembers([
             {
@@ -207,7 +215,10 @@ describe('ForwardHandler', () => {
             dmarcVerdict: { status: 'PASS' },
         });
         expect(options).toMatchObject({
-            to: 'hallo@stamhoofd.be',
+            to: [{
+                email: 'hallo@stamhoofd.be',
+                name: 'Stamhoofd',
+            }],
             subject: 'E-mail unsubscribe mislukt',
         });
     });

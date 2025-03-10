@@ -39,11 +39,9 @@
 
             <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="answersClone" :error-box="errors.errorBox" />
 
-            <div v-for="category of recordCategories" :key="category.id" class="container">
+            <div v-for="category in recordCategories.filter(c => c.isEnabled(patchedOrder.data))" :key="category.id" class="container">
                 <hr>
-                <h2>{{ category.name }}</h2>
-
-                <RecordAnswerInput v-for="record of category.records" :key="record.id" :record="record" :answers="recordAnswers" :validator="errors.validator" :all-optional="true" />
+                <FillRecordCategoryBox :category="category" :value="patchedOrder.data" :validator="errors.validator" :level="2" :all-optional="true" :force-mark-reviewed="true" @patch="addRecordAnswersPatch" />
             </div>
 
             <template v-if="checkoutMethods.length > 1">
@@ -175,10 +173,10 @@
 <script lang="ts" setup>
 import { PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
-import { AddressInput, CartItemRow, CartItemView, CenteredMessage, EmailInput, ErrorBox, FieldBox, PaymentSelectionList, PhoneInput, PriceBreakdownBox, Radio, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
+import { AddressInput, CartItemRow, CartItemView, CenteredMessage, EmailInput, ErrorBox, FieldBox, FillRecordCategoryBox, PaymentSelectionList, PhoneInput, PriceBreakdownBox, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager } from '@stamhoofd/networking';
-import { CartItem, CheckoutMethod, CheckoutMethodType, Customer, DiscountCode, OrderData, PaymentConfiguration, PaymentMethod, PrivateOrder, RecordAnswer, RecordCategory, ValidatedAddress, Version, WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
+import { CartItem, CheckoutMethod, CheckoutMethodType, Customer, DiscountCode, OrderData, PatchAnswers, PaymentConfiguration, PaymentMethod, PrivateOrder, RecordCategory, ValidatedAddress, Version, WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { WebshopManager } from '../WebshopManager';
@@ -200,13 +198,11 @@ const present = usePresent();
 const dismiss = useDismiss();
 
 const answersClone = ref(order.data.fieldAnswers.map(a => a.clone()));
-const recordAnswersClone = ref(new Map([...order.data.recordAnswers].map(([id, recordAnswer]) => [id, recordAnswer.clone()])));
 
 const finalPatch = computed(() => {
     return patchOrder.value.patch(PrivateOrder.patch({
         data: OrderData.patch({
             fieldAnswers: answersClone.value,
-            recordAnswers: recordAnswersClone.value as any,
         }),
     }));
 });
@@ -362,6 +358,15 @@ const comments = computed({
     },
 });
 
+function addRecordAnswersPatch(patch: PatchAnswers) {
+    console.log('Add patch', patch);
+    addPatch({
+        data: OrderData.patch({
+            recordAnswers: patch,
+        }),
+    });
+}
+
 const checkoutMethods = computed(() => webshop.meta.checkoutMethods);
 
 const selectedMethod = computed({
@@ -442,13 +447,6 @@ const selectedSlot = computed({
     },
 });
 
-const recordAnswers = computed({
-    get: () => recordAnswersClone.value,
-    set: (recordAnswers: Map<string, RecordAnswer>) => {
-        recordAnswersClone.value = recordAnswers;
-    },
-});
-
 // Other
 async function save() {
     if (saving.value) {
@@ -465,9 +463,6 @@ async function save() {
 
         const orderData = patchedOrder.value.data;
         orderData.validate(props.webshopManager.webshop!, organization.value!.meta, I18nController.i18n, true);
-
-        // Save validated record answers (to delete old answers)
-        recordAnswersClone.value = orderData.recordAnswers;
 
         saving.value = true;
 

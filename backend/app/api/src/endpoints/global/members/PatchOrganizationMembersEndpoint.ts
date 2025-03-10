@@ -1,9 +1,9 @@
 import { OneToManyRelation } from '@simonbackx/simple-database';
-import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder, isEmptyPatch, isPatchableArray, PatchableArray, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuditLog, BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, mergeTwoMembers, Organization, Platform, RateLimiter, Registration, RegistrationPeriod, User } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, GroupType, MembersBlob, MemberWithRegistrationsBlob, PermissionLevel } from '@stamhoofd/structures';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, EmergencyContact, GroupType, MemberDetails, MemberResponsibility, MembersBlob, MemberWithRegistrationsBlob, Parent, PermissionLevel } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Email } from '@stamhoofd/email';
@@ -16,8 +16,7 @@ import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
 import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater';
 import { PlatformMembershipService } from '../../../services/PlatformMembershipService';
 import { RegistrationService } from '../../../services/RegistrationService';
-import { shouldCheckIfMemberIsDuplicateForPatch, shouldCheckIfMemberIsDuplicateForPut } from './shouldCheckIfMemberIsDuplicate';
-import { AuditLogService } from '../../../services/AuditLogService';
+import { shouldCheckIfMemberIsDuplicateForPatch } from './shouldCheckIfMemberIsDuplicate';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -109,12 +108,10 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             struct.details.cleanData();
             member.details = struct.details;
 
-            if (shouldCheckIfMemberIsDuplicateForPut(struct)) {
-                const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, struct.details.securityCode);
-                if (duplicate) {
+            const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, struct.details.securityCode, 'put');
+            if (duplicate) {
                 // Merge data
-                    member = duplicate;
-                }
+                member = duplicate;
             }
 
             // We risk creating a new member without being able to access it manually afterwards
@@ -159,12 +156,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             const securityCode = patch.details?.securityCode; // will get cleared after the filter
 
             if (!member) {
-                throw Context.auth.notFoundOrNoAccess('Je hebt geen toegang tot dit lid of het bestaat niet');
+                throw Context.auth.memberNotFoundOrNoAccess();
             }
 
-            if (!await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
-                // Still allowed if you provide a security code
-                await PatchOrganizationMembersEndpoint.checkSecurityCode(member, securityCode);
+            if (!(await Context.auth.canAccessMember(member, PermissionLevel.Write))) {
+                await PatchOrganizationMembersEndpoint.checkSecurityCode(member, securityCode, 'patch');
             }
 
             patch = await Context.auth.filterMemberPatch(member, patch);
@@ -194,7 +190,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
 
             if (shouldCheckDuplicate) {
-                const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, securityCode);
+                const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, securityCode, 'patch');
 
                 if (duplicate) {
                     // Remove the member from the list
@@ -210,6 +206,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
 
             await member.save();
+
+            // If parents changed or emergeny contacts: fetch family and merge data
+            if (patch.details && (!isEmptyPatch(patch.details?.parents) || !isEmptyPatch(patch.details?.emergencyContacts))) {
+                await PatchOrganizationMembersEndpoint.mergeDuplicateRelations(member, patch.details);
+            }
 
             // Update documents
             await Document.updateForMember(member.id);
@@ -259,6 +260,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw Context.auth.error('Je kan de startdatum van een functie niet zoveel verplaatsen');
                     }
                     responsibilityRecord.startDate = patchResponsibility.startDate;
+                }
+
+                // Check maximum
+                if (responsibility) {
+                    await this.checkResponsbilityLimits(responsibilityRecord, responsibility);
                 }
 
                 await responsibilityRecord.save();
@@ -392,6 +398,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
 
                 model.startDate = put.startDate;
+
+                // Check maximum
+                await this.checkResponsbilityLimits(model, responsibility);
 
                 await model.save();
                 shouldUpdateSetupSteps = true;
@@ -735,6 +744,129 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
     }
 
+    static async mergeDuplicateRelations(member: MemberWithRegistrations, patch: AutoEncoderPatchType<MemberDetails> | MemberDetails) {
+        const _familyMembers = await Member.getFamilyWithRegistrations(member.id);
+        const familyMembers: typeof _familyMembers = [];
+        // Only modify members if we have write access to them (this avoids issues with overriding data)
+        for (const member of _familyMembers) {
+            if (await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
+                familyMembers.push(member);
+            }
+        }
+
+        // Replace member with member
+        const memberIndex = familyMembers.findIndex(m => m.id === member.id);
+        if (memberIndex !== -1 && familyMembers.length >= 2) {
+            familyMembers[memberIndex] = member;
+            const parentMergeMap = MemberDetails.mergeParents(
+                familyMembers.map(m => m.details),
+                true, // Allow deletes
+            );
+            const contactsMergeMap = MemberDetails.mergeEmergencyContacts(
+                familyMembers.map(m => m.details),
+                true, // Allow deletes
+            );
+
+            // If there were patches or puts of parents or emergency contacts
+            // Make sure that those patches have been applied even after a potential merge
+            // E.g. you only changed the email, but there was a more recent parent object in a different member
+            // -> avoid losing the email change
+            const parentPatches = isPatchableArray(patch.parents) ? patch.parents.getPatches() : [];
+
+            // Add puts
+            const parentPuts = isPatchableArray(patch.parents) ? patch.parents.getPuts().map(p => p.put) : patch.parents;
+            for (const put of parentPuts) {
+                if (!parentMergeMap.get(put.id)) {
+                    // This one has not been merged
+                    continue;
+                }
+
+                const alternativeEmailsArr = new PatchableArray() as PatchableArray<string, string, string>;
+                for (const alternativeEmail of put.alternativeEmails) {
+                    alternativeEmailsArr.addPut(alternativeEmail);
+                }
+
+                const p = Parent.patch({
+                    ...put,
+                    alternativeEmails: alternativeEmailsArr,
+                    createdAt: undefined, // Not allowed to change (should have already happened + the merge method will already chose the right value)
+                    updatedAt: undefined, // Not allowed to change (should have already happened + the merge method will already chose the right value)
+                });
+
+                // Delete null values or empty strings
+                for (const key in p) {
+                    if (p[key] === null || p[key] === '') {
+                        delete p[key];
+                    }
+                }
+
+                parentPatches.push(p);
+            }
+
+            // Same for emergency contacts
+            const contactsPatches = isPatchableArray(patch.emergencyContacts) ? patch.emergencyContacts.getPatches() : [];
+
+            // Add puts
+            const contactsPuts = isPatchableArray(patch.emergencyContacts) ? patch.emergencyContacts.getPuts().map(p => p.put) : patch.emergencyContacts;
+            for (const put of contactsPuts) {
+                if (!contactsMergeMap.get(put.id)) {
+                    // This one has not been merged
+                    continue;
+                }
+                const p = EmergencyContact.patch({
+                    ...put,
+                    createdAt: undefined, // Not allowed to change (should have already happened + the merge method will already chose the right value)
+                    updatedAt: undefined, // Not allowed to change (should have already happened + the merge method will already chose the right value)
+                });
+
+                // Delete null values or empty strings
+                for (const key in p) {
+                    if (p[key] === null || p[key] === '') {
+                        delete p[key];
+                    }
+                }
+
+                contactsPatches.push(p);
+            }
+
+            // Apply patches
+            for (const parentPatch of parentPatches) {
+                for (const m of familyMembers) {
+                    const arr = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+                    parentPatch.id = parentMergeMap.get(parentPatch.id) ?? parentPatch.id;
+                    arr.addPatch(parentPatch);
+                    m.details = m.details.patch({
+                        parents: arr,
+                    });
+                }
+            }
+
+            // Apply patches
+            for (const contactPatch of contactsPatches) {
+                for (const m of familyMembers) {
+                    const arr = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+                    contactPatch.id = contactsMergeMap.get(contactPatch.id) ?? contactPatch.id;
+                    arr.addPatch(contactPatch);
+                    m.details = m.details.patch({
+                        emergencyContacts: arr,
+                    });
+                }
+            }
+
+            for (const m of familyMembers) {
+                m.details.cleanData();
+
+                if (await m.save() && m.id !== member.id) {
+                    // Auto link users based on data
+                    await MemberUserSyncer.onChangeMember(m);
+
+                    // Update documents
+                    await Document.updateForMember(m.id);
+                }
+            }
+        }
+    }
+
     static async findExistingMember(member: Member) {
         if (!member.details.birthDay) {
             return;
@@ -759,8 +891,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
     }
 
-    static async checkSecurityCode(member: MemberWithRegistrations, securityCode: string | null | undefined) {
-        if (await member.isSafeToMergeDuplicateWithoutSecurityCode() || await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
+    static async checkSecurityCode(member: MemberWithRegistrations, securityCode: string | null | undefined, type: 'put' | 'patch') {
+        if ((type === 'put' && await member.isSafeToMergeDuplicateWithoutSecurityCode()) || await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
             console.log('checkSecurityCode: without security code: allowed for ' + member.id);
         }
         else if (securityCode) {
@@ -802,8 +934,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             const log = new AuditLog();
 
             // a member has multiple organizations, so this is difficult to determine - for now it is only visible in the admin panel
-            log.organizationId = member.organizationId; 
-            
+            log.organizationId = member.organizationId;
+
             log.type = AuditLogType.MemberSecurityCodeUsed;
             log.source = AuditLogSource.Anonymous;
 
@@ -823,6 +955,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             await log.save();
         }
         else {
+            if (type === 'patch') {
+                throw Context.auth.memberNotFoundOrNoAccess();
+            }
             throw new SimpleError({
                 code: 'known_member_missing_rights',
                 message: 'Creating known member without sufficient access rights',
@@ -832,11 +967,25 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
     }
 
-    static async checkDuplicate(member: Member, securityCode: string | null | undefined) {
+    static shouldCheckIfMemberIsDuplicate(put: Member): boolean {
+        if (put.details.firstName.length <= 3 && put.details.lastName.length <= 3) {
+            return false;
+        }
+
+        const age = put.details.age;
+        // do not check if member is duplicate for historical members
+        return age !== null && age < 81;
+    }
+
+    static async checkDuplicate(member: Member, securityCode: string | null | undefined, type: 'put' | 'patch') {
+        if (!this.shouldCheckIfMemberIsDuplicate(member)) {
+            return;
+        }
+
         // Check for duplicates and prevent creating a duplicate member by a user
         const duplicate = await this.findExistingMember(member);
         if (duplicate) {
-            await this.checkSecurityCode(duplicate, securityCode);
+            await this.checkSecurityCode(duplicate, securityCode, type);
 
             // Merge data
             // NOTE: We use mergeTwoMembers instead of mergeMultipleMembers, because we should never safe 'member' , because that one does not exist in the database
@@ -849,5 +998,42 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         await new MemberFactory({
             organization,
         }).createMultiple(count);
+    }
+
+    async checkResponsbilityLimits(model: MemberResponsibilityRecord, responsibility: MemberResponsibility) {
+        if (responsibility.maximumMembers !== null) {
+            if (!model.getBaseStructure().isActive) {
+                return;
+            }
+
+            const query = MemberResponsibilityRecord.select()
+                .where('responsibilityId', responsibility.id)
+                .andWhere('organizationId', model.organizationId)
+                .andWhere('groupId', model.groupId)
+                .andWhere(MemberResponsibilityRecord.whereActive);
+
+            if (model.existsInDatabase) {
+                query.andWhere('id', '!=', model.id);
+            }
+
+            const count = (await query.count()) + 1;
+
+            // Because it should be possible to move around responsibilities, we allow 1 extra
+            const actualLimit = responsibility.maximumMembers <= 1 ? 2 : responsibility.maximumMembers;
+
+            if (count > actualLimit) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: 'Maximum members reached',
+                    human: responsibility.maximumMembers === 1
+                        ? (model.groupId
+                                ? $t('e3e4ba16-7923-42bc-ae23-cd729ce06869', { responsibility: responsibility.name })
+                                : $t('77e408e8-59e5-42c2-b58d-956f7c391e5c', { responsibility: responsibility.name }))
+                        : (model.groupId
+                                ? $t('10c13841-9f58-4651-a9b3-a34c8ce1a505', { count: responsibility.maximumMembers.toFixed(), responsibility: responsibility.name })
+                                : $t('01ef9768-89b5-48ea-955e-b896306a9a87', { count: responsibility.maximumMembers.toFixed(), responsibility: responsibility.name })),
+                });
+            }
+        }
     }
 }

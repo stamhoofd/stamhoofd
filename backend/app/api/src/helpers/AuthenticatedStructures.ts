@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuditLog, BalanceItem, CachedBalance, Document, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
 import { SQL } from '@stamhoofd/sql';
@@ -58,11 +58,29 @@ export class AuthenticatedStructures {
 
     static async groups(groups: Group[]) {
         const waitingListIds = Formatter.uniqueArray(groups.map(g => g.waitingListId).filter(id => id !== null));
-        const waitingLists = waitingListIds.length > 0 ? await Group.getByIDs(...waitingListIds) : [];
+
+        const waitingLists: Group[] = [];
+        const waitingListsToFetch: string[] = [];
+
+        for (const waitingListId of waitingListIds) {
+            const existingGroup = groups.find(g => g.id === waitingListId);
+
+            if (existingGroup) {
+                waitingLists.push(existingGroup);
+            }
+            else {
+                waitingListsToFetch.push(waitingListId);
+            }
+        }
+
+        if (waitingListsToFetch.length) {
+            const fetchedWaitingLists = await Group.getByIDs(...waitingListsToFetch);
+            waitingLists.push(...fetchedWaitingLists);
+        }
 
         const structs: GroupStruct[] = [];
         for (const group of groups) {
-            const waitingList = waitingLists.find(g => g.id == group.waitingListId) ?? null;
+            const waitingList = waitingLists.find(g => g.id === group.waitingListId) ?? null;
             const waitingListStruct = waitingList ? GroupStruct.create(waitingList) : null;
             if (waitingList && waitingListStruct && !await Context.optionalAuth?.canAccessGroup(waitingList)) {
                 waitingListStruct.privateSettings = null;
@@ -88,31 +106,70 @@ export class AuthenticatedStructures {
             return [];
         }
 
+        const periodIds = periods ? Formatter.uniqueArray(periods.map(p => p.id)) : Formatter.uniqueArray(organizationRegistrationPeriods.map(p => p.periodId));
+
         if (!periods) {
-            const periodIds = Formatter.uniqueArray(organizationRegistrationPeriods.map(p => p.periodId));
             periods = await RegistrationPeriod.getByIDs(...periodIds);
         }
 
+        const organizationIds = Formatter.uniqueArray(organizationRegistrationPeriods.map(r => r.organizationId));
+
         const groupIds = Formatter.uniqueArray(organizationRegistrationPeriods.flatMap(p => p.settings.categories.flatMap(c => c.groupIds)));
-        const groups = groupIds.length ? await Group.getByIDs(...groupIds) : [];
+
+        let groups: Group[] = [];
+
+        const whereWaitingList = SQL.where('organizationId', organizationIds)
+            .and('periodId', periodIds)
+            .and('type', GroupType.WaitingList)
+            .and('deletedAt', null);
+
+        if (groupIds.length) {
+            const whereGroupIds = SQL.where('id', groupIds);
+
+            if (organizationIds.length && periodIds.length) {
+                groups = await Group.select()
+                    .where(whereGroupIds)
+                    .orWhere(whereWaitingList)
+                    .fetch();
+            }
+            else {
+                groups = await Group.select()
+                    .where(whereGroupIds).fetch();
+            }
+        }
+        else if (organizationIds.length && periodIds.length) {
+            groups = await Group.select()
+                .where(whereWaitingList)
+                .fetch();
+        }
 
         const groupStructs = await this.groups(groups);
 
         const structs: OrganizationRegistrationPeriodStruct[] = [];
         for (const organizationPeriod of organizationRegistrationPeriods) {
-            const period = periods.find(p => p.id == organizationPeriod.periodId) ?? null;
+            const period = periods.find(p => p.id === organizationPeriod.periodId) ?? null;
             if (!period) {
                 continue;
             }
-            const groupIds = Formatter.uniqueArray(organizationPeriod.settings.categories.flatMap(c => c.groupIds));
 
-            structs.push(
-                OrganizationRegistrationPeriodStruct.create({
-                    ...organizationPeriod,
-                    period: period.getStructure(),
-                    groups: groupStructs.filter(gg => groupIds.includes(gg.id)).sort(GroupStruct.defaultSort),
-                }),
-            );
+            const struct = OrganizationRegistrationPeriodStruct.create({
+                ...organizationPeriod,
+                period: period.getStructure(),
+                groups: groupStructs.filter((gg) => {
+                    if (gg.organizationId !== organizationPeriod.organizationId) {
+                        return false;
+                    }
+
+                    if (gg.periodId !== organizationPeriod.periodId) {
+                        return false;
+                    }
+
+                    return true;
+                })
+                    .sort(GroupStruct.defaultSort),
+            });
+
+            structs.push(struct);
         }
 
         return structs;
@@ -767,11 +824,11 @@ export class AuthenticatedStructures {
                                     ]
                                 : []),
 
-                            ...(member.details.parentsHaveAccess
-                                ? member.details.parents.filter(p => !!p.email).map(p => ReceivableBalanceObjectContact.create({
+                            ...((member.details.defaultAge <= 18 || member.details.getMemberEmails().length === 0)
+                                ? member.details.parents.filter(p => p.getEmails().length > 0).map(p => ReceivableBalanceObjectContact.create({
                                     firstName: p.firstName ?? '',
                                     lastName: p.lastName ?? '',
-                                    emails: [p.email!],
+                                    emails: p.getEmails(),
                                     meta: {
                                         type: 'parent',
                                         responsibilityIds: [],
@@ -810,11 +867,11 @@ export class AuthenticatedStructures {
                                     ]
                                 : []),
 
-                            ...(member.details.parentsHaveAccess
-                                ? member.details.parents.filter(p => !!p.email).map(p => ReceivableBalanceObjectContact.create({
+                            ...((member.details.defaultAge <= 18 || member.details.getMemberEmails().length === 0)
+                                ? member.details.parents.filter(p => p.getEmails().length > 0).map(p => ReceivableBalanceObjectContact.create({
                                     firstName: p.firstName ?? '',
                                     lastName: p.lastName ?? '',
-                                    emails: [p.email!],
+                                    emails: p.getEmails(),
                                     meta: {
                                         type: 'parent',
                                         responsibilityIds: [],

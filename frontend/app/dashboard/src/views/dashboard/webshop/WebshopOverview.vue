@@ -170,7 +170,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="getFeatureFlag('webshop-discounts')" :selectable="true" class="left-center" @click="editDiscounts(true)">
+                    <STListItem :selectable="true" class="left-center" @click="editDiscounts(true)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/discount.svg">
                         </template>

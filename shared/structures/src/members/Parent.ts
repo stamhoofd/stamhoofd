@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, EnumDecoder, field, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
 import { DataValidator, Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -41,6 +41,15 @@ export class Parent extends AutoEncoder {
     @field({ decoder: Address, nullable: true })
     address: Address | null = null;
 
+    @field({ decoder: DateDecoder, version: 367 })
+    createdAt = new Date();
+
+    /**
+     * Stores the timestamp the parent was last edited in the UI (not the same as edited in the database - this is used to find the most correct data in case of duplicates)
+     */
+    @field({ decoder: DateDecoder, nullable: true, version: 367 })
+    updatedAt: Date | null = null;
+
     get name() {
         if (!this.firstName) {
             return this.lastName;
@@ -64,6 +73,16 @@ export class Parent extends AutoEncoder {
             return true;
         }
         return false;
+    }
+
+    getEmails() {
+        const userEmails = [...this.alternativeEmails];
+
+        if (this.email) {
+            userEmails.unshift(this.email);
+        }
+
+        return userEmails;
     }
 
     hasEmail(email: string): boolean {
@@ -93,7 +112,7 @@ export class Parent extends AutoEncoder {
             }
         }
 
-        this.alternativeEmails = this.alternativeEmails.map(e => e.toLowerCase().trim()).filter((email) => {
+        this.alternativeEmails = Formatter.uniqueArray(this.alternativeEmails.map(e => e.toLowerCase().trim()).filter((email) => {
             if (this.email && email === this.email) {
                 return false;
             }
@@ -102,7 +121,7 @@ export class Parent extends AutoEncoder {
             }
 
             return true;
-        });
+        }));
 
         if (this.phone) {
             this.phone = Formatter.removeDuplicateSpaces(this.phone.trim());
@@ -125,6 +144,9 @@ export class Parent extends AutoEncoder {
         return this.firstName === other.firstName && this.lastName === other.lastName && this.email === other.email && this.phone === other.phone && this.address?.toString() === other.address?.toString();
     }
 
+    /**
+     * Merge, giving other priority over this
+     */
     merge(other: Parent) {
         if (other.firstName.length > 0) {
             this.firstName = other.firstName;
@@ -132,6 +154,11 @@ export class Parent extends AutoEncoder {
         if (other.lastName.length > 0) {
             this.lastName = other.lastName;
         }
+        // note: do not change createdAt
+        if (other.updatedAt) {
+            this.updatedAt = other.updatedAt;
+        }
+        this.alternativeEmails = Formatter.uniqueArray([...other.getEmails(), ...this.getEmails()]);
 
         if (other.email) {
             this.email = other.email;
@@ -157,6 +184,10 @@ export class Parent extends AutoEncoder {
             }
         }
 
-        this.alternativeEmails = Formatter.uniqueArray([...this.alternativeEmails, ...other.alternativeEmails]);
+        if (other.nationalRegisterNumber) {
+            this.nationalRegisterNumber = other.nationalRegisterNumber;
+        }
+
+        this.cleanData();
     }
 }

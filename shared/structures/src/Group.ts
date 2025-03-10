@@ -11,6 +11,7 @@ import { Gender } from './members/Gender.js';
 import { PermissionLevel } from './PermissionLevel.js';
 import { PermissionsResourceType } from './PermissionsResourceType.js';
 import { StockReservation } from './StockReservation.js';
+import { Event } from './Event.js';
 
 export enum GroupStatus {
     Open = 'Open',
@@ -81,6 +82,9 @@ export class Group extends AutoEncoder {
      */
     @field({ decoder: new EnumDecoder(GroupStatus), version: 192 })
     status = GroupStatus.Open;
+
+    // Permission checking cache:
+    event: Event | null = null;
 
     getDiffName() {
         return this.settings.name;

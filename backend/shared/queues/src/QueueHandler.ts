@@ -264,21 +264,19 @@ export class QueueHandler {
         }
         catch (e) {
             next.reject(e);
-            if (STAMHOOFD.environment !== 'test') {
-                if (!isDebouncedError(e) && !isCanceledError(e) && !isAbortedError(e)) {
-                    console.log('[QUEUE] (' + (q.runCount - 1) + '/' + q.parallel + ') Rejected ' + queue + ' (' + q.items.length + ' remaining)');
-                    console.error(e);
+            if (!isDebouncedError(e) && !isCanceledError(e) && !isAbortedError(e)) {
+                console.log('[QUEUE] (' + (q.runCount - 1) + '/' + q.parallel + ') Rejected ' + queue + ' (' + q.items.length + ' remaining)');
+                console.error(e);
+            }
+            else {
+                if (isDebouncedError(e)) {
+                    console.log('[QUEUE] (' + (q.runCount - 1) + '/' + q.parallel + ') Debounced ' + queue + ' (' + q.items.length + ' remaining)');
                 }
-                else {
-                    if (isDebouncedError(e)) {
-                        console.log('[QUEUE] (' + (q.runCount - 1) + '/' + q.parallel + ') Debounced ' + queue + ' (' + q.items.length + ' remaining)');
-                    }
-                    else if (isCanceledError(e)) {
-                        console.log('[QUEUE] (' + (q.runCount - 1) + '/' + q.parallel + ') Canceled ' + queue + ' (' + q.items.length + ' remaining)');
-                    }
-                    else if (isAbortedError(e)) {
-                        console.log('[QUEUE] (' + (q.runCount - 1) + '/' + q.parallel + ') Aborted ' + queue + ' (' + q.items.length + ' remaining)');
-                    }
+                else if (isCanceledError(e)) {
+                    console.log('[QUEUE] (' + (q.runCount - 1) + '/' + q.parallel + ') Canceled ' + queue + ' (' + q.items.length + ' remaining)');
+                }
+                else if (isAbortedError(e)) {
+                    console.log('[QUEUE] (' + (q.runCount - 1) + '/' + q.parallel + ') Aborted ' + queue + ' (' + q.items.length + ' remaining)');
                 }
             }
         }

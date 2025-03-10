@@ -285,7 +285,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         tags: request.body.meta.tags as any,
                     });
 
-                    const platform: Platform = await Platform.getShared();
+                    const platform = await Platform.getShared();
                     const patchedMeta: OrganizationMetaData = organization.meta.patch(cleanedPatch);
                     for (const tag of patchedMeta.tags) {
                         if (!platform.config.tags.find(t => t.id === tag)) {
@@ -293,8 +293,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         }
                     }
 
-                    const platformConfig: PlatformConfig = platform.config;
-                    organization.meta.tags = TagHelper.getAllTagsFromHierarchy(patchedMeta.tags, platformConfig.tags);
+                    organization.meta.tags = TagHelper.getAllTagsFromHierarchy(patchedMeta.tags, platform.config.tags);
 
                     updateTags = true;
                 }

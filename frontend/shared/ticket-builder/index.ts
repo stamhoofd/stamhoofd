@@ -1,6 +1,7 @@
 /* eslint-disable no-irregular-whitespace */
 import metropolisMediumUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-Medium.woff2';
 import metropolisBoldUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2';
+import { Toast } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { AppManager } from '@stamhoofd/networking';
 import { Country, Order, Organization, Sponsor, TicketPublic, Webshop, WebshopOnSiteMethod, WebshopPreview, WebshopTakeoutMethod, WebshopTicketType } from '@stamhoofd/structures';
@@ -91,13 +92,12 @@ export class TicketBuilder {
         });
 
         const fileName = (this.tickets.length == 1 ? Formatter.fileSlug(this.tickets[0].getTitle() + (this.tickets[0].getIndexText() ? (' ' + this.tickets[0].getIndexText()) : '')) : Formatter.fileSlug('Tickets ' + this.webshop.meta.name)) + '.pdf';
+        const blob = new Blob([buffer], { type: 'application/pdf' });
 
         if (AppManager.shared.downloadFile) {
-            const data = buffer.toString('base64');
-            await AppManager.shared.downloadFile(data, fileName);
+            await AppManager.shared.downloadFile(blob, fileName);
         }
         else {
-            const blob = new Blob([buffer], { type: 'application/pdf' });
             const link = document.createElement('a');
             const href = window.URL.createObjectURL(blob);
             link.href = href;

@@ -33,10 +33,8 @@ describe('Endpoint.RegisterMembers', () => {
         period = await new RegistrationPeriodFactory({
             startDate: new Date(2023, 0, 1),
             endDate: new Date(2023, 11, 31),
+            previousPeriodId: previousPeriod.id,
         }).create();
-
-        period.previousPeriodId = previousPeriod.id;
-        await period.save();
     });
 
     afterEach(() => {
@@ -2199,41 +2197,23 @@ describe('Endpoint.RegisterMembers', () => {
                 groupPrice: groupPrice1,
             }).create();
 
-            const group2 = await new GroupFactory({
-                organization,
-                price: 30,
-                stock: 5,
-            }).create();
-
-            const groupPrice = group2.settings.prices[0];
-
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
-                            groupPrice,
-                            organizationId: organization.id,
-                            groupId: group2.id,
-                            memberId: member.id,
-                        }),
-                    ],
+                    items: [],
                     balanceItems: [],
                     deleteRegistrationIds: [registration.id],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 30,
+                totalPrice: 0,
                 customer: null,
                 asOrganizationId: organization.id,
             });
             // #endregion
 
             // #region act and assert
-            await expect(async () => await post(body, organization, token)).rejects.toThrow(new RegExp('Je hebt geen toegangsrechten om deze inschrijving te verwijderen'));
+            await expect(async () => await post(body, organization, token)).rejects.toThrow(/No permission to delete this registration/);
             // #endregion
         });
 
@@ -2363,7 +2343,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             // #region act and assert
             await post(body1, organization, token);
-            await expect(async () => await post(body2, organization, token)).rejects.toThrow(new RegExp('Oeps, één of meerdere inschrijvingen die je probeert te verwijderen was al verwijderd. Herlaad de pagina en probeer opnieuw'));
+            await expect(async () => await post(body2, organization, token)).rejects.toThrow(/No permission to delete this registration/);
             // #endregion
         });
     });

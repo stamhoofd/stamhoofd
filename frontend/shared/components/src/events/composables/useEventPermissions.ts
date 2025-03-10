@@ -11,7 +11,7 @@ export function useEventPermissions() {
             return false;
         }
 
-        return permissions.hasAccessRightForSomeResource(PermissionsResourceType.OrganizationTags, AccessRight.EventWrite) || permissions.hasAccessRightForSomeResource(PermissionsResourceType.Groups, AccessRight.EventWrite);
+        return permissions.hasAccessRightForSomeResourceOfType(PermissionsResourceType.OrganizationTags, AccessRight.EventWrite) || permissions.hasAccessRightForSomeResourceOfType(PermissionsResourceType.Groups, AccessRight.EventWrite);
     }
 
     function canWriteAllGroupEvents() {

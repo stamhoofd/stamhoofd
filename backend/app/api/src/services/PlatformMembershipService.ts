@@ -169,6 +169,13 @@ export class PlatformMembershipService {
                         console.warn('No periods found for member ' + me.id);
                     }
                 }
+                const types = platform.config.membershipTypes.filter(m => m.behaviour === PlatformMembershipTypeBehaviour.Period).map(m => m.id);
+                if (types.length === 0) {
+                    if (!silent) {
+                        console.warn('No membership types found for memberships');
+                    }
+                    return;
+                }
 
                 // Every (not-locked) period can have a generated membership
                 for (const period of periods) {
@@ -199,8 +206,6 @@ export class PlatformMembershipService {
                             membership: defaultMembership,
                         }];
                     });
-
-                    const types = platform.config.membershipTypes.filter(m => m.behaviour === PlatformMembershipTypeBehaviour.Period).map(m => m.id);
 
                     // Get active memberships for this member that
                     const activeMemberships = await MemberPlatformMembership.where({

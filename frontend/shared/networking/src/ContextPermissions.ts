@@ -1,4 +1,4 @@
-import { AccessRight, Event, EventPermissionChecker, Group, GroupCategory, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationTag, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
+import { AccessRight, Event, EventPermissionChecker, Group, GroupCategory, GroupType, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationTag, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
 import { Ref, toRaw, unref } from 'vue';
 
 export class ContextPermissions {
@@ -110,8 +110,8 @@ export class ContextPermissions {
         return this.permissions?.hasResourceAccessRight(resourceType, resourceId, right) ?? false;
     }
 
-    hasAccessRightForSomeResource(resourceType: PermissionsResourceType, right: AccessRight) {
-        return this.permissions?.hasAccessRightForSomeResource(resourceType, right) ?? false;
+    hasAccessRightForSomeResourceOfType(resourceType: PermissionsResourceType, right: AccessRight) {
+        return this.permissions?.hasAccessRightForSomeResourceOfType(resourceType, right) ?? false;
     }
 
     canManagePayments() {
@@ -123,7 +123,28 @@ export class ContextPermissions {
             return this.hasFullPlatformAccess();
         }
 
-        return group.hasAccess(this.permissions, this.organization.period.settings.categories, permissionLevel);
+        if (group.hasAccess(this.permissions, this.organization.period.settings.categories, permissionLevel)) {
+            return true;
+        }
+
+        if (group.type === GroupType.EventRegistration && group.event && group.event.organizationId === this.organization.id) {
+            // we'll need to check the event permissions
+            return this.canWriteEventForOrganization(group.event, this.organization);
+        }
+
+        return false;
+    }
+
+    canRegisterMembersInGroup(group: Group) {
+        if (this.canAccessGroup(group, PermissionLevel.Write)) {
+            return true;
+        }
+        if (this.organization) {
+            if (group.settings.allowRegistrationsByOrganization && !group.closed) {
+                return this.hasFullAccess();
+            }
+        }
+        return false;
     }
 
     canCreateGroupInCategory(category: GroupCategory) {
@@ -147,6 +168,11 @@ export class ContextPermissions {
         }
 
         if (this.user && 'members' in this.user && this.user.members.members.some(m => m.id === member.id)) {
+            return true;
+        }
+
+        if (this.getPlatformAccessibleOrganizationTags(permissionLevel) === 'all') {
+            // Can access all members: even members without any registration
             return true;
         }
 

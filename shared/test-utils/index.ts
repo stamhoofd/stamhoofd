@@ -4,6 +4,7 @@ type AfterCallback = () => void | Promise<void>;
 class TestInstance {
     onceAfterEachCallbacks: AfterCallback[] = [];
     afterEachCallbacks: AfterCallback[] = [];
+    beforeAllCallbacks: AfterCallback[] = [];
 
     permanentEnvironmentOverrides: Record<string, any> = {};
 
@@ -28,6 +29,19 @@ class TestInstance {
      */
     addAfterEach(callback: AfterCallback) {
         this.afterEachCallbacks.push(callback);
+    }
+
+    /**
+     * Will run after each test in this test suite
+     */
+    addBeforeAll(callback: AfterCallback) {
+        this.beforeAllCallbacks.push(callback);
+    }
+
+    async beforeAll() {
+        for (const callback of this.beforeAllCallbacks) {
+            await callback();
+        }
     }
 
     async afterEach() {
@@ -59,6 +73,10 @@ class TestInstance {
      * Run this in each jest.setup.ts file
      */
     setup() {
+        beforeAll(async () => {
+            await this.beforeAll();
+        });
+
         beforeEach(async () => {
             await this.beforeEach();
         });

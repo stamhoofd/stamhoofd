@@ -25,6 +25,32 @@
             </STInputBox>
             <TimeInput v-model="deadlineDate" title="Tijdstip" :validator="errors.validator" />
         </div>
+
+        <STInputBox :title="$t('9106b204-3db9-4fac-acfa-e53e07d5a867')" error-fields="reminderText" :error-box="errors.errorBox" class="max">
+            <input
+                v-model="reminderTitle"
+                class="input"
+                type="text"
+                :placeholder="$t('16e52c0a-81e8-4d24-9efb-470a92b74c15')"
+            >
+        </STInputBox>
+
+        <STInputBox :title="$t('49706c38-6fcf-4533-8692-ccf5836a27df')" error-fields="reminderText" :error-box="errors.errorBox" class="max">
+            <textarea
+                v-model="reminderText"
+                class="input"
+                type="text"
+                :placeholder="$t('55770076-d3a3-48db-a49b-ba23c6a54a39')"
+                autocomplete="off"
+            />
+        </STInputBox>
+        <p class="style-description-small">
+            Deze tekst is zichtbaar in het 'Start' tabblad als de deadline nadert.
+        </p>
+
+        <STInputBox title="Herinnering tonen vanaf" error-fields="reminderFrom" :error-box="errors.errorBox">
+            <DateSelection v-model="reminderFrom" :required="false" :placeholder="$t('ba2b2a5a-8c8a-42c5-9ee7-78daa3b6c5ec')" :time="{hours: 0, minutes: 0, seconds: 0}" />
+        </STInputBox>
     </SaveView>
 </template>
 
@@ -105,6 +131,21 @@ const endDate = computed({
 const deadlineDate = computed({
     get: () => patched.value.deadline,
     set: deadline => addPatch({ deadline }),
+});
+
+const reminderTitle = computed({
+    get: () => patched.value.reminderTitle,
+    set: reminderTitle => addPatch({ reminderTitle }),
+});
+
+const reminderText = computed({
+    get: () => patched.value.reminderText,
+    set: reminderText => addPatch({ reminderText }),
+});
+
+const reminderFrom = computed({
+    get: () => patched.value.reminderFrom,
+    set: reminderFrom => addPatch({ reminderFrom }),
 });
 
 const shouldNavigateAway = async () => {

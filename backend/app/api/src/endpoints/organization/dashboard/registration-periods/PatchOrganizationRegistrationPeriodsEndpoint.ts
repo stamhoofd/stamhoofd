@@ -430,6 +430,9 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                         patch.waitingList,
                         model.organizationId,
                         requiredPeriod,
+                        {
+                            allowedIds: [patch.waitingList.id],
+                        },
                     );
                     model.waitingListId = group.id;
                 }
@@ -443,12 +446,14 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
     static async createGroup(struct: GroupStruct, organizationId: string, period: RegistrationPeriod, options?: { allowedIds?: string[] }): Promise<Group> {
         const allowedIds = options?.allowedIds ?? [];
 
-        if (!await Context.auth.hasFullAccess(organizationId)) {
-            if (allowedIds.includes(struct.id)) {
-                // Ok
-            }
-            else {
-                throw Context.auth.error('Je hebt geen toegangsrechten om groepen toe te voegen');
+        if (struct.type === GroupType.Membership || struct.type === GroupType.WaitingList) {
+            if (!await Context.auth.hasFullAccess(organizationId)) {
+                if (allowedIds.includes(struct.id)) {
+                    // Ok
+                }
+                else {
+                    throw Context.auth.error('Je hebt geen toegangsrechten om groepen toe te voegen');
+                }
             }
         }
 
@@ -493,15 +498,15 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             user.permissions!.organizationPermissions.set(organizationId, organizationPermissions.patch(patch));
             console.log('Automatically granted author full permissions to resource', 'group', model.id, 'user', user.id, 'patch', patch.encode({ version: Version }));
             await user.save();
-        }
 
-        // Check if current user has permissions to this new group -> else fail with error
-        if (!await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
-            throw new SimpleError({
-                code: 'missing_permissions',
-                message: 'You cannot restrict your own permissions',
-                human: 'Je kan geen inschrijvingsgroep maken zonder dat je zelf volledige toegang hebt tot de nieuwe groep',
-            });
+            // Check if current user has permissions to this new group -> else fail with error
+            if (!await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
+                throw new SimpleError({
+                    code: 'missing_permissions',
+                    message: 'You cannot restrict your own permissions',
+                    human: 'Je kan geen inschrijvingsgroep maken zonder dat je zelf volledige toegang hebt tot de nieuwe groep',
+                });
+            }
         }
 
         if (struct.waitingList) {
@@ -523,6 +528,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     struct.waitingList,
                     model.organizationId,
                     period,
+                    { allowedIds: [struct.waitingList.id] },
                 );
                 model.waitingListId = group.id;
             }

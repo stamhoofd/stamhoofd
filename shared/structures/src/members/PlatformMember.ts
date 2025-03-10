@@ -296,6 +296,9 @@ export class PlatformFamily {
         return Array.from(parents.values());
     }
 
+    /**
+     * Change all references to an address to a new address
+     */
     updateAddress(oldValue: Address, newValue: Address) {
         for (const member of this.members) {
             const patch = member.patchedMember.details.updateAddressPatch(oldValue, newValue);
@@ -306,11 +309,10 @@ export class PlatformFamily {
     }
 
     /// Update all references to this parent (with same id)
-    updateParent(parent: Parent) {
+    patchParent(parent: AutoEncoderPatchType<Parent>) {
         for (const member of this.members) {
-            const patch = member.patchedMember.details.updateParentPatch(parent);
-            if (patch !== null) {
-                member.addDetailsPatch(patch);
+            if (member.patchedMember.details.parents.find(p => p.id === parent.id)) {
+                member.patchParent(parent);
             }
         }
     }
@@ -319,11 +321,10 @@ export class PlatformFamily {
         return this.members.filter(m => m.patchedMember.details.parents.find(p => p.id === parent.id));
     }
 
-    updateEmergencyContact(emergencyContact: EmergencyContact) {
+    patchEmergencyContact(emergencyContact: AutoEncoderPatchType<EmergencyContact>) {
         for (const member of this.members) {
-            const patch = member.patchedMember.details.updateEmergencyContactPatch(emergencyContact);
-            if (patch !== null) {
-                member.addDetailsPatch(patch);
+            if (member.patchedMember.details.emergencyContacts.find(p => p.id === emergencyContact.id)) {
+                member.patchEmergencyContact(emergencyContact);
             }
         }
     }
@@ -516,9 +517,25 @@ export class PlatformMember implements ObjectWithRecords {
         });
     }
 
+    patchEmergencyContact(emergencyContact: AutoEncoderPatchType<EmergencyContact>) {
+        const arr = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+        arr.addPatch(emergencyContact);
+        this.addDetailsPatch({
+            emergencyContacts: arr,
+        });
+    }
+
     addParent(parent: Parent) {
         const arr = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
         arr.addPut(parent);
+        this.addDetailsPatch({
+            parents: arr,
+        });
+    }
+
+    patchParent(parent: AutoEncoderPatchType<Parent>) {
+        const arr = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+        arr.addPatch(parent);
         this.addDetailsPatch({
             parents: arr,
         });
@@ -633,10 +650,6 @@ export class PlatformMember implements ObjectWithRecords {
 
     isPropertyRequiredForPlatform(property: MemberProperty) {
         if (!this.isPropertyEnabledForPlatform(property)) {
-            return false;
-        }
-
-        if (property === 'nationalRegisterNumber' && !this.patchedMember.details.hasAllCountry(Country.Belgium)) {
             return false;
         }
 
@@ -1060,8 +1073,8 @@ export class PlatformMember implements ObjectWithRecords {
         return cloned as this;
     }
 
-    getResponsibilities(organization?: Organization | null) {
+    getResponsibilities(filter?: { organization?: Organization | null | undefined }) {
         return this.patchedMember.responsibilities
-            .filter(r => r.isActive && (!organization || r.organizationId === organization.id));
+            .filter(r => r.isActive && (filter?.organization === undefined || (filter.organization ? r.organizationId === filter.organization.id : r.organizationId === null)));
     }
 }

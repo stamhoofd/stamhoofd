@@ -3,7 +3,6 @@ import { TestUtils } from '@stamhoofd/test-utils';
 
 type MockedCallback = (data: InternalEmailData) => Promise<void> | void;
 type MockedResponse = { error?: Error | null; callback?: MockedCallback };
-import sinon from 'sinon';
 
 export class EmailMocker {
     sentEmails: InternalEmailData[] = [];
@@ -49,18 +48,23 @@ export class EmailMocker {
             };
         };
 
-        sinon.stub(Email, 'setupIfNeeded').callsFake(function (this: typeof Email) {
-            this.transporter = {
-                sendMail: async (data: InternalEmailData) => {
-                    return handler(EmailMocker.broadcast, data);
-                },
-            } as any;
+        TestUtils.addBeforeAll(async () => {
+            // We load async here because this is a dev dependency (otherwise Node will reach this and complain, breaking the boot)
+            const sinon = await import('sinon');
 
-            this.transactionalTransporter = {
-                sendMail: async (data: InternalEmailData) => {
-                    return handler(EmailMocker.transactional, data);
-                },
-            } as any;
+            sinon.stub(Email, 'setupIfNeeded').callsFake(function (this: typeof Email) {
+                this.transporter = {
+                    sendMail: async (data: InternalEmailData) => {
+                        return handler(EmailMocker.broadcast, data);
+                    },
+                } as any;
+
+                this.transactionalTransporter = {
+                    sendMail: async (data: InternalEmailData) => {
+                        return handler(EmailMocker.transactional, data);
+                    },
+                } as any;
+            });
         });
 
         TestUtils.addAfterEach(() => {

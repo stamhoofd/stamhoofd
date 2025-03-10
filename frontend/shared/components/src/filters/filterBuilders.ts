@@ -82,16 +82,16 @@ memberWithRegistrationsBlobUIFilterBuilders.unshift(
 export function useMemberWithRegistrationsBlobFilterBuilders() {
     return (recordConfiguration: OrganizationRecordsConfiguration) => {
         const all: UIFilterBuilders = [];
-        
+
         if (recordConfiguration.birthDay) {
             all.push(new DateFilterBuilder({
                 name: 'Geboortedatum',
-                key: 'birthDay'
+                key: 'birthDay',
             }));
 
             all.push(new NumberFilterBuilder({
                 name: 'Leeftijd',
-                key: 'age'
+                key: 'age',
             }));
         }
 
@@ -107,13 +107,13 @@ export function useMemberWithRegistrationsBlobFilterBuilders() {
                     gender: {
                         $in: FilterWrapperMarker,
                     },
-                }
+                },
             }));
         }
 
         // Add record categories
         all.push(...getFilterBuildersForRecordCategories(recordConfiguration.recordCategories));
-        
+
         // Recursive: self referencing groups
         all.unshift(
             new GroupUIFilterBuilder({
@@ -122,12 +122,12 @@ export function useMemberWithRegistrationsBlobFilterBuilders() {
         );
 
         return all;
-    }
+    };
 }
 
 export function usePlatformMemberFilterBuilders() {
     // the platform member passes all filters directly to the memberWithRegistrationsBlob
-    return useMemberWithRegistrationsBlobFilterBuilders()
+    return useMemberWithRegistrationsBlobFilterBuilders();
 }
 
 export function useRegisterItemFilterBuilders() {
@@ -137,15 +137,15 @@ export function useRegisterItemFilterBuilders() {
                 name: 'Leeftijd',
                 key: 'age',
                 wrapper: {
-                    member: FilterWrapperMarker
-                }
+                    member: FilterWrapperMarker,
+                },
             }),
             new DateFilterBuilder({
                 name: 'Geboortedatum',
                 key: 'birthDay',
                 wrapper: {
-                    member: FilterWrapperMarker
-                }
+                    member: FilterWrapperMarker,
+                },
             }),
             new MultipleChoiceFilterBuilder({
                 name: 'Gender',
@@ -159,8 +159,8 @@ export function useRegisterItemFilterBuilders() {
                         gender: {
                             $in: FilterWrapperMarker,
                         },
-                    }
-                }
+                    },
+                },
             }),
         ];
 
@@ -179,9 +179,9 @@ export function useRegisterItemFilterBuilders() {
                         id: {
                             $in: FilterWrapperMarker,
                         },
-                    }
-                }
-            })
+                    },
+                },
+            }),
         );
 
         // Option filter
@@ -202,10 +202,10 @@ export function useRegisterItemFilterBuilders() {
                                 },
                                 option: {
                                     id: {
-                                        $in: FilterWrapperMarker
+                                        $in: FilterWrapperMarker,
                                     },
                                 },
-                            }
+                            },
                         },
                     },
                 }),
@@ -214,7 +214,6 @@ export function useRegisterItemFilterBuilders() {
 
         // Add record categories
         all.push(...getFilterBuildersForRecordCategories(group.settings.recordCategories));
-        
 
         // Recursive: self referencing groups
         all.unshift(
@@ -224,7 +223,7 @@ export function useRegisterItemFilterBuilders() {
         );
 
         return all;
-    }
+    };
 }
 
 export function useAdvancedRegistrationsUIFilterBuilders() {
@@ -392,7 +391,6 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
                     options: (platform.periods ?? []).map((period) => {
                         return new MultipleChoiceUIFilterOption(period.nameShort, period.id);
                     }),
-                    allowCreation: hasPlatformPermissions,
                     wrapper: {
                         periodId: { $in: FilterWrapperMarker },
                     },
@@ -424,7 +422,7 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
                     key: 'price',
                     type: NumberFilterFormat.Currency,
                 }),
-            )
+            );
 
             all.push(
                 new NumberFilterBuilder({
@@ -432,7 +430,7 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
                     key: 'priceWithoutDiscount',
                     type: NumberFilterFormat.Currency,
                 }),
-            )
+            );
 
             all.push(
                 new MultipleChoiceFilterBuilder({
@@ -441,7 +439,6 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
                         new MultipleChoiceUIFilterOption($t('c5235739-b78a-4add-ab2f-515aef40073d'), true),
                         new MultipleChoiceUIFilterOption($t('539dc5d4-c221-412b-bc33-fe28f85625c4'), false),
                     ],
-                    allowCreation: hasPlatformPermissions,
                     wrapFilter: (f: StamhoofdFilter) => {
                         const choices = Array.isArray(f) ? f : [f];
 
@@ -471,7 +468,6 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
                         new MultipleChoiceUIFilterOption('Met actieve proefperiode', true),
                         new MultipleChoiceUIFilterOption('Zonder proefperiode', false),
                     ],
-                    allowCreation: hasPlatformPermissions,
                     wrapFilter: (f: StamhoofdFilter) => {
                         const choices = Array.isArray(f) ? f : [f];
 

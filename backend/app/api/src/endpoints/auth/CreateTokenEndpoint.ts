@@ -85,7 +85,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 request.request.request?.setTimeout(30 * 1000);
 
                 if (STAMHOOFD.userMode === 'platform') {
-                    const platform = await Platform.getShared();
+                    const platform = await Platform.getSharedPrivateStruct();
                     const config = platform.config.loginMethods.get(LoginMethod.Password);
                     if (!config) {
                         throw new SimpleError({

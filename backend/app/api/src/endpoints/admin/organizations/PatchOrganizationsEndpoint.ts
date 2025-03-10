@@ -51,7 +51,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({ code: 'not_found', message: 'Organization not found', statusCode: 404 });
             }
 
-            if (organization.id === (await Platform.getShared()).membershipOrganizationId) {
+            if (organization.id === (await Platform.getSharedPrivateStruct()).membershipOrganizationId) {
                 throw new SimpleError({
                     code: 'cannot_delete_membership_organization',
                     message: 'Cannot delete membership organization',

@@ -241,6 +241,18 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 });
             }
 
+            if (request.body.asOrganizationId) {
+                // Do you have write access to this group?
+                if (!await Context.auth.canRegisterMembersInGroup(group, request.body.asOrganizationId)) {
+                    throw new SimpleError({
+                        code: 'forbidden',
+                        message: 'No permission to register in this group',
+                        human: $t('36e8f895-91df-4c88-88e7-d4f0e9d1b5bf', { group: group.settings.name }),
+                        statusCode: 403,
+                    });
+                }
+            }
+
             // Check if this member is already registered in this group?
             const existingRegistrations = await Registration.where({ memberId: member.id, groupId: item.groupId, cycle: group.cycle, periodId: group.periodId, registeredAt: { sign: '!=', value: null } });
 
@@ -388,7 +400,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (!await Context.auth.canAccessRegistration(existingRegistration, PermissionLevel.Write)) {
                 throw new SimpleError({
                     code: 'forbidden',
-                    message: 'Je hebt geen toegangsrechten om deze inschrijving te verwijderen.',
+                    message: 'No permission to delete this registration',
+                    human: 'Je hebt geen toegangsrechten om deze inschrijving te verwijderen.',
                     statusCode: 403,
                 });
             }
@@ -396,7 +409,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (existingRegistration.deactivatedAt || !existingRegistration.registeredAt) {
                 throw new SimpleError({
                     code: 'invalid_data',
-                    message: 'Oeps, één of meerdere inschrijvingen die je probeert te verwijderen was al verwijderd. Herlaad de pagina en probeer opnieuw.',
+                    message: 'Cannot delete inactive registration',
+                    human: 'Oeps, één of meerdere inschrijvingen die je probeert te verwijderen was al verwijderd. Herlaad de pagina en probeer opnieuw.',
                 });
             }
 

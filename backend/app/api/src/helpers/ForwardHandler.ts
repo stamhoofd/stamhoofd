@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
-import { Email, EmailAddress, EmailInterfaceRecipient } from '@stamhoofd/email';
+
+import { Email, EmailAddress, EmailInterface, EmailInterfaceRecipient } from '@stamhoofd/email';
 import { Organization } from '@stamhoofd/models';
 import { Formatter } from '@stamhoofd/utility';
 import { simpleParser } from 'mailparser';
@@ -49,7 +49,7 @@ export class ForwardHandler {
                     // Forward
                     return {
                         from: Email.getWebmasterFromEmail(),
-                        to: Email.getWebmasterToEmail(),
+                        to: [Email.getWebmasterToEmail()],
                         subject: 'E-mail unsubscribe mislukt',
                         text: 'Beste,\n\nEr werd een unsubscribe gemeld op ' + email + ' die niet kon worden verwerkt. Gelieve dit na te kijken.\n\nStamhoofd',
                     };
@@ -64,7 +64,7 @@ export class ForwardHandler {
         }
 
         // Send a new e-mail
-        let defaultEmail: EmailInterfaceRecipient[] | string = Email.getWebmasterToEmail();
+        let defaultEmail: EmailInterfaceRecipient[] = [Email.getWebmasterToEmail()];
         let organizationEmails: EmailInterfaceRecipient[] = [];
         const extraDescription = 'Dit bericht werd verstuurd naar ' + email + ', en werd automatisch doorgestuurd naar alle beheerders. Stel in Stamhoofd de e-mailadressen in om ervoor te zorgen dat antwoorden naar een specifiek e-mailadres worden verstuurd.';
 
@@ -80,8 +80,12 @@ export class ForwardHandler {
 
             // Send back to receiver without including the original message to avoid spam
             return {
-                from: email ?? Email.getWebmasterToEmail(),
-                to: from,
+                from: email
+                    ? {
+                            email,
+                        }
+                    : Email.getWebmasterToEmail(),
+                to: [{ email: from }],
                 subject: 'Ongeldig e-mailadres',
                 text: 'Beste,\n\nDe vereniging die je probeert te bereiken via ' + email + ' is helaas niet bereikbaar via dit e-mailadres. Dit e-mailadres wordt enkel gebruikt voor het versturen van automatische e-mails in naam van een vereniging. Probeer de vereniging te contacteren via een ander e-mailadres.\n\nBedankt.',
             };
@@ -123,10 +127,18 @@ export class ForwardHandler {
             }
         }
 
-        const options = {
-            from: email ?? Email.getWebmasterToEmail(),
+        const options: EmailInterface = {
+            from: email
+                ? {
+                        email,
+                    }
+                : Email.getWebmasterToEmail(),
             to: defaultEmail,
-            replyTo: parsed.from?.text,
+            replyTo: parsed.from?.text
+                ? {
+                        email: parsed.from?.text,
+                    }
+                : undefined,
             subject: parsed.subject ?? 'Doorgestuurd bericht',
             text: parsed.text ? extraDescription + '\n\n' + parsed.text : undefined,
             html: html,

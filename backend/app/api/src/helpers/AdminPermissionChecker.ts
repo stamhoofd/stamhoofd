@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, CachedBalance, Document, EmailTemplate, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
-import { AccessRight, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory, RecordSettings } from '@stamhoofd/structures';
+import { AccessRight, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, GroupType, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory, RecordSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryMemberAccess';
 import { MemberRecordStore } from '../services/MemberRecordStore';
@@ -89,6 +89,10 @@ export class AdminPermissionChecker {
             human: message ?? 'Je hebt geen toegangsrechten voor deze actie',
             statusCode: 403,
         });
+    }
+
+    memberNotFoundOrNoAccess(): SimpleError {
+        return this.notFoundOrNoAccess($t('d24814a3-aedc-4569-9ab3-f854027c4e9f'));
     }
 
     notFoundOrNoAccess(message?: string): SimpleError {
@@ -181,15 +185,38 @@ export class AdminPermissionChecker {
             return true;
         }
 
-        // Check parent categories
-        const organizationPeriod = await this.getOrganizationCurrentPeriod(organization);
-        const parentCategories = group.getParentCategories(organizationPeriod.settings.categories);
-        for (const category of parentCategories) {
-            if (organizationPermissions.hasResourceAccess(PermissionsResourceType.GroupCategories, category.id, permissionLevel)) {
+        if (group.type === GroupType.EventRegistration) {
+            // Check if we can access the event
+            const event = await Event.select().where('groupId', group.id).first(false);
+
+            if (event && event.organizationId === group.organizationId && await this.canAccessEvent(event)) {
                 return true;
             }
         }
 
+        // Check parent categories
+        if (group.type === GroupType.Membership) {
+            const organizationPeriod = await this.getOrganizationCurrentPeriod(organization);
+            const parentCategories = group.getParentCategories(organizationPeriod.settings.categories);
+            for (const category of parentCategories) {
+                if (organizationPermissions.hasResourceAccess(PermissionsResourceType.GroupCategories, category.id, permissionLevel)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    async canRegisterMembersInGroup(group: Group, asOrganizationId: string | null) {
+        if (await this.canAccessGroup(group, PermissionLevel.Write)) {
+            return true;
+        }
+        if (asOrganizationId) {
+            if (group.settings.allowRegistrationsByOrganization) {
+                return await this.hasFullAccess(asOrganizationId);
+            }
+        }
         return false;
     }
 
@@ -317,6 +344,11 @@ export class AdminPermissionChecker {
      * Note: only checks admin permissions. Users that 'own' this member can also access it but that does not use the AdminPermissionChecker
      */
     async canAccessRegistration(registration: Registration, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+        if (registration.deactivatedAt || !registration.registeredAt) {
+            // No full access: cannot access deactivated registrations
+            return false;
+        }
+
         const organizationPermissions = await this.getOrganizationPermissions(registration.organizationId);
 
         if (!organizationPermissions) {
@@ -326,11 +358,6 @@ export class AdminPermissionChecker {
         if (organizationPermissions.hasAccess(PermissionLevel.Full)) {
             // Only full permissions; because non-full doesn't have access to other periods
             return true;
-        }
-
-        if (registration.deactivatedAt || !registration.registeredAt) {
-            // No full access: cannot access deactivated registrations
-            return false;
         }
 
         const allGroups = await this.getOrganizationGroups(registration.organizationId);
@@ -1043,6 +1070,20 @@ export class AdminPermissionChecker {
             };
         }
 
+        // It is possible that this is a platform admin, and inherits automatic permissions for tags. So'll need to loop all the organizations where this member has an active registration for
+        if (!record.organizationId && this.platformPermissions) {
+            const organizations = Formatter.uniqueArray(member.registrations.map(r => r.organizationId));
+            for (const organizationId of organizations) {
+                const organizationPermissions = await this.getOrganizationPermissions(organizationId);
+                if (organizationPermissions && organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, record.rootCategoryId, level)) {
+                    return {
+                        canAccess: true,
+                        record: record.record,
+                    };
+                }
+            }
+        }
+
         return {
             canAccess: false,
             record: record.record,
@@ -1088,8 +1129,8 @@ export class AdminPermissionChecker {
         if (isUserManager) {
             // For a user manager without an organization, we don't delete data, because when registering a new member, it doesn't have any organizations yet...
             if (!(await this.canAccessMember(member, PermissionLevel.Full))) {
-                cloned.details.securityCode = null;
                 cloned.details.notes = null;
+                // a user manager can see the security codes
             }
 
             return cloned;

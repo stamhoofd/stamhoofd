@@ -313,7 +313,7 @@ import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoE
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncPaymentView, CartItemRow, EditPaymentView, GlobalEventBus, PriceBreakdownBox, STList, STListItem, STNavigationBar, TableActionsContextMenu, TableActionSelection, Toast, useAuth, useContext, useArrowUpDown, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
-import { AccessRight, BalanceItemWithPrivatePayments, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, PrivatePayment, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTakeoutMethod, WebshopTicketType } from '@stamhoofd/structures';
+import { AccessRight, BalanceItemWithPrivatePayments, LimitedFilteredRequest, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, PrivatePayment, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTakeoutMethod, WebshopTicketType } from '@stamhoofd/structures';
 import OrderView from './OrderView.vue';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -498,7 +498,12 @@ function showContextMenu(event: MouseEvent) {
         yPlacement: 'bottom',
         actions: actionBuilder.getActions(),
         selection: {
-            filter: {}, // todo
+            filter: new LimitedFilteredRequest({
+                filter: {
+                    id: props.initialOrder.id,
+                },
+                limit: 2,
+            }),
             fetcher: {}, // todo
             markedRows: new Map([[order.value.id, order.value]]),
             markedRowsAreSelected: true,

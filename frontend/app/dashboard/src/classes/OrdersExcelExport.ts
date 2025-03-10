@@ -379,13 +379,13 @@ export class OrdersExcelExport {
                 }
             }
 
-            const itemAmounts: RowValue[] = itemNames.map(a => '');
+            const itemAmounts: number[] = itemNames.map(a => 0);
 
             for (const item of order.data.cart.items) {
                 const group = cartItemGroupingString(item);
                 const index = itemColumns.get(group);
                 if (index !== undefined) {
-                    itemAmounts[index] = item.amount;
+                    itemAmounts[index] = (itemAmounts[index] ?? 0) + item.amount;
                 }
             }
 
@@ -577,8 +577,9 @@ export class OrdersExcelExport {
         }
 
         if (AppManager.shared.downloadFile) {
-            const data = XLSX.write(wb, { type: 'base64' });
-            AppManager.shared.downloadFile(data, 'bestellingen.xlsx').catch((e) => {
+            const data: ArrayBuffer = XLSX.write(wb, { type: 'array' });
+            const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            AppManager.shared.downloadFile(blob, 'bestellingen.xlsx').catch((e) => {
                 Toast.fromError(e).show();
             });
         }

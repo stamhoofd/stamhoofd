@@ -140,7 +140,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
                             }
                         }
 
-                        if (manualFeatureFlag('event-notifications', reactiveSession) && reactiveSession.auth.hasAccessRightForSomeResource(PermissionsResourceType.OrganizationTags, AccessRight.OrganizationEventNotificationReviewer)) {
+                        if (manualFeatureFlag('event-notifications', reactiveSession) && reactiveSession.auth.hasAccessRightForSomeResourceOfType(PermissionsResourceType.OrganizationTags, AccessRight.OrganizationEventNotificationReviewer)) {
                             // Feature is still in development so not visible for everyone
                             moreTab.items.push(eventNotificationsTab);
                         }

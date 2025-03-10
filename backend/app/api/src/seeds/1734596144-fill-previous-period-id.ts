@@ -44,7 +44,7 @@ export default new Migration(async () => {
     console.log('Updated ' + c + ' registration periods');
 
     // Now update platform
-    const platform = await Platform.getShared();
+    const platform = await Platform.getForEditing();
     await platform.setPreviousPeriodId();
     await platform.save();
 

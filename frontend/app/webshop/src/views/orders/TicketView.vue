@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition>
-        <div v-if="!loading"> class="st-view ticket-view">
+        <div v-if="!loading" class="st-view ticket-view">
             <STNavigationBar v-if="!$isMobile" :large="!true" :sticky="false">
                 <template #left>
                     <OrganizationLogo :organization="organization" />

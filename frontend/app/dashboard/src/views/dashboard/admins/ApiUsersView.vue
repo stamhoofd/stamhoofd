@@ -41,7 +41,7 @@
                         </template>
 
                         <h2 class="style-title-list">
-                            <span>{{ user.name }}</span>
+                            <span>{{ user.name || $t('0076d594-efee-4ec7-a00a-073a4c689a38') }}</span>
                         </h2>
                         <p class="style-description-small">
                             {{ permissionList(user) }}
@@ -125,8 +125,8 @@ export default class ApiUsersView extends Mixins(NavigationMixin) {
 
     permissionList(user: User) {
         const list: string[] = [];
-        const o = user.permissions?.forOrganization(this.organization);
-        if (o?.hasFullAccess()) {
+        const o = user.permissions?.organizationPermissions.get(this.organization.id);
+        if (o?.level === PermissionLevel.Full) {
             list.push('Hoofdbeheerders');
         }
 

@@ -5,7 +5,7 @@
 //
 // -------------------------------------------------------------
 
-export const Version = 366;
+export const Version = 367;
 
 declare global {
     const NextVersion: { optional: true; version: number };

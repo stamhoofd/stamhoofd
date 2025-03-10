@@ -68,25 +68,22 @@
                         <button class="button icon trash small gray" type="button" @click="deleteEmail(n - 1)" />
                     </template>
                 </EmailInput>
-                <div v-if="!member.isNew && (isPropertyEnabled('emailAddress') || email) && member.patchedMember.details.canHaveOwnAccount">
-                    <p v-if="member.patchedMember.details.parentsHaveAccess" class="style-description-small">
+                <div v-if="!member.isNew && (isPropertyEnabled('emailAddress') || email)">
+                    <p class="style-description-small">
                         {{ member.patchedMember.firstName }} kan zelf inloggen of registreren op <template v-if="alternativeEmails.length">
                             één van de ingevoerde e-mailadressen.
                         </template><template v-else>
                             het ingevoerde e-mailadres.
                         </template> Daarnaast kan je in één van de volgende stappen één of meerdere ouders toevoegen, met een e-mailadres, die ook toegang krijgen. Vul hier enkel een e-mailadres van {{ member.patchedMember.firstName }} zelf in.
                     </p>
-                    <p v-else class="style-description-small">
-                        {{ member.patchedMember.firstName }} kan zelf inloggen of registreren op <template v-if="alternativeEmails.length">
-                            één van de ingevoerde e-mailadressen
-                        </template><template v-else>
-                            het ingevoerde e-mailadres
-                        </template>. Vul enkel een e-mailadres van {{ member.patchedMember.firstName }} zelf in.
-                    </p>
                 </div>
 
                 <div v-if="!member.isNew && (nationalRegisterNumber || isPropertyEnabled('nationalRegisterNumber') )">
-                    <NRNInput v-model="nationalRegisterNumber" :title="'Rijksregisternummer' + lidSuffix" :required="isPropertyRequired('nationalRegisterNumber')" :nullable="true" :validator="validator" :birth-day="birthDay" />
+                    <NRNInput v-model="nationalRegisterNumber" :title="'Rijksregisternummer' + lidSuffix" :required="isPropertyRequired('nationalRegisterNumber')" :nullable="true" :validator="validator" :birth-day="birthDay">
+                        <template v-if="!isPropertyEnabled('nationalRegisterNumber')" #right>
+                            <button class="button icon trash small gray" type="button" @click="nationalRegisterNumber = null" />
+                        </template>
+                    </NRNInput>
                     <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
                         Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. Heeft {{ firstName || 'dit lid' }} geen Belgische nationaliteit, <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
                             klik dan hier
