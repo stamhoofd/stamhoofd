@@ -450,7 +450,7 @@ if (groups.length) {
     );
 }
 
-if (app === 'admin' || (props.group && props.group.settings.requireOrganizationIds.length !== 1 && props.group.type === GroupType.EventRegistration)) {
+if (app === 'admin' || (props.group && props.group.settings.requireOrganizationIds.length !== 1 && props.group.type === GroupType.EventRegistration && auth.hasSomePlatformAccess())) {
     allColumns.push(
         new Column<ObjectType, Organization[]>({
             id: 'organization',
@@ -461,6 +461,7 @@ if (app === 'admin' || (props.group && props.group.settings.requireOrganizationI
             getStyle: organizations => organizations.length === 0 ? 'gray' : '',
             minimumWidth: 100,
             recommendedWidth: 300,
+            enabled: app === 'admin',
         }),
     );
 
@@ -477,30 +478,30 @@ if (app === 'admin' || (props.group && props.group.settings.requireOrganizationI
             enabled: false,
         }),
     );
+}
 
-    // Who has paid?
-    if (props.group && props.group.settings.allowRegistrationsByOrganization) {
-        allColumns.push(
-            new Column<ObjectType, string | null>({
-                id: 'groupRegistration',
-                allowSorting: false,
-                name: $t('7289b10e-a284-40ea-bc57-8287c6566a82'),
-                getValue: (member) => {
-                    const registrations = member.filterRegistrations({ groups, periodId: filterPeriodId });
-                    if (registrations.find(r => r.payingOrganizationId)) {
-                        const organization = member.organizations.find(o => o.id === registrations[0].payingOrganizationId);
-                        return organization ? organization.name : 'Onbekend';
-                    }
-                    return null;
-                },
-                format: organizations => organizations || 'Nee',
-                getStyle: organizations => organizations === null ? 'gray' : '',
-                minimumWidth: 100,
-                recommendedWidth: 300,
-                enabled: false,
-            }),
-        );
-    }
+// Who has paid?
+if (props.group && props.group.type === GroupType.EventRegistration && props.group.settings.allowRegistrationsByOrganization) {
+    allColumns.push(
+        new Column<ObjectType, string | null>({
+            id: 'groupRegistration',
+            allowSorting: false,
+            name: $t('7289b10e-a284-40ea-bc57-8287c6566a82'),
+            getValue: (member) => {
+                const registrations = member.filterRegistrations({ groups, periodId: filterPeriodId });
+                if (registrations.find(r => r.payingOrganizationId)) {
+                    const organization = member.organizations.find(o => o.id === registrations[0].payingOrganizationId);
+                    return organization ? organization.name : 'Onbekend';
+                }
+                return null;
+            },
+            format: organizations => organizations || 'Nee',
+            getStyle: organizations => organizations === null ? 'gray' : '',
+            minimumWidth: 100,
+            recommendedWidth: 300,
+            enabled: false,
+        }),
+    );
 }
 
 if (groups.find(g => g.settings.trialDays)) {
@@ -587,7 +588,7 @@ allColumns.push(
     }),
 );
 
-if (!waitingList.value && financialRead.value && organization.value && !groups.find(g => g.organizationId !== organization.value!.id)) {
+if (!waitingList.value && financialRead.value) {
     allColumns.push(
         new Column<ObjectType, number>({
             name: 'Prijs',
@@ -626,6 +627,7 @@ if (!waitingList.value && financialRead.value && organization.value && !groups.f
             getStyle: v => v <= 0 ? 'gray' : '',
             minimumWidth: 70,
             recommendedWidth: 80,
+            enabled: false,
         }),
     );
 }
