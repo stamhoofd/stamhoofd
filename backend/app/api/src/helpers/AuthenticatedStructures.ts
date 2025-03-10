@@ -391,7 +391,7 @@ export class AuthenticatedStructures {
         const organizations = new Map<string, Organization>();
 
         const registrationIds = Formatter.uniqueArray(members.flatMap(m => m.registrations.map(r => r.id)));
-        const balances = await CachedBalance.getForObjects(registrationIds, Context.organization?.id ?? null);
+        const balances = await CachedBalance.getForObjects(registrationIds, null);
 
         if (includeUser) {
             for (const organizationId of includeUser.permissions?.organizationPermissions.keys() ?? []) {
