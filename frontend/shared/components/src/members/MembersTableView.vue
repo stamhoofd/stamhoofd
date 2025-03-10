@@ -156,11 +156,24 @@ function getRequiredFilter(): StamhoofdFilter | null {
     if (organization.value && props.group && props.group.organizationId !== organization.value?.id) {
         // Only show members that are registered in the current period AND in this group
         // (avoid showing old members that moved to other groups)
+        const periodIds = [props.group.periodId];
+        if (props.periodId) {
+            periodIds.push(props.periodId);
+        }
+        if (organization?.value?.period?.period?.id) {
+            periodIds.push(organization.value.period.period.id);
+        }
+        if (platform.value.period.id) {
+            periodIds.push(platform.value.period.id);
+        }
+
         extra.push({
             registrations: {
                 $elemMatch: {
                     organizationId: organization.value.id,
-                    periodId: props.group.periodId,
+                    periodId: {
+                        $in: Formatter.uniqueArray(periodIds),
+                    },
                 },
             },
         });
