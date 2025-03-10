@@ -400,7 +400,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (!await Context.auth.canAccessRegistration(existingRegistration, PermissionLevel.Write)) {
                 throw new SimpleError({
                     code: 'forbidden',
-                    message: 'Je hebt geen toegangsrechten om deze inschrijving te verwijderen.',
+                    message: 'No permission to delete this registration',
+                    human: 'Je hebt geen toegangsrechten om deze inschrijving te verwijderen.',
                     statusCode: 403,
                 });
             }
@@ -408,7 +409,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (existingRegistration.deactivatedAt || !existingRegistration.registeredAt) {
                 throw new SimpleError({
                     code: 'invalid_data',
-                    message: 'Oeps, één of meerdere inschrijvingen die je probeert te verwijderen was al verwijderd. Herlaad de pagina en probeer opnieuw.',
+                    message: 'Cannot delete inactive registration',
+                    human: 'Oeps, één of meerdere inschrijvingen die je probeert te verwijderen was al verwijderd. Herlaad de pagina en probeer opnieuw.',
                 });
             }
 
