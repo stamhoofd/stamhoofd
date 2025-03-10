@@ -358,6 +358,9 @@ export class MemberDetails extends AutoEncoder {
     }
 
     isEqual(other: MemberDetails): boolean {
+        this.cleanData();
+        other.cleanData();
+
         if (!this.firstName || !other.firstName) {
             // Not possible to compare
             return false;
