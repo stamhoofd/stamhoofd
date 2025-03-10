@@ -6,11 +6,23 @@
     "private": true,
     "scripts": {
         "build": "tsc -b",
-        "start": "yarn build && node ./dist/index.js"
+        "start": "yarn build && node --enable-source-maps ./dist/index.js start",
+        "replace-text": "yarn build && node --enable-source-maps ./dist/index.js replace-text",
+        "replace-keys": "yarn build && node --enable-source-maps ./dist/index.js replace-keys",
+        "auto-translate": "yarn build && node --enable-source-maps ./dist/index.js auto-translate",
+        "create-comparison": "yarn build && node --enable-source-maps ./dist/index.js create-comparison"
     },
     "dependencies": {
+        "@anthropic-ai/sdk": "^0.39.0",
+        "@google/generative-ai": "^0.22.0",
+        "@mistralai/mistralai": "^1.5.0",
+        "chalk": "4",
+        "commander": "^13.1.0",
+        "dotenv": "^16.4.5",
+        "fast-xml-parser": "^5.0.6",
+        "openai": "^4.86.2",
         "uuid": "11.0.3",
-        "dotenv": "^16.4.5"
+        "winston": "^3.17.0"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^7.7.1",
