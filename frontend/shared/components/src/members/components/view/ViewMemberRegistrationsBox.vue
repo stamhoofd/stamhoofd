@@ -90,7 +90,7 @@ const hasWrite = computed(() => {
 
 const filteredRegistrations = computed(() => {
     return props.member.patchedMember.registrations.filter((r) => {
-        if (organization.value && r.organizationId !== organization.value.id) {
+        if (!auth.hasSomePlatformAccess() && organization.value && r.organizationId !== organization.value.id && r.payingOrganizationId !== organization.value.id) {
             return false;
         }
         if (r.group.periodId !== period.value.id) {
