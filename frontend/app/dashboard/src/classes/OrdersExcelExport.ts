@@ -130,6 +130,7 @@ export class OrdersExcelExport {
                 "Betaalmethode",
                 "Betaald",
                 "Status",
+                "Kortingscode"
             ],
         ];
 
@@ -262,7 +263,7 @@ export class OrdersExcelExport {
                     PaymentMethodHelper.getNameCapitalized(order.data.paymentMethod),
                     order.payment?.paidAt === null ? "Nog niet betaald" : "Betaald",
                     OrderStatusHelper.getName(order.status),
-                    
+                    order.data.discountCodes.map(d => d.code).join(", ")
                 ]);
             }
         }
@@ -341,6 +342,7 @@ export class OrdersExcelExport {
                 "Betaalmethode",
                 "Betaald",
                 "Status",
+                "Kortingscode",
                 ...(shouldIncludeSettements ? ["Uitbetalingsdatum", "Uitbetalingsmededeling"] : []),
                 ...itemNames
             ],
@@ -428,6 +430,7 @@ export class OrdersExcelExport {
                 PaymentMethodHelper.getNameCapitalized(order.data.paymentMethod),
                 order.pricePaid < order.totalToPay ? "Nog niet betaald" : "Betaald",
                 OrderStatusHelper.getName(order.status),
+                order.data.discountCodes.map(d => d.code).join(", "),
                 ...(shouldIncludeSettements ? 
                     (order.payment?.settlement ? [Formatter.capitalizeFirstLetter(Formatter.dateWithDay(order.payment.settlement.settledAt)), order.payment.settlement.reference] : ["/", "/"])
                     : []
