@@ -1,5 +1,5 @@
 <template>
-    <ChargeView :filter="filter" :type="'organization'" />
+    <ChargeView :filter="filter" :type="'member'" />
 </template>
 
 <script lang="ts" setup>
