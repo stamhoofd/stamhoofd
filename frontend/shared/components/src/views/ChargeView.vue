@@ -44,7 +44,7 @@ import { computed, Ref, ref, watch } from 'vue';
 import { useCount } from '../composables/useCount';
 import OrganizationSelect from '../organizations/components/OrganizationSelect.vue';
 
-const props = defineProps<{ filter: StamhoofdFilter; type: 'organization' | 'member' }>();
+const props = defineProps<{ filter: StamhoofdFilter; countEndpointPath: string; chargeEndpointPath: string; getDescription: (args: { count: number }) => string; getConfirmationText: (args: { total: string; count: number | null }) => string }>();
 
 const errors = useErrors();
 const $t = useTranslate();
@@ -52,7 +52,7 @@ const pop = usePop();
 const owner = useRequestOwner();
 const context = useContext();
 const platform = usePlatform();
-const { count } = useCount(props.type === 'organization' ? '/admin/organizations/count' : '/members/count');
+const { count } = useCount(props.countEndpointPath);
 
 count(props.filter)
     .then((result: number | null) => {
@@ -81,21 +81,7 @@ const chargeViewDescription = computed(() => {
         return '';
     }
 
-    if (selectionCount.value === 1) {
-        if (props.type === 'organization') {
-            return $t('51c27c5e-c2be-441b-a571-7bf573ee6848');
-        }
-
-        return $t('Reken een bedrag aan aan het geselecteerde lid.');
-    }
-
-    const translationArguments = { count: selectionCount.value.toString() };
-
-    if (props.type === 'organization') {
-        return $t('88119ffc-b692-4222-8217-75a9fa64f675', translationArguments);
-    }
-
-    return $t('Reken een bedrag aan aan de {count} geselecteerde leden.', translationArguments);
+    return props.getDescription({ count: selectionCount.value });
 });
 
 const saving = ref(false);
@@ -161,26 +147,7 @@ async function save() {
         return;
     }
 
-    let confirmText: string;
-
-    const translationArguments = {
-        total: Formatter.price(total.value),
-        count: selectionCount.value?.toString() ?? '?',
-    };
-
-    if (props.type === 'organization') {
-        confirmText = $t('9305016a-babf-4606-af6c-e8ef9f2ba91e', translationArguments);
-    }
-    else {
-        if (selectionCount.value === 1) {
-            confirmText = $t('Weet je zeker dat je {total} wilt aanrekenen aan 1 lid?', translationArguments);
-        }
-        else {
-            confirmText = $t('Weet je zeker dat je {total} wilt aanrekenen aan {count} leden?', translationArguments);
-        }
-    }
-
-    const isConfirm = await CenteredMessage.confirm(confirmText,
+    const isConfirm = await CenteredMessage.confirm(props.getConfirmationText({ total: Formatter.price(total.value), count: selectionCount.value }),
         $t('00bdd5bd-af3f-4f83-abe0-696d5b872ca9'),
     );
 
@@ -204,7 +171,7 @@ async function save() {
 
         await context.value.authenticatedServer.request({
             method: 'POST',
-            path: props.type === 'organization' ? '/admin/charge-organizations' : '/admin/charge-members',
+            path: props.chargeEndpointPath,
             query: limitedFilteredRequest,
             shouldRetry: false,
             body,
