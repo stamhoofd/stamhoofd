@@ -56,24 +56,24 @@ describe('Endpoint.SearchOrganization', () => {
         expect(response.body.map(o => o.id).sort()).toEqual(organizations.map(o => o.id).sort());
     });
 
-    test('Search for a given organization on organization name by word should return best match first', async () => {
+    test('Search on organization name by word should return best match first', async () => {
         const name = 'WAT?';
 
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 2; i++) {
             await new OrganizationFactory({
                 name: 'Some other organization ' + (i + 1),
                 city: 'Waterloo',
             }).create();
         }
 
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 2; i++) {
             await new OrganizationFactory({
                 name: 'Some other organization 2 ' + (i + 1),
                 city: 'Wats',
             }).create();
         }
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 2; i++) {
             await new OrganizationFactory({
                 name: 'De Watten ' + (i + 1),
             }).create();
@@ -84,7 +84,7 @@ describe('Endpoint.SearchOrganization', () => {
             name,
         }).create();
 
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 2; i++) {
             await new OrganizationFactory({
                 name: 'De Watten 2 ' + (i + 1),
             }).create();
@@ -97,11 +97,11 @@ describe('Endpoint.SearchOrganization', () => {
 
         const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
-        expect(response.body).toHaveLength(15);
+        expect(response.body).toHaveLength(9);
         expect(response.body[0].id).toEqual(targetOrganization.id);
     });
 
-    test('Search for a given organization on organization name by sentence should return best match first', async () => {
+    test('Search on organization name by sentence should return best match first', async () => {
         const query = 'Spaghetti Vreters';
 
         for (const name of ['De Spaghetti Eters', 'Vreters', 'Spaghetti', 'De Spaghetti', 'De Spaghetti Vretersschool']) {
@@ -123,6 +123,51 @@ describe('Endpoint.SearchOrganization', () => {
         const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
         expect(response.body).toHaveLength(5);
+        expect(response.body[0].id).toEqual(targetOrganization.id);
+    });
+
+    test('Search on organization name by word should return organization with searchindex that starts with query first', async () => {
+        const query = 'Gent';
+
+        for (let i = 0; i < 10; i++) {
+            await new OrganizationFactory({
+                name: 'Some other Gent organization ' + (i + 1),
+                city: 'Gent',
+            }).create();
+        }
+
+        for (let i = 0; i < 5; i++) {
+            await new OrganizationFactory({
+                name: 'De Gentenaars ' + (i + 1),
+            }).create();
+        }
+        // should appear first in results
+        const targetOrganization = await new OrganizationFactory({
+            name: 'Gent',
+        }).create();
+
+        for (let i = 0; i < 3; i++) {
+            await new OrganizationFactory({
+                name: 'De Gentenaars 2 ' + (i + 1),
+            }).create();
+        }
+
+        for (let i = 0; i < 10; i++) {
+            await new OrganizationFactory({
+                name: 'Some other organization 2 ' + (i + 1),
+                city: 'Gent',
+            }).create();
+        }
+
+        const r = Request.buildJson('GET', '/v1/organizations/search');
+        r.query = {
+            query,
+        };
+
+        const response = await testServer.test(endpoint, r);
+        expect(response.body).toBeDefined();
+        expect(response.body).toHaveLength(15);
+        expect(response.body[0].name).toEqual(targetOrganization.name);
         expect(response.body[0].id).toEqual(targetOrganization.id);
     });
 });
