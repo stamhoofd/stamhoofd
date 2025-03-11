@@ -74,6 +74,7 @@ class TestInstance {
      */
     setup() {
         beforeAll(async () => {
+            this.loadEnvironment();
             await this.beforeAll();
         });
 

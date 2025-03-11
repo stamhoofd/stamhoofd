@@ -96,5 +96,6 @@
     "typescript.enablePromptUseWorkspaceTsdk": true,
     "i18n-ally.extract.ignored": [
         "success green"
-    ]
+    ],
+    "typescript.preferGoToSourceDefinition": true
 }

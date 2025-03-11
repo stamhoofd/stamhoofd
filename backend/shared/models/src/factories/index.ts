@@ -15,3 +15,8 @@ export * from './OrganizationTagFactory';
 export * from './OrganizationRegistrationPeriodFactory';
 export * from './MemberResponsibilityRecordFactory';
 export * from './PlatformResponsibilityFactory';
+export * from './PlatformEventTypeFactory';
+export * from './EventFactory';
+export * from './EventNotificationTypeFactory';
+export * from './EventNotificationFactory';
+export * from './EmailTemplateFactory';

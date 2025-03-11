@@ -3,7 +3,7 @@ backendEnv.load({ path: __dirname + '/../../.env.test.json' });
 
 import { Column, Database } from '@simonbackx/simple-database';
 import { Request } from '@simonbackx/simple-endpoints';
-import { Email } from '@stamhoofd/email';
+import { Email, EmailMocker } from '@stamhoofd/email';
 import { Version } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 import nock from 'nock';
@@ -43,6 +43,7 @@ beforeAll(async () => {
     await Database.delete('DELETE FROM `provinces`');
     await Database.delete('DELETE FROM `email_recipients`');
     await Database.delete('DELETE FROM `emails`');
+    await Database.delete('DELETE FROM `email_templates`');
 
     await Database.delete('DELETE FROM `webshop_orders`');
     await Database.delete('DELETE FROM `webshops`');
@@ -67,6 +68,9 @@ beforeAll(async () => {
     TestUtils.setPermanentEnvironment('FILE_SIGNING_PRIVATE_KEY', exportedPrivateKey);
 
     await GlobalHelper.load();
+
+    // Override default $t handlers
+    TestUtils.loadEnvironment();
 });
 
 afterAll(async () => {
@@ -79,3 +83,4 @@ afterAll(async () => {
 });
 
 TestUtils.setup();
+EmailMocker.infect();
