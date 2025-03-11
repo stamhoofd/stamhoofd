@@ -11,6 +11,8 @@ export enum SQLWhereSign {
     Less = '<',
     LessEqual = '<=',
     NotEqual = '!=',
+    BooleanMatch = 'BOOLEAN_MATCH',
+    BooleanMatchNot = 'BOOLEAN_MATCH_NOT',
 };
 
 export const SQLWhereSignMap = {
@@ -20,6 +22,8 @@ export const SQLWhereSignMap = {
     '<': SQLWhereSign.Less,
     '<=': SQLWhereSign.LessEqual,
     '!=': SQLWhereSign.NotEqual,
+    'BOOLEAN_MATCH': SQLWhereSign.BooleanMatch,
+    'BOOLEAN_MATCH_NOT': SQLWhereSign.BooleanMatchNot,
 } as const;
 
 function parseWhereSign(sign: SQLWhereSign | keyof typeof SQLWhereSignMap): SQLWhereSign {
@@ -226,6 +230,12 @@ export class SQLWhereEqual extends SQLWhere {
             case SQLWhereSign.LessEqual:
                 this.sign = SQLWhereSign.Greater;
                 break;
+            case SQLWhereSign.BooleanMatch:
+                this.sign = SQLWhereSign.BooleanMatchNot;
+                break;
+            case SQLWhereSign.BooleanMatchNot:
+                this.sign = SQLWhereSign.BooleanMatch;
+                break;
         }
         return this;
     }
@@ -253,6 +263,22 @@ export class SQLWhereEqual extends SQLWhere {
                 ` IS ${(this.sign === SQLWhereSign.NotEqual) ? 'NOT ' : ''} `,
                 this.value.getSQL(options),
             ]);
+        }
+
+        if (this.sign === SQLWhereSign.BooleanMatch || this.sign === SQLWhereSign.BooleanMatchNot) {
+            const queries = [
+                'MATCH(',
+                this.column.getSQL(options),
+                ') AGAINST(',
+                this.value.getSQL(options),
+                ' IN BOOLEAN MODE)',
+            ];
+
+            if (this.sign === SQLWhereSign.BooleanMatchNot) {
+                queries.unshift('NOT ');
+            }
+
+            return joinSQLQuery(queries);
         }
 
         return joinSQLQuery([
