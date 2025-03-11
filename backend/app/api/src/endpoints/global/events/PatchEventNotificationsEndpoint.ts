@@ -141,7 +141,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             if (
                 notification.status === EventNotificationStatus.Pending
                 || notification.status === EventNotificationStatus.Accepted
-                || (patch.status && patch.status !== EventNotificationStatus.Pending)
+                || (patch.status && (patch.status !== EventNotificationStatus.Pending || (notification.status !== EventNotificationStatus.Draft && notification.status !== EventNotificationStatus.Rejected)))
                 || patch.feedbackText !== undefined
             ) {
                 requiredPermissionLevel = PermissionLevel.Full;
@@ -187,6 +187,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                     // Only allowed if complete
                     await this.validateAnswers(notification);
                 }
+                const previousStatus = notification.status;
                 notification.status = patch.status; // checks already happened
                 if (patch.status === EventNotificationStatus.Pending) {
                     notification.submittedBy = user.id;
@@ -198,7 +199,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                     await EventNotificationService.sendReviewerEmail(EmailTemplateType.EventNotificationSubmittedReviewer, notification);
                 }
 
-                if (patch.status === EventNotificationStatus.Accepted) {
+                if ((patch.status === EventNotificationStatus.Accepted || patch.status === EventNotificationStatus.PartiallyAccepted) && previousStatus !== EventNotificationStatus.Accepted && previousStatus !== EventNotificationStatus.PartiallyAccepted) {
                     await EventNotificationService.sendSubmitterEmail(EmailTemplateType.EventNotificationAccepted, notification);
                 }
 
@@ -207,7 +208,13 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 }
             }
 
-            await notification.save();
+            const didChange = await notification.save();
+
+            if (didChange && notification.status === EventNotificationStatus.PartiallyAccepted && !await Context.auth.canAccessEventNotification(notification, PermissionLevel.Full)) {
+                // A change to a event notification by a non-full admin should trigger a notification email
+                await EventNotificationService.sendSubmitterEmail(EmailTemplateType.EventNotificationAccepted, notification);
+            }
+
             notifications.push(notification);
         }
 
