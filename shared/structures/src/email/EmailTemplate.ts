@@ -119,6 +119,7 @@ export enum EmailTemplateType {
     EventNotificationSubmittedReviewer = 'EventNotificationSubmittedReviewer',
     EventNotificationAccepted = 'EventNotificationAccepted',
     EventNotificationRejected = 'EventNotificationRejected',
+    EventNotificationPartiallyAcceptedEdited = 'EventNotificationPartiallyAcceptedEdited',
 }
 
 export class EmailTemplate extends AutoEncoder {
@@ -269,6 +270,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.EventNotificationSubmittedReviewer: return $t('ff2beaea-cb8f-4de8-ba1c-039b7ba20bc0');
             case EmailTemplateType.EventNotificationAccepted: return $t('c936748e-b6f9-4aa9-9822-77bd727501eb');
             case EmailTemplateType.EventNotificationRejected: return $t('01266433-c6b9-4c4b-b09f-b212cc0ce5a8');
+            case EmailTemplateType.EventNotificationPartiallyAcceptedEdited: return $t('Voorlopig goedgekeurde kampmelding werd gewijzigd');
         }
     }
 
@@ -352,6 +354,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.EventNotificationSubmittedReviewer:
             case EmailTemplateType.EventNotificationAccepted:
             case EmailTemplateType.EventNotificationRejected:
+            case EmailTemplateType.EventNotificationPartiallyAcceptedEdited:
                 return $t('a4658017-52e9-4732-8570-2c60e5d6a5cd');
         }
 
@@ -425,6 +428,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.EventNotificationSubmittedReviewer: return $t('bd2321f7-caea-423e-a5e9-823023e74ec9');
             case EmailTemplateType.EventNotificationAccepted: return $t('1bb58aa1-e36e-4384-8c54-be3b71d77a3b');
             case EmailTemplateType.EventNotificationRejected: return $t('0b6949f6-80b7-4d48-9e1e-16bfb826014a');
+            case EmailTemplateType.EventNotificationPartiallyAcceptedEdited: return $t('E-mail die wordt verzonden naar de reviewers als een voorlopig goedgekeurde kampmelding werd gewijzigd');
         }
 
         return null;
@@ -464,6 +468,7 @@ export class EmailTemplate extends AutoEncoder {
             EmailTemplateType.EventNotificationSubmittedReviewer,
             EmailTemplateType.EventNotificationAccepted,
             EmailTemplateType.EventNotificationRejected,
+            EmailTemplateType.EventNotificationPartiallyAcceptedEdited,
         ].includes(type)) {
             return [
                 ...ExampleReplacements.default,
