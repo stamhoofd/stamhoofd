@@ -735,6 +735,14 @@ async function save() {
         return;
     }
 
+    if ((type.value === RecordType.ChooseOne || type.value === RecordType.MultipleChoice) && choices.value.length === 0) {
+        errors.errorBox = new ErrorBox(new SimpleError({
+            code: 'invalid_record',
+            message: $t('Voeg minstens één keuzemogelijkheid toe'),
+        }));
+        return;
+    }
+
     const arrayPatch: PatchableArrayAutoEncoder<RecordSettings> = new PatchableArray();
 
     if (props.isNew) {
