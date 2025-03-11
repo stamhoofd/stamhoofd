@@ -43,7 +43,8 @@ export class SearchOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
 
         if (query.includes(' ')) {
             // give higher relevance if the searchindex includes the exact sentence
-            matchValue = `>"${query}" ${query}*`;
+            // give lower relevance if the last word is not a complete match
+            matchValue = `>("${query}") (${query}) <(${query}*)`;
         }
         else {
             // give higher relevance if the searchindex includes the exact word
@@ -63,6 +64,8 @@ export class SearchOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         if (organizations.length === limit) {
             const organizationsStartingWith = await Organization.select()
                 .where(new SQLWhereLike(SQL.column(Organization.table, 'searchIndex'), scalarToSQLExpression(`${query}%`)))
+                // order by relevance
+                .orderBy(whereMatch, 'DESC')
                 .limit(limit).fetch();
 
             const organizationsStartingWithIds = new Set(organizationsStartingWith.map(o => o.id));

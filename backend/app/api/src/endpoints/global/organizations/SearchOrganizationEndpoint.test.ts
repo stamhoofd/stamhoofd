@@ -56,7 +56,7 @@ describe('Endpoint.SearchOrganization', () => {
         expect(response.body.map(o => o.id).sort()).toEqual(organizations.map(o => o.id).sort());
     });
 
-    test('Search on organization name by word should return best match first', async () => {
+    test('Search organization by name using word should return best match first', async () => {
         const name = 'WAT?';
 
         for (let i = 0; i < 2; i++) {
@@ -101,7 +101,7 @@ describe('Endpoint.SearchOrganization', () => {
         expect(response.body[0].id).toEqual(targetOrganization.id);
     });
 
-    test('Search on organization name by sentence should return best match first', async () => {
+    test('Search on organization by name using sentence should return best match first', async () => {
         const query = 'Spaghetti Vreters';
 
         for (const name of ['De Spaghetti Eters', 'Vreters', 'Spaghetti', 'De Spaghetti', 'De Spaghetti Vretersschool']) {
@@ -122,11 +122,11 @@ describe('Endpoint.SearchOrganization', () => {
 
         const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
-        expect(response.body).toHaveLength(5);
+        expect(response.body).toHaveLength(6);
         expect(response.body[0].id).toEqual(targetOrganization.id);
     });
 
-    test('Search on organization name by word should return organization with searchindex that starts with query first', async () => {
+    test('Search on organization by name using word should return organization with searchindex that starts with query first if limit reached', async () => {
         const query = 'Gent';
 
         for (let i = 0; i < 10; i++) {
@@ -141,6 +141,7 @@ describe('Endpoint.SearchOrganization', () => {
                 name: 'De Gentenaars ' + (i + 1),
             }).create();
         }
+
         // should appear first in results
         const targetOrganization = await new OrganizationFactory({
             name: 'Gent',
@@ -167,6 +168,70 @@ describe('Endpoint.SearchOrganization', () => {
         const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
         expect(response.body).toHaveLength(15);
+        expect(response.body[0].name).toEqual(targetOrganization.name);
+        expect(response.body[0].id).toEqual(targetOrganization.id);
+    });
+
+    test('Search on organization by name using sentence should return organization with searchindex that starts with query first if limit reached', async () => {
+        const query = 'De Spaghetti Vreters';
+
+        // without the where like (if the limit is reached), 'Spaghetti Vreters Spaghetti Vreters' would come first ('De' is a stopword)
+        for (const name of ['De Spaghetti Eters', 'Vreters', 'Spaghetti', 'De Spaghetti', 'Spaghetti Vreters', 'Spaghetti Vreters Spaghetti Vreters', 'De Spaghetti Vretersschool', 'Spaghetti 2', 'Spaghetti 3', 'Spaghetti 4', 'Spaghetti 5', 'Spaghetti 6', 'Spaghetti 7', 'Spaghetti 8', 'Spaghetti 9', 'Spaghetti 10']) {
+            await new OrganizationFactory({
+                name,
+            }).create();
+        }
+
+        let i = 1;
+        for (const city of ['De Spaghetti Eters', 'Vreters', 'Spaghetti', 'De Spaghetti', 'De Spaghetti Vretersschool']) {
+            await new OrganizationFactory({
+                name: 'name ' + i,
+                city,
+            }).create();
+            i = i + 1;
+        }
+
+        // should appear first in results
+        const targetOrganization = await new OrganizationFactory({
+            name: 'De Spaghetti Vreters',
+        }).create();
+
+        const r = Request.buildJson('GET', '/v1/organizations/search');
+        r.query = {
+            query,
+        };
+
+        const response = await testServer.test(endpoint, r);
+        expect(response.body).toBeDefined();
+        expect(response.body).toHaveLength(15);
+        expect(response.body[0].name).toEqual(targetOrganization.name);
+        expect(response.body[0].id).toEqual(targetOrganization.id);
+    });
+
+    test('Search on organization by name and city should return organization that matches city and name first', async () => {
+        const query = 'De Spaghetti Vreters Gent';
+
+        for (let i = 0; i < 5; i++) {
+            await new OrganizationFactory({
+                name: 'De Spaghetti Vreters ' + (i + 1),
+                city: 'Wetteren',
+            }).create();
+        }
+
+        // should appear first in results
+        const targetOrganization = await new OrganizationFactory({
+            name: 'De Spaghetti Vreters 16',
+            city: 'Gent',
+        }).create();
+
+        const r = Request.buildJson('GET', '/v1/organizations/search');
+        r.query = {
+            query,
+        };
+
+        const response = await testServer.test(endpoint, r);
+        expect(response.body).toBeDefined();
+        expect(response.body).toHaveLength(6);
         expect(response.body[0].name).toEqual(targetOrganization.name);
         expect(response.body[0].id).toEqual(targetOrganization.id);
     });
