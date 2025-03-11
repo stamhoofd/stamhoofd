@@ -12,7 +12,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Column, GlobalEventBus, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { CheckoutMethod, CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, RecordCategory, TicketPrivate, WebshopOrdersQuery, WebshopTimeSlot } from '@stamhoofd/structures';
+import { CheckoutMethod, CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, RecordCategory, StringFilterDefinition, TicketPrivate, WebshopOrdersQuery, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -880,6 +880,16 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 defaultMode: ChoicesFilterMode.Or,
                 getValue: (order) => {
                     return order.data.cart.items.flatMap(i => i.product.id)
+                }
+            })
+        )
+
+        definitions.push(
+            new StringFilterDefinition<PrivateOrder>({
+                id: "discount_code",
+                name: "Kortingscode",
+                getValue: (order) => {
+                    return order.data.discountCodes.map(d => d.code).join(' ')
                 }
             })
         )
