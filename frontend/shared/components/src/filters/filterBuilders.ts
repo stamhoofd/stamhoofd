@@ -875,6 +875,77 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                             return ['Active', 'Trial', 'Expiring'];
                         }
 
+                        const activeOrExpiring = unwrapFilter(f, {
+                            platformMemberships: {
+                                $elemMatch: {
+                                    startDate: {
+                                        $lte: { $: '$now' },
+                                    },
+                                    endDate: {
+                                        $gt: { $: '$now' },
+                                    },
+                                },
+                            },
+                        });
+
+                        if (activeOrExpiring.match) {
+                            return ['Active', 'Expiring', 'Trial'];
+                        }
+
+                        const activeOrExpiringButNoTrial = unwrapFilter(f, {
+                            platformMemberships: {
+                                $elemMatch: {
+                                    startDate: {
+                                        $lte: { $: '$now' },
+                                    },
+                                    endDate: {
+                                        $gt: { $: '$now' },
+                                    },
+                                    $or: [
+                                        {
+                                            trialUntil: null,
+                                        },
+                                        {
+                                            trialUntil: {
+                                                $lte: { $: '$now' },
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                        });
+
+                        if (activeOrExpiringButNoTrial.match) {
+                            return ['Active', 'Expiring'];
+                        }
+
+                        const activeOrTrial = unwrapFilter(f, {
+                            platformMemberships: {
+                                $elemMatch: {
+                                    endDate: {
+                                        $gt: { $: '$now' },
+                                    },
+                                    startDate: {
+                                        $lte: { $: '$now' },
+                                    },
+                                    $or: [
+                                        {
+                                            expireDate: null,
+                                        },
+                                        {
+                                            expireDate: {
+                                                $gt: { $: '$now' },
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                        });
+
+                        if (activeOrTrial.match) {
+                            return ['Active', 'Trial'];
+                        }
+
                         return null;
                     },
                 }),
