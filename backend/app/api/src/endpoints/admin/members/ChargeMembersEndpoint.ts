@@ -32,8 +32,6 @@ export class ChargeMembersEndpoint extends Endpoint<Params, Query, Body, Respons
     }
 
     private static throwIfInvalidBody(body: Body) {
-        // todo: add validation for due at and createdAt?
-
         if (!body.description?.trim()?.length) {
             throw new SimpleError({
                 code: 'invalid_field',
@@ -99,7 +97,7 @@ export class ChargeMembersEndpoint extends Endpoint<Params, Query, Body, Respons
             const organizationId = body.organizationId;
             const chargeMembers = organizationId === null
                 ? MemberCharger.chargeFromPlatform
-                : (args: { membersToCharge: MemberWithRegistrationsBlob[]; price: number; amount?: number; description: string;dueAt: Date | null; createdAt: Date | null }) => MemberCharger.chargeMany({
+                : (args: { membersToCharge: MemberWithRegistrationsBlob[]; price: number; amount?: number; description: string; dueAt: Date | null; createdAt: Date | null }) => MemberCharger.chargeMany({
                         chargingOrganizationId: organizationId,
                         ...args });
 

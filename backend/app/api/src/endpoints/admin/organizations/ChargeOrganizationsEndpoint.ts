@@ -97,7 +97,7 @@ export class ChargeOrganizationsEndpoint extends Endpoint<Params, Query, Body, R
             const organizationId = body.organizationId;
             const chargeOrganizations = organizationId === null
                 ? OrganizationCharger.chargeFromPlatform
-                : (args: { organizationsToCharge: OrganizationStruct[]; price: number; amount?: number; description: string }) => OrganizationCharger.chargeMany({
+                : (args: { organizationsToCharge: OrganizationStruct[]; price: number; amount?: number; description: string; dueAt: Date | null; createdAt: Date | null }) => OrganizationCharger.chargeMany({
                         chargingOrganizationId: organizationId,
                         ...args });
 
@@ -107,6 +107,8 @@ export class ChargeOrganizationsEndpoint extends Endpoint<Params, Query, Body, R
                     price: body.price,
                     amount: body.amount ?? 1,
                     description: body.description,
+                    dueAt: body.dueAt,
+                    createdAt: body.createdAt,
                 });
             }
         });
