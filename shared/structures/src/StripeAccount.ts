@@ -237,7 +237,7 @@ export class StripeAccount extends AutoEncoder {
             const missing = this.missingData
 
             return {
-                text: "Je moet gegevens aanvullen om te voorkomen dat uitbetalingen en betalingen worden stopgezet. Dit moet gebeuren voor "+ Formatter.date(new Date(this.meta.requirements.current_deadline * 1000)) + ". Ga naar je Stripe dashboard om dit in orde te brengen. Volgende zaken zouden ontbreken: " + missing + ".",
+                text: "Je moet gegevens aanvullen om te voorkomen dat uitbetalingen en betalingen worden stopgezet. Dit moet gebeuren voor "+ Formatter.date(new Date(this.meta.requirements.current_deadline * 1000)) + ". Ga naar je Stripe dashboard om dit in orde te brengen (daarna moet deze melding verdwijnen na ±1 dag, zoniet heb je het niet goed aangevuld of werd het opnieuw afgekeurd). Volgende zaken zouden ontbreken: " + missing + ".",
                 type: 'error'
             }
         }
@@ -249,12 +249,12 @@ export class StripeAccount extends AutoEncoder {
 
             if (missing.length === 1) {
                 return {
-                    text: "De betaalmethode " + text + " werd nog niet door Stripe geactiveerd. Kijk na of alle informatie in je Stripe dashboard volledig ingevuld werd. " + (missingText ? (" Volgende zaken zouden ontbreken: " + missingText + ".") : ""),
+                    text: "De betaalmethode " + text + " werd niet door Stripe geactiveerd. Kijk na of jouw websiteadres (dit is meestal de oorzaak) en andere informatie in je Stripe dashboard volledig ingevuld werd, lees daarvoor onze documentatie. Daarna zal het na ± 1 dag wachten geactiveerd worden door Stripe. Zoniet, stuur je ons best nog een mailtje zodat we jullie wat verder kunnen helpen zoeken naar wat er precies ontbreekt. Heel soms kan het ook zijn dat "+text+" een onderzoek heeft geopend naar jullie account als gevolg van verdachte informatie zoals bv. een ongeldig adres of website (dit is helaas een wettelijke verplichting voor hen). " + (missingText ? (" Volgende zaken zouden ontbreken: " + missingText + ".") : ""),
                     type: 'error'
                 }
             }
             return {
-                text: "De betaalmethodes " + text + " werden nog niet door Stripe geactiveerd. Kijk na of alle informatie in je Stripe dashboard volledig ingevuld werd. " + (missingText ? (" Volgende zaken zouden ontbreken: " + missingText + ".") : ""),
+                text: "De betaalmethodes " + text + " werden nog niet door Stripe geactiveerd. Kijk na of jouw websiteadres (dit is meestal de oorzaak) en andere informatie in je Stripe dashboard volledig ingevuld werd, lees daarvoor onze documentatie. Daarna zal het na ± 1 dag wachten geactiveerd worden door Stripe. Zoniet, stuur je ons best nog een mailtje zodat we jullie wat verder kunnen helpen zoeken naar wat er precies ontbreekt. Heel soms kan het ook zijn dat "+text+" een onderzoek heeft geopend naar jullie account als gevolg van verdachte informatie zoals bv. een ongeldig adres of website (dit is helaas een wettelijke verplichting voor hen). " + (missingText ? (" Volgende zaken zouden ontbreken: " + missingText + ".") : ""),
                 type: 'error'
             }
         }
@@ -263,7 +263,7 @@ export class StripeAccount extends AutoEncoder {
             const missing = this.missingData
             const d = new Date(this.meta.future_requirements.current_deadline * 1000);
             return {
-                text: "Je moet gegevens aanvullen om te voorkomen dat uitbetalingen en betalingen worden stopgezet. Dit moet gebeuren voor "+ Formatter.date(d) + ". Ga naar je Stripe dashboard om dit in orde te brengen. Volgende zaken zouden ontbreken: " + missing + ".",
+                text: "Je moet gegevens aanvullen om te voorkomen dat uitbetalingen en betalingen worden stopgezet. Dit moet gebeuren voor "+ Formatter.date(d) + ". Ga naar je Stripe dashboard om dit in orde te brengen (daarna moet deze melding verdwijnen na ±1 dag, zoniet heb je het niet goed aangevuld of werd het opnieuw afgekeurd). Volgende zaken zouden ontbreken: " + missing + ".",
                 // Error if needed within one month
                 type: d < new Date(Date.now() + 24*60*60*1000 * 30 ) ? 'error' : 'warning'
             }
@@ -273,7 +273,7 @@ export class StripeAccount extends AutoEncoder {
             // Try to convert to readable text
             const missing = this.missingData
             return {
-                text: 'Niet alle gegevens van jouw vereniging werden in het Stripe dashboard ingevuld. Kijk na of alles werd ingevuld. Volgende zaken zouden ontbreken: ' + missing + ".",
+                text: 'Niet alle gegevens van jouw vereniging werden in het Stripe dashboard ingevuld. Kijk na of alles werd ingevuld. Ga naar je Stripe dashboard om dit in orde te brengen (daarna moet deze melding verdwijnen na ±1 dag, zoniet heb je het niet goed aangevuld of werd het opnieuw afgekeurd). Volgende zaken zouden ontbreken: ' + missing + ".",
                 type: 'warning'
             }
         }
