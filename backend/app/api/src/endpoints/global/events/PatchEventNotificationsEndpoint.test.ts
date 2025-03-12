@@ -1,4 +1,4 @@
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import { Endpoint, Request } from '@simonbackx/simple-endpoints';
 import { EventNotificationFactory, EventFactory, EventNotificationTypeFactory, Organization, OrganizationFactory, Token, User, UserFactory, EmailTemplateFactory } from '@stamhoofd/models';
 import { AccessRight, BaseOrganization, EmailTemplateType, Event, EventNotificationStatus, EventNotification as EventNotificationStruct, Permissions, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
@@ -19,11 +19,16 @@ const simpleError = (data: {
     message?: string;
     field?: string;
 }) => {
-    return expect.objectContaining({
+    const d = {
         code: data.code ?? expect.any(String),
         message: data.message ?? expect.any(String),
         field: data.field ?? expect.anything(),
-    }) as jest.Constructable;
+    };
+
+    if (!data.field) {
+        delete d.field;
+    }
+    return expect.objectContaining(d) as jest.Constructable;
 };
 
 const minimumUserPermissions = Permissions.create({
@@ -227,11 +232,200 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         ]);
     });
 
-    test.todo('A normal user can move the event notification to pending state from rejected');
-    test.todo('A normal user cannot move the event notification to pending from accepted');
+    test('A normal user can move the event notification to pending state from rejected', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: minimumUserPermissions,
+        }).create();
+        const event = await new EventFactory({ organization }).create();
+        const eventNotification = await new EventNotificationFactory({
+            organization,
+            events: [event],
+            status: EventNotificationStatus.Rejected,
+        }).create();
 
-    test.todo('A normal user cannot edit an accepted event notification');
-    test.todo('A normal user cannot edit a pending event notification');
+        const body: Body = new PatchableArray();
+        body.addPatch(
+            EventNotificationStruct.patch({
+                id: eventNotification.id,
+                status: EventNotificationStatus.Pending,
+            }),
+        );
+
+        const result = await TestRequest.patch({ body, user, organization });
+        expect(result.status).toBe(200);
+
+        expect(result.body).toHaveLength(1);
+        expect(result.body[0]).toMatchObject({
+            organization: expect.objectContaining({ id: organization.id }),
+            status: EventNotificationStatus.Pending,
+            submittedBy: expect.objectContaining({ id: user.id }),
+        });
+
+        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+            expect.objectContaining({
+                to: user.email,
+                text: expect.stringContaining(event.name),
+            }),
+        ]);
+    });
+
+    test('A normal user cannot move the event notification to pending from accepted', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: minimumUserPermissions,
+        }).create();
+        const event = await new EventFactory({ organization }).create();
+        const eventNotification = await new EventNotificationFactory({
+            organization,
+            events: [event],
+            status: EventNotificationStatus.Accepted,
+        }).create();
+
+        const body: Body = new PatchableArray();
+        body.addPatch(
+            EventNotificationStruct.patch({
+                id: eventNotification.id,
+                status: EventNotificationStatus.Pending,
+            }),
+        );
+
+        await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
+            simpleError({ code: 'permission_denied' }),
+        );
+    });
+
+    test('A normal user cannot move the event notification to accepted from pending', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: minimumUserPermissions,
+        }).create();
+        const event = await new EventFactory({ organization }).create();
+        const eventNotification = await new EventNotificationFactory({
+            organization,
+            events: [event],
+            status: EventNotificationStatus.Pending,
+        }).create();
+
+        const body: Body = new PatchableArray();
+        body.addPatch(
+            EventNotificationStruct.patch({
+                id: eventNotification.id,
+                status: EventNotificationStatus.Accepted,
+            }),
+        );
+
+        await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
+            simpleError({ code: 'permission_denied' }),
+        );
+    });
+
+    test('A normal user cannot move the event notification to accepted from draft', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: minimumUserPermissions,
+        }).create();
+        const event = await new EventFactory({ organization }).create();
+        const eventNotification = await new EventNotificationFactory({
+            organization,
+            events: [event],
+            status: EventNotificationStatus.Draft,
+        }).create();
+
+        const body: Body = new PatchableArray();
+        body.addPatch(
+            EventNotificationStruct.patch({
+                id: eventNotification.id,
+                status: EventNotificationStatus.Accepted,
+            }),
+        );
+
+        await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
+            simpleError({ code: 'permission_denied' }),
+        );
+    });
+
+    test('A normal user cannot move the event notification to partially accepted from draft', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: minimumUserPermissions,
+        }).create();
+        const event = await new EventFactory({ organization }).create();
+        const eventNotification = await new EventNotificationFactory({
+            organization,
+            events: [event],
+            status: EventNotificationStatus.Draft,
+        }).create();
+
+        const body: Body = new PatchableArray();
+        body.addPatch(
+            EventNotificationStruct.patch({
+                id: eventNotification.id,
+                status: EventNotificationStatus.PartiallyAccepted,
+            }),
+        );
+
+        await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
+            simpleError({ code: 'permission_denied' }),
+        );
+    });
+
+    test('A normal user cannot edit an accepted event notification', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: minimumUserPermissions,
+        }).create();
+        const event = await new EventFactory({ organization }).create();
+        const eventNotification = await new EventNotificationFactory({
+            organization,
+            events: [event],
+            status: EventNotificationStatus.Accepted,
+        }).create();
+
+        const body: Body = new PatchableArray();
+        body.addPatch(
+            EventNotificationStruct.patch({
+                id: eventNotification.id,
+                recordAnswers: new PatchMap(),
+            }),
+        );
+
+        await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
+            simpleError({ code: 'permission_denied' }),
+        );
+    });
+
+    test('A normal user cannot edit a pending event notification', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: minimumUserPermissions,
+        }).create();
+        const event = await new EventFactory({ organization }).create();
+        const eventNotification = await new EventNotificationFactory({
+            organization,
+            events: [event],
+            status: EventNotificationStatus.Pending,
+        }).create();
+
+        const body: Body = new PatchableArray();
+        body.addPatch(
+            EventNotificationStruct.patch({
+                id: eventNotification.id,
+                recordAnswers: new PatchMap(),
+            }),
+        );
+
+        await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
+            simpleError({ code: 'permission_denied' }),
+        );
+    });
 
     test.todo('An admin can accept an event notification');
     test.todo('An admin can partially accept an event notification');
