@@ -48,7 +48,7 @@
 <script setup lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, ExternalOrganizationContainer, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useErrors, useInfiniteObjectFetcher, usePositionableSheet, useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '@stamhoofd/components';
+import { ErrorBox, ExternalOrganizationContainer, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useErrors, useInfiniteObjectFetcher, usePositionableSheet } from '@stamhoofd/components';
 import { assertSort, Group, isEmptyFilter, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, RegisterCheckout, RegisterItem, SortItemDirection, SortList } from '@stamhoofd/structures';
 import { computed, Ref, ref, watchEffect } from 'vue';
 import { useAuth, useContext, useOrganization, usePlatform } from '../hooks';
@@ -179,6 +179,10 @@ const canSelectAll = computed(() => {
         return false;
     }
 
+    if (props.group.settings.recordCategories.length > 0) {
+        return false;
+    }
+
     for (const member of fetcher.objects) {
         if (!props.checkout.cart.containsMemberAndGroup(member.id, props.group.id)) {
             if (member.canRegister(props.group, props.checkout.singleOrganization)) {
@@ -186,6 +190,7 @@ const canSelectAll = computed(() => {
             }
         }
     }
+
     return false;
 });
 
