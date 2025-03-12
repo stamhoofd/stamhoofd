@@ -823,10 +823,17 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                         body: post
                     })
 
+                    // JSON response content-type header is missing
+                    if (typeof updateResponse.data === 'string') {
+                        lid = JSON.parse(updateResponse.data)
+                    } else {
+                        lid = updateResponse.data
+                    }
+
                     // Do a patch for the remaining functies
                     lid = await this.syncLid({
                         stamhoofd: member,
-                        sgvId: updateResponse.data.id
+                        sgvId: lid.id
                     }, report);
                 } else {
                     const updateResponse = await this.authenticatedServer.request<any>({
