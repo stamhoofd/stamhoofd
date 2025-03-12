@@ -728,7 +728,7 @@ const actions: TableAction<ObjectType>[] = [
     ...actionBuilder.getActions(),
 ];
 
-if (auth.hasPlatformFullAccess()) {
+if (app !== 'admin' && auth.hasPlatformFullAccess()) {
     actions.push(new AsyncTableAction({
         name: 'Bedrag aanrekenen',
         icon: 'calculator',
@@ -740,6 +740,7 @@ if (auth.hasPlatformFullAccess()) {
                 components: [
                     new ComponentWithProperties(ChargeMembersView, {
                         filter: selection.filter.filter,
+                        organization: organization.value!,
                     }),
                 ],
             });

@@ -11,8 +11,8 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <div :class="{'split-inputs': modalDisplayStyle === 'popup'}">
-            <STInputBox :title="$t('4a5ca65c-3a96-4ca0-991c-518a9e92adb7')" error-fields="organization" :error-box="errors.errorBox">
+        <div :class="{'split-inputs': modalDisplayStyle === 'popup' && showSelectOrganization}">
+            <STInputBox v-if="showSelectOrganization" :title="$t('4a5ca65c-3a96-4ca0-991c-518a9e92adb7')" error-fields="organization" :error-box="errors.errorBox">
                 <OrganizationSelect v-model="selectedOrganization" />
             </STInputBox>
 
@@ -37,14 +37,14 @@
                 </STInputBox>
             </div>
             <div v-if="canShowDueAt">
-                <STInputBox title="Te betalen tegen*" error-fields="dueAt" :error-box="errors.errorBox">
+                <STInputBox :title="$t('Te betalen tegen') + (dueAtDescription ? '*' : '')" error-fields="dueAt" :error-box="errors.errorBox">
                     <DateSelection v-model="dueAt" :required="false" placeholder="Onmiddelijk" :time="{hours: 0, minutes: 0, seconds: 0}" />
                 </STInputBox>
             </div>
         </div>
 
-        <p v-if="canShowDueAt" class="style-description-small">
-            {{ $t('15b6f0c8-6287-4b4d-bf34-4da2f4a0e575') }}
+        <p v-if="canShowDueAt && dueAtDescription" class="style-description-small">
+            {{ dueAtDescription }}
         </p>
 
         <PriceBreakdownBox :price-breakdown="priceBreakdown" />
@@ -55,7 +55,7 @@
 import { AutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, DateSelection, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, Toast, useContext, useErrors, useExternalOrganization, useFeatureFlag, usePlatform, useValidation } from '@stamhoofd/components';
+import { CenteredMessage, DateSelection, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, Toast, useContext, useErrors, useExternalOrganization, usePlatform, useValidation } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { LimitedFilteredRequest, Organization, StamhoofdFilter } from '@stamhoofd/structures';
@@ -67,7 +67,9 @@ import OrganizationSelect from '../organizations/components/OrganizationSelect.v
 export type ChargeViewOptions = {
     filter: StamhoofdFilter;
     countEndpointPath: string; chargeEndpointPath: string;
-    getDescription: (args: { count: number }) => string; getConfirmationText: (args: { total: string; count: number | null }) => string;
+    getDescription: (args: { count: number }) => string;
+    getConfirmationText: (args: { total: string; count: number | null }) => string;
+    dueAtDescription?: string;
     createBody: (args: { organizationId: string;
         price: number;
         description: string;
@@ -77,12 +79,15 @@ export type ChargeViewOptions = {
     modalDisplayStyle?: 'sheet' | 'popup';
     showCreatedAt?: boolean;
     showDueAt?: boolean;
+    organization?: Organization | null;
 };
 
 const props = withDefaults(defineProps<ChargeViewOptions>(), {
     showCreatedAt: false,
     showDueAt: false,
     modalDisplayStyle: 'sheet',
+    organization: null,
+    dueAtDescription: undefined,
 });
 
 const errors = useErrors();
@@ -92,7 +97,6 @@ const owner = useRequestOwner();
 const context = useContext();
 const platform = usePlatform();
 const { count } = useCount(props.countEndpointPath);
-const $feature = useFeatureFlag();
 
 count(props.filter)
     .then((result: number | null) => {
@@ -103,15 +107,16 @@ count(props.filter)
     .catch(console.error);
 
 const selectionCount = ref<number | null>(null);
-const selectedOrganization: Ref<Organization | null> = ref(null);
+const selectedOrganization = ref(props.organization) as Ref<Organization | null>;
+const showSelectOrganization = computed(() => props.organization === null);
 const description = ref('');
 const price = ref(0);
 const amount = ref(1);
 const hasChanges = computed(() => description.value !== '' || price.value !== 0);
 const total = computed(() => price.value * amount.value);
-const canShowDueAt = computed(() => props.showDueAt && $feature('member-trials') && (price.value >= 0));
+const canShowDueAt = computed(() => props.showDueAt && (price.value >= 0));
 
-const createdAt = ref(null);
+const createdAt = ref(props.showCreatedAt ? new Date() : null);
 const dueAt = ref(null);
 
 const priceBreakdown = computed(() => {
