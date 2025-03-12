@@ -91,9 +91,9 @@ import Radio from '../inputs/Radio.vue';
 import STInputBox from '../inputs/STInputBox.vue';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
+import { GroupUIFilterBuilder } from './GroupUIFilter';
 import { filterToString, UIFilter, UIFilterBuilder } from './UIFilter';
 import UIFilterEditor from './UIFilterEditor.vue';
-import { GroupUIFilterBuilder } from './GroupUIFilter';
 
 @Component({
     components: {
@@ -230,7 +230,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
             return;
         }
 
-        const filter = this.modelValue.requiredWhen ? this.builder.fromFilter(this.modelValue.requiredWhen) : this.builder.create();
+        const filter = isEmptyFilter(this.modelValue.requiredWhen) ? this.builder.create() : this.builder.fromFilter(this.modelValue.requiredWhen);
 
         this.present({
             components: [
@@ -259,7 +259,10 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     }
 
     get requiredText() {
-        return this.modelValue.requiredWhen ? filterToString(this.modelValue.requiredWhen, this.builder) : '';
+        if (isEmptyFilter(this.modelValue.requiredWhen)) {
+            return '';
+        }
+        return filterToString(this.modelValue.requiredWhen, this.builder);
     }
 }
 </script>
