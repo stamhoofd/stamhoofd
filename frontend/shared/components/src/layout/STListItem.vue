@@ -265,7 +265,7 @@ button.st-list-item {
             border-radius: $border-width-thin/2;
             margin: 0;
             margin-right: calc(-1 * var(--custom-st-horizontal-padding, 15px));
-            z-index: -3;
+            z-index: -2;
 
             // Increase width + horizontal padding
             padding-right: var(--custom-st-horizontal-padding, 15px);
@@ -338,12 +338,12 @@ button.st-list-item {
             // This is the hover layer
             content: '';
             position: absolute;
-            top: -2px;
+            top: -1px;
             left: calc(-1 * var(--added-st-horizontal-padding, 0px));
             right: calc(-1 * var(--added-st-horizontal-padding, 0px));
-            bottom: -2px;
+            bottom: 1px;
             background: $color-primary-lighter;
-            z-index: -2;
+            z-index: -3;
             opacity: 0;
             pointer-events: none;
             border-radius: min($border-radius, var(--added-st-horizontal-padding, 0px));
