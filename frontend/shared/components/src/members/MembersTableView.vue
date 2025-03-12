@@ -736,7 +736,7 @@ if (auth.hasPlatformFullAccess()) {
         groupIndex: 4,
         handler: async (selection: TableActionSelection<ObjectType>) => {
             await present({
-                modalDisplayStyle: 'sheet',
+                modalDisplayStyle: 'popup',
                 components: [
                     new ComponentWithProperties(ChargeMembersView, {
                         filter: selection.filter.filter,

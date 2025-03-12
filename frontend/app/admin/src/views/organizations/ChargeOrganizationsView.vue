@@ -1,12 +1,21 @@
 <template>
-    <ChargeView :filter="filter" count-endpoint-path="/admin/organizations/count" charge-endpoint-path="/admin/charge-organizations" :get-description="getDescription" :get-confirmation-text="getConfirmationText" />
+    <ChargeView :filter="filter" count-endpoint-path="/admin/organizations/count" charge-endpoint-path="/admin/charge-organizations" :get-description="getDescription" :get-confirmation-text="getConfirmationText" :create-body="createBody" />
 </template>
 
 <script lang="ts" setup>
 import ChargeView from '@stamhoofd/components/src/views/ChargeView.vue';
-import { StamhoofdFilter } from '@stamhoofd/structures';
+import { ChargeOrganizationsRequest, StamhoofdFilter } from '@stamhoofd/structures';
 
 defineProps<{ filter: StamhoofdFilter }>();
+
+function createBody(args: { organizationId: string;
+    price: number;
+    description: string;
+    amount: number | null;
+    dueAt: Date | null;
+    createdAt: Date | null; }): ChargeOrganizationsRequest {
+    return ChargeOrganizationsRequest.create(args);
+}
 
 function getDescription({ count }: { count: number }) {
     if (count === 1) {

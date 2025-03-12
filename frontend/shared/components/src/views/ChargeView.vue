@@ -11,13 +11,15 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox :title="$t('4a5ca65c-3a96-4ca0-991c-518a9e92adb7')" error-fields="organization" :error-box="errors.errorBox">
-            <OrganizationSelect v-model="selectedOrganization" />
-        </STInputBox>
+        <div :class="{'split-inputs': modalDisplayStyle === 'popup'}">
+            <STInputBox :title="$t('4a5ca65c-3a96-4ca0-991c-518a9e92adb7')" error-fields="organization" :error-box="errors.errorBox">
+                <OrganizationSelect v-model="selectedOrganization" />
+            </STInputBox>
 
-        <STInputBox :title="$t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c')" error-fields="description" :error-box="errors.errorBox">
-            <input v-model="description" class="input" type="text" :placeholder="$t('e4a32f97-64aa-43d7-803f-3d18f7cdf8e4')" autocomplete="given-name">
-        </STInputBox>
+            <STInputBox :title="$t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c')" error-fields="description" :error-box="errors.errorBox">
+                <input v-model="description" class="input" type="text" :placeholder="$t('e4a32f97-64aa-43d7-803f-3d18f7cdf8e4')" autocomplete="given-name">
+            </STInputBox>
+        </div>
 
         <div class="split-inputs">
             <STInputBox :title="$t('7453643b-fdb2-4aa1-9964-ddd71762c983')" error-fields="price" :error-box="errors.errorBox">
@@ -28,14 +30,32 @@
             </STInputBox>
         </div>
 
+        <div class="split-inputs">
+            <div v-if="showCreatedAt">
+                <STInputBox title="Verschuldigd sinds" error-fields="createdAt" :error-box="errors.errorBox">
+                    <DateSelection v-model="createdAt" />
+                </STInputBox>
+            </div>
+            <div v-if="canShowDueAt">
+                <STInputBox title="Te betalen tegen*" error-fields="dueAt" :error-box="errors.errorBox">
+                    <DateSelection v-model="dueAt" :required="false" placeholder="Onmiddelijk" :time="{hours: 0, minutes: 0, seconds: 0}" />
+                </STInputBox>
+            </div>
+        </div>
+
+        <p v-if="canShowDueAt" class="style-description-small">
+            {{ $t('15b6f0c8-6287-4b4d-bf34-4da2f4a0e575') }}
+        </p>
+
         <PriceBreakdownBox :price-breakdown="priceBreakdown" />
     </SaveView>
 </template>
 
 <script lang="ts" setup>
+import { AutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, Toast, useContext, useErrors, useExternalOrganization, usePlatform, useValidation } from '@stamhoofd/components';
+import { CenteredMessage, DateSelection, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, Toast, useContext, useErrors, useExternalOrganization, useFeatureFlag, usePlatform, useValidation } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { LimitedFilteredRequest, Organization, StamhoofdFilter } from '@stamhoofd/structures';
@@ -44,7 +64,26 @@ import { computed, Ref, ref, watch } from 'vue';
 import { useCount } from '../composables/useCount';
 import OrganizationSelect from '../organizations/components/OrganizationSelect.vue';
 
-const props = defineProps<{ filter: StamhoofdFilter; countEndpointPath: string; chargeEndpointPath: string; getDescription: (args: { count: number }) => string; getConfirmationText: (args: { total: string; count: number | null }) => string }>();
+export type ChargeViewOptions = {
+    filter: StamhoofdFilter;
+    countEndpointPath: string; chargeEndpointPath: string;
+    getDescription: (args: { count: number }) => string; getConfirmationText: (args: { total: string; count: number | null }) => string;
+    createBody: (args: { organizationId: string;
+        price: number;
+        description: string;
+        amount: number | null;
+        dueAt: Date | null;
+        createdAt: Date | null; }) => AutoEncoder;
+    modalDisplayStyle?: 'sheet' | 'popup';
+    showCreatedAt?: boolean;
+    showDueAt?: boolean;
+};
+
+const props = withDefaults(defineProps<ChargeViewOptions>(), {
+    showCreatedAt: false,
+    showDueAt: false,
+    modalDisplayStyle: 'sheet',
+});
 
 const errors = useErrors();
 const $t = useTranslate();
@@ -53,6 +92,7 @@ const owner = useRequestOwner();
 const context = useContext();
 const platform = usePlatform();
 const { count } = useCount(props.countEndpointPath);
+const $feature = useFeatureFlag();
 
 count(props.filter)
     .then((result: number | null) => {
@@ -69,6 +109,11 @@ const price = ref(0);
 const amount = ref(1);
 const hasChanges = computed(() => description.value !== '' || price.value !== 0);
 const total = computed(() => price.value * amount.value);
+const canShowDueAt = computed(() => props.showDueAt && $feature('member-trials') && (price.value >= 0));
+
+const createdAt = ref(null);
+const dueAt = ref(null);
+
 const priceBreakdown = computed(() => {
     return [{
         name: 'Totaal',
@@ -162,12 +207,14 @@ async function save() {
             limit: 100,
         });
 
-        const body = {
+        const body = props.createBody({
             organizationId: selectedOrganization.value!.id,
             price: price.value,
             description: description.value,
             amount: amount.value,
-        };
+            dueAt: dueAt.value,
+            createdAt: createdAt.value,
+        });
 
         await context.value.authenticatedServer.request({
             method: 'POST',
