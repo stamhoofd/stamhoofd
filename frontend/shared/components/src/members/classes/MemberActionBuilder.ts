@@ -3,7 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
-import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, PermissionLevel, Platform, PlatformMember, RegistrationWithMember, mergeFilters } from '@stamhoofd/structures';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, PermissionLevel, Platform, PlatformMember, RegistrationWithMember, mergeFilters } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { markRaw } from 'vue';
 import { EditMemberAllBox, MemberSegmentedView, MemberStepView, checkoutDefaultItem, chooseOrganizationMembersForGroup } from '..';
@@ -156,7 +156,7 @@ export class MemberActionBuilder {
         ];
     }
 
-    getMoveAction(): TableAction<PlatformMember>[] {
+    getMoveAction(selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod): TableAction<PlatformMember>[] {
         if (this.organizations.length !== 1) {
             return [];
         }
@@ -166,6 +166,8 @@ export class MemberActionBuilder {
         }
 
         const organization = this.organizations[0];
+        const period = selectedOrganizationRegistrationPeriod ?? organization.period;
+
         return [
             new MenuTableAction({
                 name: 'Verplaatsen naar',
@@ -192,8 +194,8 @@ export class MemberActionBuilder {
                             }),
                         ],
                     }),
-                    ...this.getActionsForCategory(organization.period.adminCategoryTree, (members, group) => this.moveRegistrations(members, group)).map((r) => {
-                        r.description = organization.period.period.name;
+                    ...this.getActionsForCategory(period.adminCategoryTree, (members, group) => this.moveRegistrations(members, group)).map((r) => {
+                        r.description = period.period.name;
                         return r;
                     }),
                 ],
@@ -314,7 +316,7 @@ export class MemberActionBuilder {
         return r;
     }
 
-    getActions(options: { includeDelete?: boolean } = {}): TableAction<PlatformMember>[] {
+    getActions(options: { includeDelete?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}): TableAction<PlatformMember>[] {
         const actions = [
             new InMemoryTableAction({
                 name: 'Gegevens bewerken',
@@ -373,7 +375,7 @@ export class MemberActionBuilder {
                 childActions: () => this.getRegisterActions(),
             }),
 
-            ...this.getMoveAction(),
+            ...this.getMoveAction(options.selectedOrganizationRegistrationPeriod),
             ...this.getEditAction(),
 
             ...this.getUnsubscribeAction(),

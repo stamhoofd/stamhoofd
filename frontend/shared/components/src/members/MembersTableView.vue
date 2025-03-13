@@ -92,6 +92,12 @@ const defaultFilter = app === 'admin' && !props.group
         }
     : null;
 
+const organizationRegistrationPeriod = computed(() => {
+    const periodId = filterPeriodId;
+
+    return organization.value?.periods?.organizationPeriods?.find(p => p.period.id === periodId);
+});
+
 useGlobalEventListener('members-deleted', async () => {
     tableObjectFetcher.reset(true, true);
 });
@@ -722,6 +728,6 @@ const actions: TableAction<ObjectType>[] = [
             });
         },
     }),
-    ...actionBuilder.getActions(),
+    ...actionBuilder.getActions({ selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value }),
 ];
 </script>
