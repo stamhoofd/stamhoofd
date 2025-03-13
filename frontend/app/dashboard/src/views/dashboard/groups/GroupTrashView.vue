@@ -15,7 +15,7 @@
             <STList v-else-if="groups.length">
                 <STListItem v-for="group in groups" :key="group.id" :selectable="true" @click="restoreGroup($event, group)">
                     <template #left>
-                        <GroupAvatar #left :group="group" />
+                        <GroupAvatar :group="group" />
                     </template>
 
                     <h2 class="style-title-list">
@@ -37,141 +37,115 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { Request } from '@simonbackx/simple-networking';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { CenteredMessage, ContextMenu, ContextMenuItem, GroupAvatar, STList, STListItem, STNavigationBar, Spinner, Toast } from '@stamhoofd/components';
+import { CenteredMessage, ContextMenu, ContextMenuItem, GroupAvatar, Spinner, STList, STListItem, STNavigationBar, Toast, useContext, useRequiredOrganization } from '@stamhoofd/components';
+import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { computed, Ref, ref } from 'vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STList,
-        GroupAvatar,
-        STListItem,
-        Spinner,
-    },
-})
-export default class GroupTrashView extends Mixins(NavigationMixin) {
-    loadingGroups = true;
-    groups: Group[] = [];
+const loadingGroups = ref(true);
+const groups: Ref<Group[]> = ref([]);
+const title = 'Prullenmand';
+const context = useContext();
+const organization = useRequiredOrganization();
+const organizationManager = useOrganizationManager();
+const allCategories = computed(() => organization.value.getCategoryTree({
+    admin: true,
+    permissions: context.value.auth.permissions,
+}).getAllCategories().filter(c => c.categories.length === 0));
+const owner = useRequestOwner();
 
-    get title() {
-        return 'Prullenmand';
-    }
+load().catch(console.error);
 
-    mounted() {
-        // Load deleted groups
-        this.load().catch(console.error);
-    }
+function formatDate(date: Date) {
+    return Formatter.dateTime(date);
+}
 
-    formatDate(date: Date) {
-        return Formatter.dateTime(date);
-    }
-
-    async load() {
-        try {
-            const response = await this.$context.authenticatedServer.request({
-                method: 'GET',
-                path: '/organization/deleted-groups',
-                decoder: new ArrayDecoder(Group as Decoder<Group>),
-                owner: this,
-            });
-
-            this.groups = response.data.filter(g => g.periodId === this.organization.period.period.id);
-        }
-        catch (e) {
-            Toast.fromError(e).show();
-        }
-        this.loadingGroups = false;
-    }
-
-    beforeUnmount() {
-        // Cancel all requests
-        Request.cancelAll(this);
-    }
-
-    get organization() {
-        return this.$organization;
-    }
-
-    get allCategories() {
-        return this.organization.getCategoryTree({
-            admin: true,
-            permissions: this.$context.auth.permissions,
-        }).getAllCategories().filter(c => c.categories.length === 0);
-    }
-
-    async restoreGroup(event, group: Group) {
-        if (this.allCategories.length === 0) {
-            const toast = Toast.error(this.$t('3e9cdd5a-b614-4e2b-bc84-48566628a60f'));
-            toast.show();
-            return;
-        }
-
-        if (this.allCategories.length === 1) {
-            await this.restoreTo(group, this.allCategories[0]);
-            return;
-        }
-
-        const menu = new ContextMenu([
-            this.allCategories.map(cat =>
-                new ContextMenuItem({
-                    name: cat.settings.name,
-                    rightText: cat.groupIds.length + '',
-                    action: () => {
-                        this.restoreTo(group, cat).catch(console.error);
-                        return true;
-                    },
-                }),
-            ),
-        ]);
-        menu.show({ clickEvent: event }).catch(console.error);
-    }
-
-    async restoreTo(group: Group, cat: GroupCategoryTree) {
-        if (!(await CenteredMessage.confirm(`${group.settings.name} terugzetten naar ${cat.settings.name}?`, 'Ja, terugzetten'))) {
-            return;
-        }
-
-        const settings = OrganizationRegistrationPeriodSettings.patch({});
-        const catPatch = GroupCategory.patch({ id: cat.id });
-
-        if (cat.groupIds.filter(id => id === group.id).length > 1) {
-            // Not fixable, we need to set the ids manually
-            const cleaned = cat.groupIds.filter(id => id !== group.id);
-            cleaned.push(group.id);
-            catPatch.groupIds = cleaned as any;
-        }
-        else {
-            // We need to delete it to fix issues if it is still there
-            catPatch.groupIds.addDelete(group.id);
-            catPatch.groupIds.addPut(group.id);
-        }
-
-        settings.categories.addPatch(catPatch);
-
-        const patch = OrganizationRegistrationPeriod.patch({
-            id: this.organization.period.id,
-            settings,
+async function load() {
+    try {
+        const response = await context.value.authenticatedServer.request({
+            method: 'GET',
+            path: '/organization/deleted-groups',
+            decoder: new ArrayDecoder(Group as Decoder<Group>),
+            owner,
         });
 
-        patch.groups.addPatch(Group.patch({
-            id: group.id,
-            deletedAt: null,
-        }));
-
-        try {
-            await this.$organizationManager.patchPeriod(patch);
-        }
-        catch (e) {
-            Toast.fromError(e).show();
-        }
-
-        this.load().catch(console.error);
+        groups.value = response.data.filter(g => g.periodId === organization.value.period.period.id);
     }
+    catch (e) {
+        Toast.fromError(e).show();
+    }
+    loadingGroups.value = false;
+}
+
+async function restoreGroup(event: TouchEvent | MouseEvent | undefined, group: Group) {
+    if (allCategories.value.length === 0) {
+        const toast = Toast.error($t('3e9cdd5a-b614-4e2b-bc84-48566628a60f'));
+        toast.show();
+        return;
+    }
+
+    if (allCategories.value.length === 1) {
+        await restoreTo(group, allCategories.value[0]);
+        return;
+    }
+
+    const menu = new ContextMenu([
+        allCategories.value.map(cat =>
+            new ContextMenuItem({
+                name: cat.settings.name,
+                rightText: cat.groupIds.length + '',
+                action: () => {
+                    restoreTo(group, cat).catch(console.error);
+                    return true;
+                },
+            }),
+        ),
+    ]);
+    menu.show({ clickEvent: event }).catch(console.error);
+}
+
+async function restoreTo(group: Group, cat: GroupCategoryTree) {
+    if (!(await CenteredMessage.confirm(`${group.settings.name} terugzetten naar ${cat.settings.name}?`, 'Ja, terugzetten'))) {
+        return;
+    }
+
+    const settings = OrganizationRegistrationPeriodSettings.patch({});
+    const catPatch = GroupCategory.patch({ id: cat.id });
+
+    if (cat.groupIds.filter(id => id === group.id).length > 1) {
+        // Not fixable, we need to set the ids manually
+        const cleaned = cat.groupIds.filter(id => id !== group.id);
+        cleaned.push(group.id);
+        catPatch.groupIds = cleaned as any;
+    }
+    else {
+        // We need to delete it to fix issues if it is still there
+        catPatch.groupIds.addDelete(group.id);
+        catPatch.groupIds.addPut(group.id);
+    }
+
+    settings.categories.addPatch(catPatch);
+
+    const patch = OrganizationRegistrationPeriod.patch({
+        id: organization.value.period.id,
+        settings,
+    });
+
+    patch.groups.addPatch(Group.patch({
+        id: group.id,
+        deletedAt: null,
+    }));
+
+    try {
+        await organizationManager.value.patchPeriod(patch);
+    }
+    catch (e) {
+        Toast.fromError(e).show();
+    }
+
+    load().catch(console.error);
 }
 </script>
