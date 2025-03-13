@@ -1,7 +1,7 @@
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import { Endpoint, Request } from '@simonbackx/simple-endpoints';
-import { EventNotificationFactory, EventFactory, EventNotificationTypeFactory, Organization, OrganizationFactory, Token, User, UserFactory, EmailTemplateFactory } from '@stamhoofd/models';
-import { AccessRight, BaseOrganization, EmailTemplateType, Event, EventNotificationStatus, EventNotification as EventNotificationStruct, Permissions, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
+import { EventNotificationFactory, EventFactory, EventNotificationTypeFactory, Organization, OrganizationFactory, Token, User, UserFactory, EmailTemplateFactory, RecordCategoryFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
+import { AccessRight, BaseOrganization, EmailTemplateType, Event, EventNotificationStatus, EventNotification as EventNotificationStruct, Permissions, PermissionsResourceType, RecordType, ResourcePermissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { PatchEventNotificationsEndpoint } from './PatchEventNotificationsEndpoint';
 import { testServer } from '../../../../tests/helpers/TestServer';
@@ -90,7 +90,18 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             permissions: minimumUserPermissions,
         }).create();
         const event = await new EventFactory({ organization }).create();
-        const notificationType = (await new EventNotificationTypeFactory({ }).create());
+        const recordCategories = await new RecordCategoryFactory({
+            records: [
+                {
+                    type: RecordType.Checkbox,
+                },
+                {
+                    type: RecordType.Text,
+                    required: true,
+                },
+            ],
+        }).createMultiple(2);
+        const notificationType = (await new EventNotificationTypeFactory({ recordCategories }).create());
 
         const body: Body = new PatchableArray();
         body.addPut(
@@ -167,7 +178,40 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             simpleError({ code: 'invalid_field', field: 'events' }),
         );
     });
-    test.todo('It throws when trying to create an event notification for a locked period');
+
+    test('It throws when trying to create an event notification for a locked period', async () => {
+        await new RegistrationPeriodFactory({
+            startDate: new Date(2050, 0, 1),
+            endDate: new Date(2051, 11, 31),
+            locked: true,
+        }).create();
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: minimumUserPermissions,
+        }).create();
+        const event = await new EventFactory({
+            organization,
+            startDate: new Date(2050, 10, 1),
+            endDate: new Date(2051, 10, 15),
+        }).create();
+        const notificationType = (await new EventNotificationTypeFactory({ }).create());
+
+        const body: Body = new PatchableArray();
+        body.addPut(
+            EventNotificationStruct.create({
+                typeId: notificationType.id,
+                events: [Event.create({ id: event.id })],
+                organization: BaseOrganization.create({
+                    id: organization.id,
+                }),
+                status: EventNotificationStatus.Draft,
+            }),
+        );
+        await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
+            simpleError({ code: 'invalid_period', field: 'startDate' }),
+        );
+    });
 
     test('It throws when trying to create an event notification for an event in a different organization', async () => {
         const organization = await new OrganizationFactory({}).create();

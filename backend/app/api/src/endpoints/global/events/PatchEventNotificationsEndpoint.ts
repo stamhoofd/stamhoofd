@@ -81,7 +81,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 if (index === 0) {
                     notification.startDate = model.startDate;
                     notification.endDate = model.endDate;
-                    const period = await RegistrationPeriod.getByDate(event.startDate);
+                    const period = await RegistrationPeriod.getByDate(model.startDate);
 
                     if (!period) {
                         throw new SimpleError({

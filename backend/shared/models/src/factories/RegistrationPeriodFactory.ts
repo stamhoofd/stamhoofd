@@ -7,6 +7,7 @@ class Options {
     startDate?: Date;
     endDate?: Date;
     previousPeriodId?: string;
+    locked?: boolean;
 }
 
 export class RegistrationPeriodFactory extends Factory<Options, RegistrationPeriod> {
@@ -20,6 +21,7 @@ export class RegistrationPeriodFactory extends Factory<Options, RegistrationPeri
             period.previousPeriodId = this.options.previousPeriodId;
         }
         period.settings = RegistrationPeriodSettings.create({});
+        period.locked = this.options.locked ?? false;
 
         await period.save();
         return period;
