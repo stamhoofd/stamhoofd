@@ -20,3 +20,4 @@ export * from './EventFactory';
 export * from './EventNotificationTypeFactory';
 export * from './EventNotificationFactory';
 export * from './EmailTemplateFactory';
+export * from './RecordCategoryFactory';
