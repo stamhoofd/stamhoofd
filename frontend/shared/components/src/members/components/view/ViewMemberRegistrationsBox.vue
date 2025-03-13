@@ -41,21 +41,21 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
-import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
+import { useOrganizationManager, usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { LimitedFilteredRequest, PermissionLevel, PlatformMember, Registration, RegistrationPeriod } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { GlobalEventBus } from '../../../EventBus';
+import { useMembersObjectFetcher } from '../../../fetchers/useMembersObjectFetcher';
 import { useAuth, useOrganization, usePlatform } from '../../../hooks';
 import { ContextMenu, ContextMenuItem } from '../../../overlays/ContextMenu';
 import { Toast } from '../../../overlays/Toast';
+import { TableActionSelection } from '../../../tables';
 import TableActionsContextMenu from '../../../tables/TableActionsContextMenu.vue';
 import { useChooseGroupForMember } from '../../checkout';
 import { useRegistrationActionBuilder } from '../../classes/RegistrationActionBuilder';
 import ViewMemberRegistrationRow from './ViewMemberRegistrationRow.vue';
-import { TableActionSelection } from '../../../tables';
-import { useMembersObjectFetcher } from '../../../fetchers/useMembersObjectFetcher';
 
 const props = defineProps<{
     member: PlatformMember;
@@ -68,11 +68,13 @@ const visibleRegistrationsTitle = computed(() => {
 const auth = useAuth();
 const present = usePresent();
 const organization = useOrganization();
+const organizationManager = useOrganizationManager();
 const platform = usePlatform();
 
 // If the organization of this member already moved to the next period, select it by default
 const defaultPeriod = organization.value?.period?.period ?? props.member.filterOrganizations({ currentPeriod: true })[0]?.period?.period ?? props.member.filterOrganizations({})[0]?.period?.period ?? platform.value.period;
 const period = ref(defaultPeriod) as Ref<RegistrationPeriod>;
+
 const platformManager = usePlatformManager();
 const owner = useRequestOwner();
 const showDeleted = ref(false);
@@ -132,15 +134,17 @@ async function editRegistration(registration: Registration, event: MouseEvent) {
         member: props.member,
     });
 
-    const actions = builder.getActions();
+    const el = event.currentTarget! as HTMLElement;
+    const bounds = el.getBoundingClientRect();
+
+    const periods = await organizationManager.value.loadPeriods(false, true, owner).catch(console.error);
+    const selectedOrganizationRegistrationPeriod = periods?.organizationPeriods.find(p => p.period.id === registration.group.periodId);
+    const actions = builder.getActions({ selectedOrganizationRegistrationPeriod });
 
     if (actions.filter(a => a.enabled).length === 0) {
         Toast.warning('Er zijn geen acties beschikbaar voor deze inschrijving').show();
         return;
     }
-
-    const el = event.currentTarget! as HTMLElement;
-    const bounds = el.getBoundingClientRect();
 
     const selection: TableActionSelection<PlatformMember> = {
         filter: new LimitedFilteredRequest({

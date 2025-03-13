@@ -728,6 +728,6 @@ const actions: TableAction<ObjectType>[] = [
             });
         },
     }),
-    ...actionBuilder.getActions({ selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value }),
+    ...actionBuilder.getActions({ selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value, includeMove: true }),
 ];
 </script>

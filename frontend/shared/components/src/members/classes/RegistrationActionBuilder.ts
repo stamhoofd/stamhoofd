@@ -1,6 +1,6 @@
 import { usePresent } from '@simonbackx/vue-app-navigation';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
-import { Group, GroupCategoryTree, Organization, PermissionLevel, PlatformMember, RegisterCheckout, RegisterItem, Registration, RegistrationWithMember } from '@stamhoofd/structures';
+import { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, PermissionLevel, PlatformMember, RegisterCheckout, RegisterItem, Registration, RegistrationWithMember } from '@stamhoofd/structures';
 import { checkoutRegisterItem, chooseOrganizationMembersForGroup } from '..';
 import { useContext, useOrganization } from '../../hooks';
 import { InMemoryTableAction, MenuTableAction, TableAction } from '../../tables/classes';
@@ -71,7 +71,9 @@ export class RegistrationActionBuilder {
         return true;
     }
 
-    getMoveAction(): TableAction<PlatformMember>[] {
+    getMoveAction(selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod): TableAction<PlatformMember>[] {
+        const period = selectedOrganizationRegistrationPeriod ?? this.organization.period;
+
         return [
             new MenuTableAction({
                 name: 'Verplaatsen naar',
@@ -98,8 +100,8 @@ export class RegistrationActionBuilder {
                             }),
                         ],
                     }),
-                    ...this.getActionsForCategory(this.organization.period.adminCategoryTree, group => this.moveRegistrations(group)).map((r) => {
-                        r.description = this.organization.period.period.name;
+                    ...this.getActionsForCategory(period.adminCategoryTree, group => this.moveRegistrations(group)).map((r) => {
+                        r.description = period.period.name;
                         return r;
                     }),
                 ],
@@ -207,9 +209,9 @@ export class RegistrationActionBuilder {
         ];
     }
 
-    getActions(): TableAction<PlatformMember>[] {
+    getActions(options: { selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}): TableAction<PlatformMember>[] {
         return [
-            ...this.getMoveAction(),
+            ...this.getMoveAction(options.selectedOrganizationRegistrationPeriod),
             ...this.getAdminActions(),
             ...this.getEditAction(),
             ...this.getUnsubscribeAction(),
