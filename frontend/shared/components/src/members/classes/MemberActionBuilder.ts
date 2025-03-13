@@ -8,6 +8,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { markRaw } from 'vue';
 import { EditMemberAllBox, MemberSegmentedView, MemberStepView, checkoutDefaultItem, chooseOrganizationMembersForGroup } from '..';
 import { GlobalEventBus } from '../../EventBus';
+import { AuditLogsView } from '../../audit-logs';
 import EmailView, { RecipientChooseOneOption } from '../../email/EmailView.vue';
 import { manualFeatureFlag, useContext, useOrganization, usePlatform } from '../../hooks';
 import { Toast } from '../../overlays/Toast';
@@ -18,7 +19,6 @@ import { PlatformFamilyManager, usePlatformFamilyManager } from '../PlatformFami
 import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue';
 import { RegistrationActionBuilder } from './RegistrationActionBuilder';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
-import { AuditLogsView } from '../../audit-logs';
 
 export function useDirectMemberActions(options?: { groups?: Group[]; organizations?: Organization[] }) {
     return useMemberActions()(options);
@@ -630,7 +630,7 @@ export class MemberActionBuilder {
                     root: new ComponentWithProperties(ExcelExportView, {
                         type: ExcelExportType.Members,
                         filter: selection.filter,
-                        workbook: getSelectableWorkbook(this.platform, this.organizations.length === 1 ? this.organizations[0] : null, this.groups),
+                        workbook: getSelectableWorkbook(this.platform, this.organizations.length === 1 ? this.organizations[0] : null, this.groups, this.context.auth),
                         configurationId: 'members',
                     }),
                 }),
