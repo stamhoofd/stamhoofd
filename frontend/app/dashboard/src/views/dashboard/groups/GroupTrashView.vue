@@ -39,19 +39,25 @@
 
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { CenteredMessage, ContextMenu, ContextMenuItem, GroupAvatar, Spinner, STList, STListItem, STNavigationBar, Toast, useContext, useRequiredOrganization } from '@stamhoofd/components';
+import { CenteredMessage, ContextMenu, ContextMenuItem, GroupAvatar, Spinner, STList, STListItem, STNavigationBar, Toast, useContext } from '@stamhoofd/components';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
 
+const props = defineProps<{
+    period: OrganizationRegistrationPeriod;
+}>();
+
+const organizatioPeriodId = props.period.id;
+const periodId = props.period.period.id;
+
 const loadingGroups = ref(true);
 const groups: Ref<Group[]> = ref([]);
-const title = 'Prullenmand';
+const title = computed(() => `${$t('Prullenmand')} (${props.period.period.nameShort ?? '?'})`);
 const context = useContext();
-const organization = useRequiredOrganization();
 const organizationManager = useOrganizationManager();
-const allCategories = computed(() => organization.value.getCategoryTree({
+const allCategories = computed(() => props.period.getCategoryTree({
     admin: true,
     permissions: context.value.auth.permissions,
 }).getAllCategories().filter(c => c.categories.length === 0));
@@ -72,7 +78,7 @@ async function load() {
             owner,
         });
 
-        groups.value = response.data.filter(g => g.periodId === organization.value.period.period.id);
+        groups.value = response.data.filter(g => g.periodId === periodId);
     }
     catch (e) {
         Toast.fromError(e).show();
@@ -130,7 +136,7 @@ async function restoreTo(group: Group, cat: GroupCategoryTree) {
     settings.categories.addPatch(catPatch);
 
     const patch = OrganizationRegistrationPeriod.patch({
-        id: organization.value.period.id,
+        id: organizatioPeriodId,
         settings,
     });
 

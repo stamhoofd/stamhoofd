@@ -339,7 +339,7 @@ async function createCategory() {
 async function openGroupTrash() {
     await present({
         components: [
-            new ComponentWithProperties(GroupTrashView, { }).setDisplayStyle('popup'),
+            new ComponentWithProperties(GroupTrashView, { period: props.period}).setDisplayStyle('popup'),
         ],
         modalDisplayStyle: 'popup',
     });
