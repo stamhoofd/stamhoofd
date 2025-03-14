@@ -713,6 +713,9 @@ if (!organization.value) {
     canAdd = false;
 }
 
+// registrations for events of another organization should not be editable
+const excludeEdit = props.group && props.group.type === GroupType.EventRegistration && !!organization.value && props.group.organizationId !== organization.value.id;
+
 const actions: TableAction<ObjectType>[] = [
     new InMemoryTableAction({
         name: 'Leden inschrijven',
@@ -728,6 +731,6 @@ const actions: TableAction<ObjectType>[] = [
             });
         },
     }),
-    ...actionBuilder.getActions({ selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value, includeMove: true }),
+    ...actionBuilder.getActions({ selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value, includeMove: true, includeEdit: !excludeEdit }),
 ];
 </script>
