@@ -263,7 +263,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         const members = memberIds.map(id => _members.find(m => m.id === id)!);
 
         for (const member of members) {
-            if (!await Context.auth.canAccessMember(member, PermissionLevel.Read)) {
+            if (!await Context.auth.canAccessMember(member, permissionLevel)) {
                 throw Context.auth.error();
             }
         }
