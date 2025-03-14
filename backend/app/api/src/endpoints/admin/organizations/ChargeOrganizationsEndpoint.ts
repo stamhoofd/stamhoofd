@@ -1,7 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ChargeOrganizationsRequest, LimitedFilteredRequest, Organization as OrganizationStruct } from '@stamhoofd/structures';
+import { ChargeOrganizationsRequest, LimitedFilteredRequest } from '@stamhoofd/structures';
 
 import { QueueHandler } from '@stamhoofd/queues';
 import { Context } from '../../../helpers/Context';
@@ -59,7 +59,7 @@ export class ChargeOrganizationsEndpoint extends Endpoint<Params, Query, Body, R
             });
         }
 
-        if (body.organizationId === undefined) {
+        if (!body.organizationId) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid organization id',
@@ -94,15 +94,9 @@ export class ChargeOrganizationsEndpoint extends Endpoint<Params, Query, Body, R
                 fetch: GetOrganizationsEndpoint.buildData,
             });
 
-            const organizationId = body.organizationId;
-            const chargeOrganizations = organizationId === null
-                ? OrganizationCharger.chargeFromPlatform
-                : (args: { organizationsToCharge: OrganizationStruct[]; price: number; amount?: number; description: string; dueAt: Date | null; createdAt: Date | null }) => OrganizationCharger.chargeMany({
-                        chargingOrganizationId: organizationId,
-                        ...args });
-
             for await (const data of dataGenerator) {
-                await chargeOrganizations({
+                await OrganizationCharger.chargeMany({
+                    chargingOrganizationId: body.organizationId,
                     organizationsToCharge: data,
                     price: body.price,
                     amount: body.amount ?? 1,

@@ -1,25 +1,8 @@
-import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, Platform } from '@stamhoofd/models';
+import { BalanceItem } from '@stamhoofd/models';
 import { BalanceItemType, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 import { BalanceItemService } from '../services/BalanceItemService';
 
 export class MemberCharger {
-    static async chargeFromPlatform(args: { membersToCharge: MemberWithRegistrationsBlob[]; price: number; amount?: number; description: string; dueAt: Date | null; createdAt: Date | null }) {
-        const platform = await Platform.getShared();
-
-        const chargeVia = platform.membershipOrganizationId;
-
-        if (!chargeVia) {
-            throw new SimpleError({
-                code: 'missing_membership_organization',
-                message: 'Missing membershipOrganizationId',
-                human: 'Er is geen lokale groep verantwoordelijk voor de aanrekening van aansluitingen geconfigureerd',
-            });
-        }
-
-        await MemberCharger.chargeMany({ chargingOrganizationId: chargeVia, ...args });
-    }
-
     static async chargeMany({ chargingOrganizationId, membersToCharge, price, amount, description, dueAt, createdAt }: { chargingOrganizationId: string; membersToCharge: MemberWithRegistrationsBlob[]; price: number; amount?: number; description: string; dueAt: Date | null; createdAt: Date | null }) {
         const balanceItems = membersToCharge.map(memberBeingCharged => MemberCharger.createBalanceItem({
             price,

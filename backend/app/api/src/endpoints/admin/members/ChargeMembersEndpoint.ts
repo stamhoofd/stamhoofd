@@ -1,7 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ChargeMembersRequest, LimitedFilteredRequest, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
+import { ChargeMembersRequest, LimitedFilteredRequest } from '@stamhoofd/structures';
 
 import { QueueHandler } from '@stamhoofd/queues';
 import { Context } from '../../../helpers/Context';
@@ -59,7 +59,7 @@ export class ChargeMembersEndpoint extends Endpoint<Params, Query, Body, Respons
             });
         }
 
-        if (body.organizationId === undefined) {
+        if (!body.organizationId) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid organization id',
@@ -94,15 +94,9 @@ export class ChargeMembersEndpoint extends Endpoint<Params, Query, Body, Respons
                 fetch: GetMembersEndpoint.buildData,
             });
 
-            const organizationId = body.organizationId;
-            const chargeMembers = organizationId === null
-                ? MemberCharger.chargeFromPlatform
-                : (args: { membersToCharge: MemberWithRegistrationsBlob[]; price: number; amount?: number; description: string; dueAt: Date | null; createdAt: Date | null }) => MemberCharger.chargeMany({
-                        chargingOrganizationId: organizationId,
-                        ...args });
-
             for await (const data of dataGenerator) {
-                await chargeMembers({
+                await MemberCharger.chargeMany({
+                    chargingOrganizationId: body.organizationId,
                     membersToCharge: data.members,
                     price: body.price,
                     amount: body.amount ?? 1,
