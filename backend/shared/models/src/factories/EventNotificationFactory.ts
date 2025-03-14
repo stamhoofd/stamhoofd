@@ -1,5 +1,5 @@
 import { Factory } from '@simonbackx/simple-database';
-import { EventNotificationStatus } from '@stamhoofd/structures';
+import { EventNotificationStatus, RecordAnswer } from '@stamhoofd/structures';
 
 import { EventNotification } from '../models';
 import { Event } from '../models/Event';
@@ -14,6 +14,8 @@ class Options {
     status?: EventNotificationStatus;
     feedbackText?: string;
     periodId?: string;
+    recordAnswers?: Map<string, RecordAnswer>;
+    acceptedRecordAnswers?: Map<string, RecordAnswer>;
 }
 
 export class EventNotificationFactory extends Factory<Options, EventNotification> {
@@ -31,6 +33,10 @@ export class EventNotificationFactory extends Factory<Options, EventNotification
         eventNotification.startDate = events[0].startDate;
         eventNotification.endDate = events[0].endDate;
         eventNotification.periodId = this.options.periodId ?? this.options.organization.periodId;
+
+        // Set record answers
+        eventNotification.recordAnswers = this.options.recordAnswers ?? new Map();
+        eventNotification.acceptedRecordAnswers = this.options.acceptedRecordAnswers ?? new Map();
 
         await eventNotification.save();
 
