@@ -172,7 +172,7 @@ describe('Endpoint.SearchOrganization', () => {
         expect(response.body[0].id).toEqual(targetOrganization.id);
     });
 
-    test('Search on organization by name using sentence should return organization with searchindex that starts with query first if limit reached', async () => {
+    test('Search on organization by name using sentence should return organization with name that starts with query first if limit reached', async () => {
         const query = 'De Spaghetti Vreters';
 
         // without the where like (if the limit is reached), 'Spaghetti Vreters Spaghetti Vreters' would come first ('De' is a stopword)
