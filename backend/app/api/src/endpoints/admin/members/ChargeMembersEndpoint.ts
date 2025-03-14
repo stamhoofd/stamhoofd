@@ -66,7 +66,7 @@ export class ChargeMembersEndpoint extends Endpoint<Params, Query, Body, Respons
 
         await Context.authenticate();
 
-        if (!await Context.auth.canManageFinances(organization.id)) {
+        if (!await Context.auth.canManagePayments(organization.id)) {
             throw Context.auth.error();
         }
 
