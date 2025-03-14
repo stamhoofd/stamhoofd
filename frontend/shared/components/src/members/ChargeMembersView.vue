@@ -8,7 +8,7 @@ import { ChargeMembersRequest, Organization, StamhoofdFilter } from '@stamhoofd/
 
 defineProps<{ filter: StamhoofdFilter; organization: Organization }>();
 
-function createBody(args: { organizationId: string;
+function createBody(args: {
     price: number;
     description: string;
     amount: number | null;

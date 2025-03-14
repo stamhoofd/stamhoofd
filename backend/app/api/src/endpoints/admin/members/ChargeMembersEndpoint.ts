@@ -58,26 +58,18 @@ export class ChargeMembersEndpoint extends Endpoint<Params, Query, Body, Respons
                 field: 'amount',
             });
         }
-
-        if (!body.organizationId) {
-            throw new SimpleError({
-                code: 'invalid_field',
-                message: 'Invalid organization id',
-                human: 'Organisatie is verplicht',
-                field: 'organizationId',
-            });
-        }
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
+        const body = request.body;
+
         await Context.authenticate();
 
         if (!await Context.auth.canManageFinances(organization.id)) {
             throw Context.auth.error();
         }
 
-        const body = request.body;
         ChargeMembersEndpoint.throwIfInvalidBody(body);
 
         const queueId = 'charge-members';
@@ -97,7 +89,7 @@ export class ChargeMembersEndpoint extends Endpoint<Params, Query, Body, Respons
 
             for await (const data of dataGenerator) {
                 await MemberCharger.chargeMany({
-                    chargingOrganizationId: body.organizationId,
+                    chargingOrganizationId: organization.id,
                     membersToCharge: data.members,
                     price: body.price,
                     amount: body.amount ?? 1,

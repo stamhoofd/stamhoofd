@@ -1,9 +1,6 @@
 import { AutoEncoder, DateDecoder, field, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 export class ChargeMembersRequest extends AutoEncoder {
-    @field({ decoder: StringDecoder, nullable: false })
-    organizationId: string;
-
     @field({ decoder: StringDecoder })
     description: string;
 
