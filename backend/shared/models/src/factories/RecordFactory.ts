@@ -1,13 +1,19 @@
 import { Factory } from '@simonbackx/simple-database';
-import { LegacyRecord, LegacyRecordType } from '@stamhoofd/structures';
+import { RecordSettings, RecordType } from '@stamhoofd/structures';
 
-type Options = Record<string, never>;
+export class RecordOptions {
+    type: RecordType;
+    required?: boolean;
+}
 
-export class RecordFactory extends Factory<Options, LegacyRecord> {
-    LegacyRecordLegacyRecord;
-    create(): Promise<LegacyRecord> {
-        return Promise.resolve(LegacyRecord.create({
-            type: this.randomArray(Object.values(LegacyRecordType)),
-        }));
+export class RecordFactory extends Factory<RecordOptions, RecordSettings> {
+    create(): Promise<RecordSettings> {
+        return Promise.resolve(
+            RecordSettings.create({
+                name: 'Record name ' + Math.floor(Math.random() * 10000),
+                type: this.options.type,
+                required: this.options.required ?? (this.options.type !== RecordType.Checkbox),
+            }),
+        );
     }
 }

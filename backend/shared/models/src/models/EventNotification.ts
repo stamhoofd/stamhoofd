@@ -41,6 +41,12 @@ export class EventNotification extends QueryableModel {
     @column({ type: 'json', decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder) })
     recordAnswers: Map<string, RecordAnswer> = new Map();
 
+    /**
+     * Contains the answers of an event notification that were accepted
+     */
+    @column({ type: 'json', decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder) })
+    acceptedRecordAnswers: Map<string, RecordAnswer> = new Map();
+
     @column({ type: 'string', nullable: true })
     createdBy: string | null = null;
 

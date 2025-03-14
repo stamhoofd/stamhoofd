@@ -2,6 +2,7 @@ export enum EventNotificationStatus {
     Draft = 'Draft',
     Pending = 'Pending',
     Accepted = 'Accepted',
+    PartiallyAccepted = 'PartiallyAccepted',
     Rejected = 'Rejected',
 }
 
@@ -14,6 +15,8 @@ export class EventNotificationStatusHelper {
                 return $t('62bee5f8-3532-4eee-8281-ff6df193d190');
             case EventNotificationStatus.Accepted:
                 return $t('372e7507-9f34-4360-bb44-25e324ff36c6');
+            case EventNotificationStatus.PartiallyAccepted:
+                return $t('voorlopig goedgekeurd');
             case EventNotificationStatus.Rejected:
                 return $t('1ff072f8-6913-4b85-a1e4-4e4ecc1a1bf4');
         }
