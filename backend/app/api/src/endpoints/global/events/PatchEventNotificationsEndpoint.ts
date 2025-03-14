@@ -200,6 +200,9 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 }
 
                 if ((patch.status === EventNotificationStatus.Accepted || patch.status === EventNotificationStatus.PartiallyAccepted) && previousStatus !== EventNotificationStatus.Accepted && previousStatus !== EventNotificationStatus.PartiallyAccepted) {
+                    // Make sure the accepted record answers stay in sync
+                    notification.acceptedRecordAnswers = notification.recordAnswers;
+
                     await EventNotificationService.sendSubmitterEmail(EmailTemplateType.EventNotificationAccepted, notification);
                 }
 
@@ -208,13 +211,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 }
             }
 
-            const didChange = await notification.save();
-
-            if (didChange && notification.status === EventNotificationStatus.PartiallyAccepted && !await Context.auth.canAccessEventNotification(notification, PermissionLevel.Full)) {
-                // A change to a event notification by a non-full admin should trigger a notification email
-                await EventNotificationService.sendSubmitterEmail(EmailTemplateType.EventNotificationAccepted, notification);
-            }
-
+            await notification.save();
             notifications.push(notification);
         }
 

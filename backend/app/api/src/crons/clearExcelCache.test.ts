@@ -4,7 +4,7 @@ import { clearExcelCacheHelper } from './clearExcelCache';
 
 const testPath = '/Users/user/project/backend/app/api/.cache';
 jest.mock('fs/promises');
-const fsMock = jest.mocked(fs, true);
+const fsMock = jest.mocked(fs, { shallow: true });
 
 describe('clearExcelCacheHelper', () => {
     it('should only run between 3 and 6 AM', async () => {
