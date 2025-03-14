@@ -13,6 +13,7 @@ async function fileExists(file) {
     return false;
 }
 
+const translatorType = 'MistralSmall';
 const namespaces = ['stamhoofd', 'digit', 'keeo', 'landelijke-gilden'];
 
 for (const namespace of namespaces) {
@@ -91,7 +92,7 @@ function replaceValues(object, callback) {
 
 // Make sure English is loaded as last, because this should contain the default values for untranslated properties
 const enIndex = languages.findIndex(n => n === 'en');
-if (enIndex != -1) {
+if (enIndex !== -1) {
     languages.splice(enIndex, 1);
     languages.push('en');
 }
@@ -159,9 +160,23 @@ async function build(country, language, namespace, skipFallbackLanguages, skipNa
         json = mergeObjects(json, specifics);
     }
 
+    // machine translations of language file
+    const machineLanguageFile = `${folder}/machine-${translatorType}-${language}.json`;
+    if (await fileExists(machineLanguageFile)) {
+        const specifics = await readMachineTranslations(machineLanguageFile);
+        json = mergeObjects(json, specifics);
+    }
+
     // language
     if (await fileExists(folder + '/' + language + '.json')) {
         const specifics = JSON.parse(await fs.readFile(folder + '/' + language + '.json'));
+        json = mergeObjects(json, specifics);
+    }
+
+    // machine translations of locale file
+    const machineLocaleFile = `${folder}/machine-${translatorType}-${locale}.json`;
+    if (await fileExists(machineLocaleFile)) {
+        const specifics = await readMachineTranslations(machineLocaleFile);
         json = mergeObjects(json, specifics);
     }
 
@@ -172,7 +187,7 @@ async function build(country, language, namespace, skipFallbackLanguages, skipNa
     }
 
     if (!skipReplace) {
-        await runReplacements(json);
+        runReplacements(json);
     }
 
     // If we still have missing translations, fall back to the fallback languages, by only setting missing values
@@ -194,7 +209,7 @@ async function build(country, language, namespace, skipFallbackLanguages, skipNa
 }
 
 for (const country of countries) {
-    // Build country defatuls
+    // Build country defaults
     for (const language of languages) {
         const locale = language + '-' + country;
 
@@ -218,4 +233,15 @@ for (const country of countries) {
             }
         }
     }
+}
+
+async function readMachineTranslations(machineLanguageFile) {
+    const dictonary = JSON.parse(await fs.readFile(machineLanguageFile));
+    return Object.fromEntries(
+        Object.entries(
+            dictonary,
+        ).map(([key, value]) => {
+            return [key, value.translation];
+        }),
+    );
 }
