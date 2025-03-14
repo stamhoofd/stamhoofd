@@ -306,6 +306,57 @@ export class SQLWhereLike extends SQLWhere {
     }
 }
 
+export type SQLMatchSearchModifier = 'IN NATURAL LANGUAGE MODE' | 'IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION' | 'IN BOOLEAN MODE' | 'WITH QUERY EXPANSION';
+
+export class SQLMatch extends SQLWhere {
+    column: SQLExpression;
+    notMatch = false;
+    value: SQLExpression;
+    searchModifier: SQLMatchSearchModifier;
+
+    constructor(column: SQLExpression, value: SQLExpression, searchModifier: SQLMatchSearchModifier = 'IN BOOLEAN MODE') {
+        super();
+        this.column = column;
+        this.value = value;
+        this.searchModifier = searchModifier;
+    }
+
+    clone(): this {
+        const c = (new (this.constructor as any)(this.column, this.value)) as this;
+        Object.assign(c, this);
+        return c;
+    }
+
+    get isSingle(): boolean {
+        return true;
+    }
+
+    inverted(): this {
+        return this.clone().invert();
+    }
+
+    invert(): this {
+        this.notMatch = !this.notMatch;
+        return this;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        const queries = [
+            'MATCH(',
+            this.column.getSQL(options),
+            ') AGAINST(',
+            this.value.getSQL(options),
+            ` ${this.searchModifier})`,
+        ];
+
+        if (this.notMatch) {
+            queries.unshift('NOT ');
+        }
+
+        return joinSQLQuery(queries);
+    }
+}
+
 export class SQLWhereExists extends SQLWhere {
     subquery: SQLExpression;
     notExists = false;
