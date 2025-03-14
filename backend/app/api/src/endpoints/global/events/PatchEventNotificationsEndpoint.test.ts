@@ -1,7 +1,7 @@
-import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
+import { PatchableArray, PatchMap, patchObject } from '@simonbackx/simple-encoding';
 import { Endpoint, Request } from '@simonbackx/simple-endpoints';
-import { EventNotificationFactory, EventFactory, EventNotificationTypeFactory, Organization, OrganizationFactory, Token, User, UserFactory, EmailTemplateFactory, RecordCategoryFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
-import { AccessRight, BaseOrganization, EmailTemplateType, Event, EventNotificationStatus, EventNotification as EventNotificationStruct, Permissions, PermissionsResourceType, RecordType, ResourcePermissions } from '@stamhoofd/structures';
+import { EventNotificationFactory, EventFactory, EventNotificationTypeFactory, Organization, OrganizationFactory, Token, User, UserFactory, EmailTemplateFactory, RecordCategoryFactory, RegistrationPeriodFactory, RecordAnswerFactory } from '@stamhoofd/models';
+import { AccessRight, BaseOrganization, EmailTemplateType, Event, EventNotificationStatus, EventNotification as EventNotificationStruct, Permissions, PermissionsResourceType, RecordAnswer, RecordType, ResourcePermissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { PatchEventNotificationsEndpoint } from './PatchEventNotificationsEndpoint';
 import { testServer } from '../../../../tests/helpers/TestServer';
@@ -443,6 +443,63 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
             simpleError({ code: 'permission_denied' }),
         );
+    });
+
+    test('A normal user can edit an partially accepted event notification', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: minimumUserPermissions,
+        }).create();
+        const event = await new EventFactory({ organization }).create();
+
+        const recordCategories = await new RecordCategoryFactory({
+            records: [
+                {
+                    type: RecordType.Checkbox,
+                },
+                {
+                    type: RecordType.Text,
+                    required: true,
+                },
+            ],
+        }).createMultiple(2);
+
+        const firstRecord = recordCategories[0].records[0];
+
+        const notificationType = (await new EventNotificationTypeFactory({ recordCategories }).create());
+        const acceptedRecordAnswers = await new RecordAnswerFactory({ recordCategories }).create();
+        const eventNotification = await new EventNotificationFactory({
+            organization,
+            events: [event],
+            status: EventNotificationStatus.PartiallyAccepted,
+            typeId: notificationType.id,
+            acceptedRecordAnswers: acceptedRecordAnswers,
+            recordAnswers: acceptedRecordAnswers,
+        }).create();
+
+        const patchedRecordAnswers = await new RecordAnswerFactory({ records: [firstRecord] }).create();
+        const patch = new PatchMap([...patchedRecordAnswers.entries()]);
+
+        const body: Body = new PatchableArray();
+        body.addPatch(
+            EventNotificationStruct.patch({
+                id: eventNotification.id,
+                recordAnswers: patch,
+            }),
+        );
+
+        const result = await TestRequest.patch({ body, user, organization });
+        expect(result.status).toBe(200);
+        expect(result.body).toHaveLength(1);
+
+        expect(result.body[0]).toMatchObject({
+            status: EventNotificationStatus.PartiallyAccepted,
+            acceptedRecordAnswers: expect.toMatchMap(acceptedRecordAnswers),
+            recordAnswers: expect.toMatchMap(
+                patchObject(acceptedRecordAnswers, patch),
+            ),
+        });
     });
 
     test('A normal user cannot edit a pending event notification', async () => {

@@ -21,3 +21,4 @@ export * from './EventNotificationTypeFactory';
 export * from './EventNotificationFactory';
 export * from './EmailTemplateFactory';
 export * from './RecordCategoryFactory';
+export * from './RecordAnswerFactory';
