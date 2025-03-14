@@ -728,7 +728,7 @@ const actions: TableAction<ObjectType>[] = [
     ...actionBuilder.getActions(),
 ];
 
-if (app !== 'admin' && auth.hasPlatformFullAccess()) {
+if (app !== 'admin' && auth.canManagePayments()) {
     actions.push(new AsyncTableAction({
         name: 'Bedrag aanrekenen',
         icon: 'calculator',
