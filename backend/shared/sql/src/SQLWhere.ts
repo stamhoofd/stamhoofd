@@ -11,8 +11,6 @@ export enum SQLWhereSign {
     Less = '<',
     LessEqual = '<=',
     NotEqual = '!=',
-    BooleanMatch = 'BOOLEAN_MATCH',
-    BooleanMatchNot = 'BOOLEAN_MATCH_NOT',
 };
 
 export const SQLWhereSignMap = {
@@ -22,8 +20,6 @@ export const SQLWhereSignMap = {
     '<': SQLWhereSign.Less,
     '<=': SQLWhereSign.LessEqual,
     '!=': SQLWhereSign.NotEqual,
-    'BOOLEAN_MATCH': SQLWhereSign.BooleanMatch,
-    'BOOLEAN_MATCH_NOT': SQLWhereSign.BooleanMatchNot,
 } as const;
 
 function parseWhereSign(sign: SQLWhereSign | keyof typeof SQLWhereSignMap): SQLWhereSign {
@@ -230,12 +226,6 @@ export class SQLWhereEqual extends SQLWhere {
             case SQLWhereSign.LessEqual:
                 this.sign = SQLWhereSign.Greater;
                 break;
-            case SQLWhereSign.BooleanMatch:
-                this.sign = SQLWhereSign.BooleanMatchNot;
-                break;
-            case SQLWhereSign.BooleanMatchNot:
-                this.sign = SQLWhereSign.BooleanMatch;
-                break;
         }
         return this;
     }
@@ -263,22 +253,6 @@ export class SQLWhereEqual extends SQLWhere {
                 ` IS ${(this.sign === SQLWhereSign.NotEqual) ? 'NOT ' : ''} `,
                 this.value.getSQL(options),
             ]);
-        }
-
-        if (this.sign === SQLWhereSign.BooleanMatch || this.sign === SQLWhereSign.BooleanMatchNot) {
-            const queries = [
-                'MATCH(',
-                this.column.getSQL(options),
-                ') AGAINST(',
-                this.value.getSQL(options),
-                ' IN BOOLEAN MODE)',
-            ];
-
-            if (this.sign === SQLWhereSign.BooleanMatchNot) {
-                queries.unshift('NOT ');
-            }
-
-            return joinSQLQuery(queries);
         }
 
         return joinSQLQuery([
@@ -329,6 +303,57 @@ export class SQLWhereLike extends SQLWhere {
             ` ${this.notLike ? 'NOT LIKE' : 'LIKE'} `,
             this.value.getSQL(options),
         ]);
+    }
+}
+
+export type SQLMatchSearchModifier = 'IN NATURAL LANGUAGE MODE' | 'IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION' | 'IN BOOLEAN MODE' | 'WITH QUERY EXPANSION';
+
+export class SQLMatch extends SQLWhere {
+    column: SQLExpression;
+    notMatch = false;
+    value: SQLExpression;
+    searchModifier: SQLMatchSearchModifier;
+
+    constructor(column: SQLExpression, value: SQLExpression, searchModifier: SQLMatchSearchModifier = 'IN BOOLEAN MODE') {
+        super();
+        this.column = column;
+        this.value = value;
+        this.searchModifier = searchModifier;
+    }
+
+    clone(): this {
+        const c = (new (this.constructor as any)(this.column, this.value)) as this;
+        Object.assign(c, this);
+        return c;
+    }
+
+    get isSingle(): boolean {
+        return true;
+    }
+
+    inverted(): this {
+        return this.clone().invert();
+    }
+
+    invert(): this {
+        this.notMatch = !this.notMatch;
+        return this;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        const queries = [
+            'MATCH(',
+            this.column.getSQL(options),
+            ') AGAINST(',
+            this.value.getSQL(options),
+            ` ${this.searchModifier})`,
+        ];
+
+        if (this.notMatch) {
+            queries.unshift('NOT ');
+        }
+
+        return joinSQLQuery(queries);
     }
 }
 

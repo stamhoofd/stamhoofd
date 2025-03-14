@@ -1,7 +1,7 @@
 import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Organization } from '@stamhoofd/models';
-import { scalarToSQLExpression, SQL, SQLWhereLike, SQLWhereSign } from '@stamhoofd/sql';
+import { scalarToSQLExpression, SQL, SQLMatch, SQLWhere, SQLWhereLike } from '@stamhoofd/sql';
 import { Organization as OrganizationStruct } from '@stamhoofd/structures';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 
@@ -53,7 +53,7 @@ export class SearchOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
 
         const limit = 15;
 
-        const whereMatch = SQL.where('searchIndex', SQLWhereSign.BooleanMatch, matchValue);
+        const whereMatch: SQLWhere = new SQLMatch(SQL.column(Organization.table, 'searchIndex'), scalarToSQLExpression(matchValue));
 
         let organizations = await Organization.select()
             .where(whereMatch)
