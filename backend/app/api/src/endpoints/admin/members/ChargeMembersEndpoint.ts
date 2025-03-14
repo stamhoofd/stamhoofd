@@ -1,7 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ChargeMembersRequest, LimitedFilteredRequest } from '@stamhoofd/structures';
+import { ChargeMembersRequest, LimitedFilteredRequest, PermissionLevel } from '@stamhoofd/structures';
 
 import { QueueHandler } from '@stamhoofd/queues';
 import { Context } from '../../../helpers/Context';
@@ -70,9 +70,10 @@ export class ChargeMembersEndpoint extends Endpoint<Params, Query, Body, Respons
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
+        const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        if (!Context.auth.hasPlatformFullAccess()) {
+        if (!await Context.auth.canManageFinances(organization.id)) {
             throw Context.auth.error();
         }
 
@@ -91,7 +92,7 @@ export class ChargeMembersEndpoint extends Endpoint<Params, Query, Body, Respons
 
         await QueueHandler.schedule(queueId, async () => {
             const dataGenerator = fetchToAsyncIterator(request.query, {
-                fetch: GetMembersEndpoint.buildData,
+                fetch: request => GetMembersEndpoint.buildData(request, PermissionLevel.Write),
             });
 
             for await (const data of dataGenerator) {

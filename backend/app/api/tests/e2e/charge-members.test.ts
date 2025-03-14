@@ -1,6 +1,7 @@
 import { Request, Response } from '@simonbackx/simple-endpoints';
-import { MemberFactory, Organization, OrganizationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
-import { BalanceItemWithPayments, ChargeMembersRequest, LimitedFilteredRequest, PermissionLevel, Permissions, StamhoofdFilter, Version } from '@stamhoofd/structures';
+import { MemberFactory, Organization, OrganizationFactory, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
+import { AccessRight, BalanceItemWithPayments, ChargeMembersRequest, LimitedFilteredRequest, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, StamhoofdFilter, Version } from '@stamhoofd/structures';
+import { TestUtils } from '@stamhoofd/test-utils';
 import { ChargeMembersEndpoint } from '../../src/endpoints/admin/members/ChargeMembersEndpoint';
 import { GetMemberBalanceEndpoint } from '../../src/endpoints/organization/dashboard/payments/GetMemberBalanceEndpoint';
 import { testServer } from '../helpers/TestServer';
@@ -10,11 +11,12 @@ describe('E2E.ChargeMembers', () => {
     const memberBalanceEndpoint = new GetMemberBalanceEndpoint();
     let period: RegistrationPeriod;
     let organization: Organization;
-    let admin: User;
-    let adminToken: Token;
+    let financialDirector: User;
+    let financialDirectorToken: Token;
+    let financialDirectorRole: PermissionRoleDetailed;
 
-    const postCharge = async (filter: StamhoofdFilter, body: ChargeMembersRequest, token: Token) => {
-        const request = Request.buildJson('POST', `/v${Version}/admin/charge-members`, undefined, body);
+    const postCharge = async (filter: StamhoofdFilter, organization: Organization, body: ChargeMembersRequest, token: Token) => {
+        const request = Request.buildJson('POST', `/v${Version}/admin/charge-members`, organization.getApiHost(), body);
         const filterRequest = new LimitedFilteredRequest({
             filter,
             limit: 100,
@@ -30,36 +32,51 @@ describe('E2E.ChargeMembers', () => {
         return await testServer.test(memberBalanceEndpoint, request);
     };
 
+    beforeEach(async () => {
+        TestUtils.setEnvironment('userMode', 'platform');
+    });
+
     beforeAll(async () => {
         period = await new RegistrationPeriodFactory({
             startDate: new Date(2023, 0, 1),
             endDate: new Date(2023, 11, 31),
         }).create();
 
-        organization = await new OrganizationFactory({ period })
+        financialDirectorRole = PermissionRoleDetailed.create({
+            name: 'financial director',
+            accessRights: [AccessRight.OrganizationFinanceDirector],
+        });
+
+        organization = await new OrganizationFactory({ period, roles: [financialDirectorRole] })
             .create();
 
-        admin = await new UserFactory({
-            globalPermissions: Permissions.create({
-                level: PermissionLevel.Full,
-            }),
+        financialDirector = await new UserFactory({
+            organization,
             permissions: Permissions.create({
-                level: PermissionLevel.Full,
+                level: PermissionLevel.None,
+                roles: [
+                    financialDirectorRole,
+                ],
+                resources: new Map([[PermissionsResourceType.Groups, new Map([[
+                    '',
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Write,
+                    }),
+                ]])]]),
             }),
         })
             .create();
 
-        admin.organizationId = null;
-        await admin.save();
-
-        adminToken = await Token.createToken(admin);
+        financialDirectorToken = await Token.createToken(financialDirector);
     });
 
-    test('Should fail if user does not have full platform access', async () => {
+    test('Should fail if user does can not manage the finances of the organization', async () => {
         // arrange
-        const member1 = await new MemberFactory({ organization }).create();
+        const member1 = await new MemberFactory({ }).create();
+        const member2 = await new MemberFactory({ }).create();
 
-        const member2 = await new MemberFactory({ organization }).create();
+        await new RegistrationFactory({ member: member1, organization }).create();
+        await new RegistrationFactory({ member: member2, organization }).create();
 
         const filter: StamhoofdFilter = {
             id: {
@@ -76,29 +93,55 @@ describe('E2E.ChargeMembers', () => {
             createdAt: new Date(2023, 0, 4),
         });
 
-        const user = await new UserFactory({
-            permissions: Permissions.create({
-                level: PermissionLevel.Read,
+        const testUserFactories: UserFactory[] = [
+            new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    roles: [
+                        financialDirectorRole,
+                    ],
+                    resources: new Map([[PermissionsResourceType.Groups, new Map([[
+                        '',
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ]])]]),
+                }),
             }),
-        })
-            .create();
+            new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources: new Map([[PermissionsResourceType.Groups, new Map([[
+                        '',
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Write,
+                        }),
+                    ]])]]),
+                }),
+            }),
+        ];
 
-        user.organizationId = null;
+        for (const userFactory of testUserFactories) {
+            const user = await userFactory.create();
 
-        await user.save();
+            const token = await Token.createToken(user);
 
-        const token = await Token.createToken(user);
-
-        await expect(async () => await postCharge(filter, body, token))
-            .rejects
-            .toThrow('You do not have permissions for this action');
+            await expect(async () => await postCharge(filter, organization, body, token))
+                .rejects
+                .toThrow('You do not have permissions for this action');
+        }
     });
 
     test('Should create balance items for members', async () => {
         // arrange
-        const member1 = await new MemberFactory({ organization }).create();
+        const member1 = await new MemberFactory({ }).create();
 
-        const member2 = await new MemberFactory({ organization }).create();
+        const member2 = await new MemberFactory({ }).create();
+
+        await new RegistrationFactory({ member: member1, organization }).create();
+        await new RegistrationFactory({ member: member2, organization }).create();
 
         const filter: StamhoofdFilter = {
             id: {
@@ -115,7 +158,7 @@ describe('E2E.ChargeMembers', () => {
             createdAt: new Date(2023, 0, 4),
         });
 
-        const result = await postCharge(filter, body, adminToken);
+        const result = await postCharge(filter, organization, body, financialDirectorToken);
         expect(result).toBeDefined();
         expect(result.body).toBeUndefined();
 
@@ -133,15 +176,18 @@ describe('E2E.ChargeMembers', () => {
             expect(balanceItem1.createdAt).toEqual(body.createdAt);
         };
 
-        testBalanceResponse(await getBalance(member1.id, organization, adminToken));
-        testBalanceResponse(await getBalance(member2.id, organization, adminToken));
+        testBalanceResponse(await getBalance(member1.id, organization, financialDirectorToken));
+        testBalanceResponse(await getBalance(member2.id, organization, financialDirectorToken));
     });
 
     test('Should fail if invalid request', async () => {
         // arrange
-        const member1 = await new MemberFactory({ organization }).create();
+        const member1 = await new MemberFactory({ }).create();
 
-        const member2 = await new MemberFactory({ organization }).create();
+        const member2 = await new MemberFactory({ }).create();
+
+        await new RegistrationFactory({ member: member1, organization }).create();
+        await new RegistrationFactory({ member: member2, organization }).create();
 
         const filter: StamhoofdFilter = {
             id: {
@@ -183,7 +229,7 @@ describe('E2E.ChargeMembers', () => {
 
         // act and assert
         for (const [body, expectedErrorMessage] of testCases) {
-            await expect(async () => await postCharge(filter, body, adminToken))
+            await expect(async () => await postCharge(filter, organization, body, financialDirectorToken))
                 .rejects
                 .toThrow(expectedErrorMessage);
         }

@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Member, Platform } from '@stamhoofd/models';
-import { SQL, compileToSQLFilter, applySQLSorter } from '@stamhoofd/sql';
+import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import { CountFilteredRequest, Country, CountryCode, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 import { DataValidator } from '@stamhoofd/utility';
 
@@ -37,12 +37,12 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         return [false];
     }
 
-    static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
+    static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest, permissionLevel: PermissionLevel = PermissionLevel.Read) {
         const organization = Context.organization;
         let scopeFilter: StamhoofdFilter | undefined = undefined;
 
         if (!organization && !Context.auth.canAccessAllPlatformMembers()) {
-            const tags = Context.auth.getPlatformAccessibleOrganizationTags(PermissionLevel.Read);
+            const tags = Context.auth.getPlatformAccessibleOrganizationTags(permissionLevel);
             if (tags !== 'all' && tags.length === 0) {
                 throw Context.auth.error();
             }
@@ -68,14 +68,14 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
         if (organization && !Context.auth.canAccessAllPlatformMembers()) {
             // Add organization scope filter
-            const groups = await Context.auth.getAccessibleGroups(organization.id);
+            const groups = await Context.auth.getAccessibleGroups(organization.id, permissionLevel);
 
             if (groups.length === 0) {
                 throw Context.auth.error();
             }
 
             if (groups === 'all') {
-                if (await Context.auth.hasFullAccess(organization.id)) {
+                if (await Context.auth.hasFullAccess(organization.id, permissionLevel)) {
                     // Can access full history for now
                     scopeFilter = {
                         registrations: {
@@ -233,8 +233,8 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         return query;
     }
 
-    static async buildData(requestQuery: LimitedFilteredRequest) {
-        const query = await GetMembersEndpoint.buildQuery(requestQuery);
+    static async buildData(requestQuery: LimitedFilteredRequest, permissionLevel = PermissionLevel.Read) {
+        const query = await GetMembersEndpoint.buildQuery(requestQuery, permissionLevel);
         let data: SQLResultNamespacedRow[];
 
         try {
