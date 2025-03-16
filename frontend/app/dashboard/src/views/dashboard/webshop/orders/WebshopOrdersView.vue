@@ -37,11 +37,15 @@ const props = defineProps<{ webshopManager: WebshopManager }>();
 const title = 'Bestellingen';
 const configurationId = 'orders';
 
-useVisibilityChange(() => fetchOrders());
+useVisibilityChange(() => {
+    fetchTickets();
+    fetchOrders();
+});
 const objectFetcher = useOrdersObjectFetcher(props.webshopManager, {
     requiredFilter: OrderRequiredFilterHelper.getDefault(props.webshopManager.preview.id),
 });
 const tableObjectFetcher = useTableObjectFetcher<PrivateOrderWithTickets>(objectFetcher);
+fetchTickets();
 fetchOrders();
 
 function fetchOrders() {
@@ -50,6 +54,10 @@ function fetchOrders() {
             tableObjectFetcher.reset(true, true);
         }
     }).catch(console.error);
+}
+
+function fetchTickets() {
+    props.webshopManager.fetchTickets().catch(console.error);
 }
 
 const filterBuilders: UIFilterBuilders = getWebshopOrderUIFilterBuilders(props.webshopManager.preview);
