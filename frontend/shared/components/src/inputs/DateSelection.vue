@@ -43,12 +43,14 @@ const props = withDefaults(defineProps<{
     min?: Date | null;
     max?: Date | null;
     time?: { hours: number; minutes: number; seconds: number } | null;
+    doLog?: boolean;
 }>(), {
     required: true,
     placeholder: $t(`2ac677a6-f225-46b6-8fea-f6e0f10582ca`),
     min: null,
     max: null,
     time: null,
+    doLog: false,
 });
 
 const modelValue = defineModel<Date | null>({ default: (() => {
@@ -204,20 +206,20 @@ function updateTextStrings() {
 }
 
 function updateTextStringsHelper() {
-    const currentDateValue = textDate.value;
+    const currentDateValue = textDateTime.value ? new Date(textDateTime.value.toMillis()) : null;
 
     const iso1 = modelValue.value ? Formatter.dateIso(modelValue.value) : '';
     const iso2 = currentDateValue ? Formatter.dateIso(currentDateValue) : '';
 
     if (iso1 !== iso2 || !hasFocusUnbounced.value) {
-        dayText.value = modelValue.value ? modelValue.value.getDate().toString() : '';
-        monthText.value = modelValue.value ? (modelValue.value.getMonth() + 1).toString() : '';
-        yearText.value = modelValue.value ? modelValue.value.getFullYear().toString() : '';
+        dayText.value = modelValue.value ? Formatter.day(modelValue.value) : '';
+        monthText.value = modelValue.value ? Formatter.monthNumber(modelValue.value).toString() : '';
+        yearText.value = modelValue.value ? Formatter.year(modelValue.value).toString() : '';
     }
 }
 
 const monthTextLong = computed(() => {
-    return modelValue.value ? Formatter.month(modelValue.value.getMonth() + 1) : '';
+    return modelValue.value ? Formatter.month(modelValue.value) : '';
 });
 
 const numberInputs = computed(() => [dayInput.value, monthInput.value, yearInput.value]);
@@ -386,7 +388,7 @@ function focusFirst() {
 }
 
 function updateDate() {
-    const date = textDate.value;
+    const date = textDateTime.value ? new Date(textDateTime.value.toMillis()) : null;
 
     if (date) {
         emitDate(date);
@@ -399,19 +401,15 @@ function updateDate() {
     }
 }
 
-const textDate = computed(() => {
+const textDateTime = computed(() => {
     const day = parseInt(dayText.value.replace(/[^0-9]/g, ''));
     const month = parseInt(monthText.value.replace(/[^0-9]/g, ''));
     const year = parseInt(yearText.value.replace(/[^0-9]/g, ''));
-    if (day && month && year && !isNaN(day) && !isNaN(month) && !isNaN(year)) {
-        const date = new Date(year, month - 1, day);
-        if (date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day) {
-            return date;
-        }
 
-        // The date has automatically been corrected
-        return new Date(year, month, 0);
+    if (day && month && year && !isNaN(day) && !isNaN(month) && !isNaN(year)) {
+        return DateTime.fromObject({ year, month, day }, { zone: Formatter.timezone });
     }
+
     return null;
 });
 
@@ -422,49 +420,49 @@ function emitDate(value: Date | null): void {
         modelValue.value = null;
         return;
     }
-    let d = DateTime.fromMillis(value.getTime()); // new Date(value.getTime());
-    const max = props.max ? DateTime.fromJSDate(props.max) : null;
-    const min = props.min ? DateTime.fromJSDate(props.min) : null;
+    // const d = new Date(value.getTime());
+    let d = DateTime.fromJSDate(value, { zone: Formatter.timezone });
+    const max = props.max ? DateTime.fromJSDate(props.max, { zone: Formatter.timezone }) : null;
+    const min = props.min ? DateTime.fromJSDate(props.min, { zone: Formatter.timezone }) : null;
 
     // First correct for min/max
     if (max && d > max) {
-        d = DateTime.fromObject(max.toObject());
+        d = max;
     }
 
     if (min && d < min) {
-        d = DateTime.fromObject(min.toObject());
+        d = min;
     }
 
     if (props.time) {
-        // todo: rename time keys?
-        // todo: check if max is 23 or 24?
-        d.set({ hour: props.time.hours, minute: props.time.minutes, second: props.time.seconds });
+        d = d.set({ hour: props.time.hours, minute: props.time.minutes, second: props.time.seconds, millisecond: 0 });
     }
     else if (modelValue.value) {
-        d.set({ hour: modelValue.value.getHours(), minute: modelValue.value.getMinutes(), second: 0, millisecond: 0 });
+        const modelValueLuxon = Formatter.luxon(modelValue.value);
+        d = d.set({ hour: modelValueLuxon.hour, minute: modelValueLuxon.minute, second: 0, millisecond: 0 });
     }
     else {
-        d.set({ hour: 12, minute: 0, second: 0, millisecond: 0 });
+        d = d.set({ hour: 12, minute: 0, second: 0, millisecond: 0 });
     }
 
     // End with min/max correction again
     if (max && d > max) {
-        d = DateTime.fromObject(max.toObject());
+        d = max;
 
         if (props.time) {
             // To fix infinite loop, we'll need to decrease the day with 1
-            d = DateTime.fromMillis(max.toMillis() - 24 * 60 * 60 * 1000);
-            d.set({ hour: props.time.hours, minute: props.time.minutes, second: props.time.seconds, millisecond: 0 });
+            d = d.minus({ day: 1 });
+            d = d.set({ hour: props.time.hours, minute: props.time.minutes, second: props.time.seconds, millisecond: 0 });
         }
     }
 
     if (min && d < min) {
-        d = DateTime.fromObject(min.toObject());
+        d = min;
 
         if (props.time) {
             // To fix infinite loop, we'll need to increase the day with 1
-            d = DateTime.fromMillis(min.toMillis() + 24 * 60 * 60 * 1000);
-            d.set({ hour: props.time.hours, minute: props.time.minutes, second: props.time.seconds, millisecond: 0 });
+            d = d.plus({ day: 1 });
+            d = d.set({ hour: props.time.hours, minute: props.time.minutes, second: props.time.seconds, millisecond: 0 });
         }
     }
 
@@ -539,7 +537,6 @@ watch(modelValue, (newValue, oldValue) => {
 watch(hasFocusUnbounced, (hasFocusUnbounced) => {
     if (!hasFocusUnbounced) {
         hideDisplayedComponent({ unlessFocused: true });
-
         // Clear invalid date text
         updateTextStrings();
     }
