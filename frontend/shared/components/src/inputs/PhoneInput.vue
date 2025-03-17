@@ -114,14 +114,16 @@ export default class PhoneInput extends VueComponent {
 
             if (!phoneNumber || !phoneNumber.isValid()) {
                 for (const country of Object.values(Country)) {
-                    const defaultCountry = country === Country.Other ? undefined : country;
-                    const phoneNumber = libphonenumber.parsePhoneNumber(this.phoneRaw, defaultCountry);
+                    if (country === Country.Other) {
+                        continue;
+                    }
+                    const phoneNumber = libphonenumber.parsePhoneNumber(this.phoneRaw, country);
 
                     if (phoneNumber && phoneNumber.isValid()) {
                         if (!silent) {
                             this.errorBox = new ErrorBox(new SimpleError({
                                 code: 'invalid_field',
-                                message: this.$t('f7cbe04a-3175-4794-8f74-8261a11fbade').toString(),
+                                message: $t('f7cbe04a-3175-4794-8f74-8261a11fbade').toString(),
                                 field: 'phone',
                             }));
                         }
