@@ -6,8 +6,8 @@
                 <h1>
                     <div class="input-icon-container right icon arrow-down-small gray">
                         <select v-model="month" @mousedown.stop>
-                            <option v-for="month in 12" :key="month" :value="month">
-                                {{ monthText(month) }}
+                            <option v-for="monthNumber in 12" :key="monthNumber" :value="monthNumber">
+                                {{ monthText(monthNumber) }}
                             </option>
                         </select>
                     </div>
@@ -50,236 +50,186 @@
     </ContextMenuView>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { usePop } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
 
-import LongPressDirective from '../directives/LongPress';
-import Dropdown from '../inputs/Dropdown.vue';
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
 import ContextMenuView from './ContextMenuView.vue';
 
-@Component({
-    components: {
-        ContextMenuView,
-        Dropdown,
-    },
-    directives: {
-        LongPress: LongPressDirective,
-    },
-})
-export default class DateSelectionView extends Mixins(NavigationMixin) {
-    @Prop()
-    setDate!: (date: Date | null) => void;
+const props = withDefaults(defineProps<{
+    setDate: (date: Date | null) => void;
+    onClose: () => void;
+    selectedDay: Date;
+    min?: Date | null;
+    max?: Date | null;
+    autoDismiss?: boolean;
+    allowClear?: boolean;
+}>(), {
+    min: null,
+    max: null,
+    autoDismiss: true,
+    allowClear: false,
+});
 
-    @Prop()
-    onClose!: () => void;
+const pop = usePop();
+const aside = useTemplateRef('aside');
 
-    @Prop({ default: true })
-    autoDismiss!: boolean;
+const currentMonth = ref(new Date((props.selectedDay ?? new Date()).getTime()));
+const weeks = ref(generateDays());
+const monthTitle = ref('');
+const yearTitle = ref('');
 
-    @Prop({ required: true })
-    selectedDay!: Date;
+updateMonthTitle();
 
-    @Prop({ default: null })
-    min!: Date | null;
+onBeforeUnmount(() => props.onClose());
+onMounted(() => {
+    if (!props.autoDismiss) {
+        aside.value?.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+        });
+    }
+});
 
-    @Prop({ default: null })
-    max!: Date | null;
+function isDisabled(day: { value: Date }) {
+    if (props.min && day.value.getTime() < props.min.getTime()) {
+        return true;
+    }
+    if (props.max && day.value.getTime() > props.max.getTime()) {
+        return true;
+    }
+    return false;
+}
 
-    currentMonth: Date = new Date((this.selectedDay ?? new Date()).getTime());
-    weeks: any = null;
-    monthTitle = '';
-    yearTitle = '';
+function generateDays() {
+    const weeks: any = [];
 
-    @Prop({ default: false })
-    allowClear!: boolean;
+    const start = new Date(currentMonth.value.getTime());
+    start.setDate(1);
 
-    created() {
-        this.weeks = this.generateDays();
-        this.updateMonthTitle();
+    const month = start.getMonth();
+    const year = start.getFullYear();
+
+    // Make sure first day is 1
+    while (start.getDay() !== 1) {
+        start.setDate(start.getDate() - 1);
     }
 
-    beforeUnmount() {
-        this.onClose();
-    }
-
-    mounted() {
-        if (!this.autoDismiss) {
-            (this.$refs?.aside as any)?.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-            });
-        }
-    }
-
-    isDisabled(day: { value: Date }) {
-        if (this.min && day.value.getTime() < this.min.getTime()) {
-            return true;
-        }
-        if (this.max && day.value.getTime() > this.max.getTime()) {
-            return true;
-        }
-        return false;
-    }
-
-    generateDays() {
-        const weeks: any = [];
-
-        const start = new Date(this.currentMonth.getTime());
-        start.setDate(1);
-
-        const month = start.getMonth();
-        const year = start.getFullYear();
-
-        // Make sure first day is 1
-        while (start.getDay() !== 1) {
-            start.setDate(start.getDate() - 1);
+    // loop days
+    while ((start.getMonth() <= month && start.getFullYear() === year) || start.getFullYear() < year || start.getDay() !== 1) {
+        if (start.getDay() === 1) {
+            // Start new week
+            weeks.push([]);
         }
 
-        // loop days
-        while ((start.getMonth() <= month && start.getFullYear() === year) || start.getFullYear() < year || start.getDay() !== 1) {
-            if (start.getDay() === 1) {
-                // Start new week
-                weeks.push([]);
-            }
+        weeks[weeks.length - 1].push({
+            number: start.getDate(),
+            value: new Date(start.getTime()),
+            otherMonth: start.getMonth() !== month,
+            selected: props.selectedDay && start.getDate() === props.selectedDay.getDate() && start.getFullYear() === props.selectedDay.getFullYear() && start.getMonth() === props.selectedDay.getMonth(),
+        });
 
-            weeks[weeks.length - 1].push({
-                number: start.getDate(),
-                value: new Date(start.getTime()),
-                otherMonth: start.getMonth() !== month,
-                selected: this.selectedDay && start.getDate() === this.selectedDay.getDate() && start.getFullYear() === this.selectedDay.getFullYear() && start.getMonth() === this.selectedDay.getMonth(),
-            });
+        start.setDate(start.getDate() + 1);
 
-            start.setDate(start.getDate() + 1);
-
-            if (weeks[weeks.length - 1].length > 7 || weeks.length > 6) {
-                console.error('Calendar infinite loop');
-                break;
-            }
+        if (weeks[weeks.length - 1].length > 7 || weeks.length > 6) {
+            console.error('Calendar infinite loop');
+            break;
         }
-        return weeks;
     }
+    return weeks;
+}
 
-    clear() {
-        this.setDate(null);
-        this.pop();
+function clear() {
+    props.setDate(null);
+    pop()?.catch(console.error);
+}
+
+function setDateValue(date: Date) {
+    const selectedDay = props.selectedDay;
+    selectedDay.setTime(date.getTime());
+    currentMonth.value = new Date(selectedDay.getTime());
+    weeks.value = generateDays();
+    updateMonthTitle();
+    props.setDate(new Date(date.getTime()));
+}
+
+function setToday() {
+    setDateValue(new Date());
+    pop()?.catch(console.error);
+}
+
+function updateMonthTitle() {
+    monthTitle.value = Formatter.capitalizeFirstLetter(Formatter.month(currentMonth.value.getMonth() + 1));
+    yearTitle.value = currentMonth.value.getFullYear().toString();
+}
+
+function nextMonth() {
+    month.value = month.value + 1;
+}
+
+function previousMonth() {
+    month.value = month.value - 1;
+}
+
+function onSelect(day: { value: Date; selected: boolean }) {
+    console.log('Select', day);
+    day.selected = true;
+    props.setDate(day.value);
+    pop()?.catch(console.error);
+}
+
+const nowYear = computed(() => {
+    const ny = new Date().getFullYear();
+
+    if (currentYear.value < ny - 50) {
+        return currentYear.value + 50;
     }
-
-    setDateValue(date: Date) {
-        const selectedDay = this.selectedDay;
-        selectedDay.setTime(date.getTime());
-        this.currentMonth = new Date(selectedDay.getTime());
-        this.weeks = this.generateDays();
-        this.updateMonthTitle();
-        this.setDate(new Date(date.getTime()));
+    if (currentYear.value > ny) {
+        return currentYear.value;
     }
+    return ny;
+});
 
-    setToday() {
-        this.setDateValue(new Date());
-        this.pop();
-    }
-
-    updateMonthTitle() {
-        this.monthTitle = Formatter.capitalizeFirstLetter(Formatter.month(this.currentMonth.getMonth() + 1));
-        this.yearTitle = this.currentMonth.getFullYear().toString();
-    }
-
-    nextMonth() {
-        this.month = this.month + 1;
-    }
-
-    updateSelectedMonth() {
-        if (!this.selectedDay) {
-            return;
-        }
-        // Don't make a copy
-        const selectedDay = this.selectedDay;
-        const day = selectedDay.getDate();
-        selectedDay.setMonth(this.currentMonth.getMonth());
-        selectedDay.setMonth(this.currentMonth.getMonth());
-        selectedDay.setFullYear(this.currentMonth.getFullYear());
-        if (selectedDay.getDate() < day) {
-            selectedDay.setDate(new Date(selectedDay.getFullYear(), selectedDay.getMonth() + 1, 0).getDate());
-        }
-        this.setDate(selectedDay);
-    }
-
-    previousMonth() {
-        this.month = this.month - 1;
-    }
-
-    nextYear() {
-        this.currentYear = this.currentYear + 1;
-    }
-
-    previousYear() {
-        this.currentYear = this.currentYear - 1;
-    }
-
-    onSelect(day) {
-        console.log('Select', day);
-        day.selected = true;
-        this.setDate(day.value);
-        this.pop();
-    }
-
-    get nowYear() {
-        const ny = new Date().getFullYear();
-
-        if (this.currentYear < ny - 50) {
-            return this.currentYear + 50;
-        }
-        if (this.currentYear > ny) {
-            return this.currentYear;
-        }
-        return ny;
-    }
-
-    get currentYear() {
-        return this.currentMonth.getFullYear();
-    }
-
-    set currentYear(year: number) {
+const currentYear = computed({ get: () => currentMonth.value.getFullYear(),
+    set: (year: number) => {
         if (!year) {
             // Weird vue thing
             return;
         }
-        const d = new Date(this.currentMonth);
+        const d = new Date(currentMonth.value);
         d.setFullYear(year);
-        this.setDateValue(d);
-    }
+        setDateValue(d);
+    },
+});
 
-    get month() {
-        // Date is not reactive
-        return this.currentMonth.getMonth() + 1;
-    }
-
-    set month(month: number) {
+const month = computed({
+    get: () => currentMonth.value.getMonth() + 1,
+    set: (month: number) => {
         console.log('Set month', month);
-        const d = new Date(this.currentMonth);
+        const d = new Date(currentMonth.value);
         d.setDate(1);
         if (month < 1) {
             month = 12;
             d.setMonth(month - 1);
-            d.setFullYear(this.currentMonth.getFullYear() - 1);
+            d.setFullYear(currentMonth.value.getFullYear() - 1);
         }
         d.setMonth(month - 1);
-        d.setDate(this.currentMonth.getDate());
+        d.setDate(currentMonth.value.getDate());
 
         // If date overflowed
-        if (d.getDate() !== this.currentMonth.getDate()) {
-            d.setTime(this.currentMonth.getTime());
+        if (d.getDate() !== currentMonth.value.getDate()) {
+            d.setTime(currentMonth.value.getTime());
             d.setDate(1);
             d.setMonth(month);
             d.setDate(0);
         }
 
-        this.setDateValue(d);
-    }
+        setDateValue(d);
+    },
+});
 
-    monthText(month: number) {
-        return Formatter.capitalizeFirstLetter(Formatter.month(month));
-    }
+function monthText(month: number) {
+    return Formatter.capitalizeFirstLetter(Formatter.month(month));
 }
 </script>
 <style lang="scss">
