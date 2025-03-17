@@ -501,7 +501,7 @@ function openContextMenu(autoDismiss = true) {
     displayedComponent = newDisplayedComponent;
 }
 
-function hideDisplayedComponent({ unlessFocused } = { unlessFocused: false }) {
+async function hideDisplayedComponent({ unlessFocused } = { unlessFocused: false }) {
     if (displayedComponent) {
         const instance = displayedComponent.componentInstance();
         if (instance) {
@@ -518,7 +518,7 @@ function hideDisplayedComponent({ unlessFocused } = { unlessFocused: false }) {
 
                 // return;
             }
-            (instance as any).dismiss();
+            await (instance as any).dismiss();
         }
         displayedComponent = null;
     }
@@ -536,7 +536,7 @@ watch(modelValue, (newValue, oldValue) => {
 
 watch(hasFocusUnbounced, (hasFocusUnbounced) => {
     if (!hasFocusUnbounced) {
-        hideDisplayedComponent({ unlessFocused: true });
+        hideDisplayedComponent({ unlessFocused: true }).catch(console.error);
         // Clear invalid date text
         updateTextStrings();
     }
