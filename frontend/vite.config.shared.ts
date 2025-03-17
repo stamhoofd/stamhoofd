@@ -123,7 +123,7 @@ export function buildConfig(options: { port: number; clientFiles?: string[] }): 
                 },
         publicDir: resolve(__dirname, './public'),
         test: {
-            setupFiles: ['vitest-browser-vue'],
+            setupFiles: ['vitest-browser-vue', __dirname + '/tests/vitest.setup.ts'],
             browser: {
                 provider: 'playwright', // or 'webdriverio'
                 enabled: true,
@@ -134,5 +134,6 @@ export function buildConfig(options: { port: number; clientFiles?: string[] }): 
                 ],
             },
         },
+        optimizeDeps: { exclude: ['fsevents'] },
     };
 }
