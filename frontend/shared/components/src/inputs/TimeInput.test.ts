@@ -23,7 +23,6 @@ describe('TimeInput', async () => {
 
         const wrapper = mount(TimeInput, {
             props: {
-                title: 'Phone Number',
                 modelValue: date,
             },
         });
@@ -33,7 +32,59 @@ describe('TimeInput', async () => {
         expect(wrapper.vm.modelValue).toBe(date);
     });
 
-    describe('Model should output correct Date after user input', async () => {
+    test('Model should not update if invalid input', async () => {
+        const invalidInputs = ['invalid input', '24:00', '12:60'];
+
+        for (const invalidInput of invalidInputs) {
+            setFormatterTimeZone('Europe/Brussels');
+            const date = new Date(2023, 0, 1, 12, 0, 0);
+
+            const wrapper = mount(TimeInput, {
+                props: {
+                    'modelValue': date,
+                    'onUpdate:modelValue': async (e) => {
+                        await wrapper.setProps({ modelValue: e });
+                    },
+                },
+            });
+
+            const inputWrapper = wrapper.find('input');
+
+            await inputWrapper.setValue(invalidInput);
+
+            // model should not update
+            expect(wrapper.props('modelValue').getTime()).toEqual(date.getTime());
+        }
+    });
+
+    test('Error should be shown if invalid input', async () => {
+        const invalidInputs = ['invalid input', '24:00', '12:60'];
+
+        for (const invalidInput of invalidInputs) {
+            setFormatterTimeZone('Europe/Brussels');
+            const date = new Date(2023, 0, 1, 12, 0, 0);
+
+            const wrapper = mount(TimeInput, {
+                props: {
+                    'modelValue': date,
+                    'onUpdate:modelValue': async (e) => {
+                        await wrapper.setProps({ modelValue: e });
+                    },
+                },
+            });
+
+            const inputWrapper = wrapper.find('input');
+
+            await inputWrapper.setValue(invalidInput);
+
+            // error should be shown
+            const errorBox = wrapper.find('.error-box');
+            expect(errorBox.exists()).toBe(true);
+            expect(inputWrapper.classes()).toContain('error');
+        }
+    });
+
+    test('Model should output correct Date after user input', async () => {
         const date = new Date(2023, 0, 1, 12, 0, 0);
 
         const testCases: { timezone: string; input: string; output: Date }[] = [
@@ -74,25 +125,22 @@ describe('TimeInput', async () => {
         ];
 
         for (const { timezone, input, output } of testCases) {
-            test(`organization time zone ${timezone}`, async () => {
-                setFormatterTimeZone(timezone);
+            setFormatterTimeZone(timezone);
 
-                const wrapper = mount(TimeInput, {
-                    props: {
-                        'title': 'Phone Number',
-                        'modelValue': new Date(date),
-                        'onUpdate:modelValue': async (e) => {
-                            await wrapper.setProps({ modelValue: e });
-                        },
+            const wrapper = mount(TimeInput, {
+                props: {
+                    'modelValue': new Date(date),
+                    'onUpdate:modelValue': async (e) => {
+                        await wrapper.setProps({ modelValue: e });
                     },
-                });
-
-                const inputWrapper = wrapper.find('input');
-
-                await inputWrapper.setValue(input);
-
-                expect(wrapper.props('modelValue').getTime()).toEqual(output.getTime());
+                },
             });
+
+            const inputWrapper = wrapper.find('input');
+
+            await inputWrapper.setValue(input);
+
+            expect(wrapper.props('modelValue').getTime()).toEqual(output.getTime());
         }
     });
 });
