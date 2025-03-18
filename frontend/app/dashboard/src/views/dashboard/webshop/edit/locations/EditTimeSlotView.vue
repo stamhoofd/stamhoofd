@@ -13,8 +13,8 @@
             <DateSelection v-model="date" />
         </STInputBox>
 
-        <TimeMinutesInput v-model="startTime" :validator="errors.validator" :title="$t(`01b5d104-748c-4801-a369-4eab05809fcf`)" />
-        <TimeMinutesInput v-model="endTime" :validator="errors.validator" :title="$t(`91310731-bddd-4ad3-b5fb-182237699f20`)" />
+        <TimeMinutesInput v-model="startTime" :validator="errors.validator" :required="true" :title="$t(`01b5d104-748c-4801-a369-4eab05809fcf`)" />
+        <TimeMinutesInput v-model="endTime" :validator="errors.validator" :required="true" :title="$t(`91310731-bddd-4ad3-b5fb-182237699f20`)" />
 
         <STInputBox error-fields="maxOrders" :error-box="errors.errorBox" :title="$t(`fcb7332b-ae0e-4262-9220-bd38e44a42a9`)">
             <NumberInput v-model="maxOrders" :required="false" :placeholder="$t(`3433bd78-f07f-4661-ba9e-28b76c468d58`)" />
