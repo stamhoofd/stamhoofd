@@ -1,112 +1,96 @@
 <template>
-    <STInputBox :title="title" error-fields="time" :error-box="errorBox">
-        <input v-model="timeRaw" class="input" type="time" :class="{ error: !valid }" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" @input="(event: any) => {timeRaw = event.currentTarget.value; validate();}">
+    <STInputBox :title="title" error-fields="time" :error-box="errors.errorBox">
+        <input v-model="timeRaw" class="input" type="time" :class="{ error: errors.errorBox !== null }" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled">
     </STInputBox>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 import { Formatter } from '@stamhoofd/utility';
-
+import { computed, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
+import { useErrors } from '../errors/useErrors';
+import { useValidation } from '../errors/useValidation';
 import { Validator } from '../errors/Validator';
 import STInputBox from './STInputBox.vue';
 
-@Component({
-    components: {
-        STInputBox,
-    },
-})
-export default class TimeInput extends VueComponent {
-    @Prop({ default: '' })
-    title: string;
+withDefaults(defineProps<{
+    title?: string;
+    validator?: Validator | null;
+    disabled?: boolean;
+    placeholder?: string;
+    autocomplete?: string;
+}>(), {
+    title: '',
+    validator: null,
+    disabled: false,
+    placeholder: '',
+    autocomplete: '',
+});
 
-    @Prop({ default: null })
-    validator: Validator | null;
+const isNull = ref(false);
+const model = defineModel<Date>({ required: true, set: (value: Date) => {
+    isNull.value = false;
+    return value;
+} });
 
-    timeRaw = '';
-    valid = true;
+const timeRaw = computed({
+    get: () => isNull.value || model.value === null ? '' : Formatter.timeIso(model.value),
+    set: (value: string) => validate(value),
+});
 
-    @Prop({ required: true })
-    modelValue!: Date;
+const errors = useErrors();
 
-    @Prop({ default: false })
-    disabled!: boolean;
+useValidation(errors.validator, () => onChange());
 
-    @Prop({ default: '' })
-    placeholder!: string;
+function onChange() {
+    return validate(timeRaw.value);
+}
 
-    @Prop({ default: '' })
-    autocomplete!: string;
+function validate(timeValue: string | null) {
+    timeValue = timeValue?.trim().toLowerCase() ?? '';
 
-    errorBox: ErrorBox | null = null;
+    const regex = /^([0-9]{1,2}:)?[0-9]{1,2}$/;
 
-    @Watch('modelValue', { deep: true })
-    onValueChanged(val: Date) {
-        if (val === null) {
-            return;
+    if (!regex.test(timeValue)) {
+        errors.errorBox = new ErrorBox(new SimpleError({
+            code: 'invalid_field',
+            message: "Ongeldig tijdstip. Voer in zoals bv. '12:30'",
+            field: 'time',
+        }));
+        if (!isNull.value) {
+            isNull.value = true;
         }
-        this.timeRaw = Formatter.timeIso(this.modelValue);
+        return false;
     }
+    else {
+        const split = timeValue.split(':');
+        let hours = parseInt(split[0]);
+        let minutes = parseInt(split[1] ?? '0');
 
-    mounted() {
-        if (this.validator) {
-            this.validator.addValidation(this, () => {
-                return this.validate();
-            });
+        if (isNaN(hours)) {
+            hours = 0;
         }
-        this.timeRaw = Formatter.timeIso(this.modelValue);
-    }
 
-    unmounted() {
-        if (this.validator) {
-            this.validator.removeValidation(this);
+        if (isNaN(minutes)) {
+            minutes = 0;
         }
-    }
 
-    async validate() {
-        this.timeRaw = this.timeRaw.trim().toLowerCase();
-
-        const regex = /^([0-9]{1,2}:)?[0-9]{1,2}$/;
-
-        if (!regex.test(this.timeRaw)) {
-            this.errorBox = new ErrorBox(new SimpleError({
+        if (hours > 24 || minutes > 60) {
+            errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
                 message: $t(`dce292b4-9edd-4e20-a2e3-e3be80d42eb4`),
                 field: 'time',
             }));
             return false;
         }
-        else {
-            const split = this.timeRaw.split(':');
-            let hours = parseInt(split[0]);
-            let minutes = parseInt(split[1] ?? '0');
 
-            if (isNaN(hours)) {
-                hours = 0;
-            }
+        const d = new Date(model.value!.getTime());
+        d.setHours(hours, minutes, 0, 0);
+        model.value = d;
 
-            if (isNaN(minutes)) {
-                minutes = 0;
-            }
-
-            if (hours > 24 || minutes > 60) {
-                this.errorBox = new ErrorBox(new SimpleError({
-                    code: 'invalid_field',
-                    message: $t(`dce292b4-9edd-4e20-a2e3-e3be80d42eb4`),
-                    field: 'time',
-                }));
-                return false;
-            }
-
-            const d = new Date(this.modelValue.getTime());
-            d.setHours(hours, minutes, 0, 0);
-            this.$emit('update:modelValue', d);
-
-            this.errorBox = null;
-            return true;
-        }
+        errors.errorBox = null;
+        return true;
     }
 }
 </script>
