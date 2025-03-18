@@ -7,6 +7,7 @@
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
+import { DateTime } from 'luxon';
 import { computed, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
@@ -65,18 +66,18 @@ function validate(timeValue: string | null) {
     }
     else {
         const split = timeValue.split(':');
-        let hours = parseInt(split[0]);
-        let minutes = parseInt(split[1] ?? '0');
+        let hour = parseInt(split[0]);
+        let minute = parseInt(split[1] ?? '0');
 
-        if (isNaN(hours)) {
-            hours = 0;
+        if (isNaN(hour)) {
+            hour = 0;
         }
 
-        if (isNaN(minutes)) {
-            minutes = 0;
+        if (isNaN(minute)) {
+            minute = 0;
         }
 
-        if (hours > 24 || minutes > 60) {
+        if (hour > 24 || minute > 60) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
                 message: $t(`dce292b4-9edd-4e20-a2e3-e3be80d42eb4`),
@@ -85,9 +86,10 @@ function validate(timeValue: string | null) {
             return false;
         }
 
-        const d = new Date(model.value!.getTime());
-        d.setHours(hours, minutes, 0, 0);
-        model.value = d;
+        const luxonModelValue = DateTime.fromJSDate(model.value!).setZone(Formatter.timezone);
+        model.value = DateTime.fromObject({ year: luxonModelValue.year, month: luxonModelValue.month, day: luxonModelValue.day, hour, minute, second: 0, millisecond: 0 },
+            { zone: Formatter.timezone })
+            .toJSDate();
 
         errors.errorBox = null;
         return true;

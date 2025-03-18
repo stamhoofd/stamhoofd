@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="time" :error-box="errors.errorBox">
-        <input v-model="timeRaw" class="input" type="time" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" @change="onChange">
+        <input v-model="timeRaw" class="input" :class="{ error: errors.errorBox !== null }" type="time" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" @change="onChange">
     </STInputBox>
 </template>
 
