@@ -219,3 +219,6 @@ yalc.lock
 .env.json
 .env.*.json
 !.env.template.json
+
+# Vitest screenshots
+__screenshots__

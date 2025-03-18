@@ -352,6 +352,15 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     });
                 }
 
+                const maximumStart = 1000 * 60 * 60 * 24 * 31 * 2; // 2 months in advance
+                if (period.startDate > new Date(Date.now() + maximumStart)) {
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        message: 'Het werkjaar die je wilt instellen is nog niet gestart',
+                        field: 'period',
+                    });
+                }
+
                 organization.periodId = period.id;
                 shouldUpdateSetupSteps = true;
             }

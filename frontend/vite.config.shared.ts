@@ -3,7 +3,7 @@ import fs from 'fs';
 import path, { resolve } from 'path';
 import viteSvgToWebfont from 'vite-svg-2-webfont';
 
-import { UserConfig } from 'vite';
+import { type ViteUserConfig } from 'vitest/config';
 import iconConfig from './shared/assets/images/icons/icons.font';
 import svgNamespacePlugin from './svgNamespacePlugin';
 
@@ -60,7 +60,7 @@ else {
 }
 
 // https://vitejs.dev/config/
-export function buildConfig(options: { port: number; clientFiles?: string[] }): UserConfig {
+export function buildConfig(options: { port: number; clientFiles?: string[] }): ViteUserConfig {
     return {
         mode: process.env.NODE_ENV !== 'production' ? 'development' : 'production',
         logLevel: 'warn', // Options are 'info', 'warn', 'error', and 'silent'
@@ -108,17 +108,32 @@ export function buildConfig(options: { port: number; clientFiles?: string[] }): 
                     },
                 }
             : undefined,
-        build: process.env.NODE_ENV !== 'production' ? {
-            sourcemap: 'inline',
-            rollupOptions: {
-                treeshake: false, // Increases performance
-            },
-            watch: {
-                buildDelay: 1000,
-            },
-        } : {
-            sourcemap: true,
-        },
+        build: process.env.NODE_ENV !== 'production'
+            ? {
+                    sourcemap: 'inline',
+                    rollupOptions: {
+                        treeshake: false, // Increases performance
+                    },
+                    watch: {
+                        buildDelay: 1000,
+                    },
+                }
+            : {
+                    sourcemap: true,
+                },
         publicDir: resolve(__dirname, './public'),
+        test: {
+            setupFiles: ['vitest-browser-vue', __dirname + '/tests/vitest.setup.ts'],
+            browser: {
+                provider: 'playwright', // or 'webdriverio'
+                enabled: true,
+                headless: true,
+                // at least one instance is required
+                instances: [
+                    { browser: 'chromium' },
+                ],
+            },
+        },
+        optimizeDeps: { exclude: ['fsevents'] },
     };
 }
