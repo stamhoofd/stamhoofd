@@ -13,8 +13,8 @@
             <DateSelection v-model="date" />
         </STInputBox>
 
-        <TimeMinutesInput v-model="startTime" title="Van" :validator="errors.validator" />
-        <TimeMinutesInput v-model="endTime" title="Tot" :validator="errors.validator" />
+        <TimeMinutesInput v-model="startTime" title="Van" :validator="errors.validator" :required="true" />
+        <TimeMinutesInput v-model="endTime" title="Tot" :validator="errors.validator" :required="true" />
 
         <STInputBox error-fields="maxOrders" title="Maximum aantal bestellingen" :error-box="errors.errorBox">
             <NumberInput v-model="maxOrders" :required="false" placeholder="Geen limiet" />
