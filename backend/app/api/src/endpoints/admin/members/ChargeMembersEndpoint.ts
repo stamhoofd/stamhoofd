@@ -1,29 +1,29 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ChargeOrganizationsRequest, LimitedFilteredRequest } from '@stamhoofd/structures';
+import { ChargeMembersRequest, LimitedFilteredRequest, PermissionLevel } from '@stamhoofd/structures';
 
 import { QueueHandler } from '@stamhoofd/queues';
 import { Context } from '../../../helpers/Context';
 import { fetchToAsyncIterator } from '../../../helpers/fetchToAsyncIterator';
-import { OrganizationCharger } from '../../../helpers/OrganizationCharger';
-import { GetOrganizationsEndpoint } from './GetOrganizationsEndpoint';
+import { MemberCharger } from '../../../helpers/MemberCharger';
+import { GetMembersEndpoint } from '../../global/members/GetMembersEndpoint';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
-type Body = ChargeOrganizationsRequest;
+type Body = ChargeMembersRequest;
 type ResponseBody = undefined;
 
-export class ChargeOrganizationsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class ChargeMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>;
-    bodyDecoder = ChargeOrganizationsRequest as Decoder<ChargeOrganizationsRequest>;
+    bodyDecoder = ChargeMembersRequest as Decoder<ChargeMembersRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'POST') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/admin/charge-organizations', {});
+        const params = Endpoint.parseParameters(request.url, '/admin/charge-members', {});
 
         if (params) {
             return [true, params as Params];
@@ -58,46 +58,39 @@ export class ChargeOrganizationsEndpoint extends Endpoint<Params, Query, Body, R
                 field: 'amount',
             });
         }
-
-        if (!body.organizationId) {
-            throw new SimpleError({
-                code: 'invalid_field',
-                message: 'Invalid organization id',
-                human: 'Organisatie is verplicht',
-                field: 'organizationId',
-            });
-        }
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
+        const organization = await Context.setOrganizationScope();
+        const body = request.body;
+
         await Context.authenticate();
 
-        if (!Context.auth.hasPlatformFullAccess()) {
+        if (!await Context.auth.canManagePayments(organization.id)) {
             throw Context.auth.error();
         }
 
-        const body = request.body;
-        ChargeOrganizationsEndpoint.throwIfInvalidBody(body);
+        ChargeMembersEndpoint.throwIfInvalidBody(body);
 
-        const queueId = 'charge-organizations';
+        const queueId = 'charge-members';
 
         if (QueueHandler.isRunning(queueId)) {
             throw new SimpleError({
                 code: 'charge_pending',
-                message: 'Charge organizations already pending',
+                message: 'Charge members already pending',
                 human: 'Er is al een aanrekening bezig, even geduld.',
             });
         }
 
         await QueueHandler.schedule(queueId, async () => {
             const dataGenerator = fetchToAsyncIterator(request.query, {
-                fetch: GetOrganizationsEndpoint.buildData,
+                fetch: request => GetMembersEndpoint.buildData(request, PermissionLevel.Write),
             });
 
             for await (const data of dataGenerator) {
-                await OrganizationCharger.chargeMany({
-                    chargingOrganizationId: body.organizationId,
-                    organizationsToCharge: data,
+                await MemberCharger.chargeMany({
+                    chargingOrganizationId: organization.id,
+                    membersToCharge: data.members,
                     price: body.price,
                     amount: body.amount ?? 1,
                     description: body.description,

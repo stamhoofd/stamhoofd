@@ -4,7 +4,7 @@ import { useContext } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { CountResponse, StamhoofdFilter } from '@stamhoofd/structures';
 
-export function useCountOrganizations() {
+export function useCount(path: string) {
     const context = useContext();
     const owner = useRequestOwner();
 
@@ -14,7 +14,7 @@ export function useCountOrganizations() {
         try {
             const response = await context.value.authenticatedServer.request({
                 method: 'GET',
-                path: `/admin/organizations/count`,
+                path,
                 query: {
                     filter: JSON.stringify(filter),
                 },

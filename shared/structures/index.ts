@@ -98,6 +98,7 @@ export * from './src/UserWithMembers.js';
 export * from './src/DNSRecord.js';
 export * from './src/endpoints/ChargeMembershipsSummary.js';
 export * from './src/endpoints/ChargeOrganizationsRequest.js';
+export * from './src/endpoints/ChargeMembersRequest.js';
 export * from './src/endpoints/CheckMollieResponse.js';
 export * from './src/endpoints/CreateOrganization.js';
 export * from './src/endpoints/EmailRequest.js';
