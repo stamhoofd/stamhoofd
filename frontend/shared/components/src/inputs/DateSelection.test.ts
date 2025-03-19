@@ -397,7 +397,7 @@ describe('DateSelection', async () => {
             expect(document.activeElement).toBe(dayInput.element);
         });
 
-        test.skip('ArrowLeft should blur all if day input in focus', async () => {
+        test('ArrowLeft should blur all if day input in focus', async () => {
             setFormatterTimeZone('Asia/Shanghai');
 
             const date = new Date(2023, 0, 1, 12, 0, 0);
@@ -425,6 +425,208 @@ describe('DateSelection', async () => {
             expect(document.activeElement).not.toBe(dayInput.element);
             expect(document.activeElement).not.toBe(monthInput.element);
             expect(document.activeElement).not.toBe(yearInput.element);
+        });
+
+        test('ArrowUp should set input value + 1', async () => {
+            setFormatterTimeZone('Europe/Brussels');
+
+            const date = new Date(2023, 0, 1, 11, 0, 0);
+
+            const dateSelectionWrapper = mount(DateSelection, {
+                attachTo: document.body,
+                props: {
+                    'time': { hours: 12, minutes: 0, seconds: 0 },
+                    'modelValue': date,
+                    'onUpdate:modelValue': async (e) => {
+                        await wrapper!.setProps({ modelValue: e });
+                    },
+                },
+            });
+            wrapper = dateSelectionWrapper;
+
+            const yearInput = findYearInput(dateSelectionWrapper);
+            const monthInput = findMonthInput(dateSelectionWrapper);
+            const dayInput = findDayInput(dateSelectionWrapper);
+
+            // day
+            await dayInput.trigger('focus');
+            await dayInput.trigger('keydown', { key: 'ArrowUp' });
+
+            expect(dateSelectionWrapper.props('modelValue')).not.toBeNull();
+            expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2023, 0, 2, 11, 0, 0).getTime());
+
+            // month
+            await monthInput.trigger('focus');
+            await monthInput.trigger('keydown', { key: 'ArrowUp' });
+
+            expect(dateSelectionWrapper.props('modelValue')).not.toBeNull();
+            expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2023, 1, 2, 11, 0, 0).getTime());
+
+            // year
+            await yearInput.trigger('focus');
+            await yearInput.trigger('keydown', { key: 'ArrowUp' });
+
+            expect(dateSelectionWrapper.props('modelValue')).not.toBeNull();
+            expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2024, 1, 2, 11, 0, 0).getTime());
+        });
+
+        test('PageUp should set input value + 1', async () => {
+            setFormatterTimeZone('Europe/Brussels');
+
+            const date = new Date(2023, 0, 1, 11, 0, 0);
+
+            const dateSelectionWrapper = mount(DateSelection, {
+                attachTo: document.body,
+                props: {
+                    'time': { hours: 12, minutes: 0, seconds: 0 },
+                    'modelValue': date,
+                    'onUpdate:modelValue': async (e) => {
+                        await wrapper!.setProps({ modelValue: e });
+                    },
+                },
+            });
+            wrapper = dateSelectionWrapper;
+
+            const yearInput = findYearInput(dateSelectionWrapper);
+            const monthInput = findMonthInput(dateSelectionWrapper);
+            const dayInput = findDayInput(dateSelectionWrapper);
+
+            // day
+            await dayInput.trigger('focus');
+            await dayInput.trigger('keydown', { key: 'PageUp' });
+
+            expect(dateSelectionWrapper.props('modelValue')).not.toBeNull();
+            expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2023, 0, 2, 11, 0, 0).getTime());
+
+            // month
+            await monthInput.trigger('focus');
+            await monthInput.trigger('keydown', { key: 'PageUp' });
+
+            expect(dateSelectionWrapper.props('modelValue')).not.toBeNull();
+            expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2023, 1, 2, 11, 0, 0).getTime());
+
+            // year
+            await yearInput.trigger('focus');
+            await yearInput.trigger('keydown', { key: 'PageUp' });
+
+            expect(dateSelectionWrapper.props('modelValue')).not.toBeNull();
+            expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2024, 1, 2, 11, 0, 0).getTime());
+        });
+
+        test('ArrowDown should set input value - 1', async () => {
+            setFormatterTimeZone('Europe/Brussels');
+
+            const date = new Date(2023, 1, 2, 11, 0, 0);
+
+            const dateSelectionWrapper = mount(DateSelection, {
+                attachTo: document.body,
+                props: {
+                    'time': { hours: 12, minutes: 0, seconds: 0 },
+                    'modelValue': date,
+                    'onUpdate:modelValue': async (e) => {
+                        await wrapper!.setProps({ modelValue: e });
+                    },
+                },
+            });
+            wrapper = dateSelectionWrapper;
+
+            const yearInput = findYearInput(dateSelectionWrapper);
+            const monthInput = findMonthInput(dateSelectionWrapper);
+            const dayInput = findDayInput(dateSelectionWrapper);
+
+            // day
+            await dayInput.trigger('focus');
+            await dayInput.trigger('keydown', { key: 'ArrowDown' });
+
+            expect(dateSelectionWrapper.props('modelValue')).not.toBeNull();
+            expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2023, 1, 1, 11, 0, 0).getTime());
+
+            // month
+            await monthInput.trigger('focus');
+            await monthInput.trigger('keydown', { key: 'ArrowDown' });
+
+            expect(dateSelectionWrapper.props('modelValue')).not.toBeNull();
+            expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2023, 0, 1, 11, 0, 0).getTime());
+
+            // year
+            await yearInput.trigger('focus');
+            await yearInput.trigger('keydown', { key: 'ArrowDown' });
+
+            expect(dateSelectionWrapper.props('modelValue')).not.toBeNull();
+            expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2022, 0, 1, 11, 0, 0).getTime());
+        });
+
+        test('PageDown should set input value - 1', async () => {
+            setFormatterTimeZone('Europe/Brussels');
+
+            const date = new Date(2023, 1, 2, 11, 0, 0);
+
+            const dateSelectionWrapper = mount(DateSelection, {
+                attachTo: document.body,
+                props: {
+                    'time': { hours: 12, minutes: 0, seconds: 0 },
+                    'modelValue': date,
+                    'onUpdate:modelValue': async (e) => {
+                        await wrapper!.setProps({ modelValue: e });
+                    },
+                },
+            });
+            wrapper = dateSelectionWrapper;
+
+            const yearInput = findYearInput(dateSelectionWrapper);
+            const monthInput = findMonthInput(dateSelectionWrapper);
+            const dayInput = findDayInput(dateSelectionWrapper);
+
+            // day
+            await dayInput.trigger('focus');
+            await dayInput.trigger('keydown', { key: 'PageDown' });
+
+            expect(dateSelectionWrapper.props('modelValue')).not.toBeNull();
+            expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2023, 1, 1, 11, 0, 0).getTime());
+
+            // month
+            await monthInput.trigger('focus');
+            await monthInput.trigger('keydown', { key: 'PageDown' });
+
+            expect(dateSelectionWrapper.props('modelValue')).not.toBeNull();
+            expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2023, 0, 1, 11, 0, 0).getTime());
+
+            // year
+            await yearInput.trigger('focus');
+            await yearInput.trigger('keydown', { key: 'PageDown' });
+
+            expect(dateSelectionWrapper.props('modelValue')).not.toBeNull();
+            expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2022, 0, 1, 11, 0, 0).getTime());
+        });
+
+        test('Key events should be removed before unmount', async () => {
+            setFormatterTimeZone('Europe/Brussels');
+
+            const date = new Date(2023, 0, 1, 11, 0, 0);
+
+            const dateSelectionWrapper = mount(DateSelection, {
+                attachTo: document.body,
+                props: {
+                    'time': { hours: 12, minutes: 0, seconds: 0 },
+                    'modelValue': date,
+                    'onUpdate:modelValue': async (e) => {
+                        await wrapper!.setProps({ modelValue: e });
+                    },
+                },
+            });
+            wrapper = dateSelectionWrapper;
+
+            const dayInput = findDayInput(dateSelectionWrapper);
+
+            // day
+            await dayInput.trigger('focus');
+
+            dateSelectionWrapper.unmount();
+            await dayInput.trigger('keydown', { key: 'ArrowUp' });
+
+            expect(dateSelectionWrapper.props('modelValue')).not.toBeNull();
+            // value should not change due to keydown event
+            expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(date.getTime());
         });
     });
 });
