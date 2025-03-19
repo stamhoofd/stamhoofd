@@ -285,8 +285,8 @@ function diffMap(oldValue: unknown, value: unknown, key?: AuditLogReplacement) {
             if (original) {
                 items.push(
                     ...diffUnknown(
-                        null,
                         original,
+                        null,
                         (getDiffName(original) || getDiffKey(k)).prepend(key),
                     ),
                 );
@@ -318,8 +318,8 @@ function diffMap(oldValue: unknown, value: unknown, key?: AuditLogReplacement) {
 
             items.push(
                 ...diffUnknown(
-                    null,
                     v,
+                    null,
                     (getDiffName(v) || getDiffKey(k)).prepend(key),
                 ),
             );
