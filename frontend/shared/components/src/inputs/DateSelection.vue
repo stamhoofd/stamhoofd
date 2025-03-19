@@ -399,7 +399,14 @@ const textDateTime = computed(() => {
     const year = parseInt(yearText.value.replace(/[^0-9]/g, ''));
 
     if (day && month && year && !isNaN(day) && !isNaN(month) && !isNaN(year)) {
-        return DateTime.fromObject({ year, month, day }, { zone: Formatter.timezone });
+        const correctedMonth = Math.min(month, 12);
+        const luxonMonth = DateTime.fromObject({ year, month: correctedMonth }, { zone: Formatter.timezone });
+        if (luxonMonth.isValid) {
+            const result = DateTime.fromObject({ year, month: correctedMonth, day: Math.min(day, luxonMonth.daysInMonth) }, { zone: Formatter.timezone });
+            if (result.isValid) {
+                return result;
+            }
+        }
     }
 
     return null;
@@ -412,7 +419,7 @@ function emitDate(value: Date | null): void {
         modelValue.value = null;
         return;
     }
-    // const d = new Date(value.getTime());
+
     let d = DateTime.fromJSDate(value, { zone: Formatter.timezone });
     const max = props.max ? DateTime.fromJSDate(props.max, { zone: Formatter.timezone }) : null;
     const min = props.min ? DateTime.fromJSDate(props.min, { zone: Formatter.timezone }) : null;
