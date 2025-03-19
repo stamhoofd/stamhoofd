@@ -316,7 +316,7 @@ export class MemberActionBuilder {
         return r;
     }
 
-    getActions(options: { includeDelete?: boolean; includeMove?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}): TableAction<PlatformMember>[] {
+    getActions(options: { includeDelete?: boolean; includeMove?: boolean; includeEdit?: boolean, selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}): TableAction<PlatformMember>[] {
         const actions = [
             new InMemoryTableAction({
                 name: 'Gegevens bewerken',
@@ -374,15 +374,11 @@ export class MemberActionBuilder {
                 enabled: this.hasWrite && !!this.context.organization,
                 childActions: () => this.getRegisterActions(),
             }),
-        ];
-
-        if (options.includeMove === true) {
-            actions.push(...this.getMoveAction(options.selectedOrganizationRegistrationPeriod));
-        }
-
-        actions.push(...this.getEditAction(),
+            ...(options.includeMove === true ? this.getMoveAction(options.selectedOrganizationRegistrationPeriod) : []),
+            ...(options.includeEdit === true ? this.getEditAction() : []),
             ...this.getUnsubscribeAction(),
-            ...this.getAuditLogAction());
+            ...this.getAuditLogAction()
+        ];
 
         if (options.includeDelete) {
             actions.push(
