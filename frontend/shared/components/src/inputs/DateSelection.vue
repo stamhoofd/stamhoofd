@@ -392,12 +392,6 @@ function updateDate() {
 
     if (date) {
         emitDate(date);
-        if (displayedComponent) {
-            const instance = displayedComponent.componentInstance();
-            if (instance) {
-                (instance as any).setDateValue(date);
-            }
-        }
     }
 }
 
