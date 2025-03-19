@@ -43,14 +43,12 @@ const props = withDefaults(defineProps<{
     min?: Date | null;
     max?: Date | null;
     time?: { hours: number; minutes: number; seconds: number } | null;
-    doLog?: boolean;
 }>(), {
     required: true,
     placeholder: 'Kies een datum',
     min: null,
     max: null,
     time: null,
-    doLog: false,
 });
 
 const modelValue = defineModel<Date | null>({ default: (() => {
