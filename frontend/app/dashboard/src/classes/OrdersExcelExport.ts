@@ -519,7 +519,7 @@ export class OrdersExcelExport {
     /**
      * List all amount per product variant
      */
-    static createProducts(orders: PrivateOrder[]): XLSX.WorkSheet {
+    static createProducts(orders: PrivateOrder[]): XLSX.WorkSheet | null {
         
         // Columns
         const wsData: RowValue[][] = [
@@ -530,14 +530,14 @@ export class OrdersExcelExport {
             ],
         ];
 
-        const counter: Map<string, { amount: number; name: string; variant: string}> = new Map()
+        const counter: Map<string, { amount: number; name: string; variant: string, grouping: string}> = new Map()
 
         for (const order of orders) {
             for (const item of order.data.cart.items) {
                 const code = item.codeWithoutFields
                 let existing = counter.get(code)
                 if (!existing) {
-                    existing = { amount: 0, name: item.product.name,  variant: item.descriptionWithoutFields}
+                    existing = { amount: 0, name: item.product.name,  variant: item.descriptionWithoutFields, grouping: cartItemGroupingString(item) }
                     counter.set(code, existing)
                 }
                 existing.amount += item.amount
@@ -547,8 +547,10 @@ export class OrdersExcelExport {
         // Sort by amount
         const arr = Array.from(counter.values())
         arr.sort((a, b) => Sorter.stack(Sorter.byStringProperty(a, b, "name"), Sorter.byNumberProperty(a, b, "amount")))
+        let hasVariant = false;
 
         for (const item of arr) {
+            hasVariant = hasVariant || item.grouping !== item.name
           
             wsData.push([
                 item.name,
@@ -557,6 +559,127 @@ export class OrdersExcelExport {
                     value: item.amount,
                     format: "0"
                 }
+            ]);
+        }
+
+        // If all variant rows are empty: return null
+        if (!hasVariant) {
+            return null;
+        }
+
+        return ExcelHelper.buildWorksheet(wsData, {
+            defaultColumnWidth: 13
+        })
+    }
+
+    /**
+     * List all amount per option menu (unique names)
+     */
+    static createOptions(orders: PrivateOrder[]): XLSX.WorkSheet {
+        const productPriceColumns = new Map<string, {name: string}>()
+        const optionColumns = new Map<string, {name: string}>()
+        
+        for (const order of orders) {
+            // Add all prodcuct options and variants
+            for (const item of order.data.cart.items) {
+                // Produce prices
+                if (item.productPrice.name) {
+                    const name = item.productPrice.name
+
+                    if (!productPriceColumns.has(Formatter.slug(name))) {
+                        productPriceColumns.set(Formatter.slug(name), {
+                            name
+                        })
+                    }
+                }
+
+                for (const option of item.options) {
+                    const name = option.option.name
+
+                    if (!optionColumns.has(Formatter.slug(name))) {
+                        optionColumns.set(Formatter.slug(name), {
+                            name
+                        })
+                    }
+                }
+            }
+        }
+
+        // Sort productPriceColumns by name and change indexes
+        const productPriceColumnsArr = Array.from(productPriceColumns.keys())
+        productPriceColumnsArr.sort();
+
+        // Sort optionColumns by name and change indexes
+        const optionColumnsArr = Array.from(optionColumns.keys())
+        optionColumnsArr.sort();
+
+        // Columns
+        const wsData: RowValue[][] = [
+            [
+                "Artikel",
+                "Datum",
+                "Totaal",
+                ...productPriceColumnsArr.map(a => productPriceColumns.get(a)!.name),
+                ...optionColumnsArr.map(a => optionColumns.get(a)!.name)
+            ],
+        ];
+
+        type ProductData = { amount: number; name: string; date: string; optionCounts: Map<string, number>, productPriceCounts: Map<string, number> };
+        const counter: Map<string, ProductData> = new Map()
+
+        for (const order of orders) {
+            for (const item of order.data.cart.items) {
+
+                let date = '';
+                if ((item.product.type === ProductType.Ticket || item.product.type === ProductType.Voucher) && item.product.dateRange) {
+                    date = Formatter.capitalizeFirstLetter(item.product.dateRange.toString())
+                }
+                const code = Formatter.slug(item.product.name + date)
+
+                const productData = counter.get(code) ?? { amount: 0, name: item.product.name, date, optionCounts: new Map(), productPriceCounts: new Map() }
+                counter.set(code, productData)
+                
+                productData.amount += item.amount
+                
+                if (item.productPrice.name) {
+                    const name = Formatter.slug(item.productPrice.name)
+                    productData.productPriceCounts.set(name, (productData.productPriceCounts.get(name) ?? 0) + 1)
+                }
+
+                for (const option of item.options) {
+                    const name = Formatter.slug(option.option.name)
+                    productData.optionCounts.set(name, (productData.optionCounts.get(name) ?? 0) + 1)
+                }
+                
+            }
+        }
+
+        // Sort by amount
+        const arr = Array.from(counter.values())
+        arr.sort((a, b) => Sorter.stack(Sorter.byStringProperty(a, b, "name"), Sorter.byNumberProperty(a, b, "amount")))
+
+        for (const item of arr) {
+            wsData.push([
+                item.name,
+                item.date,
+                {
+                    value: item.amount,
+                    format: "0"
+                },
+                ...productPriceColumnsArr.map(a => {
+                    const value = item.productPriceCounts.get(Formatter.slug(a))
+                    return {
+                        value: value ?? 0,
+                        format: "0"
+                    }
+                }),
+                ...optionColumnsArr.map(a => {
+                    const value = item.optionCounts.get(Formatter.slug(a))
+                    return {
+                        value: value ?? 0,
+                        format: "0"
+                    }
+                })
             ]);
         }
 
@@ -580,7 +703,12 @@ export class OrdersExcelExport {
         /* Add the worksheet to the workbook */
         XLSX.utils.book_append_sheet(wb, this.createOrderLines(webshop, orders), "Artikel per lijn");
         XLSX.utils.book_append_sheet(wb, this.createOrders(orders, shouldIncludeSettements), "Bestelling per lijn");
-        XLSX.utils.book_append_sheet(wb, this.createProducts(orders), "Totalen");
+        const products = this.createProducts(orders);
+
+        if (products) {
+            XLSX.utils.book_append_sheet(wb, products, "Totalen per combinatie");
+        }
+        XLSX.utils.book_append_sheet(wb, this.createOptions(orders), "Totalen");
 
         if (shouldIncludeSettements) {
             XLSX.utils.book_append_sheet(wb, this.createSettlements(orders), "Uitbetalingen");
