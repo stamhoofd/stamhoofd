@@ -1,6 +1,7 @@
 import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Organization } from '@stamhoofd/models';
+import { scalarToSQLExpression, SQL, SQLMatch, SQLWhere, SQLWhereLike } from '@stamhoofd/sql';
 import { Organization as OrganizationStruct } from '@stamhoofd/structures';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 
@@ -32,28 +33,45 @@ export class SearchOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         // Escape query
-        const query = request.query.query.replace(/([-+><()~*"@\s]+)/g, ' ').replace(/[^\w\d]+$/, '');
-        if (query.length == 0) {
+        const query = request.query.query.replace(/([-+><()~*"@\s]+)/g, ' ').replace(/[^\w\d]+$/, '').trim();
+        if (query.length === 0) {
             // Do not try searching...
             return new Response([]);
         }
 
-        const match = {
-            sign: 'MATCH',
-            value: query + '*', // We replace special operators in boolean mode with spaces since special characters aren't indexed anyway
-            mode: 'BOOLEAN',
-        };
+        let matchValue: string;
 
-        // We had to add an order by in the query to fix the limit. MySQL doesn't want to limit the results correctly if we don't explicitly sort the results on their relevance
-        const organizations = await Organization.where({ searchIndex: match, active: 1 }, {
-            limit: 15,
-            sort: [
-                {
-                    column: { searchIndex: match },
-                    direction: 'DESC',
-                },
-            ],
-        });
+        if (query.includes(' ')) {
+            // give higher relevance if the searchindex includes the exact sentence
+            // give lower relevance if the last word is not a complete match
+            matchValue = `>("${query}") (${query}) <(${query}*)`;
+        }
+        else {
+            // give higher relevance if the searchindex includes the exact word
+            matchValue = `>${query} ${query}*`;
+        }
+
+        const limit = 15;
+
+        const whereMatch: SQLWhere = new SQLMatch(SQL.column(Organization.table, 'searchIndex'), scalarToSQLExpression(matchValue));
+
+        let organizations = await Organization.select()
+            .where(whereMatch)
+            .orderBy(whereMatch, 'DESC')
+            .limit(limit).fetch();
+
+        // if the limit is reached it is possible that organizations where the name starts with the query are missing -> fetch them and add them at the start
+        if (organizations.length === limit) {
+            const organizationsStartingWith = await Organization.select()
+                .where(new SQLWhereLike(SQL.column(Organization.table, 'name'), scalarToSQLExpression(`${query}%`)))
+                // order by relevance
+                .orderBy(whereMatch, 'DESC')
+                .limit(limit).fetch();
+
+            const organizationsStartingWithIds = new Set(organizationsStartingWith.map(o => o.id));
+
+            organizations = organizationsStartingWith.concat(organizations.filter(o => !organizationsStartingWithIds.has(o.id)));
+        }
 
         return new Response(await Promise.all(organizations.map(o => AuthenticatedStructures.organization(o))));
     }
