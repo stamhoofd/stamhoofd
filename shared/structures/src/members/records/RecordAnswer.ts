@@ -8,6 +8,7 @@ import { CountryHelper } from '../../addresses/CountryDecoder.js';
 import { Image } from '../../files/Image.js';
 import { RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from './RecordSettings.js';
 import { File } from '../../files/File.js';
+import { AuditLogReplacement, AuditLogReplacementType } from '../../AuditLogReplacement.js';
 
 export class RecordAnswer extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -135,10 +136,12 @@ export class RecordAnswer extends AutoEncoder {
     }
 
     getDiffValue(): unknown {
-        return this.stringValue;
-    }
-
-    transformForDiff(): unknown {
+        if (this.settings.type === RecordType.Textarea) {
+            return AuditLogReplacement.create({
+                value: this.stringValue ?? undefined,
+                type: AuditLogReplacementType.LongText,
+            });
+        }
         return this.stringValue;
     }
 }
