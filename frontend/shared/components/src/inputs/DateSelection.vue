@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useFocused, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
 
 import { DateTime } from 'luxon';
@@ -58,7 +58,6 @@ const modelValue = defineModel<Date | null>({ default: (() => {
 })() });
 
 const present = usePresent();
-const isFocused = useFocused();
 const isMobile = useIsMobile();
 
 const el = useTemplateRef('el');
@@ -80,7 +79,7 @@ const onKey = (event: KeyboardEvent) => {
         return;
     }
 
-    if (!isFocused.value) {
+    if (!hasFocus) {
         return;
     }
 
