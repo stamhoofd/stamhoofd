@@ -132,7 +132,7 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
             const style = `padding: 0; margin: 0; font-size: 15px; line-height: 1.5; font-family: "Metropolis", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";`;
             return h('button', {
                 class: 'style-inline-resource button simple',
-                onClick: () => showHtml('<p style="' + Formatter.escapeHtml(style) + '">' + Formatter.escapeHtml(obj.value!).replace('\n', '<br>') + '</p>', context),
+                onClick: () => showHtml('<p style="' + Formatter.escapeHtml(style) + '">' + Formatter.escapeHtml(obj.value!).replace(/\n/g, '<br>') + '</p>', context),
                 type: 'button',
             }, obj.toString() as string);
         }
