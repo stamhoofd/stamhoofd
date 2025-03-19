@@ -64,12 +64,6 @@
                     <p v-if="notification.submittedBy && notification.submittedAt" class="style-description-small">
                         {{ $t('46e61090-1188-4085-8995-69aef85af678', {name: notification.submittedBy.name, date: formatDate(notification.submittedAt)}) }}
                     </p>
-
-                    <p v-if="notification.status !== EventNotificationStatus.Accepted && notification.acceptedRecordAnswers.size > 0" class="style-description-small">
-                        {{ $t('Deze melding werd voorlopig goedgekeurd.') }} <button type="button" class="inline-link" @click="showOriginalAnswers">
-                            {{ $t('Toon originele antwoorden') }}
-                        </button>
-                    </p>
                 </STListItem>
 
                 <STListItem v-if="notification.feedbackText && notification.status !== EventNotificationStatus.Accepted" :selectable="isReviewer" @click="isReviewer && editFeedbackText()">
@@ -81,6 +75,19 @@
                     <template v-if="isReviewer" #right>
                         <span class="icon edit gray" />
                     </template>
+                </STListItem>
+
+                <STListItem v-if="isReviewer && notification.status !== EventNotificationStatus.Accepted && notification.acceptedRecordAnswers.size > 0 && diffList">
+                    <h3 class="style-definition-label">
+                        {{ $t('Aangepast sinds voorlopige goedkeuring') }}
+                    </h3>
+                    <PatchListText :items="diffList" />
+
+                    <p class="style-description-small">
+                        <button type="button" class="inline-link" @click="showOriginalAnswers">
+                            {{ $t('Toon originele antwoorden') }}
+                        </button>
+                    </p>
                 </STListItem>
             </STList>
 
@@ -161,7 +168,7 @@
                             </IconContainer>
                         </template>
                         <h3 class="style-title-list">
-                            Gedeeltelijk goedgekeurd
+                            Voorlopig goedgekeurd
                         </h3>
                         <p class="style-description-small">
                             Als alles wel in orde is, maar er nog iets klein moet worden aangevuld op een later tijdstip.
@@ -214,8 +221,9 @@
 
 <script setup lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, ComponentWithPropertiesInstance, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, EventOverview, IconContainer, InputSheet, ProgressIcon, useAppContext, useAuth, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, EventOverview, IconContainer, InputSheet, PatchListText, ProgressIcon, useAppContext, useAuth, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import { ObjectDiffer } from '@stamhoofd/object-differ';
 import { AccessRight, Event, EventNotification, EventNotificationStatus, EventNotificationStatusHelper, RecordCategory } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
@@ -247,6 +255,10 @@ const isComplete = computed(() => {
     return recordCategories.value.every(c => c.isComplete(notification.value));
 });
 const { save, deleteModel, isSaving } = props.viewModel.useSave();
+
+const diffList = computed(() => {
+    return ObjectDiffer.diff(notification.value.acceptedRecordAnswers, notification.value.recordAnswers);
+});
 
 const title = computed(() => {
     return type.value.title;
