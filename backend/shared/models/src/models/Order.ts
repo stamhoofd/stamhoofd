@@ -960,6 +960,7 @@ export class Order extends Model {
                 console.error('Order number issue for order ', this.id, this.number, e, 'trying again');
                 this.number = await WebshopCounter.getNextNumber(this.webshop)
                 await this.save()
+                console.error('Retry succeeded with order number ', this.number);
             } else {
                 throw e
             }

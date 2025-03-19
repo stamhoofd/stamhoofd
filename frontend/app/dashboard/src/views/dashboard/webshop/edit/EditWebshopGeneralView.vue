@@ -108,7 +108,7 @@
             </STList>
 
             <STInputBox v-if="numberingType === WebshopNumberingType.Continuous" title="Eerste bestelnummer" error-fields="settings.openAt" :error-box="errorBox">
-                <NumberInput v-model="startNumber" :min="1" />
+                <NumberInput v-model="startNumber" :min="1" :max="100000000 - 100000" />
             </STInputBox>
             <p v-if="!isNew && numberingType === WebshopNumberingType.Continuous" class="style-description-small">
                 Je kan dit enkel wijzigen als je alle bestellingen verwijdert.

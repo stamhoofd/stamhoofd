@@ -12,6 +12,9 @@ export class WebshopCounter  {
             return Math.floor(Math.random() * 1000000000) + 100000000
         }
         const webshopId = webshop.id
+
+        // For sequential numbering, we cannot go over 100000000
+        const maxStartNumber = 100000000 - 100000;
         
         // Prevent race conditions: create a queue
         // The queue can only run one at a time for the same webshop (so multiple webshops at the same time are allowed)
@@ -26,10 +29,10 @@ export class WebshopCounter  {
             let nextNumber: number | undefined
 
             if (rows.length == 0) {
-                nextNumber = webshop.privateMeta.startNumber ?? 1
+                nextNumber = Math.min(maxStartNumber, webshop.privateMeta.startNumber ?? 1)
             } else {
                 const previousNumber: number | null = rows[0]['']['previousNumber'] as number|null;
-                nextNumber = (previousNumber ?? ((webshop.privateMeta.startNumber ?? 1) - 1)) + 1;
+                nextNumber = (previousNumber ?? (Math.min(maxStartNumber, webshop.privateMeta.startNumber ?? 1) - 1)) + 1;
             }
 
             this.numberCache.set(webshopId, nextNumber + 1 );
