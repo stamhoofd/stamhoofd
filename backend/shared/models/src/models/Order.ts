@@ -952,7 +952,18 @@ export class Order extends Model {
             await payment.save();
         }
 
-        await this.save()
+        try {
+            await this.save()
+        } catch (e) {
+            if (e.code && e.code === "ER_DUP_ENTRY") {
+                // Something went wrong with the number, try again once
+                console.error('Order number issue for order ', this.id, this.number, e, 'trying again');
+                this.number = await WebshopCounter.getNextNumber(this.webshop)
+                await this.save()
+            } else {
+                throw e
+            }
+        }
 
         if (this.data.customer.email.length > 0) {
             const webshop = this.webshop
