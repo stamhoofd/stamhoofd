@@ -18,6 +18,7 @@ export enum AuditLogReplacementType {
     Uuid = 'Uuid',
     Color = 'Color', // id is the color
     Image = 'Image', // id is the source url
+    File = 'File', // id is the source url
     Html = 'Html',
     LongText = 'LongText', // Expandable text
 
@@ -174,6 +175,10 @@ export class AuditLogReplacement extends AutoEncoder {
 
         if (this.type === AuditLogReplacementType.Image) {
             return 'Afbeelding';
+        }
+
+        if (this.type === AuditLogReplacementType.File) {
+            return 'Bestand';
         }
         return this.value;
     }
