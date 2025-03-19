@@ -8,9 +8,11 @@ import DateSelection from './DateSelection.vue';
 
 describe('DateSelection', async () => {
     const originalTimezone = Formatter.timezone;
+    let wrapper: VueWrapper | undefined;
 
     afterEach(() => {
         setFormatterTimeZone(originalTimezone);
+        wrapper?.unmount();
     });
 
     const setFormatterTimeZone = (timezone: string) => {
@@ -293,12 +295,6 @@ describe('DateSelection', async () => {
     });
 
     describe('keydown', async () => {
-        let wrapper: VueWrapper | undefined;
-
-        afterEach(() => {
-            wrapper?.unmount();
-        });
-
         test('ArrowRight should focus next input', async () => {
             setFormatterTimeZone('Asia/Shanghai');
 
@@ -628,5 +624,53 @@ describe('DateSelection', async () => {
             // value should not change due to keydown event
             expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(date.getTime());
         });
+    });
+
+    test('Next input should focus while typing if input is full', async () => {
+        setFormatterTimeZone('Europe/Brussels');
+
+        const date = new Date(2023, 0, 1, 11, 0, 0);
+
+        const dateSelectionWrapper = mount(DateSelection, { attachTo: document.body });
+
+        await dateSelectionWrapper.setProps({
+            'time': { hours: 12, minutes: 0, seconds: 0 },
+            'modelValue': date,
+            'onUpdate:modelValue': async (e) => {
+                await dateSelectionWrapper!.setProps({ modelValue: e });
+            },
+        });
+
+        wrapper = dateSelectionWrapper;
+
+        const dayInput = findDayInput(dateSelectionWrapper);
+        const monthInput = findMonthInput(dateSelectionWrapper);
+        const yearInput = findYearInput(dateSelectionWrapper);
+
+        // day
+        await dayInput.trigger('focus');
+        await dayInput.setValue('12');
+
+        expect(dateSelectionWrapper.props('modelValue')).not.toBeNull();
+        // todo: fix -> hour should be 10!!!
+        expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2023, 0, 12, 11, 0, 0).getTime());
+
+        expect(document.activeElement).not.toBe(dayInput.element);
+        expect(document.activeElement).toBe(monthInput.element);
+
+        // month
+        await monthInput.setValue('9');
+
+        expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2023, 8, 12, 10, 0, 0).getTime());
+        expect(document.activeElement).not.toBe(monthInput.element);
+        expect(document.activeElement).toBe(yearInput.element);
+
+        // year
+        await yearInput.setValue('2024');
+
+        expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2024, 8, 12, 10, 0, 0).getTime());
+        expect(document.activeElement).not.toBe(dayInput.element);
+        expect(document.activeElement).not.toBe(monthInput.element);
+        expect(document.activeElement).not.toBe(yearInput.element);
     });
 });
