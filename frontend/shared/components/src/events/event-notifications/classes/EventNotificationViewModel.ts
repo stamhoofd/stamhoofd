@@ -57,6 +57,12 @@ export class EventNotificationViewModel {
         return computed(() => this.eventNotification);
     }
 
+    useOriginalNotification() {
+        return computed(() => this.eventNotification.patch({
+            recordAnswers: this.eventNotification.acceptedRecordAnswers,
+        }));
+    }
+
     get type() {
         return this.platform.config.eventNotificationTypes.find(t => t.id === this.eventNotification.typeId) ?? EventNotificationType.create({ title: 'Onbekend' });
     }
