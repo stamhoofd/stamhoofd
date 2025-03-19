@@ -470,7 +470,7 @@ function diffField(field: Field<any>, oldValue: unknown, value: unknown, key?: A
     return diffUnknown(oldValue, value, key);
 }
 
-export function diffObject(original: unknown | null, patch: unknown, rootKey?: AuditLogReplacement): AuditLogPatchItem[] {
+function diffObject(original: unknown | null, patch: unknown, rootKey?: AuditLogReplacement): AuditLogPatchItem[] {
     if (typeof patch !== 'object' || patch === null) {
         return [];
     }

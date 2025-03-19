@@ -55,13 +55,20 @@
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ capitalizeFirstLetter(EventNotificationStatusHelper.getName(notification.status)) }}</span>
-                        <span v-if="notification.status === EventNotificationStatus.Pending" class="icon clock" />
-                        <span v-if="notification.status === EventNotificationStatus.Rejected" class="icon error red" />
-                        <span v-if="notification.status === EventNotificationStatus.Accepted" class="icon success green" />
+                        <span v-if="notification.status === EventNotificationStatus.Pending" class="icon clock middle" />
+                        <span v-if="notification.status === EventNotificationStatus.Rejected" class="icon error red middle" />
+                        <span v-if="notification.status === EventNotificationStatus.PartiallyAccepted" class="icon secundary partially middle" />
+                        <span v-if="notification.status === EventNotificationStatus.Accepted" class="icon success green middle" />
                     </p>
 
                     <p v-if="notification.submittedBy && notification.submittedAt" class="style-description-small">
                         {{ $t('46e61090-1188-4085-8995-69aef85af678', {name: notification.submittedBy.name, date: formatDate(notification.submittedAt)}) }}
+                    </p>
+
+                    <p v-if="notification.status !== EventNotificationStatus.Accepted && notification.acceptedRecordAnswers.size > 0" class="style-description-small">
+                        {{ $t('Deze melding werd voorlopig goedgekeurd.') }} <button type="button" class="inline-link" @click="showOriginalAnswers">
+                            {{ $t('Toon originele antwoorden') }}
+                        </button>
                     </p>
                 </STListItem>
 
@@ -145,6 +152,26 @@
                         </template>
                     </STListItem>
 
+                    <STListItem :selectable="true" element-name="button" @click="doAcceptPartially">
+                        <template #left>
+                            <IconContainer icon="notification" class="secundary">
+                                <template #aside>
+                                    <span class="icon partially small" />
+                                </template>
+                            </IconContainer>
+                        </template>
+                        <h3 class="style-title-list">
+                            Gedeeltelijk goedgekeurd
+                        </h3>
+                        <p class="style-description-small">
+                            Als alles wel in orde is, maar er nog iets klein moet worden aangevuld op een later tijdstip.
+                        </p>
+
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
                     <STListItem :selectable="true" element-name="button" @click="doReject">
                         <template #left>
                             <IconContainer icon="notification" class="error">
@@ -169,7 +196,7 @@
             </div>
         </main>
 
-        <STToolbar v-if="notification.status === EventNotificationStatus.Draft || notification.status === EventNotificationStatus.Rejected">
+        <STToolbar v-if="notification.status === EventNotificationStatus.Draft || notification.status === EventNotificationStatus.Rejected || notification.status === EventNotificationStatus.PartiallyAccepted">
             <template #right>
                 <LoadingButton :loading="isSaving">
                     <button class="button primary" :disabled="!isComplete" type="button" @click="doSubmit">
@@ -187,7 +214,7 @@
 
 <script setup lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ComponentWithPropertiesInstance, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, EventOverview, IconContainer, InputSheet, ProgressIcon, useAppContext, useAuth, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
 import { AccessRight, Event, EventNotification, EventNotificationStatus, EventNotificationStatusHelper, RecordCategory } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -195,6 +222,7 @@ import { computed } from 'vue';
 import { useErrors } from '../errors/useErrors';
 import { EventNotificationViewModel } from './event-notifications/classes/EventNotificationViewModel';
 import EditEventNotificationRecordCategoryView from './event-notifications/EditEventNotificationRecordCategoryView.vue';
+import OriginalEventNotificationAnswersView from './OriginalEventNotificationAnswersView.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -323,6 +351,33 @@ async function doSubmit() {
         errors.errorBox = new ErrorBox(e);
     }
 }
+async function doAcceptPartially() {
+    await present({
+        components: [
+            new ComponentWithProperties(InputSheet, {
+                title: $t('Voorlopig goedkeuren'),
+                description: $t('Je kan hieronder nog opmerkingen achterlaten over wat er nog moet worden aangevuld en tegen wanneer.'),
+                saveText: $t('Voorlopig goedkeuren'),
+                placeholder: $t('Opmerkingen'),
+                defaultValue: notification.value.feedbackText ?? '',
+                multiline: true,
+                saveHandler: async (value: string) => {
+                    if (!value) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: $t('63e45277-76d4-4971-909b-1c86326b609f'),
+                        });
+                    }
+                    await save(EventNotification.patch({
+                        status: EventNotificationStatus.PartiallyAccepted,
+                        feedbackText: value ? value : null,
+                    }));
+                },
+            }),
+        ],
+        modalDisplayStyle: 'sheet',
+    });
+}
 
 async function doAccept() {
     if (!await CenteredMessage.confirm($t('f48e7518-0f1d-4610-a967-82d146a47f5b'), $t('eacd1cfa-a04b-485b-bd8d-41c1518e5306'), $t('754f6578-9fee-44f3-931c-dc00a34d7871'), undefined, false)) {
@@ -387,6 +442,17 @@ async function editFeedbackText() {
     });
 }
 
+async function showOriginalAnswers() {
+    await present({
+        components: [
+            new ComponentWithProperties(OriginalEventNotificationAnswersView, {
+                viewModel: props.viewModel,
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
+
 async function doDelete() {
     if (!await CenteredMessage.confirm('Ben je zeker dat je deze melding wilt verwijderen?', 'Ja, verwijderen', 'Je kan dit niet ongedaan maken')) {
         return;
@@ -439,6 +505,13 @@ async function showContextMenu(event: MouseEvent) {
                             icon: 'canceled',
                             action: async () => {
                                 await doReject();
+                            },
+                        }),
+                        new ContextMenuItem({
+                            name: Formatter.capitalizeFirstLetter(EventNotificationStatusHelper.getName(EventNotificationStatus.PartiallyAccepted)),
+                            icon: 'partially',
+                            action: async () => {
+                                await doAcceptPartially();
                             },
                         }),
                         new ContextMenuItem({
