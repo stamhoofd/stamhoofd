@@ -83,11 +83,9 @@
                     </h3>
                     <PatchListText :items="diffList" />
 
-                    <p class="style-description-small">
-                        <button type="button" class="inline-link" @click="showOriginalAnswers">
-                            {{ $t('Toon originele antwoorden') }}
-                        </button>
-                    </p>
+                    <template #right>
+                        <button class="button icon eye gray" @click="showOriginalAnswers" type="button" v-tooltip="'Bekijk origineel'"/>
+                    </template>
                 </STListItem>
             </STList>
 
