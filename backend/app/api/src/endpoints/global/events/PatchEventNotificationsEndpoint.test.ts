@@ -1,7 +1,7 @@
 import { PatchableArray, PatchMap, patchObject } from '@simonbackx/simple-encoding';
 import { Endpoint, Request } from '@simonbackx/simple-endpoints';
-import { EventNotificationFactory, EventFactory, EventNotificationTypeFactory, Organization, OrganizationFactory, Token, User, UserFactory, EmailTemplateFactory, RecordCategoryFactory, RegistrationPeriodFactory, RecordAnswerFactory } from '@stamhoofd/models';
-import { AccessRight, BaseOrganization, EmailTemplateType, Event, EventNotificationStatus, EventNotification as EventNotificationStruct, Permissions, PermissionsResourceType, RecordAnswer, RecordType, ResourcePermissions } from '@stamhoofd/structures';
+import { EventNotificationFactory, EventFactory, EventNotificationTypeFactory, Organization, OrganizationFactory, Token, User, UserFactory, EmailTemplateFactory, RecordCategoryFactory, RegistrationPeriodFactory, RecordAnswerFactory, EventNotification } from '@stamhoofd/models';
+import { AccessRight, BaseOrganization, EmailTemplateType, Event, EventNotificationStatus, EventNotification as EventNotificationStruct, PermissionLevel, Permissions, PermissionsResourceType, RecordAnswer, RecordType, ResourcePermissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { PatchEventNotificationsEndpoint } from './PatchEventNotificationsEndpoint';
 import { testServer } from '../../../../tests/helpers/TestServer';
@@ -57,17 +57,20 @@ const TestRequest = {
 };
 
 describe('Endpoint.PatchEventNotificationsEndpoint', () => {
+    let admin: User;
+
     beforeEach(async () => {
         TestUtils.setEnvironment('userMode', 'platform');
     });
 
     beforeAll(async () => {
+        TestUtils.setEnvironment('userMode', 'platform');
         await new EmailTemplateFactory({
             type: EmailTemplateType.EventNotificationAccepted,
         }).create();
 
         await new EmailTemplateFactory({
-            type: EmailTemplateType.EventNotificationPartiallyAcceptedEdited,
+            type: EmailTemplateType.EventNotificationPartiallyAccepted,
         }).create();
 
         await new EmailTemplateFactory({
@@ -80,6 +83,22 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
 
         await new EmailTemplateFactory({
             type: EmailTemplateType.EventNotificationSubmittedReviewer,
+        }).create();
+
+        // Create an admin that will receive the emails
+        admin = await new UserFactory({
+            email: 'event-notification-reviewer@example.com',
+            globalPermissions: Permissions.create({
+                resources: new Map([
+                    [PermissionsResourceType.OrganizationTags, new Map([
+                        ['', ResourcePermissions.create({
+                            accessRights: [
+                                AccessRight.OrganizationEventNotificationReviewer,
+                            ],
+                        })],
+                    ])],
+                ]),
+            }),
         }).create();
     });
 
@@ -270,7 +289,14 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
 
         expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
             expect.objectContaining({
+                to: 'event-notification-reviewer@example.com',
+                subject: EmailTemplateType.EventNotificationSubmittedReviewer,
+                text: expect.stringContaining(event.name),
+            }),
+
+            expect.objectContaining({
                 to: user.email,
+                subject: EmailTemplateType.EventNotificationSubmittedCopy,
                 text: expect.stringContaining(event.name),
             }),
         ]);
@@ -309,7 +335,60 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
 
         expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
             expect.objectContaining({
+                to: 'event-notification-reviewer@example.com',
+                subject: EmailTemplateType.EventNotificationSubmittedReviewer,
+                text: expect.stringContaining(event.name),
+            }),
+
+            expect.objectContaining({
                 to: user.email,
+                subject: EmailTemplateType.EventNotificationSubmittedCopy,
+                text: expect.stringContaining(event.name),
+            }),
+        ]);
+    });
+
+    test('A normal user can move the event notification to pending state from partially accepted', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: minimumUserPermissions,
+        }).create();
+        const event = await new EventFactory({ organization }).create();
+        const eventNotification = await new EventNotificationFactory({
+            organization,
+            events: [event],
+            status: EventNotificationStatus.PartiallyAccepted,
+        }).create();
+
+        const body: Body = new PatchableArray();
+        body.addPatch(
+            EventNotificationStruct.patch({
+                id: eventNotification.id,
+                status: EventNotificationStatus.Pending,
+            }),
+        );
+
+        const result = await TestRequest.patch({ body, user, organization });
+        expect(result.status).toBe(200);
+
+        expect(result.body).toHaveLength(1);
+        expect(result.body[0]).toMatchObject({
+            organization: expect.objectContaining({ id: organization.id }),
+            status: EventNotificationStatus.Pending,
+            submittedBy: expect.objectContaining({ id: user.id }),
+        });
+
+        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+            expect.objectContaining({
+                to: 'event-notification-reviewer@example.com',
+                subject: EmailTemplateType.EventNotificationSubmittedReviewer,
+                text: expect.stringContaining(event.name),
+            }),
+
+            expect.objectContaining({
+                to: user.email,
+                subject: EmailTemplateType.EventNotificationSubmittedCopy,
                 text: expect.stringContaining(event.name),
             }),
         ]);
@@ -528,8 +607,391 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
     });
 
-    test.todo('An admin can accept an event notification');
-    test.todo('An admin can partially accept an event notification');
-    test.todo('An admin can reject an event notification');
-    test.todo('An admin can move an event notification back to draft');
+    test('An admin can accept an event notification', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: minimumUserPermissions,
+        }).create();
+        const event = await new EventFactory({ organization }).create();
+
+        const recordCategories = await new RecordCategoryFactory({
+            records: [
+                {
+                    type: RecordType.Checkbox,
+                },
+                {
+                    type: RecordType.Text,
+                    required: true,
+                },
+            ],
+        }).createMultiple(2);
+
+        const notificationType = (await new EventNotificationTypeFactory({ recordCategories }).create());
+        const acceptedRecordAnswers = await new RecordAnswerFactory({ recordCategories }).create();
+        const eventNotification = await new EventNotificationFactory({
+            organization,
+            events: [event],
+            status: EventNotificationStatus.Pending,
+            typeId: notificationType.id,
+            recordAnswers: acceptedRecordAnswers,
+            submittedBy: user,
+        }).create();
+
+        const body: Body = new PatchableArray();
+        body.addPatch(
+            EventNotificationStruct.patch({
+                id: eventNotification.id,
+                status: EventNotificationStatus.Accepted,
+            }),
+        );
+
+        const result = await TestRequest.patch({ body, user: admin, organization });
+        expect(result.status).toBe(200);
+        expect(result.body).toHaveLength(1);
+
+        expect(result.body[0]).toMatchObject({
+            status: EventNotificationStatus.Accepted,
+            acceptedRecordAnswers: expect.toMatchMap(acceptedRecordAnswers),
+            recordAnswers: expect.toMatchMap(acceptedRecordAnswers),
+        });
+
+        // Check mails
+        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+            expect.objectContaining({
+                to: user.email,
+                subject: EmailTemplateType.EventNotificationAccepted,
+                text: expect.stringContaining(event.name),
+            }),
+        ]);
+    });
+
+    test('An admin can partially accept an event notification and set feedback', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: minimumUserPermissions,
+        }).create();
+        const event = await new EventFactory({ organization }).create();
+
+        const recordCategories = await new RecordCategoryFactory({
+            records: [
+                {
+                    type: RecordType.Checkbox,
+                },
+                {
+                    type: RecordType.Text,
+                    required: true,
+                },
+            ],
+        }).createMultiple(2);
+
+        const notificationType = (await new EventNotificationTypeFactory({ recordCategories }).create());
+        const acceptedRecordAnswers = await new RecordAnswerFactory({ recordCategories }).create();
+        const eventNotification = await new EventNotificationFactory({
+            organization,
+            events: [event],
+            status: EventNotificationStatus.Pending,
+            typeId: notificationType.id,
+            recordAnswers: acceptedRecordAnswers,
+            submittedBy: user,
+        }).create();
+
+        const body: Body = new PatchableArray();
+        body.addPatch(
+            EventNotificationStruct.patch({
+                id: eventNotification.id,
+                status: EventNotificationStatus.PartiallyAccepted,
+                feedbackText: 'Some feedback',
+            }),
+        );
+
+        const result = await TestRequest.patch({ body, user: admin, organization });
+        expect(result.status).toBe(200);
+        expect(result.body).toHaveLength(1);
+
+        expect(result.body[0]).toMatchObject({
+            status: EventNotificationStatus.PartiallyAccepted,
+            feedbackText: 'Some feedback',
+            acceptedRecordAnswers: expect.toMatchMap(acceptedRecordAnswers),
+            recordAnswers: expect.toMatchMap(acceptedRecordAnswers),
+        });
+
+        // Check mails
+        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+            expect.objectContaining({
+                to: user.email,
+                subject: EmailTemplateType.EventNotificationPartiallyAccepted,
+                text: expect.stringContaining(event.name),
+                html: expect.stringContaining('Some feedback'),
+            }),
+        ]);
+    });
+
+    test('An admin can reject an event notification with feedback', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: minimumUserPermissions,
+        }).create();
+        const event = await new EventFactory({ organization }).create();
+
+        const recordCategories = await new RecordCategoryFactory({
+            records: [
+                {
+                    type: RecordType.Checkbox,
+                },
+                {
+                    type: RecordType.Text,
+                    required: true,
+                },
+            ],
+        }).createMultiple(2);
+
+        const notificationType = (await new EventNotificationTypeFactory({ recordCategories }).create());
+        const acceptedRecordAnswers = await new RecordAnswerFactory({ recordCategories }).create();
+        const eventNotification = await new EventNotificationFactory({
+            organization,
+            events: [event],
+            status: EventNotificationStatus.Pending,
+            typeId: notificationType.id,
+            recordAnswers: acceptedRecordAnswers,
+            submittedBy: user,
+        }).create();
+
+        const body: Body = new PatchableArray();
+        body.addPatch(
+            EventNotificationStruct.patch({
+                id: eventNotification.id,
+                status: EventNotificationStatus.Rejected,
+                feedbackText: 'Some feedback',
+            }),
+        );
+
+        const result = await TestRequest.patch({ body, user: admin, organization });
+        expect(result.status).toBe(200);
+        expect(result.body).toHaveLength(1);
+
+        expect(result.body[0]).toMatchObject({
+            status: EventNotificationStatus.Rejected,
+            feedbackText: 'Some feedback',
+            acceptedRecordAnswers: expect.toMatchMap(new Map()),
+            recordAnswers: expect.toMatchMap(acceptedRecordAnswers),
+        });
+
+        // Check mails
+        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+            expect.objectContaining({
+                to: user.email,
+                subject: EmailTemplateType.EventNotificationRejected,
+                text: expect.stringContaining(event.name),
+                html: expect.stringContaining('Some feedback'),
+            }),
+        ]);
+    });
+
+    test('An admin can move an event notification back to draft', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: minimumUserPermissions,
+        }).create();
+        const event = await new EventFactory({ organization }).create();
+
+        const recordCategories = await new RecordCategoryFactory({
+            records: [
+                {
+                    type: RecordType.Checkbox,
+                },
+                {
+                    type: RecordType.Text,
+                    required: true,
+                },
+            ],
+        }).createMultiple(2);
+
+        const notificationType = (await new EventNotificationTypeFactory({ recordCategories }).create());
+        const acceptedRecordAnswers = await new RecordAnswerFactory({ recordCategories }).create();
+        const eventNotification = await new EventNotificationFactory({
+            organization,
+            events: [event],
+            status: EventNotificationStatus.Accepted,
+            typeId: notificationType.id,
+            recordAnswers: acceptedRecordAnswers,
+            submittedBy: user,
+        }).create();
+
+        const body: Body = new PatchableArray();
+        body.addPatch(
+            EventNotificationStruct.patch({
+                id: eventNotification.id,
+                status: EventNotificationStatus.Draft,
+            }),
+        );
+
+        const result = await TestRequest.patch({ body, user: admin, organization });
+        expect(result.status).toBe(200);
+        expect(result.body).toHaveLength(1);
+
+        expect(result.body[0]).toMatchObject({
+            status: EventNotificationStatus.Draft,
+            acceptedRecordAnswers: expect.toMatchMap(new Map()),
+            recordAnswers: expect.toMatchMap(acceptedRecordAnswers),
+        });
+
+        // Check mails
+        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([]);
+    });
+
+    test('An admin can edit an accepted event notification', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: minimumUserPermissions,
+        }).create();
+        const event = await new EventFactory({ organization }).create();
+
+        const recordCategories = await new RecordCategoryFactory({
+            records: [
+                {
+                    type: RecordType.Checkbox,
+                },
+                {
+                    type: RecordType.Text,
+                    required: true,
+                },
+            ],
+        }).createMultiple(2);
+
+        const notificationType = (await new EventNotificationTypeFactory({ recordCategories }).create());
+        const acceptedRecordAnswers = await new RecordAnswerFactory({ recordCategories }).create();
+        const eventNotification = await new EventNotificationFactory({
+            organization,
+            events: [event],
+            status: EventNotificationStatus.Accepted,
+            typeId: notificationType.id,
+            recordAnswers: acceptedRecordAnswers,
+            acceptedRecordAnswers: acceptedRecordAnswers,
+            submittedBy: user,
+        }).create();
+
+        const patchedRecordAnswers = await new RecordAnswerFactory({ records: [recordCategories[0].records[0]] }).create();
+        const patch = new PatchMap([...patchedRecordAnswers.entries()]);
+
+        const body: Body = new PatchableArray();
+        body.addPatch(
+            EventNotificationStruct.patch({
+                id: eventNotification.id,
+                recordAnswers: patch,
+            }),
+        );
+
+        const result = await TestRequest.patch({ body, user: admin, organization });
+        expect(result.status).toBe(200);
+        expect(result.body).toHaveLength(1);
+
+        expect(result.body[0]).toMatchObject({
+            status: EventNotificationStatus.Accepted,
+
+            // Note: the record answers should automatically copy over to the accepted record answers
+            acceptedRecordAnswers: expect.toMatchMap(
+                patchObject(acceptedRecordAnswers, patch),
+            ),
+            recordAnswers: expect.toMatchMap(
+                patchObject(acceptedRecordAnswers, patch),
+            ),
+        });
+
+        // Check mails
+        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([]);
+    });
+
+    test('An admin can delete an event notification', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: minimumUserPermissions,
+        }).create();
+        const event = await new EventFactory({ organization }).create();
+
+        const recordCategories = await new RecordCategoryFactory({
+            records: [
+                {
+                    type: RecordType.Checkbox,
+                },
+                {
+                    type: RecordType.Text,
+                    required: true,
+                },
+            ],
+        }).createMultiple(2);
+
+        const notificationType = (await new EventNotificationTypeFactory({ recordCategories }).create());
+        const acceptedRecordAnswers = await new RecordAnswerFactory({ recordCategories }).create();
+        const eventNotification = await new EventNotificationFactory({
+            organization,
+            events: [event],
+            status: EventNotificationStatus.Accepted,
+            typeId: notificationType.id,
+            recordAnswers: acceptedRecordAnswers,
+            submittedBy: user,
+        }).create();
+
+        const body: Body = new PatchableArray();
+        body.addDelete(
+            eventNotification.id,
+        );
+
+        const result = await TestRequest.patch({ body, user: admin, organization });
+        expect(result.status).toBe(200);
+        expect(result.body).toHaveLength(0);
+
+        // Check mails
+        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([]);
+
+        // Check not exists
+        const model = await EventNotification.getByID(eventNotification.id);
+        expect(model).toBeUndefined();
+    });
+
+    test('An user cannot delete an event notification', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: minimumUserPermissions,
+        }).create();
+        const event = await new EventFactory({ organization }).create();
+
+        const recordCategories = await new RecordCategoryFactory({
+            records: [
+                {
+                    type: RecordType.Checkbox,
+                },
+                {
+                    type: RecordType.Text,
+                    required: true,
+                },
+            ],
+        }).createMultiple(2);
+
+        const notificationType = (await new EventNotificationTypeFactory({ recordCategories }).create());
+        const acceptedRecordAnswers = await new RecordAnswerFactory({ recordCategories }).create();
+        const eventNotification = await new EventNotificationFactory({
+            organization,
+            events: [event],
+            status: EventNotificationStatus.Accepted,
+            typeId: notificationType.id,
+            recordAnswers: acceptedRecordAnswers,
+            submittedBy: user,
+        }).create();
+
+        const body: Body = new PatchableArray();
+        body.addDelete(
+            eventNotification.id,
+        );
+
+        await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
+            simpleError({ code: 'permission_denied' }),
+        );
+    });
 });

@@ -141,7 +141,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             if (
                 notification.status === EventNotificationStatus.Pending
                 || notification.status === EventNotificationStatus.Accepted
-                || (patch.status && (patch.status !== EventNotificationStatus.Pending || (notification.status !== EventNotificationStatus.Draft && notification.status !== EventNotificationStatus.Rejected)))
+                || (patch.status && (patch.status !== EventNotificationStatus.Pending || (notification.status !== EventNotificationStatus.Draft && notification.status !== EventNotificationStatus.Rejected && notification.status !== EventNotificationStatus.PartiallyAccepted)))
                 || patch.feedbackText !== undefined
             ) {
                 requiredPermissionLevel = PermissionLevel.Full;
@@ -199,16 +199,28 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                     await EventNotificationService.sendReviewerEmail(EmailTemplateType.EventNotificationSubmittedReviewer, notification);
                 }
 
-                if ((patch.status === EventNotificationStatus.Accepted || patch.status === EventNotificationStatus.PartiallyAccepted) && previousStatus !== EventNotificationStatus.Accepted && previousStatus !== EventNotificationStatus.PartiallyAccepted) {
+                if ((patch.status === EventNotificationStatus.Accepted) && previousStatus !== EventNotificationStatus.Accepted) {
                     // Make sure the accepted record answers stay in sync
                     notification.acceptedRecordAnswers = notification.recordAnswers;
 
                     await EventNotificationService.sendSubmitterEmail(EmailTemplateType.EventNotificationAccepted, notification);
                 }
 
+                if ((patch.status === EventNotificationStatus.PartiallyAccepted) && previousStatus !== EventNotificationStatus.Accepted && previousStatus !== EventNotificationStatus.PartiallyAccepted) {
+                    // Make sure the accepted record answers stay in sync
+                    notification.acceptedRecordAnswers = notification.recordAnswers;
+
+                    await EventNotificationService.sendSubmitterEmail(EmailTemplateType.EventNotificationPartiallyAccepted, notification);
+                }
+
                 if (patch.status === EventNotificationStatus.Rejected) {
                     await EventNotificationService.sendSubmitterEmail(EmailTemplateType.EventNotificationRejected, notification);
                 }
+            }
+
+            if (notification.status === EventNotificationStatus.Accepted) {
+                // Make sure the accepted record answers stay in sync (only for full accepted, since these cannot be changed)
+                notification.acceptedRecordAnswers = notification.recordAnswers;
             }
 
             await notification.save();
