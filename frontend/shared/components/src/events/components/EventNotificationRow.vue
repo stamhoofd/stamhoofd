@@ -17,6 +17,7 @@
             <span v-if="notification && notification.status === EventNotificationStatus.Pending" class="icon clock gray" />
             <span v-if="notification && notification.status === EventNotificationStatus.Rejected" class="icon error" />
             <span v-if="notification && notification.status === EventNotificationStatus.Accepted" class="icon success green" />
+            <span v-if="notification && notification.status === EventNotificationStatus.PartiallyAccepted" class="icon partially green" />
             <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>

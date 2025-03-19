@@ -33,6 +33,29 @@ function updateSize() {
     iframe.value.height = `${mainElement.value.clientHeight - paddingTop - paddingBottom}px`;
 }
 
+function cleanHtml(html: string) {
+    if (html.startsWith('<!DOCTYPE html>')) {
+        return html;
+    }
+
+    // Add body and html tag, with 0 padding
+    // This is needed because the iframe will not render the html correctly otherwise
+    return `
+        <!DOCTYPE html>
+        <html style="padding: 0; margin: 0;">
+            <head>
+                <style>
+                    body {
+                        padding: 0;
+                        margin: 0;
+                    }
+                </style>
+            </head>
+            <body>${html}</body>
+        </html>
+    `;
+}
+
 watch(() => props.html, (newHTML) => {
     if (!iframe.value) {
         return;
@@ -57,7 +80,7 @@ useResizeObserver(mainElement, () => {
 });
 
 function replaceIframeContent(iframeElement: HTMLIFrameElement, newHTML: string) {
-    iframeElement.src = 'data:text/html;base64,' + base64Encode(newHTML);
+    iframeElement.src = 'data:text/html;base64,' + base64Encode(cleanHtml(newHTML));
 }
 
 function base64Encode(str: string) {

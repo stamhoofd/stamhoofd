@@ -1,9 +1,9 @@
 import { Model, ModelEvent } from '@simonbackx/simple-database';
 import { AuditLog } from '@stamhoofd/models';
+import { ObjectDiffer } from '@stamhoofd/object-differ';
 import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacement, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
 import { ContextInstance } from '../helpers/Context';
 import { AuditLogService } from '../services/AuditLogService';
-import { diffUnknown } from '../services/diff';
 
 export type ModelEventLogOptions<D> = {
     type: AuditLogType;
@@ -180,7 +180,7 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
                             }));
                         }
                         else {
-                            log.patchList.push(...diffUnknown(
+                            log.patchList.push(...ObjectDiffer.diff(
                                 key in oldModel ? oldModel[key] : undefined,
                                 key in event.model ? event.model[key] : undefined,
                                 AuditLogReplacement.key(renamedKey),

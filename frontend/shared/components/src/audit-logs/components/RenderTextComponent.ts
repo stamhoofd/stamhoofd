@@ -95,6 +95,17 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
             ]);
         }
 
+        if (obj.type === AuditLogReplacementType.File && obj.id) {
+            // Open member button
+            return h('a', {
+                class: 'style-inline-resource simple',
+                href: obj.id,
+                target: '_blank',
+            }, [
+                obj.value || 'Bestand',
+            ]);
+        }
+
         if (obj.type === AuditLogReplacementType.Organization && obj.id) {
             if (context.app === 'admin') {
             // Open member button
@@ -115,9 +126,13 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
         }
 
         if (obj.type === AuditLogReplacementType.LongText && obj.value) {
+            if (obj.value.length < 200 && !obj.value.includes('\n')) {
+                return obj.value;
+            }
+            const style = `padding: 0; margin: 0; font-size: 15px; line-height: 1.5; font-family: "Metropolis", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";`;
             return h('button', {
                 class: 'style-inline-resource button simple',
-                onClick: () => showHtml('<p>' + Formatter.escapeHtml(obj.value!) + '</p>', context),
+                onClick: () => showHtml('<p style="' + Formatter.escapeHtml(style) + '">' + Formatter.escapeHtml(obj.value!).replace(/\n/g, '<br>') + '</p>', context),
                 type: 'button',
             }, obj.toString() as string);
         }

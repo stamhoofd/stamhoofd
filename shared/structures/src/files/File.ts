@@ -1,5 +1,6 @@
 import { Data, Encodeable, EncodeContext, EncodeMedium } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { AuditLogReplacement, AuditLogReplacementType } from '../AuditLogReplacement';
 
 export class File implements Encodeable {
     id: string;
@@ -45,6 +46,14 @@ export class File implements Encodeable {
         this.isPrivate = data.isPrivate ?? false;
         this.signedUrl = data.signedUrl ?? null;
         this.signature = data.signature ?? null;
+    }
+
+    getDiffValue() {
+        return AuditLogReplacement.create({
+            id: this.getPublicPath(),
+            value: this.name ?? undefined,
+            type: AuditLogReplacementType.File,
+        });
     }
 
     get signPayload() {

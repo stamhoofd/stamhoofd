@@ -285,8 +285,8 @@ function diffMap(oldValue: unknown, value: unknown, key?: AuditLogReplacement) {
             if (original) {
                 items.push(
                     ...diffUnknown(
-                        null,
                         original,
+                        null,
                         (getDiffName(original) || getDiffKey(k)).prepend(key),
                     ),
                 );
@@ -318,8 +318,8 @@ function diffMap(oldValue: unknown, value: unknown, key?: AuditLogReplacement) {
 
             items.push(
                 ...diffUnknown(
-                    null,
                     v,
+                    null,
                     (getDiffName(v) || getDiffKey(k)).prepend(key),
                 ),
             );
@@ -336,7 +336,7 @@ export function transformValueForDiff(value: unknown) {
     return value;
 }
 
-export function diffUnknown(oldValue: unknown, value: unknown, key?: AuditLogReplacement) {
+function diffUnknown(oldValue: unknown, value: unknown, key?: AuditLogReplacement) {
     oldValue = transformValueForDiff(oldValue);
     value = transformValueForDiff(value);
 
@@ -470,7 +470,7 @@ function diffField(field: Field<any>, oldValue: unknown, value: unknown, key?: A
     return diffUnknown(oldValue, value, key);
 }
 
-export function diffObject(original: unknown | null, patch: unknown, rootKey?: AuditLogReplacement): AuditLogPatchItem[] {
+function diffObject(original: unknown | null, patch: unknown, rootKey?: AuditLogReplacement): AuditLogPatchItem[] {
     if (typeof patch !== 'object' || patch === null) {
         return [];
     }
@@ -511,4 +511,10 @@ export function diffObject(original: unknown | null, patch: unknown, rootKey?: A
         items.push(...diffField(field, oldValue, value, getDiffKey(key).prepend(rootKey)));
     }
     return items;
+}
+
+export class ObjectDiffer {
+    static diff(oldValue: unknown, value: unknown, key?: AuditLogReplacement): AuditLogPatchItem[] {
+        return diffUnknown(oldValue, value, key);
+    }
 }

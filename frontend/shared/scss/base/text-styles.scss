@@ -1396,6 +1396,7 @@
             font-weight: $font-weight-default;
             text-decoration: underline;
             text-decoration-color: $color-border;
+            color: inherit;
         }
         @extend .style-hover-area;
     }
