@@ -584,7 +584,7 @@ export class OrdersExcelExport {
             for (const item of order.data.cart.items) {
                 // Produce prices
                 if (item.productPrice.name) {
-                    const name = item.productPrice.name
+                    const name = item.productPrice.name || 'Standaardtarief'
 
                     if (!productPriceColumns.has(Formatter.slug(name))) {
                         productPriceColumns.set(Formatter.slug(name), {
@@ -642,13 +642,13 @@ export class OrdersExcelExport {
                 productData.amount += item.amount
                 
                 if (item.productPrice.name) {
-                    const name = Formatter.slug(item.productPrice.name)
-                    productData.productPriceCounts.set(name, (productData.productPriceCounts.get(name) ?? 0) + 1)
+                    const name = Formatter.slug(item.productPrice.name || 'Standaardtarief')
+                    productData.productPriceCounts.set(name, (productData.productPriceCounts.get(name) ?? 0) + item.amount)
                 }
 
                 for (const option of item.options) {
                     const name = Formatter.slug(option.option.name)
-                    productData.optionCounts.set(name, (productData.optionCounts.get(name) ?? 0) + 1)
+                    productData.optionCounts.set(name, (productData.optionCounts.get(name) ?? 0) + item.amount)
                 }
                 
             }
@@ -667,14 +667,14 @@ export class OrdersExcelExport {
                     format: "0"
                 },
                 ...productPriceColumnsArr.map(a => {
-                    const value = item.productPriceCounts.get(Formatter.slug(a))
+                    const value = item.productPriceCounts.get(a)
                     return {
                         value: value ?? 0,
                         format: "0"
                     }
                 }),
                 ...optionColumnsArr.map(a => {
-                    const value = item.optionCounts.get(Formatter.slug(a))
+                    const value = item.optionCounts.get(a)
                     return {
                         value: value ?? 0,
                         format: "0"
