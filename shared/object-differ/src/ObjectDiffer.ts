@@ -336,7 +336,7 @@ export function transformValueForDiff(value: unknown) {
     return value;
 }
 
-export function diffUnknown(oldValue: unknown, value: unknown, key?: AuditLogReplacement) {
+function diffUnknown(oldValue: unknown, value: unknown, key?: AuditLogReplacement) {
     oldValue = transformValueForDiff(oldValue);
     value = transformValueForDiff(value);
 
@@ -511,4 +511,10 @@ function diffObject(original: unknown | null, patch: unknown, rootKey?: AuditLog
         items.push(...diffField(field, oldValue, value, getDiffKey(key).prepend(rootKey)));
     }
     return items;
+}
+
+export class ObjectDiffer {
+    static diff(oldValue: unknown, value: unknown, key?: AuditLogReplacement): AuditLogPatchItem[] {
+        return diffUnknown(oldValue, value, key);
+    }
 }
