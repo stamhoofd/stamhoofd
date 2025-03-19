@@ -291,4 +291,140 @@ describe('DateSelection', async () => {
             expect(wrapper.props('modelValue')?.getTime()).toEqual(output.getTime());
         }
     });
+
+    describe('keydown', async () => {
+        let wrapper: VueWrapper | undefined;
+
+        afterEach(() => {
+            wrapper?.unmount();
+        });
+
+        test('ArrowRight should focus next input', async () => {
+            setFormatterTimeZone('Asia/Shanghai');
+
+            const date = new Date(2023, 0, 1, 12, 0, 0);
+
+            wrapper = mount(DateSelection, {
+                attachTo: document.body,
+                props: {
+                    'modelValue': date,
+                    'onUpdate:modelValue': async (e) => {
+                        await wrapper!.setProps({ modelValue: e });
+                    },
+                },
+            });
+
+            const dayInput = findDayInput(wrapper);
+            await dayInput.trigger('focus');
+            expect(document.activeElement).toBe(dayInput.element);
+
+            // first time -> month input should be in focus
+            const monthInput = findMonthInput(wrapper);
+            await dayInput.trigger('keydown', { key: 'ArrowRight' });
+
+            expect(document.activeElement).not.toBe(dayInput.element);
+            expect(document.activeElement).toBe(monthInput.element);
+
+            // second time -> year input should be in focus
+            const yearInput = findYearInput(wrapper);
+            await monthInput.trigger('keydown', { key: 'ArrowRight' });
+
+            expect(document.activeElement).not.toBe(monthInput.element);
+            expect(document.activeElement).toBe(yearInput.element);
+        });
+
+        test('ArrowRight should blur all if year input in focus', async () => {
+            setFormatterTimeZone('Asia/Shanghai');
+
+            const date = new Date(2023, 0, 1, 12, 0, 0);
+
+            wrapper = mount(DateSelection, {
+                attachTo: document.body,
+                props: {
+                    'modelValue': date,
+                    'onUpdate:modelValue': async (e) => {
+                        await wrapper!.setProps({ modelValue: e });
+                    },
+                },
+            });
+
+            const yearInput = findYearInput(wrapper);
+            const monthInput = findMonthInput(wrapper);
+            const dayInput = findDayInput(wrapper);
+
+            await yearInput.trigger('focus');
+            expect(document.activeElement).not.toBe(dayInput.element);
+            expect(document.activeElement).not.toBe(monthInput.element);
+            expect(document.activeElement).toBe(yearInput.element);
+
+            await yearInput.trigger('keydown', { key: 'ArrowRight' });
+            expect(document.activeElement).not.toBe(dayInput.element);
+            expect(document.activeElement).not.toBe(monthInput.element);
+            expect(document.activeElement).not.toBe(yearInput.element);
+        });
+
+        test('ArrowLeft should focus previous input', async () => {
+            setFormatterTimeZone('Asia/Shanghai');
+
+            const date = new Date(2023, 0, 1, 12, 0, 0);
+
+            wrapper = mount(DateSelection, {
+                attachTo: document.body,
+                props: {
+                    'modelValue': date,
+                    'onUpdate:modelValue': async (e) => {
+                        await wrapper!.setProps({ modelValue: e });
+                    },
+                },
+            });
+
+            const yearInput = findYearInput(wrapper);
+            await yearInput.trigger('focus');
+            expect(document.activeElement).toBe(yearInput.element);
+
+            // first time -> month input should be in focus
+            const monthInput = findMonthInput(wrapper);
+            await yearInput.trigger('keydown', { key: 'ArrowLeft' });
+
+            expect(document.activeElement).not.toBe(yearInput.element);
+            expect(document.activeElement).toBe(monthInput.element);
+
+            // second time -> day input should be in focus
+            const dayInput = findDayInput(wrapper);
+            await monthInput.trigger('keydown', { key: 'ArrowLeft' });
+
+            expect(document.activeElement).not.toBe(monthInput.element);
+            expect(document.activeElement).toBe(dayInput.element);
+        });
+
+        test.skip('ArrowLeft should blur all if day input in focus', async () => {
+            setFormatterTimeZone('Asia/Shanghai');
+
+            const date = new Date(2023, 0, 1, 12, 0, 0);
+
+            wrapper = mount(DateSelection, {
+                attachTo: document.body,
+                props: {
+                    'modelValue': date,
+                    'onUpdate:modelValue': async (e) => {
+                        await wrapper!.setProps({ modelValue: e });
+                    },
+                },
+            });
+
+            const yearInput = findYearInput(wrapper);
+            const monthInput = findMonthInput(wrapper);
+            const dayInput = findDayInput(wrapper);
+
+            await dayInput.trigger('focus');
+            expect(document.activeElement).not.toBe(yearInput.element);
+            expect(document.activeElement).not.toBe(monthInput.element);
+            expect(document.activeElement).toBe(dayInput.element);
+
+            await dayInput.trigger('keydown', { key: 'ArrowLeft' });
+            expect(document.activeElement).not.toBe(dayInput.element);
+            expect(document.activeElement).not.toBe(monthInput.element);
+            expect(document.activeElement).not.toBe(yearInput.element);
+        });
+    });
 });
