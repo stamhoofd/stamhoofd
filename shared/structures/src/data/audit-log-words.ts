@@ -172,4 +172,5 @@ export default {
     'reviewTime.records': 'persoonsgegevens',
     'reviewTime.uitpasNumber': 'UiTPAS-nummer',
     'reviewTimes': 'laatst nagekeken',
+    'updatedAt': 'laatst gewijzigd op',
 };
