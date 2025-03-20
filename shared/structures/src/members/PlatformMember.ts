@@ -734,7 +734,20 @@ export class PlatformMember implements ObjectWithRecords {
         }
     }
 
-    filterRegistrations(filters: { groups?: Group[] | null; groupIds?: string[] | null; canRegister?: boolean; periodId?: string; currentPeriod?: boolean; types?: GroupType[]; organizationId?: string }) {
+    /**
+     *
+     * @param filters
+     * @param filters.groups - Only show registrations for these groups
+     * @param filters.groupIds - Only show registrations for these group ids
+     * @param filters.canRegister - Only show registrations for which the member can register
+     * @param filters.periodId - Only show registrations for this period
+     * @param filters.currentPeriod - Only show registrations for the current period
+     * @param filters.includeFuture - Used in combination with currentPeriod. If true, also show registrations that start in the future. Defaults to true.
+     * @param filters.types - Only show registrations for these group types
+     * @param filters.organizationId - Only show registrations for this organization
+     * @returns
+     */
+    filterRegistrations(filters: { groups?: Group[] | null; groupIds?: string[] | null; canRegister?: boolean; periodId?: string; includeFuture?: boolean; currentPeriod?: boolean; types?: GroupType[]; organizationId?: string }) {
         return this.patchedMember.registrations.filter((r) => {
             if (r.registeredAt === null || r.deactivatedAt !== null) {
                 return false;
@@ -763,7 +776,9 @@ export class PlatformMember implements ObjectWithRecords {
                 const isCurrentPeriod = !!organization && r.group.periodId === organization.period.period.id;
 
                 if (isCurrentPeriod !== filters.currentPeriod) {
-                    return false;
+                    if (!(filters.includeFuture ?? true) || r.group.settings.endDate < new Date()) {
+                        return false;
+                    }
                 }
             }
 
