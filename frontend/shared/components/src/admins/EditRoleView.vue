@@ -84,8 +84,8 @@
                         :resource="resource"
                         :configurable-access-rights="[AccessRight.EventWrite, AccessRight.OrganizationFinanceDirector, AccessRight.OrganizationEventNotificationReviewer]"
                         type="resource"
-                        @patch:role="addPatch"
                         :unlisted="true"
+                        @patch:role="addPatch"
                     />
                 </STList>
             </template>
@@ -117,8 +117,8 @@
                         :resource="resource"
                         :configurable-access-rights="[AccessRight.OrganizationCreateGroups]"
                         type="resource"
-                        @patch:role="addPatch"
                         :unlisted="true"
+                        @patch:role="addPatch"
                     />
                 </STList>
             </template>
@@ -157,8 +157,8 @@
                         :resource="resource"
                         :configurable-access-rights="[AccessRight.EventWrite]"
                         type="resource"
-                        @patch:role="addPatch"
                         :unlisted="true"
+                        @patch:role="addPatch"
                     />
                 </STList>
             </div>
@@ -194,8 +194,8 @@
                         :resource="resource"
                         :configurable-access-rights="[AccessRight.WebshopScanTickets]"
                         type="resource"
-                        @patch:role="addPatch"
                         :unlisted="true"
+                        @patch:role="addPatch"
                     />
                 </STList>
             </div>
@@ -230,26 +230,26 @@
                     />
 
                     <ResourcePermissionRow
-                        v-for="recordCategory in recordCategories"
+                        v-for="{recordCategory, organization} in recordCategories"
                         :key="recordCategory.id"
                         :role="patched"
                         :inherited-roles="inheritedRoles"
-                        :resource="{id: recordCategory.id, name: recordCategory.name, type: PermissionsResourceType.RecordCategories }"
+                        :resource="{id: recordCategory.id, name: recordCategory.name, type: PermissionsResourceType.RecordCategories, description: !organization ? $t('Vragenlijst van #koepel') : $t('Eigen vragenlijst') }"
                         :configurable-access-rights="[]"
                         type="resource"
                         @patch:role="addPatch"
                     />
 
                     <ResourcePermissionRow
-                        v-for="resource in getUnlistedResources(PermissionsResourceType.RecordCategories, patched, recordCategories)"
+                        v-for="resource in getUnlistedResources(PermissionsResourceType.RecordCategories, patched, recordCategories.map(r => r.recordCategory))"
                         :key="resource.id"
                         :role="patched"
                         :inherited-roles="inheritedRoles"
                         :resource="resource"
                         :configurable-access-rights="[]"
                         type="resource"
-                        @patch:role="addPatch"
                         :unlisted="true"
+                        @patch:role="addPatch"
                     />
                 </STList>
             </div>
@@ -377,17 +377,16 @@ const webshops: Ref<WebshopPreview[]> = computed(() => organization.value?.websh
 const categories: Ref<GroupCategory[]> = computed(() => organization.value?.getCategoryTree({ permissions: auth.permissions }).categories ?? []);
 const tags = computed(() => platform.value.config.tags);
 const recordCategories = computed(() => {
-    const base = organization.value?.meta.recordsConfiguration.recordCategories?.slice() ?? [];
+    const base = (organization.value?.meta.recordsConfiguration.recordCategories?.slice() ?? []).map(r => ({
+        organization: organization.value,
+        recordCategory: r,
+    }));
 
     for (const r of platform.value.config.recordsConfiguration.recordCategories) {
-        if (r.defaultEnabled) {
-            base.push(r);
-        }
-        else {
-            if (organization.value?.meta.recordsConfiguration.inheritedRecordCategories.has(r.id)) {
-                base.push(r);
-            }
-        }
+        base.push({
+            organization: null,
+            recordCategory: r,
+        });
     }
 
     return base;
