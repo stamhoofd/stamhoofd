@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/locales",
-    "version": "2.79.7",
+    "version": "2.79.8",
     "license": "UNLICENCED",
     "main": "./dist/index.js",
     "module": "./esm/dist/index.js",
