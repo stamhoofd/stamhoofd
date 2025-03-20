@@ -12,7 +12,7 @@
         "auto-translate": "yarn build && node --enable-source-maps ./dist/index.js auto-translate",
         "create-comparison": "yarn build && node --enable-source-maps ./dist/index.js create-comparison"
     },
-    "dependencies": {
+    "devDependencies": {
         "@anthropic-ai/sdk": "^0.39.0",
         "@google/generative-ai": "^0.22.0",
         "@mistralai/mistralai": "^1.5.0",
@@ -22,9 +22,7 @@
         "fast-xml-parser": "^5.0.6",
         "openai": "^4.86.2",
         "uuid": "11.0.3",
-        "winston": "^3.17.0"
-    },
-    "devDependencies": {
+        "winston": "^3.17.0",
         "@typescript-eslint/eslint-plugin": "^7.7.1",
         "@typescript-eslint/parser": "^7.7.1",
         "eslint": "^8.56.0",

@@ -9,7 +9,8 @@
             "backend/app/*",
             "backend/shared/*",
             "shared/*",
-            "*"
+            "*",
+            ".development/i18n-uuid"
         ],
         "nohoist": [
             "@simonbackx/simple-encoding"
