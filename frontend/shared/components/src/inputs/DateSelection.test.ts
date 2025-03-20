@@ -941,7 +941,6 @@ describe('DateSelection', async () => {
                 },
             });
 
-            // set year below min
             const dayInput = findDayInput(wrapper);
             await dayInput.setValue(3);
 
@@ -964,7 +963,6 @@ describe('DateSelection', async () => {
                 },
             });
 
-            // set year below min
             const dayInput = findDayInput(wrapper);
             await dayInput.setValue(3);
 
@@ -989,7 +987,6 @@ describe('DateSelection', async () => {
                 },
             });
 
-            // set year below min
             const dayInput = findDayInput(wrapper);
             await dayInput.setValue(3);
 
@@ -1013,7 +1010,6 @@ describe('DateSelection', async () => {
                 },
             });
 
-            // set year below min
             const dayInput = findDayInput(wrapper);
             await dayInput.setValue(3);
 
@@ -1023,9 +1019,30 @@ describe('DateSelection', async () => {
         });
     });
 
-    // todo: add test if no time set and no date
-    // todo: test if min and max very close -> problem with time
+    test('Default date should be today with local time 12', async () => {
+        setFormatterTimeZone('Europe/Brussels');
 
+        const wrapper = mount(DateSelection, {
+            props: {
+                'modelValue': null,
+                'onUpdate:modelValue': async (e) => {
+                    await wrapper.setProps({ modelValue: e });
+                },
+            },
+        });
+
+        const yearInput = findYearInput(wrapper);
+        // trigger update
+        await yearInput.setValue((new Date()).getFullYear());
+
+        const now = new Date();
+
+        expect(wrapper.props('modelValue')).not.toBeNull();
+        // today with local time 12 (11 in UTC)
+        expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11).getTime());
+    });
+
+    // todo: test if min and max very close -> problem with time
     // todo: add test for time prop
     // todo: test is mobile?
     // todo: test display component
