@@ -57,6 +57,7 @@ const props = withDefaults(defineProps<{
     placeholder?: string;
     min?: Date;
     max?: Date;
+    // local time!
     time?: { hours: number; minutes: number; seconds: number; millisecond?: number } | null;
 }>(), {
     required: true,
@@ -66,7 +67,7 @@ const props = withDefaults(defineProps<{
     time: null,
 });
 
-const defaultTime: ComputedRef<{ hour: number; minute: number; second: number; millisecond: number }> = computed(() => {
+const defaultLocalTime: ComputedRef<{ hour: number; minute: number; second: number; millisecond: number }> = computed(() => {
     if (props.time !== null) {
         return {
             hour: props.time.hours,
@@ -90,7 +91,7 @@ const numberInputs = computed(() => [dayInput.value, monthInput.value, yearInput
 let hasFocus = false;
 
 const dateTime = computed({
-    get: () => model.value ? Formatter.luxon(model.value) : DateTime.fromObject(defaultTime.value, { zone: Formatter.timezone }).setZone(Formatter.timezone),
+    get: () => model.value ? setTime(Formatter.luxon(model.value)) : DateTime.fromObject(defaultLocalTime.value, { zone: Formatter.timezone }).setZone(Formatter.timezone),
     set: (value: DateTime) => {
         if (value.isValid) {
             emitDateTime(value);
@@ -361,7 +362,7 @@ function focusFirst() {
 }
 
 function setTime(dateTime: DateTime) {
-    return dateTime.set({ ...defaultTime.value });
+    return dateTime.set({ ...defaultLocalTime.value });
 }
 
 function emitDateTime(dateTime: DateTime | null): void {
@@ -374,8 +375,8 @@ function emitDateTime(dateTime: DateTime | null): void {
         return;
     }
 
-    const max = DateTime.fromJSDate(props.max, { zone: Formatter.timezone }).setZone(Formatter.timezone);
-    const min = DateTime.fromJSDate(props.min, { zone: Formatter.timezone }).setZone(Formatter.timezone);
+    const max = DateTime.fromJSDate(props.max).setZone(Formatter.timezone);
+    const min = DateTime.fromJSDate(props.min).setZone(Formatter.timezone);
 
     dateTime = setTime(dateTime);
 
@@ -383,9 +384,13 @@ function emitDateTime(dateTime: DateTime | null): void {
     if (dateTime > max) {
         if (isFull(dateTime.year.toString(), yearConfig)) {
             dateTime = max;
-            // To fix infinite loop, we'll need to decrease the day with 1
-            dateTime = dateTime.minus({ day: 1 });
             dateTime = setTime(dateTime);
+
+            if (dateTime > max) {
+                // To fix infinite loop, we'll need to decrease the day with 1
+                dateTime = dateTime.minus({ day: 1 });
+                dateTime = setTime(dateTime);
+            }
         }
         else {
             return;
@@ -395,9 +400,13 @@ function emitDateTime(dateTime: DateTime | null): void {
     if (dateTime < min) {
         if (isFull(dateTime.year.toString(), yearConfig)) {
             dateTime = min;
-            // To fix infinite loop, we'll need to increase the day with 1
-            dateTime = dateTime.plus({ day: 1 });
             dateTime = setTime(dateTime);
+
+            if (dateTime < min) {
+                // To fix infinite loop, we'll need to increase the day with 1
+                dateTime = dateTime.plus({ day: 1 });
+                dateTime = setTime(dateTime);
+            }
         }
         else {
             return;

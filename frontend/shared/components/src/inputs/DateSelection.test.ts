@@ -774,8 +774,164 @@ describe('DateSelection', async () => {
         expect(document.activeElement).not.toBe(yearInput.element);
     });
 
-    // todo: add test for min and max
+    test('Model value should not exceed max - default time below max', async () => {
+        setFormatterTimeZone('Europe/Brussels');
+        const date = new Date(2023, 0, 2, 13, 0, 0);
+
+        const wrapper = mount(DateSelection, {
+            props: {
+                'max': new Date(2024, 0, 1, 12, 0, 0),
+                'modelValue': date,
+                'onUpdate:modelValue': async (e) => {
+                    await wrapper.setProps({ modelValue: e });
+                },
+            },
+        });
+
+        // set year above max
+        const yearInput = findYearInput(wrapper);
+        await yearInput.setValue(2025);
+
+        expect(wrapper.props('modelValue')).not.toBeNull();
+        expect(wrapper.props('modelValue')?.getTime()).toEqual((new Date(2024, 0, 1, 11, 0, 0)).getTime());
+
+        // set month 1 higher
+        const monthInput = findMonthInput(wrapper);
+        await monthInput.trigger('focus');
+        await monthInput.trigger('keydown', { key: 'ArrowUp' });
+
+        expect(wrapper.props('modelValue')).not.toBeNull();
+        expect(wrapper.props('modelValue')?.getTime()).toEqual((new Date(2024, 0, 1, 11, 0, 0)).getTime());
+
+        // set day 1 higher
+        const dayInput = findDayInput(wrapper);
+        await dayInput.trigger('focus');
+        await dayInput.trigger('keydown', { key: 'ArrowUp' });
+
+        expect(wrapper.props('modelValue')).not.toBeNull();
+        expect(wrapper.props('modelValue')?.getTime()).toEqual((new Date(2024, 0, 1, 11, 0, 0)).getTime());
+    });
+
+    test('Model value should not exceed max - default time above max', async () => {
+        setFormatterTimeZone('Europe/Brussels');
+        const date = new Date(2023, 0, 2, 13, 0, 0);
+
+        const wrapper = mount(DateSelection, {
+            props: {
+                'max': new Date(2024, 0, 1, 10, 0, 0),
+                'modelValue': date,
+                'onUpdate:modelValue': async (e) => {
+                    await wrapper.setProps({ modelValue: e });
+                },
+            },
+        });
+
+        // set year above max
+        const yearInput = findYearInput(wrapper);
+        await yearInput.setValue(2025);
+
+        expect(wrapper.props('modelValue')).not.toBeNull();
+        // date -1 day because default local hour 11 (10 in UTC) is below UTC 12
+        expect(wrapper.props('modelValue')?.getTime()).toEqual((new Date(2023, 11, 31, 11, 0, 0)).getTime());
+
+        // set month 1 higher
+        const monthInput = findMonthInput(wrapper);
+        await monthInput.trigger('focus');
+        await monthInput.trigger('keydown', { key: 'ArrowUp' });
+
+        expect(wrapper.props('modelValue')).not.toBeNull();
+        expect(wrapper.props('modelValue')?.getTime()).toEqual((new Date(2023, 11, 31, 11, 0, 0)).getTime());
+
+        // set day 1 higher
+        const dayInput = findDayInput(wrapper);
+        await dayInput.trigger('focus');
+        await dayInput.trigger('keydown', { key: 'ArrowUp' });
+
+        expect(wrapper.props('modelValue')).not.toBeNull();
+        expect(wrapper.props('modelValue')?.getTime()).toEqual((new Date(2023, 11, 31, 11, 0, 0)).getTime());
+    });
+
+    test('Model value should not be lower than min - default time above min', async () => {
+        setFormatterTimeZone('Europe/Brussels');
+        const date = new Date(2023, 0, 2, 13, 0, 0);
+
+        const wrapper = mount(DateSelection, {
+            props: {
+                'min': new Date(2022, 0, 1, 13, 0, 0),
+                'modelValue': date,
+                'onUpdate:modelValue': async (e) => {
+                    await wrapper.setProps({ modelValue: e });
+                },
+            },
+        });
+
+        // set year below min
+        const yearInput = findYearInput(wrapper);
+        await yearInput.setValue(2021);
+
+        expect(wrapper.props('modelValue')).not.toBeNull();
+        // date +1 day because default local hour 13 (12 in UTC) is above UTC 11
+        expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(2022, 0, 2, 11, 0, 0).getTime());
+
+        // set month 1 lower
+        const monthInput = findMonthInput(wrapper);
+        await monthInput.trigger('focus');
+        await monthInput.trigger('keydown', { key: 'ArrowDown' });
+
+        expect(wrapper.props('modelValue')).not.toBeNull();
+        expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(2022, 0, 2, 11, 0, 0).getTime());
+
+        // set day 1 lower
+        const dayInput = findDayInput(wrapper);
+        await dayInput.trigger('focus');
+        await dayInput.trigger('keydown', { key: 'ArrowDown' });
+
+        expect(wrapper.props('modelValue')).not.toBeNull();
+        expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(2022, 0, 2, 11, 0, 0).getTime());
+    });
+
+    test('Model value should not be lower than min - default time below min', async () => {
+        setFormatterTimeZone('Europe/Brussels');
+        const date = new Date(2023, 0, 2, 13, 0, 0);
+
+        const wrapper = mount(DateSelection, {
+            props: {
+                'min': new Date(2022, 0, 1, 10, 0, 0),
+                'modelValue': date,
+                'onUpdate:modelValue': async (e) => {
+                    await wrapper.setProps({ modelValue: e });
+                },
+            },
+        });
+
+        // set year below min
+        const yearInput = findYearInput(wrapper);
+        await yearInput.setValue(2021);
+
+        expect(wrapper.props('modelValue')).not.toBeNull();
+        // same day because default local hour 10 (9 in UTC) is below UTC 11
+        expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(2022, 0, 1, 11, 0, 0).getTime());
+
+        // set month 1 lower
+        const monthInput = findMonthInput(wrapper);
+        await monthInput.trigger('focus');
+        await monthInput.trigger('keydown', { key: 'ArrowDown' });
+
+        expect(wrapper.props('modelValue')).not.toBeNull();
+        expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(2022, 0, 1, 11, 0, 0).getTime());
+
+        // set day 1 lower
+        const dayInput = findDayInput(wrapper);
+        await dayInput.trigger('focus');
+        await dayInput.trigger('keydown', { key: 'ArrowDown' });
+
+        expect(wrapper.props('modelValue')).not.toBeNull();
+        expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(2022, 0, 1, 11, 0, 0).getTime());
+    });
+
     // todo: add test if no time set and no date
+
+    // todo: tet if min and max very close -> problem with time
 
     // todo: add test for time prop
     // todo: test is mobile?
