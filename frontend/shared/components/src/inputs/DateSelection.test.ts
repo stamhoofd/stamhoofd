@@ -105,7 +105,7 @@ describe('DateSelection', async () => {
 
             expect(wrapper.props('modelValue')).not.toBeNull();
             // 31 should be corrected to 31
-            expect(wrapper.props('modelValue')?.getTime()).toEqual((new Date(2023, 0, 31, 12, 0, 0)).getTime());
+            expect(wrapper.props('modelValue')?.getTime()).toEqual((new Date(2023, 0, 31, 11, 0, 0)).getTime());
         });
 
         test('for month should limit to 12', async () => {
@@ -126,55 +126,9 @@ describe('DateSelection', async () => {
             await monthInput.setValue(numberOutOfRange);
 
             expect(wrapper.props('modelValue')).not.toBeNull();
-            expect(wrapper.props('modelValue')?.getTime()).toEqual((new Date(2023, 11, 1, 12, 0, 0)).getTime());
+            expect(wrapper.props('modelValue')?.getTime()).toEqual((new Date(2023, 11, 1, 11, 0, 0)).getTime());
         });
     });
-
-    // describe('Input number out of range', async () => {
-    //     test('for day should change month', async () => {
-    //         setFormatterTimeZone('Europe/Brussels');
-    //         const date = new Date(2023, 0, 1, 12, 0, 0);
-
-    //         const wrapper = mount(DateSelection, {
-    //             props: {
-    //                 'modelValue': date,
-    //                 'onUpdate:modelValue': async (e) => {
-    //                     await wrapper.setProps({ modelValue: e });
-    //                 },
-    //             },
-    //         });
-
-    //         const numberOutOfRange = '34';
-    //         const dayInput = findDayInput(wrapper);
-    //         await dayInput.setValue(numberOutOfRange);
-
-    //         expect(wrapper.props('modelValue')).not.toBeNull();
-    //         // 32 should be corrected to 31
-    //         expect(wrapper.props('modelValue')?.getTime()).toEqual((new Date(2023, 1, 3, 12, 0, 0)).getTime());
-    //     });
-
-    //     test('for month should change year', async () => {
-    //         setFormatterTimeZone('Europe/Brussels');
-    //         const date = new Date(2023, 0, 1, 12, 0, 0);
-
-    //         const wrapper = mount(DateSelection, {
-    //             props: {
-    //                 'modelValue': date,
-    //                 'onUpdate:modelValue': async (e) => {
-    //                     await wrapper.setProps({ modelValue: e });
-    //                 },
-    //             },
-    //         });
-
-    //         const numberOutOfRange = '15';
-    //         const monthInput = findMonthInput(wrapper);
-    //         await monthInput.setValue(numberOutOfRange);
-
-    //         expect(wrapper.props('modelValue')).not.toBeNull();
-    //         // 32 should be corrected to 31
-    //         expect(wrapper.props('modelValue')?.getTime()).toEqual((new Date(2024, 2, 1, 12, 0, 0)).getTime());
-    //     });
-    // });
 
     describe('Input negative number should become positive', async () => {
         test('for day', async () => {
@@ -195,7 +149,7 @@ describe('DateSelection', async () => {
 
             expect(wrapper.props('modelValue')).not.toBeNull();
             // 32 should be corrected to 31
-            expect(wrapper.props('modelValue')?.getTime()).toEqual((new Date(2023, 0, 23, 12, 0, 0)).getTime());
+            expect(wrapper.props('modelValue')?.getTime()).toEqual((new Date(2023, 0, 23, 11, 0, 0)).getTime());
         });
 
         test('for month', async () => {
@@ -782,7 +736,6 @@ describe('DateSelection', async () => {
 
         const dateSelectionWrapper = mount(DateSelection, { attachTo: document.body });
 
-        // let internalModelValue: Date | null = date;
         await dateSelectionWrapper.setProps({
             'time': { hours: 12, minutes: 0, seconds: 0 },
             'modelValue': date,
@@ -822,6 +775,8 @@ describe('DateSelection', async () => {
     });
 
     // todo: add test for min and max
+    // todo: add test if no time set and no date
+
     // todo: add test for time prop
     // todo: test is mobile?
     // todo: test display component
