@@ -1,19 +1,19 @@
 <template>
     <div ref="el" class="date-selection-container input-icon-container right icon arrow-down-small gray">
-        <div v-if="$isMobile" class="input selectable" :class="{placeholder: modelValue === null}" @click="openContextMenu(true)">
+        <div v-if="isMobile" class="input selectable" :class="{placeholder: model === null}" @click="openContextMenu(true)">
             <div>{{ dateText }}</div>
         </div>
-        <div v-else class="input selectable" :class="{placeholder: modelValue === null}" @click="focusFirst()" @mousedown.prevent>
-            <span v-if="modelValue === null" class="placeholder">{{ placeholder }}</span>
+        <div v-else class="input selectable" :class="{placeholder: model === null}" @click="focusFirst()" @mousedown.prevent>
+            <span v-if="model === null" class="placeholder">{{ placeholder }}</span>
             <div @click.prevent @mouseup.prevent>
-                <input ref="dayInput" v-model="dayText" inputmode="numeric" autocomplete="off" @change="updateDate" @focus.prevent="onFocus(0)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(0)" @input="onTyping();">
+                <input ref="dayInput" v-model="dayText" inputmode="numeric" autocomplete="off" @focus.prevent="onFocus(0)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(0)">
                 <span>{{ dayText }}</span>
             </div>
 
             <span :class="{sep: true, hide: !hasFocus}">/</span>
 
             <div @click.prevent @mouseup.prevent>
-                <input ref="monthInput" v-model="monthText" inputmode="numeric" autocomplete="off" @change="updateDate" @focus.prevent="onFocus(1)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(1)" @input="onTyping();">
+                <input ref="monthInput" v-model="monthText" inputmode="numeric" autocomplete="off" @focus.prevent="onFocus(1)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(1)">
                 <span v-if="hasFocus">{{ monthText }}</span>
                 <span v-else>{{ monthTextLong }}</span>
             </div>
@@ -21,7 +21,7 @@
             <span :class="{sep: true, hide: !hasFocus}">/</span>
 
             <div @click.prevent @mouseup.prevent>
-                <input ref="yearInput" v-model="yearText" inputmode="numeric" autocomplete="off" @change="updateDate" @focus.prevent="onFocus(2)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(2)" @input="onTyping();">
+                <input ref="yearInput" v-model="yearText" inputmode="numeric" autocomplete="off" @focus.prevent="onFocus(2)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(2)">
                 <span>{{ yearText }}</span>
             </div>
         </div>
@@ -31,46 +31,128 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
-
 import { DateTime } from 'luxon';
-import { computed, onActivated, onBeforeMount, onDeactivated, onMounted, ref, useTemplateRef, watch } from 'vue';
+import { computed, ComputedRef, onActivated, onBeforeMount, onDeactivated, onMounted, useTemplateRef, WritableComputedRef } from 'vue';
 import { useIsMobile } from '../hooks';
 import DateSelectionView from '../overlays/DateSelectionView.vue';
+
+type DateInputType = 'day' | 'month' | 'year';
+
+type InputConfig = {
+    readonly type: DateInputType;
+    readonly maxLength: number;
+    readonly format: (value: Date | null) => string;
+    readonly max: number;
+    readonly autoCorrectIfOutOfRange?: boolean;
+};
+
+type NumberConfig = {
+    readonly model: WritableComputedRef<string, string>;
+} & InputConfig;
+
+const model = defineModel<Date | null>({ default: null });
 
 const props = withDefaults(defineProps<{
     required?: boolean;
     placeholder?: string;
-    min?: Date | null;
-    max?: Date | null;
-    time?: { hours: number; minutes: number; seconds: number } | null;
+    min?: Date;
+    max?: Date;
+    time?: { hours: number; minutes: number; seconds: number; millisecond?: number } | null;
 }>(), {
     required: true,
     placeholder: $t(`2ac677a6-f225-46b6-8fea-f6e0f10582ca`),
-    min: null,
-    max: null,
+    min: () => new Date(1900, 0, 1, 0, 0, 0, 0),
+    max: () => new Date(2100, 0, 1, 0, 0, 0, 0),
     time: null,
 });
 
-const modelValue = defineModel<Date | null>({ default: (() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
-})() });
+const defaultTime: ComputedRef<{ hour: number; minute: number; second: number; millisecond: number }> = computed(() => {
+    if (props.time !== null) {
+        return {
+            hour: props.time.hours,
+            minute: props.time.minutes,
+            second: props.time.seconds,
+            millisecond: props.time.millisecond ?? 0,
+        };
+    }
+
+    if (model.value === null) {
+        return ({ hour: 12, minute: 0, second: 0, millisecond: 0 });
+    }
+
+    const luxon = Formatter.luxon(model.value);
+
+    return ({ hour: luxon.hour, minute: luxon.minute, second: luxon.second, millisecond: luxon.millisecond });
+});
 
 const present = usePresent();
 const isMobile = useIsMobile();
-
 const el = useTemplateRef('el');
 const dayInput = useTemplateRef('dayInput');
 const monthInput = useTemplateRef('monthInput');
 const yearInput = useTemplateRef('yearInput');
+const numberInputs = computed(() => [dayInput.value, monthInput.value, yearInput.value]);
 
 let hasFocus = false;
-const hasFocusUnbounced = ref(false);
 
-const dayText = ref('');
-const monthText = ref('');
-const yearText = ref('');
+const dateTime = computed({
+    get: () => model.value ? Formatter.luxon(model.value) : DateTime.fromObject(defaultTime.value, { zone: Formatter.timezone }).setZone(Formatter.timezone),
+    set: (value: DateTime) => {
+        if (value.isValid) {
+            emitDateTime(value);
+        }
+    },
+});
+
+const selectedDay = computed(() => dateTime.value.toJSDate());
+
+const dateText = computed(() => model.value ? Formatter.date(model.value, true) : props.placeholder);
+
+const dayConfig: InputConfig = {
+    type: 'day',
+    maxLength: 2,
+    max: 31,
+    format: value => value ? Formatter.day(value) : '',
+    autoCorrectIfOutOfRange: true,
+};
+
+const dayText = dateInputFactory(dayConfig);
+
+const monthConfig: InputConfig = {
+    type: 'month',
+    maxLength: 2,
+    max: 12,
+    format: value => value ? Formatter.monthNumber(value).toString() : '',
+    autoCorrectIfOutOfRange: true,
+};
+
+const monthText = dateInputFactory(monthConfig);
+
+const monthTextLong = computed(() => model.value ? Formatter.month(model.value) : '');
+
+const yearConfig: InputConfig = {
+    type: 'year',
+    maxLength: 4,
+    max: props.max.getFullYear(),
+    format: value => value ? Formatter.year(value).toString() : '',
+};
+
+const yearText = dateInputFactory(yearConfig);
+
+const numberConfigs: NumberConfig[] = [
+    {
+        ...dayConfig,
+        model: dayText,
+    },
+    {
+        ...monthConfig,
+        model: monthText,
+    },
+    {
+        ...yearConfig,
+        model: yearText,
+    },
+];
 
 let displayedComponent: ComponentWithProperties | null = null;
 
@@ -90,7 +172,7 @@ const onKey = (event: KeyboardEvent) => {
         return;
     }
 
-    const config = numberConfigs.value[index];
+    const config = numberConfigs[index];
 
     const key = event.key || event.keyCode;
 
@@ -108,17 +190,11 @@ const onKey = (event: KeyboardEvent) => {
         event.preventDefault();
     }
     else if (key === 'ArrowUp' || key === 'PageUp') {
-        const value = parseInt(config.getValue());
-        if (!isNaN(value) && value < config.max) {
-            config.setValue((value + 1).toString());
-        }
+        setText((parseInt(config.model.value) + 1).toString(), config, false);
         event.preventDefault();
     }
     else if (key === 'ArrowDown' || key === 'PageDown') {
-        const value = parseInt(config.getValue());
-        if (!isNaN(value) && value > config.min) {
-            config.setValue((value - 1).toString());
-        }
+        setText((parseInt(config.model.value) - 1).toString(), config, false);
         event.preventDefault();
     }
 };
@@ -144,211 +220,34 @@ const updateHasFocus = () => {
 
     if (focus) {
         hasFocus = true;
-        hasFocusUnbounced.value = true;
+        openContextMenu(false);
     }
     else {
         hasFocus = false;
         setTimeout(() => {
-            hasFocusUnbounced.value = hasFocus;
-        }, 50);
-    }
-};
-
-onMounted(() => {
-    updateTextStrings();
-
-    document.addEventListener('keydown', onKey);
-    document.addEventListener('focusin', updateHasFocus);
-    document.addEventListener('focusout', updateHasFocus);
-    document.addEventListener('visibilitychange', updateHasFocus);
-
-    // Sometimes focusin/focusout isn't called reliably
-    document.addEventListener('click', updateHasFocus, { passive: true });
-});
-
-onActivated(() => {
-    document.addEventListener('keydown', onKey);
-    document.addEventListener('focusin', updateHasFocus);
-    document.addEventListener('focusout', updateHasFocus);
-    document.addEventListener('visibilitychange', updateHasFocus);
-
-    // Sometimes focusin/focusout isn't called reliably
-    document.addEventListener('click', updateHasFocus, { passive: true });
-});
-
-onDeactivated(() => {
-    document.removeEventListener('keydown', onKey);
-    document.removeEventListener('focusin', updateHasFocus);
-    document.removeEventListener('focusout', updateHasFocus);
-    document.removeEventListener('visibilitychange', updateHasFocus);
-    document.removeEventListener('click', updateHasFocus);
-});
-
-onBeforeMount(() => {
-    document.removeEventListener('keydown', onKey);
-    document.removeEventListener('focusin', updateHasFocus);
-    document.removeEventListener('focusout', updateHasFocus);
-    document.removeEventListener('visibilitychange', updateHasFocus);
-    document.removeEventListener('click', updateHasFocus);
-});
-
-function updateTextStrings() {
-    updateTextStringsHelper();
-
-    if (modelValue.value && props.time) {
-        if ((props.min && modelValue.value < props.min) || (props.max && modelValue.value > props.max) || modelValue.value.getHours() !== props.time.hours || modelValue.value.getMinutes() !== props.time.minutes || modelValue.value.getSeconds() !== props.time.seconds || modelValue.value.getMilliseconds() !== 0) {
-            emitDate(modelValue.value);
-        }
-    }
-}
-
-function updateTextStringsHelper() {
-    const currentDateValue = textDateTime.value ? new Date(textDateTime.value.toMillis()) : null;
-
-    const iso1 = modelValue.value ? Formatter.dateIso(modelValue.value) : '';
-    const iso2 = currentDateValue ? Formatter.dateIso(currentDateValue) : '';
-
-    if (iso1 !== iso2 || !hasFocusUnbounced.value) {
-        dayText.value = modelValue.value ? Formatter.day(modelValue.value) : '';
-        monthText.value = modelValue.value ? Formatter.monthNumber(modelValue.value).toString() : '';
-        yearText.value = modelValue.value ? Formatter.year(modelValue.value).toString() : '';
-    }
-}
-
-const monthTextLong = computed(() => {
-    return modelValue.value ? Formatter.month(modelValue.value) : '';
-});
-
-const numberInputs = computed(() => [dayInput.value, monthInput.value, yearInput.value]);
-
-type NumberConfig = {
-    maxLength: number;
-    max: number;
-    min: number;
-    type: string;
-    getValue: () => string;
-    setValue: (value: string) => void;
-};
-
-const numberConfigs = computed<NumberConfig[]>(() => {
-    return [
-        {
-            maxLength: 2,
-            max: 31,
-            min: 1,
-            type: 'day',
-            getValue: () => {
-                return dayText.value;
-            },
-            setValue: (value: string) => {
-                dayText.value = value;
-                updateDate();
-            },
-        },
-        {
-            maxLength: 2,
-            max: 12,
-            min: 1,
-            type: 'month',
-            getValue: () => {
-                return monthText.value;
-            },
-            setValue: (value: string) => {
-                monthText.value = value;
-                updateDate();
-            },
-        },
-        {
-            maxLength: 4,
-            max: 2100,
-            min: 1900,
-            type: 'year',
-            getValue: () => {
-                return yearText.value;
-            },
-            setValue: (value: string) => {
-                yearText.value = value;
-                updateDate();
-            },
-        },
-    ];
-});
-
-function blurAll() {
-    // Blur all
-    for (const element of numberInputs.value) {
-        element?.blur();
-    }
-}
-
-function selectNext(index: number) {
-    if (index < 0) {
-        return;
-    }
-
-    if (index >= numberInputs.value.length) {
-        // Remove extra characters of last input
-        const config = numberConfigs.value[index - 1];
-        let val = config.getValue().replace(/[^0-9]/g, '');
-
-        while (val.length >= 2) {
-            const shorter = val.substring(0, val.length - 1);
-            if (isFull(shorter, config)) {
-                val = shorter;
+            if (hasFocus) {
+                openContextMenu(false);
             }
             else {
-                break;
+                hideDisplayedComponent({ unlessFocused: true }).catch(console.error);
             }
-        }
-
-        config.setValue(val);
-
-        // Blur all
-        blurAll();
-
-        return;
+        });
     }
+};
 
-    if (index >= 1) {
-        const config = numberConfigs.value[index - 1];
-        const val = config.getValue();
+onMounted(addEventListeners);
+onActivated(addEventListeners);
+onDeactivated(removeEventListeners);
+onBeforeMount(removeEventListeners);
 
-        // Get location of first special character after a number
-        const firstSpecialCharacter = val.search(/[0-9][^0-9]/);
-        const cutIndex = firstSpecialCharacter > -1 ? Math.min(firstSpecialCharacter + 1, config.maxLength, val.length) : Math.min(config.maxLength, val.length);
-
-        if (val.length > cutIndex) {
-            config.setValue(val.substr(0, cutIndex).replace(/[^0-9]/g, ''));
-
-            const currentConfig = numberConfigs.value[index];
-
-            const moveText = val.substr(cutIndex).replace(/^[^0-9]+/, '');
-            currentConfig.setValue(moveText + currentConfig.getValue());
-
-            if (isFull(currentConfig.getValue(), currentConfig)) {
-                selectNext(index + 1);
-                return;
-            }
-        }
-        else {
-            // Clean previous
-            config.setValue(val.replace(/[^0-9]/g, ''));
-        }
-    }
-
-    (numberInputs.value[index] as HTMLInputElement).focus();
-
-    if ((numberInputs.value[index] as HTMLInputElement).value.length > 0) {
-        // iOS fix
-        (numberInputs.value[index] as HTMLInputElement).select();
-    }
+function dateInputFactory(config: InputConfig) {
+    return computed({
+        get: () => config.format(model.value),
+        set: value => setText(value, config, true, true),
+    });
 }
 
-function onBlur() {
-    // todo
-}
-
-function isFull(value: string, config: NumberConfig) {
+function isFull(value: string, config: InputConfig) {
     if (value.length >= config.maxLength) {
         return true;
     }
@@ -362,20 +261,103 @@ function isFull(value: string, config: NumberConfig) {
     return false;
 }
 
-function onTyping() {
-    // Check if we can move to the next field
-    const focusedInput = document.activeElement as HTMLInputElement;
-    const index = numberInputs.value.indexOf(focusedInput);
+function setText(value: string, config: InputConfig, autoSelectNext = false, limitInput = false) {
+    const valueRaw = parseInt(value);
+    if (isNaN(valueRaw)) {
+        return;
+    }
 
-    if (index !== -1) {
-        // TODO remove and split on special characters
-        // todo: automatically move extra characters to the next field
+    let result = Math.abs(valueRaw);
 
-        // Check move to next date
-        if (isFull(focusedInput.value, numberConfigs.value[index])) {
-            selectNext(index + 1);
+    if (limitInput) {
+        switch (config.type) {
+            case 'day': {
+                const daysInMonth = dateTime.value.daysInMonth;
+
+                if (daysInMonth !== undefined && result > daysInMonth) {
+                    result = daysInMonth;
+                }
+                break;
+            }
+            case 'month': {
+                if (result > 12) {
+                    result = 12;
+                }
+                break;
+            }
         }
     }
+
+    dateTime.value = dateTime.value.set({ [config.type]: result });
+
+    if (autoSelectNext && isFull(result.toString(), config)) {
+        let nextIndex = -1;
+
+        switch (config.type) {
+            case 'day': {
+                nextIndex = 1;
+                break;
+            }
+            case 'month': {
+                nextIndex = 2;
+                break;
+            }
+            case 'year': {
+                nextIndex = 3;
+                break;
+            }
+        }
+
+        selectNext(nextIndex);
+    }
+}
+
+function addEventListeners() {
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('focusin', updateHasFocus);
+    document.addEventListener('focusout', updateHasFocus);
+    document.addEventListener('visibilitychange', updateHasFocus);
+
+    // Sometimes focusin/focusout isn't called reliably
+    document.addEventListener('click', updateHasFocus, { passive: true });
+}
+
+function removeEventListeners() {
+    document.removeEventListener('keydown', onKey);
+    document.removeEventListener('focusin', updateHasFocus);
+    document.removeEventListener('focusout', updateHasFocus);
+    document.removeEventListener('visibilitychange', updateHasFocus);
+    document.removeEventListener('click', updateHasFocus);
+}
+
+function blurAll() {
+    // Blur all
+    for (const element of numberInputs.value) {
+        element?.blur();
+    }
+}
+
+function selectNext(index: number) {
+    if (index < 0) {
+        return;
+    }
+
+    const nextInput = numberInputs.value[index];
+
+    if (nextInput) {
+        nextInput.focus();
+        if (nextInput.value.length > 0) {
+            // iOS fix
+            nextInput.select();
+        }
+    }
+    else {
+        blurAll();
+    }
+}
+
+function onBlur() {
+    // todo
 }
 
 function focusFirst() {
@@ -384,92 +366,52 @@ function focusFirst() {
     }
 }
 
-function updateDate() {
-    const date = textDateTime.value ? new Date(textDateTime.value.toMillis()) : null;
-
-    if (date) {
-        emitDate(date);
-    }
+function setTime(dateTime: DateTime) {
+    return dateTime.set({ ...defaultTime.value });
 }
 
-const textDateTime = computed(() => {
-    const day = parseInt(dayText.value.replace(/[^0-9]/g, ''));
-    const month = parseInt(monthText.value.replace(/[^0-9]/g, ''));
-    const year = parseInt(yearText.value.replace(/[^0-9]/g, ''));
-
-    if (day && month && year && !isNaN(day) && !isNaN(month) && !isNaN(year)) {
-        const correctedMonth = Math.min(month, 12);
-        const luxonMonth = DateTime.fromObject({ year, month: correctedMonth }, { zone: Formatter.timezone });
-        if (luxonMonth.isValid) {
-            const result = DateTime.fromObject({ year, month: correctedMonth, day: Math.min(day, luxonMonth.daysInMonth) }, { zone: Formatter.timezone });
-            if (result.isValid) {
-                return result;
-            }
+function emitDateTime(dateTime: DateTime | null): void {
+    if (!dateTime) {
+        if (props.required) {
+            model.value = selectedDay.value;
+            return;
         }
-    }
-
-    return null;
-});
-
-const dateText = computed(() => modelValue.value ? Formatter.date(modelValue.value, true) : props.placeholder);
-
-function emitDate(value: Date | null): void {
-    if (!value) {
-        modelValue.value = null;
+        model.value = null;
         return;
     }
 
-    let d = DateTime.fromJSDate(value, { zone: Formatter.timezone });
-    const max = props.max ? DateTime.fromJSDate(props.max, { zone: Formatter.timezone }) : null;
-    const min = props.min ? DateTime.fromJSDate(props.min, { zone: Formatter.timezone }) : null;
+    const max = DateTime.fromJSDate(props.max, { zone: Formatter.timezone }).setZone(Formatter.timezone);
+    const min = DateTime.fromJSDate(props.min, { zone: Formatter.timezone }).setZone(Formatter.timezone);
 
-    // First correct for min/max
-    if (max && d > max) {
-        d = max;
-    }
-
-    if (min && d < min) {
-        d = min;
-    }
-
-    if (props.time) {
-        d = d.set({ hour: props.time.hours, minute: props.time.minutes, second: props.time.seconds, millisecond: 0 });
-    }
-    else if (modelValue.value) {
-        const modelValueLuxon = Formatter.luxon(modelValue.value);
-        d = d.set({ hour: modelValueLuxon.hour, minute: modelValueLuxon.minute, second: 0, millisecond: 0 });
-    }
-    else {
-        d = d.set({ hour: 12, minute: 0, second: 0, millisecond: 0 });
-    }
+    dateTime = setTime(dateTime);
 
     // End with min/max correction again
-    if (max && d > max) {
-        d = max;
-
-        if (props.time) {
+    if (dateTime > max) {
+        if (isFull(dateTime.year.toString(), yearConfig)) {
+            dateTime = max;
             // To fix infinite loop, we'll need to decrease the day with 1
-            d = d.minus({ day: 1 });
-            d = d.set({ hour: props.time.hours, minute: props.time.minutes, second: props.time.seconds, millisecond: 0 });
+            dateTime = dateTime.minus({ day: 1 });
+            dateTime = setTime(dateTime);
+        }
+        else {
+            return;
         }
     }
 
-    if (min && d < min) {
-        d = min;
-
-        if (props.time) {
+    if (dateTime < min) {
+        if (isFull(dateTime.year.toString(), yearConfig)) {
+            dateTime = min;
             // To fix infinite loop, we'll need to increase the day with 1
-            d = d.plus({ day: 1 });
-            d = d.set({ hour: props.time.hours, minute: props.time.minutes, second: props.time.seconds, millisecond: 0 });
+            dateTime = dateTime.plus({ day: 1 });
+            dateTime = setTime(dateTime);
+        }
+        else {
+            return;
         }
     }
 
-    modelValue.value = d.toJSDate();
+    model.value = dateTime.toJSDate();
 }
-
-const selectedDay = computed(() => {
-    return modelValue.value ? new Date(modelValue.value) : new Date();
-});
 
 function openContextMenu(autoDismiss = true) {
     if (displayedComponent || el.value === null) {
@@ -488,7 +430,7 @@ function openContextMenu(autoDismiss = true) {
         min: props.min,
         max: props.max,
         setDate: (value: Date | null) => {
-            emitDate(value);
+            emitDateTime(value ? Formatter.luxon(value) : null);
         },
         onClose: () => {
             blurAll();
@@ -509,7 +451,6 @@ async function hideDisplayedComponent({ unlessFocused } = { unlessFocused: false
                 const listener = () => {
                     activeElement.removeEventListener('change', listener);
                     activeElement.removeEventListener('focusout', listener);
-                    // selectNext(2)
                 };
                 activeElement.addEventListener('change', listener);
                 activeElement.addEventListener('focusout', listener);
@@ -525,23 +466,6 @@ async function hideDisplayedComponent({ unlessFocused } = { unlessFocused: false
 function onFocus(index: number) {
     selectNext(index);
 }
-
-watch(modelValue, (newValue, oldValue) => {
-    if (newValue?.getTime() !== oldValue?.getTime()) {
-        updateTextStrings();
-    }
-});
-
-watch(hasFocusUnbounced, (hasFocusUnbounced) => {
-    if (!hasFocusUnbounced) {
-        hideDisplayedComponent({ unlessFocused: true }).catch(console.error);
-        // Clear invalid date text
-        updateTextStrings();
-    }
-    else {
-        openContextMenu(false);
-    }
-}, { immediate: true });
 </script>
 
 <style lang="scss">
