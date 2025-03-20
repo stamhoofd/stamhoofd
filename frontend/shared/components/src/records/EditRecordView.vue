@@ -738,7 +738,7 @@ async function save() {
     if ((type.value === RecordType.ChooseOne || type.value === RecordType.MultipleChoice) && choices.value.length === 0) {
         errors.errorBox = new ErrorBox(new SimpleError({
             code: 'invalid_record',
-            message: $t('Voeg minstens één keuzemogelijkheid toe'),
+            message: $t('a3101c16-5dc1-4baf-82fd-9f1f900281d0'),
         }));
         return;
     }

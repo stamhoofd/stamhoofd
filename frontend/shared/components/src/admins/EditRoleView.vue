@@ -234,7 +234,7 @@
                         :key="recordCategory.id"
                         :role="patched"
                         :inherited-roles="inheritedRoles"
-                        :resource="{id: recordCategory.id, name: recordCategory.name, type: PermissionsResourceType.RecordCategories, description: !organization ? $t('Vragenlijst van #koepel') : $t('Eigen vragenlijst') }"
+                        :resource="{id: recordCategory.id, name: recordCategory.name, type: PermissionsResourceType.RecordCategories, description: !organization ? $t('1dfaeb07-5f01-42c7-a9a4-0096047da86e') : $t('4dea71e9-0965-4c9a-81ac-6ee7046a0d8e') }"
                         :configurable-access-rights="[]"
                         type="resource"
                         @patch:role="addPatch"

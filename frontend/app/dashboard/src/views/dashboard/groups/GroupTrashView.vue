@@ -54,7 +54,7 @@ const periodId = props.period.period.id;
 
 const loadingGroups = ref(true);
 const groups: Ref<Group[]> = ref([]);
-const title = computed(() => `${$t('Prullenmand')} (${props.period.period.nameShort ?? '?'})`);
+const title = computed(() => `${$t('0671f7d3-7089-4cde-b28b-79acb10bea28')} (${props.period.period.nameShort ?? '?'})`);
 const context = useContext();
 const organizationManager = useOrganizationManager();
 const allCategories = computed(() => props.period.getCategoryTree({
