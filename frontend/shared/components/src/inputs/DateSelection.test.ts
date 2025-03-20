@@ -4,8 +4,6 @@ import { mount, VueWrapper } from '@vue/test-utils';
 import { describe, expect, test } from 'vitest';
 import DateSelection from './DateSelection.vue';
 
-// todo: add test that time should not be changed if no time is set + implement
-
 describe('DateSelection', async () => {
     const originalTimezone = Formatter.timezone;
     let wrapper: VueWrapper | undefined;
@@ -929,9 +927,104 @@ describe('DateSelection', async () => {
         expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(2022, 0, 1, 11, 0, 0).getTime());
     });
 
-    // todo: add test if no time set and no date
+    describe('Model value should have default local time after emit', async () => {
+        test('Europe/Brussels', async () => {
+            setFormatterTimeZone('Europe/Brussels');
+            const date = new Date(2023, 0, 2, 13, 0, 0);
 
-    // todo: tet if min and max very close -> problem with time
+            const wrapper = mount(DateSelection, {
+                props: {
+                    'modelValue': date,
+                    'onUpdate:modelValue': async (e) => {
+                        await wrapper.setProps({ modelValue: e });
+                    },
+                },
+            });
+
+            // set year below min
+            const dayInput = findDayInput(wrapper);
+            await dayInput.setValue(3);
+
+            expect(wrapper.props('modelValue')).not.toBeNull();
+            // default time is 12 in local time -> 11 in UTC
+            expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(2023, 0, 3, 11, 0, 0).getTime());
+        });
+
+        // test for other timezone
+        test('Asia/Shanghai', async () => {
+            setFormatterTimeZone('Asia/Shanghai');
+            const date = new Date(2023, 0, 2, 13, 0, 0);
+
+            const wrapper = mount(DateSelection, {
+                props: {
+                    'modelValue': date,
+                    'onUpdate:modelValue': async (e) => {
+                        await wrapper.setProps({ modelValue: e });
+                    },
+                },
+            });
+
+            // set year below min
+            const dayInput = findDayInput(wrapper);
+            await dayInput.setValue(3);
+
+            expect(wrapper.props('modelValue')).not.toBeNull();
+            // default time is 12 in local time -> 4 in UTC
+            expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(2023, 0, 3, 4, 0, 0).getTime());
+        });
+    });
+
+    describe('Model value should have defined local time after emit', async () => {
+        test('Europe/Brussels', async () => {
+            setFormatterTimeZone('Europe/Brussels');
+            const date = new Date(2023, 0, 2, 13, 0, 0);
+
+            const wrapper = mount(DateSelection, {
+                props: {
+                    'time': { hours: 15, minutes: 5, seconds: 3, millisecond: 2 },
+                    'modelValue': date,
+                    'onUpdate:modelValue': async (e) => {
+                        await wrapper.setProps({ modelValue: e });
+                    },
+                },
+            });
+
+            // set year below min
+            const dayInput = findDayInput(wrapper);
+            await dayInput.setValue(3);
+
+            expect(wrapper.props('modelValue')).not.toBeNull();
+            // defined time is 15 in local time -> 14 in UTC
+            expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(2023, 0, 3, 14, 5, 3, 2).getTime());
+        });
+
+        // test for other timezone
+        test('Asia/Shanghai', async () => {
+            setFormatterTimeZone('Asia/Shanghai');
+            const date = new Date(2023, 0, 2, 13, 0, 0);
+
+            const wrapper = mount(DateSelection, {
+                props: {
+                    'time': { hours: 15, minutes: 5, seconds: 3, millisecond: 2 },
+                    'modelValue': date,
+                    'onUpdate:modelValue': async (e) => {
+                        await wrapper.setProps({ modelValue: e });
+                    },
+                },
+            });
+
+            // set year below min
+            const dayInput = findDayInput(wrapper);
+            await dayInput.setValue(3);
+
+            expect(wrapper.props('modelValue')).not.toBeNull();
+            // defined time is 15 in local time -> 7 in UTC
+            expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(2023, 0, 3, 7, 5, 3, 2).getTime());
+        });
+    });
+
+    // todo: add test if no time set and no date
+    // todo: test if min and max very close -> problem with time
 
     // todo: add test for time prop
     // todo: test is mobile?
