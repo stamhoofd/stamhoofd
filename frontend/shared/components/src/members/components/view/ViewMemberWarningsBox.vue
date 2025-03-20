@@ -20,7 +20,7 @@ import { MemberPlatformMembership, MembershipStatus, PermissionLevel, PlatformMe
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useDataPermissionSettings, useFinancialSupportSettings } from '../../../groups';
-import { useAuth, useOrganization, usePlatform } from '../../../hooks';
+import { useAuth } from '../../../hooks';
 import { useIsPropertyEnabled } from '../../hooks/useIsPropertyRequired';
 
 defineOptions({
@@ -30,11 +30,9 @@ defineOptions({
 const props = defineProps<{
     member: PlatformMember;
 }>();
-const organization = useOrganization();
 const auth = useAuth();
 const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), false);
 const $t = useTranslate();
-const platform = usePlatform();
 
 // Possible the member didn't fill in the answers yet
 const autoCompletedAnswers = computed(() => {
@@ -43,7 +41,6 @@ const autoCompletedAnswers = computed(() => {
             user: auth.user!,
             level: PermissionLevel.Read,
         },
-        scopeOrganization: organization.value,
     });
     const allRecords = recordCategories.flatMap(category => category.getAllFilteredRecords(props.member));
     const answerClone: typeof props.member.patchedMember.details.recordAnswers = new Map();

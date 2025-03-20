@@ -18,7 +18,6 @@ const props = defineProps<{
     member: PlatformMember;
 }>();
 
-const organization = useOrganization();
 const auth = useAuth();
 
 const recordCategories = computed(() => {
@@ -30,7 +29,6 @@ const recordCategories = computed(() => {
     const member = props.member;
     const categories = member.getEnabledRecordCategories({
         checkPermissions,
-        scopeOrganization: organization.value,
     });
 
     return RecordCategory.filterCategories(categories, member);
