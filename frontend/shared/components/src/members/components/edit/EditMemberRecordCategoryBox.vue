@@ -34,9 +34,6 @@ const owningOrganization = computed(() => {
     return props.member.organizations.find(o => o.meta.recordsConfiguration.recordCategories.find(c => c.id === props.category.id));
 });
 const titleSuffix = computed(() => {
-    if (allOptional.value && app === 'registration') {
-        return ' (optioneel)';
-    }
     if (app === 'registration') {
         return '';
     }
