@@ -251,6 +251,41 @@ export class PlatformFamily {
         return Array.from(occurrences.values());
     }
 
+    getAddressesWithoutPatches(skip: { memberId?: string; parentId?: string }) {
+        const addresses = new Map<string, Address>();
+        for (const member of this.members) {
+            if (member.member.details.address) {
+                addresses.set(member.member.details.address.toString(), member.member.details.address);
+            }
+
+            if (!skip.memberId || member.id !== skip.memberId) {
+                if (member.patchedMember.details.address) {
+                    addresses.set(member.patchedMember.details.address.toString(), member.patchedMember.details.address);
+                }
+            }
+
+            for (const parent of member.member.details.parents) {
+                if (parent.address) {
+                    addresses.set(parent.address.toString(), parent.address);
+                }
+            }
+
+            for (const parent of member.patchedMember.details.parents) {
+                if (!skip.parentId || parent.id !== skip.parentId) {
+                    if (parent.address) {
+                        addresses.set(parent.address.toString(), parent.address);
+                    }
+                }
+            }
+
+            for (const unverifiedAddress of member.member.details.unverifiedAddresses) {
+                addresses.set(unverifiedAddress.toString(), unverifiedAddress);
+            }
+        }
+
+        return Array.from(addresses.values());
+    }
+
     get addresses() {
         const addresses = new Map<string, Address>();
         for (const member of this.members) {

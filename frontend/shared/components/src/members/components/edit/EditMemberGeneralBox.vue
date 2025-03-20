@@ -272,12 +272,7 @@ const alternativeEmails = computed({
 });
 
 const availableAddresses = computed(() => {
-    const list = props.member.family.addresses;
-
-    if (props.member.patchedMember.details.address !== null && !list.find(a => a.toString() === props.member.patchedMember.details.address!.toString())) {
-        list.push(props.member.patchedMember.details.address);
-    }
-    return list;
+    return props.member.family.getAddressesWithoutPatches({ memberId: props.member.id });
 });
 
 function deleteEmail(n: number) {
