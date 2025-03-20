@@ -85,8 +85,8 @@ describe('DateSelection', async () => {
         }
     });
 
-    describe('Input number out of range should be limited', async () => {
-        test('for day', async () => {
+    describe('Input number out of range', async () => {
+        test('for day should limit to days in month', async () => {
             setFormatterTimeZone('Europe/Brussels');
             const date = new Date(2023, 0, 1, 12, 0, 0);
 
@@ -104,11 +104,11 @@ describe('DateSelection', async () => {
             await dayInput.setValue(numberOutOfRange);
 
             expect(wrapper.props('modelValue')).not.toBeNull();
-            // 32 should be corrected to 31
+            // 31 should be corrected to 31
             expect(wrapper.props('modelValue')?.getTime()).toEqual((new Date(2023, 0, 31, 12, 0, 0)).getTime());
         });
 
-        test('for month', async () => {
+        test('for month should limit to 12', async () => {
             setFormatterTimeZone('Europe/Brussels');
             const date = new Date(2023, 0, 1, 12, 0, 0);
 
@@ -126,10 +126,55 @@ describe('DateSelection', async () => {
             await monthInput.setValue(numberOutOfRange);
 
             expect(wrapper.props('modelValue')).not.toBeNull();
-            // 32 should be corrected to 31
             expect(wrapper.props('modelValue')?.getTime()).toEqual((new Date(2023, 11, 1, 12, 0, 0)).getTime());
         });
     });
+
+    // describe('Input number out of range', async () => {
+    //     test('for day should change month', async () => {
+    //         setFormatterTimeZone('Europe/Brussels');
+    //         const date = new Date(2023, 0, 1, 12, 0, 0);
+
+    //         const wrapper = mount(DateSelection, {
+    //             props: {
+    //                 'modelValue': date,
+    //                 'onUpdate:modelValue': async (e) => {
+    //                     await wrapper.setProps({ modelValue: e });
+    //                 },
+    //             },
+    //         });
+
+    //         const numberOutOfRange = '34';
+    //         const dayInput = findDayInput(wrapper);
+    //         await dayInput.setValue(numberOutOfRange);
+
+    //         expect(wrapper.props('modelValue')).not.toBeNull();
+    //         // 32 should be corrected to 31
+    //         expect(wrapper.props('modelValue')?.getTime()).toEqual((new Date(2023, 1, 3, 12, 0, 0)).getTime());
+    //     });
+
+    //     test('for month should change year', async () => {
+    //         setFormatterTimeZone('Europe/Brussels');
+    //         const date = new Date(2023, 0, 1, 12, 0, 0);
+
+    //         const wrapper = mount(DateSelection, {
+    //             props: {
+    //                 'modelValue': date,
+    //                 'onUpdate:modelValue': async (e) => {
+    //                     await wrapper.setProps({ modelValue: e });
+    //                 },
+    //             },
+    //         });
+
+    //         const numberOutOfRange = '15';
+    //         const monthInput = findMonthInput(wrapper);
+    //         await monthInput.setValue(numberOutOfRange);
+
+    //         expect(wrapper.props('modelValue')).not.toBeNull();
+    //         // 32 should be corrected to 31
+    //         expect(wrapper.props('modelValue')?.getTime()).toEqual((new Date(2024, 2, 1, 12, 0, 0)).getTime());
+    //     });
+    // });
 
     describe('Input negative number should become positive', async () => {
         test('for day', async () => {
@@ -466,6 +511,58 @@ describe('DateSelection', async () => {
             expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2024, 1, 2, 11, 0, 0).getTime());
         });
 
+        test('ArrowUp should set next month if day is last day of month', async () => {
+            setFormatterTimeZone('Europe/Brussels');
+
+            const date = new Date(2025, 1, 28, 11, 0, 0);
+
+            const dateSelectionWrapper = mount(DateSelection, {
+                attachTo: document.body,
+                props: {
+                    'time': { hours: 12, minutes: 0, seconds: 0 },
+                    'modelValue': date,
+                    'onUpdate:modelValue': async (e) => {
+                        await wrapper!.setProps({ modelValue: e });
+                    },
+                },
+            });
+            wrapper = dateSelectionWrapper;
+            const dayInput = findDayInput(dateSelectionWrapper);
+
+            // day
+            await dayInput.trigger('focus');
+            await dayInput.trigger('keydown', { key: 'ArrowUp' });
+
+            expect(dateSelectionWrapper.props('modelValue')).not.toBeNull();
+            expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2025, 2, 1, 11, 0, 0).getTime());
+        });
+
+        test('ArrowUp should set next year if last month', async () => {
+            setFormatterTimeZone('Europe/Brussels');
+
+            const date = new Date(2025, 11, 1, 11, 0, 0);
+
+            const dateSelectionWrapper = mount(DateSelection, {
+                attachTo: document.body,
+                props: {
+                    'time': { hours: 12, minutes: 0, seconds: 0 },
+                    'modelValue': date,
+                    'onUpdate:modelValue': async (e) => {
+                        await wrapper!.setProps({ modelValue: e });
+                    },
+                },
+            });
+            wrapper = dateSelectionWrapper;
+            const monthInput = findMonthInput(dateSelectionWrapper);
+
+            // day
+            await monthInput.trigger('focus');
+            await monthInput.trigger('keydown', { key: 'ArrowUp' });
+
+            expect(dateSelectionWrapper.props('modelValue')).not.toBeNull();
+            expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2026, 0, 1, 11, 0, 0).getTime());
+        });
+
         test('PageUp should set input value + 1', async () => {
             setFormatterTimeZone('Europe/Brussels');
 
@@ -552,6 +649,58 @@ describe('DateSelection', async () => {
             expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2022, 0, 1, 11, 0, 0).getTime());
         });
 
+        test('ArrowDown should set previous month if day is first day of month', async () => {
+            setFormatterTimeZone('Europe/Brussels');
+
+            const date = new Date(2025, 0, 1, 11, 0, 0);
+
+            const dateSelectionWrapper = mount(DateSelection, {
+                attachTo: document.body,
+                props: {
+                    'time': { hours: 12, minutes: 0, seconds: 0 },
+                    'modelValue': date,
+                    'onUpdate:modelValue': async (e) => {
+                        await wrapper!.setProps({ modelValue: e });
+                    },
+                },
+            });
+            wrapper = dateSelectionWrapper;
+            const dayInput = findDayInput(dateSelectionWrapper);
+
+            // day
+            await dayInput.trigger('focus');
+            await dayInput.trigger('keydown', { key: 'ArrowDown' });
+
+            expect(dateSelectionWrapper.props('modelValue')).not.toBeNull();
+            expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2024, 11, 31, 11, 0, 0).getTime());
+        });
+
+        test('ArrowDown should set previous year if first month', async () => {
+            setFormatterTimeZone('Europe/Brussels');
+
+            const date = new Date(2025, 0, 1, 11, 0, 0);
+
+            const dateSelectionWrapper = mount(DateSelection, {
+                attachTo: document.body,
+                props: {
+                    'time': { hours: 12, minutes: 0, seconds: 0 },
+                    'modelValue': date,
+                    'onUpdate:modelValue': async (e) => {
+                        await wrapper!.setProps({ modelValue: e });
+                    },
+                },
+            });
+            wrapper = dateSelectionWrapper;
+            const monthInput = findMonthInput(dateSelectionWrapper);
+
+            // day
+            await monthInput.trigger('focus');
+            await monthInput.trigger('keydown', { key: 'ArrowDown' });
+
+            expect(dateSelectionWrapper.props('modelValue')).not.toBeNull();
+            expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2024, 11, 1, 11, 0, 0).getTime());
+        });
+
         test('PageDown should set input value - 1', async () => {
             setFormatterTimeZone('Europe/Brussels');
 
@@ -629,16 +778,15 @@ describe('DateSelection', async () => {
     test('Next input should focus while typing if input is full', async () => {
         setFormatterTimeZone('Europe/Brussels');
 
-        const date = new Date(2023, 0, 1, 11, 0, 0);
+        const date = new Date(2023, 7, 1, 11, 0, 0);
 
         const dateSelectionWrapper = mount(DateSelection, { attachTo: document.body });
 
+        // let internalModelValue: Date | null = date;
         await dateSelectionWrapper.setProps({
             'time': { hours: 12, minutes: 0, seconds: 0 },
             'modelValue': date,
-            'onUpdate:modelValue': async (e) => {
-                await dateSelectionWrapper!.setProps({ modelValue: e });
-            },
+            'onUpdate:modelValue': e => dateSelectionWrapper.setProps({ modelValue: e }),
         });
 
         wrapper = dateSelectionWrapper;
@@ -652,20 +800,19 @@ describe('DateSelection', async () => {
         await dayInput.setValue('12');
 
         expect(dateSelectionWrapper.props('modelValue')).not.toBeNull();
-        // todo: fix -> hour should be 10!!!
-        expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2023, 0, 12, 11, 0, 0).getTime());
+        expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2023, 7, 12, 10, 0, 0).getTime());
 
         expect(document.activeElement).not.toBe(dayInput.element);
         expect(document.activeElement).toBe(monthInput.element);
 
-        // month
+        // // month
         await monthInput.setValue('9');
 
         expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2023, 8, 12, 10, 0, 0).getTime());
         expect(document.activeElement).not.toBe(monthInput.element);
         expect(document.activeElement).toBe(yearInput.element);
 
-        // year
+        // // year
         await yearInput.setValue('2024');
 
         expect(dateSelectionWrapper.props('modelValue')?.getTime()).toEqual(new Date(2024, 8, 12, 10, 0, 0).getTime());
@@ -673,4 +820,9 @@ describe('DateSelection', async () => {
         expect(document.activeElement).not.toBe(monthInput.element);
         expect(document.activeElement).not.toBe(yearInput.element);
     });
+
+    // todo: add test for min and max
+    // todo: add test for time prop
+    // todo: test is mobile?
+    // todo: test display component
 });
