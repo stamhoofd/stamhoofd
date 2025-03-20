@@ -76,13 +76,7 @@ const defaultTime: ComputedRef<{ hour: number; minute: number; second: number; m
         };
     }
 
-    if (model.value === null) {
-        return ({ hour: 12, minute: 0, second: 0, millisecond: 0 });
-    }
-
-    const luxon = Formatter.luxon(model.value);
-
-    return ({ hour: luxon.hour, minute: luxon.minute, second: luxon.second, millisecond: luxon.millisecond });
+    return ({ hour: 12, minute: 0, second: 0, millisecond: 0 });
 });
 
 const present = usePresent();
