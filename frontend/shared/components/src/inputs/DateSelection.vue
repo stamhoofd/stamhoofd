@@ -385,6 +385,7 @@ function emitDateTime(dateTime: DateTime | null): void {
         return;
     }
 
+    const original = dateTime;
     const max = DateTime.fromJSDate(props.max).setZone(Formatter.timezone);
     const min = DateTime.fromJSDate(props.min).setZone(Formatter.timezone);
 
@@ -424,6 +425,16 @@ function emitDateTime(dateTime: DateTime | null): void {
 
     if (dateTime > max) {
         console.warn('Impossible to set time between min and max date');
+        // check if datetime is closer to min or max
+        const dayWithTime = setTime(original > max ? max : min);
+        if (dayWithTime > max) {
+            // set to max if closer to max
+            dateTime = max;
+        }
+        else {
+            // set to min if closer to min
+            dateTime = min;
+        }
     }
 
     model.value = dateTime.toJSDate();
