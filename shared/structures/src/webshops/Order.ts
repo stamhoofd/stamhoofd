@@ -4,6 +4,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { BalanceItemWithPayments, BalanceItemWithPrivatePayments } from '../BalanceItem';
 import { Recipient, Replacement } from '../endpoints/EmailRequest';
 import { Payment, PrivatePayment } from '../members/Payment';
+import { RecordCheckboxAnswer } from '../members/records/RecordAnswer';
 import { Organization } from '../Organization';
 import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodHelper, PaymentMethodV150 } from '../PaymentMethod';
 import { PaymentStatus } from '../PaymentStatus';
@@ -304,6 +305,10 @@ export class Order extends AutoEncoder {
             ...this.data.fieldAnswers.filter(a => a.answer).map(a => ({
                 title: a.field.name,
                 value: a.answer
+            })),
+            ...this.data.recordAnswers.filter(a => !a.isEmpty || a instanceof RecordCheckboxAnswer).map(a => ({
+                title: a.settings.name,
+                value: a.stringValue
             })),
             ...(
                 (this.data.paymentMethod !== PaymentMethod.Unknown) ? [
