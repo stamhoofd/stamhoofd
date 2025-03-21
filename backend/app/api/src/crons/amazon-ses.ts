@@ -27,13 +27,17 @@ async function saveLog({ email, organization, type, subType, subject, response, 
             type: AuditLogReplacementType.EmailAddress,
         })],
         ['subType', AuditLogReplacement.key(subType || 'unknown')],
-        ['response', AuditLogReplacement.longText(response)],
         ['subject', AuditLogReplacement.string(subject)],
         ['sender', AuditLogReplacement.create({
             value: sender,
             type: AuditLogReplacementType.EmailAddress,
         })],
     ]);
+
+    if (response) {
+        log.replacements.set('response', AuditLogReplacement.longText(response));
+    }
+
     // Check if we already logged this bounce
     const existing = await AuditLog.select().where('externalId', log.externalId).first(false);
     if (existing) {
