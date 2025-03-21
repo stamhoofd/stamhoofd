@@ -198,9 +198,15 @@ const updateHasFocus = () => {
     if (el.value === null) {
         return;
     }
+
+    const initial = hasFocus;
+
     let focus = !!el.value.contains(document.activeElement);
 
-    if (displayedComponent) {
+    if (isMobile) {
+        focus = false;
+    }
+    else if (displayedComponent) {
         const instance = displayedComponent.componentInstance();
         if (instance) {
             if (instance.$el && document.activeElement && instance.$el.contains(document.activeElement)) {
@@ -209,24 +215,28 @@ const updateHasFocus = () => {
         }
     }
 
-    if (isMobile) {
-        focus = false;
-    }
-
     if (focus) {
         hasFocus = true;
-        openContextMenu(false);
+
+        // if changed
+        if (hasFocus !== initial) {
+            openContextMenu(false);
+        }
     }
     else {
         hasFocus = false;
-        setTimeout(() => {
-            if (hasFocus) {
-                openContextMenu(false);
-            }
-            else {
-                hideDisplayedComponent({ unlessFocused: true }).catch(console.error);
-            }
-        });
+
+        // if changed
+        if (hasFocus !== initial) {
+            setTimeout(() => {
+                if (hasFocus) {
+                    openContextMenu(false);
+                }
+                else {
+                    hideDisplayedComponent({ unlessFocused: true });
+                }
+            });
+        }
     }
 };
 
@@ -444,7 +454,7 @@ function openContextMenu(autoDismiss = true) {
     displayedComponent = newDisplayedComponent;
 }
 
-async function hideDisplayedComponent({ unlessFocused } = { unlessFocused: false }) {
+function hideDisplayedComponent({ unlessFocused } = { unlessFocused: false }) {
     if (displayedComponent) {
         const instance = displayedComponent.componentInstance();
         if (instance) {
@@ -457,10 +467,8 @@ async function hideDisplayedComponent({ unlessFocused } = { unlessFocused: false
                 };
                 activeElement.addEventListener('change', listener);
                 activeElement.addEventListener('focusout', listener);
-
-                // return;
             }
-            await (instance as any).dismiss();
+            (instance as any).dismiss();
         }
         displayedComponent = null;
     }
