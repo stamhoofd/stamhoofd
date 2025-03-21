@@ -106,7 +106,7 @@
                 <p v-if="stockText" class="st-list-description" v-text="stockText" />
             </template>
 
-            <div v-if="!cartEnabled && (pricedCheckout.priceBreakown.length > 1 || (pricedCheckout.totalPrice > 0 && cartItem.amount > 1))" class="pricing-box max">
+            <div v-if="!cartEnabled && (pricedCheckout.priceBreakown.length > 1 || pricedCheckout.totalPrice > 0)" class="pricing-box max">
                 <CheckoutPriceBreakdown :checkout="pricedCheckout" />
             </div>
         </main>
