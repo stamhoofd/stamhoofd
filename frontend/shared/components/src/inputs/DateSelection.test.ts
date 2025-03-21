@@ -1042,8 +1042,29 @@ describe('DateSelection', async () => {
         expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11).getTime());
     });
 
-    // todo: test if min and max very close -> problem with time
-    // todo: add test for time prop
+    // todo: what to do in this case?
+    test('Should set date if impossible to set time between min and max', async () => {
+        setFormatterTimeZone('Europe/Brussels');
+
+        const wrapper = mount(DateSelection, {
+            props: {
+                'min': new Date(2021, 2, 15, 5, 0, 0, 0),
+                'max': new Date(2021, 2, 15, 6, 0, 0, 0),
+                'modelValue': null,
+                'onUpdate:modelValue': async (e) => {
+                    await wrapper.setProps({ modelValue: e });
+                },
+            },
+        });
+
+        const yearInput = findYearInput(wrapper);
+        // trigger update
+        await yearInput.setValue(2021);
+
+        expect(wrapper.props('modelValue')).not.toBeNull();
+        expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(2021, 2, 15, 11, 0, 0, 0).getTime());
+    });
+
     // todo: test is mobile?
     // todo: test display component
 });

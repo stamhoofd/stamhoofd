@@ -390,7 +390,6 @@ function emitDateTime(dateTime: DateTime | null): void {
 
     dateTime = setTime(dateTime);
 
-    // End with min/max correction again
     if (dateTime > max) {
         if (isFull(dateTime.year.toString(), yearConfig)) {
             dateTime = max;
@@ -421,6 +420,10 @@ function emitDateTime(dateTime: DateTime | null): void {
         else {
             return;
         }
+    }
+
+    if (dateTime > max) {
+        console.warn('Impossible to set time between min and max date');
     }
 
     model.value = dateTime.toJSDate();
