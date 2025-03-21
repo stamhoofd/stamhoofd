@@ -460,9 +460,17 @@ export class Organization extends QueryableModel {
         });
     }
 
+    static get forbiddenEmailDomains() {
+        return [
+            STAMHOOFD.domains.dashboard,
+            ...Object.values(STAMHOOFD.domains.defaultBroadcastEmail ?? {}),
+            ...Object.values(STAMHOOFD.domains.defaultTransactionalEmail ?? {}),
+        ];
+    }
+
     async deleteAWSMailIdenitity(mailDomain: string) {
         // Protect specific domain names
-        if (['stamhoofd.be', 'stamhoofd.nl', 'stamhoofd.shop', 'stamhoofd.app', 'stamhoofd.email'].includes(mailDomain)) {
+        if (Organization.forbiddenEmailDomains.includes(mailDomain.toLowerCase())) {
             return;
         }
 
