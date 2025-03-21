@@ -252,7 +252,9 @@ async function readFromQueue(queueUrl: string) {
                 }
             }
             catch (e) {
-                console.log('[AWS Queue] Mssage processing failed:');
+                console.log('[AWS Queue] Message processing failed:');
+                console.log('[AWS Queue]', e);
+
                 console.error('[AWS Queue] Message processing failed:');
                 console.error('[AWS Queue]', e);
             }
