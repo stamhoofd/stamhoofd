@@ -123,6 +123,9 @@ declare global {
         readonly AWS_ACCESS_KEY_ID: string,
         readonly AWS_SECRET_ACCESS_KEY: string,
         readonly AWS_REGION: "eu-west-1" | string, // TODO: add others
+        readonly AWS_BOUNCE_QUEUE_URL?: string | null,
+        readonly AWS_COMPLAINTS_QUEUE_URL?: string | null,
+        readonly AWS_FORWARDING_QUEUE_URL?: string | null,
  
         // DO spaces
         readonly SPACES_ENDPOINT: string,

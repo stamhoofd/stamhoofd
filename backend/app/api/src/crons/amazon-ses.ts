@@ -45,22 +45,22 @@ async function saveLog({ email, organization, type, subType, subject, response, 
 }
 
 async function checkBounces() {
-    if (STAMHOOFD.environment !== 'production' || !STAMHOOFD.AWS_ACCESS_KEY_ID) {
+    if (!STAMHOOFD.AWS_ACCESS_KEY_ID || !STAMHOOFD.AWS_BOUNCE_QUEUE_URL) {
         return;
     }
 
     console.log('[AWS BOUNCES] Checking bounces from AWS SQS');
     const sqs = new AWS.SQS();
-    const messages = await sqs.receiveMessage({ QueueUrl: 'https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-bounces-queue', MaxNumberOfMessages: 10 }).promise();
+    const messages = await sqs.receiveMessage({ QueueUrl: STAMHOOFD.AWS_BOUNCE_QUEUE_URL, MaxNumberOfMessages: 10 }).promise();
     if (messages.Messages) {
         for (const message of messages.Messages) {
             console.log('[AWS BOUNCES] Received bounce message');
             console.log('[AWS BOUNCES]', message);
 
             if (message.ReceiptHandle) {
-                if (STAMHOOFD.environment === 'production') {
+                if (STAMHOOFD.environment !== 'development') {
                     await sqs.deleteMessage({
-                        QueueUrl: 'https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-bounces-queue',
+                        QueueUrl: STAMHOOFD.AWS_BOUNCE_QUEUE_URL,
                         ReceiptHandle: message.ReceiptHandle,
                     }).promise();
                     console.log('[AWS BOUNCES] Deleted from queue');
@@ -158,21 +158,21 @@ async function checkBounces() {
 }
 
 async function checkReplies() {
-    if (STAMHOOFD.environment !== 'production' || !STAMHOOFD.AWS_ACCESS_KEY_ID) {
+    if (!STAMHOOFD.AWS_ACCESS_KEY_ID || !STAMHOOFD.AWS_FORWARDING_QUEUE_URL) {
         return;
     }
 
     console.log('Checking replies from AWS SQS');
     const sqs = new AWS.SQS();
-    const messages = await sqs.receiveMessage({ QueueUrl: 'https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-email-forwarding', MaxNumberOfMessages: 10 }).promise();
+    const messages = await sqs.receiveMessage({ QueueUrl: STAMHOOFD.AWS_FORWARDING_QUEUE_URL, MaxNumberOfMessages: 10 }).promise();
     if (messages.Messages) {
         for (const message of messages.Messages) {
             console.log('Received message from forwarding queue');
 
             if (message.ReceiptHandle) {
-                if (STAMHOOFD.environment === 'production') {
+                if (STAMHOOFD.environment !== 'development') {
                     await sqs.deleteMessage({
-                        QueueUrl: 'https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-email-forwarding',
+                        QueueUrl: STAMHOOFD.AWS_FORWARDING_QUEUE_URL,
                         ReceiptHandle: message.ReceiptHandle,
                     }).promise();
                     console.log('Deleted from queue');
@@ -201,7 +201,7 @@ async function checkReplies() {
 
                             const options = await ForwardHandler.handle(content, receipt);
                             if (options) {
-                                if (STAMHOOFD.environment === 'production') {
+                                if (STAMHOOFD.environment !== 'development') {
                                     Email.send(options);
                                 }
                             }
@@ -217,22 +217,22 @@ async function checkReplies() {
 }
 
 async function checkComplaints() {
-    if (STAMHOOFD.environment !== 'production' || !STAMHOOFD.AWS_ACCESS_KEY_ID) {
+    if (!STAMHOOFD.AWS_ACCESS_KEY_ID || !STAMHOOFD.AWS_COMPLAINTS_QUEUE_URL) {
         return;
     }
 
     console.log('[AWS COMPLAINTS] Checking complaints from AWS SQS');
     const sqs = new AWS.SQS();
-    const messages = await sqs.receiveMessage({ QueueUrl: 'https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-complaints-queue', MaxNumberOfMessages: 10 }).promise();
+    const messages = await sqs.receiveMessage({ QueueUrl: STAMHOOFD.AWS_COMPLAINTS_QUEUE_URL, MaxNumberOfMessages: 10 }).promise();
     if (messages.Messages) {
         for (const message of messages.Messages) {
             console.log('[AWS COMPLAINTS] Received complaint message');
             console.log('[AWS COMPLAINTS]', message);
 
             if (message.ReceiptHandle) {
-                if (STAMHOOFD.environment === 'production') {
+                if (STAMHOOFD.environment !== 'development') {
                     await sqs.deleteMessage({
-                        QueueUrl: 'https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-complaints-queue',
+                        QueueUrl: STAMHOOFD.AWS_COMPLAINTS_QUEUE_URL,
                         ReceiptHandle: message.ReceiptHandle,
                     }).promise();
                     console.log('[AWS COMPLAINTS] Deleted from queue');
@@ -297,7 +297,7 @@ async function checkComplaints() {
                             if (type === 'virus' || type === 'fraud') {
                                 console.error('[AWS COMPLAINTS] Received virus / fraud complaint!');
                                 console.error('[AWS COMPLAINTS]', complaint);
-                                if (STAMHOOFD.environment === 'production') {
+                                if (STAMHOOFD.environment !== 'development') {
                                     Email.sendWebmaster({
                                         subject: 'Received a ' + type + ' email notification',
                                         text: 'We received a ' + type + ' notification for an e-mail from the organization: ' + organization?.name + '. Please check and adjust if needed.\n',
