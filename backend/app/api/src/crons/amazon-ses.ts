@@ -84,7 +84,7 @@ async function handleBounce(message: any) {
                     type: AuditLogType.EmailAddressHardBounced,
                     subType: subtype || 'unknown',
                     sender: source,
-                    response: b.diagnosticCode || '',
+                    response: recipient.diagnosticCode || '',
                     subject: message.mail.commonHeaders?.subject || '',
                 });
             }
@@ -99,7 +99,7 @@ async function handleBounce(message: any) {
                     type: AuditLogType.EmailAddressSoftBounced,
                     subType: subtype || 'unknown',
                     sender: source,
-                    response: b.diagnosticCode || '',
+                    response: recipient.diagnosticCode || '',
                     subject: message.mail.commonHeaders?.subject || '',
                 });
             }
@@ -135,7 +135,7 @@ async function handleComplaint(message: any) {
                             type: AuditLogType.EmailAddressFraudComplaint,
                             subType: type || 'unknown',
                             sender: source,
-                            response: b.diagnosticCode || '',
+                            response: recipient.diagnosticCode || '',
                             subject: message.mail.commonHeaders?.subject || '',
                         });
                     }
@@ -147,7 +147,7 @@ async function handleComplaint(message: any) {
                             type: AuditLogType.EmailAddressMarkedAsSpam,
                             subType: type || 'unknown',
                             sender: source,
-                            response: b.diagnosticCode || '',
+                            response: recipient.diagnosticCode || '',
                             subject: message.mail.commonHeaders?.subject || '',
                         });
                     }
