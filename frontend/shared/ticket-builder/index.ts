@@ -90,7 +90,8 @@ export class TicketBuilder {
             }
         });
 
-        const fileName = ((this.tickets.length === 1 ? Formatter.fileSlug(this.tickets[0].getTitle() + (this.tickets[0].getIndexText() ? ('_' + this.tickets[0].getIndexText()) : '')) : Formatter.fileSlug('Tickets_' + this.webshop.meta.name)) + '.pdf').replace(/\s/g, '_');
+        const fileName = ((this.tickets.length === 1 ? Formatter.slug(this.tickets[0].getTitle() + (this.tickets[0].getIndexText() ? ('-' + this.tickets[0].getIndexText()) : '')) : Formatter.slug('Tickets-' + this.webshop.meta.name)) + '.pdf');
+
         const blob = new Blob([buffer], { type: 'application/pdf' });
 
         if (AppManager.shared.downloadFile) {
