@@ -171,6 +171,7 @@ export class EventNotificationService {
 
     static async sendSubmitterEmail(type: EmailTemplateType, notification: EventNotification) {
         if (notification.endDate < new Date()) {
+            console.log('Skipped submitter email because it is in the past');
             // Ignore
             return;
         }
@@ -186,6 +187,8 @@ export class EventNotificationService {
 
     static async sendReviewerEmail(type: EmailTemplateType, notification: EventNotification) {
         if (notification.endDate < new Date()) {
+            console.log('Skipped reviewer email because it is in the past');
+
             // Ignore
             return;
         }
