@@ -318,7 +318,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
 
             // Override headers
             recipient.headers = {
-                'List-Unsubscribe': STAMHOOFD.domains.defaultBroadcastEmail ? '<mailto:unsubscribe+' + unsubscribe.id + '@' + STAMHOOFD.domains.defaultBroadcastEmail![''] + `>, <${unsubscribeUrl}>` : `<${unsubscribeUrl}>`,
+                'List-Unsubscribe': STAMHOOFD.domains.defaultBroadcastEmail !== undefined ? '<mailto:unsubscribe+' + unsubscribe.id + '@' + STAMHOOFD.domains.defaultBroadcastEmail![''] + `>, <${unsubscribeUrl}>` : `<${unsubscribeUrl}>`,
                 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
             };
             cleaned.push(recipient);
