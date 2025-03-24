@@ -1,6 +1,6 @@
 import { Data, Encodeable, EncodeContext, EncodeMedium } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { AuditLogReplacement, AuditLogReplacementType } from '../AuditLogReplacement';
+import { AuditLogReplacement, AuditLogReplacementType } from '../AuditLogReplacement.js';
 
 export class File implements Encodeable {
     id: string;
