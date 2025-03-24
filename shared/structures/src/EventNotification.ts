@@ -41,7 +41,7 @@ export class EventNotification extends AutoEncoder implements ObjectWithRecords 
     @field({ decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder) })
     recordAnswers: Map<string, RecordAnswer> = new Map();
 
-    @field({ decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder), ...NextVersion })
+    @field({ decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder), version: 368 })
     acceptedRecordAnswers: Map<string, RecordAnswer> = new Map();
 
     /**

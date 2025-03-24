@@ -26,7 +26,7 @@ export class DNSRecord extends AutoEncoder {
     @field({ decoder: StringDecoder })
     value: string;
 
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 368 })
     description: string | null = null;
 
     @field({ decoder: new EnumDecoder(DNSRecordStatus) })
@@ -38,6 +38,6 @@ export class DNSRecord extends AutoEncoder {
     @field({ decoder: SimpleErrors, nullable: true, version: 7 })
     errors: SimpleErrors | null = null;
 
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 368 })
     optional = false;
 }
