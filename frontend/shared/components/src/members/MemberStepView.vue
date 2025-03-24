@@ -90,7 +90,9 @@ onActivated(() => {
      * Update the clone when the component is activated again
      * because the member could have been patched in other steps.
      */
-    cloned.value = props.member.clone();
+    const newClone = props.member.clone();
+    newClone.addPatch(cloned.value.patch);
+    cloned.value = newClone;
 });
 
 const show = useShow();
