@@ -47,7 +47,7 @@
 import { patchContainsChanges } from '@simonbackx/simple-encoding';
 import { useDismiss, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { PlatformMember, Version } from '@stamhoofd/structures';
-import { ComponentOptions, computed, Ref, ref } from 'vue';
+import { ComponentOptions, computed, onActivated, Ref, ref } from 'vue';
 
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { useAppContext } from '../context';
@@ -84,6 +84,17 @@ const props = withDefaults(
 
 // We use a clone, so we don't propate the patches to the rest of the app until the save was successful
 const cloned = ref(props.member.clone() as any) as Ref<PlatformMember>;
+
+onActivated(() => {
+    /**
+     * Update the clone when the component is activated again
+     * because the member could have been patched in other steps.
+     */
+    const newClone = props.member.clone();
+    newClone.addPatch(cloned.value.patch);
+    cloned.value = newClone;
+});
+
 const show = useShow();
 const present = usePresent();
 const dismiss = useDismiss();
@@ -147,6 +158,7 @@ async function save() {
             patchMemberWithReviewed(saveClone);
             await manager.save(saveClone.family.members);
             props.member.family.copyFromClone(saveClone.family);
+            cloned.value = saveClone;
         }
         else {
             // Copy over clone
