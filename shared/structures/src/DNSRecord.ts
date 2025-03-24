@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -26,6 +26,9 @@ export class DNSRecord extends AutoEncoder {
     @field({ decoder: StringDecoder })
     value: string;
 
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    description: string | null = null;
+
     @field({ decoder: new EnumDecoder(DNSRecordStatus) })
     status: DNSRecordStatus = DNSRecordStatus.Pending;
 
@@ -34,4 +37,7 @@ export class DNSRecord extends AutoEncoder {
 
     @field({ decoder: SimpleErrors, nullable: true, version: 7 })
     errors: SimpleErrors | null = null;
+
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    optional = false;
 }

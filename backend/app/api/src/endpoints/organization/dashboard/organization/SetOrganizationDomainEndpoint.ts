@@ -133,9 +133,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                         value: STAMHOOFD.domains.registrationCname + '.',
                     }));
                 }
-            }
 
-            if (request.body.mailDomain !== null) {
                 let priv: string;
                 let pub: string;
 
@@ -158,8 +156,17 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                 // DKIM records
                 organization.privateMeta.dnsRecords.push(DNSRecord.create({
                     type: DNSRecordType.TXT,
-                    name: 'stamhoofd._domainkey.' + request.body.mailDomain + '.',
+                    name: Formatter.slug(STAMHOOFD.platformName) + '._domainkey.' + organization.privateMeta.pendingMailDomain + '.',
                     value: 'v=DKIM1; k=rsa; p=' + pub + '',
+                }));
+
+                // DMARC records
+                organization.privateMeta.dnsRecords.push(DNSRecord.create({
+                    type: DNSRecordType.TXT,
+                    name: '_dmarc.' + organization.privateMeta.pendingMailDomain + '.',
+                    value: 'v=DMARC1; p=quarantine; pct=100; sp=quarantine; aspf=r; adkim=r;',
+                    description: 'Opgelet met het instellen van deze DMARC-record voor je domeinnaam. Mogelijks bestaat er al een record met deze naam, voeg deze dan zeker niet dubbel toe en behoud best de huidige waarde (wel zou aspf en adkim op r moeten staan). De waarde die we voorstellen zorgt voor een sterke beveiliging, maar kan mogelijks problemen veroorzaken als je andere diensten gebruikt die op een onveilige manier emails versturen (zonder DKIM of SPF).',
+                    optional: true,
                 }));
             }
             else {
