@@ -1,10 +1,10 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, CachedBalance, Document, EmailTemplate, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
-import { AccessRight, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, GroupType, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory, RecordSettings } from '@stamhoofd/structures';
+import { AccessRight, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, GroupType, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryMemberAccess';
 import { MemberRecordStore } from '../services/MemberRecordStore';
+import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryMemberAccess';
 
 /**
  * One class with all the responsabilities of checking permissions to each resource in the system by a given user, possibly in an organization context.
@@ -1091,7 +1091,7 @@ export class AdminPermissionChecker {
     }
 
     async getAccessibleGroups(organizationId: string, level: PermissionLevel = PermissionLevel.Read): Promise<string[] | 'all'> {
-        if (await this.hasFullAccess(organizationId)) {
+        if (await this.hasFullAccess(organizationId, level)) {
             return 'all';
         }
 

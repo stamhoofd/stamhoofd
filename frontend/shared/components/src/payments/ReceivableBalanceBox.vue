@@ -101,7 +101,7 @@
             <h2>Betalingen</h2>
 
             <p v-if="succeededPayments.length === 0" class="info-box">
-                Je hebt nog geen ontvangen
+                Je hebt nog geen betalingen ontvangen
             </p>
 
             <STList v-else>

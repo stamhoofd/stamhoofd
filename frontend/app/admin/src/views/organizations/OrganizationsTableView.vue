@@ -28,7 +28,7 @@ import { Address, EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExport
 import { computed, Ref, ref } from 'vue';
 import EditOrganizationView from './EditOrganizationView.vue';
 import OrganizationView from './OrganizationView.vue';
-import { useChargeOrganizationsSheet } from './composables/useChargeOrganizationsSheet';
+import { useChargeOrganizationsPopup } from './composables/useChargeOrganizationsPopup';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 
 type ObjectType = Organization;
@@ -65,7 +65,7 @@ const present = usePresent();
 const platform = usePlatform();
 const auth = useAuth();
 const { getOrganizationUIFilterBuilders } = useGetOrganizationUIFilterBuilders();
-const chargeOrganizationsSheet = useChargeOrganizationsSheet();
+const chargeOrganizationsSheet = useChargeOrganizationsPopup();
 
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const configurationId = computed(() => {

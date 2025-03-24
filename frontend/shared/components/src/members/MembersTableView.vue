@@ -21,12 +21,14 @@
 </template>
 
 <script lang="ts" setup>
-import { Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, useAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncTableAction, Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, TableActionSelection, useAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { AccessRight, Group, GroupCategoryTree, GroupPrice, GroupType, MemberResponsibility, MembershipStatus, Organization, PermissionLevel, PlatformMember, RecordAnswer, RegisterItemOption, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
+import ChargeMembersView from './ChargeMembersView.vue';
 import { useDirectMemberActions } from './classes/MemberActionBuilder';
 import MemberSegmentedView from './MemberSegmentedView.vue';
 
@@ -79,6 +81,7 @@ const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTa
 const auth = useAuth();
 const organization = useOrganization();
 const platform = usePlatform();
+const present = usePresent();
 const filterPeriodId = props.periodId ?? props.group?.periodId ?? organization?.value?.period?.period?.id ?? platform.value.period.id;
 const defaultFilter = app === 'admin' && !props.group
     ? {
@@ -733,4 +736,24 @@ const actions: TableAction<ObjectType>[] = [
     }),
     ...actionBuilder.getActions({ selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value, includeMove: true, includeEdit: !excludeEdit }),
 ];
+
+if (app !== 'admin' && auth.canManagePayments()) {
+    actions.push(new AsyncTableAction({
+        name: 'Bedrag aanrekenen',
+        icon: 'calculator',
+        priority: 13,
+        groupIndex: 4,
+        handler: async (selection: TableActionSelection<ObjectType>) => {
+            await present({
+                modalDisplayStyle: 'popup',
+                components: [
+                    new ComponentWithProperties(ChargeMembersView, {
+                        filter: selection.filter.filter,
+                        organization: organization.value!,
+                    }),
+                ],
+            });
+        },
+    }));
+}
 </script>
