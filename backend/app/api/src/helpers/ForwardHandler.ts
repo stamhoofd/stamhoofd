@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 
 import { Email, EmailAddress, EmailInterface, EmailInterfaceRecipient } from '@stamhoofd/email';
-import { Organization } from '@stamhoofd/models';
+import { Organization, Platform } from '@stamhoofd/models';
 import { Formatter } from '@stamhoofd/utility';
 import { simpleParser } from 'mailparser';
 
@@ -66,7 +66,8 @@ export class ForwardHandler {
         // Send a new e-mail
         let defaultEmail: EmailInterfaceRecipient[] = [Email.getWebmasterToEmail()];
         let organizationEmails: EmailInterfaceRecipient[] = [];
-        const extraDescription = 'Dit bericht werd verstuurd naar ' + email + ', en werd automatisch doorgestuurd naar alle beheerders. Stel in Stamhoofd de e-mailadressen in om ervoor te zorgen dat antwoorden naar een specifiek e-mailadres worden verstuurd.';
+        const platform = await Platform.getShared();
+        const extraDescription = 'Dit bericht werd verstuurd naar ' + email + ', en werd automatisch doorgestuurd naar alle beheerders. Stel in ' + platform.config.name + ' de e-mailadressen in om ervoor te zorgen dat antwoorden naar een specifiek e-mailadres worden verstuurd.';
 
         function doBounce() {
             if (!from) {

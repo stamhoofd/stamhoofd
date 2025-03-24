@@ -1,6 +1,11 @@
 <template>
     <div>
         <dl class="details-grid dns-records" :class="{ success: record.status === 'Valid' }">
+            <template v-if="record.optional">
+                <dt>Optioneel</dt>
+                <dd>Deze record is optioneel</dd>
+            </template>
+
             <dt>Type</dt>
             <dd>{{ record.type }}</dd>
 
@@ -22,6 +27,9 @@
             <span v-if="record.status === 'Valid'" class="icon green success" />
             <span v-if="record.status === 'Failed'" class="icon error" />
         </dl>
+        <div v-if="record.description" class="info-box" style="word-wrap: break-word">
+            {{ record.description }}
+        </div>
         <template v-if="record.errors">
             <div v-for="error in record.errors.errors" :key="error.id" class="error-box" style="word-wrap: break-word">
                 {{ error.human || error.message }}

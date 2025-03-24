@@ -36,7 +36,7 @@
             Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om de blauwe kleur te behouden.
         </p>
 
-        <template v-if="STAMHOOFD.userMode === 'organization'">
+        <div v-if="STAMHOOFD.userMode === 'organization'" class="container">
             <hr>
             <h2>Domeinnaam</h2>
 
@@ -91,7 +91,7 @@
                     </button>
                 </p>
             </template>
-        </template>
+        </div>
     </SaveView>
 </template>
 

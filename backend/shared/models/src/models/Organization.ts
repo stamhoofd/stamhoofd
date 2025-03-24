@@ -1,7 +1,7 @@
 import { column, Database } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
-import { Email, EmailInterfaceRecipient } from '@stamhoofd/email';
+import { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { QueryableModel } from '@stamhoofd/sql';
 import { Address, Country, DNSRecordStatus, EmailTemplateType, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, PrivatePaymentConfiguration, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
 import { AWSError } from 'aws-sdk';
@@ -10,6 +10,7 @@ import { PromiseResult } from 'aws-sdk/lib/request';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueueHandler } from '@stamhoofd/queues';
+import { Formatter } from '@stamhoofd/utility';
 import { validateDNSRecords } from '../helpers/DNSValidator';
 import { sendEmailTemplate } from '../helpers/EmailBuilder';
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
@@ -531,6 +532,7 @@ export class Organization extends QueryableModel {
         }
 
         const sesv2 = new SES();
+        const expectedConfigurationSetName = Formatter.slug(STAMHOOFD.platformName + '-domains');
 
         // Check if mail identitiy already exists..
         let exists = false;
@@ -543,7 +545,7 @@ export class Organization extends QueryableModel {
 
             console.log('AWS mail idenitiy exists already: just checking the verification status in AWS @' + this.id);
 
-            if (existing.ConfigurationSetName !== 'stamhoofd-domains') {
+            if (existing.ConfigurationSetName !== expectedConfigurationSetName) {
                 // Not allowed to use this identity
                 this.privateMeta.mailDomainActive = false;
                 console.error('Organization is not allowed to use email identity ' + this.privateMeta.mailDomain + ' @' + this.id + ', got ' + existing.ConfigurationSetName);
@@ -575,10 +577,10 @@ export class Organization extends QueryableModel {
 
             const result = await sesv2.createEmailIdentity({
                 EmailIdentity: this.privateMeta.mailDomain,
-                ConfigurationSetName: 'stamhoofd-domains',
+                ConfigurationSetName: expectedConfigurationSetName,
                 DkimSigningAttributes: {
                     DomainSigningPrivateKey: this.serverMeta.privateDKIMKey!,
-                    DomainSigningSelector: 'stamhoofd',
+                    DomainSigningSelector: Formatter.slug(STAMHOOFD.platformName),
                 },
                 Tags: [
                     {

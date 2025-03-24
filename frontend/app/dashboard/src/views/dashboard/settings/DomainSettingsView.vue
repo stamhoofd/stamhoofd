@@ -118,10 +118,17 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
     validator = new Validator();
     saving = false;
     useDkim1024bit = false;
-    registerDomain = this.$organization.privateMeta?.pendingRegisterDomain ?? this.$organization.registerDomain ?? '';
-    mailDomain = this.$organization.privateMeta?.pendingMailDomain ?? this.$organization.privateMeta?.mailDomain ?? '';
-    customRegisterDomain = this.registerDomain && this.mailDomain && (this.registerDomain !== 'inschrijven.' + this.mailDomain);
-    allowSubdomain = !!this.mailDomain.match(/^[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+\.[a-zA-Z]+$/);
+    registerDomain = '';
+    mailDomain = '';
+    customRegisterDomain = '';
+    allowSubdomain = true;
+
+    created() {
+        this.registerDomain = this.$organization.privateMeta?.pendingRegisterDomain ?? this.$organization.registerDomain ?? '';
+        this.mailDomain = this.$organization.privateMeta?.pendingMailDomain ?? this.$organization.privateMeta?.mailDomain ?? '';
+        this.customRegisterDomain = this.registerDomain && this.mailDomain ? (this.registerDomain !== 'inschrijven.' + this.mailDomain) : '';
+        this.allowSubdomain = !!this.mailDomain.match(/^[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+\.[a-zA-Z]+$/);
+    }
 
     validateDomain() {
         const d = this.mailDomain;
