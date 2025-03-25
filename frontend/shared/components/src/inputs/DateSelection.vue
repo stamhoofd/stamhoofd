@@ -1,7 +1,9 @@
 <template>
     <div ref="el" class="date-selection-container input-icon-container right icon arrow-down-small gray">
         <div v-if="isMobile" class="input selectable" :class="{placeholder: model === null}" @click="openContextMenu(true)">
-            <div>{{ dateText }}</div>
+            <div data-testid="mobile-text">
+                {{ dateText }}
+            </div>
         </div>
         <div v-else class="input selectable" :class="{placeholder: model === null}" @click="focusFirst()" @mousedown.prevent>
             <span v-if="model === null" class="placeholder">{{ placeholder }}</span>

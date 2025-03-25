@@ -5,7 +5,18 @@ import { describe, expect, test, vi } from 'vitest';
 import TestAppWithModalStackComponent from '../../../../tests/helpers/TestAppWithModalStackComponent.vue';
 
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { page } from '@vitest/browser/context';
+import { useIsMobile } from '../hooks';
 import DateSelection from './DateSelection.vue';
+
+vi.mock('../hooks/useIsMobile', async (importOriginal) => {
+    const original = await importOriginal() as { useIsMobile: typeof useIsMobile };
+    const useIsMobileMock = vi.fn().mockImplementation(original.useIsMobile);
+    return {
+        ...original,
+        useIsMobile: useIsMobileMock,
+    };
+});
 
 describe('DateSelection', async () => {
     const originalTimezone = Formatter.timezone;
@@ -1264,5 +1275,27 @@ describe('DateSelection', async () => {
         expect(dateSelectionViews.length).toBe(0);
     });
 
-    // todo: test is mobile?
+    test('Mobile date text should be visible if mobile', async () => {
+        setFormatterTimeZone('Europe/Brussels');
+
+        vi.mocked(useIsMobile).mockReturnValue(true);
+
+        wrapper = mount(TestAppWithModalStackComponent, {
+            attachTo: document.body,
+            props: {
+                root: new ComponentWithProperties(DateSelection, {
+                    'min': new Date(2023, 2, 14, 20, 0, 0, 0),
+                    'max': new Date(2023, 2, 15, 4, 0, 0, 0),
+                    'modelValue': new Date(2023, 2, 14, 22, 0, 0, 0),
+                    'onUpdate:modelValue': async () => {
+                    },
+                }),
+            },
+        });
+
+        const mobileTextEl = page.getByTestId('mobile-text');
+
+        await expect.element(mobileTextEl).toBeVisible();
+        await expect.element(mobileTextEl).toHaveTextContent('14 maart 2023');
+    });
 });
