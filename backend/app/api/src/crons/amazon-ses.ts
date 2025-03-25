@@ -72,14 +72,9 @@ async function handleBounce(message: any) {
                 )
             ) {
                 const organization: Organization | undefined = source ? await Organization.getByEmail(source) : undefined;
-                if (organization) {
-                    const emailAddress = await EmailAddress.getOrCreate(email, organization.id);
-                    emailAddress.hardBounce = true;
-                    await emailAddress.save();
-                }
-                else {
-                    console.error('[AWS BOUNCES] Unknown organization for email address ' + source);
-                }
+                const emailAddress = await EmailAddress.getOrCreate(email, organization?.id ?? null);
+                emailAddress.hardBounce = true;
+                await emailAddress.save();
 
                 await saveLog({
                     id: b.feedbackId,
@@ -123,43 +118,38 @@ async function handleComplaint(message: any) {
 
         const type: 'abuse' | 'auth-failure' | 'fraud' | 'not-spam' | 'other' | 'virus' = b.complaintFeedbackType;
 
-        if (organization) {
-            for (const recipient of b.complainedRecipients) {
-                const email = recipient.emailAddress;
-                const emailAddress = await EmailAddress.getOrCreate(email, organization.id);
-                emailAddress.markedAsSpam = type !== 'not-spam';
-                await emailAddress.save();
+        for (const recipient of b.complainedRecipients) {
+            const email = recipient.emailAddress;
+            const emailAddress = await EmailAddress.getOrCreate(email, organization?.id ?? null);
+            emailAddress.markedAsSpam = type !== 'not-spam';
+            await emailAddress.save();
 
-                if (type !== 'not-spam') {
-                    if (type === 'virus' || type === 'fraud') {
-                        await saveLog({
-                            id: b.feedbackId,
-                            email: source,
-                            organization,
-                            type: AuditLogType.EmailAddressFraudComplaint,
-                            subType: type || 'unknown',
-                            sender: source,
-                            response: recipient.diagnosticCode || '',
-                            subject: message.mail.commonHeaders?.subject || '',
-                        });
-                    }
-                    else {
-                        await saveLog({
-                            id: b.feedbackId,
-                            email: source,
-                            organization,
-                            type: AuditLogType.EmailAddressMarkedAsSpam,
-                            subType: type || 'unknown',
-                            sender: source,
-                            response: recipient.diagnosticCode || '',
-                            subject: message.mail.commonHeaders?.subject || '',
-                        });
-                    }
+            if (type !== 'not-spam') {
+                if (type === 'virus' || type === 'fraud') {
+                    await saveLog({
+                        id: b.feedbackId,
+                        email: source,
+                        organization,
+                        type: AuditLogType.EmailAddressFraudComplaint,
+                        subType: type || 'unknown',
+                        sender: source,
+                        response: recipient.diagnosticCode || '',
+                        subject: message.mail.commonHeaders?.subject || '',
+                    });
+                }
+                else {
+                    await saveLog({
+                        id: b.feedbackId,
+                        email: source,
+                        organization,
+                        type: AuditLogType.EmailAddressMarkedAsSpam,
+                        subType: type || 'unknown',
+                        sender: source,
+                        response: recipient.diagnosticCode || '',
+                        subject: message.mail.commonHeaders?.subject || '',
+                    });
                 }
             }
-        }
-        else {
-            console.error('[AWS COMPLAINTS] Unknown organization for email address ' + source);
         }
 
         if (type === 'virus' || type === 'fraud') {

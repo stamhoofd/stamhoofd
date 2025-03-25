@@ -18,7 +18,7 @@ class Query extends AutoEncoder {
 
 type ResponseBody = EmailAddressSettings;
 
-export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetEmailAddressEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = Query as Decoder<Query>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
