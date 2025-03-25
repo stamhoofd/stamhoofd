@@ -1,7 +1,10 @@
 /// <reference types="@vitest/browser/providers/playwright" />
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, sleep } from '@stamhoofd/utility';
 import { mount, VueWrapper } from '@vue/test-utils';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
+import TestAppWithModalStackComponent from '../../../../tests/helpers/TestAppWithModalStackComponent.vue';
+
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import DateSelection from './DateSelection.vue';
 
 describe('DateSelection', async () => {
@@ -9,6 +12,7 @@ describe('DateSelection', async () => {
     let wrapper: VueWrapper | undefined;
 
     afterEach(() => {
+        vi.restoreAllMocks();
         setFormatterTimeZone(originalTimezone);
         wrapper?.unmount();
     });
@@ -354,6 +358,43 @@ describe('DateSelection', async () => {
             expect(document.activeElement).not.toBe(dayInput.element);
             expect(document.activeElement).not.toBe(monthInput.element);
             expect(document.activeElement).not.toBe(yearInput.element);
+        });
+
+        test('ArrowRight should close the date picker if year input in focus', async () => {
+            setFormatterTimeZone('Asia/Shanghai');
+
+            const app = mount(TestAppWithModalStackComponent, {
+                attachTo: document.body,
+                props: {
+                    root: new ComponentWithProperties(DateSelection, {
+                        'min': new Date(2023, 2, 14, 20, 0, 0, 0),
+                        'max': new Date(2023, 2, 15, 4, 0, 0, 0),
+                        'modelValue': new Date(2023, 2, 14, 22, 0, 0, 0),
+                        'onUpdate:modelValue': async () => {
+                        },
+                    }),
+                },
+            });
+
+            wrapper = app;
+
+            const dateSelection = app.findComponent(DateSelection);
+            const yearInput = findYearInput(dateSelection);
+
+            // check if date picker is open after focus
+            await yearInput.trigger('focus');
+            const dateSelectionViewsBefore = document.getElementsByClassName('date-selection-view');
+            expect(dateSelectionViewsBefore.length).toBe(1);
+
+            // act
+            await yearInput.trigger('keydown', { key: 'ArrowRight' });
+
+            // Date selection has a timeout of 0, so we need to wait
+            await sleep(0);
+
+            // there should be no date picker
+            const dateSelectionViews = document.getElementsByClassName('date-selection-view');
+            expect(dateSelectionViews.length).toBe(0);
         });
 
         test('ArrowLeft should focus previous input', async () => {
@@ -1134,6 +1175,94 @@ describe('DateSelection', async () => {
         });
     });
 
+    test('Date picker should not be visible on mount', async () => {
+        setFormatterTimeZone('Europe/Brussels');
+
+        wrapper = mount(TestAppWithModalStackComponent, {
+            attachTo: document.body,
+            props: {
+                root: new ComponentWithProperties(DateSelection, {
+                    'min': new Date(2023, 2, 14, 20, 0, 0, 0),
+                    'max': new Date(2023, 2, 15, 4, 0, 0, 0),
+                    'modelValue': new Date(2023, 2, 14, 22, 0, 0, 0),
+                    'onUpdate:modelValue': async () => {
+                    },
+                }),
+            },
+        });
+
+        // make sure no date picker is visible before focus
+        const dateSelectionViewsBefore = document.getElementsByClassName('date-selection-view');
+        expect(dateSelectionViewsBefore.length).toBe(0);
+    });
+
+    test('Date picker should appear on focus', async () => {
+        setFormatterTimeZone('Europe/Brussels');
+
+        const app = mount(TestAppWithModalStackComponent, {
+            attachTo: document.body,
+            props: {
+                root: new ComponentWithProperties(DateSelection, {
+                    'min': new Date(2023, 2, 14, 20, 0, 0, 0),
+                    'max': new Date(2023, 2, 15, 4, 0, 0, 0),
+                    'modelValue': new Date(2023, 2, 14, 22, 0, 0, 0),
+                    'onUpdate:modelValue': async () => {
+                    },
+                }),
+            },
+        });
+
+        wrapper = app;
+
+        const dateSelection = app.findComponent(DateSelection);
+        const yearInput = findYearInput(dateSelection);
+
+        // make sure no date picker is visible before focus
+        const dateSelectionViewsBefore = document.getElementsByClassName('date-selection-view');
+        expect(dateSelectionViewsBefore.length).toBe(0);
+
+        // act
+        await yearInput.trigger('focus');
+
+        // check if date picker visible after focus
+        const dateSelectionViews = document.getElementsByClassName('date-selection-view');
+        expect(dateSelectionViews.length).toBe(1);
+    });
+
+    test('Date picker should disappear on lose focus', async () => {
+        setFormatterTimeZone('Europe/Brussels');
+
+        const app = mount(TestAppWithModalStackComponent, {
+            attachTo: document.body,
+            props: {
+                root: new ComponentWithProperties(DateSelection, {
+                    'min': new Date(2023, 2, 14, 20, 0, 0, 0),
+                    'max': new Date(2023, 2, 15, 4, 0, 0, 0),
+                    'modelValue': new Date(2023, 2, 14, 22, 0, 0, 0),
+                    'onUpdate:modelValue': async () => {
+                    },
+                }),
+            },
+        });
+
+        const dateSelection = app.findComponent(DateSelection);
+        const yearInput = findYearInput(dateSelection);
+
+        // date picker should be visible after focus
+        await yearInput.trigger('focus');
+        const dateSelectionViewsBefore = document.getElementsByClassName('date-selection-view');
+        expect(dateSelectionViewsBefore.length).toBe(1);
+
+        // date picker should disappear after clicking outside the date picker
+        const datePickerContainers = document.getElementsByClassName('context-menu-container');
+        expect(datePickerContainers.length).toBe(1);
+        (datePickerContainers[0] as HTMLElement).click();
+
+        // Date selection has a timeout of 0, so we need to wait
+        await sleep(0);
+        const dateSelectionViews = document.getElementsByClassName('date-selection-view');
+        expect(dateSelectionViews.length).toBe(0);
+    });
+
     // todo: test is mobile?
-    // todo: test display component
 });
