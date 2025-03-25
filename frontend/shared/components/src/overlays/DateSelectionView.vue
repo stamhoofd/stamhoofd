@@ -170,7 +170,6 @@ function previousMonth() {
 }
 
 function onSelect(day: { value: DateTime; selected: boolean }) {
-    console.log('Select', day);
     day.selected = true;
     props.setDate(day.value.toJSDate());
     pop()?.catch(console.error);
