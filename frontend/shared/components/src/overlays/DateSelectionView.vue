@@ -5,7 +5,7 @@
                 <button type="button" class="button icon gray arrow-left" @click="previousMonth" />
                 <h1>
                     <div class="input-icon-container right icon arrow-down-small gray">
-                        <select v-model="month" @mousedown.stop>
+                        <select v-model="month" data-testid="select-month" @mousedown.stop>
                             <option v-for="monthNumber in 12" :key="monthNumber" :value="monthNumber">
                                 {{ monthText(monthNumber) }}
                             </option>
@@ -13,7 +13,7 @@
                     </div>
 
                     <div class="input-icon-container right icon arrow-down-small gray">
-                        <select v-model="currentYear" @mousedown.stop>
+                        <select v-model="currentYear" data-testid="select-year" @mousedown.stop>
                             <option v-for="year in 105" :key="year" :value="nowYear - year + 5">
                                 {{ nowYear - year + 5 }}
                             </option>
@@ -171,7 +171,7 @@ function previousMonth() {
 
 function onSelect(day: { value: DateTime; selected: boolean }) {
     day.selected = true;
-    props.setDate(day.value.toJSDate());
+    setDateValue(day.value);
     pop()?.catch(console.error);
 }
 
