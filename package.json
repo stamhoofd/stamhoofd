@@ -124,6 +124,7 @@
         "socket.io": "4.6.2",
         "ws": "8.17.1",
         "express": "4.20.0",
-        "@types/node": "^20.12"
+        "@types/node": "^20.12",
+        "@types/jest": "^29.0.0"
     }
 }
