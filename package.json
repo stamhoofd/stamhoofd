@@ -41,6 +41,7 @@
         "clear-vite-cache": "rm -rf frontend/app/*/node_modules/.vite",
         "ship": "node ./.development/increase-structures-version.js && yarn -s clear:shared && yarn -s build:shared && lerna version --exact --force-publish --yes --no-private && lerna publish from-git --yes --no-private --otp $(op item get NPM --otp || :)",
         "ship:fix": "lerna publish from-git --yes --no-private --otp $(op item get NPM --otp || :)",
+        "translate:keys": "cd .development/i18n-uuid && yarn replace-keys",
         "translate": "cd .development/i18n-uuid && yarn start"
     },
     "dependencies": {
@@ -122,6 +123,7 @@
         "postcss": "8.4.38",
         "socket.io": "4.6.2",
         "ws": "8.17.1",
-        "express": "4.20.0"
+        "express": "4.20.0",
+        "@types/node": "^20.12"
     }
 }
