@@ -5,7 +5,7 @@ import { describe, expect, test, vi } from 'vitest';
 import TestAppWithModalStackComponent from '../../../../tests/helpers/TestAppWithModalStackComponent.vue';
 
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { page } from '@vitest/browser/context';
+import { Locator, page } from '@vitest/browser/context';
 import { ref } from 'vue';
 import DateSelectionView from './DateSelectionView.vue';
 
@@ -32,9 +32,10 @@ describe('DateSelectionView', () => {
         await wrapper!.find('select[data-testid="select-year"]').setValue(value);
     };
 
-    const selectDay = (value: number) => {
+    const selectDay = (value: number): Locator => {
         const dayLocator = page.getByText(value.toString(), { exact: true });
         (dayLocator.element() as HTMLElement).click();
+        return dayLocator;
     };
 
     describe('Should set date after selection', async () => {
@@ -157,7 +158,66 @@ describe('DateSelectionView', () => {
         });
     });
 
-    // min and max -> disabled
+    test('Date above max or below min should be disabled', async () => {
+        setFormatterTimeZone('Europe/Brussels');
+
+        const getDayButtonLocator = (value: number): Locator => {
+            return page.getByText(value.toString(), { exact: true });
+        };
+
+        const getDayButton = (value: number): HTMLButtonElement => {
+            return getDayButtonLocator(value).element() as HTMLButtonElement;
+        };
+
+        const getDayButtonForDate = async (date: Date): Promise<HTMLButtonElement> => {
+            await selectYear(date.getFullYear());
+            await selectMonth(date.getMonth() + 1);
+
+            return getDayButton(date.getDate());
+        };
+
+        const selectedDay = ref(new Date(2023, 10, 14, 22, 0, 0, 0));
+
+        const onClose = vi.fn();
+        const setDate = vi.fn().mockImplementation((value: Date) => {
+            // do nohting
+            selectedDay.value = value;
+        });
+
+        const min = new Date(2022, 11, 5, 22, 0, 0, 0);
+        const max = new Date(2024, 3, 20, 22, 0, 0, 0);
+
+        wrapper = mount(TestAppWithModalStackComponent, {
+            attachTo: document.body,
+            props: {
+                root: new ComponentWithProperties(DateSelectionView, {
+                    selectedDay,
+                    min,
+                    max,
+                    onClose,
+                    setDate,
+                },
+                ),
+            },
+        });
+
+        const testCases: [Date, boolean][] = [
+            [new Date(2021, 5, 20, 22, 0, 0, 0), true],
+            [new Date(2022, 11, 4, 22, 0, 0, 0), true],
+            [new Date(2022, 11, 5, 22, 0, 0, 0), false],
+            [new Date(2022, 11, 6, 22, 0, 0, 0), false],
+            [new Date(2023, 2, 5, 22, 0, 0, 0), false],
+            [new Date(2024, 3, 20, 22, 0, 0, 0), false],
+            [new Date(2024, 3, 21, 22, 0, 0, 0), true],
+            [new Date(2024, 4, 20, 22, 0, 0, 0), true],
+            [new Date(2025, 3, 21, 22, 0, 0, 0), true],
+        ];
+
+        for (const [date, disabled] of testCases) {
+            const button = await getDayButtonForDate(date);
+            expect(button.disabled).toBe(disabled);
+        }
+    });
 
     // test for specific date number of elements? (generateDays)
 
