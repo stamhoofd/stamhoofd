@@ -54,6 +54,8 @@ export class XlsxSheetWriter extends XlsxFileWriter {
 
     rowCount = 0;
 
+    mergeCells: string[] = [];
+
     async writeHeader(columnCount = 0) {
         await this.write('<?xml version="1.0" encoding="UTF-8"?>\n');
         await this.write(`<worksheet xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">`);
@@ -79,6 +81,14 @@ export class XlsxSheetWriter extends XlsxFileWriter {
 
         await this.write('</sheetData>');
 
+        if (this.mergeCells.length > 0) {
+            await this.write('<mergeCells count="' + this.mergeCells.length + '">');
+            for (const merge of this.mergeCells) {
+                await this.write('<mergeCell ref="' + escapeXml(merge) + '" />');
+            }
+            await this.write('</mergeCells>');
+        }
+
         await this.write('</worksheet>');
     }
 
@@ -103,6 +113,13 @@ export class XlsxSheetWriter extends XlsxFileWriter {
 
         for (const [index, cell] of cells.entries()) {
             str += await this.getCellString(cell, { row: this.rowCount, column: index + 1 });
+
+            if (cell.merge && (cell.merge.width > 1 || cell.merge.height > 1)) {
+                const start = `${numberToAlpha(index + 1).toUpperCase()}${this.rowCount}`;
+                const end = `${numberToAlpha(index + cell.merge.width).toUpperCase()}${this.rowCount + cell.merge.height - 1}`;
+                // append at the end of the file
+                this.mergeCells.push(`${start}:${end}`);
+            }
         }
 
         str += '</row>';
@@ -112,6 +129,7 @@ export class XlsxSheetWriter extends XlsxFileWriter {
     async getCellString(cell: CellValue, { row, column }: { row: number; column: number }) {
         let type = CellType.InlineString;
         let str = '';
+        const r = `${numberToAlpha(column).toUpperCase()}${row}`;
 
         switch (typeof cell.value) {
             case 'boolean':
@@ -152,8 +170,6 @@ export class XlsxSheetWriter extends XlsxFileWriter {
         }
 
         const styleId = (await this.styles.requestCellStyleId(cell.style ?? {})).toString();
-
-        const r = `${numberToAlpha(column).toUpperCase()}${row}`;
 
         if (type === CellType.InlineString) {
             return `<c r="${escapeXml(r)}" s="${escapeXml(styleId)}" t="${escapeXml(type)}"><is><t>${escapeXml(str)}</t></is></c>`;

@@ -3,6 +3,8 @@ export type XlsxTransformerConcreteColumn<T> = {
     id: string;
     name: string;
     width: number;
+    category?: string;
+    defaultCategory?: string;
     getValue(object: T): CellValue;
 };
 
@@ -28,6 +30,12 @@ export interface CellValue {
     value: string | number | Date | null;
     width?: number; // Only works for first row
     style?: CellStyleRequest;
+    merge?: MergeCells;
+}
+
+export interface MergeCells {
+    width: number;
+    height: number;
 }
 
 /**
@@ -53,7 +61,7 @@ export type XlsxWorkbookFilter = {
     sheets: {
         id: string;
         name?: string;
-        columns: { id: string; name?: string }[];
+        columns: { id: string; name?: string; category?: string | null }[];
     }[];
 };
 

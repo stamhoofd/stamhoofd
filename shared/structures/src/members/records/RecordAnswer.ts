@@ -9,6 +9,7 @@ import { Image } from '../../files/Image.js';
 import { RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from './RecordSettings.js';
 import { File } from '../../files/File.js';
 import { AuditLogReplacement, AuditLogReplacementType } from '../../AuditLogReplacement.js';
+import { type CellValue } from '@stamhoofd/excel-writer';
 
 export class RecordAnswer extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -66,10 +67,16 @@ export class RecordAnswer extends AutoEncoder {
         return this.settings.excelColumns;
     }
 
-    get excelValues() {
+    get excelValues(): CellValue[] {
         return [{
             value: this.stringValue,
-            format: null,
+            style: this.stringValue.includes('\n')
+                ? {
+                        alignment: {
+                            wrapText: true,
+                        },
+                    }
+                : undefined,
         }];
     }
 
@@ -401,19 +408,23 @@ export class RecordAddressAnswer extends RecordAnswer {
     get excelValues() {
         return [
             {
-                value: this.address ? `${this.address.street} ${this.address.number}` : '/',
+                value: this.address ? `${this.address.street}` : null,
                 format: null,
             },
             {
-                value: this.address?.postalCode ?? '/',
+                value: this.address ? `${this.address.number}` : null,
                 format: null,
             },
             {
-                value: this.address?.city ?? '/',
+                value: this.address?.postalCode ?? null,
                 format: null,
             },
             {
-                value: this.address ? CountryHelper.getName(this.address.country) : '/',
+                value: this.address?.city ?? null,
+                format: null,
+            },
+            {
+                value: this.address ? CountryHelper.getName(this.address.country) : null,
                 format: null,
             },
         ];

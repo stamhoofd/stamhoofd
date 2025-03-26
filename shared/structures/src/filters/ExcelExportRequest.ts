@@ -6,6 +6,7 @@ export enum ExcelExportType {
     Members = 'members',
     Organizations = 'organizations',
     ReceivableBalances = 'receivable-balances',
+    EventNotifications = 'event-notifications',
 }
 
 export class ExcelSheetColumnFilter extends AutoEncoder {
@@ -14,6 +15,9 @@ export class ExcelSheetColumnFilter extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     name: string;
+
+    @field({ decoder: StringDecoder, nullable: true, optional: true })
+    category?: string | null = null;
 }
 
 export class ExcelSheetFilter extends AutoEncoder {

@@ -198,44 +198,44 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             return [
                 new SelectableColumn({
                     id: getId('type'),
-                    name: 'Type ' + category,
+                    name: 'Type',
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('firstName'),
-                    name: 'Voornaam ' + category,
+                    name: 'Voornaam',
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('lastName'),
-                    name: 'Achternaam ' + category,
+                    name: 'Achternaam',
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('phone'),
-                    name: 'Telefoonnummer ' + category,
+                    name: 'Telefoonnummer',
                     category,
                     enabled,
                 }),
 
                 new SelectableColumn({
                     id: getId('email'),
-                    name: 'E-mailadres ' + category,
+                    name: 'E-mailadres',
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('address'),
-                    name: 'Adres ' + category,
+                    name: 'Adres',
                     category,
                     enabled,
                 }),
                 returnNullIfNoAccessRight(new SelectableColumn({
                     id: getId('nationalRegisterNumber'),
-                    name: 'Rijksregisternummer ' + category,
+                    name: 'Rijksregisternummer',
                     category,
                     enabled,
                 }), [AccessRight.MemberManageNRN]),

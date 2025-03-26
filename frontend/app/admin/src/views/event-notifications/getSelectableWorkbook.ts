@@ -1,127 +1,79 @@
 import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoofd/frontend-excel-export';
-import { Platform } from '@stamhoofd/structures';
+import { Platform, RecordCategory } from '@stamhoofd/structures';
 
-export function getSelectableWorkbook(_platform: Platform) {
+export function getSelectableWorkbook(platform: Platform) {
+    const recordCategories = platform.config.eventNotificationTypes.flatMap(r => r.recordCategories);
+
+    const flattenedCategories = RecordCategory.flattenCategoriesWith(recordCategories, r => r.excelColumns.length > 0);
+
     return new SelectableWorkbook({
         sheets: [
             new SelectableSheet({
-                id: 'organizations',
-                name: 'Groepen',
+                id: 'event-notifications',
+                name: $t('Kampmeldingen'),
                 columns: [
                     new SelectableColumn({
                         id: 'id',
                         name: 'ID',
-                        description: 'Unieke identificatie van de groep',
-                        enabled: false,
-                    }),
-
-                    // todo: only if platform?
-                    new SelectableColumn({
-                        id: 'uri',
-                        name: 'Groepsnummer',
-                        description: 'Nummer van de groep',
+                        description: $t('Unieke identificatie van de kampmelding'),
                     }),
 
                     new SelectableColumn({
                         id: 'name',
-                        name: 'Naam',
-                    }),
-
-                    new SelectableColumn({
-                        id: 'tags',
-                        name: 'Hiërarchie',
-                    }),
-
-                    new SelectableColumn({
-                        id: 'address',
-                        name: 'Adres',
-                    }),
-                ],
-            }),
-
-            new SelectableSheet({
-                id: 'responsibilities',
-                name: 'Functies',
-                columns: [
-                    new SelectableColumn({
-                        id: 'organization.id',
-                        name: 'ID',
-                        description: 'Unieke identificatie van de groep',
-                        enabled: false,
-                    }),
-
-                    new SelectableColumn({
-                        id: 'organization.uri',
-                        name: 'Groepsnummer',
-                        description: 'Nummer van de groep',
+                        name: $t('Activiteitsnaam'),
                     }),
 
                     new SelectableColumn({
                         id: 'organization.name',
-                        name: 'Groepsnaam',
-                    }),
-
-                    new SelectableColumn({
-                        id: 'responsibility.name',
-                        name: 'Functie',
-                    }),
-
-                    new SelectableColumn({
-                        id: 'responsibility.member.firstName',
-                        name: 'Voornaam',
-                    }),
-
-                    new SelectableColumn({
-                        id: 'responsibility.member.lastName',
-                        name: 'Achternaam',
-                    }),
-
-                    new SelectableColumn({
-                        id: 'responsibility.member.email',
-                        name: 'E-mail',
-                    }),
-
-                    new SelectableColumn({
-                        id: 'responsibility.member.address',
-                        name: 'Adres',
-                    }),
-                ],
-            }),
-            new SelectableSheet({
-                id: 'premises',
-                name: 'Lokalen',
-                columns: [
-                    new SelectableColumn({
-                        id: 'organization.id',
-                        name: 'ID',
-                        description: 'Unieke identificatie van de groep',
-                        enabled: false,
+                        name: $t('Groepsnaam'),
                     }),
 
                     new SelectableColumn({
                         id: 'organization.uri',
-                        name: 'Groepsnummer',
-                        description: 'Nummer van de groep',
+                        name: $t('Groepsnummer'),
                     }),
 
                     new SelectableColumn({
-                        id: 'organization.name',
-                        name: 'Groepsnaam',
+                        id: 'status',
+                        name: $t('Status'),
                     }),
 
                     new SelectableColumn({
-                        id: 'premise.name',
-                        name: 'Naam gebouw',
+                        id: 'feedbackText',
+                        name: $t('Opmerkingen'),
                     }),
 
                     new SelectableColumn({
-                        id: 'premise.type',
-                        name: 'Types',
+                        id: 'startDate',
+                        name: $t('Startdatum'),
                     }),
 
                     new SelectableColumn({
-                        id: 'premise.address',
-                        name: 'Adres',
+                        id: 'endDate',
+                        name: $t('Einddatum'),
+                    }),
+
+                    new SelectableColumn({
+                        id: 'submittedAt',
+                        category: 'Indiening',
+                        name: $t('Datum'),
+                    }),
+
+                    new SelectableColumn({
+                        id: 'submittedBy',
+                        category: 'Indiening',
+                        name: $t('Indiener'),
+                    }),
+
+                    ...flattenedCategories.flatMap((category) => {
+                        return category.getAllRecords().flatMap((record) => {
+                            return new SelectableColumn({
+                                id: `recordAnswers.${record.id}`,
+                                name: record.name,
+                                category: category.name,
+                                description: record.description,
+                            });
+                        });
                     }),
                 ],
             }),

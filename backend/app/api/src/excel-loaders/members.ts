@@ -6,7 +6,7 @@ import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEn
 import { GetMembersEndpoint } from '../endpoints/global/members/GetMembersEndpoint';
 import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures';
 import { Context } from '../helpers/Context';
-import { XlsxTransformerColumnHelper } from '../helpers/xlsxAddressTransformerColumnFactory';
+import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper';
 
 // Assign to a typed variable to assure we have correct type checking in place
 const sheet: XlsxTransformerSheet<PlatformMember, PlatformMember> = {
@@ -16,7 +16,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformMember> = {
         {
             id: 'id',
             name: 'ID',
-            width: 20,
+            width: 40,
             getValue: ({ patchedMember: object }: PlatformMember) => ({
                 value: object.id,
             }),
@@ -89,7 +89,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformMember> = {
         {
             id: 'email',
             name: 'E-mailadres',
-            width: 20,
+            width: 40,
             getValue: ({ patchedMember: object }: PlatformMember) => ({
                 value: object.details.email,
             }),
@@ -247,42 +247,19 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformMember> = {
         },
 
         // Dynamic records
-        {
-            match(id) {
-                if (id.startsWith('recordAnswers.')) {
-                    const platform = PlatformStruct.shared;
-                    const organization = Context.organization;
+        XlsxTransformerColumnHelper.createRecordAnswersColumns({
+            matchId: 'recordAnswers',
+            getRecordAnswers: ({ patchedMember: object }: PlatformMember) => object.details.recordAnswers,
+            getRecordCategories: () => {
+                const platform = PlatformStruct.shared;
+                const organization = Context.organization;
 
-                    const recordSettings = [
-                        ...(organization?.meta.recordsConfiguration.recordCategories.flatMap(category => category.getAllRecords()) ?? []),
-                        ...platform.config.recordsConfiguration.recordCategories.flatMap(category => category.getAllRecords()),
-                    ];
-
-                    const recordSettingId = id.split('.')[1];
-                    console.log('recordSettingId', recordSettingId);
-                    const recordSetting = recordSettings.find(r => r.id === recordSettingId);
-
-                    if (!recordSetting) {
-                        // Will throw a proper error itself
-                        console.log('recordSetting not found', recordSettings);
-                        return;
-                    }
-
-                    const columns = recordSetting.excelColumns;
-
-                    return columns.map((columnName, index) => {
-                        return {
-                            id: `recordAnswers.${recordSettingId}.${index}`,
-                            name: columnName,
-                            width: 20,
-                            getValue: ({ patchedMember: object }: PlatformMember) => ({
-                                value: object.details.recordAnswers.get(recordSettingId)?.excelValues[index]?.value ?? '',
-                            }),
-                        };
-                    });
-                }
+                return [
+                    ...(organization?.meta.recordsConfiguration.recordCategories ?? []),
+                    ...platform.config.recordsConfiguration.recordCategories,
+                ];
             },
-        },
+        }),
 
         // Registration records
         {

@@ -297,16 +297,62 @@ export class RecordSettings extends BaseRecordSettings {
         return getPermissionLevelNumber(this.externalPermissionLevel) >= getPermissionLevelNumber(level);
     }
 
-    get excelColumns() {
+    get excelColumns(): { name: string; width?: number; defaultCategory?: string }[] {
         if (this.type === RecordType.Address) {
+            let prefix = '';
+            const defaultCategory = $t('Adres');
+            if (this.name !== defaultCategory) {
+                prefix = this.name + ' - ';
+            }
+
             return [
-                this.name + ' - Straat en nummer',
-                this.name + ' - Postcode',
-                this.name + ' - Gemeente',
-                this.name + ' - Land',
+                {
+                    name: prefix + $t('Straat'),
+                    defaultCategory, // Ignore this name
+                    width: 40,
+                },
+                {
+                    name: prefix + $t('Nummer'),
+                    defaultCategory, // Ignore this name
+                    width: 20,
+                },
+                {
+                    name: prefix + $t('Postcode'),
+                    defaultCategory, // Ignore this name
+                    width: 20,
+                },
+                {
+                    name: prefix + $t('Gemeente'),
+                    defaultCategory, // Ignore this name
+                    width: 20,
+                },
+                {
+                    name: prefix + $t('Land'),
+                    defaultCategory, // Ignore this name
+                    width: 20,
+                },
             ];
         }
-        return [this.name];
+
+        let width = 20;
+
+        switch (this.type) {
+            case RecordType.Image:
+            case RecordType.File:
+                width = 115;
+                break;
+            case RecordType.Textarea:
+                width = 80;
+                break;
+            case RecordType.Email:
+                width = 40;
+                break;
+        }
+
+        return [{
+            name: this.name,
+            width,
+        }];
     }
 
     isEnabled<T extends ObjectWithRecords>(filterValue: T, options?: RecordFilterOptions): boolean {

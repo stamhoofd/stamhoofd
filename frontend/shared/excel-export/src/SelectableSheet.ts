@@ -1,4 +1,4 @@
-import { SelectableColumn } from "./SelectableColumn";
+import { SelectableColumn } from './SelectableColumn';
 
 export class SelectableSheet {
     id: string;
@@ -6,6 +6,7 @@ export class SelectableSheet {
     name: string;
     description: string;
     columns: SelectableColumn[];
+    withCategoryRow: boolean = true;
 
     constructor(data: {
         id: string;
@@ -14,6 +15,10 @@ export class SelectableSheet {
         columns: SelectableColumn[];
     }) {
         Object.assign(this, data);
+
+        if (!this.columns.find(c => c.category)) {
+            this.withCategoryRow = false;
+        }
     }
 
     disableAll() {
@@ -30,4 +35,3 @@ export class SelectableSheet {
         return this.columns.filter(c => c.enabled).length;
     }
 }
-

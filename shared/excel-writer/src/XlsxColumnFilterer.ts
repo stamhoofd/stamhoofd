@@ -34,7 +34,7 @@ export class XlsxColumnFilterer<T> {
 
             // Validate sheetFilter
             const concreteColumns: XlsxTransformerConcreteColumn<T>[] = [];
-            for (const { id, name } of sheetFilter.columns) {
+            for (const { id, name, category } of sheetFilter.columns) {
                 let found = false;
 
                 for (const column of sheet.columns) {
@@ -42,6 +42,7 @@ export class XlsxColumnFilterer<T> {
                         if (column.id === id) {
                             const c = { ...column };
                             c.name = name || c.name;
+                            c.category = (category !== undefined ? category : c.category) ?? undefined;
                             concreteColumns.push(c);
                             found = true;
                             break;
@@ -50,13 +51,50 @@ export class XlsxColumnFilterer<T> {
                     else {
                         const matched = column.match(id);
                         if (matched !== undefined) {
+                            if (category !== undefined) {
+                                for (const m of matched) {
+                                    m.category = category ?? undefined;
+                                }
+                            }
+
                             if (name) {
                                 for (const m of matched) {
                                     if (matched.length === 1) {
                                         m.name = name || m.name;
                                     }
                                     else {
-                                        m.name = name + ' ' + m.name;
+                                        if (!m.name) {
+                                            m.name = name || m.name;
+                                        }
+                                        else {
+                                            if (m.name === name) {
+                                                // ignore
+                                                continue;
+                                            }
+
+                                            if (m.category === null || m.category === undefined) {
+                                                if (name === m.defaultCategory) {
+                                                    // No real added value of repating this if we can't add it cleanly
+                                                    continue;
+                                                }
+
+                                                // Never create a category if it was not set
+                                                m.name = name + ' ' + m.name;
+                                            }
+                                            else {
+                                                if (m.category.trim().length > 0) {
+                                                    if (name === m.defaultCategory) {
+                                                        // No real added value of repating this if we can't add it cleanly
+                                                        continue;
+                                                    }
+                                                    m.category = m.category.trim() + (' → ' + name);
+                                                }
+                                                else {
+                                                    m.category = name;
+                                                }
+                                                m.name = m.name ?? '';
+                                            }
+                                        }
                                     }
                                 }
                             }

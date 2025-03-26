@@ -206,19 +206,11 @@ async function openMail(selection: TableActionSelection<EventNotification>) {
 }
 
 async function exportToExcel(selection: TableActionSelection<ObjectType>) {
-    if ((true as any)) {
-        throw new SimpleError({
-            code: 'not_implemented',
-            message: 'Not implemented',
-            human: 'Deze functie is nog niet beschikbaar',
-        });
-    }
-
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(ExcelExportView, {
-                    type: ExcelExportType.Organizations, // todo
+                    type: ExcelExportType.EventNotifications,
                     filter: selection.filter,
                     workbook: getSelectableWorkbook(platform.value),
                     configurationId: configurationId.value,

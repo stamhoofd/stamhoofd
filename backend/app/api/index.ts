@@ -111,10 +111,7 @@ const start = async () => {
     console.log('Loading loaders...');
 
     // Register Excel loaders
-    await import('./src/excel-loaders/members');
-    await import('./src/excel-loaders/payments');
-    await import('./src/excel-loaders/organizations');
-    await import('./src/excel-loaders/receivable-balances');
+    await import('./src/excel-loaders');
 
     // Register Email Recipient loaders
     await import('./src/email-recipient-loaders/members');

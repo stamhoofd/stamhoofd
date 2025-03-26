@@ -1,4 +1,4 @@
-import { XlsxTransformerConcreteSheet, XlsxTransformerSheet, XlsxWriterAdapter } from './interfaces';
+import { XlsxTransformerConcreteColumn, XlsxTransformerConcreteSheet, XlsxTransformerSheet, XlsxWriterAdapter } from './interfaces';
 
 /**
  * Transforms data into an excel file using
@@ -29,6 +29,58 @@ export class XlsxTransformer<T> {
             const sheetSymbol = this.sheetMap.get(sheet);
             if (!sheetSymbol) {
                 throw new Error('Sheet not found');
+            }
+
+            const hasColumns = sheet.columns.find(col => !!col.category);
+            if (hasColumns) {
+                const categories: {
+                    name: string;
+                    columns: XlsxTransformerConcreteColumn<unknown>[];
+                }[] = [];
+
+                for (const col of sheet.columns) {
+                    const lastCategory = categories[categories.length - 1];
+                    if (lastCategory && lastCategory.name === (col.category ?? '')) {
+                        lastCategory.columns.push(col);
+                    }
+                    else {
+                        // Create new category
+                        categories.push({
+                            name: col.category ?? '',
+                            columns: [col],
+                        });
+                    }
+                }
+
+                // Write in bold
+                await this.writer.addRow(sheetSymbol, categories.flatMap((col) => {
+                    return col.columns.map((c, index) => {
+                        if (index === 0) {
+                            return {
+                                value: col.name,
+                                width: c.width,
+                                style: {
+                                    font: {
+                                        bold: true,
+                                    },
+                                },
+                                merge: {
+                                    width: col.columns.length,
+                                    height: 1,
+                                },
+                            };
+                        }
+                        return {
+                            value: null,
+                            width: c.width,
+                            style: {
+                                font: {
+                                    bold: true,
+                                },
+                            },
+                        };
+                    });
+                }));
             }
 
             await this.writer.addRow(sheetSymbol, sheet.columns.map((col) => {

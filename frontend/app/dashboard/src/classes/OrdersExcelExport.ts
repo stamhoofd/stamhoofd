@@ -49,7 +49,7 @@ export class OrdersExcelExport {
                     answerColumns.set(a.settings.id, answerNames.length);
                     const columns = a.excelColumns;
                     for (const c of columns) {
-                        answerNames.push(c);
+                        answerNames.push(c.defaultCategory ? (c.defaultCategory + ' - ' + c.name) : c.name);
                     }
                 }
             }
@@ -298,7 +298,7 @@ export class OrdersExcelExport {
                     answerColumns.set(a.settings.id, answerNames.length);
                     const columns = a.excelColumns;
                     for (const c of columns) {
-                        answerNames.push(c);
+                        answerNames.push(c.defaultCategory ? (c.defaultCategory + ' - ' + c.name) : c.name);
                     }
                 }
             }

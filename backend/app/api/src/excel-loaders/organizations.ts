@@ -2,7 +2,7 @@ import { XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { Platform as PlatformStruct, ExcelExportType, LimitedFilteredRequest, Organization as OrganizationStruct, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, PaginatedResponse, MemberWithRegistrationsBlob, Premise } from '@stamhoofd/structures';
 import { GetOrganizationsEndpoint } from '../endpoints/admin/organizations/GetOrganizationsEndpoint';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint';
-import { XlsxTransformerColumnHelper } from '../helpers/xlsxAddressTransformerColumnFactory';
+import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper';
 import { Group, Member, MemberResponsibilityRecord } from '@stamhoofd/models';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { ArrayDecoder, field } from '@simonbackx/simple-encoding';
@@ -33,7 +33,7 @@ const sheet: XlsxTransformerSheet<Object, Object> = {
         {
             id: 'id',
             name: 'ID',
-            width: 35,
+            width: 40,
             getValue: (object: Object) => ({
                 value: object.id,
             }),

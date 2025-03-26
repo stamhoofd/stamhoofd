@@ -1,5 +1,5 @@
 import { XlsxTransformerColumn } from '@stamhoofd/excel-writer';
-import { Address, CountryHelper, Parent, ParentTypeHelper, PlatformMember } from '@stamhoofd/structures';
+import { Address, CountryHelper, Parent, ParentTypeHelper, PlatformMember, RecordAnswer, RecordCategory, RecordSettings, RecordType } from '@stamhoofd/structures';
 
 export class XlsxTransformerColumnHelper {
     static formatBoolean(value: boolean | undefined | null): string {
@@ -115,7 +115,8 @@ export class XlsxTransformerColumnHelper {
                         {
                             id: getId('street'),
                             name: `Straat`,
-                            width: 30,
+                            defaultCategory: 'Adres', // Ignore this name
+                            width: 40,
                             getValue: (object: T) => {
                                 const address = getAddress(object);
                                 return {
@@ -126,6 +127,7 @@ export class XlsxTransformerColumnHelper {
                         {
                             id: getId('number'),
                             name: 'Nummer',
+                            defaultCategory: 'Adres', // Ignore this name
                             width: 20,
                             getValue: (object: T) => {
                                 const address = getAddress(object);
@@ -137,6 +139,7 @@ export class XlsxTransformerColumnHelper {
                         {
                             id: getId('postalCode'),
                             name: 'Postcode',
+                            defaultCategory: 'Adres', // Ignore this name
                             width: 20,
                             getValue: (object: T) => {
                                 const address = getAddress(object);
@@ -148,6 +151,7 @@ export class XlsxTransformerColumnHelper {
                         {
                             id: getId('city'),
                             name: 'Stad',
+                            defaultCategory: 'Adres', // Ignore this name
                             width: 20,
                             getValue: (object: T) => {
                                 const address = getAddress(object);
@@ -159,6 +163,7 @@ export class XlsxTransformerColumnHelper {
                         {
                             id: getId('country'),
                             name: 'Land',
+                            defaultCategory: 'Adres', // Ignore this name
                             width: 20,
                             getValue: (object: T) => {
                                 const address = getAddress(object);
@@ -169,6 +174,67 @@ export class XlsxTransformerColumnHelper {
                             },
                         },
                     ];
+                }
+            },
+        };
+    }
+
+    static createRecordAnswersColumns<T>({ matchId, getRecordCategories, getRecordAnswers }: { matchId: string; getRecordCategories: () => RecordCategory[]; getRecordAnswers: (object: T) => Map<string, RecordAnswer> }): XlsxTransformerColumn<T> {
+        return {
+            match(id) {
+                if (id.startsWith(matchId + '.')) {
+                    const recordCategories = getRecordCategories();
+                    const flattenedCategories = RecordCategory.flattenCategoriesWith(recordCategories, r => r.excelColumns.length > 0);
+
+                    let recordCategory: RecordCategory | undefined;
+                    let recordSetting: RecordSettings | undefined;
+                    const recordSettingId = id.split('.')[1];
+
+                    for (const category of flattenedCategories) {
+                        const recordSettings = category.getAllRecords();
+                        const rr = recordSettings.find(r => r.id === recordSettingId);
+
+                        if (rr) {
+                            recordSetting = rr;
+                            recordCategory = category;
+                            break;
+                        }
+                    }
+
+                    if (!recordSetting || !recordCategory) {
+                        // Will throw a proper error itself
+                        console.log('recordSetting not found');
+                        return;
+                    }
+
+                    const columns = recordSetting.excelColumns;
+
+                    return columns.map(({ name, width, defaultCategory }, index) => {
+                        return {
+                            id: `${matchId}.${recordSettingId}.${index}`,
+                            name,
+                            width: width ?? 20,
+                            defaultCategory,
+                            category: recordCategory.name,
+                            getValue: (object: T) => {
+                                const answers = getRecordAnswers(object);
+                                const b = (answers.get(recordSettingId)?.excelValues[index] ?? {
+                                    value: '',
+                                });
+
+                                return {
+                                    ...b,
+                                    style: {
+                                        ...b.style,
+                                        alignment: {
+                                            ...b.style?.alignment,
+                                            wrapText: recordSetting.type === RecordType.Textarea,
+                                        },
+                                    },
+                                };
+                            },
+                        };
+                    });
                 }
             },
         };

@@ -5,7 +5,7 @@ import { BalanceItemPaymentDetailed, BalanceItemRelationType, ExcelExportType, g
 import { Formatter } from '@stamhoofd/utility';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint';
 import { GetPaymentsEndpoint } from '../endpoints/organization/dashboard/payments/GetPaymentsEndpoint';
-import { XlsxTransformerColumnHelper } from '../helpers/xlsxAddressTransformerColumnFactory';
+import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper';
 
 type PaymentWithItem = {
     payment: PaymentGeneral;
@@ -475,7 +475,7 @@ function getPayingOrganizationColumns(): XlsxTransformerColumn<PaymentGeneral>[]
         {
             id: 'payingOrganization.id',
             name: 'ID betalende groep',
-            width: 30,
+            width: 40,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
                     value: object.payingOrganization?.id || '',

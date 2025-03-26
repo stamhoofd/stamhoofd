@@ -23,10 +23,16 @@ export class SelectableWorkbook {
                 continue;
             }
 
-            for (const { id } of s.columns) {
+            sheet.withCategoryRow = false;
+
+            for (const { id, category } of s.columns) {
                 const column = sheet.columns.find(c => c.id === id);
                 if (column) {
                     column.enabled = true;
+                }
+
+                if (category !== undefined && category !== null) {
+                    sheet.withCategoryRow = true;
                 }
             }
         }
@@ -43,7 +49,11 @@ export class SelectableWorkbook {
                     ExcelSheetFilter.create({
                         id: sheet.id,
                         name: sheet.name,
-                        columns: sheet.columns.filter(c => c.enabled).map(c => (ExcelSheetColumnFilter.create({ id: c.id, name: c.name }))),
+                        columns: sheet.columns.filter(c => c.enabled).map(c => (ExcelSheetColumnFilter.create({
+                            id: c.id,
+                            name: c.name,
+                            category: sheet.withCategoryRow ? (c.category ?? '') : null, // '' makes sure the backend knows it can add categories for smart categories
+                        }))),
                     }),
                 ];
             }),

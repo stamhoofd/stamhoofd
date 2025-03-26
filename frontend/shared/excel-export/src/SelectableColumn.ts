@@ -1,17 +1,17 @@
 export class SelectableColumn {
-    enabled: boolean = true
+    enabled: boolean = true;
     id: string;
 
     name: string;
-    description: string = ''
-    category?: string|null = null
+    description: string = '';
+    category?: string | null = null;
 
     constructor(data: {
         enabled?: boolean;
         id: string;
         name: string;
         description?: string;
-        category?: string|null;
+        category?: string | null;
     }) {
         Object.assign(this, data);
     }
