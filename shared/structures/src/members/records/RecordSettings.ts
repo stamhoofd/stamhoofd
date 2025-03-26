@@ -300,34 +300,34 @@ export class RecordSettings extends BaseRecordSettings {
     get excelColumns(): { name: string; width?: number; defaultCategory?: string }[] {
         if (this.type === RecordType.Address) {
             let prefix = '';
-            const defaultCategory = $t('Adres');
+            const defaultCategory = $t('0a37de09-120b-4bea-8d13-6d7ed6823884');
             if (this.name !== defaultCategory) {
                 prefix = this.name + ' - ';
             }
 
             return [
                 {
-                    name: prefix + $t('Straat'),
+                    name: prefix + $t('780f327b-5a25-497f-b741-7d0b1a659db9'),
                     defaultCategory, // Ignore this name
                     width: 40,
                 },
                 {
-                    name: prefix + $t('Nummer'),
+                    name: prefix + $t('af42889c-3278-4dab-8e5c-5ada25e40cf8'),
                     defaultCategory, // Ignore this name
                     width: 20,
                 },
                 {
-                    name: prefix + $t('Postcode'),
+                    name: prefix + $t('997da269-7091-470e-9032-abe1a1ea8096'),
                     defaultCategory, // Ignore this name
                     width: 20,
                 },
                 {
-                    name: prefix + $t('Gemeente'),
+                    name: prefix + $t('b87def14-63e9-4c00-bff9-21283f7890a9'),
                     defaultCategory, // Ignore this name
                     width: 20,
                 },
                 {
-                    name: prefix + $t('Land'),
+                    name: prefix + $t('b1064996-ca77-48d0-b178-4bbd6af44e8e'),
                     defaultCategory, // Ignore this name
                     width: 20,
                 },

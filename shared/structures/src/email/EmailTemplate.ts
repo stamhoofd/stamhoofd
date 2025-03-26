@@ -270,7 +270,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.EventNotificationSubmittedReviewer: return $t('ff2beaea-cb8f-4de8-ba1c-039b7ba20bc0');
             case EmailTemplateType.EventNotificationAccepted: return $t('c936748e-b6f9-4aa9-9822-77bd727501eb');
             case EmailTemplateType.EventNotificationRejected: return $t('01266433-c6b9-4c4b-b09f-b212cc0ce5a8');
-            case EmailTemplateType.EventNotificationPartiallyAccepted: return $t('Kampmelding voorlopig goedgekeurd');
+            case EmailTemplateType.EventNotificationPartiallyAccepted: return $t('f24bc296-9945-4b12-a3b2-e5c1e7a7c52c');
         }
     }
 
@@ -428,7 +428,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.EventNotificationSubmittedReviewer: return $t('bd2321f7-caea-423e-a5e9-823023e74ec9');
             case EmailTemplateType.EventNotificationAccepted: return $t('1bb58aa1-e36e-4384-8c54-be3b71d77a3b');
             case EmailTemplateType.EventNotificationRejected: return $t('0b6949f6-80b7-4d48-9e1e-16bfb826014a');
-            case EmailTemplateType.EventNotificationPartiallyAccepted: return $t('E-mail die wordt verzonden naar de indieners als de kampmelding voorlopig wordt goedgekeurd');
+            case EmailTemplateType.EventNotificationPartiallyAccepted: return $t('56dbf1c6-1651-41dc-95c5-4a9fece298c2');
         }
 
         return null;

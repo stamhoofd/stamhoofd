@@ -79,7 +79,7 @@
 
                 <STListItem v-if="isReviewer && notification.status !== EventNotificationStatus.Accepted && notification.acceptedRecordAnswers.size > 0 && diffList.length">
                     <h3 class="style-definition-label">
-                        {{ $t('Aangepast sinds voorlopige goedkeuring') }}
+                        {{ $t('355512bd-902c-4193-8aa0-81e5cb81284b') }}
                     </h3>
                     <PatchListText :items="diffList" />
 
@@ -365,10 +365,10 @@ async function doAcceptPartially() {
     await present({
         components: [
             new ComponentWithProperties(InputSheet, {
-                title: $t('Voorlopig goedkeuren'),
-                description: $t('Je kan hieronder nog opmerkingen achterlaten over wat er nog moet worden aangevuld en tegen wanneer.'),
-                saveText: $t('Voorlopig goedkeuren'),
-                placeholder: $t('Opmerkingen'),
+                title: $t('15407414-de94-40bf-8a62-c5f37613ed39'),
+                description: $t('153fcd92-0ce3-4465-b9ce-b2e68c496a9a'),
+                saveText: $t('15407414-de94-40bf-8a62-c5f37613ed39'),
+                placeholder: $t('387f4352-c78d-4e21-9dfe-a2433e3ba554'),
                 defaultValue: notification.value.feedbackText ?? '',
                 multiline: true,
                 saveHandler: async (value: string) => {

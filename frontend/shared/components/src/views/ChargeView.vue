@@ -37,7 +37,7 @@
                 </STInputBox>
             </div>
             <div v-if="canShowDueAt">
-                <STInputBox :title="$t('Te betalen tegen') + (dueAtDescription ? '*' : '')" error-fields="dueAt" :error-box="errors.errorBox">
+                <STInputBox :title="$t('1402e826-1f61-498a-81b4-595dce3248d0') + (dueAtDescription ? '*' : '')" error-fields="dueAt" :error-box="errors.errorBox">
                     <DateSelection v-model="dueAt" :required="false" placeholder="Onmiddelijk" :time="{hours: 0, minutes: 0, seconds: 0}" />
                 </STInputBox>
             </div>

@@ -16,7 +16,7 @@ export class EventNotificationStatusHelper {
             case EventNotificationStatus.Accepted:
                 return $t('372e7507-9f34-4360-bb44-25e324ff36c6');
             case EventNotificationStatus.PartiallyAccepted:
-                return $t('voorlopig goedgekeurd');
+                return $t('0dd9b51d-792f-4f97-9284-70404600581c');
             case EventNotificationStatus.Rejected:
                 return $t('1ff072f8-6913-4b85-a1e4-4e4ecc1a1bf4');
         }

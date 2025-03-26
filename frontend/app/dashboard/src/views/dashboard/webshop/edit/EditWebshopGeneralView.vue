@@ -67,7 +67,7 @@
         <h2>Beschikbaarheid</h2>
 
         <Checkbox v-model="hasStatusClosed">
-            {{ $t('Manueel gesloten') }}
+            {{ $t('4ae26268-586e-41f7-875d-90137f9ed836') }}
         </Checkbox>
 
         <template v-if="!hasStatusClosed">

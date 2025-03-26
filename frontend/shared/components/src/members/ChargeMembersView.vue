@@ -19,17 +19,17 @@ function createBody(args: {
 
 function getDescription({ count }: { count: number }) {
     if (count === 1) {
-        return $t('Reken een bedrag aan aan het geselecteerde lid.');
+        return $t('04606184-d9d9-4cb0-a98a-a4457f1d0293');
     }
 
-    return $t('Reken een bedrag aan aan de {count} geselecteerde leden.', { count: count.toString() });
+    return $t('fce1ee6b-8dfc-43f6-b34a-5f9037326e76', { count: count.toString() });
 }
 
 function getConfirmationText({ total, count }: { total: string; count: number | null }) {
     if (count === 1) {
-        return $t('Weet je zeker dat je {total} wilt aanrekenen aan 1 lid?', { total });
+        return $t('173a325e-049d-4ce1-a220-e75c37e99b01', { total });
     }
 
-    return $t('Weet je zeker dat je {total} wilt aanrekenen aan {count} leden?', { total, count: count === null ? '?' : count.toString() });
+    return $t('459ab829-65a9-4a55-8349-f8ec381fe9b3', { total, count: count === null ? '?' : count.toString() });
 }
 </script>

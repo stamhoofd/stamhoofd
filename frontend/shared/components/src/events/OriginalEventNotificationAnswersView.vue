@@ -1,12 +1,12 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t('Originele antwoorden')" />
+        <STNavigationBar :title="$t('21127e91-a406-4a40-b9a7-af4e45c1f907')" />
 
         <main>
             <h1>
-                {{ $t('Originele antwoorden') }}
+                {{ $t('21127e91-a406-4a40-b9a7-af4e45c1f907') }}
             </h1>
-            <p>{{ $t('Hieronder zie je de antwoorden op alle vragen op het moment van de laatste (voorlopige) goedkeuring') }}</p>
+            <p>{{ $t('3a851e65-6c43-433f-a7af-808ea01f271e') }}</p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
