@@ -19,6 +19,25 @@ describe('DateSelectionView', () => {
         wrapper?.unmount();
     });
 
+    // #region helpers
+    const getDayButtonLocator = (value: number): Locator => {
+        return page.getByText(value.toString(), { exact: true });
+    };
+
+    const getDayButton = (value: number): HTMLButtonElement => {
+        return getDayButtonLocator(value).element() as HTMLButtonElement;
+    };
+
+    const selectYearAndMonth = async (date: Date) => {
+        await selectYear(date.getFullYear());
+        await selectMonth(date.getMonth() + 1);
+    };
+
+    const getDayButtonForDate = async (date: Date): Promise<HTMLButtonElement> => {
+        await selectYearAndMonth(date);
+        return getDayButton(date.getDate());
+    };
+
     const setFormatterTimeZone = (timezone: string) => {
         // https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
         Formatter.timezone = timezone;
@@ -32,11 +51,15 @@ describe('DateSelectionView', () => {
         await wrapper!.find('select[data-testid="select-year"]').setValue(value);
     };
 
-    const selectDay = (value: number): Locator => {
-        const dayLocator = page.getByText(value.toString(), { exact: true });
-        (dayLocator.element() as HTMLElement).click();
-        return dayLocator;
+    const selectDay = (value: number) => {
+        const dayWrapper = wrapper!.findAll('.days button:not(.other-month)').find(day => day.text() === value.toString());
+        if (!dayWrapper) {
+            throw new Error('day not found: ' + value);
+        }
+
+        (dayWrapper.element as HTMLButtonElement).click();
     };
+    // #endregion
 
     describe('Should set date after selection', async () => {
         test('Select day', () => {
@@ -44,7 +67,7 @@ describe('DateSelectionView', () => {
 
             const onClose = vi.fn();
             const setDate = vi.fn().mockImplementation(() => {
-                // do nohting
+                // do nothing
             });
 
             wrapper = mount(TestAppWithModalStackComponent, {
@@ -72,7 +95,7 @@ describe('DateSelectionView', () => {
 
             const onClose = vi.fn();
             const setDate = vi.fn().mockImplementation((value: Date) => {
-                // do nohting
+                // do nothing
                 selectedDay.value = value;
             });
 
@@ -99,7 +122,7 @@ describe('DateSelectionView', () => {
 
             const onClose = vi.fn();
             const setDate = vi.fn().mockImplementation((value: Date) => {
-                // do nohting
+                // do nothing
                 selectedDay.value = value;
             });
 
@@ -128,7 +151,7 @@ describe('DateSelectionView', () => {
 
             const onClose = vi.fn();
             const setDate = vi.fn().mockImplementation((value: Date) => {
-                // do nohting
+                // do nothing
                 selectedDay.value = value;
             });
 
@@ -161,26 +184,11 @@ describe('DateSelectionView', () => {
     test('Date above max or below min should be disabled', async () => {
         setFormatterTimeZone('Europe/Brussels');
 
-        const getDayButtonLocator = (value: number): Locator => {
-            return page.getByText(value.toString(), { exact: true });
-        };
-
-        const getDayButton = (value: number): HTMLButtonElement => {
-            return getDayButtonLocator(value).element() as HTMLButtonElement;
-        };
-
-        const getDayButtonForDate = async (date: Date): Promise<HTMLButtonElement> => {
-            await selectYear(date.getFullYear());
-            await selectMonth(date.getMonth() + 1);
-
-            return getDayButton(date.getDate());
-        };
-
         const selectedDay = ref(new Date(2023, 10, 14, 22, 0, 0, 0));
 
         const onClose = vi.fn();
         const setDate = vi.fn().mockImplementation((value: Date) => {
-            // do nohting
+            // do nothing
             selectedDay.value = value;
         });
 
@@ -219,7 +227,88 @@ describe('DateSelectionView', () => {
         }
     });
 
-    // test for specific date number of elements? (generateDays)
+    test('Should show button for each day in month', async () => {
+        setFormatterTimeZone('Europe/Brussels');
 
-    // test timezones
+        const selectedDay = ref(new Date(2023, 10, 14, 22, 0, 0, 0));
+
+        const onClose = vi.fn();
+        const setDate = vi.fn().mockImplementation((value: Date) => {
+            // do nothing
+            selectedDay.value = value;
+        });
+
+        wrapper = mount(TestAppWithModalStackComponent, {
+            attachTo: document.body,
+            props: {
+                root: new ComponentWithProperties(DateSelectionView, {
+                    selectedDay,
+                    onClose,
+                    setDate,
+                },
+                ),
+            },
+        });
+
+        const testCases: [Date, number][] = [
+            [new Date(2025, 1, 1, 22, 0, 0, 0), 28],
+            // leap year
+            [new Date(2028, 1, 1, 22, 0, 0, 0), 29],
+            [new Date(2023, 0, 5, 22, 0, 0, 0), 31],
+            [new Date(2022, 3, 30, 22, 0, 0, 0), 30],
+        ];
+
+        for (const [date, daysInMonth] of testCases) {
+            await selectYearAndMonth(date);
+
+            // count buttons without class other-month
+            const dayButtons = wrapper.findAll('.days button:not(.other-month)');
+            expect(dayButtons.length).toBe(daysInMonth);
+        }
+    });
+
+    test('Should show correct month and set correct date for timezone', async () => {
+        const testCases: [timezone: string, selectedDay: Date, expectedDate: Date, expectedMonthSelected: number][] = [
+            // +11:00
+            ['Asia/Sakhalin', new Date(2025, 3, 30, 14), new Date(2025, 3, 30, 14), 4],
+            // // +12:00 (SDT), +13:00 (DST)
+            ['Antarctica/South_Pole', new Date(2025, 3, 30, 14), new Date(2025, 3, 30, 14), 4],
+            // // +08:00
+            ['Asia/Shanghai', new Date(2025, 3, 30, 16), new Date(2025, 3, 30, 16), 4],
+            // // +01:00 (SDT)
+            ['Europe/Brussels', new Date(2025, 3, 30, 23), new Date(2025, 3, 30, 23), 4],
+            // // -11:00
+            ['Pacific/Pago_Pago', new Date(2025, 3, 1, 10), new Date(2025, 2, 2, 10), 2],
+        ];
+
+        for (const [timezone, selectedDay, expectedDate, expectedMonthSelected] of testCases) {
+            setFormatterTimeZone(timezone);
+
+            const selectedDayRef = ref(selectedDay);
+
+            const onClose = vi.fn();
+            const setDate = vi.fn().mockImplementation((value: Date) => {
+                // do nothing
+                selectedDayRef.value = value;
+            });
+
+            wrapper = mount(TestAppWithModalStackComponent, {
+                attachTo: document.body,
+                props: {
+                    root: new ComponentWithProperties(DateSelectionView, {
+                        selectedDay: selectedDayRef,
+                        onClose,
+                        setDate,
+                    },
+                    ),
+                },
+            });
+
+            const monthValue = (wrapper!.find('select[data-testid="select-month"]').element as HTMLSelectElement).value;
+            expect(monthValue).toBe((expectedMonthSelected + 1).toString());
+
+            selectDay(1);
+            expect(setDate).toHaveBeenCalledWith(expectedDate);
+        }
+    });
 });
