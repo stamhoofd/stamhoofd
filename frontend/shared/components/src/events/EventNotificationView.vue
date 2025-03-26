@@ -77,7 +77,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="isReviewer && notification.status !== EventNotificationStatus.Accepted && notification.acceptedRecordAnswers.size > 0 && diffList">
+                <STListItem v-if="isReviewer && notification.status !== EventNotificationStatus.Accepted && notification.acceptedRecordAnswers.size > 0 && diffList.length">
                     <h3 class="style-definition-label">
                         {{ $t('Aangepast sinds voorlopige goedkeuring') }}
                     </h3>
