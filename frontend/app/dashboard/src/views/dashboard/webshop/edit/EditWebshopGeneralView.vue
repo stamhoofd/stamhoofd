@@ -60,27 +60,30 @@
         <hr>
         <h2>Beschikbaarheid</h2>
 
-        <Checkbox v-model="useAvailableUntil">
-            Sluit webshop na een bepaalde datum
+        <Checkbox v-model="hasStatusClosed">
+            Manueel gesloten
         </Checkbox>
 
-        <div v-if="useAvailableUntil" class="split-inputs">
-            <STInputBox title="Stop bestellingen op" error-fields="settings.availableUntil" :error-box="errorBox">
-                <DateSelection v-model="availableUntil" />
-            </STInputBox>
-            <TimeInput v-model="availableUntil" title="Om" :validator="validator" /> 
-        </div>
-
-        <Checkbox v-model="useOpenAt">
-            Open webshop pas na een bepaalde datum
-        </Checkbox>
-
-        <div v-if="useOpenAt" class="split-inputs">
-            <STInputBox title="Open op" error-fields="settings.openAt" :error-box="errorBox">
-                <DateSelection v-model="openAt" />
-            </STInputBox>
-            <TimeInput v-model="openAt" title="Om" :validator="validator" /> 
-        </div>
+        <template v-if="!hasStatusClosed">
+            <Checkbox v-model="useAvailableUntil">
+                Sluit webshop na een bepaalde datum
+            </Checkbox>
+            <div v-if="useAvailableUntil" class="split-inputs">
+                <STInputBox title="Stop bestellingen op" error-fields="settings.availableUntil" :error-box="errorBox">
+                    <DateSelection v-model="availableUntil" />
+                </STInputBox>
+                <TimeInput v-model="availableUntil" title="Om" :validator="validator" />
+            </div>
+            <Checkbox v-model="useOpenAt">
+                Open webshop pas na een bepaalde datum
+            </Checkbox>
+            <div v-if="useOpenAt" class="split-inputs">
+                <STInputBox title="Open op" error-fields="settings.openAt" :error-box="errorBox">
+                    <DateSelection v-model="openAt" />
+                </STInputBox>
+                <TimeInput v-model="openAt" title="Om" :validator="validator" />
+            </div>
+        </template>
 
         <div class="container">
             <hr>
@@ -182,10 +185,10 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { CenteredMessage, Checkbox, DateSelection, NumberInput, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast } from "@stamhoofd/components";
+import { Checkbox, DateSelection, NumberInput, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { PaymentConfiguration, PermissionRole, PermissionsByRole, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductType, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
-import { Formatter, sleep } from '@stamhoofd/utility';
+import { PaymentConfiguration, PermissionRole, PermissionsByRole, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductType, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
@@ -408,6 +411,15 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
         meta.availableUntil = availableUntil
         p.meta = meta
         this.addPatch(p)
+    }
+
+    get hasStatusClosed() {
+        return this.webshop.meta.status === WebshopStatus.Closed
+    }
+
+    set hasStatusClosed(value: boolean) {
+        const status = value ? WebshopStatus.Closed : WebshopStatus.Open;
+        this.addPatch(PrivateWebshop.patch({ meta: WebshopMetaData.patch({ status }) }));
     }
 
     get useOpenAt() {
