@@ -1458,7 +1458,9 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             await member3.refresh();
 
             // Check all parents equal
-            const expectedParent = parent3;
+            const expectedParent = parent3.patch({ c,
+                createdAt: parent1.createdAt, // parent1 created at can be 1ms smaller, and oldest will be used
+            });
 
             expect(member1.details.parents).toEqual([expectedParent]);
             expect(member2.details.parents).toEqual([expectedParent]);
