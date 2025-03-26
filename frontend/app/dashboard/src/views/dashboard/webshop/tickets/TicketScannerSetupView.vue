@@ -19,7 +19,10 @@
                 Dit appartaat ondersteunt de scanner niet. Probeer in een moderne browser, op een smartphone en zorg ervoor dat je niet in privé modus surft (dat voorkomt de noodzakelijk opslag van tickets als het internet wegvalt).
             </p>
 
-            <a class="info-box icon download selectable" href="https://files.stamhoofd.be/website/docs/tickets-checklist.pdf" download="tickets-checklist.pdf" target="_blank">
+            <a v-if="STAMHOOFD.platformName === 'stamhoofd'" class="info-box icon download selectable" href="https://files.stamhoofd.be/website/docs/tickets-checklist.pdf" download="tickets-checklist.pdf" target="_blank">
+                Download de checklist voor het scannen van tickets
+            </a>
+            <a v-else class="info-box icon download selectable" href="https://files.stamhoofd.be/website/docs/tickets-checklist-whitelabel.pdf" download="tickets-checklist.pdf" target="_blank">
                 Download de checklist voor het scannen van tickets
             </a>
 
