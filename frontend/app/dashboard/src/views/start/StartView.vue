@@ -2,8 +2,15 @@
     <section class="st-view">
         <STNavigationBar :title="$t('d5d2e25f-588e-496e-925f-f7e375c3888a')" />
         <main class="center">
-            <h1>
+            <aside v-copyable class="style-title-prefix">
                 {{ $t('d5d2e25f-588e-496e-925f-f7e375c3888a') }}
+            </aside>
+
+            <h1>
+                {{ organization.name }}
+                <span v-copyable class="title-suffix style-copyable">
+                    {{ organization.uri }}
+                </span>
             </h1>
 
             <p>{{ $t('5dbc2f08-f2d0-43bc-973d-b789077ca3ad') }}</p>
@@ -23,11 +30,12 @@
 </template>
 
 <script setup lang="ts">
-import { QuickActionsBox, useAuth } from '@stamhoofd/components';
+import { QuickActionsBox, useAuth, useRequiredOrganization } from '@stamhoofd/components';
 import { useDashboardQuickActions } from '@stamhoofd/components/src/quick-actions/hooks/useDashboardQuickActions';
 import SetupStepsView from './SetupStepsView.vue';
 
 const auth = useAuth();
 const quickActions = useDashboardQuickActions();
+const organization = useRequiredOrganization();
 
 </script>

@@ -28,6 +28,16 @@
             </div>
 
             <div>
+                <STInputBox :title="$t('Groepsnummer')" :error-box="errors.errorBox">
+                    <input
+                        id="organization-uri"
+                        :value="uri"
+                        class="input"
+                        type="text"
+                        disabled
+                    >
+                </STInputBox>
+
                 <UrlInput v-model="website" :title="$t('0e17f20e-e0a6-4fa0-8ec4-378e4325bea5')" :placeholder="$t('5d75775a-a4b5-426a-aea9-b1e75ee5f055')" :validator="errors.validator" :required="false" />
 
                 <p class="style-description-small">
@@ -154,6 +164,8 @@ const name = computed({
         });
     },
 });
+
+const uri = computed(() => patched.value.uri);
 
 const address = computed({
     get: () => patched.value.address,
