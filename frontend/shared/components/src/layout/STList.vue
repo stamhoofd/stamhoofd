@@ -1,5 +1,5 @@
 <template>
-    <Sortable v-if="draggable" :list="listModel" :item-key="itemKey" tag="div" class="st-list" :class="{'is-dragging': isDrag}" :options="options" @start="onStart" @update="onUpdate">
+    <Sortable v-if="draggable" :list="listModel" :item-key="itemKey" tag="div" class="st-list" :class="{'is-dragging': isDrag}" :options="options" @start="onStart" @end="onEnd" @update="onUpdate">
         <template #item="{element, index}">
             <slot name="item" v-bind="{item: element as T, index}" />
         </template>
@@ -51,6 +51,9 @@ const isDrag = ref(false);
 
 const onStart = () => {
     isDrag.value = true;
+};
+const onEnd = () => {
+    isDrag.value = false;
 };
 
 const onUpdate = async ({ from, to, oldIndex, newIndex, ...event }: SortableEvent) => {
