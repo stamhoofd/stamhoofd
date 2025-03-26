@@ -46,7 +46,7 @@
 <script setup lang="ts">
 import { patchContainsChanges } from '@simonbackx/simple-encoding';
 import { useDismiss, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { PlatformMember, Version } from '@stamhoofd/structures';
+import { Address, PlatformMember, Version } from '@stamhoofd/structures';
 import { ComponentOptions, computed, onActivated, Ref, ref } from 'vue';
 
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
@@ -58,6 +58,7 @@ import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
 import { NavigationActions } from '../types/NavigationActions';
 import { usePlatformFamilyManager } from './PlatformFamilyManager';
+import { Formatter } from '@stamhoofd/utility';
 
 defineOptions({
     inheritAttrs: false,
@@ -152,6 +153,13 @@ async function save() {
             });
         }
 
+        const old = cloned.value.member.details.address;
+        const updated = cloned.value.patchedMember.details.address;
+
+        if (old !== null && updated !== null && old.toString() !== updated.toString()) {
+            await modifyAddress(old, updated);
+        }
+
         if (props.doSave) {
             // Extra clone for saving, so the view doesn't change during saving
             const saveClone = cloned.value.clone();
@@ -191,6 +199,20 @@ async function save() {
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;
+}
+
+async function modifyAddress(from: Address, to: Address) {
+    const occurrences = cloned.value.family.getAddressOccurrences(from, { memberId: props.member.patchedMember.id });
+
+    if (occurrences.length === 0) {
+        return;
+    }
+
+    if (!await CenteredMessage.confirm('Wil je dit adres overal wijzigen?', 'Overal wijzigen', from.shortString() + ' is ook het adres van ' + Formatter.joinLast(occurrences, ', ', ' en ') + '. Als je wilt kan je het adres ook voor hen wijzigen naar ' + to.shortString() + '.', 'Enkel hier', false)) {
+        return;
+    }
+
+    cloned.value.family.updateAddress(from, to);
 }
 
 const hasChanges = computed(() => {
