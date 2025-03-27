@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="time" :error-box="errors.errorBox">
-        <input v-model="timeRaw" class="input" type="time" :class="{ error: errors.errorBox !== null }" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled">
+        <input v-model="timeRaw" class="input" type="time" :class="{ error: errors.errorBox !== null }" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" @change="validate">
     </STInputBox>
 </template>
 
@@ -8,7 +8,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { DateTime } from 'luxon';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { useValidation } from '../errors/useValidation';
@@ -29,27 +29,35 @@ withDefaults(defineProps<{
     autocomplete: '',
 });
 
-const isNull = ref(false);
-const model = defineModel<Date>({ required: true, set: (value: Date) => {
-    isNull.value = false;
-    return value;
-} });
+const model = defineModel<Date>({ required: true });
+
+const timeRawCache = ref(formatDate(model.value));
+
+watch(model, (value) => {
+    timeRawCache.value = formatDate(value);
+});
 
 const timeRaw = computed({
-    get: () => isNull.value || model.value === null ? '' : Formatter.timeIso(model.value),
-    set: (value: string) => validate(value),
+    get: () => timeRawCache.value,
+    set: (value: string) => {
+        timeRawCache.value = value?.trim().toLowerCase() ?? ''
+    },
 });
 
 const errors = useErrors();
 
-useValidation(errors.validator, () => onChange());
+useValidation(errors.validator, validate);
 
-function onChange() {
-    return validate(timeRaw.value);
+function formatDate(date: Date | null): string {
+    if(date === null) {
+        return '';
+    }
+
+    return Formatter.timeIso(date);
 }
 
-function validate(timeValue: string | null) {
-    timeValue = timeValue?.trim().toLowerCase() ?? '';
+function validate() {
+    const timeValue = timeRawCache.value;
 
     const regex = /^([0-9]{1,2}:)?[0-9]{1,2}$/;
 
@@ -59,9 +67,6 @@ function validate(timeValue: string | null) {
             message: "Ongeldig tijdstip. Voer in zoals bv. '12:30'",
             field: 'time',
         }));
-        if (!isNull.value) {
-            isNull.value = true;
-        }
         return false;
     }
     else {
