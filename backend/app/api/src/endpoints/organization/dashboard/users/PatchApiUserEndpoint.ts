@@ -1,17 +1,16 @@
-import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, Decoder, isPatch } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Token, User } from '@stamhoofd/models';
-import { ApiUser, PermissionLevel, UserPermissions } from '@stamhoofd/structures';
-
-import { Context } from '../../helpers/Context';
+import { ApiUser, PermissionLevel, UserMeta, UserPermissions } from '@stamhoofd/structures';
+import { Context } from '../../../../helpers/Context';
 
 type Params = { id: string };
 type Query = undefined;
 type Body = AutoEncoderPatchType<ApiUser>;
 type ResponseBody = ApiUser;
 
-export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class PatchApiUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = ApiUser.patchType() as Decoder<AutoEncoderPatchType<ApiUser>>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -82,6 +81,26 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                         });
                     }
                 }
+            }
+        }
+
+        if (request.body.meta) {
+            if (!isPatch(request.body.meta)) {
+                throw new SimpleError({
+                    code: 'invalid_request',
+                    message: 'Invalid request: meta is not a patch',
+                    statusCode: 400,
+                });
+            }
+
+            const rateLimits = request.body.meta.rateLimits;
+            if (rateLimits && rateLimits !== editUser.meta?.rateLimits) {
+                if (!Context.auth.hasPlatformFullAccess()) {
+                    throw Context.auth.error($t('Je hebt geen rechten om de rate limits van API-keys te wijzigen'));
+                }
+
+                editUser.meta = editUser.meta ?? UserMeta.create({});
+                editUser.meta.rateLimits = rateLimits;
             }
         }
 

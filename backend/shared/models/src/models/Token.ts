@@ -1,6 +1,6 @@
 import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
 import { QueryableModel } from '@stamhoofd/sql';
-import { ApiUser } from '@stamhoofd/structures';
+import { ApiUser, ApiUserRateLimits } from '@stamhoofd/structures';
 import crypto from 'crypto';
 
 import { RateLimiter } from '../helpers/RateLimiter';
@@ -19,31 +19,6 @@ async function randomBytes(size: number): Promise<Buffer> {
         });
     });
 }
-
-export const apiUserRateLimiter = new RateLimiter({
-    limits: [
-        {
-            // Block heavy bursts (5req/s for 5s)
-            limit: 25,
-            duration: 5 * 1000,
-        },
-        {
-            // max 1req/s during 150s
-            limit: 150,
-            duration: 150 * 1000,
-        },
-        {
-            // 1000 requests per hour
-            limit: 1000,
-            duration: 60 * 1000 * 60,
-        },
-        {
-            // 2000 requests per day
-            limit: 2000,
-            duration: 24 * 60 * 1000 * 60,
-        },
-    ],
-});
 
 export class Token extends QueryableModel {
     static table = 'tokens';
@@ -109,6 +84,7 @@ export class Token extends QueryableModel {
             permissions: user.permissions,
             expiresAt: lastToken?.accessTokenValidUntil ?? null,
             createdAt: user.createdAt,
+            meta: user.meta,
         });
     }
 

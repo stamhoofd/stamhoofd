@@ -3,7 +3,7 @@ import { PatchableArray, PatchableArrayAutoEncoder, PatchMap } from '@simonbackx
 import { Endpoint, Request } from '@simonbackx/simple-endpoints';
 import { GroupFactory, MemberFactory, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { Address, Country, EmergencyContact, MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PatchAnswers, PermissionLevel, Permissions, PermissionsResourceType, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes } from '@stamhoofd/structures';
-import { TestUtils } from '@stamhoofd/test-utils';
+import { SHExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { PatchOrganizationMembersEndpoint } from './PatchOrganizationMembersEndpoint';
 
@@ -15,8 +15,6 @@ type Body = EndpointType extends Endpoint<any, any, infer B, any> ? B : never;
 const firstName = 'John';
 const lastName = 'Doe';
 const birthDay = { year: 1993, month: 4, day: 5 };
-
-const errorWithCode = (code: string) => expect.objectContaining({ code }) as jest.Constructable;
 
 describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
     beforeEach(async () => {
@@ -59,7 +57,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             request.headers.authorization = 'Bearer ' + token.accessToken;
             await expect(testServer.test(endpoint, request))
                 .rejects
-                .toThrow(errorWithCode('known_member_missing_rights'));
+                .toThrow(SHExpect.errorWithCode('known_member_missing_rights'));
         });
 
         test('The security code is not a requirement for members without additional data', async () => {
@@ -219,7 +217,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request)).rejects.toThrow(errorWithCode('not_found'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(SHExpect.errorWithCode('not_found'));
         });
 
         test('An admin can edit members registered in its own organization', async () => {
@@ -495,7 +493,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request)).rejects.toThrow(errorWithCode('permission_denied'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(SHExpect.errorWithCode('permission_denied'));
         });
 
         test('An admin without record category permission cannot set the records in that category', async () => {
@@ -564,7 +562,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request)).rejects.toThrow(errorWithCode('permission_denied'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(SHExpect.errorWithCode('permission_denied'));
         });
 
         test('An admin can set records of the platform', async () => {

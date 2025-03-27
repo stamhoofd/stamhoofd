@@ -10,12 +10,25 @@ export enum LoginProviderType {
     Google = 'Google',
 }
 
+/**
+ * Defines the applicable rate limits of the user (only used for API's).
+ * Can only get changed by a platform admin
+ */
+export enum ApiUserRateLimits {
+    Normal = 'Normal',
+    Medium = 'Medium',
+    High = 'High',
+}
+
 export class UserMeta extends AutoEncoder {
     /**
      * When signed in with SSO, this is the id of that user in the SSO system
      */
     @field({ decoder: new MapDecoder(new EnumDecoder(LoginProviderType), StringDecoder) })
     loginProviderIds: Map<LoginProviderType, string> = new Map();
+
+    @field({ decoder: new EnumDecoder(ApiUserRateLimits), nullable: true, ...NextVersion })
+    rateLimits: ApiUserRateLimits | null = null;
 }
 
 export class User extends AutoEncoder {
@@ -126,6 +139,12 @@ export class ApiUser extends AutoEncoder {
         },
     })
     permissions: UserPermissions | null = null;
+
+    /**
+     * Readonly
+     */
+    @field({ decoder: UserMeta, nullable: true, ...NextVersion })
+    meta: UserMeta | null = null;
 
     @field({ decoder: DateDecoder })
     createdAt = new Date();

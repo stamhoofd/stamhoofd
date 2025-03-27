@@ -4,7 +4,7 @@ export class RateLimitWindow {
     start: Date = new Date();
     windows: Map<string, number> = new Map();
 
-    limit: number;
+    limit: Record<string, number>;
 
     /**
      * in ms
@@ -12,10 +12,10 @@ export class RateLimitWindow {
     duration: number;
 
     constructor(options: {
-        limit: number;
+        limit: Record<string, number> | number;
         duration: number;
     }) {
-        this.limit = options.limit;
+        this.limit = typeof options.limit === 'number' ? { '': options.limit } : options.limit;
         this.duration = options.duration;
     }
 
@@ -27,7 +27,14 @@ export class RateLimitWindow {
         return Date.now() - this.start.getTime();
     }
 
-    track(key: string, amount = 1) {
+    getLimit(category?: string) {
+        if (category) {
+            return this.limit[category] ?? this.limit[''] ?? 0;
+        }
+        return this.limit[''] ?? 0;
+    }
+
+    track(key: string, amount = 1, category?: string) {
         if (this.isExpired()) {
             // We have a shared window
             this.start = new Date();
@@ -37,11 +44,13 @@ export class RateLimitWindow {
         let w = this.windows.get(key) ?? 0;
         w += amount;
 
-        if (w > this.limit) {
+        const limit = this.getLimit(category);
+
+        if (w > limit) {
             const retryAfter = Math.ceil((this.duration - this.age) / 1000);
             throw new SimpleError({
                 code: 'rate_limit',
-                message: `Rate limit exceeded (${w} ${amount > 1 ? '(' + amount + ' added)' : ''} requests in ${Math.round(this.age / 1000)}s). Retry after ${retryAfter}s. Check your code and try to reduce the number of (parallel) requests you make. Add waiting periods if needed.`,
+                message: `Rate limit exceeded (${w} ${amount > 1 ? '(' + amount + ' added)' : ''} requests in ${Math.round(this.age / 1000)}s). Retry after ${retryAfter}s. Check your code and try to reduce the number of (parallel) requests you make. Add waiting periods if needed. Limit ${limit} ${category ?? ''}`,
                 human: `Oeps! Te veel aanvragen. Om spam te vermijden is jouw aanvraag tijdelijk geblokkeerd. Probeer het over ${retryAfter} seconden opnieuw.`,
                 statusCode: 429,
             });
@@ -56,7 +65,7 @@ export class RateLimiter {
     windows: RateLimitWindow[] = [];
 
     constructor(options: {
-        limits: { duration: number; limit: number }[];
+        limits: { duration: number; limit: Record<string, number> | number }[];
     }) {
         for (const limit of options.limits) {
             this.windows.push(new RateLimitWindow({
@@ -66,9 +75,9 @@ export class RateLimiter {
         }
     }
 
-    track(key: string, amount = 1) {
+    track(key: string, amount = 1, category?: string) {
         for (const window of this.windows) {
-            window.track(key, amount);
+            window.track(key, amount, category);
         }
     }
 }

@@ -16,6 +16,63 @@
 
             <EditUserPermissionsBox :user="patched" @patch:user="addPatch($event)" />
         </div>
+
+        <div class="container">
+            <hr>
+            <h2>Rate limits</h2>
+            <p>Een API-key heeft rate limits om overbelasting door foutief of inefficiënt gebruik te voorkomen.</p>
+
+            <STList>
+                <STListItem v-if="canAlterRateLimits || rateLimits === ApiUserRateLimits.Normal" :selectable="canAlterRateLimits" class="right-stack right-top" element-name="label">
+                    <template v-if="canAlterRateLimits" #left>
+                        <Radio v-model="rateLimits" :value="ApiUserRateLimits.Normal" />
+                    </template>
+                    <h3 class="style-title-list">
+                        Laag
+                    </h3>
+                    <p v-if="canAlterRateLimits" class="style-description-small">
+                        Ideaal voor de meeste API-keys.
+                    </p>
+                    <p class="style-description-small">
+                        Maximaal 5 req/s; 120 requests per 2 minuten; 1.000 requests per uur; 2.000 requests per dag
+                    </p>
+
+                    <template v-if="canAlterRateLimits" #right>
+                        <span class="style-tag">Aangeraden</span>
+                    </template>
+                </STListItem>
+
+                <STListItem v-if="canAlterRateLimits || rateLimits === ApiUserRateLimits.Medium" :selectable="canAlterRateLimits" class="right-stack right-top" element-name="label">
+                    <template v-if="canAlterRateLimits" #left>
+                        <Radio v-model="rateLimits" :value="ApiUserRateLimits.Medium" />
+                    </template>
+                    <h3 class="style-title-list">
+                        Gemiddeld
+                    </h3>
+                    <p v-if="canAlterRateLimits" class="style-description-small">
+                        Voor een API-key die heel regelmatig de API moet aanroepen. Risico op overbelasting als de API niet correct is geimplementeerd en zware requests op korte tijd afvuurt.
+                    </p>
+                    <p class="style-description-small">
+                        Maximaal 10 req/s; 240 requests per 2 minuten; 2.000 requests per uur; 14.400 requests per dag
+                    </p>
+                </STListItem>
+
+                <STListItem v-if="canAlterRateLimits || rateLimits === ApiUserRateLimits.High" :selectable="canAlterRateLimits" class="right-stack right-top" element-name="label">
+                    <template v-if="canAlterRateLimits" #left>
+                        <Radio v-model="rateLimits" :value="ApiUserRateLimits.High" />
+                    </template>
+                    <h3 class="style-title-list">
+                        Hoog
+                    </h3>
+                    <p v-if="canAlterRateLimits" class="style-description-small">
+                        Voor een API-key die heel intensief gebruik moet maken van de API. Risico op overbelasting als de API niet correct is geimplementeerd en zware requests op korte tijd afvuurt.
+                    </p>
+                    <p class="style-description-small">
+                        Maximaal 25 req/s; 480 requests per 2 minuten; 4.000 requests per uur; 28.800 requests per dag
+                    </p>
+                </STListItem>
+            </STList>
+        </div>
     </SaveView>
 </template>
 
@@ -23,8 +80,8 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, useShow } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, EditUserPermissionsBox, ErrorBox, SaveView, Toast, useContext, useErrors, usePatch } from '@stamhoofd/components';
-import { ApiUser, ApiUserWithToken } from '@stamhoofd/structures';
+import { CenteredMessage, EditUserPermissionsBox, ErrorBox, SaveView, Toast, useAuth, useContext, useErrors, usePatch } from '@stamhoofd/components';
+import { ApiUser, ApiUserRateLimits, ApiUserWithToken, UserMeta } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import CopyApiTokenView from './CopyApiTokenView.vue';
 
@@ -34,6 +91,8 @@ const deleting = ref(false);
 const $context = useContext();
 const pop = usePop();
 const show = useShow();
+const auth = useAuth();
+const canAlterRateLimits = auth.hasPlatformFullAccess();
 
 const props = defineProps<{
     user: ApiUser;
@@ -52,6 +111,15 @@ const title = computed(() => {
 const name = computed({
     get: () => patched.value.name ?? '',
     set: (value: string) => addPatch({ name: value ? value : null }),
+});
+
+const rateLimits = computed({
+    get: () => patched.value.meta?.rateLimits ?? ApiUserRateLimits.Normal,
+    set: (value: ApiUserRateLimits) => addPatch({
+        meta: UserMeta.patch({
+            rateLimits: value,
+        }),
+    }),
 });
 
 async function save() {

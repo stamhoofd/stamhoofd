@@ -99,3 +99,24 @@ class TestInstance {
 }
 
 export const TestUtils = new TestInstance();
+
+export const SHExpect = {
+    errorWithCode: (code: string) => expect.objectContaining({ code }) as jest.Constructable,
+    errorWithMessage: (message: string) => expect.objectContaining({ message }) as jest.Constructable,
+    simpleError: (data: {
+        code?: string;
+        message?: string;
+        field?: string;
+    }) => {
+        const d = {
+            code: data.code ?? expect.any(String),
+            message: data.message ?? expect.any(String),
+            field: data.field ?? expect.anything(),
+        };
+
+        if (!data.field) {
+            delete d.field;
+        }
+        return expect.objectContaining(d) as jest.Constructable;
+    },
+};

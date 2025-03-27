@@ -2,15 +2,15 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Token, User } from '@stamhoofd/models';
-import { ApiUser, ApiUserWithToken, UserPermissions } from '@stamhoofd/structures';
+import { ApiUser, ApiUserWithToken, UserMeta, UserPermissions } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = ApiUser;
-type ResponseBody = ApiUser;
+type ResponseBody = ApiUserWithToken;
 
-export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class CreateApiUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = ApiUser as Decoder<ApiUser>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -56,6 +56,19 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         admin.permissions = UserPermissions.limitedAdd(null, request.body.permissions, organization.id);
+
+        if (request.body.meta) {
+            const rateLimits = request.body.meta.rateLimits;
+            if (rateLimits) {
+                if (!Context.auth.hasPlatformFullAccess()) {
+                    throw Context.auth.error($t('Je hebt geen rechten om de rate limits van API-keys te wijzigen'));
+                }
+
+                admin.meta = admin.meta ?? UserMeta.create({});
+                admin.meta.rateLimits = rateLimits;
+            }
+        }
+
         await admin.save();
 
         // Set id

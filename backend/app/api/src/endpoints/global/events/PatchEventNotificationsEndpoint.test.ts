@@ -1,35 +1,16 @@
 import { PatchableArray, PatchMap, patchObject } from '@simonbackx/simple-encoding';
 import { Endpoint, Request } from '@simonbackx/simple-endpoints';
-import { EventNotificationFactory, EventFactory, EventNotificationTypeFactory, Organization, OrganizationFactory, Token, User, UserFactory, EmailTemplateFactory, RecordCategoryFactory, RegistrationPeriodFactory, RecordAnswerFactory, EventNotification } from '@stamhoofd/models';
-import { AccessRight, BaseOrganization, EmailTemplateType, Event, EventNotificationStatus, EventNotification as EventNotificationStruct, PermissionLevel, Permissions, PermissionsResourceType, RecordAnswer, RecordType, ResourcePermissions } from '@stamhoofd/structures';
-import { TestUtils } from '@stamhoofd/test-utils';
-import { PatchEventNotificationsEndpoint } from './PatchEventNotificationsEndpoint';
-import { testServer } from '../../../../tests/helpers/TestServer';
 import { EmailMocker } from '@stamhoofd/email';
+import { EmailTemplateFactory, EventFactory, EventNotification, EventNotificationFactory, EventNotificationTypeFactory, Organization, OrganizationFactory, RecordAnswerFactory, RecordCategoryFactory, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
+import { AccessRight, BaseOrganization, EmailTemplateType, Event, EventNotificationStatus, EventNotification as EventNotificationStruct, Permissions, PermissionsResourceType, RecordType, ResourcePermissions } from '@stamhoofd/structures';
+import { SHExpect, TestUtils } from '@stamhoofd/test-utils';
+import { testServer } from '../../../../tests/helpers/TestServer';
+import { PatchEventNotificationsEndpoint } from './PatchEventNotificationsEndpoint';
 
 const baseUrl = `/event-notifications`;
 const endpoint = new PatchEventNotificationsEndpoint();
 type EndpointType = typeof endpoint;
 type Body = EndpointType extends Endpoint<any, any, infer B, any> ? B : never;
-
-const errorWithCode = (code: string) => expect.objectContaining({ code }) as jest.Constructable;
-const errorWithMessage = (message: string) => expect.objectContaining({ message }) as jest.Constructable;
-const simpleError = (data: {
-    code?: string;
-    message?: string;
-    field?: string;
-}) => {
-    const d = {
-        code: data.code ?? expect.any(String),
-        message: data.message ?? expect.any(String),
-        field: data.field ?? expect.anything(),
-    };
-
-    if (!data.field) {
-        delete d.field;
-    }
-    return expect.objectContaining(d) as jest.Constructable;
-};
 
 const minimumUserPermissions = Permissions.create({
     resources: new Map([
@@ -169,7 +150,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            simpleError({ code: 'invalid_field', field: 'typeId' }),
+            SHExpect.simpleError({ code: 'invalid_field', field: 'typeId' }),
         );
     });
 
@@ -194,7 +175,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            simpleError({ code: 'invalid_field', field: 'events' }),
+            SHExpect.simpleError({ code: 'invalid_field', field: 'events' }),
         );
     });
 
@@ -228,7 +209,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             }),
         );
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            simpleError({ code: 'invalid_period', field: 'startDate' }),
+            SHExpect.simpleError({ code: 'invalid_period', field: 'startDate' }),
         );
     });
 
@@ -256,7 +237,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            simpleError({ code: 'invalid_field', field: 'events' }),
+            SHExpect.simpleError({ code: 'invalid_field', field: 'events' }),
         );
     });
 
@@ -416,7 +397,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            simpleError({ code: 'permission_denied' }),
+            SHExpect.simpleError({ code: 'permission_denied' }),
         );
     });
 
@@ -442,7 +423,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            simpleError({ code: 'permission_denied' }),
+            SHExpect.simpleError({ code: 'permission_denied' }),
         );
     });
 
@@ -468,7 +449,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            simpleError({ code: 'permission_denied' }),
+            SHExpect.simpleError({ code: 'permission_denied' }),
         );
     });
 
@@ -494,7 +475,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            simpleError({ code: 'permission_denied' }),
+            SHExpect.simpleError({ code: 'permission_denied' }),
         );
     });
 
@@ -520,7 +501,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            simpleError({ code: 'permission_denied' }),
+            SHExpect.simpleError({ code: 'permission_denied' }),
         );
     });
 
@@ -603,7 +584,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            simpleError({ code: 'permission_denied' }),
+            SHExpect.simpleError({ code: 'permission_denied' }),
         );
     });
 
@@ -991,7 +972,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            simpleError({ code: 'permission_denied' }),
+            SHExpect.simpleError({ code: 'permission_denied' }),
         );
     });
 });

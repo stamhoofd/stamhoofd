@@ -142,6 +142,12 @@ button.st-list-item {
         }
     }
 
+    &.right-top {
+        > .main > div > .right {
+            align-self: flex-start;
+        }
+    }
+
     &.right-description {
         > .main > div > .right {
             @extend .style-description;

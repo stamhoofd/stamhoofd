@@ -4,29 +4,42 @@ import { I18n } from '@stamhoofd/backend-i18n';
 import { Organization, Platform, RateLimiter, Token, User } from '@stamhoofd/models';
 import { AsyncLocalStorage } from 'async_hooks';
 
+import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ApiUserRateLimits } from '@stamhoofd/structures';
 import { AdminPermissionChecker } from './AdminPermissionChecker';
-import { AutoEncoder, field, Decoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 export const apiUserRateLimiter = new RateLimiter({
     limits: [
         {
-            // Block heavy bursts (5req/s for 5s)
-            limit: 25,
+            limit: {
+                '': 25, // (5req/s for 5s)
+                [ApiUserRateLimits.Medium]: 10 * 5, // (10req/s for 5s)
+                [ApiUserRateLimits.High]: 25 * 5, // (100req/s for 5s)
+            },
             duration: 5 * 1000,
         },
         {
-            // max 1req/s during 150s
-            limit: 150,
-            duration: 150 * 1000,
+            limit: {
+                '': 120, // max 1req/s during 150s
+                [ApiUserRateLimits.Medium]: 240, // (2req/s for 150s)
+                [ApiUserRateLimits.High]: 480, // (4req/s for 150s)
+            },
+            duration: 120 * 1000,
         },
         {
-            // 1000 requests per hour
-            limit: 1000,
+            limit: {
+                '': 1000, // ± 0.27 request/s sustained for an hour = 3.6s between each request
+                [ApiUserRateLimits.Medium]: 2000, // ± 0.56 request/s sustained for an hour
+                [ApiUserRateLimits.High]: 4000, // ± 1.11 request/s sustained for an hour
+            },
             duration: 60 * 1000 * 60,
         },
         {
-            // 2000 requests per day
-            limit: 2000,
+            limit: {
+                '': 2_000, // max 2000 requests per day
+                [ApiUserRateLimits.Medium]: 14_400, // max 4000 requests per day
+                [ApiUserRateLimits.High]: 18_000, // max 10 requests per minute, sustained for a full day
+            },
             duration: 24 * 60 * 1000 * 60,
         },
     ],
@@ -235,7 +248,7 @@ export class ContextInstance {
 
         // Rate limits for api users
         if (token.user.isApiUser) {
-            apiUserRateLimiter.track(this.organization?.id ?? token.user.id);
+            apiUserRateLimiter.track(this.organization?.id ?? token.user.id, 1, token.user.meta?.rateLimits ?? undefined);
         }
 
         const user = token.user;
