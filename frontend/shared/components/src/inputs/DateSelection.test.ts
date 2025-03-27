@@ -1502,8 +1502,6 @@ describe('DateSelection', async () => {
         await app.setProps({keepAlive: false});
         await app.setProps({keepAlive: true});
 
-        await app.vm.$nextTick();
-
         const wrapper = app.findComponent(DateSelection);
 
         const dayInput = findDayInput(wrapper);
