@@ -2,18 +2,14 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { Email } from '@stamhoofd/models';
 import { EmailPreview, EmailStatus, Email as EmailStruct } from '@stamhoofd/structures';
 
+import { AutoEncoderPatchType, Decoder, patchObject } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Context } from '../../../helpers/Context';
-import { AutoEncoderPatchType, Decoder, patchObject } from '@simonbackx/simple-encoding';
 
 type Params = { id: string };
 type Query = undefined;
 type Body = AutoEncoderPatchType<EmailStruct>;
 type ResponseBody = EmailPreview;
-
-/**
- * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once
- */
 
 export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = EmailStruct.patchType() as Decoder<AutoEncoderPatchType<EmailStruct>>;
@@ -107,6 +103,33 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
         if (request.body.status === EmailStatus.Sending || request.body.status === EmailStatus.Sent) {
             model.throwIfNotReadyToSend();
+
+            const replacement = '{{unsubscribeUrl}}';
+ 
+            if (model.html) {
+                // Check email contains an unsubscribe button
+                if (!model.html.includes(replacement)) {
+                    throw new SimpleError({
+                        code: "missing_unsubscribe_button",
+                        message: "Missing unsubscribe button",
+                        human: "Je moet een ‘uitschrijven’-knop of link toevoegen onderaan je e-mail. Klik daarvoor onderaan op het ‘toverstaf’ icoontje en kies voor ‘Knop om uit te schrijven voor e-mails’. Dit is verplicht volgens de GDPR-wetgeving, maar het zorgt ook voor een betere e-mail reputatie omdat minder e-mails als spam worden gemarkeerd.",
+                        field: "html"
+                    })
+                }
+            }
+
+            if (model.text) {
+                // Check email contains an unsubscribe button
+                if (!model.text.includes(replacement)) {
+                    throw new SimpleError({
+                        code: "missing_unsubscribe_button",
+                        message: "Missing unsubscribe button",
+                        human: "Je moet een ‘uitschrijven’-knop of link toevoegen onderaan je e-mail. Klik daarvoor onderaan op het ‘toverstaf’ icoontje en kies voor ‘Knop om uit te schrijven voor e-mails’. Dit is verplicht volgens de GDPR-wetgeving, maar het zorgt ook voor een betere e-mail reputatie omdat minder e-mails als spam worden gemarkeerd.",
+                        field: "text"
+                    })
+                }
+            }
+
             model.send().catch(console.error);
         }
 
