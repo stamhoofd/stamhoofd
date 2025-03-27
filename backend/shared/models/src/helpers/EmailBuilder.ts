@@ -452,10 +452,14 @@ export async function fillRecipientReplacements(recipient: Recipient, options: {
     }
 
     if (from || replyTo) {
-        recipient.replacements.push(Replacement.create({
-            token: 'fromAddress',
-            value: replyTo?.email ?? from!.email,
-        }));
+        const fromAddress = replyTo?.email ?? from!.email;
+
+        if (fromAddress) {
+            recipient.replacements.push(Replacement.create({
+                token: 'fromAddress',
+                value: fromAddress,
+            }));
+        }
 
         const name = replyTo?.name ?? from?.name;
         if (name) {
