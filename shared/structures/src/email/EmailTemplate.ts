@@ -1,7 +1,7 @@
 import { AnyDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
-import { EmailRecipientFilterType } from './Email.js';
 import { Replacement } from '../endpoints/EmailRequest.js';
+import { EmailRecipientFilterType } from './Email.js';
 import { ExampleReplacements } from './exampleReplacements.js';
 
 export enum EmailTemplateType {
@@ -16,6 +16,7 @@ export enum EmailTemplateType {
     DefaultMembersEmail = 'DefaultMembersEmail',
     DefaultReceivableBalancesEmail = 'DefaultReceivableBalancesEmail',
     SavedReceivableBalancesEmail = 'SavedReceivableBalancesEmail',
+    DefaultOrdersEmail = 'DefaultOrdersEmail',
 
     //
     MembersExpirationReminder = 'MembersExpirationReminder',
@@ -165,6 +166,10 @@ export class EmailTemplate extends AutoEncoder {
             return EmailTemplateType.DefaultReceivableBalancesEmail;
         }
 
+        if (type === EmailRecipientFilterType.Orders) {
+            return EmailTemplateType.DefaultOrdersEmail;
+        }
+
         return null;
     }
 
@@ -212,6 +217,7 @@ export class EmailTemplate extends AutoEncoder {
 
             case EmailTemplateType.DefaultMembersEmail: return 'Standaard e-mail naar leden';
             case EmailTemplateType.DefaultReceivableBalancesEmail: return 'Standaard e-mail naar openstaande bedragen';
+            case EmailTemplateType.DefaultOrdersEmail: return 'Standaard e-mail naar bestellingen';
 
             case EmailTemplateType.MembersExpirationReminder: return 'Herinnering verlopen pakket ledenadministratie';
             case EmailTemplateType.WebshopsExpirationReminder: return 'Herinnering verlopen pakket webshops';
@@ -282,6 +288,7 @@ export class EmailTemplate extends AutoEncoder {
 
             case EmailTemplateType.DefaultMembersEmail:
             case EmailTemplateType.DefaultReceivableBalancesEmail:
+            case EmailTemplateType.DefaultOrdersEmail:
                 return 'Placeholder';
 
             case EmailTemplateType.MembersExpirationReminder:
@@ -375,6 +382,7 @@ export class EmailTemplate extends AutoEncoder {
         switch (type) {
             case EmailTemplateType.DefaultMembersEmail: return true;
             case EmailTemplateType.DefaultReceivableBalancesEmail: return true;
+            case EmailTemplateType.DefaultOrdersEmail: return true;
 
             case EmailTemplateType.SavedMembersEmail: return true;
             case EmailTemplateType.SavedReceivableBalancesEmail: return true;
@@ -438,6 +446,7 @@ export class EmailTemplate extends AutoEncoder {
         switch (type) {
             case EmailTemplateType.DefaultMembersEmail: return 'Als iemand een nieuwe e-mail opstelt, gericht aan leden, zal deze template standaard al klaar staan. Deze kan dan nog aangepast worden.';
             case EmailTemplateType.DefaultReceivableBalancesEmail: return 'Als iemand een nieuwe e-mail opstelt, gericht aan leden met openstaande bedragen, zal deze template standaard al klaar staan. Deze kan dan nog aangepast worden.';
+            case EmailTemplateType.DefaultOrdersEmail: return 'Als iemand een nieuwe e-mail opstelt, gericht aan bestellingen, zal deze template standaard al klaar staan. Deze kan dan nog aangepast worden.';
 
             case EmailTemplateType.OrderNotification: return 'E-mail die webshop eigenaren ontvangen wanneer er een bestelling is geplaatst (indien ze die functie hebben ingeschakeld)';
             case EmailTemplateType.RegistrationConfirmation: return 'Leden en ouders (die toegang hebben of moeten krijgen) ontvangen deze e-mail nadat ze worden ingeschreven of zelf inschrijven.';
