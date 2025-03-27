@@ -1,18 +1,25 @@
 <template>
     <div id="app">
-        <ModalStackComponent ref="modalStack" :root="root" />
+        <KeepAlive>
+            <template v-if="keepAlive">
+                <ModalStackComponent ref="modalStack" :root="root" />
+            </template>
+        </KeepAlive>
         <ToastBox />
     </div>
 </template>
 
 <script lang="ts" setup>
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions, useManualPresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, CenteredMessageView, ModalStackEventBus, ReplaceRootEventBus, ToastBox } from '@stamhoofd/components';
+import { CenteredMessage, CenteredMessageView, ModalStackEventBus, ReplaceRootEventBus } from '@stamhoofd/components';
 import { onMounted, Ref, ref } from 'vue';
 
-defineProps<{
+withDefaults(defineProps<{
     root: ComponentWithProperties;
-}>();
+    keepAlive?: boolean;
+}>(), {
+    keepAlive: true
+});
 
 const modalStack = ref(null) as Ref<InstanceType<typeof ModalStackComponent> | null>;
 HistoryManager.activate();
