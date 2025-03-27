@@ -1474,4 +1474,44 @@ describe('DateSelection', async () => {
         await expect.element(mobileTextEl).toBeVisible();
         await expect.element(mobileTextEl).toHaveTextContent('14 maart 2023');
     });
+
+    test('Component should remember state when removed and added to DOM again', async () => {
+        setFormatterTimeZone('Europe/Brussels');
+
+        const app = mount(TestAppWithModalStackComponent, {
+            attachTo: document.body,
+            props: {
+                root: new ComponentWithProperties(DateSelection, {
+                     'modelValue': new Date(2023, 2, 14, 22, 0, 0, 0),
+                    'onUpdate:modelValue': async () => {
+                    },
+                }),
+            },
+        });
+
+        const wrapperBefore = app.findComponent(DateSelection);
+
+        const dayInputBefore = findDayInput(wrapperBefore);
+        const monthInputBefore = findMonthInput(wrapperBefore);
+        const yearInputBefore = findYearInput(wrapperBefore);
+
+        await dayInputBefore.setValue(18);
+        await monthInputBefore.setValue(5);
+        await yearInputBefore.setValue(2027);
+
+        await app.setProps({keepAlive: false});
+        await app.setProps({keepAlive: true});
+
+        await app.vm.$nextTick();
+
+        const wrapper = app.findComponent(DateSelection);
+
+        const dayInput = findDayInput(wrapper);
+        const monthInput = findMonthInput(wrapper);
+        const yearInput = findYearInput(wrapper);
+
+        expect(dayInput.element).toHaveValue('18');
+        expect(monthInput.element).toHaveValue('5');
+        expect(yearInput.element).toHaveValue('2027');
+    })
 });
