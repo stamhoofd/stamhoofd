@@ -8,14 +8,14 @@
         <div v-else class="input selectable" :class="{placeholder: model === null}" @click="focusFirst()" @mousedown.prevent>
             <span v-if="model === null" class="placeholder">{{ placeholder }}</span>
             <div @click.prevent @mouseup.prevent>
-                <input ref="dayInput" v-model="dayText" inputmode="numeric" autocomplete="off" @focus.prevent="onFocus(0)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(0)">
+                <input ref="dayInput" v-model="dayText" inputmode="numeric" autocomplete="off" @focus.prevent="onFocus(0)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(0)" @change="onChangeDay">
                 <span>{{ dayText }}</span>
             </div>
 
             <span :class="{sep: true, hide: !hasFocus}">/</span>
 
             <div @click.prevent @mouseup.prevent>
-                <input ref="monthInput" v-model="monthText" inputmode="numeric" autocomplete="off" @focus.prevent="onFocus(1)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(1)">
+                <input ref="monthInput" v-model="monthText" inputmode="numeric" autocomplete="off" @focus.prevent="onFocus(1)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(1)" @change="onChangeMonth">
                 <span v-if="hasFocus">{{ monthText }}</span>
                 <span v-else>{{ monthTextLong }}</span>
             </div>
@@ -23,7 +23,7 @@
             <span :class="{sep: true, hide: !hasFocus}">/</span>
 
             <div @click.prevent @mouseup.prevent>
-                <input ref="yearInput" v-model="yearText" inputmode="numeric" autocomplete="off" @focus.prevent="onFocus(2)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(2)">
+                <input ref="yearInput" v-model="yearText" inputmode="numeric" autocomplete="off" @focus.prevent="onFocus(2)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(2)" @change="onChangeYear">
                 <span>{{ yearText }}</span>
             </div>
         </div>
@@ -34,7 +34,7 @@
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
 import { DateTime } from 'luxon';
-import { computed, ComputedRef, onActivated, onBeforeMount, onDeactivated, onMounted, useTemplateRef, WritableComputedRef } from 'vue';
+import { computed, ComputedRef, onActivated, onBeforeMount, onDeactivated, onMounted, Ref, ref, useTemplateRef, watch } from 'vue';
 import { useIsMobile } from '../hooks';
 import DateSelectionView from '../overlays/DateSelectionView.vue';
 
@@ -49,7 +49,7 @@ type InputConfig = {
 };
 
 type NumberConfig = {
-    readonly model: WritableComputedRef<string, string>;
+    readonly model: Ref<string, string>;
 } & InputConfig;
 
 const model = defineModel<Date | null>({ default: null });
@@ -113,7 +113,7 @@ const dayConfig: InputConfig = {
     autoCorrectIfOutOfRange: true,
 };
 
-const dayText = dateInputFactory(dayConfig);
+const {inputRef: dayText, onChange: onChangeDay, onModelChange: onModelChangeDay } = dateInputFactory(dayConfig);
 
 const monthConfig: InputConfig = {
     type: 'month',
@@ -123,7 +123,7 @@ const monthConfig: InputConfig = {
     autoCorrectIfOutOfRange: true,
 };
 
-const monthText = dateInputFactory(monthConfig);
+const {inputRef: monthText, onChange: onChangeMonth, onModelChange: onModelChangeMonth } = dateInputFactory(monthConfig);
 
 const monthTextLong = computed(() => model.value ? Formatter.month(model.value) : '');
 
@@ -134,7 +134,17 @@ const yearConfig: InputConfig = {
     format: value => value ? Formatter.year(value).toString() : '',
 };
 
-const yearText = dateInputFactory(yearConfig);
+const {inputRef: yearText, onChange: onChangeYear, onModelChange: onModelChangeYear } = dateInputFactory(yearConfig);
+
+watch(model, (value: Date | null) => {
+    if(value === null) {
+        return;
+    }
+
+    onModelChangeDay(value);
+    onModelChangeMonth(value);
+    onModelChangeYear(value);
+})
 
 const numberConfigs: NumberConfig[] = [
     {
@@ -248,10 +258,15 @@ onDeactivated(removeEventListeners);
 onBeforeMount(removeEventListeners);
 
 function dateInputFactory(config: InputConfig) {
-    return computed({
-        get: () => config.format(model.value),
-        set: value => setText(value, config, true, true),
-    });
+    const inputRef = ref(config.format(model.value));
+
+    return {
+        inputRef,
+        onChange: () => setText(inputRef.value, config, true, true),
+        onModelChange: (value: Date | null) => {
+            inputRef.value = config.format(value);
+        }
+    }
 }
 
 function isFull(value: string, config: InputConfig) {

@@ -1,13 +1,13 @@
 <template>
     <STInputBox :title="title" error-fields="time" :error-box="errors.errorBox">
-        <input v-model="timeRaw" class="input" :class="{ error: errors.errorBox !== null }" type="time" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" @change="onChange">
+        <input v-model="timeRaw" class="input" :class="{ error: errors.errorBox !== null }" type="time" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" @change="validate">
     </STInputBox>
 </template>
 
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { useValidation } from '../errors/useValidation';
@@ -31,7 +31,6 @@ const props = withDefaults(defineProps<{
 });
 
 const model = defineModel<number | null>({ default: null, set: (value: number | null) => {
-    isNull.value = value === null;
 
     // prevent emitting null if required
     if (props.required && value === null) {
@@ -41,23 +40,37 @@ const model = defineModel<number | null>({ default: null, set: (value: number | 
     return value;
 } });
 
-const isNull = ref<boolean>(model.value === null);
+const timeRawCache = ref(formatMinutes(model.value));
+
+watch(model, (value) => {
+    if(value === null) {
+        return;
+    }
+    
+    timeRawCache.value = formatMinutes(value);
+});
 
 const timeRaw = computed({
-    get: () => isNull.value || model.value === null ? '' : Formatter.minutesPadded(model.value),
-    set: (value: string) => validate(value),
+    get: () => timeRawCache.value,
+    set: (value: string) => {
+        timeRawCache.value = value?.trim().toLowerCase() ?? '';
+    },
 });
 
 const errors = useErrors();
 
-useValidation(errors.validator, () => onChange());
+useValidation(errors.validator, validate);
 
-function onChange() {
-    return validate(timeRaw.value);
+function formatMinutes(minutes: number | null): string {
+    if(minutes === null) {
+        return '';
+    }
+
+    return Formatter.minutesPadded(minutes);
 }
 
-function validate(timeValue: string | null) {
-    timeValue = timeValue?.trim().toLowerCase() ?? '';
+function validate(): boolean {
+    const timeValue = timeRawCache.value;
 
     if (!props.required && timeValue.length === 0) {
         errors.errorBox = null;
