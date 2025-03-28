@@ -1,112 +1,103 @@
 <template>
-    <STInputBox :title="title" error-fields="time" :error-box="errorBox">
-        <input v-model="timeRaw" class="input" type="time" :class="{ error: !valid }" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" @input="(event) => {timeRaw = event.currentTarget.value; validate();}">
+    <STInputBox :title="title" error-fields="time" :error-box="errors.errorBox">
+        <input v-model="timeRaw" class="input" type="time" :class="{ error: errors.errorBox !== null }" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" @change="validate">
     </STInputBox>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
 import { Formatter } from '@stamhoofd/utility';
+import { DateTime } from 'luxon';
+import { computed, ref, watch } from 'vue';
+import { ErrorBox } from '../errors/ErrorBox';
+import { useErrors } from '../errors/useErrors';
+import { useValidation } from '../errors/useValidation';
+import { Validator } from '../errors/Validator';
+import STInputBox from './STInputBox.vue';
 
-import { ErrorBox } from "../errors/ErrorBox";
-import { Validator } from "../errors/Validator";
-import STInputBox from "./STInputBox.vue";
+withDefaults(defineProps<{
+    title?: string;
+    validator?: Validator | null;
+    disabled?: boolean;
+    placeholder?: string;
+    autocomplete?: string;
+}>(), {
+    title: '',
+    validator: null,
+    disabled: false,
+    placeholder: '',
+    autocomplete: '',
+});
 
-@Component({
-    components: {
-        STInputBox
-    }
-})
-export default class TimeInput extends VueComponent {
-    @Prop({ default: "" }) 
-        title: string;
+const model = defineModel<Date>({ required: true });
 
-    @Prop({ default: null }) 
-        validator: Validator | null
+const timeRawCache = ref(formatDate(model.value));
 
-    timeRaw = "";
-    valid = true;
+watch(model, (value) => {
+    timeRawCache.value = formatDate(value);
+});
 
-    @Prop({ required: true })
-        modelValue!: Date
+const timeRaw = computed({
+    get: () => timeRawCache.value,
+    set: (value: string) => {
+        timeRawCache.value = value?.trim().toLowerCase() ?? ''
+    },
+});
 
-    @Prop({ default: false })
-        disabled!: boolean
+const errors = useErrors();
 
-    @Prop({ default: "" })
-        placeholder!: string
+useValidation(errors.validator, validate);
 
-    @Prop({ default: "" })
-        autocomplete!: string
-
-    errorBox: ErrorBox | null = null
-
-    @Watch('modelValue', {deep: true})
-    onValueChanged(val: Date) {
-        if (val === null) {
-            return
-        }
-        this.timeRaw = Formatter.timeIso(this.modelValue)
-    }
-
-    mounted() {
-        if (this.validator) {
-            this.validator.addValidation(this, () => {
-                return this.validate()
-            })
-        }
-        this.timeRaw = Formatter.timeIso(this.modelValue)
+function formatDate(date: Date | null): string {
+    if(date === null) {
+        return '';
     }
 
-    unmounted() {
-        if (this.validator) {
-            this.validator.removeValidation(this)
-        }
+    return Formatter.timeIso(date);
+}
+
+function validate() {
+    const timeValue = timeRawCache.value;
+
+    const regex = /^([0-9]{1,2}:)?[0-9]{1,2}$/;
+
+    if (!regex.test(timeValue)) {
+        errors.errorBox = new ErrorBox(new SimpleError({
+            code: 'invalid_field',
+            message: "Ongeldig tijdstip. Voer in zoals bv. '12:30'",
+            field: 'time',
+        }));
+        return false;
     }
+    else {
+        const split = timeValue.split(':');
+        let hour = parseInt(split[0]);
+        let minute = parseInt(split[1] ?? '0');
 
-    async validate() {
-        this.timeRaw = this.timeRaw.trim().toLowerCase()
-
-        const regex = /^([0-9]{1,2}:)?[0-9]{1,2}$/;
-        
-        if (!regex.test(this.timeRaw)) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                "code": "invalid_field",
-                "message": "Ongeldig tijdstip. Voer in zoals bv. '12:30'",
-                "field": "time"
-            }))
-            return false
-
-        } else {
-            const split = this.timeRaw.split(":")
-            let hours = parseInt(split[0])
-            let minutes = parseInt(split[1] ?? "0")
-
-            if (isNaN(hours)) {
-                hours = 0;
-            }
-
-            if (isNaN(minutes)) {
-                minutes = 0;
-            }
-
-            if (hours > 24 || minutes > 60) {
-                this.errorBox = new ErrorBox(new SimpleError({
-                    "code": "invalid_field",
-                    "message": "Ongeldig tijdstip. Voer in zoals bv. '12:30'",
-                    "field": "time"
-                }))
-                return false
-            }
- 
-            const d = new Date(this.modelValue.getTime())
-            d.setHours(hours, minutes, 0, 0)
-            this.$emit('update:modelValue', d)
-
-            this.errorBox = null
-            return true
+        if (isNaN(hour)) {
+            hour = 0;
         }
+
+        if (isNaN(minute)) {
+            minute = 0;
+        }
+
+        if (hour > 24 || minute > 60) {
+            errors.errorBox = new ErrorBox(new SimpleError({
+                code: 'invalid_field',
+                message: "Ongeldig tijdstip. Voer in zoals bv. '12:30'",
+                field: 'time',
+            }));
+            return false;
+        }
+
+        const luxonModelValue = DateTime.fromJSDate(model.value!).setZone(Formatter.timezone);
+        model.value = DateTime.fromObject({ year: luxonModelValue.year, month: luxonModelValue.month, day: luxonModelValue.day, hour, minute, second: 0, millisecond: 0 },
+            { zone: Formatter.timezone })
+            .toJSDate();
+
+        errors.errorBox = null;
+        return true;
     }
 }
 </script>
