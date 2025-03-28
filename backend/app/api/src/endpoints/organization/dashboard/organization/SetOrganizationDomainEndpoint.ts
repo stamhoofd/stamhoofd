@@ -113,7 +113,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                         type: DNSRecordType.CNAME,
                         name: organization.privateMeta.mailFromDomain + '.',
                         // Use shops for mail domain, to allow reuse
-                        value: STAMHOOFD.domains.webshopCname + '.',
+                        value: (STAMHOOFD.domains.webshopCname ?? STAMHOOFD.domains.registrationCname) + '.',
                     }));
 
                     if (STAMHOOFD.domains.registration && organization.privateMeta.pendingRegisterDomain) {

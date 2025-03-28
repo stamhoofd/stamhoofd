@@ -26,8 +26,8 @@ export class GetWebshopFromDomainEndpoint extends Endpoint<Params, Query, Body, 
     queryDecoder = Query as Decoder<Query>;
     webshopDomains = [
         ...new Set([
-            ...Object.values(STAMHOOFD.domains.webshop),
-            ...Object.values(STAMHOOFD.domains.marketing),
+            ...Object.values(STAMHOOFD.domains.webshop ?? {}),
+            ...Object.values(STAMHOOFD.domains.marketing ?? {}),
         ]),
     ];
 

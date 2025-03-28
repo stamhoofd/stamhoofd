@@ -173,6 +173,10 @@ export class Webshop extends QueryableModel {
             return this.domain;
         }
 
+        if (!STAMHOOFD.domains.webshop) {
+            throw new Error('No webshop domains configured');
+        }
+
         const domain = STAMHOOFD.domains.webshop[this.organization.address.country] ?? STAMHOOFD.domains.webshop[''];
         return domain + '/' + this.uri;
     }

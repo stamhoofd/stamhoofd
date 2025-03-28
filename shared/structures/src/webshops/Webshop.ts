@@ -56,6 +56,10 @@ export class WebshopPreview extends AutoEncoder {
     }
 
     getDefaultDomain(organization: Organization): string {
+        if (!STAMHOOFD.domains.webshop) {
+            console.error('No webshop domains configured');
+            return '';
+        }
         return (STAMHOOFD.domains.webshop[organization.address.country] ?? STAMHOOFD.domains.webshop['']);
     }
 
@@ -211,6 +215,11 @@ export class Webshop extends AutoEncoder {
     }
 
     getDefaultDomain(organization: Organization): string {
+        if (!STAMHOOFD.domains.webshop) {
+            console.error('No webshop domains configured');
+            return '';
+        }
+
         return (STAMHOOFD.domains.webshop[organization.address.country] ?? STAMHOOFD.domains.webshop['']);
     }
 
