@@ -46,7 +46,7 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
             });
         }
 
-        const type = STAMHOOFD.STRIPE_CONNECT_METHOD;
+        const type = STAMHOOFD.STRIPE_CONNECT_METHOD ?? 'standard';
 
         const sharedData: Stripe.AccountCreateParams = {
             capabilities: {

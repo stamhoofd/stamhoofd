@@ -165,9 +165,15 @@ export class StripeMocker {
         const endpoint = new StripeWebookEndpoint();
 
         const r = Request.buildJson('POST', `/stripe/webhooks`, undefined, payload);
+        const secret = payload.account ? STAMHOOFD.STRIPE_CONNECT_ENDPOINT_SECRET : STAMHOOFD.STRIPE_ENDPOINT_SECRET;
+
+        if (!secret) {
+            throw new Error('No stripe secret set in env');
+        }
+
         r.headers['stripe-signature'] = stripe.webhooks.generateTestHeaderString({
             payload: await r.body,
-            secret: payload.account ? STAMHOOFD.STRIPE_CONNECT_ENDPOINT_SECRET : STAMHOOFD.STRIPE_ENDPOINT_SECRET,
+            secret: secret,
         });
         await testServer.test(endpoint, r);
     }

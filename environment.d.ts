@@ -150,11 +150,11 @@ declare global {
         readonly NOLT_SSO_SECRET_KEY?: string
 
         // Stripe
-        readonly STRIPE_ACCOUNT_ID: string
-        readonly STRIPE_SECRET_KEY: string
-        readonly STRIPE_CONNECT_ENDPOINT_SECRET: string
-        readonly STRIPE_ENDPOINT_SECRET: string
-        readonly STRIPE_CONNECT_METHOD: 'express' | 'standard'
+        readonly STRIPE_ACCOUNT_ID?: string
+        readonly STRIPE_SECRET_KEY?: string
+        readonly STRIPE_CONNECT_ENDPOINT_SECRET?: string
+        readonly STRIPE_ENDPOINT_SECRET?: string
+        readonly STRIPE_CONNECT_METHOD?: 'express' | 'standard'
 
         // Communication with other internal services
         readonly INTERNAL_SECRET_KEY: string

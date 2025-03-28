@@ -52,6 +52,11 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         console.log('Received Stripe Webhook', request.body.type);
+        const secret = request.body.account ? STAMHOOFD.STRIPE_CONNECT_ENDPOINT_SECRET : STAMHOOFD.STRIPE_ENDPOINT_SECRET;
+
+        if (!secret) {
+            throw StripeHelper.notConfiguredError;
+        }
 
         // Verify webhook signature and extract the event.
         // See https://stripe.com/docs/webhooks/signatures for more information.
@@ -66,7 +71,6 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
                     statusCode: 400,
                 });
             }
-            const secret = request.body.account ? STAMHOOFD.STRIPE_CONNECT_ENDPOINT_SECRET : STAMHOOFD.STRIPE_ENDPOINT_SECRET;
             event = await stripe.webhooks.constructEventAsync(await request.request.bodyPromise!, sig, secret);
         }
         catch (err) {

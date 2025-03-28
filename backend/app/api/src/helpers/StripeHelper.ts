@@ -6,7 +6,18 @@ import { Formatter } from '@stamhoofd/utility';
 import Stripe from 'stripe';
 
 export class StripeHelper {
+    static get notConfiguredError() {
+        return new SimpleError({
+            code: 'not_configured',
+            message: 'Stripe is not yet configured for this platform',
+            human: $t('Stripe is nog niet geconfigureerd voor dit platform'),
+        });
+    }
+
     static getInstance(accountId: string | null = null) {
+        if (!STAMHOOFD.STRIPE_SECRET_KEY) {
+            throw this.notConfiguredError;
+        }
         return new Stripe(STAMHOOFD.STRIPE_SECRET_KEY, { apiVersion: '2024-06-20', typescript: true, maxNetworkRetries: 0, timeout: 10000, stripeAccount: accountId ?? undefined });
     }
 
@@ -81,7 +92,7 @@ export class StripeHelper {
     }
 
     static async getStatus(payment: Payment, cancel = false, testMode = false): Promise<PaymentStatus> {
-        if (testMode && !STAMHOOFD.STRIPE_SECRET_KEY.startsWith('sk_test_')) {
+        if (testMode && !STAMHOOFD.STRIPE_SECRET_KEY?.startsWith('sk_test_')) {
             // Do not query anything
             return payment.status;
         }

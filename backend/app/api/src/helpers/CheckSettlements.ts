@@ -23,7 +23,7 @@ type MolliePaymentJSON = {
 let lastSettlementCheck: Date | null = null;
 
 export async function checkAllStripePayouts(checkAll = false) {
-    if (STAMHOOFD.environment !== 'production') {
+    if (STAMHOOFD.environment !== 'production' || !STAMHOOFD.STRIPE_SECRET_KEY) {
         console.log('Skip settlement check');
         return;
     }
