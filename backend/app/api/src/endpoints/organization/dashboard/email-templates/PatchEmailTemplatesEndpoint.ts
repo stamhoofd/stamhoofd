@@ -4,7 +4,6 @@ import { EmailTemplate, Group, Webshop } from '@stamhoofd/models';
 import { EmailTemplate as EmailTemplateStruct, PermissionLevel } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
-import { SimpleError } from '@simonbackx/simple-errors';
 
 type Params = Record<string, never>;
 type Body = PatchableArrayAutoEncoder<EmailTemplateStruct>;
@@ -34,11 +33,6 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
 
         if (organization) {
             if (!await Context.auth.canReadEmailTemplates(organization.id)) {
-                throw Context.auth.error();
-            }
-        }
-        else {
-            if (!Context.auth.hasPlatformFullAccess()) {
                 throw Context.auth.error();
             }
         }
