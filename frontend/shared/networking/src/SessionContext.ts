@@ -198,6 +198,7 @@ export class SessionContext implements RequestMiddleware {
                     try {
                         const parsed = JSON.parse(json);
                         this.user = new ObjectData(parsed, { version: 0 }).decode(new VersionBoxDecoder(UserWithMembers as Decoder<UserWithMembers>) as Decoder<VersionBox<UserWithMembers>>).data;
+                        this.clearAuthCache();
                         this.callListeners('user');
                         return;
                     }
@@ -602,6 +603,7 @@ export class SessionContext implements RequestMiddleware {
         }
         else {
             this.user = response.data;
+            this.clearAuthCache();
         }
         console.log('Fetched session user');
 
@@ -642,6 +644,7 @@ export class SessionContext implements RequestMiddleware {
         if (!this.organization) {
             this.setOrganization(organization);
             this.clearAuthCache();
+            this.callListeners('organization');
         }
         else {
             const oldAdmins = this.organization.admins;
