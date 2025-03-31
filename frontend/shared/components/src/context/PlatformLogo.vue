@@ -1,5 +1,5 @@
 <template>
-    <a alt="Stamhoofd" :href="'https://'+$domains.marketing+''" rel="noopener" class="platform-logo" :class="{expand: platform.config.expandLogo}">
+    <a alt="Stamhoofd" :href="'https://'+$domains.marketing+''" rel="noopener" class="platform-logo" :class="{expand: logo && platform.config.expandLogo, center: !logo}">
         <ImageComponent v-if="logo" :image="logo" :image-dark="logoDark" />
         <template v-else>
             <Logo class="responsive" />
@@ -14,11 +14,11 @@ import { computed } from 'vue';
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
 
-const platform = usePlatform()
-const width = useDeviceWidth()
+const platform = usePlatform();
+const width = useDeviceWidth();
 
-const logo = computed(() => width.value > 800 ? (platform.value.config.horizontalLogo ?? platform.value.config.squareLogo) : (platform.value.config.squareLogo ?? platform.value.config.horizontalLogo))
-const logoDark = computed(() => width.value > 800 ? (platform.value.config.horizontalLogoDark ?? platform.value.config.squareLogoDark) : (platform.value.config.squareLogoDark ?? platform.value.config.horizontalLogoDark))
+const logo = computed(() => width.value > 800 ? (platform.value.config.horizontalLogo ?? platform.value.config.squareLogo) : (platform.value.config.squareLogo ?? platform.value.config.horizontalLogo));
+const logoDark = computed(() => width.value > 800 ? (platform.value.config.horizontalLogoDark ?? platform.value.config.squareLogoDark) : (platform.value.config.squareLogoDark ?? platform.value.config.horizontalLogoDark));
 
 </script>
 
@@ -31,6 +31,12 @@ const logoDark = computed(() => width.value > 800 ? (platform.value.config.horiz
 
     &.expand {
         height: 60px;
+    }
+
+    &.center {
+        align-items: center;
+        display: flex;
+        justify-content: flex-start;
     }
 
     > .image-component {

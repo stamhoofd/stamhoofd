@@ -1,14 +1,16 @@
 <template>
-    <PlatformLogo v-if="app === 'auto'" />
+    <PlatformLogo v-if="app === 'auto' || (app === 'registration' && !canSwitch && !organization)" />
+    <OrganizationLogo v-else-if="app === 'registration' && organization && !canSwitch" :organization="organization" />
     <button v-else v-long-press="($event) => open($event)" class="organization-switcher" :class="{small}" type="button" @click="open" @contextmenu.prevent="open($event)">
         <ContextLogo :organization="organization" :app="app" />
         <div>
             <h1>
-                <span>{{ small && organization ? organization.name : getAppTitle(app, organization) }}</span><span v-if="small" ref="arrow" class="icon arrow-down-small gray" />
+                <span>{{ small && organization ? organization.name : getAppTitle(app, organization) }}</span><span v-if="small" class="icon arrow-down-small gray" />
             </h1>
-            <h2 v-if="!small && getAppDescription(app, organization)">
+            <h2 v-if="!small && getAppDescription(app, organization) && canSwitch">
                 <span>{{ getAppDescription(app, organization) }}</span>
-                <span ref="arrow" class="icon arrow-down-small gray" />
+                <span v-if="canSwitch" class="icon arrow-down-small gray" />
+                <span v-else class="icon dot" />
             </h2>
         </div>
     </button>
@@ -21,13 +23,19 @@ import { useOrganization } from '../hooks';
 import { usePositionableSheet } from '../tables';
 import { useAppContext, useAppData } from './appContext';
 import ContextLogo from './ContextLogo.vue';
+import { useContextOptions } from './hooks/useContextOptions';
 import OrganizationAppSelector from './OrganizationAppSelector.vue';
+import OrganizationLogo from './OrganizationLogo.vue';
 import PlatformLogo from './PlatformLogo.vue';
 
 const organization = useOrganization();
 const app = useAppContext();
 const { presentPositionableSheet } = usePositionableSheet();
 const { getAppTitle, getAppDescription } = useAppData();
+const { getDefaultOptions } = useContextOptions();
+
+const options = getDefaultOptions();
+const canSwitch = options.length > 1;
 
 withDefaults(
     defineProps<{
@@ -55,6 +63,7 @@ const open = async (event: MouseEvent) => {
         ],
     }, { padding: 25 });
 };
+
 </script>
 
 <style lang="scss">

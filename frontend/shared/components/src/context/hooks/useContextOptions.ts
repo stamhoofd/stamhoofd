@@ -48,9 +48,8 @@ export function useContextOptions() {
     const $t = useTranslate();
     const platform = usePlatform();
 
-    const getRegistrationOption = async (): Promise<Option> => {
+    const getRegistrationOption = (): Option => {
         const context = new SessionContext(null);
-        await context.loadFromStorage();
 
         return {
             id: 'registration',
@@ -60,27 +59,25 @@ export function useContextOptions() {
         };
     };
 
-    const getDefaultOptions = async () => {
+    const getDefaultOptions = () => {
         const opts: Option[] = [];
 
         if ($user.value && $user.value.organizationId === null && $user.value.permissions && $user.value.permissions.globalPermissions !== null) {
             if ($user.value.permissions?.forPlatform(platform.value)?.isEmpty === false) {
                 const context = new SessionContext(null);
-                await context.loadFromStorage();
+                // await context.loadFromStorage();
 
-                if (context.canGetCompleted()) {
-                    opts.push({
-                        id: 'admin',
-                        organization: null,
-                        app: 'admin',
-                        context,
-                    });
-                }
+                opts.push({
+                    id: 'admin',
+                    organization: null,
+                    app: 'admin',
+                    context,
+                });
             }
         }
 
         if (STAMHOOFD.userMode === 'platform') {
-            opts.push(await getRegistrationOption());
+            opts.push(getRegistrationOption());
         }
 
         for (const organizationId of $user.value?.permissions?.organizationPermissions.keys() ?? []) {
@@ -89,7 +86,6 @@ export function useContextOptions() {
                 continue;
             }
             const context = new SessionContext(organization);
-            await context.loadFromStorage();
 
             opts.push({
                 id: 'dashboard-' + organization.id,
@@ -104,7 +100,6 @@ export function useContextOptions() {
 
     const getOptionForOrganization = async (organization: Organization) => {
         const context = new SessionContext(organization);
-        await context.loadFromStorage();
 
         return {
             id: 'org-' + organization.id,
@@ -116,6 +111,7 @@ export function useContextOptions() {
     };
 
     const buildRootForOption = async (option: Option) => {
+        await option.context.loadFromStorage();
         await SessionManager.prepareSessionForUsage(option.context);
 
         if (option.app === 'auto') {

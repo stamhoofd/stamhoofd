@@ -60,6 +60,14 @@ export async function wrapContext(context: SessionContext, app: AppType | 'auto'
     });
 }
 
+export async function sessionFromOrganization(data: ({ organization: Organization } | { organizationId: string })) {
+    const session = await SessionContext.createFrom(data);
+    await session.loadFromStorage();
+    await session.checkSSO();
+    await SessionManager.prepareSessionForUsage(session, false);
+    return session;
+}
+
 export async function loadSessionFromUrl() {
     const parts = UrlHelper.shared.getParts();
     const ignoreUris = ['login', 'aansluiten', 'start', 'activiteiten', 'mandje', 'leden'];
@@ -68,7 +76,10 @@ export async function loadSessionFromUrl() {
 
     console.log('load session', parts);
 
-    if (parts[1] && !ignoreUris.includes(parts[1])) {
+    if (STAMHOOFD.singleOrganization) {
+        session = await sessionFromOrganization({ organizationId: STAMHOOFD.singleOrganization });
+    }
+    else if (parts[1] && !ignoreUris.includes(parts[1])) {
         const uri = parts[1];
 
         // Load organization
@@ -83,11 +94,7 @@ export async function loadSessionFromUrl() {
                 decoder: Organization as Decoder<Organization>,
             });
             const organization = response.data;
-
-            session = new SessionContext(organization);
-            await session.loadFromStorage();
-            await session.checkSSO();
-            await SessionManager.prepareSessionForUsage(session, false);
+            session = await sessionFromOrganization({ organization });
         }
         catch (e) {
             console.error('Failed to load organization from uri', uri);
@@ -179,7 +186,8 @@ export async function getScopedDashboardRootFromUrl() {
     const session = await loadSessionFromUrl();
 
     if (!session.organization) {
-        return getOrganizationSelectionRoot(session);
+        // Invalid URL
+        return getScopedAutoRoot(session);
     }
 
     return await getScopedDashboardRoot(session);
@@ -221,8 +229,13 @@ export async function getScopedAutoRoot(session: SessionContext, options: { init
         );
     }
 
+    if (STAMHOOFD.singleOrganization && !session.organization) {
+        // Try to load the default organization
+        session = await sessionFromOrganization({ organizationId: STAMHOOFD.singleOrganization });
+    }
+
     // Make sure users without permissions always go to the member portal automatically
-    if (((!session.organization && !session.auth.userPermissions) || (session.organization && !session.auth.permissions)) && (STAMHOOFD.userMode === 'platform' || (session.organization && session.organization.meta.packages.useMembers))) {
+    if (((!session.organization && !session.auth.userPermissions?.isEmpty) || (session.organization && !session.auth.permissions?.isEmpty)) && (STAMHOOFD.userMode === 'platform' || (session.organization && session.organization.meta.packages.useMembers))) {
         const registration = await import('@stamhoofd/registration');
         return await registration.getRootView(session);
     }

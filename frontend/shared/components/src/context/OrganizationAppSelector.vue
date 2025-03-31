@@ -57,12 +57,14 @@
                 </STListItem>
             </STList>
 
-            <hr v-if="currentOptions.length || otherOptions.length">
+            <template v-if="(STAMHOOFD.userMode !== 'platform' || hasAdmin) && !STAMHOOFD.singleOrganization">
+                <hr v-if="currentOptions.length || otherOptions.length">
 
-            <button class="button text" type="button" @click="searchOrganizations">
-                <span class="icon search" />
-                <span>Andere zoeken</span>
-            </button>
+                <button class="button text" type="button" @click="searchOrganizations">
+                    <span class="icon search" />
+                    <span>Andere zoeken</span>
+                </button>
+            </template>
         </main>
     </nav>
 </template>
@@ -78,11 +80,11 @@ import { useAppData } from './appContext';
 import ContextLogo from './ContextLogo.vue';
 import { Option, useContextOptions } from './hooks/useContextOptions';
 
-const options: Ref<Option[]> = shallowRef([]);
 const popup = usePopup();
 
 const { getDefaultOptions, selectOption, isCurrent } = useContextOptions();
 const { getAppTitle, getAppDescription } = useAppData();
+const options: Ref<Option[]> = shallowRef(getDefaultOptions());
 
 const currentOptions = computed(() => {
     const list = options.value.filter(o => o.app !== 'auto');
@@ -92,10 +94,9 @@ const currentOptions = computed(() => {
     return [];
 });
 const otherOptions = computed(() => currentOptions.value.length <= 0 ? options.value : options.value.filter(o => o.app === 'auto'));
-
-getDefaultOptions().then((opts) => {
-    options.value = opts;
-}).catch(console.error);
+const hasAdmin = computed(() => {
+    return options.value.some(o => o.app === 'admin');
+});
 
 const searchOrganizations = async () => {
     await ReplaceRootEventBus.sendEvent('replace', PromiseComponent(async () => {

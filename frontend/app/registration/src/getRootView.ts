@@ -1,7 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, UrlHelper } from '@simonbackx/vue-app-navigation';
 import { AuthenticatedView, ColorHelper, manualFeatureFlag, PromiseView, TabBarController, TabBarItem } from '@stamhoofd/components';
-import { getNonAutoLoginRoot, wrapContext } from '@stamhoofd/dashboard';
+import { getNonAutoLoginRoot, sessionFromOrganization, wrapContext } from '@stamhoofd/dashboard';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { Country, Organization } from '@stamhoofd/structures';
@@ -17,11 +17,14 @@ export function wrapWithModalStack(...components: ComponentWithProperties[]) {
 
 export async function getScopedRegistrationRootFromUrl() {
     const parts = UrlHelper.shared.getParts();
-    const ignoreUris = ['login', 'start'];
+    const ignoreUris = ['login', 'start', 'mandje'];
 
     let session: SessionContext | null = null;
 
-    if (parts[0] === 'leden' && parts[1] && !ignoreUris.includes(parts[1])) {
+    if (STAMHOOFD.singleOrganization) {
+        session = await sessionFromOrganization({ organizationId: STAMHOOFD.singleOrganization });
+    }
+    else if (parts[0] === 'leden' && parts[1] && !ignoreUris.includes(parts[1])) {
         const uri = parts[1];
 
         // Load organization
@@ -36,11 +39,7 @@ export async function getScopedRegistrationRootFromUrl() {
                 decoder: Organization as Decoder<Organization>,
             });
             const organization = response.data;
-
-            session = new SessionContext(organization);
-            await session.loadFromStorage();
-            await session.checkSSO();
-            await SessionManager.prepareSessionForUsage(session, false);
+            session = await sessionFromOrganization({ organization });
         }
         catch (e) {
             console.error('Failed to load organization from uri', uri);
@@ -56,13 +55,16 @@ export async function getScopedRegistrationRootFromUrl() {
             return await getRootView(session);
         }
         const dashboard = await import('@stamhoofd/dashboard');
-        return dashboard.getOrganizationSelectionRoot();
+        return dashboard.getOrganizationSelectionRoot(new SessionContext(null));
     }
 
     return await getRootView(session);
 }
 
 export async function getRootView(session: SessionContext, ownDomain = false) {
+    if (STAMHOOFD.singleOrganization && !session.organization) {
+        session = await sessionFromOrganization({ organizationId: STAMHOOFD.singleOrganization });
+    }
     await I18nController.loadDefault(session, Country.Belgium, 'nl', session?.organization?.address?.country);
 
     // Set color

@@ -85,7 +85,7 @@ export function useDashboardQuickActions(): QuickActions {
                         ? $t('6720c55c-b9a5-44ad-bdd5-4681e8e2478e')
                         : $t('d43da88d-8890-4fa8-894d-e0a4fa6d3565', { count: registrationActions.length.toString() }),
                     action: async () => {
-                        contextOptions.selectOption(await contextOptions.getRegistrationOption());
+                        contextOptions.selectOption(contextOptions.getRegistrationOption());
                     },
                 });
             }

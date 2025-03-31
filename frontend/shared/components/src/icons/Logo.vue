@@ -81,7 +81,7 @@
 }
 
 .stamhoofd-logo-container {
-    display: inline-block;  
+    display: block;
 
     &.small {
         svg:first-child {

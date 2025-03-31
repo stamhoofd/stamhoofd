@@ -97,7 +97,7 @@ const items = computed(() => {
 const labels = computed(() => {
     return items.value.map(o => o.name);
 });
-const allowChangingOrganization = STAMHOOFD.userMode === 'platform' && (app === 'registration' || app === 'admin');
+const allowChangingOrganization = STAMHOOFD.userMode === 'platform' && (app === 'registration' || app === 'admin') && !STAMHOOFD.singleOrganization;
 
 const tree = computed(() => treeFactory({
     filterGroups: (g) => {

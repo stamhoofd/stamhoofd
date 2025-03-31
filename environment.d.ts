@@ -83,6 +83,11 @@ declare global {
         readonly translationNamespace: string
         readonly platformName: string
         readonly fixedCountry?: Country
+
+        /**
+         * This server only uses a single organization
+         */
+        readonly singleOrganization?: string
     }
 
     /** 
