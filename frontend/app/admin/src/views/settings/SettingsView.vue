@@ -53,7 +53,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.DefaultAgeGroups)">
+                <STListItem v-if="platform.config.defaultAgeGroups.length > 0" :selectable="true" class="left-center" @click="$navigate(Routes.DefaultAgeGroups)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/group.svg">
                     </template>
@@ -68,22 +68,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Responsibilities)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/responsibility.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('e7ba96d7-b233-45c4-8331-d429fcea40a9') }}
-                    </h2>
-                    <p class="style-description">
-                        {{ $t('e392de09-15a4-4726-8751-074a4d1db650') }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.PlatformMembershipTypes)">
+                <STListItem v-if="platform.config.membershipTypes.length > 0" :selectable="true" class="left-center" @click="$navigate(Routes.PlatformMembershipTypes)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/membership.svg">
                     </template>
@@ -98,7 +83,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EventTypes)">
+                <STListItem v-if="!$feature('disable-events') && platform.config.eventTypes.length > 0" :selectable="true" class="left-center" @click="$navigate(Routes.EventTypes)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/tent.svg">
                     </template>
@@ -113,7 +98,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="$feature('event-notifications')" :selectable="true" class="left-center" @click="$navigate(Routes.EventNotificationTypes)">
+                <STListItem v-if="!$feature('disable-events') && $feature('event-notifications') && platform.config.eventNotificationTypes.length > 0" :selectable="true" class="left-center" @click="$navigate(Routes.EventNotificationTypes)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/event-notifications.svg">
                     </template>
@@ -128,7 +113,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Premises)">
+                <STListItem v-if="platform.config.premiseTypes.length > 0" :selectable="true" class="left-center" @click="$navigate(Routes.Premises)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/house.svg">
                     </template>
@@ -143,7 +128,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.OrganizationRecordConfiguration)">
+                <STListItem v-if="platform.config.organizationLevelRecordsConfiguration.recordCategories.length > 0" :selectable="true" class="left-center" @click="$navigate(Routes.OrganizationRecordConfiguration)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/list.svg">
                     </template>
@@ -252,6 +237,101 @@
                     </h2>
                     <p class="style-description">
                         Wijzig de inhoud van automatische en opgeslagen e-mails.
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </STList>
+
+            <hr>
+            <h2>Ongebruikte functionaliteiten</h2>
+
+            <STList class="illustration-list">
+                <STListItem v-if="platform.config.defaultAgeGroups.length === 0" :selectable="true" class="left-center" @click="$navigate(Routes.DefaultAgeGroups)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/group.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('24682ea8-b3c6-4372-9a63-5385520888ff') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('8677fa37-3092-42af-869e-bd7363461d32') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem v-if="platform.config.membershipTypes.length === 0" :selectable="true" class="left-center" @click="$navigate(Routes.PlatformMembershipTypes)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/membership.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('429e2447-3506-4828-bb08-a4cde355c78d') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('21683697-3ebf-4f15-827a-ff18d1941f32') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem v-if="!$feature('disable-events') && platform.config.eventTypes.length === 0" :selectable="true" class="left-center" @click="$navigate(Routes.EventTypes)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/tent.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('de211760-1306-4108-92e3-9301435d8988') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('70fd0ad1-d005-46ff-9376-50e16d876f4e') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem v-if="!$feature('disable-events') && $feature('event-notifications') && platform.config.eventNotificationTypes.length === 0" :selectable="true" class="left-center" @click="$navigate(Routes.EventNotificationTypes)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/event-notifications.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('5e2a299f-a166-46a8-9975-cf1b1ce334a6') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('9e53d8ca-d01f-4d64-8707-3877435f28fc') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem v-if="platform.config.premiseTypes.length === 0" :selectable="true" class="left-center" @click="$navigate(Routes.Premises)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/house.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('5d0062df-e595-4e28-b1e3-d399102dfadf') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('76b00f58-a587-431f-9c28-1b86d394fc26') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem v-if="platform.config.organizationLevelRecordsConfiguration.recordCategories.length === 0" :selectable="true" class="left-center" @click="$navigate(Routes.OrganizationRecordConfiguration)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/list.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('e6405d38-2bd8-4e24-8e35-24f4daea2a37') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('f5bf8b84-52d2-49a3-b4b4-73573b320739') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />

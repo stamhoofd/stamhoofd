@@ -18,7 +18,7 @@ export function wrapWithModalStack(component: ComponentWithProperties, initialPr
     return new ComponentWithProperties(ModalStackComponent, { root: component, initialPresents });
 }
 
-export async function wrapContext(context: SessionContext, app: AppType | 'auto', component: ComponentWithProperties, options?: { ownDomain?: boolean; initialPresents?: PushOptions[]; webshop?: Webshop }) {
+export async function wrapContext(context: SessionContext, app: AppType | 'auto', buildComponent: ComponentWithProperties | ((data: { platformManager: PlatformManager }) => ComponentWithProperties), options?: { ownDomain?: boolean; initialPresents?: PushOptions[]; webshop?: Webshop }) {
     const platformManager = await PlatformManager.createFromCache(context, app, true);
     const $memberManager = new MemberManager(context, platformManager.$platform);
     await I18nController.loadDefault(context, Country.Belgium, 'nl', context?.organization?.address?.country);
@@ -29,6 +29,8 @@ export async function wrapContext(context: SessionContext, app: AppType | 'auto'
 
     const $webshopManager = options?.webshop ? reactive(new WebshopManager(context, platformManager.$platform, options.webshop) as any) as WebshopManager : null;
     const $checkoutManager = $webshopManager ? reactive(new CheckoutManager($webshopManager)) : null;
+
+    const component = typeof buildComponent === 'function' ? buildComponent({ platformManager }) : buildComponent;
 
     return new ComponentWithProperties(ContextProvider, {
         context: markRaw({
@@ -370,7 +372,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
     // }
 
     return wrapContext(reactiveSession, 'dashboard',
-        new ComponentWithProperties(AuthenticatedView, {
+        ({ platformManager }) => new ComponentWithProperties(AuthenticatedView, {
             root: wrapWithModalStack(
                 new ComponentWithProperties(TabBarController, {
                     tabs: computed(() => {
@@ -384,7 +386,9 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                             tabs.push(membersTab);
                         }
 
-                        tabs.push(calendarTab);
+                        if (platformManager.$platform.config.eventTypes.length > 0 && !manualFeatureFlag('disable-events', reactiveSession)) {
+                            tabs.push(calendarTab);
+                        }
 
                         if (organization?.meta.packages.useWebshops && STAMHOOFD.domains.webshop) {
                             if (reactiveSession.auth.hasAccessRight(AccessRight.OrganizationCreateWebshops) || !!organization.webshops.find(w => reactiveSession.auth.canAccessWebshop(w, PermissionLevel.Read))) {

@@ -75,7 +75,7 @@
                 <span>{{ $t('6ecc6d7f-35dd-4459-b8d0-ce5b780b8012') }}</span>
             </button>
 
-            <button v-if="cachedOutstandingBalancesEnabled && types.includes(EmailTemplateType.SavedReceivableBalancesEmail)" class="button text" type="button" @click="addTemplate(EmailTemplateType.SavedReceivableBalancesEmail)">
+            <button v-if="types.includes(EmailTemplateType.SavedReceivableBalancesEmail)" class="button text" type="button" @click="addTemplate(EmailTemplateType.SavedReceivableBalancesEmail)">
                 <span class="icon add" />
                 <span>{{ $t('c88003a3-8582-4e59-a8d3-b3e77b4f01ed') }}</span>
             </button>
@@ -140,8 +140,6 @@ const pop = usePop();
 const saving = ref(false);
 const $t = useTranslate();
 loadTemplates().catch(console.error);
-
-const cachedOutstandingBalancesEnabled = useFeatureFlag()('cached-outstanding-balances');
 
 const tabItems = props.onSelect
     ? [

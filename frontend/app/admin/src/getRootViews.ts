@@ -112,7 +112,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
         component: settingsView,
     });
 
-    return wrapContext(reactiveSession, 'admin', wrapWithModalStack(
+    return wrapContext(reactiveSession, 'admin', ({ platformManager }) => wrapWithModalStack(
         new ComponentWithProperties(AuthenticatedView, {
             root: wrapWithModalStack(
                 new ComponentWithProperties(TabBarController, {
@@ -121,8 +121,11 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
                             startTab,
                             membersTab,
                             groupsTab,
-                            calendarTab,
                         ];
+
+                        if (platformManager.$platform.config.eventTypes.length > 0 && !manualFeatureFlag('disable-events', reactiveSession)) {
+                            tabs.push(calendarTab);
+                        }
 
                         const moreTab = new TabBarItemGroup({
                             icon: 'category',

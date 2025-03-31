@@ -91,14 +91,6 @@
                 Activeer test-modus voor betalingen
             </Checkbox>
 
-            <Checkbox :model-value="getFeatureFlag('documents')" @update:model-value="setFeatureFlag('documents', !!$event)">
-                Documenten
-            </Checkbox>
-
-            <Checkbox :model-value="getFeatureFlag('cached-outstanding-balances')" @update:model-value="setFeatureFlag('cached-outstanding-balances', !!$event)">
-                Openstaande bedragen
-            </Checkbox>
-
             <Checkbox :model-value="getFeatureFlag('sso')" @update:model-value="setFeatureFlag('sso', !!$event)">
                 Single-Sign-On
             </Checkbox>

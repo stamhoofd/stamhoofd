@@ -8,6 +8,19 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
+        <p class="info-box">
+            Geen experimentele functies op dit moment.
+        </p>
+
+        <hr>
+        <h2>
+            Functionaliteiten
+        </h2>
+
+        <p>Hier kan je bepaalde functies in- of uitschakelen.</p>
+
+        <STErrorsDefault :error-box="errors.errorBox" />
+
         <Checkbox :model-value="getFeatureFlag('documents')" @update:model-value="setFeatureFlag('documents', !!$event)">
             Documenten
         </Checkbox>
@@ -16,12 +29,12 @@
             Logboek
         </Checkbox>
 
-        <Checkbox :model-value="getFeatureFlag('member-trials')" @update:model-value="setFeatureFlag('member-trials', !!$event)">
-            Proefperiodes
+        <Checkbox :model-value="!getFeatureFlag('disable-events')" @update:model-value="setFeatureFlag('disable-events', !$event)">
+            Activiteiten
         </Checkbox>
 
-        <Checkbox :model-value="getFeatureFlag('cached-outstanding-balances')" @update:model-value="setFeatureFlag('cached-outstanding-balances', !!$event)">
-            Openstaande bedragen
+        <Checkbox :model-value="getFeatureFlag('member-trials')" @update:model-value="setFeatureFlag('member-trials', !!$event)">
+            Proefperiodes
         </Checkbox>
 
         <Checkbox :model-value="getFeatureFlag('balance-emails')" @update:model-value="setFeatureFlag('balance-emails', !!$event)">
@@ -30,6 +43,10 @@
 
         <Checkbox :model-value="getFeatureFlag('event-notifications')" @update:model-value="setFeatureFlag('event-notifications', !!$event)">
             Kampmeldingen
+        </Checkbox>
+
+        <Checkbox :model-value="!!STAMHOOFD.domains.webshop" :disabled="true">
+            Webshops
         </Checkbox>
 
         <hr>

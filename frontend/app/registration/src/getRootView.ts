@@ -1,6 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, UrlHelper } from '@simonbackx/vue-app-navigation';
-import { AuthenticatedView, ColorHelper, PromiseView, TabBarController, TabBarItem } from '@stamhoofd/components';
+import { AuthenticatedView, ColorHelper, manualFeatureFlag, PromiseView, TabBarController, TabBarItem } from '@stamhoofd/components';
 import { getNonAutoLoginRoot, wrapContext } from '@stamhoofd/dashboard';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, SessionContext, SessionManager } from '@stamhoofd/networking';
@@ -86,7 +86,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
         }),
     });
 
-    return wrapContext(session, 'registration', new ComponentWithProperties(AuthenticatedView, {
+    return wrapContext(session, 'registration', ({ platformManager }) => new ComponentWithProperties(AuthenticatedView, {
         root: wrapWithModalStack(
             new ComponentWithProperties(PromiseView, {
                 promise: async function (this: PromiseView) {
@@ -95,6 +95,8 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
                     await $memberManager.loadCheckout();
                     await $memberManager.loadDocuments();
 
+                    const enableEvents = platformManager.$platform.config.eventTypes.length > 0 && !manualFeatureFlag('disable-events', session);
+
                     return new ComponentWithProperties(TabBarController, {
                         tabs: [
                             new TabBarItem({
@@ -102,7 +104,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
                                 name: 'Start',
                                 component: startView,
                             }),
-                            calendarTab,
+                            ...(enableEvents ? [calendarTab] : []),
                             new TabBarItem({
                                 icon: 'basket',
                                 name: 'Mandje',

@@ -54,7 +54,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="cachedOutstandingBalancesEnabled && auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.ReceivableBalance)">
+                    <STListItem v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.ReceivableBalance)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg">
                         </template>
@@ -234,8 +234,6 @@ const context = useContext();
 const errors = useErrors();
 const organization = useOrganization();
 const outstandingBalance = ref(null) as Ref<DetailedPayableBalanceCollection | null>;
-
-const cachedOutstandingBalancesEnabled = useFeatureFlag()('cached-outstanding-balances');
 
 const balancePromise = updateBalance().catch(console.error);
 
