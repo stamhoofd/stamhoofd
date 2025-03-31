@@ -1258,7 +1258,8 @@ describe('DateSelection', async () => {
     });
 
     test('Default date should be today with local time 12', async () => {
-        setFormatterTimeZone('Europe/Brussels');
+        // use timezone without daylight saving time (otherwise the test can fail depending on date)
+        setFormatterTimeZone('Asia/Shanghai');
 
         const wrapper = mount(DateSelection, {
             props: {
@@ -1277,7 +1278,7 @@ describe('DateSelection', async () => {
 
         expect(wrapper.props('modelValue')).not.toBeNull();
         // today with local time 12 (11 in UTC)
-        expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11).getTime());
+        expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 4).getTime());
     });
 
     describe('Should set date to max if impossible to set time between min and max and default time is closer to max', async () => {
