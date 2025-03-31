@@ -55,7 +55,7 @@ describe('DateSelection', async () => {
     describe('Text should change if model changes from parent', async () => {
         test('not mobile', async () => {
             setFormatterTimeZone('Asia/Shanghai');
-    
+
             const wrapper = mount(DateSelection, {
                 attachTo: document.body,
                 props: {
@@ -75,7 +75,7 @@ describe('DateSelection', async () => {
             expect((monthInput.element as HTMLInputElement)).toHaveValue('1');
             expect((yearInput.element as HTMLInputElement)).toHaveValue('2023');
 
-            await wrapper.setProps({modelValue: new Date(2024,5,16,12,0,0)});
+            await wrapper.setProps({ modelValue: new Date(2024, 5, 16, 12, 0, 0) });
 
             expect((dayInput.element as HTMLInputElement)).toHaveValue('16');
             expect((monthInput.element as HTMLInputElement)).toHaveValue('6');
@@ -86,7 +86,7 @@ describe('DateSelection', async () => {
             setFormatterTimeZone('Asia/Shanghai');
 
             vi.mocked(useIsMobile).mockReturnValue(true);
-    
+
             const wrapper = mount(DateSelection, {
                 attachTo: document.body,
                 props: {
@@ -100,7 +100,7 @@ describe('DateSelection', async () => {
             const mobileTextEl = page.getByTestId('mobile-text');
             await expect.element(mobileTextEl).toHaveTextContent('1 januari 2023');
 
-            await wrapper.setProps({modelValue: new Date(2024,5,16,12,0,0)});
+            await wrapper.setProps({ modelValue: new Date(2024, 5, 16, 12, 0, 0) });
             await expect.element(mobileTextEl).toHaveTextContent('16 juni 2024');
         });
     });
@@ -280,9 +280,9 @@ describe('DateSelection', async () => {
     describe('Timezones', async () => {
         test('Model should output correct Date after user input', async () => {
             const date = new Date(2012, 7, 13, 0, 0, 0);
-    
+
             const testCases: { timezone: string; input: { day: string; month: string; year: string }; output: Date }[] = [
-    
+
                 { // +11:00
                     timezone: 'Asia/Sakhalin',
                     input: {
@@ -332,12 +332,12 @@ describe('DateSelection', async () => {
                     output: new Date(2024, 8, 1, 11, 0, 0),
                 },
             ];
-    
+
             for (const { timezone, input: { day, month, year }, output } of testCases) {
                 setFormatterTimeZone(timezone);
-    
+
                 const wrapper = mount(DateSelection);
-    
+
                 await wrapper.setProps({
                     'time': { hours: 0, minutes: 0, seconds: 0 },
                     'modelValue': new Date(date),
@@ -345,15 +345,15 @@ describe('DateSelection', async () => {
                         await wrapper.setProps({ modelValue: e });
                     },
                 });
-    
+
                 const dayInput = findDayInput(wrapper);
                 const monthInput = findMonthInput(wrapper);
                 const yearInput = findYearInput(wrapper);
-    
+
                 await dayInput.setValue(day);
                 await monthInput.setValue(month);
                 await yearInput.setValue(year);
-    
+
                 expect(wrapper.props('modelValue')).not.toBeNull();
                 expect(wrapper.props('modelValue')?.getTime()).toEqual(output.getTime());
             }
@@ -362,7 +362,7 @@ describe('DateSelection', async () => {
         // is reverse of previous test
         test('Date should be shown in formatter timezone', async () => {
             const testCases: { timezone: string; expected: { day: string; month: string; year: string }; modelValue: Date }[] = [
-    
+
                 { // +11:00
                     timezone: 'Asia/Sakhalin',
                     expected: {
@@ -412,12 +412,12 @@ describe('DateSelection', async () => {
                     modelValue: new Date(2024, 8, 1, 11, 0, 0),
                 },
             ];
-    
+
             for (const { timezone, expected: { day, month, year }, modelValue } of testCases) {
                 setFormatterTimeZone(timezone);
-    
+
                 const wrapper = mount(DateSelection);
-    
+
                 await wrapper.setProps({
                     'time': { hours: 0, minutes: 0, seconds: 0 },
                     modelValue,
@@ -425,7 +425,7 @@ describe('DateSelection', async () => {
                         await wrapper.setProps({ modelValue: e });
                     },
                 });
-    
+
                 const dayInput = findDayInput(wrapper);
                 const monthInput = findMonthInput(wrapper);
                 const yearInput = findYearInput(wrapper);
@@ -438,7 +438,7 @@ describe('DateSelection', async () => {
 
         test('Date should be shown in formatter timezone - mobile', async () => {
             const testCases: { timezone: string; expected: string; modelValue: Date }[] = [
-    
+
                 { // +11:00
                     timezone: 'Asia/Sakhalin',
                     modelValue: new Date(2024, 7, 31, 13, 0, 0),
@@ -473,11 +473,11 @@ describe('DateSelection', async () => {
 
             for (const { timezone, expected, modelValue } of testCases) {
                 setFormatterTimeZone(timezone);
-    
+
                 const wrapper = mount(DateSelection, {
                     attachTo: document.body,
                 });
-    
+
                 await wrapper.setProps({
                     'time': { hours: 0, minutes: 0, seconds: 0 },
                     modelValue,
@@ -490,8 +490,8 @@ describe('DateSelection', async () => {
                 await expect.element(mobileTextEl).toHaveTextContent(expected);
                 wrapper.unmount();
             }
-        })
-    })
+        });
+    });
 
     describe('keydown', async () => {
         test('ArrowRight should focus next input', async () => {
@@ -978,28 +978,36 @@ describe('DateSelection', async () => {
 
         // day
         await dayInput.trigger('focus');
-        await dayInput.setValue('12');
-
-        expect(wrapper.props('modelValue')).not.toBeNull();
-        expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(2023, 7, 12, 10, 0, 0).getTime());
+        (dayInput.element as HTMLInputElement).value = '12';
+        await dayInput.trigger('input');
 
         expect(document.activeElement).not.toBe(dayInput.element);
         expect(document.activeElement).toBe(monthInput.element);
 
-        // // month
-        await monthInput.setValue('9');
+        await dayInput.trigger('change');
+        expect(wrapper.props('modelValue')).not.toBeNull();
+        expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(2023, 7, 12, 10, 0, 0).getTime());
 
-        expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(2023, 8, 12, 10, 0, 0).getTime());
+        // month
+        (monthInput.element as HTMLInputElement).value = '9';
+        await monthInput.trigger('input');
+
         expect(document.activeElement).not.toBe(monthInput.element);
         expect(document.activeElement).toBe(yearInput.element);
 
-        // // year
-        await yearInput.setValue('2024');
+        await monthInput.trigger('change');
+        expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(2023, 8, 12, 10, 0, 0).getTime());
 
-        expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(2024, 8, 12, 10, 0, 0).getTime());
+        // year
+        (yearInput.element as HTMLInputElement).value = '2024';
+        await yearInput.trigger('input');
+
         expect(document.activeElement).not.toBe(dayInput.element);
         expect(document.activeElement).not.toBe(monthInput.element);
         expect(document.activeElement).not.toBe(yearInput.element);
+
+        await yearInput.trigger('change');
+        expect(wrapper.props('modelValue')?.getTime()).toEqual(new Date(2024, 8, 12, 10, 0, 0).getTime());
     });
 
     test('Model value should not exceed max - default time below max', async () => {
@@ -1482,7 +1490,7 @@ describe('DateSelection', async () => {
             attachTo: document.body,
             props: {
                 root: new ComponentWithProperties(DateSelection, {
-                     'modelValue': new Date(2023, 2, 14, 22, 0, 0, 0),
+                    'modelValue': new Date(2023, 2, 14, 22, 0, 0, 0),
                     'onUpdate:modelValue': async () => {
                     },
                 }),
@@ -1499,8 +1507,8 @@ describe('DateSelection', async () => {
         await monthInputBefore.setValue(5);
         await yearInputBefore.setValue(2027);
 
-        await app.setProps({keepAlive: false});
-        await app.setProps({keepAlive: true});
+        await app.setProps({ keepAlive: false });
+        await app.setProps({ keepAlive: true });
 
         const wrapper = app.findComponent(DateSelection);
 
@@ -1511,5 +1519,5 @@ describe('DateSelection', async () => {
         expect(dayInput.element).toHaveValue('18');
         expect(monthInput.element).toHaveValue('5');
         expect(yearInput.element).toHaveValue('2027');
-    })
+    });
 });

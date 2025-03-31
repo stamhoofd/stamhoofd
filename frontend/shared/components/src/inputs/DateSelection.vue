@@ -8,14 +8,14 @@
         <div v-else class="input selectable" :class="{placeholder: model === null}" @click="focusFirst()" @mousedown.prevent>
             <span v-if="model === null" class="placeholder">{{ placeholder }}</span>
             <div @click.prevent @mouseup.prevent>
-                <input ref="dayInput" v-model="dayText" inputmode="numeric" autocomplete="off" @focus.prevent="onFocus(0)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(0)" @change="onChangeDay">
+                <input ref="dayInput" v-model="dayText" inputmode="numeric" autocomplete="off" @focus.prevent="onFocus(0)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(0)" @change="onChangeDay" @input="onTyping">
                 <span>{{ dayText }}</span>
             </div>
 
             <span :class="{sep: true, hide: !hasFocus}">/</span>
 
             <div @click.prevent @mouseup.prevent>
-                <input ref="monthInput" v-model="monthText" inputmode="numeric" autocomplete="off" @focus.prevent="onFocus(1)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(1)" @change="onChangeMonth">
+                <input ref="monthInput" v-model="monthText" inputmode="numeric" autocomplete="off" @focus.prevent="onFocus(1)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(1)" @change="onChangeMonth" @input="onTyping">
                 <span v-if="hasFocus">{{ monthText }}</span>
                 <span v-else>{{ monthTextLong }}</span>
             </div>
@@ -23,7 +23,7 @@
             <span :class="{sep: true, hide: !hasFocus}">/</span>
 
             <div @click.prevent @mouseup.prevent>
-                <input ref="yearInput" v-model="yearText" inputmode="numeric" autocomplete="off" @focus.prevent="onFocus(2)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(2)" @change="onChangeYear">
+                <input ref="yearInput" v-model="yearText" inputmode="numeric" autocomplete="off" @focus.prevent="onFocus(2)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(2)" @change="onChangeYear" @input="onTyping">
                 <span>{{ yearText }}</span>
             </div>
         </div>
@@ -113,7 +113,7 @@ const dayConfig: InputConfig = {
     autoCorrectIfOutOfRange: true,
 };
 
-const {inputRef: dayText, onChange: onChangeDay, onModelChange: onModelChangeDay } = dateInputFactory(dayConfig);
+const { inputRef: dayText, onChange: onChangeDay, onModelChange: onModelChangeDay } = dateInputFactory(dayConfig);
 
 const monthConfig: InputConfig = {
     type: 'month',
@@ -123,7 +123,7 @@ const monthConfig: InputConfig = {
     autoCorrectIfOutOfRange: true,
 };
 
-const {inputRef: monthText, onChange: onChangeMonth, onModelChange: onModelChangeMonth } = dateInputFactory(monthConfig);
+const { inputRef: monthText, onChange: onChangeMonth, onModelChange: onModelChangeMonth } = dateInputFactory(monthConfig);
 
 const monthTextLong = computed(() => model.value ? Formatter.month(model.value) : '');
 
@@ -134,17 +134,17 @@ const yearConfig: InputConfig = {
     format: value => value ? Formatter.year(value).toString() : '',
 };
 
-const {inputRef: yearText, onChange: onChangeYear, onModelChange: onModelChangeYear } = dateInputFactory(yearConfig);
+const { inputRef: yearText, onChange: onChangeYear, onModelChange: onModelChangeYear } = dateInputFactory(yearConfig);
 
 watch(model, (value: Date | null) => {
-    if(value === null) {
+    if (value === null) {
         return;
     }
 
     onModelChangeDay(value);
     onModelChangeMonth(value);
     onModelChangeYear(value);
-})
+});
 
 const numberConfigs: NumberConfig[] = [
     {
@@ -197,11 +197,11 @@ const onKey = (event: KeyboardEvent) => {
         event.preventDefault();
     }
     else if (key === 'ArrowUp' || key === 'PageUp') {
-        setText((parseInt(config.model.value) + 1).toString(), config, false);
+        setText((parseInt(config.model.value) + 1).toString(), config);
         event.preventDefault();
     }
     else if (key === 'ArrowDown' || key === 'PageDown') {
-        setText((parseInt(config.model.value) - 1).toString(), config, false);
+        setText((parseInt(config.model.value) - 1).toString(), config);
         event.preventDefault();
     }
 };
@@ -262,11 +262,11 @@ function dateInputFactory(config: InputConfig) {
 
     return {
         inputRef,
-        onChange: () => setText(inputRef.value, config, true, true),
+        onChange: () => setText(inputRef.value, config, true),
         onModelChange: (value: Date | null) => {
             inputRef.value = config.format(value);
-        }
-    }
+        },
+    };
 }
 
 function isFull(value: string, config: InputConfig) {
@@ -283,7 +283,7 @@ function isFull(value: string, config: InputConfig) {
     return false;
 }
 
-function setText(value: string, config: InputConfig, autoSelectNext = false, limitInput = false) {
+function setText(value: string, config: InputConfig, limitInput = false) {
     const valueRaw = parseInt(value);
     if (isNaN(valueRaw)) {
         return;
@@ -311,26 +311,18 @@ function setText(value: string, config: InputConfig, autoSelectNext = false, lim
     }
 
     dateTime.value = dateTime.value.set({ [config.type]: result });
+}
 
-    if (autoSelectNext && isFull(result.toString(), config)) {
-        let nextIndex = -1;
+function onTyping() {
+    // Check if we can move to the next field
+    const focusedInput = document.activeElement as HTMLInputElement;
+    const index = numberInputs.value.indexOf(focusedInput);
 
-        switch (config.type) {
-            case 'day': {
-                nextIndex = 1;
-                break;
-            }
-            case 'month': {
-                nextIndex = 2;
-                break;
-            }
-            case 'year': {
-                nextIndex = 3;
-                break;
-            }
+    if (index !== -1) {
+        // Check move to next date
+        if (isFull(focusedInput.value, numberConfigs[index])) {
+            selectNext(index + 1);
         }
-
-        selectNext(nextIndex);
     }
 }
 
