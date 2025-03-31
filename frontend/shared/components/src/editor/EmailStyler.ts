@@ -131,19 +131,17 @@ ${element.innerHTML}
 
 </html>`;
 
-        const clonedElement = element.cloneNode(true) as HTMLElement;
-
         // include the href of anchor elements in the text
-        for(const anchorElement of clonedElement.getElementsByTagName('a')) {
+        for (const anchorElement of element.getElementsByTagName('a')) {
             const href = anchorElement.getAttribute('href');
-            if(href) {
+            if (href) {
                 anchorElement.innerText = `${anchorElement.innerText} (${href})`;
             }
         }
 
         return {
             html,
-            text: clonedElement.innerText,
+            text: element.innerText,
         };
     }
 }
