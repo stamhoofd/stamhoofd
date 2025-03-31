@@ -131,6 +131,14 @@ ${element.innerHTML}
 
 </html>`;
 
+        // include the href of anchor elements in the text
+        for (const anchorElement of element.getElementsByTagName('a')) {
+            const href = anchorElement.getAttribute('href');
+            if (href) {
+                anchorElement.innerText = `${anchorElement.innerText} (${href})`;
+            }
+        }
+
         return {
             html,
             text: element.innerText,
