@@ -14,7 +14,7 @@ async function fileExists(file) {
 }
 
 const translatorType = 'MistralSmall';
-const namespaces = ['stamhoofd', 'digit', 'keeo', 'landelijke-gilden'];
+const namespaces = ['stamhoofd', 'digit', 'keeo', 'jamboree'];
 
 for (const namespace of namespaces) {
     // await fs.rm("./dist/"+namespace, { recursive: true, force: true })
