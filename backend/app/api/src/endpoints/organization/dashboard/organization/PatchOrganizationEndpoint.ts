@@ -1,17 +1,17 @@
-import { AutoEncoderPatchType, cloneObject, Decoder, isPatchableArray, ObjectData, PatchableArrayAutoEncoder, patchObject } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, cloneObject, Decoder, isPatchableArray, ObjectData, PatchableArray, PatchableArrayAutoEncoder, patchObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Organization, OrganizationRegistrationPeriod, PayconiqPayment, Platform, RegistrationPeriod, StripeAccount, Webshop } from '@stamhoofd/models';
-import { BuckarooSettings, Company, OrganizationMetaData, OrganizationPatch, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, PlatformConfig } from '@stamhoofd/structures';
+import { BuckarooSettings, Company, OrganizationMetaData, OrganizationPatch, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, PermissionRoleForResponsibility, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { BuckarooHelper } from '../../../../helpers/BuckarooHelper';
 import { Context } from '../../../../helpers/Context';
+import { MemberUserSyncer } from '../../../../helpers/MemberUserSyncer';
 import { SetupStepUpdater } from '../../../../helpers/SetupStepUpdater';
 import { TagHelper } from '../../../../helpers/TagHelper';
 import { ViesHelper } from '../../../../helpers/ViesHelper';
-import { MemberUserSyncer } from '../../../../helpers/MemberUserSyncer';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -375,6 +375,49 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     message: 'You do not have permissions to edit the organization settings',
                     statusCode: 403,
                 });
+            }
+
+            if (request.body.privateMeta && request.body.privateMeta.isPatch() && request.body.privateMeta.inheritedResponsibilityRoles) {
+                const patchableArray: PatchableArrayAutoEncoder<PermissionRoleForResponsibility> = new PatchableArray();
+
+                for (const patch of request.body.privateMeta.inheritedResponsibilityRoles.getPatches()) {
+                    const resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = patch.resources.applyTo(new Map<PermissionsResourceType, Map<string, ResourcePermissions>>());
+
+                    if (!await Context.auth.hasFullAccessForOrganizationResources(request.body.id, resources)) {
+                        throw new SimpleError({
+                            code: 'permission_denied',
+                            message: 'You do not have permissions to edit the inherited responsibility roles',
+                            statusCode: 403,
+                        });
+                    }
+
+                    patchableArray.addPatch(PermissionRoleForResponsibility.patch({
+                        id: patch.id,
+                        resources: patch.resources,
+                    }));
+                }
+
+                for (const { put, afterId } of request.body.privateMeta.inheritedResponsibilityRoles.getPuts()) {
+                    const resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = put.resources;
+
+                    if (!await Context.auth.hasFullAccessForOrganizationResources(request.body.id, resources)) {
+                        throw new SimpleError({
+                            code: 'permission_denied',
+                            message: 'You do not have permissions to add inherited responsibility roles',
+                            statusCode: 403,
+                        });
+                    }
+
+                    const limitedPut = PermissionRoleForResponsibility.create({ responsibilityId: put.responsibilityId, responsibilityGroupId: put.responsibilityGroupId });
+                    limitedPut.resources = put.resources;
+                    patchableArray.addPut(limitedPut, afterId);
+                }
+
+                organization.privateMeta = organization.privateMeta.patch({
+                    inheritedResponsibilityRoles: patchableArray,
+                });
+
+                await organization.save();
             }
         }
 
