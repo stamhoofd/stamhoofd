@@ -80,9 +80,14 @@ export function useContextOptions() {
             opts.push(getRegistrationOption());
         }
 
-        for (const organizationId of $user.value?.permissions?.organizationPermissions.keys() ?? []) {
+        const organizationIds = [...$user.value?.permissions?.organizationPermissions.keys() ?? []];
+        if (STAMHOOFD.singleOrganization) {
+            organizationIds.push(STAMHOOFD.singleOrganization);
+        }
+
+        for (const organizationId of organizationIds) {
             const organization = $user.value!.members.organizations.find(o => o.id === organizationId) ?? ($organization.value?.id === organizationId ? $organization.value : null);
-            if (!organization || $user.value?.permissions?.forWithoutInherit(organization)?.isEmpty !== false) {
+            if (!organization || $user.value?.permissions?.forOrganization(organization, platform.value)?.isEmpty !== false) {
                 continue;
             }
             const context = new SessionContext(organization);

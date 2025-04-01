@@ -423,6 +423,14 @@ export class AuthenticatedStructures {
             }
         }
 
+        if (includeContextOrganization && STAMHOOFD.singleOrganization && !Context.auth.organization) {
+            const found = organizations.get(STAMHOOFD.singleOrganization);
+            if (!found) {
+                const organization = await Context.auth.getOrganization(STAMHOOFD.singleOrganization);
+                organizations.set(organization.id, organization);
+            }
+        }
+
         const memberBlobs: MemberWithRegistrationsBlob[] = [];
         for (const member of members) {
             for (const registration of member.registrations) {
