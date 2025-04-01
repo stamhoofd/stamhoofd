@@ -182,7 +182,10 @@ export class ContextInstance {
             return await this.authenticate({ allowWithoutAccount });
         }
         catch (e) {
-            return {};
+            if (e.code === 'not_authenticated') {
+                return {};
+            }
+            throw e;
         }
     }
 

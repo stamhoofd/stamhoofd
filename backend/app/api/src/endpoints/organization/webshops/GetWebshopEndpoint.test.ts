@@ -1,13 +1,18 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { OrganizationFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
-import { PermissionLevel, Permissions, PrivateWebshop, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { PermissionLevel, Permissions } from '@stamhoofd/structures';
 
+import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { GetWebshopEndpoint } from './GetWebshopEndpoint';
 
 describe('Endpoint.GetWebshop', () => {
     // Test endpoint
     const endpoint = new GetWebshopEndpoint();
+
+    beforeEach(async () => {
+        TestUtils.setEnvironment('userMode', 'platform');
+    });
 
     test('Get webshop as signed in user', async () => {
         const organization = await new OrganizationFactory({}).create();

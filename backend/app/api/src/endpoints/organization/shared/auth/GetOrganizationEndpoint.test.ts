@@ -2,12 +2,17 @@ import { Request } from '@simonbackx/simple-endpoints';
 import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { Organization, PermissionLevel, Permissions } from '@stamhoofd/structures';
 
+import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer';
 import { GetOrganizationEndpoint } from './GetOrganizationEndpoint';
 
 describe('Endpoint.GetOrganization', () => {
     // Test endpoint
     const endpoint = new GetOrganizationEndpoint();
+
+    beforeEach(async () => {
+        TestUtils.setEnvironment('userMode', 'platform');
+    });
 
     test('Get organization as signed in user', async () => {
         const organization = await new OrganizationFactory({}).create();
