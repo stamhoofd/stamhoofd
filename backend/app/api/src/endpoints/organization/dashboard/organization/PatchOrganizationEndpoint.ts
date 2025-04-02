@@ -389,7 +389,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         if (!await Context.auth.hasFullAccessForOrganizationResources(request.body.id, resources)) {
                             throw new SimpleError({
                                 code: 'permission_denied',
-                                message: 'You do not have permissions to edit the inherited responsibility roles',
+                                message: 'You do not have permissions to edit inherited responsibility roles',
                                 statusCode: 403,
                             });
                         }
@@ -411,7 +411,14 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                             });
                         }
 
-                        const limitedPut = PermissionRoleForResponsibility.create({ responsibilityId: put.responsibilityId, responsibilityGroupId: put.responsibilityGroupId, resources: put.resources });
+                        const limitedPut = PermissionRoleForResponsibility.create({
+                            id: put.id,
+                            name: put.name,
+                            responsibilityId: put.responsibilityId,
+                            responsibilityGroupId: put.responsibilityGroupId,
+                            resources: put.resources,
+                        });
+
                         patchableArray.addPut(limitedPut, afterId);
                     }
 
@@ -433,7 +440,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         if (!await Context.auth.hasFullAccessForOrganizationResources(request.body.id, resources)) {
                             throw new SimpleError({
                                 code: 'permission_denied',
-                                message: 'You do not have permissions to edit the responsibilities',
+                                message: 'You do not have permissions to edit responsibilities',
                                 statusCode: 403,
                             });
                         }
@@ -462,7 +469,16 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         }
 
                         const limitedPut = MemberResponsibility.create({
-                            permissions: PermissionRoleForResponsibility.create({ responsibilityId: put.permissions.responsibilityId, responsibilityGroupId: put.permissions.responsibilityGroupId,
+                            id: put.id,
+                            name: put.name,
+                            description: put.name,
+                            minimumMembers: put.minimumMembers,
+                            maximumMembers: put.maximumMembers,
+                            permissions: PermissionRoleForResponsibility.create({
+                                id: put.permissions.id,
+                                name: put.permissions.name,
+                                responsibilityId: put.permissions.responsibilityId,
+                                responsibilityGroupId: put.permissions.responsibilityGroupId,
                                 resources: put.permissions.resources,
                             }),
                         });
@@ -484,7 +500,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         if (!await Context.auth.hasFullAccessForOrganizationResources(request.body.id, resources)) {
                             throw new SimpleError({
                                 code: 'permission_denied',
-                                message: 'You do not have permissions to edit the roles',
+                                message: 'You do not have permissions to edit roles',
                                 statusCode: 403,
                             });
                         }
@@ -506,7 +522,12 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                             });
                         }
 
-                        const limitedPut = PermissionRoleDetailed.create({ resources: put.resources });
+                        const limitedPut = PermissionRoleDetailed.create({
+                            id: put.id,
+                            name: put.name,
+                            resources: put.resources,
+                        });
+
                         patchableArray.addPut(limitedPut, afterId);
                     }
 
