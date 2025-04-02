@@ -67,6 +67,8 @@ describe('Endpoint.PatchOrganization', () => {
         await expect(testServer.test(endpoint, r)).rejects.toThrow(/permissions/i);
     });
 
+    // todo: add test where put resources with ressource without access (for example group)
+
     describe('Edit access to webshop', () => {
         describe('full access', () => {
             test('patch responsibilities, roles and inherited responsibility roles should be allowed', async () => {
@@ -330,11 +332,13 @@ describe('Endpoint.PatchOrganization', () => {
                 token = await Token.createToken(user);
             });
 
-            test('should be able to put roles', async () => {
+            test('should be able to put limited roles', async () => {
                 const roleName = 'test role 1';
 
                 const role1 = PermissionRoleDetailed.create({
                     name: roleName,
+                    level: PermissionLevel.Full,
+                    accessRights: [AccessRight.MemberReadFinancialData],
                     resources: new Map([
                         [PermissionsResourceType.Webshops,
                             new Map([
@@ -372,11 +376,17 @@ describe('Endpoint.PatchOrganization', () => {
                 expect(response.body.privateMeta!.roles).toHaveLength(2);
                 expect(response.body.privateMeta!.roles[1].id).toBe(role1.id);
                 expect(response.body.privateMeta!.roles[1].resources.size).toBe(1);
+
+                // level should not be default level
+                expect(response.body.privateMeta!.roles[1].level).toBe(PermissionLevel.None);
+                expect(response.body.privateMeta!.roles[1].accessRights).toBeEmpty();
             });
 
-            test('should be able to patch roles', async () => {
+            test('should only be able to patch resources of roles', async () => {
                 // arrange
-                const role1 = PermissionRoleDetailed.create({});
+                const role1 = PermissionRoleDetailed.create({
+                    name: 'role1',
+                });
                 organization.privateMeta.roles = [role1, ...organization.privateMeta.roles];
 
                 await organization.save();
@@ -385,6 +395,7 @@ describe('Endpoint.PatchOrganization', () => {
 
                 rolesPatch.addPatch(PermissionRoleDetailed.patch({
                     id: role1.id,
+                    name: 'new name',
                     resources: new PatchMap([
                         [PermissionsResourceType.Webshops,
                             new Map([
@@ -394,6 +405,7 @@ describe('Endpoint.PatchOrganization', () => {
                             ]),
                         ],
                     ]),
+                    level: PermissionLevel.Full,
                 }));
 
                 const patch = OrganizationStruct.patch({
@@ -418,13 +430,18 @@ describe('Endpoint.PatchOrganization', () => {
                 expect(response.body.privateMeta!.roles).toHaveLength(2);
                 expect(response.body.privateMeta!.roles[0].id).toBe(role1.id);
                 expect(response.body.privateMeta!.roles[0].resources.size).toBe(1);
+
+                // name should not have been changed
+                expect(response.body.privateMeta!.roles[0].name).toBe('role1');
+                // permission level should not have been changed
+                expect(response.body.privateMeta!.roles[0].level).toBe(PermissionLevel.None);
             });
 
-            test('should be able to put responsibilities', async () => {
+            test('should be able to put limited responsibilities', async () => {
                 // arrange
                 const inheritedResponsibilityRole = PermissionRoleForResponsibility.create({
-                    responsibilityId: 'doesnotmatter',
-                    responsibilityGroupId: 'doesnotmatter',
+                    responsibilityId: 'responsibilityId',
+                    responsibilityGroupId: 'responsibilityGroupId',
                     resources: new Map([
                         [PermissionsResourceType.Webshops,
                             new Map([
@@ -434,10 +451,16 @@ describe('Endpoint.PatchOrganization', () => {
                             ]),
                         ],
                     ]),
+                    level: PermissionLevel.Full,
+                    accessRights: [AccessRight.MemberReadFinancialData],
                 });
 
                 const memberResponsibility = MemberResponsibility.create({
                     permissions: inheritedResponsibilityRole,
+                    organizationBased: false,
+                    defaultAgeGroupIds: ['test'],
+                    organizationTagIds: ['test'],
+                    groupPermissionLevel: PermissionLevel.Full,
                 });
 
                 const responsibilitiesPatch: PatchableArrayAutoEncoder<MemberResponsibility> = new PatchableArray();
@@ -467,16 +490,29 @@ describe('Endpoint.PatchOrganization', () => {
                 expect(response.body.privateMeta!.responsibilities[0].id).toBe(memberResponsibility.id);
                 expect(response.body.privateMeta!.responsibilities[0].permissions).not.toBeNull();
                 expect(response.body.privateMeta!.responsibilities[0].permissions?.resources.size).toBe(1);
+                expect(response.body.privateMeta!.responsibilities[0].permissions?.responsibilityId).toBe('responsibilityId');
+                expect(response.body.privateMeta!.responsibilities[0].permissions?.responsibilityGroupId).toBe('responsibilityGroupId');
+
+                // other fields should be default fields and not be set
+                expect(response.body.privateMeta!.responsibilities[0].permissions?.level).toBe(PermissionLevel.None);
+                expect(response.body.privateMeta!.responsibilities[0].permissions?.accessRights).toBeEmpty();
+                expect(response.body.privateMeta!.responsibilities[0].defaultAgeGroupIds).toBeNull();
+                expect(response.body.privateMeta!.responsibilities[0].organizationTagIds).toBeNull();
+                expect(response.body.privateMeta!.responsibilities[0].groupPermissionLevel).toBe(PermissionLevel.None);
+                expect(response.body.privateMeta!.responsibilities[0].organizationBased).toBe(true);
             });
 
-            test('should be able to patch responsibilities', async () => {
+            test('should only be able to patch resources of responsibilities', async () => {
                 // arrange
                 const inheritedResponsibilityRole = PermissionRoleForResponsibility.create({
+                    name: 'name1',
                     responsibilityId: 'doesnotmatter',
                     responsibilityGroupId: 'doesnotmatter',
                 });
 
                 const memberResponsibility = MemberResponsibility.create({
+                    name: 'memberResponsibility1',
+                    description: 'description1',
                     permissions: inheritedResponsibilityRole,
                 });
 
@@ -488,7 +524,11 @@ describe('Endpoint.PatchOrganization', () => {
 
                 responsibilitiesPatch.addPatch(MemberResponsibility.patch({
                     id: memberResponsibility.id,
+                    name: 'new name',
+                    description: 'new description',
                     permissions: PermissionRoleForResponsibility.patch({
+                        name: 'new name',
+                        level: PermissionLevel.Full,
                         id: inheritedResponsibilityRole.id,
                         resources: new PatchMap([
                             [PermissionsResourceType.Webshops,
@@ -525,13 +565,19 @@ describe('Endpoint.PatchOrganization', () => {
                 expect(response.body.privateMeta!.responsibilities[0].id).toBe(memberResponsibility.id);
                 expect(response.body.privateMeta!.responsibilities[0].permissions).not.toBeNull();
                 expect(response.body.privateMeta!.responsibilities[0].permissions?.resources.size).toBe(1);
+
+                // other fields should not have changed
+                expect(response.body.privateMeta!.responsibilities[0].name).toBe('memberResponsibility1');
+                expect(response.body.privateMeta!.responsibilities[0].description).toBe('description1');
+                expect(response.body.privateMeta!.responsibilities[0].permissions?.name).toBe('name1');
+                expect(response.body.privateMeta!.responsibilities[0].permissions?.level).toBe(PermissionLevel.None);
             });
 
-            test('should be able to put inherited responsibility roles', async () => {
+            test('should be able to put limited inherited responsibility roles', async () => {
                 // arrange
                 const inheritedResponsibilityRole = PermissionRoleForResponsibility.create({
-                    responsibilityId: 'doesnotmatter',
-                    responsibilityGroupId: 'doesnotmatter',
+                    responsibilityId: 'responsibilityId',
+                    responsibilityGroupId: 'responsibilityGroupId',
                     resources: new Map([
                         [PermissionsResourceType.Webshops,
                             new Map([
@@ -541,6 +587,8 @@ describe('Endpoint.PatchOrganization', () => {
                             ]),
                         ],
                     ]),
+                    level: PermissionLevel.Full,
+                    accessRights: [AccessRight.MemberReadFinancialData],
                 });
 
                 const inheritedResponsibilityRolesPatch: PatchableArrayAutoEncoder<PermissionRoleForResponsibility> = new PatchableArray();
@@ -553,14 +601,6 @@ describe('Endpoint.PatchOrganization', () => {
                         inheritedResponsibilityRoles: inheritedResponsibilityRolesPatch,
                     }),
                 });
-
-                const user = await new UserFactory({
-                    organization,
-                    permissions: Permissions.create({ level: PermissionLevel.Full }),
-                })
-                    .create();
-
-                const token = await Token.createToken(user);
 
                 // act
                 const response = await patchOrganization({
@@ -577,13 +617,20 @@ describe('Endpoint.PatchOrganization', () => {
                 expect(response.body.privateMeta!.inheritedResponsibilityRoles).toHaveLength(1);
                 expect(response.body.privateMeta!.inheritedResponsibilityRoles[0].id).toBe(inheritedResponsibilityRole.id);
                 expect(response.body.privateMeta!.inheritedResponsibilityRoles[0].resources.size).toBe(1);
+                expect(response.body.privateMeta!.inheritedResponsibilityRoles[0].responsibilityId).toBe('responsibilityId');
+                expect(response.body.privateMeta!.inheritedResponsibilityRoles[0].responsibilityGroupId).toBe('responsibilityGroupId');
+
+                // other fields should be default fields and not be set
+                expect(response.body.privateMeta!.inheritedResponsibilityRoles[0].level).toBe(PermissionLevel.None);
+                expect(response.body.privateMeta!.inheritedResponsibilityRoles[0].accessRights).toBeEmpty();
             });
 
-            test('should be able to patch inherited responsibility roles', async () => {
+            test('should only be able to patch resources of inherited responsibility roles', async () => {
                 // arrange
                 const inheritedResponsibilityRole = PermissionRoleForResponsibility.create({
-                    responsibilityId: 'doesnotmatter',
-                    responsibilityGroupId: 'doesnotmatter',
+                    responsibilityId: 'responsibilityId',
+                    responsibilityGroupId: 'responsibilityGroupId',
+                    name: 'name1',
                 });
 
                 organization.privateMeta.inheritedResponsibilityRoles = [inheritedResponsibilityRole];
@@ -594,6 +641,10 @@ describe('Endpoint.PatchOrganization', () => {
 
                 inheritedResponsibilityRolesPatch.addPatch(PermissionRoleForResponsibility.patch({
                     id: inheritedResponsibilityRole.id,
+                    name: 'new name',
+                    responsibilityId: 'new id',
+                    responsibilityGroupId: 'new group id',
+                    level: PermissionLevel.Full,
                     resources: new PatchMap([
                         [PermissionsResourceType.Webshops,
                             new Map([
@@ -627,6 +678,12 @@ describe('Endpoint.PatchOrganization', () => {
                 expect(response.body.privateMeta!.inheritedResponsibilityRoles).toHaveLength(1);
                 expect(response.body.privateMeta!.inheritedResponsibilityRoles[0].id).toBe(inheritedResponsibilityRole.id);
                 expect(response.body.privateMeta!.inheritedResponsibilityRoles[0].resources.size).toBe(1);
+
+                // other fields should not have changed
+                expect(response.body.privateMeta!.inheritedResponsibilityRoles[0].name).toBe('name1');
+                expect(response.body.privateMeta!.inheritedResponsibilityRoles[0].responsibilityId).toBe('responsibilityId');
+                expect(response.body.privateMeta!.inheritedResponsibilityRoles[0].responsibilityGroupId).toBe('responsibilityGroupId');
+                expect(response.body.privateMeta!.inheritedResponsibilityRoles[0].level).toBe(PermissionLevel.None);
             });
         });
 

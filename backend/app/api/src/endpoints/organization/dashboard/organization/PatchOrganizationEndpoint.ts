@@ -377,8 +377,6 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 });
             }
 
-            // todo: deletes?
-
             if (request.body.privateMeta && request.body.privateMeta.isPatch()) {
                 if (request.body.privateMeta.inheritedResponsibilityRoles) {
                     const patchableArray: PatchableArrayAutoEncoder<PermissionRoleForResponsibility> = new PatchableArray();
@@ -432,7 +430,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
                     for (const patch of request.body.privateMeta.responsibilities.getPatches()) {
                         if (!patch.permissions) {
-                            throw Error('todo');
+                            continue;
                         };
 
                         const resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = isPatchMap(patch.permissions.resources) ? patch.permissions.resources.applyTo(new Map<PermissionsResourceType, Map<string, ResourcePermissions>>()) : patch.permissions.resources;
@@ -455,7 +453,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
                     for (const { put, afterId } of request.body.privateMeta.responsibilities.getPuts()) {
                         if (!put.permissions) {
-                            throw Error('todo');
+                            continue;
                         };
 
                         const resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = put.permissions.resources;
