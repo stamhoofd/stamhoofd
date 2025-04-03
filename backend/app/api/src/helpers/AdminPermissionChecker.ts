@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, CachedBalance, Document, EmailTemplate, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
-import { AccessRight, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, GroupType, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordSettings } from '@stamhoofd/structures';
+import { AccessRight, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, GroupType, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordSettings, ResourcePermissions } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { MemberRecordStore } from '../services/MemberRecordStore';
 import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryMemberAccess';
@@ -371,6 +371,24 @@ export class AdminPermissionChecker {
         }
 
         return false;
+    }
+
+    async hasFullAccessForOrganizationResources(organizationId: string, resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>>): Promise<boolean> {
+        const organizationPermissions = await this.getOrganizationPermissions(organizationId);
+
+        if (!organizationPermissions) {
+            return false;
+        }
+
+        for (const [resourceType, mapForType] of resources.entries()) {
+            for (const resourceId of mapForType.keys()) {
+                if (!organizationPermissions.hasResourceAccess(resourceType, resourceId, PermissionLevel.Full)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     async canAccessWebshop(webshop: { id: string; organizationId: string }, permissionLevel: PermissionLevel = PermissionLevel.Read) {
