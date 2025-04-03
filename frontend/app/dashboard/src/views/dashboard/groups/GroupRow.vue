@@ -48,12 +48,12 @@ export default class GroupRow extends Mixins(NavigationMixin) {
 
     editGroup() {
         this.present(new ComponentWithProperties(EditGroupView, {
+            period: this.period,
             group: this.group,
             isNew: false,
-            saveHandler: (patch: AutoEncoderPatchType<Group>) => {
-                const p = OrganizationRegistrationPeriod.patch({});
-                p.groups.addPatch(patch);
-                this.$emit('patch:period', p);
+            saveHandler: (patch: AutoEncoderPatchType<Group>, periodPatch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                periodPatch.groups.addPatch(patch);
+                this.$emit('patch:period', periodPatch);
             },
             deleteHandler: () => {
                 const settings = OrganizationRegistrationPeriodSettings.patch({});

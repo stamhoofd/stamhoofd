@@ -272,14 +272,16 @@ export default class CategoryView extends Mixins(NavigationMixin) {
         settings.categories.addPatch(me);
 
         this.present(new ComponentWithProperties(EditGroupView, {
+            period: this.period,
             group,
             isNew: true,
-            saveHandler: async (patch: AutoEncoderPatchType<Group>) => {
+            saveHandler: async (patch: AutoEncoderPatchType<Group>, periodPatch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
                 const p = OrganizationRegistrationPeriod.patch({
                     id: this.period.id,
                     settings,
                 });
                 p.groups.addPut(group.patch(patch));
+                p.patch(periodPatch);
                 await this.$organizationManager.patchPeriod(p);
             },
         }).setDisplayStyle('popup'));

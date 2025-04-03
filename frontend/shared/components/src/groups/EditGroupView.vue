@@ -237,15 +237,15 @@
                 <template v-if="isPropertyEnabled('birthDay')">
                     <div class="split-inputs">
                         <STInputBox title="Minimum leeftijd* (optioneel)" error-fields="settings.minAge" :error-box="errors.errorBox">
-                            <AgeInput v-model="minAge" :year="period.startDate.getFullYear()" placeholder="Onbeperkt" :nullable="true" />
+                            <AgeInput v-model="minAge" :year="patchedPeriod.period.startDate.getFullYear()" placeholder="Onbeperkt" :nullable="true" />
                         </STInputBox>
 
                         <STInputBox title="Maximum leeftijd* (optioneel)" error-fields="settings.maxAge" :error-box="errors.errorBox">
-                            <AgeInput v-model="maxAge" :year="period.startDate.getFullYear()" placeholder="Onbeperkt" :nullable="true" />
+                            <AgeInput v-model="maxAge" :year="patchedPeriod.period.startDate.getFullYear()" placeholder="Onbeperkt" :nullable="true" />
                         </STInputBox>
                     </div>
                     <p class="st-list-description">
-                        *Hoe oud het lid is op 31/12/{{ period.startDate.getFullYear() }}.<template v-if="externalOrganization?.address.country === Country.Belgium">
+                        *Hoe oud het lid is op 31/12/{{ patchedPeriod.period.startDate.getFullYear() }}.<template v-if="externalOrganization?.address.country === Country.Belgium">
                             Ter referentie: leden uit het eerste leerjaar zijn 6 jaar op 31 december. Leden uit het eerste secundair zijn 12 jaar op 31 december.
                         </template>
                     </p>
@@ -484,7 +484,7 @@
                     </p>
 
                     <STInputBox :title="$t('5ecd5e10-f233-4a6c-8acd-c1abff128a21')" error-fields="settings.startDate" :error-box="errors.errorBox">
-                        <DateSelection v-model="startDate" :placeholder="formatDate(patched.settings.startDate, true)" :min="period?.startDate" :max="period?.endDate" />
+                        <DateSelection v-model="startDate" :placeholder="formatDate(patched.settings.startDate, true)" :min="patchedPeriod.period.startDate" :max="patchedPeriod.period.endDate" />
                     </STInputBox>
                     <p class="style-description-small">
                         {{ $t('db636f2c-371d-4209-bd44-eaa6984c2813') }}
@@ -516,11 +516,11 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AgeInput, DateSelection, Dropdown, EditGroupView, EditRecordCategoriesBox, ErrorBox, GroupIdsInput, InheritedRecordsConfigurationBox, LoadingViewTransition, NumberInput, OrganizationAvatar, RecordEditorSettings, RecordEditorType, TimeInput, useRegisterItemFilterBuilders } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { BooleanStatus, Country, DefaultAgeGroup, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupStatus, GroupType, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, Platform, PlatformFamily, PlatformMember, RecordCategory, RegisterItem, Registration, WaitingListType, type MemberProperty } from '@stamhoofd/structures';
+import { BooleanStatus, Country, DefaultAgeGroup, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupStatus, GroupType, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, RecordCategory, RegisterItem, WaitingListType, type MemberProperty } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
@@ -532,14 +532,15 @@ import GroupOptionMenuBox from './components/GroupOptionMenuBox.vue';
 import GroupOptionMenuView from './components/GroupOptionMenuView.vue';
 import GroupPriceBox from './components/GroupPriceBox.vue';
 import GroupPriceView from './components/GroupPriceView.vue';
-import { useExternalOrganization, useFinancialSupportSettings, useRegistrationPeriod } from './hooks';
+import { useExternalOrganization, useFinancialSupportSettings } from './hooks';
 
 const props = withDefaults(
     defineProps<{
+        period: OrganizationRegistrationPeriod;
         group: Group;
         isMultiOrganization: boolean;
         isNew: boolean;
-        saveHandler: (group: AutoEncoderPatchType<Group>) => Promise<void>;
+        saveHandler: (group: AutoEncoderPatchType<Group>, period: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => Promise<void>;
         deleteHandler?: (() => Promise<void>) | null;
         showToasts?: boolean;
         organizationHint?: Organization | null;
@@ -554,8 +555,9 @@ const props = withDefaults(
 
 const platform = usePlatform();
 const organization = useOrganization();
-const { patched, hasChanges, addPatch, patch } = usePatch(props.group);
-const period = useRegistrationPeriod(computed(() => patched.value.periodId));
+const { patched, hasChanges: hasGroupChanges, addPatch, patch } = usePatch(props.group);
+const { patched: patchedPeriod, hasChanges: hasPeriodChanges, addPatch: addPeriodPatch, patch: periodPatch } = usePatch(props.period);
+const hasChanges = computed(() => hasGroupChanges.value || hasPeriodChanges.value);
 const forceShowRequireGroupIds = ref(false);
 const usedStock = computed(() => patched.value.settings.getUsedStock(patched.value) || 0);
 const auth = useAuth();
@@ -564,14 +566,14 @@ function addRequireGroupIds() {
     forceShowRequireGroupIds.value = true;
 }
 
-const { externalOrganization: externalOrganization, choose: chooseOrganizer, loading: loadingOrganizer, errorBox: loadingExternalOrganizerErrorBox } = useExternalOrganization(
+const { externalOrganization, choose: chooseOrganizer, loading: loadingOrganizer, errorBox: loadingExternalOrganizerErrorBox } = useExternalOrganization(
     computed({
         get: () => patched.value.organizationId,
         set: (organizationId: string) => addPatch({
             organizationId,
         }),
     }),
-    props.organizationHint
+    props.organizationHint,
 );
 
 const patchPricesArray = (prices: PatchableArrayAutoEncoder<GroupPrice>) => {
@@ -630,7 +632,7 @@ const present = usePresent();
 const didSetAutomaticGroup = ref(false);
 
 const availableWaitingLists = computed(() => {
-    let base = externalOrganization?.value?.period?.waitingLists ?? [];
+    let base = patchedPeriod.value.waitingLists ?? [];
 
     // Replace patched waiting lists
     base = base.map((list) => {
@@ -653,7 +655,7 @@ const availableWaitingLists = computed(() => {
     base = base.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
 
     return base.map((list) => {
-        const usedByGroups = externalOrganization?.value?.period?.groups.filter(g => g.waitingList?.id === list.id);
+        const usedByGroups = patchedPeriod.value.groups.filter(g => g.waitingList?.id === list.id);
         return {
             list,
             description: usedByGroups?.length ? 'Deze wachtlijst wordt gebruikt door ' + Formatter.joinLast(usedByGroups.map(g => g.settings.name), ', ', ' en ') : 'Niet gebruikt',
@@ -1025,7 +1027,7 @@ async function save() {
             saving.value = false;
             return;
         }
-        await props.saveHandler(patch.value);
+        await props.saveHandler(patch.value, periodPatch.value);
         if (props.showToasts) {
             Toast.success($t('1e6b16bd-ca6e-49e2-9792-f8864a140d7b')).show();
         }
@@ -1153,11 +1155,19 @@ async function addWaitingList() {
     await present({
         components: [
             new ComponentWithProperties(EditGroupView, {
+                period: patchedPeriod.value,
                 group: waitingList,
                 isNew: true,
                 showToasts: false,
                 organizationHint: externalOrganization.value,
                 saveHandler: (patch: AutoEncoderPatchType<Group>) => {
+                    const arrayPatch: PatchableArrayAutoEncoder<Group> = new PatchableArray();
+                    arrayPatch.addPut(waitingList.patch(patch));
+
+                    addPeriodPatch({
+                        groups: arrayPatch,
+                    });
+
                     addPatch({
                         waitingList: waitingList.patch(patch),
                     });
@@ -1178,20 +1188,20 @@ function isPropertyEnabled(name: MemberProperty) {
 }
 
 async function editWaitingList(waitingList: Group) {
-    if (waitingList.id !== patched.value.waitingList?.id) {
-        return;
-    }
-
     await present({
         components: [
             new ComponentWithProperties(EditGroupView, {
+                period: patchedPeriod.value,
                 group: waitingList,
                 isNew: false,
                 showToasts: false,
                 organizationHint: externalOrganization.value,
                 saveHandler: (patch: AutoEncoderPatchType<Group>) => {
-                    addPatch({
-                        waitingList: patch,
+                    const arrayPatch: PatchableArrayAutoEncoder<Group> = new PatchableArray();
+                    arrayPatch.addPatch(patch);
+
+                    addPeriodPatch({
+                        groups: arrayPatch,
                     });
                 },
             }),
@@ -1293,10 +1303,10 @@ const recordEditorSettings = computed(() => {
             }))[0];
         },
         exampleValue: RegisterItem.defaultFor(exampleMember, patched.value, externalOrganization.value ?? Organization.create({
-            id: patched.value.organizationId
+            id: patched.value.organizationId,
         })),
     });
-})
+});
 
 defineExpose({
     shouldNavigateAway,

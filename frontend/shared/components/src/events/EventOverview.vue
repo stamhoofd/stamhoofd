@@ -159,7 +159,8 @@
 <script setup lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
-import { EmailTemplateType, Event, Group, Organization } from '@stamhoofd/structures';
+import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
+import { EmailTemplateType, Event, Group, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, Ref, ref } from 'vue';
 import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';
@@ -181,6 +182,8 @@ const props = defineProps<{
 const title = computed(() => props.event.name);
 const $navigate = useNavigate();
 const organization = useOrganization();
+const organizationManager = useOrganizationManager();
+const owner = useRequestOwner();
 const context = useContext();
 const platform = usePlatform();
 const pop = usePop();
@@ -197,6 +200,8 @@ const groupOrganization: Ref<Organization | null> = ref(null);
 function setGroupOrganization(o: Organization) {
     groupOrganization.value = o;
 }
+
+const groupOrganizationRegistrationPeriod = computed(() => groupOrganization.value ? groupOrganization.value.period : null);
 
 const canWriteEvent = computed(() => auth.canWriteEventForOrganization(props.event, eventOrganization.value));
 
@@ -284,17 +289,18 @@ defineRoutes([
         component: EditGroupView as ComponentOptions,
         present: 'popup',
         paramsToProps: () => {
-            if (!props.event.group) {
-                throw new Error('Missing group');
+            if (!groupOrganizationRegistrationPeriod.value) {
+                throw new Error('Missing group organization registration period');
             }
 
             return {
+                period: groupOrganizationRegistrationPeriod.value,
                 group: props.event.group,
                 isMultiOrganization: !props.event.organizationId,
                 organizationHint: eventOrganization.value ?? groupOrganization.value,
                 isNew: false,
                 showToasts: true,
-                saveHandler: async (patch: AutoEncoderPatchType<Group>) => {
+                saveHandler: async (patch: AutoEncoderPatchType<Group>, periodPatch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
                     const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
 
                     arr.addPatch(Event.patch({
@@ -311,6 +317,13 @@ defineRoutes([
 
                     // Make sure original event is patched
                     deepSetArray([props.event], response.data);
+
+                    // todo: save organization registration period, problem is that organization scope is required
+
+                    // if organization scope
+                    if (organization.value) {
+                        await organizationManager.value.patchPeriod(periodPatch, { owner });
+                    }
                 },
                 deleteHandler: async () => {
                     const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
