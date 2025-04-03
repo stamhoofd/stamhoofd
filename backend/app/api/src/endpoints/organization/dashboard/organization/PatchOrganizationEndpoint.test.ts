@@ -1,5 +1,5 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { Organization, OrganizationFactory, Token, User, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
+import { GroupFactory, Organization, OrganizationFactory, Token, User, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
 import { AccessRight, MemberResponsibility, OrganizationPrivateMetaData, Organization as OrganizationStruct, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
 
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, PatchMap } from '@simonbackx/simple-encoding';
@@ -66,8 +66,6 @@ describe('Endpoint.PatchOrganization', () => {
 
         await expect(testServer.test(endpoint, r)).rejects.toThrow(/permissions/i);
     });
-
-    // todo: add test where put resources with ressource without access (for example group)
 
     describe('Edit access to webshop', () => {
         describe('full access', () => {
@@ -1000,6 +998,312 @@ describe('Endpoint.PatchOrganization', () => {
                         token,
                     })).rejects.toThrow('You do not have permissions to edit inherited responsibility roles');
                 }
+            });
+        });
+
+        describe('full access to webshop but extra resource without access', () => {
+            let organization: Organization;
+            let webshop: Webshop;
+            let token: Token;
+
+            beforeAll(async () => {
+                const createWebshopRole = PermissionRoleDetailed.create({
+                    accessRights: [AccessRight.OrganizationCreateWebshops],
+                });
+
+                organization = await new OrganizationFactory({ roles: [createWebshopRole] }).create();
+                webshop = await new WebshopFactory({ organizationId: organization.id }).create();
+                const user = await new UserFactory({
+                    organization,
+                    permissions: Permissions.create({ level: PermissionLevel.None, roles: [createWebshopRole], resources: new Map([
+                        [PermissionsResourceType.Webshops,
+                            new Map([
+                                [webshop.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Full }),
+                                ],
+                            ])],
+                    ]) }),
+                })
+                    .create();
+
+                token = await Token.createToken(user);
+            });
+
+            test('should not be able to put roles', async () => {
+                const roleName = 'test role 1';
+
+                const otherGroup = await new GroupFactory({ organization }).create();
+
+                const role1 = PermissionRoleDetailed.create({
+                    name: roleName,
+                    resources: new Map([
+                        [PermissionsResourceType.Webshops,
+                            new Map([
+                                [webshop.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Full }),
+                                ],
+                            ]),
+                        ],
+                        [PermissionsResourceType.Groups, new Map([
+                            [otherGroup.id,
+                                ResourcePermissions.create({ level: PermissionLevel.Full }),
+                            ],
+                        ])],
+                    ]),
+                });
+
+                const rolesPatch: PatchableArrayAutoEncoder<PermissionRoleDetailed> = new PatchableArray();
+
+                rolesPatch.addPut(role1);
+
+                const patch = OrganizationStruct.patch({
+                    id: organization.id,
+                    privateMeta: OrganizationPrivateMetaData.patch({
+                        roles: rolesPatch,
+                    }),
+                });
+
+                // act and assert
+                await expect(patchOrganization({
+                    patch,
+                    organization,
+                    token,
+                })).rejects.toThrow('You do not have permissions to add roles');
+            });
+
+            test('should not be able to patch roles', async () => {
+                // arrange
+                const role1 = PermissionRoleDetailed.create({});
+                organization.privateMeta.roles = [role1, ...organization.privateMeta.roles];
+
+                await organization.save();
+
+                const rolesPatch: PatchableArrayAutoEncoder<PermissionRoleDetailed> = new PatchableArray();
+
+                const otherGroup = await new GroupFactory({ organization }).create();
+
+                rolesPatch.addPatch(PermissionRoleDetailed.patch({
+                    id: role1.id,
+                    resources: new PatchMap([
+                        [PermissionsResourceType.Webshops,
+                            new Map([
+                                [webshop.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Full }),
+                                ],
+                            ]),
+                        ],
+                        [PermissionsResourceType.Groups, new Map([
+                            [otherGroup.id,
+                                ResourcePermissions.create({ level: PermissionLevel.Full }),
+                            ],
+                        ])],
+                    ]),
+                }));
+
+                const patch = OrganizationStruct.patch({
+                    id: organization.id,
+                    privateMeta: OrganizationPrivateMetaData.patch({
+                        roles: rolesPatch,
+                    }),
+                });
+
+                // act and assert
+                await expect(patchOrganization({
+                    patch,
+                    organization,
+                    token,
+                })).rejects.toThrow('You do not have permissions to edit roles');
+            });
+
+            test('should not be able to put responsibilities', async () => {
+                // arrange
+                const otherGroup = await new GroupFactory({ organization }).create();
+
+                const inheritedResponsibilityRole = PermissionRoleForResponsibility.create({
+                    responsibilityId: 'doesnotmatter',
+                    responsibilityGroupId: 'doesnotmatter',
+                    resources: new Map([
+                        [PermissionsResourceType.Webshops,
+                            new Map([
+                                [webshop.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Full }),
+                                ],
+                            ]),
+                        ],
+                        [PermissionsResourceType.Groups, new Map([
+                            [otherGroup.id,
+                                ResourcePermissions.create({ level: PermissionLevel.Full }),
+                            ],
+                        ])],
+                    ]),
+                });
+
+                const memberResponsibility = MemberResponsibility.create({
+                    permissions: inheritedResponsibilityRole,
+                });
+
+                const responsibilitiesPatch: PatchableArrayAutoEncoder<MemberResponsibility> = new PatchableArray();
+
+                responsibilitiesPatch.addPut(memberResponsibility);
+
+                const patch = OrganizationStruct.patch({
+                    id: organization.id,
+                    privateMeta: OrganizationPrivateMetaData.patch({
+                        responsibilities: responsibilitiesPatch,
+                    }),
+                });
+
+                // act and assert
+                await expect(patchOrganization({
+                    patch,
+                    organization,
+                    token,
+                })).rejects.toThrow('You do not have permissions to add responsibilities');
+            });
+
+            test('should not be able to patch responsibilities', async () => {
+                // arrange
+                const inheritedResponsibilityRole = PermissionRoleForResponsibility.create({
+                    responsibilityId: 'doesnotmatter',
+                    responsibilityGroupId: 'doesnotmatter',
+                });
+
+                const memberResponsibility = MemberResponsibility.create({
+                    permissions: inheritedResponsibilityRole,
+                });
+
+                organization.privateMeta.responsibilities = [memberResponsibility];
+
+                await organization.save();
+
+                const responsibilitiesPatch: PatchableArrayAutoEncoder<MemberResponsibility> = new PatchableArray();
+
+                const otherGroup = await new GroupFactory({ organization }).create();
+
+                responsibilitiesPatch.addPatch(MemberResponsibility.patch({
+                    id: memberResponsibility.id,
+                    permissions: PermissionRoleForResponsibility.patch({
+                        id: inheritedResponsibilityRole.id,
+                        resources: new PatchMap([
+                            [PermissionsResourceType.Webshops,
+                                new Map([
+                                    [webshop.id,
+                                        ResourcePermissions.create({ level: PermissionLevel.Full }),
+                                    ],
+                                ]),
+                            ],
+                            [PermissionsResourceType.Groups, new Map([
+                                [otherGroup.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Full }),
+                                ],
+                            ])],
+                        ]),
+                    }),
+                }));
+
+                const patch = OrganizationStruct.patch({
+                    id: organization.id,
+                    privateMeta: OrganizationPrivateMetaData.patch({
+                        responsibilities: responsibilitiesPatch,
+                    }),
+                });
+
+                // act and assert
+                await expect(patchOrganization({
+                    patch,
+                    organization,
+                    token,
+                })).rejects.toThrow('You do not have permissions to edit responsibilities');
+            });
+
+            test('should not be able to put inherited responsibility roles', async () => {
+                // arrange
+                const otherGroup = await new GroupFactory({ organization }).create();
+
+                const inheritedResponsibilityRole = PermissionRoleForResponsibility.create({
+                    responsibilityId: 'doesnotmatter',
+                    responsibilityGroupId: 'doesnotmatter',
+                    resources: new Map([
+                        [PermissionsResourceType.Webshops,
+                            new Map([
+                                [webshop.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Full }),
+                                ],
+                            ]),
+                        ],
+                        [PermissionsResourceType.Groups, new Map([
+                            [otherGroup.id,
+                                ResourcePermissions.create({ level: PermissionLevel.Full }),
+                            ],
+                        ])],
+                    ]),
+                });
+
+                const inheritedResponsibilityRolesPatch: PatchableArrayAutoEncoder<PermissionRoleForResponsibility> = new PatchableArray();
+
+                inheritedResponsibilityRolesPatch.addPut(inheritedResponsibilityRole);
+
+                const patch = OrganizationStruct.patch({
+                    id: organization.id,
+                    privateMeta: OrganizationPrivateMetaData.patch({
+                        inheritedResponsibilityRoles: inheritedResponsibilityRolesPatch,
+                    }),
+                });
+
+                // act and assert
+                await expect(patchOrganization({
+                    patch,
+                    organization,
+                    token,
+                })).rejects.toThrow('You do not have permissions to add inherited responsibility roles');
+            });
+
+            test('should not be able to patch inherited responsibility roles', async () => {
+                // arrange
+                const inheritedResponsibilityRole = PermissionRoleForResponsibility.create({
+                    responsibilityId: 'doesnotmatter',
+                    responsibilityGroupId: 'doesnotmatter',
+                });
+
+                const otherGroup = await new GroupFactory({ organization }).create();
+
+                organization.privateMeta.inheritedResponsibilityRoles = [inheritedResponsibilityRole];
+
+                await organization.save();
+
+                const inheritedResponsibilityRolesPatch: PatchableArrayAutoEncoder<PermissionRoleForResponsibility> = new PatchableArray();
+
+                inheritedResponsibilityRolesPatch.addPatch(PermissionRoleForResponsibility.patch({
+                    id: inheritedResponsibilityRole.id,
+                    resources: new PatchMap([
+                        [PermissionsResourceType.Webshops,
+                            new Map([
+                                [webshop.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Full }),
+                                ],
+                            ]),
+                        ],
+                        [PermissionsResourceType.Groups, new Map([
+                            [otherGroup.id,
+                                ResourcePermissions.create({ level: PermissionLevel.Full }),
+                            ],
+                        ])],
+                    ]),
+                }));
+
+                const patch = OrganizationStruct.patch({
+                    id: organization.id,
+                    privateMeta: OrganizationPrivateMetaData.patch({
+                        inheritedResponsibilityRoles: inheritedResponsibilityRolesPatch,
+                    }),
+                });
+
+                // act and assert
+                await expect(patchOrganization({
+                    patch,
+                    organization,
+                    token,
+                })).rejects.toThrow('You do not have permissions to edit inherited responsibility roles');
             });
         });
     });
