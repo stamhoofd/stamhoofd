@@ -27,7 +27,7 @@ export class UserMeta extends AutoEncoder {
     @field({ decoder: new MapDecoder(new EnumDecoder(LoginProviderType), StringDecoder) })
     loginProviderIds: Map<LoginProviderType, string> = new Map();
 
-    @field({ decoder: new EnumDecoder(ApiUserRateLimits), nullable: true, ...NextVersion })
+    @field({ decoder: new EnumDecoder(ApiUserRateLimits), nullable: true, version: 369 })
     rateLimits: ApiUserRateLimits | null = null;
 }
 
@@ -143,7 +143,7 @@ export class ApiUser extends AutoEncoder {
     /**
      * Readonly
      */
-    @field({ decoder: UserMeta, nullable: true, ...NextVersion })
+    @field({ decoder: UserMeta, nullable: true, version: 369 })
     meta: UserMeta | null = null;
 
     @field({ decoder: DateDecoder })
