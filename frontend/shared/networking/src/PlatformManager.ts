@@ -23,6 +23,7 @@ export class PlatformManager {
         this.$app = app;
 
         $platform.setShared();
+        $context.clearAuthCache();
 
         this.updateStyles();
     }
@@ -34,6 +35,8 @@ export class PlatformManager {
         }
         this.setFavicon();
     }
+
+    static _lastFetch: Date | null = null;
 
     /**
      * Create one from cache, otherwise load it using the network
@@ -47,7 +50,8 @@ export class PlatformManager {
         if (fromStorage && (fromStorage.privateConfig || !requirePrivateConfig)) {
             const manager = new PlatformManager($context, reactive(fromStorage as any) as Platform, app);
 
-            if (backgroundFetch) {
+            if (backgroundFetch && (this._lastFetch === null || (Date.now() - this._lastFetch.getTime()) > 1000 * 60)) {
+                this._lastFetch = new Date();
                 manager.forceUpdate().catch(console.error);
             }
 
@@ -89,6 +93,7 @@ export class PlatformManager {
             path: '/platform',
             decoder: Platform as Decoder<Platform>,
         });
+        this._lastFetch = new Date();
         return pResponse.data;
     }
 

@@ -234,8 +234,19 @@ export async function getScopedAutoRoot(session: SessionContext, options: { init
         session = await sessionFromOrganization({ organizationId: STAMHOOFD.singleOrganization });
     }
 
+    // Load the platform manager so we can calculate permissions correctly
+    await PlatformManager.createFromCache(session, 'auto', true);
+
     // Make sure users without permissions always go to the member portal automatically
-    if (((!session.organization && !session.auth.userPermissions?.isEmpty) || (session.organization && !session.auth.permissions?.isEmpty)) && (STAMHOOFD.userMode === 'platform' || (session.organization && session.organization.meta.packages.useMembers))) {
+    if (
+        (
+            (!session.organization && session.auth.userPermissions?.isEmpty) // note: we cannot use .isEmpty because the platform is not yet loaded and we cannot detect inheritance
+            || (session.organization && session.auth.permissions?.isEmpty)
+        ) && (
+            STAMHOOFD.userMode === 'platform'
+            || (session.organization && session.organization.meta.packages.useMembers)
+        )
+    ) {
         const registration = await import('@stamhoofd/registration');
         return await registration.getRootView(session);
     }
