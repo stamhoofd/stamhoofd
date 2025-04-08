@@ -91,13 +91,14 @@ export class OrganizationManager {
         });
 
         this.updatePeriods(response.data);
+        return response.data;
     }
 
     async patchPeriod(patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>, options: { shouldRetry?: boolean; owner?: any } = {}) {
         const arr = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>;
         arr.addPatch(patch);
 
-        await this.patchPeriods(arr, options);
+        return await this.patchPeriods(arr, options);
     }
 
     updatePeriods(periods: OrganizationRegistrationPeriod[]) {

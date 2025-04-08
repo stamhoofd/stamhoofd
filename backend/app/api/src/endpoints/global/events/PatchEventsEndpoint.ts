@@ -106,12 +106,22 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     });
                 }
 
-                put.group.type = GroupType.EventRegistration;
-                const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
-                    put.group,
-                    put.group.organizationId,
-                    period,
-                );
+                const group = await Group.getByID(put.group.id);
+
+                if (group === undefined) {
+                    throw new SimpleError({
+                        code: 'invalid_group',
+                        message: 'No group found for this id',
+                    });
+                }
+
+                if (group.type !== GroupType.EventRegistration) {
+                    throw new SimpleError({
+                        code: 'invalid_group',
+                        message: 'Group is not of type EventRegistration',
+                    });
+                }
+
                 await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
                     await event.syncGroupRequirements(group);
                 });

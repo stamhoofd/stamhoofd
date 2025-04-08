@@ -160,7 +160,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
-import { EmailTemplateType, Event, Group, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import { EmailTemplateType, Event, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, Ref, ref } from 'vue';
 import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';
@@ -293,36 +293,52 @@ defineRoutes([
                 throw new Error('Missing group organization registration period');
             }
 
+            if (!props.event.group) {
+                throw new Error('Group is null');
+            }
+
+            const period = groupOrganizationRegistrationPeriod.value;
+            const group = props.event.group;
+            const groupId = group.id;
+
+            if (!period.groups.find(g => g.id === groupId)) {
+                period.groups.push(group);
+            }
+
             return {
                 period: groupOrganizationRegistrationPeriod.value,
-                group: props.event.group,
+                groupId,
                 isMultiOrganization: !props.event.organizationId,
                 organizationHint: eventOrganization.value ?? groupOrganization.value,
                 isNew: false,
                 showToasts: true,
-                saveHandler: async (patch: AutoEncoderPatchType<Group>, periodPatch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                    const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
+                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                    const groupPatch = patch.groups.getPatches().find(g => g.id === groupId);
 
-                    arr.addPatch(Event.patch({
-                        id: props.event.id,
-                        group: patch,
-                    }));
+                    if (groupPatch !== undefined) {
+                        const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
 
-                    const response = await context.value.authenticatedServer.request({
-                        method: 'PATCH',
-                        path: '/events',
-                        body: arr,
-                        decoder: new ArrayDecoder(Event as Decoder<Event>),
-                    });
+                        arr.addPatch(Event.patch({
+                            id: props.event.id,
+                            group: groupPatch,
+                        }));
 
-                    // Make sure original event is patched
-                    deepSetArray([props.event], response.data);
+                        const response = await context.value.authenticatedServer.request({
+                            method: 'PATCH',
+                            path: '/events',
+                            body: arr,
+                            decoder: new ArrayDecoder(Event as Decoder<Event>),
+                        });
+
+                        // Make sure original event is patched
+                        deepSetArray([props.event], response.data);
+                    }
 
                     // todo: save organization registration period, problem is that organization scope is required
 
                     // if organization scope
                     if (organization.value) {
-                        await organizationManager.value.patchPeriod(periodPatch, { owner });
+                        await organizationManager.value.patchPeriod(patch, { owner });
                     }
                 },
                 deleteHandler: async () => {

@@ -271,13 +271,13 @@
 </template>
 
 <script setup lang="ts">
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AddressInput, CenteredMessage, DateSelection, Dropdown, EditGroupView, ErrorBox, GlobalEventBus, ImageComponent, NavigationActions, OrganizationAvatar, TagIdsInput, TimeInput, Toast, UploadButton, useExternalOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
-import { AccessRight, Event, EventLocation, EventMeta, Group, GroupSettings, GroupType, Organization, OrganizationRegistrationPeriod, ResolutionRequest } from '@stamhoofd/structures';
+import { AccessRight, Event, EventLocation, EventMeta, Group, GroupSettings, GroupType, Organization, OrganizationRegistrationPeriod, ResolutionRequest, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, Ref, watch, watchEffect } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
@@ -301,7 +301,9 @@ const props = withDefaults(
 );
 
 const errors = useErrors();
-const { hasChanges, patched, addPatch, patch } = usePatch(props.event);
+const { hasChanges: hasEventChanges, patched, addPatch, patch } = usePatch(props.event);
+const organizationRegistrationPeriodPatch = ref(null) as Ref<AutoEncoderPatchType<OrganizationRegistrationPeriod> | null>;
+
 const title = computed(() => props.isNew ? 'Activiteit toevoegen' : 'Activiteit bewerken');
 const saving = ref(false);
 const deleting = ref(false);
@@ -323,6 +325,23 @@ const { externalOrganization, choose: chooseOrganizer } = useExternalOrganizatio
         }),
     }),
 );
+
+const eventGroupOrganization = computed(() => {
+    if (patched.value.group === null) {
+        return null;
+    }
+
+    // prevent double requests
+    if (patched.value.organizationId === patched.value.group.organizationId) {
+        return externalOrganization.value;
+    }
+
+    return useExternalOrganization(
+        computed(() => patched.value.group?.organizationId ?? null),
+    ).externalOrganization.value;
+});
+
+const hasChanges = computed(() => hasEventChanges.value || (organizationRegistrationPeriodPatch.value !== null && eventGroupOrganization.value && patchContainsChanges(organizationRegistrationPeriodPatch.value, eventGroupOrganization.value, { version: Version })));
 
 const type = computed(() => {
     const type = platform.value.config.eventTypes.find(e => e.id === patched.value.typeId);
@@ -627,14 +646,27 @@ function deleteTagRestriction() {
     organizationTagIds.value = null;
 }
 
-const organizationRegistrationPeriodPatch = ref(null) as Ref<AutoEncoderPatchType<OrganizationRegistrationPeriod> | null>;
-
 function patchOrganizationRegistrationPeriod(patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) {
     if (organizationRegistrationPeriodPatch.value !== null && patch.id === organizationRegistrationPeriodPatch.value.id) {
         organizationRegistrationPeriodPatch.value = organizationRegistrationPeriodPatch.value.patch(patch);
     }
     else {
         organizationRegistrationPeriodPatch.value = OrganizationRegistrationPeriod.patch(patch);
+    }
+}
+
+function patchEventGroup(groupId: string, patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) {
+    const put = patch.groups.getPuts().find(g => g.put.id === groupId)?.put;
+
+    if (put) {
+        addPatch({ group: put });
+        return;
+    }
+
+    const foundPatch = patch.groups.getPatches().find(p => p.id === groupId);
+
+    if (foundPatch) {
+        addPatch({ group: foundPatch });
     }
 }
 
@@ -681,16 +713,23 @@ async function save() {
             arr.addPatch(patch.value);
         }
 
+        if (organizationRegistrationPeriodPatch.value) {
+            // todo: for now organization scope is required to patch OrganizationRegistrationPeriods
+            if (organization.value === null) {
+                organizationRegistrationPeriodPatch.value = null;
+                console.error('Cannot patch organization registration periods when platform scope');
+            }
+            else {
+                await organizationManager.value.patchPeriod(organizationRegistrationPeriodPatch.value, { owner });
+            }
+        }
+
         const response = await context.value.authenticatedServer.request({
             method: 'PATCH',
             path: '/events',
             body: arr,
             decoder: new ArrayDecoder(Event as Decoder<Event>),
         });
-
-        if (organizationRegistrationPeriodPatch.value) {
-            await organizationManager.value.patchPeriod(organizationRegistrationPeriodPatch.value, { owner });
-        }
 
         Toast.success($t('dced31f7-3554-425d-bae9-85416e3742d6')).show();
 
@@ -711,26 +750,27 @@ async function save() {
 async function addRegistrations() {
     if (patched.value.group) {
         const group = patched.value.group;
-        if (externalOrganization.value === null || group.organizationId !== externalOrganization.value.id) {
-            // todo: throw error
-            throw new Error('todo');
+        const eventOrganization = eventGroupOrganization.value;
+        if (eventOrganization === null || group.organizationId !== eventOrganization.id) {
+            throw new Error('Event organization and event group organization do not match');
+        }
+
+        if (!eventOrganization.period.groups.find(g => g.id === group.id)) {
+            eventOrganization.period.groups.push(group);
         }
 
         // Edit the group
         await present({
             components: [
                 new ComponentWithProperties(EditGroupView, {
-                    period: externalOrganization.value.period.patch(organizationRegistrationPeriodPatch.value ?? {}),
-                    group: patched.value.group,
+                    period: eventOrganization.period.patch(organizationRegistrationPeriodPatch.value ?? {}),
+                    groupId: group.id,
                     isMultiOrganization: isNationalActivity.value,
                     isNew: false,
                     showToasts: false,
-                    saveHandler: (patch: AutoEncoderPatchType<Group>, periodPatch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                        addPatch({
-                            group: patch,
-                        });
-
-                        patchOrganizationRegistrationPeriod(periodPatch);
+                    saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                        patchEventGroup(group.id, patch);
+                        patchOrganizationRegistrationPeriod(patch);
                     },
                     deleteHandler: async () => {
                         addPatch({
@@ -746,15 +786,6 @@ async function addRegistrations() {
     }
     else {
         const organizationId = patched.value.organizationId ?? organization.value?.id ?? '';
-        const group = Group.create({
-            organizationId,
-            periodId: externalOrganization.value?.period.period.id ?? organization.value?.period.period.id,
-            type: GroupType.EventRegistration,
-            settings: GroupSettings.create({
-                name: patched.value.name,
-                allowRegistrationsByOrganization: isNationalActivity.value,
-            }),
-        });
 
         if (!organizationId) {
             // Kies een organisator
@@ -765,25 +796,38 @@ async function addRegistrations() {
                             title: $t('67967405-d320-4d40-8dc0-889915da1f34'),
                             description: $t('2e5e052c-98b7-4375-b771-05a8913c145b'),
                             selectOrganization: async (organization: Organization, navigation: NavigationActions) => {
-                                group.organizationId = organization.id;
-                                group.periodId = organization.period.period.id;
+                                const group = Group.create({
+                                    organizationId: organization.id,
+                                    periodId: organization.period.period.id,
+                                    type: GroupType.EventRegistration,
+                                    settings: GroupSettings.create({
+                                        name: patched.value.name,
+                                        allowRegistrationsByOrganization: isNationalActivity.value,
+                                    }),
+                                });
+
+                                const groups: PatchableArrayAutoEncoder<Group> = new PatchableArray();
+                                groups.addPut(group);
+                                const basePatch = OrganizationRegistrationPeriod.patch({ groups });
+
                                 await navigation.show({
                                     force: true,
                                     replace: 1,
                                     components: [
                                         new ComponentWithProperties(EditGroupView, {
-                                            period: organization.period,
-                                            group: group,
+                                            period: organization.period.patch(basePatch),
+                                            groupId: group.id,
                                             isNew: true,
                                             isMultiOrganization: isNationalActivity.value,
                                             showToasts: false,
                                             organizationHint: organization,
-                                            saveHandler: (patch: AutoEncoderPatchType<Group>, periodPatch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                                            saveHandler: (newPatch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                                                const patch = basePatch.patch(newPatch);
                                                 addPatch({
-                                                    group: group.patch(patch),
+                                                    organizationId: organization.id,
                                                 });
-
-                                                patchOrganizationRegistrationPeriod(periodPatch);
+                                                patchEventGroup(group.id, patch);
+                                                patchOrganizationRegistrationPeriod(patch);
                                             },
                                         }),
                                     ],
@@ -797,28 +841,41 @@ async function addRegistrations() {
             return;
         }
 
-        if (externalOrganization.value === null || group.organizationId !== externalOrganization.value.id) {
-            // todo: throw error
-            throw new Error('todo');
+        const eventOrganization = externalOrganization.value ?? organization.value;
+
+        const group = Group.create({
+            organizationId,
+            periodId: eventOrganization?.period.period.id,
+            type: GroupType.EventRegistration,
+            settings: GroupSettings.create({
+                name: patched.value.name,
+                allowRegistrationsByOrganization: isNationalActivity.value,
+            }),
+        });
+
+        const groups: PatchableArrayAutoEncoder<Group> = new PatchableArray();
+        groups.addPut(group);
+
+        if (eventOrganization === null || group.organizationId !== eventOrganization.id) {
+            throw new Error('Event organization and event group organization do not match');
         }
+
+        const basePatch = OrganizationRegistrationPeriod.patch({ groups });
 
         // Edit the group
         await present({
             components: [
                 new ComponentWithProperties(EditGroupView, {
-                    period: externalOrganization.value.period.patch(organizationRegistrationPeriodPatch.value ?? {}),
-                    group: group,
+                    period: eventOrganization.period.patch(organizationRegistrationPeriodPatch.value ?? {}).patch(basePatch),
+                    groupId: group.id,
                     isNew: true,
                     isMultiOrganization: isNationalActivity.value,
                     organizationHint: externalOrganization.value,
                     showToasts: false,
-                    saveHandler: (patch: AutoEncoderPatchType<Group>, periodPatch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                        // todo: patch organization registration period
-                        addPatch({
-                            group: group.patch(patch),
-                        });
-
-                        patchOrganizationRegistrationPeriod(periodPatch);
+                    saveHandler: (newPatch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                        const patch = basePatch.patch(newPatch);
+                        patchEventGroup(group.id, patch);
+                        patchOrganizationRegistrationPeriod(patch);
                     },
                 }),
             ],

@@ -64,11 +64,11 @@
                     autocomplete="off"
                 />
             </STInputBox>
-            <p v-if="patched.type === GroupType.EventRegistration" class="style-description-small">
+            <p v-if="patchedGroup.type === GroupType.EventRegistration" class="style-description-small">
                 De beschrijving is zichtbaar als leden doorklikken om in te schrijven voor de activiteit.
             </p>
 
-            <template v-if="patched.type === GroupType.EventRegistration && isMultiOrganization">
+            <template v-if="patchedGroup.type === GroupType.EventRegistration && isMultiOrganization">
                 <hr>
                 <h2>Organisator</h2>
                 <p>Voor nationale activiteiten moet je kiezen via welke groep alle betalingen verlopen. De betaalinstellingen van die groep worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die groep.</p>
@@ -96,7 +96,7 @@
                 </STList>
             </template>
 
-            <div v-if="type !== GroupType.WaitingList || patched.settings.prices.length !== 1 || patched.settings.prices[0]?.price.price" class="container">
+            <div v-if="type !== GroupType.WaitingList || patchedGroup.settings.prices.length !== 1 || patchedGroup.settings.prices[0]?.price.price" class="container">
                 <hr>
                 <h2 class="style-with-button">
                     <div>{{ $t('0fb1a3a9-4ced-4097-b931-e865b3173cf9') }}</div>
@@ -109,7 +109,7 @@
                 </h2>
                 <p>{{ $t("de2222d9-c934-4d06-8702-9527686de012") }}</p>
 
-                <STList v-if="patched.settings.prices.length !== 1" v-model="draggablePrices" :draggable="true">
+                <STList v-if="patchedGroup.settings.prices.length !== 1" v-model="draggablePrices" :draggable="true">
                     <template #item="{item: price}">
                         <STListItem :selectable="true" class="right-stack" @click="editGroupPrice(price)">
                             <h3 class="style-title-list">
@@ -124,11 +124,11 @@
                                 {{ reducedPriceName }}: <span>{{ formatPrice(price.price.reducedPrice) }}</span>
                             </p>
 
-                            <p v-if="price.isSoldOut(patched)" class="style-description-small">
+                            <p v-if="price.isSoldOut(patchedGroup)" class="style-description-small">
                                 Uitverkocht
                             </p>
                             <p v-else-if="price.stock" class="style-description-small">
-                                Nog {{ pluralText(price.getRemainingStock(patched) ?? 0, 'stuk', 'stuks') }} beschikbaar
+                                Nog {{ pluralText(price.getRemainingStock(patchedGroup) ?? 0, 'stuk', 'stuks') }} beschikbaar
                             </p>
 
                             <template #right>
@@ -139,12 +139,12 @@
                         </STListItem>
                     </template>
                 </STList>
-                <GroupPriceBox v-else :price="patched.settings.prices[0]" :group="patched" :errors="errors" :default-membership-type-id="defaultMembershipTypeId" @patch:price="addPricePatch" />
+                <GroupPriceBox v-else :price="patchedGroup.settings.prices[0]" :group="patchedGroup" :errors="errors" :default-membership-type-id="defaultMembershipTypeId" @patch:price="addPricePatch" />
             </div>
 
-            <div v-for="optionMenu of patched.settings.optionMenus" :key="optionMenu.id" class="container">
+            <div v-for="optionMenu of patchedGroup.settings.optionMenus" :key="optionMenu.id" class="container">
                 <hr>
-                <GroupOptionMenuBox :option-menu="optionMenu" :group="patched" :errors="errors" :level="2" @patch:group="addPatch" @patch:option-menu="addOptionMenuPatch" @delete="addOptionMenuDelete(optionMenu.id)" />
+                <GroupOptionMenuBox :option-menu="optionMenu" :group="patchedGroup" :errors="errors" :level="2" @patch:group="addGroupPatch" @patch:option-menu="addOptionMenuPatch" @delete="addOptionMenuDelete(optionMenu.id)" />
             </div>
 
             <hr>
@@ -230,22 +230,22 @@
                 </STListItem>
             </STList>
 
-            <div v-if="patched.type === GroupType.Membership" class="container">
+            <div v-if="patchedGroup.type === GroupType.Membership" class="container">
                 <hr>
                 <h2>Restricties</h2>
 
                 <template v-if="isPropertyEnabled('birthDay')">
                     <div class="split-inputs">
                         <STInputBox title="Minimum leeftijd* (optioneel)" error-fields="settings.minAge" :error-box="errors.errorBox">
-                            <AgeInput v-model="minAge" :year="patchedPeriod.period.startDate.getFullYear()" placeholder="Onbeperkt" :nullable="true" />
+                            <AgeInput v-model="minAge" :year="patched.period.startDate.getFullYear()" placeholder="Onbeperkt" :nullable="true" />
                         </STInputBox>
 
                         <STInputBox title="Maximum leeftijd* (optioneel)" error-fields="settings.maxAge" :error-box="errors.errorBox">
-                            <AgeInput v-model="maxAge" :year="patchedPeriod.period.startDate.getFullYear()" placeholder="Onbeperkt" :nullable="true" />
+                            <AgeInput v-model="maxAge" :year="patched.period.startDate.getFullYear()" placeholder="Onbeperkt" :nullable="true" />
                         </STInputBox>
                     </div>
                     <p class="st-list-description">
-                        *Hoe oud het lid is op 31/12/{{ patchedPeriod.period.startDate.getFullYear() }}.<template v-if="externalOrganization?.address.country === Country.Belgium">
+                        *Hoe oud het lid is op 31/12/{{ patched.period.startDate.getFullYear() }}.<template v-if="externalOrganization?.address.country === Country.Belgium">
                             Ter referentie: leden uit het eerste leerjaar zijn 6 jaar op 31 december. Leden uit het eerste secundair zijn 12 jaar op 31 december.
                         </template>
                     </p>
@@ -322,7 +322,7 @@
                 </STList>
             </div>
 
-            <div v-if="patched.waitingList || enableMaxMembers" class="container">
+            <div v-if="patchedGroup.waitingList || enableMaxMembers" class="container">
                 <hr>
                 <h2>Wachtlijst</h2>
                 <p>Je kan een wachtlijst delen tussen verschillende leeftijdsgroepen. Op die manier kan je de wachtlijst makkelijk meerdere jaren aanhouden. Kies hieronder welke wachtlijst van toepassing is voor deze groep.</p>
@@ -466,12 +466,12 @@
                 </STList>
             </template>
 
-            <JumpToContainer v-if="patched.type === GroupType.Membership" class="container" :visible="forceShowRequireGroupIds || !!requireGroupIds.length">
-                <GroupIdsInput v-model="requireGroupIds" :default-period-id="patched.periodId" title="Verplichte andere inschrijvingen" />
+            <JumpToContainer v-if="patchedGroup.type === GroupType.Membership" class="container" :visible="forceShowRequireGroupIds || !!requireGroupIds.length">
+                <GroupIdsInput v-model="requireGroupIds" :default-period-id="patchedGroup.periodId" title="Verplichte andere inschrijvingen" />
             </JumpToContainer>
 
             <template v-if="$feature('member-trials')">
-                <template v-if="patched.type === GroupType.Membership && (!defaultMembershipConfig || defaultMembershipConfig.trialDays)">
+                <template v-if="patchedGroup.type === GroupType.Membership && (!defaultMembershipConfig || defaultMembershipConfig.trialDays)">
                     <hr>
                     <h2>{{ $t('8265d9e0-32c1-453c-ab2f-d31f1eb244c3') }}</h2>
                     <p>{{ $t('89a760d7-8995-458c-9635-da104971e95c') }}</p>
@@ -484,7 +484,7 @@
                     </p>
 
                     <STInputBox :title="$t('5ecd5e10-f233-4a6c-8acd-c1abff128a21')" error-fields="settings.startDate" :error-box="errors.errorBox">
-                        <DateSelection v-model="startDate" :placeholder="formatDate(patched.settings.startDate, true)" :min="patchedPeriod.period.startDate" :max="patchedPeriod.period.endDate" />
+                        <DateSelection v-model="startDate" :placeholder="formatDate(patchedGroup.settings.startDate, true)" :min="patched.period.startDate" :max="patched.period.endDate" />
                     </STInputBox>
                     <p class="style-description-small">
                         {{ $t('db636f2c-371d-4209-bd44-eaa6984c2813') }}
@@ -510,13 +510,13 @@
                 </span>
             </p>
 
-            <EditRecordCategoriesBox :categories="patched.settings.recordCategories" :settings="recordEditorSettings" @patch:categories="addRecordCategoriesPatch" />
+            <EditRecordCategoriesBox :categories="patchedGroup.settings.recordCategories" :settings="recordEditorSettings" @patch:categories="addRecordCategoriesPatch" />
         </SaveView>
     </LoadingViewTransition>
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AgeInput, DateSelection, Dropdown, EditGroupView, EditRecordCategoriesBox, ErrorBox, GroupIdsInput, InheritedRecordsConfigurationBox, LoadingViewTransition, NumberInput, OrganizationAvatar, RecordEditorSettings, RecordEditorType, TimeInput, useRegisterItemFilterBuilders } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
@@ -536,11 +536,11 @@ import { useExternalOrganization, useFinancialSupportSettings } from './hooks';
 
 const props = withDefaults(
     defineProps<{
-        period: OrganizationRegistrationPeriod;
-        group: Group;
-        isMultiOrganization: boolean;
         isNew: boolean;
-        saveHandler: (group: AutoEncoderPatchType<Group>, period: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => Promise<void>;
+        period: OrganizationRegistrationPeriod;
+        groupId: string;
+        isMultiOrganization: boolean;
+        saveHandler: (period: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => Promise<void>;
         deleteHandler?: (() => Promise<void>) | null;
         showToasts?: boolean;
         organizationHint?: Organization | null;
@@ -555,11 +555,23 @@ const props = withDefaults(
 
 const platform = usePlatform();
 const organization = useOrganization();
-const { patched, hasChanges: hasGroupChanges, addPatch, patch } = usePatch(props.group);
-const { patched: patchedPeriod, hasChanges: hasPeriodChanges, addPatch: addPeriodPatch, patch: periodPatch } = usePatch(props.period);
-const hasChanges = computed(() => hasGroupChanges.value || hasPeriodChanges.value);
+const { patched, hasChanges, addPatch, patch } = usePatch(props.period);
+const patchedGroup = computed(() => patched.value.groups.find(group => group.id === props.groupId)!);
+const groupBeforePatch = computed(() => props.period.groups.find(group => group.id === props.groupId)!);
+if (!groupBeforePatch.value) {
+    console.error(`Group with id ${props.groupId} not found in OrganizationRegistrationPeriod`);
+}
+
+function addGroupPatch(newPatch: PartialWithoutMethods<AutoEncoderPatchType<Group>>) {
+    const groups: PatchableArrayAutoEncoder<Group> = new PatchableArray();
+
+    groups.addPatch(Group.patch({ id: props.groupId, ...newPatch }));
+
+    addPatch({ groups });
+}
+
 const forceShowRequireGroupIds = ref(false);
-const usedStock = computed(() => patched.value.settings.getUsedStock(patched.value) || 0);
+const usedStock = computed(() => patchedGroup.value.settings.getUsedStock(patchedGroup.value) || 0);
 const auth = useAuth();
 
 function addRequireGroupIds() {
@@ -568,8 +580,8 @@ function addRequireGroupIds() {
 
 const { externalOrganization, choose: chooseOrganizer, loading: loadingOrganizer, errorBox: loadingExternalOrganizerErrorBox } = useExternalOrganization(
     computed({
-        get: () => patched.value.organizationId,
-        set: (organizationId: string) => addPatch({
+        get: () => patchedGroup.value.organizationId,
+        set: (organizationId: string) => addGroupPatch({
             organizationId,
         }),
     }),
@@ -577,7 +589,7 @@ const { externalOrganization, choose: chooseOrganizer, loading: loadingOrganizer
 );
 
 const patchPricesArray = (prices: PatchableArrayAutoEncoder<GroupPrice>) => {
-    addPatch({
+    addGroupPatch({
         settings: GroupSettings.patch({
             prices,
         }),
@@ -585,7 +597,7 @@ const patchPricesArray = (prices: PatchableArrayAutoEncoder<GroupPrice>) => {
 };
 
 function addRecordCategoriesPatch(categories: PatchableArrayAutoEncoder<RecordCategory>) {
-    addPatch({
+    addGroupPatch({
         settings: GroupSettings.patch({
             recordCategories: categories,
         }),
@@ -593,19 +605,19 @@ function addRecordCategoriesPatch(categories: PatchableArrayAutoEncoder<RecordCa
 }
 
 const { addPatch: addPricePatch, addPut: addPricePut, addDelete: addPriceDelete } = usePatchableArray(patchPricesArray);
-const draggablePrices = useDraggableArray(() => patched.value.settings.prices, patchPricesArray);
+const draggablePrices = useDraggableArray(() => patchedGroup.value.settings.prices, patchPricesArray);
 
 const { addPatch: addOptionMenuPatch, addPut: addOptionMenuPut, addDelete: addOptionMenuDelete } = usePatchableArray((optionMenus: PatchableArrayAutoEncoder<GroupOptionMenu>) => {
-    addPatch({
+    addGroupPatch({
         settings: GroupSettings.patch({
             optionMenus,
         }),
     });
 });
 
-const recordsConfiguration = computed(() => patched.value.settings.recordsConfiguration);
+const recordsConfiguration = computed(() => patchedGroup.value.settings.recordsConfiguration);
 const patchRecordsConfiguration = (recordsConfiguration: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => {
-    addPatch({
+    addGroupPatch({
         settings: GroupSettings.patch({
             recordsConfiguration,
         }),
@@ -615,7 +627,7 @@ const inheritedRecordsConfiguration = computed(() => {
     return OrganizationRecordsConfiguration.build({
         platform: platform.value,
         organization: externalOrganization.value,
-        group: patched.value,
+        group: patchedGroup.value,
         includeGroup: false,
     });
 });
@@ -626,41 +638,29 @@ const deleting = ref(false);
 const $t = useTranslate();
 const pop = usePop();
 const { priceName: reducedPriceName } = useFinancialSupportSettings({
-    group: patched,
+    group: patchedGroup,
 });
 const present = usePresent();
 const didSetAutomaticGroup = ref(false);
 
 const availableWaitingLists = computed(() => {
-    let base = patchedPeriod.value.waitingLists ?? [];
-
-    // Replace patched waiting lists
-    base = base.map((list) => {
-        if (list.id === patched.value.waitingList?.id) {
-            return patched.value.waitingList;
-        }
-        return list;
-    });
-
-    if (props.group.waitingList && props.group.waitingList.id !== patched.value.waitingList?.id) {
-        base.push(props.group.waitingList);
-    }
+    let base = patched.value.waitingLists;
 
     // Add patched waiting list and the end, to maintain ordering
-    if (patched.value.waitingList) {
-        base.push(patched.value.waitingList);
+    if (patchedGroup.value.waitingList) {
+        base.push(patchedGroup.value.waitingList);
     }
 
-    // Remove duplicates (removing last one)
     base = base.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
 
-    return base.map((list) => {
-        const usedByGroups = patchedPeriod.value.groups.filter(g => g.waitingList?.id === list.id);
-        return {
-            list,
-            description: usedByGroups?.length ? 'Deze wachtlijst wordt gebruikt door ' + Formatter.joinLast(usedByGroups.map(g => g.settings.name), ', ', ' en ') : 'Niet gebruikt',
-        };
-    });
+    return base
+        .map((list) => {
+            const usedByGroups = patched.value.groups.filter(g => g.waitingList?.id === list.id);
+            return {
+                list,
+                description: usedByGroups?.length ? 'Deze wachtlijst wordt gebruikt door ' + Formatter.joinLast(usedByGroups.map(g => g.settings.name), ', ', ' en ') : 'Niet gebruikt',
+            };
+        });
 });
 
 const defaultAgeGroups = computed(() => {
@@ -673,13 +673,13 @@ const defaultAgeGroupsFiltered = computed(() => {
 });
 
 const defaultAgeGroup = computed(() => {
-    return defaultAgeGroups.value.find(g => g.id === patched.value.defaultAgeGroupId);
+    return defaultAgeGroups.value.find(g => g.id === patchedGroup.value.defaultAgeGroupId);
 });
 
 const name = computed({
-    get: () => patched.value.settings.name,
+    get: () => patchedGroup.value.settings.name,
     set: (name) => {
-        addPatch({
+        addGroupPatch({
             settings: GroupSettings.patch({
                 name,
             }),
@@ -701,21 +701,21 @@ const name = computed({
 
 const virtualOpenStatus = computed({
     get: () => {
-        if (patched.value.status !== GroupStatus.Open) {
+        if (patchedGroup.value.status !== GroupStatus.Open) {
             return GroupStatus.Closed;
         }
 
         if (useRegistrationStartDate.value) {
-            if (registrationStartDate.value !== props.group.settings.registrationStartDate || (registrationStartDate.value && registrationStartDate.value > new Date())) {
+            if (registrationStartDate.value !== groupBeforePatch.value.settings.registrationStartDate || (registrationStartDate.value && registrationStartDate.value > new Date())) {
                 return 'RegistrationStartDate' as const;
             }
         }
 
-        if (patched.value.status !== props.group.status) {
-            return patched.value.status;
+        if (patchedGroup.value.status !== groupBeforePatch.value.status) {
+            return patchedGroup.value.status;
         }
 
-        if (patched.value.closed && props.group.closed) {
+        if (patchedGroup.value.closed && groupBeforePatch.value.closed) {
             return GroupStatus.Closed;
         }
 
@@ -723,13 +723,13 @@ const virtualOpenStatus = computed({
     },
     set: (val) => {
         if (val === 'RegistrationStartDate') {
-            addPatch({
+            addGroupPatch({
                 status: GroupStatus.Open,
             });
             useRegistrationStartDate.value = true;
 
-            if (patched.value.settings.registrationEndDate && patched.value.settings.registrationEndDate.getTime() <= Date.now()) {
-                addPatch({
+            if (patchedGroup.value.settings.registrationEndDate && patchedGroup.value.settings.registrationEndDate.getTime() <= Date.now()) {
+                addGroupPatch({
                     settings: GroupSettings.patch({
                         registrationEndDate: null,
                     }),
@@ -739,13 +739,13 @@ const virtualOpenStatus = computed({
         }
 
         if (val === GroupStatus.Open) {
-            addPatch({
+            addGroupPatch({
                 status: GroupStatus.Open,
             });
             useRegistrationStartDate.value = false;
 
-            if (patched.value.settings.registrationEndDate && patched.value.settings.registrationEndDate.getTime() <= Date.now()) {
-                addPatch({
+            if (patchedGroup.value.settings.registrationEndDate && patchedGroup.value.settings.registrationEndDate.getTime() <= Date.now()) {
+                addGroupPatch({
                     settings: GroupSettings.patch({
                         registrationEndDate: null,
                     }),
@@ -755,7 +755,7 @@ const virtualOpenStatus = computed({
         }
 
         if (val === GroupStatus.Closed) {
-            addPatch({
+            addGroupPatch({
                 status: GroupStatus.Closed,
             });
         }
@@ -763,8 +763,8 @@ const virtualOpenStatus = computed({
 });
 
 const description = computed({
-    get: () => patched.value.settings.description,
-    set: description => addPatch({
+    get: () => patchedGroup.value.settings.description,
+    set: description => addGroupPatch({
         settings: GroupSettings.patch({
             description,
         }),
@@ -772,8 +772,8 @@ const description = computed({
 });
 
 const minAge = computed({
-    get: () => patched.value.settings.minAge,
-    set: minAge => addPatch({
+    get: () => patchedGroup.value.settings.minAge,
+    set: minAge => addGroupPatch({
         settings: GroupSettings.patch({
             minAge,
         }),
@@ -781,8 +781,8 @@ const minAge = computed({
 });
 
 const maxAge = computed({
-    get: () => patched.value.settings.maxAge,
-    set: maxAge => addPatch({
+    get: () => patchedGroup.value.settings.maxAge,
+    set: maxAge => addGroupPatch({
         settings: GroupSettings.patch({
             maxAge,
         }),
@@ -790,8 +790,8 @@ const maxAge = computed({
 });
 
 const genderType = computed({
-    get: () => patched.value.settings.genderType,
-    set: genderType => addPatch({
+    get: () => patchedGroup.value.settings.genderType,
+    set: genderType => addGroupPatch({
         settings: GroupSettings.patch({
             genderType,
         }),
@@ -799,8 +799,8 @@ const genderType = computed({
 });
 
 const startDate = computed({
-    get: () => patched.value.settings.startDate,
-    set: startDate => addPatch({
+    get: () => patchedGroup.value.settings.startDate,
+    set: startDate => addGroupPatch({
         settings: GroupSettings.patch({
             startDate,
         }),
@@ -808,8 +808,8 @@ const startDate = computed({
 });
 
 const requireGroupIds = computed({
-    get: () => patched.value.settings.requireGroupIds,
-    set: requireGroupIds => addPatch({
+    get: () => patchedGroup.value.settings.requireGroupIds,
+    set: requireGroupIds => addGroupPatch({
         settings: GroupSettings.patch({
             requireGroupIds: requireGroupIds as any,
         }),
@@ -819,20 +819,20 @@ const requireGroupIds = computed({
 const showAllowRegistrationsByOrganization = computed(() => props.isMultiOrganization || allowRegistrationsByOrganization.value);
 
 const allowRegistrationsByOrganization = computed({
-    get: () => patched.value.settings.allowRegistrationsByOrganization,
-    set: allowRegistrationsByOrganization => addPatch({
+    get: () => patchedGroup.value.settings.allowRegistrationsByOrganization,
+    set: allowRegistrationsByOrganization => addGroupPatch({
         settings: GroupSettings.patch({
             allowRegistrationsByOrganization,
         }),
     }),
 });
 
-const type = computed(() => patched.value.type);
+const type = computed(() => patchedGroup.value.type);
 
 const defaultAgeGroupId = computed({
-    get: () => patched.value.defaultAgeGroupId,
+    get: () => patchedGroup.value.defaultAgeGroupId,
     set: (defaultAgeGroupId) => {
-        addPatch({
+        addGroupPatch({
             defaultAgeGroupId,
         });
         didSetAutomaticGroup.value = false;
@@ -840,9 +840,9 @@ const defaultAgeGroupId = computed({
 });
 
 const waitingListType = computed({
-    get: () => patched.value.settings.waitingListType,
+    get: () => patchedGroup.value.settings.waitingListType,
     set: (waitingListType) => {
-        addPatch({
+        addGroupPatch({
             settings: GroupSettings.patch({
                 waitingListType,
             }),
@@ -862,8 +862,8 @@ const waitingListType = computed({
 });
 
 const maxMembers = computed({
-    get: () => patched.value.settings.maxMembers,
-    set: maxMembers => addPatch({
+    get: () => patchedGroup.value.settings.maxMembers,
+    set: maxMembers => addGroupPatch({
         settings: GroupSettings.patch({
             maxMembers,
         }),
@@ -873,19 +873,19 @@ const maxMembers = computed({
 const showEnableMaxMembers = computed(() => enableMaxMembers.value || type.value !== GroupType.WaitingList);
 
 const enableMaxMembers = computed({
-    get: () => patched.value.settings.maxMembers !== null,
+    get: () => patchedGroup.value.settings.maxMembers !== null,
     set: (enableMaxMembers) => {
         if (!enableMaxMembers) {
-            addPatch({
+            addGroupPatch({
                 settings: GroupSettings.patch({
                     maxMembers: null,
                 }),
             });
         }
         else {
-            addPatch({
+            addGroupPatch({
                 settings: GroupSettings.patch({
-                    maxMembers: props.group.settings.maxMembers ?? patched.value.settings.maxMembers ?? 200,
+                    maxMembers: patchedGroup.value.settings.maxMembers ?? 200,
                 }),
             });
         }
@@ -893,9 +893,9 @@ const enableMaxMembers = computed({
 });
 
 const requirePlatformMembershipOnRegistrationDate = computed({
-    get: () => patched.value.settings.requirePlatformMembershipOnRegistrationDate === true,
+    get: () => patchedGroup.value.settings.requirePlatformMembershipOnRegistrationDate === true,
     set: (value: boolean) => {
-        addPatch({
+        addGroupPatch({
             settings: GroupSettings.patch({
                 requirePlatformMembershipOnRegistrationDate: value,
             }),
@@ -904,8 +904,8 @@ const requirePlatformMembershipOnRegistrationDate = computed({
 });
 
 const registrationStartDate = computed({
-    get: () => patched.value.settings.registrationStartDate,
-    set: registrationStartDate => addPatch({
+    get: () => patchedGroup.value.settings.registrationStartDate,
+    set: registrationStartDate => addGroupPatch({
         settings: GroupSettings.patch({
             registrationStartDate,
         }),
@@ -913,8 +913,8 @@ const registrationStartDate = computed({
 });
 
 const registrationEndDate = computed({
-    get: () => patched.value.settings.registrationEndDate,
-    set: registrationEndDate => addPatch({
+    get: () => patchedGroup.value.settings.registrationEndDate,
+    set: registrationEndDate => addGroupPatch({
         settings: GroupSettings.patch({
             registrationEndDate,
         }),
@@ -922,8 +922,8 @@ const registrationEndDate = computed({
 });
 
 const preRegistrationsDate = computed({
-    get: () => patched.value.settings.preRegistrationsDate,
-    set: preRegistrationsDate => addPatch({
+    get: () => patchedGroup.value.settings.preRegistrationsDate,
+    set: preRegistrationsDate => addGroupPatch({
         settings: GroupSettings.patch({
             preRegistrationsDate,
         }),
@@ -931,8 +931,8 @@ const preRegistrationsDate = computed({
 });
 
 const priorityForFamily = computed({
-    get: () => patched.value.settings.priorityForFamily,
-    set: priorityForFamily => addPatch({
+    get: () => patchedGroup.value.settings.priorityForFamily,
+    set: priorityForFamily => addGroupPatch({
         settings: GroupSettings.patch({
             priorityForFamily,
         }),
@@ -940,15 +940,20 @@ const priorityForFamily = computed({
 });
 
 const waitingList = computed({
-    get: () => patched.value.waitingList,
-    set: waitingList => addPatch({
+    get: () => {
+        if (patchedGroup.value.waitingList === null) {
+            return null;
+        }
+        return patched.value.waitingLists.find(w => w.id === patchedGroup.value.waitingList!.id) ?? patchedGroup.value.waitingList;
+    },
+    set: waitingList => addGroupPatch({
         waitingList,
     }),
 });
 
 const trialDays = computed({
-    get: () => patched.value.settings.trialDays,
-    set: trialDays => addPatch({
+    get: () => patchedGroup.value.settings.trialDays,
+    set: trialDays => addGroupPatch({
         settings: GroupSettings.patch({
             trialDays,
         }),
@@ -956,19 +961,19 @@ const trialDays = computed({
 });
 
 const useRegistrationStartDate = computed({
-    get: () => !!patched.value.settings.registrationStartDate,
+    get: () => !!patchedGroup.value.settings.registrationStartDate,
     set: (useRegistrationStartDate) => {
         if (!useRegistrationStartDate) {
-            addPatch({
+            addGroupPatch({
                 settings: GroupSettings.patch({
                     registrationStartDate: null,
                 }),
             });
         }
         else {
-            addPatch({
+            addGroupPatch({
                 settings: GroupSettings.patch({
-                    registrationStartDate: props.group.settings.registrationStartDate && props.group.settings.registrationStartDate > new Date() ? props.group.settings.registrationStartDate : new Date(Date.now() + 1000 * 60 * 60 * 24),
+                    registrationStartDate: patchedGroup.value.settings.registrationStartDate && patchedGroup.value.settings.registrationStartDate > new Date() ? patchedGroup.value.settings.registrationStartDate : new Date(Date.now() + 1000 * 60 * 60 * 24),
                 }),
             });
         }
@@ -976,19 +981,19 @@ const useRegistrationStartDate = computed({
 });
 
 const useRegistrationEndDate = computed({
-    get: () => !!patched.value.settings.registrationEndDate,
+    get: () => !!patchedGroup.value.settings.registrationEndDate,
     set: (useRegistrationEndDate) => {
         if (!useRegistrationEndDate) {
-            addPatch({
+            addGroupPatch({
                 settings: GroupSettings.patch({
                     registrationEndDate: null,
                 }),
             });
         }
         else {
-            addPatch({
+            addGroupPatch({
                 settings: GroupSettings.patch({
-                    registrationEndDate: props.group.settings.registrationEndDate ?? new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+                    registrationEndDate: patchedGroup.value.settings.registrationEndDate ?? new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
                 }),
             });
         }
@@ -996,11 +1001,11 @@ const useRegistrationEndDate = computed({
 });
 
 const title = computed(() => {
-    if (props.group.type === GroupType.WaitingList) {
+    if (patchedGroup.value.type === GroupType.WaitingList) {
         return props.isNew ? $t('5936be80-5f7a-429b-8bc2-7afdd47ff232') : $t('b3f49e49-2db8-46e3-8a9b-bc05a4b989c0');
     }
 
-    if (props.group.type === GroupType.EventRegistration) {
+    if (patchedGroup.value.type === GroupType.EventRegistration) {
         return props.isNew ? $t('bd6ad13b-be70-4d03-a1a0-3578786f4df3') : $t('8fd3a74f-5dae-4a7e-bcd3-7ac1da2e7e6c');
     }
     return props.isNew ? $t('c7944f69-c772-4cc5-b7c8-2ef96272dfe0') : $t('d886e927-86d1-48ed-93ed-60e924484db1');
@@ -1012,7 +1017,7 @@ const defaultMembership = computed(() => {
     return platform.value.config.membershipTypes.find(t => t.id === defaultMembershipTypeId.value);
 });
 const defaultMembershipConfig = computed(() => {
-    return defaultMembership.value?.periods.get(patched.value.periodId);
+    return defaultMembership.value?.periods.get(patchedGroup.value.periodId);
 });
 
 async function save() {
@@ -1027,7 +1032,7 @@ async function save() {
             saving.value = false;
             return;
         }
-        await props.saveHandler(patch.value, periodPatch.value);
+        await props.saveHandler(patch.value);
         if (props.showToasts) {
             Toast.success($t('1e6b16bd-ca6e-49e2-9792-f8864a140d7b')).show();
         }
@@ -1042,7 +1047,7 @@ async function save() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm(props.group.type === GroupType.EventRegistration ? $t('90ec517b-14e6-4436-8c91-fabac5c1bddf') : $t('11426f89-b2bf-4f7a-bd5a-a51c34e6aa96'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'))) {
+    if (!await CenteredMessage.confirm(patchedGroup.value.type === GroupType.EventRegistration ? $t('90ec517b-14e6-4436-8c91-fabac5c1bddf') : $t('11426f89-b2bf-4f7a-bd5a-a51c34e6aa96'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'))) {
         return;
     }
     if (deleting.value || saving.value || !props.deleteHandler) {
@@ -1071,14 +1076,14 @@ async function addGroupPrice() {
     if (isValid) {
         const price = GroupPrice.create({
             name: $t('9b0aebaf-d119-49df-955b-eb57654529e5'),
-            price: patched.value.settings.prices[0]?.price?.clone(),
+            price: patchedGroup.value.settings.prices[0]?.price?.clone(),
         });
 
         await present({
             components: [
                 new ComponentWithProperties(GroupPriceView, {
                     price,
-                    group: patched,
+                    group: patchedGroup,
                     isNew: true,
                     defaultMembershipTypeId,
                     showNameAlways: true,
@@ -1097,7 +1102,7 @@ async function editGroupPrice(price: GroupPrice) {
         components: [
             new ComponentWithProperties(GroupPriceView, {
                 price,
-                group: patched,
+                group: patchedGroup,
                 isNew: false,
                 defaultMembershipTypeId,
                 saveHandler: async (patch: AutoEncoderPatchType<GroupPrice>) => {
@@ -1126,7 +1131,7 @@ async function addGroupOptionMenu() {
         components: [
             new ComponentWithProperties(GroupOptionMenuView, {
                 optionMenu,
-                group: patched,
+                group: patchedGroup,
                 isNew: true,
                 saveHandler: async (patch: AutoEncoderPatchType<GroupOptionMenu>) => {
                     addOptionMenuPut(optionMenu.patch(patch));
@@ -1143,34 +1148,29 @@ async function addWaitingList() {
     }
 
     const waitingList = Group.create({
-        organizationId: patched.value.organizationId,
-        periodId: patched.value.periodId,
+        organizationId: patchedGroup.value.organizationId,
+        periodId: patchedGroup.value.periodId,
         type: GroupType.WaitingList,
         settings: GroupSettings.create({
-            name: 'Wachtlijst van ' + patched.value.settings.name,
+            name: 'Wachtlijst van ' + patchedGroup.value.settings.name,
         }),
     });
+
+    const groups: PatchableArrayAutoEncoder<Group> = new PatchableArray();
+    groups.addPut(waitingList);
+    const basePatch = OrganizationRegistrationPeriod.patch({ groups });
 
     // Edit the group
     await present({
         components: [
             new ComponentWithProperties(EditGroupView, {
-                period: patchedPeriod.value,
-                group: waitingList,
+                period: patched.value.patch(basePatch),
+                groupId: waitingList.id,
                 isNew: true,
                 showToasts: false,
                 organizationHint: externalOrganization.value,
-                saveHandler: (patch: AutoEncoderPatchType<Group>) => {
-                    const arrayPatch: PatchableArrayAutoEncoder<Group> = new PatchableArray();
-                    arrayPatch.addPut(waitingList.patch(patch));
-
-                    addPeriodPatch({
-                        groups: arrayPatch,
-                    });
-
-                    addPatch({
-                        waitingList: waitingList.patch(patch),
-                    });
+                saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                    addPatch(basePatch.patch(patch));
                 },
             }),
         ],
@@ -1182,7 +1182,7 @@ function isPropertyEnabled(name: MemberProperty) {
     return !!OrganizationRecordsConfiguration.build({
         platform: platform.value,
         organization: externalOrganization.value,
-        group: patched.value,
+        group: patchedGroup.value,
         includeGroup: true,
     })[name];
 }
@@ -1191,18 +1191,13 @@ async function editWaitingList(waitingList: Group) {
     await present({
         components: [
             new ComponentWithProperties(EditGroupView, {
-                period: patchedPeriod.value,
-                group: waitingList,
+                period: patched.value,
+                groupId: waitingList.id,
                 isNew: false,
                 showToasts: false,
                 organizationHint: externalOrganization.value,
-                saveHandler: (patch: AutoEncoderPatchType<Group>) => {
-                    const arrayPatch: PatchableArrayAutoEncoder<Group> = new PatchableArray();
-                    arrayPatch.addPatch(patch);
-
-                    addPeriodPatch({
-                        groups: arrayPatch,
-                    });
+                saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                    addPatch(patch);
                 },
             }),
         ],
@@ -1296,14 +1291,14 @@ const recordEditorSettings = computed(() => {
         dataPermission: false,
         toggleDefaultEnabled: false,
         filterBuilder: (recordCategories: RecordCategory[]) => {
-            return getRegisterItemFilterBuilders(patched.value.patch({
+            return getRegisterItemFilterBuilders(patchedGroup.value.patch({
                 settings: GroupSettings.patch({
                     recordCategories: recordCategories as any,
                 }),
             }))[0];
         },
-        exampleValue: RegisterItem.defaultFor(exampleMember, patched.value, externalOrganization.value ?? Organization.create({
-            id: patched.value.organizationId,
+        exampleValue: RegisterItem.defaultFor(exampleMember, patchedGroup.value, externalOrganization.value ?? Organization.create({
+            id: patchedGroup.value.organizationId,
         })),
     });
 });

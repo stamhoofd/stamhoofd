@@ -54,11 +54,10 @@ async function editGroup(group: Group) {
                     await organizationManager.value.forceUpdate();
                     return new ComponentWithProperties(EditGroupView, {
                         period: period.value,
-                        group,
+                        groupId: group.id,
                         iswNew: false,
-                        saveHandler: async (patch: AutoEncoderPatchType<Group>, periodPatch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                            periodPatch.groups.addPatch(patch);
-                            await organizationManager.value.patchPeriod(periodPatch);
+                        saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                            await organizationManager.value.patchPeriod(patch);
                         },
                     });
                 }

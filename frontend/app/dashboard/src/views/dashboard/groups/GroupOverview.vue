@@ -373,11 +373,10 @@ async function editGeneral(animated = true) {
                     await organizationManager.value.forceUpdate();
                     return new ComponentWithProperties(EditGroupView, {
                         period: props.period,
-                        group: props.group,
+                        groupId: props.group.id,
                         isNew: false,
-                        saveHandler: async (patch: AutoEncoderPatchType<Group>, periodPatch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                            periodPatch.groups.addPatch(patch);
-                            await organizationManager.value.patchPeriod(periodPatch);
+                        saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                            await organizationManager.value.patchPeriod(patch);
                         },
                     });
                 }
