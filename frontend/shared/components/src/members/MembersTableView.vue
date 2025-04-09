@@ -11,7 +11,6 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncTableAction, Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, TableActionSelection, useAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { AccessRight, Group, GroupCategoryTree, GroupPrice, GroupType, MemberResponsibility, MembershipStatus, Organization, PermissionLevel, PlatformMember, RecordAnswer, RegisterItemOption, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
@@ -239,11 +238,16 @@ const allColumns: Column<ObjectType, any>[] = [
         minimumWidth: 50,
         recommendedWidth: 120,
     }),
-    new Column<ObjectType, MembershipStatus>({
+    new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
         id: 'membership',
         name: $t(`c7d995f1-36a0-446e-9fcf-17ffb69f3f45`),
-        getValue: member => member.membershipStatus,
-        format: (status) => {
+        getValue: (member) => {
+            return {
+                status: member.membershipStatus,
+                hasFutureMembership: member.hasFutureMembership,
+            };
+        },
+        format: ({ status }) => {
             switch (status) {
                 case MembershipStatus.Trial:
                     return $t(`47c7c3c4-9246-40b7-b1e0-2cb408d5f79e`);
@@ -257,7 +261,7 @@ const allColumns: Column<ObjectType, any>[] = [
                     return $t(`1f8620fa-e8a5-4665-99c8-c1907a5b5768`);
             }
         },
-        getStyle: (status) => {
+        getStyle: ({ status, hasFutureMembership }) => {
             switch (status) {
                 case MembershipStatus.Trial:
                     return 'secundary';
@@ -267,8 +271,13 @@ const allColumns: Column<ObjectType, any>[] = [
                     return 'warn';
                 case MembershipStatus.Temporary:
                     return 'secundary';
-                case MembershipStatus.Inactive:
+                case MembershipStatus.Inactive: {
+                    if (hasFutureMembership) {
+                        return 'warn';
+                    }
+
                     return 'error';
+                }
             }
         },
         minimumWidth: 120,

@@ -12,7 +12,6 @@ import { Document as DocumentStruct } from '../Document.js';
 import { Platform } from '../Platform.js';
 import { UserWithMembers } from '../UserWithMembers.js';
 import { Address } from '../addresses/Address.js';
-import { Country } from '../addresses/CountryDecoder.js';
 import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import { EmergencyContact } from './EmergencyContact.js';
 import { MemberDetails, MemberProperty } from './MemberDetails.js';
@@ -534,6 +533,23 @@ export class PlatformMember implements ObjectWithRecords {
         }
 
         return status;
+    }
+
+    get hasFutureMembership(): boolean {
+        const now = new Date();
+
+        for (const t of this.patchedMember.platformMemberships) {
+            const organization = this.organizations.find(o => o.id === t.organizationId);
+            if (!organization) {
+                continue;
+            }
+
+            if (t.startDate > now) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     get shouldApplyReducedPrice() {
