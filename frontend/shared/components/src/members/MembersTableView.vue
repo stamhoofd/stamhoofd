@@ -251,11 +251,16 @@ const allColumns: Column<ObjectType, any>[] = [
         minimumWidth: 50,
         recommendedWidth: 120,
     }),
-    new Column<ObjectType, MembershipStatus>({
+    new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
         id: 'membership',
         name: 'Aansluiting',
-        getValue: member => member.membershipStatus,
-        format: (status) => {
+        getValue: (member) => {
+            return {
+                status: member.membershipStatus,
+                hasFutureMembership: member.hasFutureMembership,
+            };
+        },
+        format: ({ status }) => {
             switch (status) {
                 case MembershipStatus.Trial:
                     return 'Proefperiode';
@@ -269,7 +274,7 @@ const allColumns: Column<ObjectType, any>[] = [
                     return 'Niet verzekerd';
             }
         },
-        getStyle: (status) => {
+        getStyle: ({ status, hasFutureMembership }) => {
             switch (status) {
                 case MembershipStatus.Trial:
                     return 'secundary';
@@ -279,8 +284,13 @@ const allColumns: Column<ObjectType, any>[] = [
                     return 'warn';
                 case MembershipStatus.Temporary:
                     return 'secundary';
-                case MembershipStatus.Inactive:
+                case MembershipStatus.Inactive: {
+                    if (hasFutureMembership) {
+                        return 'warn';
+                    }
+
                     return 'error';
+                }
             }
         },
         minimumWidth: 120,
