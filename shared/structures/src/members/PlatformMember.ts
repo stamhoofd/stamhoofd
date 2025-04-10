@@ -429,6 +429,12 @@ export enum ContinuousMembershipStatus {
     None = 'None',
 }
 
+export enum ContinuousMembershipStatus {
+    Full = 'Full',
+    Partial = 'Partial',
+    None = 'None',
+}
+
 export class PlatformMember implements ObjectWithRecords {
     member: MemberWithRegistrationsBlob;
     patch: AutoEncoderPatchType<MemberWithRegistrationsBlob>;
