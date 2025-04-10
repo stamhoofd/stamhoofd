@@ -3,7 +3,7 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
-        <p>Voeg voorwaarden toe die bij het registereren staan vermeldt of geaccepteerd moeten worden.</p>
+        <p>{{ $t('Voeg voorwaarden toe die bij het registereren staan vermeldt of geaccepteerd moeten worden.') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -16,7 +16,7 @@
         <p>
             <button class="button text" type="button" @click="addPolicy">
                 <span class="icon add" />
-                <span>Voorwaarden</span>
+                <span>{{ $t('Voorwaarden') }}</span>
             </button>
         </p>
     </SaveView>

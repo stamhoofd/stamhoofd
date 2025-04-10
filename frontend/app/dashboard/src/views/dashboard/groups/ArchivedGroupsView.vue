@@ -8,7 +8,7 @@
             </h1>
 
             <p>
-                Deze inschrijvingsgroepen werden gearchiveerd. Je kan ze altijd nog bekijken en hun gegevens blijven behouden tot je ze manueel verwijdert. Hier kan je dus afgelopen activiteiten in bewaren.
+                {{ $t('Deze inschrijvingsgroepen werden gearchiveerd. Je kan ze altijd nog bekijken en hun gegevens blijven behouden tot je ze manueel verwijdert. Hier kan je dus afgelopen activiteiten in bewaren.') }}
             </p>
 
             <Spinner v-if="loadingGroups" />
@@ -27,7 +27,7 @@
                 </STListItem>
             </STList>
             <p v-else class="info-box">
-                Het archief is leeg.
+                {{ $t('Het archief is leeg.') }}
             </p>
         </main>
     </div>

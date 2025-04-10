@@ -7,48 +7,37 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox title="Startdatum (inclusief)" error-fields="startDate" :error-box="errors.errorBox">
+            <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`Startdatum (inclusief)`)">
                 <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" />
             </STInputBox>
 
-            <STInputBox title="Einddatum (inclusief)" error-fields="endDate" :error-box="errors.errorBox">
+            <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t(`Einddatum (inclusief)`)">
                 <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" />
             </STInputBox>
         </div>
         <p class="style-description-small">
-            Activiteiten die vallen binnen dit bereik moeten voldoen aan de deadline.
+            {{ $t('Activiteiten die vallen binnen dit bereik moeten voldoen aan de deadline.') }}
         </p>
 
         <div class="split-inputs">
-            <STInputBox title="Deadline" error-fields="startDate" :error-box="errors.errorBox">
+            <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`Deadline`)">
                 <DateSelection v-model="deadlineDate" />
             </STInputBox>
-            <TimeInput v-model="deadlineDate" title="Tijdstip" :validator="errors.validator" />
+            <TimeInput v-model="deadlineDate" :validator="errors.validator" :title="$t(`Tijdstip`)" />
         </div>
 
         <STInputBox :title="$t('9106b204-3db9-4fac-acfa-e53e07d5a867')" error-fields="reminderText" :error-box="errors.errorBox" class="max">
-            <input
-                v-model="reminderTitle"
-                class="input"
-                type="text"
-                :placeholder="$t('16e52c0a-81e8-4d24-9efb-470a92b74c15')"
-            >
+            <input v-model="reminderTitle" class="input" type="text" :placeholder="$t('16e52c0a-81e8-4d24-9efb-470a92b74c15')">
         </STInputBox>
 
         <STInputBox :title="$t('49706c38-6fcf-4533-8692-ccf5836a27df')" error-fields="reminderText" :error-box="errors.errorBox" class="max">
-            <textarea
-                v-model="reminderText"
-                class="input"
-                type="text"
-                :placeholder="$t('55770076-d3a3-48db-a49b-ba23c6a54a39')"
-                autocomplete="off"
-            />
+            <textarea v-model="reminderText" class="input" type="text" :placeholder="$t('55770076-d3a3-48db-a49b-ba23c6a54a39')" autocomplete="off" />
         </STInputBox>
         <p class="style-description-small">
-            Deze tekst is zichtbaar in het 'Start' tabblad als de deadline nadert.
+            {{ $t("Deze tekst is zichtbaar in het 'Start' tabblad als de deadline nadert.") }}
         </p>
 
-        <STInputBox title="Herinnering tonen vanaf" error-fields="reminderFrom" :error-box="errors.errorBox">
+        <STInputBox error-fields="reminderFrom" :error-box="errors.errorBox" :title="$t(`Herinnering tonen vanaf`)">
             <DateSelection v-model="reminderFrom" :required="false" :placeholder="$t('ba2b2a5a-8c8a-42c5-9ee7-78daa3b6c5ec')" :time="{hours: 0, minutes: 0, seconds: 0}" />
         </STInputBox>
     </SaveView>

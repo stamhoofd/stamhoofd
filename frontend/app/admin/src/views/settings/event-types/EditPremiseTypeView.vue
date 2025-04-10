@@ -8,30 +8,18 @@
 
         <div class="split-inputs">
             <STInputBox :title="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') " error-fields="name" :error-box="errors.errorBox">
-                <input
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    :placeholder="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') "
-                >
+                <input v-model="name" class="input" type="text" :placeholder="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') ">
             </STInputBox>
         </div>
 
         <STInputBox :title="$t('688fc9a3-68af-4aa3-ae6c-7d35a5f954ad')" error-fields="description" :error-box="errors.errorBox" class="max">
-            <textarea
-                v-model="description"
-                class="input"
-                type="text"
-                :placeholder="$t('37739daf-2424-4f6e-a316-d4ac6bdaef85')"
-                autocomplete="off"
-            />
+            <textarea v-model="description" class="input" type="text" :placeholder="$t('37739daf-2424-4f6e-a316-d4ac6bdaef85')" autocomplete="off" />
         </STInputBox>
 
-        <hr>
-        <h2>{{ $t('1d742718-992d-4487-9c5e-a4ac46841a27') }}</h2>
+        <hr><h2>{{ $t('1d742718-992d-4487-9c5e-a4ac46841a27') }}</h2>
 
         <p class="style-description-small">
-            Stel optioneel limieten voor het aantal lokalen van deze soort per groep in.
+            {{ $t('Stel optioneel limieten voor het aantal lokalen van deze soort per groep in.') }}
         </p>
 
         <div class="split-inputs">

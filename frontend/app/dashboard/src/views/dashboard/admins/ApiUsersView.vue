@@ -1,14 +1,14 @@
 <template>
     <LoadingViewTransition>
         <div v-if="!loading" class="st-view background">
-            <STNavigationBar title="Beheerders">
+            <STNavigationBar :title="$t(`Beheerders`)">
                 <template #right>
                     <button class="button navigation icon add" aria-label="Nieuwe beheerder" type="button" @click="createUser" />
                 </template>
             </STNavigationBar>
 
             <main>
-                <h1>API-keys</h1>
+                <h1>{{ $t('API-keys') }}</h1>
                 <p>{{ $t('4d995169-f792-40f5-addf-60d8aed00362') }}</p>
 
                 <STList class="illustration-list">
@@ -17,10 +17,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/laptop-add.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Nieuwe API-key
+                            {{ $t('Nieuwe API-key') }}
                         </h2>
                         <p class="style-description">
-                            Maak een nieuwe key aan.
+                            {{ $t('Maak een nieuwe key aan.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -28,11 +28,10 @@
                     </STListItem>
                 </STList>
 
-                <hr>
-                <h2>Alle API-keys</h2>
+                <hr><h2>{{ $t('Alle API-keys') }}</h2>
 
                 <p v-if="apiUsers.length === 0" class="info-box">
-                    Nog geen API-keys aangemaakt
+                    {{ $t('Nog geen API-keys aangemaakt') }}
                 </p>
                 <STList v-else>
                     <STListItem v-for="user in apiUsers" :key="user.id" :selectable="true" class="right-stack" @click="editUser(user)">
@@ -47,10 +46,10 @@
                             {{ permissionList(user) }}
                         </p>
                         <p class="style-description-small">
-                            Aangemaakt op {{ formatDate(user.createdAt) }}
+                            {{ $t('Aangemaakt op') }} {{ formatDate(user.createdAt) }}
                         </p>
                         <p class="style-description-small">
-                            Geldig tot {{ formatDate(user.expiresAt) }}
+                            {{ $t('Geldig tot') }} {{ formatDate(user.expiresAt) }}
                         </p>
 
                         <template #right>
@@ -68,7 +67,7 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { BackButton, Checkbox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective, LoadingViewTransition } from '@stamhoofd/components';
+import { BackButton, Checkbox, LoadingViewTransition, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective } from '@stamhoofd/components';
 import { SessionManager } from '@stamhoofd/networking';
 import { ApiUser, PermissionLevel, Permissions, User, UserPermissions } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';

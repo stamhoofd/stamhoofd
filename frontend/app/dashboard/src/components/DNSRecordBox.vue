@@ -2,24 +2,24 @@
     <div>
         <dl class="details-grid dns-records" :class="{ success: record.status === 'Valid' }">
             <template v-if="record.optional">
-                <dt>Optioneel</dt>
-                <dd>Deze record is optioneel</dd>
+                <dt>{{ $t('Optioneel') }}</dt>
+                <dd>{{ $t('Deze record is optioneel') }}</dd>
             </template>
 
-            <dt>Type</dt>
+            <dt>{{ $t('Type') }}</dt>
             <dd>{{ record.type }}</dd>
 
-            <dt>Naam</dt>
+            <dt>{{ $t('Naam') }}</dt>
             <dd v-tooltip="'Klik om te kopiëren'" v-copyable class="selectable">
                 {{ record.name }}
             </dd>
 
-            <dt>Waarde</dt>
+            <dt>{{ $t('Waarde') }}</dt>
             <dd v-tooltip="'Klik om te kopiëren'" v-copyable class="selectable">
                 {{ record.value }}
             </dd>
 
-            <dt>TTL</dt>
+            <dt>{{ $t('TTL') }}</dt>
             <dd v-copyable class="selectable">
                 3600
             </dd>

@@ -5,23 +5,17 @@
         </h1>
 
         <p class="warning-box">
-            Als je hier gegevens wijzigt, zullen die gegevens van dit document niet meer automatisch gekoppeld zijn aan de gegevens van de bijhorende leden en inschrijvingen. Meestal is het beter om de gegevens rechtstreeks bij het lid of de inschrijving te wijzigen.
+            {{ $t('Als je hier gegevens wijzigt, zullen die gegevens van dit document niet meer automatisch gekoppeld zijn aan de gegevens van de bijhorende leden en inschrijvingen. Meestal is het beter om de gegevens rechtstreeks bij het lid of de inschrijving te wijzigen.') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox">
-            <input
-                v-model="description"
-                class="input"
-                type="text"
-                placeholder="Beschrijving document"
-            >
+        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t(`Beschrijving`)">
+            <input v-model="description" class="input" type="text" :placeholder="$t(`Beschrijving document`)">
         </STInputBox>
 
         <div v-for="category of fieldCategories" :key="category.id" class="container">
-            <hr>
-            <h2>{{ category.name }}</h2>
+            <hr><h2>{{ category.name }}</h2>
             <p v-if="category.description" class="style-description pre-wrap" v-text="category.description" />
 
             <!-- todo: should records be filtered? -->
@@ -31,7 +25,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, AutoEncoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, useContext, useErrors, usePatch } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';

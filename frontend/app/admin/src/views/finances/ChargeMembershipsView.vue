@@ -1,7 +1,7 @@
 <template>
     <LoadingViewTransition :error-box="loadingOrganizationErrorBox">
         <div v-if="!loadingOrganization" class="st-view charge-memberships-view">
-            <STNavigationBar title="Aansluitingen aanrekenen" />
+            <STNavigationBar :title="$t(`Aansluitingen aanrekenen`)" />
 
             <main class="center">
                 <h1>
@@ -11,12 +11,11 @@
                 <STErrorsDefault :error-box="errors.errorBox" />
 
                 <p v-if="summary && summary.running" class="info-box icon clock">
-                    Er is momenteel een aanrekening bezig. Wacht tot deze is afgelopen.
+                    {{ $t('Er is momenteel een aanrekening bezig. Wacht tot deze is afgelopen.') }}
                 </p>
                 <template v-else>
                     <template v-if="membershipOrganization">
-                        <hr>
-                        <h2>Boekhouding {{ membershipOrganization.name }}</h2>
+                        <hr><h2>{{ $t('Boekhouding') }} {{ membershipOrganization.name }}</h2>
 
                         <STList class="illustration-list">
                             <STListItem :selectable="true" class="left-center" element-name="a" :href="'/beheerders/' + membershipOrganization.uri + '/boekhouding/exporteren'">
@@ -80,16 +79,15 @@
                             </STListItem>
                         </STList>
                     </template>
-                    <hr>
-                    <h2>
-                        Aansluitingen aanrekenen
+                    <hr><h2>
+                        {{ $t('Aansluitingen aanrekenen') }}
                     </h2>
                     <p>
                         {{ $t("4a2a630f-3396-404f-9316-d660df9935a9") }}
                     </p>
 
                     <div class="style-stats-grid">
-                        <STInputBox title="Nieuwe aansluitingen">
+                        <STInputBox :title="$t(`Nieuwe aansluitingen`)">
                             <p class="style-price-big">
                                 <span v-if="!summary" class="style-placeholder-skeleton" />
                                 <span v-else>
@@ -98,7 +96,7 @@
                             </p>
                         </STInputBox>
 
-                        <STInputBox title="Unieke leden">
+                        <STInputBox :title="$t(`Unieke leden`)">
                             <p class="style-price-big">
                                 <span v-if="!summary" class="style-placeholder-skeleton" />
                                 <span v-else>
@@ -107,7 +105,7 @@
                             </p>
                         </STInputBox>
 
-                        <STInputBox title="Totaal bedrag">
+                        <STInputBox :title="$t(`Totaal bedrag`)">
                             <p class="style-price-big">
                                 <span v-if="!summary" class="style-placeholder-skeleton" />
                                 <span v-else>
@@ -116,7 +114,7 @@
                             </p>
                         </STInputBox>
 
-                        <STInputBox title="Unieke groepen">
+                        <STInputBox :title="$t(`Unieke groepen`)">
                             <p class="style-price-big">
                                 <span v-if="!summary" class="style-placeholder-skeleton" />
                                 <span v-else>
@@ -137,8 +135,7 @@
                         {{ $t('ffd221f8-0f55-4b66-99f4-d43916f55f90') }}
                     </p>
 
-                    <hr>
-                    <h2>
+                    <hr><h2>
                         {{ $t('5e9e86f7-81f6-4ffe-9cda-95982de2b4cb') }}
                     </h2>
                     <p>
@@ -184,8 +181,7 @@
                     </p>
 
                     <div v-if="summary && summary?.trials.members > 0" class="container">
-                        <hr>
-                        <h2>{{ $t('cc3d3da6-27ce-4f32-a696-4e08d649a7bc') }}</h2>
+                        <hr><h2>{{ $t('cc3d3da6-27ce-4f32-a696-4e08d649a7bc') }}</h2>
 
                         <div class="style-stats-grid">
                             <STInputBox :title="$t('faa31f24-a42f-454b-9ceb-417c46dcee0d')">
@@ -227,8 +223,7 @@
                     </div>
 
                     <div v-for="type of platform.config.membershipTypes" :key="type.id" class="container">
-                        <hr>
-                        <h2>{{ $t('ed995f5d-eeff-44ad-ac35-f518b2892524') }} "{{ type.name }}"</h2>
+                        <hr><h2>{{ $t('ed995f5d-eeff-44ad-ac35-f518b2892524') }} "{{ type.name }}"</h2>
 
                         <div class="style-stats-grid">
                             <STInputBox :title="$t('faa31f24-a42f-454b-9ceb-417c46dcee0d')">

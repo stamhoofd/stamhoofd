@@ -1,22 +1,22 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Inschrijvingsgroep" />
+        <STNavigationBar :title="$t(`Inschrijvingsgroep`)" />
 
         <main>
-            <h1>Kies voor welke inschrijvingen je dit document wilt aanmaken</h1>
+            <h1>{{ $t('Kies voor welke inschrijvingen je dit document wilt aanmaken') }}</h1>
 
             <SegmentedControl v-model="selectedTab" :items="tabs.map(t => t.id)" :labels="tabs.map(t => t.label)" />
 
             <div v-if="selectedTab === Tab.Activities" class="input-with-buttons">
                 <div>
                     <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                        <input v-model="searchQuery" class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
+                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`Zoeken`)">
                     </form>
                 </div>
                 <div>
                     <button type="button" class="button text" @click="editFilter">
                         <span class="icon filter" />
-                        <span class="hide-small">Filter</span>
+                        <span class="hide-small">{{ $t('Filter') }}</span>
                         <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary" />
                     </button>
                 </div>
@@ -31,8 +31,7 @@
                 </p>
 
                 <div v-for="category in categoryTree.categories" :key="category.id" class="container">
-                    <hr>
-                    <h2>{{ category.settings.name }}</h2>
+                    <hr><h2>{{ category.settings.name }}</h2>
                     <STList>
                         <STListItem v-for="group in category.groups" :key="group.id" :selectable="true" @click="selectGroup(group)">
                             <template #left>
@@ -54,8 +53,7 @@
                     </STList>
                 </div>
 
-                <hr>
-                <h2>Archief</h2>
+                <hr><h2>{{ $t('Archief') }}</h2>
                 <Spinner v-if="loadingGroups" />
                 <STList v-else-if="archivedGroups.length">
                     <STListItem v-for="group in archivedGroups" :key="group.id" :selectable="true" @click="selectGroup(group)">
@@ -76,7 +74,7 @@
                     </STListItem>
                 </STList>
                 <p v-else class="info-box">
-                    Het archief is leeg.
+                    {{ $t('Het archief is leeg.') }}
                 </p>
             </template>
 

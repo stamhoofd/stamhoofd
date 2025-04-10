@@ -6,19 +6,13 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="paymentMethod === PaymentMethod.Transfer">
-            <STInputBox title="Begunstigde" error-fields="transferSettings.creditor" :error-box="errors.errorBox">
-                <input
-                    v-model="creditor"
-                    class="input"
-                    type="text"
-                    :placeholder="organization.name"
-                    autocomplete="off"
-                >
+            <STInputBox error-fields="transferSettings.creditor" :error-box="errors.errorBox" :title="$t(`Begunstigde`)">
+                <input v-model="creditor" class="input" type="text" :placeholder="organization.name" autocomplete="off">
             </STInputBox>
 
-            <IBANInput v-model="iban" title="Bankrekeningnummer" :validator="errors.validator" :required="true" />
+            <IBANInput v-model="iban" :validator="errors.validator" :required="true" :title="$t(`Bankrekeningnummer`)" />
 
-            <STInputBox title="Soort mededeling" error-fields="transferSettings.type" :error-box="errors.errorBox" class="max">
+            <STInputBox error-fields="transferSettings.type" :error-box="errors.errorBox" class="max" :title="$t(`Soort mededeling`)">
                 <STList>
                     <STListItem v-for="_type in transferTypes" :key="_type.value" :selectable="true" element-name="label">
                         <template #left>
@@ -33,46 +27,32 @@
             </STInputBox>
 
             <p v-if="transferType !== 'Structured'" class="warning-box">
-                <span>De mededeling kan niet gewijzigd worden door <span v-if="type === 'webshop'">bestellers</span><span v-else>leden</span> die betalen met een app. Voorzie dus zelf geen eigen vervangingen zoals <em class="style-em">bestelling + naam</em> waarbij je ervan uitgaat dat de betaler manueel de mededeling kan invullen en wijzigen. Gebruik in plaats daarvan de 'Vaste mededeling' met de beschikbare automatische vervangingen.</span>
+                <span>{{ $t('De mededeling kan niet gewijzigd worden door') }} <span v-if="type === 'webshop'">{{ $t('bestellers') }}</span><span v-else>{{ $t('leden') }}</span> {{ $t('die betalen met een app. Voorzie dus zelf geen eigen vervangingen zoals') }} <em class="style-em">{{ $t('bestelling + naam') }}</em> {{ $t("waarbij je ervan uitgaat dat de betaler manueel de mededeling kan invullen en wijzigen. Gebruik in plaats daarvan de 'Vaste mededeling' met de beschikbare automatische vervangingen.") }}</span>
             </p>
 
-            <STInputBox v-if="transferType !== 'Structured'" :title="transferType === 'Fixed' ? 'Mededeling' : 'Voorvoegsel'" error-fields="transferSettings.prefix" :error-box="errors.errorBox">
-                <input
-                    v-model="prefix"
-                    class="input"
-                    type="text"
-                    :placeholder="transferType === 'Fixed' ? 'Mededeling' : (type === 'registration' ? 'Optioneel. Bv. Inschrijving' : 'Optioneel. Bv. Bestelling')"
-                    autocomplete="off"
-                >
+            <STInputBox v-if="transferType !== 'Structured'" :title="transferType === 'Fixed' ? $t(`Mededeling`) : $t(`Voorvoegsel`)" error-fields="transferSettings.prefix" :error-box="errors.errorBox">
+                <input v-model="prefix" class="input" type="text" :placeholder="transferType === 'Fixed' ? $t(`Mededeling`) : (type === 'registration' ? $t(`Optioneel. Bv. Inschrijving`) : $t(`Optioneel. Bv. Bestelling`))" autocomplete="off">
             </STInputBox>
 
             <p v-if="transferExample && transferExample !== prefix" class="style-description-small">
-                Voorbeeld: <span class="style-em">{{ transferExample }}</span>
+                {{ $t('Voorbeeld:') }} <span class="style-em">{{ transferExample }}</span>
             </p>
 
             <p v-if="transferType === 'Fixed' && type === 'webshop'" class="style-description-small">
-                Gebruik automatische tekstvervangingen in de mededeling via <code v-copyable class="style-inline-code style-copyable" v-text="`{{naam}}`" />, <code v-copyable class="style-inline-code style-copyable" v-text="`{{email}}`" /> of <code v-copyable class="style-inline-code style-copyable" v-text="`{{nr}}`" />
+                {{ $t('Gebruik automatische tekstvervangingen in de mededeling via') }} <code v-copyable class="style-inline-code style-copyable" v-text="`{{naam}}`" />, <code v-copyable class="style-inline-code style-copyable" v-text="`{{email}}`" /> {{ $t('of') }} <code v-copyable class="style-inline-code style-copyable" v-text="`{{nr}}`" />
             </p>
             <p v-else-if="transferType === 'Fixed' && type === 'registration'" class="style-description-small">
-                Gebruik automatische tekstvervangingen in de mededeling via <code v-copyable class="style-inline-code style-copyable" v-text="`{{naam}}`" />
+                {{ $t('Gebruik automatische tekstvervangingen in de mededeling via') }} <code v-copyable class="style-inline-code style-copyable" v-text="`{{naam}}`" />
             </p>
 
-            <hr>
-            <h2>Instructies</h2>
-            <p>Op de betaalpagina worden automatisch instructies getoond om de overschrijving correct uit te voeren. Je kan eventueel andere instructies opgeven, bv. als je het toelaat om de overschrijving later uit te voeren.</p>
+            <hr><h2>{{ $t('Instructies') }}</h2>
+            <p>{{ $t('Op de betaalpagina worden automatisch instructies getoond om de overschrijving correct uit te voeren. Je kan eventueel andere instructies opgeven, bv. als je het toelaat om de overschrijving later uit te voeren.') }}</p>
 
             <STInputBox title="" error-fields="infoDescription" :error-box="errors.errorBox" class="max">
-                <textarea
-                    v-model="infoDescription"
-                    class="input"
-                    type="text"
-                    placeholder="Optioneel. Indien niet ingevuld worden automatisch geschikte instructies getoond."
-                    autocomplete="off"
-                />
+                <textarea v-model="infoDescription" class="input" type="text" autocomplete="off" :placeholder="$t(`Optioneel. Indien niet ingevuld worden automatisch geschikte instructies getoond.`)" />
             </STInputBox>
 
-            <hr>
-            <h2>Geavanceerd</h2>
+            <hr><h2>{{ $t('Geavanceerd') }}</h2>
         </template>
 
         <STList>
@@ -82,7 +62,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Uitschakelen voor particulieren
+                    {{ $t('Uitschakelen voor particulieren') }}
                 </h3>
             </STListItem>
 
@@ -92,11 +72,11 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Maak pas beschikbaar vanaf een minimum bedrag
+                    {{ $t('Maak pas beschikbaar vanaf een minimum bedrag') }}
                 </h3>
 
                 <div v-if="useMinimumAmount" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox title="Minimum bedrag" error-fields="minimumAmount" :error-box="errors.errorBox">
+                    <STInputBox error-fields="minimumAmount" :error-box="errors.errorBox" :title="$t(`Minimum bedrag`)">
                         <PriceInput v-model="minimumAmount" :min="2" :validator="errors.validator" />
                     </STInputBox>
                 </div>
@@ -108,18 +88,12 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Waarschuwing tonen bij selectie van deze betaalmethode
+                    {{ $t('Waarschuwing tonen bij selectie van deze betaalmethode') }}
                 </h3>
 
                 <div v-if="useWarning" class="split-inputs option" @click.stop.prevent>
                     <STInputBox title="" error-fields="warningText" :error-box="errors.errorBox" class="max">
-                        <textarea
-                            v-model="warningText"
-                            class="input"
-                            type="text"
-                            placeholder="Waarschuwingstekst"
-                            autocomplete="off"
-                        />
+                        <textarea v-model="warningText" class="input" type="text" autocomplete="off" :placeholder="$t(`Waarschuwingstekst`)" />
                     </STInputBox>
                 </div>
             </STListItem>
@@ -130,18 +104,12 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Waarschuwing enkel tonen vanaf een minimum bedrag
+                    {{ $t('Waarschuwing enkel tonen vanaf een minimum bedrag') }}
                 </h3>
 
                 <div v-if="useWarningAmount" class="split-inputs option" @click.stop.prevent>
                     <STInputBox title="" error-fields="warningAmount" :error-box="errors.errorBox">
-                        <PriceInput
-                            v-model="warningAmount"
-                            class="input"
-                            type="text"
-                            :min="1"
-                            :validator="errors.validator"
-                        />
+                        <PriceInput v-model="warningAmount" class="input" type="text" :min="1" :validator="errors.validator" />
                     </STInputBox>
                 </div>
             </STListItem>
@@ -152,7 +120,7 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, PriceInput, Toast, useErrors, usePatch, useRequiredOrganization, IBANInput, NumberInput, useAuth } from '@stamhoofd/components';
+import { CenteredMessage, IBANInput, PriceInput, Toast, useAuth, useErrors, usePatch, useRequiredOrganization } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentMethodSettings, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';

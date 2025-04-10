@@ -1,69 +1,67 @@
 <template>
-    <SaveView :loading="saving" title="Experimenten" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`Experimenten`)" @save="save">
         <h1>
-            Experimenten
+            {{ $t('Experimenten') }}
         </h1>
 
-        <p>Hier kan je functies aanzetten die we nog aan het uittesten zijn, of functies die enkel voor geavanceerdere gebruikers nodig zijn.</p>
+        <p>{{ $t('Hier kan je functies aanzetten die we nog aan het uittesten zijn, of functies die enkel voor geavanceerdere gebruikers nodig zijn.') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p class="info-box">
-            Geen experimentele functies op dit moment.
+            {{ $t('Geen experimentele functies op dit moment.') }}
         </p>
 
-        <hr>
-        <h2>
-            Functionaliteiten
+        <hr><h2>
+            {{ $t('Functionaliteiten') }}
         </h2>
 
-        <p>Hier kan je bepaalde functies in- of uitschakelen.</p>
+        <p>{{ $t('Hier kan je bepaalde functies in- of uitschakelen.') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <Checkbox :model-value="getFeatureFlag('documents')" @update:model-value="setFeatureFlag('documents', !!$event)">
-            Documenten
+            {{ $t('Documenten') }}
         </Checkbox>
 
         <Checkbox :model-value="getFeatureFlag('audit-logs')" @update:model-value="setFeatureFlag('audit-logs', !!$event)">
-            Logboek
+            {{ $t('Logboek') }}
         </Checkbox>
 
         <Checkbox :model-value="!getFeatureFlag('disable-events')" @update:model-value="setFeatureFlag('disable-events', !$event)">
-            Activiteiten
+            {{ $t('Activiteiten') }}
         </Checkbox>
 
         <Checkbox :model-value="getFeatureFlag('member-trials')" @update:model-value="setFeatureFlag('member-trials', !!$event)">
-            Proefperiodes
+            {{ $t('Proefperiodes') }}
         </Checkbox>
 
         <Checkbox :model-value="getFeatureFlag('balance-emails')" @update:model-value="setFeatureFlag('balance-emails', !!$event)">
-            Notificaties voor openstaande bedragen
+            {{ $t('Notificaties voor openstaande bedragen') }}
         </Checkbox>
 
         <Checkbox :model-value="getFeatureFlag('event-notifications')" @update:model-value="setFeatureFlag('event-notifications', !!$event)">
-            Kampmeldingen
+            {{ $t('Kampmeldingen') }}
         </Checkbox>
 
         <Checkbox :model-value="!!STAMHOOFD.domains.webshop" :disabled="true">
-            Webshops
+            {{ $t('Webshops') }}
         </Checkbox>
 
-        <hr>
-        <h2>Login methodes</h2>
+        <hr><h2>{{ $t('Login methodes') }}</h2>
 
         <STList>
-            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.Password)" label="Wachtwoord" @update:model-value="setLoginMethod(LoginMethod.Password, !!$event)">
+            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.Password)" :label="$t(`Wachtwoord`)" @update:model-value="setLoginMethod(LoginMethod.Password, !!$event)">
                 <template #right>
                     <button class="button icon settings" type="button" @click="editLoginMethodConfig(LoginMethod.Password)" />
                 </template>
             </CheckboxListItem>
-            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.Google)" label="Google" @update:model-value="setLoginMethod(LoginMethod.Google, !!$event)">
+            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.Google)" :label="$t(`Google`)" @update:model-value="setLoginMethod(LoginMethod.Google, !!$event)">
                 <template #right>
                     <button class="button icon settings" type="button" @click="editLoginMethodConfig(LoginMethod.Google)" />
                 </template>
             </CheckboxListItem>
-            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.SSO)" label="Single-Sign-On (SSO)" @update:model-value="setLoginMethod(LoginMethod.SSO, !!$event)">
+            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.SSO)" :label="$t(`Single-Sign-On (SSO)`)" @update:model-value="setLoginMethod(LoginMethod.SSO, !!$event)">
                 <template #right>
                     <button class="button icon settings" type="button" @click="editLoginMethodConfig(LoginMethod.SSO)" />
                 </template>

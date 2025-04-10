@@ -1,17 +1,17 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Token" />
+        <STNavigationBar :title="$t(`Token`)" />
 
         <main>
             <h1>
-                Sla jouw key op
+                {{ $t('Sla jouw key op') }}
             </h1>
 
             <p class="st-list-description">
-                Hieronder kan je jouw key kopiëren. Bewaar deze goed, want je kan deze nooit meer opvragen.
+                {{ $t('Hieronder kan je jouw key kopiëren. Bewaar deze goed, want je kan deze nooit meer opvragen.') }}
             </p>
 
-            <STInputBox title="API-key" class="max">
+            <STInputBox class="max" :title="$t(`API-key`)">
                 <div v-copyable class="input-icon-container right icon copy gray">
                     <div class="token-input input selectable">
                         <div>{{ user.token }}</div>
@@ -19,14 +19,14 @@
                 </div>
             </STInputBox>
             <p class="style-description-small">
-                Geldig tot {{ formatDate(user.expiresAt) }}
+                {{ $t('Geldig tot') }} {{ formatDate(user.expiresAt) }}
             </p>
         </main>
 
         <STToolbar>
             <template #right>
                 <button class="button primary" type="button" @click="dismiss">
-                    Klaar
+                    {{ $t('Klaar') }}
                 </button>
             </template>
         </STToolbar>
@@ -35,10 +35,10 @@
 
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { CenteredMessage, STInputBox, STNavigationBar, STToolbar } from '@stamhoofd/components';
 import { ApiUserWithToken } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 @Component({
     components: {

@@ -6,47 +6,33 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox :title="'Naam'">
-            <input
-                v-model="name"
-                class="input"
-                type="text"
-                autocomplete="off"
-                placeholder="bv. privacyvoorwaarden"
-            >
+        <STInputBox :title="$t(`Naam`)">
+            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`bv. privacyvoorwaarden`)">
         </STInputBox>
 
-        <STInputBox title="Volledige link" error-fields="privacyPolicyUrl" :error-box="errors.errorBox">
-            <input
-                v-model="url"
-                class="input"
-                type="url"
-                :placeholder="$t('4c8b6dd3-e058-45f7-8da8-1e1a6014a7a7')"
-            >
+        <STInputBox error-fields="privacyPolicyUrl" :error-box="errors.errorBox" :title="$t(`Volledige link`)">
+            <input v-model="url" class="input" type="url" :placeholder="$t('4c8b6dd3-e058-45f7-8da8-1e1a6014a7a7')">
         </STInputBox>
 
-        <UploadFileButton text="Upload PDF" accept="application/pdf" @change="url = $event.getPublicPath()" />
+        <UploadFileButton accept="application/pdf" :text="$t(`Upload PDF`)" @change="url = $event.getPublicPath()" />
 
         <Checkbox v-model="enableAtSignup" class="long-text">
-            Tonen bij het registeren
+            {{ $t('Tonen bij het registeren') }}
         </Checkbox>
 
         <template v-if="enableAtSignup">
             <Checkbox v-model="checkbox" class="long-text">
-                Verplicht aanvinkvakje
+                {{ $t('Verplicht aanvinkvakje') }}
             </Checkbox>
             <p class="style-description-small">
-                Het aanvinkvakje moet aangevinkt worden bij het registreren als je dit aanzet. In het andere geval is het enkel een vermelding die impliciet aanvaard wordt.
+                {{ $t('Het aanvinkvakje moet aangevinkt worden bij het registreren als je dit aanzet. In het andere geval is het enkel een vermelding die impliciet aanvaard wordt.') }}
             </p>
 
-            <STInputBox title="Aanvinktekst" error-fields="meta.description" :error-box="errors.errorBox" class="max">
-                <WYSIWYGTextInput
-                    v-model="richText"
-                    placeholder="Tekst die naast het aanvinkvakje staat"
-                />
+            <STInputBox error-fields="meta.description" :error-box="errors.errorBox" class="max" :title="$t(`Aanvinktekst`)">
+                <WYSIWYGTextInput v-model="richText" :placeholder="$t(`Tekst die naast het aanvinkvakje staat`)" />
             </STInputBox>
             <p class="style-description-small">
-                Herhaal jouw link in deze tekst door een deel van de tekst te selecteren en op de link-knop te drukken.
+                {{ $t('Herhaal jouw link in deze tekst door een deel van de tekst te selecteren en op de link-knop te drukken.') }}
             </p>
         </template>
     </SaveView>

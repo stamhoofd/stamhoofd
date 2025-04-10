@@ -7,8 +7,7 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="sortedPeriods.length && patchedPlatform.period.id !== sortedPeriods[0].id && (sortedPeriods[0].startDate.getTime() - new Date().getTime()) < 1000 * 60 * 60 * 24 * 30 * 2">
-            <hr>
-            <h2>Overschakelen naar {{ sortedPeriods[0].nameShort }}</h2>
+            <hr><h2>{{ $t('Overschakelen naar') }} {{ sortedPeriods[0].nameShort }}</h2>
             <p>{{ $t("31e91d3b-16e5-4608-9390-75e61d4d090d") }}</p>
 
             <ul class="style-list">
@@ -22,12 +21,11 @@
             <p class="style-button-bar">
                 <button class="button primary" type="button" @click="setCurrent(sortedPeriods[0])">
                     <span class="icon flag" />
-                    <span>Overschakelen naar {{ sortedPeriods[0].nameShort }}</span>
+                    <span>{{ $t('Overschakelen naar') }} {{ sortedPeriods[0].nameShort }}</span>
                 </button>
             </p>
 
-            <hr>
-            <h2>{{ $t('c28ace1d-50ff-4f1a-b403-bd5ab55d9dcb') }}</h2>
+            <hr><h2>{{ $t('c28ace1d-50ff-4f1a-b403-bd5ab55d9dcb') }}</h2>
         </template>
 
         <STList>

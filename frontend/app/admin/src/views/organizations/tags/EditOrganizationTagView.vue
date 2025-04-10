@@ -6,29 +6,15 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox title="Titel" error-fields="name" :error-box="errors.errorBox">
-            <input
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="Naam van deze tag"
-                autocomplete="off"
-            >
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Titel`)">
+            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`Naam van deze tag`)">
         </STInputBox>
 
-        <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox" class="max">
-            <textarea
-                v-model="description"
-                class="input"
-                type="text"
-                placeholder="Optioneel. Korte beschrijving van het doel van deze tag."
-                autocomplete="off"
-                enterkeyhint="next"
-            />
+        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`Beschrijving`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`Optioneel. Korte beschrijving van het doel van deze tag.`)" />
         </STInputBox>
         <div class="container">
-            <hr>
-            <h2>{{ $t('b381ed6f-c509-418d-9668-7c161a0fa652') }}</h2>
+            <hr><h2>{{ $t('b381ed6f-c509-418d-9668-7c161a0fa652') }}</h2>
             <p class="style-description">
                 {{ $t('4139ef30-55c8-4775-b97a-69b3a8b7d112') }}
             </p>
@@ -46,8 +32,7 @@
         </div>
 
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
+            <hr><h2>
                 {{ $t('e5c15476-6092-45c9-ac55-541f45720c71') }}
             </h2>
             <p v-if="!isEmpty" class="style-description">
@@ -67,12 +52,12 @@ import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableA
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, SaveView, useDraggableArrayIds, useErrors } from '@stamhoofd/components';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { getOrganizationTagTypeName, OrganizationTag } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, Ref } from 'vue';
 import TagRow from './components/TagRow.vue';
 import EditOrganizationTagView from './EditOrganizationTagView.vue';
-import { Formatter } from '@stamhoofd/utility';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 
 const errors = useErrors();
 const present = usePresent();

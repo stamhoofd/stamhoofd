@@ -1,5 +1,5 @@
 <template>
-    <SaveView :error-box="errors.errorBox" :loading="saving" :title="title" :disabled="total == 0" save-text="Betalen" save-icon-right="arrow-right" @save="save">
+    <SaveView :error-box="errors.errorBox" :loading="saving" :title="title" :disabled="total == 0" :save-text="$t('Betalen')" save-icon-right="arrow-right" @save="save">
         <h1>{{ title }}</h1>
         <STErrorsDefault :error-box="errors.errorBox" />
         <SelectBalanceItemsList :items="items" :list="list" :is-payable="isPayable" @patch="addPatch" />

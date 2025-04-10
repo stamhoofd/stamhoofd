@@ -17,7 +17,7 @@
             </h1>
 
             <p v-if="!organization.active" class="error-box">
-                Deze groep is inactief. Deze kan niet meer gebruikt worden en bestaat enkel nog voor archiveringsdoeleinden.
+                {{ $t('Deze groep is inactief. Deze kan niet meer gebruikt worden en bestaat enkel nog voor archiveringsdoeleinden.') }}
             </p>
 
             <STList class="info">
@@ -38,13 +38,13 @@
                         {{ company.name }}
                     </p>
                     <p v-if="company.VATNumber" v-copyable class="style-description-small style-copyable">
-                        {{ company.VATNumber }} (BTW-plichtig)
+                        {{ company.VATNumber }} {{ $t('(BTW-plichtig)') }}
                     </p>
                     <p v-else-if="company.companyNumber" v-copyable class="style-description-small style-copyable">
                         {{ company.companyNumber }}
                     </p>
                     <p v-else class="style-description-small">
-                        Feitelijke vereniging
+                        {{ $t('Feitelijke vereniging') }}
                     </p>
 
                     <p v-if="company.address" v-copyable class="style-description-small style-copyable">
@@ -115,9 +115,7 @@
                 </STListItem>
             </STList>
 
-            <hr>
-
-            <h2>{{ $t('f18beb62-a9e8-4881-865c-28ad534b6f24') }}</h2>
+            <hr><h2>{{ $t('f18beb62-a9e8-4881-865c-28ad534b6f24') }}</h2>
 
             <p>{{ $t('Deze functies verhuizen in de toekomst grotendeels naar het administratieportaal zelf. Voorlopig zijn de acties bereikbaar via het beheerdersportaal.' ) }}</p>
 
@@ -171,13 +169,11 @@
             <ViewOrganizationRecordCategoriesBox :organization="organization" />
 
             <div v-if="setupSteps.steps.size" class="container">
-                <hr>
-                <h2>{{ $t('6355a1b9-7b98-48c4-9aca-91df9a22d66e') }}</h2>
+                <hr><h2>{{ $t('6355a1b9-7b98-48c4-9aca-91df9a22d66e') }}</h2>
                 <SetupStepRows :steps="setupSteps" list-type="review" />
             </div>
 
-            <hr>
-            <h2>
+            <hr><h2>
                 {{ $t('f477755c-2d6e-473c-b9b9-2ebe0af173f3') }}
             </h2>
 

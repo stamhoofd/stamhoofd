@@ -7,39 +7,25 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox v-for="n in names.length" :key="n" :title="'Naam '+n">
-            <input
-                class="input"
-                type="text"
-                autocomplete="off"
-                :value="getName(n - 1)" :placeholder="'Synoniem '+n" @input="setName(n - 1, ($event as any).target.value)"
-            >
-
-            <template #right>
+        <STInputBox v-for="n in names.length" :key="n" :title="$t(`Naam`) + ' '+n">
+            <input class="input" type="text" autocomplete="off" :value="getName(n - 1)" :placeholder="$t(`Synoniem`) + ' '+n" @input="setName(n - 1, ($event as any).target.value)"><template #right>
                 <button v-if="names.length > 1" class="button icon trash gray" type="button" @click="deleteName(n - 1)" />
             </template>
         </STInputBox>
 
         <button class="button text" type="button" @click="addName">
             <span class="icon add" />
-            <span>Synoniem</span>
+            <span>{{ $t('Synoniem') }}</span>
         </button>
 
-        <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox" class="max">
-            <textarea
-                v-model="description"
-                class="input"
-                type="text"
-                placeholder="Korte tip voor hoe deze standaard leeftijdsgroep gebruikt kan worden"
-                autocomplete="off"
-            />
+        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`Beschrijving`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`Korte tip voor hoe deze standaard leeftijdsgroep gebruikt kan worden`)" />
         </STInputBox>
         <p class="style-description-small">
             {{ $t('4f96c821-c032-4772-8d6a-55cf0c8354d1') }}
         </p>
 
-        <hr>
-        <h2>{{ $t('bb2ff811-dae0-4322-975f-793de13d471a') }}</h2>
+        <hr><h2>{{ $t('bb2ff811-dae0-4322-975f-793de13d471a') }}</h2>
         <p>{{ $t('6af3e1d3-802c-4cf3-923e-33faacfd2e16') }}</p>
 
         <STInputBox :title="$t('61f434a9-49e6-4a92-b613-965dfd807dca')" error-fields="defaultMembershipTypeId" :error-box="errors.errorBox">
@@ -53,36 +39,32 @@
             </Dropdown>
         </STInputBox>
 
-        <hr>
-        <h2>{{ $t('8c1f264f-3b0b-49b9-8a29-9ceb2dfd7754') }}</h2>
+        <hr><h2>{{ $t('8c1f264f-3b0b-49b9-8a29-9ceb2dfd7754') }}</h2>
         <p>{{ $t('4be45e47-0ee2-43cd-b719-8a60513f0965') }}</p>
 
         <div class="split-inputs">
-            <STInputBox title="Minimum leeftijd* (optioneel)" error-fields="minAge" :error-box="errors.errorBox">
-                <AgeInput v-model="minAge" :year="startYear" placeholder="Onbeperkt" :nullable="true" />
+            <STInputBox error-fields="minAge" :error-box="errors.errorBox" :title="$t(`Minimum leeftijd* (optioneel)`)">
+                <AgeInput v-model="minAge" :year="startYear" :nullable="true" :placeholder="$t(`Onbeperkt`)" />
             </STInputBox>
 
-            <STInputBox title="Maximum leeftijd* (optioneel)" error-fields="maxAge" :error-box="errors.errorBox">
-                <AgeInput v-model="maxAge" :year="startYear" placeholder="Onbeperkt" :nullable="true" />
+            <STInputBox error-fields="maxAge" :error-box="errors.errorBox" :title="$t(`Maximum leeftijd* (optioneel)`)">
+                <AgeInput v-model="maxAge" :year="startYear" :nullable="true" :placeholder="$t(`Onbeperkt`)" />
             </STInputBox>
         </div>
         <p class="st-list-description">
             {{ $t('ea927f14-835b-43f6-bf6e-3e689b5a0824', {startYear: startYear.toString()}) }}
         </p>
 
-        <hr>
-        <h2>{{ $t('c6c8e406-3d1f-41c4-b3df-d0b1e8661040') }}</h2>
+        <hr><h2>{{ $t('c6c8e406-3d1f-41c4-b3df-d0b1e8661040') }}</h2>
 
         <div class="split-inputs">
-            <STInputBox title="Minimum aantal leden" error-fields="minimumRequiredMembers" :error-box="errors.errorBox">
-                <NumberInput v-model="minimumRequiredMembers" placeholder="Geen" :required="true" suffix="leden" suffix-singular="lid" />
+            <STInputBox error-fields="minimumRequiredMembers" :error-box="errors.errorBox" :title="$t(`Minimum aantal leden`)">
+                <NumberInput v-model="minimumRequiredMembers" :required="true" suffix="leden" suffix-singular="lid" :placeholder="$t(`Geen`)" />
             </STInputBox>
         </div>
 
         <div class="container">
-            <hr>
-
-            <STList v-if="organizationTagIds === null">
+            <hr><STList v-if="organizationTagIds === null">
                 <STListItem :selectable="true" element-name="button" @click="organizationTagIds = []">
                     <template #left>
                         <span class="icon add gray" />
@@ -105,8 +87,7 @@
             </template>
         </div>
 
-        <hr>
-        <h2>{{ $t('070cf05d-b582-4f6a-b153-48f5f3ecc9fe') }}</h2>
+        <hr><h2>{{ $t('070cf05d-b582-4f6a-b153-48f5f3ecc9fe') }}</h2>
         <p>{{ $t('f9c9433c-24fd-4645-b5df-966f9d076b1b') }}</p>
 
         <InheritedRecordsConfigurationBox :group-level="true" :inherited-records-configuration="inheritedRecordsConfiguration" :records-configuration="recordsConfiguration" @patch:records-configuration="patchRecordsConfiguration" />

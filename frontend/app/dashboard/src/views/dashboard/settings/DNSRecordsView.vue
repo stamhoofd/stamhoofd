@@ -1,14 +1,14 @@
 <template>
     <div id="dns-records-view" class="st-view">
-        <STNavigationBar title="Instellingen" />
+        <STNavigationBar :title="$t(`Instellingen`)" />
 
         <main>
             <h1>
-                Pas de volgende instellingen aan
+                {{ $t('Pas de volgende instellingen aan') }}
             </h1>
 
             <p class="st-list-description">
-                Stel de volgende DNS-instellingen in voor jouw domeinnaam. Dit kan je meestal doen in het klantenpaneel van jouw registrar (bv. Combell, Versio, Transip, One.com, GoDaddy...) waar je je domeinnaam hebt gekocht.
+                {{ $t('Stel de volgende DNS-instellingen in voor jouw domeinnaam. Dit kan je meestal doen in het klantenpaneel van jouw registrar (bv. Combell, Versio, Transip, One.com, GoDaddy...) waar je je domeinnaam hebt gekocht.') }}
             </p>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -18,10 +18,10 @@
             </div>
 
             <p class="warning-box">
-                Kijk alles goed na voor je aanpassingen maakt, verwijder zeker geen bestaande DNS-records. Als je DNS-records verwijdert, kan jouw huidige website onbereikbaar worden.
+                {{ $t('Kijk alles goed na voor je aanpassingen maakt, verwijder zeker geen bestaande DNS-records. Als je DNS-records verwijdert, kan jouw huidige website onbereikbaar worden.') }}
             </p>
             <p class="warning-box">
-                Het kan tot 24 uur duren tot de aanpassingen zijn doorgevoerd, in de meeste gevallen zou het binnen 1 uur al in orde moeten zijn. Je mag dit scherm sluiten als je de aanpassingen hebt gemaakt, we blijven op de achtergrond proberen en sturen jou een mailtje als alles in orde is.
+                {{ $t('Het kan tot 24 uur duren tot de aanpassingen zijn doorgevoerd, in de meeste gevallen zou het binnen 1 uur al in orde moeten zijn. Je mag dit scherm sluiten als je de aanpassingen hebt gemaakt, we blijven op de achtergrond proberen en sturen jou een mailtje als alles in orde is.') }}
             </p>
         </main>
 
@@ -29,7 +29,7 @@
             <template #right>
                 <LoadingButton :loading="saving">
                     <button class="button primary" type="button" @click="validate">
-                        Verifieer
+                        {{ $t('Verifieer') }}
                     </button>
                 </LoadingButton>
             </template>
@@ -40,10 +40,9 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { BackButton, Checkbox, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, TooltipDirective } from '@stamhoofd/components';
-import { SessionManager } from '@stamhoofd/networking';
-import { Organization, OrganizationDomains } from '@stamhoofd/structures';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { BackButton, Checkbox, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, TooltipDirective } from '@stamhoofd/components';
+import { Organization, OrganizationDomains } from '@stamhoofd/structures';
 
 import DNSRecordBox from '../../../components/DNSRecordBox.vue';
 import DNSRecordsDoneView from './DNSRecordsDoneView.vue';

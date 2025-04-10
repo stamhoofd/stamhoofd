@@ -1,6 +1,6 @@
 <template>
     <div class="st-menu st-view">
-        <STNavigationBar title="Groepen">
+        <STNavigationBar :title="$t(`Groepen`)">
             <template #right>
                 <button v-if="hasFullAccess" class="navigation button icon settings" type="button" @click="hasFullAccess && navigate(Routes.Tags)" />
             </template>
@@ -18,9 +18,7 @@
                 </button>
             </div>
 
-            <hr>
-
-            <div v-for="(tag, index) in rootTags" :key="tag.id" class="container">
+            <hr><div v-for="(tag, index) in rootTags" :key="tag.id" class="container">
                 <div class="grouped">
                     <button type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.Tag, {properties: {tag}}) }" @click="navigateToTag(tag)">
                         <span v-if="tag.type === OrganizationTagType.Tag" class="icon label" />
@@ -33,14 +31,7 @@
                     </button>
 
                     <div :class="{collapsable: true, hide: collapsed.isCollapsed(tag.id)}">
-                        <button
-                            v-for="childTag in tagIdsToTags(tag.childTags)"
-                            :key="childTag.id"
-                            class="menu-button button sub-button"
-                            :class="{ selected: checkRoute(Routes.Tag, {properties: {tag: childTag}}) }"
-                            type="button"
-                            @click="navigateToTag(childTag)"
-                        >
+                        <button v-for="childTag in tagIdsToTags(tag.childTags)" :key="childTag.id" class="menu-button button sub-button" :class="{ selected: checkRoute(Routes.Tag, {properties: {tag: childTag}}) }" type="button" @click="navigateToTag(childTag)">
                             <span class="icon" />
                             <span>{{ childTag.name }}</span>
                             <span class="count">{{ formatInteger(childTag.organizationCount) }}</span>

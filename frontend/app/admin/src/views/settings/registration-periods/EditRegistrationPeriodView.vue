@@ -7,11 +7,11 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox title="Startdatum" error-fields="settings.minAge" :error-box="errors.errorBox">
+            <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`Startdatum`)">
                 <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" />
             </STInputBox>
 
-            <STInputBox title="Einddatum" error-fields="settings.maxAge" :error-box="errors.errorBox">
+            <STInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`Einddatum`)">
                 <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" />
             </STInputBox>
         </div>
@@ -23,7 +23,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Vergrendel inschrijvingen
+                    {{ $t('Vergrendel inschrijvingen') }}
                 </h3>
                 <p v-if="locked" class="style-description-small">
                     {{ $t('cc48e00f-2c6b-4f4d-9bae-65a889364ea3') }}

@@ -2,13 +2,13 @@
     <LoadingBoxTransition :loading="loadingStripeAccounts">
         <div class="container">
             <STErrorsDefault :error-box="errors.errorBox" />
-            <STInputBox v-if="(stripeAccountObject === null && stripeAccounts.length > 0) || stripeAccounts.length > 1 || (stripeAccounts.length > 0 && hasMollieOrBuckaroo)" title="Betaalaccount" error-fields="stripeAccountId">
+            <STInputBox v-if="(stripeAccountObject === null && stripeAccounts.length > 0) || stripeAccounts.length > 1 || (stripeAccounts.length > 0 && hasMollieOrBuckaroo)" error-fields="stripeAccountId" :title="$t(`Betaalaccount`)">
                 <Dropdown v-model="stripeAccountId">
                     <option v-if="hasMollieOrBuckaroo" :value="null">
                         {{ mollieOrBuckarooName }}
                     </option>
                     <option v-else :value="null">
-                        Geen
+                        {{ $t('Geen') }}
                     </option>
                     <option v-for="account in stripeAccounts" :key="account.id" :value="account.id">
                         {{ account.meta.settings.dashboard.display_name }} - {{ account.meta.business_profile.name }}, xxxx {{ account.meta.bank_account_last4 }} - {{ account.accountId }}
@@ -18,7 +18,7 @@
             <p v-if="stripeAccountObject && stripeAccountObject.warning" :class="stripeAccountObject.warning.type + '-box'">
                 {{ stripeAccountObject.warning.text }}
                 <a :href="$domains.getDocs('documenten-stripe-afgekeurd')" target="_blank" class="button text">
-                    Meer info
+                    {{ $t('Meer info') }}
                 </a>
             </p>
 
@@ -40,26 +40,30 @@
             </STList>
 
             <template v-if="showAdministrationFee">
-                <hr>
-                <h2>Administratiekosten</h2>
+                <hr><h2>{{ $t('Administratiekosten') }}</h2>
                 <p>{{ $t('b091538b-014e-4db2-8241-9ed98e0c51c7') }}</p>
 
                 <div class="split-inputs">
-                    <STInputBox title="Vaste kost" error-fields="administrationFee.fixed" :error-box="errors.errorBox">
-                        <PriceInput v-model="fixed" :min="0" placeholder="Vaste kost" :required="true" />
+                    <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`Vaste kost`)">
+                        <PriceInput v-model="fixed" :min="0" :required="true" :placeholder="$t(`Vaste kost`)" />
                     </STInputBox>
 
-                    <STInputBox title="Percentage" error-fields="administrationFee.fixed" :error-box="errors.errorBox">
-                        <PermyriadInput v-model="percentage" placeholder="Percentage" :required="true" />
+                    <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`Percentage`)">
+                        <PermyriadInput v-model="percentage" :required="true" :placeholder="$t(`Percentage`)" />
                     </STInputBox>
                 </div>
 
                 <Checkbox v-if="fixed > 0" v-model="zeroIfZero">
-                    Reken geen administratiekosten aan als het totaalbedrag 0 euro is
+                    {{ $t('Reken geen administratiekosten aan als het totaalbedrag 0 euro is') }}
                 </Checkbox>
 
                 <p v-if="percentage && exampleAdministrationFee1" class="style-description-small">
-                    Voorbeeld: de aangerekende administratiekost bedraagt {{ formatPrice(exampleAdministrationFee1) }} op een bedrag van {{ formatPrice(exampleAdministrationFeeValue1) }}, en {{ formatPrice(exampleAdministrationFee2) }} op een bedrag van {{ formatPrice(exampleAdministrationFeeValue2) }}.
+                    {{ $t('Voorbeeld: de aangerekende administratiekost bedraagt {exampleAdministrationFee1} op een bedrag van {exampleAdministrationFeeValue1}, en {exampleAdministrationFee2} op een bedrag van {exampleAdministrationFeeValue2}.', {
+                        exampleAdministrationFee1: formatPrice(exampleAdministrationFee1),
+                        exampleAdministrationFeeValue1: formatPrice(exampleAdministrationFeeValue1),
+                        exampleAdministrationFee2: formatPrice(exampleAdministrationFee2),
+                        exampleAdministrationFeeValue2: formatPrice(exampleAdministrationFeeValue2)
+                    }) }}
                 </p>
             </template>
         </div>
