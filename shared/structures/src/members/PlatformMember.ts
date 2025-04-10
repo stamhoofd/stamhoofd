@@ -12,7 +12,6 @@ import { Document as DocumentStruct } from '../Document.js';
 import { Platform } from '../Platform.js';
 import { UserWithMembers } from '../UserWithMembers.js';
 import { Address } from '../addresses/Address.js';
-import { Country } from '../addresses/CountryDecoder.js';
 import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import { EmergencyContact } from './EmergencyContact.js';
 import { MemberDetails, MemberProperty } from './MemberDetails.js';
@@ -424,6 +423,12 @@ export enum MembershipStatus {
     Temporary = 'Temporary',
 }
 
+export enum ContinuousMembershipStatus {
+    Full = 'Full',
+    Partial = 'Partial',
+    None = 'None',
+}
+
 export class PlatformMember implements ObjectWithRecords {
     member: MemberWithRegistrationsBlob;
     patch: AutoEncoderPatchType<MemberWithRegistrationsBlob>;
@@ -536,8 +541,43 @@ export class PlatformMember implements ObjectWithRecords {
         return status;
     }
 
+    get hasFutureMembership(): boolean {
+        const now = new Date();
+
+        for (const t of this.patchedMember.platformMemberships) {
+            const organization = this.organizations.find(o => o.id === t.organizationId);
+            if (!organization) {
+                continue;
+            }
+
+            if (t.startDate > now) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     get shouldApplyReducedPrice() {
         return this.patchedMember.details.shouldApplyReducedPrice;
+    }
+
+    getContinuousMembershipStatus({ start, end }: { start: Date; end: Date }): ContinuousMembershipStatus {
+        const memberships = this.patchedMember.platformMemberships.filter(t => !!this.organizations.find(o => o.id === t.organizationId));
+
+        for (const t of memberships) {
+            if (t.endDate >= end && t.startDate <= start) {
+                return ContinuousMembershipStatus.Full;
+            }
+        }
+
+        for (const t of memberships) {
+            if ((t.endDate < end && t.endDate > start) || (t.startDate < end && t.startDate > start)) {
+                return ContinuousMembershipStatus.Partial;
+            }
+        }
+
+        return ContinuousMembershipStatus.None;
     }
 
     addPatch(p: PartialWithoutMethods<AutoEncoderPatchType<MemberWithRegistrationsBlob>>) {

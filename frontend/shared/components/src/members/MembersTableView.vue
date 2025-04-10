@@ -24,7 +24,7 @@
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncTableAction, Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, TableActionSelection, useAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { AccessRight, Group, GroupCategoryTree, GroupPrice, GroupType, MemberResponsibility, MembershipStatus, Organization, PermissionLevel, PlatformMember, RecordAnswer, RegisterItemOption, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight, ContinuousMembershipStatus, Group, GroupCategoryTree, GroupPrice, GroupType, MemberResponsibility, MembershipStatus, Organization, PermissionLevel, PlatformMember, RecordAnswer, RegisterItemOption, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
@@ -42,6 +42,7 @@ const props = withDefaults(
         responsibility?: MemberResponsibility | null; // for now only for saving column config
         customFilter?: StamhoofdFilter | null;
         customTitle?: string | null;
+        dateRange?: { start: Date; end: Date } | null;
     }>(), {
         group: null,
         category: null,
@@ -49,6 +50,7 @@ const props = withDefaults(
         customFilter: null,
         customTitle: null,
         responsibility: null,
+        dateRange: null,
     },
 );
 
@@ -251,11 +253,16 @@ const allColumns: Column<ObjectType, any>[] = [
         minimumWidth: 50,
         recommendedWidth: 120,
     }),
-    new Column<ObjectType, MembershipStatus>({
+    new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
         id: 'membership',
         name: 'Aansluiting',
-        getValue: member => member.membershipStatus,
-        format: (status) => {
+        getValue: (member) => {
+            return {
+                status: member.membershipStatus,
+                hasFutureMembership: member.hasFutureMembership,
+            };
+        },
+        format: ({ status }) => {
             switch (status) {
                 case MembershipStatus.Trial:
                     return 'Proefperiode';
@@ -269,7 +276,7 @@ const allColumns: Column<ObjectType, any>[] = [
                     return 'Niet verzekerd';
             }
         },
-        getStyle: (status) => {
+        getStyle: ({ status, hasFutureMembership }) => {
             switch (status) {
                 case MembershipStatus.Trial:
                     return 'secundary';
@@ -279,14 +286,49 @@ const allColumns: Column<ObjectType, any>[] = [
                     return 'warn';
                 case MembershipStatus.Temporary:
                     return 'secundary';
-                case MembershipStatus.Inactive:
+                case MembershipStatus.Inactive: {
+                    if (hasFutureMembership) {
+                        return 'warn';
+                    }
+
                     return 'error';
+                }
             }
         },
         minimumWidth: 120,
         recommendedWidth: 140,
         allowSorting: false,
     }),
+    props.dateRange !== null
+        ? new Column<ObjectType, ContinuousMembershipStatus>({
+            id: 'continuousMembership',
+            name: 'Doorlopende aansluiting',
+            getValue: member => member.getContinuousMembershipStatus(props.dateRange!),
+            format: (status) => {
+                switch (status) {
+                    case ContinuousMembershipStatus.Full:
+                        return 'Volledig';
+                    case ContinuousMembershipStatus.Partial:
+                        return 'Gedeeltelijk';
+                    case ContinuousMembershipStatus.None:
+                        return 'Geen aansluiting';
+                }
+            },
+            getStyle: (status) => {
+                switch (status) {
+                    case ContinuousMembershipStatus.Full:
+                        return 'success';
+                    case ContinuousMembershipStatus.Partial:
+                        return 'warn';
+                    case ContinuousMembershipStatus.None:
+                        return 'error';
+                }
+            },
+            minimumWidth: 120,
+            recommendedWidth: 140,
+            allowSorting: false,
+        })
+        : null,
     new Column<ObjectType, string[]>({
         name: 'Functies',
         allowSorting: false,
@@ -317,7 +359,7 @@ const allColumns: Column<ObjectType, any>[] = [
         recommendedWidth: 200,
         enabled: false,
     }),
-];
+].filter(column => column !== null);
 
 if (props.group) {
     if (props.group.settings.prices.length > 1) {
