@@ -4,13 +4,13 @@
             {{ productPrice.name || 'Naamloos' }}
         </h3>
         <p v-if="productPrice.hidden" class="style-description-small">
-            Verborgen
+            {{ $t('Verborgen') }}
         </p>
         <p v-if="productPrice.isSoldOut" class="style-description-small">
-            Uitverkocht
+            {{ $t('Uitverkocht') }}
         </p>
         <p v-else-if="productPrice.stock" class="style-description-small">
-            Nog {{ pluralText(productPrice.remainingStock ?? 0, 'stuk', 'stuks') }} beschikbaar
+            {{ $t('Nog {stock} beschikbaar', {stock: pluralText(productPrice.remainingStock ?? 0, $t('stuk'), $t('stuks'))}) }}
         </p>
 
         <template #right>

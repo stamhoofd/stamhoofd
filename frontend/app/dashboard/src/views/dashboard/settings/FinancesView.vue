@@ -1,11 +1,11 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
         <div v-if="outstandingBalance" class="st-view">
-            <STNavigationBar title="Boekhouding" />
+            <STNavigationBar :title="$t(`Boekhouding`)" />
 
             <main class="center">
                 <h1>
-                    Boekhouding
+                    {{ $t('Boekhouding') }}
                 </h1>
 
                 <STList class="illustration-list">
@@ -14,7 +14,7 @@
                             <img src="@stamhoofd/assets/images/illustrations/calculator.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Betalingen exporteren
+                            {{ $t('Betalingen exporteren') }}
                         </h2>
                         <p class="style-description">
                             {{ $t("64633f7b-2d6e-4ad2-abb1-e9dd77d9a81f") }}
@@ -29,10 +29,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/check-transfer.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Overschrijvingen controleren
+                            {{ $t('Overschrijvingen controleren') }}
                         </h2>
                         <p class="style-description">
-                            Markeer overschrijvingen als betaald.
+                            {{ $t('Markeer overschrijvingen als betaald.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -44,10 +44,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Alle betalingen
+                            {{ $t('Alle betalingen') }}
                         </h2>
                         <p class="style-description">
-                            Controleer alle betalingen die in het systeem aanwezig zijn, inclusief eventueel mislukte betaalpogingen.
+                            {{ $t('Controleer alle betalingen die in het systeem aanwezig zijn, inclusief eventueel mislukte betaalpogingen.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -59,10 +59,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Te ontvangen bedragen
+                            {{ $t('Te ontvangen bedragen') }}
                         </h2>
                         <p class="style-description">
-                            Lijst van alle leden die nog een openstaand bedrag hebben tegenover {{ organization!.name }}
+                            {{ $t('Lijst van alle leden die nog een openstaand bedrag hebben tegenover {organization}', {organization: organization!.name}) }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -71,9 +71,8 @@
                 </STList>
 
                 <div v-for="item of outstandingBalance.organizations" :key="item.organization.id" class="container">
-                    <hr>
-                    <h2>Betalingen aan {{ item.organization.name }}</h2>
-                    <p>Hier vind je een overzicht van wat je moet betalen aan {{ item.organization.name }}, bv. voor de aansluitingkosten van leden.</p>
+                    <hr><h2>{{ $t('Betalingen aan {organization}', {organization: item.organization.name}) }}</h2>
+                    <p>{{ $t('Hier vind je een overzicht van wat je moet betalen aan {organization}, bv. voor de aansluitingkosten van leden.', {organization: item.organization.name}) }}</p>
 
                     <STList class="illustration-list">
                         <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.PayableBalance, {params: {uri: item.organization.uri}})">
@@ -81,14 +80,14 @@
                                 <img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg">
                             </template>
                             <h2 class="style-title-list">
-                                Openstaand bedrag
+                                {{ $t('Openstaand bedrag') }}
                             </h2>
                             <p class="style-description">
-                                Breng de betaling van dit bedrag in orde.
+                                {{ $t('Breng de betaling van dit bedrag in orde.') }}
                             </p>
 
                             <p v-if="BalanceItem.getOutstandingBalance(item.balanceItems).pricePending > 0" class="style-description">
-                                Betaling van {{ formatPrice(BalanceItem.getOutstandingBalance(item.balanceItems).pricePending) }} gestart, maar nog in verwerking.
+                                {{ $t('Betaling van {price} gestart, maar nog in verwerking.', {price: formatPrice(BalanceItem.getOutstandingBalance(item.balanceItems).pricePending)}) }}
                             </p>
 
                             <template #right>
@@ -104,10 +103,10 @@
                                 <img src="@stamhoofd/assets/images/illustrations/transfer.svg">
                             </template>
                             <h2 class="style-title-list">
-                                Betaalbewijzen
+                                {{ $t('Betaalbewijzen') }}
                             </h2>
                             <p class="style-description">
-                                Bekijk een overzicht van jouw betalingen aan {{ item.organization.name }}.
+                                {{ $t('Bekijk een overzicht van jouw betalingen aan {organization}.', {organization: item.organization.name}) }}
                             </p>
                             <template #right>
                                 <span class="icon arrow-right-small gray" />
@@ -123,7 +122,7 @@
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, LoadingViewTransition, PayableBalanceCollectionView, useAuth, useContext, useErrors, useFeatureFlag, useOrganization } from '@stamhoofd/components';
+import { ErrorBox, LoadingViewTransition, PayableBalanceCollectionView, useAuth, useContext, useErrors, useOrganization } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { AccessRight, BalanceItem, DetailedPayableBalanceCollection, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { ComponentOptions, ref, Ref } from 'vue';

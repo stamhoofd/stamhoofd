@@ -1,19 +1,19 @@
 <template>
     <div id="settings-view" class="st-view">
-        <STNavigationBar title="Domeinnaam kiezen" />
+        <STNavigationBar :title="$t(`Domeinnaam kiezen`)" />
 
         <main>
             <h1>
-                Domeinnaam kiezen
+                {{ $t('Domeinnaam kiezen') }}
             </h1>
 
             <p v-if="!isMailOk && !isRegisterOk" class="warning-box">
-                Je moet jouw domeinnaam al in bezit hebben voor je deze kan instellen. Contacteer ons gerust via {{ $t('59b85264-c4c3-4cf6-8923-9b43282b2787') }} als je hulp nodig hebt.
+                {{ $t('Je moet jouw domeinnaam al in bezit hebben voor je deze kan instellen. Contacteer ons gerust via {email} als je hulp nodig hebt.', {email: $t('59b85264-c4c3-4cf6-8923-9b43282b2787')}) }}
             </p>
             <template v-else>
                 <p v-if="isMailOk" class="success-box">
-                    Jouw domeinnaam is correct ingesteld voor het versturen van e-mails. <template v-if="!organization.privateMeta.mailDomainActive">
-                        Maar je moet nog even geduld hebben voor deze kan gebruikt worden.
+                    {{ $t('Jouw domeinnaam is correct ingesteld voor het versturen van e-mails.') }} <template v-if="!organization.privateMeta.mailDomainActive">
+                        {{ $t('Maar je moet nog even geduld hebben voor deze kan gebruikt worden.') }}
                     </template>
                 </p>
                 <p v-else class="warning-box">
@@ -22,57 +22,44 @@
 
                 <template v-if="enableMemberModule">
                     <p v-if="isRegisterOk" class="success-box">
-                        Jouw domeinnaam is correct ingesteld voor jouw inschrijvingsportaal (op {{ organization.registerDomain }})
+                        {{ $t('Jouw domeinnaam is correct ingesteld voor jouw inschrijvingsportaal (op {registerDomain})', {registerDomain: organization.registerDomain ?? ''}) }}
                     </p>
                     <p v-else class="warning-box">
-                        Jouw domeinnaam wordt nog niet gebruikt voor jullie inschrijvingsportaal. Klik door naar 'Volgende' om die ook te configureren.
+                        {{ $t("Jouw domeinnaam wordt nog niet gebruikt voor jullie inschrijvingsportaal. Klik door naar 'Volgende' om die ook te configureren.") }}
                     </p>
                 </template>
             </template>
 
             <STErrorsDefault :error-box="errorBox" />
 
-            <STInputBox title="Domeinnaam" error-fields="mailDomain" :error-box="errorBox">
-                <input
-                    v-model="mailDomain"
-                    class="input"
-                    type="text"
-                    :placeholder="$t('d687b491-be68-4e5b-9acb-e2c090951c23')"
-                    @change="domainChanged"
-                >
+            <STInputBox error-fields="mailDomain" :error-box="errorBox" :title="$t(`Domeinnaam`)">
+                <input v-model="mailDomain" class="input" type="text" :placeholder="$t('d687b491-be68-4e5b-9acb-e2c090951c23')" @change="domainChanged">
             </STInputBox>
             <p v-if="mailDomain && enableMemberModule" class="st-list-description">
-                Jullie ledenportaal zal bereikbaar zijn op {{ usedRegisterDomain }} nadat je het instellen hebt voltooid. Je kan dan ook e-mails versturen vanaf @{{ mailDomain }}.
+                {{ $t('Jullie ledenportaal zal bereikbaar zijn op {usedRegisterDomain} nadat je het instellen hebt voltooid. Je kan dan ook e-mails versturen vanaf @{mailDomain}.', {usedRegisterDomain, mailDomain}) }}
             </p>
             <p v-else-if="mailDomain" class="st-list-description">
-                Je zal e-mails kunnen versturen vanaf @{{ mailDomain }} nadat je het instellen hebt voltooid.
+                {{ $t('Je zal e-mails kunnen versturen vanaf @{mailDomain} nadat je het instellen hebt voltooid.', {mailDomain}) }}
             </p>
 
             <template v-if="isStamhoofd">
-                <hr>
-                <h2>Geavanceerd</h2>
+                <hr><h2>{{ $t('Geavanceerd') }}</h2>
 
                 <Checkbox v-model="useDkim1024bit">
-                    Gebruik kortere 1024 bit DKIM sleutel (in plaats van 2048 bit)
+                    {{ $t('Gebruik kortere 1024 bit DKIM sleutel (in plaats van 2048 bit)') }}
                 </Checkbox>
 
                 <Checkbox v-model="allowSubdomain">
-                    Subdomeinnaam toestaan
+                    {{ $t('Subdomeinnaam toestaan') }}
                 </Checkbox>
 
                 <Checkbox v-if="enableMemberModule" v-model="customRegisterDomain">
-                    Andere domeinnaam voor registratie
+                    {{ $t('Andere domeinnaam voor registratie') }}
                 </Checkbox>
             </template>
 
-            <STInputBox v-if="enableMemberModule && customRegisterDomain" title="Registratie domein" error-fields="registerDomain" :error-box="errorBox">
-                <input
-                    v-model="registerDomain"
-                    class="input"
-                    type="text"
-                    :placeholder="'inschrijven.' + $t('d687b491-be68-4e5b-9acb-e2c090951c23')"
-                    @change="registerDomainChanged"
-                >
+            <STInputBox v-if="enableMemberModule && customRegisterDomain" error-fields="registerDomain" :error-box="errorBox" :title="$t(`Registratie domein`)">
+                <input v-model="registerDomain" class="input" type="text" :placeholder="$t(`inschrijven.`) + $t('d687b491-be68-4e5b-9acb-e2c090951c23')" @change="registerDomainChanged">
             </STInputBox>
         </main>
 
@@ -80,11 +67,11 @@
             <template #right>
                 <button v-if="isAlreadySet" class="button secundary" type="button" @click="deleteMe">
                     <span class="icon trash" />
-                    <span>Verwijderen</span>
+                    <span>{{ $t('Verwijderen') }}</span>
                 </button>
                 <LoadingButton :loading="saving">
                     <button class="button primary" type="button" @click="save">
-                        Volgende
+                        {{ $t('Volgende') }}
                     </button>
                 </LoadingButton>
             </template>

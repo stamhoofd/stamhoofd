@@ -9,10 +9,10 @@
             {{ option.name || 'Naamloos' }}
         </h3>
         <p v-if="option.isSoldOut" class="style-description-small">
-            Uitverkocht
+            {{ $t('Uitverkocht') }}
         </p>
         <p v-else-if="option.stock" class="style-description-small">
-            Nog {{ pluralText(option.remainingStock ?? 0, 'stuk', 'stuks') }} beschikbaar
+            {{ $t('Nog {stock} beschikbaar', {stock: pluralText(option.remainingStock ?? 0, $t('stuk'), $t('stuks'))}) }}
         </p>
 
         <template #right>

@@ -1,14 +1,13 @@
 <template>
-    <SaveView :loading="saving" title="Vragenlijsten en gegevens" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`Vragenlijsten en gegevens`)" @save="save">
         <h1>
-            Vragenlijsten en gegevens
+            {{ $t('Vragenlijsten en gegevens') }}
         </h1>
-        <p>Je kan zelf kiezen welke extra informatie je van bestellers wilt verzamelen.</p>
+        <p>{{ $t('Je kan zelf kiezen welke extra informatie je van bestellers wilt verzamelen.') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <hr>
-        <h2>Ingebouwde gegevens</h2>
+        <hr><h2>{{ $t('Ingebouwde gegevens') }}</h2>
 
         <p>{{ $t('fd68e1a7-6059-47fc-b7ad-fdfe4924a67d') }}</p>
 
@@ -23,11 +22,10 @@
             </STListItem>
         </STList>
 
-        <hr>
-        <h2>Vragenlijsten tijdens afrekenen</h2>
+        <hr><h2>{{ $t('Vragenlijsten tijdens afrekenen') }}</h2>
 
         <p>
-            Voeg zelf vragenlijsten toe die ingevuld kunnen worden bij het plaatsen van een bestelling (na de ingebouwde gegevens). <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">Meer info</a>
+            {{ $t('Voeg zelf vragenlijsten toe die ingevuld kunnen worden bij het plaatsen van een bestelling (na de ingebouwde gegevens).') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('Meer info') }}</a>
         </p>
 
         <STList v-model="categories" :draggable="true">
@@ -39,7 +37,7 @@
         <p>
             <button class="button text" type="button" @click="addCategory">
                 <span class="icon add" />
-                <span>Nieuwe vragenlijst</span>
+                <span>{{ $t('Nieuwe vragenlijst') }}</span>
             </button>
         </p>
     </SaveView>
@@ -49,7 +47,7 @@
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { Checkbox, EditRecordCategoryView, RecordCategoryRow, RecordEditorSettings, RecordEditorType, STErrorsDefault, STList, STListItem, SaveView, checkoutUIFilterBuilders } from '@stamhoofd/components';
-import { Checkout, PatchAnswers, PrivateWebshop, RecordCategory, WebshopMetaData } from '@stamhoofd/structures';
+import { Checkout, PrivateWebshop, RecordCategory, WebshopMetaData } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { UseEditWebshopProps, useEditWebshop } from './useEditWebshop';
 
@@ -89,7 +87,7 @@ const editorSettings = computed(() => {
         filterBuilder: (_categories: RecordCategory[]) => {
             return checkoutUIFilterBuilders[0];
         },
-        exampleValue: Checkout.create({})
+        exampleValue: Checkout.create({}),
     });
 });
 

@@ -1,15 +1,14 @@
 <template>
-    <SaveView :loading="saving" title="Experimenten" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`Experimenten`)" @save="save">
         <h1>
-            Experimenten
+            {{ $t('Experimenten') }}
         </h1>
 
-        <p>Hier kan je functies aanzetten die we nog aan het uittesten zijn, of functies die enkel voor geavanceerdere gebruikers nodig zijn.</p>
+        <p>{{ $t('Hier kan je functies aanzetten die we nog aan het uittesten zijn, of functies die enkel voor geavanceerdere gebruikers nodig zijn.') }}</p>
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <hr>
-        <h2>Ontwikkelaars</h2>
+        <hr><h2>{{ $t('Ontwikkelaars') }}</h2>
 
         <STList class="illustration-list">
             <STListItem :selectable="true" class="left-center" @click="openApiUsers(true)">
@@ -17,7 +16,7 @@
                     <img src="@stamhoofd/assets/images/illustrations/laptop.svg">
                 </template>
                 <h2 class="style-title-list">
-                    API-keys
+                    {{ $t('API-keys') }}
                 </h2>
                 <p class="style-description">
                     {{ $t('4d995169-f792-40f5-addf-60d8aed00362') }}
@@ -32,10 +31,10 @@
                     <img src="@stamhoofd/assets/images/illustrations/box-download.svg">
                 </template>
                 <h2 class="style-title-list">
-                    Exporteer instellingen
+                    {{ $t('Exporteer instellingen') }}
                 </h2>
                 <p class="style-description">
-                    Maak een kopie van de instellingen van jouw vereniging.
+                    {{ $t('Maak een kopie van de instellingen van jouw vereniging.') }}
                 </p>
                 <template #right>
                     <LoadingButton :loading="downloadingSettings">
@@ -49,10 +48,10 @@
                     <img src="@stamhoofd/assets/images/illustrations/box-upload.svg">
                 </template>
                 <h2 class="style-title-list">
-                    Importeer instellingen
+                    {{ $t('Importeer instellingen') }}
                 </h2>
                 <p class="style-description">
-                    Overschrijf alle instellingen.
+                    {{ $t('Overschrijf alle instellingen.') }}
                 </p>
                 <template #right>
                     <LoadingButton :loading="uploadingSettings">
@@ -62,8 +61,7 @@
             </STListItem>
         </STList>
 
-        <hr>
-        <h2>Geavanceerde instellingen</h2>
+        <hr><h2>{{ $t('Geavanceerde instellingen') }}</h2>
 
         <STList>
             <STListItem v-if="!enableBuckaroo && false" :selectable="true" element-name="label">
@@ -72,41 +70,38 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Mollie (betaalprovider)
+                    {{ $t('Mollie (betaalprovider)') }}
                 </h3>
 
                 <p class="style-description-small">
-                    Hou er rekening mee dat de tarieven van Mollie anders zijn dan die van Stripe. <a :href="$domains.getDocs('transactiekosten')" class="inline-link" target="_blank">Meer info</a>
+                    {{ $t('Hou er rekening mee dat de tarieven van Mollie anders zijn dan die van Stripe.') }} <a :href="$domains.getDocs('transactiekosten')" class="inline-link" target="_blank">{{ $t('Meer info') }}</a>
                 </p>
             </STListItem>
         </STList>
 
         <div v-if="isStamhoofd" key="stamhoofd-settings" class="container">
-            <hr>
-            <h2>
-                Platforminstellingen (enkel voor platformbeheerders)
+            <hr><h2>
+                {{ $t('Platforminstellingen (enkel voor platformbeheerders)') }}
             </h2>
 
             <Checkbox v-model="useTestPayments">
-                Activeer test-modus voor betalingen
+                {{ $t('Activeer test-modus voor betalingen') }}
             </Checkbox>
 
             <Checkbox :model-value="getFeatureFlag('sso')" @update:model-value="setFeatureFlag('sso', !!$event)">
-                Single-Sign-On
+                {{ $t('Single-Sign-On') }}
             </Checkbox>
 
             <Checkbox :model-value="getFeatureFlag('webshop-auth')" @update:model-value="setFeatureFlag('webshop-auth', !!$event)">
-                Webshop auth
+                {{ $t('Webshop auth') }}
             </Checkbox>
 
             <Checkbox :model-value="getFeatureFlag('organization-receivable-balances')" @update:model-value="setFeatureFlag('organization-receivable-balances', !!$event)">
-                Openstaande bedragen tussen verenigingen
+                {{ $t('Openstaande bedragen tussen verenigingen') }}
             </Checkbox>
 
-            <hr>
-
-            <button class="button text" type="button" @click="applyDiscountCode">
-                <span class="icon gift" /><span>Kortingscode toepassen</span>
+            <hr><button class="button text" type="button" @click="applyDiscountCode">
+                <span class="icon gift" /><span>{{ $t('Kortingscode toepassen') }}</span>
             </button>
         </div>
     </SaveView>

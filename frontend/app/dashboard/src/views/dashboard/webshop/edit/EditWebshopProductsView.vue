@@ -24,24 +24,23 @@
         <p v-if="webshop.categories.length === 0">
             <button class="button text" type="button" @click="addProduct">
                 <span class="icon add" />
-                <span v-if="isTickets">Ticket toevoegen</span>
-                <span v-else>Artikel toevoegen</span>
+                <span v-if="isTickets">{{ $t('Ticket toevoegen') }}</span>
+                <span v-else>{{ $t('Artikel toevoegen') }}</span>
             </button>
         </p>
 
         <p>
             <button class="button text" type="button" @click="addCategory">
                 <span class="icon add" />
-                <span v-if="webshop.categories.length === 0 && webshop.products.length > 0">Opdelen in categorieën</span>
-                <span v-else>Categorie toevoegen</span>
+                <span v-if="webshop.categories.length === 0 && webshop.products.length > 0">{{ $t('Opdelen in categorieën') }}</span>
+                <span v-else>{{ $t('Categorie toevoegen') }}</span>
             </button>
         </p>
 
         <template v-if="webshop.canEnableCart">
-            <hr>
-            <h2>Winkelmandje</h2>
+            <hr><h2>{{ $t('Winkelmandje') }}</h2>
             <p>
-                Met een winkelmandje kunnen bezoekers meerdere artikel combinaties in één keer bestellen. Zet je het uit, dan kunnen bezoekers meteen afrekenen na het selecteren van een artikel. Voor formulieren waar je maar één ingevuld formulier (= artikel) verwacht, is het vaak nuttig om het uit te zetten.
+                {{ $t('Met een winkelmandje kunnen bezoekers meerdere artikel combinaties in één keer bestellen. Zet je het uit, dan kunnen bezoekers meteen afrekenen na het selecteren van een artikel. Voor formulieren waar je maar één ingevuld formulier (= artikel) verwacht, is het vaak nuttig om het uit te zetten.') }}
             </p>
 
             <STList>
@@ -50,7 +49,7 @@
                         <Checkbox v-model="cartEnabled" />
                     </template>
                     <h3 class="style-title-list">
-                        Winkelmandje gebruiken
+                        {{ $t('Winkelmandje gebruiken') }}
                     </h3>
                 </STListItem>
             </STList>

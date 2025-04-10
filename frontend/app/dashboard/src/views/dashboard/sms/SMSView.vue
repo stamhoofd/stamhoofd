@@ -1,31 +1,31 @@
 <template>
     <div class="st-view sms-view">
-        <STNavigationBar title="SMS'en" />
+        <STNavigationBar :title="$t(`SMS'en`)" />
 
         <main>
             <h1>
-                SMS'en
+                {{ $t("SMS'en") }}
             </h1>
 
             <div v-if="!isSupported" class="error-box">
-                SMS functionaliteit is niet beschikbaar op dit toestel. Probeer het op een smartphone (Android of iOS) of Mac.
+                {{ $t('SMS functionaliteit is niet beschikbaar op dit toestel. Probeer het op een smartphone (Android of iOS) of Mac.') }}
             </div>
-            <STInputBox v-if="customers.length === 0 && parentsEnabled" title="Naar wie?">
+            <STInputBox v-if="customers.length === 0 && parentsEnabled" :title="$t(`Naar wie?`)">
                 <Dropdown id="sms-who" v-model="smsFilter">
                     <option value="parents">
-                        Enkel naar ouders
+                        {{ $t('Enkel naar ouders') }}
                     </option>
                     <option value="members">
-                        Enkel naar leden
+                        {{ $t('Enkel naar leden') }}
                     </option>
                     <option value="all">
-                        Ouders en leden
+                        {{ $t('Ouders en leden') }}
                     </option>
                 </Dropdown>
             </STInputBox>
 
-            <STInputBox v-if="canUseBody" id="message-title" title="Bericht" />
-            <textarea v-if="canUseBody" id="sms-text" v-model="message" class="input" placeholder="Typ hier je SMS-bericht" />
+            <STInputBox v-if="canUseBody" id="message-title" :title="$t(`Bericht`)" />
+            <textarea v-if="canUseBody" id="sms-text" v-model="message" class="input" :placeholder="$t(`Typ hier je SMS-bericht`)" />
         </main>
 
         <STToolbar>
@@ -40,7 +40,7 @@
             </template>
             <template #right>
                 <button class="button primary" :disabled="!isSupported || phones.length === 0" type="button" @click="send">
-                    Versturen...
+                    {{ $t('Versturen...') }}
                 </button>
             </template>
         </STToolbar>

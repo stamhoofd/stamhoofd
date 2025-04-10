@@ -1,10 +1,10 @@
 <template>
-    <SaveView :title="isNew ? 'Prijskeuze toevoegen' : 'Prijskeuze bewerken'" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`Prijskeuze toevoegen`) : $t(`Prijskeuze bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            Prijskeuze toevoegen
+            {{ $t('Prijskeuze toevoegen') }}
         </h1>
         <h1 v-else>
-            Prijskeuze bewerken
+            {{ $t('Prijskeuze bewerken') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -12,14 +12,13 @@
         <ProductPriceBox :product-price="patchedProductPrice" :product="patched" :error-box="errors.errorBox" @patch="addPatch($event)" />
 
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Verwijder deze prijskeuze
+            <hr><h2>
+                {{ $t('Verwijder deze prijskeuze') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span>{{ $t('Verwijderen') }}</span>
             </button>
         </div>
     </SaveView>

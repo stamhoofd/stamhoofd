@@ -1,53 +1,38 @@
 <template>
-    <SaveView title="Leveringsoptie" :disabled="!hasChanges" @save="save">
+    <SaveView :disabled="!hasChanges" :title="$t(`Leveringsoptie`)" @save="save">
         <h1 v-if="isNew">
-            Leveringsoptie toevoegen
+            {{ $t('Leveringsoptie toevoegen') }}
         </h1>
         <h1 v-else>
-            Leveringsoptie bewerken
+            {{ $t('Leveringsoptie bewerken') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox title="Leveringsnaam" error-fields="name" :error-box="errors.errorBox">
-            <input
-                ref="firstInput"
-                v-model="name"
-                class="input"
-                type="text"
-                :placeholder="$t('0d4b25fe-6a3d-480b-86e8-e21c664a15ee')"
-                autocomplete="off"
-            >
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Leveringsnaam`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('0d4b25fe-6a3d-480b-86e8-e21c664a15ee')" autocomplete="off">
         </STInputBox>
 
-        <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox" class="max">
-            <textarea
-                v-model="description"
-                class="input"
-                type="text"
-                placeholder="Hier kan je eventeel leveringsinformatie kwijt (optioneel)"
-                autocomplete="off"
-            />
+        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`Beschrijving`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`Hier kan je eventeel leveringsinformatie kwijt (optioneel)`)" />
         </STInputBox>
         <EditDeliveryRegionsSection :delivery-method="patchedDeliveryMethod" @patch="addPatch" />
 
-        <EditTimeSlotsSection :webshop="webshop" :time-slots="patchedDeliveryMethod.timeSlots" title="Keuze uit leveringstijdstip" @patch="patchTimeSlots">
-            <p>Je kan tijdsintervallen toevoegen waartussen je de bestelling aan huis kan leveren. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (bv. via post versturen). Als je leveren organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).</p>
+        <EditTimeSlotsSection :webshop="webshop" :time-slots="patchedDeliveryMethod.timeSlots" :title="$t(`Keuze uit leveringstijdstip`)" @patch="patchTimeSlots">
+            <p>{{ $t('Je kan tijdsintervallen toevoegen waartussen je de bestelling aan huis kan leveren. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (bv. via post versturen). Als je leveren organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).') }}</p>
         </EditTimeSlotsSection>
 
-        <hr>
-        <h2>Leveringskost</h2>
+        <hr><h2>{{ $t('Leveringskost') }}</h2>
         <CheckoutMethodPriceBox :checkout-method-price="patchedDeliveryMethod.price" :error-box="errors.errorBox" @patch="patchPrice" />
 
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Verwijder deze leveringsoptie
+            <hr><h2>
+                {{ $t('Verwijder deze leveringsoptie') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span>{{ $t('Verwijderen') }}</span>
             </button>
         </div>
     </SaveView>

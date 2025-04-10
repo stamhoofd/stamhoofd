@@ -1,38 +1,33 @@
 <template>
-    <SaveView :loading="saving" title="Privacy" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`Privacy`)" @save="save">
         <h1>
-            Privacy
+            {{ $t('Privacy') }}
         </h1>
         <p>
-            Om in orde te zijn met de GDPR-wetgeving moet je jullie privacyvoorwaarden instellen.
+            {{ $t('Om in orde te zijn met de GDPR-wetgeving moet je jullie privacyvoorwaarden instellen.') }}
         </p>
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <STInputBox title="Waar staan de privacyvoorwaarden?" error-fields="privacy" :error-box="errorBox" class="max">
+        <STInputBox error-fields="privacy" :error-box="errorBox" class="max" :title="$t(`Waar staan de privacyvoorwaarden?`)">
             <RadioGroup>
                 <Radio v-model="selectedPrivacyType" value="none">
-                    Geen
+                    {{ $t('Geen') }}
                 </Radio>
                 <Radio v-model="selectedPrivacyType" value="website">
-                    Op onze website
+                    {{ $t('Op onze website') }}
                 </Radio>
                 <Radio v-model="selectedPrivacyType" value="file">
-                    Zelf PDF-bestand aanleveren
+                    {{ $t('Zelf PDF-bestand aanleveren') }}
                 </Radio>
             </RadioGroup>
         </STInputBox>
 
-        <STInputBox v-if="selectedPrivacyType === 'website'" key="website" title="Volledige link naar privacyvoorwaarden" error-fields="privacyPolicyUrl" :error-box="errorBox">
-            <input
-                v-model="privacyPolicyUrl"
-                class="input"
-                type="url"
-                :placeholder="$t('daf8a992-77cd-4c20-8bca-5c692fd1e431')"
-            >
+        <STInputBox v-if="selectedPrivacyType === 'website'" key="website" error-fields="privacyPolicyUrl" :error-box="errorBox" :title="$t(`Volledige link naar privacyvoorwaarden`)">
+            <input v-model="privacyPolicyUrl" class="input" type="url" :placeholder="$t('daf8a992-77cd-4c20-8bca-5c692fd1e431')">
         </STInputBox>
 
-        <FileInput v-if="selectedPrivacyType === 'file'" key="file" v-model="privacyPolicyFile" title="Kies een bestand" :validator="validator" :required="false" />
+        <FileInput v-if="selectedPrivacyType === 'file'" key="file" v-model="privacyPolicyFile" :validator="validator" :required="false" :title="$t(`Kies een bestand`)" />
     </SaveView>
 </template>
 
