@@ -11,7 +11,7 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncTableAction, Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, TableActionSelection, useAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
-import { AccessRight, Group, GroupCategoryTree, GroupPrice, GroupType, MemberResponsibility, MembershipStatus, Organization, PermissionLevel, PlatformMember, RecordAnswer, RegisterItemOption, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight, ContinuousMembershipStatus, Group, GroupCategoryTree, GroupPrice, GroupType, MemberResponsibility, MembershipStatus, Organization, PermissionLevel, PlatformMember, RecordAnswer, RegisterItemOption, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
@@ -29,6 +29,7 @@ const props = withDefaults(
         responsibility?: MemberResponsibility | null; // for now only for saving column config
         customFilter?: StamhoofdFilter | null;
         customTitle?: string | null;
+        dateRange?: { start: Date; end: Date } | null;
     }>(), {
         group: null,
         category: null,
@@ -36,6 +37,7 @@ const props = withDefaults(
         customFilter: null,
         customTitle: null,
         responsibility: null,
+        dateRange: null,
     },
 );
 
@@ -284,6 +286,36 @@ const allColumns: Column<ObjectType, any>[] = [
         recommendedWidth: 140,
         allowSorting: false,
     }),
+    props.dateRange !== null
+        ? new Column<ObjectType, ContinuousMembershipStatus>({
+            id: 'continuousMembership',
+            name: 'Doorlopende aansluiting',
+            getValue: member => member.getContinuousMembershipStatus(props.dateRange!),
+            format: (status) => {
+                switch (status) {
+                    case ContinuousMembershipStatus.Full:
+                        return 'Volledig';
+                    case ContinuousMembershipStatus.Partial:
+                        return 'Gedeeltelijk';
+                    case ContinuousMembershipStatus.None:
+                        return 'Geen aansluiting';
+                }
+            },
+            getStyle: (status) => {
+                switch (status) {
+                    case ContinuousMembershipStatus.Full:
+                        return 'success';
+                    case ContinuousMembershipStatus.Partial:
+                        return 'warn';
+                    case ContinuousMembershipStatus.None:
+                        return 'error';
+                }
+            },
+            minimumWidth: 120,
+            recommendedWidth: 140,
+            allowSorting: false,
+        })
+        : null,
     new Column<ObjectType, string[]>({
         name: $t(`d0defb77-0a25-4b85-a03e-57569c5edf6c`),
         allowSorting: false,
@@ -314,7 +346,7 @@ const allColumns: Column<ObjectType, any>[] = [
         recommendedWidth: 200,
         enabled: false,
     }),
-];
+].filter(column => column !== null);
 
 if (props.group) {
     if (props.group.settings.prices.length > 1) {

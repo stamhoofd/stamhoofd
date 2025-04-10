@@ -423,6 +423,12 @@ export enum MembershipStatus {
     Temporary = 'Temporary',
 }
 
+export enum ContinuousMembershipStatus {
+    Full = 'Full',
+    Partial = 'Partial',
+    None = 'None',
+}
+
 export class PlatformMember implements ObjectWithRecords {
     member: MemberWithRegistrationsBlob;
     patch: AutoEncoderPatchType<MemberWithRegistrationsBlob>;
@@ -554,6 +560,24 @@ export class PlatformMember implements ObjectWithRecords {
 
     get shouldApplyReducedPrice() {
         return this.patchedMember.details.shouldApplyReducedPrice;
+    }
+
+    getContinuousMembershipStatus({ start, end }: { start: Date; end: Date }): ContinuousMembershipStatus {
+        const memberships = this.patchedMember.platformMemberships.filter(t => !!this.organizations.find(o => o.id === t.organizationId));
+
+        for (const t of memberships) {
+            if (t.endDate >= end && t.startDate <= start) {
+                return ContinuousMembershipStatus.Full;
+            }
+        }
+
+        for (const t of memberships) {
+            if ((t.endDate < end && t.endDate > start) || (t.startDate < end && t.startDate > start)) {
+                return ContinuousMembershipStatus.Partial;
+            }
+        }
+
+        return ContinuousMembershipStatus.None;
     }
 
     addPatch(p: PartialWithoutMethods<AutoEncoderPatchType<MemberWithRegistrationsBlob>>) {
