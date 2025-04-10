@@ -1,23 +1,23 @@
 <template>
     <div ref="root" class="st-view ticket-already-scanned-view">
-        <STNavigationBar title="Ticket al gescand" />
+        <STNavigationBar :title="$t(`Ticket al gescand`)" />
 
         <main>
             <h1>
                 <span class="icon warning yellow" />
-                <span>Ticket al gescand</span>
+                <span>{{ $t('Ticket al gescand') }}</span>
             </h1>
             <p class="ticket-secret">
                 {{ ticket.secret }}
             </p>
             <p class="style-description">
-                Let op dat je hetzelfde ticket niet meerdere keren scant en zo hergebruik van een ticket mogelijk maakt.
+                {{ $t('Let op dat je hetzelfde ticket niet meerdere keren scant en zo hergebruik van een ticket mogelijk maakt.') }}
             </p>
 
             <STList class="info">
                 <STListItem v-if="ticket.scannedAt">
                     <h3 class="style-definition-label">
-                        Tijdstip
+                        {{ $t('Tijdstip') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDateTime(ticket.scannedAt) }}
@@ -26,7 +26,7 @@
 
                 <STListItem v-if="ticket.scannedBy">
                     <h3 class="style-definition-label">
-                        Gescand door
+                        {{ $t('Gescand door') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ ticket.scannedBy }}
@@ -38,10 +38,10 @@
         <STToolbar>
             <template #right>
                 <button class="button secundary" type="button" @click="viewTicket">
-                    Ticket toch bekijken
+                    {{ $t('Ticket toch bekijken') }}
                 </button>
                 <button class="button primary" type="button" @click="() => pop()">
-                    Terug
+                    {{ $t('Terug') }}
                 </button>
             </template>
         </STToolbar>

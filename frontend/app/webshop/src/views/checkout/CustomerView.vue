@@ -1,26 +1,26 @@
 <template>
-    <SaveView title="Jouw gegevens" :loading="loading" save-icon-right="arrow-right" save-text="Doorgaan" data-submit-last-field @save="goNext">
-        <h1>Jouw gegevens</h1>
+    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('Doorgaan')" data-submit-last-field :title="$t(`Jouw gegevens`)" @save="goNext">
+        <h1>{{ $t('Jouw gegevens') }}</h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="!isLoggedIn">
-            <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errors.errorBox">
+            <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`Jouw naam`)">
                 <div class="input-group">
                     <div>
-                        <input v-model="firstName" class="input" name="fname" type="text" placeholder="Voornaam" required autocomplete="given-name">
+                        <input v-model="firstName" class="input" name="fname" type="text" required autocomplete="given-name" :placeholder="$t(`Voornaam`)">
                     </div>
                     <div>
-                        <input v-model="lastName" class="input" name="lname" type="text" placeholder="Achternaam" required autocomplete="family-name">
+                        <input v-model="lastName" class="input" name="lname" type="text" required autocomplete="family-name" :placeholder="$t(`Achternaam`)">
                     </div>
                 </div>
             </STInputBox>
 
-            <EmailInput v-model="email" title="E-mailadres" name="email" :validator="errors.validator" :placeholder="emailPlaceholder" autocomplete="email" />
+            <EmailInput v-model="email" name="email" :validator="errors.validator" :placeholder="emailPlaceholder" autocomplete="email" :title="$t(`E-mailadres`)" />
             <p v-if="emailDescription" class="style-description-small" v-text="emailDescription" />
         </template>
 
-        <PhoneInput v-if="phoneEnabled" v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34' )" name="mobile" :validator="errors.validator" placeholder="Voor dringende info" autocomplete="tel" />
+        <PhoneInput v-if="phoneEnabled" v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34' )" name="mobile" :validator="errors.validator" autocomplete="tel" :placeholder="$t(`Voor dringende info`)" />
 
         <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="checkoutManager.checkout.fieldAnswers" :error-box="errors.errorBox" />
     </SaveView>

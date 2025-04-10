@@ -1,24 +1,24 @@
 <template>
     <LoadingViewTransition>
         <form v-if="!loadingRegisterCode" id="signup-general-view" class="st-view" @submit.prevent="goNext">
-            <STNavigationBar title="Nieuwe vereniging" />
+            <STNavigationBar :title="$t(`Nieuwe vereniging`)" />
 
             <main>
                 <h1>
                     {{ $t("92f76d54-282e-448e-ae15-21411b7bc085") }}
                 </h1>
                 <p>
-                    Je kan alle functies gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen. <a v-if="validatedRegisterCode" :href="'https://'+ $domains.marketing" target="_blank" class="inline-link">{{ $t("2ca73761-bc6c-4ffb-9550-a988376f26ef") }}</a>
+                    {{ $t('Je kan alle functies gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen.') }} <a v-if="validatedRegisterCode" :href="'https://'+ $domains.marketing" target="_blank" class="inline-link">{{ $t("2ca73761-bc6c-4ffb-9550-a988376f26ef") }}</a>
                 </p>
                 <button v-if="!validatedRegisterCode && visitViaUrl" class="info-box with-button selectable" type="button" @click="dismiss">
                     {{ $t('d80e2291-5bb9-4799-9594-bcda54480efa') }}
                     <span class="button text" type="button">
-                        Log dan hier in
+                        {{ $t('Log dan hier in') }}
                     </span>
                 </button>
 
                 <p v-if="validatedRegisterCode && !validatedRegisterCode.customMessage" class="success-box icon gift">
-                    Je ontvangt {{ formatPrice(validatedRegisterCode.value) }} tegoed van {{ validatedRegisterCode.organizationName }} als je nu registreert
+                    {{ $t('Je ontvangt {value} tegoed van {organization} als je nu registreert', {value: formatPrice(validatedRegisterCode.value), organization: validatedRegisterCode.organizationName ?? ''}) }}
                 </p>
                 <p v-else-if="validatedRegisterCode" class="success-box icon gift">
                     {{ validatedRegisterCode.customMessage }}
@@ -32,28 +32,20 @@
                 <div class="split-inputs">
                     <div>
                         <STInputBox :title="$t('d185d3ca-e20f-43a2-a79f-f77404b8f33a')" error-fields="name" :error-box="errorBox">
-                            <input
-                                id="organization-name"
-                                ref="firstInput"
-                                v-model="name"
-                                class="input"
-                                type="text"
-                                :placeholder="$t('cb51b737-c4cf-4ea7-aeb5-b5736a43c333')"
-                                autocomplete="organization"
-                            >
+                            <input id="organization-name" ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('cb51b737-c4cf-4ea7-aeb5-b5736a43c333')" autocomplete="organization">
                         </STInputBox>
 
                         <AddressInput v-model="address" :title="$t('68c40b9e-30d7-4ce5-8069-f7ca93221906')" :validator="validator" :link-country-to-locale="true" />
                         <p class="style-description-small">
-                            Geen adres? Vul dan een adres in dat in de buurt ligt
+                            {{ $t('Geen adres? Vul dan een adres in dat in de buurt ligt') }}
                         </p>
                     </div>
 
                     <div>
-                        <STInputBox title="Type vereniging" error-fields="type" :error-box="errorBox">
+                        <STInputBox error-fields="type" :error-box="errorBox" :title="$t(`Type vereniging`)">
                             <Dropdown v-model="type">
                                 <option :value="null" disabled>
-                                    Maak een keuze
+                                    {{ $t('Maak een keuze') }}
                                 </option>
 
                                 <optgroup v-for="group in availableTypes" :key="group.name" :label="group.name">
@@ -64,13 +56,13 @@
                             </Dropdown>
                         </STInputBox>
                         <p class="style-description-small">
-                            Hiermee stellen we automatisch al enkele instellingen goed in.
+                            {{ $t('Hiermee stellen we automatisch al enkele instellingen goed in.') }}
                         </p>
 
-                        <STInputBox v-if="type === 'Youth' && isBelgium" title="Koepelorganisatie" error-fields="umbrellaOrganization" :error-box="errorBox">
+                        <STInputBox v-if="type === 'Youth' && isBelgium" error-fields="umbrellaOrganization" :error-box="errorBox" :title="$t(`Koepelorganisatie`)">
                             <Dropdown v-model="umbrellaOrganization">
                                 <option :value="null" disabled>
-                                    Maak een keuze
+                                    {{ $t('Maak een keuze') }}
                                 </option>
                                 <option v-for="item in availableUmbrellaOrganizations" :key="item.value" :value="item.value">
                                     {{ item.name }}
@@ -81,23 +73,22 @@
                 </div>
 
                 <template v-if="!validatedRegisterCode">
-                    <hr>
-                    <h2>Hoe ken je Stamhoofd?</h2>
+                    <hr><h2>{{ $t('Hoe ken je Stamhoofd?') }}</h2>
 
                     <Checkbox :model-value="getBooleanType(AcquisitionType.Recommended)" @update:model-value="setBooleanType(AcquisitionType.Recommended, $event)">
-                        Op aanraden van andere vereniging / persoon
+                        {{ $t('Op aanraden van andere vereniging / persoon') }}
                     </Checkbox>
                     <Checkbox :model-value="getBooleanType(AcquisitionType.Seen)" @update:model-value="setBooleanType(AcquisitionType.Seen, $event)">
-                        Gezien bij andere vereniging
+                        {{ $t('Gezien bij andere vereniging') }}
                     </Checkbox>
                     <Checkbox :model-value="getBooleanType(AcquisitionType.SocialMedia)" @update:model-value="setBooleanType(AcquisitionType.SocialMedia, $event)">
-                        Via sociale media
+                        {{ $t('Via sociale media') }}
                     </Checkbox>
                     <Checkbox :model-value="getBooleanType(AcquisitionType.Search)" @update:model-value="setBooleanType(AcquisitionType.Search, $event)">
-                        Via opzoekwerk (bv. Google)
+                        {{ $t('Via opzoekwerk (bv. Google)') }}
                     </Checkbox>
                     <Checkbox :model-value="getBooleanType(AcquisitionType.Other)" @update:model-value="setBooleanType(AcquisitionType.Other, $event)">
-                        Andere
+                        {{ $t('Andere') }}
                     </Checkbox>
                 </template>
             </main>
@@ -106,7 +97,7 @@
                 <template #right>
                     <LoadingButton :loading="loading">
                         <button class="button primary" type="submit" @click.prevent="goNext">
-                            Vereniging aanmaken
+                            {{ $t('Vereniging aanmaken') }}
                         </button>
                     </LoadingButton>
                 </template>

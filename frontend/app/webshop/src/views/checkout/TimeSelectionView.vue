@@ -1,15 +1,15 @@
 <template>
-    <SaveView :title="title" :loading="loading" save-icon-right="arrow-right" save-text="Doorgaan" :prefer-large-button="true" @save="goNext">
+    <SaveView :title="title" :loading="loading" save-icon-right="arrow-right" :save-text="$t('Doorgaan')" :prefer-large-button="true" @save="goNext">
         <h1>
             {{ title }}
         </h1>
 
         <p v-if="checkoutMethod.type === 'Takeout'">
-            Afhaallocatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ (checkoutMethod as any).address }}
+            {{ $t('Afhaallocatie:') }} {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ (checkoutMethod as any).address }}
         </p>
 
         <p v-if="checkoutMethod.type === 'OnSite'">
-            Locatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ (checkoutMethod as any).address }}
+            {{ $t('Locatie:') }} {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ (checkoutMethod as any).address }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -23,12 +23,12 @@
                     {{ formatDateWithDay(slot.date) }}
                 </h2>
                 <p class="style-description">
-                    Tussen {{ formatMinutes(slot.startTime) }} - {{ formatMinutes(slot.endTime) }}
+                    {{ $t('Tussen') }} {{ formatMinutes(slot.startTime) }} - {{ formatMinutes(slot.endTime) }}
                 </p>
 
                 <template #right>
-                    <span v-if="slot.listedRemainingStock === 0" class="style-tag error">Volzet</span>
-                    <span v-else-if="slot.listedRemainingStock !== null" class="style-tag">Nog {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock === 1 ? "persoon" : "personen") : (slot.listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
+                    <span v-if="slot.listedRemainingStock === 0" class="style-tag error">{{ $t('Volzet') }}</span>
+                    <span v-else-if="slot.listedRemainingStock !== null" class="style-tag">{{ $t('Nog') }} {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock === 1 ? "persoon" : "personen") : (slot.listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
                 </template>
             </STListItem>
         </STList>

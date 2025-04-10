@@ -8,45 +8,36 @@
 
         <template v-if="mode === 'comments'">
             <STInputBox error-fields="data.comments" :error-box="errors.errorBox" class="max">
-                <textarea
-                    v-model="comments"
-                    class="input large"
-                    type="text"
-                    placeholder="Hou zelf interne notities bij voor deze bestelling"
-                    autocomplete="off"
-                />
+                <textarea v-model="comments" class="input large" type="text" autocomplete="off" :placeholder="$t(`Hou zelf interne notities bij voor deze bestelling`)" />
             </STInputBox>
         </template>
         <template v-else>
-            <hr>
-            <h2>Klantgegevens</h2>
+            <hr><h2>{{ $t('Klantgegevens') }}</h2>
 
-            <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errors.errorBox">
+            <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`Jouw naam`)">
                 <div class="input-group">
                     <div>
-                        <input v-model="firstName" class="input" name="fname" type="text" placeholder="Voornaam" required autocomplete="given-name">
+                        <input v-model="firstName" class="input" name="fname" type="text" required autocomplete="given-name" :placeholder="$t(`Voornaam`)">
                     </div>
                     <div>
-                        <input v-model="lastName" class="input" name="lname" type="text" placeholder="Achternaam" required autocomplete="family-name">
+                        <input v-model="lastName" class="input" name="lname" type="text" required autocomplete="family-name" :placeholder="$t(`Achternaam`)">
                     </div>
                 </div>
             </STInputBox>
 
-            <EmailInput v-model="email" title="E-mailadres" name="email" :validator="errors.validator" :placeholder="emailPlaceholder" autocomplete="email" />
+            <EmailInput v-model="email" name="email" :validator="errors.validator" :placeholder="emailPlaceholder" autocomplete="email" :title="$t(`E-mailadres`)" />
             <p v-if="emailDescription" class="style-description-small" v-text="emailDescription" />
 
-            <PhoneInput v-if="phone || phoneEnabed" v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34' )" name="mobile" :validator="errors.validator" placeholder="Optioneel voor beheerders" autocomplete="tel" :required="false" />
+            <PhoneInput v-if="phone || phoneEnabed" v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34' )" name="mobile" :validator="errors.validator" autocomplete="tel" :required="false" :placeholder="$t(`Optioneel voor beheerders`)" />
 
             <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="answersClone" :error-box="errors.errorBox" />
 
             <div v-for="category in recordCategories.filter(c => c.isEnabled(patchedOrder.data))" :key="category.id" class="container">
-                <hr>
-                <FillRecordCategoryBox :category="category" :value="patchedOrder.data" :validator="errors.validator" :level="2" :all-optional="true" :force-mark-reviewed="true" @patch="addRecordAnswersPatch" />
+                <hr><FillRecordCategoryBox :category="category" :value="patchedOrder.data" :validator="errors.validator" :level="2" :all-optional="true" :force-mark-reviewed="true" @patch="addRecordAnswersPatch" />
             </div>
 
             <template v-if="checkoutMethods.length > 1">
-                <hr>
-                <h2>Afhaalmethode</h2>
+                <hr><h2>{{ $t('Afhaalmethode') }}</h2>
 
                 <STList>
                     <STListItem v-for="checkoutMethod in checkoutMethods" :key="checkoutMethod.id" :selectable="true" element-name="label" class="right-stack left-center">
@@ -64,31 +55,30 @@
                         </p>
 
                         <template v-if="checkoutMethod.timeSlots.timeSlots.length === 1 && checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock !== null" #right>
-                            <span v-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 0" class="style-tag error">Volzet</span>
-                            <span v-else class="style-tag">Nog {{ checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock }} {{ checkoutMethod.timeSlots.timeSlots[0].remainingPersons !== null ? (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "persoon" : "personen") : (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
+                            <span v-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 0" class="style-tag error">{{ $t('Volzet') }}</span>
+                            <span v-else class="style-tag">{{ $t('Nog') }} {{ checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock }} {{ checkoutMethod.timeSlots.timeSlots[0].remainingPersons !== null ? (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "persoon" : "personen") : (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
                         </template>
                     </STListItem>
                 </STList>
             </template>
 
             <template v-if="selectedMethod && timeSlots.length > 0">
-                <hr>
-                <h2 v-if="selectedMethod.type === 'Takeout'">
-                    Afhaaltijdstip
+                <hr><h2 v-if="selectedMethod.type === 'Takeout'">
+                    {{ $t('Afhaaltijdstip') }}
                 </h2>
                 <h2 v-else-if="selectedMethod.type === 'Delivery'">
-                    Leveringstijdstip
+                    {{ $t('Leveringstijdstip') }}
                 </h2>
                 <h2 v-else-if="selectedMethod.type === 'OnSite'">
-                    Tijdstip
+                    {{ $t('Tijdstip') }}
                 </h2>
 
                 <p v-if="selectedMethod.type === 'Takeout'">
-                    Afhaallocatie: {{ selectedMethod.name ? selectedMethod.name + ',' : '' }} {{ (selectedMethod as WebshopTakeoutMethod).address }}
+                    {{ $t('Afhaallocatie') }}: {{ selectedMethod.name ? selectedMethod.name + ',' : '' }} {{ (selectedMethod as WebshopTakeoutMethod).address }}
                 </p>
 
                 <p v-if="selectedMethod.type === 'OnSite'">
-                    Locatie: {{ selectedMethod.name ? selectedMethod.name + ',' : '' }} {{ (selectedMethod as WebshopOnSiteMethod).address }}
+                    {{ $t('Locatie') }}: {{ selectedMethod.name ? selectedMethod.name + ',' : '' }} {{ (selectedMethod as WebshopOnSiteMethod).address }}
                 </p>
 
                 <STErrorsDefault :error-box="errors.errorBox" />
@@ -103,45 +93,43 @@
                             {{ formatDateWithDay(slot.date) }}
                         </h2>
                         <p class="style-description">
-                            Tussen {{ formatMinutes(slot.startTime) }} - {{ formatMinutes(slot.endTime) }}
+                            {{ $t('Tussen') }} {{ formatMinutes(slot.startTime) }} - {{ formatMinutes(slot.endTime) }}
                         </p>
 
                         <template v-if="slot.listedRemainingStock !== null" #right>
-                            <span v-if="slot.listedRemainingStock === 0" class="style-tag error">Volzet</span>
-                            <span v-else class="style-tag">Nog {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock === 1 ? "persoon" : "personen") : (slot.listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
+                            <span v-if="slot.listedRemainingStock === 0" class="style-tag error">{{ $t('Volzet') }}</span>
+                            <span v-else class="style-tag">{{ $t('Nog') }} {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock === 1 ? "persoon" : "personen") : (slot.listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
                         </template>
                     </STListItem>
                 </STList>
             </template>
 
             <template v-if="selectedMethod && selectedMethod.type === 'Delivery'">
-                <hr>
-                <h2>Leveringsadres</h2>
+                <hr><h2>{{ $t('Leveringsadres') }}</h2>
                 <div v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice !== patchedOrder.data.deliveryPrice" class="info-box">
-                    Bestel minimum {{ formatPrice(deliveryMethod.price.minimumPrice) }} om van een verlaagde leveringskost van {{ formatPrice(deliveryMethod.price.discountPrice) }} te genieten.
+                    {{ $t('Bestel minimum {min} om van een verlaagde leveringskost van {price} te genieten.', {min: formatPrice(deliveryMethod.price.minimumPrice), price: formatPrice(deliveryMethod.price.discountPrice)}) }}
                 </div>
 
                 <p v-if="patchedOrder.data.deliveryPrice === 0" class="success-box">
-                    Levering is gratis
+                    {{ $t('Levering is gratis') }}
                     <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.price !== 0">
-                        vanaf een bestelbedrag van {{ formatPrice(deliveryMethod.price.minimumPrice) }}.
+                        {{ $t('vanaf een bestelbedrag van {min}.', {min: formatPrice(deliveryMethod.price.minimumPrice)}) }}
                     </template>
                 </p>
                 <p v-else class="info-box">
-                    De leveringskost bedraagt {{ formatPrice(patchedOrder.data.deliveryPrice) }}
+                    {{ $t('De leveringskost bedraagt {price}', {price: formatPrice(patchedOrder.data.deliveryPrice)}) }}
                     <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice === patchedOrder.data.deliveryPrice">
-                        vanaf een bestelbedrag van {{ formatPrice(deliveryMethod.price.minimumPrice) }}.
+                        {{ $t('vanaf een bestelbedrag van {min}.', {min: formatPrice(deliveryMethod.price.minimumPrice)}) }}
                     </template>
                 </p>
 
-                <AddressInput v-model="address" :required="true" title="Vul het leveringsadres in" :validator="errors.validator" :validate-server="server" />
+                <AddressInput v-model="address" :required="true" :validator="errors.validator" :validate-server="server" :title="$t(`Vul het leveringsadres in`)" />
             </template>
 
-            <hr>
-            <h2>Winkelmandje</h2>
+            <hr><h2>{{ $t('Winkelmandje') }}</h2>
 
             <p v-for="code of patchedOrder.data.discountCodes" :key="code.id" class="discount-box icon label">
-                <span>Kortingscode <span class="style-discount-code">{{ code.code }}</span></span>
+                <span>{{ $t('Kortingscode') }} <span class="style-discount-code">{{ code.code }}</span></span>
 
                 <button class="button icon trash" type="button" @click="deleteCode(code)" />
             </p>
@@ -153,17 +141,14 @@
             <p v-if="(webshopFull && webshopFull.shouldEnableCart) || patchedOrder.data.cart.items.length === 0">
                 <button class="button text" type="button" @click="addProduct">
                     <span class="icon add" />
-                    <span>Nieuw</span>
+                    <span>{{ $t('Nieuw') }}</span>
                 </button>
             </p>
 
-            <hr>
-
-            <PriceBreakdownBox :price-breakdown="patchedOrder.data.priceBreakown" />
+            <hr><PriceBreakdownBox :price-breakdown="patchedOrder.data.priceBreakown" />
 
             <template v-if="isNew">
-                <hr>
-                <h2>Betaalmethode</h2>
+                <hr><h2>{{ $t('Betaalmethode') }}</h2>
 
                 <PaymentSelectionList v-model="paymentMethod" :payment-configuration="paymentConfiguration" :organization="organization!" :context="paymentContext" :amount="patchedOrder.data.totalPrice" />
             </template>

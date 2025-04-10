@@ -1,12 +1,12 @@
 <template>
     <div class="st-view order-tickets-view">
-        <STNavigationBar :title="'Tickets'" />
+        <STNavigationBar :title="$t(`Tickets`)" />
         <main>
             <h1 v-if="tickets.length > 1">
-                Tickets
+                {{ $t('Tickets') }}
             </h1>
             <h1 v-else>
-                Ticket
+                {{ $t('Ticket') }}
             </h1>
 
             <STList>
@@ -18,7 +18,7 @@
             <template #right>
                 <button class="button primary" type="button" @click="downloadAllTickets">
                     <span class="icon download" />
-                    <span>Download</span>
+                    <span>{{ $t('Download') }}</span>
                 </button>
             </template>
         </STToolbar>

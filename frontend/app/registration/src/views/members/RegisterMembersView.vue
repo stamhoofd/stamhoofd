@@ -19,7 +19,7 @@
                     </p>
 
                     <template #right>
-                        <span v-if="user && member.id === user.memberId" v-color="member" class="style-tag">Dit ben jij</span>
+                        <span v-if="user && member.id === user.memberId" v-color="member" class="style-tag">{{ $t('Dit ben jij') }}</span>
                         <span class="icon gray arrow-right-small" />
                     </template>
                 </STListItem>
@@ -30,7 +30,7 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        Nieuw lid toevoegen
+                        {{ $t('Nieuw lid toevoegen') }}
                     </h2>
 
                     <template #right>
@@ -44,32 +44,32 @@
 
 <script setup lang="ts">
 import { MemberIcon, useAddMember, useChooseGroupForMember, useUser } from '@stamhoofd/components';
+import { useMemberManager } from '@stamhoofd/networking';
 import { PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { useMemberManager } from '@stamhoofd/networking';
 
 const memberManager = useMemberManager();
 const members = computed(() => memberManager.family.members);
-const title = 'Wie wil je inschrijven?'
+const title = 'Wie wil je inschrijven?';
 const user = useUser();
 
 const isAcceptingNewMembers = computed(() => memberManager.isAcceptingNewMembers);
-const chooseGroupForMember = useChooseGroupForMember()
-const addMember = useAddMember()
+const chooseGroupForMember = useChooseGroupForMember();
+const addMember = useAddMember();
 
 async function selectMember(member: PlatformMember) {
-    await chooseGroupForMember({member, displayOptions: {action: 'show'}})
+    await chooseGroupForMember({ member, displayOptions: { action: 'show' } });
 }
 
 async function addNewMember() {
     await addMember(memberManager.family, {
-        displayOptions: {action: 'show'},
+        displayOptions: { action: 'show' },
         async finishHandler(member, navigate) {
             await chooseGroupForMember({
                 member,
-                displayOptions: {action: 'show', replace: 100, force: true},
-                customNavigate: navigate
-            })
+                displayOptions: { action: 'show', replace: 100, force: true },
+                customNavigate: navigate,
+            });
         },
     });
 }

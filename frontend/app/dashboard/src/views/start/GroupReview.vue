@@ -9,11 +9,11 @@
         </h3>
 
         <STListItemGrid>
-            <STListItemGridRow label="Tarief" :value="prices" />
-            <STListItemGridRow label="Leeftijd" :value="ageRestriction" />
-            <STListItemGridRow label="Geslacht" :value="genderRestriction" />
-            <STListItemGridRow v-if="$defaultAgeGroups.length" label="Aansluiting" :value="defaultAgeGroupName" />
-            <STListItemGridRow label="Status" :value="status" />
+            <STListItemGridRow :value="prices" :label="$t(`Tarief`)" />
+            <STListItemGridRow :value="ageRestriction" :label="$t(`Leeftijd`)" />
+            <STListItemGridRow :value="genderRestriction" :label="$t(`Geslacht`)" />
+            <STListItemGridRow v-if="$defaultAgeGroups.length" :value="defaultAgeGroupName" :label="$t(`Aansluiting`)" />
+            <STListItemGridRow :value="status" :label="$t(`Status`)" />
         </STListItemGrid>
 
         <template #right>

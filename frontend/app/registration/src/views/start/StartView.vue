@@ -11,27 +11,26 @@
             <p v-if="members.length === 0" class="style-button-bar">
                 <button v-if="isAcceptingNewMembers" class="button primary" type="button" @click="registerMembers">
                     <span class="icon edit" />
-                    <span>Schrijf een lid in</span>
+                    <span>{{ $t('Schrijf een lid in') }}</span>
                 </button>
 
                 <a :href="$domains.getDocs('mijn-account')" target="_blank" class="button text selected">
                     <span class="icon book" />
-                    <span>Hulp nodig?</span>
+                    <span>{{ $t('Hulp nodig?') }}</span>
                 </a>
             </p>
             <p v-else class="style-button-bar">
                 <a :href="$domains.getDocs('mijn-account')" target="_blank" class="button text selected">
                     <span class="icon book" />
-                    <span>Hulp nodig?</span>
+                    <span>{{ $t('Hulp nodig?') }}</span>
                 </a>
             </p>
 
             <QuickActionsBox :quick-actions="quickActions" />
 
             <div v-if="members.length > 0" class="container">
-                <hr>
-                <h2>
-                    Leden
+                <hr><h2>
+                    {{ $t('Leden') }}
                 </h2>
 
                 <STList class="illustration-list">
@@ -48,14 +47,14 @@
                         </p>
 
                         <p v-if="getRegistrationsForMember(member).length" class="style-description-small">
-                            Ingeschreven voor {{ Formatter.joinLast(getRegistrationsForMember(member).map(r => r.group.settings.name), ', ', ' en ') }}.
+                            {{ $t('Ingeschreven voor {groups}.', {groups: Formatter.joinLast(getRegistrationsForMember(member).map(r => r.group.settings.name), ', ', ' ' + $t('en') + ' ')}) }}
                         </p>
                         <p v-else class="style-description-small">
-                            {{ member.patchedMember.firstName }} is momenteel niet ingeschreven.
+                            {{ $t('{member} is momenteel niet ingeschreven.', {member: member.patchedMember.firstName}) }}
                         </p>
 
                         <template #right>
-                            <span v-if="user && member.id === user.memberId" v-color="member" class="style-tag">Dit ben jij</span>
+                            <span v-if="user && member.id === user.memberId" v-color="member" class="style-tag">{{ $t('Dit ben jij') }}</span>
                             <span class="icon gray arrow-right-small" />
                         </template>
                     </STListItem>
@@ -64,15 +63,14 @@
                 <footer class="style-button-bar">
                     <button class="button text" type="button" @click="addNewMember">
                         <span class="icon add" />
-                        <span>Nieuw gezinslid</span>
+                        <span>{{ $t('Nieuw gezinslid') }}</span>
                     </button>
                 </footer>
             </div>
 
             <div v-if="members.length > 0" class="container">
-                <hr>
-                <h2>
-                    Acties
+                <hr><h2>
+                    {{ $t('Acties') }}
                 </h2>
 
                 <STList class="illustration-list">
@@ -82,10 +80,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            Lid inschrijven
+                            {{ $t('Lid inschrijven') }}
                         </h3>
                         <p class="style-description-small">
-                            Schrijf iemand in.
+                            {{ $t('Schrijf iemand in.') }}
                         </p>
 
                         <template #right>
@@ -99,10 +97,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            Gegevens nakijken
+                            {{ $t('Gegevens nakijken') }}
                         </h3>
                         <p class="style-description-small">
-                            Pas gegevens aan en bekijk al jouw inschrijvingen.
+                            {{ $t('Pas gegevens aan en bekijk al jouw inschrijvingen.') }}
                         </p>
 
                         <template #right>
@@ -116,10 +114,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            Betalingen en openstaande rekening
+                            {{ $t('Betalingen en openstaande rekening') }}
                         </h3>
                         <p class="style-description-small">
-                            Bekijk een overzicht van jouw recente betalingen en jouw openstaand bedrag.
+                            {{ $t('Bekijk een overzicht van jouw recente betalingen en jouw openstaand bedrag.') }}
                         </p>
 
                         <template #right>
@@ -130,9 +128,8 @@
             </div>
 
             <div v-if="documents.length > 0" class="container">
-                <hr>
-                <h2>
-                    Documenten
+                <hr><h2>
+                    {{ $t('Documenten') }}
                 </h2>
                 <STList>
                     <STListItem v-for="document of documents" :key="document.id" class="left-center hover-box member-registration-block" :selectable="true" @click="onDownloadDocument(document)">
@@ -145,7 +142,7 @@
                         <p class="style-description-small">
                             {{ document.data.description }}
                         </p>
-                        <span v-if="document.status === 'MissingData'" class="style-tag error">Onvolledig</span>
+                        <span v-if="document.status === 'MissingData'" class="style-tag error">{{ $t('Onvolledig') }}</span>
 
                         <template #right>
                             <LoadingButton :loading="isDocumentDownloading(document)">

@@ -19,10 +19,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/cart.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Bestellingen
+                        {{ $t('Bestellingen') }}
                     </h2>
                     <p class="style-description">
-                        Bekijk en exporteer bestellingen, e-mail en SMS klanten.
+                        {{ $t('Bekijk en exporteer bestellingen, e-mail en SMS klanten.') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -34,10 +34,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/seating-plan.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Zaaloverzicht
+                        {{ $t('Zaaloverzicht') }}
                     </h2>
                     <p class="style-description">
-                        Bekijk welke plaatsen door welke personen zijn ingenomen.
+                        {{ $t('Bekijk welke plaatsen door welke personen zijn ingenomen.') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -49,10 +49,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/scanner.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Scan tickets
+                        {{ $t('Scan tickets') }}
                     </h2>
                     <p class="style-description">
-                        Gebruik je camera om snel tickets te scannen.
+                        {{ $t('Gebruik je camera om snel tickets te scannen.') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -64,10 +64,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/diagram.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Statistieken
+                        {{ $t('Statistieken') }}
                     </h2>
                     <p class="style-description">
-                        Bekijk jouw omzet en andere statistieken.
+                        {{ $t('Bekijk jouw omzet en andere statistieken.') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -79,10 +79,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/earth.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Bekijk jouw webshop
+                        {{ $t('Bekijk jouw webshop') }}
                     </h2>
                     <p class="style-description">
-                        Jouw webshop is bereikbaar via {{ webshopUrl }}
+                        {{ $t('Jouw webshop is bereikbaar via') }} {{ webshopUrl }}
                     </p>
                     <template #right>
                         <span class="icon external gray" />
@@ -91,8 +91,7 @@
             </STList>
 
             <template v-if="hasFullPermissions">
-                <hr>
-                <h2>Instellingen</h2>
+                <hr><h2>{{ $t('Instellingen') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editGeneral(true)">
@@ -100,10 +99,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/flag.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Algemeen
+                            {{ $t('Algemeen') }}
                         </h2>
                         <p class="style-description">
-                            Naam, type en beschikbaarheid.
+                            {{ $t('Naam, type en beschikbaarheid.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -115,10 +114,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/edit-package.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Productaanbod
+                            {{ $t('Productaanbod') }}
                         </h2>
                         <p class="style-description">
-                            Bewerk welke artikels je verkoopt in jouw webshop.
+                            {{ $t('Bewerk welke artikels je verkoopt in jouw webshop.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -130,10 +129,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/tickets.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Aanbod tickets en vouchers
+                            {{ $t('Aanbod tickets en vouchers') }}
                         </h2>
                         <p class="style-description">
-                            Bewerk en voeg nieuwe tickets en vouchers toe aan je webshop.
+                            {{ $t('Bewerk en voeg nieuwe tickets en vouchers toe aan je webshop.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -145,10 +144,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/bike.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Afhalen, leveren, ter plaatse eten
+                            {{ $t('Afhalen, leveren, ter plaatse eten') }}
                         </h2>
                         <p class="style-description">
-                            Wijzig tijdstippen, locaties en afhaalmethodes.
+                            {{ $t('Wijzig tijdstippen, locaties en afhaalmethodes.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -160,10 +159,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Betaalmethodes
+                            {{ $t('Betaalmethodes') }}
                         </h2>
                         <p class="style-description">
-                            Kies welke betaalmethodes je wilt activeren, en stel eventueel administratiekosten in.
+                            {{ $t('Kies welke betaalmethodes je wilt activeren, en stel eventueel administratiekosten in.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -175,10 +174,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/discount.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Kortingen
+                            {{ $t('Kortingen') }}
                         </h2>
                         <p class="style-description">
-                            Voeg kortingen toe aan je webshop.
+                            {{ $t('Voeg kortingen toe aan je webshop.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -190,10 +189,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Vrije invoervelden
+                            {{ $t('Vrije invoervelden') }}
                         </h2>
                         <p class="style-description">
-                            Verzamel extra informatie van bestellers bij het afrekenen.
+                            {{ $t('Verzamel extra informatie van bestellers bij het afrekenen.') }}
                         </p>
 
                         <template #right>
@@ -207,10 +206,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Vragenlijsten en gegevens
+                            {{ $t('Vragenlijsten en gegevens') }}
                         </h2>
                         <p class="style-description">
-                            Verzamel extra informatie van bestellers bij het afrekenen.
+                            {{ $t('Verzamel extra informatie van bestellers bij het afrekenen.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -222,10 +221,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/lock.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Toegangsbeheer
+                            {{ $t('Toegangsbeheer') }}
                         </h2>
                         <p class="style-description">
-                            Bepaal wie bestellingen en instellingen van deze webshop kan bekijken of wijzigen.
+                            {{ $t('Bepaal wie bestellingen en instellingen van deze webshop kan bekijken of wijzigen.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -237,10 +236,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/notifications.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Meldingen
+                            {{ $t('Meldingen') }}
                         </h2>
                         <p class="style-description">
-                            Blijf zelf op de hoogte van nieuwe bestellingen.
+                            {{ $t('Blijf zelf op de hoogte van nieuwe bestellingen.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -248,8 +247,7 @@
                     </STListItem>
                 </STList>
 
-                <hr>
-                <h2>Personaliseren</h2>
+                <hr><h2>{{ $t('Personaliseren') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editPage(true)">
@@ -257,10 +255,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/palette.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Tekst, uiterlijk, en externe links
+                            {{ $t('Tekst, uiterlijk, en externe links') }}
                         </h2>
                         <p class="style-description">
-                            Wijzig de teksten en uitzicht van jouw webshop.
+                            {{ $t('Wijzig de teksten en uitzicht van jouw webshop.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -272,10 +270,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/compass.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Link
+                            {{ $t('Link') }}
                         </h2>
                         <p class="style-description">
-                            Wijzig de link van jouw webshop.
+                            {{ $t('Wijzig de link van jouw webshop.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -287,10 +285,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/email.svg">
                         </template>
                         <h2 class="style-title-list">
-                            E-mailsjablonen
+                            {{ $t('E-mailsjablonen') }}
                         </h2>
                         <p class="style-description">
-                            Wijzig de inhoud van automatische e-mails naar bestellers.
+                            {{ $t('Wijzig de inhoud van automatische e-mails naar bestellers.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -298,21 +296,20 @@
                     </STListItem>
                 </STList>
 
-                <hr>
-                <h2>Acties</h2>
+                <hr><h2>{{ $t('Acties') }}</h2>
 
                 <STList>
                     <STListItem v-if="isOpen" :selectable="true" @click="closeWebshop()">
                         <h2 class="style-title-list">
-                            Webshop sluiten
+                            {{ $t('Webshop sluiten') }}
                         </h2>
                         <p class="style-description">
-                            Sluit de webshop, zodat geen nieuwe bestellingen meer mogelijk zijn.
+                            {{ $t('Sluit de webshop, zodat geen nieuwe bestellingen meer mogelijk zijn.') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary danger hide-smartphone">
                                 <span class="icon power" />
-                                <span>Sluiten</span>
+                                <span>{{ $t('Sluiten') }}</span>
                             </button>
                             <button type="button" class="button icon power only-smartphone" />
                         </template>
@@ -320,15 +317,15 @@
 
                     <STListItem v-if="!isOpen && !isArchive" :selectable="true" @click="openWebshop()">
                         <h2 class="style-title-list">
-                            Webshop terug openen
+                            {{ $t('Webshop terug openen') }}
                         </h2>
                         <p class="style-description">
-                            Open de webshop opnieuw.
+                            {{ $t('Open de webshop opnieuw.') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary green hide-smartphone">
                                 <span class="icon power" />
-                                <span>Openen</span>
+                                <span>{{ $t('Openen') }}</span>
                             </button>
                             <button type="button" class="button icon power only-smartphone" />
                         </template>
@@ -336,15 +333,15 @@
 
                     <STListItem v-if="!isOpen && !isArchive" :selectable="true" @click="archiveWebshop()">
                         <h2 class="style-title-list">
-                            Webshop archiveren
+                            {{ $t('Webshop archiveren') }}
                         </h2>
                         <p class="style-description">
-                            Verplaats de webshop naar het archief, maar behoud alle gegevens. De webshop is dan niet meer zo prominent zichtbaar in het menu.
+                            {{ $t('Verplaats de webshop naar het archief, maar behoud alle gegevens. De webshop is dan niet meer zo prominent zichtbaar in het menu.') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary hide-smartphone">
                                 <span class="icon archive" />
-                                <span>Archiveren</span>
+                                <span>{{ $t('Archiveren') }}</span>
                             </button>
                             <button type="button" class="button icon archive only-smartphone" />
                         </template>
@@ -352,15 +349,15 @@
 
                     <STListItem v-if="isArchive" :selectable="true" @click="closeWebshop()">
                         <h2 class="style-title-list">
-                            Webshop uit archief halen
+                            {{ $t('Webshop uit archief halen') }}
                         </h2>
                         <p class="style-description">
-                            Verplaats de webshop terug naar het hoofdmenu.
+                            {{ $t('Verplaats de webshop terug naar het hoofdmenu.') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary hide-smartphone">
                                 <span class="icon undo" />
-                                <span>Terugzetten</span>
+                                <span>{{ $t('Terugzetten') }}</span>
                             </button>
                             <button type="button" class="button icon undo only-smartphone" />
                         </template>
@@ -368,15 +365,15 @@
 
                     <STListItem :selectable="true" @click="duplicateWebshop()">
                         <h2 class="style-title-list">
-                            Webshop dupliceren
+                            {{ $t('Webshop dupliceren') }}
                         </h2>
                         <p class="style-description">
-                            Maak een nieuwe webshop met dezelfde instellingen, maar met een andere naam en link.
+                            {{ $t('Maak een nieuwe webshop met dezelfde instellingen, maar met een andere naam en link.') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary hide-smartphone">
                                 <span class="icon copy" />
-                                <span>Dupliceren</span>
+                                <span>{{ $t('Dupliceren') }}</span>
                             </button>
                             <button type="button" class="button icon copy only-smartphone" />
                         </template>
@@ -384,15 +381,15 @@
 
                     <STListItem v-if="isArchive" :selectable="true" @click="deleteWebshop()">
                         <h2 class="style-title-list">
-                            Webshop definitief verwijderen
+                            {{ $t('Webshop definitief verwijderen') }}
                         </h2>
                         <p class="style-description">
-                            Verwijder deze webshop en alle daarbij horende informatie en bestellingen. Dit is meestal niet nodig.
+                            {{ $t('Verwijder deze webshop en alle daarbij horende informatie en bestellingen. Dit is meestal niet nodig.') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary danger hide-smartphone">
                                 <span class="icon trash" />
-                                <span>Verwijderen</span>
+                                <span>{{ $t('Verwijderen') }}</span>
                             </button>
                             <button type="button" class="button icon trash only-smartphone" />
                         </template>

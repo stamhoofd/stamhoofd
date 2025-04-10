@@ -7,7 +7,7 @@
         <p v-if="isSingle && order" class="style-description-small" v-text="'Bestelling #'+order.number" />
         <p v-if="isSingle && order" class="style-description-small" v-text="order.data.customer.name" />
         <p v-if="!isSingle && !cartItem" class="style-description-small">
-            <span class="style-tag error">Verwijderd ticket</span>
+            <span class="style-tag error">{{ $t('Verwijderd ticket') }}</span>
         </p>
         <p v-if="cartItem && cartItem.description" class="style-description-small pre-wrap" v-text="cartItem.description" />
         <p v-if="cartItem && cartItem.product.location" class="style-description-small" v-text="cartItem.product.location.name" />
@@ -82,7 +82,7 @@ async function openTicket() {
             }),
         ],
         modalDisplayStyle: 'popup',
-    })
+    });
 }
 
 function openMenu(clickEvent: MouseEvent) {
@@ -94,7 +94,7 @@ function openMenu(clickEvent: MouseEvent) {
                 action: () => {
                     openTicket();
                     return true;
-                }
+                },
             }),
             new ContextMenuItem({
                 name: 'Markeer als',
@@ -116,7 +116,7 @@ function openMenu(clickEvent: MouseEvent) {
 
 function markAs(event: MouseEvent) {
     if (!hasWrite.value) {
-        return
+        return;
     }
     const el: HTMLElement = (event.currentTarget as HTMLElement).querySelector('.right') ?? event.currentTarget as HTMLElement;
     const contextMenu = getMarkAsMenu();

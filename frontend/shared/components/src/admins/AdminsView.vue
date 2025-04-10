@@ -1,10 +1,10 @@
 <template>
     <LoadingViewTransition>
         <div v-if="!loading" class="st-view background">
-            <STNavigationBar title="Beheerders" />
+            <STNavigationBar :title="$t(`Beheerders`)" />
 
             <main class="center">
-                <h1>Beheerders</h1>
+                <h1>{{ $t('Beheerders') }}</h1>
                 <p>{{ $t('ac3b2a14-e029-404c-9fe1-2aab4279a3ac') }}</p>
 
                 <STList class="illustration-list">
@@ -13,10 +13,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/admin-role.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Functies beheren
+                            {{ $t('Functies beheren') }}
                         </h2>
                         <p class="style-description">
-                            Voeg functies toe en stel de toegangsrechten voor elke functie in.
+                            {{ $t('Voeg functies toe en stel de toegangsrechten voor elke functie in.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -24,12 +24,11 @@
                     </STListItem>
                 </STList>
 
-                <hr>
-                <h2>Interne beheerders (leden met functies)</h2>
-                <p>Om een beheerder toe te voegen, schrijf je een (nieuw) lid in en ken je dat lid de juiste functies toe.</p>
+                <hr><h2>{{ $t('Interne beheerders (leden met functies)') }}</h2>
+                <p>{{ $t('Om een beheerder toe te voegen, schrijf je een (nieuw) lid in en ken je dat lid de juiste functies toe.') }}</p>
 
                 <p v-if="sortedMembers.length === 0" class="info-box">
-                    Deze groep heeft nog geen interne beheerders.
+                    {{ $t('Deze groep heeft nog geen interne beheerders.') }}
                 </p>
                 <STList v-else>
                     <STListItem v-for="member in sortedMembers" :key="member.id" :selectable="true" class="right-stack" @click="editMember(member)">
@@ -57,7 +56,7 @@
 
                         <template #right>
                             <span v-if="member.id === me?.memberId" class="style-tag">
-                                Ik
+                                {{ $t('Ik') }}
                             </span>
                             <span v-else-if="!member.patchedMember.users.find(u => u.hasAccount)" v-tooltip="'Uitnodiging nog niet geaccepteerd'" class="icon email gray" />
                             <span><span class="icon gray edit" /></span>
@@ -65,21 +64,20 @@
                     </STListItem>
                 </STList>
 
-                <hr>
-                <h2 class="style-with-button">
-                    <div>Externe beheerders</div>
+                <hr><h2 class="style-with-button">
+                    <div>{{ $t('Externe beheerders') }}</div>
                     <div>
                         <button type="button" class="button icon add" @click="createAdmin" />
                     </div>
                 </h2>
 
-                <p>Deze beheerders hebben enkel een account en zijn niet aangesloten als lid (of hun account kon niet gekoppeld worden aan een lid omdat ze een onbekend e-mailadres gebruiken).</p>
+                <p>{{ $t('Deze beheerders hebben enkel een account en zijn niet aangesloten als lid (of hun account kon niet gekoppeld worden aan een lid omdat ze een onbekend e-mailadres gebruiken).') }}</p>
                 <p class="info-box">
                     {{ $t('a9605085-cd44-454d-9386-3dd30206f3bf') }}
                 </p>
 
                 <p v-if="sortedAdmins.length === 0" class="info-box">
-                    Deze groep heeft nog geen externe beheerders. Nodig iemand uit om beheerder te worden.
+                    {{ $t('Deze groep heeft nog geen externe beheerders. Nodig iemand uit om beheerder te worden.') }}
                 </p>
 
                 <STList v-else>
@@ -111,7 +109,7 @@
 
                         <template #right>
                             <span v-if="admin.id === me?.id" class="style-tag">
-                                Ik
+                                {{ $t('Ik') }}
                             </span>
                             <span v-else-if="!admin.hasAccount" v-tooltip="'Uitnodiging nog niet geaccepteerd'" class="icon email gray" />
                             <span><span class="icon gray edit" /></span>

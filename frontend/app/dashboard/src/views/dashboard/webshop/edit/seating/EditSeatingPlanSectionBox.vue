@@ -10,90 +10,44 @@
                 <p class="button-row">
                     <button class="button text" type="button" @click="addRow($event, false)">
                         <span class="icon add" />
-                        <span>Rij</span>
+                        <span>{{ $t('Rij') }}</span>
                     </button>
 
                     <button class="button text" type="button" @click="addRow($event, true)">
                         <span class="icon add" />
-                        <span>Gang</span>
+                        <span>{{ $t('Gang') }}</span>
                     </button>
                 </p>
 
                 <div
-                    class="seating-plan-seats"
-                    :style="{
+                    class="seating-plan-seats" :style="{
                         '--sw': size.width + 'px',
                         '--sh': size.height + 'px',
                     }"
                 >
                     <div
-                        v-for="row of rows"
-                        :key="row.uuid"
-                        :ref="'row-' + row.uuid"
-                        class="seating-plan-row"
-                        :style="{
+                        v-for="row of rows" :key="row.uuid" :ref="'row-' + row.uuid" class="seating-plan-row" :style="{
                             '--rw': row.width + 'px',
                             '--rh': row.height + 'px',
                             '--rx': row.x + 'px',
                             '--ry': row.y + 'px',
                         }"
                     >
-                        <input
-                            v-model="row.label"
-                            class="row-label left"
-                            :class="{error: isRowInvalid(row)}"
-                            @click.prevent="selectInput"
-                            @input="emitChange()"
-                        >
-                        <input
-                            v-model="row.label"
-                            class="row-label right"
-                            :class="{error: isRowInvalid(row)}"
-                            @click.prevent="selectInput"
-                            @input="emitChange()"
-                        >
-                        <button
-                            v-if="isRowSelected(row) || row.seats.length === 0"
-                            class="left add-seat-button button icon add gray hover-show"
-                            type="button"
-                            @click.prevent="addLeftSeat(row)"
-                        />
+                        <input v-model="row.label" class="row-label left" :class="{error: isRowInvalid(row)}" @click.prevent="selectInput" @input="emitChange()"><input v-model="row.label" class="row-label right" :class="{error: isRowInvalid(row)}" @click.prevent="selectInput" @input="emitChange()"><button v-if="isRowSelected(row) || row.seats.length === 0" class="left add-seat-button button icon add gray hover-show" type="button" @click.prevent="addLeftSeat(row)" />
 
-                        <button
-                            v-if="isRowSelected(row) || row.seats.length === 0"
-                            class="right add-seat-button button icon add gray hover-show"
-                            type="button"
-                            @click.prevent="addRightSeat(row)"
-                        />
+                        <button v-if="isRowSelected(row) || row.seats.length === 0" class="right add-seat-button button icon add gray hover-show" type="button" @click.prevent="addRightSeat(row)" />
 
                         <div>
                             <div
-                                v-for="seat of row.seats"
-                                :key="seat.uuid"
-                                v-long-press="(e: MouseEvent | TouchEvent) => openContextMenu(e, seat)"
-                                class="seat"
-                                :class="{error: isSeatInvalid(row, seat), space: seat.isSpace, disabledPerson: isDisabledPersonSeat(seat), selected: isSeatSelected(seat)}"
-                                :style="{
+                                v-for="seat of row.seats" :key="seat.uuid" v-long-press="(e: MouseEvent | TouchEvent) => openContextMenu(e, seat)" class="seat" :class="{error: isSeatInvalid(row, seat), space: seat.isSpace, disabledPerson: isDisabledPersonSeat(seat), selected: isSeatSelected(seat)}" :style="{
                                     '--w': seat.width + 'px',
                                     '--h': seat.height + 'px',
                                     '--x': seat.x + 'px',
                                     '--y': seat.y + 'px',
                                     '--color': getSeatColor(seat)
-                                }"
-                                @click.left="selectSeat(seat, $event)"
-                                @pointerdown.left="preventIfNotSelected(seat, $event)"
-                                @contextmenu.prevent.stop="openContextMenu($event, seat)"
+                                }" @click.left="selectSeat(seat, $event)" @pointerdown.left="preventIfNotSelected(seat, $event)" @contextmenu.prevent.stop="openContextMenu($event, seat)"
                             >
-                                <input
-                                    :ref="(el) => storeSeatEl(el as HTMLInputElement | null, seat.uuid)"
-                                    :data-uuid="seat.uuid"
-                                    data-seat="true"
-                                    :value="seat.label"
-                                    :class="{error: isSeatInvalid(row, seat), space: seat.isSpace, disabledPerson: isDisabledPersonSeat(seat), selected: isSeatSelected(seat)}"
-                                    @input="setSeat(row, seat, ($event as any).target.value)"
-                                    @keydown.enter.prevent.stop="insertSeat(row, seat, $event)"
-                                >
-                                <span v-if="isDisabledPersonSeat(seat)" class="icon disabled-person" />
+                                <input :ref="(el) => storeSeatEl(el as HTMLInputElement | null, seat.uuid)" :data-uuid="seat.uuid" data-seat="true" :value="seat.label" :class="{error: isSeatInvalid(row, seat), space: seat.isSpace, disabledPerson: isDisabledPersonSeat(seat), selected: isSeatSelected(seat)}" @input="setSeat(row, seat, ($event as any).target.value)" @keydown.enter.prevent.stop="insertSeat(row, seat, $event)"><span v-if="isDisabledPersonSeat(seat)" class="icon disabled-person" />
                             </div>
                         </div>
                     </div>
@@ -102,22 +56,22 @@
                 <p class="button-row">
                     <button class="button text" type="button" @click="addRowBottom($event, false)">
                         <span class="icon add" />
-                        <span>Rij</span>
+                        <span>{{ $t('Rij') }}</span>
                     </button>
 
                     <button class="button text" type="button" @click="addRowBottom($event, true)">
                         <span class="icon add" />
-                        <span>Gang</span>
+                        <span>{{ $t('Gang') }}</span>
                     </button>
                 </p>
             </div>
         </div>
         <p v-if="!isMobile" class="style-description-small">
-            Voeg rijen en gangen toe. Binnen een rij kan je verticale gangen maken door een stoel aan te klikken met je rechtermuisknop en een gang links of rechts in te voegen. Je kan ook een stoel selecteren en wijzigen in een gang. Je kan tekst in een gang plaatsen ter informatie, bijvoorbeeld om ingangen en het podium aan te geven. Je kan de breedte van een gang of stoel wijzigen met je rechtermuisknop. Hou <template v-if="$isMac || $isIOS">
-                Command(⌘)
+            {{ $t('Voeg rijen en gangen toe. Binnen een rij kan je verticale gangen maken door een stoel aan te klikken met je rechtermuisknop en een gang links of rechts in te voegen. Je kan ook een stoel selecteren en wijzigen in een gang. Je kan tekst in een gang plaatsen ter informatie, bijvoorbeeld om ingangen en het podium aan te geven. Je kan de breedte van een gang of stoel wijzigen met je rechtermuisknop. Hou') }} <template v-if="$isMac || $isIOS">
+                {{ $t('Command(⌘)') }}
             </template><template v-else>
-                Ctrl
-            </template> en/of Shift(⇧) ingedrukt om meerdere stoelen te selecteren. Gebruik de Enter(⏎) toetst om snel stoelen toe te voegen. Gebruik Backspace(⌫) om een stoel of rij te verwijderen. Gebruik de pijltjestoetsen om snel te navigeren.
+                {{ $t('Ctrl') }}
+            </template> {{ $t('en/of Shift(⇧) ingedrukt om meerdere stoelen te selecteren. Gebruik de Enter(⏎) toetst om snel stoelen toe te voegen. Gebruik Backspace(⌫) om een stoel of rij te verwijderen. Gebruik de pijltjestoetsen om snel te navigeren.') }}
         </p>
         <STErrorsDefault :error-box="errors.errorBox" />
     </div>
@@ -711,18 +665,18 @@ const sizeConfig = computed(() => {
         seatWidth: 28,
         seatHeight: 28,
         seatXSpacing: 3,
-        seatYSpacing: 10
-    })
+        seatYSpacing: 10,
+    });
     if (isMobile) {
         config = new SeatingSizeConfiguration({
             seatWidth: 35,
             seatHeight: 35,
             seatXSpacing: 3 / 4 * 5,
-            seatYSpacing: 10 / 4 * 5
-        })
+            seatYSpacing: 10 / 4 * 5,
+        });
     }
 
-    clonedSeatingPlanSection.value.correctSizeConfig(config)
+    clonedSeatingPlanSection.value.correctSizeConfig(config);
     return config;
 });
 

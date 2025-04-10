@@ -19,7 +19,7 @@
                 {{ role.name }}
             </h2>
             <p v-if="isMe" class="style-description-small">
-                Jij zit in deze groep
+                {{ $t('Jij zit in deze groep') }}
             </p>
         </template>
 
@@ -45,12 +45,12 @@ import { AccessRight, AccessRightHelper, PermissionLevel, PermissionRoleDetailed
 import { Ref, computed } from 'vue';
 
 const props = withDefaults(defineProps<{
-    resource: { id: string; name: string; type: PermissionsResourceType, description?: string };
+    resource: { id: string; name: string; type: PermissionsResourceType; description?: string };
     role: PermissionRoleDetailed | Permissions;
     inheritedRoles?: (PermissionRoleDetailed | Permissions)[];
     type: 'resource' | 'role'; // whether we show the name of the role or the resource
     configurableAccessRights: AccessRight[];
-    unlisted?: boolean
+    unlisted?: boolean;
 }>(), {
     inheritedRoles: () => [],
     unlisted: false,

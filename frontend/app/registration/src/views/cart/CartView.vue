@@ -1,22 +1,22 @@
 <template>
     <section class="st-view">
-        <STNavigationBar title="Winkelmandje" />
+        <STNavigationBar :title="$t(`Winkelmandje`)" />
         <main class="center">
             <h1>
-                Winkelmandje
+                {{ $t('Winkelmandje') }}
             </h1>
 
             <p v-if="cart.price">
-                Voeg alle inschrijvingen toe aan het mandje en reken in één keer af.
+                {{ $t('Voeg alle inschrijvingen toe aan het mandje en reken in één keer af.') }}
             </p>
             <p v-else>
-                Voeg alle inschrijvingen toe aan het mandje en bevestig ze.
+                {{ $t('Voeg alle inschrijvingen toe aan het mandje en bevestig ze.') }}
             </p>
-            
+
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <p v-if="cart.isEmpty" class="info-box">
-                Jouw mandje is leeg. Schrijf een lid in via het tabblad 'Start'.
+                {{ $t("Jouw mandje is leeg. Schrijf een lid in via het tabblad 'Start'.") }}
             </p>
 
             <template v-else>
@@ -29,8 +29,8 @@
                 <p class="style-button-bar right-align">
                     <LoadingButton :loading="loading">
                         <button class="button primary" type="button" @click="goToCheckout">
-                            <span v-if="checkout.totalPrice">Afrekenen</span>
-                            <span v-else>Bevestigen</span>
+                            <span v-if="checkout.totalPrice">{{ $t('Afrekenen') }}</span>
+                            <span v-else>{{ $t('Bevestigen') }}</span>
 
                             <span class="icon arrow-right" />
                         </button>
@@ -47,47 +47,50 @@ import { useMemberManager } from '@stamhoofd/networking';
 import { computed, onActivated, onMounted, ref } from 'vue';
 
 const memberManager = useMemberManager();
-const checkout = computed(() => memberManager.family.checkout)
-const cart = computed(() => checkout.value.cart)
-const errors = useErrors()
-const context = useContext()
+const checkout = computed(() => memberManager.family.checkout);
+const cart = computed(() => checkout.value.cart);
+const errors = useErrors();
+const context = useContext();
 const navigate = useNavigationActions();
 
-const loading = ref(false)
+const loading = ref(false);
 
 onMounted(() => {
-    checkout.value.updatePrices()
+    checkout.value.updatePrices();
 
     try {
-        errors.errorBox = null
-        checkout.value.validate({})
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        errors.errorBox = null;
+        checkout.value.validate({});
     }
-})
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+});
 onActivated(() => {
-    checkout.value.updatePrices()
-})
+    checkout.value.updatePrices();
+});
 
 async function goToCheckout() {
     if (loading.value) {
-        return
+        return;
     }
 
-    loading.value = true
-    errors.errorBox = null
+    loading.value = true;
+    errors.errorBox = null;
 
     try {
         await startCheckout({
             admin: false,
             checkout: checkout.value,
             context: context.value,
-            displayOptions: {action: 'present', modalDisplayStyle: 'popup'}
-        }, navigate)
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
-    } finally {
-        loading.value = false
+            displayOptions: { action: 'present', modalDisplayStyle: 'popup' },
+        }, navigate);
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+    finally {
+        loading.value = false;
     }
 }
 

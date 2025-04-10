@@ -1,18 +1,18 @@
 <template>
     <div class="st-menu st-view members-menu">
-        <STNavigationBar title="Leden">
+        <STNavigationBar :title="$t(`Leden`)">
             <template #right>
                 <button v-if="$canEdit" class="navigation button icon settings" type="button" @click="editMe" />
             </template>
         </STNavigationBar>
 
         <main>
-            <h1>Leden</h1>
+            <h1>{{ $t('Leden') }}</h1>
 
             <template v-if="auth.hasFullAccess()">
                 <button v-if="canUpgradePeriod" type="button" class="menu-button button cta" @click="upgradePeriod">
                     <span class="icon flag" />
-                    <span>Schakel over naar {{ newestPeriod.name }}</span>
+                    <span>{{ $t('Schakel over naar') }} {{ newestPeriod.name }}</span>
                 </button>
                 <button v-else-if="canSetDefaultPeriod" type="button" class="menu-button button cta" @click="setDefaultPeriod">
                     <span class="icon flag" />
@@ -23,18 +23,16 @@
             </template>
 
             <p v-if="tree.categories.length === 0" class="info-box">
-                Oeps, er zijn nog geen inschrijvingsgroepen gemaakt. Ga naar de instellingen en configureer jouw inschrijvingsgroepen.
+                {{ $t('Oeps, er zijn nog geen inschrijvingsgroepen gemaakt. Ga naar de instellingen en configureer jouw inschrijvingsgroepen.') }}
             </p>
 
             <div v-if="tree.categories.length > 1" class="container">
                 <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.All) }" @click="$navigate(Routes.All)">
                     <span class="icon ul" />
-                    <span>Alle leden</span>
+                    <span>{{ $t('Alle leden') }}</span>
                 </button>
             </div>
-            <hr v-if="tree.categories.length > 1">
-
-            <div v-for="(category, index) in tree.categories" :key="category.id" class="container">
+            <hr v-if="tree.categories.length > 1"><div v-for="(category, index) in tree.categories" :key="category.id" class="container">
                 <div class="grouped">
                     <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Category, {properties: {category, period}}) }" @click="$navigate('category', {properties: {category, period}})">
                         <span :class="'icon ' + getCategoryIcon(category)" />
@@ -44,26 +42,12 @@
                     </button>
 
                     <div :class="{collapsable: true, hide: collapsed.isCollapsed(category.id) || isCategoryDeactivated(category)}">
-                        <button
-                            v-for="c in category.categories"
-                            :key="c.id"
-                            class="menu-button button sub-button"
-                            :class="{ selected: checkRoute(Routes.Category, {properties: {category: c, period}}) }"
-                            type="button"
-                            @click="$navigate(Routes.Category, {properties: {category: c, period}})"
-                        >
+                        <button v-for="c in category.categories" :key="c.id" class="menu-button button sub-button" :class="{ selected: checkRoute(Routes.Category, {properties: {category: c, period}}) }" type="button" @click="$navigate(Routes.Category, {properties: {category: c, period}})">
                             <span class="icon" />
                             <span>{{ c.settings.name }}</span>
                         </button>
 
-                        <button
-                            v-for="group in category.groups"
-                            :key="group.id"
-                            class="menu-button button sub-button"
-                            :class="{ selected: checkRoute(Routes.Group, {properties: {group, period}}) }"
-                            type="button"
-                            @click="$navigate(Routes.Group, {properties: {group, period}})"
-                        >
+                        <button v-for="group in category.groups" :key="group.id" class="menu-button button sub-button" :class="{ selected: checkRoute(Routes.Group, {properties: {group, period}}) }" type="button" @click="$navigate(Routes.Group, {properties: {group, period}})">
                             <GroupAvatar :group="group" :allow-empty="true" />
                             <span>{{ group.settings.name }}</span>
                             <span v-if="group.settings.registeredMembers !== null" class="count">{{ formatInteger(group.settings.registeredMembers) }}</span>
@@ -75,9 +59,7 @@
             </div>
 
             <div v-if="auth.hasFullAccess()" class="grouped footer">
-                <hr>
-
-                <button class="menu-button button" type="button" @click="switchPeriod">
+                <hr><button class="menu-button button" type="button" @click="switchPeriod">
                     <span>{{ period.period.name }}</span>
                     <span class="icon gray arrow-swap right-icon" />
                 </button>
