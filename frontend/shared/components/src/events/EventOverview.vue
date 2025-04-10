@@ -251,8 +251,13 @@ defineRoutes([
             if (!props.event.group) {
                 throw new Error('No group found');
             }
+
             return {
                 group: props.event.group,
+                dateRange: {
+                    start: props.event.startDate,
+                    end: props.event.endDate,
+                },
             };
         },
     },
