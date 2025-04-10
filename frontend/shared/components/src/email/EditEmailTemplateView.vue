@@ -1,27 +1,26 @@
 <template>
-    <EditorView ref="editorView" class="mail-view" title="E-mail template" save-text="Opslaan" :replacements="replacements" @save="save">
+    <EditorView ref="editorView" class="mail-view" :save-text="$t('Opslaan')" :replacements="replacements" :title="$t(`E-mail template`)" @save="save">
         <p v-if="prefix" class="style-title-prefix" v-text="prefix" />
         <h1 v-if="isNew" class="style-navigation-title">
-            Nieuw sjabloon
+            {{ $t('Nieuw sjabloon') }}
         </h1>
         <h1 v-else class="style-navigation-title">
-            Wijzig sjabloon
+            {{ $t('Wijzig sjabloon') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <!-- List -->
         <template #list>
             <STListItem class="no-padding">
                 <div class="list-input-box">
-                    <span>Type:</span>
+                    <span>{{ $t('Type') }}:</span>
                     <span class="list-input">{{ EmailTemplate.getTypeTitle(emailTemplate.type) }}</span>
                 </div>
             </STListItem>
             <STListItem class="no-padding" element-name="label">
                 <div class="list-input-box">
-                    <span>Onderwerp:</span>
-                    <input id="mail-subject" v-model="subject" class="list-input" type="text" placeholder="Typ hier het onderwerp van je e-mail">
+                    <span>{{ $t('Onderwerp') }}:</span>
+                    <input id="mail-subject" v-model="subject" class="list-input" type="text" :placeholder="$t(`Typ hier het onderwerp van je e-mail`)">
                 </div>
             </STListItem>
         </template>

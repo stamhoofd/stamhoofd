@@ -23,7 +23,7 @@
                         <span>{{ notification.events.map(e => e.name).join(', ') }}</span>
                     </p>
                     <p v-if="notification.events.length === 0" class="style-definition-text style-em">
-                        Geen
+                        {{ $t('Geen') }}
                     </p>
 
                     <template v-if="isReviewer && notification.events.length === 1" #right>
@@ -42,7 +42,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        Wanneer
+                        {{ $t('Wanneer') }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ capitalizeFirstLetter(formatDateRange(notification.startDate, notification.endDate, undefined, false)) }}</span>
@@ -51,7 +51,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        Status
+                        {{ $t('Status') }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ capitalizeFirstLetter(EventNotificationStatusHelper.getName(notification.status)) }}</span>
@@ -84,17 +84,15 @@
                     <PatchListText :items="diffList" />
 
                     <template #right>
-                        <button class="button icon eye gray" @click="showOriginalAnswers" type="button" v-tooltip="'Bekijk origineel'"/>
+                        <button v-tooltip="'Bekijk origineel'" class="button icon eye gray" type="button" @click="showOriginalAnswers" />
                     </template>
                 </STListItem>
             </STList>
 
             <template v-if="notification.status === EventNotificationStatus.Draft">
-                <hr>
-                <h2>Gegevens</h2>
-                <p>Vul de gegevens hieronder aan voor je de kampmelding indient.</p>
+                <hr><h2>{{ $t('Gegevens') }}</h2>
+                <p>{{ $t('Vul de gegevens hieronder aan voor je de kampmelding indient.') }}</p>
 
-                <!-- For each record category: a new view -->
                 <STList>
                     <STListItem v-for="category of recordCategories" :key="category.id" :selectable="isEnabled(category)" :disabled="!isEnabled(category)" @click="editRecordCategory(category)">
                         <template #left>
@@ -108,13 +106,13 @@
                             {{ category.name }}
                         </h3>
                         <p v-if="getRecordCategoryProgress(category) === 0" class="style-description">
-                            Nog niet ingevuld
+                            {{ $t('Nog niet ingevuld') }}
                         </p>
                         <p v-else-if="getRecordCategoryProgress(category) === 1" class="style-description">
-                            Volledig ingevuld
+                            {{ $t('Volledig ingevuld') }}
                         </p>
                         <p v-else class="style-description">
-                            Onvolledig
+                            {{ $t('Onvolledig') }}
                         </p>
 
                         <template #right>
@@ -133,8 +131,7 @@
             </template>
 
             <div v-if="notification.status === EventNotificationStatus.Pending && isComplete && isReviewer" class="container">
-                <hr>
-                <h2>Beslissing</h2>
+                <hr><h2>{{ $t('Beslissing') }}</h2>
 
                 <STList>
                     <STListItem :selectable="true" element-name="button" @click="doAccept">
@@ -146,10 +143,10 @@
                             </IconContainer>
                         </template>
                         <h3 class="style-title-list">
-                            Goedkeuren
+                            {{ $t('Goedkeuren') }}
                         </h3>
                         <p class="style-description-small">
-                            Keur deze melding goed.
+                            {{ $t('Keur deze melding goed.') }}
                         </p>
 
                         <template #right>
@@ -166,10 +163,10 @@
                             </IconContainer>
                         </template>
                         <h3 class="style-title-list">
-                            Voorlopig goedgekeurd
+                            {{ $t('Voorlopig goedgekeurd') }}
                         </h3>
                         <p class="style-description-small">
-                            Als alles wel in orde is, maar er nog iets klein moet worden aangevuld op een later tijdstip.
+                            {{ $t('Als alles wel in orde is, maar er nog iets klein moet worden aangevuld op een later tijdstip.') }}
                         </p>
 
                         <template #right>
@@ -187,10 +184,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            Afkeuren
+                            {{ $t('Afkeuren') }}
                         </h3>
                         <p class="style-description-small">
-                            Hierna zijn er terug wijzigingen mogelijk. Laat eventueel een opmerking achter.
+                            {{ $t('Hierna zijn er terug wijzigingen mogelijk. Laat eventueel een opmerking achter.') }}
                         </p>
 
                         <template #right>
@@ -208,8 +205,8 @@
                         <span v-if="notification.status === EventNotificationStatus.Rejected" class="icon retry" />
                         <span v-else class="icon success" />
 
-                        <span v-if="notification.status === EventNotificationStatus.Rejected">Opnieuw indienen</span>
-                        <span v-else>Indienen</span>
+                        <span v-if="notification.status === EventNotificationStatus.Rejected">{{ $t('Opnieuw indienen') }}</span>
+                        <span v-else>{{ $t('Indienen') }}</span>
                     </button>
                 </LoadingButton>
             </template>

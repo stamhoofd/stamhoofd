@@ -1,11 +1,10 @@
 <template>
-    <SaveView title="Developers" :loading="saving" @save="save">
+    <SaveView :loading="saving" :title="$t(`Developers`)" @save="save">
         <h1>
-            Developers
+            {{ $t('Developers') }}
         </h1>
 
-        <hr>
-        <h2>Kanaal</h2>
+        <hr><h2>{{ $t('Kanaal') }}</h2>
         <STList>
             <STListItem v-for="r in availableChannels" :key="r.url" :selectable="true" element-name="label">
                 <template #left>
@@ -23,42 +22,42 @@
                     <Radio v-model="releaseChannel" value="custom" />
                 </template>
                 <h3 class="style-title-list">
-                    Custom
+                    {{ $t('Custom') }}
                 </h3>
-                <input v-if="releaseChannel === 'custom'" v-model="customChannel" type="text" placeholder="Vul een URL in" class="input option">
+                <input v-if="releaseChannel === 'custom'" v-model="customChannel" type="text" class="input option" :placeholder="$t(`Vul een URL in`)">
             </STListItem>
         </STList>
     </SaveView>
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Radio, SaveView, STList, STListItem, Toast, TooltipDirective } from "@stamhoofd/components";
-import { AppManager, Storage } from "@stamhoofd/networking";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { Radio, SaveView, STList, STListItem, Toast, TooltipDirective } from '@stamhoofd/components';
+import { AppManager, Storage } from '@stamhoofd/networking';
 
 @Component({
     components: {
         SaveView,
         Radio,
         STList,
-        STListItem
+        STListItem,
     },
     directives: {
-        tooltip: TooltipDirective
-    }
+        tooltip: TooltipDirective,
+    },
 })
 export default class DevPanelView extends Mixins(NavigationMixin) {
-    releaseChannel = ''
-    customChannel = ''
+    releaseChannel = '';
+    customChannel = '';
     saving = false;
-    availableChannels: {name: string, url: string}[] = []
+    availableChannels: { name: string; url: string }[] = [];
 
-    mounted() {        
+    mounted() {
         this.availableChannels = [
             {
                 name: 'Standaard',
-                url: STAMHOOFD.APP_UPDATE_SERVER_URL
+                url: STAMHOOFD.APP_UPDATE_SERVER_URL,
             },
             {
                 name: 'Production',
@@ -72,27 +71,28 @@ export default class DevPanelView extends Mixins(NavigationMixin) {
                 name: 'Development',
                 url: STAMHOOFD.APP_UPDATE_DEVELOPMENT_SERVER_URL,
             },
-        ].filter(c => c.url !== undefined) as any
+        ].filter(c => c.url !== undefined) as any;
 
-        Storage.keyValue.getItem("UPDATE_SERVER").then((value) => {
-            this.releaseChannel = value ?? ''
-            this.customChannel = value ?? ''
+        Storage.keyValue.getItem('UPDATE_SERVER').then((value) => {
+            this.releaseChannel = value ?? '';
+            this.customChannel = value ?? '';
 
             if (!this.availableChannels.find(c => c.url === value)) {
-                this.releaseChannel = 'custom'
+                this.releaseChannel = 'custom';
             }
         }).catch(console.error);
     }
 
     async saveChannel() {
         if (this.releaseChannel === '') {
-            await Storage.keyValue.removeItem("UPDATE_SERVER")
+            await Storage.keyValue.removeItem('UPDATE_SERVER');
         } if (this.releaseChannel === 'custom') {
             // Check valid
-            new URL(this.customChannel)
-            await Storage.keyValue.setItem("UPDATE_SERVER", this.customChannel)
-        } else {
-            await Storage.keyValue.setItem("UPDATE_SERVER", this.releaseChannel)
+            new URL(this.customChannel);
+            await Storage.keyValue.setItem('UPDATE_SERVER', this.customChannel);
+        }
+        else {
+            await Storage.keyValue.setItem('UPDATE_SERVER', this.releaseChannel);
         }
         await AppManager.shared.checkUpdates({
             visibleCheck: 'text',
@@ -100,22 +100,23 @@ export default class DevPanelView extends Mixins(NavigationMixin) {
             installAutomatically: true,
             checkTimeout: 15 * 1000,
             force: true,
-            channel: this.releaseChannel === 'custom' ? this.customChannel : this.releaseChannel
-        })
+            channel: this.releaseChannel === 'custom' ? this.customChannel : this.releaseChannel,
+        });
     }
 
     async save() {
         if (this.saving) {
             return;
         }
-        this.saving = true
+        this.saving = true;
 
         try {
-            await this.saveChannel()
-            new Toast("Wijzigingen opgeslagen", "success").show()
-            this.dismiss({force: true})
-        } catch (e) {
-            Toast.fromError(e as Error).show()
+            await this.saveChannel();
+            new Toast('Wijzigingen opgeslagen', 'success').show();
+            this.dismiss({ force: true });
+        }
+        catch (e) {
+            Toast.fromError(e as Error).show();
         }
 
         this.saving = false;

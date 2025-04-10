@@ -1,29 +1,29 @@
 <template>
     <div id="settings-view" class="st-view background">
-        <STNavigationBar title="Activiteiten">
+        <STNavigationBar :title="$t(`Activiteiten`)">
             <template #right>
                 <button v-if="canWriteSomeEvent" type="button" class="button text navigation" @click="addEvent()">
                     <span class="icon add" />
-                    <span>Nieuw</span>
+                    <span>{{ $t('Nieuw') }}</span>
                 </button>
             </template>
         </STNavigationBar>
 
         <main class="center">
             <h1>
-                Activiteiten
+                {{ $t('Activiteiten') }}
             </h1>
 
             <div class="input-with-buttons">
                 <div>
                     <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                        <input v-model="searchQuery" class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
+                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`Zoeken`)">
                     </form>
                 </div>
                 <div>
                     <button type="button" class="button text" @click="editFilter">
                         <span class="icon filter" />
-                        <span class="hide-small">Filter</span>
+                        <span class="hide-small">{{ $t('Filter') }}</span>
                         <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary" />
                     </button>
                 </div>
@@ -33,15 +33,14 @@
 
             <template v-if="selectedYear === null && suggestionsGroup">
                 <Checkbox v-model="addSuggestions">
-                    Toon wekelijkse suggesties voor {{ suggestionsGroup.settings.name }}
+                    {{ $t('Toon wekelijkse suggesties voor') }} {{ suggestionsGroup.settings.name }}
                 </Checkbox>
 
                 <hr>
             </template>
 
             <div v-for="(group, index) of groupedEvents" :key="group.title" class="container">
-                <hr v-if="index > 0">
-                <h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
+                <hr v-if="index > 0"><h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
 
                 <STList>
                     <EventRow v-for="event of group.events" :key="event.id" :event="event" @click="onClickEvent(event)" />

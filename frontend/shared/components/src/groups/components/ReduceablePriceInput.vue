@@ -2,7 +2,7 @@
     <STErrorsDefault :error-box="ownErrors.errorBox" />
     <div class="split-inputs">
         <STInputBox :title="title" error-fields="price" :error-box="errorBox">
-            <PriceInput v-model="price" placeholder="Gratis" :min="min" />
+            <PriceInput v-model="price" :min="min" :placeholder="$t(`Gratis`)" />
             <p v-if="defaultMembershipTypeId" class="style-description-small">
                 {{ formatPriceForPlatform(defaultPrice, defaultPriceNow) }}
             </p>

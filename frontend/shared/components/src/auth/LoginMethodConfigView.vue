@@ -1,89 +1,54 @@
 <template>
-    <SaveView :loading="saving" title="Login methode configuratie" :disabled="!hasChanges" :error-box="errors.errorBox" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChanges" :error-box="errors.errorBox" :title="$t(`Login methode configuratie`)" @save="save">
         <h1>
-            Login methode configuratie ({{ loginMethod }})
+            {{ $t('Login methode configuratie ({method})', {method: loginMethod}) }}
         </h1>
         <p>
-            Bepaal de voorwaarden en benamign van deze login methode.
+            {{ $t('Bepaal de voorwaarden en benamign van deze login methode.') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox title="Volledige naam" error-fields="fullName" :error-box="errors.errorBox">
-            <input
-                ref="firstInput"
-                v-model="fullName"
-                class="input"
-                type="text"
-                placeholder="Optioneel"
-                autocomplete="off"
-            >
+        <STInputBox error-fields="fullName" :error-box="errors.errorBox" :title="$t(`Volledige naam`)">
+            <input ref="firstInput" v-model="fullName" class="input" type="text" autocomplete="off" :placeholder="$t(`Optioneel`)">
         </STInputBox>
 
-        <STInputBox title="Korte naam" error-fields="shortName" :error-box="errors.errorBox">
-            <input
-                ref="firstInput"
-                v-model="shortName"
-                class="input"
-                type="text"
-                placeholder="Optioneel"
-                autocomplete="off"
-            >
+        <STInputBox error-fields="shortName" :error-box="errors.errorBox" :title="$t(`Korte naam`)">
+            <input ref="firstInput" v-model="shortName" class="input" type="text" autocomplete="off" :placeholder="$t(`Optioneel`)">
         </STInputBox>
 
-        <STInputBox title="Login knop text" error-fields="loginButtonText" :error-box="errors.errorBox">
-            <input
-                ref="firstInput"
-                v-model="loginButtonText"
-                class="input"
-                type="text"
-                placeholder="Optioneel"
-                autocomplete="off"
-            >
+        <STInputBox error-fields="loginButtonText" :error-box="errors.errorBox" :title="$t(`Login knop text`)">
+            <input ref="firstInput" v-model="loginButtonText" class="input" type="text" autocomplete="off" :placeholder="$t(`Optioneel`)">
         </STInputBox>
 
-        <ArrayInput v-model="allowlist" title="Toegestane domeinnamen" :default-value="() => ''">
+        <ArrayInput v-model="allowlist" :default-value="() => ''" :title="$t(`Toegestane domeinnamen`)">
             <template #item="{index, modelValue, updateModelValue}">
-                <input
-                    :value="modelValue"
-                    class="input"
-                    type="text"
-                    :placeholder="'Domeinnaam ' + (index + 1)"
-                    autocomplete="off"
-                    @input="updateModelValue(($event.target as HTMLInputElement).value || '')"
-                >
+                <input :value="modelValue" class="input" type="text" :placeholder="$t(`Domeinnaam`) + ' ' + (index + 1)" autocomplete="off" @input="updateModelValue(($event.target as HTMLInputElement).value || '')">
             </template>
 
             <template #empty>
                 <p class="style-description-small">
-                    Alle emaildomeinnamen zijn toegestaan
+                    {{ $t('Alle emaildomeinnamen zijn toegestaan') }}
                 </p>
             </template>
         </ArrayInput>
         <p v-if="allowlist.length" class="style-description-small">
-            Enkel e-mailadressen met deze domeinnamen kunnen deze login methode gebruiken.
+            {{ $t('Enkel e-mailadressen met deze domeinnamen kunnen deze login methode gebruiken.') }}
         </p>
 
-        <ArrayInput v-model="blocklist" title="Uitgesloten domeinnamen" :default-value="() => ''">
+        <ArrayInput v-model="blocklist" :default-value="() => ''" :title="$t(`Uitgesloten domeinnamen`)">
             <template #item="{index, modelValue, updateModelValue}">
-                <input
-                    :value="modelValue"
-                    class="input"
-                    type="text"
-                    :placeholder="'Domeinnaam ' + (index + 1)"
-                    autocomplete="off"
-                    @input="updateModelValue(($event.target as HTMLInputElement).value || '')"
-                >
+                <input :value="modelValue" class="input" type="text" :placeholder="$t(`Domeinnaam`) + ' ' + (index + 1)" autocomplete="off" @input="updateModelValue(($event.target as HTMLInputElement).value || '')">
             </template>
 
             <template #empty>
                 <p class="style-description-small">
-                    Geen uitgesloten domeinnamen
+                    {{ $t('Geen uitgesloten domeinnamen') }}
                 </p>
             </template>
         </ArrayInput>
         <p class="style-description-small">
-            E-mailadressen met deze domeinnamen kunnen deze login methode niet gebruiken.
+            {{ $t('E-mailadressen met deze domeinnamen kunnen deze login methode niet gebruiken.') }}
         </p>
     </SaveView>
 </template>

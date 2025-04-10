@@ -17,7 +17,7 @@
         <STToolbar v-if="!live || !popup">
             <template #right>
                 <button class="button primary full" type="button" @click="applyFilter">
-                    Toepassen
+                    {{ $t('Toepassen') }}
                 </button>
             </template>
         </STToolbar>

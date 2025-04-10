@@ -43,11 +43,11 @@
             </template>
 
             <h2 class="style-title-list">
-                <span v-if="event.group.notYetOpen && event.group.settings.registrationEndDate">Inschrijven mogelijk van {{ Formatter.dateRange(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date(), event.group.settings.registrationEndDate, ' tot ') }}</span>
-                <span v-else-if="event.group.notYetOpen">Inschrijven mogelijk vanaf {{ Formatter.startDate(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date()) }}</span>
-                <span v-else-if="event.group.closed">De inschrijvingen zijn gesloten</span>
-                <span v-else-if="event.group.settings.registrationEndDate">Inschrijven kan tot {{ Formatter.endDate(event.group.settings.registrationEndDate) }}</span>
-                <span v-else>Inschrijvingen zijn geopend</span>
+                <span v-if="event.group.notYetOpen && event.group.settings.registrationEndDate">{{ $t('Inschrijven mogelijk van') }} {{ Formatter.dateRange(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date(), event.group.settings.registrationEndDate, ' tot ') }}</span>
+                <span v-else-if="event.group.notYetOpen">{{ $t('Inschrijven mogelijk vanaf') }} {{ Formatter.startDate(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date()) }}</span>
+                <span v-else-if="event.group.closed">{{ $t('De inschrijvingen zijn gesloten') }}</span>
+                <span v-else-if="event.group.settings.registrationEndDate">{{ $t('Inschrijven kan tot') }} {{ Formatter.endDate(event.group.settings.registrationEndDate) }}</span>
+                <span v-else>{{ $t('Inschrijvingen zijn geopend') }}</span>
             </h2>
 
             <p v-if="app !== 'registration' && !event.group.closed && (organization && event.organizationId !== organization.id && !event.group.settings.allowRegistrationsByOrganization)" class="style-description-small">

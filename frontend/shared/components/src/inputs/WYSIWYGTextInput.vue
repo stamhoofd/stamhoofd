@@ -7,9 +7,9 @@
                 <STList>
                     <STListItem class="no-padding right-stack">
                         <div class="list-input-box">
-                            <span>Link:</span>
+                            <span>{{ $t('Link') }}:</span>
 
-                            <input ref="linkInput" v-model="editLink" class="list-input" type="url" placeholder="https://" enterkeyhint="go">
+                            <input ref="linkInput" v-model="editLink" class="list-input" type="url" enterkeyhint="go" :placeholder="$t(`https://`)">
                         </div>
                         <template #right>
                             <button class="button text" type="submit" @mousedown.prevent>
@@ -26,9 +26,7 @@
                 <button v-tooltip="'Schuine tekst'" class="button icon italic" type="button" :class="{ 'is-active': editor.isActive('italic') }" @click="editor.chain().focus().toggleItalic().run()" />
                 <button v-tooltip="'Onderlijn tekst'" class="button icon underline" type="button" :class="{ 'is-active': editor.isActive('underline') }" @click="editor.chain().focus().toggleUnderline().run()" />
 
-                <hr v-if="!$isMobile">
-
-                <button v-tooltip="'Titel'" class="button icon text-style" type="button" @click="openTextStyles" />
+                <hr v-if="!$isMobile"><button v-tooltip="'Titel'" class="button icon text-style" type="button" @click="openTextStyles" />
                 <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
                 <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click.prevent.stop="openLinkEditor()" @mousedown.prevent />
             </div>
@@ -46,6 +44,7 @@ import Underline from '@tiptap/extension-underline';
 import StarterKit from '@tiptap/starter-kit';
 import { Editor, EditorContent } from '@tiptap/vue-3';
 
+import { DataValidator } from '@stamhoofd/utility';
 import { ColorHelper } from '../ColorHelper';
 import TooltipDirective from '../directives/Tooltip';
 import { WarningBox } from '../editor/EditorWarningBox';
@@ -54,7 +53,6 @@ import STListItem from '../layout/STListItem.vue';
 import STButtonToolbar from '../navigation/STButtonToolbar.vue';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
-import { DataValidator } from '@stamhoofd/utility';
 
 function escapeHtml(unsafe: string): string {
     return unsafe
@@ -298,7 +296,8 @@ export default class WYSIWYGTextInput extends VueComponent {
         if (!this.isValidHttpUrl(cleanedUrl)) {
             if (!cleanedUrl.startsWith('mailto:') && !cleanedUrl.startsWith('http://') && !cleanedUrl.startsWith('https://') && DataValidator.isEmailValid(cleanedUrl)) {
                 cleanedUrl = 'mailto:' + cleanedUrl;
-            } else if (this.isValidHttpUrl('http://' + cleanedUrl)) {
+            }
+            else if (this.isValidHttpUrl('http://' + cleanedUrl)) {
                 cleanedUrl = 'http://' + cleanedUrl;
             }
         }

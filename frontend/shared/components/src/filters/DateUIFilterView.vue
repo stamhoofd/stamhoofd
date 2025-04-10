@@ -5,10 +5,10 @@
                 <Radio v-model="filter.mode" :name="filter.id" :value="UIDateFilterMode.Equals" @change="onChange" />
             </template>
             <p class="style-title-list">
-                Gelijk aan...
+                {{ $t('Gelijk aan...') }}
             </p>
 
-            <component :is="DateSelection" v-if="filter.mode === UIDateFilterMode.Equals" ref="input" v-model="filter.value" :required="true" placeholder="Vul datum in" class="option" />
+            <component :is="DateSelection" v-if="filter.mode === UIDateFilterMode.Equals" ref="input" v-model="filter.value" :required="true" class="option" :placeholder="$t(`Vul datum in`)" />
         </STListItem>
 
         <STListItem :selectable="true" element-name="label">
@@ -16,10 +16,10 @@
                 <Radio v-model="filter.mode" :name="filter.id" :value="UIDateFilterMode.NotEquals" @change="onChange" />
             </template>
             <p class="style-title-list">
-                Niet gelijk aan...
+                {{ $t('Niet gelijk aan...') }}
             </p>
 
-            <component :is="DateSelection" v-if="filter.mode === UIDateFilterMode.NotEquals" ref="input" v-model="filter.value" :required="true" placeholder="Vul datum in" class="option" />
+            <component :is="DateSelection" v-if="filter.mode === UIDateFilterMode.NotEquals" ref="input" v-model="filter.value" :required="true" class="option" :placeholder="$t(`Vul datum in`)" />
         </STListItem>
 
         <STListItem :selectable="true" element-name="label">
@@ -27,10 +27,10 @@
                 <Radio v-model="filter.mode" :name="filter.id" :value="UIDateFilterMode.GreaterThan" @change="onChange" />
             </template>
             <p class="style-title-list">
-                Groter dan...
+                {{ $t('Groter dan...') }}
             </p>
 
-            <component :is="DateSelection" v-if="filter.mode === UIDateFilterMode.GreaterThan" ref="input" v-model="filter.value" :required="true" placeholder="Vul datum in" class="option" />
+            <component :is="DateSelection" v-if="filter.mode === UIDateFilterMode.GreaterThan" ref="input" v-model="filter.value" :required="true" class="option" :placeholder="$t(`Vul datum in`)" />
         </STListItem>
 
         <STListItem :selectable="true" element-name="label">
@@ -38,10 +38,10 @@
                 <Radio v-model="filter.mode" :name="filter.id" :value="UIDateFilterMode.LessThan" @change="onChange" />
             </template>
             <p class="style-title-list">
-                Kleiner dan...
+                {{ $t('Kleiner dan...') }}
             </p>
 
-            <component :is="DateSelection" v-if="filter.mode === UIDateFilterMode.LessThan" ref="input" v-model="filter.value" :required="true" placeholder="Vul datum in" class="option" />
+            <component :is="DateSelection" v-if="filter.mode === UIDateFilterMode.LessThan" ref="input" v-model="filter.value" :required="true" class="option" :placeholder="$t(`Vul datum in`)" />
         </STListItem>
     </STList>
 </template>

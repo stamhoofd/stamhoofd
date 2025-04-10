@@ -5,9 +5,9 @@
                 <Radio v-model="filter.mode" :name="filter.id" :value="StringFilterMode.Equals" @change="onChange" />
             </template>
             <p class="style-title-list">
-                Is gelijk aan...
+                {{ $t('Is gelijk aan...') }}
             </p>
-            <input v-if="filter.mode === StringFilterMode.Equals" ref="input" v-model="filter.value" placeholder="Vul tekst in" class="input option">
+            <input v-if="filter.mode === StringFilterMode.Equals" ref="input" v-model="filter.value" class="input option" :placeholder="$t(`Vul tekst in`)">
         </STListItem>
 
         <STListItem :selectable="true" element-name="label" @click="onChange">
@@ -15,9 +15,9 @@
                 <Radio v-model="filter.mode" :name="filter.id" :value="StringFilterMode.NotEquals" @change="onChange" />
             </template>
             <p class="style-title-list">
-                Is niet gelijk aan...
+                {{ $t('Is niet gelijk aan...') }}
             </p>
-            <input v-if="filter.mode === StringFilterMode.NotEquals" ref="input" v-model="filter.value" placeholder="Vul tekst in" class="input option">
+            <input v-if="filter.mode === StringFilterMode.NotEquals" ref="input" v-model="filter.value" class="input option" :placeholder="$t(`Vul tekst in`)">
         </STListItem>
 
         <STListItem :selectable="true" element-name="label" @click="onChange">
@@ -25,9 +25,9 @@
                 <Radio v-model="filter.mode" :name="filter.id" :value="StringFilterMode.Contains" @change="onChange" />
             </template>
             <p class="style-title-list">
-                Bevat...
+                {{ $t('Bevat...') }}
             </p>
-            <input v-if="filter.mode === StringFilterMode.Contains" ref="input" v-model="filter.value" placeholder="Vul tekst in" class="input option">
+            <input v-if="filter.mode === StringFilterMode.Contains" ref="input" v-model="filter.value" class="input option" :placeholder="$t(`Vul tekst in`)">
         </STListItem>
 
         <STListItem :selectable="true" element-name="label" @click="onChange">
@@ -35,9 +35,9 @@
                 <Radio v-model="filter.mode" :name="filter.id" :value="StringFilterMode.NotContains" @change="onChange" />
             </template>
             <p class="style-title-list">
-                Bevat niet...
+                {{ $t('Bevat niet...') }}
             </p>
-            <input v-if="filter.mode === StringFilterMode.NotContains" ref="input" v-model="filter.value" placeholder="Vul tekst in" class="input option">
+            <input v-if="filter.mode === StringFilterMode.NotContains" ref="input" v-model="filter.value" class="input option" :placeholder="$t(`Vul tekst in`)">
         </STListItem>
 
         <STListItem :selectable="true" element-name="label" @click="onChange">
@@ -45,7 +45,7 @@
                 <Radio v-model="filter.mode" :name="filter.id" :value="StringFilterMode.Empty" @change="onChange" />
             </template>
             <p class="style-title-list">
-                Is leeg
+                {{ $t('Is leeg') }}
             </p>
         </STListItem>
 
@@ -54,41 +54,39 @@
                 <Radio v-model="filter.mode" :name="filter.id" :value="StringFilterMode.NotEmpty" @change="onChange" />
             </template>
             <p class="style-title-list">
-                Is niet leeg
+                {{ $t('Is niet leeg') }}
             </p>
         </STListItem>
     </STList>
 </template>
 
-
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
-import Radio from "../inputs/Radio.vue";
-import STList from "../layout/STList.vue";
-import STListItem from "../layout/STListItem.vue";
+import Radio from '../inputs/Radio.vue';
+import STList from '../layout/STList.vue';
+import STListItem from '../layout/STListItem.vue';
 import { StringFilterMode, StringUIFilter } from './StringUIFilter';
 
 @Component({
     components: {
         STListItem,
         STList,
-        Radio
-    }
+        Radio,
+    },
 })
 export default class StringUIFilterView extends Mixins(NavigationMixin) {
-    @Prop({ required: true }) 
-        filter: StringUIFilter
+    @Prop({ required: true })
+    filter: StringUIFilter;
 
     get StringFilterMode() {
-        return StringFilterMode
+        return StringFilterMode;
     }
 
     async onChange() {
         await this.$nextTick();
-        (this.$refs["input"] as any).focus()
+        (this.$refs['input'] as any).focus();
     }
-
 }
 </script>

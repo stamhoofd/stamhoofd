@@ -1,20 +1,12 @@
 <template>
     <SaveView :title="title" :loading="saving" :prefer-large-button="true" @save="save">
-        <FillRecordCategoryBox
-            :category="category"
-            :value="patched"
-            :validator="errors.validator"
-            :level="1"
-            :all-optional="false"
-            :force-mark-reviewed="true"
-            @patch="addPatch({recordAnswers: $event})"
-        >
+        <FillRecordCategoryBox :category="category" :value="patched" :validator="errors.validator" :level="1" :all-optional="false" :force-mark-reviewed="true" @patch="addPatch({recordAnswers: $event})">
             <STErrorsDefault :error-box="errors.errorBox" />
         </FillRecordCategoryBox>
 
         <template v-if="canSaveDraft" #toolbar>
             <button class="button secundary" type="button" @click="saveDraft">
-                Opslaan als klad
+                {{ $t('Opslaan als klad') }}
             </button>
         </template>
     </SaveView>
@@ -22,7 +14,7 @@
 
 <script setup lang="ts">
 import { useDismiss, usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, FillRecordCategoryBox, NavigationActions, Toast, ToastButton, useErrors, useNavigationActions } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, FillRecordCategoryBox, NavigationActions, useErrors, useNavigationActions } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';

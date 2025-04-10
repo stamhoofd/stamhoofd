@@ -1,27 +1,27 @@
 <template>
     <div id="settings-view" class="st-view background">
-        <STNavigationBar title="Logboek" />
+        <STNavigationBar :title="$t(`Logboek`)" />
 
         <main class="center">
             <h1>
-                Logboek
+                {{ $t('Logboek') }}
             </h1>
-            <p>In het logboek worden alle gebeurtenissen geregistreerd. Enkel hoofdbeheerders hebben toegang tot het logboek.</p>
+            <p>{{ $t('In het logboek worden alle gebeurtenissen geregistreerd. Enkel hoofdbeheerders hebben toegang tot het logboek.') }}</p>
 
             <div class="input-with-buttons">
                 <div>
                     <div class="split-inputs">
-                        <STInputBox title="Vanaf" error-fields="startDate" :error-box="errors.errorBox">
-                            <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" placeholder="Begin" :required="false" />
+                        <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`Vanaf`)">
+                            <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" :required="false" :placeholder="$t(`Begin`)" />
                         </STInputBox>
 
-                        <STInputBox title="Tot en met" error-fields="endDate" :error-box="errors.errorBox">
-                            <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" placeholder="Nu" :required="false" />
+                        <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t(`Tot en met`)">
+                            <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" :required="false" :placeholder="$t(`Nu`)" />
                         </STInputBox>
                     </div>
 
                     <p class="style-description-small">
-                        Snel selecteren: <span v-for="(suggestion, index) in dateRangeSuggestions" :key="suggestion.name">
+                        {{ $t('Snel selecteren:') }} <span v-for="(suggestion, index) in dateRangeSuggestions" :key="suggestion.name">
                             <button type="button" class="inline-link" :class="isSuggestionSelected(suggestion) ? {secundary: false} : {secundary: true}" @click="selectSuggestion(suggestion)">
                                 {{ suggestion.name }}
                             </button><template v-if="index < dateRangeSuggestions.length - 1">, </template>
@@ -31,17 +31,14 @@
                 <div>
                     <button type="button" class="button text" @click="editFilter">
                         <span class="icon filter" />
-                        <span class="hide-small">Filter</span>
+                        <span class="hide-small">{{ $t('Filter') }}</span>
                         <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary" />
                     </button>
                 </div>
             </div>
 
-            <hr>
-
-            <div v-for="(group, index) of groupedLogs" :key="group.title" class="container">
-                <hr v-if="index > 0">
-                <h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
+            <hr><div v-for="(group, index) of groupedLogs" :key="group.title" class="container">
+                <hr v-if="index > 0"><h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
 
                 <STList>
                     <AuditLogRow v-for="log of group.logs" :key="log.id" :log="log" />
@@ -86,7 +83,7 @@ const errors = useErrors();
 const organization = useOrganization();
 
 const objectFetcher = useAuditLogsObjectFetcher({
-    requiredFilter: props.objectIds ? { objectId: { $in: props.objectIds } } : {organizationId: organization.value?.id ?? null},
+    requiredFilter: props.objectIds ? { objectId: { $in: props.objectIds } } : { organizationId: organization.value?.id ?? null },
 });
 
 const fetcher = useInfiniteObjectFetcher<ObjectType>(objectFetcher);

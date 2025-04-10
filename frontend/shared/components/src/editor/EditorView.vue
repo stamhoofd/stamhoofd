@@ -30,9 +30,7 @@
                 <slot name="list" />
             </STList>
 
-            <hr class="mail-hr">
-
-            <div class="editor-container">
+            <hr class="mail-hr"><div class="editor-container">
                 <editor-content v-color="primaryColor" :editor="editor" class="editor-content" />
                 <footer>
                     <slot name="footer" />
@@ -56,9 +54,9 @@
                 <STList>
                     <STListItem class="no-padding right-stack">
                         <div class="list-input-box">
-                            <span>Link:</span>
+                            <span>{{ $t('Link:') }}</span>
 
-                            <input ref="linkInput" v-model="editLink" class="list-input" type="url" placeholder="https://" enterkeyhint="go">
+                            <input ref="linkInput" v-model="editLink" class="list-input" type="url" enterkeyhint="go" :placeholder="$t(`https://`)">
                         </div>
                         <template #right>
                             <button class="button text" type="submit" @mousedown.prevent>
@@ -74,8 +72,7 @@
             <template #right>
                 <div class="editor-button-bar">
                     <button v-tooltip="'Toon/verberg tekst opties'" class="button icon text-style" :class="{ 'is-active': showTextStyles }" type="button" @mousedown.prevent @click.prevent="showTextStyles = !showTextStyles" />
-                    <hr>
-                    <button v-if="smartVariables.length > 0" v-tooltip="'Magische tekstvervanging'" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
+                    <hr><button v-if="smartVariables.length > 0" v-tooltip="'Magische tekstvervanging'" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
                     <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
                     <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click.prevent="openLinkEditor()" @mousedown.prevent />
                     <UploadButton :resolutions="imageResolutions" @update:model-value="insertImage" @mousedown.native.prevent>
@@ -115,7 +112,8 @@ import Underline from '@tiptap/extension-underline';
 import StarterKit from '@tiptap/starter-kit';
 import { Editor, EditorContent } from '@tiptap/vue-3';
 
-import { useCanDismiss, useCanPop, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
+import { useCanPop, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
+import { DataValidator } from '@stamhoofd/utility';
 import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue';
 import UploadButton from '../inputs/UploadButton.vue';
 import STList from '../layout/STList.vue';
@@ -131,7 +129,6 @@ import { DescriptiveText } from './EditorDescriptiveText';
 import { SmartButtonInlineNode, SmartButtonNode } from './EditorSmartButton';
 import { SmartVariableNode, SmartVariableNodeBlock } from './EditorSmartVariable';
 import TextStyleButtonsView from './TextStyleButtonsView.vue';
-import { DataValidator } from '@stamhoofd/utility';
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {

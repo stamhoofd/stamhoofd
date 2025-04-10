@@ -2,10 +2,10 @@
     <div class="st-view invalid-page-view">
         <main>
             <h1>
-                Doorverwijzen...
+                {{ $t('Doorverwijzen...') }}
             </h1>
 
-            <p>Bezig met doorverwijzen</p>
+            <p>{{ $t('Bezig met doorverwijzen') }}</p>
         </main>
     </div>
 </template>

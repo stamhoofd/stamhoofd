@@ -1,8 +1,8 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
-        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" class="mail-view" :loading="sending" title="Nieuwe e-mail" save-text="Versturen" :replacements="replacements" @save="send">
+        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" class="mail-view" :loading="sending" :save-text="$t('Versturen')" :replacements="replacements" :title="$t(`Nieuwe e-mail`)" @save="send">
             <h1 class="style-navigation-title">
-                Nieuwe e-mail
+                {{ $t('Nieuwe e-mail') }}
             </h1>
 
             <STErrorsDefault :error-box="errors.errorBox" />
@@ -10,19 +10,17 @@
             <!-- Buttons -->
             <template #buttons>
                 <label v-tooltip="'Bijlage toevoegen'" class="button icon attachment">
-                    <input type="file" multiple="true" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile">
-                    <span v-if="$isMobile && files.length > 0" class="style-bubble">{{ files.length }}</span>
+                    <input type="file" multiple="true" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile"><span v-if="$isMobile && files.length > 0" class="style-bubble">{{ files.length }}</span>
                 </label>
 
-                <hr v-if="canOpenTemplates">
-                <button v-if="canOpenTemplates" v-tooltip="'Sjablonen'" class="button icon email-template" type="button" @click="openTemplates" />
+                <hr v-if="canOpenTemplates"><button v-if="canOpenTemplates" v-tooltip="'Sjablonen'" class="button icon email-template" type="button" @click="openTemplates" />
             </template>
 
             <!-- List -->
             <template #list>
                 <STListItem class="no-padding right-stack">
                     <div class="list-input-box">
-                        <span>Aan:</span>
+                        <span>{{ $t('Aan') }}:</span>
 
                         <div v-if="onlyOption" class="list-input">
                             {{ toDescription }}
@@ -39,13 +37,13 @@
                 </STListItem>
                 <STListItem class="no-padding" element-name="label">
                     <div class="list-input-box">
-                        <span>Onderwerp:</span>
-                        <input id="mail-subject" v-model="subject" class="list-input" type="text" placeholder="Typ hier het onderwerp van je e-mail">
+                        <span>{{ $t('Onderwerp') }}:</span>
+                        <input id="mail-subject" v-model="subject" class="list-input" type="text" :placeholder="$t(`Typ hier het onderwerp van je e-mail`)">
                     </div>
                 </STListItem>
                 <STListItem v-if="emails.length > 0" class="no-padding" element-name="label">
                     <div class="list-input-box">
-                        <span>Van:</span>
+                        <span>{{ $t('Van') }}:</span>
 
                         <div class="input-icon-container right icon arrow-down-small gray">
                             <select v-model="selectedEmailAddress" class="list-input">
@@ -87,18 +85,18 @@
             <!-- Warnings and errors -->
             <template v-if="emails.length === 0">
                 <p v-if="auth.hasFullAccess()" class="warning-box selectable with-button" @click="manageEmails">
-                    Stel eerst jouw e-mailadressen in
+                    {{ $t('Stel eerst jouw e-mailadressen in') }}
                     <span class="button text inherit-color">
                         <span class="icon settings" />
-                        <span>Wijzigen</span>
+                        <span>{{ $t('Wijzigen') }}</span>
                     </span>
                 </p>
                 <p v-else class="warning-box">
-                    Een hoofdbeheerder van jouw vereniging moet eerst e-mailadressen instellen voor je een e-mail kan versturen.
+                    {{ $t('Een hoofdbeheerder van jouw vereniging moet eerst e-mailadressen instellen voor je een e-mail kan versturen.') }}
                 </p>
             </template>
-        </EditorView>
-    </LoadingViewTransition>
+        </editorview>
+    </loadingviewtransition>
 </template>
 
 <script setup lang="ts">
@@ -118,7 +116,6 @@ import { CenteredMessage } from '../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import EmailSettingsView from './EmailSettingsView.vue';
-import { LoadingViewTransition } from '../containers';
 
 export type RecipientChooseOneOption = {
     type: 'ChooseOne';
