@@ -29,7 +29,7 @@
                 <hr v-if="index > 0 || !allowChangingOrganization"><h2 class="style-with-button">
                     <div>
                         {{ category.settings.name }}
-                        <span v-if="!category.settings.public" v-tooltip="$t('Deze categorie is niet zichtbaar voor gewone leden')" class="icon lock gray" />
+                        <span v-if="!category.settings.public" class="icon lock gray" :v-tooltip="$t('Deze categorie is niet zichtbaar voor gewone leden')" />
                     </div>
                     <div>
                         <span class="title-suffix">{{ selectedOrganization.period.period.nameShort }}</span>

@@ -2,9 +2,9 @@
     <div class="st-view">
         <STNavigationBar :title="title">
             <template #right>
-                <button v-if="hasWrite" v-tooltip="'Bewerken'" class="button icon navigation edit" type="button" @click="editOrganization" />
-                <button v-if="hasPrevious || hasNext" v-tooltip="'Ga naar vorige groep'" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" v-tooltip="'Ga naar volgende groep'" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goForward" />
+                <button v-if="hasWrite" class="button icon navigation edit" type="button" :v-tooltip="$t(`'Bewerken'`)" @click="editOrganization" />
+                <button v-if="hasPrevious || hasNext" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('Ga naar vorige groep')" @click="goBack" />
+                <button v-if="hasNext || hasPrevious" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('Ga naar volgende groep')" @click="goForward" />
             </template>
         </STNavigationBar>
 

@@ -4,7 +4,7 @@
             {{ name }}
             <span v-if="ticket.getIndexText()" class="ticket-index">{{ ticket.getIndexText() }}</span>
         </h3>
-        <p v-if="isSingle && order" class="style-description-small" v-text="'Bestelling #'+order.number" />
+        <p v-if="isSingle && order" class="style-description-small" v-text="$t('Bestelling #')+order.number" />
         <p v-if="isSingle && order" class="style-description-small" v-text="order.data.customer.name" />
         <p v-if="!isSingle && !cartItem" class="style-description-small">
             <span class="style-tag error">{{ $t('Verwijderd ticket') }}</span>

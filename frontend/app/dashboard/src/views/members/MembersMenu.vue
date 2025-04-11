@@ -37,7 +37,7 @@
                     <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Category, {properties: {category, period}}) }" @click="$navigate('category', {properties: {category, period}})">
                         <span :class="'icon ' + getCategoryIcon(category)" />
                         <span>{{ category.settings.name }}</span>
-                        <span v-if="isCategoryDeactivated(category)" v-tooltip="'Deze categorie is onzichtbaar voor leden omdat activiteiten niet geactiveerd is'" class="icon error red right-icon" />
+                        <span v-if="isCategoryDeactivated(category)" class="icon error red right-icon" :v-tooltip="$t('Deze categorie is onzichtbaar voor leden omdat activiteiten niet geactiveerd is')" />
                         <span v-else-if="category.groups.length || category.categories.length" class="button icon arrow-down-small right-icon rot" :class="{rot180: collapsed.isCollapsed(category.id)}" @click.stop="collapsed.toggle(category.id)" />
                     </button>
 

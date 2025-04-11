@@ -110,7 +110,7 @@
                             </p>
 
                             <template #right>
-                                <span v-if="price.hidden" v-tooltip="$t('aff982ed-0f1a-4838-af79-9e00cd53131b')" class="icon gray eye-off" />
+                                <span v-if="price.hidden" :v-tooltip="$t('aff982ed-0f1a-4838-af79-9e00cd53131b')" class="icon gray eye-off" />
                                 <span class="button icon drag gray" @click.stop @contextmenu.stop />
                                 <span class="icon arrow-right-small gray" />
                             </template>

@@ -18,7 +18,7 @@
         </Checkbox>
 
         <p v-if="!willMarkReviewed && dataPermissionsChangeDate" class="style-description-small">
-            {{ $t('Laatst nagekeken op') }} {{ formatDate(dataPermissionsChangeDate) }}. <button v-tooltip="'Het lid zal deze stap terug moeten doorlopen via het ledenportaal'" type="button" class="inline-link" @click="clear">
+            {{ $t('Laatst nagekeken op') }} {{ formatDate(dataPermissionsChangeDate) }}. <button type="button" class="inline-link" :v-tooltip="$t('Het lid zal deze stap terug moeten doorlopen via het ledenportaal')" @click="clear">
                 {{ $t('Wissen') }}
             </button>.
         </p>

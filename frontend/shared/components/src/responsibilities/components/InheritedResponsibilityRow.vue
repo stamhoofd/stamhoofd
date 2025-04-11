@@ -5,7 +5,7 @@
                 <span class="icon user-admin-layer-1" />
                 <span class="icon user-admin-layer-2 yellow" />
             </span>
-            <span v-else-if="mergedRole.isEmpty" v-tooltip="'Heeft geen rol'" class="icon layered">
+            <span v-else-if="mergedRole.isEmpty" class="icon layered" :v-tooltip="$t('Heeft geen rol')">
                 <span class="icon user-blocked-layer-1" />
                 <span class="icon user-blocked-layer-2 red" />
             </span>

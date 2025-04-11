@@ -1,7 +1,7 @@
 <template>
     <div ref="root" class="edit-seating-plan-section-box" data-disable-enter-focus>
         <div class="undo-buttons">
-            <button v-tooltip="'Spiegel verticaal'" type="button" class="button icon flip-vertical gray" @click="flip" />
+            <button type="button" class="button icon flip-vertical gray" :v-tooltip="$t('Spiegel verticaal')" @click="flip" />
             <button type="button" class="button icon undo gray" :disabled="!canUndo()" @click="undo" />
             <button type="button" class="button icon redo gray" :disabled="!canRedo()" @click="redo" />
         </div>

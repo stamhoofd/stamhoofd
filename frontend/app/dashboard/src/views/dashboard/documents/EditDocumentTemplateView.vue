@@ -89,7 +89,7 @@
                 <hr><h2>{{ $t('Geavanceerd') }}</h2>
 
                 <STList>
-                    <CheckboxListItem v-model="useCustomHtml" description="Personaliseer het document door het wat aan te passen indien je zelf ervaring hebt met HTML. Test het resultaat wel goed uit." :label="$t(`Eigen HTML gebruiken voor document`)">
+                    <CheckboxListItem v-model="useCustomHtml" :label="$t(`Eigen HTML gebruiken voor document`)" :description="$t(`Personaliseer het document door het wat aan te passen indien je zelf ervaring hebt met HTML. Test het resultaat wel goed uit.`)">
                         <div v-if="useCustomHtml" class="style-button-bar">
                             <button class="button text" type="button" @click="downloadHtml">
                                 <span class="icon download" />

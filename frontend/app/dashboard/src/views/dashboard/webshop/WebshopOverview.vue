@@ -196,7 +196,7 @@
                         </p>
 
                         <template #right>
-                            <span v-tooltip="'Deze functie is verouderd. Als je alle vrije invoervelden wist, kan je gebruik maken van uitgebreidere vragenlijsten.'" class="icon error " />
+                            <span class="icon error " :v-tooltip="$t('Deze functie is verouderd. Als je alle vrije invoervelden wist, kan je gebruik maken van uitgebreidere vragenlijsten.')" />
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>

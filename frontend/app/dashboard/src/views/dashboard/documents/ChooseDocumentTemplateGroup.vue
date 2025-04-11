@@ -82,7 +82,7 @@
                 <STList>
                     <EventRow v-for="event of fetcher.objects" :key="event.id" :event="event" @click="selectGroup(event.group!)" />
                 </STList>
-                <InfiniteObjectFetcherEnd empty-message="Geen activiteiten gevonden" :fetcher="fetcher" />
+                <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`Geen activiteiten gevonden`)" />
             </template>
         </main>
     </div>

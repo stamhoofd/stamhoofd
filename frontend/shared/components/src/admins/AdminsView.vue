@@ -33,11 +33,11 @@
                 <STList v-else>
                     <STListItem v-for="member in sortedMembers" :key="member.id" :selectable="true" class="right-stack" @click="editMember(member)">
                         <template #left>
-                            <span v-if="memberHasFullAccess(member)" v-tooltip="'Hoofdbeheerder'" class="icon layered">
+                            <span v-if="memberHasFullAccess(member)" class="icon layered" :v-tooltip="$t('Hoofdbeheerder')">
                                 <span class="icon user-admin-layer-1" />
                                 <span class="icon user-admin-layer-2 yellow" />
                             </span>
-                            <span v-else-if="memberHasNoRoles(member)" v-tooltip="'Heeft geen rol'" class="icon layered">
+                            <span v-else-if="memberHasNoRoles(member)" class="icon layered" :v-tooltip="$t('Heeft geen rol')">
                                 <span class="icon user-blocked-layer-1" />
                                 <span class="icon user-blocked-layer-2 red" />
                             </span>
@@ -58,7 +58,7 @@
                             <span v-if="member.id === me?.memberId" class="style-tag">
                                 {{ $t('Ik') }}
                             </span>
-                            <span v-else-if="!member.patchedMember.users.find(u => u.hasAccount)" v-tooltip="'Uitnodiging nog niet geaccepteerd'" class="icon email gray" />
+                            <span v-else-if="!member.patchedMember.users.find(u => u.hasAccount)" class="icon email gray" :v-tooltip="$t('Uitnodiging nog niet geaccepteerd')" />
                             <span><span class="icon gray edit" /></span>
                         </template>
                     </STListItem>
@@ -83,11 +83,11 @@
                 <STList v-else>
                     <STListItem v-for="admin of sortedAdmins" :key="admin.id" :selectable="true" class="right-stack" @click="editAdmin(admin)">
                         <template #left>
-                            <span v-if="hasFullAccess(admin)" v-tooltip="'Hoofdbeheerder'" class="icon layered">
+                            <span v-if="hasFullAccess(admin)" class="icon layered" :v-tooltip="$t('Hoofdbeheerder')">
                                 <span class="icon user-admin-layer-1" />
                                 <span class="icon user-admin-layer-2 yellow" />
                             </span>
-                            <span v-else-if="hasEmptyAccess(admin)" v-tooltip="'Heeft geen rol'" class="icon layered">
+                            <span v-else-if="hasEmptyAccess(admin)" class="icon layered" :v-tooltip="$t('Heeft geen rol')">
                                 <span class="icon user-blocked-layer-1" />
                                 <span class="icon user-blocked-layer-2 red" />
                             </span>
@@ -111,7 +111,7 @@
                             <span v-if="admin.id === me?.id" class="style-tag">
                                 {{ $t('Ik') }}
                             </span>
-                            <span v-else-if="!admin.hasAccount" v-tooltip="'Uitnodiging nog niet geaccepteerd'" class="icon email gray" />
+                            <span v-else-if="!admin.hasAccount" class="icon email gray" :v-tooltip="$t('Uitnodiging nog niet geaccepteerd')" />
                             <span><span class="icon gray edit" /></span>
                         </template>
                     </STListItem>

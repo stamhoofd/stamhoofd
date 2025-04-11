@@ -7,16 +7,14 @@
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <!-- Buttons -->
             <template #buttons>
-                <label v-tooltip="'Bijlage toevoegen'" class="button icon attachment">
+                <label class="button icon attachment" :v-tooltip="$t('Bijlage toevoegen')">
                     <input type="file" multiple="true" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile"><span v-if="$isMobile && files.length > 0" class="style-bubble">{{ files.length }}</span>
                 </label>
 
-                <hr v-if="canOpenTemplates"><button v-if="canOpenTemplates" v-tooltip="'Sjablonen'" class="button icon email-template" type="button" @click="openTemplates" />
+                <hr v-if="canOpenTemplates"><button v-if="canOpenTemplates" class="button icon email-template" type="button" :v-tooltip="$t('Sjablonen')" @click="openTemplates" />
             </template>
 
-            <!-- List -->
             <template #list>
                 <STListItem class="no-padding right-stack">
                     <div class="list-input-box">
@@ -49,54 +47,52 @@
                             <select v-model="selectedEmailAddress" class="list-input">
                                 <option v-for="e in emails" :key="e.id" :value="e">
                                     {{ e.name ? (e.name+" <"+e.email+">") : e.email }}
+                                </"+e.email+">
                                 </option>
                             </select>
                         </div>
+
+                        <template v-if="auth.hasFullAccess()" #right>
+                            <button class="button text" type="button" @click="manageEmails">
+                                <span class="icon settings" />
+                            </button>
+                        </template>
                     </div>
-
-                    <template v-if="auth.hasFullAccess()" #right>
-                        <button class="button text" type="button" @click="manageEmails">
-                            <span class="icon settings" />
-                        </button>
-                    </template>
                 </STListItem>
-            </template>
 
-            <!-- Editor footer -->
-            <template #footer>
-                <!-- E-mail attachments -->
-                <STList v-if="patchedEmail.attachments.length > 0">
-                    <STListItem v-for="attachment in patchedEmail.attachments" :key="attachment.id" class="file-list-item">
-                        <template #left>
-                            <span :class="'icon '+getFileIcon(attachment)" />
-                        </template>
-                        <h3 class="style-title-list" v-text="attachment.filename" />
-                        <p class="style-description-small">
-                            {{ Formatter.fileSize(attachment.bytes) }}
-                        </p>
+                <template #footer>
+                    <STList v-if="patchedEmail.attachments.length > 0">
+                        <STListItem v-for="attachment in patchedEmail.attachments" :key="attachment.id" class="file-list-item">
+                            <template #left>
+                                <span :class="'icon '+getFileIcon(attachment)" />
+                            </template>
+                            <h3 class="style-title-list" v-text="attachment.filename" />
+                            <p class="style-description-small">
+                                {{ Formatter.fileSize(attachment.bytes) }}
+                            </p>
 
-                        <template #right>
-                            <button class="button icon gray trash" type="button" @click.stop="deleteAttachment(attachment)" />
-                        </template>
-                    </STListItem>
-                </STList>
-            </template>
+                            <template #right>
+                                <button class="button icon gray trash" type="button" @click.stop="deleteAttachment(attachment)" />
+                            </template>
+                        </STListItem>
+                    </STList>
+                </template>
 
-            <!-- Warnings and errors -->
-            <template v-if="emails.length === 0">
-                <p v-if="auth.hasFullAccess()" class="warning-box selectable with-button" @click="manageEmails">
-                    {{ $t('Stel eerst jouw e-mailadressen in') }}
-                    <span class="button text inherit-color">
-                        <span class="icon settings" />
-                        <span>{{ $t('Wijzigen') }}</span>
-                    </span>
-                </p>
-                <p v-else class="warning-box">
-                    {{ $t('Een hoofdbeheerder van jouw vereniging moet eerst e-mailadressen instellen voor je een e-mail kan versturen.') }}
-                </p>
+                <template v-if="emails.length === 0">
+                    <p v-if="auth.hasFullAccess()" class="warning-box selectable with-button" @click="manageEmails">
+                        {{ $t('Stel eerst jouw e-mailadressen in') }}
+                        <span class="button text inherit-color">
+                            <span class="icon settings" />
+                            <span>{{ $t('Wijzigen') }}</span>
+                        </span>
+                    </p>
+                    <p v-else class="warning-box">
+                        {{ $t('Een hoofdbeheerder van jouw vereniging moet eerst e-mailadressen instellen voor je een e-mail kan versturen.') }}
+                    </p>
+                </template>
             </template>
-        </editorview>
-    </loadingviewtransition>
+        </EditorView>
+    </LoadingViewTransition>
 </template>
 
 <script setup lang="ts">

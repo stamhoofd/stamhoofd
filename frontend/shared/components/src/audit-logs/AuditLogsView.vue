@@ -45,7 +45,7 @@
                 </STList>
             </div>
 
-            <InfiniteObjectFetcherEnd empty-message="Geen logs gevonden" :fetcher="fetcher" />
+            <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`Geen logs gevonden`)" />
         </main>
     </div>
 </template>

@@ -39,10 +39,10 @@
             </p>
 
             <p v-if="transferType === 'Fixed' && type === 'webshop'" class="style-description-small">
-                {{ $t('Gebruik automatische tekstvervangingen in de mededeling via') }} <code v-copyable class="style-inline-code style-copyable" v-text="`{{naam}}`" />, <code v-copyable class="style-inline-code style-copyable" v-text="`{{email}}`" /> {{ $t('of') }} <code v-copyable class="style-inline-code style-copyable" v-text="`{{nr}}`" />
+                {{ $t('Gebruik automatische tekstvervangingen in de mededeling via') }} <code v-copyable class="style-inline-code style-copyable" :v-text="$t('{{naam}}')" />, <code v-copyable class="style-inline-code style-copyable" :v-text="$t('{{email}}')" /> {{ $t('of') }} <code v-copyable class="style-inline-code style-copyable" :v-text="$t('{{nr}}')" />
             </p>
             <p v-else-if="transferType === 'Fixed' && type === 'registration'" class="style-description-small">
-                {{ $t('Gebruik automatische tekstvervangingen in de mededeling via') }} <code v-copyable class="style-inline-code style-copyable" v-text="`{{naam}}`" />
+                {{ $t('Gebruik automatische tekstvervangingen in de mededeling via') }} <code v-copyable class="style-inline-code style-copyable" :v-text="$t('{{naam}}')" />
             </p>
 
             <hr><h2>{{ $t('Instructies') }}</h2>

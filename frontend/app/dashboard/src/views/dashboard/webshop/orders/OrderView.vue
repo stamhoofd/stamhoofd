@@ -2,8 +2,8 @@
     <div class="st-view order-view">
         <STNavigationBar :title="$t(`Bestelling #`) + order.number">
             <template #right>
-                <button v-if="hasPreviousOrder || hasNextOrder" v-tooltip="'Ga naar vorige bestelling'" type="button" class="button navigation icon arrow-up" :disabled="!hasPreviousOrder" @click="goBack" />
-                <button v-if="hasNextOrder || hasPreviousOrder" v-tooltip="'Ga naar volgende bestelling'" type="button" class="button navigation icon arrow-down" :disabled="!hasNextOrder" @click="goNext" />
+                <button v-if="hasPreviousOrder || hasNextOrder" type="button" class="button navigation icon arrow-up" :disabled="!hasPreviousOrder" :v-tooltip="$t('Ga naar vorige bestelling')" @click="goBack" />
+                <button v-if="hasNextOrder || hasPreviousOrder" type="button" class="button navigation icon arrow-down" :disabled="!hasNextOrder" :v-tooltip="$t('Ga naar volgende bestelling')" @click="goNext" />
                 <button v-long-press="(e: MouseEvent) => showContextMenu(e)" class="button icon navigation more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
             </template>
         </STNavigationBar>

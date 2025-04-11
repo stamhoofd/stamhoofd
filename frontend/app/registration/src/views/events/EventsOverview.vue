@@ -30,7 +30,7 @@
                 </STList>
             </div>
 
-            <InfiniteObjectFetcherEnd empty-message="Geen activiteiten gevonden" :fetcher="fetcher" />
+            <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`Geen activiteiten gevonden`)" />
         </main>
     </div>
 </template>

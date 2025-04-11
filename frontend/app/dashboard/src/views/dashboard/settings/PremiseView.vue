@@ -33,7 +33,7 @@
 
                         <template #right>
                             <span v-if="premiseTypeWarnings.has(premiseType.id)" v-tooltip="premiseTypeWarnings.get(premiseType.id)" class="icon warning yellow" />
-                            <span v-else-if="isPremiseTypeDisabled(premiseType)" v-tooltip="'Het maximum aantal van dit type is bereikt. Verwijder eerst een ander lokaal van dit type om dit type te selecteren.'" class="icon info-circle hover-show" />
+                            <span v-else-if="isPremiseTypeDisabled(premiseType)" class="icon info-circle hover-show" :v-tooltip="$t('Het maximum aantal van dit type is bereikt. Verwijder eerst een ander lokaal van dit type om dit type te selecteren.')" />
                         </template>
                     </STListItem>
                     <STListItem v-if="hasUnknownType" :selectable="true" element-name="label">

@@ -28,7 +28,7 @@
                 {{ name }}
                 <span v-if="ticket.getIndexText()" class="ticket-index">{{ ticket.getIndexText() }}</span>
             </h1>
-            <p v-if="isSingle && order" class="description" v-text="'Bestelling #'+order.number" />
+            <p v-if="isSingle && order" class="description" v-text="$t('Bestelling #')+order.number" />
             <p v-if="isSingle && order" class="description" v-text="order.data.customer.name" />
             <p v-if="cartItem.descriptionWithoutDate" class="description" v-text="cartItem.descriptionWithoutDate" />
             <p v-if="changedSeatString" class="warning-box">

@@ -11,10 +11,10 @@
                     <span class="icon user small" />
                 </template>
                 <template v-else-if="user.hasAccount && !user.verified" #left>
-                    <span v-tooltip="'Deze gebruiker moet het e-mailadres nog verifiëren.'" class="icon email small" />
+                    <span class="icon email small" :v-tooltip="$t('Deze gebruiker moet het e-mailadres nog verifiëren.')" />
                 </template>
                 <template v-else #left>
-                    <span v-tooltip="'Deze gebruiker moet eerst registreren op dit emailadres en daarbij een wachtwoord instellen.'" class="icon email small" />
+                    <span class="icon email small" :v-tooltip="$t('Deze gebruiker moet eerst registreren op dit emailadres en daarbij een wachtwoord instellen.')" />
                 </template>
                 <template v-if="(user.firstName || user.lastName) && (user.name !== member.patchedMember.name)">
                     <h3 v-if="user.firstName || user.lastName" class="style-title-list">

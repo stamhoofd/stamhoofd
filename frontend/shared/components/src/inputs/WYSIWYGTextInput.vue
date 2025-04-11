@@ -15,20 +15,20 @@
                             <button class="button text" type="submit" @mousedown.prevent>
                                 {{ editLink.length === 0 ? "Sluiten" : "Opslaan" }}
                             </button>
-                            <button v-if="editor.isActive('link')" v-tooltip="'Link verwijderen'" class="button icon trash gray" type="button" @mousedown.prevent @click.stop.prevent="clearLink()" />
+                            <button v-if="editor.isActive('link')" class="button icon trash gray" type="button" :v-tooltip="$t('Link verwijderen')" @mousedown.prevent @click.stop.prevent="clearLink()" />
                         </template>
                     </STListItem>
                 </STList>
             </form>
 
             <div v-else class="small editor-button-bar sticky">
-                <button v-tooltip="'Vet gedrukte tekst'" class="button icon bold" :class="{ 'is-active': editor.isActive('bold') }" type="button" @click="editor.chain().focus().toggleBold().run()" />
-                <button v-tooltip="'Schuine tekst'" class="button icon italic" type="button" :class="{ 'is-active': editor.isActive('italic') }" @click="editor.chain().focus().toggleItalic().run()" />
-                <button v-tooltip="'Onderlijn tekst'" class="button icon underline" type="button" :class="{ 'is-active': editor.isActive('underline') }" @click="editor.chain().focus().toggleUnderline().run()" />
+                <button class="button icon bold" :class="{ 'is-active': editor.isActive('bold') }" type="button" :v-tooltip="$t('Vet gedrukte tekst')" @click="editor.chain().focus().toggleBold().run()" />
+                <button class="button icon italic" type="button" :class="{ 'is-active': editor.isActive('italic') }" :v-tooltip="$t('Schuine tekst')" @click="editor.chain().focus().toggleItalic().run()" />
+                <button class="button icon underline" type="button" :class="{ 'is-active': editor.isActive('underline') }" :v-tooltip="$t('Onderlijn tekst')" @click="editor.chain().focus().toggleUnderline().run()" />
 
-                <hr v-if="!$isMobile"><button v-tooltip="'Titel'" class="button icon text-style" type="button" @click="openTextStyles" />
-                <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
-                <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click.prevent.stop="openLinkEditor()" @mousedown.prevent />
+                <hr v-if="!$isMobile"><button class="button icon text-style" type="button" :v-tooltip="$t('Titel')" @click="openTextStyles" />
+                <button class="button icon hr" type="button" :v-tooltip="$t('Horizontale lijn')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
+                <button class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" :v-tooltip="$t('Link toevoegen')" @click.prevent.stop="openLinkEditor()" @mousedown.prevent />
             </div>
         </div>
     </div>

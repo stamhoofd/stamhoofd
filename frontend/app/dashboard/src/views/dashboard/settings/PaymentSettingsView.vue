@@ -231,13 +231,13 @@
                             </p>
 
                             <template v-if="profile.status === 'verified'" #right>
-                                <span v-tooltip="'Geverifieerd'" class="icon success green" />
+                                <span class="icon success green" :v-tooltip="$t('Geverifieerd')" />
                             </template>
                             <template v-else-if="profile.status === 'unverified'" #right>
-                                <span v-tooltip="'Wacht op verificatie'" class="icon clock gray" />
+                                <span class="icon clock gray" :v-tooltip="$t('Wacht op verificatie')" />
                             </template>
                             <template v-else #right>
-                                <span v-tooltip="'Geblokkeerd'" class="icon canceled red" />
+                                <span class="icon canceled red" :v-tooltip="$t('Geblokkeerd')" />
                             </template>
                         </STListItem>
                     </STList>

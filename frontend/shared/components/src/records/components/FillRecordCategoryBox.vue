@@ -19,7 +19,7 @@
                 </span>
             </div>
             <div>
-                <button v-if="!markReviewed && hasAnswers" v-tooltip="'Wis alle antwoorden'" type="button" class="button icon trash" @click="clearAnswers" />
+                <button v-if="!markReviewed && hasAnswers" type="button" class="button icon trash" :v-tooltip="$t('Wis alle antwoorden')" @click="clearAnswers" />
             </div>
         </h2>
 

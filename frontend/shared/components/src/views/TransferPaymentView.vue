@@ -43,19 +43,19 @@
                         <tbody>
                             <tr>
                                 <td>{{ $t('Bedrag') }}</td>
-                                <td v-tooltip="'Klik om te kopiëren'" v-copyable="payment.price/100" class="style-copyable">
+                                <td v-copyable="payment.price/100" class="style-copyable" :v-tooltip="$t('Klik om te kopiëren')">
                                     {{ formatPrice(payment.price) }}
                                 </td>
                             </tr>
                             <tr v-if="payment.price > 0">
                                 <td>{{ $t('Begunstigde') }}</td>
-                                <td v-tooltip="'Klik om te kopiëren'" v-copyable="creditor" class="style-copyable">
+                                <td v-copyable="creditor" class="style-copyable" :v-tooltip="$t('Klik om te kopiëren')">
                                     {{ creditor }}
                                 </td>
                             </tr>
                             <tr v-if="payment.price > 0">
                                 <td>{{ $t('Rekeningnummer') }}</td>
-                                <td v-tooltip="'Klik om te kopiëren'" v-copyable="iban" class="style-copyable">
+                                <td v-copyable="iban" class="style-copyable" :v-tooltip="$t('Klik om te kopiëren')">
                                     {{ iban }}
                                 </td>
                             </tr>
@@ -69,7 +69,7 @@
                                 <td v-else>
                                     {{ $t('Mededeling') }}
                                 </td>
-                                <td v-tooltip="'Klik om te kopiëren'" v-copyable="transferDescription" class="style-copyable">
+                                <td v-copyable="transferDescription" class="style-copyable" :v-tooltip="$t('Klik om te kopiëren')">
                                     {{ formattedTransferDescription }}
                                 </td>
                             </tr>
