@@ -1,19 +1,19 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Overschrijven" :disable-pop="true" :disable-dismiss="!isPopup" />
+        <STNavigationBar :disable-pop="true" :disable-dismiss="!isPopup" :title="$t(`Overschrijven`)" />
 
         <main>
             <h1 v-if="created && type === 'order'">
-                Bestelling geplaatst! Schrijf nu over.
+                {{ $t('Bestelling geplaatst! Schrijf nu over.') }}
             </h1>
             <h1 v-else-if="created">
-                Gelukt! Schrijf nu het bedrag over
+                {{ $t('Gelukt! Schrijf nu het bedrag over') }}
             </h1>
             <h1 v-else-if="payment.price < 0">
-                Terugbetaling via overschrijving
+                {{ $t('Terugbetaling via overschrijving') }}
             </h1>
             <h1 v-else>
-                Bedrag overschrijven
+                {{ $t('Bedrag overschrijven') }}
             </h1>
 
             <p v-if="payment.price > 0 && payment.status !== 'Succeeded'">
@@ -21,53 +21,53 @@
                     {{ payment.transferSettings.infoDescription }}
                 </template>
                 <template v-else-if="created">
-                    Voer de overschrijving meteen uit. Vermeld zeker “{{ formattedTransferDescription }}” in je overschrijving.
+                    {{ $t('Voer de overschrijving meteen uit. Vermeld zeker “{description}” in je overschrijving.', {description: formattedTransferDescription ?? ''}) }}
                 </template>
                 <template v-else>
-                    We kijken de betaalstatus van jouw overschrijving manueel na. Het kan dus even duren voor je hier ziet staan dat we de betaling hebben ontvangen. Vermeld zeker “{{ transferDescription }}” in je overschrijving.
+                    {{ $t('We kijken de betaalstatus van jouw overschrijving manueel na. Het kan dus even duren voor je hier ziet staan dat we de betaling hebben ontvangen. Vermeld zeker “{description}” in je overschrijving.', {description: transferDescription ?? ''}) }}
                 </template>
             </p>
             <p v-else-if="payment.price < 0 && payment.status !== 'Succeeded' && !created">
-                Je ontvangt dit bedrag binnenkort terug op jouw rekening.
+                {{ $t('Je ontvangt dit bedrag binnenkort terug op jouw rekening.') }}
             </p>
             <p v-else-if="payment.price < 0 && payment.status === 'Succeeded'" class="success-box">
-                We hebben dit bedrag terug op jouw rekening gestort.
+                {{ $t('We hebben dit bedrag terug op jouw rekening gestort.') }}
             </p>
 
             <div class="payment-split">
                 <div class="rectangle">
                     <div v-if="payment.price > 0" class="rectangle-top hide-smartphone">
-                        Typ het over
+                        {{ $t('Typ het over') }}
                     </div>
                     <table class="payment-transfer-table rectangle">
                         <tbody>
                             <tr>
-                                <td>Bedrag</td>
+                                <td>{{ $t('Bedrag') }}</td>
                                 <td v-tooltip="'Klik om te kopiëren'" v-copyable="payment.price/100" class="style-copyable">
                                     {{ formatPrice(payment.price) }}
                                 </td>
                             </tr>
                             <tr v-if="payment.price > 0">
-                                <td>Begunstigde</td>
+                                <td>{{ $t('Begunstigde') }}</td>
                                 <td v-tooltip="'Klik om te kopiëren'" v-copyable="creditor" class="style-copyable">
                                     {{ creditor }}
                                 </td>
                             </tr>
                             <tr v-if="payment.price > 0">
-                                <td>Rekeningnummer</td>
+                                <td>{{ $t('Rekeningnummer') }}</td>
                                 <td v-tooltip="'Klik om te kopiëren'" v-copyable="iban" class="style-copyable">
                                     {{ iban }}
                                 </td>
                             </tr>
                             <tr v-if="payment.price > 0">
                                 <td v-if="isStructured && isBelgium">
-                                    Mededeling
+                                    {{ $t('Mededeling') }}
                                 </td>
                                 <td v-else-if="isStructured">
-                                    Betalingskenmerk
+                                    {{ $t('Betalingskenmerk') }}
                                 </td>
                                 <td v-else>
-                                    Mededeling
+                                    {{ $t('Mededeling') }}
                                 </td>
                                 <td v-tooltip="'Klik om te kopiëren'" v-copyable="transferDescription" class="style-copyable">
                                     {{ formattedTransferDescription }}
@@ -78,20 +78,18 @@
                 </div>
                 <div v-if="payment.price > 0" class="hide-smartphone rectangle">
                     <div class="rectangle-top">
-                        Kopieer in app
+                        {{ $t('Kopieer in app') }}
                     </div>
                     <div class="rectangle-bottom">
-                        <img v-if="isBelgium" src="@stamhoofd/assets/images/partners/scan-apps-belgium.svg">
-                        <img v-else src="@stamhoofd/assets/images/partners/scan-apps-nl.svg">
+                        <img v-if="isBelgium" src="@stamhoofd/assets/images/partners/scan-apps-belgium.svg"><img v-else src="@stamhoofd/assets/images/partners/scan-apps-nl.svg">
                     </div>
                     <img v-if="QRCodeUrl" :src="QRCodeUrl" width="228" height="228">
                 </div>
             </div>
 
             <div v-if="false && isBelgium && getOS() === 'iOS' && payment.price > 0 && payment.status !== 'Succeeded'" class="only-smartphone container">
-                <hr>
-                <h2>Snel app openen</h2>
-                <p>Je moet niet noodzakelijk overschrijven via een app of één van deze apps. Dit is puur voor het gemak, het gaat hier om een gewone overschrijving.</p>
+                <hr><h2>{{ $t('Snel app openen') }}</h2>
+                <p>{{ $t('Je moet niet noodzakelijk overschrijven via een app of één van deze apps. Dit is puur voor het gemak, het gaat hier om een gewone overschrijving.') }}</p>
 
                 <STList>
                     <STListItem element-name="a" :href="'com.kbc.mobilesignqrcode://'+qrMessage">
@@ -99,10 +97,10 @@
                             <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/kbc/app.svg">
                         </template>
                         <h3 class="style-title-list">
-                            KBC Mobile
+                            {{ $t('KBC Mobile') }}
                         </h3>
                         <p class="style-description">
-                            Gegevens worden automatisch ingevuld
+                            {{ $t('Gegevens worden automatisch ingevuld') }}
                         </p>
                     </STListItem>
 
@@ -111,10 +109,10 @@
                             <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/ing/app.svg">
                         </template>
                         <h3 class="style-title-list">
-                            ING Banking
+                            {{ $t('ING Banking') }}
                         </h3>
                         <p class="style-description">
-                            Kopieer zelf manueel de gegevens bovenaan
+                            {{ $t('Kopieer zelf manueel de gegevens bovenaan') }}
                         </p>
                     </STListItem>
 
@@ -123,10 +121,10 @@
                             <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/belfius/app.svg">
                         </template>
                         <h3 class="style-title-list">
-                            Belfius Mobile
+                            {{ $t('Belfius Mobile') }}
                         </h3>
                         <p class="style-description">
-                            Kopieer zelf manueel de gegevens bovenaan
+                            {{ $t('Kopieer zelf manueel de gegevens bovenaan') }}
                         </p>
                     </STListItem>
 
@@ -135,10 +133,10 @@
                             <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/bnp/app.png">
                         </template>
                         <h3 class="style-title-list">
-                            Easy Banking App (BNP Paribas Fortis)
+                            {{ $t('Easy Banking App (BNP Paribas Fortis)') }}
                         </h3>
                         <p class="style-description">
-                            Kopieer zelf manueel de gegevens bovenaan
+                            {{ $t('Kopieer zelf manueel de gegevens bovenaan') }}
                         </p>
                     </STListItem>
 
@@ -147,10 +145,10 @@
                             <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/argenta/app.png">
                         </template>
                         <h3 class="style-title-list">
-                            Argenta-app
+                            {{ $t('Argenta-app') }}
                         </h3>
                         <p class="style-description">
-                            Kopieer zelf manueel de gegevens bovenaan
+                            {{ $t('Kopieer zelf manueel de gegevens bovenaan') }}
                         </p>
                     </STListItem>
 
@@ -159,28 +157,28 @@
                             <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/hello-bank/app.png">
                         </template>
                         <h3 class="style-title-list">
-                            Hello Bank! app
+                            {{ $t('Hello Bank! app') }}
                         </h3>
                         <p class="style-description">
-                            Kopieer zelf manueel de gegevens bovenaan
+                            {{ $t('Kopieer zelf manueel de gegevens bovenaan') }}
                         </p>
                     </STListItem>
                 </STList>
 
                 <p class="style-description">
-                    Of open zelf een andere app. Je kan de gegevens makkelijk kopiëren hierboven door erop te klikken.
+                    {{ $t('Of open zelf een andere app. Je kan de gegevens makkelijk kopiëren hierboven door erop te klikken.') }}
                 </p>
             </div>
 
             <p v-if="payment.price > 0 && payment.status === 'Succeeded'" class="success-box">
-                We hebben de betaling ontvangen.
+                {{ $t('We hebben de betaling ontvangen.') }}
             </p>
             <template v-else-if="payment.price > 0 && created">
                 <p v-if="isBelgium" class="hide-smartphone info-box">
-                    <span>*De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner en ook niet met Payconiq/Bancontact. De QR-code scannen is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). Dit is een overschrijving, niet te verwarren met een online betaling. <a class="inline-link" :href="$domains.getDocs('betalen-qr-code')" target="_blank">Meer info</a></span>
+                    <span>*{{ $t('De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner en ook niet met Payconiq/Bancontact. De QR-code scannen is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). Dit is een overschrijving, niet te verwarren met een online betaling.') }} <a class="inline-link" :href="$domains.getDocs('betalen-qr-code')" target="_blank">{{ $t('Meer info') }}</a></span>
                 </p>
                 <p v-else class="hide-smartphone info-box">
-                    De QR-code scannen is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner.
+                    {{ $t('De QR-code scannen is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner.') }}
                 </p>
             </template>
         </main>
@@ -189,10 +187,10 @@
             <template #right>
                 <button v-if="payment.price > 0 && payment.status !== 'Succeeded'" class="button secundary hide-smartphone" type="button" @click="helpMe">
                     <span class="icon help" />
-                    <span>Het lukt niet</span>
+                    <span>{{ $t('Het lukt niet') }}</span>
                 </button>
                 <button class="button primary" type="button" @click="goNext">
-                    <span>Doorgaan</span>
+                    <span>{{ $t('Doorgaan') }}</span>
                     <span class="icon arrow-right" />
                 </button>
             </template>

@@ -14,7 +14,7 @@
 
         <h2 class="style-title-list">
             {{ responsibility.name }} <template v-if="group">
-                van {{ group.settings.name }}
+                {{ $t('van') }} {{ group.settings.name }}
             </template>
         </h2>
         <p class="style-description-small">
@@ -22,7 +22,7 @@
         </p>
 
         <p class="style-description-small">
-            Rechten: {{ capitalizeFirstLetter(roleDescription) }}
+            {{ $t('Rechten') }}: {{ capitalizeFirstLetter(roleDescription) }}
         </p>
 
         <template #right>

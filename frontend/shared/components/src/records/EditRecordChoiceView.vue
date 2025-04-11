@@ -3,33 +3,19 @@
         <h1>
             {{ title }}
         </h1>
-        
+
         <STErrorsDefault :error-box="errorBox" />
 
-        <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
-            <input
-                ref="firstInput"
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="Naam van deze keuze"
-                autocomplete="off"
-            >
-        </STInputBox>
-    
-        <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox" class="max">
-            <textarea
-                v-model="description"
-                class="input"
-                type="text"
-                placeholder="Optioneel"
-                autocomplete="off"
-            />
+        <STInputBox error-fields="name" :error-box="errorBox" :title="$t(`Naam`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`Naam van deze keuze`)">
         </STInputBox>
 
-        <hr>
-        <h2>Waarschuwing</h2>
-        <p>Soms wil je dat iets opvalt voor beheerders, dat kan je bereiken met waarschuwingen.</p>
+        <STInputBox error-fields="description" :error-box="errorBox" class="max" :title="$t(`Beschrijving`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`Optioneel`)" />
+        </STInputBox>
+
+        <hr><h2>{{ $t('Waarschuwing') }}</h2>
+        <p>{{ $t('Soms wil je dat iets opvalt voor beheerders, dat kan je bereiken met waarschuwingen.') }}</p>
 
         <STList>
             <STListItem :selectable="true" element-name="label">
@@ -37,7 +23,7 @@
                     <Radio v-model="warningInverted" :value="null" name="warningInverted" />
                 </template>
                 <h3 class="style-title-list">
-                    Geen waarschuwing
+                    {{ $t('Geen waarschuwing') }}
                 </h3>
             </STListItem>
 
@@ -46,7 +32,7 @@
                     <Radio v-model="warningInverted" :value="false" name="warningInverted" />
                 </template>
                 <h3 class="style-title-list">
-                    Waarschuwing als aangevinkt
+                    {{ $t('Waarschuwing als aangevinkt') }}
                 </h3>
             </STListItem>
 
@@ -55,32 +41,26 @@
                     <Radio v-model="warningInverted" :value="true" name="warningInverted" />
                 </template>
                 <h3 class="style-title-list">
-                    Waarschuwing als niet aangevinkt
+                    {{ $t('Waarschuwing als niet aangevinkt') }}
                 </h3>
             </STListItem>
         </STList>
 
-        <STInputBox v-if="warningText !== null" title="Waarschuwingstekst" error-fields="label" :error-box="errorBox" class="max">
-            <input
-                v-model="warningText"
-                class="input"
-                type="text"
-                placeholder="bv. 'Geen toestemming om foto's te maken'"
-                autocomplete="off"
-            >
+        <STInputBox v-if="warningText !== null" error-fields="label" :error-box="errorBox" class="max" :title="$t(`Waarschuwingstekst`)">
+            <input v-model="warningText" class="input" type="text" autocomplete="off" :placeholder="$t(`bv. 'Geen toestemming om foto's te maken'`)">
         </STInputBox>
 
-        <STInputBox v-if="warningType" class="max" title="Type">
+        <STInputBox v-if="warningType" class="max" :title="$t(`Type`)">
             <STList>
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
                         <Radio v-model="warningType" :value="RecordWarningType.Info" name="warningType" />
                     </template>
                     <h3 class="style-title-list">
-                        Informatief
+                        {{ $t('Informatief') }}
                     </h3>
                     <p class="style-description-small">
-                        Grijze achtergrond. Voor minder belangrijke zaken
+                        {{ $t('Grijze achtergrond. Voor minder belangrijke zaken') }}
                     </p>
                 </STListItem>
 
@@ -89,10 +69,10 @@
                         <Radio v-model="warningType" :value="RecordWarningType.Warning" name="warningType" />
                     </template>
                     <h3 class="style-title-list">
-                        Waarschuwing
+                        {{ $t('Waarschuwing') }}
                     </h3>
                     <p class="style-description-small">
-                        Gele achtergrond
+                        {{ $t('Gele achtergrond') }}
                     </p>
                 </STListItem>
 
@@ -101,23 +81,22 @@
                         <Radio v-model="warningType" :value="RecordWarningType.Error" name="warningType" />
                     </template>
                     <h3 class="style-title-list">
-                        Foutmelding
+                        {{ $t('Foutmelding') }}
                     </h3>
                     <p class="style-description-small">
-                        Voor zaken die echt heel belangrijk zijn. Probeer dit weinig te gebruiken, zet niet alles op 'foutmelding', anders valt het niet meer op.
+                        {{ $t("Voor zaken die echt heel belangrijk zijn. Probeer dit weinig te gebruiken, zet niet alles op 'foutmelding', anders valt het niet meer op.") }}
                     </p>
                 </STListItem>
             </STList>
         </STInputBox>
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Optie verwijderen
+            <hr><h2>
+                {{ $t('Optie verwijderen') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span>{{ $t('Verwijderen') }}</span>
             </button>
         </div>
     </SaveView>
@@ -125,10 +104,10 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
-import { RecordChoice, RecordSettings, RecordWarning, RecordWarningType, Version } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { CenteredMessage, ErrorBox, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from '@stamhoofd/components';
+import { RecordChoice, RecordSettings, RecordWarning, RecordWarningType, Version } from '@stamhoofd/structures';
 
 @Component({
     components: {
@@ -137,191 +116,193 @@ import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes"
         STErrorsDefault,
         STList,
         STListItem,
-        Radio
+        Radio,
     },
 })
 export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
+    errorBox: ErrorBox | null = null;
+    validator = new Validator();
 
     @Prop({ required: true })
-    choice!: RecordChoice
+    choice!: RecordChoice;
 
     @Prop({ required: false, default: null })
-    parentCategory!: RecordSettings | null
+    parentCategory!: RecordSettings | null;
 
     @Prop({ required: true })
-    isNew!: boolean
+    isNew!: boolean;
 
-    patchChoice: AutoEncoderPatchType<RecordChoice> = RecordChoice.patch({ id: this.choice.id })
+    patchChoice: AutoEncoderPatchType<RecordChoice> = RecordChoice.patch({ id: this.choice.id });
 
     @Prop({ required: true })
     saveHandler: (patch: PatchableArrayAutoEncoder<RecordChoice>) => void;
 
     get RecordWarningType() {
-        return RecordWarningType
+        return RecordWarningType;
     }
 
     get patchedChoice() {
-        return this.choice.patch(this.patchChoice)
+        return this.choice.patch(this.patchChoice);
     }
 
     get title(): string {
         if (this.isNew) {
-            return "Nieuwe optie"
+            return 'Nieuwe optie';
         }
-        return "Optie bewerken"
+        return 'Optie bewerken';
     }
 
     get name() {
-        return this.patchedChoice.name
+        return this.patchedChoice.name;
     }
 
     set name(name: string) {
-        this.patchChoice = this.patchChoice.patch({ name })
+        this.patchChoice = this.patchChoice.patch({ name });
     }
 
     get description() {
-        return this.patchedChoice.description
+        return this.patchedChoice.description;
     }
 
     set description(description: string) {
-        this.patchChoice = this.patchChoice.patch({ description })
+        this.patchChoice = this.patchChoice.patch({ description });
     }
 
     get warningInverted() {
-        return this.patchedChoice.warning?.inverted ?? null
+        return this.patchedChoice.warning?.inverted ?? null;
     }
 
     set warningInverted(inverted: boolean | null) {
         if (inverted === null) {
-            this.patchChoice = this.patchChoice.patch({ 
-                warning: null
-            })
-            return
+            this.patchChoice = this.patchChoice.patch({
+                warning: null,
+            });
+            return;
         }
         if (this.warningInverted === null) {
-            this.patchChoice = this.patchChoice.patch({ 
+            this.patchChoice = this.patchChoice.patch({
                 warning: RecordWarning.create({
-                    inverted
-                })
-            })
-        } else {
-            this.patchChoice = this.patchChoice.patch({ 
+                    inverted,
+                }),
+            });
+        }
+        else {
+            this.patchChoice = this.patchChoice.patch({
                 warning: RecordWarning.patch({
-                    inverted
-                })
-            })
+                    inverted,
+                }),
+            });
         }
     }
 
     get warningText() {
-        return this.patchedChoice.warning?.text ?? null
+        return this.patchedChoice.warning?.text ?? null;
     }
 
     set warningText(text: string | null) {
         if (text === null) {
-            this.patchChoice = this.patchChoice.patch({ 
-                warning: null
-            })
-            return
+            this.patchChoice = this.patchChoice.patch({
+                warning: null,
+            });
+            return;
         }
         if (this.warningText === null) {
-            this.patchChoice = this.patchChoice.patch({ 
+            this.patchChoice = this.patchChoice.patch({
                 warning: RecordWarning.create({
-                    text
-                })
-            })
-        } else {
-            this.patchChoice = this.patchChoice.patch({ 
+                    text,
+                }),
+            });
+        }
+        else {
+            this.patchChoice = this.patchChoice.patch({
                 warning: RecordWarning.patch({
-                    text
-                })
-            })
+                    text,
+                }),
+            });
         }
     }
 
     get warningType() {
-        return this.patchedChoice.warning?.type ?? null
+        return this.patchedChoice.warning?.type ?? null;
     }
 
     set warningType(type: RecordWarningType | null) {
         if (type === null) {
-            this.patchChoice = this.patchChoice.patch({ 
-                warning: null
-            })
-            return
+            this.patchChoice = this.patchChoice.patch({
+                warning: null,
+            });
+            return;
         }
         if (this.warningType === null) {
-            this.patchChoice = this.patchChoice.patch({ 
+            this.patchChoice = this.patchChoice.patch({
                 warning: RecordWarning.create({
-                    type
-                })
-            })
-        } else {
-            this.patchChoice = this.patchChoice.patch({ 
+                    type,
+                }),
+            });
+        }
+        else {
+            this.patchChoice = this.patchChoice.patch({
                 warning: RecordWarning.patch({
-                    type
-                })
-            })
+                    type,
+                }),
+            });
         }
     }
 
     addPatch(patch: AutoEncoderPatchType<RecordChoice>) {
-        this.patchChoice = this.patchChoice.patch(patch)
+        this.patchChoice = this.patchChoice.patch(patch);
     }
 
     async save() {
-        const isValid = await this.validator.validate()
+        const isValid = await this.validator.validate();
         if (!isValid) {
-            return
+            return;
         }
 
-        const arrayPatch: PatchableArrayAutoEncoder<RecordChoice> = new PatchableArray()
+        const arrayPatch: PatchableArrayAutoEncoder<RecordChoice> = new PatchableArray();
 
         if (this.isNew) {
-            arrayPatch.addPut(this.patchedChoice)
-        } else {
-            arrayPatch.addPatch(this.patchChoice)
+            arrayPatch.addPut(this.patchedChoice);
+        }
+        else {
+            arrayPatch.addPatch(this.patchChoice);
         }
 
-        this.saveHandler(arrayPatch)
-        this.pop({ force: true })
+        this.saveHandler(arrayPatch);
+        this.pop({ force: true });
     }
 
     async deleteMe() {
-        if (!await CenteredMessage.confirm("Ben je zeker dat je deze optie wilt verwijderen?", "Verwijderen")) {
-            return
+        if (!await CenteredMessage.confirm('Ben je zeker dat je deze optie wilt verwijderen?', 'Verwijderen')) {
+            return;
         }
 
         if (this.isNew) {
             // do nothing
-            this.pop({ force: true })
-            return
+            this.pop({ force: true });
+            return;
         }
 
-        const arrayPatch: PatchableArrayAutoEncoder<RecordChoice> = new PatchableArray()
-        arrayPatch.addDelete(this.choice.id)
+        const arrayPatch: PatchableArrayAutoEncoder<RecordChoice> = new PatchableArray();
+        arrayPatch.addDelete(this.choice.id);
 
-        this.saveHandler(arrayPatch)
-        this.pop({ force: true })
+        this.saveHandler(arrayPatch);
+        this.pop({ force: true });
     }
 
     cancel() {
-        this.pop()
+        this.pop();
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.patchChoice, this.choice, { version: Version })
+        return patchContainsChanges(this.patchChoice, this.choice, { version: Version });
     }
 
     async shouldNavigateAway() {
         if (!this.hasChanges) {
-            return true
+            return true;
         }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
-
-    
 }
 </script>

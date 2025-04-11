@@ -5,36 +5,22 @@
         </h1>
 
         <p v-if="allowChildCategories && type === RecordEditorType.PlatformMember" class="style-description">
-            Een vragenlijst bevat één of meerdere persoonsgegevens, eventueel opgedeeld in categorieën. Lees <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
+            {{ $t('Een vragenlijst bevat één of meerdere persoonsgegevens, eventueel opgedeeld in categorieën. Lees') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('hier') }}</a> {{ $t('meer informatie na over hoe je een vragenlijst kan instellen.') }}
         </p>
         <p v-else class="style-description">
-            Lees <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
+            {{ $t('Lees') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('hier') }}</a> {{ $t('meer informatie na over hoe je een vragenlijst kan instellen.') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox title="Titel" error-fields="name" :error-box="errors.errorBox">
-                <input
-                    ref="firstInput"
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    placeholder="Titel"
-                    autocomplete="off"
-                    enterkeyhint="next"
-                >
+            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Titel`)">
+                <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`Titel`)">
             </STInputBox>
         </div>
 
-        <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox" class="max">
-            <textarea
-                v-model="description"
-                class="input"
-                type="text"
-                placeholder="Optioneel"
-                autocomplete="off"
-            />
+        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`Beschrijving`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`Optioneel`)" />
         </STInputBox>
 
         <STList v-if="(settings.toggleDefaultEnabled && allowChildCategories) || !patchedCategory.defaultEnabled">
@@ -44,22 +30,20 @@
                 </template>
 
                 <h3 v-if="app === 'admin'" class="style-title-list">
-                    Verplicht ingeschakeld voor alle leden ingeschreven bij minstens één standaard-leeftijdsgroep
+                    {{ $t('Verplicht ingeschakeld voor alle leden ingeschreven bij minstens één standaard-leeftijdsgroep') }}
                 </h3>
                 <h3 v-else class="style-title-list">
-                    Verplicht ingeschakeld voor alle leden (behalve wachtlijsten en activiteiten)
+                    {{ $t('Verplicht ingeschakeld voor alle leden (behalve wachtlijsten en activiteiten)') }}
                 </h3>
 
                 <p class="style-description-small">
-                    Schakel je dit uit, dan staat deze vragenlijst standaard uit maar kan deze op lagere niveau's worden ingeschakeld. Zo behoud je maximale flexibiliteit.
+                    {{ $t("Schakel je dit uit, dan staat deze vragenlijst standaard uit maar kan deze op lagere niveau's worden ingeschakeld. Zo behoud je maximale flexibiliteit.") }}
                 </p>
             </STListItem>
         </STList>
 
-        <hr>
-
-        <p v-if="records.length === 0 && categories.length === 0" class="info-box">
-            Deze vragenlijst is leeg en zal nog niet getoond worden.
+        <hr><p v-if="records.length === 0 && categories.length === 0" class="info-box">
+            {{ $t('Deze vragenlijst is leeg en zal nog niet getoond worden.') }}
         </p>
 
         <STList :model-value="getDraggableRecords(patchedCategory).computed.value" :draggable="true" @update:model-value="newValue => getDraggableRecords(patchedCategory).computed.value = newValue!">
@@ -71,19 +55,18 @@
         <p class="style-button-bar">
             <button class="button text" type="button" @click="addRecord()">
                 <span class="icon add" />
-                <span v-if="categories.length === 0">Vraag</span>
-                <span v-else>Algemene vraag</span>
+                <span v-if="categories.length === 0">{{ $t('Vraag') }}</span>
+                <span v-else>{{ $t('Algemene vraag') }}</span>
             </button>
 
             <button v-if="allowChildCategories" class="button text" type="button" @click="addCategory()">
                 <span class="icon add" />
-                <span>Categorie</span>
+                <span>{{ $t('Categorie') }}</span>
             </button>
         </p>
 
         <div v-for="c in categories" :key="c.id" class="container">
-            <hr>
-            <h2 class="style-with-button with-list">
+            <hr><h2 class="style-with-button with-list">
                 <div>
                     {{ c.name }}
                 </div>
@@ -98,7 +81,7 @@
             </p>
 
             <p v-if="c.records.length === 0" class="info-box">
-                Deze categorie bevat nog geen vragen.
+                {{ $t('Deze categorie bevat nog geen vragen.') }}
             </p>
 
             <p v-if="c.description" class="style-description-block style-em pre-wrap" v-text="c.description" />
@@ -111,16 +94,15 @@
         </div>
 
         <div v-if="defaultEnabled && (hasFilters || (allowChildCategories && patchedCategory.getAllRecords().length > 1))" class="container">
-            <hr>
-            <h2>Slim in- en uitschakelen</h2>
+            <hr><h2>{{ $t('Slim in- en uitschakelen') }}</h2>
             <p v-if="!hasFilters">
-                Je kan kiezen wanneer deze stap overgeslagen kan worden.
+                {{ $t('Je kan kiezen wanneer deze stap overgeslagen kan worden.') }}
             </p>
             <p v-else-if="allowChildCategories && patchedCategory.getAllRecords().length > 1">
-                Je kan kiezen wanneer deze vragen van toepassing zijn, en of deze stap overgeslagen kan worden.
+                {{ $t('Je kan kiezen wanneer deze vragen van toepassing zijn, en of deze stap overgeslagen kan worden.') }}
             </p>
             <p v-else>
-                Je kan kiezen wanneer deze vragen van toepassing zijn.
+                {{ $t('Je kan kiezen wanneer deze vragen van toepassing zijn.') }}
             </p>
 
             <PropertyFilterInput v-model="filter" :allow-optional="allowChildCategories && patchedCategory.getAllRecords().length > 1" :builder="filterBuilder" />
@@ -598,7 +580,7 @@ async function showExample() {
                 category: patchedCategory.value.patch({
                     // Disable filter on category level for the preview, since these cannot work
                     filter: null,
-                    defaultEnabled: true
+                    defaultEnabled: true,
                 }),
                 value: reactiveValue,
                 saveText: 'Opslaan',

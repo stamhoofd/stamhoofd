@@ -11,14 +11,14 @@
             {{ filterDescription }}
         </p>
         <p v-if="!category.childCategories.length && !category.records.length" class="style-description-small">
-            Leeg
+            {{ $t('Leeg') }}
         </p>
         <p v-else class="style-description-small">
             <template v-if="category.records.length">
                 {{ category.records.length }} {{ category.records.length === 1 ? "vraag" : "vragen" }}
             </template>
             <template v-if="category.childCategories.length && category.records.length">
-                en
+                {{ $t('en') }}
             </template>
             <template v-if="category.childCategories.length">
                 {{ category.childCategories.length }} {{ category.childCategories.length === 1 ? "categorie" : "categorieën" }}
@@ -40,9 +40,9 @@ import { RecordCategory } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { propertyFilterToString } from '../../filters/UIFilter';
 import { useEmitPatchArray, usePatchMoveUpDownSingle } from '../../hooks';
+import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
 import { RecordEditorSettings } from '../RecordEditorSettings';
-import { CenteredMessage } from '../../overlays/CenteredMessage';
 
 const props = withDefaults(
     defineProps<{

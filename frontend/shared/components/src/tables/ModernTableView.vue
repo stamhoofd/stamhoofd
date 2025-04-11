@@ -5,10 +5,10 @@
                 <button v-if="canLeaveSelectionMode && isMobile && showSelection && !isIOS" type="button" class="button icon navigation close" @click="setShowSelection(false)" />
                 <button v-else-if="canLeaveSelectionMode && showSelection && isIOS" type="button" class="button navigation" @click="isAllSelected = !isAllSelected">
                     <template v-if="isAllSelected">
-                        Deselecteer alles
+                        {{ $t('Deselecteer alles') }}
                     </template>
                     <template v-else>
-                        Selecteer alles
+                        {{ $t('Selecteer alles') }}
                     </template>
                 </button>
                 <BackButton v-else-if="canPop" @click="pop">
@@ -22,11 +22,11 @@
 
                 <template v-if="showSelection && isIOS && canLeaveSelectionMode">
                     <button v-if="canLeaveSelectionMode" key="iOSDone" type="button" class="button navigation highlight" @click="setShowSelection(false)">
-                        Gereed
+                        {{ $t('Gereed') }}
                     </button>
                 </template>
                 <button v-else-if="!showSelection && isIOS && false" key="iOSSelect" type="button" class="button navigation" @click="setShowSelection(true)">
-                    Selecteer
+                    {{ $t('Selecteer') }}
                 </button>
                 <button v-else key="actions" v-long-press="(e) => showActions(true, e)" type="button" class="button icon more navigation" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)" />
             </template>
@@ -45,13 +45,13 @@
                 <div class="input-with-buttons">
                     <div>
                         <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                            <input v-model="searchQuery" class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
+                            <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`Zoeken`)">
                         </form>
                     </div>
                     <div v-if="canFilter">
                         <button type="button" class="button text" @click="editFilter">
                             <span class="icon filter" />
-                            <span class="hide-small">Filter</span>
+                            <span class="hide-small">{{ $t('Filter') }}</span>
                             <span v-if="!isEmptyFilter(tableObjectFetcher.baseFilter)" class="icon dot primary" />
                         </button>
                     </div>
@@ -71,9 +71,7 @@
                                     <span>{{ column.name }}</span>
 
                                     <span
-                                        v-if="sortBy === column"
-                                        class="sort-arrow icon"
-                                        :class="{
+                                        v-if="sortBy === column" class="sort-arrow icon" :class="{
                                             'arrow-up-small': sortDirection === 'ASC',
                                             'arrow-down-small': sortDirection === 'DESC',
                                         }"
@@ -110,7 +108,7 @@
                 {{ errorMessage }}
 
                 <button class="button text" type="button" @click="refresh">
-                    Opnieuw
+                    {{ $t('Opnieuw') }}
                 </button>
             </p>
 
@@ -118,10 +116,10 @@
                 <slot name="empty" />
             </p>
             <p v-else-if="totalFilteredCount === 0" class="info-box with-button">
-                Geen resultaten gevonden
+                {{ $t('Geen resultaten gevonden') }}
 
                 <button class="button text" type="button" @click="resetFilter">
-                    Reset
+                    {{ $t('Reset') }}
                 </button>
             </p>
         </main>
