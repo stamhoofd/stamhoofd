@@ -19,7 +19,8 @@ const attributeWhiteList = new Set([
     'placeholder',
     'label',
     'title',
-    'text'
+    'text',
+    'empty-message'
 ]);
 
 export async function translateVueFiles(options: TranslateVueFilesOptions = {}) {
