@@ -11,7 +11,7 @@
                     <input v-model="name" class="input" nmae="name" type="text" autocomplete="name" :placeholder="$t(`Naam`)">
                 </STInputBox>
 
-                <STInputBox error-fields="title" :error-box="errors.errorBox" :title="$t(`Relatie`)*">
+                <STInputBox error-fields="title" :error-box="errors.errorBox" :title="$t(`Relatie`)+'*'">
                     <input v-model="contactTitle" list="emergency-contact-types" class="input" name="type" type="text" :placeholder="$t(`Bv. buurman`)"><datalist id="emergency-contact-types">
                         <option v-if="details && details.parents.length === 0" value="Vader" />
                         <option v-if="details && details.parents.length === 0" value="Moeder" />

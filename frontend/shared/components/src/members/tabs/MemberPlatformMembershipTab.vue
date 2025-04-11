@@ -48,7 +48,8 @@
                             <p v-if="membership.organizationId === platform.membershipOrganizationId" class="style-description-small">
                                 {{ $t('4a39e12b-efa2-46fe-aa30-83bc576548a3') }}
                             </p>
-                            <p v-else class="style-description-small" /><p v-if="membership.price === 0" class="style-description-small">
+                            <p v-else class="style-description-small">
+                                <p v-if="membership.price === 0" class="style-description-small">
                                 {{ $t('c8f1e4d4-669c-4ccb-a9d9-30584f6c2d55', {organization: getOrganizationName(membership)}) }}
                             </p>
                             <p v-else-if="membership.balanceItemId" class="style-description-small">
