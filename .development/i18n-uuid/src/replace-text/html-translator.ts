@@ -2,7 +2,7 @@ import chalk from "chalk";
 import { X2jOptions, XMLBuilder, XmlBuilderOptions, XMLParser } from "fast-xml-parser";
 import { addChangeMarkers, endChangeMarker, removeChangeMarkers, startChangeMarker } from "./git-html-helper";
 import { promptBoolean } from "./prompt-helper";
-import { getWhiteSpaceBeforeAndAfter, isNumberOrSpecialCharacter } from "./regex-helper";
+import { getWhiteSpaceBeforeAndAfter, isNumberOrSpecialCharacter, splitInParts } from "./regex-helper";
 import { wrapWithTranslationFunction } from "./translation-helper";
 
 export interface HtmlTranslatorOptions {
@@ -185,7 +185,7 @@ export class HtmlTranslator {
         const text: string | null = this.setIsChangedAndRemoveMarkers(record[key]);
 
         if(text !== null) {
-            const parts = this.splitInParts(text, betweenBracketsRegex).map(item => {
+            const parts = splitInParts(text, betweenBracketsRegex).map(item => {
                 return {
                     value: item.value,
                     shouldTranslate: !item.isMatch
@@ -450,41 +450,6 @@ REPLACEMENT:`))
         return processedParts.join('');
     }
 
-    private splitInParts(text: string, regex: RegExp): {isMatch: boolean, value: string}[] {
-        const matches = [...text.matchAll(regex)];
-        const startsWithMatch = matches[0]?.index === 0;
-        const matchedText = matches.map(match => match[0]);
-        const otherText = text.split(regex);
-
-        if(startsWithMatch) {
-            const removed = otherText.shift();
-            if(removed !== '') {
-                throw new Error('Removed part is not empty')
-            }
-        }
-    
-        const results: {isMatch: boolean, value: string}[] = [];
-    
-        for(let i = 0; i < otherText.length; i++) {
-            const part = otherText[i];
-    
-            const matchedPart = matchedText[i];
-            if(startsWithMatch && matchedPart !== undefined) {
-                results.push({value: matchedPart, isMatch: true});
-            }
-    
-            if(part !== undefined && part !== null && part.length > 0) {
-                results.push({value: part, isMatch: false});
-            }
-    
-            if(!startsWithMatch && matchedPart !== undefined) {
-                results.push({value: matchedPart, isMatch: true});
-            }
-        }
-    
-        return results;
-    }
-
     private async replaceTextInNonReactiveAttributeValue(parent: Record<string, any>, record: Record<string, string>, key: string, value: string, attributeName: string): Promise<string> {
         const allParts: {value: string, shouldTranslate: boolean}[] = [{
             value,
@@ -507,7 +472,7 @@ REPLACEMENT:`))
     }
 
     private async replaceTextInTypescript(parent: Record<string, any>, record: Record<string, string>, key: string, value: string): Promise<string> {
-        const parts = this.splitInParts(value, /"(?:[^"]*?)"|'(?:[^']*?)'/ig);
+        const parts = splitInParts(value, /"(?:[^"]*?)"|'(?:[^']*?)'/ig);
         const allParts: {value: string, shouldTranslate: boolean}[] = [];
     
         for(let i = 0; i < parts.length; i++) {
