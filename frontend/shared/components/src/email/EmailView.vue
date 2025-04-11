@@ -9,11 +9,11 @@
 
             <!-- Buttons -->
             <template #buttons>
-                <label v-tooltip="'Bijlage toevoegen'" class="button icon attachment">
+                <label v-tooltip="$t('Bijlage toevoegen')" class="button icon attachment">
                     <input type="file" multiple="true" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile"><span v-if="$isMobile && files.length > 0" class="style-bubble">{{ files.length }}</span>
                 </label>
 
-                <hr v-if="canOpenTemplates"><button v-if="canOpenTemplates" v-tooltip="'Sjablonen'" class="button icon email-template" type="button" @click="openTemplates" />
+                <hr v-if="canOpenTemplates"><button v-if="canOpenTemplates" v-tooltip="$t('Sjablonen')" class="button icon email-template" type="button" @click="openTemplates" />
             </template>
 
             <!-- List -->
