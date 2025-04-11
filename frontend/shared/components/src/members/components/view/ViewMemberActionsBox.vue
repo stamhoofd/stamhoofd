@@ -1,8 +1,7 @@
 <template>
     <div class="hover-box container">
-        <hr>
-        <h2 class="style-with-button">
-            <span class="icon-spacer">Acties</span>
+        <hr><h2 class="style-with-button">
+            <span class="icon-spacer">{{ $t('Acties') }}</span>
         </h2>
 
         <STList>
@@ -12,7 +11,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Gegevens wijzigen
+                    {{ $t('Gegevens wijzigen') }}
                 </h3>
             </STListItem>
 
@@ -22,7 +21,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ props.member.patchedMember.firstName }} inschrijven
+                    {{ $t('{member} inschrijven', {member: props.member.patchedMember.firstName}) }}
                 </h3>
             </STListItem>
 
@@ -32,7 +31,7 @@
                 </template>
 
                 <h3 class="style-title-list red">
-                    Definitief verwijderen
+                    {{ $t('Definitief verwijderen') }}
                 </h3>
             </STListItem>
         </STList>
@@ -51,28 +50,28 @@ import { useEditMember } from '../../hooks';
 import { usePlatformFamilyManager } from '../../PlatformFamilyManager';
 
 defineOptions({
-    inheritAttrs: false
-})
+    inheritAttrs: false,
+});
 const props = defineProps<{
-    member: PlatformMember
-}>()
+    member: PlatformMember;
+}>();
 const $editMember = useEditMember();
-const present = usePresent()
-const dismiss = useDismiss()
-const platformFamilyManager = usePlatformFamilyManager()
-const chooseGroupForMember = useChooseGroupForMember()
+const present = usePresent();
+const dismiss = useDismiss();
+const platformFamilyManager = usePlatformFamilyManager();
+const chooseGroupForMember = useChooseGroupForMember();
 
 async function editMember() {
-    await $editMember(props.member, {title: 'Gegevens bewerken'});
+    await $editMember(props.member, { title: 'Gegevens bewerken' });
 }
 async function addRegistration() {
-    await chooseGroupForMember({member: props.member, displayOptions: {action: 'show'}})
+    await chooseGroupForMember({ member: props.member, displayOptions: { action: 'show' } });
 }
 
 async function deleteMember() {
     const member = props.member;
     const name = member.patchedMember.name;
-    
+
     await present({
         components: [
             new ComponentWithProperties(DeleteView, {
@@ -84,19 +83,19 @@ async function deleteMember() {
                 checkboxText: 'Ja, ik ben 100% zeker',
                 onDelete: async () => {
                     const patch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
-                    patch.addDelete(member.id)
+                    patch.addDelete(member.id);
 
-                    await platformFamilyManager.isolatedPatch([member], patch)
-                    GlobalEventBus.sendEvent('members-deleted', [member]).catch(console.error)
+                    await platformFamilyManager.isolatedPatch([member], patch);
+                    GlobalEventBus.sendEvent('members-deleted', [member]).catch(console.error);
 
                     Toast.success(name + ' is verwijderd').show();
 
-                    await dismiss({force: true})
+                    await dismiss({ force: true });
                     return true;
-                }
-            })
+                },
+            }),
         ],
-        modalDisplayStyle: "sheet"
+        modalDisplayStyle: 'sheet',
     });
 }
 

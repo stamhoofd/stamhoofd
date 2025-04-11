@@ -1,46 +1,40 @@
 <template>
     <ExternalOrganizationContainer v-slot="{externalOrganization: groupOrganization}" :organization-id="group.organizationId" @update="setOrganization">
-        <SaveView save-text="Doorgaan" title="Zoeken" :loading="saving" @save="goNext">
+        <SaveView :save-text="$t('Doorgaan')" :loading="saving" :title="$t(`Zoeken`)" @save="goNext">
             <p v-if="!checkout.isAdminFromSameOrganization" class="style-title-prefix">
                 {{ groupOrganization!.name }}
             </p>
-            <h1>Zoek bestaande leden voor {{ group.settings.name }}</h1>
+            <h1>{{ $t('Zoek bestaande leden voor {group}', {group: group.settings.name}) }}</h1>
 
             <div class="input-with-buttons">
                 <div>
                     <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                        <input v-model="searchQuery" class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
+                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`Zoeken`)">
                     </form>
                 </div>
                 <div>
                     <button type="button" class="button text" @click="editFilter">
                         <span class="icon filter" />
-                        <span class="hide-small">Filter</span>
+                        <span class="hide-small">{{ $t('Filter') }}</span>
                         <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary" />
                     </button>
                 </div>
             </div>
 
             <p v-if="fetcher.objects.length > 1 && canSelectAll || canUnselectAll" class="style-description-small for-input">
-                Snel selecteren:  <button v-if="canSelectAll" class="inline-link" type="button" @click="selectAllResults">
-                    Selecteer alles
+                {{ $t('Snel selecteren:') }}  <button v-if="canSelectAll" class="inline-link" type="button" @click="selectAllResults">
+                    {{ $t('Selecteer alles') }}
                 </button>
 
                 <button v-else-if="canUnselectAll" class="inline-link" type="button" @click="deselectAllResults">
-                    Deselecteer alles
+                    {{ $t('Deselecteer alles') }}
                 </button>
             </p>
 
             <STList v-if="fetcher.objects.length">
-                <RegisterItemCheckboxRow
-                    v-for="member in fetcher.objects"
-                    :key="member.id"
-                    :member="member"
-                    :group="group"
-                    :group-organization="groupOrganization"
-                />
+                <RegisterItemCheckboxRow v-for="member in fetcher.objects" :key="member.id" :member="member" :group="group" :group-organization="groupOrganization" />
             </STList>
-            <InfiniteObjectFetcherEnd empty-message="Geen leden gevonden" :fetcher="fetcher" />
+            <InfiniteObjectFetcherEnd :empty-message="$t('Geen leden gevonden')" :fetcher="fetcher" />
         </SaveView>
     </ExternalOrganizationContainer>
 </template>

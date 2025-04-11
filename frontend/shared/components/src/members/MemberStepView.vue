@@ -1,17 +1,16 @@
 <template>
-    <SaveView :title="title" :loading="loading" :save-text="isDuplicate ? 'Doorgaan' : saveText" @save="save">
+    <SaveView :title="title" :loading="loading" :save-text="isDuplicate ? $t('Doorgaan') : saveText" @save="save">
         <template v-if="isDuplicate">
-            <h1>Krijg toegang tot de gegevens van {{ cloned.patchedMember.details.firstName }}</h1>
-            <p>{{ cloned.patchedMember.details.firstName }} is al gekend in ons systeem, maar jouw e-mailadres niet. Om toegang te krijgen heb je de beveiligingscode nodig.</p>
+            <h1>{{ $t('Krijg toegang tot de gegevens van {member}', {member: cloned.patchedMember.details.firstName}) }}</h1>
+            <p>{{ $t('{member} is al gekend in ons systeem, maar jouw e-mailadres niet. Om toegang te krijgen heb je de beveiligingscode nodig.', {member: cloned.patchedMember.details.firstName}) }}</p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <STInputBox title="Beveiligingscode" error-fields="code" :error-box="errors.errorBox" class="max">
+            <STInputBox error-fields="code" :error-box="errors.errorBox" class="max" :title="$t(`Beveiligingscode`)">
                 <CodeInput v-model="code" :code-length="16" :space-length="4" :numbers-only="false" @complete="save" />
             </STInputBox>
 
-            <hr>
-            <h2>Waar vind ik deze code?</h2>
+            <hr><h2>{{ $t('Waar vind ik deze code?') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem class="left-center">
@@ -19,7 +18,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/communication.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Vraag de code aan jouw leiding
+                        {{ $t('Vraag de code aan jouw leiding') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('f5229cc1-c908-4409-855a-1dba40371815') }}
@@ -31,10 +30,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/email.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Zoek de code onderaan een e-mail die je van ons kreeg
+                        {{ $t('Zoek de code onderaan een e-mail die je van ons kreeg') }}
                     </h2>
                     <p class="style-description">
-                        Zoek de laatste (recente) e-mail die je van ons kreeg op een e-mailadres die we wél kennen. Daar vind je normaal een beveiligingscode.
+                        {{ $t('Zoek de laatste (recente) e-mail die je van ons kreeg op een e-mailadres die we wél kennen. Daar vind je normaal een beveiligingscode.') }}
                     </p>
                 </STListItem>
             </STList>
@@ -50,6 +49,7 @@ import { Address, PlatformMember, Version } from '@stamhoofd/structures';
 import { ComponentOptions, computed, onActivated, Ref, ref } from 'vue';
 
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { Formatter } from '@stamhoofd/utility';
 import { useAppContext } from '../context';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
@@ -58,7 +58,6 @@ import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
 import { NavigationActions } from '../types/NavigationActions';
 import { usePlatformFamilyManager } from './PlatformFamilyManager';
-import { Formatter } from '@stamhoofd/utility';
 
 defineOptions({
     inheritAttrs: false,

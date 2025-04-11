@@ -1,5 +1,5 @@
 <template>
-    <SaveView class="st-view register-item-view" main-class="flex" :loading="saving" :save-text="isInCart ? 'Aanpassen' : 'Toevoegen'" :save-icon="isInCart ? 'edit' : 'basket'" :title="item.group.settings.name" v-on="isInCart ? {delete: deleteMe} : {}" @save="addToCart">
+    <SaveView class="st-view register-item-view" main-class="flex" :loading="saving" :save-text="isInCart ? $t('Aanpassen') : $t('Toevoegen')" :save-icon="isInCart ? 'edit' : 'basket'" :title="item.group.settings.name" v-on="isInCart ? {delete: deleteMe} : {}" @save="addToCart">
         <p class="style-title-prefix">
             {{ item.organization.name }}
         </p>
@@ -13,10 +13,10 @@
         </h1>
         <p v-for="registration in item.replaceRegistrations" :key="registration.id" class="style-description">
             <template v-if="registration.group.id !== item.group.id">
-                Verplaatsen vanaf {{ registration.group.settings.name }}
+                {{ $t('Verplaatsen vanaf {group}', {group: registration.group.settings.name}) }}
             </template>
             <template v-else>
-                Bestaande inschrijving aanpassen
+                {{ $t('Bestaande inschrijving aanpassen') }}
             </template>
         </p>
 
@@ -33,12 +33,12 @@
         </p>
 
         <p v-if="item.totalPrice && contextOrganization && checkout.asOrganizationId && !checkout.isAdminFromSameOrganization" class="warning-box">
-            Je betaalt deze inschrijving in naam van {{ contextOrganization.name }}. Je moet zelf de kosten aan je leden doorrekenen indien gewenst.
+            {{ $t('Je betaalt deze inschrijving in naam van {organization}. Je moet zelf de kosten aan je leden doorrekenen indien gewenst.', {organization: contextOrganization.name}) }}
         </p>
 
         <template v-if="item.replaceRegistrations.length === 0">
             <p v-if="item.group.settings.description" class="style-description-block" v-text="item.group.settings.description" />
-            <p v-else class="style-description-block" v-text="'Schrijf ' +item.member.patchedMember.firstName+ ' hier in. Voeg de inschrijving toe aan je winkelmandje en reken daarna alle inschrijvingen in één keer af.' " />
+            <p v-else class="style-description-block" :v-text="$t('Schrijf {member} hier in. Voeg de inschrijving toe aan je winkelmandje en reken daarna alle inschrijvingen in één keer af.', {member: item.member.patchedMember.firstName})" />
         </template>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -47,23 +47,22 @@
                 <DateSelection v-model="customStartDate" :required="false" :placeholder="formatDate(item.defaultStartDate, true)" :min="item.group.settings.startDate" :max="item.group.settings.endDate" />
             </STInputBox>
             <p v-if="item.group.settings.trialDays > 0" class="style-description-small">
-                Als beheerder kan je zelf een andere startdatum kiezen voor deze inschrijving. Bijvoorbeeld om een proefperiode later te laten beginnen, of een late inschrijving vroeger te laten starten.
+                {{ $t('Als beheerder kan je zelf een andere startdatum kiezen voor deze inschrijving. Bijvoorbeeld om een proefperiode later te laten beginnen, of een late inschrijving vroeger te laten starten.') }}
             </p>
             <p v-else class="style-description-small">
-                Als beheerder kan je zelf een andere startdatum kiezen voor deze inschrijving. Bijvoorbeeld om een late inschrijving vroeger te laten starten.
+                {{ $t('Als beheerder kan je zelf een andere startdatum kiezen voor deze inschrijving. Bijvoorbeeld om een late inschrijving vroeger te laten starten.') }}
             </p>
         </div>
 
         <div v-if="item.canHaveTrial || trial" class="container">
-            <hr>
-            <h2>
-                <span>Proefperiode</span>
+            <hr><h2>
+                <span>{{ $t('Proefperiode') }}</span>
                 <span class="style-tag">{{ Formatter.days(item.group.settings.trialDays) }}</span>
             </h2>
-            <p>{{ item.member.patchedMember.details.firstName }} komt in aanmerking voor een proefperiode van {{ Formatter.days(item.group.settings.trialDays) }}. Je moet dan pas betalen tegen het einde van de proefperiode (via het ledenportaal). Als je de inschrijving stopzet voor afloop van de proefperiode, hoef je niets te betalen. Als je geen proefperiode wilt, kan je ook onmiddelijk inschrijven als volwaardig lid.</p>
+            <p>{{ $t('{member} komt in aanmerking voor een proefperiode van {days}. Je moet dan pas betalen tegen het einde van de proefperiode (via het ledenportaal). Als je de inschrijving stopzet voor afloop van de proefperiode, hoef je niets te betalen. Als je geen proefperiode wilt, kan je ook onmiddelijk inschrijven als volwaardig lid.', {member: item.member.patchedMember.details.firstName, days: Formatter.days(item.group.settings.trialDays)}) }}</p>
 
             <STList>
-                <CheckboxListItem v-model="trial" label="Ik wil gebruik maken van de proefperiode" description="Als je dit aanvinkt zal je nog niet meteen moeten betalen voor de inschrijving, maar pas bij afloop van de proefperiode." />
+                <CheckboxListItem v-model="trial" :description="$t('Als je dit aanvinkt zal je nog niet meteen moeten betalen voor de inschrijving, maar pas bij afloop van de proefperiode.')" :label="$t(`Ik wil gebruik maken van de proefperiode`)" />
             </STList>
         </div>
 
@@ -78,7 +77,7 @@
                     </h4>
 
                     <p v-if="price.getRemainingStock(item) === 0" class="style-description-small">
-                        Uitverkocht
+                        {{ $t('Uitverkocht') }}
                     </p>
 
                     <template #right>
@@ -89,8 +88,7 @@
         </div>
 
         <div v-for="menu in item.getFilteredOptionMenus()" :key="menu.id" class="container">
-            <hr>
-            <h2>{{ menu.name }}</h2>
+            <hr><h2>{{ menu.name }}</h2>
             <p v-if="menu.description" class="pre-wrap style-description-block">
                 {{ menu.description }}
             </p>
@@ -105,15 +103,15 @@
                         {{ option.name || 'Naamloos' }}
                     </h4>
                     <p v-if="option.allowAmount && option.price.forMember(item.member)" class="style-description-small">
-                        {{ formatPrice(option.price.forMember(item.member)) }} per stuk
+                        {{ $t('{price} per stuk', {price: formatPrice(option.price.forMember(item.member))}) }}
                     </p>
 
                     <p v-if="option.getRemainingStock(item) && (option.maximum === null || option.getRemainingStock(item)! < option.maximum) && option.allowAmount" class="style-description-small">
-                        Nog {{ Formatter.pluralText(option.getRemainingStock(item)!, 'stuk', 'stuks') }} beschikbaar
+                        {{ $t('Nog {stock} beschikbaar', {stock: Formatter.pluralText(option.getRemainingStock(item)!, $t('stuk'), $t('stuks'))}) }}
                     </p>
 
                     <p v-else-if="option.getRemainingStock(item) === 0" class="style-description-small">
-                        Uitverkocht
+                        {{ $t('Uitverkocht') }}
                     </p>
 
                     <template #right>
@@ -131,8 +129,7 @@
         </div>
 
         <div v-for="category in categories.filter(c => c.isEnabled(item))" :key="category.id" class="container">
-            <hr>
-            <FillRecordCategoryBox :category="category" :value="item" :validator="errors.validator" :level="2" :all-optional="false" :force-mark-reviewed="true" @patch="addRecordAnswersPatch" />
+            <hr><FillRecordCategoryBox :category="category" :value="item" :validator="errors.validator" :level="2" :all-optional="false" :force-mark-reviewed="true" @patch="addRecordAnswersPatch" />
         </div>
 
         <div class="pricing-box max">

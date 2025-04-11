@@ -19,7 +19,7 @@
             <div v-if="hasRight || hasRight" class="right">
                 <slot name="right" />
                 <button v-if="canDismiss && !disableDismiss && $isIOS" class="button navigation" type="button" @click="dismiss()">
-                    Sluiten
+                    {{ $t('Sluiten') }}
                 </button>
                 <button v-else-if="canDismiss && !disableDismiss && !$isAndroid" class="button navigation icon close" type="button" @click="dismiss()" />
             </div>
@@ -28,76 +28,75 @@
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
-import InheritComponent from "../containers/InheritComponent.vue";
-import BackButton from "./BackButton.vue";
+import InheritComponent from '../containers/InheritComponent.vue';
+import BackButton from './BackButton.vue';
 
 @Component({
     components: {
         BackButton,
-        InheritComponent
-    }
+        InheritComponent,
+    },
 })
 export default class STNavigationBar extends Mixins(NavigationMixin) {
-    @Prop({ default: "", type: String })
-        title!: string;
+    @Prop({ default: '', type: String })
+    title!: string;
 
     @Prop({ default: true, type: Boolean })
-        addShadow!: boolean;
+    addShadow!: boolean;
 
     /**
      * Also show the title when not scrolled
      */
     @Prop({ default: false, type: Boolean })
-        showTitle!: boolean;
+    showTitle!: boolean;
 
     @Prop({ default: false, type: Boolean })
-        large!: boolean;
+    large!: boolean;
 
     @Prop({ default: false, type: Boolean })
-        disableDismiss!: boolean;
+    disableDismiss!: boolean;
 
     @Prop({ default: false, type: Boolean })
-        disablePop!: boolean;
+    disablePop!: boolean;
 
     @Prop({ default: false, type: Boolean })
-        leftLogo!: boolean;
+    leftLogo!: boolean;
 
     scrolled = false;
     scrollElement!: HTMLElement | null;
 
     get hasLeft() {
-        return (this.canPop  && !this.disablePop) || (this.canDismiss && !this.disableDismiss && (this as any).$isAndroid) || !!this.$slots['left']
+        return (this.canPop && !this.disablePop) || (this.canDismiss && !this.disableDismiss && (this as any).$isAndroid) || !!this.$slots['left'];
     }
 
     get hasRight() {
-        return ((this.canDismiss  && !this.disableDismiss) && !(this as any).$isAndroid) || !!this.$slots['right']
+        return ((this.canDismiss && !this.disableDismiss) && !(this as any).$isAndroid) || !!this.$slots['right'];
     }
 
     get hasMiddle() {
-        return !!this.$slots['middle'] || this.title.length > 0
+        return !!this.$slots['middle'] || this.title.length > 0;
     }
 
     get templateColumns() {
         if (this.hasMiddle && (this.hasLeft || this.hasRight)) {
             if ((this as any).$isAndroid) {
-                return "auto 1fr auto"
+                return 'auto 1fr auto';
             }
-            return "1fr auto 1fr"
+            return '1fr auto 1fr';
         }
 
         if (!this.hasMiddle) {
             if (this.leftLogo) {
-                return "1fr auto"
+                return '1fr auto';
             }
-            return "auto 1fr"
+            return 'auto 1fr';
         }
 
-        return "1fr"
+        return '1fr';
     }
-
 
     getScrollElement(element: HTMLElement | null = null): HTMLElement {
         return this.$el.nextElementSibling as HTMLElement;
@@ -108,16 +107,17 @@ export default class STNavigationBar extends Mixins(NavigationMixin) {
             return;
         }
         this.scrollElement = this.getScrollElement();
-        
+
         if (!this.scrollElement) {
-            console.error("No scroll element found for STNavigationBar");
+            console.error('No scroll element found for STNavigationBar');
             return;
         }
-        
+
         if (this.scrollElement === document.documentElement) {
-            window.addEventListener("scroll", this.onScroll, { passive: true });
-        } else {
-            this.scrollElement.addEventListener("scroll", this.onScroll, { passive: true });
+            window.addEventListener('scroll', this.onScroll, { passive: true });
+        }
+        else {
+            this.scrollElement.addEventListener('scroll', this.onScroll, { passive: true });
         }
     }
 
@@ -146,9 +146,10 @@ export default class STNavigationBar extends Mixins(NavigationMixin) {
             return;
         }
         if (this.scrollElement === document.documentElement) {
-            window.removeEventListener("scroll", this.onScroll);
-        } else {
-            this.scrollElement.removeEventListener("scroll", this.onScroll);
+            window.removeEventListener('scroll', this.onScroll);
+        }
+        else {
+            this.scrollElement.removeEventListener('scroll', this.onScroll);
         }
         this.scrollElement = null;
     }
@@ -160,7 +161,8 @@ export default class STNavigationBar extends Mixins(NavigationMixin) {
         const scroll = this.scrollElement!.scrollTop;
         if (scroll > 20) {
             this.scrolled = true;
-        } else if (scroll < 15) {
+        }
+        else if (scroll < 15) {
             this.scrolled = false;
         }
     }
@@ -262,7 +264,7 @@ export default class STNavigationBar extends Mixins(NavigationMixin) {
                 }
                 padding-right: 0px;;
             }
-            
+
             display: flex;
             flex-direction: row;
 
@@ -358,7 +360,6 @@ export default class STNavigationBar extends Mixins(NavigationMixin) {
         }
     }
 
-
     &.show-title {
         > h1 {
             opacity: 1;
@@ -380,12 +381,12 @@ export default class STNavigationBar extends Mixins(NavigationMixin) {
             box-shadow: 0px 2px 5px $color-shadow;
             border-bottom-color: transparent;
         }
-  
+
         > h1 {
             opacity: 1;
         }
     }
-    
+
     // Other helper styles (need to revalidate)
     .input {
         width: 220px;

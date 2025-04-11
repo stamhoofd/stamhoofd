@@ -1,7 +1,7 @@
 <template>
     <div v-if="!category.isEnabled(value)" class="container">
         <p v-if="STAMHOOFD.environment === 'development'" class="error-box">
-            This category should be invisible. Check if the record categories are filtered using .filter(c => c.isEnabled(value))
+            {{ $t('This category should be invisible. Check if the record categories are filtered using .filter(c => c.isEnabled(value))') }}
         </p>
     </div>
     <div v-else class="container">
@@ -31,23 +31,22 @@
 
         <RecordAnswerInput v-for="record of filteredWriteableRecords" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
         <div v-for="childCategory of childCategories" :key="childCategory.id" class="container">
-            <hr>
-            <h2>{{ level === 1 ? childCategory.name : (category.name + ': ' + childCategory.name) }}</h2>
+            <hr><h2>{{ level === 1 ? childCategory.name : (category.name + ': ' + childCategory.name) }}</h2>
             <p v-if="childCategory.description" class="style-description pre-wrap" v-text="childCategory.description" />
 
             <RecordAnswerInput v-for="record of childCategory.filterRecords(props.value, filterOptions)" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
         </div>
 
         <p v-if="!markReviewed && lastReviewed" class="style-description-small">
-            Laatst nagekeken op {{ formatDate(lastReviewed) }}<template v-if="isLastReviewIncomplete">
-                (onvolledig)
+            {{ $t('Laatst nagekeken op {date}', {date: formatDate(lastReviewed)}) }}<template v-if="isLastReviewIncomplete">
+                {{ $t('(onvolledig)') }}
             </template>. <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
-                Markeer als nagekeken
+                {{ $t('Markeer als nagekeken') }}
             </button>
         </p>
         <p v-if="!markReviewed && !lastReviewed" class="style-description-small">
-            Nog nooit nagekeken. <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
-                Markeer als nagekeken
+            {{ $t('Nog nooit nagekeken.') }} <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
+                {{ $t('Markeer als nagekeken') }}
             </button>
         </p>
     </div>

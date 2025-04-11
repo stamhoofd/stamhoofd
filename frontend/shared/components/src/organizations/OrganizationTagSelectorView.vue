@@ -2,11 +2,9 @@
     <SaveView :title="title" :disabled="!$hasChanges" :save-text="$saveText" @save="save">
         <h1>{{ title }}<span v-show="$selectedTags.size > 0" class="selection-count">{{ " (" + $selectedTags.size + ")" }}</span></h1>
         <form class="search-box input-icon-container icon search gray" @submit.prevent>
-            <input ref="input" v-model="$searchString" :autofocus="true" class="input" placeholder="Zoek tag" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
+            <input ref="input" v-model="$searchString" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`Zoek tag`)">
         </form>
-        <hr>
-
-        <STList>
+        <hr><STList>
             <STListItem v-for="tag in $searchResult" :key="tag.id" :selectable="true" @click="toggleSelect(tag)">
                 <template #left>
                     <Checkbox :model-value="isSelected(tag)" @click.stop.prevent="toggleSelect(tag)" />
@@ -19,13 +17,12 @@
             </STListItem>
         </STList>
         <p v-if="!$searchResult.length" class="style-description-large">
-            Er zijn geen resultaten gevonden.
+            {{ $t('Er zijn geen resultaten gevonden.') }}
         </p>
 
         <TransitionFade>
             <div v-if="$selectedOutsideSearch.length" class="container">
-                <hr>
-                <h2>Selectie buiten zoekresultaat</h2>
+                <hr><h2>{{ $t('Selectie buiten zoekresultaat') }}</h2>
                 <STList :draggable="false">
                     <STListItem v-for="tag in $selectedOutsideSearch" :key="tag.id" :selectable="true" @click="toggleSelect(tag)">
                         <template #left>

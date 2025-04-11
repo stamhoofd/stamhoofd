@@ -8,12 +8,11 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="groupedResponsibilites.length === 0" class="info-box">
-            Geen functies gevonden
+            {{ $t('Geen functies gevonden') }}
         </p>
 
         <div v-for="({title: groupTitle, responsibilities}, index) of groupedResponsibilites" :key="''+index" class="container">
-            <hr v-if="index > 0 || !(!organization && items.length)">
-            <h2 v-if="groupTitle && groupedResponsibilites.length > 1">
+            <hr v-if="index > 0 || !(!organization && items.length)"><h2 v-if="groupTitle && groupedResponsibilites.length > 1">
                 {{ groupTitle }}
             </h2>
 
@@ -25,7 +24,7 @@
 
                     <h2 class="style-title-list">
                         {{ responsibility.name }}<template v-if="group">
-                            van {{ group.settings.name }}
+                            {{ $t('van') }} {{ group.settings.name }}
                         </template>
                     </h2>
                     <p v-if="group && selectedOrganization && group.periodId === selectedOrganization?.period.period.id" class="style-description-small">
@@ -36,7 +35,7 @@
                     </p>
 
                     <p class="style-description-small">
-                        Rechten: {{ getResponsibilityMergedRoleDescription(responsibility, group?.id) }}
+                        {{ $t('Rechten') }}: {{ getResponsibilityMergedRoleDescription(responsibility, group?.id) }}
                     </p>
 
                     <p v-if="getResponsibilityEnabledDescription(responsibility, group?.id)" class="style-description-small">
@@ -54,8 +53,7 @@
         </div>
 
         <div v-if="deletedMemberResponsibilityRecords.length > 0" class="container">
-            <hr>
-            <h2>{{ $t('e81e0bdb-c15f-4b9a-abca-172a8d379993') }}</h2>
+            <hr><h2>{{ $t('e81e0bdb-c15f-4b9a-abca-172a8d379993') }}</h2>
             <STList>
                 <STListItem v-for="record of deletedMemberResponsibilityRecords" :key="record.id" element-name="label" :selectable="true">
                     <template #left>
@@ -72,7 +70,7 @@
                     </p>
 
                     <p class="style-description-small">
-                        Rechten: {{ getResponsibilityRecordMergedRoleDescription(record) }}
+                        {{ $t('Rechten') }}: {{ getResponsibilityRecordMergedRoleDescription(record) }}
                     </p>
 
                     <p v-if="getResponsibilityRecordEnabledDescription(record)" class="style-description-small">

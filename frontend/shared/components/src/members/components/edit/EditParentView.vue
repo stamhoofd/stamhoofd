@@ -7,7 +7,7 @@
         <STErrorsDefault :error-box="errors.errorBox" />
         <div class="split-inputs">
             <div>
-                <STInputBox title="Titel" error-fields="type" :error-box="errors.errorBox">
+                <STInputBox error-fields="type" :error-box="errors.errorBox" :title="$t(`Titel`)">
                     <Dropdown v-model="type">
                         <option v-for="t in parentTypes" :key="t" :value="t">
                             {{ formatParentType(t) }}
@@ -15,75 +15,66 @@
                     </Dropdown>
                 </STInputBox>
 
-                <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errors.errorBox">
+                <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`Naam`)">
                     <div class="input-group">
                         <div>
-                            <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
+                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`Voornaam`)">
                         </div>
                         <div>
-                            <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
+                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :placeholder="$t(`Achternaam`)">
                         </div>
                     </div>
                 </STInputBox>
 
                 <PhoneInput v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34')" :validator="errors.validator" :placeholder="$t('7f30db7e-4851-4aa6-b731-2c898054f707')" :required="app === 'registration'" />
 
-                <EmailInput v-model="email" :required="app === 'registration'" :title="'E-mailadres' " placeholder="E-mailadres van ouder" :validator="errors.validator">
+                <EmailInput v-model="email" :required="app === 'registration'" :title="$t(`E-mailadres`) " :validator="errors.validator" :placeholder="$t(`E-mailadres van ouder`)">
                     <template #right>
-                        <button v-tooltip="'Alternatief e-mailadres toevoegen'" class="button icon add gray" type="button" @click="addEmail" />
+                        <button :v-tooltip="$t('Alternatief e-mailadres toevoegen')" class="button icon add gray" type="button" @click="addEmail" />
                     </template>
                 </EmailInput>
-                <EmailInput
-                    v-for="n in alternativeEmails.length"
-                    :key="n"
-                    :model-value="getEmail(n - 1)"
-                    :required="true"
-                    :title="'Alternatief e-mailadres ' + (alternativeEmails.length > 1 ? n : '') "
-                    placeholder="E-mailadres van ouder"
-                    :validator="errors.validator"
-                    @update:model-value="setEmail(n - 1, $event)"
-                >
+                <EmailInput v-for="n in alternativeEmails.length" :key="n" :model-value="getEmail(n - 1)" :required="true" :title="$t(`Alternatief e-mailadres`) + ' ' + (alternativeEmails.length > 1 ? n : '') " :validator="errors.validator" :placeholder="$t(`E-mailadres van ouder`)" @update:model-value="setEmail(n - 1, $event)">
                     <template #right>
                         <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" />
                     </template>
                 </EmailInput>
 
                 <p v-if="email && member && app !== 'registration'" class="style-description-small">
-                    Deze ouder kan inloggen of registreren op <template v-if="alternativeEmails.length">
-                        één van de ingevoerde e-mailadressen
+                    {{ $t('Deze ouder kan inloggen of registreren op') }} <template v-if="alternativeEmails.length">
+                        {{ $t('één van de ingevoerde e-mailadressen') }}
                     </template><template v-else>
-                        het ingevoerde e-mailadres
-                    </template> en krijgt dan automatisch toegang tot de gegevens van {{ member.patchedMember.firstName }} en het ledenportaal.
+                        {{ $t('het ingevoerde e-mailadres') }}
+                    </template> {{ $t('en krijgt dan automatisch toegang tot de gegevens van {member} en het ledenportaal.', {member: member.patchedMember.firstName}) }}
                 </p>
                 <p v-else-if="firstName && email && member" class="style-description-small">
-                    {{ firstName }} kan inloggen of registreren op <template v-if="alternativeEmails.length">
-                        één van de ingevoerde e-mailadressen
+                    {{ firstName }} {{ $t('kan inloggen of registreren op') }} <template v-if="alternativeEmails.length">
+                        {{ $t('één van de ingevoerde e-mailadressen') }}
                     </template><template v-else>
-                        het ingevoerde e-mailadres
-                    </template> en krijgt dan automatisch toegang tot de gegevens van {{ member.patchedMember.firstName }} en het ledenportaal.
+                        {{ $t('het ingevoerde e-mailadres') }}
+                    </template> {{ $t('en krijgt dan automatisch toegang tot de gegevens van {member} en het ledenportaal.', {member: member.patchedMember.firstName}) }}
                 </p>
 
                 <p v-if="alternativeEmails.length && member" class="style-description-small">
                     <template v-if="app !== 'registration'">
-                        De ouder ontvangt enkel communicatie op het eerste e-mailadres.
+                        {{ $t('De ouder ontvangt enkel communicatie op het eerste e-mailadres.') }}
                     </template>
                     <template v-else>
-                        {{ firstName }} ontvangt enkel communicatie op het eerste e-mailadres.
+                        {{ firstName }} {{ $t('ontvangt enkel communicatie op het eerste e-mailadres.') }}
                     </template>
                 </p>
 
                 <template v-if="(isPropertyEnabled('parents.nationalRegisterNumber') || nationalRegisterNumber)">
-                    <NRNInput v-model="nationalRegisterNumber" :title="'Rijksregisternummer'" :required="isNRNRequiredForThisParent" :nullable="true" :validator="errors.validator" />
+                    <NRNInput v-model="nationalRegisterNumber" :title="$t(`Rijksregisternummer`)" :required="isNRNRequiredForThisParent" :nullable="true" :validator="errors.validator" />
                     <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
-                        Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
-                            Vul het bij minstens één ouder in, deze ouder zal vermeld worden op de attesten.
-                        </template> Heeft {{ firstName || 'deze ouder' }} geen Belgische nationaliteit, <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
-                            klik dan hier
+                        {{ $t('Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken.') }} <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
+                            {{ $t('Vul het bij minstens één ouder in, deze ouder zal vermeld worden op de attesten.') }}
+                        </template> {{ $t('Heeft {name} geen Belgische nationaliteit,', {name: firstName || 'deze ouder'}) }} <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
+                            {{ $t('klik dan hier') }}
                         </button>.
                     </p>
                     <p v-else class="style-description-small">
-                        Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit, <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
-                            klik dan hier
+                        {{ $t('Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit,') }} <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
+                            {{ $t('klik dan hier') }}
                         </button>.
                     </p>
                 </template>

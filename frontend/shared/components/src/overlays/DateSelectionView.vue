@@ -2,7 +2,7 @@
     <ContextMenuView v-bind="$attrs" :auto-dismiss="autoDismiss">
         <aside ref="aside" class="date-selection-view">
             <header>
-                <button type="button" class="button icon gray arrow-left" @click="previousMonth" />
+                <button type="button" class="button icon gray arrow-left" @click="previousMonth"/>
                 <h1>
                     <div class="input-icon-container right icon arrow-down-small gray">
                         <select v-model="month" @mousedown.stop>
@@ -20,17 +20,17 @@
                         </select>
                     </div>
                 </h1>
-                <button type="button" class="button icon gray arrow-right" @click="nextMonth" />
+                <button type="button" class="button icon gray arrow-right" @click="nextMonth"/>
             </header>
             <div class="days">
                 <div class="days">
-                    <div>Ma</div>
-                    <div>Di</div>
-                    <div>Wo</div>
-                    <div>Do</div>
-                    <div>Vr</div>
-                    <div>Za</div>
-                    <div>Zo</div>
+                    <div>{{ $t('Ma') }}</div>
+                    <div>{{ $t('Di') }}</div>
+                    <div>{{ $t('Wo') }}</div>
+                    <div>{{ $t('Do') }}</div>
+                    <div>{{ $t('Vr') }}</div>
+                    <div>{{ $t('Za') }}</div>
+                    <div>{{ $t('Zo') }}</div>
                 </div>
                 <div v-for="(week, index) in weeks" :key="index" class="row">
                     <button v-for="day in week" :key="day.number" type="button" :class="{selected: day.selected, 'other-month': day.otherMonth}" :disabled="isDisabled(day)" @click="onSelect(day)">
@@ -40,10 +40,10 @@
             </div>
             <footer>
                 <button v-if="allowClear" type="button" class="button text" @click="clear">
-                    Leegmaken
+                    {{ $t('Leegmaken') }}
                 </button>
                 <button v-if="!isDisabled({value: new Date()})" type="button" class="button text" @click="setToday">
-                    Vandaag
+                    {{ $t('Vandaag') }}
                 </button>
             </footer>
         </aside>

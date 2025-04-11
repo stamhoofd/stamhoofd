@@ -6,12 +6,12 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <Checkbox v-model="dataPermissions" :indeterminate="!dataPermissionsChangeDate">
-            Er werd toestemming gegeven
+            {{ $t('Er werd toestemming gegeven') }}
         </Checkbox>
 
         <p v-if="!willMarkReviewed && dataPermissionsChangeDate" class="style-description-small">
-            Laatst nagekeken op {{ formatDate(dataPermissionsChangeDate) }}. <button v-tooltip="'Het lid zal deze stap terug moeten doorlopen via het ledenportaal'" type="button" class="inline-link" @click="clear">
-                Wissen
+            {{ $t('Laatst nagekeken op') }} {{ formatDate(dataPermissionsChangeDate) }}. <button v-tooltip="$t('Het lid zal deze stap terug moeten doorlopen via het ledenportaal')" type="button" class="inline-link" @click="clear">
+                {{ $t('Wissen') }}
             </button>.
         </p>
         <p v-if="!dataPermissionsChangeDate" class="style-description-small">
