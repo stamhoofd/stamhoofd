@@ -19,11 +19,13 @@
             "dom"
         ],
         "types": [
-            "node"
+            "node",
+            "jest",
         ]
     },
     "include": [
         "src/**/*.ts",
+        "tests/**/*.ts",
         "index.ts"
     ],
     "exclude": [

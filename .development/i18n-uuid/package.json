@@ -10,7 +10,10 @@
         "replace-text": "yarn build && node --enable-source-maps ./dist/index.js replace-text",
         "replace-keys": "yarn build && node --enable-source-maps ./dist/index.js replace-keys",
         "auto-translate": "yarn build && node --enable-source-maps ./dist/index.js auto-translate",
-        "create-comparison": "yarn build && node --enable-source-maps ./dist/index.js create-comparison"
+        "create-comparison": "yarn build && node --enable-source-maps ./dist/index.js create-comparison",
+        "test": "jest --runInBand",
+        "test:build": "yarn -s build && yarn -s test",
+        "test:reset": "yarn build && jest --runInBand"
     },
     "devDependencies": {
         "@anthropic-ai/sdk": "^0.39.0",

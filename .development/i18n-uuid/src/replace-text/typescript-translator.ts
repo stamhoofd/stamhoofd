@@ -2,6 +2,7 @@ import chalk from "chalk";
 import { removeChangeMarkers } from "./git-html-helper";
 import { promptBoolean } from "./prompt-helper";
 import { getWhiteSpaceBeforeAndAfter, splitInParts } from "./regex-helper";
+import { shouldTranslateTypescriptString } from "./should-translate-typescript-string";
 import { wrapWithTranslationFunction } from "./translation-helper";
 
 export interface TypescriptTranslatorOptions {
@@ -21,8 +22,6 @@ export interface TypescriptTranslatorOptions {
         total: number;
     };
 }
-
-const blackListKeys = new Set(['icon', 'method', 'path', 'modalDisplayStyle', 'id'])
 
 export class TypescriptTranslator {
     private readonly shouldCheckChanges: boolean;
@@ -71,7 +70,7 @@ export class TypescriptTranslator {
             throw new Error('Option shouldCheckChanges is not implemented.')
         }
 
-        const parts = splitInParts(text, /"(?:[^"]*?)"|'(?:[^']*?)'/ig);
+        const parts = splitInPartsIgnoreComments(text);
         const allParts: {value: string, shouldTranslate: boolean}[] = [];
 
         for(let i = 0; i < parts.length; i++) {
@@ -87,7 +86,7 @@ export class TypescriptTranslator {
             const unquoted = value.slice(1, value.length - 1);
             const trimmed = unquoted.trim();
             
-            if(trimmed.length === 0) {
+            if(trimmed.length < 2) {
                 allParts.push({
                     value,
                     shouldTranslate: false
@@ -117,7 +116,7 @@ export class TypescriptTranslator {
                 continue;
             }
     
-            const isEquality = ['==', '!=', '>=', '<='].some(item => beforeTrimmedEnd.endsWith(item));
+            const isEquality = ['==', '!=', '>=', '<=', '<', '>'].some(item => beforeTrimmedEnd.endsWith(item));
     
             if(isEquality) {
                 allParts.push({
@@ -127,21 +126,11 @@ export class TypescriptTranslator {
                 continue;
             }
 
-            const isKey = beforeTrimmedEnd.endsWith(':');
-
-            if(isKey) {
-                const key = getKey(beforeTrimmedEnd);
-                if(key && blackListKeys.has(key)) {
-                    allParts.push({
-                        value,
-                        shouldTranslate: false
-                    });
-                }
-            }
+            const shouldTranslate = shouldTranslateTypescriptString(allParts, value);
     
             allParts.push({
                 value,
-                shouldTranslate: true
+                shouldTranslate
             });
         }
 
@@ -223,14 +212,16 @@ REPLACEMENT:`))
     }
 }
 
-function getKey(text: string): string | null {
-    const matches = [...text.matchAll(/\w+/gm)];
-    if(matches.length === 0) {
-        return null;
-    }
-    const matchedText = matches.map(match => match[0]);
+function splitInPartsIgnoreComments(text: string): {isMatch: boolean, value: string}[] {
+    const splittedByComments = splitInParts(text, /\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm);
 
-    return matchedText[matchedText.length - 1];
+    return splittedByComments.flatMap(({value, isMatch}) => {
+        if(isMatch) {
+            return {isMatch: false, value}
+        }
+
+        return splitInParts(value, /"(?:[^"]*?)"|'(?:[^']*?)'/ig);
+    })
 }
 
 export async function translateTypescript(html: string, options: TypescriptTranslatorOptions = {}) {

@@ -3,7 +3,7 @@ import fs from "fs";
 import { getFilesToSearch } from "../shared/get-files-to-search";
 import { eslintFormatter } from "./eslint-formatter";
 import { getChangedFiles } from "./git-helper";
-import { getTotalMatchCount, translateTypescript, TypescriptTranslatorOptions } from "./typeScript-translator";
+import { getTotalMatchCount, translateTypescript, TypescriptTranslatorOptions } from "./typescript-translator";
 
 interface TranslateTypescriptFilesOptions {
     replaceChangesOnly?: boolean;
