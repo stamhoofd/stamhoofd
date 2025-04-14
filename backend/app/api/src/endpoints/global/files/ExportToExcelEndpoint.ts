@@ -65,7 +65,7 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
             throw new SimpleError({
                 code: 'not_allowed',
                 message: 'Export is pending',
-                human: 'Je hebt momenteel al een Excel export lopen. Wacht tot die klaar is voor je een nieuwe export start.',
+                human: $t(`Je hebt momenteel al een Excel export lopen. Wacht tot die klaar is voor je een nieuwe export start.`),
                 statusCode: 403,
             });
         }

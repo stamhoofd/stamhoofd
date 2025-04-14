@@ -44,7 +44,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         const editUser = request.body.id === user.id ? user : await User.getByID(request.body.id);
 
         if (!editUser || !await Context.auth.canAccessUser(editUser, PermissionLevel.Write) || editUser.isApiUser) {
-            throw Context.auth.notFoundOrNoAccess('Je hebt geen toegang om deze gebruiker te wijzigen');
+            throw Context.auth.notFoundOrNoAccess($t(`Je hebt geen toegang om deze gebruiker te wijzigen`));
         }
 
         if (await Context.auth.canEditUserName(editUser)) {
@@ -72,7 +72,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             if (!await Context.auth.canAccessUser(editUser, PermissionLevel.Full)) {
                 throw new SimpleError({
                     code: 'permission_denied',
-                    message: 'Je hebt geen rechten om de rechten van deze gebruiker te wijzigen',
+                    message: $t(`Je hebt geen rechten om de rechten van deze gebruiker te wijzigen`),
                 });
             }
 
@@ -83,7 +83,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.forOrganization(organization)?.hasFullAccess()) && STAMHOOFD.environment !== 'development') {
                         throw new SimpleError({
                             code: 'permission_denied',
-                            message: 'Je kan jezelf niet verwijderen als hoofdbeheerder',
+                            message: $t(`Je kan jezelf niet verwijderen als hoofdbeheerder`),
                         });
                     }
                 }
@@ -102,7 +102,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     if (editUser.id === user.id && !editUser.permissions?.platform?.hasFullAccess() && STAMHOOFD.environment !== 'development') {
                         throw new SimpleError({
                             code: 'permission_denied',
-                            message: 'Je kan jezelf niet verwijderen als hoofdbeheerder',
+                            message: $t(`Je kan jezelf niet verwijderen als hoofdbeheerder`),
                         });
                     }
                 }
@@ -124,7 +124,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                             throw new SimpleError({
                                 code: 'invalid_request',
                                 message: 'You cannot remove the last login provider',
-                                human: 'Stel eerst een wachtwoord in voor jouw account voor je deze loginmethode uitschakelt.',
+                                human: $t(`Stel eerst een wachtwoord in voor jouw account voor je deze loginmethode uitschakelt.`),
                                 statusCode: 400,
                             });
                         }
@@ -142,7 +142,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     throw new SimpleError({
                         code: 'not_supported',
                         message: 'This platform does not support password login',
-                        human: 'Dit platform ondersteunt geen wachtwoord login',
+                        human: $t(`Dit platform ondersteunt geen wachtwoord login`),
                         statusCode: 400,
                     });
                 }
@@ -151,7 +151,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     throw new SimpleError({
                         code: 'not_supported',
                         message: 'Login method not supported',
-                        human: 'Je kan op dit account geen wachtwoord gebruiken om in te loggen.',
+                        human: $t(`Je kan op dit account geen wachtwoord gebruiken om in te loggen.`),
                         statusCode: 400,
                     });
                 }
@@ -170,7 +170,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     throw new SimpleError({
                         code: 'invalid_request',
                         message: 'You cannot remove the last login provider',
-                        human: 'Je kan jouw wachtwoord niet verwijderen als je geen andere loginmethode hebt.',
+                        human: $t(`Je kan jouw wachtwoord niet verwijderen als je geen andere loginmethode hebt.`),
                         statusCode: 400,
                     });
                 }
@@ -192,7 +192,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 throw new SimpleError({
                     code: 'verify_email',
                     message: 'Your email address needs verification',
-                    human: editUser.id === user.id ? 'Verifieer jouw nieuwe e-mailadres via de link in de e-mail, daarna passen we het automatisch aan.' : 'Er is een verificatie e-mail verstuurd naar ' + request.body.email + ' om het e-mailadres te verifiëren. Zodra dat is gebeurd, wordt het e-mailadres gewijzigd.',
+                    human: editUser.id === user.id ? $t(`Verifieer jouw nieuwe e-mailadres via de link in de e-mail, daarna passen we het automatisch aan.`) : $t(`Er is een verificatie e-mail verstuurd naar`) + ' ' + request.body.email + ' ' + $t(`om het e-mailadres te verifiëren. Zodra dat is gebeurd, wordt het e-mailadres gewijzigd.`),
                     meta: SignupResponse.create({
                         token: code.token,
                     }).encode({ version: request.request.getVersion() }),

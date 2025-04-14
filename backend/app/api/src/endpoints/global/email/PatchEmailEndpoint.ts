@@ -40,7 +40,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             throw new SimpleError({
                 code: 'not_found',
                 human: 'Email not found',
-                message: 'Deze e-mail bestaat niet of is verwijderd',
+                message: $t(`Deze e-mail bestaat niet of is verwijderd`),
                 statusCode: 404,
             });
         }
@@ -49,7 +49,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             throw new SimpleError({
                 code: 'not_draft',
                 human: 'Email is not a draft',
-                message: 'Deze e-mail is al verzonden en kan niet meer aangepast worden',
+                message: $t(`Deze e-mail is al verzonden en kan niet meer aangepast worden`),
                 statusCode: 400,
             });
         }
@@ -112,7 +112,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     throw new SimpleError({
                         code: "missing_unsubscribe_button",
                         message: "Missing unsubscribe button",
-                        human: "Je moet een ‘uitschrijven’-knop of link toevoegen onderaan je e-mail. Klik daarvoor onderaan op het ‘toverstaf’ icoontje en kies voor ‘Knop om uit te schrijven voor e-mails’. Dit is verplicht volgens de GDPR-wetgeving, maar het zorgt ook voor een betere e-mail reputatie omdat minder e-mails als spam worden gemarkeerd.",
+                        human: $t(`Je moet een ‘uitschrijven’-knop of link toevoegen onderaan je e-mail. Klik daarvoor onderaan op het ‘toverstaf’ icoontje en kies voor ‘Knop om uit te schrijven voor e-mails’. Dit is verplicht volgens de GDPR-wetgeving, maar het zorgt ook voor een betere e-mail reputatie omdat minder e-mails als spam worden gemarkeerd.`),
                         field: "html"
                     })
                 }
@@ -124,7 +124,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     throw new SimpleError({
                         code: "missing_unsubscribe_button",
                         message: "Missing unsubscribe button",
-                        human: "Je moet een ‘uitschrijven’-knop of link toevoegen onderaan je e-mail. Klik daarvoor onderaan op het ‘toverstaf’ icoontje en kies voor ‘Knop om uit te schrijven voor e-mails’. Dit is verplicht volgens de GDPR-wetgeving, maar het zorgt ook voor een betere e-mail reputatie omdat minder e-mails als spam worden gemarkeerd.",
+                        human: $t(`Je moet een ‘uitschrijven’-knop of link toevoegen onderaan je e-mail. Klik daarvoor onderaan op het ‘toverstaf’ icoontje en kies voor ‘Knop om uit te schrijven voor e-mails’. Dit is verplicht volgens de GDPR-wetgeving, maar het zorgt ook voor een betere e-mail reputatie omdat minder e-mails als spam worden gemarkeerd.`),
                         field: "text"
                     })
                 }

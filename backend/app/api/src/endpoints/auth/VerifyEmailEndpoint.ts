@@ -36,7 +36,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: 'invalid_code',
                 message: 'This code is invalid',
-                human: 'Deze code is ongeldig of vervallen.',
+                human: $t(`Deze code is ongeldig of vervallen.`),
                 statusCode: 400,
             });
         }
@@ -47,7 +47,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: 'invalid_code',
                 message: 'This code is invalid',
-                human: 'Deze code is ongeldig of vervallen.',
+                human: $t(`Deze code is ongeldig of vervallen.`),
                 statusCode: 400,
             });
         }
@@ -77,7 +77,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'email_in_use',
                     message: 'This e-mail is already in use, we cannot set it',
-                    human: 'We kunnen het e-mailadres van deze gebruiker niet instellen naar ' + code.email + ', omdat die al in gebruik is. Waarschijnlijk heb je meerdere accounts. Probeer met dat e-mailadres in te loggen of contacteer ons (' + request.$t('59b85264-c4c3-4cf6-8923-9b43282b2787') + ') als we de gebruikers moeten combineren tot één gebruiker.',
+                    human: $t(`We kunnen het e-mailadres van deze gebruiker niet instellen naar {email}, omdat die al in gebruik is. Waarschijnlijk heb je meerdere accounts. Probeer met dat e-mailadres in te loggen of contacteer ons ({contactEmail}) als we de gebruikers moeten combineren tot één gebruiker.`, { email: code.email, contactEmail: request.$t('59b85264-c4c3-4cf6-8923-9b43282b2787') }),
                 });
             }
             throw e;

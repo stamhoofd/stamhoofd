@@ -36,7 +36,7 @@ export class ChargeOrganizationsEndpoint extends Endpoint<Params, Query, Body, R
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid description',
-                human: 'Beschrijving is verplicht',
+                human: $t(`Beschrijving is verplicht`),
                 field: 'description',
             });
         }
@@ -45,7 +45,7 @@ export class ChargeOrganizationsEndpoint extends Endpoint<Params, Query, Body, R
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid price',
-                human: 'Bedrag kan niet 0 zijn',
+                human: $t(`Bedrag kan niet 0 zijn`),
                 field: 'price',
             });
         }
@@ -54,7 +54,7 @@ export class ChargeOrganizationsEndpoint extends Endpoint<Params, Query, Body, R
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid amount',
-                human: 'Aantal kan niet 0 zijn',
+                human: $t(`Aantal kan niet 0 zijn`),
                 field: 'amount',
             });
         }
@@ -63,7 +63,7 @@ export class ChargeOrganizationsEndpoint extends Endpoint<Params, Query, Body, R
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid organization id',
-                human: 'Organisatie is verplicht',
+                human: $t(`Organisatie is verplicht`),
                 field: 'organizationId',
             });
         }
@@ -85,7 +85,7 @@ export class ChargeOrganizationsEndpoint extends Endpoint<Params, Query, Body, R
             throw new SimpleError({
                 code: 'charge_pending',
                 message: 'Charge organizations already pending',
-                human: 'Er is al een aanrekening bezig, even geduld.',
+                human: $t(`Er is al een aanrekening bezig, even geduld.`),
             });
         }
 

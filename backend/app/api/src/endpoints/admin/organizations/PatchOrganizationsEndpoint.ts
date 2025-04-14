@@ -43,7 +43,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
 
         for (const id of request.body.getDeletes()) {
             if (!Context.auth.hasPlatformFullAccess()) {
-                throw Context.auth.error('Enkel een platform hoofdbeheerder kan groepen verwijderen');
+                throw Context.auth.error($t(`Enkel een platform hoofdbeheerder kan groepen verwijderen`));
             }
 
             const organization = await Organization.getByID(id);
@@ -55,7 +55,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'cannot_delete_membership_organization',
                     message: 'Cannot delete membership organization',
-                    human: 'Je kan de hoofdgroep niet verwijderen. Als je dit toch wil doen, kan je eerst een andere vereniging instellen als hoofdgroep via \'Boekhouding en aansluitingen\'.',
+                    human: $t(`Je kan de hoofdgroep niet verwijderen. Als je dit toch wil doen, kan je eerst een andere vereniging instellen als hoofdgroep via \`)Boekhouding en aansluitingen\'.',
                 });
             }
 
@@ -65,7 +65,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
         // Organization creation
         for (const { put } of request.body.getPuts()) {
             if (!Context.auth.hasPlatformFullAccess()) {
-                throw Context.auth.error('Enkel een platform hoofdbeheerder kan nieuwe groepen aanmaken');
+                throw Context.auth.error($t(`Enkel een platform hoofdbeheerder kan nieuwe groepen aanmaken`));
             }
 
             if (put.name.length < 4) {
@@ -73,7 +73,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Should not be empty',
-                        human: 'Je bent de naam van je organisatie vergeten in te vullen',
+                        human: $t(`Je bent de naam van je organisatie vergeten in te vullen`),
                         field: 'organization.name',
                     });
                 }
@@ -81,7 +81,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Field is too short',
-                    human: 'Kijk de naam van je organisatie na, deze is te kort. Vul eventueel aan met de gemeente.',
+                    human: $t(`Kijk de naam van je organisatie na, deze is te kort. Vul eventueel aan met de gemeente.`),
                     field: 'organization.name',
                 });
             }
@@ -92,7 +92,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Field is too long',
-                    human: 'De naam van de vereniging is te lang. Probeer de naam wat te verkorten en probeer opnieuw.',
+                    human: $t(`De naam van de vereniging is te lang. Probeer de naam wat te verkorten en probeer opnieuw.`),
                     field: 'organization.name',
                 });
             }
@@ -102,7 +102,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'name_taken',
                     message: 'An organization with the same name already exists',
-                    human: 'Er bestaat al een vereniging met dezelfde URI. Pas deze aan zodat deze uniek is, en controleer of deze vereniging niet al bestaat.',
+                    human: $t(`Er bestaat al een vereniging met dezelfde URI. Pas deze aan zodat deze uniek is, en controleer of deze vereniging niet al bestaat.`),
                     field: 'name',
                 });
             }
@@ -113,7 +113,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'name_taken',
                     message: 'An organization with the same name already exists',
-                    human: 'Er bestaat al een vereniging met dezelfde naam. Voeg bijvoorbeeld de naam van je gemeente toe.',
+                    human: $t(`Er bestaat al een vereniging met dezelfde naam. Voeg bijvoorbeeld de naam van je gemeente toe.`),
                     field: 'name',
                 });
             }

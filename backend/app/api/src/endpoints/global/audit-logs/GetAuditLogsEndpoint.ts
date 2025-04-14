@@ -81,7 +81,7 @@ export class GetAuditLogsEndpoint extends Endpoint<Params, Query, Body, Response
             throw new SimpleError({
                 code: 'not_supported',
                 message: 'Search is not possible in audit logs',
-                human: 'Zoeken is niet mogelijk in audit logs',
+                human: $t(`Zoeken is niet mogelijk in audit logs`),
             });
         }
 
