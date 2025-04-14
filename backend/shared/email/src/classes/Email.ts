@@ -443,6 +443,7 @@ class EmailStatic {
                 console.log('Message sent via api:', to, data.subject, data.type);
             }
             else {
+                console.log('Sending email', to, data.subject, data.type);
                 const info = await transporter.sendMail(mail);
                 console.log('Message sent:', to, data.subject, info.messageId, data.type);
             }
