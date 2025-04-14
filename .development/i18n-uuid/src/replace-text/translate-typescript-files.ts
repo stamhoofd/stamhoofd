@@ -2,6 +2,7 @@ import chalk from "chalk";
 import fs from "fs";
 import { getFilesToSearch } from "../shared/get-files-to-search";
 import { eslintFormatter } from "./eslint-formatter";
+import { fileCache } from "./FileCache";
 import { getChangedFiles } from "./git-helper";
 import { getTotalMatchCount, translateTypescript, TypescriptTranslatorOptions } from "./typescript-translator";
 
@@ -16,7 +17,7 @@ interface TranslateTypescriptFilesOptions {
 }
 
 export async function translateTypescriptFiles(options: TranslateTypescriptFilesOptions = {}) {
-    const files = getFilesToSearch(['typescript']);
+    const files = getFilesToSearch(['typescript']).filter(filePath => !fileCache.hasFile(filePath));
     let filesToLoop: string[];
 
     if(options.replaceChangesOnly) {
@@ -96,6 +97,7 @@ export async function translateTypescriptFileHelper(filePath: string, options: T
 
     const fileContent = fs.readFileSync(filePath, "utf8");
     const translation = await translateTypescript(fileContent, fileOptions);
+    fileCache.addFile(filePath);
 
     if(translation !== fileContent) {
         const infoText = options.dryRun ? 'Completed with changes (dry-run)' : 'Write file';

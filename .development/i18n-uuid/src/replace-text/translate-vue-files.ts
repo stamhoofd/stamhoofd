@@ -2,6 +2,7 @@ import chalk from "chalk";
 import fs from "fs";
 import { getFilesToSearch } from "../shared/get-files-to-search";
 import { eslintFormatter } from "./eslint-formatter";
+import { fileCache } from "./FileCache";
 import { getChangedFiles } from "./git-helper";
 import { getVueTemplateMatchCount, TranslateVueFileOptions, translateVueTemplate } from "./translate-vue-template";
 
@@ -24,7 +25,7 @@ const attributeWhiteList = new Set([
 ]);
 
 export async function translateVueFiles(options: TranslateVueFilesOptions = {}) {
-    const files = getFilesToSearch(['vue']);
+    const files = getFilesToSearch(['vue']).filter(filePath => !fileCache.hasFile(filePath));
     let filesToLoop: string[];
 
     if(options.replaceChangesOnly) {
@@ -94,6 +95,7 @@ export async function translateVueFileHelper(filePath: string, options: Translat
     }
 
     const translation = await translateVueTemplate(templateContent, fileOptions);
+    fileCache.addFile(filePath);
 
     if(translation !== templateContent) {
         const infoText = options.dryRun ? 'Completed with changes (dry-run)' : 'Write file';
