@@ -213,7 +213,7 @@ REPLACEMENT:`))
 }
 
 function splitInPartsIgnoreComments(text: string): {isMatch: boolean, value: string}[] {
-    const splittedByComments = splitInParts(text, /\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm);
+    const splittedByComments = splitInParts(text, /\/\*[\s\S]*?\*\/|(?:[^\\:]|^)\/\/.*$/gm);
 
     return splittedByComments.flatMap(({value, isMatch}) => {
         if(isMatch) {
