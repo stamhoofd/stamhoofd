@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { X2jOptions, XMLBuilder, XmlBuilderOptions, XMLParser } from "fast-xml-parser";
-import { addChangeMarkers, endChangeMarker, removeChangeMarkers, startChangeMarker } from "./git-html-helper";
+import { addChangeMarkers, endChangeMarker, removeChangeMarkers, startChangeMarker } from "./git-helper";
 import { promptBoolean } from "./prompt-helper";
 import { getWhiteSpaceBeforeAndAfter, isNumberOrSpecialCharacter, splitInParts } from "./regex-helper";
 import { wrapWithTranslationFunction } from "./translation-helper";
@@ -38,8 +38,6 @@ export class HtmlTranslator {
     private _currentMatchCount = 0;
     private totalMatchCount = 0;
     private static readonly PLACEHOLDER = '[[html-translator-placeholder]]';
-    private static readonly START_CHANGE_MARKER = startChangeMarker;
-    private static readonly END_CHANGE_MARKER = endChangeMarker;
     private readonly shouldCheckChanges: boolean;
     private readonly fileProgressText: string;
 
@@ -361,7 +359,7 @@ REPLACEMENT:`))
     }
 
     private checkIsStartChange(value: string): boolean {
-        if(this.shouldCheckChanges && value.includes(HtmlTranslator.START_CHANGE_MARKER)) {
+        if(this.shouldCheckChanges && value.includes(startChangeMarker)) {
             this.areCurrentLinesChanged = true;
             return true;
         }
@@ -370,7 +368,7 @@ REPLACEMENT:`))
     }
 
     private checkIsEndChange(value: string): boolean {
-        if(this.shouldCheckChanges && value.includes(HtmlTranslator.END_CHANGE_MARKER)) {
+        if(this.shouldCheckChanges && value.includes(endChangeMarker)) {
             this.areCurrentLinesChanged = false;
             return true;
         }
@@ -379,8 +377,8 @@ REPLACEMENT:`))
     }
 
     private setIsChangedAndRemoveMarkers(value: string): string | null {
-        const startIndex = value.indexOf(HtmlTranslator.START_CHANGE_MARKER);
-        const endIndex = value.indexOf(HtmlTranslator.END_CHANGE_MARKER);
+        const startIndex = value.indexOf(startChangeMarker);
+        const endIndex = value.indexOf(endChangeMarker);
         const originalIsChanged = this.areCurrentLinesChanged;
 
         if(startIndex === -1) {
@@ -400,7 +398,7 @@ REPLACEMENT:`))
             }
 
             if(originalIsChanged) {
-                return value.replace(HtmlTranslator.END_CHANGE_MARKER, '')
+                return value.replace(endChangeMarker, '')
             }
 
             return null;
@@ -408,11 +406,11 @@ REPLACEMENT:`))
 
         if(endIndex === -1) {
             this.areCurrentLinesChanged = true;
-            return value.replace(HtmlTranslator.START_CHANGE_MARKER, '');
+            return value.replace(startChangeMarker, '');
         }
 
         this.areCurrentLinesChanged = startIndex > endIndex;
-        return value.replace(HtmlTranslator.START_CHANGE_MARKER, '').replace(HtmlTranslator.END_CHANGE_MARKER, '')
+        return value.replace(startChangeMarker, '').replace(endChangeMarker, '')
     }
 
     private async translateTextParts(parent: Record<string, any>, record: Record<string, string>, key: string, textParts: {value: string, shouldTranslate: boolean}[], translate: (text: string) => string, transformContext?: (context: HtmlTranslatorContext) => HtmlTranslatorContext) {

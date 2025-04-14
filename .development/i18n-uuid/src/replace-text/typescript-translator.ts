@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { removeChangeMarkers } from "./git-html-helper";
+import { getChangedLines, removeChangeMarkers } from "./git-helper";
 import { promptBoolean } from "./prompt-helper";
 import { getWhiteSpaceBeforeAndAfter, splitInParts } from "./regex-helper";
 import { shouldTranslateTypescriptString } from "./should-translate-typescript-string";
@@ -26,7 +26,6 @@ export interface TypescriptTranslatorOptions {
 export class TypescriptTranslator {
     private readonly shouldCheckChanges: boolean;
     private readonly fileProgressText: string;
-    private isChanged = false;
     private _currentMatchCount = 0;
     private totalMatchCount = 0;
 
@@ -51,31 +50,41 @@ export class TypescriptTranslator {
     }
 
     async translate(text: string): Promise<string> {
-        // todo: translate human/message in SimpleError
-        // todo: find other text that needs translation?
-
-        // in vue text: Toast
-
-        // use blacklist and loop every string, except if already translated
-
         this._currentMatchCount = 0;
-        this.isChanged = false;
 
         if(this.options.doPrompt) {
             this.totalMatchCount = await this.getTotalMatchCount(text);
         }
 
-        // todo
-        if(this.shouldCheckChanges) {
-            throw new Error('Option shouldCheckChanges is not implemented.')
-        }
-
+        const changedLines = this.shouldCheckChanges ? getChangedLines(this.options.replaceChangesOnly!.filePath, {compare: this.options.replaceChangesOnly?.commitsToCompare}) : null;
         const parts = splitInPartsIgnoreComments(text);
+
+        let lineIndex = 0;
         const allParts: {value: string, shouldTranslate: boolean}[] = [];
 
         for(let i = 0; i < parts.length; i++) {
-            const {value, isMatch} = parts[i];
-            if(!isMatch) {
+            const part = parts[i];
+            const isMatch = part.isMatch;
+            const value = part.value;
+
+            const startIndex = lineIndex;
+            const endIndex = lineIndex + [...value.matchAll(/(\r|\n)/g)].length;
+            lineIndex = endIndex;
+
+            let isChanged = true;
+
+            if(changedLines !== null) {
+                isChanged = false;
+
+                for(let i = startIndex; i <= endIndex; i++) {
+                    if(changedLines.has(i)) {
+                        isChanged = true;
+                        break;
+                    }
+                }
+            }
+
+            if(!isChanged || !isMatch) {
                 allParts.push({
                     value,
                     shouldTranslate: false
@@ -169,11 +178,6 @@ export class TypescriptTranslator {
             }
     
             const canTranslate = isTranslated && (!this.options.doPrompt || await this.prompt(value, translatedPart, processedParts.join(''), getUnprocessedpart(i)));
-
-            if(canTranslate) {
-                this.isChanged = true;
-            }
-    
             processedParts.push(canTranslate ? translatedPart : value);
         }
     
