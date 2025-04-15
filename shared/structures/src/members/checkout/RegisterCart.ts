@@ -40,7 +40,7 @@ export class IDRegisterCart extends AutoEncoder {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Registration not found',
-                    human: 'De inschrijving die je wou verwijderen kon niet gevonden worden. Het is mogelijk dat deze inschrijving al verwijderd is.',
+                    human: $t(`De inschrijving die je wou verwijderen kon niet gevonden worden. Het is mogelijk dat deze inschrijving al verwijderd is.`),
                     field: 'deleteRegistrationIds',
                 });
             }
@@ -243,7 +243,7 @@ export class RegisterCart {
                     errors.addError(new SimpleError({
                         code: 'duplicate_register_item',
                         message: 'duplicate register item',
-                        human: 'Het is niet mogelijk om meerdere keren in te schrijven voor dezelfde groep.',
+                        human: $t(`Het is niet mogelijk om meerdere keren in te schrijven voor dezelfde groep.`),
                     }));
                 }
             }
@@ -270,7 +270,7 @@ export class RegisterCart {
                 errors.addError(new SimpleError({
                     code: 'invalid_organization',
                     message: 'Invalid organization in balanceItems',
-                    human: 'Het is niet mogelijk om een openstaand bedrag af te rekenen voor een andere organisatie samen met andere items in je winkelmandje voor een andere organisatie, dit moet apart gebeuren.',
+                    human: $t(`Het is niet mogelijk om een openstaand bedrag af te rekenen voor een andere organisatie samen met andere items in je winkelmandje voor een andere organisatie, dit moet apart gebeuren.`),
                     field: 'balanceItems',
                 }));
                 continue;
@@ -299,7 +299,7 @@ export class RegisterCart {
                 errors.addError(new SimpleError({
                     code: 'invalid_organization',
                     message: 'Invalid organization in deleteRegistrations',
-                    human: 'Het is niet mogelijk om een inschrijving te verwijderen samen met een inschrijving voor een andere organisatie, dit moet apart gebeuren.',
+                    human: $t(`Het is niet mogelijk om een inschrijving te verwijderen samen met een inschrijving voor een andere organisatie, dit moet apart gebeuren.`),
                     field: 'deleteRegistrations',
                 }));
                 continue;
@@ -318,7 +318,7 @@ export class RegisterCart {
                 errors.addError(new SimpleError({
                     code: 'locked_period',
                     message: 'Locked period',
-                    human: `Je kan geen inschrijvingen wijzigen van ${registration.group.settings.name} omdat werkjaar ${period.nameShort} is afgesloten.`,
+                    human: $t('Je kan geen inschrijvingen wijzigen van {group} omdat werkjaar {period} is afgesloten.', { group: registration.group.settings.name, period: period.nameShort }),
                 }));
                 continue;
             }
@@ -327,7 +327,7 @@ export class RegisterCart {
                 errors.addError(new SimpleError({
                     code: 'locked_period',
                     message: 'Locked period',
-                    human: `Je kan geen inschrijvingen wijzigen van ${registration.group.settings.name} omdat dat werkjaar is afgesloten.`,
+                    human: $t('Je kan geen inschrijvingen wijzigen van {group} omdat dat werkjaar is afgesloten.', { group: registration.group.settings.name }),
                 }));
                 continue;
             }

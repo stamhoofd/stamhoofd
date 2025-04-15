@@ -15,7 +15,7 @@ export class RecordFactory {
                 return RecordCategory.create({
                     // We need to have a predictable id
                     id: 'RecordCategory.Privacy',
-                    name: 'Privacy',
+                    name: $t(`Privacy`),
                 });
 
             case LegacyRecordType.FoodAllergies:
@@ -25,7 +25,7 @@ export class RecordFactory {
                 return RecordCategory.create({
                     // We need to have a predictable id
                     id: 'RecordCategory.Allergies',
-                    name: 'Allergieën',
+                    name: $t(`Allergieën`),
                 });
 
             case LegacyRecordType.Vegetarian:
@@ -36,7 +36,7 @@ export class RecordFactory {
                 return RecordCategory.create({
                     // We need to have a predictable id
                     id: 'RecordCategory.Diet',
-                    name: 'Dieet',
+                    name: $t(`Dieet`),
                 });
 
             case LegacyRecordType.CovidHighRisk:
@@ -53,7 +53,7 @@ export class RecordFactory {
                 return RecordCategory.create({
                     // We need to have a predictable id
                     id: 'RecordCategory.Health',
-                    name: 'Gezondheid, hygiëne & slapen',
+                    name: $t(`Gezondheid, hygiëne & slapen`),
                 });
 
             case LegacyRecordType.CanNotSwim:
@@ -63,29 +63,29 @@ export class RecordFactory {
                 return RecordCategory.create({
                     // We need to have a predictable id
                     id: 'RecordCategory.Sport',
-                    name: 'Sport, spel en sociale omgang',
+                    name: $t(`Sport, spel en sociale omgang`),
                 });
 
             case LegacyRecordType.Other:
                 return RecordCategory.create({
                     // We need to have a predictable id
                     id: 'RecordCategory.Other',
-                    name: 'Andere inlichtingen',
+                    name: $t(`Andere inlichtingen`),
                 });
 
             case LegacyRecordType.TetanusVaccine:
                 return RecordCategory.create({
                     // We need to have a predictable id
                     id: 'RecordCategory.TetanusVaccine',
-                    name: 'Tetanusvaccinatie (klem)',
+                    name: $t(`Tetanusvaccinatie (klem)`),
                 });
 
             case LegacyRecordType.MedicinePermissions: {
                 return RecordCategory.create({
                     // We need to have a predictable id
                     id: 'RecordCategory.MedicinePermissions',
-                    name: 'Toedienen van medicatie',
-                    description: 'Het is verboden om als begeleid(st)er, behalve EHBO, op eigen initiatief medische handelingen uit te voeren. Ook het verstrekken van lichte pijnstillende en koortswerende medicatie zoals Perdolan, Dafalgan of Aspirine is, zonder toelating van de ouders, voorbehouden aan een arts. Daarom is het noodzakelijk om via deze steekkaart vooraf toestemming van ouders te hebben voor het eventueel toedienen van dergelijke hulp.',
+                    name: $t(`Toedienen van medicatie`),
+                    description: $t(`Het is verboden om als begeleid(st)er, behalve EHBO, op eigen initiatief medische handelingen uit te voeren. Ook het verstrekken van lichte pijnstillende en koortswerende medicatie zoals Perdolan, Dafalgan of Aspirine is, zonder toelating van de ouders, voorbehouden aan een arts. Daarom is het noodzakelijk om via deze steekkaart vooraf toestemming van ouders te hebben voor het eventueel toedienen van dergelijke hulp.`),
 
                     // Only ask if <18y
                     filter: new PropertyFilter(
@@ -147,7 +147,7 @@ export class RecordFactory {
         if (categories.length > 0) {
             categories = [
                 RecordCategory.create({
-                    name: 'Steekkaart',
+                    name: $t(`Steekkaart`),
                     childCategories: categories,
                 }),
             ];
@@ -183,21 +183,21 @@ export class RecordFactory {
                 record.sensitive = false;
                 record.type = RecordType.ChooseOne;
                 record.required = true;
-                record.name = "Toestemming foto's";
-                record.label = "Toestemming publicatie foto's";
+                record.name = $t(`Toestemming foto's`);
+                record.label = $t(`Toestemming publicatie foto's`);
                 record.choices = [
                     RecordChoice.create({
                         id: 'no',
-                        name: 'Nee, ik geef geen toestemming',
+                        name: $t(`Nee, ik geef geen toestemming`),
                         warning: RecordWarning.create({
                             id: '',
-                            text: "Geen toestemming voor publicatie foto's",
+                            text: $t(`Geen toestemming voor publicatie foto's`),
                             type: RecordWarningType.Error,
                         }),
                     }),
                     RecordChoice.create({
                         id: 'yes',
-                        name: 'Ja, ik geef toestemming',
+                        name: $t(`Ja, ik geef toestemming`),
                     }),
 
                 ];
@@ -206,26 +206,26 @@ export class RecordFactory {
                     record.choices.push(
                         RecordChoice.create({
                             id: 'groups_only',
-                            name: "Ik geef enkel toestemming voor groepsfoto's",
+                            name: $t(`Ik geef enkel toestemming voor groepsfoto's`),
                             warning: RecordWarning.create({
                                 id: '',
-                                text: "Enkel toestemming voor groepsfoto's",
+                                text: $t(`Enkel toestemming voor groepsfoto's`),
                                 type: RecordWarningType.Error,
                             }),
                         }),
                     );
                 }
-                record.description = "Tijdens de activiteiten maken we soms foto's die we publiceren op de website en sociale media.";
+                record.description = $t(`Tijdens de activiteiten maken we soms foto's die we publiceren op de website en sociale media.`);
                 break;
 
             case LegacyRecordType.FoodAllergies:
                 record.type = RecordType.Checkbox;
-                record.name = 'Allergisch of overgevoelig voor bepaalde voeding';
+                record.name = $t(`Allergisch of overgevoelig voor bepaalde voeding`);
                 record.askComments = true;
-                record.inputPlaceholder = 'Som hier op welke zaken (bv. noten, lactose, ...). Vul eventueel aan met enkele voorbeelden';
+                record.inputPlaceholder = $t(`Som hier op welke zaken (bv. noten, lactose, ...). Vul eventueel aan met enkele voorbeelden`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Allergisch of overgevoelig voor bepaalde voeding',
+                    text: $t(`Allergisch of overgevoelig voor bepaalde voeding`),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -234,12 +234,12 @@ export class RecordFactory {
 
             case LegacyRecordType.MedicineAllergies:
                 record.type = RecordType.Checkbox;
-                record.name = 'Allergisch voor geneesmiddelen';
+                record.name = $t(`Allergisch voor geneesmiddelen`);
                 record.askComments = true;
-                record.inputPlaceholder = 'Som hier op welke zaken (bv. bepaalde antibiotica, ontsmettingsmiddelen, pijnstillers, ...). Vul eventueel aan met enkele voorbeelden';
+                record.inputPlaceholder = $t(`Som hier op welke zaken (bv. bepaalde antibiotica, ontsmettingsmiddelen, pijnstillers, ...). Vul eventueel aan met enkele voorbeelden`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Allergisch voor geneesmiddelen',
+                    text: $t(`Allergisch voor geneesmiddelen`),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -248,10 +248,10 @@ export class RecordFactory {
 
             case LegacyRecordType.HayFever:
                 record.type = RecordType.Checkbox;
-                record.name = 'Hooikoorts';
+                record.name = $t(`Hooikoorts`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Hooikoorts',
+                    text: $t(`Hooikoorts`),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -260,13 +260,13 @@ export class RecordFactory {
 
             case LegacyRecordType.OtherAllergies:
                 record.type = RecordType.Checkbox;
-                record.name = 'Allergisch voor bepaalde zaken';
+                record.name = $t(`Allergisch voor bepaalde zaken`);
                 record.askComments = true;
-                record.description = 'Zoals verf, insecten...';
-                record.inputPlaceholder = 'Som hier op welke zaken';
+                record.description = $t(`Zoals verf, insecten...`);
+                record.inputPlaceholder = $t(`Som hier op welke zaken`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Allergisch voor bepaalde zaken',
+                    text: $t(`Allergisch voor bepaalde zaken`),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -275,10 +275,10 @@ export class RecordFactory {
 
             case LegacyRecordType.Vegetarian:
                 record.type = RecordType.Checkbox;
-                record.name = 'Vegetarisch dieet';
+                record.name = $t(`Vegetarisch dieet`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Vegetarisch',
+                    text: $t(`Vegetarisch`),
                     type: RecordWarningType.Info,
                     inverted: false,
                 });
@@ -287,11 +287,11 @@ export class RecordFactory {
 
             case LegacyRecordType.Vegan:
                 record.type = RecordType.Checkbox;
-                record.name = 'Veganistisch dieet';
-                record.description = 'Geen dierlijke producten';
+                record.name = $t(`Veganistisch dieet`);
+                record.description = $t(`Geen dierlijke producten`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Veganistisch',
+                    text: $t(`Veganistisch`),
                     type: RecordWarningType.Info,
                     inverted: false,
                 });
@@ -300,10 +300,10 @@ export class RecordFactory {
 
             case LegacyRecordType.Halal:
                 record.type = RecordType.Checkbox;
-                record.name = 'Halal dieet';
+                record.name = $t(`Halal dieet`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Halal dieet',
+                    text: $t(`Halal dieet`),
                     type: RecordWarningType.Info,
                     inverted: false,
                 });
@@ -312,10 +312,10 @@ export class RecordFactory {
 
             case LegacyRecordType.Kosher:
                 record.type = RecordType.Checkbox;
-                record.name = 'Koosjer dieet';
+                record.name = $t(`Koosjer dieet`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Koosjer dieet',
+                    text: $t(`Koosjer dieet`),
                     type: RecordWarningType.Info,
                     inverted: false,
                 });
@@ -324,15 +324,15 @@ export class RecordFactory {
 
             case LegacyRecordType.Diet:
                 record.type = RecordType.Checkbox;
-                record.name = 'Speciaal dieet';
+                record.name = $t(`Speciaal dieet`);
 
                 record.askComments = true;
-                record.label = 'Ander dieet';
-                record.description = 'Geen allergieën';
-                record.inputPlaceholder = 'Beschrijving van ander soort dieet. Allergieën hoef je hier niet nog eens te vermelden.';
+                record.label = $t(`Ander dieet`);
+                record.description = $t(`Geen allergieën`);
+                record.inputPlaceholder = $t(`Beschrijving van ander soort dieet. Allergieën hoef je hier niet nog eens te vermelden.`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Speciaal dieet',
+                    text: $t(`Speciaal dieet`),
                     type: RecordWarningType.Info,
                     inverted: false,
                 });
@@ -341,13 +341,13 @@ export class RecordFactory {
 
             case LegacyRecordType.CovidHighRisk:
                 record.type = RecordType.Checkbox;
-                record.name = 'Hoog-risicogroep voor coronavirus';
+                record.name = $t(`Hoog-risicogroep voor coronavirus`);
 
                 record.askComments = true;
-                record.inputPlaceholder = 'Optioneel';
+                record.inputPlaceholder = $t(`Optioneel`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Hoog-risicogroep voor coronavirus',
+                    text: $t(`Hoog-risicogroep voor coronavirus`),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -356,16 +356,16 @@ export class RecordFactory {
 
             case LegacyRecordType.TetanusVaccine:
                 record.type = RecordType.Checkbox;
-                record.name = 'Tetanusvaccinatie';
+                record.name = $t(`Tetanusvaccinatie`);
 
                 record.askComments = true;
-                record.label = 'Is gevaccineerd tegen tetanus/klem in de afgelopen 10 jaar';
-                record.description = 'In de afgelopen 10 jaar';
-                record.inputPlaceholder = 'In welk jaar? (mag maximaal 10 jaar geleden zijn)';
-                record.commentsDescription = 'Een vaccinatie voor tetanus/klem is 10 jaar werkzaam, daarna is een nieuwe vaccinatie noodzakelijk.';
+                record.label = $t(`Is gevaccineerd tegen tetanus/klem in de afgelopen 10 jaar`);
+                record.description = $t(`In de afgelopen 10 jaar`);
+                record.inputPlaceholder = $t(`In welk jaar? (mag maximaal 10 jaar geleden zijn)`);
+                record.commentsDescription = $t(`Een vaccinatie voor tetanus/klem is 10 jaar werkzaam, daarna is een nieuwe vaccinatie noodzakelijk.`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Geen tetanusvaccinatie in de afgelopen 10 jaar',
+                    text: $t(`Geen tetanusvaccinatie in de afgelopen 10 jaar`),
                     type: RecordWarningType.Info,
                     inverted: true,
                 });
@@ -374,13 +374,13 @@ export class RecordFactory {
 
             case LegacyRecordType.Asthma:
                 record.type = RecordType.Checkbox;
-                record.name = 'Astma';
+                record.name = $t(`Astma`);
 
                 record.askComments = true;
-                record.inputPlaceholder = 'Optioneel';
+                record.inputPlaceholder = $t(`Optioneel`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Astma',
+                    text: $t(`Astma`),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -388,39 +388,39 @@ export class RecordFactory {
                 break;
             case LegacyRecordType.BedWaters:
                 record.type = RecordType.Checkbox;
-                record.name = 'Bedwateren';
+                record.name = $t(`Bedwateren`);
 
                 record.askComments = true;
-                record.inputPlaceholder = 'Optioneel';
+                record.inputPlaceholder = $t(`Optioneel`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Bedwateren',
+                    text: $t(`Bedwateren`),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
                 break;
             case LegacyRecordType.Epilepsy:
                 record.type = RecordType.Checkbox;
-                record.name = 'Epilepsie';
+                record.name = $t(`Epilepsie`);
 
                 record.askComments = true;
-                record.inputPlaceholder = 'Optioneel';
+                record.inputPlaceholder = $t(`Optioneel`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Epilepsie',
+                    text: $t(`Epilepsie`),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
                 break;
             case LegacyRecordType.HeartDisease:
                 record.type = RecordType.Checkbox;
-                record.name = 'Hartaandoening';
+                record.name = $t(`Hartaandoening`);
 
                 record.askComments = true;
-                record.inputPlaceholder = 'Optioneel';
+                record.inputPlaceholder = $t(`Optioneel`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Hartaandoening',
+                    text: $t(`Hartaandoening`),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -428,52 +428,52 @@ export class RecordFactory {
                 break;
             case LegacyRecordType.SkinCondition:
                 record.type = RecordType.Checkbox;
-                record.name = 'Huidaandoening';
+                record.name = $t(`Huidaandoening`);
 
                 record.askComments = true;
-                record.inputPlaceholder = 'Optioneel';
+                record.inputPlaceholder = $t(`Optioneel`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Huidaandoening',
+                    text: $t(`Huidaandoening`),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
                 break;
             case LegacyRecordType.Rheumatism:
                 record.type = RecordType.Checkbox;
-                record.name = 'Reuma';
+                record.name = $t(`Reuma`);
 
                 record.askComments = true;
-                record.inputPlaceholder = 'Optioneel';
+                record.inputPlaceholder = $t(`Optioneel`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Reuma',
+                    text: $t(`Reuma`),
                     type: RecordWarningType.Info,
                     inverted: false,
                 });
                 break;
             case LegacyRecordType.SleepWalking:
                 record.type = RecordType.Checkbox;
-                record.name = 'Slaapwandelen';
+                record.name = $t(`Slaapwandelen`);
 
                 record.askComments = true;
-                record.inputPlaceholder = 'Optioneel';
+                record.inputPlaceholder = $t(`Optioneel`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Slaapwandelen',
+                    text: $t(`Slaapwandelen`),
                     type: RecordWarningType.Info,
                     inverted: false,
                 });
                 break;
             case LegacyRecordType.Diabetes:
                 record.type = RecordType.Checkbox;
-                record.name = 'Diabetes';
+                record.name = $t(`Diabetes`);
 
                 record.askComments = true;
-                record.inputPlaceholder = 'Optioneel';
+                record.inputPlaceholder = $t(`Optioneel`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Diabetes',
+                    text: $t(`Diabetes`),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -481,15 +481,15 @@ export class RecordFactory {
 
             case LegacyRecordType.Medicines:
                 record.type = RecordType.Checkbox;
-                record.name = 'Moet geneesmiddelen nemen';
+                record.name = $t(`Moet geneesmiddelen nemen`);
 
                 record.askComments = true;
-                record.description = 'Dagelijks, wekelijks...';
-                record.inputPlaceholder = 'Welke, wanneer en hoe vaak?';
-                record.commentsDescription = 'Gelieve ons ook de noodzakelijke doktersattesten te bezorgen.';
+                record.description = $t(`Dagelijks, wekelijks...`);
+                record.inputPlaceholder = $t(`Welke, wanneer en hoe vaak?`);
+                record.commentsDescription = $t(`Gelieve ons ook de noodzakelijke doktersattesten te bezorgen.`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Moet geneesmiddelen nemen (dagelijks/wekelijks/...)',
+                    text: $t(`Moet geneesmiddelen nemen (dagelijks/wekelijks/...)`),
                     type: RecordWarningType.Error,
                     inverted: false,
                 });
@@ -497,13 +497,13 @@ export class RecordFactory {
 
             case LegacyRecordType.SpecialHealthCare:
                 record.type = RecordType.Checkbox;
-                record.name = "Speciale zorg om risico's te voorkomen";
+                record.name = $t(`Speciale zorg om risico's te voorkomen`);
 
                 record.askComments = true;
-                record.inputPlaceholder = 'Welke?';
+                record.inputPlaceholder = $t(`Welke?`);
 
                 record.warning = RecordWarning.create({
-                    text: "Speciale zorg om risico's te voorkomen",
+                    text: $t(`Speciale zorg om risico's te voorkomen`),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -512,11 +512,11 @@ export class RecordFactory {
 
             case LegacyRecordType.CanNotSwim:
                 record.type = RecordType.Checkbox;
-                record.name = 'Kan niet (of onvoldoende) zwemmen';
+                record.name = $t(`Kan niet (of onvoldoende) zwemmen`);
                 record.askComments = false;
 
                 record.warning = RecordWarning.create({
-                    text: 'Kan niet (of onvoldoende) zwemmen',
+                    text: $t(`Kan niet (of onvoldoende) zwemmen`),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -524,13 +524,13 @@ export class RecordFactory {
 
             case LegacyRecordType.TiredQuickly:
                 record.type = RecordType.Checkbox;
-                record.name = 'Is snel moe';
+                record.name = $t(`Is snel moe`);
 
                 record.askComments = true;
-                record.inputPlaceholder = 'Meer informatie';
+                record.inputPlaceholder = $t(`Meer informatie`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Is snel moe',
+                    text: $t(`Is snel moe`),
                     type: RecordWarningType.Info,
                     inverted: false,
                 });
@@ -538,13 +538,13 @@ export class RecordFactory {
 
             case LegacyRecordType.CanNotParticipateInSport:
                 record.type = RecordType.Checkbox;
-                record.name = 'Kan niet deelnemen aan sport en spel afgestemd op leeftijd';
+                record.name = $t(`Kan niet deelnemen aan sport en spel afgestemd op leeftijd`);
 
                 record.askComments = true;
-                record.inputPlaceholder = 'Meer informatie';
+                record.inputPlaceholder = $t(`Meer informatie`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Kan niet deelnemen aan sport en spel afgestemd op leeftijd',
+                    text: $t(`Kan niet deelnemen aan sport en spel afgestemd op leeftijd`),
                     type: RecordWarningType.Info,
                     inverted: false,
                 });
@@ -552,26 +552,26 @@ export class RecordFactory {
 
             case LegacyRecordType.SpecialSocialCare:
                 record.type = RecordType.Checkbox;
-                record.name = 'Bijzondere aandacht nodig bij sociale omgang';
+                record.name = $t(`Bijzondere aandacht nodig bij sociale omgang`);
                 record.askComments = true;
-                record.inputPlaceholder = 'Meer informatie';
+                record.inputPlaceholder = $t(`Meer informatie`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Bijzondere aandacht nodig bij sociale omgang',
+                    text: $t(`Bijzondere aandacht nodig bij sociale omgang`),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
                 break;
 
             case LegacyRecordType.Other:
-                record.name = 'Andere opmerking';
+                record.name = $t(`Andere opmerking`);
 
                 record.required = false;
                 record.type = RecordType.Textarea;
-                record.inputPlaceholder = 'Enkel invullen indien van toepassing';
+                record.inputPlaceholder = $t(`Enkel invullen indien van toepassing`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Andere opmerking!',
+                    text: $t(`Andere opmerking!`),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -579,15 +579,15 @@ export class RecordFactory {
 
             case LegacyRecordType.MedicinePermissions:
                 record.type = RecordType.Checkbox;
-                record.name = 'Toedienen van medicatie';
+                record.name = $t(`Toedienen van medicatie`);
 
                 record.sensitive = false;
 
-                record.label = 'Wij geven toestemming aan de begeleiders om bij hoogdringendheid aan onze zoon of dochter een dosis via de apotheek vrij verkrijgbare pijnstillende en koortswerende medicatie toe te dienen*';
-                record.description = '* gebaseerd op aanbeveling Kind & Gezin 09.12.2009 – Aanpak van koorts / Toedienen van geneesmiddelen in de kinderopvang';
+                record.label = $t(`Wij geven toestemming aan de begeleiders om bij hoogdringendheid aan onze zoon of dochter een dosis via de apotheek vrij verkrijgbare pijnstillende en koortswerende medicatie toe te dienen*`);
+                record.description = $t(`* gebaseerd op aanbeveling Kind & Gezin 09.12.2009 – Aanpak van koorts / Toedienen van geneesmiddelen in de kinderopvang`);
 
                 record.warning = RecordWarning.create({
-                    text: 'Geen toestemming voor het toedienen van medicatie',
+                    text: $t(`Geen toestemming voor het toedienen van medicatie`),
                     type: RecordWarningType.Error,
                     inverted: true,
                 });
@@ -607,29 +607,29 @@ export class RecordFactory {
     static createDoctorName() {
         return RecordSettings.create({
             id: 'template-doctor-name',
-            name: 'Naam huisarts',
-            inputPlaceholder: 'Huisarts of praktijknaam',
+            name: $t(`Naam huisarts`),
+            inputPlaceholder: $t(`Huisarts of praktijknaam`),
             type: RecordType.Text,
             required: true,
             sensitive: true,
-            label: 'Naam',
+            label: $t(`Naam`),
         });
     }
 
     static createDoctorPhone() {
         return RecordSettings.create({
             id: 'template-doctor-phone',
-            name: 'Telefoon huisarts',
-            inputPlaceholder: 'Telefoonnummer',
+            name: $t(`Telefoon huisarts`),
+            inputPlaceholder: $t(`Telefoonnummer`),
             type: RecordType.Phone,
             required: true,
-            label: 'Telefoonnummer',
+            label: $t(`Telefoonnummer`),
         });
     }
 
     static createDoctorCategory(required = true) {
         return RecordCategory.create({
-            name: 'Contactgegevens huisarts',
+            name: $t(`Contactgegevens huisarts`),
             records: [
                 this.createDoctorName(),
                 this.createDoctorPhone(),

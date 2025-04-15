@@ -81,7 +81,7 @@ export class Recipient extends AutoEncoder {
             }),
             Replacement.create({
                 token: 'greeting',
-                value: this.firstName ? `Dag ${this.firstName},` : 'Hallo!',
+                value: this.firstName ? $t(`Dag {name},`, { name: this.firstName }) : $t(`Hallo!`),
             }),
         ];
     }

@@ -15,21 +15,21 @@ export class ParentTypeHelper {
     static getName(type: ParentType): string {
         switch (type) {
             case ParentType.Mother:
-                return 'Mama';
+                return $t(`Mama`);
             case ParentType.Father:
-                return 'Papa';
+                return $t(`Papa`);
             case ParentType.Stepmother:
-                return 'Plusmama';
+                return $t(`Plusmama`);
             case ParentType.Stepfather:
-                return 'Pluspapa';
+                return $t(`Pluspapa`);
             case ParentType.Parent1:
-                return 'Ouder 1';
+                return $t(`Ouder 1`);
             case ParentType.Parent2:
-                return 'Ouder 2';
+                return $t(`Ouder 2`);
             case ParentType.Other:
-                return 'Voogd';
+                return $t(`Voogd`);
             case ParentType.FosterParent:
-                return 'Pleegouder';
+                return $t(`Pleegouder`);
         }
     }
 
