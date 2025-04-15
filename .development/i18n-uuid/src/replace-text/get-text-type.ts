@@ -2,11 +2,40 @@ export enum TextType {
     Key,
     FunctionArgument,
     Variable,
-    Array
+    Array,
+    Equality,
+    SwitchCase,
+    Import
 }
 
-export function getTextType(allParts: {value: string, shouldTranslate: boolean}[]): {type: TextType, name: string | null} | null {
+export function getTextType(allParts: {value: string}[]): {type: TextType, name: string | null} | null {
     const text = allParts.map(p => p.value).join('');
+    const lastCodePart = text.trimEnd().match(/(?<=(?:\s+))\S*$/g);
+    if(lastCodePart) {
+        const value = lastCodePart[0];
+
+        if(value.endsWith('case')) {
+            return {
+                type: TextType.SwitchCase,
+                name: null
+            }
+        }
+
+        if(value.endsWith('from')) {
+            return {
+                type: TextType.Import,
+                name: null
+            }
+        }
+
+        if(['==', '!=', '>=', '<=', '<', '>'].some(item => value.endsWith(item))) {
+            return {
+                type: TextType.Equality,
+                name: null
+            }
+        }
+    }
+
     const result = getOpenChar(text);
     if(result?.type === TextType.Array) {
         return getOpenChar(result.name);

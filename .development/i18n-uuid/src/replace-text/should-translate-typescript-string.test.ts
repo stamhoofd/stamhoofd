@@ -12,7 +12,7 @@ describe('shouldTranslateTypescriptString', () => {
         ];
 
         for(const testCase of testCases) {
-            const result = shouldTranslateTypescriptString(testCase.allParts, testCase.value);
+            const result = shouldTranslateTypescriptString(testCase.allParts);
             expect(result).toBe(false);
         }
     })

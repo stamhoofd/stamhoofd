@@ -23,6 +23,8 @@ export interface TypescriptTranslatorOptions {
     };
 }
 
+// todo: identify imports, switch case, if statements
+
 export class TypescriptTranslator {
     private readonly shouldCheckChanges: boolean;
     private readonly fileProgressText: string;
@@ -103,39 +105,7 @@ export class TypescriptTranslator {
                 continue;
             }
 
-            const before = i === 0 ? '' : parts[i - 1].value;
-            const beforeTrimmedEnd = before.trimEnd();
-    
-            const isTranslated = before.endsWith('$t(') || before.startsWith('$t(');
-    
-            if(isTranslated) {
-                allParts.push({
-                    value,
-                    shouldTranslate: false
-                });
-                continue;
-            }
-
-            const isImport = beforeTrimmedEnd.endsWith(' from');
-            if(isImport) {
-                allParts.push({
-                    value,
-                    shouldTranslate: false
-                });
-                continue;
-            }
-    
-            const isEquality = ['==', '!=', '>=', '<=', '<', '>'].some(item => beforeTrimmedEnd.endsWith(item));
-    
-            if(isEquality) {
-                allParts.push({
-                    value,
-                    shouldTranslate: false
-                });
-                continue;
-            }
-
-            const shouldTranslate = shouldTranslateTypescriptString(allParts, value);
+            const shouldTranslate = shouldTranslateTypescriptString(allParts);
     
             allParts.push({
                 value,
