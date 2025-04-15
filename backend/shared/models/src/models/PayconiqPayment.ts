@@ -124,7 +124,7 @@ export class PayconiqPayment extends QueryableModel {
         if (!apiKey) {
             throw new SimpleError({
                 code: '',
-                message: 'Betaling via Payconiq is tijdelijk onbeschikbaar',
+                message: $t('Betaling via Payconiq is tijdelijk onbeschikbaar'),
             });
         }
 

@@ -92,7 +92,6 @@ class EmailStatic {
 
         if (!STAMHOOFD.SMTP_HOST || !STAMHOOFD.SMTP_PORT) {
             throw new Error('Missing environment variables to send emails');
-            return;
         }
 
         // create reusable transporter object using the default SMTP transport
@@ -310,7 +309,7 @@ class EmailStatic {
                     new SimpleError({
                         code: 'all_filtered',
                         message: 'Invalid email address',
-                        human: 'Ongeldig e-mailadres',
+                        human: $t(`Ongeldig e-mailadres`),
                     }),
                 );
             }
@@ -332,7 +331,7 @@ class EmailStatic {
                     new SimpleError({
                         code: 'all_filtered',
                         message: 'All recipients are filtered due to hard bounce or spam',
-                        human: 'Alle ontvangers zijn gefilterd wegens een hard bounce of spam',
+                        human: $t(`Alle ontvangers zijn gefilterd wegens een hard bounce of spam`),
                     }),
                 );
             }
@@ -357,7 +356,7 @@ class EmailStatic {
                     new SimpleError({
                         code: 'all_filtered',
                         message: 'All recipients are filtered due to environment',
-                        human: 'Alle ontvangers zijn gefilterd omwille van de demo-omgeving die het versturen van bepaalde e-mails limiteert',
+                        human: $t(`Alle ontvangers zijn gefilterd omwille van de demo-omgeving die het versturen van bepaalde e-mails limiteert`),
                     }),
                 );
             }
@@ -487,8 +486,8 @@ class EmailStatic {
                 if (STAMHOOFD.environment === 'production') {
                     if (data.from.email !== this.getWebmasterFromEmail().email) {
                         this.sendWebmaster({
-                            subject: 'E-mail kon niet worden verzonden',
-                            text: 'Een e-mail vanaf ' + data.from.email + ' kon niet worden verstuurd aan ' + mail.to + ': \n\n' + e + '\n\n' + (mail.text ?? ''),
+                            subject: $t(`E-mail kon niet worden verzonden`),
+                            text: $t(`Een e-mail vanaf {email} kon niet worden verstuurd aan {to}`, { email: data.from.email, to: mail.to }) + ': \n\n' + e + '\n\n' + (mail.text ?? ''),
                             type: (data.type === 'transactional') ? 'broadcast' : 'transactional',
                         });
                     }

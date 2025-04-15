@@ -316,7 +316,7 @@ export class MemberActionBuilder {
         return r;
     }
 
-    getActions(options: { includeDelete?: boolean; includeMove?: boolean; includeEdit?: boolean, selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}): TableAction<PlatformMember>[] {
+    getActions(options: { includeDelete?: boolean; includeMove?: boolean; includeEdit?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}): TableAction<PlatformMember>[] {
         const actions = [
             new InMemoryTableAction({
                 name: 'Gegevens bewerken',
@@ -377,7 +377,7 @@ export class MemberActionBuilder {
             ...(options.includeMove === true ? this.getMoveAction(options.selectedOrganizationRegistrationPeriod) : []),
             ...(options.includeEdit === true ? this.getEditAction() : []),
             ...this.getUnsubscribeAction(),
-            ...this.getAuditLogAction()
+            ...this.getAuditLogAction(),
         ];
 
         if (options.includeDelete) {
@@ -589,7 +589,7 @@ export class MemberActionBuilder {
         if (members.length > 1) {
             throw new SimpleError({
                 code: 'not-supported',
-                message: 'Meerdere leden verwijderen is niet ondersteund',
+                message: $t('Meerdere leden verwijderen is niet ondersteund'),
             });
         }
 

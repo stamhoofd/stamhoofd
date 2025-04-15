@@ -112,7 +112,7 @@ export class PlatformFamilyManager {
                 if (member.isSaving) {
                     throw new SimpleError({
                         code: 'save_pending',
-                        message: 'Even geduld. Nog bezig met opslaan...',
+                        message: $t('Even geduld. Nog bezig met opslaan...'),
                     });
                 }
                 patches.addPut(member.patchedMember);

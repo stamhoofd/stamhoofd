@@ -140,7 +140,7 @@ export abstract class UIFilter {
         if (typeof filter !== 'object') {
             throw new SimpleError({
                 code: 'filter_invert_fail',
-                message: 'Inverteren van de filter is mislukt',
+                message: $t('Inverteren van de filter is mislukt'),
             });
         }
 
