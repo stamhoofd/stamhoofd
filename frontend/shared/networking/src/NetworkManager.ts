@@ -86,7 +86,7 @@ export class NetworkManagerStatic implements RequestMiddleware {
 
         if ((request as any).retryCount > 1 && !this.networkErrorToast) {
             // Only on second try
-            this.networkErrorToast = new Toast("Bezig met verbinden met internet...", "spinner").setHide(null).show()
+            this.networkErrorToast = new Toast($t(`Bezig met verbinden met internet...`), "spinner").setHide(null).show()
         }
 
         if (navigator.onLine) {
@@ -167,13 +167,13 @@ export class NetworkManagerStatic implements RequestMiddleware {
 
                 if (this.platformLatestVersion > Version) {
                     if (AppManager.shared.isNative) {
-                        new Toast("Er is een update beschikbaar. Update de app om te vermijden dat bepaalde zaken stoppen met werken. Tip: houd automatische updates ingeschakeld.", "yellow download").setHide(null).show()
+                        new Toast($t(`Er is een update beschikbaar. Update de app om te vermijden dat bepaalde zaken stoppen met werken. Tip: houd automatische updates ingeschakeld.`), "yellow download").setHide(null).show()
                         AppManager.shared.checkUpdates({
                             checkTimeout: 20 * 1000
                         }).catch(console.error)
                     } else {
                         console.info('Received latest version: ', latestVersion, 'got', Version)
-                        new Toast("Er is een update beschikbaar. Herlaad de pagina zodra het kan om te vermijden dat bepaalde zaken stoppen met werken.", "yellow download").setHide(null).show()
+                        new Toast($t(`Er is een update beschikbaar. Herlaad de pagina zodra het kan om te vermijden dat bepaalde zaken stoppen met werken.`), "yellow download").setHide(null).show()
                     }
                 }
             }  

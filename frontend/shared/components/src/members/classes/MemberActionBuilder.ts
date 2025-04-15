@@ -124,7 +124,7 @@ export class MemberActionBuilder {
             }
             return this.organizations.map((org) => {
                 return new MenuTableAction({
-                    name: 'Inschrijven bij ' + org.name,
+                    name: $t(`Inschrijven bij`) + ' ' + org.name,
                     groupIndex: 0,
                     childActions: () => this.getRegisterActions(org),
                 });
@@ -133,7 +133,7 @@ export class MemberActionBuilder {
 
         return [
             new MenuTableAction({
-                name: 'Wachtlijsten',
+                name: $t(`Wachtlijsten`),
                 groupIndex: 0,
                 enabled: organization.period.waitingLists.length > 0,
                 childActions: () => [
@@ -170,7 +170,7 @@ export class MemberActionBuilder {
 
         return [
             new MenuTableAction({
-                name: 'Verplaatsen naar',
+                name: $t(`Verplaatsen naar`),
                 priority: 1,
                 groupIndex: 5,
                 needsSelection: true,
@@ -178,7 +178,7 @@ export class MemberActionBuilder {
                 enabled: this.hasWrite,
                 childActions: () => [
                     new MenuTableAction({
-                        name: 'Wachtlijsten',
+                        name: $t(`Wachtlijsten`),
                         groupIndex: 0,
                         enabled: organization.period.waitingLists.length > 0,
                         childActions: () => [
@@ -218,14 +218,14 @@ export class MemberActionBuilder {
 
         return [
             new InMemoryTableAction({
-                name: 'Toon geschiedenis',
+                name: $t(`Toon geschiedenis`),
                 priority: 1,
                 groupIndex: 6,
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (members: PlatformMember[]) => {
                     if (members.length > 100) {
-                        Toast.error('Te veel leden geselecteerd').show();
+                        Toast.error($t(`Te veel leden geselecteerd`)).show();
                         return;
                     }
                     await this.present({
@@ -249,7 +249,7 @@ export class MemberActionBuilder {
 
         return [
             new InMemoryTableAction({
-                name: 'Inschrijving bewerken',
+                name: $t(`Inschrijving bewerken`),
                 priority: 1,
                 groupIndex: 1,
                 needsSelection: true,
@@ -269,7 +269,7 @@ export class MemberActionBuilder {
         }
 
         return [new InMemoryTableAction({
-            name: 'Uitschrijven',
+            name: $t(`Uitschrijven`),
             destructive: true,
             priority: 0,
             groupIndex: 7,
@@ -319,7 +319,7 @@ export class MemberActionBuilder {
     getActions(options: { includeDelete?: boolean; includeMove?: boolean; includeEdit?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}): TableAction<PlatformMember>[] {
         const actions = [
             new InMemoryTableAction({
-                name: 'Gegevens bewerken',
+                name: $t(`Gegevens bewerken`),
                 icon: 'edit',
                 priority: 2,
                 groupIndex: 1,
@@ -332,7 +332,7 @@ export class MemberActionBuilder {
             }),
 
             new InMemoryTableAction({
-                name: 'Functies bewerken',
+                name: $t(`Functies bewerken`),
                 icon: 'star',
                 priority: 0,
                 groupIndex: 1,
@@ -345,7 +345,7 @@ export class MemberActionBuilder {
             }),
 
             new AsyncTableAction({
-                name: 'E-mailen',
+                name: $t(`E-mailen`),
                 icon: 'email',
                 priority: 12,
                 groupIndex: 3,
@@ -355,7 +355,7 @@ export class MemberActionBuilder {
             }),
 
             new AsyncTableAction({
-                name: 'Exporteren naar Excel',
+                name: $t(`Exporteren naar Excel`),
                 icon: 'download',
                 priority: 11,
                 groupIndex: 3,
@@ -366,7 +366,7 @@ export class MemberActionBuilder {
                 },
             }),
             new MenuTableAction({
-                name: 'Inschrijven voor',
+                name: $t(`Inschrijven voor`),
                 priority: 1,
                 groupIndex: 5,
                 needsSelection: true,
@@ -383,7 +383,7 @@ export class MemberActionBuilder {
         if (options.includeDelete) {
             actions.push(
                 new InMemoryTableAction({
-                    name: 'Definitief verwijderen',
+                    name: $t(`Definitief verwijderen`),
                     destructive: true,
                     priority: 1,
                     groupIndex: 100,
@@ -412,7 +412,7 @@ export class MemberActionBuilder {
             options: [
                 {
                     id: 'all',
-                    name: 'Alle leden',
+                    name: $t(`Alle leden`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.Members,
@@ -423,12 +423,12 @@ export class MemberActionBuilder {
                 },
                 {
                     id: 'none',
-                    name: 'Geen leden',
+                    name: $t(`Geen leden`),
                     value: [],
                 },
                 {
                     id: 'adults',
-                    name: 'Alle volwassen leden',
+                    name: $t(`Alle volwassen leden`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.Members,
@@ -452,7 +452,7 @@ export class MemberActionBuilder {
             options: [
                 {
                     id: 'minors',
-                    name: 'Ouders van minderjarige leden',
+                    name: $t(`Ouders van minderjarige leden`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.MemberParents,
@@ -470,7 +470,7 @@ export class MemberActionBuilder {
                 },
                 {
                     id: 'all',
-                    name: 'Alle ouders',
+                    name: $t(`Alle ouders`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.MemberParents,
@@ -481,7 +481,7 @@ export class MemberActionBuilder {
                 },
                 {
                     id: 'none',
-                    name: 'Geen ouders',
+                    name: $t(`Geen ouders`),
                     value: [],
                 },
             ],
@@ -492,12 +492,12 @@ export class MemberActionBuilder {
             options: [
                 {
                     id: 'none',
-                    name: 'Geen niet-geverifieerde adressen',
+                    name: $t(`Geen niet-geverifieerde adressen`),
                     value: [],
                 },
                 {
                     id: 'minors',
-                    name: 'Niet-geverifieerde adressen van minderjarige leden',
+                    name: $t(`Niet-geverifieerde adressen van minderjarige leden`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.MemberUnverified,
@@ -515,7 +515,7 @@ export class MemberActionBuilder {
                 },
                 {
                     id: 'all',
-                    name: 'Alle niet-geverifieerde adressen',
+                    name: $t(`Alle niet-geverifieerde adressen`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.MemberUnverified,
@@ -558,7 +558,7 @@ export class MemberActionBuilder {
             components: [
                 new ComponentWithProperties(MemberStepView, {
                     member,
-                    title: member.member.firstName + ' bewerken',
+                    title: member.member.firstName + ' ' + $t(`bewerken`),
                     component: markRaw(EditMemberAllBox),
                     saveHandler: async ({ dismiss }: NavigationActions) => {
                         await dismiss({ force: true });
@@ -574,7 +574,7 @@ export class MemberActionBuilder {
             components: [
                 new ComponentWithProperties(MemberStepView, {
                     member,
-                    title: 'Functies van ' + member.member.firstName,
+                    title: $t(`Functies van`) + ' ' + member.member.firstName,
                     component: markRaw(EditMemberResponsibilitiesBox),
                     saveHandler: async ({ dismiss }: NavigationActions) => {
                         await dismiss({ force: true });
@@ -601,10 +601,10 @@ export class MemberActionBuilder {
                 new ComponentWithProperties(DeleteView, {
                     title: `${name} definitief verwijderen?`,
                     description: `Ben je 100% zeker dat je ${name} wilt verwijderen? Vul dan de volledige naam van het lid in ter bevestiging. De volledige geschiedenis gaat verloren. Probeer dit absoluut te vermijden en enkel voor uitzonderingen te gebruiken.`,
-                    confirmationTitle: 'Bevestig de naam van het lid',
-                    confirmationPlaceholder: 'Volledige naam',
+                    confirmationTitle: $t(`Bevestig de naam van het lid`),
+                    confirmationPlaceholder: $t(`Volledige naam`),
                     confirmationCode: name,
-                    checkboxText: 'Ja, ik ben 100% zeker',
+                    checkboxText: $t(`Ja, ik ben 100% zeker`),
                     onDelete: async () => {
                         const patch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
                         for (const member of members) {
@@ -614,7 +614,7 @@ export class MemberActionBuilder {
                         await this.platformFamilyManager.isolatedPatch(members, patch);
                         GlobalEventBus.sendEvent('members-deleted', members).catch(console.error);
 
-                        Toast.success(Formatter.capitalizeFirstLetter(Formatter.pluralText(members.length, 'lid', 'leden')) + ' verwijderd').show();
+                        Toast.success(Formatter.capitalizeFirstLetter(Formatter.pluralText(members.length, $t(`lid`), $t(`leden`))) + ' ' + $t(`verwijderd`)).show();
                         return true;
                     },
                 }),

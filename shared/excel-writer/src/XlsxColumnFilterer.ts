@@ -1,5 +1,5 @@
-import { XlsxTransformerConcreteColumn, XlsxTransformerConcreteSheet, XlsxTransformerSheet, XlsxWorkbookFilter } from './interfaces';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { XlsxTransformerConcreteColumn, XlsxTransformerConcreteSheet, XlsxTransformerSheet, XlsxWorkbookFilter } from './interfaces';
 
 /**
  * Allows to specify which columns to include in the excel file.
@@ -19,7 +19,7 @@ export class XlsxColumnFilterer<T> {
                 throw new SimpleError({
                     code: 'invalid_sheet',
                     message: 'Invalid sheet ' + id,
-                    human: 'Ongeldig werkblad ' + id + ', deze wordt niet (meer) ondersteund',
+                    human: $t(`Ongeldig werkblad {sheet}, deze wordt niet (meer) ondersteund`, { sheet: id }),
                     statusCode: 400,
                 });
             }
@@ -109,7 +109,7 @@ export class XlsxColumnFilterer<T> {
                     throw new SimpleError({
                         code: 'invalid_column',
                         message: 'Invalid column ' + id,
-                        human: 'Ongeldige kolom ' + id + ', deze wordt niet (meer) ondersteund',
+                        human: $t(`Ongeldige kolom {column}, deze wordt niet (meer) ondersteund`, { column: id }),
                         statusCode: 400,
                     });
                 }
@@ -128,7 +128,7 @@ export class XlsxColumnFilterer<T> {
             throw new SimpleError({
                 code: 'no_columns',
                 message: 'No columns selected',
-                human: 'Geen enkele kolom is geselecteerd',
+                human: $t(`Geen enkele kolom is geselecteerd`),
                 statusCode: 400,
             });
         }
