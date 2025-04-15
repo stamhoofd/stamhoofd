@@ -41,6 +41,7 @@ export class HtmlTranslator {
     private static readonly PLACEHOLDER = '[[html-translator-placeholder]]';
     private readonly shouldCheckChanges: boolean;
     private readonly fileProgressText: string;
+    private _isDoubt = false;
 
     get currentMatchCount() {
         return this._currentMatchCount;
@@ -103,7 +104,7 @@ export class HtmlTranslator {
             await this.processRecord(parent, source);
         }
 
-        if(!this.isChanged) {
+        if(this._isDoubt || !this.isChanged) {
             return originalHtml;
         }
 
@@ -192,7 +193,7 @@ export class HtmlTranslator {
             });
         
             // update text on record
-            record[key] = await this.translateTextParts(parent, record, key, parts, this.translateText)
+            record[key] = await this.translateTextParts(parent, record, key, text, parts, this.translateText)
         }
     }
 
@@ -225,6 +226,7 @@ export class HtmlTranslator {
         }
 
         if(result === ReplaceTextPromptResult.Doubt && this.options.onPromptDoubt) {
+            this._isDoubt = true;
             this.options.onPromptDoubt();
         }
 
@@ -424,7 +426,7 @@ REPLACEMENT:`))
         return value.replace(startChangeMarker, '').replace(endChangeMarker, '')
     }
 
-    private async translateTextParts(parent: Record<string, any>, record: Record<string, string>, key: string, textParts: {value: string, shouldTranslate: boolean}[], translate: (text: string) => string, transformContext?: (context: HtmlTranslatorContext) => HtmlTranslatorContext) {
+    private async translateTextParts(parent: Record<string, any>, record: Record<string, string>, key: string, original: string, textParts: {value: string, shouldTranslate: boolean}[], translate: (text: string) => string, transformContext?: (context: HtmlTranslatorContext) => HtmlTranslatorContext) {
 
         const processedParts: string[] = [];
     
@@ -448,6 +450,9 @@ REPLACEMENT:`))
             }
     
             const canTranslate = isTranslated && (!this.options.doPrompt || await this.prompt(parent, record, key, value, translatedPart, processedParts.join(''), getUnprocessedpart(i), transformContext));
+            if(this._isDoubt) {
+                return original;
+            }
 
             if(canTranslate) {
                 this.isChanged = true;
@@ -465,7 +470,7 @@ REPLACEMENT:`))
             shouldTranslate: value !== undefined && value.trim().length > 0
         }];
     
-        return await this.translateTextParts(parent, record, key, allParts, (value: string) => {
+        return await this.translateTextParts(parent, record, key, value, allParts, (value: string) => {
             return wrapWithTranslationFunction(value, ['"']);
         }, context => {
 
@@ -543,7 +548,7 @@ REPLACEMENT:`))
             });
         }
     
-        return await this.translateTextParts(parent, record, key, allParts, (value: string) => {
+        return await this.translateTextParts(parent, record, key, value, allParts, (value: string) => {
             const unquoted = value.slice(1, value.length - 1);
             const trimmed = unquoted.trim();
             const quoteType = "'";

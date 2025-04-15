@@ -31,6 +31,7 @@ export class TypescriptTranslator {
     private readonly fileProgressText: string;
     private _currentMatchCount = 0;
     private totalMatchCount = 0;
+    private _isDoubt = false;
 
     get currentMatchCount() {
         return this._currentMatchCount;
@@ -114,7 +115,7 @@ export class TypescriptTranslator {
             });
         }
 
-        return await this.translateTextParts(allParts, (value: string) => {
+        return await this.translateTextParts(allParts, text, (value: string) => {
             const unquoted = value.slice(1, value.length - 1);
             const trimmed = unquoted.trim();
             const quoteType = "'";
@@ -125,7 +126,7 @@ export class TypescriptTranslator {
         });
     }
 
-    private async translateTextParts(textParts: {value: string, shouldTranslate: boolean}[], translate: (text: string) => string) {
+    private async translateTextParts(textParts: {value: string, shouldTranslate: boolean}[], original: string, translate: (text: string) => string) {
 
         const processedParts: string[] = [];
     
@@ -149,6 +150,10 @@ export class TypescriptTranslator {
             }
     
             const canTranslate = isTranslated && (!this.options.doPrompt || await this.prompt(value, translatedPart, processedParts.join(''), getUnprocessedpart(i)));
+            if(this._isDoubt) {
+                return original;
+            }
+
             processedParts.push(canTranslate ? translatedPart : value);
         }
     
@@ -156,6 +161,10 @@ export class TypescriptTranslator {
     }
 
     private async prompt(part: string, translatedPart: string, processedParts: string, unprocessedPart: string): Promise<boolean> {
+        if(this._isDoubt) {
+            return false;
+        }
+
         if(this.options.onBeforePrompt) {
             this.options.onBeforePrompt();
         }
@@ -168,6 +177,7 @@ export class TypescriptTranslator {
         }
 
         if(result === ReplaceTextPromptResult.Doubt && this.options.onPromptDoubt) {
+            this._isDoubt = true;
             this.options.onPromptDoubt();
         }
 
