@@ -61,6 +61,7 @@ export async function translateTypescriptFiles(options: TranslateTypescriptFiles
 export interface TranslateTypescriptFileOptions {
     doPrompt?: boolean,
     onBeforePrompt?: () => void,
+    onPromptDoubt?: () => void;
     replaceChangesOnly?: {
         filePath: string,
         commitsToCompare?: [string, string]
@@ -84,11 +85,16 @@ export async function translateTypescriptFileHelper(filePath: string, options: T
     current: number,
     total: number
 }, commitsToCompare?: [string, string]) {
+    let isDoubt = false;
+
     const fileOptions: TranslateTypescriptFileOptions = {
         doPrompt: options.doPrompt === undefined ? true : options.doPrompt,
         onBeforePrompt: () => {
             // console.clear();
             console.log(chalk.blue(filePath));
+        },
+        onPromptDoubt: () => {
+            isDoubt = true;
         },
         replaceChangesOnly: options.replaceChangesOnly ? {filePath, commitsToCompare} : undefined,
         fileProgress,
@@ -97,7 +103,10 @@ export async function translateTypescriptFileHelper(filePath: string, options: T
 
     const fileContent = fs.readFileSync(filePath, "utf8");
     const translation = await translateTypescript(fileContent, fileOptions);
-    fileCache.addFile(filePath);
+    if(!isDoubt) {
+        fileCache.addFile(filePath);
+    }
+    
 
     if(translation !== fileContent) {
         const infoText = options.dryRun ? 'Completed with changes (dry-run)' : 'Write file';

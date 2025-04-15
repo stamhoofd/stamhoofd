@@ -8,8 +8,8 @@ export enum TextType {
     Import
 }
 
-export function getTextType(allParts: {value: string}[]): {type: TextType, name: string | null} | null {
-    const text = allParts.map(p => p.value).join('');
+export function getTextType(allParts: {value: string}[] | string): {type: TextType, name: string | null} | null {
+    const text = typeof allParts === 'string' ? allParts : allParts.map(p => p.value).join('');
     const lastCodePart = text.trimEnd().match(/(?<=(?:\s+))\S*$/g);
     if(lastCodePart) {
         const value = lastCodePart[0];
@@ -21,7 +21,7 @@ export function getTextType(allParts: {value: string}[]): {type: TextType, name:
             }
         }
 
-        if(value.endsWith('from')) {
+        if(value.endsWith('from') || value.endsWith('import')) {
             return {
                 type: TextType.Import,
                 name: null
@@ -37,7 +37,14 @@ export function getTextType(allParts: {value: string}[]): {type: TextType, name:
     }
 
     const result = getOpenChar(text);
-    if(result?.type === TextType.Array) {
+
+    if(result === null) {
+        return null;
+    }
+    
+    const type = result.type;
+
+    if(type === TextType.Array) {
         return getOpenChar(result.name);
     }
 

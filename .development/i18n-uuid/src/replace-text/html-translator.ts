@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import { X2jOptions, XMLBuilder, XmlBuilderOptions, XMLParser } from "fast-xml-parser";
 import { addChangeMarkers, endChangeMarker, removeChangeMarkers, startChangeMarker } from "./git-helper";
-import { promptBoolean } from "./prompt-helper";
+import { promptReplaceText, ReplaceTextPromptResult } from "./prompt-helper";
 import { getWhiteSpaceBeforeAndAfter, isNumberOrSpecialCharacter, splitInParts } from "./regex-helper";
 import { wrapWithTranslationFunction } from "./translation-helper";
 
@@ -11,6 +11,7 @@ export interface HtmlTranslatorOptions {
     skipKeys?: Set<string>,
     attributeWhiteList?: Set<string>,
     onBeforePrompt?: () => void,
+    onPromptDoubt?: () => void;
     replaceChangesOnly?: {
         filePath: string,
         commitsToCompare?: [string, string]
@@ -217,7 +218,17 @@ export class HtmlTranslator {
         }
     
         this.logContext(parent, record, key, part, translatedPart, processedParts, unprocessedPart, transformContext);
-        return await promptBoolean(chalk.yellow(`> Accept (press [y] or [enter])?`));
+        const result = await promptReplaceText(chalk.yellow(`> Accept (press [y] or [enter])?`));
+
+        if(result === ReplaceTextPromptResult.Yes) {
+            return true;
+        }
+
+        if(result === ReplaceTextPromptResult.Doubt && this.options.onPromptDoubt) {
+            this.options.onPromptDoubt();
+        }
+
+        return false;
     }
 
     private replaceObjectWithPlaceholder(contextObject: any, copyObject: any, childObject: Record<string, string>, key: string): boolean {

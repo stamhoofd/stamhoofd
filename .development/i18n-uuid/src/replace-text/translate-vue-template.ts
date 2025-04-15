@@ -4,6 +4,7 @@ export interface TranslateVueFileOptions {
     doPrompt?: boolean,
     attributeWhiteList?: Set<string>
     onBeforePrompt?: () => void,
+    onPromptDoubt?: () => void;
     replaceChangesOnly?: {
         filePath: string,
         commitsToCompare?: [string, string]

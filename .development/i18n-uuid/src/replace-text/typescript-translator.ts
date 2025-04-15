@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { getChangedLines, removeChangeMarkers } from "./git-helper";
-import { promptBoolean } from "./prompt-helper";
+import { promptReplaceText, ReplaceTextPromptResult } from "./prompt-helper";
 import { getWhiteSpaceBeforeAndAfter, splitInParts } from "./regex-helper";
 import { shouldTranslateTypescriptString } from "./should-translate-typescript-string";
 import { wrapWithTranslationFunction } from "./translation-helper";
@@ -9,6 +9,7 @@ export interface TypescriptTranslatorOptions {
     path?: string[];
     doPrompt?: boolean;
     onBeforePrompt?: () => void;
+    onPromptDoubt?: () => void;
     replaceChangesOnly?: {
         filePath: string;
         commitsToCompare?: [string, string];
@@ -160,7 +161,17 @@ export class TypescriptTranslator {
         }
     
         this.logContext(part, translatedPart, processedParts, unprocessedPart);
-        return await promptBoolean(chalk.yellow(`> Accept (press [y] or [enter])?`));
+        const result = await promptReplaceText(chalk.yellow(`> Accept (press [y] or [enter])?`));
+
+        if(result === ReplaceTextPromptResult.Yes) {
+            return true;
+        }
+
+        if(result === ReplaceTextPromptResult.Doubt && this.options.onPromptDoubt) {
+            this.options.onPromptDoubt();
+        }
+
+        return false;
     }
 
     private logContext(part: string, translatedPart: string, processedParts: string, unprocessedPart: string) {

@@ -75,12 +75,17 @@ export async function translateVueFileHelper(filePath: string, options: Translat
     current: number,
     total: number
 }, commitsToCompare?: [string, string]) {
+    let isDoubt = false;
+
     const fileOptions: TranslateVueFileOptions = {
         attributeWhiteList: options.attributeWhiteList ?? attributeWhiteList,
         doPrompt: options.doPrompt === undefined ? true : options.doPrompt,
         onBeforePrompt: () => {
             // console.clear();
             console.log(chalk.blue(filePath));
+        },
+        onPromptDoubt: () => {
+            isDoubt = true;
         },
         replaceChangesOnly: options.replaceChangesOnly ? {filePath, commitsToCompare} : undefined,
         fileProgress,
@@ -95,7 +100,9 @@ export async function translateVueFileHelper(filePath: string, options: Translat
     }
 
     const translation = await translateVueTemplate(templateContent, fileOptions);
-    fileCache.addFile(filePath);
+    if(!isDoubt) {
+        fileCache.addFile(filePath);
+    }
 
     if(translation !== templateContent) {
         const infoText = options.dryRun ? 'Completed with changes (dry-run)' : 'Write file';
