@@ -5,11 +5,17 @@ export enum TextType {
     Array,
     Equality,
     SwitchCase,
-    Import
+    Import,
+    ObjectAccessKey
 }
 
 export function getTextType(allParts: {value: string}[] | string): {type: TextType, name: string | null} | null {
     const text = typeof allParts === 'string' ? allParts : allParts.map(p => p.value).join('');
+
+    if(isObjectAccessKey(text)) {
+        return {type: TextType.ObjectAccessKey, name: null};
+    }
+
     const lastCodePart = text.trimEnd().match(/(?<=(?:\s+))\S*$/g);
     if(lastCodePart) {
         const value = lastCodePart[0];
@@ -49,6 +55,11 @@ export function getTextType(allParts: {value: string}[] | string): {type: TextTy
     }
 
     return result;
+}
+
+function isObjectAccessKey(value: string) {
+    const match = value.match(/\w+\[$/g);
+    return match !== null;
 }
 
 export function getOpenChar(text: string): {type: TextType, name: string} | null {
