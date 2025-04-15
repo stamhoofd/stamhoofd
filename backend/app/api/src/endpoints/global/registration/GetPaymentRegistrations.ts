@@ -33,7 +33,7 @@ export class GetPaymentRegistrations extends Endpoint<Params, Query, Body, Respo
         if (!payment) {
             throw new SimpleError({
                 code: '',
-                message: 'Deze link is ongeldig',
+                message: $t(`Deze link is ongeldig`),
             });
         }
         const registrations = await Member.getRegistrationWithMembersForPayment(payment.id);
@@ -45,7 +45,7 @@ export class GetPaymentRegistrations extends Endpoint<Params, Query, Body, Respo
             if (!authorizedMembers.includes(registration.member.id)) {
                 throw new SimpleError({
                     code: '',
-                    message: 'Deze link is ongeldig',
+                    message: $t(`Deze link is ongeldig`),
                 });
             }
         }

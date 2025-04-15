@@ -55,7 +55,7 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
 
                 // Check access to this member (this will automatically give access to the family)
                 if (!await Context.auth.canAccessMember(member)) {
-                    throw Context.auth.error('Je hebt geen toegang tot dit lid');
+                    throw Context.auth.error($t(`Je hebt geen toegang tot dit lid`));
                 }
                 validatedMembers.push(member);
                 continue;
@@ -67,7 +67,7 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         if (!foundMember) {
-            throw Context.auth.error('Je hebt geen toegang tot dit lid');
+            throw Context.auth.error($t(`Je hebt geen toegang tot dit lid`));
         }
 
         return new Response(
