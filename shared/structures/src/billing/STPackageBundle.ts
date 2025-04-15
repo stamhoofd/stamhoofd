@@ -20,18 +20,18 @@ export enum STPackageBundle {
 export class STPackageBundleHelper {
     static getTitle(bundle: STPackageBundle): string {
         switch (bundle) {
-            case STPackageBundle.Members: return 'Ledenadministratie voor één jaar';
-            case STPackageBundle.Webshops: return 'Webshops (max. 10) voor één jaar';
-            case STPackageBundle.SingleWebshop: return 'Eén webshop voor twee maanden';
+            case STPackageBundle.Members: return $t(`Ledenadministratie voor één jaar`);
+            case STPackageBundle.Webshops: return $t(`Webshops (max. 10) voor één jaar`);
+            case STPackageBundle.SingleWebshop: return $t(`Eén webshop voor twee maanden`);
         }
         return '?';
     }
 
     static getDescription(bundle: STPackageBundle): string {
         switch (bundle) {
-            case STPackageBundle.Members: return '€ 1 per jaar, per lid. Minimum € 79 per jaar, waarbij 79 leden inbegrepen (minder leden kan uiteraard)';
-            case STPackageBundle.Webshops: return '€ 79 per jaar (inclusief ticketverkoop-functie) indien minder dan 50.000 euro omzet per jaar (zie website voor hogere omzet)';
-            case STPackageBundle.SingleWebshop: return 'Eénmalig € 49 (inclusief ticketverkoop-functie)';
+            case STPackageBundle.Members: return $t(`€ 1 per jaar, per lid. Minimum € 79 per jaar, waarbij 79 leden inbegrepen (minder leden kan uiteraard)`);
+            case STPackageBundle.Webshops: return $t(`€ 79 per jaar (inclusief ticketverkoop-functie) indien minder dan 50.000 euro omzet per jaar (zie website voor hogere omzet)`);
+            case STPackageBundle.SingleWebshop: return $t(`Eénmalig € 49 (inclusief ticketverkoop-functie)`);
         }
         return '?';
     }

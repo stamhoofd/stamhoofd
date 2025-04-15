@@ -25,18 +25,18 @@ export enum STPackageType {
 export class STPackageTypeHelper {
     static getName(type: STPackageType): string {
         switch (type) {
-            case STPackageType.LegacyMembers: return 'Ledenadministratie (oud gratis pakket)';
+            case STPackageType.LegacyMembers: return $t(`Ledenadministratie (oud gratis pakket)`);
             case STPackageType.Members: {
-                return 'Ledenadministratie, per lid';
+                return $t(`Ledenadministratie, per lid`);
             }
             case STPackageType.Webshops: {
-                return 'Webshop module. Maximaal 10 webshops';
+                return $t(`Webshop module. Maximaal 10 webshops`);
             }
             case STPackageType.SingleWebshop: {
-                return 'Webshop module voor één webshop';
+                return $t(`Webshop module voor één webshop`);
             }
-            case STPackageType.TrialMembers: return 'Demo ledenadministratie';
-            case STPackageType.TrialWebshops: return 'Demo webshops';
+            case STPackageType.TrialMembers: return $t(`Demo ledenadministratie`);
+            case STPackageType.TrialWebshops: return $t(`Demo webshops`);
         }
     }
 }

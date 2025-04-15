@@ -34,9 +34,9 @@ export class SetupStep extends AutoEncoder {
     transformForDiff() {
         if (this.isDone) {
             if (this.review) {
-                return 'Voltooid en nagekeken op ' + Formatter.dateNumber(this.review.date);
+                return $t(`Voltooid en nagekeken op`) + ' ' + Formatter.dateNumber(this.review.date);
             }
-            return 'Voltooid';
+            return $t(`Voltooid`);
         }
 
         return this.finishedSteps + '/' + this.totalSteps;

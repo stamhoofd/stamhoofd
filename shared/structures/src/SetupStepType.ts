@@ -11,18 +11,18 @@ export enum SetupStepType {
 export function getSetupStepName(step: SetupStepType) {
     switch (step) {
         case SetupStepType.Responsibilities:
-            return 'functies';
+            return $t(`functies`);
         case SetupStepType.Companies:
-            return 'facturatiegegevens';
+            return $t(`facturatiegegevens`);
         case SetupStepType.Groups:
-            return 'leeftijdsgroepen';
+            return $t(`leeftijdsgroepen`);
         case SetupStepType.Premises:
-            return 'lokalen';
+            return $t(`lokalen`);
         case SetupStepType.Emails:
-            return 'e-mailadressen';
+            return $t(`e-mailadressen`);
         case SetupStepType.Payment:
-            return 'betaalinstellingen';
+            return $t(`betaalinstellingen`);
         case SetupStepType.Registrations:
-            return 'inschrijvingen';
+            return $t(`inschrijvingen`);
     }
 }

@@ -41,21 +41,21 @@ export enum BalanceItemType {
 
 export function getBalanceItemStatusName(type: BalanceItemStatus): string {
     switch (type) {
-        case BalanceItemStatus.Hidden: return 'Verborgen';
-        case BalanceItemStatus.Due: return 'Verschuldigd';
-        case BalanceItemStatus.Canceled: return 'Geannuleerd';
+        case BalanceItemStatus.Hidden: return $t(`Verborgen`);
+        case BalanceItemStatus.Due: return $t(`Verschuldigd`);
+        case BalanceItemStatus.Canceled: return $t(`Geannuleerd`);
     }
 }
 
 export function getBalanceItemTypeName(type: BalanceItemType): string {
     switch (type) {
-        case BalanceItemType.Registration: return 'Inschrijving';
-        case BalanceItemType.AdministrationFee: return 'Administratiekosten';
-        case BalanceItemType.FreeContribution: return 'Vrije bijdrage';
-        case BalanceItemType.Order: return 'Webshopbestelling';
-        case BalanceItemType.Other: return 'Andere';
-        case BalanceItemType.PlatformMembership: return 'Aansluiting';
-        case BalanceItemType.CancellationFee: return 'Annuleringskosten';
+        case BalanceItemType.Registration: return $t(`Inschrijving`);
+        case BalanceItemType.AdministrationFee: return $t(`Administratiekosten`);
+        case BalanceItemType.FreeContribution: return $t(`Vrije bijdrage`);
+        case BalanceItemType.Order: return $t(`Webshopbestelling`);
+        case BalanceItemType.Other: return $t(`Andere`);
+        case BalanceItemType.PlatformMembership: return $t(`Aansluiting`);
+        case BalanceItemType.CancellationFee: return $t(`Annuleringskosten`);
     }
 }
 
@@ -83,24 +83,24 @@ export enum BalanceItemRelationType {
 
 export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): string {
     switch (type) {
-        case BalanceItemRelationType.Webshop: return 'Webshop';
-        case BalanceItemRelationType.Group: return 'Inschrijving';
-        case BalanceItemRelationType.GroupPrice: return 'Tarief';
-        case BalanceItemRelationType.GroupOptionMenu: return 'Keuzemenu';
-        case BalanceItemRelationType.GroupOption: return 'Keuze';
-        case BalanceItemRelationType.Member: return 'Lid';
+        case BalanceItemRelationType.Webshop: return $t(`Webshop`);
+        case BalanceItemRelationType.Group: return $t(`Inschrijving`);
+        case BalanceItemRelationType.GroupPrice: return $t(`Tarief`);
+        case BalanceItemRelationType.GroupOptionMenu: return $t(`Keuzemenu`);
+        case BalanceItemRelationType.GroupOption: return $t(`Keuze`);
+        case BalanceItemRelationType.Member: return $t(`Lid`);
         case BalanceItemRelationType.MembershipType: return 'Aansluitingstype';
     }
 }
 
 export function getBalanceItemRelationTypeDescription(type: BalanceItemRelationType): string {
     switch (type) {
-        case BalanceItemRelationType.Webshop: return 'Webshop geassocieerd aan dit item';
-        case BalanceItemRelationType.Group: return 'Naam van de groep of activiteit geassocieerd aan dit item';
-        case BalanceItemRelationType.GroupPrice: return 'Tarief dat gekozen werd voor de groep of activiteit';
-        case BalanceItemRelationType.GroupOptionMenu: return 'Naam van het keuzemenu waaruit gekozen werd';
-        case BalanceItemRelationType.GroupOption: return 'De gekozen optie van het keuzemenu waarvoor betaald werd. Als er meerdere keuzes gekozen werden, dan wordt er per keuze een apart item aangemaakt.';
-        case BalanceItemRelationType.Member: return 'Naam van het lid geassocieerd aan dit item';
+        case BalanceItemRelationType.Webshop: return $t(`Webshop geassocieerd aan dit item`);
+        case BalanceItemRelationType.Group: return $t(`Naam van de groep of activiteit geassocieerd aan dit item`);
+        case BalanceItemRelationType.GroupPrice: return $t(`Tarief dat gekozen werd voor de groep of activiteit`);
+        case BalanceItemRelationType.GroupOptionMenu: return $t(`Naam van het keuzemenu waaruit gekozen werd`);
+        case BalanceItemRelationType.GroupOption: return $t(`De gekozen optie van het keuzemenu waarvoor betaald werd. Als er meerdere keuzes gekozen werden, dan wordt er per keuze een apart item aangemaakt.`);
+        case BalanceItemRelationType.Member: return $t(`Naam van het lid geassocieerd aan dit item`);
         case BalanceItemRelationType.MembershipType: return 'Naam van het aansluitingstype geassocieerd aan dit item';
     }
 }
@@ -317,13 +317,13 @@ export class BalanceItem extends AutoEncoder {
         switch (this.type) {
             case BalanceItemType.Registration: {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
-                const group = this.relations.get(BalanceItemRelationType.Group)?.name || 'Onbekende inschrijvingsgroep';
+                const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`Onbekende inschrijvingsgroep`);
 
                 if (option) {
-                    return 'keuzeoptie voor ' + group;
+                    return $t(`keuzeoptie voor`) + ' ' + group;
                 }
 
-                return 'inschrijving voor ' + group;
+                return $t(`inschrijving voor`) + ' ' + group;
             }
             case BalanceItemType.CancellationFee: {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
@@ -331,18 +331,18 @@ export class BalanceItem extends AutoEncoder {
 
                 if (group) {
                     if (option) {
-                        return 'annuleringskost voor keuzeoptie bij ' + group;
+                        return $t(`annuleringskost voor keuzeoptie bij`) + ' ' + group;
                     }
 
-                    return 'annuleringskost voor inschrijving bij ' + group;
+                    return $t(`annuleringskost voor inschrijving bij`) + ' ' + group;
                 }
-                return 'annuleringskost';
+                return $t(`annuleringskost`);
             }
-            case BalanceItemType.AdministrationFee: return 'administratiekosten';
-            case BalanceItemType.FreeContribution: return 'vrije bijdrage';
-            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name || 'onbekende webshop';
+            case BalanceItemType.AdministrationFee: return $t(`administratiekosten`);
+            case BalanceItemType.FreeContribution: return $t(`vrije bijdrage`);
+            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name || $t(`onbekende webshop`);
             case BalanceItemType.Other: return this.description;
-            case BalanceItemType.PlatformMembership: return 'aansluiting voor ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || 'onbekend aansluitingstype';
+            case BalanceItemType.PlatformMembership: return $t(`aansluiting voor`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t(`onbekend aansluitingstype`);
         }
     }
 
@@ -352,14 +352,14 @@ export class BalanceItem extends AutoEncoder {
     get category(): string {
         switch (this.type) {
             case BalanceItemType.Registration: {
-                return this.relations.get(BalanceItemRelationType.Group)?.name ?? 'onbekende inschrijvingsgroep';
+                return this.relations.get(BalanceItemRelationType.Group)?.name ?? $t(`onbekende inschrijvingsgroep`);
             }
-            case BalanceItemType.CancellationFee: return this.relations.get(BalanceItemRelationType.Group)?.name ?? this.relations.get(BalanceItemRelationType.Webshop)?.name ?? this.relations.get(BalanceItemRelationType.MembershipType)?.name ?? 'annuleringskosten';
-            case BalanceItemType.AdministrationFee: return 'administratiekosten';
-            case BalanceItemType.FreeContribution: return 'vrije bijdrage';
-            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name ?? 'onbekende webshop';
+            case BalanceItemType.CancellationFee: return this.relations.get(BalanceItemRelationType.Group)?.name ?? this.relations.get(BalanceItemRelationType.Webshop)?.name ?? this.relations.get(BalanceItemRelationType.MembershipType)?.name ?? $t(`annuleringskosten`);
+            case BalanceItemType.AdministrationFee: return $t(`administratiekosten`);
+            case BalanceItemType.FreeContribution: return $t(`vrije bijdrage`);
+            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name ?? $t(`onbekende webshop`);
             case BalanceItemType.Other: return this.description;
-            case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name ?? 'aansluitingen';
+            case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name ?? $t(`aansluitingen`);
         }
     }
 
@@ -372,8 +372,8 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Registration: {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
                 if (option) {
-                    const group = this.relations.get(BalanceItemRelationType.Group)?.name || 'Onbekende inschrijvingsgroep';
-                    return 'Keuzeoptie ' + group;
+                    const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`Onbekende inschrijvingsgroep`);
+                    return $t(`Keuzeoptie`) + ' ' + group;
                 }
                 break;
             }
@@ -394,18 +394,18 @@ export class BalanceItem extends AutoEncoder {
     get priceBreakown(): PriceBreakdown {
         const all = [
             {
-                name: 'Reeds betaald',
+                name: $t(`Reeds betaald`),
                 price: this.pricePaid,
             },
             {
-                name: 'In verwerking',
+                name: $t(`In verwerking`),
                 price: this.pricePending,
             },
         ].filter(a => a.price !== 0);
 
         if (all.length > 0) {
             all.unshift({
-                name: 'Totaalprijs',
+                name: $t(`Totaalprijs`),
                 price: this.price,
             });
         }
@@ -413,7 +413,7 @@ export class BalanceItem extends AutoEncoder {
         return [
             ...all,
             {
-                name: this.priceOpen < 0 ? 'Terug te betalen' : 'Te betalen',
+                name: this.priceOpen < 0 ? $t(`Terug te betalen`) : $t(`Te betalen`),
                 price: Math.abs(this.priceOpen),
             },
         ];
@@ -450,18 +450,18 @@ export class BalanceItem extends AutoEncoder {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
                 if (option) {
                     const optionMenu = this.relations.get(BalanceItemRelationType.GroupOptionMenu);
-                    return (optionMenu?.name ?? 'Onbekend') + ': ' + option.name;
+                    return (optionMenu?.name ?? $t(`Onbekend`)) + ': ' + option.name;
                 }
-                const group = this.relations.get(BalanceItemRelationType.Group)?.name || 'Onbekende inschrijvingsgroep';
+                const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`Onbekende inschrijvingsgroep`);
                 const price = this.relations.get(BalanceItemRelationType.GroupPrice)?.name;
-                return 'Inschrijving voor ' + group + (price && price !== 'Standaardtarief' ? ' (' + price + ')' : '');
+                return $t(`Inschrijving voor`) + ' ' + group + (price && price !== 'Standaardtarief' ? ' (' + price + ')' : '');
             }
-            case BalanceItemType.CancellationFee: return 'Annuleringskosten';
-            case BalanceItemType.AdministrationFee: return 'Administratiekosten';
-            case BalanceItemType.FreeContribution: return 'Vrije bijdrage';
-            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name || 'Onbekende webshop';
+            case BalanceItemType.CancellationFee: return $t(`Annuleringskosten`);
+            case BalanceItemType.AdministrationFee: return $t(`Administratiekosten`);
+            case BalanceItemType.FreeContribution: return $t(`Vrije bijdrage`);
+            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name || $t(`Onbekende webshop`);
             case BalanceItemType.Other: return this.description;
-            case BalanceItemType.PlatformMembership: return 'Aansluiting voor ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || 'Onbekend aansluitingstype';
+            case BalanceItemType.PlatformMembership: return $t(`Aansluiting voor`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t(`Onbekend aansluitingstype`);
         }
     }
 
@@ -474,8 +474,8 @@ export class BalanceItem extends AutoEncoder {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
                 let prefix = '';
                 if (option) {
-                    const group = this.relations.get(BalanceItemRelationType.Group)?.name || 'Onbekende inschrijvingsgroep';
-                    prefix = 'Keuzeoptie ' + group;
+                    const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`Onbekende inschrijvingsgroep`);
+                    prefix = $t(`Keuzeoptie`) + ' ' + group;
                 }
                 const member = this.relations.get(BalanceItemRelationType.Member);
                 if (member) {
@@ -506,7 +506,7 @@ export class BalanceItem extends AutoEncoder {
         const grouped = GroupedBalanceItems.group(BalanceItem.filterBalanceItems(items));
 
         if (grouped.length === 0) {
-            return '<p class="description">Geen openstaand bedrag</p>';
+            return '<p class="description">' + $t('Geen openstaand bedrag') + '</p>';
         }
 
         let str = '';
@@ -527,14 +527,14 @@ export class BalanceItem extends AutoEncoder {
                 }
             }
             else if (item.status === BalanceItemStatus.Canceled) {
-                prefix = 'Geannuleerd';
+                prefix = $t(`Geannuleerd`);
                 prefixClass = 'error';
             }
             else if (item.priceOpen < 0 && item.pricePaid > item.price && item.pricePaid > 0) {
-                prefix = 'Te veel betaald';
+                prefix = $t(`Te veel betaald`);
             }
             else if (item.priceOpen < 0) {
-                prefix = 'Terug te krijgen';
+                prefix = $t(`Terug te krijgen`);
             }
 
             if (!item.isDue) {

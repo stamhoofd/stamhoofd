@@ -349,13 +349,13 @@ export class LoadedPermissions {
     getDescription() {
         const stack: string[] = [];
         if (this.level === PermissionLevel.Read) {
-            stack.push('alles lezen');
+            stack.push($t(`alles lezen`));
         }
         if (this.level === PermissionLevel.Write) {
-            stack.push('alles bewerken');
+            stack.push($t(`alles bewerken`));
         }
         if (this.level === PermissionLevel.Full) {
-            stack.push('volledige toegang');
+            stack.push($t(`volledige toegang`));
         }
 
         for (const right of this.accessRights) {
@@ -365,9 +365,9 @@ export class LoadedPermissions {
         stack.push(...ResourcePermissions.getMapDescription(this.resources));
 
         if (stack.length === 0) {
-            return 'geen rechten';
+            return $t(`geen rechten`);
         }
 
-        return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' en '));
+        return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' ' + $t(`en`) + ' '));
     }
 }

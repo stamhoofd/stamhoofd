@@ -50,9 +50,9 @@ export class EditorSmartButton extends AutoEncoder {
 
         buttons.push(EditorSmartButton.create({
             id: 'paymentUrl',
-            name: 'Knop om te betalen',
-            text: 'Betalen',
-            hint: 'Met deze knop kunnen ontvangers betalen.',
+            name: $t(`Knop om te betalen`),
+            text: $t(`Betalen`),
+            hint: $t(`Met deze knop kunnen ontvangers betalen.`),
         }));
 
         buttons.push(EditorSmartButton.create({
@@ -64,46 +64,46 @@ export class EditorSmartButton extends AutoEncoder {
 
         buttons.push(EditorSmartButton.create({
             id: 'downloadUrl',
-            name: 'Knop om te downloaden',
-            text: 'Download',
-            hint: 'Download een gekoppeld bestand.',
+            name: $t(`Knop om te downloaden`),
+            text: $t(`Download`),
+            hint: $t(`Download een gekoppeld bestand.`),
         }));
 
         buttons.push(EditorSmartButton.create({
             id: 'resetUrl',
-            name: 'Knop om wachtwoord opnieuw in te stellen',
-            text: 'Wachtwoord opnieuw instellen',
-            hint: 'Knop waarmee gebruikers hun wachtwoord kunnen herstellen',
+            name: $t(`Knop om wachtwoord opnieuw in te stellen`),
+            text: $t(`Wachtwoord opnieuw instellen`),
+            hint: $t(`Knop waarmee gebruikers hun wachtwoord kunnen herstellen`),
         }));
 
         buttons.push(EditorSmartButton.create({
             id: 'signInUrl',
-            name: 'Knop om in te loggen',
-            text: 'Open ledenportaal',
-            hint: 'Als gebruikers op deze knop klikken, zorgt het systeem ervoor dat ze inloggen of registreren op het juiste e-mailadres dat al in het systeem zit.',
+            name: $t(`Knop om in te loggen`),
+            text: $t(`Open ledenportaal`),
+            hint: $t(`Als gebruikers op deze knop klikken, zorgt het systeem ervoor dat ze inloggen of registreren op het juiste e-mailadres dat al in het systeem zit.`),
         }));
 
         // todo: make button text smart, e.g. 'view tickets' vs 'open order'
         buttons.push(EditorSmartButton.create({
             id: 'orderUrl',
-            name: 'Knop naar bestelling',
-            text: 'Bestelling bekijken',
-            hint: 'Deze knop gaat naar het besteloverzicht, met alle informatie van de bestellingen en eventueel betalingsinstructies.',
+            name: $t(`Knop naar bestelling`),
+            text: $t(`Bestelling bekijken`),
+            hint: $t(`Deze knop gaat naar het besteloverzicht, met alle informatie van de bestellingen en eventueel betalingsinstructies.`),
         }));
 
         buttons.push(EditorSmartButton.create({
             id: 'unsubscribeUrl',
-            name: 'Knop om uit te schrijven voor e-mails',
-            text: 'Uitschrijven',
-            hint: 'Met deze knop kan de ontvanger zich uitschrijven voor alle e-mails.',
+            name: $t(`Knop om uit te schrijven voor e-mails`),
+            text: $t(`Uitschrijven`),
+            hint: $t(`Met deze knop kan de ontvanger zich uitschrijven voor alle e-mails.`),
             type: 'inline',
         }));
 
         buttons.push(EditorSmartButton.create({
             id: 'confirmEmailUrl',
-            name: 'Knop om e-mailadres te bevestigen',
-            text: 'Bevestig e-mailadres',
-            hint: 'Met deze knop kan de ontvanger het e-mailadres bevestigen.',
+            name: $t(`Knop om e-mailadres te bevestigen`),
+            text: $t(`Bevestig e-mailadres`),
+            hint: $t(`Met deze knop kan de ontvanger het e-mailadres bevestigen.`),
         }));
 
         // Remove all smart variables that are not set in the recipients

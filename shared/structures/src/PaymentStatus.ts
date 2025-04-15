@@ -10,10 +10,10 @@ export enum PaymentStatus {
 export class PaymentStatusHelper {
     static getName(method: PaymentStatus): string {
         switch (method) {
-            case PaymentStatus.Pending: return 'wacht op betaling';
-            case PaymentStatus.Created: return 'wacht op betaling';
-            case PaymentStatus.Succeeded: return 'ontvangen';
-            case PaymentStatus.Failed: return 'mislukt/geannuleerd';
+            case PaymentStatus.Pending: return $t(`wacht op betaling`);
+            case PaymentStatus.Created: return $t(`wacht op betaling`);
+            case PaymentStatus.Succeeded: return $t(`ontvangen`);
+            case PaymentStatus.Failed: return $t(`mislukt/geannuleerd`);
         }
     }
 
