@@ -41,7 +41,7 @@ export class PatchApiUserEndpoint extends Endpoint<Params, Query, Body, Response
         const editUser = request.body.id === user.id ? user : await User.getByID(request.body.id);
 
         if (!editUser || !await Context.auth.canAccessUser(editUser, PermissionLevel.Write) || !editUser.isApiUser) {
-            throw Context.auth.notFoundOrNoAccess('Je hebt geen toegang om deze API-user te wijzigen');
+            throw Context.auth.notFoundOrNoAccess($t(`Je hebt geen toegang om deze API-user te wijzigen`));
         }
 
         editUser.firstName = request.body.name ?? editUser.name;

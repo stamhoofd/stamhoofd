@@ -55,7 +55,7 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Ticket not found',
-                    human: 'Dit ticket bestaat niet',
+                    human: $t(`Dit ticket bestaat niet`),
                 });
             }
 
@@ -67,7 +67,7 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     throw new SimpleError({
                         code: 'not_found',
                         message: 'Ticket not found',
-                        human: 'Dit ticket bestaat niet',
+                        human: $t(`Dit ticket bestaat niet`),
                     });
                 }
 
@@ -79,7 +79,7 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         throw new SimpleError({
                             code: 'not_found',
                             message: 'Ticket not found',
-                            human: 'Dit ticket bestaat niet',
+                            human: $t(`Dit ticket bestaat niet`),
                         });
                     }
 

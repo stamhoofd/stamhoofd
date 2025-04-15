@@ -49,7 +49,7 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
         for (const patch of request.body.getPatches()) {
             const template = await EmailTemplate.getByID(patch.id);
             if (!template || !(await Context.auth.canAccessEmailTemplate(template, PermissionLevel.Write))) {
-                throw Context.auth.notFoundOrNoAccess('Je hebt geen toegang om deze emailtemplate te bewerken');
+                throw Context.auth.notFoundOrNoAccess($t(`Je hebt geen toegang om deze emailtemplate te bewerken`));
             }
 
             template.html = patch.html ?? template.html;
@@ -104,7 +104,7 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
 
             // Check if valid + write permissions
             if (!(await Context.auth.canAccessEmailTemplate(template, PermissionLevel.Write))) {
-                throw Context.auth.error('Je hebt geen toegang om deze emailtemplate te maken');
+                throw Context.auth.error($t(`Je hebt geen toegang om deze emailtemplate te maken`));
             }
 
             await template.save();
@@ -115,7 +115,7 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
         for (const id of request.body.getDeletes()) {
             const template = await EmailTemplate.getByID(id);
             if (!template || !(await Context.auth.canAccessEmailTemplate(template, PermissionLevel.Write))) {
-                throw Context.auth.notFoundOrNoAccess('Je hebt geen toegang om deze emailtemplate te verwijderen');
+                throw Context.auth.notFoundOrNoAccess($t(`Je hebt geen toegang om deze emailtemplate te verwijderen`));
             }
 
             await template.delete();

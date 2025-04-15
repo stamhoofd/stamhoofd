@@ -91,7 +91,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                                     throw new SimpleError({
                                         code: 'domain_already_used',
                                         message: 'This domain is already used by another organization',
-                                        human: 'Deze domeinnaam is al in gebruik door een andere vereniging. Neem contact op met Stamhoofd als je denkt dat je toch toegang zou moeten krijgen.',
+                                        human: $t(`Deze domeinnaam is al in gebruik door een andere vereniging. Neem contact op met Stamhoofd als je denkt dat je toch toegang zou moeten krijgen.`),
                                         statusCode: 400,
                                     });
                                 }
@@ -107,7 +107,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                             throw new SimpleError({
                                 code: 'invalid_field',
                                 message: 'Invalid domain',
-                                human: 'Ongeldige domeinnaam',
+                                human: $t(`Ongeldige domeinnaam`),
                                 field: 'customUrl',
                             });
                         }
@@ -128,7 +128,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'domainUri contains invalid characters',
-                            human: 'Een link mag geen spaties, hoofdletters of speciale tekens bevatten',
+                            human: $t(`Een link mag geen spaties, hoofdletters of speciale tekens bevatten`),
                             field: 'customUrl',
                         });
                     }
@@ -139,7 +139,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                         throw new SimpleError({
                             code: 'invalid_domain',
                             message: 'This domain is already in use',
-                            human: 'Deze link is al in gebruik door een andere webshop: ' + existing.meta.name + '. Verwijder of pas daar de link eerst aan als je die wilt hergebruiken.',
+                            human: $t(`Deze link is al in gebruik door een andere webshop:`) + ' ' + existing.meta.name + $t(`. Verwijder of pas daar de link eerst aan als je die wilt hergebruiken.`),
                         });
                     }
                 }
@@ -159,7 +159,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Uri cannot be empty',
-                        human: 'De link mag niet leeg zijn',
+                        human: $t(`De link mag niet leeg zijn`),
                         field: 'uri',
                     });
                 }
@@ -168,7 +168,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Uri contains invalid characters',
-                        human: 'Een link mag geen spaties, hoofdletters of speciale tekens bevatten',
+                        human: $t(`Een link mag geen spaties, hoofdletters of speciale tekens bevatten`),
                         field: 'uri',
                     });
                 }
@@ -181,7 +181,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                 throw new SimpleError({
                     code: 'missing_permissions',
                     message: 'You cannot restrict your own permissions',
-                    human: 'Je kan je eigen volledige toegang tot deze webshop niet verwijderen (algemeen > toegangsbeheer). Vraag aan een hoofdbeheerder om jouw toegang te verwijderen.',
+                    human: $t(`Je kan je eigen volledige toegang tot deze webshop niet verwijderen (algemeen > toegangsbeheer). Vraag aan een hoofdbeheerder om jouw toegang te verwijderen.`),
                 });
             }
 
@@ -194,7 +194,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Uri already in use',
-                        human: 'De link die je hebt gekozen is al in gebruik. Kies een andere.',
+                        human: $t(`De link die je hebt gekozen is al in gebruik. Kies een andere.`),
                         field: 'uri',
                     });
                 }

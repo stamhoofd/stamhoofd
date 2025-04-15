@@ -72,13 +72,13 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 if (put.payingOrganizationId) {
                     // Not allowed if not full admin
                     if (!Context.auth.hasPlatformFullAccess()) {
-                        throw Context.auth.error('Je moet volledige platform beheerder zijn om schulden tussen verenigingen te wijzigen of toe te voegen');
+                        throw Context.auth.error($t(`Je moet volledige platform beheerder zijn om schulden tussen verenigingen te wijzigen of toe te voegen`));
                     }
                     if (put.payingOrganizationId === model.organizationId) {
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'payingOrganizationId cannot be the same as organizationId',
-                            human: 'Dit is een ongeldige situatie. Een schuld moet tussen verschillende verenigingen zijn.',
+                            human: $t(`Dit is een ongeldige situatie. Een schuld moet tussen verschillende verenigingen zijn.`),
                             field: 'payingOrganizationId',
                         });
                     }
@@ -90,7 +90,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_price',
                         message: 'Cannot create negative balance in the future',
-                        human: 'Het is niet mogelijk om een negatief openstaand bedrag toe te voegen in de toekomst',
+                        human: $t(`Het is niet mogelijk om een negatief openstaand bedrag toe te voegen in de toekomst`),
                     });
                 }
 
@@ -98,7 +98,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'createdAt cannot be in the future',
-                        human: 'De datum kan niet in de toekomst liggen',
+                        human: $t(`De datum kan niet in de toekomst liggen`),
                         field: 'createdAt',
                     });
                 }
@@ -130,13 +130,13 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 if (patch.payingOrganizationId !== undefined) {
                     // Not allowed if not full admin
                     if (!Context.auth.hasPlatformFullAccess()) {
-                        throw Context.auth.error('Je moet volledige platform beheerder zijn om schulden tussen verenigingen te wijzigen of toe te voegen');
+                        throw Context.auth.error($t(`Je moet volledige platform beheerder zijn om schulden tussen verenigingen te wijzigen of toe te voegen`));
                     }
                     if (patch.payingOrganizationId === model.organizationId) {
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'payingOrganizationId cannot be the same as organizationId',
-                            human: 'Dit is een ongeldige situatie. Een schuld moet tussen verschillende verenigingen zijn.',
+                            human: $t(`Dit is een ongeldige situatie. Een schuld moet tussen verschillende verenigingen zijn.`),
                             field: 'payingOrganizationId',
                         });
                     }
@@ -158,7 +158,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                             throw new SimpleError({
                                 code: 'invalid_field',
                                 message: 'No user or member provided',
-                                human: 'Een verschuild moet altijd aan een lid of gebruiker gelinkt zijn',
+                                human: $t(`Een verschuild moet altijd aan een lid of gebruiker gelinkt zijn`),
                                 field: 'memberId',
                             });
                         }
@@ -176,7 +176,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'createdAt cannot be in the future',
-                            human: 'De datum kan niet in de toekomst liggen',
+                            human: $t(`De datum kan niet in de toekomst liggen`),
                             field: 'createdAt',
                         });
                     }
@@ -191,7 +191,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_price',
                         message: 'Cannot create negative balance in the future',
-                        human: 'Het is niet mogelijk om een negatief openstaand bedrag toe te voegen in de toekomst',
+                        human: $t(`Het is niet mogelijk om een negatief openstaand bedrag toe te voegen in de toekomst`),
                         field: 'dueAt',
                     });
                 }
@@ -251,7 +251,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
             throw new SimpleError({
                 code: 'permission_denied',
                 message: 'No permission to link balance items to this member',
-                human: 'Je hebt geen toegang om aanrekeningen te maken verbonden met dit lid',
+                human: $t(`Je hebt geen toegang om aanrekeningen te maken verbonden met dit lid`),
                 field: 'memberId',
             });
         }
@@ -265,7 +265,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
             throw new SimpleError({
                 code: 'permission_denied',
                 message: 'No permission to link balance items to this user',
-                human: 'Je hebt geen toegang om aanrekeningen te maken verbonden met deze gebruiker',
+                human: $t(`Je hebt geen toegang om aanrekeningen te maken verbonden met deze gebruiker`),
                 field: 'userId',
             });
         }

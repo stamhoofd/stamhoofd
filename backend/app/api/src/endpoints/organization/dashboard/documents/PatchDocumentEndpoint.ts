@@ -40,7 +40,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
         for (const patch of request.body.getPatches()) {
             const document = await Document.getByID(patch.id);
             if (!document || !(await Context.auth.canAccessDocument(document, PermissionLevel.Write))) {
-                throw Context.auth.notFoundOrNoAccess('Onbekend document');
+                throw Context.auth.notFoundOrNoAccess($t(`Onbekend document`));
             }
 
             if (patch.data) {
@@ -57,7 +57,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                     throw new SimpleError({
                         code: 'not_found',
                         message: 'Document not found',
-                        human: 'Document niet gevonden',
+                        human: $t(`Document niet gevonden`),
                     });
                 }
 
@@ -78,7 +78,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Document template not found',
-                    human: 'Document template niet gevonden',
+                    human: $t(`Document template niet gevonden`),
                 });
             }
             const document = new Document();
@@ -97,7 +97,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                     throw new SimpleError({
                         code: 'not_found',
                         message: 'Registration not found',
-                        human: 'Inschrijving niet gevonden',
+                        human: $t(`Inschrijving niet gevonden`),
                     });
                 }
                 document.registrationId = put.registrationId;
@@ -109,7 +109,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                     throw new SimpleError({
                         code: 'not_found',
                         message: 'Member not found',
-                        human: 'Lid niet gevonden',
+                        human: $t(`Lid niet gevonden`),
                     });
                 }
                 document.memberId = put.memberId;
