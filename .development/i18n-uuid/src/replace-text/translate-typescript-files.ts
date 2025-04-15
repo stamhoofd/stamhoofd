@@ -95,6 +95,7 @@ export async function translateTypescriptFileHelper(filePath: string, options: T
         },
         onPromptDoubt: () => {
             isDoubt = true;
+            fileCache.doubtFile(filePath);
         },
         replaceChangesOnly: options.replaceChangesOnly ? {filePath, commitsToCompare} : undefined,
         fileProgress,

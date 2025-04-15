@@ -86,6 +86,7 @@ export async function translateVueFileHelper(filePath: string, options: Translat
         },
         onPromptDoubt: () => {
             isDoubt = true;
+            fileCache.doubtFile(filePath);
         },
         replaceChangesOnly: options.replaceChangesOnly ? {filePath, commitsToCompare} : undefined,
         fileProgress,
