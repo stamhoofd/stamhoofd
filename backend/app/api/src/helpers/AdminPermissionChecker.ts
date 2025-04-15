@@ -86,7 +86,7 @@ export class AdminPermissionChecker {
         return new SimpleError({
             code: 'permission_denied',
             message: 'You do not have permissions for this action',
-            human: message ?? 'Je hebt geen toegangsrechten voor deze actie',
+            human: message ?? $t(`Je hebt geen toegangsrechten voor deze actie`),
             statusCode: 403,
         });
     }
@@ -99,7 +99,7 @@ export class AdminPermissionChecker {
         return new SimpleError({
             code: 'not_found',
             message: 'Resource not found or no access',
-            human: message ?? 'Niet gevonden of geen toegang tot dit object',
+            human: message ?? $t(`Niet gevonden of geen toegang tot dit object`),
             statusCode: 404,
         });
     }
@@ -1222,7 +1222,7 @@ export class AdminPermissionChecker {
                 if (!canAccess) {
                     throw new SimpleError({
                         code: 'permission_denied',
-                        message: `Je hebt geen toegangsrechten om het antwoord op ${record?.name ?? 'deze vraag'} aan te passen voor dit lid`,
+                        message: $t('Je hebt geen toegangsrechten om het antwoord op {name} aan te passen voor dit lid', { name: record?.name ?? 'deze vraag' }),
                         statusCode: 400,
                     });
                 }

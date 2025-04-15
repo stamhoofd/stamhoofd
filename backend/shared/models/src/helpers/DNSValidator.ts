@@ -30,7 +30,7 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                             record.errors = new SimpleErrors(new SimpleError({
                                 code: 'not_found',
                                 message: '',
-                                human: 'We konden de CNAME-record ' + record.name + ' nog niet vinden. Hou er rekening mee dat het even (tot 24u) kan duren voor we deze kunnen zien.',
+                                human: $t(`We konden de CNAME-record`) + ' ' + record.name + ' ' + $t(`nog niet vinden. Hou er rekening mee dat het even (tot 24u) kan duren voor we deze kunnen zien.`),
                             }));
                         }
                     }
@@ -42,7 +42,7 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                         record.errors = new SimpleErrors(new SimpleError({
                             code: 'too_many_fields',
                             message: '',
-                            human: 'Er zijn meerdere CNAME records ingesteld voor ' + record.name + ', kijk na of je er geen moet verwijderen of per ongeluk meerdere hebt aangemaakt',
+                            human: $t(`Er zijn meerdere CNAME records ingesteld voor`) + ' ' + record.name + $t(`, kijk na of je er geen moet verwijderen of per ongeluk meerdere hebt aangemaakt`),
                         }));
                     }
                     else {
@@ -59,7 +59,7 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                                 record.errors = new SimpleErrors(new SimpleError({
                                     code: 'wrong_value',
                                     message: '',
-                                    human: 'Er is een andere waarde ingesteld voor de CNAME-record ' + record.name + ', kijk na of je geen typfout hebt gemaakt. Gevonden: ' + addresses[0] + '.',
+                                    human: $t(`Er is een andere waarde ingesteld voor de CNAME-record`) + ' ' + record.name + $t(`, kijk na of je geen typfout hebt gemaakt. Gevonden:`) + ' ' + addresses[0] + '.',
                                 }));
                             }
                         }
@@ -82,7 +82,7 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                             record.errors = new SimpleErrors(new SimpleError({
                                 code: 'not_found',
                                 message: '',
-                                human: 'We konden de TXT-record ' + record.name + ' nog niet vinden. Hou er rekening mee dat het even (tot 24u) kan duren voor we deze kunnen zien.',
+                                human: $t(`We konden de TXT-record`) + ' ' + record.name + ' ' + $t(`nog niet vinden. Hou er rekening mee dat het even (tot 24u) kan duren voor we deze kunnen zien.`),
                             }));
                         }
                     }
@@ -92,7 +92,7 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                         record.errors = new SimpleErrors(new SimpleError({
                             code: 'too_many_fields',
                             message: '',
-                            human: 'Er zijn meerdere TXT-records ingesteld voor ' + record.name + ', kijk na of je er geen moet verwijderen of per ongeluk meerdere hebt aangemaakt',
+                            human: $t(`Er zijn meerdere TXT-records ingesteld voor`) + ' ' + record.name + $t(`, kijk na of je er geen moet verwijderen of per ongeluk meerdere hebt aangemaakt`),
                         }));
                     }
                     else {
@@ -109,7 +109,7 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                                 record.errors = new SimpleErrors(new SimpleError({
                                     code: 'wrong_value',
                                     message: '',
-                                    human: 'Er is een andere waarde ingesteld voor de TXT-record ' + record.name + ', kijk na of je geen typfout hebt gemaakt. Gevonden: ' + records[0].join(''),
+                                    human: $t(`Er is een andere waarde ingesteld voor de TXT-record`) + ' ' + record.name + $t(`, kijk na of je geen typfout hebt gemaakt. Gevonden:`) + ' ' + records[0].join(''),
                                 }));
                             }
                         }
@@ -126,7 +126,7 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                     record.errors = new SimpleErrors(new SimpleError({
                         code: 'not_found',
                         message: '',
-                        human: 'We konden de record ' + record.name + ' nog niet vinden. Hou er rekening mee dat het even (tot 24u) kan duren voor we deze kunnen zien.',
+                        human: $t(`We konden de record`) + ' ' + record.name + ' ' + $t(`nog niet vinden. Hou er rekening mee dat het even (tot 24u) kan duren voor we deze kunnen zien.`),
                     }));
                 }
             }
@@ -136,7 +136,7 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                     record.errors = new SimpleErrors(new SimpleError({
                         code: 'not_found',
                         message: '',
-                        human: 'Er ging iets mis. Deze record lijkt niet goed ingesteld te zijn.',
+                        human: $t(`Er ging iets mis. Deze record lijkt niet goed ingesteld te zijn.`),
                     }));
                 }
             }
