@@ -251,7 +251,7 @@ function blobToBase64(blob: Blob | File): Promise<string> {
 AppManager.shared.downloadFile = async (data: Blob | File | URL, filename: string) => {
     const { publicStorage } = await Filesystem.checkPermissions();
     if (!publicStorage) {
-        throw new Error('Geen toegang tot bestanden. Wijzig de toestemmingen van de app om bestanden te kunnen opslaan.');
+        throw new Error($t(`Geen toegang tot bestanden. Wijzig de toestemmingen van de app om bestanden te kunnen opslaan.`));
     }
 
     // TODO: automatically encode data to base64 in case of buffer

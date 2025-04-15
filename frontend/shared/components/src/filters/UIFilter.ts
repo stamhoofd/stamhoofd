@@ -188,30 +188,30 @@ export function filterToString(filter: StamhoofdFilter, builder: UIFilterBuilder
     if (uiFilter) {
         return uiFilter.description;
     }
-    return 'Onleesbare filter';
+    return $t(`Onleesbare filter`);
 }
 
 export function propertyFilterToString(filter: PropertyFilter, builder: UIFilterBuilder) {
     if (filter.enabledWhen === null || isEmptyFilter(filter.enabledWhen)) {
         if (filter.requiredWhen === null) {
-            return 'Optioneel';
+            return $t(`Optioneel`);
         }
         if (isEmptyFilter(filter.requiredWhen)) {
-            return 'Verplicht';
+            return $t(`Verplicht`);
         }
 
-        return 'Verplicht in te vullen als: ' + filterToString(filter.requiredWhen, builder) + ' (anders optioneel)';
+        return $t(`Verplicht in te vullen als:`) + ' ' + filterToString(filter.requiredWhen, builder) + ' ' + $t(`(anders optioneel)`);
     }
 
     const enabledDescription = filterToString(filter.enabledWhen, builder);
 
     if (filter.requiredWhen === null) {
-        return 'Wordt enkel gevraagd als: ' + enabledDescription + ' (optioneel)';
+        return $t(`Wordt enkel gevraagd als:`) + ' ' + enabledDescription + ' ' + $t(`(optioneel)`);
     }
 
     if (isEmptyFilter(filter.requiredWhen)) {
-        return 'Wordt enkel gevraagd als: ' + enabledDescription;
+        return $t(`Wordt enkel gevraagd als:`) + ' ' + enabledDescription;
     }
 
-    return 'Wordt enkel gevraagd als: ' + enabledDescription + ' (enkel verplicht invullen als: ' + filterToString(filter.requiredWhen, builder) + ')';
+    return $t(`Wordt enkel gevraagd als:`) + ' ' + enabledDescription + ' ' + $t(`(enkel verplicht invullen als:`) + ' ' + filterToString(filter.requiredWhen, builder) + ')';
 }

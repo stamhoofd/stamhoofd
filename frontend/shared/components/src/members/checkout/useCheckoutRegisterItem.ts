@@ -115,7 +115,7 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
         member.family.pendingRegisterItems = [];
 
         if (!member.family.checkout.cart.contains(item)) {
-            Toast.error('We konden de inschrijving niet toevoegen aan je winkelmandje omdat er al andere zaken in staan die niet samen afgerekend kunnen worden. Reken eerst je huidige winkelmandje af, en ga daarna verder met de andere inschrijvingen.').show();
+            Toast.error($t(`We konden de inschrijving niet toevoegen aan je winkelmandje omdat er al andere zaken in staan die niet samen afgerekend kunnen worden. Reken eerst je huidige winkelmandje af, en ga daarna verder met de andere inschrijvingen.`)).show();
             return;
         }
 
@@ -137,10 +137,10 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
         else {
             if (!admin) {
                 if (item.group.type === GroupType.WaitingList) {
-                    Toast.warning('De inschrijving op de wachtlijst is toegevoegd aan het winkelmandje. Bevestig de inschrijving door het winkelmandje te bevestigen.').setIcon('clock').show();
+                    Toast.warning($t(`De inschrijving op de wachtlijst is toegevoegd aan het winkelmandje. Bevestig de inschrijving door het winkelmandje te bevestigen.`)).setIcon('clock').show();
                 }
                 else {
-                    Toast.success('Inschrijving toegevoegd aan winkelmandje. Ga naar het winkelmandje als je alle inschrijvingen hebt toegevoegd om af te rekenen.').setIcon('basket').show();
+                    Toast.success($t(`Inschrijving toegevoegd aan winkelmandje. Ga naar het winkelmandje als je alle inschrijvingen hebt toegevoegd om af te rekenen.`)).setIcon('basket').show();
                 }
             }
 

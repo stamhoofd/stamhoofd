@@ -64,7 +64,7 @@ export class MultipleChoiceUIFilter extends UIFilter {
                 choices: [
                     {
                         id: 'is',
-                        text: isSubjectPlural ? 'zijn' : 'is',
+                        text: isSubjectPlural ? $t(`zijn`) : $t(`is`),
                         action: () => {
                             this.isInverted = false;
                         },
@@ -72,7 +72,7 @@ export class MultipleChoiceUIFilter extends UIFilter {
                     },
                     {
                         id: 'is not',
-                        text: isSubjectPlural ? 'zijn niet' : 'is niet',
+                        text: isSubjectPlural ? $t(`zijn niet`) : $t(`is niet`),
                         action: () => {
                             this.isInverted = true;
                         },

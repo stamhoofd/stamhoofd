@@ -341,7 +341,7 @@ function insertImage(image: Image | null) {
         return;
     }
     editor.value.chain().focus().setImage({ src: resolution.file.getPublicPath(), alt: image.source.name ?? undefined, width: resolution.width, height: resolution.height }).run();
-    new Toast('Beperk het gebruik van afbeeldingen in e-mails. Afbeeldingen worden bestraft door spamfilters, en e-mails komen daardoor vaker bij spam terecht.', 'info').show();
+    new Toast($t('Beperk het gebruik van afbeeldingen in e-mails. Afbeeldingen worden bestraft door spamfilters, en e-mails komen daardoor vaker bij spam terecht.'), 'info').show();
 }
 //
 async function openTextStyles(event: MouseEvent) {

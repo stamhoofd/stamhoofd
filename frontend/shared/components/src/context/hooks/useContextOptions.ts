@@ -18,13 +18,13 @@ export type Option = {
 export function appToUri(app: AppType | 'auto') {
     switch (app) {
         case 'admin':
-            return 'administratie';
+            return $t(`administratie`);
         case 'dashboard':
-            return 'beheerders';
+            return $t(`beheerders`);
         case 'registration':
-            return 'leden';
+            return $t(`leden`);
         case 'auto':
-            return 'auto';
+            return $t(`auto`);
     }
 }
 
