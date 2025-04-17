@@ -79,10 +79,15 @@ const props = withDefaults(
 const auth = useAuth();
 const app = useAppContext();
 const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), true);
+const organization = useOrganization();
 
-const recordCategories = computed(() =>
-    props.member.getEnabledRecordCategories({
+const recordCategories = computed(() => {
+    const isUserManager = !!auth.user?.members.members.some(m => m.id === props.member.id);
+
+    return props.member.getEnabledRecordCategories({
         checkPermissions: { user: auth.user!, level: PermissionLevel.Write },
-    }),
+        scopeOrganization: isUserManager ? organization.value : undefined,
+    });
+},
 );
 </script>
