@@ -35,7 +35,7 @@ export function getTranslationsWithPath(): Map<string, Record<string, string>> {
 
     addTranslationFilePaths(localesDir);
 
-    for (const filePath of filePaths) {
+    for (const filePath of filePaths.filter(path => !path.includes('consistent-words'))) {
         const translations = readTranslations(filePath);
         result.set(filePath, translations);
     }
