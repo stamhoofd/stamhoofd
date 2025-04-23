@@ -181,7 +181,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformMember> = {
             width: 40,
             getValue: (member: PlatformMember) => {
                 const groups = member.filterRegistrations({ currentPeriod: true, types: [GroupType.Membership], organizationId: Context.organization?.id });
-                const str = Formatter.joinLast(Formatter.uniqueArray(groups.map(o => o.group.settings.name)).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || Context.i18n.$t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
+                const str = Formatter.joinLast(Formatter.uniqueArray(groups.map(o => o.group.settings.name.toString())).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || Context.i18n.$t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
 
                 return {
                     value: str,

@@ -1,4 +1,4 @@
-import { Group as GroupStruct, GroupCategory, GroupCategorySettings, GroupGenderType, GroupSettings, OrganizationGenderType, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization } from '@stamhoofd/structures';
+import { Group as GroupStruct, GroupCategory, GroupCategorySettings, GroupGenderType, GroupSettings, OrganizationGenderType, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization, TranslatedString } from '@stamhoofd/structures';
 import { Group, Organization } from '../models';
 
 export class GroupBuilder {
@@ -84,7 +84,7 @@ export class GroupBuilder {
         kapoenen.organizationId = this.organization.id;
         kapoenen.periodId = this.organization.periodId;
         kapoenen.settings = GroupSettings.create({
-            name: 'Kapoenen',
+            name: new TranslatedString('Kapoenen'),
             genderType: mixedType,
             startDate: this.organization.meta.defaultStartDate,
             endDate: this.organization.meta.defaultEndDate,
@@ -98,7 +98,7 @@ export class GroupBuilder {
         jin.organizationId = this.organization.id;
         jin.periodId = this.organization.periodId;
         jin.settings = GroupSettings.create({
-            name: 'Jin',
+            name: new TranslatedString('Jin'),
             genderType: mixedType,
             startDate: this.organization.meta.defaultStartDate,
             endDate: this.organization.meta.defaultEndDate,
@@ -113,7 +113,7 @@ export class GroupBuilder {
             wouters.organizationId = this.organization.id;
             wouters.periodId = this.organization.periodId;
             wouters.settings = GroupSettings.create({
-                name: 'Wouters',
+                name: new TranslatedString('Wouters'),
                 genderType: GroupGenderType.Mixed,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
@@ -127,7 +127,7 @@ export class GroupBuilder {
             jonggivers.organizationId = this.organization.id;
             jonggivers.periodId = this.organization.periodId;
             jonggivers.settings = GroupSettings.create({
-                name: 'Jonggivers',
+                name: new TranslatedString('Jonggivers'),
                 genderType: GroupGenderType.Mixed,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
@@ -141,7 +141,7 @@ export class GroupBuilder {
             givers.organizationId = this.organization.id;
             givers.periodId = this.organization.periodId;
             givers.settings = GroupSettings.create({
-                name: 'Givers',
+                name: new TranslatedString('Givers'),
                 genderType: GroupGenderType.Mixed,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
@@ -157,7 +157,7 @@ export class GroupBuilder {
             wouters.organizationId = this.organization.id;
             wouters.periodId = this.organization.periodId;
             wouters.settings = GroupSettings.create({
-                name: 'Kabouters',
+                name: new TranslatedString('Kabouters'),
                 genderType: GroupGenderType.OnlyFemale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
@@ -171,7 +171,7 @@ export class GroupBuilder {
             jonggivers.organizationId = this.organization.id;
             jonggivers.periodId = this.organization.periodId;
             jonggivers.settings = GroupSettings.create({
-                name: 'Jonggidsen',
+                name: new TranslatedString('Jonggidsen'),
                 genderType: GroupGenderType.OnlyFemale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
@@ -185,7 +185,7 @@ export class GroupBuilder {
             givers.organizationId = this.organization.id;
             givers.periodId = this.organization.periodId;
             givers.settings = GroupSettings.create({
-                name: 'Gidsen',
+                name: new TranslatedString('Gidsen'),
                 genderType: GroupGenderType.OnlyFemale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
@@ -201,7 +201,7 @@ export class GroupBuilder {
             wouters.organizationId = this.organization.id;
             wouters.periodId = this.organization.periodId;
             wouters.settings = GroupSettings.create({
-                name: 'Welpen',
+                name: new TranslatedString('Welpen'),
                 genderType: GroupGenderType.OnlyMale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
@@ -215,7 +215,7 @@ export class GroupBuilder {
             jonggivers.organizationId = this.organization.id;
             jonggivers.periodId = this.organization.periodId;
             jonggivers.settings = GroupSettings.create({
-                name: 'Jongverkenners',
+                name: new TranslatedString('Jongverkenners'),
                 genderType: GroupGenderType.OnlyMale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
@@ -229,7 +229,7 @@ export class GroupBuilder {
             givers.organizationId = this.organization.id;
             givers.periodId = this.organization.periodId;
             givers.settings = GroupSettings.create({
-                name: 'Verkenners',
+                name: new TranslatedString('Verkenners'),
                 genderType: GroupGenderType.OnlyMale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
@@ -254,7 +254,7 @@ export class GroupBuilder {
         ribbels.organizationId = this.organization.id;
         ribbels.periodId = this.organization.periodId;
         ribbels.settings = GroupSettings.create({
-            name: 'Ribbels',
+            name: new TranslatedString('Ribbels'),
             genderType: mixedType,
             startDate: this.organization.meta.defaultStartDate,
             endDate: this.organization.meta.defaultEndDate,
@@ -267,7 +267,7 @@ export class GroupBuilder {
         speelclub.organizationId = this.organization.id;
         speelclub.periodId = this.organization.periodId;
         speelclub.settings = GroupSettings.create({
-            name: 'Speelclub',
+            name: new TranslatedString('Speelclub'),
             genderType: mixedType,
             startDate: this.organization.meta.defaultStartDate,
             endDate: this.organization.meta.defaultEndDate,
@@ -280,7 +280,7 @@ export class GroupBuilder {
         aspis.organizationId = this.organization.id;
         aspis.periodId = this.organization.periodId;
         aspis.settings = GroupSettings.create({
-            name: "Aspi's",
+            name: new TranslatedString("Aspi's"),
             genderType: mixedType,
             startDate: this.organization.meta.defaultStartDate,
             endDate: this.organization.meta.defaultEndDate,
@@ -294,7 +294,7 @@ export class GroupBuilder {
             rakwis.organizationId = this.organization.id;
             rakwis.periodId = this.organization.periodId;
             rakwis.settings = GroupSettings.create({
-                name: "Rakwi's",
+                name: new TranslatedString("Rakwi's"),
                 genderType: GroupGenderType.Mixed,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
@@ -307,7 +307,7 @@ export class GroupBuilder {
             titos.organizationId = this.organization.id;
             titos.periodId = this.organization.periodId;
             titos.settings = GroupSettings.create({
-                name: "Tito's",
+                name: new TranslatedString("Tito's"),
                 genderType: GroupGenderType.Mixed,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
@@ -320,7 +320,7 @@ export class GroupBuilder {
             ketis.organizationId = this.organization.id;
             ketis.periodId = this.organization.periodId;
             ketis.settings = GroupSettings.create({
-                name: "Keti's",
+                name: new TranslatedString("Keti's"),
                 genderType: GroupGenderType.Mixed,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
@@ -335,7 +335,7 @@ export class GroupBuilder {
             rakwis.organizationId = this.organization.id;
             rakwis.periodId = this.organization.periodId;
             rakwis.settings = GroupSettings.create({
-                name: 'Kwiks',
+                name: new TranslatedString('Kwiks'),
                 genderType: GroupGenderType.OnlyFemale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
@@ -348,7 +348,7 @@ export class GroupBuilder {
             titos.organizationId = this.organization.id;
             titos.periodId = this.organization.periodId;
             titos.settings = GroupSettings.create({
-                name: 'Toppers',
+                name: new TranslatedString('Toppers'),
                 genderType: GroupGenderType.OnlyFemale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
@@ -361,7 +361,7 @@ export class GroupBuilder {
             ketis.organizationId = this.organization.id;
             ketis.periodId = this.organization.periodId;
             ketis.settings = GroupSettings.create({
-                name: 'Tiptiens',
+                name: new TranslatedString('Tiptiens'),
                 genderType: GroupGenderType.OnlyFemale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
@@ -376,7 +376,7 @@ export class GroupBuilder {
             rakwis.organizationId = this.organization.id;
             rakwis.periodId = this.organization.periodId;
             rakwis.settings = GroupSettings.create({
-                name: 'Rakkers',
+                name: new TranslatedString('Rakkers'),
                 genderType: GroupGenderType.OnlyMale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
@@ -389,7 +389,7 @@ export class GroupBuilder {
             titos.organizationId = this.organization.id;
             titos.periodId = this.organization.periodId;
             titos.settings = GroupSettings.create({
-                name: 'Tippers',
+                name: new TranslatedString('Tippers'),
                 genderType: GroupGenderType.OnlyMale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
@@ -402,7 +402,7 @@ export class GroupBuilder {
             ketis.organizationId = this.organization.id;
             ketis.periodId = this.organization.periodId;
             ketis.settings = GroupSettings.create({
-                name: 'Kerels',
+                name: new TranslatedString('Kerels'),
                 genderType: GroupGenderType.OnlyMale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,

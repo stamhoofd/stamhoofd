@@ -7,7 +7,7 @@ function getGroupFieldsAffectingDocuments(group: Group): PlainObject {
         type: group.type,
         startDate: group.settings.startDate.getTime(),
         endDate: group.settings.endDate.getTime(),
-        name: group.settings.name,
+        name: group.settings.name.toString(),
     };
 }
 

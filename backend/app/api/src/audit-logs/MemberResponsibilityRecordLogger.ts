@@ -59,7 +59,7 @@ export const MemberResponsibilityRecordLogger = new ModelLogger(MemberResponsibi
         if (options.data.group) {
             map.set('g', AuditLogReplacement.create({
                 id: options.data.group.id,
-                value: options.data.group.settings.name,
+                value: options.data.group.settings.name.toString(),
                 type: AuditLogReplacementType.Group,
             }));
         }

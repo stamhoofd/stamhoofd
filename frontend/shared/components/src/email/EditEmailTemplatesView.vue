@@ -243,7 +243,7 @@ function getTemplatePrefix(emailTemplate: EmailTemplate) {
     if (emailTemplate.groupId && props.groups) {
         const group = props.groups.find(g => g.id === emailTemplate.groupId);
         if (group) {
-            return group.settings.name;
+            return group.settings.name.toString();
         }
     }
     return '';

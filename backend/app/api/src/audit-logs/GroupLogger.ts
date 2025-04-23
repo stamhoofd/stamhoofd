@@ -70,7 +70,7 @@ export const GroupLogger = new ModelLogger(Group, {
                 return new Map([
                     ['e', AuditLogReplacement.create({
                         id: model.settings.eventId,
-                        value: model.settings.name,
+                        value: model.settings.name.toString(),
                         type: AuditLogReplacementType.Event,
                     })],
                 ]);
@@ -78,7 +78,7 @@ export const GroupLogger = new ModelLogger(Group, {
             return new Map([
                 ['e', AuditLogReplacement.create({
                     id: model.id,
-                    value: model.settings.name,
+                    value: model.settings.name.toString(),
                     type: AuditLogReplacementType.Group,
                 })],
             ]);
@@ -87,7 +87,7 @@ export const GroupLogger = new ModelLogger(Group, {
         return new Map([
             ['g', AuditLogReplacement.create({
                 id: model.id,
-                value: model.settings.name,
+                value: model.settings.name.toString(),
                 type: AuditLogReplacementType.Group,
             })],
         ]);

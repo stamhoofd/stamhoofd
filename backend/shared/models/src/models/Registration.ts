@@ -194,7 +194,7 @@ export class Registration extends QueryableModel {
                 }),
                 Replacement.create({
                     token: 'groupName',
-                    value: group.settings.name,
+                    value: group.settings.name.toString(),
                 }),
             ],
         }));

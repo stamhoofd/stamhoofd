@@ -37,6 +37,30 @@ declare enum Language {
  * always suggest the possible keys.
  */
 declare global {
+    type LanguageMap = {
+        [key in Language]?: string;
+    };
+
+    interface StringLikeObject {
+        toString(): string
+        trim(): string
+        toLocaleLowerCase(): string
+        toLocaleUpperCase(): string
+        toUpperCase(): string
+        toLowerCase(): string
+        substr(start: number, length?: number): string
+        substring(start: number, end?: number): string
+        length: number
+        valueOf(): string
+        normalize(form?: string): string
+        replace(searchValue: string | RegExp, replaceValue: string): string
+        charAt(index: number): string
+        slice(start: number, end?: number): string
+        split(separator: string | RegExp, limit?: number): string[]
+    }
+
+    type StringLike = string | StringLikeObject;
+
     type Localized<T> = {
         readonly [k in Country]?: T;
     } & {
@@ -284,7 +308,7 @@ declare global {
     
     type FrontendEnvironment = SharedEnvironment & FrontendSpecificEnvironment
 
-    const $t: (key: string, replace?: Record<string, string>) => string
+    const $t: (key: string, replace?: Record<string, string | {toString(): string}>) => string
     const $getCountry: () => Country
     const $getLanguage: () => Language
 }

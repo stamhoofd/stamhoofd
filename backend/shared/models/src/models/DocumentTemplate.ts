@@ -91,7 +91,7 @@ export class DocumentTemplate extends QueryableModel {
                     id: 'group.name',
                     type: RecordType.Text,
                 }),
-                value: group?.settings?.name ?? '',
+                value: group?.settings?.name?.toString() ?? '',
             }),
             'group.type': RecordTextAnswer.create({
                 settings: RecordSettings.create({
@@ -426,7 +426,7 @@ export class DocumentTemplate extends QueryableModel {
         }
 
         const group = await Group.getByID(registration.groupId);
-        const description = `${registration.member.details.name}, ${group ? group.settings.name : ''}${group && group.settings.period && group.type === GroupType.Membership ? ' ' + group.settings.period?.nameShort : ''}`;
+        const description = `${registration.member.details.name}, ${group ? group.settings.name.toString() : ''}${group && group.settings.period && group.type === GroupType.Membership ? ' ' + group.settings.period?.nameShort : ''}`;
 
         if (existingDocuments.length > 0) {
             for (const document of existingDocuments) {

@@ -247,7 +247,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     throw new SimpleError({
                         code: 'forbidden',
                         message: 'No permission to register in this group',
-                        human: $t('36e8f895-91df-4c88-88e7-d4f0e9d1b5bf', { group: group.settings.name }),
+                        human: $t('36e8f895-91df-4c88-88e7-d4f0e9d1b5bf', { group: group.settings.name.toString() }),
                         statusCode: 403,
                     });
                 }
@@ -508,7 +508,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     BalanceItemRelationType.Group,
                     BalanceItemRelation.create({
                         id: item.group.id,
-                        name: item.group.settings.name,
+                        name: item.group.settings.name.toString(),
                     }),
                 ],
             ];
@@ -529,7 +529,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 unitPrice: item.groupPrice.price.forMember(item.member),
                 type: BalanceItemType.Registration,
                 skipZero: false, // Always create at least one balance item for each registration - even when the price is zero
-                description: `${item.member.patchedMember.name} bij ${item.group.settings.name}`,
+                description: `${item.member.patchedMember.name} bij ${item.group.settings.name.toString()}`,
                 relations: new Map([
                     ...sharedRelations,
                 ]),

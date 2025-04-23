@@ -13,9 +13,7 @@
                 </p>
 
                 <div class="split-inputs">
-                    <STInputBox error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
-                        <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`feeb5e82-d955-47f1-9f1d-6012ac9bc310`)">
-                    </STInputBox>
+                    <TInput v-model="name" :placeholder="$t(`feeb5e82-d955-47f1-9f1d-6012ac9bc310`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)" />
 
                     <STInputBox v-if="defaultAgeGroupsFiltered.length" :title="$t('528545c4-028b-4711-9b16-f6fa990c3130')" error-fields="settings.defaultAgeGroupId" :error-box="errors.errorBox">
                         <Dropdown v-model="defaultAgeGroupId">
@@ -35,9 +33,7 @@
 
             <template v-if="type === GroupType.WaitingList">
                 <div class="split-inputs">
-                    <STInputBox error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
-                        <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`1612603d-bc69-44b2-a899-6905ee46d2c7`)">
-                    </STInputBox>
+                    <TInput v-model="name" :placeholder="$t(`1612603d-bc69-44b2-a899-6905ee46d2c7`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)" />
                 </div>
             </template>
 
@@ -499,6 +495,7 @@ import GroupPriceBox from './components/GroupPriceBox.vue';
 import GroupPriceView from './components/GroupPriceView.vue';
 import { useExternalOrganization, useFinancialSupportSettings, useRegistrationPeriod } from './hooks';
 import TTextarea from '../inputs/TTextarea.vue';
+import TInput from '../inputs/TInput.vue';
 
 const props = withDefaults(
     defineProps<{

@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title">
-        <textarea v-model="textValue" class="input" type="text" autocomplete="off" :placeholder="placeholder" />
+        <input v-model="textValue" class="input" type="text" autocomplete="off" :placeholder="placeholder">
 
         <template #right>
             <TInputButton v-model="value" />
