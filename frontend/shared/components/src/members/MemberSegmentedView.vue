@@ -58,20 +58,20 @@ const organization = useOrganization();
 
 const tabs = computed(() => {
     const base: { name: string; component: unknown }[] = [{
-        name: $t(`Gegevens`),
+        name: $t(`120012bf-f877-46de-b6d9-55ea46f3f2ce`),
         component: markRaw(MemberDetailsTab),
     }];
 
     if (STAMHOOFD.userMode === 'platform') {
         base.push({
-            name: $t(`Aansluiting`),
+            name: $t(`c7d995f1-36a0-446e-9fcf-17ffb69f3f45`),
             component: markRaw(MemberPlatformMembershipTab),
         });
     }
 
     if (organization.value && auth.hasAccessRight(AccessRight.MemberReadFinancialData)) {
         base.push({
-            name: $t(`Rekening`),
+            name: $t(`60dd9d3a-d48f-4e58-810c-1bd69bafa467`),
             component: markRaw(MemberPaymentsTab),
         });
     }

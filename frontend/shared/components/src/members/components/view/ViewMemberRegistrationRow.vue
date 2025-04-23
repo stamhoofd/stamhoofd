@@ -86,7 +86,7 @@ const registrationOrganization = computed(() => {
 
 const defaultAgeGroup = computed(() => {
     if (!group.value.defaultAgeGroupId) {
-        return $t(`Geen standaard leeftijdsgroep`);
+        return $t(`22e7c344-54b6-493e-84c3-cbb453810781`);
     }
     return platform.value.config.defaultAgeGroups.find(ag => ag.id === group.value.defaultAgeGroupId)?.name;
 });

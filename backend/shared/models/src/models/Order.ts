@@ -116,9 +116,9 @@ export class Order extends QueryableModel {
 
     generateBalanceDescription(webshop: Webshop) {
         if (!this.number) {
-            return $t(`Bestelling -`) + ' ' + webshop.meta.name;
+            return $t(`df5c326c-e9a3-4f76-ba80-8a22f95f0e70`) + ' ' + webshop.meta.name;
         }
-        return $t(`Bestelling #`) + this.number.toString() + ' - ' + webshop.meta.name;
+        return $t(`12be5ac0-8353-43a2-badb-ab3b27d156b3`) + this.number.toString() + ' - ' + webshop.meta.name;
     }
 
     /**
@@ -925,7 +925,7 @@ export class Order extends QueryableModel {
                 throw new SimpleError({
                     code: 'missing_iban',
                     message: 'Missing IBAN',
-                    human: $t(`Er is geen rekeningnummer ingesteld voor overschrijvingen. Contacteer de beheerder.`),
+                    human: $t(`cc8b5066-a7e4-4eae-b556-f56de5d3502c`),
                 });
             }
             payment.generateDescription(organization, this.number.toString(), this.getTransferReplacements());

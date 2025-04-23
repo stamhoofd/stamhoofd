@@ -58,7 +58,7 @@ export class OrdersExcelExport {
             for (const item of order.data.cart.items) {
                 // Produce prices
                 if (item.product.prices.length > 1) {
-                    const name = $t(`Prijskeuze`);
+                    const name = $t(`d34e8bed-2fd2-4a01-b88f-94deab82d26f`);
 
                     if (!optionColumns.has(Formatter.slug(name))) {
                         optionColumns.set(Formatter.slug(name), optionColumns.size);
@@ -68,7 +68,7 @@ export class OrdersExcelExport {
 
                 // Ticket date/time
                 if ((item.product.type === ProductType.Ticket || item.product.type === ProductType.Voucher) && item.product.dateRange) {
-                    const name = $t(`Ticketdatum`);
+                    const name = $t(`3a58bc78-bf5e-4e9d-b9e1-98a06d0b6322`);
 
                     if (!optionColumns.has(Formatter.slug(name))) {
                         optionColumns.set(Formatter.slug(name), optionColumns.size);
@@ -101,32 +101,32 @@ export class OrdersExcelExport {
         // Columns
         const wsData: RowValue[][] = [
             [
-                $t(`Bestelnummer`),
-                $t(`Besteldatum`),
-                $t(`Voornaam`),
-                $t(`Achternaam`),
-                $t(`E-mail`),
-                $t(`GSM-nummer`),
+                $t(`17772225-f9c0-4707-9e2a-97f94de4e9d0`),
+                $t(`97705203-1c2e-4326-83f2-f1a894dda0c9`),
+                $t(`efca0579-0543-4636-a996-384bc9f0527e`),
+                $t(`4a5e438e-08a1-411e-9b66-410eea7ded73`),
+                $t(`2bc71d9a-c8d0-4f55-bf68-5dbb896d1f5b`),
+                $t(`eee19242-20ee-4e5c-b2ff-ba122ec6fc06`),
                 ...answerNames,
-                $t(`Notities`),
-                $t(`Aantal`),
-                $t(`Stukprijs`),
-                $t(`Eenmalige extra kost`),
-                $t(`Korting`),
-                $t(`Prijs`),
-                $t(`Artikel`),
+                $t(`8c38d163-c01b-488f-8729-11de8af7d098`),
+                $t(`f085f874-242d-47cb-a404-96eab69662ec`),
+                $t(`9c07647c-3b5b-4c93-bfd9-e7c07ae51276`),
+                $t(`0d8b9fa2-d70a-434b-817e-c5b2b3861d91`),
+                $t(`e2c09edd-db1b-4196-9fd3-0a7d3c9f230e`),
+                $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
+                $t(`a9c436ef-31e9-43bd-83ea-742ac331380a`),
                 ...optionNames,
-                $t(`Plaatsen`),
+                $t(`507ba771-0809-4dda-9b5f-9d7f992b329a`),
 
                 // Duplicates
-                $t(`Afhaalmethode`),
-                $t(`Leveringsadres / afhaallocatie`),
-                $t(`Datum`),
-                $t(`Tijdstip`),
-                $t(`Betaalmethode`),
-                $t(`Betaald`),
-                $t(`Status`),
-                $t(`Kortingscode`),
+                $t(`402fe5ff-cf4e-4d31-b0db-1b8f5dcfebe3`),
+                $t(`444e7f72-6435-4ae7-bb5d-3fc7e5e79dad`),
+                $t(`9ee1052c-9396-4d2d-8247-97dfb45099f6`),
+                $t(`f6f77de7-7691-4512-bf95-e07d12e9a43c`),
+                $t(`f12ffd5b-2138-41b4-8179-ae7ea2ce7621`),
+                $t(`885254e1-4bd2-40be-a1aa-4c60e592b9b9`),
+                $t(`d7003b29-cc92-4ef4-b07b-f283193ef2ae`),
+                $t(`e614cfe5-5940-44e8-8093-e4d07e54beda`),
             ],
         ];
 
@@ -134,11 +134,11 @@ export class OrdersExcelExport {
             let checkoutType = '/';
             let address = '/';
             if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
-                checkoutType = $t(`Afhalen`);
+                checkoutType = $t(`cca905ff-7d00-4b9d-84c6-bda2bb5ea898`);
                 address = order.data.checkoutMethod.name;
             }
             else if (order.data.checkoutMethod?.type === CheckoutMethodType.Delivery) {
-                checkoutType = $t(`Levering {name}`, { name: order.data.checkoutMethod.name.length > 0 ? '(' + order.data.checkoutMethod.name + ')' : '' });
+                checkoutType = $t(`ce5b4d9a-7d2a-4e86-9362-a4ea90582053`, { name: order.data.checkoutMethod.name.length > 0 ? '(' + order.data.checkoutMethod.name + ')' : '' });
                 address = order.data.address?.toString() ?? '??';
             }
 
@@ -165,7 +165,7 @@ export class OrdersExcelExport {
 
                 // Product price
                 if (item.product.prices.length > 1) {
-                    const columnName = $t(`Prijskeuze`);
+                    const columnName = $t(`d34e8bed-2fd2-4a01-b88f-94deab82d26f`);
                     const index = optionColumns.get(Formatter.slug(columnName));
                     if (index !== undefined) {
                         options[index] = item.productPrice.name;
@@ -173,7 +173,7 @@ export class OrdersExcelExport {
                 }
 
                 if ((item.product.type === ProductType.Ticket || item.product.type === ProductType.Voucher) && item.product.dateRange) {
-                    const columnName = $t(`Ticketdatum`);
+                    const columnName = $t(`3a58bc78-bf5e-4e9d-b9e1-98a06d0b6322`);
                     const index = optionColumns.get(Formatter.slug(columnName));
                     if (index !== undefined) {
                         options[index] = item.product.dateRange.toString();
@@ -263,7 +263,7 @@ export class OrdersExcelExport {
                     order.data.timeSlot ? Formatter.capitalizeFirstLetter(Formatter.dateWithDay(order.data.timeSlot.date)) : '/',
                     order.data.timeSlot ? Formatter.minutes(order.data.timeSlot.startTime) + ' - ' + Formatter.minutes(order.data.timeSlot.endTime) : '/',
                     PaymentMethodHelper.getNameCapitalized(order.data.paymentMethod),
-                    order.payment?.paidAt === null ? $t(`Nog niet betaald`) : $t(`Betaald`),
+                    order.payment?.paidAt === null ? $t(`04c630cb-ca58-4613-a25e-d69925e55c37`) : $t(`885254e1-4bd2-40be-a1aa-4c60e592b9b9`),
                     OrderStatusHelper.getName(order.status),
                     order.data.discountCodes.map(d => d.code).join(', '),
                 ]);
@@ -324,28 +324,28 @@ export class OrdersExcelExport {
         // Columns
         const wsData: RowValue[][] = [
             [
-                $t(`Bestelnummer`),
-                $t(`Besteldatum`),
-                $t(`Voornaam`),
-                $t(`Achternaam`),
-                $t(`E-mail`),
-                $t(`GSM-nummer`),
+                $t(`17772225-f9c0-4707-9e2a-97f94de4e9d0`),
+                $t(`97705203-1c2e-4326-83f2-f1a894dda0c9`),
+                $t(`efca0579-0543-4636-a996-384bc9f0527e`),
+                $t(`4a5e438e-08a1-411e-9b66-410eea7ded73`),
+                $t(`2bc71d9a-c8d0-4f55-bf68-5dbb896d1f5b`),
+                $t(`eee19242-20ee-4e5c-b2ff-ba122ec6fc06`),
                 ...answerNames,
-                $t(`Notities`),
-                $t(`Afhaalmethode`),
-                $t(`Leveringsadres / afhaallocatie`),
-                $t(`Datum`),
-                $t(`Tijdstip`),
-                $t(`Subtotaal`),
-                $t(`Korting`),
-                $t(`Leveringskost`),
-                $t(`Administratiekosten`),
-                $t(`Totaal`),
-                $t(`Betaalmethode`),
-                $t(`Betaald`),
-                $t(`Status`),
-                $t(`Kortingscode`),
-                ...(shouldIncludeSettements ? [$t(`Uitbetalingsdatum`), $t(`Uitbetalingsmededeling`)] : []),
+                $t(`8c38d163-c01b-488f-8729-11de8af7d098`),
+                $t(`402fe5ff-cf4e-4d31-b0db-1b8f5dcfebe3`),
+                $t(`444e7f72-6435-4ae7-bb5d-3fc7e5e79dad`),
+                $t(`9ee1052c-9396-4d2d-8247-97dfb45099f6`),
+                $t(`f6f77de7-7691-4512-bf95-e07d12e9a43c`),
+                $t(`26369a8f-8080-4f00-af46-576fdf563ced`),
+                $t(`e2c09edd-db1b-4196-9fd3-0a7d3c9f230e`),
+                $t(`ea422e20-5ab6-45dd-9886-abe5a207260d`),
+                $t(`a0d99100-f225-416f-bcec-e25df9d651ac`),
+                $t(`341172ee-281e-4458-aeb1-64ed5b2cc8bb`),
+                $t(`f12ffd5b-2138-41b4-8179-ae7ea2ce7621`),
+                $t(`885254e1-4bd2-40be-a1aa-4c60e592b9b9`),
+                $t(`d7003b29-cc92-4ef4-b07b-f283193ef2ae`),
+                $t(`e614cfe5-5940-44e8-8093-e4d07e54beda`),
+                ...(shouldIncludeSettements ? [$t(`fe56b791-fc88-4301-a59a-b5b185d1f124`), $t(`544a77e9-c915-4f47-afbf-c626396b0308`)] : []),
                 ...itemNames,
             ],
         ];
@@ -354,11 +354,11 @@ export class OrdersExcelExport {
             let checkoutType = '/';
             let address = '/';
             if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
-                checkoutType = $t(`Afhalen`);
+                checkoutType = $t(`cca905ff-7d00-4b9d-84c6-bda2bb5ea898`);
                 address = order.data.checkoutMethod.name;
             }
             else if (order.data.checkoutMethod?.type === CheckoutMethodType.Delivery) {
-                checkoutType = $t(`Levering {name}`, { name: order.data.checkoutMethod.name.length > 0 ? '(' + order.data.checkoutMethod.name + ')' : '' });
+                checkoutType = $t(`ce5b4d9a-7d2a-4e86-9362-a4ea90582053`, { name: order.data.checkoutMethod.name.length > 0 ? '(' + order.data.checkoutMethod.name + ')' : '' });
                 address = order.data.address?.toString() ?? '??';
             }
 
@@ -431,7 +431,7 @@ export class OrdersExcelExport {
                     format: '€0.00',
                 },
                 PaymentMethodHelper.getNameCapitalized(order.data.paymentMethod),
-                order.pricePaid < order.totalToPay ? $t(`Nog niet betaald`) : $t(`Betaald`),
+                order.pricePaid < order.totalToPay ? $t(`04c630cb-ca58-4613-a25e-d69925e55c37`) : $t(`885254e1-4bd2-40be-a1aa-4c60e592b9b9`),
                 OrderStatusHelper.getName(order.status),
                 order.data.discountCodes.map(d => d.code).join(', '),
                 ...(shouldIncludeSettements
@@ -454,12 +454,12 @@ export class OrdersExcelExport {
         // Columns
         const wsData: RowValue[][] = [
             [
-                $t(`ID`),
-                $t(`Mededeling`),
-                $t(`Datum`),
-                $t(`Totaal uitbetaald`),
-                $t(`Totaal van deze bestellingen`),
-                $t(`Transactiekosten (incl. BTW)`),
+                $t(`29360811-3663-496c-8d8f-c9fdf9467a74`),
+                $t(`dccdacf7-0760-4b17-8e03-fbfcda7a0b4f`),
+                $t(`9ee1052c-9396-4d2d-8247-97dfb45099f6`),
+                $t(`7733f484-fc0e-46ff-b0a0-7b674d10015d`),
+                $t(`548f0a30-cdd6-4e9a-9a3c-bdcb3afe11e5`),
+                $t(`1e5893d7-5af8-4029-8a1c-da6294078e9d`),
             ],
         ];
 
@@ -525,9 +525,9 @@ export class OrdersExcelExport {
         // Columns
         const wsData: RowValue[][] = [
             [
-                $t(`Artikel`),
-                $t(`Variant`),
-                $t(`Aantal`),
+                $t(`a9c436ef-31e9-43bd-83ea-742ac331380a`),
+                $t(`be748ea7-badc-48b6-ae7a-8eca6341dc08`),
+                $t(`f085f874-242d-47cb-a404-96eab69662ec`),
             ],
         ];
 
@@ -571,23 +571,23 @@ export class OrdersExcelExport {
         const shouldIncludeSettements = false;
 
         /* Add the worksheet to the workbook */
-        XLSX.utils.book_append_sheet(wb, this.createOrderLines(webshop, orders), $t(`Artikel per lijn`));
-        XLSX.utils.book_append_sheet(wb, this.createOrders(orders, shouldIncludeSettements), $t(`Bestelling per lijn`));
-        XLSX.utils.book_append_sheet(wb, this.createProducts(orders), $t(`Totalen`));
+        XLSX.utils.book_append_sheet(wb, this.createOrderLines(webshop, orders), $t(`1718783a-80df-4d97-a5b5-10c785abfba1`));
+        XLSX.utils.book_append_sheet(wb, this.createOrders(orders, shouldIncludeSettements), $t(`f10a9486-34c7-46d8-950b-21fd9f41b2b4`));
+        XLSX.utils.book_append_sheet(wb, this.createProducts(orders), $t(`3f6039ff-e157-4762-b10d-93e2d2fe56ce`));
 
         if (shouldIncludeSettements) {
-            XLSX.utils.book_append_sheet(wb, this.createSettlements(orders), $t(`Uitbetalingen`));
+            XLSX.utils.book_append_sheet(wb, this.createSettlements(orders), $t(`b037949c-50c3-400e-9633-ffaca32c0b01`));
         }
 
         if (AppManager.shared.downloadFile) {
             const data: ArrayBuffer = XLSX.write(wb, { type: 'array' });
             const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            AppManager.shared.downloadFile(blob, $t(`bestellingen.xlsx`)).catch((e) => {
+            AppManager.shared.downloadFile(blob, $t(`b0c46199-2c76-4d8c-9737-08838097e62f`)).catch((e) => {
                 Toast.fromError(e).show();
             });
         }
         else {
-            XLSX.writeFile(wb, $t(`bestellingen.xlsx`));
+            XLSX.writeFile(wb, $t(`b0c46199-2c76-4d8c-9737-08838097e62f`));
         }
     }
 }

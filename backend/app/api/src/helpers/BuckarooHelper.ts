@@ -210,7 +210,7 @@ export class BuckarooHelper {
             throw new SimpleError({
                 code: 'buckaroo_error',
                 message: 'Failed to create payment',
-                human: $t(`Er ging iets mis bij het starten van de betaling. Herlaad de pagina en probeer het opnieuw.`),
+                human: $t(`08f883bb-cdc7-4d50-a35e-e2fbeaf6f284`),
             });
         }
     }

@@ -159,7 +159,7 @@ export class RegisterItem implements ObjectWithRecords {
             if (!this.groupPrice) {
                 // Probably all sold out
                 // Select the first one anyway
-                this.groupPrice = prices[0] ?? GroupPrice.create({ name: $t(`Ongeldig tarief`), id: '' });
+                this.groupPrice = prices[0] ?? GroupPrice.create({ name: $t(`18c0f453-ffe5-46bf-bcb6-ca4d940f722d`), id: '' });
             }
         }
         else {
@@ -455,7 +455,7 @@ export class RegisterItem implements ObjectWithRecords {
                 new SimpleError({
                     code: 'product_unavailable',
                     message: 'Product unavailable',
-                    human: $t(`Er is iets fout met de tariefinstellingen van {group}, waardoor je nu niet kan inschrijven. Neem contact op met een beheerder en vraag de tariefinstellingen na te kijken.`, { group: this.group.settings.name }),
+                    human: $t(`57ac219a-4e8b-4606-bdb6-88566fdaeed0`, { group: this.group.settings.name }),
                 }),
             );
         }
@@ -527,7 +527,7 @@ export class RegisterItem implements ObjectWithRecords {
                 new SimpleError({
                     code: 'missing_menu',
                     message: "Missing menu's " + remainingMenus.filter(m => !m.multipleChoice).map(m => m.name).join(', '),
-                    human: $t(`Er zijn nieuwe keuzemogelijkheden voor {group} waaruit je moet kiezen`, { group: this.group.settings.name }),
+                    human: $t(`6cf5b874-4092-47e2-b21c-3a531537a661`, { group: this.group.settings.name }),
                     meta: { recoverable: true },
                 }),
             );
@@ -667,7 +667,7 @@ export class RegisterItem implements ObjectWithRecords {
 
         if (this.replaceRegistrations.length > 0) {
             for (const registration of this.replaceRegistrations) {
-                descriptions.push($t(`Verplaatsen vanaf`) + ' ' + registration.group.settings.name);
+                descriptions.push($t(`9b0ace12-de6c-43a8-aed2-e16a81a86d59`) + ' ' + registration.group.settings.name);
             }
         }
 
@@ -948,7 +948,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_start_date',
                     message: 'Invalid start date',
-                    human: $t(`De startdatum van de inschrijving moet na de startdatum van de groep zelf zijn`),
+                    human: $t(`3cfda9a5-3dbc-4490-9dcf-986aafc7b868`),
                     field: 'customStartDate',
                 });
             }
@@ -957,7 +957,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_start_date',
                     message: 'Invalid start date',
-                    human: $t(`De startdatum van de inschrijving moet voor de einddatum van de groep zijn`),
+                    human: $t(`683c669d-005d-4fc3-ae27-2c6e727fca2a`),
                     field: 'customStartDate',
                 });
             }
@@ -967,7 +967,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'multiple_organizations',
                 message: 'Cannot add items of multiple organizations to the checkout',
-                human: $t(`Reken eerst jouw huidige winkelmandje af. Inschrijvingen voor {group} moeten aan een andere organisatie betaald worden en kan je daardoor niet samen afrekenen.`, { group: this.group.settings.name }),
+                human: $t(`654675b0-0c6c-4953-9c49-d4536bc5b9f1`, { group: this.group.settings.name }),
                 meta: { recoverable: true },
             });
         }
@@ -977,7 +977,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'missing_waiting_list',
                 message: 'No waiting list',
-                human: $t(`Je kan niet inschrijven voor de wachtlijst`),
+                human: $t(`a33f3d4c-30bf-4ecb-9769-31d51f2bcc8f`),
             });
         }
 
@@ -985,7 +985,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'as_organization_disabled',
                 message: 'allowRegistrationsByOrganization disabled',
-                human: $t(`Inschrijvingen door organisaties zijn niet toegestaan voor`) + ' ' + this.group.settings.name,
+                human: $t(`b41926c9-7846-4032-814c-2bf739ca6314`) + ' ' + this.group.settings.name,
             });
         }
 
@@ -995,7 +995,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_move',
                     message: 'Invalid member in replaceRegistration',
-                    human: $t(`Je wilt een inschrijving verplaatsen van een ander lid in ruil voor een ander lid. Dit is niet toegestaan.`),
+                    human: $t(`309bdb9d-4028-4bec-9e68-13814866ee94`),
                     field: 'replaceRegistrations',
                 });
             }
@@ -1004,7 +1004,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_move',
                     message: 'Invalid organization in replaceRegistration',
-                    human: $t(`Je wilt een inschrijving verplaatsen van een andere organisatie. Dit is niet toegestaan.`),
+                    human: $t(`2f3db975-8bd4-41b2-980d-ab3ca678e111`),
                     field: 'replaceRegistrations',
                 });
             }
@@ -1013,7 +1013,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_move',
                     message: 'Not allowed to move registrations',
-                    human: $t(`Enkel beheerders kunnen inschrijvingen verplaatsen.`),
+                    human: $t(`e3a72c38-8d17-402e-8da8-bb4cab1b1b70`),
                     field: 'replaceRegistrations',
                 });
             }
@@ -1056,7 +1056,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'not_yet_open',
                         message: 'Not yet open',
-                        human: $t(`De inschrijvingen voor {group} zijn nog niet geopend.`, { group: this.group.settings.name }),
+                        human: $t(`12d2ff48-8cb0-42a7-ad43-f5e6ef705320`, { group: this.group.settings.name }),
                     });
                 }
 
@@ -1064,7 +1064,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'closed',
                         message: 'Closed',
-                        human: $t(`De inschrijvingen voor {group} zijn gesloten.`, { group: this.group.settings.name }),
+                        human: $t(`b527f658-6cb6-488c-9447-61533d63db74`, { group: this.group.settings.name }),
                     });
                 }
             }
@@ -1098,7 +1098,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: requireOrganizationIds',
-                    human: $t(`{member} kan pas inschrijven met een geldige actieve inschrijving  (verplichte inschrijving bij lokale groep).`, { member: this.member.patchedMember.name }),
+                    human: $t(`78a012a9-3caa-405f-851d-429610138852`, { member: this.member.patchedMember.name }),
                 });
             }
 
@@ -1116,7 +1116,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: requirePlatformMembershipOn',
-                    human: $t(`{member} kan pas inschrijven met een geldige aansluiting (en dus verzekering) bij de koepel`, { member: this.member.patchedMember.name }),
+                    human: $t(`f7b1a08a-1431-45e3-83c3-8aa8bb1b18e6`, { member: this.member.patchedMember.name }),
                 });
             }
 
@@ -1124,7 +1124,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: requirePlatformMembershipOnRegistrationDate',
-                    human: $t(`{member} kan pas inschrijven met een geldige aansluiting (en dus verzekering) bij de koepel op de datum van de inschrijving`, { member: this.member.patchedMember.name }),
+                    human: $t(`33845ee8-009e-4ad2-a3d7-183e79033c4c`, { member: this.member.patchedMember.name }),
                 });
             }
 
@@ -1138,7 +1138,7 @@ export class RegisterItem implements ObjectWithRecords {
                         message: 'Pre registrations',
                         human: $t(`Momenteel zijn de voorinschrijvingen nog bezig voor {group}. Dit is enkel voor bestaande leden`, {
                             group: this.group.settings.name,
-                        }) + (this.group.settings.priorityForFamily ? ' ' + $t(`en hun broers/zussen`) : '') + '.',
+                        }) + (this.group.settings.priorityForFamily ? ' ' + $t(`4837a21c-e894-45fb-873f-1b09cbebc495`) : '') + '.',
                     });
                 }
             }
@@ -1151,7 +1151,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'waiting_list_required',
                         message: 'Waiting list required',
-                        human: $t(`Iedereen moet zich eerst op de wachtlijst inschrijven`),
+                        human: $t(`b9229c91-e7cf-48d7-823f-982dc27fe638`),
                         meta: { recoverable: true },
                     });
                 }
@@ -1160,7 +1160,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'waiting_list_required',
                         message: 'Waiting list required',
-                        human: $t(`Nieuwe leden moeten zich eerst op de wachtlijst inschrijven`),
+                        human: $t(`466118b2-637f-4c46-b240-57bc9c3ee590`),
                         meta: { recoverable: true },
                     });
                 }
@@ -1184,7 +1184,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'maximum_reached',
                     message: 'Maximum reached',
-                    human: $t(`De inschrijvingen voor {group} zijn volzet`, { group: this.group.settings.name }),
+                    human: $t(`1b7b7815-6454-4570-8ce8-fcff09df2efd`, { group: this.group.settings.name }),
                     meta: { recoverable: true },
                 });
             }
@@ -1196,7 +1196,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'stock_empty',
                         message: 'Stock empty',
-                        human: $t(`Het tarief {name} is uitverkocht`, { name: this.groupPrice.name }),
+                        human: $t(`545a9cc4-553d-4013-a8ef-e4a9a3107a9c`, { name: this.groupPrice.name }),
                         meta: { recoverable: true },
                     });
                 }
@@ -1208,8 +1208,8 @@ export class RegisterItem implements ObjectWithRecords {
                             code: 'stock_empty',
                             message: 'Stock empty',
                             human: remaining === 0
-                                ? $t(`De keuzemogelijkheid {name} is uitverkocht`, { name: option.option.name })
-                                : remaining > 1 ? $t('Er zijn nog maar {count} stuks beschikbaar van {name}', { count: remaining.toString(), name: option.option.name }) : $t('Er is nog maar 1 stuk beschikbaar van {name}', { name: option.option.name }),
+                                ? $t(`96b60f72-2bc6-479d-b317-616e23056e5c`, { name: option.option.name })
+                                : remaining > 1 ? $t('81dced9c-c5aa-4c49-b030-31363d3847db', { count: remaining.toString(), name: option.option.name }) : $t('Er is nog maar 1 stuk beschikbaar van {name}', { name: option.option.name }),
                             meta: { recoverable: true },
                         });
                     }

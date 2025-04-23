@@ -92,7 +92,7 @@ const props = defineProps<{
 
 const title = $t('cb85826e-06fc-473c-95c2-ba338fdbab50');
 const loading = ref(false);
-const saveText = $t(`Toevoegen`);
+const saveText = $t(`497e6653-45eb-4e5f-b350-2b3aafd3b62d`);
 const organization = useOrganization();
 const platform = usePlatform();
 const now = new Date();
@@ -161,7 +161,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: $t(`De startdatum kan ten vroegste morgen zijn`),
+                    message: $t(`dd14ada3-dea6-4fc5-9791-8469320d4dcf`),
                 }));
             }
 
@@ -169,7 +169,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'endDate',
-                    message: $t(`De einddatum moet na de startdatum liggen`),
+                    message: $t(`e009c5b1-ee75-43b3-989a-60b895ee05c1`),
                 }));
             }
 
@@ -177,7 +177,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: $t(`De startdatum kan niet voor`) + ' ' + Formatter.date(periodConfig.startDate) + ' ' + $t(`liggen`),
+                    message: $t(`f647cb33-7553-4c7b-9ae7-e059a838c63a`) + ' ' + Formatter.date(periodConfig.startDate) + ' ' + $t(`f8a6b25b-d877-4f7a-8bc8-f95d1524e822`),
                 }));
             }
 
@@ -185,7 +185,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: $t(`De startdatum kan niet na`) + ' ' + Formatter.date(periodConfig.endDate) + ' ' + $t(`liggen`),
+                    message: $t(`7e98165e-9c5e-4aa6-a151-931755e7619e`) + ' ' + Formatter.date(periodConfig.endDate) + ' ' + $t(`f8a6b25b-d877-4f7a-8bc8-f95d1524e822`),
                 }));
             }
 
@@ -193,7 +193,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'endDate',
-                    message: $t(`De einddatum kan niet na`) + ' ' + Formatter.date(periodConfig.endDate) + ' ' + $t(`liggen`),
+                    message: $t(`f330e984-a49b-41e3-90fc-4bfffb144724`) + ' ' + Formatter.date(periodConfig.endDate) + ' ' + $t(`f8a6b25b-d877-4f7a-8bc8-f95d1524e822`),
                 }));
             }
         }
@@ -203,7 +203,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: $t(`De startdatum kan niet voor`) + ' ' + Formatter.date(periodConfig.startDate) + ' ' + $t(`liggen`),
+                    message: $t(`f647cb33-7553-4c7b-9ae7-e059a838c63a`) + ' ' + Formatter.date(periodConfig.startDate) + ' ' + $t(`f8a6b25b-d877-4f7a-8bc8-f95d1524e822`),
                 }));
             }
 
@@ -211,7 +211,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: $t(`De startdatum kan niet na`) + ' ' + Formatter.date(periodConfig.endDate) + ' ' + $t(`liggen`),
+                    message: $t(`7e98165e-9c5e-4aa6-a151-931755e7619e`) + ' ' + Formatter.date(periodConfig.endDate) + ' ' + $t(`f8a6b25b-d877-4f7a-8bc8-f95d1524e822`),
                 }));
             }
         }
@@ -240,7 +240,7 @@ async function save() {
 
         await platformFamilyManager.isolatedPatch([props.member], patch, false);
 
-        Toast.success($t(`Aansluiting toegevoegd`)).show();
+        Toast.success($t(`423b0299-c402-4556-9d17-4675668d114d`)).show();
         await pop({ force: true });
     }
     catch (e) {
@@ -278,13 +278,13 @@ function getTypePriceNormalPrice(type: PlatformMembershipType) {
 function getPriceForDate(type: PlatformMembershipType, date: Date) {
     const periodConfig = type.periods.get(props.period.id);
     if (!periodConfig) {
-        return $t(`Niet beschikbaar`);
+        return $t(`28f78c8b-c553-4cb0-88d9-d1d766eaa1dd`);
     }
 
     const priceConfig = periodConfig.getPriceConfigForDate(date);
 
     if (type.behaviour === PlatformMembershipTypeBehaviour.Days) {
-        return Formatter.price(priceConfig.pricePerDay) + ' ' + $t(`per dag`);
+        return Formatter.price(priceConfig.pricePerDay) + ' ' + $t(`b51dbba5-8e12-4835-bdd7-b9fb7e306d8d`);
     }
 
     const tagIds = selectedOrganization.value?.meta.tags ?? [];

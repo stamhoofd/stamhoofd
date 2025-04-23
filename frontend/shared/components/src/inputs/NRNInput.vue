@@ -121,7 +121,7 @@ function validate(final = true, silent = false) {
         if (!silent) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: nrrRaw.value.length === 0 ? $t(`Vul een rijksregisternummer in`) : $t(`Dit is geen geldig rijksregisternummer. Je kan dit nummer vinden op de achterkant van de identiteitskaart, in de vorm van JJ.MM.DD-XXX.XX. Kijk na op typefouten.`),
+                message: nrrRaw.value.length === 0 ? $t(`619eee67-7e95-48a8-9f05-a2783eb52310`) : $t(`305840c7-8dc6-4f40-84c3-ca03be30f46a`),
                 field: 'nationalRegisterNumber',
             }));
         }
@@ -131,7 +131,7 @@ function validate(final = true, silent = false) {
         if (!silent) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Dit rijksregisternummer komt niet overeen met de ingevulde geboortedatum.`),
+                message: $t(`b809571c-08ed-464c-9f40-3522f8dac440`),
                 field: 'nationalRegisterNumber',
             }));
         }

@@ -23,7 +23,7 @@ const props = withDefaults(
         saveText?: string;
         forceMarkReviewed?: boolean | null;
     }>(), {
-        saveText: $t(`Opslaan`),
+        saveText: $t(`bc6b2553-c28b-4e3b-aba3-4fdc2c23db6e`),
         forceMarkReviewed: null,
     },
 );
@@ -72,7 +72,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value && !loading.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
+    return await CenteredMessage.confirm($t(`c9111e95-2f59-4164-b0af-9fbf434bf6dd`), $t(`de41b0f3-1297-4058-b390-3bfb99e3d4e0`));
 }
 
 defineExpose({

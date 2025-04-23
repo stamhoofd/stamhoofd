@@ -47,7 +47,7 @@ withDefaults(
         description?: string;
         selectOrganization: (organization: Organization, navigation: NavigationActions) => Promise<void> | void;
     }>(), {
-        title: $t(`Zoeken`),
+        title: $t(`f049ea7d-4411-4860-bd6f-d7c57863c39d`),
         description: '',
     },
 );

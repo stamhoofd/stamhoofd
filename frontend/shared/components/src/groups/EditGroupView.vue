@@ -622,7 +622,7 @@ const availableWaitingLists = computed(() => {
         const usedByGroups = externalOrganization?.value?.period?.groups.filter(g => g.waitingList?.id === list.id);
         return {
             list,
-            description: usedByGroups?.length ? $t(`Deze wachtlijst wordt gebruikt door`) + ' ' + Formatter.joinLast(usedByGroups.map(g => g.settings.name), ', ', ' ' + $t(`en`) + ' ') : $t(`Niet gebruikt`),
+            description: usedByGroups?.length ? $t(`877cbb8c-174a-4fe2-8a8a-01908a34c114`) + ' ' + Formatter.joinLast(usedByGroups.map(g => g.settings.name), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') : $t(`daef5a57-e4f0-41f4-b05f-7946913947ef`),
         };
     });
 });
@@ -1111,7 +1111,7 @@ async function addWaitingList() {
         periodId: patched.value.periodId,
         type: GroupType.WaitingList,
         settings: GroupSettings.create({
-            name: $t(`Wachtlijst van`) + ' ' + patched.value.settings.name,
+            name: $t(`c1f1d9d0-3fa1-4633-8e14-8c4fc98b4f0f`) + ' ' + patched.value.settings.name,
         }),
     });
 
@@ -1169,15 +1169,15 @@ async function editWaitingList(waitingList: Group) {
 const genderTypes = [
     {
         value: GroupGenderType.Mixed,
-        name: $t(`Gemengd`),
+        name: $t(`905afd18-5e9a-4d30-9040-646d29b25c15`),
     },
     {
         value: GroupGenderType.OnlyFemale,
-        name: $t(`Enkel meisjes`),
+        name: $t(`95e8c4b3-a548-4689-b581-88d346ee4e7b`),
     },
     {
         value: GroupGenderType.OnlyMale,
-        name: $t(`Enkel jongens`),
+        name: $t(`91ec0ba0-1840-4246-b804-27eb3cda67e3`),
     },
 ];
 
@@ -1218,7 +1218,7 @@ function getAgeGroupSelectionText(ageGroup: DefaultAgeGroup) {
     }
 
     if (!ageGroup.defaultMembershipTypeId) {
-        text = text + ' ' + $t(`(niet automatisch)`);
+        text = text + ' ' + $t(`bf9acd2b-f2d4-42df-8d13-6af97648eb27`);
     }
 
     return text;
@@ -1235,8 +1235,8 @@ const recordEditorSettings = computed(() => {
     const exampleMember = new PlatformMember({
         member: MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({
-                firstName: $t(`Voorbeeld`),
-                lastName: $t(`Lid`),
+                firstName: $t(`fbe32760-d352-4d3d-813c-acd50f3cba50`),
+                lastName: $t(`946f5e2e-d92c-4bbd-b64f-115958a04d01`),
                 dataPermissions: BooleanStatus.create({ value: true }),
                 birthDay: new Date('2020-01-01'),
             }),

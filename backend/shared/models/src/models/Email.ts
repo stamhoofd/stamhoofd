@@ -111,7 +111,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Missing subject',
-                human: $t(`Vul een onderwerp in voor je een e-mail verstuurt`),
+                human: $t(`e78c8218-4d25-413b-ae6b-fd916e663e5a`),
             });
         }
 
@@ -119,7 +119,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Missing text',
-                human: $t(`Vul een tekst in voor je een e-mail verstuurt`),
+                human: $t(`65b701a3-c74c-4eb6-b98e-7b9dcad0a358`),
             });
         }
 
@@ -127,7 +127,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Missing html',
-                human: $t(`Vul een tekst in voor je een e-mail verstuurt`),
+                human: $t(`65b701a3-c74c-4eb6-b98e-7b9dcad0a358`),
             });
         }
 
@@ -135,7 +135,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Missing from',
-                human: $t(`Vul een afzender in voor je een e-mail verstuurt`),
+                human: $t(`e92cd077-b0f1-4b0a-82a0-8a8baa82e73a`),
             });
         }
 
@@ -152,7 +152,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'too_big_attachments',
                 message: 'Too big attachments',
-                human: $t(`Jouw bericht is te groot. Grote bijlages verstuur je beter niet via e-mail, je plaatst dan best een link naar de locatie in bv. Google Drive. De maximale grootte van een e-mail is 10MB, inclusief het bericht. Als je grote bestanden verstuurt kan je ze ook proberen te verkleinen.`),
+                human: $t(`e8b9a1db-97d0-410e-99b2-6a87c1087593`),
                 field: 'attachments',
             });
         }
@@ -173,7 +173,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'content_type_not_supported',
                     message: 'Content-Type not supported',
-                    human: $t(`Het bestandstype van jouw bijlage wordt niet ondersteund of is onveilig om in een e-mail te plaatsen. Overweeg om je bestand op bv. Google Drive te zetten en de link in jouw e-mail te zetten.`),
+                    human: $t(`54da84d6-5f6a-4db2-be34-9ddb7f47bbe8`),
                     field: 'attachments',
                 });
             }
@@ -246,7 +246,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Email not found',
-                    human: $t(`De e-mail die je probeert te versturen bestaat niet meer`),
+                    human: $t(`55899a7c-f3d4-43fe-a431-70a3a9e78e34`),
                 });
             }
             if (upToDate.status === EmailStatus.Sent || upToDate.status === EmailStatus.Failed) {
@@ -281,7 +281,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Missing from',
-                    human: $t(`Vul een afzender in voor je een e-mail verstuurt`),
+                    human: $t(`e92cd077-b0f1-4b0a-82a0-8a8baa82e73a`),
                 });
             }
 
@@ -304,7 +304,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Email not found',
-                    human: $t(`De e-mail die je probeert te versturen bestaat niet meer`),
+                    human: $t(`55899a7c-f3d4-43fe-a431-70a3a9e78e34`),
                 });
             }
 
@@ -312,7 +312,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'recipients_not_created',
                     message: 'Failed to create recipients',
-                    human: $t(`Er ging iets mis bij het aanmaken van de afzenders.`),
+                    human: $t(`f660b2eb-e382-4d21-86e4-673ca7bc2d4a`),
                 });
             }
 

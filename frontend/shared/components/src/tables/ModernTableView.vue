@@ -269,7 +269,7 @@ if (props.Route) {
             if (objects.results.length === 1) {
                 return getPropertiesForRoute(objects.results[0]);
             }
-            Toast.error($t(`Niet gevonden`)).show();
+            Toast.error($t(`8ba8a143-e26a-40d3-b770-19788314295f`)).show();
             throw new Error('Not found');
         },
 
@@ -520,7 +520,7 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
     if (!showSelection.value) {
         // Add select action
         actions.push(new AsyncTableAction({
-            name: $t(`Selecteer`),
+            name: $t(`e017ca18-1f4f-4afe-aca5-8eff19d20dc1`),
             groupIndex: -1,
             priority: 10,
             needsSelection: false,
@@ -533,7 +533,7 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
     // Add select all action
     if (!isAllSelected.value) {
         actions.push(new AsyncTableAction({
-            name: $t(`Selecteer alles`),
+            name: $t(`f46e85c5-5ab7-4ab9-97f7-c675bcd6a160`),
             groupIndex: -1,
             priority: 9,
             needsSelection: false,
@@ -545,7 +545,7 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
     }
     else {
         actions.push(new AsyncTableAction({
-            name: $t(`Deselecteer alles`),
+            name: $t(`d3850361-5954-45cd-8011-7c22f4b838a5`),
             groupIndex: -1,
             priority: 9,
             needsSelection: false,
@@ -557,14 +557,14 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
 
     // Add action to change visible columns
     actions.push(new MenuTableAction({
-        name: wrapColumns.value ? $t(`Wijzig zichtbare gegevens`) : $t(`Wijzig kolommen`),
+        name: wrapColumns.value ? $t(`db2ee1ce-3c26-47ba-9559-a8dfad4f480c`) : $t(`ae5e4000-3dc2-46cb-99a4-24f02b6e6cd3`),
         groupIndex: -1,
         priority: 8,
         childMenu: getColumnContextMenu(),
     }));
 
     actions.push(new MenuTableAction({
-        name: $t(`Sorteren`),
+        name: $t(`889f97cc-d14f-4865-bd82-e03ea0fdfbb6`),
         groupIndex: -1,
         priority: 7,
         childMenu: getSortingContextMenu(),
@@ -777,7 +777,7 @@ async function onRightClickRow(row: VisibleRow<Value>, event: MouseEvent | Touch
         selection = buildSelectionObject();
 
         filteredActions.push(new AsyncTableAction({
-            name: $t(`Deselecteer`),
+            name: $t(`40655788-f117-421c-bf1e-cc93dc10c9f6`),
             groupIndex: 1,
             priority: 10,
             handler: () => {
@@ -794,7 +794,7 @@ async function onRightClickRow(row: VisibleRow<Value>, event: MouseEvent | Touch
         // Only focus this row
         // Add select action
         filteredActions.push(new AsyncTableAction({
-            name: $t(`Selecteer`),
+            name: $t(`e017ca18-1f4f-4afe-aca5-8eff19d20dc1`),
             groupIndex: !showSelection.value ? -1 : 1,
             priority: 10,
             handler: () => {

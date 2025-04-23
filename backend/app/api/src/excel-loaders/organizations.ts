@@ -28,11 +28,11 @@ type Object = OrganizationWithResponsibilities;
 // Assign to a typed variable to assure we have correct type checking in place
 const sheet: XlsxTransformerSheet<Object, Object> = {
     id: 'organizations',
-    name: $t(`Groepen`),
+    name: $t(`2a033cd8-b9e4-4a92-a8a6-b4a687d87e79`),
     columns: [
         {
             id: 'id',
-            name: $t(`ID`),
+            name: $t(`29360811-3663-496c-8d8f-c9fdf9467a74`),
             width: 40,
             getValue: (object: Object) => ({
                 value: object.id,
@@ -40,7 +40,7 @@ const sheet: XlsxTransformerSheet<Object, Object> = {
         },
         {
             id: 'uri',
-            name: $t(`Groepsnummer`),
+            name: $t(`27cfaf26-6b88-4ebc-a50a-627a9f0f9e64`),
             width: 20,
             getValue: (object: Object) => ({
                 value: object.uri,
@@ -48,7 +48,7 @@ const sheet: XlsxTransformerSheet<Object, Object> = {
         },
         {
             id: 'name',
-            name: $t(`Naam`),
+            name: $t(`522fb6c5-6d4d-4d9c-94b7-3e282fb0ea1f`),
             width: 50,
             getValue: (object: Object) => ({
                 value: object.name,
@@ -56,13 +56,13 @@ const sheet: XlsxTransformerSheet<Object, Object> = {
         },
         {
             id: 'tags',
-            name: $t(`Tags`),
+            name: $t(`5f8c1ac5-a650-4046-80b6-0fe37fa12439`),
             width: 50,
             getValue: (object: Object) => {
                 const platform = PlatformStruct.shared;
 
                 return {
-                    value: object.meta.tags.map(tag => platform.config.tags.find(t => t.id === tag)?.name ?? $t(`Onbekend`)).join(', '),
+                    value: object.meta.tags.map(tag => platform.config.tags.find(t => t.id === tag)?.name ?? $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`)).join(', '),
                 };
             },
         },
@@ -75,7 +75,7 @@ const sheet: XlsxTransformerSheet<Object, Object> = {
 
 const responsibilities: XlsxTransformerSheet<Object, MemberResponsibilityRecordWithMemberAndOrganization> = {
     id: 'responsibilities',
-    name: $t(`Functies`),
+    name: $t(`d0defb77-0a25-4b85-a03e-57569c5edf6c`),
     transform(organization) {
         return organization.responsibilities.map(r => MemberResponsibilityRecordWithMemberAndOrganization.create({
             ...r,
@@ -85,7 +85,7 @@ const responsibilities: XlsxTransformerSheet<Object, MemberResponsibilityRecordW
     columns: [
         {
             id: 'organization.id',
-            name: $t(`ID`),
+            name: $t(`29360811-3663-496c-8d8f-c9fdf9467a74`),
             width: 35,
             getValue: (object: MemberResponsibilityRecordWithMemberAndOrganization) => ({
                 value: object.organization.id,
@@ -93,7 +93,7 @@ const responsibilities: XlsxTransformerSheet<Object, MemberResponsibilityRecordW
         },
         {
             id: 'organization.uri',
-            name: $t(`Groepsnummer`),
+            name: $t(`27cfaf26-6b88-4ebc-a50a-627a9f0f9e64`),
             width: 20,
             getValue: (object: MemberResponsibilityRecordWithMemberAndOrganization) => ({
                 value: object.organization.uri,
@@ -101,7 +101,7 @@ const responsibilities: XlsxTransformerSheet<Object, MemberResponsibilityRecordW
         },
         {
             id: 'organization.name',
-            name: $t(`Groepsnaam`),
+            name: $t(`c14b0320-cb84-4386-a39a-aa9ffb5eb886`),
             width: 50,
             getValue: (object: MemberResponsibilityRecordWithMemberAndOrganization) => ({
                 value: object.organization.name,
@@ -109,7 +109,7 @@ const responsibilities: XlsxTransformerSheet<Object, MemberResponsibilityRecordW
         },
         {
             id: 'responsibility.name',
-            name: $t(`Functie`),
+            name: $t(`d6fb6973-92f7-4d39-beeb-0f324c0fe865`),
             width: 50,
             getValue: (object: MemberResponsibilityRecordWithMemberAndOrganization) => {
                 const platform = PlatformStruct.shared;
@@ -117,18 +117,18 @@ const responsibilities: XlsxTransformerSheet<Object, MemberResponsibilityRecordW
 
                 if (!responsibility) {
                     return {
-                        value: $t(`Onbekende functie`),
+                        value: $t(`2b1d05e5-6a0a-49d5-8510-8593eda94470`),
                     };
                 }
 
                 return {
-                    value: responsibility.name + (responsibility.isGroupBased ? ' ' + $t(`van`) + ' ' + (object.group?.settings.name ?? $t(`Onbekende groep`)) : ''),
+                    value: responsibility.name + (responsibility.isGroupBased ? ' ' + $t(`9ddd7aba-9426-4718-9eb0-673b615efcf4`) + ' ' + (object.group?.settings.name ?? $t(`eb6d556a-bcda-4ab4-ad39-3215b4734569`)) : ''),
                 };
             },
         },
         {
             id: 'responsibility.member.firstName',
-            name: $t(`Voornaam`),
+            name: $t(`efca0579-0543-4636-a996-384bc9f0527e`),
             width: 30,
             getValue: (object: MemberResponsibilityRecordWithMemberAndOrganization) => ({
                 value: object.member.firstName,
@@ -136,7 +136,7 @@ const responsibilities: XlsxTransformerSheet<Object, MemberResponsibilityRecordW
         },
         {
             id: 'responsibility.member.lastName',
-            name: $t(`Achternaam`),
+            name: $t(`4a5e438e-08a1-411e-9b66-410eea7ded73`),
             width: 30,
             getValue: (object: MemberResponsibilityRecordWithMemberAndOrganization) => ({
                 value: object.member.details.lastName,
@@ -144,7 +144,7 @@ const responsibilities: XlsxTransformerSheet<Object, MemberResponsibilityRecordW
         },
         {
             id: 'responsibility.member.email',
-            name: $t(`E-mailadres lid`),
+            name: $t(`a1b06e74-f581-4ea0-9e86-83f0c963fd4f`),
             width: 50,
             getValue: (object: MemberResponsibilityRecordWithMemberAndOrganization) => ({
                 value: object.member.details.email,
@@ -160,7 +160,7 @@ const responsibilities: XlsxTransformerSheet<Object, MemberResponsibilityRecordW
 type PremiseWithOrganization = { organization: Object; premise: Premise };
 const premises: XlsxTransformerSheet<Object, PremiseWithOrganization> = {
     id: 'premises',
-    name: $t(`Lokalen`),
+    name: $t(`9fe916f3-199d-4be2-b9c2-c96eeea31437`),
     transform(organization) {
         return organization.privateMeta?.premises.map(r => ({
             organization,
@@ -170,7 +170,7 @@ const premises: XlsxTransformerSheet<Object, PremiseWithOrganization> = {
     columns: [
         {
             id: 'organization.id',
-            name: $t(`ID`),
+            name: $t(`29360811-3663-496c-8d8f-c9fdf9467a74`),
             width: 35,
             getValue: (object: PremiseWithOrganization) => ({
                 value: object.organization.id,
@@ -178,7 +178,7 @@ const premises: XlsxTransformerSheet<Object, PremiseWithOrganization> = {
         },
         {
             id: 'organization.uri',
-            name: $t(`Groepsnummer`),
+            name: $t(`27cfaf26-6b88-4ebc-a50a-627a9f0f9e64`),
             width: 20,
             getValue: (object: PremiseWithOrganization) => ({
                 value: object.organization.uri,
@@ -186,7 +186,7 @@ const premises: XlsxTransformerSheet<Object, PremiseWithOrganization> = {
         },
         {
             id: 'organization.name',
-            name: $t(`Groepsnaam`),
+            name: $t(`c14b0320-cb84-4386-a39a-aa9ffb5eb886`),
             width: 50,
             getValue: (object: PremiseWithOrganization) => ({
                 value: object.organization.name,
@@ -194,7 +194,7 @@ const premises: XlsxTransformerSheet<Object, PremiseWithOrganization> = {
         },
         {
             id: 'premise.name',
-            name: $t(`Naam`),
+            name: $t(`522fb6c5-6d4d-4d9c-94b7-3e282fb0ea1f`),
             width: 20,
             getValue: (object: PremiseWithOrganization) => ({
                 value: object.premise.name,
@@ -202,13 +202,13 @@ const premises: XlsxTransformerSheet<Object, PremiseWithOrganization> = {
         },
         {
             id: 'premise.type',
-            name: $t(`Type`),
+            name: $t(`f97ad8c1-31d2-4b61-9e09-3be86eaeba08`),
             width: 20,
             getValue: (object: PremiseWithOrganization) => {
                 const ids = object.premise.premiseTypeIds;
                 const platform = PlatformStruct.shared;
                 return {
-                    value: ids.map(id => platform.config.premiseTypes.find(t => t.id === id)?.name ?? $t(`Onbekend`)).join(', '),
+                    value: ids.map(id => platform.config.premiseTypes.find(t => t.id === id)?.name ?? $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`)).join(', '),
                 };
             },
         },

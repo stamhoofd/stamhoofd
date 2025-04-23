@@ -140,9 +140,9 @@ const isAdmin = app === 'dashboard' || app === 'admin';
 
 const title = computed(() => {
     if (props.member.isNew) {
-        return $t('Nieuw lid');
+        return $t('ce4185d5-0d84-435b-bbd2-ff4a6e2e61c1');
     }
-    return $t('Algemeen');
+    return $t('43817091-8f0c-41f3-a72b-bcd0a489dfd3');
 });
 
 useValidation(errors.validator, () => {
@@ -150,14 +150,14 @@ useValidation(errors.validator, () => {
     if (firstName.value.trim().length < 2) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`Vul de voornaam in`),
+            message: $t(`7764f616-f742-4704-93ff-22f1dd31f830`),
             field: 'firstName',
         }));
     }
     if (lastName.value.trim().length < 2) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`Vul de achternaam in`),
+            message: $t(`bc27bb72-c06d-4a05-8e22-e920d01cc1f4`),
             field: 'lastName',
         }));
     }
@@ -200,12 +200,12 @@ useValidation(errors.validator, () => {
 const lidSuffix = computed(() => {
     if (firstName.value.length < 2) {
         if (props.member.patchedMember.details.defaultAge < 24) {
-            return ' ' + $t(`van dit lid`);
+            return ' ' + $t(`a7b59f15-7f75-4dd0-907c-149a46d91c73`);
         }
         return '';
     }
     if (props.member.patchedMember.details.defaultAge < 24) {
-        return ' ' + $t(`van`) + ' ' + firstName.value;
+        return ' ' + $t(`9ddd7aba-9426-4718-9eb0-673b615efcf4`) + ' ' + firstName.value;
     }
     return '';
 });
@@ -289,7 +289,7 @@ function setEmail(index: number, value: string) {
 async function showBirthDayMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [new ContextMenuItem({
-            name: $t(`Volgjaar toevoegen`),
+            name: $t(`542e21b0-662c-42df-b133-7dbb650b8e4f`),
             action: () => addTrackingYear(),
         })],
     ]);

@@ -173,14 +173,14 @@ const groupedResponsibilites = computed(() => {
 
     if (groupedPlatformResponsibilities.length > 0) {
         groups.push({
-            title: selectedOrganization.value === null ? '' : $t(`Standaardfuncties`),
+            title: selectedOrganization.value === null ? '' : $t(`8c143a89-4f63-45f8-a369-1eae10620db4`),
             responsibilities: groupedPlatformResponsibilities,
         });
     }
 
     if (groupedOrganizationResponsibilities.length > 0) {
         groups.push({
-            title: $t(`Groepseigenfuncties`),
+            title: $t(`20d0f420-edec-4c9f-9584-990258dcf1bf`),
             responsibilities: groupedOrganizationResponsibilities,
         });
     }
@@ -205,11 +205,11 @@ const deletedMemberResponsibilityRecords = computed(() => {
 });
 
 const labels = computed(() => {
-    return items.value.map(o => o === null ? $t(`Nationaal niveau`) : o.name);
+    return items.value.map(o => o === null ? $t(`0234d6cf-7eac-411a-9321-d9ce81224df8`) : o.name);
 });
 
 const title = computed(() => {
-    return $t(`Functies van`) + ' ' + props.member.patchedMember.firstName;
+    return $t(`81e6a643-e2e6-4ee5-bfc3-29fc17f83f9a`) + ' ' + props.member.patchedMember.firstName;
 });
 
 useValidation(errors.validator, () => {
@@ -233,9 +233,9 @@ function getResponsibilityEnabledDescription(responsibility: MemberResponsibilit
 
     if (rr) {
         if (!rr.endDate) {
-            return $t(`Van`) + ' ' + Formatter.date(rr.startDate, true) + ' ' + $t(`tot nu`);
+            return $t(`40eced71-abce-42f2-a157-5c7a6686bc63`) + ' ' + Formatter.date(rr.startDate, true) + ' ' + $t(`264096eb-4cc6-4c2f-807a-107a84980f25`);
         }
-        return $t(`Van`) + ' ' + Formatter.date(rr.startDate, true) + ' ' + $t(`tot`) + ' ' + Formatter.date(rr.endDate, true);
+        return $t(`40eced71-abce-42f2-a157-5c7a6686bc63`) + ' ' + Formatter.date(rr.startDate, true) + ' ' + $t(`347113ec-87a8-4dd9-88ea-c151e3f066f0`) + ' ' + Formatter.date(rr.endDate, true);
     }
 
     return null;
@@ -244,9 +244,9 @@ function getResponsibilityEnabledDescription(responsibility: MemberResponsibilit
 function getResponsibilityRecordEnabledDescription(record: MemberResponsibilityRecord | undefined) {
     if (record) {
         if (!record.endDate) {
-            return $t(`Van`) + ' ' + Formatter.date(record.startDate, true) + ' ' + $t(`tot nu`);
+            return $t(`40eced71-abce-42f2-a157-5c7a6686bc63`) + ' ' + Formatter.date(record.startDate, true) + ' ' + $t(`264096eb-4cc6-4c2f-807a-107a84980f25`);
         }
-        return $t(`Van`) + ' ' + Formatter.date(record.startDate, true) + ' ' + $t(`tot`) + ' ' + Formatter.date(record.endDate, true);
+        return $t(`40eced71-abce-42f2-a157-5c7a6686bc63`) + ' ' + Formatter.date(record.startDate, true) + ' ' + $t(`347113ec-87a8-4dd9-88ea-c151e3f066f0`) + ' ' + Formatter.date(record.endDate, true);
     }
 
     return null;

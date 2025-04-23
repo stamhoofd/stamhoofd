@@ -111,7 +111,7 @@ export default class UIFilterEditor extends Mixins(NavigationMixin) {
         if (!changed) {
             return true;
         }
-        return await CenteredMessage.confirm($t(`Filter niet opslaan?`), $t(`Niet opslaan`));
+        return await CenteredMessage.confirm($t(`c6d477b8-8ca5-4d7e-b164-21630e5057b0`), $t(`de41b0f3-1297-4058-b390-3bfb99e3d4e0`));
     }
 }
 </script>

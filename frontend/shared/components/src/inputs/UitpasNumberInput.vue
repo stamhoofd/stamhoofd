@@ -80,7 +80,7 @@ function validate(final = true, silent = false): boolean {
         if (!silent) {
             errorBox.value = new ErrorBox(new SimpleError({
                 code: "invalid_field",
-                message: $t(`Vul een geldig UiTPAS-nummer in`),
+                message: $t(`5c6ace17-d4d1-4492-8bf5-e8f90f9daed6`),
                 field: 'uitpasNumber'
             }));
         }

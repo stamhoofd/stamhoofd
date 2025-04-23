@@ -52,20 +52,20 @@ function fillReplacements(replacements: Replacement[]) {
                 endTime: 13 * 60,
             }),
             checkoutMethod: WebshopTakeoutMethod.create({
-                name: $t(`Bakkerij`),
+                name: $t(`7214779f-7c97-49af-b7b9-b6424a1b2903`),
                 address: Address.create({
-                    street: $t(`Demostraat`),
+                    street: $t(`424566d8-a5ec-4cf8-af8b-6ed49a4a1920`),
                     number: '12',
                     postalCode: '9000',
-                    city: $t(`Gent`),
+                    city: $t(`863c5b6c-dbed-4b55-bbd7-2e99e15dba5e`),
                     country: Country.Belgium,
                 }),
             }),
             address: ValidatedAddress.create({
-                street: $t(`Demostraat`),
+                street: $t(`424566d8-a5ec-4cf8-af8b-6ed49a4a1920`),
                 number: '12',
                 postalCode: '9000',
-                city: $t(`Gent`),
+                city: $t(`863c5b6c-dbed-4b55-bbd7-2e99e15dba5e`),
                 country: Country.Belgium,
                 cityId: '',
                 parentCityId: null,
@@ -75,7 +75,7 @@ function fillReplacements(replacements: Replacement[]) {
                 items: [
                     CartItem.create({
                         product: Product.create({
-                            name: $t(`Voorbeeld product`),
+                            name: $t(`feb79403-3266-47de-9e27-55122bc0c881`),
                         }),
                         productPrice: ProductPrice.create({
                             price: 550,
@@ -89,7 +89,7 @@ function fillReplacements(replacements: Replacement[]) {
                     }),
                     CartItem.create({
                         product: Product.create({
-                            name: $t(`Nog een voorbeeld product`),
+                            name: $t(`d93000f0-cb13-4756-a6ac-961950efb25c`),
                         }),
                         productPrice: ProductPrice.create({
                             price: 400,
@@ -122,11 +122,11 @@ function fillReplacements(replacements: Replacement[]) {
     }));
 
     const balance1 = BalanceItem.create({
-        description: $t(`Voorbeeld betaallijn 1`),
+        description: $t(`260c4ef6-413c-45c9-9f59-6aee4e67a848`),
         unitPrice: 1234,
     });
     const balance2 = BalanceItem.create({
-        description: $t(`Voorbeeld betaallijn 2`),
+        description: $t(`e7e960cc-94aa-42c1-b476-8a8ad67512f3`),
         unitPrice: 1234,
         amount: 2,
     });
@@ -135,7 +135,7 @@ function fillReplacements(replacements: Replacement[]) {
         method: PaymentMethod.Transfer,
         status: PaymentStatus.Pending,
         iban: 'BE1234 1234 1234',
-        ibanName: $t(`Voorbeeld`),
+        ibanName: $t(`fbe32760-d352-4d3d-813c-acd50f3cba50`),
         transferDescription: '+++111/111/111+++',
         transferSettings: TransferSettings.create({
             type: TransferDescriptionType.Structured,

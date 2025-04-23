@@ -120,8 +120,8 @@ const checkboxWarning = computed({
 
 const checkboxWarningPlaceholder = computed(() => {
     const base = props.inheritedDataPermission?.checkboxWarning || DataPermissionsSettings.defaultCheckboxWarning;
-    if (!base) return $t(`(Optioneel)`);
-    return base + ' ' + $t(`(optioneel)`);
+    if (!base) return $t(`9ce75cee-1539-467c-a9de-ce3b9e870df3`);
+    return base + ' ' + $t(`e4f8cf4f-8bb1-4a3c-80e4-7c91338bb413`);
 });
 
 async function save() {
@@ -143,7 +143,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
+    return await CenteredMessage.confirm($t(`c9111e95-2f59-4164-b0af-9fbf434bf6dd`), $t(`de41b0f3-1297-4058-b390-3bfb99e3d4e0`));
 };
 
 defineExpose({

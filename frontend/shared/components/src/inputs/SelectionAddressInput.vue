@@ -204,7 +204,7 @@ export default class SelectionAddressInput extends VueComponent {
         if (this.required && !this.customAddress) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Vul een adres in`),
+                message: $t(`a0422d2b-5fbc-4df5-b9c2-d693d24cc68e`),
                 field: 'address',
             }));
             return false;

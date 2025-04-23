@@ -47,7 +47,7 @@ export default class DateSelection extends Mixins(NavigationMixin) {
     @Prop({ default: true })
     required!: boolean;
 
-    @Prop({ default: $t(`Kies een datum`) })
+    @Prop({ default: $t(`2ac677a6-f225-46b6-8fea-f6e0f10582ca`) })
     placeholder!: string;
 
     @Prop({ default: null })

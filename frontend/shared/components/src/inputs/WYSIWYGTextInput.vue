@@ -187,7 +187,7 @@ export default class WYSIWYGTextInput extends VueComponent {
             return;
         }
         if (!this.editor.isActive('link') && this.editor.state.selection.empty) {
-            new Toast($t(`Selecteer eerst tekst die je klikbaar wilt maken`), 'info').show();
+            new Toast($t(`930cb01b-7877-45e6-99dc-7cb148f13cc9`), 'info').show();
             return;
         }
         this.editLink = this.editor.getAttributes('link')?.href ?? '';
@@ -203,7 +203,7 @@ export default class WYSIWYGTextInput extends VueComponent {
         const menu = new ContextMenu([
             [
                 new ContextMenuItem({
-                    name: $t(`Titel`),
+                    name: $t(`3337b645-929a-4c29-ba80-1898dead623d`),
                     icon: 'h1',
                     selected: this.editor.isActive('heading', { level: this.headingStartLevel }),
                     action: () => {
@@ -212,7 +212,7 @@ export default class WYSIWYGTextInput extends VueComponent {
                     },
                 }),
                 new ContextMenuItem({
-                    name: $t(`Koptekst`),
+                    name: $t(`73de3c97-dee4-4944-97ab-4ffd438ff9c4`),
                     icon: 'h2',
                     selected: this.editor.isActive('heading', { level: this.headingStartLevel + 1 }),
                     action: () => {
@@ -221,7 +221,7 @@ export default class WYSIWYGTextInput extends VueComponent {
                     },
                 }),
                 new ContextMenuItem({
-                    name: $t(`Waarschuwing`),
+                    name: $t(`4943ece9-450b-4913-a6d8-6834d011a1ee`),
                     icon: 'warning',
                     selected: this.editor.isActive('warningBox', { type: 'warning' }),
                     action: () => {
@@ -230,7 +230,7 @@ export default class WYSIWYGTextInput extends VueComponent {
                     },
                 }),
                 new ContextMenuItem({
-                    name: $t(`Info`),
+                    name: $t(`0456ef2e-5e86-48fa-835c-fd8ec1921f5e`),
                     icon: 'info',
                     selected: this.editor.isActive('warningBox', { type: 'info' }),
                     action: () => {
@@ -241,7 +241,7 @@ export default class WYSIWYGTextInput extends VueComponent {
             ],
             [
                 new ContextMenuItem({
-                    name: $t(`Opsomming met bolletjes`),
+                    name: $t(`edf611b8-a969-4861-956f-522c47a948fb`),
                     icon: 'ul',
                     selected: this.editor.isActive('bulletList'),
                     action: () => {
@@ -250,7 +250,7 @@ export default class WYSIWYGTextInput extends VueComponent {
                     },
                 }),
                 new ContextMenuItem({
-                    name: $t(`Opsomming met nummers`),
+                    name: $t(`ec732e97-237c-4271-a890-77f18e2b006f`),
                     icon: 'ol',
                     selected: this.editor.isActive('orderedList'),
                     action: () => {
@@ -303,7 +303,7 @@ export default class WYSIWYGTextInput extends VueComponent {
         }
 
         if (!this.isValidHttpUrl(cleanedUrl)) {
-            new Toast($t(`Ongeldige URL`), 'error red').show();
+            new Toast($t(`375a57e9-815f-42d0-88e0-1ce09df72c1b`), 'error red').show();
             return;
         }
 

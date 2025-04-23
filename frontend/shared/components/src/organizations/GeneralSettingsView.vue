@@ -109,7 +109,7 @@ import EditCompanyView from './components/EditCompanyView.vue';
 
 const props = defineProps<{ isReview?: boolean }>();
 
-const title = computed(() => props.isReview ? $t('31df7737-2a25-4a6c-9766-39acc3ccdbc8') : $t(`Algemene instellingen`));
+const title = computed(() => props.isReview ? $t('31df7737-2a25-4a6c-9766-39acc3ccdbc8') : $t(`1835623d-0a29-430a-a4ca-81a95eb8666e`));
 const organizationManager = useOrganizationManager();
 const platform = usePlatform();
 

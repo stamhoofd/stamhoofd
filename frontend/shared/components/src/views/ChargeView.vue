@@ -121,7 +121,7 @@ const dueAt = ref(null);
 
 const priceBreakdown = computed(() => {
     return [{
-        name: $t(`Totaal`),
+        name: $t(`341172ee-281e-4458-aeb1-64ed5b2cc8bb`),
         price: total.value,
     }];
 });
@@ -153,7 +153,7 @@ useValidation(errors.validator, () => {
     if (selectedOrganization.value === null) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`Organisatie is verplicht`),
+            message: $t(`c2c395d9-9d50-4680-a973-7d11c5fe000c`),
             field: 'organization',
         }));
     }
@@ -163,7 +163,7 @@ useValidation(errors.validator, () => {
     if (descriptionNormalized.length === 0) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`Beschrijving is verplicht`),
+            message: $t(`6223bc9f-b3e9-4cb2-a73e-62555499b6b7`),
             field: 'description',
         }));
     }
@@ -171,7 +171,7 @@ useValidation(errors.validator, () => {
     if (price.value === 0) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`Bedrag kan niet 0 zijn`),
+            message: $t(`8e1e706c-e42c-49c2-a398-f16ecc649a2b`),
             field: 'price',
         }));
     }
@@ -230,7 +230,7 @@ async function save() {
             owner,
         });
 
-        new Toast($t(`Het bedrag werd aangerekend`), 'success green').show();
+        new Toast($t(`6a753313-f3b7-4999-be86-37fad16ac6d3`), 'success green').show();
 
         await pop({ force: true });
     }

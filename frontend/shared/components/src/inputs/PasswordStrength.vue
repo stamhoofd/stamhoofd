@@ -115,18 +115,18 @@ export default class PasswordStrength extends VueComponent {
     get description() {
         const strength = this.strength;
         if (strength < 50) {
-            return $t(`Heel zwak`);
+            return $t(`a5feaa9e-0e9f-42f3-9ebc-5c536ecfdebc`);
         }
 
         if (strength < 75) {
-            return $t(`Zwak`);
+            return $t(`702a8908-fe5d-4c0f-a24f-cef7694a4b37`);
         }
 
         if (strength < 100) {
-            return $t(`Matig`);
+            return $t(`b43451f9-127b-4cb5-8310-e5c85936567f`);
         }
 
-        return $t(`Sterk`);
+        return $t(`fee65508-7b87-4db2-a56f-457cd3e7d808`);
     }
 
     get detailDescription() {

@@ -94,12 +94,12 @@ export default class PayconiqButtonView extends Mixins(PayconiqBannerView) {
 
     helpMe() {
         if (this.getOS() === 'iOS') {
-            new CenteredMessage($t(`Het lukt niet`), $t(`Kijk na of je één van de apps bovenaan deze pagina hebt geïnstalleerd. Als je op een pagina terecht komt die zegt dat je de app niet hebt: sleep die pagina naar beneden tot er een grijze balk tevoorschijn komt, klik daar op 'Open'. Probeer eventueel opnieuw op een computer of selecteer een andere betaalmethode.`))
+            new CenteredMessage($t(`99f9efd3-4d2d-4fd8-845c-b690daed606a`), $t(`6f196b46-8ac6-4565-a954-5f68cb6c56f5`))
                 .addCloseButton()
                 .show();
         }
         else {
-            new CenteredMessage($t(`Het lukt niet`), $t(`Kijk na of je één van de apps bovenaan deze pagina hebt geïnstalleerd. Probeer eventueel opnieuw op een computer (daar kan je de QR-code scannen) of selecteer een andere betaalmethode.`)).addCloseButton().show();
+            new CenteredMessage($t(`99f9efd3-4d2d-4fd8-845c-b690daed606a`), $t(`cbc17197-a98b-4017-aab8-adab5ab38cff`)).addCloseButton().show();
         }
     }
 }

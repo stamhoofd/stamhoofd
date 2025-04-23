@@ -20,12 +20,12 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.ReceivableBalances, {
     sheets: [
         {
             id: 'receivableBalances',
-            name: $t(`Te ontvangen bedragen`),
+            name: $t(`ecacb29b-6be5-4581-a0bd-5c0824b27cb9`),
             columns: getGeneralColumns(),
         },
         {
             id: 'balanceItems',
-            name: $t(`Lijnen`),
+            name: $t(`e023f8a6-a91a-48c0-98fc-863697e1e8c6`),
             transform: (data: DetailedReceivableBalance): ReceivableBalanceWithItem[] => data.balanceItems.map(balanceItem => ({
                 receivableBalance: data,
                 balanceItem,
@@ -53,7 +53,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
     return [
         {
             id: 'id',
-            name: $t(`ID`),
+            name: $t(`29360811-3663-496c-8d8f-c9fdf9467a74`),
             width: 40,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: object.balanceItem.id,
@@ -66,7 +66,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'type',
-            name: $t(`Type`),
+            name: $t(`f97ad8c1-31d2-4b61-9e09-3be86eaeba08`),
             width: 30,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: getBalanceItemTypeName(object.balanceItem.type),
@@ -74,7 +74,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'category',
-            name: $t(`Categorie`),
+            name: $t(`c5d24ab8-a87a-481d-a470-23e9386199f3`),
             width: 30,
             getValue: (object: ReceivableBalanceWithItem) => {
                 return {
@@ -84,7 +84,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'description',
-            name: $t(`Beschrijving`),
+            name: $t(`9c4977db-1ce9-424b-92cf-4bbe7f6606fd`),
             width: 40,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: object.balanceItem.description,
@@ -92,7 +92,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'amount',
-            name: $t(`Aantal`),
+            name: $t(`f085f874-242d-47cb-a404-96eab69662ec`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: object.balanceItem.amount,
@@ -105,7 +105,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'unitPrice',
-            name: $t(`Eenheidsprijs`),
+            name: $t(`7f7fdce2-1fcd-44c9-8c98-856aea11ffc3`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: object.balanceItem.unitPrice / 100,
@@ -118,7 +118,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'price',
-            name: $t(`Prijs`),
+            name: $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: object.balanceItem.price / 100,
@@ -131,7 +131,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'pricePaid',
-            name: $t(`Betaald bedrag`),
+            name: $t(`dc9f65e0-19ce-4908-8830-da48235faa70`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: object.balanceItem.pricePaid / 100,
@@ -144,7 +144,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'pricePending',
-            name: $t(`In verwerking`),
+            name: $t(`5c75e9bf-1b64-4d28-a435-6e33247d5170`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: object.balanceItem.pricePending / 100,
@@ -157,7 +157,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'priceOpen',
-            name: $t(`Openstaand bedrag`),
+            name: $t(`eb0421f4-6ee9-4d81-b549-2bc4e16c4b63`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: object.balanceItem.priceOpen / 100,
@@ -170,7 +170,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'createdAt',
-            name: $t(`Aangemaakt op`),
+            name: $t(`e5902b28-754d-42cd-b245-f403d03b8c56`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: object.balanceItem.createdAt,
@@ -183,7 +183,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'dueAt',
-            name: $t(`Verschuldigd vanaf`),
+            name: $t(`3d586760-01f3-42c3-82be-44cea7ad0820`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: object.balanceItem.dueAt,
@@ -196,7 +196,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'status',
-            name: $t(`Status`),
+            name: $t(`d7003b29-cc92-4ef4-b07b-f283193ef2ae`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: getBalanceItemStatusName(object.balanceItem.status),
@@ -229,7 +229,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<ReceivableBalance>[]
     return [
         {
             id: 'id',
-            name: $t(`ID schuldenaar`),
+            name: $t(`333e8879-0e98-4233-bc51-93a5c623c75e`),
             width: 40,
             getValue: (object: ReceivableBalance) => ({
                 value: object.id,
@@ -242,7 +242,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<ReceivableBalance>[]
         },
         {
             id: 'name',
-            name: $t(`Schuldenaar`),
+            name: $t(`b9c7a57e-6dc1-48a2-bcba-a26c5f59555e`),
             width: 40,
             getValue: (object: ReceivableBalance) => ({
                 value: object.object.name,
@@ -250,7 +250,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<ReceivableBalance>[]
         },
         {
             id: 'uri',
-            name: $t(`Groepsnummer`),
+            name: $t(`27cfaf26-6b88-4ebc-a50a-627a9f0f9e64`),
             width: 16,
             getValue: (object: ReceivableBalance) => ({
                 value: object.object.uri,
@@ -258,7 +258,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<ReceivableBalance>[]
         },
         {
             id: 'amountOpen',
-            name: $t(`Openstaand bedrag`),
+            name: $t(`eb0421f4-6ee9-4d81-b549-2bc4e16c4b63`),
             width: 10,
             getValue: (object: ReceivableBalance) => ({
                 value: object.amountOpen / 100,
@@ -271,7 +271,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<ReceivableBalance>[]
         },
         {
             id: 'amountPending',
-            name: $t(`In verwerking`),
+            name: $t(`5c75e9bf-1b64-4d28-a435-6e33247d5170`),
             width: 18,
             getValue: (object: ReceivableBalance) => ({
                 value: object.amountPending / 100,
@@ -284,7 +284,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<ReceivableBalance>[]
         },
         {
             id: 'objectType',
-            name: $t(`type`),
+            name: $t(`a0dfe596-0670-48bc-a5f3-2c9308c70a17`),
             width: 10,
             getValue: (object: ReceivableBalance) => ({
                 value: getReceivableBalanceTypeNameNotTranslated(object.objectType),

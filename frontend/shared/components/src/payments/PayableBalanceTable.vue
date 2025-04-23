@@ -59,7 +59,7 @@ async function checkout() {
                 new ComponentWithProperties(
                     SelectBalanceItemsView,
                     {
-                        title: $t(`Kies welke zaken je nu wil betalen`),
+                        title: $t(`9a9fcc54-b73c-4c9f-ba2e-56ae8c3f150d`),
                         items: items.value,
                         isPayable: true,
                         saveHandler: async (list: BalanceItemPaymentDetailed[]) => {
@@ -102,7 +102,7 @@ async function checkout() {
 async function goToCheckout(checkout: RegisterCheckout) {
     if (app === 'registration') {
         checkout.defaultOrganization = props.item.organization;
-        Toast.success($t(`Openstaande rekening toegevoegd aan winkelmandje. Reken je winkelmandje af of voeg eventueel nog andere zaken toe.`)).setIcon('basket').show();
+        Toast.success($t(`bd7351b4-ec09-4faf-86f8-122621812af0`)).setIcon('basket').show();
         await dismiss({ force: true });
         await GlobalEventBus.sendEvent('selectTabByName', 'mandje');
         return;

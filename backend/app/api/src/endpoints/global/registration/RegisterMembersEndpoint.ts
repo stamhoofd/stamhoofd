@@ -54,7 +54,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'not_supported',
                     message: 'This version is no longer supported',
-                    human: $t(`Oops! Je gebruikt een oude versie van de applicatie om in te schrijven. Herlaad de website en verwijder indien nodig de cache van jouw browser.`),
+                    human: $t(`47f56c92-fcfb-4ef4-8d0b-fb0c959fb624`),
                 });
             }
             return [true, params as Params];
@@ -71,7 +71,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'forbidden',
                     message: 'No permission to register as this organization for a different organization',
-                    human: $t(`Je hebt niet de juiste toegangsrechten om leden in te schrijven bij een andere organisatie.`),
+                    human: $t(`62fe6e39-f6b0-4836-b0f7-dc84d22a81e3`),
                     statusCode: 403,
                 });
             }
@@ -93,7 +93,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'too_many_emails_period',
                     message: 'Too many e-mails limited',
-                    human: $t(`Oeps! Om spam te voorkomen limiteren we het aantal test inschrijvingen die je per uur of dag kan plaatsen. Probeer over een uur opnieuw of schakel over naar een betaald abonnement.`),
+                    human: $t(`28fb7a27-9b8e-44e0-833b-44c72ab61306`),
                     field: 'recipients',
                 });
             }
@@ -111,7 +111,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (balanceItemsModels.length !== balanceItemIds.length) {
                 throw new SimpleError({
                     code: 'invalid_data',
-                    message: $t(`Oeps, één of meerdere openstaande bedragen in jouw winkelmandje zijn aangepast. Herlaad de pagina en probeer opnieuw.`),
+                    message: $t(`3e10f812-8871-458c-ae03-c508abfd3ca5`),
                 });
             }
             memberBalanceItemsStructs = balanceItemsModels.map(i => i.getStructure());
@@ -128,7 +128,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (group.organizationId !== organization.id) {
                 throw new SimpleError({
                     code: 'invalid_data',
-                    message: $t(`Oeps, één of meerdere groepen waarin je probeert in te schrijven lijken niet meer te bestaan. Herlaad de pagina en probeer opnieuw.`),
+                    message: $t(`57d57c76-4e76-4b0e-93b5-57ef8025f5ec`),
                 });
             }
         }
@@ -138,7 +138,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'forbidden',
                     message: 'No permission to register this member',
-                    human: $t(`Je hebt niet de juiste toegangsrechten om dit lid in te schrijven. Je kan enkel leden inschrijven als je minstens bewerkrechten hebt voor dat lid.`),
+                    human: $t(`7b7c4b2b-f30c-4cad-ba13-caad591bafde`),
                     statusCode: 403,
                 });
             }
@@ -183,7 +183,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         if (checkout.cart.isEmpty) {
             throw new SimpleError({
                 code: 'empty_data',
-                message: $t(`Oeps, jouw mandje is leeg. Voeg eerst inschrijvingen toe voor je verder gaat.`),
+                message: $t(`29d8bd5c-da83-49b9-a822-c44db58edd1a`),
             });
         }
 
@@ -198,14 +198,14 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         if (totalPrice !== request.body.totalPrice) {
             throw new SimpleError({
                 code: 'changed_price',
-                message: $t(`Oeps! De prijs is gewijzigd terwijl je aan het afrekenen was (naar {total}). Herlaad de pagina even om ervoor te zorgen dat je alle aangepaste prijzen ziet. Contacteer de webmaster als je dit probleem blijft ondervinden na het te herladen.`, { total: Formatter.price(totalPrice) }),
+                message: $t(`e424d549-2bb8-4103-9a14-ac4063d7d454`, { total: Formatter.price(totalPrice) }),
             });
         }
 
         if (totalPrice < 0) {
             throw new SimpleError({
                 code: 'empty_data',
-                message: $t(`Oeps! De totaalprijs is negatief.`),
+                message: $t(`725715e5-b0ac-43c1-adef-dd42b8907327`),
             });
         }
 
@@ -229,7 +229,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (!member) {
                 throw new SimpleError({
                     code: 'invalid_member',
-                    message: $t(`Het lid dat je probeert in te schrijven konden we niet meer terugvinden. Je herlaadt best even de pagina om opnieuw te proberen.`),
+                    message: $t(`bded79ec-0c69-47b1-9944-b9f3821b566e`),
                 });
             }
 
@@ -237,7 +237,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (!group) {
                 throw new SimpleError({
                     code: 'invalid_member',
-                    message: $t(`De groep waarin je een lid probeert in te schrijven lijkt niet meer te bestaan. Je herlaadt best even de pagina om opnieuw te proberen.`),
+                    message: $t(`c4896202-dd3b-4445-a530-3fed231259c2`),
                 });
             }
 
@@ -270,7 +270,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 if (existingRegistration.registeredAt !== null && existingRegistration.deactivatedAt === null) {
                     throw new SimpleError({
                         code: 'already_registered',
-                        message: $t(`{member} is al ingeschreven voor {group}. Mogelijks heb je meerdere keren proberen in te schrijven en is het intussen wel gelukt. Herlaad de pagina best even om zeker te zijn.`, { member: member.firstName, group: group.settings.name }),
+                        message: $t(`04d77a26-25c2-4a3e-a268-98bea9df45a2`, { member: member.firstName, group: group.settings.name }),
                     });
                 }
             }
@@ -351,7 +351,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (!checkout.paymentMethod || !allowedPaymentMethods.includes(checkout.paymentMethod)) {
                 throw new SimpleError({
                     code: 'invalid_payment_method',
-                    message: $t(`Oeps, je hebt geen geldige betaalmethode geselecteerd. Selecteer een betaalmethode en probeer opnieuw. Herlaad de pagina indien nodig.`),
+                    message: $t(`2b1ca6a0-662e-4326-ada1-10239b6ddc6f`),
                 });
             }
 
@@ -359,7 +359,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'missing_fields',
                     message: 'redirectUrl or cancelUrl is missing and is required for non-zero online payments',
-                    human: $t(`Er is iets mis. Contacteer de webmaster.`),
+                    human: $t(`ebe54b63-2de6-4f22-a5ed-d3fe65194562`),
                 });
             }
         }
@@ -384,7 +384,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'forbidden',
                     message: 'Permission denied: you are not allowed to delete registrations',
-                    human: $t(`Oeps, je hebt geen toestemming om inschrijvingen te verwijderen.`),
+                    human: $t(`d47bdfdd-5940-4818-a664-1cd072294a26`),
                     statusCode: 403,
                 });
             }
@@ -393,7 +393,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (!existingRegistration || existingRegistration.organizationId !== organization.id) {
                 throw new SimpleError({
                     code: 'invalid_data',
-                    message: $t(`Oeps, één of meerdere inschrijvingen die je probeert te verwijderen lijken niet meer te bestaan. Herlaad de pagina en probeer opnieuw.`),
+                    message: $t(`282a7491-d129-4e43-9a14-e55c72ef5c5d`),
                 });
             }
 
@@ -401,7 +401,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'forbidden',
                     message: 'No permission to delete this registration',
-                    human: $t(`Je hebt geen toegangsrechten om deze inschrijving te verwijderen.`),
+                    human: $t(`9b772fd5-a36e-4997-85fa-251bb3a97a0a`),
                     statusCode: 403,
                 });
             }
@@ -410,7 +410,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'invalid_data',
                     message: 'Cannot delete inactive registration',
-                    human: $t(`Oeps, één of meerdere inschrijvingen die je probeert te verwijderen was al verwijderd. Herlaad de pagina en probeer opnieuw.`),
+                    human: $t(`a0f43131-c880-4a8e-98e3-bf78df27336c`),
                 });
             }
 
@@ -716,14 +716,14 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (price > 0 && price > Math.max(balanceItem.priceOpen, balanceItem.price - balanceItem.pricePaid)) {
                 throw new SimpleError({
                     code: 'invalid_data',
-                    message: $t(`Oeps, het bedrag dat je probeert te betalen is ongeldig (het bedrag is hoger dan het bedrag dat je moet betalen). Herlaad de pagina en probeer opnieuw.`),
+                    message: $t(`38ddccb2-7cf6-4b47-aa71-d11ad73386d8`),
                 });
             }
 
             if (price < 0 && price < Math.min(balanceItem.priceOpen, balanceItem.price - balanceItem.pricePaid)) {
                 throw new SimpleError({
                     code: 'invalid_data',
-                    message: $t(`Oeps, het bedrag dat je probeert te betalen is ongeldig (het terug te krijgen bedrag is hoger dan het bedrag dat je kan terug krijgen). Herlaad de pagina en probeer opnieuw.`),
+                    message: $t(`dd14a1d9-c569-4d5e-bb26-569ecede4c52`),
                 });
             }
 
@@ -738,7 +738,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 if (!member) {
                     throw new SimpleError({
                         code: 'invalid_data',
-                        message: $t(`Oeps, het lid dat je probeert in te schrijven konden we niet meer terugvinden. Je herlaadt best even de pagina om opnieuw te proberen.`),
+                        message: $t(`e64b8269-1cda-434d-8d6f-35be23a9d6e9`),
                     });
                 }
                 payMembers.push(member);
@@ -749,7 +749,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             // todo: try to make it non-negative by reducing some balance items
             throw new SimpleError({
                 code: 'empty_data',
-                message: $t(`Oeps! De totaalprijs is negatief.`),
+                message: $t(`725715e5-b0ac-43c1-adef-dd42b8907327`),
             });
         }
         const payment = new Payment();
@@ -769,7 +769,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         else if (payment.method === PaymentMethod.Unknown) {
             throw new SimpleError({
                 code: 'invalid_data',
-                message: $t(`Oeps, je hebt geen betaalmethode geselecteerd. Selecteer een betaalmethode en probeer opnieuw.`),
+                message: $t(`86c7b6f7-3ec9-4af3-a5e6-b5de6de80d73`),
             });
         }
 
@@ -795,7 +795,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'missing_fields',
                     message: 'customer is required when paying as an organization',
-                    human: $t(`Vul je facturatiegegevens in om verder te gaan.`),
+                    human: $t(`d483aa9a-289c-4c59-955f-d2f99ec533ab`),
                 });
             }
 
@@ -803,7 +803,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'missing_fields',
                     message: 'customer.company is required when paying as an organization',
-                    human: $t(`Als je een betaling uitvoert in naam van je vereniging, is het noodzakelijk om facturatiegegevens met bedrijfsgegevens in te vullen.`),
+                    human: $t(`bc89861d-a799-4100-b06c-29d6808ba8d2`),
                 });
             }
 
@@ -811,7 +811,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (!payingOrganization) {
                 throw new SimpleError({
                     code: 'invalid_data',
-                    message: $t(`Oeps, de organisatie waarvoor je probeert te betalen lijkt niet meer te bestaan. Herlaad de pagina en probeer opnieuw.`),
+                    message: $t(`492117ce-4d5f-4cff-8f3f-8fa56bbb0fee`),
                 });
             }
 
@@ -823,7 +823,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (!foundCompany) {
                 throw new SimpleError({
                     code: 'invalid_data',
-                    message: $t(`Oeps, de facturatiegegevens die je probeerde te selecteren lijken niet meer te bestaan. Herlaad de pagina en probeer opnieuw.`),
+                    message: $t(`0ab71307-8f4f-4701-b120-b552a1b6bdd0`),
                 });
             }
 
@@ -853,7 +853,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'no_iban',
                     message: 'No IBAN',
-                    human: $t(`Er is geen rekeningnummer ingesteld voor overschrijvingen. Contacteer de beheerder.`),
+                    human: $t(`cc8b5066-a7e4-4eae-b556-f56de5d3502c`),
                 });
             }
 
@@ -893,7 +893,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             balanceItemPayments.push(balanceItemPayment.setRelation(BalanceItemPayment.balanceItem, balanceItem));
         }
 
-        const description = $t(`Inschrijving`) + ' ' + organization.name;
+        const description = $t(`33a926ea-9bc7-444e-becc-c0f2f70e1f0e`) + ' ' + organization.name;
 
         let paymentUrl: string | null = null;
 
@@ -943,7 +943,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     lineItems: balanceItemPayments,
                     organization,
                     customer: {
-                        name: user.name ?? payMembers[0]?.details.name ?? $t(`Onbekend`),
+                        name: user.name ?? payMembers[0]?.details.name ?? $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`),
                         email: user.email,
                     },
                 });
@@ -955,14 +955,14 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 if (!token) {
                     throw new SimpleError({
                         code: '',
-                        message: $t(`Betaling via {method} is onbeschikbaar`, { method: PaymentMethodHelper.getName(payment.method) }),
+                        message: $t(`b77e1f68-8928-42a2-802b-059fa73bedc3`, { method: PaymentMethodHelper.getName(payment.method) }),
                     });
                 }
                 const profileId = organization.privateMeta.mollieProfile?.id ?? await token.getProfileId(organization.getHost());
                 if (!profileId) {
                     throw new SimpleError({
                         code: '',
-                        message: $t(`Betaling via {method} is tijdelijk onbeschikbaar`, { method: PaymentMethodHelper.getName(payment.method) }),
+                        message: $t(`5574469f-8eee-47fe-9fb6-1b097142ac75`, { method: PaymentMethodHelper.getName(payment.method) }),
                     });
                 }
                 const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
@@ -1006,7 +1006,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 if ((payment.status as any) === PaymentStatus.Failed) {
                     throw new SimpleError({
                         code: 'payment_failed',
-                        message: $t(`Betaling via {method} is onbeschikbaar`, { method: PaymentMethodHelper.getName(payment.method) }),
+                        message: $t(`b77e1f68-8928-42a2-802b-059fa73bedc3`, { method: PaymentMethodHelper.getName(payment.method) }),
                     });
                 }
             }

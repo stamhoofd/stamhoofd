@@ -112,8 +112,8 @@ const settings = new RecordEditorSettings({
     exampleValue: new PlatformMember({
         member: MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({
-                firstName: $t(`Voorbeeld`),
-                lastName: $t(`Lid`),
+                firstName: $t(`fbe32760-d352-4d3d-813c-acd50f3cba50`),
+                lastName: $t(`946f5e2e-d92c-4bbd-b64f-115958a04d01`),
                 dataPermissions: BooleanStatus.create({ value: true }),
                 birthDay: new Date('2020-01-01'),
             }),
@@ -127,32 +127,32 @@ const settings = new RecordEditorSettings({
 family.members.push(settings.exampleValue);
 
 const properties = [
-    buildPropertyRefs('gender', $t(`Gender`)),
-    buildPropertyRefs('birthDay', $t(`Geboortedatum`)),
-    buildPropertyRefs('nationalRegisterNumber', $t(`Rijksregisternummer`)),
-    buildPropertyRefs('parents', $t(`Oudergegevens`), {
-        description: $t(`Naam, adres, e-mailadres en telefoonnummer van één of meerdere (plus)ouders`),
+    buildPropertyRefs('gender', $t(`9e080d96-2c2b-47e3-b56c-d58d993974c9`)),
+    buildPropertyRefs('birthDay', $t(`7d7b5a21-105a-41a1-b511-8639b59024a4`)),
+    buildPropertyRefs('nationalRegisterNumber', $t(`00881b27-7501-4c56-98de-55618be2bf11`)),
+    buildPropertyRefs('parents', $t(`fae120e5-80b0-4b67-a8b7-638b43362429`), {
+        description: $t(`bd1d21bd-b58f-4d13-b7c7-510db5702441`),
     }),
-    buildPropertyRefs('phone', $t('90d84282-3274-4d85-81cd-b2ae95429c34') + ' ' + $t(`(van lid zelf)`), {
-        description: $t(`Het GSM-nummer van de ouders wordt al verzameld via de oudergegevens. Activeer dit enkel voor leden die ook echt een eigen GSM-nummer kunnen hebben, en maak het enkel verplicht als je zeker weet dat iedereen een GSM-nummer heeft.`),
-        warning: $t(`Maak dit niet verplicht voor alle leden, anders moeten minderjarige leden ook verplicht een eigen GSM-nummer invullen, wat ze vaak niet hebben. Denk goed na over wat je instelt.`),
+    buildPropertyRefs('phone', $t('90d84282-3274-4d85-81cd-b2ae95429c34') + ' ' + $t(`347b9603-d66d-4587-9935-192eaeb0d3bd`), {
+        description: $t(`f06acd8c-4cec-42ff-b4b4-5da57ef7db09`),
+        warning: $t(`30047312-8c15-4988-8095-a0f605874c22`),
         preventAlways: true,
     }),
-    buildPropertyRefs('emailAddress', $t(`E-mailadres (van lid zelf)`), {
-        description: $t(`Het e-mailadres van de ouders wordt al verzameld via de oudergegevens. Activeer dit enkel voor leden die ook echt een eigen e-mailadres kunnen hebben, en maak het enkel verplicht als je zeker weet dat iedereen een e-mailadres heeft.`),
-        warning: $t(`Maak dit niet verplicht voor alle leden, anders moeten erg jonge leden ook verplicht een eigen e-mailadres invullen, wat ze vaak niet hebben. Denk goed na over wat je instelt.`),
+    buildPropertyRefs('emailAddress', $t(`0d2bf5c4-db71-465b-8795-9cf8cac63c75`), {
+        description: $t(`86db1ded-a836-486d-9ee3-4efc5b24a08f`),
+        warning: $t(`154a3457-6357-4a43-9465-a343d218a591`),
         preventAlways: true,
     }),
-    buildPropertyRefs('address', $t(`Adres (van lid zelf)`), {
-        description: $t(`Het adres van elke ouder wordt al verzameld via de oudergegevens. We raden af om dit te activeren voor minderjarige leden. Bij ouders kan er namelijk per ouder een apart adres ingesteld worden, wat beter geschikt is. Enkel voor volwassen leden is dit beter aangewezen.`),
-        warning: $t(`We raden heel sterk af om dit in te schakelen voor minderjarige leden. Gebruik een leeftijdsfilter om dit enkel in te schakelen voor volwassen leden.`),
+    buildPropertyRefs('address', $t(`bba50e14-c3a1-4b18-9102-14f323453ca0`), {
+        description: $t(`52b884eb-4437-4ecb-94b8-6079730d45c4`),
+        warning: $t(`d905b0d6-f472-4290-b9c2-3e566cdbaf33`),
         preventAlways: true,
     }),
-    buildPropertyRefs('emergencyContacts', $t(`Extra noodcontactpersonen`), {
-        description: $t(`Naam, relatie en telefoonnummer van één of meerdere noodcontactpersonen (als uitbreiding op ouders, niet de ouders zelf)`),
+    buildPropertyRefs('emergencyContacts', $t(`243b1b1d-feca-43ab-a240-24e5ba785983`), {
+        description: $t(`8a1ef416-1a1d-4e12-8b47-29d9c86a1dfe`),
     }),
-    buildPropertyRefs('uitpasNumber', $t(`UiTPAS-nummer`), {
-        warning: $t(`Maak dit niet verplicht voor alle leden anders moet iedereen verplicht een UiTPAS-nummer invullen, wat niet iedereen heeft.`),
+    buildPropertyRefs('uitpasNumber', $t(`87c1a48c-fef5-44c3-ae56-c83463fcfb84`), {
+        warning: $t(`0fcd2a4c-1c44-46df-be27-c8800370769d`),
         preventAlways: true,
     }),
 ];
@@ -185,7 +185,7 @@ const financialSupport = {
         set: (value: boolean) => {
             if (value) {
                 if (!dataPermissions.enabled.value) {
-                    Toast.error($t(`De financiële status van een lid is gevoelige informatie en vereist toestemming voor gegevensverzameling`)).show();
+                    Toast.error($t(`521bbf47-fee2-4491-afd5-d263b0ebeda9`)).show();
                     return;
                 }
                 addPatch({
@@ -297,7 +297,7 @@ function buildRefForInheritedCategory(categoryId: string) {
 
             if (enable) {
                 if (requiresDataPermissions.value && !dataPermissions.enabled.value) {
-                    Toast.error($t(`Deze vragenlijst bevat gegevens waar je toestemming voor moet vragen. Schakel de toestemming voor gegevevensverzameling in om deze vragenlijst te activeren.`)).show();
+                    Toast.error($t(`1f1e0d12-3960-46f9-b1e7-d8b42a89e51f`)).show();
                     return;
                 }
 
@@ -320,7 +320,7 @@ function buildRefForInheritedCategory(categoryId: string) {
     const configuration = computed(() => enabled.value ? (patched.value.inheritedRecordCategories.get(categoryId) ?? category.value?.filter ?? PropertyFilter.createDefault()) : null);
 
     return ref({
-        title: category.value?.name ?? $t(`Naamloos`),
+        title: category.value?.name ?? $t(`efd71f7c-05d3-4bdc-ae46-13024d6527f0`),
         enabled,
         locked,
         configuration,

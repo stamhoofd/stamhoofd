@@ -11,7 +11,6 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncTableAction, Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, TableActionSelection, useAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { AccessRight, ContinuousMembershipStatus, Group, GroupCategoryTree, GroupPrice, GroupType, MemberResponsibility, MembershipStatus, Organization, PermissionLevel, PlatformMember, RecordAnswer, RegisterItemOption, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
@@ -55,7 +54,7 @@ const title = computed(() => {
         return props.group.settings.name;
     }
 
-    return $t(`Leden`);
+    return $t(`fb35c140-e936-4e91-aa92-ef4dfc59fb51`);
 });
 
 const estimatedRows = computed(() => {
@@ -208,7 +207,7 @@ const allColumns: Column<ObjectType, any>[] = [
         name: '#',
         getValue: member => member.member.details.memberNumber ?? '',
         getStyle: val => val ? '' : 'gray',
-        format: val => val ? val : $t(`Geen`),
+        format: val => val ? val : $t(`60abecdc-9f60-4e4a-a994-95e3fec67a5a`),
         minimumWidth: 100,
         recommendedWidth: 150,
         grow: true,
@@ -218,7 +217,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'name',
-        name: $t(`Naam`),
+        name: $t(`522fb6c5-6d4d-4d9c-94b7-3e282fb0ea1f`),
         getValue: member => member.member.name,
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -226,7 +225,7 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
     new Column<ObjectType, Date | null>({
         id: 'birthDay',
-        name: $t(`Geboortedatum`),
+        name: $t(`7d7b5a21-105a-41a1-b511-8639b59024a4`),
         getValue: member => member.member.details.birthDay,
         format: date => date ? Formatter.dateNumber(date, true) : '',
         minimumWidth: 50,
@@ -235,15 +234,15 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
     new Column<ObjectType, number | null>({
         id: 'age',
-        name: $t(`Leeftijd`),
+        name: $t(`992b79e9-8c6e-4096-aa59-9e5f546eac41`),
         getValue: member => member.member.details.age,
-        format: (age, width) => age ? (width <= 60 ? Formatter.integer(age) : (Formatter.integer(age) + ' ' + $t(`jaar`))) : $t(`onbekend`),
+        format: (age, width) => age ? (width <= 60 ? Formatter.integer(age) : (Formatter.integer(age) + ' ' + $t(`ba6f46a9-2598-4da2-beb2-fdf9ba890bfd`))) : $t(`af93c340-950c-4f6c-be6a-6bb847ec2d41`),
         minimumWidth: 50,
         recommendedWidth: 120,
     }),
     new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
         id: 'membership',
-        name: $t(`Aansluiting`),
+        name: $t(`c7d995f1-36a0-446e-9fcf-17ffb69f3f45`),
         getValue: (member) => {
             return {
                 status: member.membershipStatus,
@@ -253,15 +252,15 @@ const allColumns: Column<ObjectType, any>[] = [
         format: ({ status }) => {
             switch (status) {
                 case MembershipStatus.Trial:
-                    return $t(`Proefperiode`);
+                    return $t(`47c7c3c4-9246-40b7-b1e0-2cb408d5f79e`);
                 case MembershipStatus.Active:
-                    return $t(`Actief`);
+                    return $t(`b56351e9-4847-4a0c-9eec-348d75c794c4`);
                 case MembershipStatus.Expiring:
-                    return $t(`Verlopen`);
+                    return $t(`d9858110-37d9-4b4a-8bfb-d76b3cc5ef27`);
                 case MembershipStatus.Temporary:
-                    return $t(`Tijdelijk`);
+                    return $t(`75e62d3c-f348-4104-8a1e-e11e6e7fbe32`);
                 case MembershipStatus.Inactive:
-                    return $t(`Niet verzekerd`);
+                    return $t(`1f8620fa-e8a5-4665-99c8-c1907a5b5768`);
             }
         },
         getStyle: ({ status, hasFutureMembership }) => {
@@ -319,12 +318,12 @@ const allColumns: Column<ObjectType, any>[] = [
         })
         : null,
     new Column<ObjectType, string[]>({
-        name: $t(`Functies`),
+        name: $t(`d0defb77-0a25-4b85-a03e-57569c5edf6c`),
         allowSorting: false,
         getValue: member => member.getResponsibilities({ organization: organization.value ?? undefined }).map(l => l.getName(member, false)),
         format: (list) => {
             if (list.length === 0) {
-                return $t(`Geen`);
+                return $t(`60abecdc-9f60-4e4a-a994-95e3fec67a5a`);
             }
             return list.join(', ');
         },
@@ -334,12 +333,12 @@ const allColumns: Column<ObjectType, any>[] = [
         enabled: false,
     }),
     new Column<ObjectType, string[]>({
-        name: $t(`Account`),
+        name: $t(`d84503e9-7d0e-4c4b-a3ca-92bfbed6ca49`),
         allowSorting: false,
         getValue: member => member.patchedMember.users.filter(u => u.hasAccount).map(u => u.email),
         format: (accounts) => {
             if (accounts.length === 0) {
-                return $t(`Geen account`);
+                return $t(`e7592781-8be0-4912-8628-e611e88431ba`);
             }
             return accounts.join(', ');
         },
@@ -358,7 +357,7 @@ if (props.group) {
                 allowSorting: false,
                 name: $t('a5ecc2e0-c1f2-4cfb-b4b2-8a17782787bc'),
                 getValue: member => member.filterRegistrations({ groups: [props.group!] }).map(r => r.groupPrice),
-                format: prices => Formatter.joinLast(prices.map(o => o.name).sort(), ', ', ' ' + $t(`en`) + ' ') || $t('e41660ea-180a-45ef-987c-e780319c4331'),
+                format: prices => Formatter.joinLast(prices.map(o => o.name).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || $t('e41660ea-180a-45ef-987c-e780319c4331'),
                 getStyle: prices => prices.length === 0 ? 'gray' : '',
                 minimumWidth: 100,
                 recommendedWidth: 300,
@@ -381,7 +380,7 @@ if (props.group) {
                 }),
                 format: (values) => {
                     if (values.length === 0) {
-                        return $t(`Geen`);
+                        return $t(`60abecdc-9f60-4e4a-a994-95e3fec67a5a`);
                     }
                     return values.map(v => v.option.allowAmount || v.amount > 1 ? (v.amount + 'x ' + v.option.name) : v.option.name).join(', ');
                 },
@@ -410,7 +409,7 @@ if (props.group) {
                     },
                     format: (answer) => {
                         if (answer === null) {
-                            return $t(`Ontbreekt`);
+                            return $t(`3d71ea5d-244b-493e-ba2a-6644dea74b30`);
                         }
                         return answer.stringValue;
                     },
@@ -442,38 +441,38 @@ if (groups.length) {
 
                 // Check missing information
                 if (!member.patchedMember.details.phone && member.isPropertyRequired('phone', scope)) {
-                    base.push($t(`telefoonnummer`));
+                    base.push($t(`de723a38-6e76-418a-a6f6-52c6ed45c5c8`));
                 }
 
                 if (!member.patchedMember.details.email && member.isPropertyRequired('emailAddress', scope)) {
-                    base.push($t(`e-mailadres`));
+                    base.push($t(`64163c88-2610-4542-9fd4-db523670049c`));
                 }
 
                 if (!member.patchedMember.details.address && member.isPropertyRequired('address', scope)) {
-                    base.push($t(`adres`));
+                    base.push($t(`ca287035-d735-4eaa-bbb3-ae0db435b4ea`));
                 }
 
                 if (!member.patchedMember.details.birthDay && member.isPropertyRequired('birthDay', scope)) {
-                    base.push($t(`geboortedatum`));
+                    base.push($t(`88a24a2b-d84a-4c7e-978d-6180e260a06f`));
                 }
 
                 if (!member.patchedMember.details.nationalRegisterNumber && member.isPropertyRequired('nationalRegisterNumber', scope)) {
-                    base.push($t(`rijksregisternummer`));
+                    base.push($t(`e7a21ff5-4f90-4518-8279-ea4fb747fb66`));
                 }
                 else {
                     if (member.isPropertyRequired('parents', scope) && member.isPropertyRequired('nationalRegisterNumber', scope) && !member.patchedMember.details.parents.find(p => p.nationalRegisterNumber)) {
-                        base.push($t(`rijksregisternummer ouders`));
+                        base.push($t(`af59b3e6-e47c-4c9f-a571-2e1662f17114`));
                     }
                 }
 
                 if (member.isPropertyRequired('parents', scope)) {
                     if (member.patchedMember.details.parents.length === 0) {
-                        base.push($t(`ouders`));
+                        base.push($t(`8a5dfcff-bbe3-4b8f-8b6d-85df4d35dc94`));
                     }
                 }
 
                 if (member.patchedMember.details.emergencyContacts.length === 0 && member.isPropertyRequired('emergencyContacts', scope)) {
-                    base.push($t(`noodcontactpersonen`));
+                    base.push($t(`d42f4d7d-a453-403b-9b3f-459020fc8849`));
                 }
 
                 const enabledCategories = member.getEnabledRecordCategories(scope);
@@ -481,7 +480,7 @@ if (groups.length) {
                 const incomplete = enabledCategories.filter(c => !c.isComplete(member));
                 return [...base, ...incomplete.map(c => c.name)];
             },
-            format: prices => Formatter.capitalizeFirstLetter(Formatter.joinLast(prices, ', ', ' ' + $t(`en`) + ' ') || $t('e41660ea-180a-45ef-987c-e780319c4331')),
+            format: prices => Formatter.capitalizeFirstLetter(Formatter.joinLast(prices, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || $t('e41660ea-180a-45ef-987c-e780319c4331')),
             getStyle: prices => prices.length === 0 ? 'gray' : '',
             minimumWidth: 100,
             recommendedWidth: 300,
@@ -497,7 +496,7 @@ if (app === 'admin' || (props.group && props.group.settings.requireOrganizationI
             allowSorting: false,
             name: $t('2f325358-6e2f-418c-9fea-31a14abbc17a'),
             getValue: member => member.filterOrganizations({ periodId: filterPeriodId, types: [GroupType.Membership] }),
-            format: organizations => Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' ' + $t(`en`) + ' ') || $t('1a16a32a-7ee4-455d-af3d-6073821efa8f'),
+            format: organizations => Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || $t('1a16a32a-7ee4-455d-af3d-6073821efa8f'),
             getStyle: organizations => organizations.length === 0 ? 'gray' : '',
             minimumWidth: 100,
             recommendedWidth: 300,
@@ -511,7 +510,7 @@ if (app === 'admin' || (props.group && props.group.settings.requireOrganizationI
             allowSorting: false,
             name: $t('9d283cbb-7ba2-4a16-88ec-ff0c19f39674'),
             getValue: member => member.filterOrganizations({ periodId: filterPeriodId, types: [GroupType.Membership] }),
-            format: organizations => Formatter.joinLast(organizations.map(o => o.uri).sort(), ', ', ' ' + $t(`en`) + ' ') || $t('e41660ea-180a-45ef-987c-e780319c4331'),
+            format: organizations => Formatter.joinLast(organizations.map(o => o.uri).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || $t('e41660ea-180a-45ef-987c-e780319c4331'),
             getStyle: organizations => organizations.length === 0 ? 'gray' : '',
             minimumWidth: 100,
             recommendedWidth: 300,
@@ -531,11 +530,11 @@ if (props.group && props.group.type === GroupType.EventRegistration && props.gro
                 const registrations = member.filterRegistrations({ groups, periodId: filterPeriodId });
                 if (registrations.find(r => r.payingOrganizationId)) {
                     const organization = member.organizations.find(o => o.id === registrations[0].payingOrganizationId);
-                    return organization ? organization.name : $t(`Onbekend`);
+                    return organization ? organization.name : $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`);
                 }
                 return null;
             },
-            format: organizations => organizations || $t(`Nee`),
+            format: organizations => organizations || $t(`b8b730fb-f1a3-4c13-8ec4-0aebe08a1449`),
             getStyle: organizations => organizations === null ? 'gray' : '',
             minimumWidth: 100,
             recommendedWidth: 300,
@@ -547,7 +546,7 @@ if (props.group && props.group.type === GroupType.EventRegistration && props.gro
 if (groups.find(g => g.settings.trialDays)) {
     allColumns.push(
         new Column<ObjectType, Date | null>({
-            name: $t(`Proefperiode`),
+            name: $t(`47c7c3c4-9246-40b7-b1e0-2cb408d5f79e`),
             allowSorting: false,
             getValue: (v) => {
                 const registrations = v.filterRegistrations({ groups, periodId: props.periodId ?? props.group?.periodId ?? '' });
@@ -566,9 +565,9 @@ if (groups.find(g => g.settings.trialDays)) {
             },
             format: (v, width) => {
                 if (!v) {
-                    return $t(`Geen`);
+                    return $t(`60abecdc-9f60-4e4a-a994-95e3fec67a5a`);
                 }
-                return $t(`Tot`) + ' ' + (width < 200 ? Formatter.dateNumber(v) : Formatter.date(v));
+                return $t(`68860bdb-dad1-40d5-9130-6219c83fe977`) + ' ' + (width < 200 ? Formatter.dateNumber(v) : Formatter.date(v));
             },
             getStyle: v => v === null ? 'gray' : 'secundary',
             minimumWidth: 80,
@@ -579,7 +578,7 @@ if (groups.find(g => g.settings.trialDays)) {
 
 allColumns.push(
     new Column<ObjectType, Date | null>({
-        name: $t(`Startdatum`),
+        name: $t(`bbe0af99-b574-4719-a505-ca2285fa86e4`),
         allowSorting: false,
         getValue: (v) => {
             const registrations = v.filterRegistrations({ groups, periodId: filterPeriodId });
@@ -595,7 +594,7 @@ allColumns.push(
             }
             return new Date(Math.min(...filtered));
         },
-        format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`Onbekend`),
+        format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`),
         getStyle: v => v === null ? 'gray' : '',
         minimumWidth: 80,
         recommendedWidth: 200,
@@ -605,7 +604,7 @@ allColumns.push(
 
 allColumns.push(
     new Column<ObjectType, Date | null>({
-        name: waitingList.value ? $t(`Sinds`) : $t(`Inschrijvingsdatum`),
+        name: waitingList.value ? $t(`2a96fc1f-3710-4eae-bd01-b95ef8c2622b`) : $t(`8895f354-658f-48bd-9d5d-2e0203ca2a36`),
         allowSorting: false,
         getValue: (v) => {
             const registrations = v.filterRegistrations({ groups, periodId: filterPeriodId });
@@ -621,7 +620,7 @@ allColumns.push(
             }
             return new Date(Math.min(...filtered));
         },
-        format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`Onbekend`),
+        format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`),
         getStyle: v => v === null ? 'gray' : '',
         minimumWidth: 80,
         recommendedWidth: 200,
@@ -631,7 +630,7 @@ allColumns.push(
 if (!waitingList.value && financialRead.value) {
     allColumns.push(
         new Column<ObjectType, number>({
-            name: $t(`Prijs`),
+            name: $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
             allowSorting: false,
             getValue: v => v.filterRegistrations({ groups: groups }).flatMap(r => r.balances).reduce((sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending), 0),
             format: (outstandingBalance) => {
@@ -639,7 +638,7 @@ if (!waitingList.value && financialRead.value) {
                     return Formatter.price(outstandingBalance);
                 }
                 if (outstandingBalance <= 0) {
-                    return $t(`Gratis`);
+                    return $t(`30e129d7-349d-4369-a8c4-c86b82ce2e01`);
                 }
                 return Formatter.price(outstandingBalance);
             },
@@ -652,7 +651,7 @@ if (!waitingList.value && financialRead.value) {
 
     allColumns.push(
         new Column<ObjectType, number>({
-            name: $t(`Te betalen`),
+            name: $t(`3a97e6cb-012d-4007-9c54-49d3e5b72909`),
             allowSorting: false,
             getValue: v => v.filterRegistrations({ groups: groups }).flatMap(r => r.balances).reduce((sum, r) => sum + (r.amountOpen), 0),
             format: (outstandingBalance) => {
@@ -660,7 +659,7 @@ if (!waitingList.value && financialRead.value) {
                     return Formatter.price(outstandingBalance);
                 }
                 if (outstandingBalance <= 0) {
-                    return $t(`Betaald`);
+                    return $t(`885254e1-4bd2-40be-a1aa-4c60e592b9b9`);
                 }
                 return Formatter.price(outstandingBalance);
             },
@@ -677,7 +676,7 @@ if (props.category) {
         new Column<ObjectType, Group[]>({
             id: 'category',
             allowSorting: false,
-            name: waitingList.value ? $t(`Wachtlijst`) : (props.category.settings.name || $t('b467444b-879a-4bce-b604-f7e890008c4f')),
+            name: waitingList.value ? $t(`a1608b0c-760b-4de1-9616-dea65c812437`) : (props.category.settings.name || $t('b467444b-879a-4bce-b604-f7e890008c4f')),
             getValue: (member) => {
                 if (!props.category) {
                     return [];
@@ -689,7 +688,7 @@ if (props.category) {
             },
             format: (groups) => {
                 if (groups.length === 0) {
-                    return $t(`Geen`);
+                    return $t(`60abecdc-9f60-4e4a-a994-95e3fec67a5a`);
                 }
                 return groups.map(g => g.settings.name).join(', ');
             },
@@ -716,7 +715,7 @@ if (!props.group && !props.category) {
             },
             format: (groups) => {
                 if (groups.length === 0) {
-                    return $t(`Geen`);
+                    return $t(`60abecdc-9f60-4e4a-a994-95e3fec67a5a`);
                 }
                 return groups.map(g => g.settings.name).join(', ');
             },
@@ -752,7 +751,7 @@ const excludeEdit = props.group && props.group.type === GroupType.EventRegistrat
 
 const actions: TableAction<ObjectType>[] = [
     new InMemoryTableAction({
-        name: $t(`Leden inschrijven`),
+        name: $t(`162644a1-aee8-497b-b837-04abb995047f`),
         icon: 'add',
         priority: 0,
         groupIndex: 1,
@@ -770,7 +769,7 @@ const actions: TableAction<ObjectType>[] = [
 
 if (app !== 'admin' && auth.canManagePayments()) {
     actions.push(new AsyncTableAction({
-        name: $t(`Bedrag aanrekenen`),
+        name: $t(`d799bffc-fd09-4444-abfa-3552b3c46cb9`),
         icon: 'calculator',
         priority: 13,
         groupIndex: 4,

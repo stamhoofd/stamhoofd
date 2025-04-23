@@ -63,7 +63,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Webshop not found',
-                    human: $t(`Deze webshop bestaat niet (meer)`),
+                    human: $t(`648708e0-b2f1-4336-979a-3ec3ca9cb8fd`),
                 });
             }
 
@@ -74,7 +74,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'not_authenticated',
                     message: 'Not authenticated',
-                    human: $t(`Je moet inloggen om een bestelling te kunnen plaatsen.`),
+                    human: $t(`2d5e0e5a-3fbe-4c75-ac6e-0fe8fb534716`),
                     statusCode: 401,
                 });
             }
@@ -95,7 +95,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     throw new SimpleError({
                         code: 'too_many_emails_period',
                         message: 'Too many e-mails limited',
-                        human: $t(`Oeps! Om spam te voorkomen limiteren we het aantal test bestellingen die je per uur of dag kan plaatsen. Probeer over een uur opnieuw of schakel over naar een betaald abonnement.`),
+                        human: $t(`a0e947ed-42d6-4cb8-98de-e38c27afc4db`),
                         field: 'recipients',
                     });
                 }
@@ -110,7 +110,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'duplicate_codes',
                     message: 'Duplicate usage of discount codes',
-                    human: $t(`Sommige kortingcodes werden dubbel toegepast op jouw bestelling. Kijk het even na, dit is niet toegestaan.`),
+                    human: $t(`3de5ff97-4f7c-4eb3-8ead-21563ae8fbe1`),
                     field: 'cart.discountCodes',
                 });
             }
@@ -122,7 +122,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     throw new SimpleError({
                         code: 'invalid_code',
                         message: 'Invalid discount code',
-                        human: $t(`De kortingscode die je hebt toegevoegd is niet (meer) geldig`),
+                        human: $t(`c119c353-14ad-4a9e-958f-44189725f105`),
                         field: 'cart.discountCodes',
                     });
                 }
@@ -280,14 +280,14 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         if (!token) {
                             throw new SimpleError({
                                 code: '',
-                                message: $t(`Betaling via {method} is onbeschikbaar`, { method: PaymentMethodHelper.getName(payment.method) }),
+                                message: $t(`b77e1f68-8928-42a2-802b-059fa73bedc3`, { method: PaymentMethodHelper.getName(payment.method) }),
                             });
                         }
                         const profileId = organization.privateMeta.mollieProfile?.id ?? await token.getProfileId(webshop.getHost());
                         if (!profileId) {
                             throw new SimpleError({
                                 code: '',
-                                message: $t(`Betaling via {method} is tijdelijk onbeschikbaar`, { method: PaymentMethodHelper.getName(payment.method) }),
+                                message: $t(`5574469f-8eee-47fe-9fb6-1b097142ac75`, { method: PaymentMethodHelper.getName(payment.method) }),
                             });
                         }
                         const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
@@ -335,7 +335,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         if ((payment.status as any) === PaymentStatus.Failed) {
                             throw new SimpleError({
                                 code: 'payment_failed',
-                                message: $t(`Betaling via {method} is onbeschikbaar`, {
+                                message: $t(`b77e1f68-8928-42a2-802b-059fa73bedc3`, {
                                     method: PaymentMethodHelper.getName(payment.method),
                                 }),
                             });

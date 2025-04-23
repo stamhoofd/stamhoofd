@@ -174,9 +174,9 @@ const inputPlaceholder = computed(() => {
             if (props.record.type === RecordType.Integer) {
                 return answer.value.settings.inputPlaceholder;
             }
-            return $t(`Optioneel.`) + ' ' + answer.value.settings.inputPlaceholder;
+            return $t(`b2933d54-b2ec-4fde-965c-7d62de768a1e`) + ' ' + answer.value.settings.inputPlaceholder;
         }
-        return $t(`Optioneel`);
+        return $t(`6b886749-1039-4c0b-b239-fbae9fd5f291`);
     }
     return answer.value.settings.inputPlaceholder || answer.value.settings.name;
 });

@@ -206,7 +206,7 @@ const levelPrefix = computed(() => {
             prefixes.push(...tagNames);
         }
         else {
-            prefixes.push($t(`Nationaal`));
+            prefixes.push($t(`81df09d0-56ee-491d-b474-85173b1401dd`));
         }
     }
     else {
@@ -219,7 +219,7 @@ const levelPrefix = computed(() => {
         }
     }
 
-    const base = Formatter.joinLast(prefixes, ', ', ' ' + $t(`en`) + ' ');
+    const base = Formatter.joinLast(prefixes, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ');
 
     if (groupOrganization.value && props.event.organizationId === null) {
         return `${base} (via ${groupOrganization.value.name})`;
@@ -362,7 +362,7 @@ async function addMembers() {
     }
 
     if (!organization.value) {
-        Toast.warning($t(`Ga naar het beheerdersportaal van een groep om leden uit die groep toe te voegen. Dit kan niet via het administratieportaal.`)).show();
+        Toast.warning($t(`853fe2cb-6cf6-48a3-8ee8-a0cf30b1a823`)).show();
         return;
     }
 

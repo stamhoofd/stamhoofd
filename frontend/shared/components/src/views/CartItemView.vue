@@ -292,16 +292,16 @@ const cartEnabled = computed(() => props.webshop.shouldEnableCart);
 const withSeats = computed(() => props.cartItem.product.seatingPlanId !== null);
 const suffixSingular = computed(() => {
     if (props.cartItem.product.type === ProductType.Ticket) {
-        return $t(`ticket`);
+        return $t(`3cb04b43-16ca-4467-8729-ea7dcd206ed0`);
     }
-    return props.cartItem.product.type === ProductType.Person ? $t(`persoon`) : $t(`stuk`);
+    return props.cartItem.product.type === ProductType.Person ? $t(`28f60cd9-f9bc-46ff-8fd3-8b6a6a109b4b`) : $t(`599ce864-4059-48eb-82f8-9191e9507050`);
 });
 
 const suffix = computed(() => {
     if (props.cartItem.product.type === ProductType.Ticket) {
-        return $t(`tickets`);
+        return $t(`390d335e-98c4-4c60-92fc-f1616096c875`);
     }
-    return props.cartItem.product.type === ProductType.Person ? $t(`personen`) : $t(`stuks`);
+    return props.cartItem.product.type === ProductType.Person ? $t(`414f837c-b446-41c4-b522-3e6b473d5b5d`) : $t(`3ee3c7fa-db00-4aa3-94eb-046a6af0cc9a`);
 });
 
 const image = computed(() => props.cartItem.product.images[0]?.getResolutionForSize(600, undefined));
