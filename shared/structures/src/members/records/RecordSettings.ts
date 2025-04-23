@@ -107,9 +107,9 @@ export function getRecordTypeName(type: RecordType) {
 }
 
 export enum RecordWarningType {
-    Info = $t(`Info`),
-    Warning = $t(`Warning`),
-    Error = $t(`Error`),
+    Info = 'Info',
+    Warning = 'Warning',
+    Error = 'Error',
 }
 
 export class RecordWarning extends AutoEncoder {

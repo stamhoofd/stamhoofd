@@ -5,7 +5,7 @@ import { Country, CountryDecoder, CountryHelper } from './CountryDecoder.js';
 
 export class Address extends AutoEncoder {
     get id() {
-        return this.toString();
+        return this.street + ' ' + this.number + ', ' + this.postalCode + ' ' + this.city + ', ' + this.country;
     }
 
     static patchIdentifier() {

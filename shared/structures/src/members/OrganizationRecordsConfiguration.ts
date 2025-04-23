@@ -65,28 +65,34 @@ export class FinancialSupportSettings extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 319 })
     preventSelfAssignmentText: string | null = null;
 
+    // todo translations
     static get defaultDescription() {
-        return $t(`We doen ons best om de kostprijs van onze activiteiten zo laag mogelijk te houden. Daarnaast voorzien we middelen om gezinnen die dat nodig hebben te ondersteunen. Om de drempel zo laag mogelijk te houden, voorzien we een discrete checkbox waarmee je kan aangeven dat je ondersteuning nodig hebt. We gaan hier uiterst discreet mee om.`);
+        return `We doen ons best om de kostprijs van onze activiteiten zo laag mogelijk te houden. Daarnaast voorzien we middelen om gezinnen die dat nodig hebben te ondersteunen. Om de drempel zo laag mogelijk te houden, voorzien we een discrete checkbox waarmee je kan aangeven dat je ondersteuning nodig hebt. We gaan hier uiterst discreet mee om.`;
     }
 
+    // todo translations
     static get defaultTitle() {
-        return $t(`Financiële ondersteuning`);
+        return `Financiële ondersteuning`;
     }
 
+    // todo translations
     static get defaultPriceName() {
-        return $t(`Verlaagd tarief`);
+        return `Verlaagd tarief`;
     }
 
+    // todo translations
     static get defaultCheckboxLabel() {
-        return $t(`Mijn gezin heeft nood aan financiële ondersteuning en ik wil dit discreet kenbaar maken`);
+        return `Mijn gezin heeft nood aan financiële ondersteuning en ik wil dit discreet kenbaar maken`;
     }
 
+    // todo translations
     static get defaultWarningText() {
-        return $t(`Gebruikt financiële ondersteuning`);
+        return `Gebruikt financiële ondersteuning`;
     }
 
+    // todo translations
     static get defaultPreventSelfAssignmentText() {
-        return $t(`Er is goedkeuring nodig om in te schrijven met financiële ondersteuning. Gelieve de groep te contacteren.`);
+        return `Er is goedkeuring nodig om in te schrijven met financiële ondersteuning. Gelieve de groep te contacteren.`;
     }
 }
 

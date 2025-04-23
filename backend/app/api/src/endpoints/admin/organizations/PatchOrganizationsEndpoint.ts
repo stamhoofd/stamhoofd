@@ -55,7 +55,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'cannot_delete_membership_organization',
                     message: 'Cannot delete membership organization',
-                    human: $t(`Je kan de hoofdgroep niet verwijderen. Als je dit toch wil doen, kan je eerst een andere vereniging instellen als hoofdgroep via \`)Boekhouding en aansluitingen\'.',
+                    human: $t(`Je kan de hoofdgroep niet verwijderen. Als je dit toch wil doen, kan je eerst een andere vereniging instellen als hoofdgroep via ')Boekhouding en aansluitingen'.`),
                 });
             }
 
