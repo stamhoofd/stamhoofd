@@ -15,6 +15,7 @@ import { useContext, useFeatureFlag, useOrganization, usePlatform, useUser } fro
 import STInputBox from './inputs/STInputBox.vue';
 import STListItem from './layout/STListItem.vue';
 import STNavigationBar from './navigation/STNavigationBar.vue';
+import TTextarea from './inputs/TTextarea.vue';
 
 export type ComponentExposed<T> =
 	T extends new (...args: any[]) => infer E ? E :
@@ -120,6 +121,7 @@ export class VueGlobalHelper {
         app.component('LoadingButton', LoadingButton);
         app.component('STToolbar', STToolbar);
         app.component('Spinner', Spinner);
+        app.component('TTextarea', TTextarea);
 
         document.addEventListener('keydown', (event) => {
             const element = event.target as HTMLInputElement;

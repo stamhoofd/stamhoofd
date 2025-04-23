@@ -10,30 +10,28 @@
     </STErrorsInput>
 </template>
 
-
 <script lang="ts">
-import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsInput from '../errors/STErrorsInput.vue';
 
 @Component({
     components: {
-        STErrorsInput
-    }
+        STErrorsInput,
+    },
 })
 export default class STInputBox extends VueComponent {
-    @Prop({ default: ""}) errorFields: string;
+    @Prop({ default: '' }) errorFields: string;
     @Prop({ default: null }) errorBox: ErrorBox | null;
 
-    @Prop({ default: false})
-    indent!: boolean
+    @Prop({ default: false })
+    indent!: boolean;
 
-    @Prop({ default: ""})
-    title!: string
+    @Prop({ default: '' })
+    title!: string;
 }
 </script>
-
 
 <style lang="scss">
 @use '@stamhoofd/scss/base/text-styles.scss';
@@ -90,6 +88,11 @@ export default class STInputBox extends VueComponent {
             flex-shrink: 0;
             align-self: flex-end;
             height: 24px;
+
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 7px;
         }
 
         ~ * {

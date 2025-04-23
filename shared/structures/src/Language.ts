@@ -20,4 +20,17 @@ export class LanguageHelper {
                 return '';
         }
     }
+
+    static getName(language: Language): string {
+        switch (language) {
+            case Language.Dutch:
+                return $t('Nederlands');
+            case Language.English:
+                return $t('Engels');
+            case Language.French:
+                return $t('Frans');
+            default:
+                return '';
+        }
+    }
 }

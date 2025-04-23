@@ -23,6 +23,7 @@ export * from './src/PriceBreakdown.js';
 
 // General
 export * from './src/Language.js';
+export * from './src/TranslatedString.js';
 export * from './src/AccessRight.js';
 export * from './src/addresses/Address.js';
 export * from './src/addresses/City.js';

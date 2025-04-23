@@ -12,6 +12,7 @@
 
                 <template #right>
                     <template v-if="!$isMobile && !$isIOS">
+                        <EditorLanguageButton />
                         <slot name="buttons" />
                     </template>
                     <LoadingButton v-if="canDelete" :loading="deleting">
@@ -73,6 +74,8 @@ import STButtonToolbar from './STButtonToolbar.vue';
 import STNavigationBar from './STNavigationBar.vue';
 import STToolbar from './STToolbar.vue';
 import { useKeyDown } from '../hooks';
+import { defineEditorContext } from '../inputs/hooks/useEditorContext';
+import { EditorLanguageButton } from '../inputs';
 
 withDefaults(
     defineProps<{
@@ -120,6 +123,7 @@ const canPop = useCanPop();
 const dismiss = useDismiss();
 const pop = usePop();
 const emit = defineEmits(['save', 'delete']);
+defineEditorContext();
 
 // CMD + S = Save
 useKeyDown((key, modifiers) => {
