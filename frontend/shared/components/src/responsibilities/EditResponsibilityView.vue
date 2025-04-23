@@ -23,7 +23,7 @@
 
             <div class="split-inputs">
                 <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`17dc0c45-14fb-4296-9b1d-1dddccf3970e`)">
-                    <NumberInput v-model="minimumMembers" :required="false" :placeholder="$t(`Geen`)" />
+                    <NumberInput v-model="minimumMembers" :required="false" :placeholder="$t(`57ee093f-d5f8-40f5-a991-53ff348c7376`)" />
                 </STInputBox>
 
                 <STInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`74797680-f43e-49dc-ba7e-c60990a76946`)">

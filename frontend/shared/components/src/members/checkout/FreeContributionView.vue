@@ -1,6 +1,6 @@
 <template>
     <div id="free-contribution-view" class="st-view">
-        <STNavigationBar :title="$t(`Vrije bijdrage`)" />
+        <STNavigationBar :title="$t(`6a1afe5c-dd96-4b0f-ad6f-f0598b366d54`)" />
         <main>
             <h1>{{ $t('16ca0372-9c8f-49f0-938d-aee012e59f8c') }} <span class="style-tag">{{ $t('9e0461d2-7439-4588-837c-750de6946287') }}</span></h1>
             <p v-if="description" class="style-description pre-wrap" v-text="description" />

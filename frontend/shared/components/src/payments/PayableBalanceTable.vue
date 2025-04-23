@@ -1,7 +1,7 @@
 <template>
     <div v-if="filteredItems.length !== 0 || !showName" class="container">
         <hr><h2>
-            {{ !showName ? $t('a44d9f94-a83a-49b9-9a89-833b7873fc74') : $t('Openstaand bij {organization}', {organization: item.organization.name}) }}
+            {{ !showName ? $t('a44d9f94-a83a-49b9-9a89-833b7873fc74') : $t('6030bf67-f3ec-48f1-8c00-be3e3f745351', {organization: item.organization.name}) }}
         </h2>
 
         <p v-if="filteredItems.length === 0" class="info-box">

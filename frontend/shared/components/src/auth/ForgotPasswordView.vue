@@ -1,6 +1,6 @@
 <template>
     <form class="st-view forgot-password-view" @submit.prevent="submit">
-        <STNavigationBar :title="$t(`Wachtwoord vergeten`)" />
+        <STNavigationBar :title="$t(`0eb7d18f-2fd7-4ac8-acb6-5e1c31482b3c`)" />
         <main class="center small">
             <h1>{{ $t('66176374-df16-49fb-a487-5269b97e7286') }}</h1>
             <p>{{ $t('25514619-8e51-492b-aaad-48083b028148') }}</p>
@@ -64,7 +64,7 @@ export default class ForgotPasswordView extends Mixins(NavigationMixin) {
             });
 
             this.dismiss({ force: true });
-            new Toast($t(`Je hebt een e-mail ontvangen waarmee je een nieuw wachtwoord kan instellen`), 'success').show();
+            new Toast($t(`9135aae1-14b5-4a92-b379-5f53702adffc`), 'success').show();
         }
         catch (e) {
             this.errorBox = new ErrorBox(e);

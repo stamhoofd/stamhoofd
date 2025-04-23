@@ -1,5 +1,5 @@
 <template>
-    <SaveView :disabled="!hasChanges" :loading="saving" :title="$t(`Toestemming gegevensverzameling`)" @save="save">
+    <SaveView :disabled="!hasChanges" :loading="saving" :title="$t(`27bc7f00-1839-4f47-b8e5-7f4c6996fa53`)" @save="save">
         <h1>
             {{ $t('3936222c-5399-4d5e-9543-e483fa4f058a') }}
         </h1>

@@ -169,9 +169,9 @@ const props = withDefaults(
         loading: false,
         disabled: false,
         title: '',
-        saveText: $t(`Opslaan`),
+        saveText: $t(`14abcd1e-7e65-4e84-be4c-ab2e162ae44d`),
         saveIcon: null,
-        cancelText: $t(`Annuleren`),
+        cancelText: $t(`4e1dc79e-b09c-41ec-aa8d-a2d052761bfe`),
         replacements: () => [],
     },
 );
@@ -254,7 +254,7 @@ async function openLinkEditor() {
         return;
     }
     if (!editor.value.isActive('link') && editor.value.state.selection.empty) {
-        new Toast($t(`Selecteer eerst tekst die je klikbaar wilt maken`), 'info').show();
+        new Toast($t(`1a4e5a36-80ae-4858-a16b-a430c806ee8f`), 'info').show();
         return;
     }
     editLink.value = editor.value.getAttributes('link')?.href ?? '';
@@ -304,7 +304,7 @@ async function saveLink() {
     }
 
     if (!isValidHttpUrl(cleanedUrl)) {
-        Toast.error($t(`Ongeldige URL`)).show();
+        Toast.error($t(`f60878fd-f28a-4585-a2d6-3e90437ae8c1`)).show();
         return;
     }
 
@@ -348,7 +348,7 @@ async function openTextStyles(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t(`Vet`),
+                name: $t(`8f419200-148a-4f76-8292-def02fffb0be`),
                 icon: 'bold',
                 selected: editor.value.isActive('bold'),
                 action: () => {
@@ -357,7 +357,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`Cursief`),
+                name: $t(`20a9c3b3-a4df-431e-a4e0-dd22a2ddf51f`),
                 icon: 'italic',
                 selected: editor.value.isActive('italic'),
                 action: () => {
@@ -366,7 +366,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`Onderstrepen`),
+                name: $t(`fd97c699-c6c7-4861-a22e-317a51f87ed0`),
                 icon: 'underline',
                 selected: editor.value.isActive('underline'),
                 action: () => {
@@ -377,7 +377,7 @@ async function openTextStyles(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: $t(`Titel`),
+                name: $t(`109b8d55-5b39-47da-92ad-fbdfa0f3d0b0`),
                 icon: 'h1',
                 selected: editor.value.isActive('heading', { level: 1 }),
                 action: () => {
@@ -386,7 +386,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`Koptekst`),
+                name: $t(`fc5107e1-3576-4a8a-b35c-26918f0d8052`),
                 icon: 'h2',
                 selected: editor.value.isActive('heading', { level: 2 }),
                 action: () => {
@@ -395,7 +395,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`Subkop`),
+                name: $t(`002d6c62-a1d1-4efa-a230-b03456b2d872`),
                 icon: 'h3',
                 selected: editor.value.isActive('heading', { level: 3 }),
                 action: () => {
@@ -404,7 +404,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`Licht gekleurd`),
+                name: $t(`2a2b03b6-f858-48c0-963e-b1dfdb107f25`),
                 icon: 'info-circle',
                 selected: editor.value.isActive('descriptiveText'),
                 action: () => {
@@ -415,7 +415,7 @@ async function openTextStyles(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: $t(`Opsomming met bolletjes`),
+                name: $t(`9f87bc88-6829-46dc-8bf3-333437e7bee3`),
                 icon: 'ul',
                 selected: editor.value.isActive('bulletList'),
                 action: () => {
@@ -424,7 +424,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`Opsomming met nummers`),
+                name: $t(`8d17be46-de96-4e84-af15-6bd18e8b4b17`),
                 icon: 'ol',
                 selected: editor.value.isActive('orderedList'),
                 action: () => {

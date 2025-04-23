@@ -47,11 +47,11 @@ const policies = computed(() => {
 
         return [
             PlatformPolicy.create({
-                name: $t(`Privacybeleid`),
+                name: $t(`892db826-a373-4f7f-96bf-6f1f3fa6eede`),
                 url,
                 checkbox: true,
                 richText: RichText.create({
-                    html: $t(`Ik ga akkoord met`) + '<a href="' + Formatter.escapeHtml(url) + `" target="_blank">` + $t(`het privacybeleid`) + `</a>.`,
+                    html: $t(`cad17893-df84-445c-b85b-b48e2eccfdaf`) + '<a href="' + Formatter.escapeHtml(url) + `" target="_blank">` + $t(`2d9ef8cb-a1be-4968-82a1-ea029c5fa104`) + `</a>.`,
                 }),
             }),
         ];
@@ -79,7 +79,7 @@ useValidation(props.validator, () => {
         if (!isAccepted(policy)) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'read_privacy',
-                message: $t(`Je moet akkoord gaan met de voorwaarden voor je een account kan aanmaken.`),
+                message: $t(`d5474814-62d6-4a54-94ea-6b9cd0a0d769`),
             }));
             return false;
         }

@@ -1,7 +1,7 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
         <div v-if="outstandingBalance" class="st-view">
-            <STNavigationBar :title="$t(`Boekhouding`)" />
+            <STNavigationBar :title="$t(`0fc72e2d-5fe5-4ed2-ba5d-1f880790c174`)" />
 
             <main class="center">
                 <h1>

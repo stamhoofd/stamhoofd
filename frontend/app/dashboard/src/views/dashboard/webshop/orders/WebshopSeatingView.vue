@@ -1,7 +1,7 @@
 <template>
     <LoadingViewTransition>
         <div v-if="!loading && seatingPlan" class="st-view webshop-seating-view">
-            <STNavigationBar :title="$t(`Zaaloverzicht`)">
+            <STNavigationBar :title="$t(`5b280bad-2167-42e6-8c4f-177ab1d76c67`)">
                 <template v-if="hasFullPermissions" #right>
                     <button class="icon navigation edit button" type="button" @click="editSeatingPlan" />
                 </template>

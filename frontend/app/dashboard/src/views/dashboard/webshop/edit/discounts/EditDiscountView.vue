@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="isNew ? $t(`Korting toevoegen`) : $t(`Korting bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`c15656cf-5ce1-4f77-92d7-bca128316cfd`) : $t(`9b8ce2cd-e96a-49ad-9494-53d30e2ef679`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
             {{ $t('46681ff6-bc40-4da6-9c3f-f8f335d72633') }}
         </h1>

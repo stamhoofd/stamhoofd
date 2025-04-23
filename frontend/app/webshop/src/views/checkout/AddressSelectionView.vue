@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('c72a9ab2-98a0-4176-ba9b-86fe009fa755')" data-submit-last-field :title="$t(`Kies je leveringsadres`)" @save="goNext">
+    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('c72a9ab2-98a0-4176-ba9b-86fe009fa755')" data-submit-last-field :title="$t(`39f41938-8165-49bb-bffe-6800155f02a4`)" @save="goNext">
         <h1>{{ $t('31d85181-8246-4f2e-9982-7be4aae474d1') }}</h1>
         <div v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice !== checkout.deliveryPrice" class="info-box">
             {{ $t('2c0ebaf5-1a92-4b6e-b1e6-e08a8679b0aa', {min: formatPrice(deliveryMethod.price.minimumPrice), price: formatPrice(deliveryMethod.price.discountPrice)}) }}

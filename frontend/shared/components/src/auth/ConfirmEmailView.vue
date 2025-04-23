@@ -104,11 +104,11 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
         }
 
         if (new Date().getTime() - this.startTime.getTime() < 5 * 60 * 1000 && STAMHOOFD.environment !== 'development') {
-            new Toast($t(`Je moet minimaal 5 minuten wachten voor je een nieuwe e-mail kan versturen. Kijk jouw inbox goed na!`), 'error red').show();
+            new Toast($t(`73466f92-bfc1-4fd8-9de7-363738ac6dd7`), 'error red').show();
             return;
         }
         // TODO
-        if (!await CenteredMessage.confirm($t(`Wil je een nieuwe bevestigingsmail sturen?`), $t(`Ja, versturen`), $t(`Kijk ook zeker in jouw spambox, wacht enkele minuten en kijk opnieuw. Kijk ook na of je geen typefouten hebt gemaakt in jouw e-mailadres (dan maak je best een nieuw account aan).`))) {
+        if (!await CenteredMessage.confirm($t(`6e55c6ff-8487-4376-8804-1b3934623146`), $t(`776a9bda-a078-4fe8-afa8-3285b5f5c794`), $t(`f8a74bb1-0df6-4313-875d-ac4b0ba3b36c`))) {
             return;
         }
 
@@ -121,7 +121,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
                 this.dismiss({ force: true });
                 return;
             }
-            new Toast($t(`Je hebt een nieuwe e-mail ontvangen. Kijk jouw inbox en spambox goed na!`), $t(`email`)).show();
+            new Toast($t(`cc0f2b34-b2c3-4df1-871d-17ad969205c5`), $t(`6df6c342-d948-41b1-b913-55cfd3c2b558`)).show();
         }
         catch (error) {
             this.errorBox = new ErrorBox(error);
@@ -166,7 +166,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
 
         try {
             await LoginHelper.verifyEmail(this.$context, this.code, this.token);
-            new Toast($t(`Jouw e-mailadres is geverifieerd!`), 'success green').setHide(3000).show();
+            new Toast($t(`a66456db-d4d8-4f4e-895e-e66aa873604a`), 'success green').setHide(3000).show();
 
             // Yay!
             // we could be sign in, or couldn't.
@@ -183,7 +183,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
     }
 
     async shouldNavigateAway() {
-        return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt annuleren?`), $t(`Sluiten en niet voltooien`));
+        return await CenteredMessage.confirm($t(`91ac3f67-da37-4366-9392-d07148e5557f`), $t(`078baf81-049b-4f3f-9ccb-8ab39b8ddaf8`));
     }
 }
 </script>

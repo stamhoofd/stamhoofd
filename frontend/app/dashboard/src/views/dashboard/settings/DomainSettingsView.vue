@@ -1,6 +1,6 @@
 <template>
     <div id="settings-view" class="st-view">
-        <STNavigationBar :title="$t(`Domeinnaam kiezen`)" />
+        <STNavigationBar :title="$t(`e8340220-a719-4ab8-82ff-627fce627235`)" />
 
         <main>
             <h1>

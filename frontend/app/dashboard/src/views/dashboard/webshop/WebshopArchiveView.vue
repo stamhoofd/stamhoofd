@@ -1,6 +1,6 @@
 <template>
     <div class="st-view background">
-        <STNavigationBar :title="$t(`Webshop archief`)" />
+        <STNavigationBar :title="$t(`1866a2ab-1798-45df-a619-0929258d6cd8`)" />
 
         <main>
             <h1>

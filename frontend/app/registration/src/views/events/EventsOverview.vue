@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t(`Activiteiten`)" />
+        <STNavigationBar :title="$t(`60231186-b00f-4d07-a5c7-4a905467e254`)" />
 
         <main class="center">
             <h1>

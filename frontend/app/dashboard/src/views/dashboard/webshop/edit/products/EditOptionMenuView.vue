@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="isNew ? $t(`Keuzemenu toevoegen`) : $t(`Keuzemenu bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`cb1db7b7-2470-448c-8ebd-ce5702439538`) : $t(`feef080d-4172-4ab0-a69f-d3769f32cfa8`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
             {{ $t('f334796c-dc6b-45f0-825e-c8f2eeae931b') }}
         </h1>

@@ -147,14 +147,14 @@ const save = async () => {
     if ((firstName.value?.length ?? 0) < 2) {
         errors.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`Vul de voornaam in`),
+            message: $t(`1186a60b-c59f-43d5-ba58-04ff9288c266`),
             field: 'firstName',
         }));
     }
     if ((lastName.value?.length ?? 0) < 2) {
         errors.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`Vul de achternaam in`),
+            message: $t(`d26a3f0b-667f-463c-ac49-8aab0462c0c3`),
             field: 'lastName',
         }));
     }
@@ -187,7 +187,7 @@ const save = async () => {
                 decoder: UserWithMembers as Decoder<UserWithMembers>,
             });
             user = response.data;
-            new Toast($t(`Beheerder`) + ' ' + user.firstName + ' ' + $t(`is toegevoegd en heeft een uitnodiging via email ontvangen.`), 'success').setHide(5000).show();
+            new Toast($t(`2289a0b3-d7e1-45a6-997b-b01a66182df6`) + ' ' + user.firstName + ' ' + $t(`53f702bf-2140-4ebf-8ebd-f6ec31185377`), 'success').setHide(5000).show();
         }
         else {
             const response = await $context.value.authenticatedServer.request({
@@ -197,7 +197,7 @@ const save = async () => {
                 decoder: UserWithMembers as Decoder<UserWithMembers>,
             });
             user = response.data;
-            new Toast($t(`Beheerder`) + ' ' + user.firstName + ' ' + $t(`is aangepast`), 'success').setHide(2000).show();
+            new Toast($t(`2289a0b3-d7e1-45a6-997b-b01a66182df6`) + ' ' + user.firstName + ' ' + $t(`9e4f2ef0-aa2f-42d3-8079-13f2e071db91`), 'success').setHide(2000).show();
         }
 
         // Copy all data
@@ -225,7 +225,7 @@ const doDelete = async () => {
         return false;
     }
 
-    if (!await CenteredMessage.confirm($t(`Ben je zeker dat je deze beheerder wilt verwijderen?`), $t(`Verwijderen`))) {
+    if (!await CenteredMessage.confirm($t(`e8b646d5-1377-465e-b29d-163d437e5c02`), $t(`25d866b7-3859-4a5d-b875-bc286e69f846`))) {
         return false;
     }
 
@@ -252,7 +252,7 @@ const doDelete = async () => {
 
         await pop({ force: true });
 
-        new Toast($t(`Beheerder`) + ' ' + props.user.firstName + ' ' + $t(`is verwijderd`), 'success').setHide(2000).show();
+        new Toast($t(`2289a0b3-d7e1-45a6-997b-b01a66182df6`) + ' ' + props.user.firstName + ' ' + $t(`4f093ade-8fcd-4849-8b9d-6e2db171880c`), 'success').setHide(2000).show();
     }
     catch (e) {
         console.error(e);
@@ -264,7 +264,7 @@ const doDelete = async () => {
 const resendInvite = async () => {
     // We can send a new invite by just recreating the admin (the API will merge with existing admins)
     if (hasChanges.value || props.isNew) {
-        new CenteredMessage($t(`Wijzigingen niet opgeslagen`), $t(`Voor je een uitnodiging opnieuw kan versturen moet je alle wijzigingen opslaan of annuleren.`)).addCloseButton().show();
+        new CenteredMessage($t(`88f254ee-bc8c-4a2f-9a00-9e9102354268`), $t(`acc4cfd1-42ad-45a2-bb1e-841b52f7c4e6`)).addCloseButton().show();
         return;
     }
     if (sendingInvite.value) {
@@ -285,7 +285,7 @@ const resendInvite = async () => {
         props.user.set(response.data);
         didSendInvite.value = true;
 
-        new Toast($t(`Uitnodiging verzonden naar`) + ' ' + props.user.email, 'success').setHide(2000).show();
+        new Toast($t(`a94e08c1-bddf-4f13-af83-8349dc361a47`) + ' ' + props.user.email, 'success').setHide(2000).show();
     }
     catch (e) {
         console.error(e);
@@ -313,7 +313,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
+    return await CenteredMessage.confirm($t(`3953d383-4f04-42ea-83cd-bf65478ed4a9`), $t(`4cfb2940-8532-446e-b543-a4c7ba9618a3`));
 };
 
 defineExpose({

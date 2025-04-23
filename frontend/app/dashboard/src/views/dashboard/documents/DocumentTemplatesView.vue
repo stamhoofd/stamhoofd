@@ -1,7 +1,7 @@
 <template>
     <LoadingViewTransition>
         <div v-if="!loading" id="documents-view" class="st-view background">
-            <STNavigationBar :title="$t(`Documenten`)" />
+            <STNavigationBar :title="$t(`2f140e22-4940-453f-8f49-871a69f0776e`)" />
 
             <main class="center">
                 <h1 class="style-navigation-title">

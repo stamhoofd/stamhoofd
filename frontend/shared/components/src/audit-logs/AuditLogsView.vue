@@ -1,6 +1,6 @@
 <template>
     <div id="settings-view" class="st-view background">
-        <STNavigationBar :title="$t(`Logboek`)" />
+        <STNavigationBar :title="$t(`c2cbfcc6-dfdd-4047-b178-76211382d405`)" />
 
         <main class="center">
             <h1>
@@ -177,25 +177,25 @@ const dateRangeSuggestions = buildSuggestions();
 function buildSuggestions() {
     const r = [
         new DateRangeSuggestion({
-            name: $t(`vandaag`),
+            name: $t(`13f1507b-7ad1-4748-981f-8b7b12aa2dce`),
             startDate: Formatter.luxon().startOf('day').toJSDate(),
             endDate: Formatter.luxon().endOf('day').toJSDate(),
         }),
 
         new DateRangeSuggestion({
-            name: $t(`gisteren`),
+            name: $t(`12a16bab-7d3e-46e0-95dc-43aef6818bff`),
             startDate: Formatter.luxon().minus({ day: 1 }).startOf('day').toJSDate(),
             endDate: Formatter.luxon().minus({ day: 1 }).endOf('day').toJSDate(),
         }),
 
         new DateRangeSuggestion({
-            name: $t(`deze week`),
+            name: $t(`1089afa3-5103-44de-a7e5-9501f058b26e`),
             startDate: Formatter.luxon().startOf('week').toJSDate(),
             endDate: Formatter.luxon().endOf('week').toJSDate(),
         }),
 
         new DateRangeSuggestion({
-            name: $t(`vorige week`),
+            name: $t(`c37c5108-b223-4a83-8a05-e51324da93b7`),
             startDate: Formatter.luxon().minus({ day: 7 }).startOf('week').toJSDate(),
             endDate: Formatter.luxon().minus({ day: 7 }).endOf('week').toJSDate(),
         }),

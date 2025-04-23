@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t(`Betalingen`)" />
+        <STNavigationBar :title="$t(`cda73dc5-5612-4561-bf92-f18157dcad64`)" />
 
         <main>
             <h1>{{ $t('290c7beb-61c7-425d-b35e-333aba83bbc5') }}</h1>

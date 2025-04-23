@@ -232,10 +232,10 @@ const levelText = computed(() => {
             if (accessRights.length) {
                 return accessRights.map(r => AccessRightHelper.getNameShort(r)).join(' + ');
             }
-            return $t(`Geen toegang`);
+            return $t(`5c7bd1da-78a7-428c-9c93-2be66c44ff6c`);
         }
         case PermissionLevel.Read: {
-            const rights = [$t(`Lezen`)];
+            const rights = [$t(`e80f2233-257d-45df-a04e-af7e5f694546`)];
             const accessRights = allAccessRights.value;
 
             for (const right of accessRights) {
@@ -249,7 +249,7 @@ const levelText = computed(() => {
             return rights.join(' + ');
         }
         case PermissionLevel.Write: {
-            const rights = [$t(`Bewerken`)];
+            const rights = [$t(`194b293f-79ca-4ad9-820d-91f0ada966ad`)];
             const accessRights = allAccessRights.value;
 
             for (const right of accessRights) {
@@ -263,7 +263,7 @@ const levelText = computed(() => {
             return rights.join(' + ');
         }
         case PermissionLevel.Full: {
-            const rights = [$t(`Volledige toegang`)];
+            const rights = [$t(`b182a5e2-aae7-48ae-bb42-c51edfb5df29`)];
             const accessRights = allAccessRights.value;
 
             for (const right of accessRights) {
@@ -290,7 +290,7 @@ const choosePermissions = async (event: MouseEvent) => {
         [
             new ContextMenuItem({
                 selected: permissionLevel.value === PermissionLevel.None,
-                name: $t(`Geen basistoegang`),
+                name: $t(`dc1ffb07-49de-475c-9d96-6940d0cbbc09`),
                 disabled: getPermissionLevelNumber(PermissionLevel.None) < getPermissionLevelNumber(lockedMinimumLevel.value),
                 action: () => {
                     permissionLevel.value = PermissionLevel.None;
@@ -298,7 +298,7 @@ const choosePermissions = async (event: MouseEvent) => {
             }),
             new ContextMenuItem({
                 selected: permissionLevel.value === PermissionLevel.Read,
-                name: $t(`Lezen`),
+                name: $t(`e80f2233-257d-45df-a04e-af7e5f694546`),
                 disabled: getPermissionLevelNumber(PermissionLevel.Read) < getPermissionLevelNumber(lockedMinimumLevel.value),
                 action: () => {
                     permissionLevel.value = PermissionLevel.Read;
@@ -306,7 +306,7 @@ const choosePermissions = async (event: MouseEvent) => {
             }),
             new ContextMenuItem({
                 selected: permissionLevel.value === PermissionLevel.Write,
-                name: $t(`Bewerken`),
+                name: $t(`194b293f-79ca-4ad9-820d-91f0ada966ad`),
                 disabled: getPermissionLevelNumber(PermissionLevel.Write) < getPermissionLevelNumber(lockedMinimumLevel.value),
                 action: () => {
                     permissionLevel.value = PermissionLevel.Write;
@@ -315,7 +315,7 @@ const choosePermissions = async (event: MouseEvent) => {
             new ContextMenuItem({
                 selected: permissionLevel.value === PermissionLevel.Full,
                 disabled: getPermissionLevelNumber(PermissionLevel.Full) < getPermissionLevelNumber(lockedMinimumLevel.value),
-                name: $t(`Volledige toegang`),
+                name: $t(`b182a5e2-aae7-48ae-bb42-c51edfb5df29`),
                 action: () => {
                     permissionLevel.value = PermissionLevel.Full;
                 },
@@ -334,10 +334,10 @@ const choosePermissions = async (event: MouseEvent) => {
 
                         if (!isLocked) {
                             if (included) {
-                                description = ($t(`Inbegrepen bij`) + ' ' + getPermissionLevelName(baseLevel));
+                                description = ($t(`c3d22dca-87b6-4975-96ff-72ffe2ce99d0`) + ' ' + getPermissionLevelName(baseLevel));
                             }
                             else {
-                                description = ($t(`Niet inbegrepen bij`) + ' ' + getPermissionLevelName(permissionLevel.value));
+                                description = ($t(`74dd7a35-db8b-477d-934a-2681d8d35184`) + ' ' + getPermissionLevelName(permissionLevel.value));
                             }
                         }
                         // #endregion

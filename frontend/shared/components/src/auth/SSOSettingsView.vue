@@ -136,7 +136,7 @@ async function save() {
             shouldRetry: false,
         });
 
-        new Toast($t(`De wijzigingen zijn opgeslagen`), 'success green').show();
+        new Toast($t(`89360094-8856-4b28-8921-e3d561ef824c`), 'success green').show();
         await pop({ force: true });
     }
     catch (e) {

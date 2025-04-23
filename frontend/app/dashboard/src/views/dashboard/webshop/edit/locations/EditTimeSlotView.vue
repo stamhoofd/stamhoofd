@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="isNew ? $t(`Tijdvak toevoegen`) : $t(`Tijdvak bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`1e78e9e7-bc02-4334-af6f-415ca265fdd8`) : $t(`c70f1d81-e63d-4bb3-8e32-41b767eff6c0`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
             {{ $t('4fab2bfd-3731-4574-9165-584165f00352') }}
         </h1>

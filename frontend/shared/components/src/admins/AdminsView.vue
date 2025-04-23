@@ -1,7 +1,7 @@
 <template>
     <LoadingViewTransition>
         <div v-if="!loading" class="st-view background">
-            <STNavigationBar :title="$t(`Beheerders`)" />
+            <STNavigationBar :title="$t(`844333d1-ba08-4d37-bdf3-eae024c87ff3`)" />
 
             <main class="center">
                 <h1>{{ $t('05dff2a6-72fa-4054-ab7f-8e04dc7c7ed9') }}</h1>
@@ -233,11 +233,11 @@ const permissionList = (user: User) => {
     const list: string[] = [];
     const permissions = getPermissions(user);
     if (!permissions) {
-        return $t(`Geen toegangsrechten`);
+        return $t(`09004cd9-3fc8-4ba6-b758-5fe2348b4982`);
     }
 
     if (permissions.hasFullAccess()) {
-        list.push($t(`Hoofdbeheerders`));
+        list.push($t(`6e948886-0b41-49e8-80be-0e2e3c795359`));
     }
 
     for (const role of getUnloadedPermissions(user)?.roles ?? []) {
@@ -245,7 +245,7 @@ const permissionList = (user: User) => {
     }
 
     if (list.length === 0) {
-        return $t(`Geen toegangsrechten`);
+        return $t(`09004cd9-3fc8-4ba6-b758-5fe2348b4982`);
     }
     return list.join(', ');
 };

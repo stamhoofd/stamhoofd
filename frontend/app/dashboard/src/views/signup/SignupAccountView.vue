@@ -1,6 +1,6 @@
 <template>
     <form id="signup-account-view" class="st-view" @submit.prevent="goNext">
-        <STNavigationBar :title="$t(`Maak jouw account`)" />
+        <STNavigationBar :title="$t(`cc49441a-2dba-4263-a93d-23008adac4f8`)" />
 
         <main>
             <h1>
