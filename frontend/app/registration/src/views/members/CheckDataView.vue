@@ -109,7 +109,7 @@ const addresses = computed(() => memberManager.family.addresses);
 const editMember = useEditMember();
 
 async function checkAllMemberData(member: PlatformMember) {
-    await editMember(member, { title: 'Gegevens nakijken' });
+    await editMember(member, { title: $t(`Gegevens nakijken`) });
 }
 
 function editAddress(_address: Address) {

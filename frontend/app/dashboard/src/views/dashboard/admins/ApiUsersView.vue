@@ -126,7 +126,7 @@ export default class ApiUsersView extends Mixins(NavigationMixin) {
         const list: string[] = [];
         const o = user.permissions?.organizationPermissions.get(this.organization.id);
         if (o?.level === PermissionLevel.Full) {
-            list.push('Hoofdbeheerders');
+            list.push($t(`Hoofdbeheerders`));
         }
 
         for (const role of o?.roles ?? []) {

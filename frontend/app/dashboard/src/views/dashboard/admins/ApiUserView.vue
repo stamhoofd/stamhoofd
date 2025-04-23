@@ -101,9 +101,9 @@ const { patch, patched, addPatch, hasChanges } = usePatch(props.user);
 
 const title = computed(() => {
     if (props.isNew) {
-        return 'Nieuwe API-key';
+        return $t(`Nieuwe API-key`);
     }
-    return 'API-key bewerken';
+    return $t(`API-key bewerken`);
 });
 
 const name = computed({
@@ -132,7 +132,7 @@ async function save() {
     if ((name.value?.length ?? 0) < 2) {
         errorGroup.addError(new SimpleError({
             code: 'invalid_field',
-            message: 'Vul een naam in',
+            message: $t(`Vul een naam in`),
             field: 'name',
         }));
     }

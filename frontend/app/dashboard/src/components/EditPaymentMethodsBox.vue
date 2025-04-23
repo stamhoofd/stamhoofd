@@ -117,7 +117,7 @@ if (props.validator) {
         if (loadingStripeAccounts.value) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'loading',
-                message: 'Nog bezig met laden. Even geduld.',
+                message: $t(`Nog bezig met laden. Even geduld.`),
             }));
             return false;
         }
@@ -125,7 +125,7 @@ if (props.validator) {
         if (props.config.paymentMethods.length === 0) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'no_payment_methods',
-                message: 'Je moet minimaal één betaalmethode selecteren',
+                message: $t(`Je moet minimaal één betaalmethode selecteren`),
             }));
             return false;
         }
@@ -179,7 +179,7 @@ async function loadStripeAccounts() {
     }
     catch (e) {
         console.error(e);
-        new Toast('Er is een fout opgetreden bij het ophalen van de betaalaccounts', 'error red').show();
+        new Toast($t(`Er is een fout opgetreden bij het ophalen van de betaalaccounts`), 'error red').show();
     }
     loadingStripeAccounts.value = false;
 }
@@ -292,25 +292,25 @@ function getDescription(paymentMethod: PaymentMethod): string {
         case PaymentMethod.Payconiq:
             return providerText(provider, {
                 [PaymentProvider.Payconiq]: '',
-                [PaymentProvider.Buckaroo]: 'Via Buckaroo',
+                [PaymentProvider.Buckaroo]: $t(`Via Buckaroo`),
             });
         case PaymentMethod.Bancontact:
             return providerText(provider, {
-                [PaymentProvider.Buckaroo]: 'Via Buckaroo',
-                [PaymentProvider.Mollie]: 'Via Mollie',
+                [PaymentProvider.Buckaroo]: $t(`Via Buckaroo`),
+                [PaymentProvider.Mollie]: $t(`Via Mollie`),
                 [PaymentProvider.Stripe]: '',
             });
 
         case PaymentMethod.iDEAL:
             return providerText(provider, {
-                [PaymentProvider.Buckaroo]: 'Via Buckaroo',
-                [PaymentProvider.Mollie]: 'Via Mollie',
+                [PaymentProvider.Buckaroo]: $t(`Via Buckaroo`),
+                [PaymentProvider.Mollie]: $t(`Via Mollie`),
                 [PaymentProvider.Stripe]: '',
             });
         case PaymentMethod.CreditCard:
             return providerText(provider, {
-                [PaymentProvider.Buckaroo]: 'Via Buckaroo',
-                [PaymentProvider.Mollie]: 'Via Mollie',
+                [PaymentProvider.Buckaroo]: $t(`Via Buckaroo`),
+                [PaymentProvider.Mollie]: $t(`Via Mollie`),
                 [PaymentProvider.Stripe]: '',
             });
         case PaymentMethod.Unknown: return '';
@@ -325,36 +325,36 @@ function getSettingsDescription(paymentMethod: PaymentMethod): string {
 
     if (settings) {
         if (settings.minimumAmount !== 0) {
-            texts.push('Vanaf minimum ' + Formatter.price(settings.minimumAmount));
+            texts.push($t(`Vanaf minimum`) + ' ' + Formatter.price(settings.minimumAmount));
         }
 
         if (settings.warningText) {
             if (settings.warningAmount !== null) {
-                texts.push('Met waarschuwing vanaf ' + Formatter.price(settings.warningAmount));
+                texts.push($t(`Met waarschuwing vanaf`) + ' ' + Formatter.price(settings.warningAmount));
             }
             else {
-                texts.push('Met waarschuwing');
+                texts.push($t(`Met waarschuwing`));
             }
         }
 
         if (settings.companiesOnly) {
-            texts.push('Niet beschikbaar voor particulieren');
+            texts.push($t(`Niet beschikbaar voor particulieren`));
         }
     }
 
     if (paymentMethod === PaymentMethod.Transfer) {
         if (!props.config.transferSettings.iban) {
-            texts.push('Nog geen bankrekeningnummer ingesteld');
+            texts.push($t(`Nog geen bankrekeningnummer ingesteld`));
         }
         else {
-            texts.push('Rekeningnummer: ' + props.config.transferSettings.iban);
+            texts.push($t(`Rekeningnummer:`) + ' ' + props.config.transferSettings.iban);
         }
 
         if (props.config.transferSettings.creditor) {
-            texts.push('Begunstigde: ' + props.config.transferSettings.creditor);
+            texts.push($t(`Begunstigde:`) + ' ' + props.config.transferSettings.creditor);
         }
 
-        texts.push('Mededeling: ' + transferTypes.value.find(t => t.value === props.config.transferSettings.type)?.name + (prefix.value && props.config.transferSettings.type !== TransferDescriptionType.Structured ? ' (' + prefix.value + ')' : ''));
+        texts.push($t(`Mededeling:`) + ' ' + transferTypes.value.find(t => t.value === props.config.transferSettings.type)?.name + (prefix.value && props.config.transferSettings.type !== TransferDescriptionType.Structured ? ' (' + prefix.value + ')' : ''));
     }
 
     return texts.join('\n');
@@ -380,7 +380,7 @@ function setPaymentMethod(method: PaymentMethod, enabled: boolean, force = false
     }
     else {
         if (!force && props.choices === null && props.config.paymentMethods.length === 1) {
-            new Toast('Je moet minimaal één betaalmethode accepteren', 'error red').show();
+            new Toast($t(`Je moet minimaal één betaalmethode accepteren`), 'error red').show();
             return;
         }
 
@@ -408,9 +408,9 @@ const hasMollieOrBuckaroo = computed(() => {
 
 const mollieOrBuckarooName = computed(() => {
     if (organization.value.privateMeta?.buckarooSettings !== null) {
-        return 'Buckaroo';
+        return $t(`Buckaroo`);
     }
-    return 'Mollie';
+    return $t(`Mollie`);
 });
 
 function getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined {
@@ -429,7 +429,7 @@ function getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined
     switch (paymentMethod) {
         case PaymentMethod.Payconiq: {
             if ((organization.value.privateMeta?.payconiqApiKey ?? '').length === 0) {
-                return 'Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalmethodes). Daar vind je ook meer informatie.';
+                return $t(`Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalmethodes). Daar vind je ook meer informatie.`);
             }
             break;
         }
@@ -439,7 +439,7 @@ function getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined
         case PaymentMethod.DirectDebit:
         case PaymentMethod.Bancontact: {
             if (stripeAccountObject.value) {
-                return PaymentMethodHelper.getNameCapitalized(paymentMethod) + ' is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de vereniging niet werd ingevuld.';
+                return PaymentMethodHelper.getNameCapitalized(paymentMethod) + ' ' + $t(`is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de vereniging niet werd ingevuld.`);
             }
             break;
         }
@@ -512,11 +512,11 @@ const transferTypes = computed(() => {
         },
         {
             value: TransferDescriptionType.Reference,
-            name: props.type === 'registration' ? 'Naam van lid/leden' : 'Bestelnummer',
+            name: props.type === 'registration' ? $t(`Naam van lid/leden`) : $t(`Bestelnummer`),
         },
         {
             value: TransferDescriptionType.Fixed,
-            name: 'Vaste mededeling',
+            name: $t(`Vaste mededeling`),
         },
     ];
 });

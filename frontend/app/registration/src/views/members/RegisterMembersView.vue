@@ -50,7 +50,7 @@ import { computed } from 'vue';
 
 const memberManager = useMemberManager();
 const members = computed(() => memberManager.family.members);
-const title = 'Wie wil je inschrijven?';
+const title = $t(`Wie wil je inschrijven?`);
 const user = useUser();
 
 const isAcceptingNewMembers = computed(() => memberManager.isAcceptingNewMembers);
