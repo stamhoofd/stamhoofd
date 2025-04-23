@@ -16546,5 +16546,2909 @@
   "3074ee0a-4531-47d5-a167-d058d8fc2c96": {
     "original": "Ben je zeker dat je deze melding terug naar klad wilt verplaatsen?",
     "translation": "Are you sure you want to move this notification back to draft?"
+  },
+  "65b701a3-c74c-4eb6-b98e-7b9dcad0a358": {
+    "original": "Vul een tekst in voor je een e-mail verstuurt",
+    "translation": "Enter text before sending an email"
+  },
+  "e92cd077-b0f1-4b0a-82a0-8a8baa82e73a": {
+    "original": "Vul een afzender in voor je een e-mail verstuurt",
+    "translation": "Enter a sender before sending an email"
+  },
+  "e8b9a1db-97d0-410e-99b2-6a87c1087593": {
+    "original": "Jouw bericht is te groot. Grote bijlages verstuur je beter niet via e-mail, je plaatst dan best een link naar de locatie in bv. Google Drive. De maximale grootte van een e-mail is 10MB, inclusief het bericht. Als je grote bestanden verstuurt kan je ze ook proberen te verkleinen.",
+    "translation": "Your message is too large. It is better not to send large attachments via email; instead, place a link to the location in e.g. Google Drive. The maximum size of an email is 10MB, including the message. If you send large files, you can also try to reduce their size."
+  },
+  "54da84d6-5f6a-4db2-be34-9ddb7f47bbe8": {
+    "original": "Het bestandstype van jouw bijlage wordt niet ondersteund of is onveilig om in een e-mail te plaatsen. Overweeg om je bestand op bv. Google Drive te zetten en de link in jouw e-mail te zetten.",
+    "translation": "The file type of your attachment is not supported or is unsafe to place in an email. Consider putting your file on e.g. Google Drive and putting the link in your email."
+  },
+  "55899a7c-f3d4-43fe-a431-70a3a9e78e34": {
+    "original": "De e-mail die je probeert te versturen bestaat niet meer",
+    "translation": "The email you are trying to send no longer exists"
+  },
+  "f660b2eb-e382-4d21-86e4-673ca7bc2d4a": {
+    "original": "Er ging iets mis bij het aanmaken van de afzenders.",
+    "translation": "Something went wrong when creating the senders."
+  },
+  "df5c326c-e9a3-4f76-ba80-8a22f95f0e70": {
+    "original": "Bestelling -",
+    "translation": "Order -"
+  },
+  "12be5ac0-8353-43a2-badb-ab3b27d156b3": {
+    "original": "Bestelling #",
+    "translation": "Order #"
+  },
+  "8bd60208-9101-40cf-9f1d-1fd90cdafd62": {
+    "original": "Deze groep is gearchiveerd",
+    "translation": "This group has been archived"
+  },
+  "9e44e007-3b35-4edf-979f-41b458d2eb39": {
+    "original": "Deze betaalmethode werd helaas niet volledig geconfigureerd. Probeer later even opnieuw, neem contact met ons op of kies een andere betaalmethode.",
+    "translation": "Unfortunately, this payment method was not fully configured. Please try again later, contact us or choose another payment method."
+  },
+  "01d5fd7e-2960-4eb4-ab3a-2ac6dcb2e39c": {
+    "original": "Inschrijving van",
+    "translation": "Registration of"
+  },
+  "fcb50c02-7510-4e48-bfac-10bb584e3454": {
+    "original": "Je kan dit pakket niet verlengen",
+    "translation": "You cannot extend this package"
+  },
+  "a402f8d1-b470-4b1e-948b-1524576708ea": {
+    "original": "nooit",
+    "translation": "never"
+  },
+  "d34e8bed-2fd2-4a01-b88f-94deab82d26f": {
+    "original": "Prijskeuze",
+    "translation": "Price choice"
+  },
+  "3a58bc78-bf5e-4e9d-b9e1-98a06d0b6322": {
+    "original": "Ticketdatum",
+    "translation": "Ticket date"
+  },
+  "17772225-f9c0-4707-9e2a-97f94de4e9d0": {
+    "original": "Bestelnummer",
+    "translation": "Order number"
+  },
+  "97705203-1c2e-4326-83f2-f1a894dda0c9": {
+    "original": "Besteldatum",
+    "translation": "Order date"
+  },
+  "2bc71d9a-c8d0-4f55-bf68-5dbb896d1f5b": {
+    "original": "E-mail",
+    "translation": "Email"
+  },
+  "eee19242-20ee-4e5c-b2ff-ba122ec6fc06": {
+    "original": "GSM-nummer",
+    "translation": "Mobile number"
+  },
+  "9c07647c-3b5b-4c93-bfd9-e7c07ae51276": {
+    "original": "Stukprijs",
+    "translation": "Unit price"
+  },
+  "0d8b9fa2-d70a-434b-817e-c5b2b3861d91": {
+    "original": "Eenmalige extra kost",
+    "translation": "One-off extra cost"
+  },
+  "e2c09edd-db1b-4196-9fd3-0a7d3c9f230e": {
+    "original": "Korting",
+    "translation": "Discount"
+  },
+  "a9c436ef-31e9-43bd-83ea-742ac331380a": {
+    "original": "Artikel",
+    "translation": "Item"
+  },
+  "507ba771-0809-4dda-9b5f-9d7f992b329a": {
+    "original": "Plaatsen",
+    "translation": "Places"
+  },
+  "402fe5ff-cf4e-4d31-b0db-1b8f5dcfebe3": {
+    "original": "Afhaalmethode",
+    "translation": "Collection method"
+  },
+  "444e7f72-6435-4ae7-bb5d-3fc7e5e79dad": {
+    "original": "Leveringsadres / afhaallocatie",
+    "translation": "Delivery address / collection location"
+  },
+  "9ee1052c-9396-4d2d-8247-97dfb45099f6": {
+    "original": "Datum",
+    "translation": "Date"
+  },
+  "f6f77de7-7691-4512-bf95-e07d12e9a43c": {
+    "original": "Tijdstip",
+    "translation": "Time"
+  },
+  "885254e1-4bd2-40be-a1aa-4c60e592b9b9": {
+    "original": "Betaald",
+    "translation": "Paid"
+  },
+  "e614cfe5-5940-44e8-8093-e4d07e54beda": {
+    "original": "Kortingscode",
+    "translation": "Discount code"
+  },
+  "cca905ff-7d00-4b9d-84c6-bda2bb5ea898": {
+    "original": "Afhalen",
+    "translation": "Collection"
+  },
+  "ce5b4d9a-7d2a-4e86-9362-a4ea90582053": {
+    "original": "Levering {name}",
+    "translation": "Delivery {name}"
+  },
+  "04c630cb-ca58-4613-a25e-d69925e55c37": {
+    "original": "Nog niet betaald",
+    "translation": "Not yet paid"
+  },
+  "26369a8f-8080-4f00-af46-576fdf563ced": {
+    "original": "Subtotaal",
+    "translation": "Subtotal"
+  },
+  "ea422e20-5ab6-45dd-9886-abe5a207260d": {
+    "original": "Leveringskost",
+    "translation": "Delivery cost"
+  },
+  "a0d99100-f225-416f-bcec-e25df9d651ac": {
+    "original": "Administratiekosten",
+    "translation": "Administrative costs"
+  },
+  "341172ee-281e-4458-aeb1-64ed5b2cc8bb": {
+    "original": "Totaal",
+    "translation": "Total"
+  },
+  "7733f484-fc0e-46ff-b0a0-7b674d10015d": {
+    "original": "Totaal uitbetaald",
+    "translation": "Total paid out"
+  },
+  "548f0a30-cdd6-4e9a-9a3c-bdcb3afe11e5": {
+    "original": "Totaal van deze bestellingen",
+    "translation": "Total of these orders"
+  },
+  "1e5893d7-5af8-4029-8a1c-da6294078e9d": {
+    "original": "Transactiekosten (incl. BTW)",
+    "translation": "Transaction costs (incl. VAT)"
+  },
+  "be748ea7-badc-48b6-ae7a-8eca6341dc08": {
+    "original": "Variant",
+    "translation": "Variant"
+  },
+  "1718783a-80df-4d97-a5b5-10c785abfba1": {
+    "original": "Artikel per lijn",
+    "translation": "Item per line"
+  },
+  "f10a9486-34c7-46d8-950b-21fd9f41b2b4": {
+    "original": "Bestelling per lijn",
+    "translation": "Order per line"
+  },
+  "3f6039ff-e157-4762-b10d-93e2d2fe56ce": {
+    "original": "Totalen",
+    "translation": "Totals"
+  },
+  "b037949c-50c3-400e-9633-ffaca32c0b01": {
+    "original": "Uitbetalingen",
+    "translation": "Payments"
+  },
+  "b0c46199-2c76-4d8c-9737-08838097e62f": {
+    "original": "bestellingen.xlsx",
+    "translation": "orders.xlsx"
+  },
+  "6fef52a1-82a9-456f-a51e-b32eea13b889": {
+    "original": "Geen toegang",
+    "translation": "No access"
+  },
+  "3e23e0d2-ec8c-44f9-92fa-a1fce10c0185": {
+    "original": "Start",
+    "translation": "Start"
+  },
+  "6ec2f1fd-3f8f-4814-9442-e628eea062a3": {
+    "original": "Activiteiten",
+    "translation": "Activities"
+  },
+  "dcddc3ae-d5cb-4e28-b7bd-a38020ce64ba": {
+    "original": "Verkoop",
+    "translation": "Sales"
+  },
+  "5ca94078-d742-4e17-abf7-957c4721a559": {
+    "original": "Instellingen",
+    "translation": "Settings"
+  },
+  "9bd091b0-0e9f-41f9-8896-8f2b9e64550c": {
+    "original": "Boekhouding",
+    "translation": "Bookkeeping"
+  },
+  "57ecaa64-a660-40fd-abf3-0bcf541ed8e6": {
+    "original": "Documenten",
+    "translation": "Documents"
+  },
+  "b33a8267-18b5-4775-94b0-64bdcae3bfa4": {
+    "original": "Logboek",
+    "translation": "Log"
+  },
+  "1b84643d-ab39-4c9e-89d9-ebfa98277a40": {
+    "original": "Wat is er nieuw?",
+    "translation": "What's new?"
+  },
+  "031cfca3-ca9a-44cc-95b5-03c81948f765": {
+    "original": "Documentatie",
+    "translation": "Documentation"
+  },
+  "630ab37a-85c8-4bbd-a281-b87e82a976d5": {
+    "original": "Feedback",
+    "translation": "Feedback"
+  },
+  "95bb5f36-a709-4724-bf21-9793911af5d6": {
+    "original": "Meer",
+    "translation": "More"
+  },
+  "2e2c43a8-3709-4947-83e0-3b0345cd7b44": {
+    "original": "Fiscaal attest kinderopvang (281.86)",
+    "translation": "Tax certificate childcare (281.86)"
+  },
+  "65fd44a4-cc92-49e7-8b44-91a75d601a7f": {
+    "original": "KBO nummer",
+    "translation": "KBO number"
+  },
+  "7d6fa164-e3f8-4c09-9eb4-9d2828de7128": {
+    "original": "Vergunningstype",
+    "translation": "Permit type"
+  },
+  "50f3e5f0-8589-43cc-87ec-04c8ed628ed7": {
+    "original": "Vergunningstype bepaalt het type van vergunning in Vak I.",
+    "translation": "Permit type determines the type of permit in Section I."
+  },
+  "5b822590-b76a-43d4-a2c9-78825f98c4e7": {
+    "original": "Vak I niet van toepassing",
+    "translation": "Section I not applicable"
+  },
+  "e089fe1b-ae31-4244-9d29-37f21655fe52": {
+    "original": "Voldoet aan de voorwaarden vermeld in puntje 2 van de document opmerkingen.",
+    "translation": "Meets the conditions mentioned in point 2 of the document notes."
+  },
+  "e201d9ff-c8bb-4b39-8e33-1fa3e8882248": {
+    "original": "Kind en Gezin / Opgroeien regie",
+    "translation": "Child and Family / Growing up management"
+  },
+  "72d62e2a-b6e3-4d86-9d40-a316dd8386a1": {
+    "original": "is vergund, erkend, gesubsidieerd of gecontroleerd door of onder toezicht staat van of een kwaliteitslabel heeft ontvangen van Kind en Gezin / Opgroeien regie, het ‘Office de la Naissance et de l’Enfance’ of de regering van de Duitstalige Gemeenschap",
+    "translation": "is licensed, recognised, subsidised or monitored by, or under the supervision of, or has received a quality label from Child and Family / Growing up management, the ‘Office de la Naissance et de l’Enfance’ or the government of the German-speaking Community"
+  },
+  "20a43c31-e394-4bb4-9b1f-8afd5d5268fa": {
+    "original": "Gemeenten, gemeenschappen of gewesten",
+    "translation": "Municipalities, communities or regions"
+  },
+  "b80c6123-24fb-42fc-9770-b6c251951c58": {
+    "original": "is vergund, erkend, gesubsidieerd of gecontroleerd door de lokale openbare besturen of openbare besturen van de gemeenschappen of gewesten",
+    "translation": "is licensed, recognised, subsidised or monitored by the local public authorities or public authorities of the communities or regions"
+  },
+  "6c729f25-24a1-4795-9558-dcc478fdb44d": {
+    "original": "Buitenlandse instellingen",
+    "translation": "Foreign institutions"
+  },
+  "2d8e8d29-9cb9-49a2-8824-5285dea824b7": {
+    "original": "is vergund, erkend, gesubsidieerd of gecontroleerd door of onder toezicht staat van buitenlandse openbare instellingen gevestigd in een andere lidstaat van de Europese Economische Ruimte",
+    "translation": "is licensed, recognised, subsidised or monitored by, or under the supervision of, foreign public institutions established in another member state of the European Economic Area"
+  },
+  "60f135eb-adb3-4e1a-9ba2-7e6e084a83aa": {
+    "original": "Scholen",
+    "translation": "Schools"
+  },
+  "79c1d4a0-f5f3-465d-bf7b-a15b5f2a4bb4": {
+    "original": "is verbonden met een school gevestigd in de Europese Economische Ruimte of met de inrichtende macht van een school gevestigd in de Europese Economische Ruimte,",
+    "translation": "is connected to a school located in the European Economic Area or to the governing body of a school located in the European Economic Area,"
+  },
+  "4ce7c41a-f020-4949-a889-71549e0f6d0f": {
+    "original": "Certificeringsautoriteit",
+    "translation": "Certification authority"
+  },
+  "d6686410-12c2-4481-90e1-87e112e65043": {
+    "original": "De instantie die de opvangsinstantie heeft vergund, erkend, gesubsidieerd, er een kwaliteitslabel heeft aan toegekend of die deze controleert of er toezicht op houdt of die is verbonden met de opvanginstantie in het geval van scholen of hun inrichtende machten.",
+    "translation": "The institution that has licensed, recognised, subsidised, awarded a quality label to, monitors or supervises the childcare institution, or that is connected to the childcare institution in the case of schools or their governing bodies."
+  },
+  "7fec542e-0f75-4dfe-be2f-29e1d3027373": {
+    "original": "Ondertekening",
+    "translation": "Signature"
+  },
+  "dd431861-0d75-4c28-8a26-2140465e5556": {
+    "original": "Persoon die de documenten ondertekent.",
+    "translation": "Person signing the documents."
+  },
+  "bb8c9f3b-3578-4662-b78f-1e0e92f90229": {
+    "original": "Hoedanigheid",
+    "translation": "Capacity"
+  },
+  "9c50bba5-620b-4391-88a2-a69e9034cf00": {
+    "original": "Handtekening",
+    "translation": "Signature"
+  },
+  "b36e52ad-a913-43ef-a36b-bda1ed04761e": {
+    "original": "Upload je handtekening op een witte achtergrond, met geen of weinig witruimte rondom. Tip: gebruik http://szimek.github.io/signature_pad/",
+    "translation": "Upload your signature on a white background, with little or no white space around it. Tip: use http://szimek.github.io/signature_pad/"
+  },
+  "b1549fce-7655-4e22-9622-48eb70f35e52": {
+    "original": "Persoon die heeft betaald, bij voorkeur de ouder die het kind fiscaal ten laste heeft (beide ouders hebben meestal het kind fiscaal ten laste, tenzij men niet getrouwd of niet wettelijk samenwonend is).",
+    "translation": "Person who paid, preferably the parent who has the child fiscally dependent (both parents usually have the child fiscally dependent, unless they are not married or not legally cohabiting)."
+  },
+  "d05b1cb9-e9cf-46e4-8b27-620b5562d30d": {
+    "original": "Rijksregisternummer schuldenaar ontbreekt. Je vult dit best aan bij één van de ouders van dit lid.",
+    "translation": "National registration number of debtor missing. You should add this to one of the parents of this member."
+  },
+  "c3a8a598-5b30-4d37-bc99-9f3157b36246": {
+    "original": "Gegevens lid",
+    "translation": "Member details"
+  },
+  "74941f69-d7cd-4003-bc5a-18d9b22e03ed": {
+    "original": "Deze gegevens zijn allemaal standaard beschikbaar.",
+    "translation": "This data is all standardly available."
+  },
+  "3f5b1183-9db6-4bd4-9187-552b7ae4126c": {
+    "original": "Rijksregisternummer lid ontbreekt. Je vult dit best aan bij dit lid.",
+    "translation": "Member's national registration number missing. You should add this to this member."
+  },
+  "f3262b38-7afe-485b-bd97-fab76e825818": {
+    "original": "Het bedrag dat betaald werd voor de inschrijving. Dit kan automatisch uit het systeem gehaald worden, waarbij ook rekening gehouden wordt met kortingen. De dagprijs wordt berekend op basis van de begin en einddatum. Gratis inschrijvingen komen niet in aanmerking voor een fiscale aftrek en daarvoor wordt dus geen document aangemaakt.",
+    "translation": "The amount paid for the registration. This can be automatically retrieved from the system, taking discounts into account. The daily rate is calculated based on the start and end date. Free registrations are not eligible for tax deduction and therefore no document is created."
+  },
+  "325dd5fa-871c-45b4-b732-5c5370c44b03": {
+    "original": "Het betaalde bedrag ontbreekt. Dit is essentieel om een geldig document af te leveren.",
+    "translation": "The amount paid is missing. This is essential to deliver a valid document."
+  },
+  "15bc5064-cd0d-4052-937b-cade8e19a858": {
+    "original": "Exporteren naar XML voor Belcotax",
+    "translation": "Export to XML for Belcotax"
+  },
+  "2c9a2838-607e-4e19-87d9-ce5c1f46f7f0": {
+    "original": "De XML-export is complex, en je moet zorvuldig de documentatie doorlezen voor je hier aan begint.",
+    "translation": "The XML export is complex, and you must carefully read the documentation before you start."
+  },
+  "ae4c10ae-478e-48d9-b901-86f3f79df32e": {
+    "original": "Bevestiging",
+    "translation": "Confirmation"
+  },
+  "079e1823-91db-4ef4-ba7b-94218d6a980e": {
+    "original": "Ik bevestig dat ik de documentatie over de XML-export heb gelezen en alle stappen nauwkeurig heb gevolgd.",
+    "translation": "I confirm that I have read the documentation on XML export and have followed all steps accurately."
+  },
+  "1b4a943c-e44d-4f9f-b5bd-08a485ef05d3": {
+    "original": "Bijkomende informatie",
+    "translation": "Additional information"
+  },
+  "1e58daa1-b5dc-4e51-8c2c-5ce461963f61": {
+    "original": "We hebben nog enkele gegevens nodig die we moeten opnemen in de XML. Vul deze accuraat in.",
+    "translation": "We need some more data that we need to include in the XML. Fill this in accurately."
+  },
+  "084a7b59-d7d6-4352-8fe7-8f9e98ba1483": {
+    "original": "Naam contactpersoon",
+    "translation": "Name of contact person"
+  },
+  "73219854-e149-4797-bae0-de7340b6f304": {
+    "original": "Op dit emailadres ontvang je de bevestiging/update van de aangifte.",
+    "translation": "You will receive the confirmation/update of the return at this email address."
+  },
+  "da1e6727-6f1f-4713-93a5-2ec93092b9d0": {
+    "original": "Ondernemingsnummer of refertenummer",
+    "translation": "Company number or reference number"
+  },
+  "bf58c9d8-b970-412f-bcf3-9fd2f037c4ff": {
+    "original": "Het XML-document voor het indienen van de aangifte in Belcotax.",
+    "translation": "The XML document for submitting the return to Belcotax."
+  },
+  "c2fe9ab5-f728-4898-a36c-18ba68ea7057": {
+    "original": "Deelname of inschrijvingsbewijs",
+    "translation": "Participation or registration certificate"
+  },
+  "ad7065f4-968e-4426-a21a-64425598227f": {
+    "original": "Extra informatie",
+    "translation": "Extra information"
+  },
+  "ec4ad440-8365-4f9e-b8f1-6fb4f50197b8": {
+    "original": "Afhankelijk van de noodzaak van het deelnameattest moet je soms nog extra zaken vermelden voor bijvoorbeeld de mutualiteit. Dat kan je hier ingeven.",
+    "translation": "Depending on the necessity of the participation certificate, you sometimes have to mention extra things for, for example, the mutual insurance company. You can enter this here."
+  },
+  "2c27d8ac-0c46-4b61-94fe-0e12f5a253cd": {
+    "original": "Bijkomende tekst",
+    "translation": "Additional text"
+  },
+  "e6dff01b-1b53-4722-8791-e5a848ffa906": {
+    "original": "Deze tekst zal bovenaan op elk document worden geplaatst.",
+    "translation": "This text will be placed at the top of each document."
+  },
+  "ea19c006-1755-4e2a-9dfa-447482e3db19": {
+    "original": "Bijkomende tekst onderaan",
+    "translation": "Additional text at the bottom"
+  },
+  "f191c4af-b068-4987-aab4-5178603d2b69": {
+    "original": "Deze tekst zal onderaan op elk document worden geplaatst.",
+    "translation": "This text will be placed at the bottom of each document."
+  },
+  "77909625-47a0-4ef4-a059-1a8f77ee4add": {
+    "original": "Persoon die de documenten ondertekent of stempel.",
+    "translation": "Person who signs or stamps the documents."
+  },
+  "0fd49a27-7db1-469c-9d9d-60a7283ed86c": {
+    "original": "Zichtbare gegevens",
+    "translation": "Visible data"
+  },
+  "25fe78a6-38fc-4ead-b19c-62bf131525d9": {
+    "original": "Kies welke gegevens je wilt vermelden op de documenten. Afhankelijk van waarvoor het document gebruikt moet worden, zijn bepaalde gegevens vereist. Sommige mutualiteiten vereisen bijvoorbeeld een rijksregisternummer.",
+    "translation": "Choose which data you want to include on the documents. Depending on what the document is used for, certain data is required. Some mutual insurance companies, for example, require a national registration number."
+  },
+  "837fbd12-19ca-4e9e-af34-97c532a11ee4": {
+    "original": "Toon naam groep/activiteit op document",
+    "translation": "Show group/activity name on document"
+  },
+  "28ae51dd-58a3-4c94-bf9b-38c464d5b8fe": {
+    "original": "Start- en einddatum vermelden op document",
+    "translation": "Show start and end date on document"
+  },
+  "273d798e-0e89-4cbe-9dfa-4d704db924da": {
+    "original": "Toon bedrag",
+    "translation": "Show amount"
+  },
+  "bef77bb4-89ee-4097-9215-6f5c91546f12": {
+    "original": "Toon betaaldatum op document (indien betaald)",
+    "translation": "Show payment date on document (if paid)"
+  },
+  "5ebb9959-713d-4142-8bcc-8a20f8772de8": {
+    "original": "Toon geboortedatum (indien beschikbaar)",
+    "translation": "Show date of birth (if available)"
+  },
+  "573bb657-310f-4a8c-84ed-eee3be6db42d": {
+    "original": "Toon rijksregisternummer (indien beschikbaar)",
+    "translation": "Show national registration number (if available)"
+  },
+  "f6cc9f01-5347-446d-a2d7-78b840a647c1": {
+    "original": "Toon e-mailadres (indien beschikbaar)",
+    "translation": "Show email address (if available)"
+  },
+  "cf817c09-d0c8-4237-adf7-8d16d6f96bf1": {
+    "original": "Toon adres (indien beschikbaar)",
+    "translation": "Show address (if available)"
+  },
+  "f0726317-6979-41b6-bd57-7f6eb3422dc6": {
+    "original": "Afbeelding",
+    "translation": "Image"
+  },
+  "108e2ee2-0c29-4f5e-9c34-b9030dd369b9": {
+    "original": "Bestand",
+    "translation": "File"
+  },
+  "71a1a391-f437-41e4-b2d4-e9e32121d4ee": {
+    "original": "Tekst met opmaak",
+    "translation": "Formatted text"
+  },
+  "5e6f043a-6ed5-41eb-b670-d9ac6b63e598": {
+    "original": "Betaling niet (meer) gevonden",
+    "translation": "Payment not (any longer) found"
+  },
+  "22541ecc-ba4f-4a91-b8d3-8213bfaaea0b": {
+    "original": "Lid niet (meer) gevonden",
+    "translation": "Member not (any longer) found"
+  },
+  "6f8446d7-f625-4134-bf05-553ba577619f": {
+    "original": "Activiteit niet meer gevonden",
+    "translation": "Activity no longer found"
+  },
+  "6350b2c6-ab40-4a92-873e-f667386055a4": {
+    "original": "Organisatie niet meer gevonden",
+    "translation": "Organisation no longer found"
+  },
+  "81df09d0-56ee-491d-b474-85173b1401dd": {
+    "original": "Nationaal",
+    "translation": "National"
+  },
+  "853fe2cb-6cf6-48a3-8ee8-a0cf30b1a823": {
+    "original": "Ga naar het beheerdersportaal van een groep om leden uit die groep toe te voegen. Dit kan niet via het administratieportaal.",
+    "translation": "Go to the administrator portal of a group to add members to that group. This cannot be done via the administration portal."
+  },
+  "4cb84435-bf36-4b83-9f0d-6028181eae84": {
+    "original": "Toekomstige",
+    "translation": "Future"
+  },
+  "42e0e0d5-b4f9-4774-ad91-bfae7121a29e": {
+    "original": "Activiteit niet gevonden",
+    "translation": "Activity not found"
+  },
+  "2506b55d-cd6e-42e5-a69d-f0d838bfaad2": {
+    "original": "Suggestie",
+    "translation": "Suggestion"
+  },
+  "28b7fa87-b4b9-45de-aa95-1d7fea6aee73": {
+    "original": "Activiteiten werden nog niet correct geconfigureerd. Vraag een hoofdbeheerder om dit in orde te brengen.",
+    "translation": "Activities have not yet been configured correctly. Ask a head administrator to take care of this."
+  },
+  "8dc963d1-ba79-47c0-80d8-629b8e09c4c2": {
+    "original": "of",
+    "translation": "or"
+  },
+  "c9111e95-2f59-4164-b0af-9fbf434bf6dd": {
+    "original": "Ben je zeker dat je wilt sluiten zonder op te slaan?",
+    "translation": "Are you sure you want to close without saving?"
+  },
+  "de41b0f3-1297-4058-b390-3bfb99e3d4e0": {
+    "original": "Niet opslaan",
+    "translation": "Do not save"
+  },
+  "c6d477b8-8ca5-4d7e-b164-21630e5057b0": {
+    "original": "Filter niet opslaan?",
+    "translation": "Do not save filter?"
+  },
+  "877cbb8c-174a-4fe2-8a8a-01908a34c114": {
+    "original": "Deze wachtlijst wordt gebruikt door",
+    "translation": "This waiting list is used by"
+  },
+  "daef5a57-e4f0-41f4-b05f-7946913947ef": {
+    "original": "Niet gebruikt",
+    "translation": "Not used"
+  },
+  "c1f1d9d0-3fa1-4633-8e14-8c4fc98b4f0f": {
+    "original": "Wachtlijst van",
+    "translation": "Waiting list of"
+  },
+  "905afd18-5e9a-4d30-9040-646d29b25c15": {
+    "original": "Gemengd",
+    "translation": "Mixed"
+  },
+  "95e8c4b3-a548-4689-b581-88d346ee4e7b": {
+    "original": "Enkel meisjes",
+    "translation": "Girls only"
+  },
+  "91ec0ba0-1840-4246-b804-27eb3cda67e3": {
+    "original": "Enkel jongens",
+    "translation": "Boys only"
+  },
+  "bf9acd2b-f2d4-42df-8d13-6af97648eb27": {
+    "original": "(niet automatisch)",
+    "translation": "(not automatic)"
+  },
+  "fbe32760-d352-4d3d-813c-acd50f3cba50": {
+    "original": "Voorbeeld",
+    "translation": "Example"
+  },
+  "946f5e2e-d92c-4bbd-b64f-115958a04d01": {
+    "original": "Lid",
+    "translation": "Member"
+  },
+  "faae9011-c50d-4ada-aed0-c1b578782b2a": {
+    "original": "Verwijderen",
+    "translation": "Delete"
+  },
+  "c8b8fb4b-3a2b-4de7-85a1-f1b963a739e7": {
+    "original": "Omhoog verplaatsen",
+    "translation": "Move up"
+  },
+  "47f56c92-fcfb-4ef4-8d0b-fb0c959fb624": {
+    "original": "Oops! Je gebruikt een oude versie van de applicatie om in te schrijven. Herlaad de website en verwijder indien nodig de cache van jouw browser.",
+    "translation": "Oops! You are using an old version of the application to register. Please reload the website and clear your browser cache if necessary."
+  },
+  "62fe6e39-f6b0-4836-b0f7-dc84d22a81e3": {
+    "original": "Je hebt niet de juiste toegangsrechten om leden in te schrijven bij een andere organisatie.",
+    "translation": "You do not have the necessary access rights to register members with another organisation."
+  },
+  "28fb7a27-9b8e-44e0-833b-44c72ab61306": {
+    "original": "Oeps! Om spam te voorkomen limiteren we het aantal test inschrijvingen die je per uur of dag kan plaatsen. Probeer over een uur opnieuw of schakel over naar een betaald abonnement.",
+    "translation": "Oops! To prevent spam, we limit the number of test registrations you can place per hour or day. Please try again in an hour or switch to a paid subscription."
+  },
+  "3e10f812-8871-458c-ae03-c508abfd3ca5": {
+    "original": "Oeps, één of meerdere openstaande bedragen in jouw winkelmandje zijn aangepast. Herlaad de pagina en probeer opnieuw.",
+    "translation": "Oops, one or more outstanding amounts in your shopping cart have been adjusted. Please reload the page and try again."
+  },
+  "57d57c76-4e76-4b0e-93b5-57ef8025f5ec": {
+    "original": "Oeps, één of meerdere groepen waarin je probeert in te schrijven lijken niet meer te bestaan. Herlaad de pagina en probeer opnieuw.",
+    "translation": "Oops, one or more groups you are trying to register for seem to no longer exist. Please reload the page and try again."
+  },
+  "7b7c4b2b-f30c-4cad-ba13-caad591bafde": {
+    "original": "Je hebt niet de juiste toegangsrechten om dit lid in te schrijven. Je kan enkel leden inschrijven als je minstens bewerkrechten hebt voor dat lid.",
+    "translation": "You do not have the necessary access rights to register this member. You can only register members if you have at least edit rights for that member."
+  },
+  "29d8bd5c-da83-49b9-a822-c44db58edd1a": {
+    "original": "Oeps, jouw mandje is leeg. Voeg eerst inschrijvingen toe voor je verder gaat.",
+    "translation": "Oops, your basket is empty. Please add registrations before continuing."
+  },
+  "e424d549-2bb8-4103-9a14-ac4063d7d454": {
+    "original": "Oeps! De prijs is gewijzigd terwijl je aan het afrekenen was (naar {total}). Herlaad de pagina even om ervoor te zorgen dat je alle aangepaste prijzen ziet. Contacteer de webmaster als je dit probleem blijft ondervinden na het te herladen.",
+    "translation": "Oops! The price has changed while you were checking out (to {total}). Please reload the page to ensure you see all adjusted prices. Contact the webmaster if you continue to experience this problem after reloading."
+  },
+  "725715e5-b0ac-43c1-adef-dd42b8907327": {
+    "original": "Oeps! De totaalprijs is negatief.",
+    "translation": "Oops! The total price is negative."
+  },
+  "bded79ec-0c69-47b1-9944-b9f3821b566e": {
+    "original": "Het lid dat je probeert in te schrijven konden we niet meer terugvinden. Je herlaadt best even de pagina om opnieuw te proberen.",
+    "translation": "We could no longer find the member you are trying to register. It is best to reload the page to try again."
+  },
+  "c4896202-dd3b-4445-a530-3fed231259c2": {
+    "original": "De groep waarin je een lid probeert in te schrijven lijkt niet meer te bestaan. Je herlaadt best even de pagina om opnieuw te proberen.",
+    "translation": "The group in which you are trying to register a member seems to no longer exist. It is best to reload the page to try again."
+  },
+  "04d77a26-25c2-4a3e-a268-98bea9df45a2": {
+    "original": "{member} is al ingeschreven voor {group}. Mogelijks heb je meerdere keren proberen in te schrijven en is het intussen wel gelukt. Herlaad de pagina best even om zeker te zijn.",
+    "translation": "{member} is already registered for {group}. You may have tried to register multiple times and it may have been successful in the meantime. It is best to reload the page to be sure."
+  },
+  "2b1ca6a0-662e-4326-ada1-10239b6ddc6f": {
+    "original": "Oeps, je hebt geen geldige betaalmethode geselecteerd. Selecteer een betaalmethode en probeer opnieuw. Herlaad de pagina indien nodig.",
+    "translation": "Oops, you have not selected a valid payment method. Please select a payment method and try again. Reload the page if necessary."
+  },
+  "ebe54b63-2de6-4f22-a5ed-d3fe65194562": {
+    "original": "Er is iets mis. Contacteer de webmaster.",
+    "translation": "Something went wrong. Please contact the webmaster."
+  },
+  "d47bdfdd-5940-4818-a664-1cd072294a26": {
+    "original": "Oeps, je hebt geen toestemming om inschrijvingen te verwijderen.",
+    "translation": "Oops, you do not have permission to delete registrations."
+  },
+  "282a7491-d129-4e43-9a14-e55c72ef5c5d": {
+    "original": "Oeps, één of meerdere inschrijvingen die je probeert te verwijderen lijken niet meer te bestaan. Herlaad de pagina en probeer opnieuw.",
+    "translation": "Oops, one or more registrations you are trying to delete seem to no longer exist. Please reload the page and try again."
+  },
+  "9b772fd5-a36e-4997-85fa-251bb3a97a0a": {
+    "original": "Je hebt geen toegangsrechten om deze inschrijving te verwijderen.",
+    "translation": "You do not have access rights to delete this registration."
+  },
+  "a0f43131-c880-4a8e-98e3-bf78df27336c": {
+    "original": "Oeps, één of meerdere inschrijvingen die je probeert te verwijderen was al verwijderd. Herlaad de pagina en probeer opnieuw.",
+    "translation": "Oops, one or more registrations you are trying to delete have already been deleted. Please reload the page and try again."
+  },
+  "38ddccb2-7cf6-4b47-aa71-d11ad73386d8": {
+    "original": "Oeps, het bedrag dat je probeert te betalen is ongeldig (het bedrag is hoger dan het bedrag dat je moet betalen). Herlaad de pagina en probeer opnieuw.",
+    "translation": "Oops, the amount you are trying to pay is invalid (the amount is higher than the amount you need to pay). Please reload the page and try again."
+  },
+  "dd14a1d9-c569-4d5e-bb26-569ecede4c52": {
+    "original": "Oeps, het bedrag dat je probeert te betalen is ongeldig (het terug te krijgen bedrag is hoger dan het bedrag dat je kan terug krijgen). Herlaad de pagina en probeer opnieuw.",
+    "translation": "Oops, the amount you are trying to pay is invalid (the amount to be refunded is higher than the amount you can receive back). Please reload the page and try again."
+  },
+  "e64b8269-1cda-434d-8d6f-35be23a9d6e9": {
+    "original": "Oeps, het lid dat je probeert in te schrijven konden we niet meer terugvinden. Je herlaadt best even de pagina om opnieuw te proberen.",
+    "translation": "Oops, we could no longer find the member you are trying to register. It is best to reload the page to try again."
+  },
+  "86c7b6f7-3ec9-4af3-a5e6-b5de6de80d73": {
+    "original": "Oeps, je hebt geen betaalmethode geselecteerd. Selecteer een betaalmethode en probeer opnieuw.",
+    "translation": "Oops, you have not selected a payment method. Please select a payment method and try again."
+  },
+  "d483aa9a-289c-4c59-955f-d2f99ec533ab": {
+    "original": "Vul je facturatiegegevens in om verder te gaan.",
+    "translation": "Please enter your billing details to continue."
+  },
+  "492117ce-4d5f-4cff-8f3f-8fa56bbb0fee": {
+    "original": "Oeps, de organisatie waarvoor je probeert te betalen lijkt niet meer te bestaan. Herlaad de pagina en probeer opnieuw.",
+    "translation": "Oops, the organisation you are trying to pay for seems to no longer exist. Please reload the page and try again."
+  },
+  "0ab71307-8f4f-4701-b120-b552a1b6bdd0": {
+    "original": "Oeps, de facturatiegegevens die je probeerde te selecteren lijken niet meer te bestaan. Herlaad de pagina en probeer opnieuw.",
+    "translation": "Oops, the billing details you tried to select seem to no longer exist. Please reload the page and try again."
+  },
+  "cc8b5066-a7e4-4eae-b556-f56de5d3502c": {
+    "original": "Er is geen rekeningnummer ingesteld voor overschrijvingen. Contacteer de beheerder.",
+    "translation": "No account number has been set up for transfers. Please contact the administrator."
+  },
+  "33a926ea-9bc7-444e-becc-c0f2f70e1f0e": {
+    "original": "Inschrijving",
+    "translation": "Registration"
+  },
+  "bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50": {
+    "original": "Onbekend",
+    "translation": "Unknown"
+  },
+  "b77e1f68-8928-42a2-802b-059fa73bedc3": {
+    "original": "Betaling via {method} is onbeschikbaar",
+    "translation": "Payment via {method} is unavailable"
+  },
+  "5574469f-8eee-47fe-9fb6-1b097142ac75": {
+    "original": "Betaling via {method} is tijdelijk onbeschikbaar",
+    "translation": "Payment via {method} is temporarily unavailable"
+  },
+  "648708e0-b2f1-4336-979a-3ec3ca9cb8fd": {
+    "original": "Deze webshop bestaat niet (meer)",
+    "translation": "This webshop no longer exists"
+  },
+  "2d5e0e5a-3fbe-4c75-ac6e-0fe8fb534716": {
+    "original": "Je moet inloggen om een bestelling te kunnen plaatsen.",
+    "translation": "You must log in to place an order."
+  },
+  "a0e947ed-42d6-4cb8-98de-e38c27afc4db": {
+    "original": "Oeps! Om spam te voorkomen limiteren we het aantal test bestellingen die je per uur of dag kan plaatsen. Probeer over een uur opnieuw of schakel over naar een betaald abonnement.",
+    "translation": "Oops! To prevent spam, we limit the number of test orders you can place per hour or day. Please try again in an hour or switch to a paid subscription."
+  },
+  "3de5ff97-4f7c-4eb3-8ead-21563ae8fbe1": {
+    "original": "Sommige kortingcodes werden dubbel toegepast op jouw bestelling. Kijk het even na, dit is niet toegestaan.",
+    "translation": "Some discount codes have been applied twice to your order. Please check this, this is not allowed."
+  },
+  "c119c353-14ad-4a9e-958f-44189725f105": {
+    "original": "De kortingscode die je hebt toegevoegd is niet (meer) geldig",
+    "translation": "The discount code you added is no longer valid"
+  },
+  "bdb23973-b215-447f-8077-f1e2c0bc3034": {
+    "original": "Meldingen",
+    "translation": "Notifications"
+  },
+  "29360811-3663-496c-8d8f-c9fdf9467a74": {
+    "original": "ID",
+    "translation": "ID"
+  },
+  "394aafa1-811b-4ed4-bfc6-c12ae59ff9b6": {
+    "original": "Naam activiteit",
+    "translation": "Activity name"
+  },
+  "afd7843d-f355-445b-a158-ddacf469a5b1": {
+    "original": "Groep",
+    "translation": "Group"
+  },
+  "27cfaf26-6b88-4ebc-a50a-627a9f0f9e64": {
+    "original": "Groepsnummer",
+    "translation": "Group number"
+  },
+  "d7003b29-cc92-4ef4-b07b-f283193ef2ae": {
+    "original": "Status",
+    "translation": "Status"
+  },
+  "c4cc50fc-f2f1-4af4-abaf-fe41d5fe8c0e": {
+    "original": "Opmerkingen",
+    "translation": "Comments"
+  },
+  "bbe0af99-b574-4719-a505-ca2285fa86e4": {
+    "original": "Startdatum",
+    "translation": "Start date"
+  },
+  "3c90169c-9776-4d40-bda0-dba27a5bad69": {
+    "original": "Einddatum",
+    "translation": "End date"
+  },
+  "5a1dedb6-6d67-4538-9719-e0a511fca6dd": {
+    "original": "Ingediend op",
+    "translation": "Submitted on"
+  },
+  "aaa24b94-c733-40e1-9a25-76d1c65d3737": {
+    "original": "Ingediend door",
+    "translation": "Submitted by"
+  },
+  "fb35c140-e936-4e91-aa92-ef4dfc59fb51": {
+    "original": "Leden",
+    "translation": "Members"
+  },
+  "cc1cf4a7-0bd2-4fa7-8ff2-0a12470a738d": {
+    "original": "Nummer",
+    "translation": "Number"
+  },
+  "efca0579-0543-4636-a996-384bc9f0527e": {
+    "original": "Voornaam",
+    "translation": "First name"
+  },
+  "4a5e438e-08a1-411e-9b66-410eea7ded73": {
+    "original": "Achternaam",
+    "translation": "Surname"
+  },
+  "7d7b5a21-105a-41a1-b511-8639b59024a4": {
+    "original": "Geboortedatum",
+    "translation": "Date of birth"
+  },
+  "992b79e9-8c6e-4096-aa59-9e5f546eac41": {
+    "original": "Leeftijd",
+    "translation": "Age"
+  },
+  "a39908e8-62b0-487c-9a03-57dd62326d94": {
+    "original": "Geslacht",
+    "translation": "Gender"
+  },
+  "856aaa1c-bc62-4e45-9ae5-4c7e7dca23ab": {
+    "original": "Telefoonnummer",
+    "translation": "Telephone number"
+  },
+  "82f4b6ed-afee-4655-9f07-22802e0e7ad9": {
+    "original": "E-mailadres",
+    "translation": "Email address"
+  },
+  "0fa4253f-1cfd-4394-93b4-dfba8da04738": {
+    "original": "Beveiligingscode",
+    "translation": "Security code"
+  },
+  "87c1a48c-fef5-44c3-ae56-c83463fcfb84": {
+    "original": "UiTPAS-nummer",
+    "translation": "UiTPAS number"
+  },
+  "030be384-9014-410c-87ba-e04920c26111": {
+    "original": "Financiële ondersteuning",
+    "translation": "Financial support"
+  },
+  "8c38d163-c01b-488f-8729-11de8af7d098": {
+    "original": "Notities",
+    "translation": "Notes"
+  },
+  "c1843768-2bf4-42f2-baa4-42f49028463d": {
+    "original": "en",
+    "translation": "and"
+  },
+  "0c230001-c3be-4a8e-8eab-23dc3fd96e52": {
+    "original": "Leeftijdsgroep",
+    "translation": "Age group"
+  },
+  "0ef2bbb3-0b3c-411a-8901-a454cff1f839": {
+    "original": "Standaard leeftijdsgroep",
+    "translation": "Default age group"
+  },
+  "6aeee253-beb2-4548-b60e-30836afcf2f0": {
+    "original": "verwijderde leeftijdsgroep",
+    "translation": "deleted age group"
+  },
+  "00881b27-7501-4c56-98de-55618be2bf11": {
+    "original": "Rijksregisternummer",
+    "translation": "National registration number"
+  },
+  "506a2bd8-bd5b-48ae-8480-fbb9e9faa683": {
+    "original": "Niet-geverifieerde telefoonnummers",
+    "translation": "Unverified telephone numbers"
+  },
+  "62b19231-9770-4553-ad25-500df57ccf84": {
+    "original": "Niet-geverifieerde e-mailadressen",
+    "translation": "Unverified email addresses"
+  },
+  "b45f1017-e859-43da-8829-a21639a9e70d": {
+    "original": "Niet-geverifieerde adressen",
+    "translation": "Unverified addresses"
+  },
+  "dcc53f25-f0e9-4e3e-9f4f-e8cfa4e88755": {
+    "original": "Tarief",
+    "translation": "Tariff"
+  },
+  "d89d7fcd-ecf3-40a2-afb6-f51c3f6c9bc6": {
+    "original": "Keuzemenu aantal",
+    "translation": "Choice menu amount"
+  },
+  "99e37a95-6a68-4921-a8db-08fb136f87dd": {
+    "original": "Keuzemenu",
+    "translation": "Choice menu"
+  },
+  "f972abd4-de1e-484b-b7da-ad4c75d37808": {
+    "original": "Man",
+    "translation": "Male"
+  },
+  "e21f499d-1078-4044-be5d-6693d2636699": {
+    "original": "Vrouw",
+    "translation": "Female"
+  },
+  "60f13ba4-c6c9-4388-9add-43a996bf6bee": {
+    "original": "Andere",
+    "translation": "Other"
+  },
+  "2a033cd8-b9e4-4a92-a8a6-b4a687d87e79": {
+    "original": "Groepen",
+    "translation": "Groups"
+  },
+  "522fb6c5-6d4d-4d9c-94b7-3e282fb0ea1f": {
+    "original": "Naam",
+    "translation": "Name"
+  },
+  "5f8c1ac5-a650-4046-80b6-0fe37fa12439": {
+    "original": "Tags",
+    "translation": "Tags"
+  },
+  "d0defb77-0a25-4b85-a03e-57569c5edf6c": {
+    "original": "Functies",
+    "translation": "Roles"
+  },
+  "c14b0320-cb84-4386-a39a-aa9ffb5eb886": {
+    "original": "Groepsnaam",
+    "translation": "Group name"
+  },
+  "d6fb6973-92f7-4d39-beeb-0f324c0fe865": {
+    "original": "Functie",
+    "translation": "Role"
+  },
+  "2b1d05e5-6a0a-49d5-8510-8593eda94470": {
+    "original": "Onbekende functie",
+    "translation": "Unknown role"
+  },
+  "9ddd7aba-9426-4718-9eb0-673b615efcf4": {
+    "original": "van",
+    "translation": "of"
+  },
+  "eb6d556a-bcda-4ab4-ad39-3215b4734569": {
+    "original": "Onbekende groep",
+    "translation": "Unknown group"
+  },
+  "a1b06e74-f581-4ea0-9e86-83f0c963fd4f": {
+    "original": "E-mailadres lid",
+    "translation": "Member email address"
+  },
+  "9fe916f3-199d-4be2-b9c2-c96eeea31437": {
+    "original": "Lokalen",
+    "translation": "Premises"
+  },
+  "f97ad8c1-31d2-4b61-9e09-3be86eaeba08": {
+    "original": "Type",
+    "translation": "Type"
+  },
+  "d4dbb3ee-ab9d-4231-be12-945b7d156900": {
+    "original": "Betalingen",
+    "translation": "Payments"
+  },
+  "fb8a50ba-0429-46f6-8a83-0602ba46bca7": {
+    "original": "Betaallijnen",
+    "translation": "Payment lines"
+  },
+  "0601033f-1678-4781-96cd-1653448d689a": {
+    "original": "Betaling ID",
+    "translation": "Payment ID"
+  },
+  "c5d24ab8-a87a-481d-a470-23e9386199f3": {
+    "original": "Categorie",
+    "translation": "Category"
+  },
+  "9c4977db-1ce9-424b-92cf-4bbe7f6606fd": {
+    "original": "Beschrijving",
+    "translation": "Description"
+  },
+  "10a1cf76-0757-4c92-9923-a19cd77fe24c": {
+    "original": "Aangerekend op",
+    "translation": "Charged on"
+  },
+  "3d586760-01f3-42c3-82be-44cea7ad0820": {
+    "original": "Verschuldigd vanaf",
+    "translation": "Due from"
+  },
+  "f085f874-242d-47cb-a404-96eab69662ec": {
+    "original": "Aantal",
+    "translation": "Amount"
+  },
+  "7f7fdce2-1fcd-44c9-8c98-856aea11ffc3": {
+    "original": "Eenheidsprijs",
+    "translation": "Unit price"
+  },
+  "6f3104d4-9b8f-4946-8434-77202efae9f0": {
+    "original": "Prijs",
+    "translation": "Price"
+  },
+  "61b7b9cb-287a-4655-bac2-bb2d0b83fe47": {
+    "original": "Bedrag",
+    "translation": "Amount"
+  },
+  "f12ffd5b-2138-41b4-8179-ae7ea2ce7621": {
+    "original": "Betaalmethode",
+    "translation": "Payment method"
+  },
+  "126040d7-3625-45c5-b561-4bf6c5baac12": {
+    "original": "Betaalprovider",
+    "translation": "Payment provider"
+  },
+  "e5902b28-754d-42cd-b245-f403d03b8c56": {
+    "original": "Aangemaakt op",
+    "translation": "Created on"
+  },
+  "297af5d5-1cb0-4862-b8d4-13416bdefa9f": {
+    "original": "Betaald op",
+    "translation": "Paid on"
+  },
+  "151006be-86c2-48cd-bcd7-7c3bf9b76080": {
+    "original": "Detail",
+    "translation": "Detail"
+  },
+  "544a77e9-c915-4f47-afbf-c626396b0308": {
+    "original": "Uitbetalingsmededeling",
+    "translation": "Payment notification"
+  },
+  "fe56b791-fc88-4301-a59a-b5b185d1f124": {
+    "original": "Uitbetalingsdatum",
+    "translation": "Payment date"
+  },
+  "3790be02-581f-4713-8c4b-14cdf430f54a": {
+    "original": "Uitbetalingsbedrag",
+    "translation": "Payment amount"
+  },
+  "02754274-677a-4911-9a32-8422a8d9f827": {
+    "original": "Transactiekosten",
+    "translation": "Transaction costs"
+  },
+  "a7f32979-1ee8-47fe-a409-7b17ce9f9d39": {
+    "original": "Account ID",
+    "translation": "Account ID"
+  },
+  "f8dd1b1a-3da5-472d-bb46-8763537e53c8": {
+    "original": "Kaartnummer",
+    "translation": "Card number"
+  },
+  "04d9151b-cca1-4bce-b320-3e2b7da25575": {
+    "original": "Kaarthouder",
+    "translation": "Cardholder"
+  },
+  "dccdacf7-0760-4b17-8e03-fbfcda7a0b4f": {
+    "original": "Mededeling",
+    "translation": "Notification"
+  },
+  "63c0eca3-d13a-4e13-a9d6-1fc54718fbba": {
+    "original": "Begunstigde",
+    "translation": "Beneficiary"
+  },
+  "6d5a8830-866d-4fe9-ae26-002a29b6054f": {
+    "original": "Rekeningnummer begunstigde",
+    "translation": "Beneficiary account number"
+  },
+  "bc1ac306-adaa-4e7b-a02f-47a1683c10b8": {
+    "original": "ID betalende groep",
+    "translation": "Paying group ID"
+  },
+  "ffd75ec7-b80b-4b97-961f-21246df7d803": {
+    "original": "Naam betalende groep",
+    "translation": "Paying group name"
+  },
+  "a5332744-e6e1-4af9-b05c-cbc21515c4d0": {
+    "original": "Groepsnummer betalende groep",
+    "translation": "Paying group number"
+  },
+  "ea302250-6bae-409a-a547-78ff71181cfc": {
+    "original": "Bedrijfsnaam",
+    "translation": "Company name"
+  },
+  "ee7d3d8e-9dc3-472f-900a-d1c1cc7e3947": {
+    "original": "BTW-nummer",
+    "translation": "VAT number"
+  },
+  "12f64ea7-fb54-4178-8267-9de12bdf70d7": {
+    "original": "Ondernemingsnummer",
+    "translation": "Company number"
+  },
+  "8eb5f50e-d00d-444d-979a-f80ae834eb9a": {
+    "original": "E-mailadres administratie",
+    "translation": "Administration email address"
+  },
+  "ecacb29b-6be5-4581-a0bd-5c0824b27cb9": {
+    "original": "Te ontvangen bedragen",
+    "translation": "Amounts to be received"
+  },
+  "e023f8a6-a91a-48c0-98fc-863697e1e8c6": {
+    "original": "Lijnen",
+    "translation": "Lines"
+  },
+  "dc9f65e0-19ce-4908-8830-da48235faa70": {
+    "original": "Betaald bedrag",
+    "translation": "Amount paid"
+  },
+  "5c75e9bf-1b64-4d28-a435-6e33247d5170": {
+    "original": "In verwerking",
+    "translation": "In process"
+  },
+  "eb0421f4-6ee9-4d81-b549-2bc4e16c4b63": {
+    "original": "Openstaand bedrag",
+    "translation": "Outstanding amount"
+  },
+  "333e8879-0e98-4233-bc51-93a5c623c75e": {
+    "original": "ID schuldenaar",
+    "translation": "Debtor ID"
+  },
+  "b9c7a57e-6dc1-48a2-bcba-a26c5f59555e": {
+    "original": "Schuldenaar",
+    "translation": "Debtor"
+  },
+  "a0dfe596-0670-48bc-a5f3-2c9308c70a17": {
+    "original": "type",
+    "translation": "type"
+  },
+  "9f5ee239-d01b-4ee1-961b-2e3224489781": {
+    "original": "Je hebt geen toegang tot deze betaling",
+    "translation": "You do not have access to this payment"
+  },
+  "b6f89130-e727-4f85-b3a9-18b97c4f6ab6": {
+    "original": "Organisatie niet gevonden",
+    "translation": "Organisation not found"
+  },
+  "78cd49fe-260c-4fdc-ad83-e605734c684f": {
+    "original": "Je hebt geen toegang tot de orders van deze webshop",
+    "translation": "You do not have access to the orders of this webshop"
+  },
+  "792f644d-f3eb-4772-88b9-edb88f0b6773": {
+    "original": "Je hebt geen toegang tot de documenten van deze template",
+    "translation": "You do not have access to the documents of this template"
+  },
+  "b5079e56-2480-4ce6-a3a2-3f244540fa0e": {
+    "original": "Je hebt geen toegang tot de tickets van deze webshop",
+    "translation": "You do not have access to the tickets of this webshop"
+  },
+  "da016ffd-45c5-41cc-90e4-d4e81105ebe0": {
+    "original": "Beheerder van",
+    "translation": "Administrator of"
+  },
+  "08f883bb-cdc7-4d50-a35e-e2fbeaf6f284": {
+    "original": "Er ging iets mis bij het starten van de betaling. Herlaad de pagina en probeer het opnieuw.",
+    "translation": "Something went wrong when starting the payment. Please reload the page and try again."
+  },
+  "dae9058f-0aa7-4fcb-9f1d-fc918c65784b": {
+    "original": "Het minimum bedrag voor een online betaling is € 0,50",
+    "translation": "The minimum amount for an online payment is €0.50"
+  },
+  "55d699ae-3da4-45ca-a30e-0f194b08edf7": {
+    "original": "Betaling via",
+    "translation": "Payment via"
+  },
+  "277dc49e-922a-444f-ba2b-b3442d855358": {
+    "original": "is onbeschikbaar",
+    "translation": "is unavailable"
+  },
+  "e66b54d3-70fb-4b40-b3e5-21bc795ba704": {
+    "original": "Er ging iets mis bij het aanmaken van de betaling. Probeer opnieuw of gebruik een andere betaalmethode.",
+    "translation": "Something went wrong when creating the payment. Please try again or use a different payment method."
+  },
+  "1ae8cbc7-9ef5-43db-b9a3-0117dfa43be1": {
+    "original": "Ja",
+    "translation": "Yes"
+  },
+  "b8b730fb-f1a3-4c13-8ec4-0aebe08a1449": {
+    "original": "Nee",
+    "translation": "No"
+  },
+  "2f10996e-ea97-4345-b997-c93198c7d67f": {
+    "original": "Adres",
+    "translation": "Address"
+  },
+  "dafc7b04-dfb2-4dbc-8bcf-f7e9c6356442": {
+    "original": "Postcode",
+    "translation": "Postcode"
+  },
+  "3d538399-3585-4be6-b03d-c12afa7183e8": {
+    "original": "Stad",
+    "translation": "City"
+  },
+  "cce830e0-6c05-405f-a800-4c217dc3235f": {
+    "original": "Land",
+    "translation": "Country"
+  },
+  "95c51d5c-0945-4fcf-90e9-764940e7f54d": {
+    "original": "Anoniem",
+    "translation": "Anonymous"
+  },
+  "506e15b4-622c-4167-a98a-98fbc4404bfc": {
+    "original": "Melding",
+    "translation": "Notification"
+  },
+  "f3aa8253-d88e-41c7-8c98-ed477806c533": {
+    "original": ", dan krijg je automatisch toegang tot alle bestaande gegevens.",
+    "translation": "then you will automatically get access to all existing data."
+  },
+  "af49a569-ce88-48d9-ac37-81e594e16c03": {
+    "original": "Dit e-mailadres is waarschijnlijk ongeldig. We konden eerder geen e-mails naar dit adres sturen.",
+    "translation": "This email address is probably invalid. We were previously unable to send emails to this address."
+  },
+  "e6523f56-397e-4127-8bf7-8396f6f25a62": {
+    "original": "Dit e-mailadres heeft eerder een e-mail als spam gemarkeerd. We kunnen geen e-mails naar dit adres sturen.",
+    "translation": "This email address has previously marked an email as spam. We cannot send emails to this address."
+  },
+  "e78c8218-4d25-413b-ae6b-fd916e663e5a": {
+    "original": "Vul een onderwerp in voor je een e-mail verstuurt",
+    "translation": "Please enter a subject before sending an email"
+  },
+  "31eb1b5d-b3d7-4a76-a5d8-f102dbeb757c": {
+    "original": "Omlaag verplaatsen",
+    "translation": "Move down"
+  },
+  "62013f16-5422-44c4-9993-2596eab2dc97": {
+    "original": "(geboren in",
+    "translation": "(born in"
+  },
+  "a8a86928-92f9-41f2-bf1c-7e193b59e06c": {
+    "original": "Vul de geboortedatum in",
+    "translation": "Enter date of birth"
+  },
+  "38b06bba-0683-44ca-9164-c0aff5f9c860": {
+    "original": "Ongeldige kleurcode",
+    "translation": "Invalid colour code"
+  },
+  "b122a8f8-ddc7-4b9c-abf4-3c3f356a5071": {
+    "original": "Deze kleur is niet toegelaten. Kies een andere kleur.",
+    "translation": "This colour is not permitted. Choose another colour."
+  },
+  "14d30bea-9ee7-4be6-bb58-4eafe31f8897": {
+    "original": "KVK-nummer",
+    "translation": "KVK number"
+  },
+  "13817881-e45b-4aba-a0c8-9cf886fc2de9": {
+    "original": "Vul jouw ondernemingsnummer hier in",
+    "translation": "Enter your company number here"
+  },
+  "a0b5e325-c175-4002-a812-4c83e3ce781a": {
+    "original": "vat number",
+    "translation": "vat number"
+  },
+  "0169f40b-45fd-4552-979d-095381626df1": {
+    "original": "Verplicht in te vullen",
+    "translation": "Required field"
+  },
+  "2ac677a6-f225-46b6-8fea-f6e0f10582ca": {
+    "original": "Kies een datum",
+    "translation": "Choose a date"
+  },
+  "7178d4db-3143-4fd3-832a-a6ffcad60b84": {
+    "original": "Vul een e-mailadres in",
+    "translation": "Enter an email address"
+  },
+  "e9d08384-b7a9-4c7e-9364-63a90a889657": {
+    "original": "Ongeldig e-mailadres",
+    "translation": "Invalid email address"
+  },
+  "97f9599f-cfdd-4705-a94e-8ec6351e99d4": {
+    "original": "De bestandsgrootte is te groot. Het bestand mag maximaal 20MB groot zijn.",
+    "translation": "The file size is too large. The file may be a maximum of 20MB."
+  },
+  "6285b165-8d32-4a00-bb3f-0f95abcda58f": {
+    "original": "email",
+    "translation": "email"
+  },
+  "1b84633d-5f01-44ec-ae98-dd096dd13fb4": {
+    "original": "Vul een rekeningnummer in - automatisch willekeurig rekeningnummer ingevuld",
+    "translation": "Enter an account number - an automatic random account number will be entered"
+  },
+  "14eefa10-1257-4e98-bcd5-6bddef38fa03": {
+    "original": "Vul een rekeningnummer in",
+    "translation": "Enter an account number"
+  },
+  "b2add4d5-65c6-4a91-9e10-f74cadf24001": {
+    "original": "Ongeldig rekeningnummer:",
+    "translation": "Invalid account number:"
+  },
+  "3d9d68f3-e953-46a4-b5cb-aa68aa0b1028": {
+    "original": "De bestandsgrootte is te groot. De afbeelding mag maximaal 5MB groot zijn. Probeer de afbeelding te verkleinen en daarna opnieuw te selecteren.",
+    "translation": "The file size is too large. The image may be a maximum of 5MB. Try reducing the image size and then selecting it again."
+  },
+  "bad54c0f-e030-48c4-bd75-42ed4aa9be02": {
+    "original": "Maak een keuze",
+    "translation": "Make a choice"
+  },
+  "4760e3ab-3cb5-4045-b252-ef923dc2bc9d": {
+    "original": "Alles",
+    "translation": "All"
+  },
+  "619eee67-7e95-48a8-9f05-a2783eb52310": {
+    "original": "Vul een rijksregisternummer in",
+    "translation": "Enter a national registration number"
+  },
+  "305840c7-8dc6-4f40-84c3-ca03be30f46a": {
+    "original": "Dit is geen geldig rijksregisternummer. Je kan dit nummer vinden op de achterkant van de identiteitskaart, in de vorm van JJ.MM.DD-XXX.XX. Kijk na op typefouten.",
+    "translation": "This is not a valid national registration number. You can find this number on the back of your identity card, in the form of DD.MM.YY-XXX.XX. Check for typing errors."
+  },
+  "b809571c-08ed-464c-9f40-3522f8dac440": {
+    "original": "Dit rijksregisternummer komt niet overeen met de ingevulde geboortedatum.",
+    "translation": "This national registration number does not match the entered date of birth."
+  },
+  "a5feaa9e-0e9f-42f3-9ebc-5c536ecfdebc": {
+    "original": "Heel zwak",
+    "translation": "Very weak"
+  },
+  "702a8908-fe5d-4c0f-a24f-cef7694a4b37": {
+    "original": "Zwak",
+    "translation": "Weak"
+  },
+  "b43451f9-127b-4cb5-8310-e5c85936567f": {
+    "original": "Matig",
+    "translation": "Moderate"
+  },
+  "fee65508-7b87-4db2-a56f-457cd3e7d808": {
+    "original": "Sterk",
+    "translation": "Strong"
+  },
+  "168c5bc7-2a5e-4bb9-99c0-b91905e5a193": {
+    "original": "euro",
+    "translation": "euro"
+  },
+  "b2933d54-b2ec-4fde-965c-7d62de768a1e": {
+    "original": "Optioneel.",
+    "translation": "Optional."
+  },
+  "6b886749-1039-4c0b-b239-fbae9fd5f291": {
+    "original": "Optioneel",
+    "translation": "Optional"
+  },
+  "a0422d2b-5fbc-4df5-b9c2-d693d24cc68e": {
+    "original": "Vul een adres in",
+    "translation": "Enter an address"
+  },
+  "947eb845-90da-43e5-a3bb-78903f7edd72": {
+    "original": "Maximum bereikt",
+    "translation": "Maximum reached"
+  },
+  "5c717b44-dae1-4fe0-970b-36a8546dee2a": {
+    "original": "Minimum bereikt",
+    "translation": "Minimum reached"
+  },
+  "49211487-9d94-45cd-ad3d-8009f6037d68": {
+    "original": "Dit is leeg maar werd wel ingevuld in een andere taal",
+    "translation": "This is empty but was filled in in another language"
+  },
+  "2ccc15bf-e1ac-4bb7-8227-7fc0391da7f3": {
+    "original": "Verwijder vertaling",
+    "translation": "Remove translation"
+  },
+  "171766ac-2f5d-44dd-aa7b-aebe964c7916": {
+    "original": "Neem vertaling over",
+    "translation": "Take over translation"
+  },
+  "6d060790-19c4-45d2-a47b-cfc2409006c6": {
+    "original": "Taal",
+    "translation": "Language"
+  },
+  "dce292b4-9edd-4e20-a2e3-e3be80d42eb4": {
+    "original": "Ongeldig tijdstip. Voer in zoals bv. '12:30'",
+    "translation": "Invalid time. Enter as e.g. '12:30'"
+  },
+  "5c6ace17-d4d1-4492-8bf5-e8f90f9daed6": {
+    "original": "Vul een geldig UiTPAS-nummer in",
+    "translation": "Enter a valid UiTPAS number"
+  },
+  "c938a4fe-ebdc-4c3c-9d77-bfbb2ef1d6ed": {
+    "original": "Vul jouw BTW-nummer hier in",
+    "translation": "Enter your VAT number here"
+  },
+  "811ea961-373c-4903-bab7-d4b59b7ff2fd": {
+    "original": "Vul een BTW-nummer in",
+    "translation": "Enter a VAT number"
+  },
+  "ee8d4d2c-e080-4ee2-830c-bca556879856": {
+    "original": "Ongeldig BTW-nummer:",
+    "translation": "Invalid VAT number:"
+  },
+  "930cb01b-7877-45e6-99dc-7cb148f13cc9": {
+    "original": "Selecteer eerst tekst die je klikbaar wilt maken",
+    "translation": "First select the text you want to make clickable"
+  },
+  "3337b645-929a-4c29-ba80-1898dead623d": {
+    "original": "Titel",
+    "translation": "Title"
+  },
+  "73de3c97-dee4-4944-97ab-4ffd438ff9c4": {
+    "original": "Koptekst",
+    "translation": "Header"
+  },
+  "4943ece9-450b-4913-a6d8-6834d011a1ee": {
+    "original": "Waarschuwing",
+    "translation": "Warning"
+  },
+  "0456ef2e-5e86-48fa-835c-fd8ec1921f5e": {
+    "original": "Info",
+    "translation": "Info"
+  },
+  "edf611b8-a969-4861-956f-522c47a948fb": {
+    "original": "Opsomming met bolletjes",
+    "translation": "Bulleted list"
+  },
+  "ec732e97-237c-4271-a890-77f18e2b006f": {
+    "original": "Opsomming met nummers",
+    "translation": "Numbered list"
+  },
+  "375a57e9-815f-42d0-88e0-1ce09df72c1b": {
+    "original": "Ongeldige URL",
+    "translation": "Invalid URL"
+  },
+  "2ae30b48-9f5d-4e55-9b7d-41a792704442": {
+    "original": "Er zijn geen andere groepen bij {organization} waarvoor {member} kan inschrijven. Dit kan het geval zijn als: de inschrijvingen gesloten zijn of als dit lid in geen enkele andere groep 'past' (bv. leeftijd).",
+    "translation": "There are no other groups at {organization} for which {member} can register. This may be the case if: registrations are closed or if this member does not 'fit' in any other group (e.g. age)."
+  },
+  "120012bf-f877-46de-b6d9-55ea46f3f2ce": {
+    "original": "Gegevens",
+    "translation": "Data"
+  },
+  "c7d995f1-36a0-446e-9fcf-17ffb69f3f45": {
+    "original": "Aansluiting",
+    "translation": "Affiliation"
+  },
+  "60dd9d3a-d48f-4e58-810c-1bd69bafa467": {
+    "original": "Rekening",
+    "translation": "Account"
+  },
+  "bc6b2553-c28b-4e3b-aba3-4fdc2c23db6e": {
+    "original": "Opslaan",
+    "translation": "Save"
+  },
+  "aadde496-77b6-4281-893e-3215ae73a183": {
+    "original": "Vul de beveiligingscode in",
+    "translation": "Enter the security code"
+  },
+  "14a6da51-a82f-43b5-9e6a-2d679985d41a": {
+    "original": "Wil je dit adres overal wijzigen?",
+    "translation": "Do you want to change this address everywhere?"
+  },
+  "4d5e0d3f-688a-4c8b-bad7-818d976166bf": {
+    "original": "Overal wijzigen",
+    "translation": "Change everywhere"
+  },
+  "acebb7f5-73f6-448c-842b-361da931462f": {
+    "original": "is ook het adres van",
+    "translation": "is also the address of"
+  },
+  "f5962c80-7c80-4d05-a4fe-8a842270d280": {
+    "original": ". Als je wilt kan je het adres ook voor hen wijzigen naar",
+    "translation": ". If you wish, you can also change the address for them to"
+  },
+  "fe636d8c-6506-4c8b-bb79-9c20fb1bc54d": {
+    "original": "Enkel hier",
+    "translation": "Only here"
+  },
+  "60abecdc-9f60-4e4a-a994-95e3fec67a5a": {
+    "original": "Geen",
+    "translation": "None"
+  },
+  "ba6f46a9-2598-4da2-beb2-fdf9ba890bfd": {
+    "original": "jaar",
+    "translation": "year"
+  },
+  "af93c340-950c-4f6c-be6a-6bb847ec2d41": {
+    "original": "onbekend",
+    "translation": "unknown"
+  },
+  "47c7c3c4-9246-40b7-b1e0-2cb408d5f79e": {
+    "original": "Proefperiode",
+    "translation": "Trial period"
+  },
+  "b56351e9-4847-4a0c-9eec-348d75c794c4": {
+    "original": "Actief",
+    "translation": "Active"
+  },
+  "d9858110-37d9-4b4a-8bfb-d76b3cc5ef27": {
+    "original": "Verlopen",
+    "translation": "Expired"
+  },
+  "75e62d3c-f348-4104-8a1e-e11e6e7fbe32": {
+    "original": "Tijdelijk",
+    "translation": "Temporary"
+  },
+  "1f8620fa-e8a5-4665-99c8-c1907a5b5768": {
+    "original": "Niet verzekerd",
+    "translation": "Uninsured"
+  },
+  "d84503e9-7d0e-4c4b-a3ca-92bfbed6ca49": {
+    "original": "Account",
+    "translation": "Account"
+  },
+  "e7592781-8be0-4912-8628-e611e88431ba": {
+    "original": "Geen account",
+    "translation": "No account"
+  },
+  "3d71ea5d-244b-493e-ba2a-6644dea74b30": {
+    "original": "Ontbreekt",
+    "translation": "Missing"
+  },
+  "de723a38-6e76-418a-a6f6-52c6ed45c5c8": {
+    "original": "telefoonnummer",
+    "translation": "telephone number"
+  },
+  "64163c88-2610-4542-9fd4-db523670049c": {
+    "original": "e-mailadres",
+    "translation": "email address"
+  },
+  "ca287035-d735-4eaa-bbb3-ae0db435b4ea": {
+    "original": "adres",
+    "translation": "address"
+  },
+  "88a24a2b-d84a-4c7e-978d-6180e260a06f": {
+    "original": "geboortedatum",
+    "translation": "date of birth"
+  },
+  "e7a21ff5-4f90-4518-8279-ea4fb747fb66": {
+    "original": "rijksregisternummer",
+    "translation": "national registration number"
+  },
+  "af59b3e6-e47c-4c9f-a571-2e1662f17114": {
+    "original": "rijksregisternummer ouders",
+    "translation": "parents' national registration number"
+  },
+  "8a5dfcff-bbe3-4b8f-8b6d-85df4d35dc94": {
+    "original": "ouders",
+    "translation": "parents"
+  },
+  "d42f4d7d-a453-403b-9b3f-459020fc8849": {
+    "original": "noodcontactpersonen",
+    "translation": "emergency contacts"
+  },
+  "68860bdb-dad1-40d5-9130-6219c83fe977": {
+    "original": "Tot",
+    "translation": "Until"
+  },
+  "2a96fc1f-3710-4eae-bd01-b95ef8c2622b": {
+    "original": "Sinds",
+    "translation": "Since"
+  },
+  "8895f354-658f-48bd-9d5d-2e0203ca2a36": {
+    "original": "Inschrijvingsdatum",
+    "translation": "Registration date"
+  },
+  "30e129d7-349d-4369-a8c4-c86b82ce2e01": {
+    "original": "Gratis",
+    "translation": "Free"
+  },
+  "3a97e6cb-012d-4007-9c54-49d3e5b72909": {
+    "original": "Te betalen",
+    "translation": "To be paid"
+  },
+  "a1608b0c-760b-4de1-9616-dea65c812437": {
+    "original": "Wachtlijst",
+    "translation": "Waiting list"
+  },
+  "162644a1-aee8-497b-b837-04abb995047f": {
+    "original": "Leden inschrijven",
+    "translation": "Register members"
+  },
+  "d799bffc-fd09-4444-abfa-3552b3c46cb9": {
+    "original": "Bedrag aanrekenen",
+    "translation": "Charge amount"
+  },
+  "b9b8f956-8c87-413b-a94d-2f31941e3da1": {
+    "original": "Niet alle resultaten zijn geladen. Gebruik dit niet voor te veel leden tegelijk.",
+    "translation": "Not all results have been loaded. Do not use this for too many members at once."
+  },
+  "f049ea7d-4411-4860-bd6f-d7c57863c39d": {
+    "original": "Zoeken",
+    "translation": "Search"
+  },
+  "86ebf633-c9d5-459d-8f7b-259d0d3f2ea4": {
+    "original": "Stel je facturatiegegevens in voor je verder gaat",
+    "translation": "Set up your billing details before continuing"
+  },
+  "9ef6547b-c78a-4d2d-bd2e-75bbbc71e6c7": {
+    "original": "Kies de juiste facturatiegegevens voor je verder gaat",
+    "translation": "Choose the correct billing details before continuing"
+  },
+  "a562ecf9-00ae-48b7-8568-4e762b11e1f3": {
+    "original": "Deze facturatiegegevens zijn niet volledig. Bewerk ze en kijk ze na voor je verder gaat.",
+    "translation": "These billing details are incomplete. Edit and check them before continuing."
+  },
+  "2c11315f-96a5-424d-a1e0-f24f2abf5e8a": {
+    "original": "Hoera!",
+    "translation": "Hooray!"
+  },
+  "6e6fec93-89e1-4a60-8f96-22936f2f68d7": {
+    "original": "andere leden",
+    "translation": "other members"
+  },
+  "6a96aea2-95ce-4b01-91ff-d0f83333c951": {
+    "original": "zijn ingeschreven",
+    "translation": "have been registered"
+  },
+  "4ca47c6a-ca4e-4f63-b303-b45536072957": {
+    "original": "is ingeschreven",
+    "translation": "has been registered"
+  },
+  "6d897353-bd6c-44cc-8044-5f68cc538b2c": {
+    "original": "zijn ingeschreven op de wachtlijst",
+    "translation": "are on the waiting list"
+  },
+  "59ecd638-c6a3-45b1-80bb-96c4e3bdde05": {
+    "original": "is ingeschreven op de wachtlijst",
+    "translation": "is on the waiting list"
+  },
+  "56c85b34-a9f3-46ac-a77c-991a0f463c73": {
+    "original": "Gelukt!",
+    "translation": "Success!"
+  },
+  "9d928561-b64b-46c2-a2c9-c6997384a451": {
+    "original": "Verplaatsen naar",
+    "translation": "Move to"
+  },
+  "72aa2f8d-23dc-4056-98af-a7fc32c9c0ef": {
+    "original": "Wachtlijsten",
+    "translation": "Waiting lists"
+  },
+  "7c6e4f2d-297d-4183-9079-ba123f481eb5": {
+    "original": "Inschrijving bewerken",
+    "translation": "Edit registration"
+  },
+  "5ac7a958-ec4d-4e37-b2c0-35b2ada59044": {
+    "original": "Uitschrijven",
+    "translation": "Unsubscribe"
+  },
+  "25faeb66-9c64-4431-85de-cef9edfac517": {
+    "original": "Open beheerderportaal",
+    "translation": "Open administrator portal"
+  },
+  "757f4504-e8c3-4188-a471-0d5a88c353ea": {
+    "original": "Noodcontactpersoon",
+    "translation": "Emergency contact"
+  },
+  "e01a065d-e946-4fe8-99bc-505c33b055f0": {
+    "original": "Noodcontactpersoon toevoegen",
+    "translation": "Add emergency contact"
+  },
+  "8edc8d31-c902-437c-8f0d-c4afbe52871c": {
+    "original": "Vul de naam in",
+    "translation": "Enter the name"
+  },
+  "2c3431a2-2a81-45ff-81d0-822e8fc31060": {
+    "original": "Vul een relatie in",
+    "translation": "Enter a relationship"
+  },
+  "7e6694ee-7a21-41a3-8df0-dc9e0df35b2f": {
+    "original": "Wil je deze noodcontactpersoon bij alle gezinsleden toevoegen?",
+    "translation": "Do you want to add this emergency contact to all family members?"
+  },
+  "290ab18c-dc62-4d85-a669-dd83c77758e7": {
+    "original": "Overal toevoegen",
+    "translation": "Add everywhere"
+  },
+  "0e7e79db-62f1-4be9-9464-1552fa6c1216": {
+    "original": "Je kan deze noodcontactpersoon ook automatisch toevoegen bij",
+    "translation": "You can also automatically add this emergency contact to"
+  },
+  "995345ff-f802-4485-860e-5346973cd5f9": {
+    "original": "Voeg minstens één noodcontactpersoon toe",
+    "translation": "Add at least one emergency contact"
+  },
+  "ce4185d5-0d84-435b-bbd2-ff4a6e2e61c1": {
+    "original": "Nieuw lid",
+    "translation": "New member"
+  },
+  "43817091-8f0c-41f3-a72b-bcd0a489dfd3": {
+    "original": "Algemeen",
+    "translation": "General"
+  },
+  "7764f616-f742-4704-93ff-22f1dd31f830": {
+    "original": "Vul de voornaam in",
+    "translation": "Enter the first name"
+  },
+  "bc27bb72-c06d-4a05-8e22-e920d01cc1f4": {
+    "original": "Vul de achternaam in",
+    "translation": "Enter the surname"
+  },
+  "a7b59f15-7f75-4dd0-907c-149a46d91c73": {
+    "original": "van dit lid",
+    "translation": "of this member"
+  },
+  "542e21b0-662c-42df-b133-7dbb650b8e4f": {
+    "original": "Volgjaar toevoegen",
+    "translation": "Add following year"
+  },
+  "372836f6-9b19-49b6-b6d9-5afe781d836e": {
+    "original": "Voeg minstens één ouder toe",
+    "translation": "Add at least one parent"
+  },
+  "ccc74056-d922-4af6-8318-4e797e0fd35e": {
+    "original": "Voeg bij minstens één ouder een rijksregisternummer toe.",
+    "translation": "Add a national registration number to at least one parent."
+  },
+  "8c143a89-4f63-45f8-a369-1eae10620db4": {
+    "original": "Standaardfuncties",
+    "translation": "Default roles"
+  },
+  "20d0f420-edec-4c9f-9584-990258dcf1bf": {
+    "original": "Groepseigenfuncties",
+    "translation": "Group-specific roles"
+  },
+  "0234d6cf-7eac-411a-9321-d9ce81224df8": {
+    "original": "Nationaal niveau",
+    "translation": "National level"
+  },
+  "81e6a643-e2e6-4ee5-bfc3-29fc17f83f9a": {
+    "original": "Functies van",
+    "translation": "Roles of"
+  },
+  "40eced71-abce-42f2-a157-5c7a6686bc63": {
+    "original": "Van",
+    "translation": "From"
+  },
+  "264096eb-4cc6-4c2f-807a-107a84980f25": {
+    "original": "tot nu",
+    "translation": "until now"
+  },
+  "347113ec-87a8-4dd9-88ea-c151e3f066f0": {
+    "original": "tot",
+    "translation": "until"
+  },
+  "43d59035-b07a-4f51-8e9b-cd136eb3715c": {
+    "original": "uitpasNumber",
+    "translation": "uitpasNumber"
+  },
+  "92a1d590-2388-4193-9fac-ad41b6122fe4": {
+    "original": "Ouder",
+    "translation": "Parent"
+  },
+  "eb1bf015-9263-4f25-a7e4-f57b07342fb8": {
+    "original": "Ouder toevoegen",
+    "translation": "Add parent"
+  },
+  "a23b0a8b-9048-41f7-8c22-8157cdeec177": {
+    "original": "Dit rijksregisternummer is al in gebruik door",
+    "translation": "This national registration number is already in use by"
+  },
+  "1e5ac172-0dfe-4861-b299-d0481855efbc": {
+    "original": ". Vul a.u.b. het juiste rijksregisternummer in, dit kan invloed hebben op uw belastingaangifte.",
+    "translation": ". Please enter the correct national registration number, this may affect your tax return."
+  },
+  "27091cc2-c42d-457d-8250-05abc7d4937d": {
+    "original": "Wil je deze ouder bij alle gezinsleden toevoegen?",
+    "translation": "Do you want to add this parent to all family members?"
+  },
+  "81d1f71d-0656-4086-bfd1-de54cd540678": {
+    "original": "Je kan deze ouder ook automatisch toevoegen bij",
+    "translation": "You can also automatically add this parent to"
+  },
+  "497e6653-45eb-4e5f-b350-2b3aafd3b62d": {
+    "original": "Toevoegen",
+    "translation": "Add"
+  },
+  "dd14ada3-dea6-4fc5-9791-8469320d4dcf": {
+    "original": "De startdatum kan ten vroegste morgen zijn",
+    "translation": "The start date can be no earlier than tomorrow"
+  },
+  "e009c5b1-ee75-43b3-989a-60b895ee05c1": {
+    "original": "De einddatum moet na de startdatum liggen",
+    "translation": "The end date must be after the start date"
+  },
+  "f647cb33-7553-4c7b-9ae7-e059a838c63a": {
+    "original": "De startdatum kan niet voor",
+    "translation": "The start date cannot be before"
+  },
+  "f8a6b25b-d877-4f7a-8bc8-f95d1524e822": {
+    "original": "liggen",
+    "translation": "lie"
+  },
+  "7e98165e-9c5e-4aa6-a151-931755e7619e": {
+    "original": "De startdatum kan niet na",
+    "translation": "The start date cannot be after"
+  },
+  "f330e984-a49b-41e3-90fc-4bfffb144724": {
+    "original": "De einddatum kan niet na",
+    "translation": "The end date cannot be after"
+  },
+  "423b0299-c402-4556-9d17-4675668d114d": {
+    "original": "Aansluiting toegevoegd",
+    "translation": "Affiliation added"
+  },
+  "28f78c8b-c553-4cb0-88d9-d1d766eaa1dd": {
+    "original": "Niet beschikbaar",
+    "translation": "Not available"
+  },
+  "b51dbba5-8e12-4835-bdd7-b9fb7e306d8d": {
+    "original": "per dag",
+    "translation": "per day"
+  },
+  "2a9646b3-81b0-48b0-af74-06bbc4fd6fae": {
+    "original": "Gegevens bewerken",
+    "translation": "Edit details"
+  },
+  "cd2aed8f-03e2-4a54-8bc3-100e2643c74a": {
+    "original": "Bevestig de naam van het lid",
+    "translation": "Confirm the member's name"
+  },
+  "3610e3ed-5df6-41d2-b6e6-a5823abcaff7": {
+    "original": "Volledige naam",
+    "translation": "Full name"
+  },
+  "b0427a33-f98d-439d-8625-0727c3cf53c3": {
+    "original": "Ja, ik ben 100% zeker",
+    "translation": "Yes, I am 100% sure"
+  },
+  "2437b288-7696-4af3-a688-895b6039eb37": {
+    "original": "is verwijderd",
+    "translation": "has been removed"
+  },
+  "22e7c344-54b6-493e-84c3-cbb453810781": {
+    "original": "Geen standaard leeftijdsgroep",
+    "translation": "No default age group"
+  },
+  "1769b160-721b-41cc-98fa-869045abba79": {
+    "original": "Er zijn geen acties beschikbaar voor deze inschrijving",
+    "translation": "No actions are available for this registration"
+  },
+  "d67b2375-8426-47de-8637-74557f6ad0a4": {
+    "original": "van onbekende groep",
+    "translation": "from unknown group"
+  },
+  "dce3d5b2-7cce-4ada-ab77-0572b2be509d": {
+    "original": "Verwijderde functie",
+    "translation": "Removed role"
+  },
+  "b1fdf269-a84e-44e8-9d2d-ef57919e3698": {
+    "original": "Weet je zeker dat je het gsm nummer '{phone}' wilt verwijderen?",
+    "translation": "Are you sure you want to remove the mobile number '{phone}'?"
+  },
+  "9860af1d-e902-4f21-b8bb-98e1e401f87f": {
+    "original": "Weet je zeker dat je het e-mailadres '{email}' wilt verwijderen?",
+    "translation": "Are you sure you want to remove the email address '{email}'?"
+  },
+  "d233219f-cbc2-4b54-82df-494e068d754b": {
+    "original": "Weet je zeker dat je het adres '{address}' wilt verwijderen?",
+    "translation": "Are you sure you want to remove the address '{address}'?"
+  },
+  "4ab30ed5-3e8e-43ca-b87e-dddf8dd8b5fe": {
+    "original": "Ben je zeker dat je deze aansluiting wilt verwijderen?",
+    "translation": "Are you sure you want to remove this affiliation?"
+  },
+  "3e204a5f-3198-4125-ac32-fcf973e144b2": {
+    "original": "Ja, verwijderen",
+    "translation": "Yes, remove"
+  },
+  "63b9a0c4-ee88-49b4-8609-dc014bc3e3a3": {
+    "original": "Aansluiting verwijderd",
+    "translation": "Affiliation removed"
+  },
+  "95121e0b-413e-4f98-8e0c-a74bbbdcfd6d": {
+    "original": "Wil je uitloggen?",
+    "translation": "Do you want to log out?"
+  },
+  "3b48e8f8-5ab4-4fb0-b6db-2906de2f6869": {
+    "original": "Ja, uitloggen",
+    "translation": "Yes, log out"
+  },
+  "f38e1ff9-bd43-419e-81b5-eb26fc3c594a": {
+    "original": "Hiermee zal je worden afgemeld.",
+    "translation": "This will log you out."
+  },
+  "80651252-e037-46b2-8272-a1a030c54653": {
+    "original": "Annuleren",
+    "translation": "Cancel"
+  },
+  "1835623d-0a29-430a-a4ca-81a95eb8666e": {
+    "original": "Algemene instellingen",
+    "translation": "General settings"
+  },
+  "4d08ffe7-8296-46e8-9372-e21cedcd73ff": {
+    "original": "Selecteer tags",
+    "translation": "Select tags"
+  },
+  "aaf91fd2-250b-4f2e-88a1-21af5747c760": {
+    "original": "Voeg toe",
+    "translation": "Add"
+  },
+  "30ea6c91-c638-45f7-9042-13247195743d": {
+    "original": "Wijzig selectie",
+    "translation": "Change selection"
+  },
+  "d3e9fd5b-9abc-4473-97e7-0c7734c2f14d": {
+    "original": "Ben je zeker dat je alle tags wilt verwijderen?",
+    "translation": "Are you sure you want to remove all tags?"
+  },
+  "7b73af21-99ab-4b47-8e50-e3930ebc3058": {
+    "original": "Er is 1 tag geselecteerd.",
+    "translation": "1 tag selected."
+  },
+  "6f03ce44-b9bb-476a-91ae-32d325406d80": {
+    "original": "Reeds betaald",
+    "translation": "Already paid"
+  },
+  "c38e102e-a16b-4a02-a05f-e282eaead461": {
+    "original": "Totaalprijs",
+    "translation": "Total price"
+  },
+  "3b051406-b285-4f04-a80d-b98c966cbb1c": {
+    "original": "Later te betalen",
+    "translation": "To be paid later"
+  },
+  "89bb9c20-d3f5-43ff-846c-47a23517274a": {
+    "original": "Terug te krijgen",
+    "translation": "To be recovered"
+  },
+  "38ff3cca-3877-4202-9c71-9437a12fb876": {
+    "original": "Terug te betalen",
+    "translation": "To be refunded"
+  },
+  "35337319-2bc6-41d6-9427-c1974d8a37ae": {
+    "original": "Nu te betalen",
+    "translation": "To be paid now"
+  },
+  "c40f80b1-3553-4639-ac5c-937c45baf05e": {
+    "original": "Terug te betalen bedrag toevoegen",
+    "translation": "Add amount to be refunded"
+  },
+  "6c1f62aa-e2c7-40cb-8cb9-7ea3365d5cf4": {
+    "original": "Terug te betalen bedrag bewerken",
+    "translation": "Edit amount to be refunded"
+  },
+  "d7d6da3d-3522-4c21-a03f-ef980380d4ae": {
+    "original": "Verschuldigd bedrag toevoegen",
+    "translation": "Add amount due"
+  },
+  "620143a1-0620-483c-8cec-16747a8d4856": {
+    "original": "Verschuldigd bedrag bewerken",
+    "translation": "Edit amount owed"
+  },
+  "7020d061-6349-4b42-8ee3-eca6b6cca87d": {
+    "original": "Deze aanrekening verwijderen?",
+    "translation": "Delete this charge?"
+  },
+  "6260efe1-ecdb-4a22-a046-7ce84233d11b": {
+    "original": "Je kan dit niet ongedaan maken.",
+    "translation": "You cannot undo this."
+  },
+  "9a9fcc54-b73c-4c9f-ba2e-56ae8c3f150d": {
+    "original": "Kies welke zaken je nu wil betalen",
+    "translation": "Choose what you want to pay now"
+  },
+  "bd7351b4-ec09-4faf-86f8-122621812af0": {
+    "original": "Openstaande rekening toegevoegd aan winkelmandje. Reken je winkelmandje af of voeg eventueel nog andere zaken toe.",
+    "translation": "Outstanding invoice added to shopping cart. Checkout your shopping cart or add other items."
+  },
+  "f7fab124-62ac-432c-80a7-5d594058f3f1": {
+    "original": "Betaalstatus gewijzigd",
+    "translation": "Payment status changed"
+  },
+  "9544ddfe-bde7-452b-8bfb-0f3ffe8cd0e8": {
+    "original": "Individueel",
+    "translation": "Individual"
+  },
+  "07929b60-3a4c-4de1-8d85-c25e836e0535": {
+    "original": "Gegroepeerd",
+    "translation": "Grouped"
+  },
+  "9ce75cee-1539-467c-a9de-ce3b9e870df3": {
+    "original": "(Optioneel)",
+    "translation": "(Optional)"
+  },
+  "e4f8cf4f-8bb1-4a3c-80e4-7c91338bb413": {
+    "original": "(optioneel)",
+    "translation": "(optional)"
+  },
+  "51f9909d-c91f-455d-8cd4-ee0a1897e59d": {
+    "original": "Nieuwe vragenlijst",
+    "translation": "New questionnaire"
+  },
+  "1f1e0d12-3960-46f9-b1e7-d8b42a89e51f": {
+    "original": "Deze vragenlijst bevat gegevens waar je toestemming voor moet vragen. Schakel de toestemming voor gegevevensverzameling in om deze vragenlijst te activeren.",
+    "translation": "This questionnaire contains data for which you must request permission. Enable permission for data collection to activate this questionnaire."
+  },
+  "df8def26-260a-431b-a7fe-09fac12f97e0": {
+    "original": "Wijzig instellingen",
+    "translation": "Change settings"
+  },
+  "d4ac382c-5394-4451-a25b-3b97f6d60168": {
+    "original": "Categorie dupliceren",
+    "translation": "Duplicate category"
+  },
+  "f05a29d6-2df3-45f7-a185-e4a0357fcfae": {
+    "original": "Verplaats naar boven",
+    "translation": "Move up"
+  },
+  "fa6ca066-51cf-479f-be0a-adf42b328983": {
+    "original": "Verplaats naar beneden",
+    "translation": "Move down"
+  },
+  "58351618-cc4a-4785-a8c7-dfd741aa9985": {
+    "original": "Verplaats naar vragenlijst",
+    "translation": "Move to questionnaire"
+  },
+  "ba261762-9151-487c-a3a1-deb1c59e2a14": {
+    "original": "Hoofdvragenlijst",
+    "translation": "Main questionnaire"
+  },
+  "e2193879-76cd-431e-90b5-37cb1871f156": {
+    "original": "Ben je zeker dat je dit wilt verplaatsen?",
+    "translation": "Are you sure you want to move this?"
+  },
+  "9a384a73-d222-49f8-9203-76b8e525f1ab": {
+    "original": "Ja, verplaatsen",
+    "translation": "Yes, move"
+  },
+  "4b82085a-2d05-4172-8503-8aadd2767343": {
+    "original": "Deze subcategorie zal worden omgezet in een vragenlijst als je de huidige vragenlijst opslaat.",
+    "translation": "This subcategory will be converted into a questionnaire when you save the current questionnaire."
+  },
+  "a3605548-d249-489e-bf64-4d3bd3555a8c": {
+    "original": "Deze subcategorie zal worden verplaatst naar deze vragenlijst als je de huidige vragenlijst opslaat.",
+    "translation": "This subcategory will be moved to this questionnaire when you save the current questionnaire."
+  },
+  "95557c11-2b92-4a70-8945-99f6c6f7051c": {
+    "original": "Weet je zeker dat je deze vragenlijst wilt verwijderen?",
+    "translation": "Are you sure you want to delete this questionnaire?"
+  },
+  "1fc71f7e-0985-4ea7-afc7-aeb29b5d2d8d": {
+    "original": "Nieuwe optie",
+    "translation": "New option"
+  },
+  "d35c5964-e8e9-4a42-bdd0-555ab32eda7c": {
+    "original": "Optie bewerken",
+    "translation": "Edit option"
+  },
+  "e817f9c6-5714-44b9-93f0-bf698a4d2723": {
+    "original": "Ben je zeker dat je deze optie wilt verwijderen?",
+    "translation": "Are you sure you want to delete this option?"
+  },
+  "571437e8-8eee-4cdb-bbf8-39a6144bff8c": {
+    "original": "Tekst",
+    "translation": "Text"
+  },
+  "668f1663-e8d1-4e1c-9397-32a1c2b70022": {
+    "original": "Tekstveld (één lijn)",
+    "translation": "Text field (one line)"
+  },
+  "99cf6d44-681c-450b-8c5c-74bc75ca0cde": {
+    "original": "Tekstveld (meerdere lijnen)",
+    "translation": "Text field (multiple lines)"
+  },
+  "b877974f-ec5a-4e92-8ad2-3169ece7da77": {
+    "original": "Getal",
+    "translation": "Number"
+  },
+  "e6ce4fef-ea7e-4218-840e-9435cfaa9931": {
+    "original": "Aankruisen",
+    "translation": "Tick"
+  },
+  "be247511-3af8-4006-b944-19db50d75a89": {
+    "original": "Aankruisvakje",
+    "translation": "Checkbox"
+  },
+  "0c57da32-95ac-4e64-a61a-0a7fa104294a": {
+    "original": "Keuzemenu (kies één)",
+    "translation": "Choice menu (choose one)"
+  },
+  "06f06102-d0a6-4b23-84b0-43d53fc87ca1": {
+    "original": "Keuzemenu (kies meerdere)",
+    "translation": "Choice menu (choose multiple)"
+  },
+  "af8afc36-22de-4f22-8235-e1e8f5eef7ca": {
+    "original": "Geavanceerd",
+    "translation": "Advanced"
+  },
+  "15a3e04d-9fa1-414c-87aa-22c2bd1d39ac": {
+    "original": "Afbeelding of foto",
+    "translation": "Image or photo"
+  },
+  "eaea9adf-d1c8-48ab-b6e9-4cc8d68e2392": {
+    "original": "Waarschuwing als aangevinkt",
+    "translation": "Warning if checked"
+  },
+  "87150a09-54be-4640-9203-74d0399f1e02": {
+    "original": "Waarschuwing als ingevuld",
+    "translation": "Warning if filled in"
+  },
+  "deb80c9b-6f0d-4185-800f-79e419cc8943": {
+    "original": "Waarschuwing als niet aangevinkt",
+    "translation": "Warning if not checked"
+  },
+  "64b39ce3-9624-4a38-a669-90a50443876f": {
+    "original": "Waarschuwing als niet ingevuld",
+    "translation": "Warning if not filled in"
+  },
+  "dcfc3edf-b906-420d-ac49-d89886824de9": {
+    "original": "Nieuwe vraag",
+    "translation": "New question"
+  },
+  "6b58e96c-fbd3-4998-909d-ed25cc758818": {
+    "original": "Vraag bewerken",
+    "translation": "Edit question"
+  },
+  "fac8120c-d891-42e3-8383-090db955c8ca": {
+    "original": "Tekst naast aankruisvakje",
+    "translation": "Text next to checkbox"
+  },
+  "13cac71a-fb4c-46b6-9f17-1a57c5da2420": {
+    "original": "Titel boven keuzemenu",
+    "translation": "Title above choice menu"
+  },
+  "f019894f-69ad-4999-abc0-8682bd024827": {
+    "original": "Titel boven tekstvak",
+    "translation": "Title above text box"
+  },
+  "fa02d08e-aa63-41f0-b9d4-360011c0690d": {
+    "original": "Beschrijving naast aankruisvakje",
+    "translation": "Description next to checkbox"
+  },
+  "33b05ed3-efea-4993-83a1-9c855f6ba427": {
+    "original": "Beschrijving onder keuzemenu",
+    "translation": "Description below choice menu"
+  },
+  "4dd7660f-3a18-4791-87b9-0e47115148f0": {
+    "original": "Beschrijving onder tekstvak",
+    "translation": "Description below text box"
+  },
+  "8499aa55-27b9-430a-b10e-c356a685d499": {
+    "original": "Verplicht aankruisen",
+    "translation": "Mandatory tick"
+  },
+  "40bbc5f7-2295-4c7a-a280-3a7b3d6ae8db": {
+    "original": "Verplicht om minstens één keuze te selecteren",
+    "translation": "Mandatory to select at least one choice"
+  },
+  "3e726684-099f-4229-8d45-d1bfe0d21d07": {
+    "original": "Verplicht om een keuze te selecteren",
+    "translation": "Mandatory to select a choice"
+  },
+  "4b9cc9ee-d989-4459-a8d5-727ae490380d": {
+    "original": "Keuze 1",
+    "translation": "Choice 1"
+  },
+  "a09b08eb-216c-4f07-b05c-0a26a4c580eb": {
+    "original": "Keuze 2",
+    "translation": "Choice 2"
+  },
+  "396f75d7-e7d9-42d9-a50e-9ace51c92fe6": {
+    "original": "Vul een naam in",
+    "translation": "Enter a name"
+  },
+  "025e44e2-c48d-4af2-95b4-3e60c98724f6": {
+    "original": "Ben je zeker dat je dit kenmerk wilt verwijderen?",
+    "translation": "Are you sure you want to delete this attribute?"
+  },
+  "fa50aa94-4f8a-428a-9b97-8b477176240a": {
+    "original": "Alle hieraan verbonden informatie gaat dan ook mogelijks verloren.",
+    "translation": "All information connected to this may also be lost."
+  },
+  "9e080d96-2c2b-47e3-b56c-d58d993974c9": {
+    "original": "Gender",
+    "translation": "Gender"
+  },
+  "fae120e5-80b0-4b67-a8b7-638b43362429": {
+    "original": "Oudergegevens",
+    "translation": "Parent details"
+  },
+  "bd1d21bd-b58f-4d13-b7c7-510db5702441": {
+    "original": "Naam, adres, e-mailadres en telefoonnummer van één of meerdere (plus)ouders",
+    "translation": "Name, address, email address and telephone number of one or more (plus)parents"
+  },
+  "347b9603-d66d-4587-9935-192eaeb0d3bd": {
+    "original": "(van lid zelf)",
+    "translation": "(of member itself)"
+  },
+  "f06acd8c-4cec-42ff-b4b4-5da57ef7db09": {
+    "original": "Het GSM-nummer van de ouders wordt al verzameld via de oudergegevens. Activeer dit enkel voor leden die ook echt een eigen GSM-nummer kunnen hebben, en maak het enkel verplicht als je zeker weet dat iedereen een GSM-nummer heeft.",
+    "translation": "The parents' mobile number is already collected via the parent details. Only activate this for members who can actually have their own mobile number, and only make it mandatory if you are sure that everyone has a mobile number."
+  },
+  "30047312-8c15-4988-8095-a0f605874c22": {
+    "original": "Maak dit niet verplicht voor alle leden, anders moeten minderjarige leden ook verplicht een eigen GSM-nummer invullen, wat ze vaak niet hebben. Denk goed na over wat je instelt.",
+    "translation": "Do not make this mandatory for all members, otherwise minors must also be required to fill in their own mobile number, which they often do not have. Think carefully about what you set."
+  },
+  "0d2bf5c4-db71-465b-8795-9cf8cac63c75": {
+    "original": "E-mailadres (van lid zelf)",
+    "translation": "Email address (of member itself)"
+  },
+  "86db1ded-a836-486d-9ee3-4efc5b24a08f": {
+    "original": "Het e-mailadres van de ouders wordt al verzameld via de oudergegevens. Activeer dit enkel voor leden die ook echt een eigen e-mailadres kunnen hebben, en maak het enkel verplicht als je zeker weet dat iedereen een e-mailadres heeft.",
+    "translation": "The parents' email address is already collected via the parent details. Only activate this for members who can actually have their own email address, and only make it mandatory if you are sure that everyone has an email address."
+  },
+  "154a3457-6357-4a43-9465-a343d218a591": {
+    "original": "Maak dit niet verplicht voor alle leden, anders moeten erg jonge leden ook verplicht een eigen e-mailadres invullen, wat ze vaak niet hebben. Denk goed na over wat je instelt.",
+    "translation": "Do not make this mandatory for all members, otherwise very young members must also be required to fill in their own email address, which they often do not have. Think carefully about what you set."
+  },
+  "bba50e14-c3a1-4b18-9102-14f323453ca0": {
+    "original": "Adres (van lid zelf)",
+    "translation": "Address (of member itself)"
+  },
+  "52b884eb-4437-4ecb-94b8-6079730d45c4": {
+    "original": "Het adres van elke ouder wordt al verzameld via de oudergegevens. We raden af om dit te activeren voor minderjarige leden. Bij ouders kan er namelijk per ouder een apart adres ingesteld worden, wat beter geschikt is. Enkel voor volwassen leden is dit beter aangewezen.",
+    "translation": "The address of each parent is already collected via the parent details. We advise against activating this for minors. For parents, a separate address can be set per parent, which is more suitable. Only for adult members is this better indicated."
+  },
+  "d905b0d6-f472-4290-b9c2-3e566cdbaf33": {
+    "original": "We raden heel sterk af om dit in te schakelen voor minderjarige leden. Gebruik een leeftijdsfilter om dit enkel in te schakelen voor volwassen leden.",
+    "translation": "We strongly advise against enabling this for minors. Use an age filter to only enable this for adult members."
+  },
+  "243b1b1d-feca-43ab-a240-24e5ba785983": {
+    "original": "Extra noodcontactpersonen",
+    "translation": "Extra emergency contacts"
+  },
+  "8a1ef416-1a1d-4e12-8b47-29d9c86a1dfe": {
+    "original": "Naam, relatie en telefoonnummer van één of meerdere noodcontactpersonen (als uitbreiding op ouders, niet de ouders zelf)",
+    "translation": "Name, relationship and telephone number of one or more emergency contacts (as an extension to parents, not the parents themselves)"
+  },
+  "0fcd2a4c-1c44-46df-be27-c8800370769d": {
+    "original": "Maak dit niet verplicht voor alle leden anders moet iedereen verplicht een UiTPAS-nummer invullen, wat niet iedereen heeft.",
+    "translation": "Do not make this mandatory for all members otherwise everyone must be required to fill in a UiTPAS number, which not everyone has."
+  },
+  "521bbf47-fee2-4491-afd5-d263b0ebeda9": {
+    "original": "De financiële status van een lid is gevoelige informatie en vereist toestemming voor gegevensverzameling",
+    "translation": "The financial status of a member is sensitive information and requires permission for data collection"
+  },
+  "efd71f7c-05d3-4bdc-ae46-13024d6527f0": {
+    "original": "Naamloos",
+    "translation": "Unnamed"
+  },
+  "4b50022e-7937-4b21-b97f-35af4430ed9a": {
+    "original": "Categorie verwijderen",
+    "translation": "Delete category"
+  },
+  "fa96b3e2-08bc-4ce1-9562-e09eb26bcd5b": {
+    "original": "Verplaats omhoog",
+    "translation": "Move up"
+  },
+  "dd2032e6-7a34-4027-a678-dbda939782c1": {
+    "original": "Verplaats omlaag",
+    "translation": "Move down"
+  },
+  "e48fd329-0701-47d6-998e-7598691b0200": {
+    "original": "Ben je zeker dat je deze vragenlijst wilt verplaatsen?",
+    "translation": "Are you sure you want to move this questionnaire?"
+  },
+  "34760087-cbb3-416b-b4ef-212f15fc07a8": {
+    "original": "Deze vragenlijst zal worden verplaatst naar de gekozen vragenlijst (",
+    "translation": "This questionnaire will be moved to the chosen questionnaire ("
+  },
+  "e955be72-7a4e-4a0d-9872-043cf75f1134": {
+    "original": "Nadat je hebt opgeslagen kan je dit niet meer ongedaan maken",
+    "translation": "After saving, you can no longer undo this"
+  },
+  "6aeb461a-bb68-413d-b497-c5d861dd70d1": {
+    "original": "Aankruisvakje met tekstvak indien aangevinkt",
+    "translation": "Checkbox with text box if checked"
+  },
+  "84b6d448-9e6b-4ad6-b0b1-4a5fe8141d23": {
+    "original": "Verplicht aankruisvakje",
+    "translation": "Mandatory checkbox"
+  },
+  "989879de-c980-4713-b46d-c560b3377535": {
+    "original": "Kies optioneel één uit {count} opties",
+    "translation": "Optionally choose one of {count} options"
+  },
+  "fe293db6-6810-4dd9-9ece-2a3f69015509": {
+    "original": "Kies één uit {count} opties",
+    "translation": "Choose one of {count} options"
+  },
+  "00a455ce-0ab7-44c6-82c0-4075f3bba399": {
+    "original": "Kies minstens één uit {count} opties",
+    "translation": "Choose at least one of {count} options"
+  },
+  "0bfe39a0-47cc-437b-b090-7e435a7f22eb": {
+    "original": "Kies optioneel meerdere keuzes uit {count} opties",
+    "translation": "Optionally choose multiple choices from {count} options"
+  },
+  "7213a97f-0de3-4505-87d8-bfd37ab6f427": {
+    "original": "Optioneel e-mailadres",
+    "translation": "Optional email address"
+  },
+  "a3a9dd5a-3b48-413b-9993-dedc389bc26a": {
+    "original": "Optioneel adres",
+    "translation": "Optional address"
+  },
+  "6f650005-832a-4aac-9761-6bb0c618bcd4": {
+    "original": "Optioneel telefoonnummer",
+    "translation": "Optional telephone number"
+  },
+  "2901c477-643b-46f4-918b-393356f5bebb": {
+    "original": "Optionele datum",
+    "translation": "Optional date"
+  },
+  "b8097548-a5c9-4d79-b0a9-dcaa595c4a62": {
+    "original": "Optioneel (groot) tekstveld",
+    "translation": "Optional (large) text field"
+  },
+  "0d39fefe-652c-41e1-965f-bedcc7db5b1d": {
+    "original": "Groot tekstveld",
+    "translation": "Large text field"
+  },
+  "3124f6c0-32a9-46d3-ad0b-8f6eb3d04941": {
+    "original": "Optioneel getal",
+    "translation": "Optional number"
+  },
+  "65a518fa-c5f3-4e6b-92b5-871ae31c87ce": {
+    "original": "Optionele prijs",
+    "translation": "Optional price"
+  },
+  "b685fd83-8ab7-490c-866e-c17557804949": {
+    "original": "Optionele afbeelding",
+    "translation": "Optional image"
+  },
+  "bff23f5a-4b71-4af9-9638-8ca0d75a065d": {
+    "original": "Optioneel bestand",
+    "translation": "Optional file"
+  },
+  "48305dc6-dfe3-4b93-b4d8-7fae85b0f733": {
+    "original": "Optioneel tekstveld",
+    "translation": "Optional text field"
+  },
+  "93ae4f29-4c4e-4fc8-b0d0-6db9a1edc0b4": {
+    "original": "Tekstveld",
+    "translation": "Text field"
+  },
+  "c1c5a03f-970c-4eaf-8baf-bf3195f9aded": {
+    "original": "Verplaats naar",
+    "translation": "Move to"
+  },
+  "49d8a87b-542f-4522-b054-3a374ab7df1f": {
+    "original": "Algemene vraag",
+    "translation": "General question"
+  },
+  "67ff4ca3-6f9e-4f74-92f7-ea63acfdb3b8": {
+    "original": "Moet gekoppeld worden aan specifieke lokale leeftijdsgroepen",
+    "translation": "Must be linked to specific local age groups"
+  },
+  "8ba8a143-e26a-40d3-b770-19788314295f": {
+    "original": "Niet gevonden",
+    "translation": "Not found"
+  },
+  "e017ca18-1f4f-4afe-aca5-8eff19d20dc1": {
+    "original": "Selecteer",
+    "translation": "Select"
+  },
+  "f46e85c5-5ab7-4ab9-97f7-c675bcd6a160": {
+    "original": "Selecteer alles",
+    "translation": "Select all"
+  },
+  "d3850361-5954-45cd-8011-7c22f4b838a5": {
+    "original": "Deselecteer alles",
+    "translation": "Deselect all"
+  },
+  "db2ee1ce-3c26-47ba-9559-a8dfad4f480c": {
+    "original": "Wijzig zichtbare gegevens",
+    "translation": "Change visible data"
+  },
+  "ae5e4000-3dc2-46cb-99a4-24f02b6e6cd3": {
+    "original": "Wijzig kolommen",
+    "translation": "Change columns"
+  },
+  "889f97cc-d14f-4865-bd82-e03ea0fdfbb6": {
+    "original": "Sorteren",
+    "translation": "Sort"
+  },
+  "40655788-f117-421c-bf1e-cc93dc10c9f6": {
+    "original": "Deselecteer",
+    "translation": "Deselect"
+  },
+  "5a1df63c-b028-4a77-a2bf-d595a74f29a3": {
+    "original": "De wijzigingen zijn opgeslagen",
+    "translation": "The changes have been saved"
+  },
+  "de26c235-6736-40b9-880a-82046fc2da66": {
+    "original": "Verwijder jouw account?",
+    "translation": "Delete your account?"
+  },
+  "6d4c71ba-0757-4792-aab1-a0b7b80e7c30": {
+    "original": "Bevestig je e-mailadres",
+    "translation": "Confirm your email address"
+  },
+  "6a5dd477-ac82-48a1-9b7a-341192783e22": {
+    "original": "Huidige e-mailadres",
+    "translation": "Current email address"
+  },
+  "df74b936-f96f-4853-9bce-57239b3263f3": {
+    "original": "Je account is verwijderd. Het kan even duren voor jouw aanvraag volledig is verwerkt.",
+    "translation": "Your account has been deleted. It may take some time for your request to be fully processed."
+  },
+  "5f824a9b-6fda-4aa2-be1b-eca5c82eccef": {
+    "original": "Ben je zeker dat je deze inlogmethode wilt deactiveren?",
+    "translation": "Are you sure you want to deactivate this login method?"
+  },
+  "188ff806-6983-4912-ae35-b11e2621c5b5": {
+    "original": "Ja, deactiveren",
+    "translation": "Yes, deactivate"
+  },
+  "3772eed6-90ea-45a9-90bc-f895f4c80651": {
+    "original": "De inlogmethode is ontkoppeld",
+    "translation": "The login method has been unlinked"
+  },
+  "a5f68615-9c65-4a37-bfb2-dae9774c912c": {
+    "original": "Ben je zeker dat je jouw wachtwoord wilt verwijderen?",
+    "translation": "Are you sure you want to delete your password?"
+  },
+  "06d6ec0d-c5d9-4251-a749-23c400e61905": {
+    "original": "Je wachtwoord is verwijderd",
+    "translation": "Your password has been deleted"
+  },
+  "5fb8075f-4599-406c-a90e-4923be523a0a": {
+    "original": "Ben je zeker dat je deze inlogmethode wilt koppelen?",
+    "translation": "Are you sure you want to link this login method?"
+  },
+  "4b2b58ff-d6fc-46c9-8a99-638b1ce2b0d4": {
+    "original": "Ja, koppelen",
+    "translation": "Yes, link"
+  },
+  "034eed1e-a6b2-41ee-8ca1-b6bdacbd0d9c": {
+    "original": "Ben je zeker dat je wilt uitloggen?",
+    "translation": "Are you sure you want to log out?"
+  },
+  "e3398474-26b0-49d4-9f64-bae38495fb4f": {
+    "original": "Uitloggen",
+    "translation": "Log out"
+  },
+  "805f19ef-32b7-4029-8efc-9ffdb1730add": {
+    "original": "Deze kortingscode is ongeldig",
+    "translation": "This discount code is invalid"
+  },
+  "3cb04b43-16ca-4467-8729-ea7dcd206ed0": {
+    "original": "ticket",
+    "translation": "ticket"
+  },
+  "28f60cd9-f9bc-46ff-8fd3-8b6a6a109b4b": {
+    "original": "persoon",
+    "translation": "person"
+  },
+  "599ce864-4059-48eb-82f8-9191e9507050": {
+    "original": "stuk",
+    "translation": "item"
+  },
+  "390d335e-98c4-4c60-92fc-f1616096c875": {
+    "original": "tickets",
+    "translation": "tickets"
+  },
+  "414f837c-b446-41c4-b522-3e6b473d5b5d": {
+    "original": "personen",
+    "translation": "persons"
+  },
+  "3ee3c7fa-db00-4aa3-94eb-046a6af0cc9a": {
+    "original": "stuks",
+    "translation": "items"
+  },
+  "8205ae73-2a27-4b01-a361-3a3c689726bc": {
+    "original": "De ingevoerde wachtwoorden komen niet overeen",
+    "translation": "The entered passwords do not match"
+  },
+  "f904f18b-4b7b-461d-9468-44d54443187c": {
+    "original": "Jouw wachtwoord moet uit minstens 8 karakters bestaan.",
+    "translation": "Your password must be at least 8 characters long."
+  },
+  "1de94b7d-3cc6-45a1-992f-c347813e90fb": {
+    "original": "Jouw nieuwe wachtwoord is opgeslagen",
+    "translation": "Your new password has been saved"
+  },
+  "c2c395d9-9d50-4680-a973-7d11c5fe000c": {
+    "original": "Organisatie is verplicht",
+    "translation": "Organisation is mandatory"
+  },
+  "6223bc9f-b3e9-4cb2-a73e-62555499b6b7": {
+    "original": "Beschrijving is verplicht",
+    "translation": "Description is mandatory"
+  },
+  "8e1e706c-e42c-49c2-a398-f16ecc649a2b": {
+    "original": "Bedrag kan niet 0 zijn",
+    "translation": "Amount cannot be 0"
+  },
+  "6a753313-f3b7-4999-be86-37fad16ac6d3": {
+    "original": "Het bedrag werd aangerekend",
+    "translation": "The amount was charged"
+  },
+  "0c406033-5a4a-4fa7-b3f2-d8702cf9a493": {
+    "original": "Bevestig je plaatsen",
+    "translation": "Confirm your seats"
+  },
+  "6cf46298-748e-46b3-84ab-646e1e16b3a8": {
+    "original": "plaats",
+    "translation": "seat"
+  },
+  "df624041-eee5-45b1-9cfb-b9ba48793f9e": {
+    "original": "plaatsen",
+    "translation": "seats"
+  },
+  "91e96a8b-b24b-4c57-a6a7-24bcdeeb1834": {
+    "original": "Kies in totaal",
+    "translation": "Choose in total"
+  },
+  "5bb04c82-7366-4c36-ae04-1d2be15b528a": {
+    "original": "door de plaatsen één voor één aan te klikken. Je kan een plaats deselecteren door er nog eens op te klikken.",
+    "translation": "by clicking on the seats one by one. You can deselect a seat by clicking on it again."
+  },
+  "1009735f-288b-469a-a520-ddd9d83c4ff1": {
+    "original": "We hebben jouw gekozen plaatsen aangepast zodat er minder enkele plaatsen overblijven. Klik opnieuw op \"Bevestigen\" om verder te gaan.",
+    "translation": "We have adjusted your chosen seats so that there are fewer single seats left. Click \"Confirm\" again to continue."
+  },
+  "27f7c70a-302e-477a-b21c-ca0f46fc1ff2": {
+    "original": "Bevestig de actie",
+    "translation": "Confirm the action"
+  },
+  "ed42a654-193c-4d1b-8f5b-a98bed2b575d": {
+    "original": "Bekijk en sla jouw ticket op via deze link.",
+    "translation": "View and save your ticket via this link."
+  },
+  "6b7035db-1427-49ac-8a60-973b72355a8d": {
+    "original": "Sluit dit alleen als je zeker bent dat je niet hebt betaald! Anders moet je gewoon even wachten.",
+    "translation": "Only close this if you are sure you have not paid! Otherwise, just wait a moment."
+  },
+  "4c1658ea-d89c-4634-9be5-e0a23febe2bb": {
+    "original": "Ik heb nog niet betaald",
+    "translation": "I have not yet paid"
+  },
+  "99f9efd3-4d2d-4fd8-845c-b690daed606a": {
+    "original": "Het lukt niet",
+    "translation": "It's not working"
+  },
+  "6f196b46-8ac6-4565-a954-5f68cb6c56f5": {
+    "original": "Kijk na of je één van de apps bovenaan deze pagina hebt geïnstalleerd. Als je op een pagina terecht komt die zegt dat je de app niet hebt: sleep die pagina naar beneden tot er een grijze balk tevoorschijn komt, klik daar op 'Open'. Probeer eventueel opnieuw op een computer of selecteer een andere betaalmethode.",
+    "translation": "Check if you have installed one of the apps at the top of this page. If you end up on a page that says you don't have the app: scroll down that page until a grey bar appears, click on 'Open'. You can also try again on a computer or select a different payment method."
+  },
+  "cbc17197-a98b-4017-aab8-adab5ab38cff": {
+    "original": "Kijk na of je één van de apps bovenaan deze pagina hebt geïnstalleerd. Probeer eventueel opnieuw op een computer (daar kan je de QR-code scannen) of selecteer een andere betaalmethode.",
+    "translation": "Check if you have installed one of the apps at the top of this page. You can try again on a computer (where you can scan the QR code) or select a different payment method."
+  },
+  "2166f942-4fce-476f-adf2-d5803ff4ed16": {
+    "original": "Probeer alleen opnieuw als je zeker bent dat je niet hebt betaald! Anders moet je gewoon even wachten.",
+    "translation": "Only try again if you are sure you have not paid! Otherwise, just wait a moment."
+  },
+  "bc89861d-a799-4100-b06c-29d6808ba8d2": {
+    "original": "Als je een betaling uitvoert in naam van je groep, is het noodzakelijk om facturatiegegevens met bedrijfsgegevens in te vullen.",
+    "translation": "If you make a payment on behalf of your group, it is necessary to fill in billing data with company details."
+  },
+  "cc098cc0-d849-4808-b53a-0b99755b3f99": {
+    "original": "verwijderde groep",
+    "translation": "deleted group"
+  },
+  "2fa762f2-c061-4c40-83cb-6ddc3e5f0f7a": {
+    "original": "Je kan op ‘Mijn account’ inloggen met",
+    "translation": "You can log in to ‘My account’ with"
+  },
+  "c2af5148-15a7-44b1-aa3e-91cfc4c66013": {
+    "original": "Je kan op ‘Mijn account’ een nieuw account aanmaken met het e-mailadres",
+    "translation": "You can create a new account on ‘My account’ with the email address"
+  },
+  "62246c37-15c7-4f7d-94e2-7476f971c8da": {
+    "original": "Betalen van inschrijvingsgelden of webshops voor een groep via Ravot (partner).",
+    "translation": "Paying registration fees or webshop purchases for a group via Ravot (partner)."
+  },
+  "50ebabe0-8162-486d-b32a-9ef3016256fb": {
+    "original": "Groep",
+    "translation": "Group"
+  },
+  "2e5e2e62-1e0c-406d-96c9-f66e7c8e85bd": {
+    "original": "Gegevens van de groep of persoon die instaat voor de opvang.",
+    "translation": "Data of the group or person responsible for the care."
+  },
+  "e13d9fec-ff5a-43e0-8cf4-4edc6e576d17": {
+    "original": "Is jouw groep een feitelijke groep zonder VZW, dan moet je hier het refertenummer invullen dat je bij Belcotax had aangevraagd.",
+    "translation": "If your group is a de facto group without a non-profit organisation, you must enter the reference number you requested from Belcotax here."
+  },
+  "6efffec1-322e-479d-b411-abbcbc4daf09": {
+    "original": "Gegevens van de groep",
+    "translation": "Group data"
+  },
+  "cffa7f10-50e3-4da2-946c-5c60fc3fa2cf": {
+    "original": "Via overschrijving",
+    "translation": "Via bank transfer"
+  },
+  "001d60ee-93ad-481d-a264-7ee0d2e6c906": {
+    "original": "Domiciliëring",
+    "translation": "Direct debit"
+  },
+  "e92b72a2-177b-4a1c-9137-f2e2c6ffe724": {
+    "original": "Betaal met de Payconiq by Bancontact app, de KBC-app, Belfius, BNP Paribas Fortis, ING-app, Fintro, Hello bank!, Argenta of Crelan app",
+    "translation": "Pay with the Payconiq by Bancontact app, the KBC app, Belfius, BNP Paribas Fortis, ING app, Fintro, Hello bank!, Argenta or Crelan app"
+  },
+  "6896f79a-a7f7-423d-9907-491f90a10daa": {
+    "original": "Betaalbevestiging kan enkele dagen duren",
+    "translation": "Payment confirmation may take a few days"
+  },
+  "21e54de0-fcb5-44b3-8446-f3e761e0a9b1": {
+    "original": "Meest gebruikte betaalmethode.",
+    "translation": "Most used payment method."
+  },
+  "933a58fa-2f3e-4eae-893c-790a3c5b771a": {
+    "original": "Betaalbevestiging kan 5 werkdagen duren",
+    "translation": "Payment confirmation may take 5 workdays"
+  },
+  "0100521c-b38e-4925-9484-44d44f3dfa09": {
+    "original": "Uitverkocht",
+    "translation": "Sold out"
+  },
+  "3ba66a09-31bc-4bef-9bba-ca44d5480c42": {
+    "original": "Nog {count}",
+    "translation": "Another {count}"
+  },
+  "e6bb2b94-051b-4197-b251-8ce9dc1aea44": {
+    "original": "Deze plaats is al bezet",
+    "translation": "This place is already occupied"
+  },
+  "5dc8219a-fe1d-495d-9a31-0cbd16c717ee": {
+    "original": "Deze plaats heeft een meerprijs van",
+    "translation": "This place has a surcharge of"
+  },
+  "392abeb5-1b80-404a-99bb-a8312778e44d": {
+    "original": "Jouw inschrijving is al bevestigd! Je kan niet meer van betaalmethode veranderen.",
+    "translation": "Your registration is already confirmed! You can no longer change your payment method."
+  },
+  "74ffa9d6-33a5-4dba-aa37-458bf9596aa7": {
+    "original": "Jouw bestelling is al geplaatst! Als je je bestelling gaat aanpassen zal je een tweede bestelling plaatsen!",
+    "translation": "Your order has already been placed! If you are going to change your order, you will place a second order!"
+  },
+  "82e41420-4b71-4fef-b604-592f87d812c9": {
+    "original": "Jouw bestelling is al geplaatst, probeer dus zeker niet opnieuw! Als het scannen niet lukt, kan je gewoon de overschrijving manueel uitvoeren via de vermelde gegevens. Het scannen van de QR-code is niet noodzakelijk, en werkt niet in elke bankapp. Dit is niet te verwarren met een online betaling, de QR-code neemt enkel de gegevens over in je app zodat je sneller zonder typefouten kan overschrijven.",
+    "translation": "Your order has already been placed, so please do not try again! If scanning fails, you can simply make the transfer manually using the details provided. Scanning the QR code is not necessary and does not work in every banking app. This is not to be confused with an online payment, the QR code only transfers the data to your app so that you can transfer more quickly without typing errors."
+  },
+  "ce058fa7-aba3-4e48-90b5-43de91db590c": {
+    "original": "Jouw inschrijving is al in orde, probeer dus zeker niet opnieuw! Als het scannen niet lukt, kan je gewoon de overschrijving manueel uitvoeren via de vermelde gegevens. Het scannen van de QR-code is niet noodzakelijk, en werkt niet in elke bankapp. Dit is niet te verwarren met een online betaling, de QR-code neemt enkel de gegevens over in je app zodat je sneller zonder typefouten kan overschrijven.",
+    "translation": "Your registration is already in order, so please do not try again! If scanning fails, you can simply make the transfer manually using the details provided. Scanning the QR code is not necessary and does not work in every banking app. This is not to be confused with an online payment, the QR code only transfers the data to your app so that you can transfer more quickly without typing errors."
+  },
+  "08282842-f352-402d-82b9-4880df4b010f": {
+    "original": "Downloaden geannuleerd",
+    "translation": "Download cancelled"
+  },
+  "34f31c26-5b4c-45d8-9446-b2543e767c80": {
+    "original": "Documenten downloaden...",
+    "translation": "Downloading documents..."
+  },
+  "7f2e08fe-02a9-4bb5-8c70-82787e2f471e": {
+    "original": "Documenten bundelen in een .zip...",
+    "translation": "Bundling documents into a .zip..."
+  },
+  "0f54c3b2-d611-4360-8adc-060867632759": {
+    "original": "documenten.zip",
+    "translation": "documents.zip"
+  },
+  "b8130c70-0aa0-4156-b5e0-6125668b21f8": {
+    "original": "Ticketverkoop via",
+    "translation": "Ticket sales via"
+  },
+  "e3ef8c27-f909-4725-b97b-2cbbd9f24bb5": {
+    "original": "Standaardtarief",
+    "translation": "Standard tariff"
+  },
+  "8e4c1895-286b-47e7-94c6-fceb63947706": {
+    "original": "mannen geboren in",
+    "translation": "men born in"
+  },
+  "901e5ba0-d0f3-41f8-a611-0a93f469cecd": {
+    "original": "jongens geboren in",
+    "translation": "boys born in"
+  },
+  "48f7fb2e-28fc-433d-8834-37c9fcfbe862": {
+    "original": "vrouwen geboren in",
+    "translation": "women born in"
+  },
+  "d3a6a788-8354-46f1-911e-a452763a5ae8": {
+    "original": "meisjes geboren in",
+    "translation": "girls born in"
+  },
+  "77019f85-9898-4fda-8ae3-d6ac3bc9ad3b": {
+    "original": "geboren in",
+    "translation": "born in"
+  },
+  "2d09d9be-60e7-4872-8f01-aabd51be4f1a": {
+    "original": "mannen geboren in of voor",
+    "translation": "men born in or before"
+  },
+  "b9f4f3d8-8f34-4a20-9361-071079b64cf5": {
+    "original": "jongens geboren in of voor",
+    "translation": "boys born in or before"
+  },
+  "6c4c2f13-07ce-4ac6-950b-5d28971a753d": {
+    "original": "vrouwen geboren in of voor",
+    "translation": "women born in or before"
+  },
+  "3447343b-372f-4b3c-88ed-8263a8a34557": {
+    "original": "meisjes geboren in of voor",
+    "translation": "girls born in or before"
+  },
+  "e3d49378-ea73-4fcd-9113-7c5bc0cc7591": {
+    "original": "geboren in of voor",
+    "translation": "born in or before"
+  },
+  "521b46d2-0e9b-43e8-9a1a-a5e5cb84934a": {
+    "original": "mannen geboren in of na",
+    "translation": "men born in or after"
+  },
+  "e00ec6db-06f6-4a11-affe-d79c30fdd17a": {
+    "original": "jongens geboren in of na",
+    "translation": "boys born in or after"
+  },
+  "441ecbc8-3e95-4820-ac06-253de87162e1": {
+    "original": "vrouwen geboren in of na",
+    "translation": "women born in or after"
+  },
+  "8d49f3be-7c08-4526-af54-783466d3d40d": {
+    "original": "meisjes geboren in of na",
+    "translation": "girls born in or after"
+  },
+  "6e4da2b1-9694-49f1-9238-94e784044897": {
+    "original": "geboren in of na",
+    "translation": "born in or after"
+  },
+  "da7c4439-18f9-4f20-a1f0-f5f1815d1bb9": {
+    "original": "mannen",
+    "translation": "men"
+  },
+  "06ab1d42-107d-46d8-8eba-cb62d12068b9": {
+    "original": "jongens",
+    "translation": "boys"
+  },
+  "128eb9e9-d470-49b0-8342-012e484c4daa": {
+    "original": "vrouwen",
+    "translation": "women"
+  },
+  "43e158dd-aab2-4f5c-9e35-f56ff556cc51": {
+    "original": "meisjes",
+    "translation": "girls"
+  },
+  "0b0e2784-8439-4fc8-a317-69e307c327f7": {
+    "original": "Nederlands",
+    "translation": "Dutch"
+  },
+  "61a07c8a-ff52-443e-86c9-c5a39aa56114": {
+    "original": "Engels",
+    "translation": "English"
+  },
+  "78797ba0-580e-4e41-b876-4d2b31c87e7e": {
+    "original": "Frans",
+    "translation": "French"
+  },
+  "7214779f-7c97-49af-b7b9-b6424a1b2903": {
+    "original": "Bakkerij",
+    "translation": "Bakery"
+  },
+  "424566d8-a5ec-4cf8-af8b-6ed49a4a1920": {
+    "original": "Demostraat",
+    "translation": "Demostraat"
+  },
+  "863c5b6c-dbed-4b55-bbd7-2e99e15dba5e": {
+    "original": "Gent",
+    "translation": "Ghent"
+  },
+  "feb79403-3266-47de-9e27-55122bc0c881": {
+    "original": "Voorbeeld product",
+    "translation": "Example product"
+  },
+  "d93000f0-cb13-4756-a6ac-961950efb25c": {
+    "original": "Nog een voorbeeld product",
+    "translation": "Another example product"
+  },
+  "260c4ef6-413c-45c9-9f59-6aee4e67a848": {
+    "original": "Voorbeeld betaallijn 1",
+    "translation": "Example payment line 1"
+  },
+  "e7e960cc-94aa-42c1-b476-8a8ad67512f3": {
+    "original": "Voorbeeld betaallijn 2",
+    "translation": "Example payment line 2"
+  },
+  "2302cff3-771a-47be-9edd-146fb4b4ea88": {
+    "original": "Oeps, er ging iets mis bij het laden van het voorbeeld dat hier moet komen",
+    "translation": "Oops, something went wrong loading the example that should be here"
+  },
+  "4d3280e1-101e-4fa5-8739-1fb529bce9c3": {
+    "original": "Voorbeeld item 1",
+    "translation": "Example item 1"
+  },
+  "241a2f9f-52ab-4e02-a09b-a31ff9ab6cd9": {
+    "original": "Voorbeeld item 2",
+    "translation": "Example item 2"
+  },
+  "734e03f9-3d03-4c4c-929f-657af725e4f0": {
+    "original": "ONTBREEKT",
+    "translation": "MISSING"
+  },
+  "55c039f3-987d-4f42-9db4-b05dc9a6d996": {
+    "original": "Dag Jan,",
+    "translation": "Dear John,"
+  },
+  "b115e024-edc7-401b-8e41-2da247822e9e": {
+    "original": "Jan",
+    "translation": "John"
+  },
+  "7c619773-33de-451c-9f8e-695e871058bb": {
+    "original": "Jansen",
+    "translation": "Johnson"
+  },
+  "46e8393a-144d-477e-9b9e-c79616e4b9a7": {
+    "original": "jan.jansen@voorbeeld.com",
+    "translation": "john.johnson@example.com"
+  },
+  "c5e8403a-3d2c-46f4-b21f-03be750eacbd": {
+    "original": "verstuurder@voorbeeld.com",
+    "translation": "sender@example.com"
+  },
+  "1e69f4ff-0496-4d23-a2f4-0a116b9c35f0": {
+    "original": "Verstuurder",
+    "translation": "Sender"
+  },
+  "db31945c-b255-4f37-b866-489befc61810": {
+    "original": "Jan Jansens",
+    "translation": "John Johnsons"
+  },
+  "80c2fd05-aba8-4261-bf68-2f2e07ae872b": {
+    "original": "https://www.voorbeeld.com/heel-lange-code-waarmee-de-link-beveiligd-wordt",
+    "translation": "https://www.example.com/very-long-code-that-secures-the-link"
+  },
+  "7afd1f1f-f818-40c9-b872-32d93be3958b": {
+    "original": "Piet Pieters",
+    "translation": "Peter Peters"
+  },
+  "ce00a7f3-4be9-4da8-833f-e13ff3b3fb14": {
+    "original": "Piet",
+    "translation": "Peter"
+  },
+  "65c9a375-fbca-4a27-9a42-01d49f7f9588": {
+    "original": "Klaas",
+    "translation": "Nicholas"
+  },
+  "e028c78a-166d-4531-b03b-99a573f1661b": {
+    "original": "Klaassen",
+    "translation": "Nicholas"
+  },
+  "c89a6220-9e60-4f0c-9404-d9cb0fc301f7": {
+    "original": "https://inschrijven.voorbeeld.com",
+    "translation": "https://register.example.com"
+  },
+  "e46ce65d-10a9-4d37-bd26-8979079c46a5": {
+    "original": "voorbeeld@email.com",
+    "translation": "example@email.com"
+  },
+  "aa5606d0-ed51-4228-938e-656da8c41cfc": {
+    "original": "voorbeeld.com",
+    "translation": "example.com"
+  },
+  "8f9575f3-9787-4fa5-9ddf-dd1fa4103996": {
+    "original": "Bancontact",
+    "translation": "Bancontact"
+  },
+  "967a1b0b-88cd-4b95-9008-f0610ed64b24": {
+    "original": "Inschrijving van Klaas en Piet",
+    "translation": "Registration of Nicholas and Peter"
+  },
+  "990581a8-e4db-4c33-b36b-4df045f8c294": {
+    "original": "Klaas en Piet",
+    "translation": "Nicholas and Peter"
+  },
+  "7c04a4f3-25c5-4663-9833-87a7aecbf0b9": {
+    "original": "Demoshop",
+    "translation": "Demoshop"
+  },
+  "81dced9c-c5aa-4c49-b030-31363d3847db": {
+    "original": "Er zijn nog maar {count} stuks beschikbaar van {name}",
+    "translation": "Only {count} left of {name}"
+  },
+  "18c0f453-ffe5-46bf-bcb6-ca4d940f722d": {
+    "original": "Ongeldig tarief",
+    "translation": "Invalid tariff"
+  },
+  "57ac219a-4e8b-4606-bdb6-88566fdaeed0": {
+    "original": "Er is iets fout met de tariefinstellingen van {group}, waardoor je nu niet kan inschrijven. Neem contact op met een beheerder en vraag de tariefinstellingen na te kijken.",
+    "translation": "There is a problem with the tariff settings of {group}, which is why you cannot register now. Contact an administrator and ask them to check the tariff settings."
+  },
+  "6cf5b874-4092-47e2-b21c-3a531537a661": {
+    "original": "Er zijn nieuwe keuzemogelijkheden voor {group} waaruit je moet kiezen",
+    "translation": "There are new options for {group} that you must choose from"
+  },
+  "9b0ace12-de6c-43a8-aed2-e16a81a86d59": {
+    "original": "Verplaatsen vanaf",
+    "translation": "Move from"
+  },
+  "3cfda9a5-3dbc-4490-9dcf-986aafc7b868": {
+    "original": "De startdatum van de inschrijving moet na de startdatum van de groep zelf zijn",
+    "translation": "The registration start date must be after the group's start date"
+  },
+  "683c669d-005d-4fc3-ae27-2c6e727fca2a": {
+    "original": "De startdatum van de inschrijving moet voor de einddatum van de groep zijn",
+    "translation": "The registration start date must be before the group's end date"
+  },
+  "654675b0-0c6c-4953-9c49-d4536bc5b9f1": {
+    "original": "Reken eerst jouw huidige winkelmandje af. Inschrijvingen voor {group} moeten aan een andere organisatie betaald worden en kan je daardoor niet samen afrekenen.",
+    "translation": "First settle your current shopping cart. Registrations for {group} must be paid to a different organisation and cannot be settled together."
+  },
+  "a33f3d4c-30bf-4ecb-9769-31d51f2bcc8f": {
+    "original": "Je kan niet inschrijven voor de wachtlijst",
+    "translation": "You cannot register for the waiting list"
+  },
+  "b41926c9-7846-4032-814c-2bf739ca6314": {
+    "original": "Inschrijvingen door organisaties zijn niet toegestaan voor",
+    "translation": "Registrations by organisations are not allowed for"
+  },
+  "309bdb9d-4028-4bec-9e68-13814866ee94": {
+    "original": "Je wilt een inschrijving verplaatsen van een ander lid in ruil voor een ander lid. Dit is niet toegestaan.",
+    "translation": "You want to move a registration from another member in exchange for another member. This is not allowed."
+  },
+  "2f3db975-8bd4-41b2-980d-ab3ca678e111": {
+    "original": "Je wilt een inschrijving verplaatsen van een andere organisatie. Dit is niet toegestaan.",
+    "translation": "You want to move a registration from another organisation. This is not allowed."
+  },
+  "e3a72c38-8d17-402e-8da8-bb4cab1b1b70": {
+    "original": "Enkel beheerders kunnen inschrijvingen verplaatsen.",
+    "translation": "Only administrators can move registrations."
+  },
+  "12d2ff48-8cb0-42a7-ad43-f5e6ef705320": {
+    "original": "De inschrijvingen voor {group} zijn nog niet geopend.",
+    "translation": "Registrations for {group} have not yet opened."
+  },
+  "b527f658-6cb6-488c-9447-61533d63db74": {
+    "original": "De inschrijvingen voor {group} zijn gesloten.",
+    "translation": "Registrations for {group} are closed."
+  },
+  "78a012a9-3caa-405f-851d-429610138852": {
+    "original": "{member} kan pas inschrijven met een geldige actieve inschrijving  (verplichte inschrijving bij lokale groep).",
+    "translation": "{member} can only register with a valid active registration (mandatory registration with local group)."
+  },
+  "f7b1a08a-1431-45e3-83c3-8aa8bb1b18e6": {
+    "original": "{member} kan pas inschrijven met een geldige aansluiting (en dus verzekering) bij de koepel",
+    "translation": "{member} can only register with a valid affiliation (and therefore insurance) with the umbrella organisation"
+  },
+  "33845ee8-009e-4ad2-a3d7-183e79033c4c": {
+    "original": "{member} kan pas inschrijven met een geldige aansluiting (en dus verzekering) bij de koepel op de datum van de inschrijving",
+    "translation": "{member} can only register with a valid affiliation (and therefore insurance) with the umbrella organisation on the date of registration"
+  },
+  "4837a21c-e894-45fb-873f-1b09cbebc495": {
+    "original": "en hun broers/zussen",
+    "translation": "and their brothers/sisters"
+  },
+  "b9229c91-e7cf-48d7-823f-982dc27fe638": {
+    "original": "Iedereen moet zich eerst op de wachtlijst inschrijven",
+    "translation": "Everyone must first register on the waiting list"
+  },
+  "466118b2-637f-4c46-b240-57bc9c3ee590": {
+    "original": "Nieuwe leden moeten zich eerst op de wachtlijst inschrijven",
+    "translation": "New members must first register on the waiting list"
+  },
+  "1b7b7815-6454-4570-8ce8-fcff09df2efd": {
+    "original": "De inschrijvingen voor {group} zijn volzet",
+    "translation": "Registrations for {group} are full"
+  },
+  "545a9cc4-553d-4013-a8ef-e4a9a3107a9c": {
+    "original": "Het tarief {name} is uitverkocht",
+    "translation": "The tariff {name} is sold out"
+  },
+  "96b60f72-2bc6-479d-b317-616e23056e5c": {
+    "original": "De keuzemogelijkheid {name} is uitverkocht",
+    "translation": "The option {name} is sold out"
+  },
+  "e122d6c9-a452-4c70-9868-f53c2520aedc": {
+    "original": "todo",
+    "translation": "todo"
   }
 }
