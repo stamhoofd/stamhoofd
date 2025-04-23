@@ -76,7 +76,7 @@ const props = withDefaults(
         saveHandler?: ((navigate: NavigationActions) => Promise<void> | void) | null;
     }>(), {
         doSave: true,
-        saveText: $t(`bc6b2553-c28b-4e3b-aba3-4fdc2c23db6e`),
+        saveText: () => $t(`bc6b2553-c28b-4e3b-aba3-4fdc2c23db6e`),
         saveHandler: null,
         markReviewed: () => [],
     },
