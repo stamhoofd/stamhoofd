@@ -374,7 +374,7 @@ export class RegisterItem implements ObjectWithRecords {
 
         for (const registration of this.replaceRegistrations) {
             all.push({
-                name: this.checkout.isAdminFromSameOrganization ? 'Reeds aangerekend voor ' + registration.group.settings.name : 'Terugbetaling ' + registration.group.settings.name,
+                name: this.checkout.isAdminFromSameOrganization ? $t('Reeds aangerekend voor {group}', { group: registration.group.settings.name }) : $t('Terugbetaling voor {group}', { group: registration.group.settings.name }),
                 price: -registration.price,
             });
         }
@@ -382,9 +382,9 @@ export class RegisterItem implements ObjectWithRecords {
         if (this.calculatedPriceDueLater !== 0) {
             const trialUntil = this.calculatedTrialUntil;
             all.push({
-                name: 'Later te betalen',
+                name: $t('Later te betalen'),
                 price: this.calculatedPriceDueLater,
-                description: trialUntil ? `Tegen ${Formatter.date(trialUntil)}` : undefined,
+                description: trialUntil ? $t('Tegen {date}', { date: Formatter.date(trialUntil) }) : undefined,
             });
         }
 
@@ -392,14 +392,14 @@ export class RegisterItem implements ObjectWithRecords {
 
         if (all.length > 0) {
             all.unshift({
-                name: 'Subtotaal',
+                name: $t('Subtotaal'),
                 price: this.calculatedPrice,
             });
         }
         return [
             ...all,
             {
-                name: this.checkout.isAdminFromSameOrganization ? (this.totalPrice >= 0 ? 'Openstaand bedrag stijgt met' : 'Openstaand bedrag daalt met') : (this.calculatedPriceDueLater !== 0 ? 'Nu te betalen' : 'Totaal'),
+                name: this.checkout.isAdminFromSameOrganization ? (this.totalPrice >= 0 ? $t('Openstaand bedrag stijgt met') : $t('Openstaand bedrag daalt met')) : (this.calculatedPriceDueLater !== 0 ? $t('Nu te betalen') : $t('Totaal')),
                 price: this.checkout.isAdminFromSameOrganization ? Math.abs(this.totalPrice) : this.totalPrice,
             },
         ];
