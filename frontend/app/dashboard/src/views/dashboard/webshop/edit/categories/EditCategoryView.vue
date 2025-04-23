@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="isNew ? $t(`Categorie toevoegen`) : name+' ' + $t(`8455850d-829f-412f-bf1f-eedb2caa9f57`)" :disabled="!hasChanges" @save="save">
+    <SaveView :title="isNew ? $t(`455d581c-bfae-47a1-ac6f-e88068edce26`) : name+' ' + $t(`8455850d-829f-412f-bf1f-eedb2caa9f57`)" :disabled="!hasChanges" @save="save">
         <h1 v-if="isNew">
             {{ $t('2e3852ef-423e-4fcc-82bb-c886a6c61050') }}
         </h1>

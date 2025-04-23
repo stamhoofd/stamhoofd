@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :disabled="!canContinue" :save-text="$t('5dc070ea-ed3e-4684-b0b4-16a9defc4ed4')" :title="$t(`Exporteren`)" @save="save">
+    <SaveView :loading="saving" :disabled="!canContinue" :save-text="$t('5dc070ea-ed3e-4684-b0b4-16a9defc4ed4')" :title="$t(`e2351ad3-5e04-41b8-8ec8-124f3d823b75`)" @save="save">
         <h1>
             {{ $t('48533fc2-71ed-4210-96b6-f27239ebdcc7') }}
         </h1>

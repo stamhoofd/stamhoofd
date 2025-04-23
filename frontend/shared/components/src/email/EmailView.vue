@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
-        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" class="mail-view" :loading="sending" :save-text="$t('d1e7abf8-20ac-49e5-8e0c-cc7fab78fc6b')" :replacements="replacements" :title="$t(`Nieuwe e-mail`)" @save="send">
+        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" class="mail-view" :loading="sending" :save-text="$t('d1e7abf8-20ac-49e5-8e0c-cc7fab78fc6b')" :replacements="replacements" :title="$t(`3338f8ad-c4d7-4d09-9254-70bc3f0449a9`)" @save="send">
             <h1 class="style-navigation-title">
                 {{ $t('59367bfa-a918-4475-8d90-d9e3d6c71ad8') }}
             </h1>
@@ -491,7 +491,7 @@ async function send() {
     }
 
     if (savingPatch.value) {
-        Toast.info($t(`Even geduld, de wijzigingen zijn nog aan het opslaan. Probeer straks opnieuw.`)).show();
+        Toast.info($t(`a6d49891-5af9-4dee-8dba-57ad854fb955`)).show();
         return;
     }
 
@@ -500,13 +500,13 @@ async function send() {
     }
 
     const recipientCount = email.value.recipientCount;
-    let confirmText = $t(`Ben je zeker dat je de e-mail wilt versturen?`);
+    let confirmText = $t(`8ea1d574-6388-4033-bb4e-f2e031d2da3b`);
 
     if (recipientCount) {
         confirmText = recipientCount === 1 ? `Ben je zeker dat je de e-mail naar 1 ontvanger wilt versturen?` : `Ben je zeker dat je de e-mail naar ${email.value.recipientCount} ontvangers wilt versturen?`;
     }
 
-    const isConfirm = await CenteredMessage.confirm(confirmText, $t(`Versturen`));
+    const isConfirm = await CenteredMessage.confirm(confirmText, $t(`e0c68f8b-ccb1-4622-8570-08abc7f5705a`));
 
     if (!isConfirm) return;
 
@@ -530,7 +530,7 @@ async function send() {
             shouldRetry: false,
         });
 
-        Toast.success($t(`De e-mail is verzonden. Het kan even duren voor alle e-mails zijn verstuurd.`)).show();
+        Toast.success($t(`0adee17a-6cb5-4b32-a2a9-c6f44cbb3e7d`)).show();
         await pop({ force: true });
     }
     catch (e) {
@@ -591,7 +591,7 @@ async function showToMenu(event: MouseEvent) {
             const selectedOption = option.options.find(o => o.id === selectedIds[0]);
 
             return [new ContextMenuItem({
-                name: option.name ?? selectedOption?.name ?? $t(`Onbekend`),
+                name: option.name ?? selectedOption?.name ?? $t(`d8b6c55e-72c5-4cde-bdd9-cee3b5bae6ae`),
                 childMenu: new ContextMenu([
                     getContextMenuForOption(option, j),
                 ]),
@@ -680,7 +680,7 @@ async function changedFile(event: InputEvent & { target: HTMLInputElement & { fi
 
     for (const file of event.target.files as FileList) {
         if (file.size > 10 * 1024 * 1024) {
-            const error = $t(`Bestanden groter dan 10MB kunnen niet worden verstuurd.`);
+            const error = $t(`93533097-46c1-4f88-a582-1634d57ac2c0`);
             Toast.error(error).setHide(20 * 1000).show();
             continue;
         }
@@ -696,7 +696,7 @@ async function changedFile(event: InputEvent & { target: HTMLInputElement & { fi
         }));
 
         if (file.name.endsWith('.docx') || file.name.endsWith('.xlsx') || file.name.endsWith('.doc') || file.name.endsWith('.xls')) {
-            const error = $t(`We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Sommige mensen hebben ook geen licentie voor Word/Excel, want dat is niet gratis. Zet de bestanden om in een PDF en stuur die door.`);
+            const error = $t(`70436d52-5a86-4231-89d5-2adf8bfd628f`);
             Toast.warning(error).setHide(30 * 1000).show();
         }
     }
@@ -726,7 +726,7 @@ async function openTemplates() {
                 types: [type],
                 onSelect: async (template: EmailTemplate) => {
                     if (hasExistingContent) {
-                        if (!await CenteredMessage.confirm($t(`Ben je zeker dat je de huidige inhoud wilt overschrijven?`), $t(`Overschrijven`), $t(`De huidige inhoud van je e-mail gaat verloren`))) {
+                        if (!await CenteredMessage.confirm($t(`e7ff72f3-ca11-4a2d-b6f9-afeb344f5da6`), $t(`6d679732-b845-4f36-8ed3-4024cd01f745`), $t(`be3680ca-ee60-4d09-b2f4-346617949956`))) {
                             return false;
                         }
                     }

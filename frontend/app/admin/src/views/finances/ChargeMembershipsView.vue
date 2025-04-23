@@ -1,7 +1,7 @@
 <template>
     <LoadingViewTransition :error-box="loadingOrganizationErrorBox">
         <div v-if="!loadingOrganization" class="st-view charge-memberships-view">
-            <STNavigationBar :title="$t(`Aansluitingen aanrekenen`)" />
+            <STNavigationBar :title="$t(`3024d542-4987-4487-ae83-6593036a7e1d`)" />
 
             <main class="center">
                 <h1>

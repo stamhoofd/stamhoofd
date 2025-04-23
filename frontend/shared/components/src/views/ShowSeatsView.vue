@@ -1,6 +1,6 @@
 <template>
     <div class="st-view show-seats-view shade">
-        <STNavigationBar :disable-dismiss="!allowDismiss" :title="$t(`Jouw plaatsen`)" />
+        <STNavigationBar :disable-dismiss="!allowDismiss" :title="$t(`b1f2fdc7-1235-4abf-a925-60128cbcedcc`)" />
         <main>
             <h1>{{ $t('5d783407-0f24-4cf7-aa1d-aecb6b759d3e') }}</h1>
 

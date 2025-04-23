@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t(`E-mailadressen`)" />
+        <STNavigationBar :title="$t(`1363c0ee-0f4b-43f8-a9ee-a2a6091e5d96`)" />
 
         <main>
             <h1>

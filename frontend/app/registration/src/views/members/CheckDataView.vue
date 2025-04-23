@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t(`Gegevens nakijken`)" />
+        <STNavigationBar :title="$t(`b4cba044-12c3-464d-8bc1-2873996f02fa`)" />
 
         <main>
             <h1>{{ $t('d14e4e63-c77d-44d9-b8d0-adf05e299303') }}</h1>
@@ -109,7 +109,7 @@ const addresses = computed(() => memberManager.family.addresses);
 const editMember = useEditMember();
 
 async function checkAllMemberData(member: PlatformMember) {
-    await editMember(member, { title: $t(`Gegevens nakijken`) });
+    await editMember(member, { title: $t(`b4cba044-12c3-464d-8bc1-2873996f02fa`) });
 }
 
 function editAddress(_address: Address) {

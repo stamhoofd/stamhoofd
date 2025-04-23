@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`Vrije bijdrage`)" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`6a1afe5c-dd96-4b0f-ad6f-f0598b366d54`)" @save="save">
         <h1>
             {{ $t('16ca0372-9c8f-49f0-938d-aee012e59f8c') }}
         </h1>
@@ -22,7 +22,7 @@
                 <textarea v-model="freeContributionDescription" class="input" :placeholder="$t(`90830df1-98ef-4f05-a0d4-8801e209dcdc`)" />
             </STInputBox>
 
-            <STInputBox v-for="n in amountCount" :key="n" :title="$t(`Voorgesteld bedrag`) + ' '+n">
+            <STInputBox v-for="n in amountCount" :key="n" :title="$t(`e96ab70d-4095-47b2-90bf-451870b07e05`) + ' '+n">
                 <PriceInput :model-value="getFreeContributionAmounts(n - 1)" :placeholder="$t(`ffee883f-b817-44df-ae42-46c76e77f394`) + ' '+n" @update:model-value="setFreeContributionAmounts(n - 1, $event)" />
 
                 <template #right>

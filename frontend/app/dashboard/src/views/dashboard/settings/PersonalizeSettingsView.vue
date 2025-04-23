@@ -1,5 +1,5 @@
 <template>
-    <SaveView id="personalize-settings-view" :loading="saving" :disabled="!hasChanges" :title="$t(`Personaliseren`)" @save="save">
+    <SaveView id="personalize-settings-view" :loading="saving" :disabled="!hasChanges" :title="$t(`4a7e3838-f75a-4610-9caa-0f75849ea142`)" @save="save">
         <h1>
             {{ $t('f45871aa-7723-42c3-9781-f4f9b8d7250a') }}
         </h1>

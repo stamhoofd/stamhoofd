@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('c72a9ab2-98a0-4176-ba9b-86fe009fa755')" data-submit-last-field :title="$t(`Jouw gegevens`)" @save="goNext">
+    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('c72a9ab2-98a0-4176-ba9b-86fe009fa755')" data-submit-last-field :title="$t(`1db407ec-4d25-40f9-92b9-abf820faaf98`)" @save="goNext">
         <h1>{{ $t('38bea62e-0765-4fbf-a6f3-4e21cc4cc2ef') }}</h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />

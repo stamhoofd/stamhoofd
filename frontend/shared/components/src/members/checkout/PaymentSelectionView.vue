@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="needsPay ? $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`) : $t(`Bevestigen`)" />
+        <STNavigationBar :title="needsPay ? $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`) : $t(`84dc69fb-179d-4e25-a5c8-4a6beb57bcdd`)" />
         <main v-if="needsPay" class="center">
             <h1>{{ $t('6f2975aa-d60f-4abb-b597-c30e2382da12') }}</h1>
 

@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="isNew ? $t(`Vraag toevoegen`) : $t(`Vraag bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`fb25fbab-3376-494c-a286-6f0ceef13f87`) : $t(`cbbe2de7-2d23-445c-8d23-48ce8bd3849c`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
             {{ $t('40b3b89e-4d82-4d6c-b49d-1e084802ee2e') }}
         </h1>

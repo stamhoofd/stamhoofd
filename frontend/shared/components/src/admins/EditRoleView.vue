@@ -209,9 +209,9 @@ const responsibility = computed(() => {
 
 const title = computed(() => {
     if (props.role instanceof PermissionRoleForResponsibility) {
-        return $t(`Rechten voor`) + ' ' + props.role.name;
+        return $t(`055ba4d1-abf5-4c10-9da1-29311a113568`) + ' ' + props.role.name;
     }
-    return props.isNew ? $t(`Nieuwe rol`) : props.role.name;
+    return props.isNew ? $t(`db4cb26a-c23f-4f29-b4c3-233cd0f08f38`) : props.role.name;
 });
 
 const { sortedAdmins, loading, getPermissions, getUnloadedPermissions } = useAdmins();
@@ -247,7 +247,7 @@ const save = async () => {
         if (!isForResponsibility && name.value.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Gelieve een titel in te vullen`),
+                message: $t(`0b7bedcd-0e5a-4ef3-b2d8-7ee2c23650e5`),
                 field: 'name',
             });
         }
@@ -269,7 +269,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`Ben je zeker dat je deze rol wilt verwijderen?`), $t(`Verwijderen`))) {
+    if (!await CenteredMessage.confirm($t(`4d88b931-3fa4-497d-8a23-481f8f58a967`), $t(`25d866b7-3859-4a5d-b875-bc286e69f846`))) {
         return;
     }
 
@@ -340,7 +340,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
+    return await CenteredMessage.confirm($t(`3953d383-4f04-42ea-83cd-bf65478ed4a9`), $t(`4cfb2940-8532-446e-b543-a4c7ba9618a3`));
 };
 
 defineExpose({

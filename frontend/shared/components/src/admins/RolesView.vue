@@ -178,7 +178,7 @@ const editRole = async (role: PermissionRoleDetailed | PermissionRoleForResponsi
 
 const save = async () => {
     await rawSave(() => {
-        new Toast($t(`De wijzigingen zijn opgeslagen`), 'success green').show();
+        new Toast($t(`89360094-8856-4b28-8921-e3d561ef824c`), 'success green').show();
         void pop({ force: true });
     });
 };
@@ -187,7 +187,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
+    return await CenteredMessage.confirm($t(`3953d383-4f04-42ea-83cd-bf65478ed4a9`), $t(`4cfb2940-8532-446e-b543-a4c7ba9618a3`));
 };
 
 defineExpose({

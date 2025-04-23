@@ -1,6 +1,6 @@
 <template>
     <div id="settings-view" class="st-view background">
-        <STNavigationBar :title="$t(`Activiteiten`)">
+        <STNavigationBar :title="$t(`60231186-b00f-4d07-a5c7-4a905467e254`)">
             <template #right>
                 <button v-if="canWriteSomeEvent" type="button" class="button text navigation" @click="addEvent()">
                     <span class="icon add" />

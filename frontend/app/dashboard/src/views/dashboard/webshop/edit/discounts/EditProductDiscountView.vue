@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="isNew ? $t(`Productkorting toevoegen`) : $t(`Productkorting bewerken`)" :disabled="!hasChanges && !isNew" class="product-edit-view" @save="save">
+    <SaveView :title="isNew ? $t(`b08ae26a-874b-40cd-adb9-98bdccaa99e0`) : $t(`0b100742-cfe5-4a3a-b0ee-18c278c5d617`)" :disabled="!hasChanges && !isNew" class="product-edit-view" @save="save">
         <h1 v-if="isNew">
             {{ $t('72b723a2-72c5-4d56-8129-519ea281c6b7') }}
         </h1>
@@ -17,7 +17,7 @@
         </p>
 
         <div v-for="(d, index) in discounts" :key="d.id">
-            <STInputBox :title="discounts.length === 1 ? $t(`Korting`) : $t(`bffce456-034e-4768-bd64-e0c1061e685a`) + ' '+(index+1)+$t(`9e90b5f1-bac8-4e6e-b171-d679b3959197`) + ((repeatBehaviour === 'RepeatLast' && index === discounts.length - 1) ? ' ' + $t(`049a16f3-a8dd-485e-9696-afa9fdb511b8`) : '')" :error-box="errors.errorBox" class="max">
+            <STInputBox :title="discounts.length === 1 ? $t(`fdbec5b0-6fb0-4f0b-9efa-4e4a394605d0`) : $t(`bffce456-034e-4768-bd64-e0c1061e685a`) + ' '+(index+1)+$t(`9e90b5f1-bac8-4e6e-b171-d679b3959197`) + ((repeatBehaviour === 'RepeatLast' && index === discounts.length - 1) ? ' ' + $t(`049a16f3-a8dd-485e-9696-afa9fdb511b8`) : '')" :error-box="errors.errorBox" class="max">
                 <template v-if="discounts.length > 1" #right>
                     <button class="button icon trash gray" type="button" @click="removeDiscount(d)" />
                 </template>

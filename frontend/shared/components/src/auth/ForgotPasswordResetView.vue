@@ -101,15 +101,15 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
     }
 
     get title() {
-        return this.hasAccount ? $t(`Wachtwoord opnieuw instellen`) : $t(`Account aanmaken`);
+        return this.hasAccount ? $t(`a7c42cd2-eeca-4286-9ac9-1a9bc951f86f`) : $t(`2fd0cda5-225c-4b65-87b1-210c9b54023c`);
     }
 
     get description() {
-        return this.hasAccount ? $t(`Stel een nieuw wachtwoord in voor jouw account.`) : $t(`Kies een wachtwoord voor jouw nieuwe account`);
+        return this.hasAccount ? $t(`81bbd6ba-ad08-4e3c-bade-d1cfd23949d9`) : $t(`0576b8e6-baa7-4cb9-978a-806f81144427`);
     }
 
     get buttonText() {
-        return this.hasAccount ? $t(`Wachtwoord wijzigen`) : $t(`Account aanmaken`);
+        return this.hasAccount ? $t(`b33f433c-0957-4411-a0d6-0f41cf5caa63`) : $t(`2fd0cda5-225c-4b65-87b1-210c9b54023c`);
     }
 
     mounted() {
@@ -146,12 +146,12 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
                     this.hasAccount = session.user?.hasAccount ?? false;
                     this.loadingToken = false;
                 }).catch((e) => {
-                    new Toast($t(`Deze link is ongeldig of vervallen. Stuur een nieuwe e-mail om je wachtwoord opnieuw in te stellen.`), 'error red').show();
+                    new Toast($t(`c7d81ba9-a143-4cdd-a5b3-8089e11eea92`), 'error red').show();
                     this.dismiss({ force: true });
                 });
         }
         else {
-            new Toast($t(`Deze link is ongeldig`), 'error red').show();
+            new Toast($t(`bd9a0e83-7491-4d0b-bc51-69e6d93db1c8`), 'error red').show();
             this.dismiss({ force: true });
         }
     }
@@ -171,14 +171,14 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
                 if (this.firstName.length < 2) {
                     errors.addError(new SimpleError({
                         code: 'invalid_field',
-                        message: $t(`Vul jouw voornaam in`),
+                        message: $t(`e9ca6bf3-1b1b-4099-b15f-82d98ac3557f`),
                         field: 'firstName',
                     }));
                 }
                 if (this.lastName.length < 2) {
                     errors.addError(new SimpleError({
                         code: 'invalid_field',
-                        message: $t(`Vul jouw achternaam in`),
+                        message: $t(`b1632f76-4597-402b-99bf-9f53efb5ed32`),
                         field: 'lastName',
                     }));
                 }
@@ -195,7 +195,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
         if (this.password !== this.passwordRepeat) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: '',
-                message: $t(`De ingevoerde wachtwoorden komen niet overeen`),
+                message: $t(`a5fbbeef-50dc-4825-8677-ba984b13d5cc`),
             }));
             return;
         }
@@ -205,7 +205,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
         if (this.password.length < minChars) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: '',
-                message: $t(`Jouw wachtwoord moet uit minstens`) + ' ' + minChars + ' ' + $t(`karakters bestaan.`),
+                message: $t(`fa4405a2-cca9-4643-827d-76a5cff2846c`) + ' ' + minChars + ' ' + $t(`89cd482b-36a2-49a3-9601-0b66aa90c7a2`),
             }));
             return;
         }
@@ -247,11 +247,11 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
             }
 
             if (this.hasAccount) {
-                const toast = new Toast($t(`Jouw nieuwe wachtwoord is opgeslagen`), 'success green');
+                const toast = new Toast($t(`ba5fb68b-b43b-4e7a-8dfe-abe142b2b647`), 'success green');
                 toast.show();
             }
             else {
-                const toast = new Toast($t(`Jouw account is aangemaakt`), 'success green');
+                const toast = new Toast($t(`661733da-dfb8-4091-bb69-d2d199f18aa8`), 'success green');
                 toast.show();
             }
 

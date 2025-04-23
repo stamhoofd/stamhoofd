@@ -1,6 +1,6 @@
 <template>
     <div ref="root" class="st-view ticket-already-scanned-view">
-        <STNavigationBar :title="$t(`Ticket al gescand`)" />
+        <STNavigationBar :title="$t(`69919e1e-89c6-44d7-beb1-c7b243c5a316`)" />
 
         <main>
             <h1>

@@ -90,7 +90,7 @@ const props = defineProps<{
 }>();
 
 defineOptions({
-    name: $t(`TabBarController`),
+    name: $t(`e1193431-b95a-4a8a-94b2-8659005dcb77`),
 });
 
 type TabBarItemWithComponent = TabBarItem & Required<Pick<TabBarItem, 'component'>>;

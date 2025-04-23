@@ -1,5 +1,5 @@
 <template>
-    <SaveView class="auto" data-submit-last-field save-icon="lock" :title="$t(`Wachtwoord wijzigen`)" @save="submit">
+    <SaveView class="auto" data-submit-last-field save-icon="lock" :title="$t(`b33f433c-0957-4411-a0d6-0f41cf5caa63`)" @save="submit">
         <h1 v-if="$context.user?.hasPassword">
             {{ $t('cc1728cb-e600-4888-ad64-6ee498da11e0') }}
         </h1>

@@ -1,6 +1,6 @@
 <template>
     <div class="st-menu st-view members-menu">
-        <STNavigationBar :title="$t(`Leden`)">
+        <STNavigationBar :title="$t(`6e958518-8f12-4e1b-b3af-c7d7cd0afbb6`)">
             <template #right>
                 <button v-if="$canEdit" class="navigation button icon settings" type="button" @click="editMe" />
             </template>

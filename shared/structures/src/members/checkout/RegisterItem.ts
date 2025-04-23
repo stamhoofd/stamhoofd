@@ -374,7 +374,7 @@ export class RegisterItem implements ObjectWithRecords {
 
         for (const registration of this.replaceRegistrations) {
             all.push({
-                name: this.checkout.isAdminFromSameOrganization ? $t('Reeds aangerekend voor {group}', { group: registration.group.settings.name }) : $t('Terugbetaling voor {group}', { group: registration.group.settings.name }),
+                name: this.checkout.isAdminFromSameOrganization ? $t('a87b9dfd-4acd-40c0-b430-f29dc8ec0fbf', { group: registration.group.settings.name }) : $t('Terugbetaling voor {group}', { group: registration.group.settings.name }),
                 price: -registration.price,
             });
         }
@@ -382,9 +382,9 @@ export class RegisterItem implements ObjectWithRecords {
         if (this.calculatedPriceDueLater !== 0) {
             const trialUntil = this.calculatedTrialUntil;
             all.push({
-                name: $t('Later te betalen'),
+                name: $t('45d9b6c1-1af8-4590-88ff-091a2a93c71a'),
                 price: this.calculatedPriceDueLater,
-                description: trialUntil ? $t('Tegen {date}', { date: Formatter.date(trialUntil) }) : undefined,
+                description: trialUntil ? $t('4789d323-f2da-4e87-a17c-7d29f813d68e', { date: Formatter.date(trialUntil) }) : undefined,
             });
         }
 
@@ -392,14 +392,14 @@ export class RegisterItem implements ObjectWithRecords {
 
         if (all.length > 0) {
             all.unshift({
-                name: $t('Subtotaal'),
+                name: $t('bf12f6a6-3513-451e-bf8e-fdec5833f5da'),
                 price: this.calculatedPrice,
             });
         }
         return [
             ...all,
             {
-                name: this.checkout.isAdminFromSameOrganization ? (this.totalPrice >= 0 ? $t('Openstaand bedrag stijgt met') : $t('Openstaand bedrag daalt met')) : (this.calculatedPriceDueLater !== 0 ? $t('Nu te betalen') : $t('Totaal')),
+                name: this.checkout.isAdminFromSameOrganization ? (this.totalPrice >= 0 ? $t('566df267-1215-4b90-b893-0344c1f1f3d3') : $t('566e4010-63b7-42e7-9b94-fcdec3f95767')) : (this.calculatedPriceDueLater !== 0 ? $t('6219b760-90aa-4758-8102-119af7e596e7') : $t('482bf48b-ebbc-42e5-8718-6ee11d217510')),
                 price: this.checkout.isAdminFromSameOrganization ? Math.abs(this.totalPrice) : this.totalPrice,
             },
         ];

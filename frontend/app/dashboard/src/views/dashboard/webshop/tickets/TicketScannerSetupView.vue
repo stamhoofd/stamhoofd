@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t(`Tickets scannen`)" />
+        <STNavigationBar :title="$t(`66440c5e-e663-4406-b6f0-868e0bb50bab`)" />
 
         <main>
             <h1>

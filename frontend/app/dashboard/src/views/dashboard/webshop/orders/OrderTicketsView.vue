@@ -1,6 +1,6 @@
 <template>
     <div class="st-view order-tickets-view">
-        <STNavigationBar :title="$t(`Tickets`)" />
+        <STNavigationBar :title="$t(`32e049b4-acd6-4d77-a5b8-0632111f2445`)" />
         <main>
             <h1 v-if="tickets.length > 1">
                 {{ $t('b40d200c-4265-4d58-a7f4-7c2498b062b9') }}

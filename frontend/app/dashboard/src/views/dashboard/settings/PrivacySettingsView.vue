@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`Privacy`)" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`36459d6c-1685-463a-829f-bc92f83d1f0f`)" @save="save">
         <h1>
             {{ $t('9ce28983-01ef-44bc-bc02-b76575bda1ce') }}
         </h1>

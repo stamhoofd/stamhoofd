@@ -1,6 +1,6 @@
 <template>
     <form class="st-view login-view" data-submit-last-field @submit.prevent="submit">
-        <STNavigationBar :large="true" class="transparent" :title="$t(`Inloggen`)" />
+        <STNavigationBar :large="true" class="transparent" :title="$t(`8ea6b1b7-4c8b-462d-83d7-7856cee51d6c`)" />
 
         <main class="center small flex">
             <div class="st-view-vertical-center">
@@ -242,7 +242,7 @@ async function submit() {
             // await Storage.keyValue.setItem('next_url_load', '/login/34541097-44dd-4c68-885e-de4f42abae4c')
             await AppManager.shared.checkUpdates({
                 // Always load the staging build
-                customText: $t(`Bezig met laden...`),
+                customText: $t(`a7e7f69a-3ea8-4821-983a-47b0be06b430`),
                 visibleDownload: true,
                 installAutomatically: true,
                 force: true,

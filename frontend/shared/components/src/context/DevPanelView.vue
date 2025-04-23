@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :title="$t(`Developers`)" @save="save">
+    <SaveView :loading="saving" :title="$t(`9120db75-8638-4cab-9dca-8bd81390149e`)" @save="save">
         <h1>
             {{ $t('f6de6c56-6326-42b2-b586-2bf607e058a7') }}
         </h1>
@@ -56,19 +56,19 @@ export default class DevPanelView extends Mixins(NavigationMixin) {
     mounted() {
         this.availableChannels = [
             {
-                name: $t(`Standaard`),
+                name: $t(`40c0b334-e007-4fc1-88e5-b38707175d45`),
                 url: STAMHOOFD.APP_UPDATE_SERVER_URL,
             },
             {
-                name: $t(`Production`),
+                name: $t(`8bc22ee1-303e-4b40-94dc-72c5869abdbc`),
                 url: STAMHOOFD.APP_UPDATE_PRODUCTION_SERVER_URL,
             },
             {
-                name: $t(`Staging`),
+                name: $t(`cab2694d-8d0f-44d0-9819-d2d2c4148b22`),
                 url: STAMHOOFD.APP_UPDATE_STAGING_SERVER_URL,
             },
             {
-                name: $t(`Development`),
+                name: $t(`d517ff0c-abad-4a23-91e2-3463279cfa65`),
                 url: STAMHOOFD.APP_UPDATE_DEVELOPMENT_SERVER_URL,
             },
         ].filter(c => c.url !== undefined) as any;
@@ -112,7 +112,7 @@ export default class DevPanelView extends Mixins(NavigationMixin) {
 
         try {
             await this.saveChannel();
-            new Toast($t(`Wijzigingen opgeslagen`), 'success').show();
+            new Toast($t(`5d614fe0-ec0d-47af-92bc-8c50f09717e2`), 'success').show();
             this.dismiss({ force: true });
         }
         catch (e) {

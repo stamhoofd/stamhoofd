@@ -52,7 +52,7 @@ const draggablePolicies = useDraggableArray(() => patched.value.config.privacy.p
 });
 const saving = ref(false);
 
-const title = $t(`Voorwaarden`);
+const title = $t(`e9a19cd1-7a57-440d-a97e-6cff23a7f46c`);
 
 async function addPolicy() {
     const privacyPatch = PrivacySettings.patch({});

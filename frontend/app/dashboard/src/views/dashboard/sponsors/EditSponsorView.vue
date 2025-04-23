@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="isNew ? $t(`Sponsor toevoegen`) : $t(`Sponsor bewerken`)" :disabled="!hasChanges && !isNew" class="edit-sponsor-view" @save="save">
+    <SaveView :title="isNew ? $t(`7230cd66-d5b3-4f3e-9cf6-27f5486b52f1`) : $t(`b5de4be6-b533-4949-97d8-ad8f1d3ca896`)" :disabled="!hasChanges && !isNew" class="edit-sponsor-view" @save="save">
         <h1 v-if="isNew">
             {{ $t('84c9db16-05a3-42a1-a10f-db4514f314d4') }}
         </h1>

@@ -1,6 +1,6 @@
 <template>
     <div id="settings-view" class="st-view background">
-        <STNavigationBar :title="$t(`Instellingen`)" />
+        <STNavigationBar :title="$t(`88136719-d85f-499f-8c5f-252519947c03`)" />
 
         <main class="center">
             <h1>

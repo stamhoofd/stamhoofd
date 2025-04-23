@@ -1,6 +1,6 @@
 <template>
     <form class="signup-view st-view" @submit.prevent="submit">
-        <STNavigationBar :title="$t(`Account aanmaken`)" />
+        <STNavigationBar :title="$t(`2fd0cda5-225c-4b65-87b1-210c9b54023c`)" />
 
         <main class="center">
             <h1>{{ $t('657d0ca3-739f-48bc-b4c0-b4c326b59834') }}</h1>
@@ -86,7 +86,7 @@ async function submit() {
         errors.errorBox = new ErrorBox(
             new SimpleError({
                 code: 'password_mismatch',
-                message: $t(`De ingevoerde wachtwoorden komen niet overeen`),
+                message: $t(`a5fbbeef-50dc-4825-8677-ba984b13d5cc`),
             }),
         );
         return;
@@ -95,7 +95,7 @@ async function submit() {
     if (password.value.length < 8) {
         errors.errorBox = new ErrorBox(new SimpleError({
             code: 'password_too_short',
-            message: $t(`Jouw wachtwoord moet uit minstens 8 karakters bestaan.`),
+            message: $t(`bac8adfa-0bd1-4180-9143-767f24efa111`),
         }));
         return;
     }

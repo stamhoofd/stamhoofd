@@ -1,6 +1,6 @@
 <template>
     <div class="st-view sms-view">
-        <STNavigationBar :title="$t(`SMS'en`)" />
+        <STNavigationBar :title="$t(`899d369b-4f31-4c80-a6ca-2abfc76584a8`)" />
 
         <main>
             <h1>

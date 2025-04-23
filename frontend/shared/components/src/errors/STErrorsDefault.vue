@@ -33,7 +33,7 @@ export default class STErrorsDefault extends VueComponent {
 
     getErrorMessage(error: SimpleError) {
         if (error.hasCode("network_error") || error.hasCode("network_timeout")) {
-            return $t(`Geen of slechte internetverbinding`)
+            return $t(`94bdc2a4-9ebb-42d2-a4e9-d674eb9aafef`)
         }
         return error.getHuman()
     }

@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="isNew ? $t(`2e3852ef-423e-4fcc-82bb-c886a6c61050`) : $t(`Categorie bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`2e3852ef-423e-4fcc-82bb-c886a6c61050`) : $t(`ae73c6a0-f270-4e4f-a171-417a00fcdb0a`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
             {{ $t('c853c26c-5f80-4605-be1d-117d38c5755c') }}
         </h1>

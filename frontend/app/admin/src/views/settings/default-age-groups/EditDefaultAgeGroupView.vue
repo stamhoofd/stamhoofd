@@ -8,7 +8,7 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <STInputBox v-for="n in names.length" :key="n" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`) + ' '+n">
-            <input class="input" type="text" autocomplete="off" :value="getName(n - 1)" :placeholder="$t(`Synoniem`) + ' '+n" @input="setName(n - 1, ($event as any).target.value)"><template #right>
+            <input class="input" type="text" autocomplete="off" :value="getName(n - 1)" :placeholder="$t(`e0d1cceb-6d03-40a3-bb5c-fe079ae08704`) + ' '+n" @input="setName(n - 1, ($event as any).target.value)"><template #right>
                 <button v-if="names.length > 1" class="button icon trash gray" type="button" @click="deleteName(n - 1)" />
             </template>
         </STInputBox>

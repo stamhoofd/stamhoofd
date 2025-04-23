@@ -1,6 +1,6 @@
 <template>
     <div id="registration-page-settings-view" class="st-view background">
-        <STNavigationBar :title="$t(`Jullie ledenportaal`)" />
+        <STNavigationBar :title="$t(`7f2ccfd4-a570-46fe-bc8a-44e4a6144081`)" />
 
         <main>
             <h1>{{ $t('6ce03229-0735-459d-aa3c-da665e4bafc2') }}</h1>
