@@ -491,7 +491,7 @@ async function send() {
     }
 
     if (savingPatch.value) {
-        Toast.info('Even geduld, de wijzigingen zijn nog aan het opslaan. Probeer straks opnieuw.').show();
+        Toast.info($t(`Even geduld, de wijzigingen zijn nog aan het opslaan. Probeer straks opnieuw.`)).show();
         return;
     }
 
@@ -500,13 +500,13 @@ async function send() {
     }
 
     const recipientCount = email.value.recipientCount;
-    let confirmText = 'Ben je zeker dat je de e-mail wilt versturen?';
+    let confirmText = $t(`Ben je zeker dat je de e-mail wilt versturen?`);
 
     if (recipientCount) {
         confirmText = recipientCount === 1 ? `Ben je zeker dat je de e-mail naar 1 ontvanger wilt versturen?` : `Ben je zeker dat je de e-mail naar ${email.value.recipientCount} ontvangers wilt versturen?`;
     }
 
-    const isConfirm = await CenteredMessage.confirm(confirmText, 'Versturen');
+    const isConfirm = await CenteredMessage.confirm(confirmText, $t(`Versturen`));
 
     if (!isConfirm) return;
 
@@ -530,7 +530,7 @@ async function send() {
             shouldRetry: false,
         });
 
-        Toast.success('De e-mail is verzonden. Het kan even duren voor alle e-mails zijn verstuurd.').show();
+        Toast.success($t(`De e-mail is verzonden. Het kan even duren voor alle e-mails zijn verstuurd.`)).show();
         await pop({ force: true });
     }
     catch (e) {
@@ -591,7 +591,7 @@ async function showToMenu(event: MouseEvent) {
             const selectedOption = option.options.find(o => o.id === selectedIds[0]);
 
             return [new ContextMenuItem({
-                name: option.name ?? selectedOption?.name ?? 'Onbekend',
+                name: option.name ?? selectedOption?.name ?? $t(`Onbekend`),
                 childMenu: new ContextMenu([
                     getContextMenuForOption(option, j),
                 ]),
@@ -680,7 +680,7 @@ async function changedFile(event: InputEvent & { target: HTMLInputElement & { fi
 
     for (const file of event.target.files as FileList) {
         if (file.size > 10 * 1024 * 1024) {
-            const error = 'Bestanden groter dan 10MB kunnen niet worden verstuurd.';
+            const error = $t(`Bestanden groter dan 10MB kunnen niet worden verstuurd.`);
             Toast.error(error).setHide(20 * 1000).show();
             continue;
         }
@@ -696,7 +696,7 @@ async function changedFile(event: InputEvent & { target: HTMLInputElement & { fi
         }));
 
         if (file.name.endsWith('.docx') || file.name.endsWith('.xlsx') || file.name.endsWith('.doc') || file.name.endsWith('.xls')) {
-            const error = 'We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Sommige mensen hebben ook geen licentie voor Word/Excel, want dat is niet gratis. Zet de bestanden om in een PDF en stuur die door.';
+            const error = $t(`We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Sommige mensen hebben ook geen licentie voor Word/Excel, want dat is niet gratis. Zet de bestanden om in een PDF en stuur die door.`);
             Toast.warning(error).setHide(30 * 1000).show();
         }
     }
@@ -726,7 +726,7 @@ async function openTemplates() {
                 types: [type],
                 onSelect: async (template: EmailTemplate) => {
                     if (hasExistingContent) {
-                        if (!await CenteredMessage.confirm('Ben je zeker dat je de huidige inhoud wilt overschrijven?', 'Overschrijven', 'De huidige inhoud van je e-mail gaat verloren')) {
+                        if (!await CenteredMessage.confirm($t(`Ben je zeker dat je de huidige inhoud wilt overschrijven?`), $t(`Overschrijven`), $t(`De huidige inhoud van je e-mail gaat verloren`))) {
                             return false;
                         }
                     }

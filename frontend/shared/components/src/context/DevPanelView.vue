@@ -56,19 +56,19 @@ export default class DevPanelView extends Mixins(NavigationMixin) {
     mounted() {
         this.availableChannels = [
             {
-                name: 'Standaard',
+                name: $t(`Standaard`),
                 url: STAMHOOFD.APP_UPDATE_SERVER_URL,
             },
             {
-                name: 'Production',
+                name: $t(`Production`),
                 url: STAMHOOFD.APP_UPDATE_PRODUCTION_SERVER_URL,
             },
             {
-                name: 'Staging',
+                name: $t(`Staging`),
                 url: STAMHOOFD.APP_UPDATE_STAGING_SERVER_URL,
             },
             {
-                name: 'Development',
+                name: $t(`Development`),
                 url: STAMHOOFD.APP_UPDATE_DEVELOPMENT_SERVER_URL,
             },
         ].filter(c => c.url !== undefined) as any;
@@ -112,7 +112,7 @@ export default class DevPanelView extends Mixins(NavigationMixin) {
 
         try {
             await this.saveChannel();
-            new Toast('Wijzigingen opgeslagen', 'success').show();
+            new Toast($t(`Wijzigingen opgeslagen`), 'success').show();
             this.dismiss({ force: true });
         }
         catch (e) {

@@ -101,15 +101,15 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
     }
 
     get title() {
-        return this.hasAccount ? 'Wachtwoord opnieuw instellen' : 'Account aanmaken';
+        return this.hasAccount ? $t(`Wachtwoord opnieuw instellen`) : $t(`Account aanmaken`);
     }
 
     get description() {
-        return this.hasAccount ? 'Stel een nieuw wachtwoord in voor jouw account.' : 'Kies een wachtwoord voor jouw nieuwe account';
+        return this.hasAccount ? $t(`Stel een nieuw wachtwoord in voor jouw account.`) : $t(`Kies een wachtwoord voor jouw nieuwe account`);
     }
 
     get buttonText() {
-        return this.hasAccount ? 'Wachtwoord wijzigen' : 'Account aanmaken';
+        return this.hasAccount ? $t(`Wachtwoord wijzigen`) : $t(`Account aanmaken`);
     }
 
     mounted() {
@@ -146,12 +146,12 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
                     this.hasAccount = session.user?.hasAccount ?? false;
                     this.loadingToken = false;
                 }).catch((e) => {
-                    new Toast('Deze link is ongeldig of vervallen. Stuur een nieuwe e-mail om je wachtwoord opnieuw in te stellen.', 'error red').show();
+                    new Toast($t(`Deze link is ongeldig of vervallen. Stuur een nieuwe e-mail om je wachtwoord opnieuw in te stellen.`), 'error red').show();
                     this.dismiss({ force: true });
                 });
         }
         else {
-            new Toast('Deze link is ongeldig', 'error red').show();
+            new Toast($t(`Deze link is ongeldig`), 'error red').show();
             this.dismiss({ force: true });
         }
     }
@@ -171,14 +171,14 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
                 if (this.firstName.length < 2) {
                     errors.addError(new SimpleError({
                         code: 'invalid_field',
-                        message: 'Vul jouw voornaam in',
+                        message: $t(`Vul jouw voornaam in`),
                         field: 'firstName',
                     }));
                 }
                 if (this.lastName.length < 2) {
                     errors.addError(new SimpleError({
                         code: 'invalid_field',
-                        message: 'Vul jouw achternaam in',
+                        message: $t(`Vul jouw achternaam in`),
                         field: 'lastName',
                     }));
                 }
@@ -195,7 +195,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
         if (this.password !== this.passwordRepeat) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: '',
-                message: 'De ingevoerde wachtwoorden komen niet overeen',
+                message: $t(`De ingevoerde wachtwoorden komen niet overeen`),
             }));
             return;
         }
@@ -205,7 +205,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
         if (this.password.length < minChars) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: '',
-                message: 'Jouw wachtwoord moet uit minstens ' + minChars + ' karakters bestaan.',
+                message: $t(`Jouw wachtwoord moet uit minstens`) + ' ' + minChars + ' ' + $t(`karakters bestaan.`),
             }));
             return;
         }
@@ -247,11 +247,11 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
             }
 
             if (this.hasAccount) {
-                const toast = new Toast('Jouw nieuwe wachtwoord is opgeslagen', 'success green');
+                const toast = new Toast($t(`Jouw nieuwe wachtwoord is opgeslagen`), 'success green');
                 toast.show();
             }
             else {
-                const toast = new Toast('Jouw account is aangemaakt', 'success green');
+                const toast = new Toast($t(`Jouw account is aangemaakt`), 'success green');
                 toast.show();
             }
 

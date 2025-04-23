@@ -461,7 +461,7 @@ async function showOriginalAnswers() {
 }
 
 async function doDelete() {
-    if (!await CenteredMessage.confirm('Ben je zeker dat je deze melding wilt verwijderen?', 'Ja, verwijderen', 'Je kan dit niet ongedaan maken')) {
+    if (!await CenteredMessage.confirm($t(`Ben je zeker dat je deze melding wilt verwijderen?`), $t(`Ja, verwijderen`), $t(`Je kan dit niet ongedaan maken`))) {
         return;
     }
     try {
@@ -474,7 +474,7 @@ async function doDelete() {
 }
 
 async function doDraft() {
-    if (!await CenteredMessage.confirm('Ben je zeker dat je deze melding terug naar klad wilt verplaatsen?', 'Ja, naar klad')) {
+    if (!await CenteredMessage.confirm($t(`Ben je zeker dat je deze melding terug naar klad wilt verplaatsen?`), $t(`Ja, naar klad`))) {
         return;
     }
     try {
@@ -491,7 +491,7 @@ async function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: 'Wijzig status',
+                name: $t(`Wijzig status`),
                 childMenu: new ContextMenu([
                     [
                         new ContextMenuItem({
@@ -532,7 +532,7 @@ async function showContextMenu(event: MouseEvent) {
                 ]),
             }),
             new ContextMenuItem({
-                name: 'Verwijderen',
+                name: $t(`Verwijderen`),
                 icon: 'trash',
                 action: async () => {
                     await doDelete();

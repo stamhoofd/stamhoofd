@@ -55,13 +55,13 @@ const showDescriptionInTitle = computed(() => props.log.type === AuditLogType.Un
 
 if (props.log.user) {
     if (props.log.source === AuditLogSource.User) {
-        userDescription.push('Door ');
+        userDescription.push($t(`Door`) + ' ');
     }
     else if (props.log.source === AuditLogSource.Payment) {
-        userDescription.push('Indirect veroorzaakt door betaalstatuswijziging door ');
+        userDescription.push($t(`Indirect veroorzaakt door betaalstatuswijziging door`) + ' ');
     }
     else {
-        userDescription.push('Automatische actie veroorzaakt door ');
+        userDescription.push($t(`Automatische actie veroorzaakt door`) + ' ');
     }
 
     userDescription.push(AuditLogReplacement.create({
@@ -71,16 +71,16 @@ if (props.log.user) {
     }));
 }
 else if (props.log.source === AuditLogSource.User) {
-    userDescription.push('Door verwijderde gebruiker');
+    userDescription.push($t(`Door verwijderde gebruiker`));
 }
 else if (props.log.source === AuditLogSource.Anonymous) {
-    userDescription.push('Door anonieme gebruiker');
+    userDescription.push($t(`Door anonieme gebruiker`));
 }
 else if (props.log.source === AuditLogSource.System) {
-    userDescription.push('Automatische systeemactie');
+    userDescription.push($t(`Automatische systeemactie`));
 }
 else if (props.log.source === AuditLogSource.Payment) {
-    userDescription.push('Indirect veroorzaakt door betaalstatuswijziging');
+    userDescription.push($t(`Indirect veroorzaakt door betaalstatuswijziging`));
 }
 
 const present = usePresent();
@@ -92,7 +92,7 @@ async function showContext(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: 'Toon alle gebeurtenissen van dit object',
+                name: $t(`Toon alle gebeurtenissen van dit object`),
                 action: async () => {
                     await present({
                         components: [

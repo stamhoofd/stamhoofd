@@ -242,7 +242,7 @@ async function submit() {
             // await Storage.keyValue.setItem('next_url_load', '/login/34541097-44dd-4c68-885e-de4f42abae4c')
             await AppManager.shared.checkUpdates({
                 // Always load the staging build
-                customText: 'Bezig met laden...',
+                customText: $t(`Bezig met laden...`),
                 visibleDownload: true,
                 installAutomatically: true,
                 force: true,

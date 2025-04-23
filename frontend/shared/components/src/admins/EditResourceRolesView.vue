@@ -45,7 +45,7 @@ withDefaults(
         resource: { id: string; name: string; type: PermissionsResourceType };
         configurableAccessRights: AccessRight[];
     }>(), {
-        title: 'Toegangsbeheer',
+        title: $t(`Toegangsbeheer`),
         description: '',
         configurableAccessRights: () => [],
     });
@@ -97,14 +97,14 @@ const groupedResponsibilites = computed(() => {
 
     if (groupedPlatformResponsibilities.length > 0) {
         groups.push({
-            title: organization.value === null ? '' : 'Standaardfuncties',
+            title: organization.value === null ? '' : $t(`Standaardfuncties`),
             roles: groupedPlatformResponsibilities,
         });
     }
 
     if (groupedOrganizationResponsibilities.length > 0) {
         groups.push({
-            title: 'Groepseigenfuncties',
+            title: $t(`Groepseigenfuncties`),
             roles: groupedOrganizationResponsibilities,
         });
     }
@@ -162,7 +162,7 @@ function patchResponsibilityRole(patch: AutoEncoderPatchType<PermissionRoleForRe
 
 const save = async () => {
     await rawSave(async () => {
-        new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
+        new Toast($t(`De wijzigingen zijn opgeslagen`), 'success green').show();
         await pop({ force: true });
     });
 };

@@ -232,10 +232,10 @@ const levelText = computed(() => {
             if (accessRights.length) {
                 return accessRights.map(r => AccessRightHelper.getNameShort(r)).join(' + ');
             }
-            return 'Geen toegang';
+            return $t(`Geen toegang`);
         }
         case PermissionLevel.Read: {
-            const rights = ['Lezen'];
+            const rights = [$t(`Lezen`)];
             const accessRights = allAccessRights.value;
 
             for (const right of accessRights) {
@@ -249,7 +249,7 @@ const levelText = computed(() => {
             return rights.join(' + ');
         }
         case PermissionLevel.Write: {
-            const rights = ['Bewerken'];
+            const rights = [$t(`Bewerken`)];
             const accessRights = allAccessRights.value;
 
             for (const right of accessRights) {
@@ -263,7 +263,7 @@ const levelText = computed(() => {
             return rights.join(' + ');
         }
         case PermissionLevel.Full: {
-            const rights = ['Volledige toegang'];
+            const rights = [$t(`Volledige toegang`)];
             const accessRights = allAccessRights.value;
 
             for (const right of accessRights) {
@@ -290,7 +290,7 @@ const choosePermissions = async (event: MouseEvent) => {
         [
             new ContextMenuItem({
                 selected: permissionLevel.value === PermissionLevel.None,
-                name: 'Geen basistoegang',
+                name: $t(`Geen basistoegang`),
                 disabled: getPermissionLevelNumber(PermissionLevel.None) < getPermissionLevelNumber(lockedMinimumLevel.value),
                 action: () => {
                     permissionLevel.value = PermissionLevel.None;
@@ -298,7 +298,7 @@ const choosePermissions = async (event: MouseEvent) => {
             }),
             new ContextMenuItem({
                 selected: permissionLevel.value === PermissionLevel.Read,
-                name: 'Lezen',
+                name: $t(`Lezen`),
                 disabled: getPermissionLevelNumber(PermissionLevel.Read) < getPermissionLevelNumber(lockedMinimumLevel.value),
                 action: () => {
                     permissionLevel.value = PermissionLevel.Read;
@@ -306,7 +306,7 @@ const choosePermissions = async (event: MouseEvent) => {
             }),
             new ContextMenuItem({
                 selected: permissionLevel.value === PermissionLevel.Write,
-                name: 'Bewerken',
+                name: $t(`Bewerken`),
                 disabled: getPermissionLevelNumber(PermissionLevel.Write) < getPermissionLevelNumber(lockedMinimumLevel.value),
                 action: () => {
                     permissionLevel.value = PermissionLevel.Write;
@@ -315,7 +315,7 @@ const choosePermissions = async (event: MouseEvent) => {
             new ContextMenuItem({
                 selected: permissionLevel.value === PermissionLevel.Full,
                 disabled: getPermissionLevelNumber(PermissionLevel.Full) < getPermissionLevelNumber(lockedMinimumLevel.value),
-                name: 'Volledige toegang',
+                name: $t(`Volledige toegang`),
                 action: () => {
                     permissionLevel.value = PermissionLevel.Full;
                 },
@@ -334,10 +334,10 @@ const choosePermissions = async (event: MouseEvent) => {
 
                         if (!isLocked) {
                             if (included) {
-                                description = ('Inbegrepen bij ' + getPermissionLevelName(baseLevel));
+                                description = ($t(`Inbegrepen bij`) + ' ' + getPermissionLevelName(baseLevel));
                             }
                             else {
-                                description = ('Niet inbegrepen bij ' + getPermissionLevelName(permissionLevel.value));
+                                description = ($t(`Niet inbegrepen bij`) + ' ' + getPermissionLevelName(permissionLevel.value));
                             }
                         }
                         // #endregion

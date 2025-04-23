@@ -209,9 +209,9 @@ const responsibility = computed(() => {
 
 const title = computed(() => {
     if (props.role instanceof PermissionRoleForResponsibility) {
-        return 'Rechten voor ' + props.role.name;
+        return $t(`Rechten voor`) + ' ' + props.role.name;
     }
-    return props.isNew ? 'Nieuwe rol' : props.role.name;
+    return props.isNew ? $t(`Nieuwe rol`) : props.role.name;
 });
 
 const { sortedAdmins, loading, getPermissions, getUnloadedPermissions } = useAdmins();
@@ -247,7 +247,7 @@ const save = async () => {
         if (!isForResponsibility && name.value.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Gelieve een titel in te vullen',
+                message: $t(`Gelieve een titel in te vullen`),
                 field: 'name',
             });
         }
@@ -269,7 +269,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm('Ben je zeker dat je deze rol wilt verwijderen?', 'Verwijderen')) {
+    if (!await CenteredMessage.confirm($t(`Ben je zeker dat je deze rol wilt verwijderen?`), $t(`Verwijderen`))) {
         return;
     }
 
@@ -340,7 +340,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
 };
 
 defineExpose({

@@ -86,7 +86,7 @@ async function submit() {
         errors.errorBox = new ErrorBox(
             new SimpleError({
                 code: 'password_mismatch',
-                message: 'De ingevoerde wachtwoorden komen niet overeen',
+                message: $t(`De ingevoerde wachtwoorden komen niet overeen`),
             }),
         );
         return;
@@ -95,7 +95,7 @@ async function submit() {
     if (password.value.length < 8) {
         errors.errorBox = new ErrorBox(new SimpleError({
             code: 'password_too_short',
-            message: 'Jouw wachtwoord moet uit minstens 8 karakters bestaan.',
+            message: $t(`Jouw wachtwoord moet uit minstens 8 karakters bestaan.`),
         }));
         return;
     }

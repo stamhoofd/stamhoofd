@@ -177,25 +177,25 @@ const dateRangeSuggestions = buildSuggestions();
 function buildSuggestions() {
     const r = [
         new DateRangeSuggestion({
-            name: 'vandaag',
+            name: $t(`vandaag`),
             startDate: Formatter.luxon().startOf('day').toJSDate(),
             endDate: Formatter.luxon().endOf('day').toJSDate(),
         }),
 
         new DateRangeSuggestion({
-            name: 'gisteren',
+            name: $t(`gisteren`),
             startDate: Formatter.luxon().minus({ day: 1 }).startOf('day').toJSDate(),
             endDate: Formatter.luxon().minus({ day: 1 }).endOf('day').toJSDate(),
         }),
 
         new DateRangeSuggestion({
-            name: 'deze week',
+            name: $t(`deze week`),
             startDate: Formatter.luxon().startOf('week').toJSDate(),
             endDate: Formatter.luxon().endOf('week').toJSDate(),
         }),
 
         new DateRangeSuggestion({
-            name: 'vorige week',
+            name: $t(`vorige week`),
             startDate: Formatter.luxon().minus({ day: 7 }).startOf('week').toJSDate(),
             endDate: Formatter.luxon().minus({ day: 7 }).endOf('week').toJSDate(),
         }),

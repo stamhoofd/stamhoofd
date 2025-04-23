@@ -169,9 +169,9 @@ const props = withDefaults(
         loading: false,
         disabled: false,
         title: '',
-        saveText: 'Opslaan',
+        saveText: $t(`Opslaan`),
         saveIcon: null,
-        cancelText: 'Annuleren',
+        cancelText: $t(`Annuleren`),
         replacements: () => [],
     },
 );
@@ -254,7 +254,7 @@ async function openLinkEditor() {
         return;
     }
     if (!editor.value.isActive('link') && editor.value.state.selection.empty) {
-        new Toast('Selecteer eerst tekst die je klikbaar wilt maken', 'info').show();
+        new Toast($t(`Selecteer eerst tekst die je klikbaar wilt maken`), 'info').show();
         return;
     }
     editLink.value = editor.value.getAttributes('link')?.href ?? '';
@@ -304,7 +304,7 @@ async function saveLink() {
     }
 
     if (!isValidHttpUrl(cleanedUrl)) {
-        Toast.error('Ongeldige URL').show();
+        Toast.error($t(`Ongeldige URL`)).show();
         return;
     }
 
@@ -348,7 +348,7 @@ async function openTextStyles(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: 'Vet',
+                name: $t(`Vet`),
                 icon: 'bold',
                 selected: editor.value.isActive('bold'),
                 action: () => {
@@ -357,7 +357,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: 'Cursief',
+                name: $t(`Cursief`),
                 icon: 'italic',
                 selected: editor.value.isActive('italic'),
                 action: () => {
@@ -366,7 +366,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: 'Onderstrepen',
+                name: $t(`Onderstrepen`),
                 icon: 'underline',
                 selected: editor.value.isActive('underline'),
                 action: () => {
@@ -377,7 +377,7 @@ async function openTextStyles(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: 'Titel',
+                name: $t(`Titel`),
                 icon: 'h1',
                 selected: editor.value.isActive('heading', { level: 1 }),
                 action: () => {
@@ -386,7 +386,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: 'Koptekst',
+                name: $t(`Koptekst`),
                 icon: 'h2',
                 selected: editor.value.isActive('heading', { level: 2 }),
                 action: () => {
@@ -395,7 +395,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: 'Subkop',
+                name: $t(`Subkop`),
                 icon: 'h3',
                 selected: editor.value.isActive('heading', { level: 3 }),
                 action: () => {
@@ -404,7 +404,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: 'Licht gekleurd',
+                name: $t(`Licht gekleurd`),
                 icon: 'info-circle',
                 selected: editor.value.isActive('descriptiveText'),
                 action: () => {
@@ -415,7 +415,7 @@ async function openTextStyles(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: 'Opsomming met bolletjes',
+                name: $t(`Opsomming met bolletjes`),
                 icon: 'ul',
                 selected: editor.value.isActive('bulletList'),
                 action: () => {
@@ -424,7 +424,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: 'Opsomming met nummers',
+                name: $t(`Opsomming met nummers`),
                 icon: 'ol',
                 selected: editor.value.isActive('orderedList'),
                 action: () => {
