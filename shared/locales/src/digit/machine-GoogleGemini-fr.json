@@ -15770,5 +15770,781 @@
   "6110db94-d89d-43d0-9c1c-d3e71253a795": {
     "original": "De DNS-instellingen van de domeinnaam van een groep zijn correct ingesteld.",
     "translation": "Les paramètres DNS du nom de domaine d'un groupe sont correctement configurés."
+  },
+  "21e75f22-0079-4a82-bc0e-b8ecf877d39c": {
+    "original": "Ja, naar klad",
+    "translation": "Oui, vers brouillon"
+  },
+  "13daa284-503c-4841-a2ec-16d89ab38cdc": {
+    "original": "Wijzig status",
+    "translation": "Modifier statut"
+  },
+  "84dc69fb-179d-4e25-a5c8-4a6beb57bcdd": {
+    "original": "Bevestigen",
+    "translation": "Confirmer"
+  },
+  "cda73dc5-5612-4561-bf92-f18157dcad64": {
+    "original": "Betalingen",
+    "translation": "Paiements"
+  },
+  "6030bf67-f3ec-48f1-8c00-be3e3f745351": {
+    "original": "Openstaand bij {organization}",
+    "translation": "En suspens chez {organization}"
+  },
+  "27bc7f00-1839-4f47-b8e5-7f4c6996fa53": {
+    "original": "Toestemming gegevensverzameling",
+    "translation": "Autorisation collecte de données"
+  },
+  "57ee093f-d5f8-40f5-a991-53ff348c7376": {
+    "original": "Geen",
+    "translation": "Non"
+  },
+  "b1f2fdc7-1235-4abf-a925-60128cbcedcc": {
+    "original": "Jouw plaatsen",
+    "translation": "Vos places"
+  },
+  "a87b9dfd-4acd-40c0-b430-f29dc8ec0fbf": {
+    "original": "Reeds aangerekend voor {group}",
+    "translation": "Déjà facturé pour {group}"
+  },
+  "45d9b6c1-1af8-4590-88ff-091a2a93c71a": {
+    "original": "Later te betalen",
+    "translation": "À payer plus tard"
+  },
+  "4789d323-f2da-4e87-a17c-7d29f813d68e": {
+    "original": "Tegen {date}",
+    "translation": "Contre {date}"
+  },
+  "bf12f6a6-3513-451e-bf8e-fdec5833f5da": {
+    "original": "Subtotaal",
+    "translation": "Sous-total"
+  },
+  "566df267-1215-4b90-b893-0344c1f1f3d3": {
+    "original": "Openstaand bedrag stijgt met",
+    "translation": "Montant en suspens augmente de"
+  },
+  "566e4010-63b7-42e7-9b94-fcdec3f95767": {
+    "original": "Openstaand bedrag daalt met",
+    "translation": "Montant en suspens diminue de"
+  },
+  "6219b760-90aa-4758-8102-119af7e596e7": {
+    "original": "Nu te betalen",
+    "translation": "À payer maintenant"
+  },
+  "482bf48b-ebbc-42e5-8718-6ee11d217510": {
+    "original": "Totaal",
+    "translation": "Total"
+  },
+  "4070dda9-b556-49cd-ba17-aad535240835": {
+    "original": "todo",
+    "translation": "todo"
+  },
+  "3024d542-4987-4487-ae83-6593036a7e1d": {
+    "original": "Aansluitingen aanrekenen",
+    "translation": "Comptabilisation des connexions"
+  },
+  "e58db898-16ad-4bb4-840c-2315ca894ff6": {
+    "original": "Experimenten",
+    "translation": "Expériences"
+  },
+  "88136719-d85f-499f-8c5f-252519947c03": {
+    "original": "Instellingen",
+    "translation": "Paramètres"
+  },
+  "e0d1cceb-6d03-40a3-bb5c-fe079ae08704": {
+    "original": "Synoniem",
+    "translation": "Synonyme"
+  },
+  "e9a19cd1-7a57-440d-a97e-6cff23a7f46c": {
+    "original": "Voorwaarden",
+    "translation": "Conditions"
+  },
+  "d8ceaf3c-7395-4ace-9dba-f29390f07222": {
+    "original": "Administratieportaal",
+    "translation": "Portail d'administration"
+  },
+  "2f140e22-4940-453f-8f49-871a69f0776e": {
+    "original": "Documenten",
+    "translation": "Documents"
+  },
+  "9464cf2b-10a9-4690-8ab6-2e3d2f3e9b9d": {
+    "original": "Document",
+    "translation": "Document"
+  },
+  "e8340220-a719-4ab8-82ff-627fce627235": {
+    "original": "Domeinnaam kiezen",
+    "translation": "Choisir un nom de domaine"
+  },
+  "0fc72e2d-5fe5-4ed2-ba5d-1f880790c174": {
+    "original": "Boekhouding",
+    "translation": "Comptabilité"
+  },
+  "4a7e3838-f75a-4610-9caa-0f75849ea142": {
+    "original": "Personaliseren",
+    "translation": "Personnaliser"
+  },
+  "36459d6c-1685-463a-829f-bc92f83d1f0f": {
+    "original": "Privacy",
+    "translation": "Vie privée"
+  },
+  "7f2ccfd4-a570-46fe-bc8a-44e4a6144081": {
+    "original": "Jullie ledenportaal",
+    "translation": "Votre portail des membres"
+  },
+  "e2351ad3-5e04-41b8-8ec8-124f3d823b75": {
+    "original": "Exporteren",
+    "translation": "Exporter"
+  },
+  "6a1afe5c-dd96-4b0f-ad6f-f0598b366d54": {
+    "original": "Vrije bijdrage",
+    "translation": "Contribution libre"
+  },
+  "e96ab70d-4095-47b2-90bf-451870b07e05": {
+    "original": "Voorgesteld bedrag",
+    "translation": "Montant suggéré"
+  },
+  "899d369b-4f31-4c80-a6ca-2abfc76584a8": {
+    "original": "SMS'en",
+    "translation": "SMS"
+  },
+  "7230cd66-d5b3-4f3e-9cf6-27f5486b52f1": {
+    "original": "Sponsor toevoegen",
+    "translation": "Ajouter un sponsor"
+  },
+  "b5de4be6-b533-4949-97d8-ad8f1d3ca896": {
+    "original": "Sponsor bewerken",
+    "translation": "Modifier un sponsor"
+  },
+  "1866a2ab-1798-45df-a619-0929258d6cd8": {
+    "original": "Webshop archief",
+    "translation": "Archives de la boutique en ligne"
+  },
+  "d0f49d2a-6b83-4e03-9480-4d0995bbb0a1": {
+    "original": "Vragenlijsten en gegevens",
+    "translation": "Questionnaires et données"
+  },
+  "455d581c-bfae-47a1-ac6f-e88068edce26": {
+    "original": "Categorie toevoegen",
+    "translation": "Ajouter une catégorie"
+  },
+  "cc20edc8-b323-4627-9940-a9cc23b5fd8d": {
+    "original": "Kortingscode toevoegen",
+    "translation": "Ajouter un code de réduction"
+  },
+  "22797257-f650-4609-96f8-3a10f7e687c7": {
+    "original": "Kortingscode bewerken",
+    "translation": "Modifier un code de réduction"
+  },
+  "0569800c-393c-486e-8d97-9c2b7689624a": {
+    "original": "Kortingvoorwaarde toevoegen",
+    "translation": "Ajouter une condition de réduction"
+  },
+  "d0bb4aed-a00e-4725-83d8-b6d1cf8fc90c": {
+    "original": "Kortingvoorwaarde bewerken",
+    "translation": "Modifier une condition de réduction"
+  },
+  "c15656cf-5ce1-4f77-92d7-bca128316cfd": {
+    "original": "Korting toevoegen",
+    "translation": "Ajouter une réduction"
+  },
+  "9b8ce2cd-e96a-49ad-9494-53d30e2ef679": {
+    "original": "Korting bewerken",
+    "translation": "Modifier une réduction"
+  },
+  "b08ae26a-874b-40cd-adb9-98bdccaa99e0": {
+    "original": "Productkorting toevoegen",
+    "translation": "Ajouter une réduction de produit"
+  },
+  "0b100742-cfe5-4a3a-b0ee-18c278c5d617": {
+    "original": "Productkorting bewerken",
+    "translation": "Modifier une réduction de produit"
+  },
+  "fdbec5b0-6fb0-4f0b-9efa-4e4a394605d0": {
+    "original": "Korting",
+    "translation": "Réduction"
+  },
+  "fb25fbab-3376-494c-a286-6f0ceef13f87": {
+    "original": "Vraag toevoegen",
+    "translation": "Ajouter une question"
+  },
+  "cbbe2de7-2d23-445c-8d23-48ce8bd3849c": {
+    "original": "Vraag bewerken",
+    "translation": "Modifier une question"
+  },
+  "1e78e9e7-bc02-4334-af6f-415ca265fdd8": {
+    "original": "Tijdvak toevoegen",
+    "translation": "Ajouter une période"
+  },
+  "c70f1d81-e63d-4bb3-8e32-41b767eff6c0": {
+    "original": "Tijdvak bewerken",
+    "translation": "Modifier une période"
+  },
+  "cb1db7b7-2470-448c-8ebd-ce5702439538": {
+    "original": "Keuzemenu toevoegen",
+    "translation": "Ajouter un menu déroulant"
+  },
+  "feef080d-4172-4ab0-a69f-d3769f32cfa8": {
+    "original": "Keuzemenu bewerken",
+    "translation": "Modifier un menu déroulant"
+  },
+  "f4d789d3-51e6-40ca-9c10-b81ffff6e32f": {
+    "original": "Keuze toevoegen",
+    "translation": "Ajouter un choix"
+  },
+  "67605bca-eb74-4d32-8e81-c4c1d3c66105": {
+    "original": "Prijskeuze toevoegen",
+    "translation": "Ajouter un choix de prix"
+  },
+  "da9a9438-6686-4740-806e-1f4958b3ff9f": {
+    "original": "Prijskeuze bewerken",
+    "translation": "Modifier un choix de prix"
+  },
+  "ae73c6a0-f270-4e4f-a171-417a00fcdb0a": {
+    "original": "Categorie bewerken",
+    "translation": "Modifier une catégorie"
+  },
+  "19bd9ed4-585f-4cc5-a4ea-643f00481b77": {
+    "original": "Producten",
+    "translation": "Produits"
+  },
+  "32e049b4-acd6-4d77-a5b8-0632111f2445": {
+    "original": "Tickets",
+    "translation": "Tickets"
+  },
+  "e0f1bd7f-332f-4c99-adab-35a7e7481cf9": {
+    "original": "Bestelling #",
+    "translation": "Commande #"
+  },
+  "5b280bad-2167-42e6-8c4f-177ab1d76c67": {
+    "original": "Zaaloverzicht",
+    "translation": "Aperçu des salles"
+  },
+  "66440c5e-e663-4406-b6f0-868e0bb50bab": {
+    "original": "Tickets scannen",
+    "translation": "Scanner les tickets"
+  },
+  "69919e1e-89c6-44d7-beb1-c7b243c5a316": {
+    "original": "Ticket al gescand",
+    "translation": "Ticket déjà scanné"
+  },
+  "6e958518-8f12-4e1b-b3af-c7d7cd0afbb6": {
+    "original": "Leden",
+    "translation": "Membres"
+  },
+  "cc49441a-2dba-4263-a93d-23008adac4f8": {
+    "original": "Maak jouw account",
+    "translation": "Créez votre compte"
+  },
+  "de716992-0ce7-45a3-b45b-f269d3d17256": {
+    "original": "Winkelmandje",
+    "translation": "Panier"
+  },
+  "60231186-b00f-4d07-a5c7-4a905467e254": {
+    "original": "Activiteiten",
+    "translation": "Activités"
+  },
+  "b4cba044-12c3-464d-8bc1-2873996f02fa": {
+    "original": "Gegevens nakijken",
+    "translation": "Vérifier les données"
+  },
+  "39f41938-8165-49bb-bffe-6800155f02a4": {
+    "original": "Kies je leveringsadres",
+    "translation": "Choisissez votre adresse de livraison"
+  },
+  "b799ec1f-af00-45a9-a0bf-7d02418d18b8": {
+    "original": "Kies je afhaalmethode",
+    "translation": "Choisissez votre méthode de retrait"
+  },
+  "1db407ec-4d25-40f9-92b9-abf820faaf98": {
+    "original": "Jouw gegevens",
+    "translation": "Vos données"
+  },
+  "844333d1-ba08-4d37-bdf3-eae024c87ff3": {
+    "original": "Beheerders",
+    "translation": "Administrateurs"
+  },
+  "09004cd9-3fc8-4ba6-b758-5fe2348b4982": {
+    "original": "Geen toegangsrechten",
+    "translation": "Pas de droits d'accès"
+  },
+  "6e948886-0b41-49e8-80be-0e2e3c795359": {
+    "original": "Hoofdbeheerders",
+    "translation": "Administrateurs principaux"
+  },
+  "1186a60b-c59f-43d5-ba58-04ff9288c266": {
+    "original": "Vul de voornaam in",
+    "translation": "Veuillez saisir le prénom"
+  },
+  "d26a3f0b-667f-463c-ac49-8aab0462c0c3": {
+    "original": "Vul de achternaam in",
+    "translation": "Veuillez saisir le nom"
+  },
+  "2289a0b3-d7e1-45a6-997b-b01a66182df6": {
+    "original": "Beheerder",
+    "translation": "Administrateur"
+  },
+  "53f702bf-2140-4ebf-8ebd-f6ec31185377": {
+    "original": "is toegevoegd en heeft een uitnodiging via email ontvangen.",
+    "translation": "a été ajouté et a reçu une invitation par e-mail."
+  },
+  "9e4f2ef0-aa2f-42d3-8079-13f2e071db91": {
+    "original": "is aangepast",
+    "translation": "a été modifié"
+  },
+  "e8b646d5-1377-465e-b29d-163d437e5c02": {
+    "original": "Ben je zeker dat je deze beheerder wilt verwijderen?",
+    "translation": "Êtes-vous sûr de vouloir supprimer cet administrateur ?"
+  },
+  "25d866b7-3859-4a5d-b875-bc286e69f846": {
+    "original": "Verwijderen",
+    "translation": "Supprimer"
+  },
+  "4f093ade-8fcd-4849-8b9d-6e2db171880c": {
+    "original": "is verwijderd",
+    "translation": "a été supprimé"
+  },
+  "88f254ee-bc8c-4a2f-9a00-9e9102354268": {
+    "original": "Wijzigingen niet opgeslagen",
+    "translation": "Modifications non enregistrées"
+  },
+  "acc4cfd1-42ad-45a2-bb1e-841b52f7c4e6": {
+    "original": "Voor je een uitnodiging opnieuw kan versturen moet je alle wijzigingen opslaan of annuleren.",
+    "translation": "Avant de pouvoir renvoyer une invitation, vous devez enregistrer ou annuler toutes les modifications."
+  },
+  "a94e08c1-bddf-4f13-af83-8349dc361a47": {
+    "original": "Uitnodiging verzonden naar",
+    "translation": "Invitation envoyée à"
+  },
+  "3953d383-4f04-42ea-83cd-bf65478ed4a9": {
+    "original": "Ben je zeker dat je wilt sluiten zonder op te slaan?",
+    "translation": "Êtes-vous sûr de vouloir fermer sans enregistrer ?"
+  },
+  "4cfb2940-8532-446e-b543-a4c7ba9618a3": {
+    "original": "Niet opslaan",
+    "translation": "Ne pas enregistrer"
+  },
+  "d51b7cc1-ce3d-45ad-9be0-105e97d0e4b9": {
+    "original": "Toegangsbeheer",
+    "translation": "Gestion des accès"
+  },
+  "89b5d229-1850-4063-960a-dbacee794d72": {
+    "original": "Standaardfuncties",
+    "translation": "Fonctions standard"
+  },
+  "5f37ed88-8822-44bb-8f06-7f527c5d00fe": {
+    "original": "Groepseigenfuncties",
+    "translation": "Fonctions propres au groupe"
+  },
+  "89360094-8856-4b28-8921-e3d561ef824c": {
+    "original": "De wijzigingen zijn opgeslagen",
+    "translation": "Les modifications ont été enregistrées"
+  },
+  "055ba4d1-abf5-4c10-9da1-29311a113568": {
+    "original": "Rechten voor",
+    "translation": "Droits pour"
+  },
+  "db4cb26a-c23f-4f29-b4c3-233cd0f08f38": {
+    "original": "Nieuwe rol",
+    "translation": "Nouveau rôle"
+  },
+  "0b7bedcd-0e5a-4ef3-b2d8-7ee2c23650e5": {
+    "original": "Gelieve een titel in te vullen",
+    "translation": "Veuillez saisir un titre"
+  },
+  "4d88b931-3fa4-497d-8a23-481f8f58a967": {
+    "original": "Ben je zeker dat je deze rol wilt verwijderen?",
+    "translation": "Êtes-vous sûr de vouloir supprimer ce rôle ?"
+  },
+  "5c7bd1da-78a7-428c-9c93-2be66c44ff6c": {
+    "original": "Geen toegang",
+    "translation": "Pas d'accès"
+  },
+  "e80f2233-257d-45df-a04e-af7e5f694546": {
+    "original": "Lezen",
+    "translation": "Lire"
+  },
+  "194b293f-79ca-4ad9-820d-91f0ada966ad": {
+    "original": "Bewerken",
+    "translation": "Modifier"
+  },
+  "b182a5e2-aae7-48ae-bb42-c51edfb5df29": {
+    "original": "Volledige toegang",
+    "translation": "Accès complet"
+  },
+  "dc1ffb07-49de-475c-9d96-6940d0cbbc09": {
+    "original": "Geen basistoegang",
+    "translation": "Pas d'accès de base"
+  },
+  "c3d22dca-87b6-4975-96ff-72ffe2ce99d0": {
+    "original": "Inbegrepen bij",
+    "translation": "Inclus dans"
+  },
+  "74dd7a35-db8b-477d-934a-2681d8d35184": {
+    "original": "Niet inbegrepen bij",
+    "translation": "Non inclus dans"
+  },
+  "c2cbfcc6-dfdd-4047-b178-76211382d405": {
+    "original": "Logboek",
+    "translation": "Journal"
+  },
+  "13f1507b-7ad1-4748-981f-8b7b12aa2dce": {
+    "original": "vandaag",
+    "translation": "aujourd'hui"
+  },
+  "12a16bab-7d3e-46e0-95dc-43aef6818bff": {
+    "original": "gisteren",
+    "translation": "hier"
+  },
+  "1089afa3-5103-44de-a7e5-9501f058b26e": {
+    "original": "deze week",
+    "translation": "cette semaine"
+  },
+  "c37c5108-b223-4a83-8a05-e51324da93b7": {
+    "original": "vorige week",
+    "translation": "la semaine dernière"
+  },
+  "6df4e1c5-81cd-4abb-a0dd-528aee6acaa3": {
+    "original": "Door",
+    "translation": "Par"
+  },
+  "ba7666c5-9641-4ba2-affa-a811e1773af6": {
+    "original": "Indirect veroorzaakt door betaalstatuswijziging door",
+    "translation": "Indirectement causé par la modification du statut de paiement par"
+  },
+  "6137567d-3cd1-4b89-bfcb-7cbebb60e43a": {
+    "original": "Automatische actie veroorzaakt door",
+    "translation": "Action automatique causée par"
+  },
+  "09219c0e-ed21-49eb-889d-9409d5f66006": {
+    "original": "Door verwijderde gebruiker",
+    "translation": "Par utilisateur supprimé"
+  },
+  "c2fd98f0-5081-4ce2-8313-ca45ee302eda": {
+    "original": "Door anonieme gebruiker",
+    "translation": "Par utilisateur anonyme"
+  },
+  "6ccdb9e8-c878-4bd9-a66e-8366ad66c0d1": {
+    "original": "Automatische systeemactie",
+    "translation": "Action système automatique"
+  },
+  "12d14007-0c25-4bec-86f6-d018260d8644": {
+    "original": "Indirect veroorzaakt door betaalstatuswijziging",
+    "translation": "Indirectement causé par la modification du statut de paiement"
+  },
+  "27a704b7-9e97-432f-bfb4-ab8322b2a016": {
+    "original": "Toon alle gebeurtenissen van dit object",
+    "translation": "Afficher tous les événements de cet objet"
+  },
+  "3e6ba5d2-adb4-4413-b40f-eba2ae951c7a": {
+    "original": "toegevoegd",
+    "translation": "ajouté"
+  },
+  "4dccea53-5191-48bf-b227-b59b8e41d8f0": {
+    "original": "verwijderd",
+    "translation": "supprimé"
+  },
+  "7654d4ed-431e-4613-a60c-aa61b066fac4": {
+    "original": "aangepast",
+    "translation": "modifié"
+  },
+  "a8e73745-0ef7-4c56-81dd-ad642d905431": {
+    "original": "volgorde gewijzigd",
+    "translation": "ordre modifié"
+  },
+  "73466f92-bfc1-4fd8-9de7-363738ac6dd7": {
+    "original": "Je moet minimaal 5 minuten wachten voor je een nieuwe e-mail kan versturen. Kijk jouw inbox goed na!",
+    "translation": "Vous devez attendre au moins 5 minutes avant de pouvoir envoyer un nouvel e-mail. Vérifiez bien votre boîte de réception !"
+  },
+  "6e55c6ff-8487-4376-8804-1b3934623146": {
+    "original": "Wil je een nieuwe bevestigingsmail sturen?",
+    "translation": "Voulez-vous envoyer un nouvel e-mail de confirmation ?"
+  },
+  "776a9bda-a078-4fe8-afa8-3285b5f5c794": {
+    "original": "Ja, versturen",
+    "translation": "Oui, envoyer"
+  },
+  "f8a74bb1-0df6-4313-875d-ac4b0ba3b36c": {
+    "original": "Kijk ook zeker in jouw spambox, wacht enkele minuten en kijk opnieuw. Kijk ook na of je geen typefouten hebt gemaakt in jouw e-mailadres (dan maak je best een nieuw account aan).",
+    "translation": "Consultez également votre boîte de spam, patientez quelques minutes et regardez à nouveau. Vérifiez également que vous n'avez pas fait de fautes de frappe dans votre adresse e-mail (dans ce cas, il est préférable de créer un nouveau compte)."
+  },
+  "cc0f2b34-b2c3-4df1-871d-17ad969205c5": {
+    "original": "Je hebt een nieuwe e-mail ontvangen. Kijk jouw inbox en spambox goed na!",
+    "translation": "Vous avez reçu un nouvel e-mail. Vérifiez bien votre boîte de réception et votre boîte de spam !"
+  },
+  "6df6c342-d948-41b1-b913-55cfd3c2b558": {
+    "original": "email",
+    "translation": "e-mail"
+  },
+  "a66456db-d4d8-4f4e-895e-e66aa873604a": {
+    "original": "Jouw e-mailadres is geverifieerd!",
+    "translation": "Votre adresse e-mail a été vérifiée !"
+  },
+  "91ac3f67-da37-4366-9392-d07148e5557f": {
+    "original": "Ben je zeker dat je wilt annuleren?",
+    "translation": "Êtes-vous sûr de vouloir annuler ?"
+  },
+  "078baf81-049b-4f3f-9ccb-8ab39b8ddaf8": {
+    "original": "Sluiten en niet voltooien",
+    "translation": "Fermer et ne pas terminer"
+  },
+  "a7c42cd2-eeca-4286-9ac9-1a9bc951f86f": {
+    "original": "Wachtwoord opnieuw instellen",
+    "translation": "Réinitialiser le mot de passe"
+  },
+  "2fd0cda5-225c-4b65-87b1-210c9b54023c": {
+    "original": "Account aanmaken",
+    "translation": "Créer un compte"
+  },
+  "81bbd6ba-ad08-4e3c-bade-d1cfd23949d9": {
+    "original": "Stel een nieuw wachtwoord in voor jouw account.",
+    "translation": "Définissez un nouveau mot de passe pour votre compte."
+  },
+  "0576b8e6-baa7-4cb9-978a-806f81144427": {
+    "original": "Kies een wachtwoord voor jouw nieuwe account",
+    "translation": "Choisissez un mot de passe pour votre nouveau compte"
+  },
+  "b33f433c-0957-4411-a0d6-0f41cf5caa63": {
+    "original": "Wachtwoord wijzigen",
+    "translation": "Modifier le mot de passe"
+  },
+  "c7d81ba9-a143-4cdd-a5b3-8089e11eea92": {
+    "original": "Deze link is ongeldig of vervallen. Stuur een nieuwe e-mail om je wachtwoord opnieuw in te stellen.",
+    "translation": "Ce lien est invalide ou a expiré. Envoyez un nouvel e-mail pour réinitialiser votre mot de passe."
+  },
+  "bd9a0e83-7491-4d0b-bc51-69e6d93db1c8": {
+    "original": "Deze link is ongeldig",
+    "translation": "Ce lien est invalide"
+  },
+  "e9ca6bf3-1b1b-4099-b15f-82d98ac3557f": {
+    "original": "Vul jouw voornaam in",
+    "translation": "Veuillez saisir votre prénom"
+  },
+  "b1632f76-4597-402b-99bf-9f53efb5ed32": {
+    "original": "Vul jouw achternaam in",
+    "translation": "Veuillez saisir votre nom"
+  },
+  "a5fbbeef-50dc-4825-8677-ba984b13d5cc": {
+    "original": "De ingevoerde wachtwoorden komen niet overeen",
+    "translation": "Les mots de passe saisis ne correspondent pas"
+  },
+  "fa4405a2-cca9-4643-827d-76a5cff2846c": {
+    "original": "Jouw wachtwoord moet uit minstens",
+    "translation": "Votre mot de passe doit comporter au moins"
+  },
+  "89cd482b-36a2-49a3-9601-0b66aa90c7a2": {
+    "original": "karakters bestaan.",
+    "translation": "caractères."
+  },
+  "ba5fb68b-b43b-4e7a-8dfe-abe142b2b647": {
+    "original": "Jouw nieuwe wachtwoord is opgeslagen",
+    "translation": "Votre nouveau mot de passe a été enregistré"
+  },
+  "661733da-dfb8-4091-bb69-d2d199f18aa8": {
+    "original": "Jouw account is aangemaakt",
+    "translation": "Votre compte a été créé"
+  },
+  "0eb7d18f-2fd7-4ac8-acb6-5e1c31482b3c": {
+    "original": "Wachtwoord vergeten",
+    "translation": "Mot de passe oublié"
+  },
+  "9135aae1-14b5-4a92-b379-5f53702adffc": {
+    "original": "Je hebt een e-mail ontvangen waarmee je een nieuw wachtwoord kan instellen",
+    "translation": "Vous avez reçu un e-mail vous permettant de définir un nouveau mot de passe"
+  },
+  "8ea6b1b7-4c8b-462d-83d7-7856cee51d6c": {
+    "original": "Inloggen",
+    "translation": "Connexion"
+  },
+  "a7e7f69a-3ea8-4821-983a-47b0be06b430": {
+    "original": "Bezig met laden...",
+    "translation": "Chargement..."
+  },
+  "bac8adfa-0bd1-4180-9143-767f24efa111": {
+    "original": "Jouw wachtwoord moet uit minstens 8 karakters bestaan.",
+    "translation": "Votre mot de passe doit comporter au moins 8 caractères."
+  },
+  "892db826-a373-4f7f-96bf-6f1f3fa6eede": {
+    "original": "Privacybeleid",
+    "translation": "Politique de confidentialité"
+  },
+  "cad17893-df84-445c-b85b-b48e2eccfdaf": {
+    "original": "Ik ga akkoord met",
+    "translation": "J'accepte"
+  },
+  "2d9ef8cb-a1be-4968-82a1-ea029c5fa104": {
+    "original": "het privacybeleid",
+    "translation": "la politique de confidentialité"
+  },
+  "d5474814-62d6-4a54-94ea-6b9cd0a0d769": {
+    "original": "Je moet akkoord gaan met de voorwaarden voor je een account kan aanmaken.",
+    "translation": "Vous devez accepter les conditions pour pouvoir créer un compte."
+  },
+  "e1193431-b95a-4a8a-94b2-8659005dcb77": {
+    "original": "TabBarController",
+    "translation": "TabBarController"
+  },
+  "9120db75-8638-4cab-9dca-8bd81390149e": {
+    "original": "Developers",
+    "translation": "Développeurs"
+  },
+  "40c0b334-e007-4fc1-88e5-b38707175d45": {
+    "original": "Standaard",
+    "translation": "Standard"
+  },
+  "8bc22ee1-303e-4b40-94dc-72c5869abdbc": {
+    "original": "Production",
+    "translation": "Production"
+  },
+  "cab2694d-8d0f-44d0-9819-d2d2c4148b22": {
+    "original": "Staging",
+    "translation": "Mise en scène"
+  },
+  "d517ff0c-abad-4a23-91e2-3463279cfa65": {
+    "original": "Development",
+    "translation": "Développement"
+  },
+  "5d614fe0-ec0d-47af-92bc-8c50f09717e2": {
+    "original": "Wijzigingen opgeslagen",
+    "translation": "Modifications enregistrées"
+  },
+  "14abcd1e-7e65-4e84-be4c-ab2e162ae44d": {
+    "original": "Opslaan",
+    "translation": "Enregistrer"
+  },
+  "4e1dc79e-b09c-41ec-aa8d-a2d052761bfe": {
+    "original": "Annuleren",
+    "translation": "Annuler"
+  },
+  "1a4e5a36-80ae-4858-a16b-a430c806ee8f": {
+    "original": "Selecteer eerst tekst die je klikbaar wilt maken",
+    "translation": "Sélectionnez d'abord le texte que vous souhaitez rendre cliquable"
+  },
+  "f60878fd-f28a-4585-a2d6-3e90437ae8c1": {
+    "original": "Ongeldige URL",
+    "translation": "URL invalide"
+  },
+  "8f419200-148a-4f76-8292-def02fffb0be": {
+    "original": "Vet",
+    "translation": "Gras"
+  },
+  "20a9c3b3-a4df-431e-a4e0-dd22a2ddf51f": {
+    "original": "Cursief",
+    "translation": "Italique"
+  },
+  "fd97c699-c6c7-4861-a22e-317a51f87ed0": {
+    "original": "Onderstrepen",
+    "translation": "Souligné"
+  },
+  "109b8d55-5b39-47da-92ad-fbdfa0f3d0b0": {
+    "original": "Titel",
+    "translation": "Titre"
+  },
+  "fc5107e1-3576-4a8a-b35c-26918f0d8052": {
+    "original": "Koptekst",
+    "translation": "En-tête"
+  },
+  "002d6c62-a1d1-4efa-a230-b03456b2d872": {
+    "original": "Subkop",
+    "translation": "Sous-titre"
+  },
+  "2a2b03b6-f858-48c0-963e-b1dfdb107f25": {
+    "original": "Licht gekleurd",
+    "translation": "Couleur claire"
+  },
+  "9f87bc88-6829-46dc-8bf3-333437e7bee3": {
+    "original": "Opsomming met bolletjes",
+    "translation": "Liste à puces"
+  },
+  "8d17be46-de96-4e84-af15-6bd18e8b4b17": {
+    "original": "Opsomming met nummers",
+    "translation": "Liste numérotée"
+  },
+  "1363c0ee-0f4b-43f8-a9ee-a2a6091e5d96": {
+    "original": "E-mailadressen",
+    "translation": "Adresses e-mail"
+  },
+  "3338f8ad-c4d7-4d09-9254-70bc3f0449a9": {
+    "original": "Nieuwe e-mail",
+    "translation": "Nouvel e-mail"
+  },
+  "a6d49891-5af9-4dee-8dba-57ad854fb955": {
+    "original": "Even geduld, de wijzigingen zijn nog aan het opslaan. Probeer straks opnieuw.",
+    "translation": "Patientez, les modifications sont en cours d'enregistrement. Réessayez plus tard."
+  },
+  "8ea1d574-6388-4033-bb4e-f2e031d2da3b": {
+    "original": "Ben je zeker dat je de e-mail wilt versturen?",
+    "translation": "Êtes-vous sûr de vouloir envoyer l'e-mail ?"
+  },
+  "e0c68f8b-ccb1-4622-8570-08abc7f5705a": {
+    "original": "Versturen",
+    "translation": "Envoyer"
+  },
+  "0adee17a-6cb5-4b32-a2a9-c6f44cbb3e7d": {
+    "original": "De e-mail is verzonden. Het kan even duren voor alle e-mails zijn verstuurd.",
+    "translation": "L'e-mail a été envoyé. L'envoi de tous les e-mails peut prendre un certain temps."
+  },
+  "d8b6c55e-72c5-4cde-bdd9-cee3b5bae6ae": {
+    "original": "Onbekend",
+    "translation": "Inconnu"
+  },
+  "93533097-46c1-4f88-a582-1634d57ac2c0": {
+    "original": "Bestanden groter dan 10MB kunnen niet worden verstuurd.",
+    "translation": "Les fichiers supérieurs à 10 Mo ne peuvent pas être envoyés."
+  },
+  "70436d52-5a86-4231-89d5-2adf8bfd628f": {
+    "original": "We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Sommige mensen hebben ook geen licentie voor Word/Excel, want dat is niet gratis. Zet de bestanden om in een PDF en stuur die door.",
+    "translation": "Nous vous déconseillons d'envoyer des fichiers Word ou Excel, car de nombreuses personnes lisent leurs e-mails sur leur smartphone et ces fichiers ne peuvent souvent pas être ouverts (correctement). Certaines personnes n'ont pas non plus de licence pour Word/Excel, car ce n'est pas gratuit. Convertissez les fichiers au format PDF et envoyez-les."
+  },
+  "e7ff72f3-ca11-4a2d-b6f9-afeb344f5da6": {
+    "original": "Ben je zeker dat je de huidige inhoud wilt overschrijven?",
+    "translation": "Êtes-vous sûr de vouloir écraser le contenu actuel ?"
+  },
+  "6d679732-b845-4f36-8ed3-4024cd01f745": {
+    "original": "Overschrijven",
+    "translation": "Écraser"
+  },
+  "be3680ca-ee60-4d09-b2f4-346617949956": {
+    "original": "De huidige inhoud van je e-mail gaat verloren",
+    "translation": "Le contenu actuel de votre e-mail sera perdu"
+  },
+  "94bdc2a4-9ebb-42d2-a4e9-d674eb9aafef": {
+    "original": "Geen of slechte internetverbinding",
+    "translation": "Aucune connexion Internet ou mauvaise connexion Internet"
+  },
+  "008c80e4-a46f-4e1c-8f45-d383008b2e10": {
+    "original": "Activiteit toevoegen",
+    "translation": "Ajouter une activité"
+  },
+  "e4bff2f3-d273-4755-b617-f792a01f8325": {
+    "original": "Activiteit bewerken",
+    "translation": "Modifier une activité"
+  },
+  "e07de917-f506-4699-9198-de9d4cbb5ca9": {
+    "original": "Kies een organisator",
+    "translation": "Choisissez un organisateur"
+  },
+  "382fab7a-2276-4aac-a785-7dac7dcc2b20": {
+    "original": "De locatie is verplicht voor deze soort activiteit.",
+    "translation": "L'emplacement est obligatoire pour ce type d'activité."
+  },
+  "222eb3ab-1e8d-4530-9636-0bf5525a9159": {
+    "original": "Kies minstens één leeftijdsgroep.",
+    "translation": "Choisissez au moins un groupe d'âge."
+  },
+  "663a1f20-3b21-4e8d-bb21-530918648af1": {
+    "original": "Ben je zeker dat je deze melding wilt verwijderen?",
+    "translation": "Êtes-vous sûr de vouloir supprimer ce message ?"
+  },
+  "37907821-2e63-4f33-9ae6-db1b0d82f086": {
+    "original": "Ja, verwijderen",
+    "translation": "Oui, supprimer"
+  },
+  "988f9fce-a36a-44b5-8df6-5d9ff9eaa694": {
+    "original": "Je kan dit niet ongedaan maken",
+    "translation": "Vous ne pouvez pas annuler cette action"
+  },
+  "3074ee0a-4531-47d5-a167-d058d8fc2c96": {
+    "original": "Ben je zeker dat je deze melding terug naar klad wilt verplaatsen?",
+    "translation": "Êtes-vous sûr de vouloir replacer ce message dans les brouillons ?"
   }
 }
