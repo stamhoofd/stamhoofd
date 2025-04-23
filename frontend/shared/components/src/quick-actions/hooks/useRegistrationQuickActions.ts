@@ -13,11 +13,11 @@ import { getAllMemberSteps } from '../../members/classes/steps';
 import { useNavigationActions } from '../../types/NavigationActions';
 import { QuickAction, QuickActions } from '../classes/QuickActions';
 
+import { useNavigate } from '@simonbackx/vue-app-navigation';
 import cartSvg from '@stamhoofd/assets/images/illustrations/cart.svg';
 import emailWarningSvg from '@stamhoofd/assets/images/illustrations/email-warning.svg';
 import missingDataSvg from '@stamhoofd/assets/images/illustrations/missing-data.svg';
 import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstanding-amount.svg';
-import { useNavigate } from '@simonbackx/vue-app-navigation';
 import { useVisibilityChange } from '../../composables';
 
 export function useRegistrationQuickActions(): QuickActions {
@@ -80,7 +80,7 @@ export function useRegistrationQuickActions(): QuickActions {
     // Load outstanding amount
     console.log('Load outstanding balance setup');
     const outstandingBalance = ref(null) as Ref<PayableBalanceCollection | null>;
-    let lastLoadedBalance = new Date(0)
+    let lastLoadedBalance = new Date(0);
 
     // Fetch balance
     async function updateBalance() {
@@ -150,8 +150,8 @@ export function useRegistrationQuickActions(): QuickActions {
             for (const member of membersWithMissingData.value) {
                 arr.push({
                     illustration: missingDataSvg,
-                    title: `Vul ontbrekende gegevens aan van ${member.member.patchedMember.firstName}`,
-                    description: `Enkele gegevens van ${member.member.patchedMember.firstName} ontbreken. Vul deze aan.`,
+                    title: $t(`b9bac60d-1fd8-43e7-9c9d-4b9b5227f9d6`, { member: member.member.patchedMember.firstName }),
+                    description: $t(`77e44908-5498-4b91-9b4f-8e55cb282dc5`, { member: member.member.patchedMember.firstName }),
                     action: () => fillInMemberMissingData(member.member),
                 });
             }
@@ -160,8 +160,11 @@ export function useRegistrationQuickActions(): QuickActions {
                 // Het e-mailadres van dit account is niet toegevoegd bij
                 arr.push({
                     illustration: emailWarningSvg,
-                    title: `Voeg e-mailadres toe van ${member.patchedMember.firstName}`,
-                    description: `Voeg het e-mailadres waarmee je inlogt (${user.value?.email}) toe bij ${member.patchedMember.details.firstName}, anders wordt jouw account losgekoppeld van dit lid. Of wijzig het e-mailadres waarmee je inlogt.`,
+                    title: $t(`69385e1a-413f-4583-9061-67072d0742b9`, { member: member.patchedMember.firstName }),
+                    description: $t(`9526c69d-cdbf-4c90-ae2b-a7a274e42c3c`, {
+                        email: user.value?.email ?? '',
+                        member: member.patchedMember.details.firstName,
+                    }),
                     action: () => checkAllMemberData(member),
                 });
             }

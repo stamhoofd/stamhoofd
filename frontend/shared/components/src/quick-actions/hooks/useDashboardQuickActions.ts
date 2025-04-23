@@ -99,7 +99,7 @@ export function useDashboardQuickActions(): QuickActions {
                 arr.push({
                     illustration: outstandingAmountSvg,
                     title: $t(`adabf246-d27a-4a35-9881-d86860213b24`) + ' ' + organizationStatus.organization.name,
-                    description: $t('Je moet nog {price} betalen aan {name}, via het tabblad Boekhouding.', {
+                    description: $t('492cd771-4145-4249-a009-147e11a6904f', {
                         price: Formatter.price(open),
                         name: organizationStatus.organization.name,
                     }),

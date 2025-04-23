@@ -360,7 +360,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'minimum_days',
                     message: 'An event with this type has a minimum of ' + type.minimumDays + ' days',
-                    human: $t(`Een {name} moet minimum {days} duren`, {
+                    human: $t(`04ff85c0-eb98-46b8-975b-8fd136ddc49a`, {
                         name: type.name,
                         days: Formatter.pluralText(type.minimumDays, $t(`a6279389-a070-49c9-a085-bb312555e419`), $t(`fca0ce20-d696-4966-a50c-441f54f046c4`)),
                     }),
@@ -372,7 +372,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'maximum_days',
                     message: 'An event with this type has a maximum of ' + type.maximumDays + ' days',
-                    human: $t(`Een {name} mag maximaal {days} duren`, {
+                    human: $t(`a7d005aa-ceaa-4323-8fac-a02fce174023`, {
                         name: type.name,
                         days: Formatter.pluralText(type.maximumDays, $t(`a6279389-a070-49c9-a085-bb312555e419`), $t(`fca0ce20-d696-4966-a50c-441f54f046c4`)),
                     }),
