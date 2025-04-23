@@ -45,7 +45,7 @@ export function useContextOptions() {
     const $user = useUser();
     const $organization = useOrganization();
     const app = useAppContext();
-    const $t = useTranslate();
+    
     const platform = usePlatform();
 
     const getRegistrationOption = (): Option => {

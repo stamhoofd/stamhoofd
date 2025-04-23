@@ -102,7 +102,7 @@ const context = useContext();
 const owner = useRequestOwner();
 const organization = useRequiredOrganization();
 const emit = defineEmits(['patch:privateConfig', 'patch:config']);
-const $t = useTranslate();
+
 const country = useCountry();
 const errors = useErrors({ validator: props.validator });
 const present = usePresent();

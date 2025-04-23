@@ -287,7 +287,7 @@ const platformManager = usePlatformManager();
 const saving = ref(false);
 const charging = ref(false);
 let loading = false;
-const $t = useTranslate();
+
 
 const { externalOrganization: membershipOrganization, choose: $chooseMembershipOrganization, loading: loadingOrganization, errorBox: loadingOrganizationErrorBox } = useExternalOrganization(
     computed({

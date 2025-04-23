@@ -35,7 +35,7 @@ import EventTypeRow from './components/EventTypeRow.vue';
 const errors = useErrors();
 const pop = usePop();
 const present = usePresent();
-const $t = useTranslate();
+
 const platform = usePlatform();
 const platformManager = usePlatformManager();
 

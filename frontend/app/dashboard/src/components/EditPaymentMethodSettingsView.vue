@@ -138,7 +138,7 @@ const props = withDefaults(
 const { patched, hasChanges, addPatch, patch } = usePatch(props.configuration);
 const errors = useErrors();
 const saving = ref(false);
-const $t = useTranslate();
+
 const pop = usePop();
 const organization = useRequiredOrganization();
 const auth = useAuth();

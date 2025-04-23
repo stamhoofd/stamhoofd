@@ -80,7 +80,7 @@ function addPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<LoginMethodC
 
 const errors = useErrors();
 const pop = usePop();
-const $t = useTranslate();
+
 
 const saving = ref(false);
 

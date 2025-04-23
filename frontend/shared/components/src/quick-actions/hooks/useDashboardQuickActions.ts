@@ -25,7 +25,7 @@ export function useDashboardQuickActions(): QuickActions {
     const owner = useRequestOwner();
     const errors = useErrors();
     const auth = useAuth();
-    const $t = useTranslate();
+    
     const platform = usePlatform();
 
     // Load outstanding amount

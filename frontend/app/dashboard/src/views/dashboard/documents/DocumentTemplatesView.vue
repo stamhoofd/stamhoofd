@@ -66,7 +66,7 @@ const organization = useRequiredOrganization();
 const requestOwner = useRequestOwner();
 const context = useContext();
 const present = usePresent();
-const $t = useTranslate();
+
 const enabled = useFeatureFlag()('documents');
 
 onMounted(() => {

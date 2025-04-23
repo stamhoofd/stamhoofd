@@ -28,7 +28,7 @@ const props = withDefaults(
 const model = defineModel<string[] | null>({ required: true });
 const platform = usePlatform();
 const errors = useErrors({ validator: props.validator });
-const $t = useTranslate();
+
 
 const defaultAgeGroups = computed(() => platform.value.config.defaultAgeGroups);
 

@@ -494,7 +494,7 @@ const feature = useFeatureFlag();
 const stripeWarnings = computed(() => {
     return stripeAccounts.value.flatMap(a => a.warning ? [a.warning] : []);
 });
-const $t = useTranslate();
+
 const salesDisabled = useSalesDisabled();
 const membersPackage = useMembersPackage();
 loadStripeAccounts(null).catch(console.error);

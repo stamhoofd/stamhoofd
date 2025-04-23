@@ -100,7 +100,7 @@ const organizationManager = useOrganizationManager();
 const owner = useRequestOwner();
 const pop = usePop();
 const platformManager = usePlatformManager();
-const $t = useTranslate();
+
 const name = computed({
     get: () => patched.value.name,
     set: name => addPatch({ name }),

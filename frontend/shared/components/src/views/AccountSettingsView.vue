@@ -217,7 +217,7 @@ const errors = useErrors();
 const present = usePresent();
 const dismiss = useDismiss();
 const pop = usePop();
-const $t = useTranslate();
+
 const { patched, addPatch, hasChanges, patch } = usePatch($user.value!);
 
 const email = computed({

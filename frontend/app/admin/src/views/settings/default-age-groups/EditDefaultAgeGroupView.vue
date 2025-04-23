@@ -115,7 +115,7 @@ const props = defineProps<{
 }>();
 const title = computed(() => props.isNew ? $t('9cff0038-a8c2-49bd-9353-fab8308a83ad') : $t('b486463a-3a65-4fca-b7cb-e3e93b0cfe4b'));
 const pop = usePop();
-const $t = useTranslate();
+
 const platform = usePlatform();
 const membershipTypes = computed(() => platform.value.config.membershipTypes.filter(t => t.behaviour === PlatformMembershipTypeBehaviour.Period));
 

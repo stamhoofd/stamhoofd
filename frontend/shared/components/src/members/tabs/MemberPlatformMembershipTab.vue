@@ -120,7 +120,7 @@ const props = defineProps<{
     member: PlatformMember;
 }>();
 
-const $t = useTranslate();
+
 const present = usePresent();
 const platformFamilyManager = usePlatformFamilyManager();
 const deletingMemberships = ref(new Set());

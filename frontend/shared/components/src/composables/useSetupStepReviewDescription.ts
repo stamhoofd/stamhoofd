@@ -3,7 +3,7 @@ import { SetupStepReview } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
 export function useSetupStepReviewDescription(): { getDescription: (review: SetupStepReview | null, short?: boolean, textIfNotReviewed?: string) => string } {
-    const $t = useTranslate();
+    
 
     function getDescription(review: SetupStepReview | null, short = false, textIfNotReviewed = $t('586cb220-498a-496a-8db5-89a4f10ba3df')): string {
         if(review) {

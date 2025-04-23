@@ -32,7 +32,7 @@ const props = withDefaults(
 const errors = useErrors();
 const { hasChanges, patched, addPatch, patch } = props.viewModel.usePatch();
 const saving = ref(false);
-const $t = useTranslate();
+
 const pop = usePop();
 const { save: saveModel } = props.viewModel.useSave();
 const navigationActions = useNavigationActions();

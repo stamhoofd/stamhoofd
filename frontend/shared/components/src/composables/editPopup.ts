@@ -8,7 +8,7 @@ export function useEditPopup<T extends AutoEncoder>({errors, saveHandler, delete
     const pop = usePop();
     const saving = ref(false);
     const deleting = ref(false);
-    const $t = useTranslate();
+    
     const {patched, hasChanges, addPatch, patch} = usePatch(toPatch);
 
     const save = async () => {

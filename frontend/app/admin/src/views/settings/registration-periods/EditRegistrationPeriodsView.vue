@@ -55,7 +55,7 @@ import RegistrationPeriodRow from './components/RegistrationPeriodRow.vue';
 const errors = useErrors();
 const pop = usePop();
 const present = usePresent();
-const $t = useTranslate();
+
 const context = useContext();
 const platform = usePlatform();
 const platformManager = usePlatformManager();

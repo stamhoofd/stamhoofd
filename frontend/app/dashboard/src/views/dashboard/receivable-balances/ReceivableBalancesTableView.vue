@@ -22,7 +22,7 @@ import { computed, Ref, ref } from 'vue';
 import { useSelectableWorkbook } from './getSelectableWorkbook';
 
 type ObjectType = ReceivableBalance;
-const $t = useTranslate();
+
 const present = usePresent();
 const owner = useRequestOwner();
 const platform = usePlatform();

@@ -229,7 +229,7 @@ export function useRegisterItemFilterBuilders() {
 export function useAdvancedRegistrationsUIFilterBuilders() {
     const $platform = usePlatform();
     const $user = useUser();
-    const $t = useTranslate();
+    
     const manager = usePlatformManager();
     const owner = useRequestOwner();
     const loading = ref(true);
@@ -357,7 +357,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
 export function useAdvancedPlatformMembershipUIFilterBuilders() {
     const $platform = usePlatform();
     const $user = useUser();
-    const $t = useTranslate();
+    
     const manager = usePlatformManager();
     const owner = useRequestOwner();
     const loading = ref(true);
@@ -587,7 +587,7 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
 export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
     const $platform = usePlatform();
     const $user = useUser();
-    const $t = useTranslate();
+    
     const { loading, filterBuilders: registrationFilters } = useAdvancedRegistrationsUIFilterBuilders();
     const financialSupportSettings = useFinancialSupportSettings();
     const auth = useAuth();
@@ -1326,7 +1326,7 @@ const organizationMemberUIFilterBuilders: UIFilterBuilders = [
 ];
 
 export function useGetOrganizationUIFilterBuilders() {
-    const $t = useTranslate();
+    
     const platform = usePlatform();
 
     const setupStepFilterNameMap: Record<SetupStepType, string> = {
@@ -1503,7 +1503,7 @@ export function useGetOrganizationUIFilterBuilders() {
 }
 
 export function getOrganizationUIFilterBuildersForTags(platform: Platform) {
-    const $t = useTranslate();
+    
 
     const all: UIFilterBuilder[] = [];
 

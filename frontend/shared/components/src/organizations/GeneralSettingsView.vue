@@ -118,7 +118,7 @@ const saving = ref(false);
 const pop = usePop();
 const present = usePresent();
 const { patched, hasChanges, addPatch, patch } = usePatch(computed(() => organizationManager.value.organization));
-const $t = useTranslate();
+
 const { $overrideIsDone, $hasChanges: $hasReviewChanges, save: saveReview, $reviewCheckboxData } = useReview(SetupStepType.Companies);
 
 const hasSomeChanges = computed(() => {

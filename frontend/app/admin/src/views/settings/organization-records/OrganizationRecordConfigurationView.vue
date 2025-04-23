@@ -33,7 +33,7 @@ const saving = ref(false);
 
 const pop = usePop();
 
-const $t = useTranslate();
+
 const title = computed(() => $t('e6405d38-2bd8-4e24-8e35-24f4daea2a37'));
 const platform = usePlatform();
 

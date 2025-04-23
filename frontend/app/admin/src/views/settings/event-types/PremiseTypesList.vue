@@ -26,7 +26,7 @@ import PremiseTypeRow from './components/PremiseTypeRow.vue';
 
 const errors = useErrors();
 const present = usePresent();
-const $t = useTranslate();
+
 
 const props = defineProps<{
     addArrayPatch: (value: PatchableArrayAutoEncoder<PlatformPremiseType>) => void;

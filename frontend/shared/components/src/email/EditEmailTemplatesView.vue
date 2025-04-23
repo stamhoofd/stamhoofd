@@ -138,7 +138,7 @@ const organization = useOrganization();
 const present = usePresent();
 const pop = usePop();
 const saving = ref(false);
-const $t = useTranslate();
+
 loadTemplates().catch(console.error);
 
 const tabItems = props.onSelect

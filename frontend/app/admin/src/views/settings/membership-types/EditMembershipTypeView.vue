@@ -95,7 +95,7 @@ import PlatformMembershipTypeConfigRow from './components/PlatformMembershipType
 const errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
-const $t = useTranslate();
+
 const platformManager = usePlatformManager();
 const owner = useRequestOwner();
 const loading = ref(false);

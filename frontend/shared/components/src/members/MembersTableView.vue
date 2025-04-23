@@ -66,7 +66,7 @@ const estimatedRows = computed(() => {
 });
 
 const app = useAppContext();
-const $t = useTranslate();
+
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const auth = useAuth();
 const organization = useOrganization();
