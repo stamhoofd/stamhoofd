@@ -39,7 +39,7 @@ export const RegistrationLogger = new ModelLogger(Registration, {
             })],
             ['g', AuditLogReplacement.create({
                 id: data.group.id,
-                value: data.group.settings.name,
+                value: data.group.settings.name.toString(),
                 type: AuditLogReplacementType.Group,
             })],
         ]);

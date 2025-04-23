@@ -206,14 +206,14 @@ export class I18n {
         return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     }
 
-    replace(text: string, replace?: Record<string, string>) {
+    replace(text: string, replace?: Record<string, string | { toString(): string }>) {
         if (!replace) {
             return text;
         }
         for (const key in replace) {
             if (replace.hasOwnProperty(key)) {
                 const value = replace[key];
-                text = text.replace(new RegExp('{' + this.escapeRegex(key) + '}', 'g'), value);
+                text = text.replace(new RegExp('{' + this.escapeRegex(key) + '}', 'g'), value.toString());
             }
         }
         return text;

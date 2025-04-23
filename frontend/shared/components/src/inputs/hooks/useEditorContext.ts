@@ -1,4 +1,5 @@
-import { TranslatedString } from '@stamhoofd/structures';
+import { languages } from '@stamhoofd/locales';
+import { Language, TranslatedString } from '@stamhoofd/structures';
 import { inject, onBeforeUnmount, provide, reactive, Ref, watch } from 'vue';
 
 export class TranslateableComponent {
@@ -10,6 +11,43 @@ export class EditorContext {
 
     get enabled() {
         return this.translateableComponents.size > 0;
+    }
+
+    hasLanguage(language: Language) {
+        for (const component of this.translateableComponents) {
+            if (component.latestValue && component.latestValue.getIfExists(language)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    isComplete(language: Language) {
+        const count = this.getLanguageCount(language);
+        const max = this.getMaximumLanguageCount();
+
+        return count === max;
+    }
+
+    getLanguageCount(language: Language) {
+        let c = 0;
+        for (const component of this.translateableComponents) {
+            if (component.latestValue && component.latestValue.getIfExists(language)) {
+                c += 1;
+            }
+        }
+        return c;
+    }
+
+    getMaximumLanguageCount() {
+        let max = 0;
+        for (const language of languages) {
+            const count = this.getLanguageCount(language);
+            if (count > max) {
+                max = count;
+            }
+        }
+        return max;
     }
 }
 

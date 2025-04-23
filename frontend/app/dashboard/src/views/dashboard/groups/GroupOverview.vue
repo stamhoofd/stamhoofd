@@ -214,7 +214,7 @@ const props = defineProps<{
 }>();
 
 const isPublic = computed(() => props.group.isPublic(props.period.availableCategories));
-const title = computed(() => props.group.settings.name);
+const title = computed(() => props.group.settings.name.toString());
 const isArchive = computed(() => props.group.status === GroupStatus.Archived);
 const isOpen = computed(() => !props.group.closed);
 const auth = useAuth();

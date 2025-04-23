@@ -83,7 +83,7 @@ const groups = computed(() => {
     }
     return p.adminCategoryTree.getAllGroups().filter(g => g.type === GroupType.Membership).map(group => NamedObject.create({
         id: group.id,
-        name: group.settings.name,
+        name: group.settings.name.toString(),
         description: p.period.nameShort,
     }));
 });

@@ -72,7 +72,7 @@ const groups = computed(() => {
     return periods.value.organizationPeriods.filter(p => visiblePeriodIds.value.includes(p.period.id)).flatMap((p) => {
         return p.adminCategoryTree.getAllGroups().filter(g => g.type === GroupType.Membership).map(group => NamedObject.create({
             id: group.id,
-            name: group.settings.name,
+            name: group.settings.name.toString(),
             description: p.period.nameShort,
         }));
     });

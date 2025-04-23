@@ -76,6 +76,7 @@ import STToolbar from './STToolbar.vue';
 import { useKeyDown } from '../hooks';
 import { defineEditorContext } from '../inputs/hooks/useEditorContext';
 import { EditorLanguageButton } from '../inputs';
+import { TranslatedString } from '@stamhoofd/structures';
 
 withDefaults(
     defineProps<{
@@ -84,7 +85,7 @@ withDefaults(
         errorBox?: ErrorBox | null;
         deleting?: boolean;
         disabled?: boolean;
-        title?: string;
+        title?: string | TranslatedString;
         saveText?: string;
         saveIcon?: string | null;
         saveButtonClass?: string | null;

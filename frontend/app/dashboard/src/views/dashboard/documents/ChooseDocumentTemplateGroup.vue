@@ -156,7 +156,7 @@ async function selectGroup(group: Group) {
         await props.addGroup(DocumentTemplateGroup.create({
             group: NamedObject.create({
                 id: group.id,
-                name: group.settings.name,
+                name: group.settings.name.toString(),
                 description: group.type === GroupType.Membership ? period.value.period.name : (Formatter.dateRange(group.settings.startDate, group.settings.endDate)),
             }),
         }), navigationActions);

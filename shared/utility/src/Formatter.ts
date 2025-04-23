@@ -5,28 +5,27 @@ import { Sorter } from './Sorter';
 export class Formatter {
     static timezone = 'Europe/Brussels';
 
-    static removeAccents(name: string): string {
-        name = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        return name;
+    static removeAccents(name: StringLike): string {
+        return name.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
 
-    static emailSenderName(name: string): string {
+    static emailSenderName(name: StringLike): string {
         return this.removeAccents(name).replace(/[^A-Za-z0-9-_]+/g, ' ').trim();
     }
 
-    static slug(name: string): string {
+    static slug(name: StringLike): string {
         return this.removeAccents(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
     }
 
-    static slugEmail(name: string): string {
+    static slugEmail(name: StringLike): string {
         return this.removeAccents(name).toLowerCase().replace(/[^a-z0-9_]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
     }
 
-    static fileSlug(name: string): string {
+    static fileSlug(name: StringLike): string {
         return this.removeAccents(name).replace(/[^A-Za-z0-9-]+/g, ' ').trim();
     }
 
-    static removeDuplicateSpaces(name: string): string {
+    static removeDuplicateSpaces(name: StringLike): string {
         return name.replace(/\s+/, ' ');
     }
 
@@ -433,11 +432,11 @@ export class Formatter {
         return this.price(value);
     }
 
-    static capitalizeFirstLetter(string: string) {
+    static capitalizeFirstLetter(string: StringLike) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
-    static capitalizeWords(string: string) {
+    static capitalizeWords(string: StringLike) {
         return string.split(' ').map(s => this.capitalizeFirstLetter(s)).join(' ');
     }
 
@@ -515,7 +514,7 @@ export class Formatter {
         return $t('8abddd1b-0359-42fa-ab4d-707f39d84852', { number: number.toString() });
     }
 
-    static pluralText(num: number, singular: string, plural: string): string {
+    static pluralText(num: number, singular: StringLike, plural: StringLike): string {
         if (num === 1) {
             return $t('77477737-3b6b-4e1b-9fd8-006981cf53eb', { singular });
         }
@@ -531,7 +530,7 @@ export class Formatter {
         return this.joinLast(firstNames, ', ', ' ' + $t('6a156458-b396-4d0f-b562-adb3e38fc51b') + ' ') + (lastNames.length > 0 ? (' ' + lastNames.join('-')) : '');
     }
 
-    static firstLetters(str: string, maxLength: number) {
+    static firstLetters(str: StringLike, maxLength: number) {
         if (!str) {
             return '';
         }

@@ -1,5 +1,5 @@
 import { Factory } from '@simonbackx/simple-database';
-import { GroupPrice, GroupSettings, GroupType, ReduceablePrice } from '@stamhoofd/structures';
+import { GroupPrice, GroupSettings, GroupType, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
 
 import { RegistrationPeriod } from '../models';
 import { Group } from '../models/Group';
@@ -32,7 +32,7 @@ export class GroupFactory extends Factory<Options, Group> {
         }
 
         group.settings = GroupSettings.create({
-            name: 'Group name',
+            name: new TranslatedString('Group name'),
             startDate: new Date(new Date().getTime() - 10 * 1000),
             endDate: new Date(new Date().getTime() + 10 * 1000),
             registrationStartDate: new Date(new Date().getTime() - 10 * 1000),

@@ -16,7 +16,7 @@
         <h3 class="style-title-list">
             <span>{{ group.settings.name }}</span>
         </h3>
-        <p v-if="defaultAgeGroup && group.settings.name !== defaultAgeGroup && app === 'admin'" class="style-description-small" v-text="defaultAgeGroup" />
+        <p v-if="defaultAgeGroup && group.settings.name.toString() !== defaultAgeGroup && app === 'admin'" class="style-description-small" v-text="defaultAgeGroup" />
 
         <p v-if="registration.description" class="style-description-small pre-wrap" v-text="registration.description" />
 

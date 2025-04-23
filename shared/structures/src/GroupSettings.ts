@@ -295,8 +295,8 @@ export class GroupDefaultEventTime extends AutoEncoder {
 }
 
 export class GroupSettings extends AutoEncoder {
-    @field({ decoder: StringDecoder })
-    name = '';
+    @field({ decoder: TranslatedStringDecoder })
+    name = new TranslatedString();
 
     @field({ decoder: TranslatedStringDecoder })
     description = new TranslatedString();

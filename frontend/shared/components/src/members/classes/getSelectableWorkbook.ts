@@ -22,7 +22,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                 new SelectableColumn({
                     id: `groups.${group.id}.price`,
                     name: $t(`ae21b9bf-7441-4f38-b789-58f34612b7af`),
-                    category: group.settings.name,
+                    category: group.settings.name.toString(),
                 }),
             );
         }
@@ -32,7 +32,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                 new SelectableColumn({
                     id: `groups.${group.id}.optionMenu.${menu.id}`,
                     name: menu.name,
-                    category: group.settings.name,
+                    category: group.settings.name.toString(),
                 }),
             );
 
@@ -42,7 +42,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                         new SelectableColumn({
                             id: `groups.${group.id}.optionMenu.${menu.id}.${option.id}.amount`,
                             name: menu.name + ' ' + $t(`c8f957b8-9255-44ed-973e-7c3cd1636137`) + option.name + '"',
-                            category: group.settings.name,
+                            category: group.settings.name.toString(),
                         }),
                     );
                 }
@@ -57,7 +57,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                     new SelectableColumn({
                         id: `groups.${group.id}.recordAnswers.${record.id}`,
                         name: recordCategory.name + ' → ' + record.name,
-                        category: group.settings.name,
+                        category: group.settings.name.toString(),
                     }),
                 );
             }

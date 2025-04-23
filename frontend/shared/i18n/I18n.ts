@@ -63,7 +63,7 @@ export class I18n {
         return this.$t(key, replace);
     }
 
-    $t(key: string, replace?: Record<string, string>): string {
+    $t(key: string, replace?: Record<string, string | { toString(): string }>): string {
         return this.replace(this.messages?.get(key) ?? key, replace);
     }
 
@@ -71,13 +71,13 @@ export class I18n {
         return string.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
     }
 
-    replace(text: string, replace?: Record<string, string>): string {
+    replace(text: string, replace?: Record<string, string | { toString(): string }>): string {
         if (!replace) {
             return text;
         }
         for (const key in replace) {
             const value = replace[key];
-            text = text.replace(new RegExp('{' + this.escapeRegex(key) + '}', 'g'), value);
+            text = text.replace(new RegExp('{' + this.escapeRegex(key) + '}', 'g'), value.toString());
         }
         return text;
     }

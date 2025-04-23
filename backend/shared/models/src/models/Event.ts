@@ -1,6 +1,6 @@
 import { column } from '@simonbackx/simple-database';
 import { QueryableModel } from '@stamhoofd/sql';
-import { EventMeta, Event as EventStruct, GroupType } from '@stamhoofd/structures';
+import { EventMeta, Event as EventStruct, GroupType, TranslatedString } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { Group } from './Group';
 
@@ -87,7 +87,7 @@ export class Event extends QueryableModel {
 
         if (group.type === GroupType.EventRegistration) {
             // Don't change the name of the waiting list
-            group.settings.name = this.name;
+            group.settings.name = new TranslatedString(this.name);
             group.settings.eventId = this.id;
         }
 

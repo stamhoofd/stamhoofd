@@ -2,10 +2,6 @@ import { Data, Decoder, Encodeable, EncodeContext, EnumDecoder, ObjectData, Patc
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Language } from './Language.js';
 
-type LanguageMap = {
-    [key in Language]?: string;
-};
-
 type LanguageMapPatch = {
     [key in Language]?: string | null;
 };
@@ -38,7 +34,7 @@ export class TranslatedStringPatch implements Encodeable, Patchable<TranslatedSt
     }
 }
 
-export class TranslatedString implements Encodeable, Patchable<TranslatedStringPatch> {
+export class TranslatedString implements Encodeable, Patchable<TranslatedStringPatch>, StringLikeObject {
     translations: LanguageMap;
 
     constructor(translations: LanguageMap | string = '') {
@@ -82,6 +78,34 @@ export class TranslatedString implements Encodeable, Patchable<TranslatedStringP
 
     toLocaleUpperCase() {
         return this.toString().toLocaleUpperCase();
+    }
+
+    substr(start: number, length?: number) {
+        return this.toString().substr(start, length);
+    }
+
+    substring(start: number, end?: number) {
+        return this.toString().substring(start, end);
+    }
+
+    normalize(form?: string) {
+        return this.toString().normalize(form);
+    }
+
+    replace(searchValue: string | RegExp, replaceValue: string) {
+        return this.toString().replace(searchValue, replaceValue);
+    }
+
+    charAt(index: number) {
+        return this.toString().charAt(index);
+    }
+
+    slice(start: number, end?: number) {
+        return this.toString().slice(start, end);
+    }
+
+    split(separator: string | RegExp, limit?: number): string[] {
+        return this.toString().split(separator, limit);
     }
 
     patch(patch: string | LanguageMapPatch | TranslatedStringPatch | TranslatedString): this {

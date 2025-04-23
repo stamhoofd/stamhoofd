@@ -11,31 +11,31 @@
 </template>
 
 <script lang="ts">
-import { Group } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
-import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
+import { Group } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 
 @Component
 export default class GroupAvatar extends VueComponent {
     @Prop({ required: true })
-        group!: Group
+    group!: Group;
 
     @Prop({ default: false })
-        allowEmpty!: boolean
+    allowEmpty!: boolean;
 
     get letters() {
-        return Formatter.firstLetters(this.group.settings.name, 2)
+        return Formatter.firstLetters(this.group.settings.name, 2);
     }
 
     get logoSrc() {
-        return (this.group.settings.squarePhoto)?.getPathForSize(24, 24)
+        return (this.group.settings.squarePhoto)?.getPathForSize(24, 24);
     }
 
     get logoSrcSet() {
         if (!this.group.settings.squarePhoto) {
-            return null
+            return null;
         }
-        return (this.group.settings.squarePhoto)!.getPathForSize(24, 24) + " 1x, "+(this.group.settings.squarePhoto)!.getPathForSize(24*2, 24*2)+" 2x, "+(this.group.settings.squarePhoto)!.getPathForSize(24*3, 24*3)+" 3x"
+        return (this.group.settings.squarePhoto)!.getPathForSize(24, 24) + ' 1x, ' + (this.group.settings.squarePhoto)!.getPathForSize(24 * 2, 24 * 2) + ' 2x, ' + (this.group.settings.squarePhoto)!.getPathForSize(24 * 3, 24 * 3) + ' 3x';
     }
 }
 </script>
