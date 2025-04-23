@@ -66,7 +66,7 @@ import SeatSelectionBox from './SeatSelectionBox.vue';
         priceChange: Formatter.priceChange.bind(Formatter),
         priceFree: (p: number) => {
             if (p === 0) {
-                return 'Gratis';
+                return $t(`Gratis`);
             }
             return Formatter.price(p);
         },
@@ -107,18 +107,18 @@ export default class ChooseSeatsView extends Mixins(NavigationMixin) {
 
     get title() {
         if (this.remainingAmount === 0) {
-            return 'Bevestig je plaatsen';
+            return $t(`Bevestig je plaatsen`);
         }
 
         if (this.remainingAmount === this.amount) {
-            return `Kies ${Formatter.pluralText(this.remainingAmount, 'plaats', 'plaatsen')}`;
+            return `Kies ${Formatter.pluralText(this.remainingAmount, $t(`plaats`), $t(`plaatsen`))}`;
         }
 
-        return `Kies nog ${Formatter.pluralText(this.remainingAmount, 'plaats', 'plaatsen')}`;
+        return `Kies nog ${Formatter.pluralText(this.remainingAmount, $t(`plaats`), $t(`plaatsen`))}`;
     }
 
     get description() {
-        return 'Kies in totaal ' + Formatter.pluralText(this.amount, 'plaats', 'plaatsen') + ' door de plaatsen één voor één aan te klikken. Je kan een plaats deselecteren door er nog eens op te klikken.';
+        return $t(`Kies in totaal`) + ' ' + Formatter.pluralText(this.amount, $t(`plaats`), $t(`plaatsen`)) + ' ' + $t(`door de plaatsen één voor één aan te klikken. Je kan een plaats deselecteren door er nog eens op te klikken.`);
     }
 
     get seatingPlanSection() {
@@ -197,7 +197,7 @@ export default class ChooseSeatsView extends Mixins(NavigationMixin) {
 
                 this.errorBox = new ErrorBox(new SimpleError({
                     code: 'adjusted',
-                    message: 'We hebben jouw gekozen plaatsen aangepast zodat er minder enkele plaatsen overblijven. Klik opnieuw op "Bevestigen" om verder te gaan.',
+                    message: $t(`We hebben jouw gekozen plaatsen aangepast zodat er minder enkele plaatsen overblijven. Klik opnieuw op "Bevestigen" om verder te gaan.`),
                 }));
                 return;
             }

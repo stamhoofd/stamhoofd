@@ -66,7 +66,7 @@ onMounted(() => {
 });
 
 function retry() {
-    if (confirm('Probeer alleen opnieuw als je zeker bent dat je niet hebt betaald! Anders moet je gewoon even wachten.')) {
+    if (confirm($t(`Probeer alleen opnieuw als je zeker bent dat je niet hebt betaald! Anders moet je gewoon even wachten.`))) {
         if (navigationController.value!.components.length > 1) {
             navigationActions.pop()?.catch(console.error);
         }

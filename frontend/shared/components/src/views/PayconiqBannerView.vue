@@ -93,7 +93,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin) {
     }
 
     async shouldNavigateAway() {
-        if (await CenteredMessage.confirm('Sluit dit alleen als je zeker bent dat je niet hebt betaald! Anders moet je gewoon even wachten.', 'Ik heb nog niet betaald')) {
+        if (await CenteredMessage.confirm($t(`Sluit dit alleen als je zeker bent dat je niet hebt betaald! Anders moet je gewoon even wachten.`), $t(`Ik heb nog niet betaald`))) {
             this.cancel();
             return true;
         }

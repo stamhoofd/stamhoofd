@@ -109,20 +109,20 @@ const hasNonPayconiq = computed(() => {
 function getName(paymentMethod: PaymentMethod): string {
     switch (paymentMethod) {
         case PaymentMethod.Payconiq: return 'Payconiq by Bancontact';
-        case PaymentMethod.Transfer: return 'Via overschrijving';
-        case PaymentMethod.DirectDebit: return 'Domiciliëring';
+        case PaymentMethod.Transfer: return $t(`Via overschrijving`);
+        case PaymentMethod.DirectDebit: return $t(`Domiciliëring`);
     }
     return PaymentMethodHelper.getNameCapitalized(paymentMethod, props.context);
 }
 
 function getDescription(paymentMethod: PaymentMethod): string {
     switch (paymentMethod) {
-        case PaymentMethod.Payconiq: return 'Betaal met de Payconiq by Bancontact app, de KBC-app, Belfius, BNP Paribas Fortis, ING-app, Fintro, Hello bank!, Argenta of Crelan app';
-        case PaymentMethod.Transfer: return 'Betaalbevestiging kan enkele dagen duren';
+        case PaymentMethod.Payconiq: return $t(`Betaal met de Payconiq by Bancontact app, de KBC-app, Belfius, BNP Paribas Fortis, ING-app, Fintro, Hello bank!, Argenta of Crelan app`);
+        case PaymentMethod.Transfer: return $t(`Betaalbevestiging kan enkele dagen duren`);
         case PaymentMethod.Bancontact: return props.organization.address.country === Country.Belgium ? '' : '';
-        case PaymentMethod.iDEAL: return props.organization.address.country === Country.Netherlands ? 'Meest gebruikte betaalmethode.' : '';
+        case PaymentMethod.iDEAL: return props.organization.address.country === Country.Netherlands ? $t(`Meest gebruikte betaalmethode.`) : '';
         case PaymentMethod.Unknown: return '';
-        case PaymentMethod.DirectDebit: return 'Betaalbevestiging kan 5 werkdagen duren';
+        case PaymentMethod.DirectDebit: return $t(`Betaalbevestiging kan 5 werkdagen duren`);
         case PaymentMethod.CreditCard: return '';
         case PaymentMethod.PointOfSale: return '';
     }

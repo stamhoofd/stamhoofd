@@ -286,16 +286,16 @@ const preventLeave = (event: BeforeUnloadEvent) => {
 
     if (props.type === 'registration') {
         // Chrome requires returnValue to be set
-        event.returnValue = 'Jouw inschrijving is al bevestigd! Je kan niet meer van betaalmethode veranderen.';
+        event.returnValue = $t(`Jouw inschrijving is al bevestigd! Je kan niet meer van betaalmethode veranderen.`);
 
         // This message is not visible on most browsers
-        return 'Jouw inschrijving is al bevestigd! Je kan niet meer van betaalmethode veranderen.';
+        return $t(`Jouw inschrijving is al bevestigd! Je kan niet meer van betaalmethode veranderen.`);
     }
     // Chrome requires returnValue to be set
-    event.returnValue = 'Jouw bestelling is al geplaatst! Als je je bestelling gaat aanpassen zal je een tweede bestelling plaatsen!';
+    event.returnValue = $t(`Jouw bestelling is al geplaatst! Als je je bestelling gaat aanpassen zal je een tweede bestelling plaatsen!`);
 
     // This message is not visible on most browsers
-    return 'Jouw bestelling is al geplaatst! Als je je bestelling gaat aanpassen zal je een tweede bestelling plaatsen!';
+    return $t(`Jouw bestelling is al geplaatst! Als je je bestelling gaat aanpassen zal je een tweede bestelling plaatsen!`);
 };
 
 onBeforeUnmount(() => {
@@ -352,10 +352,10 @@ async function generateQRCode() {
 
 function helpMe() {
     if (props.type === 'order') {
-        new CenteredMessage('Het lukt niet', 'Jouw bestelling is al geplaatst, probeer dus zeker niet opnieuw! Als het scannen niet lukt, kan je gewoon de overschrijving manueel uitvoeren via de vermelde gegevens. Het scannen van de QR-code is niet noodzakelijk, en werkt niet in elke bankapp. Dit is niet te verwarren met een online betaling, de QR-code neemt enkel de gegevens over in je app zodat je sneller zonder typefouten kan overschrijven.').addCloseButton().show();
+        new CenteredMessage($t(`Het lukt niet`), $t(`Jouw bestelling is al geplaatst, probeer dus zeker niet opnieuw! Als het scannen niet lukt, kan je gewoon de overschrijving manueel uitvoeren via de vermelde gegevens. Het scannen van de QR-code is niet noodzakelijk, en werkt niet in elke bankapp. Dit is niet te verwarren met een online betaling, de QR-code neemt enkel de gegevens over in je app zodat je sneller zonder typefouten kan overschrijven.`)).addCloseButton().show();
     }
     else {
-        new CenteredMessage('Het lukt niet', 'Jouw inschrijving is al in orde, probeer dus zeker niet opnieuw! Als het scannen niet lukt, kan je gewoon de overschrijving manueel uitvoeren via de vermelde gegevens. Het scannen van de QR-code is niet noodzakelijk, en werkt niet in elke bankapp. Dit is niet te verwarren met een online betaling, de QR-code neemt enkel de gegevens over in je app zodat je sneller zonder typefouten kan overschrijven.').addCloseButton().show();
+        new CenteredMessage($t(`Het lukt niet`), $t(`Jouw inschrijving is al in orde, probeer dus zeker niet opnieuw! Als het scannen niet lukt, kan je gewoon de overschrijving manueel uitvoeren via de vermelde gegevens. Het scannen van de QR-code is niet noodzakelijk, en werkt niet in elke bankapp. Dit is niet te verwarren met een online betaling, de QR-code neemt enkel de gegevens over in je app zodat je sneller zonder typefouten kan overschrijven.`)).addCloseButton().show();
     }
 }
 
