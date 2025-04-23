@@ -215,7 +215,7 @@ export class StripeHelper {
         if (!stripeAccount) {
             throw new SimpleError({
                 code: '',
-                message: 'Betaling via ' + PaymentMethodHelper.getName(payment.method) + ' is onbeschikbaar',
+                message: $t(`Betaling via {method} is onbeschikbaar`, { method: PaymentMethodHelper.getName(payment.method) }),
             });
         }
 
@@ -225,7 +225,7 @@ export class StripeHelper {
             throw new SimpleError({
                 code: 'minmum_amount',
                 message: 'The minimum amount for an online payment is € 0,50',
-                human: 'Het minimum bedrag voor een online betaling is € 0,50',
+                human: $t(`Het minimum bedrag voor een online betaling is € 0,50`),
             });
         }
 
@@ -267,7 +267,7 @@ export class StripeHelper {
             const paymentMethod = await stripe.paymentMethods.create({
                 type: payment.method.toLowerCase() as 'bancontact' | 'ideal',
                 billing_details: {
-                    name: payment.customer?.dynamicName || (customer.name.length > 2 ? customer.name : 'Onbekend'),
+                    name: payment.customer?.dynamicName || (customer.name.length > 2 ? customer.name : $t(`Onbekend`)),
                     email: payment.customer?.dynamicEmail || customer.email,
                     address: payment.customer?.company?.address
                         ? {
@@ -306,7 +306,7 @@ export class StripeHelper {
                 console.error('Stripe payment intent status is not requires_action', paymentIntent);
                 throw new SimpleError({
                     code: 'invalid_status',
-                    message: 'Betaling via ' + PaymentMethodHelper.getName(payment.method) + ' is onbeschikbaar',
+                    message: $t(`Betaling via`) + ' ' + PaymentMethodHelper.getName(payment.method) + ' ' + $t(`is onbeschikbaar`),
                 });
             }
 
@@ -347,7 +347,7 @@ export class StripeHelper {
                 throw new SimpleError({
                     code: 'invalid_price',
                     message: 'De totale prijs van de betaling komt niet overeen met de prijs van de items',
-                    human: 'Er ging iets mis bij het aanmaken van de betaling. Probeer opnieuw of gebruik een andere betaalmethode.',
+                    human: $t(`Er ging iets mis bij het aanmaken van de betaling. Probeer opnieuw of gebruik een andere betaalmethode.`),
                     statusCode: 500,
                 });
             }
@@ -389,7 +389,7 @@ export class StripeHelper {
                 console.error('Stripe session has no url', session);
                 throw new SimpleError({
                     code: 'invalid_status',
-                    message: 'Betaling via ' + PaymentMethodHelper.getName(payment.method) + ' is onbeschikbaar',
+                    message: $t(`Betaling via`) + ' ' + PaymentMethodHelper.getName(payment.method) + ' ' + $t(`is onbeschikbaar`),
                 });
             }
             paymentUrl = session.url;

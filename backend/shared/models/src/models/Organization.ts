@@ -201,7 +201,7 @@ export class Organization extends QueryableModel {
             throw new SimpleError({
                 code: 'archived',
                 message: 'This organization is archived',
-                human: 'Deze groep is gearchiveerd',
+                human: $t(`Deze groep is gearchiveerd`),
             });
         }
         return organization;
@@ -883,7 +883,7 @@ export class Organization extends QueryableModel {
             throw new SimpleError({
                 code: 'payment_provider_not_configured',
                 message: 'Payment provider not configured for ' + method,
-                human: 'Deze betaalmethode werd helaas niet volledig geconfigureerd. Probeer later even opnieuw, neem contact met ons op of kies een andere betaalmethode.',
+                human: $t(`Deze betaalmethode werd helaas niet volledig geconfigureerd. Probeer later even opnieuw, neem contact met ons op of kies een andere betaalmethode.`),
             });
         }
 

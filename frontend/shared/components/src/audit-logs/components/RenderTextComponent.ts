@@ -91,7 +91,7 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
                         'overflow': 'hidden',
                     },
                 }),
-                obj.value || 'Afbeelding',
+                obj.value || $t(`Afbeelding`),
             ]);
         }
 
@@ -102,7 +102,7 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
                 href: obj.id,
                 target: '_blank',
             }, [
-                obj.value || 'Bestand',
+                obj.value || $t(`Bestand`),
             ]);
         }
 
@@ -223,7 +223,7 @@ async function showHtml(html: string, context: Context) {
     const component = new ComponentWithProperties(NavigationController, {
         root: new ComponentWithProperties(SafeHtmlView, {
             html,
-            title: 'Tekst met opmaak',
+            title: $t(`Tekst met opmaak`),
         }),
     });
 
@@ -244,7 +244,7 @@ async function showPayment(paymentId: string, context: Context) {
                     limit: 1,
                 }));
                 if (payments.results.length === 0) {
-                    Toast.error('Betaling niet (meer) gevonden').show();
+                    Toast.error($t(`Betaling niet (meer) gevonden`)).show();
                     throw new Error('Payment not found');
                 }
                 return new ComponentWithProperties(PaymentView, {
@@ -271,7 +271,7 @@ async function showMember(memberId: string, context: Context) {
                     limit: 1,
                 }));
                 if (members.results.length === 0) {
-                    Toast.error('Lid niet (meer) gevonden').show();
+                    Toast.error($t(`Lid niet (meer) gevonden`)).show();
                     throw new Error('Member not found');
                 }
                 return new ComponentWithProperties(MemberSegmentedView, {
@@ -298,7 +298,7 @@ async function showEvent(eventId: string, context: Context) {
                     limit: 1,
                 }));
                 if (events.results.length === 0) {
-                    Toast.error('Activiteit niet meer gevonden').show();
+                    Toast.error($t(`Activiteit niet meer gevonden`)).show();
                     throw new Error('Event not found');
                 }
                 return new ComponentWithProperties(EventOverview, {
@@ -325,7 +325,7 @@ async function showOrganization(organizationId: string, context: Context) {
                     limit: 1,
                 }));
                 if (organizations.results.length === 0) {
-                    Toast.error('Organisatie niet meer gevonden').show();
+                    Toast.error($t(`Organisatie niet meer gevonden`)).show();
                     throw new Error('Event not found');
                 }
                 const OrganizationView = (await import('@stamhoofd/admin-frontend/src/views/organizations/OrganizationView.vue')).default;

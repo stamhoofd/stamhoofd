@@ -116,9 +116,9 @@ export class Order extends QueryableModel {
 
     generateBalanceDescription(webshop: Webshop) {
         if (!this.number) {
-            return 'Bestelling - ' + webshop.meta.name;
+            return $t(`Bestelling -`) + ' ' + webshop.meta.name;
         }
-        return 'Bestelling #' + this.number.toString() + ' - ' + webshop.meta.name;
+        return $t(`Bestelling #`) + this.number.toString() + ' - ' + webshop.meta.name;
     }
 
     /**
@@ -925,7 +925,7 @@ export class Order extends QueryableModel {
                 throw new SimpleError({
                     code: 'missing_iban',
                     message: 'Missing IBAN',
-                    human: 'Er is geen rekeningnummer ingesteld voor overschrijvingen. Contacteer de beheerder.',
+                    human: $t(`Er is geen rekeningnummer ingesteld voor overschrijvingen. Contacteer de beheerder.`),
                 });
             }
             payment.generateDescription(organization, this.number.toString(), this.getTransferReplacements());

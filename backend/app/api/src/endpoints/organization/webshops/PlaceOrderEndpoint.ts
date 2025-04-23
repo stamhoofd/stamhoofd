@@ -63,7 +63,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Webshop not found',
-                    human: 'Deze webshop bestaat niet (meer)',
+                    human: $t(`Deze webshop bestaat niet (meer)`),
                 });
             }
 
@@ -74,7 +74,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'not_authenticated',
                     message: 'Not authenticated',
-                    human: 'Je moet inloggen om een bestelling te kunnen plaatsen.',
+                    human: $t(`Je moet inloggen om een bestelling te kunnen plaatsen.`),
                     statusCode: 401,
                 });
             }
@@ -95,7 +95,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     throw new SimpleError({
                         code: 'too_many_emails_period',
                         message: 'Too many e-mails limited',
-                        human: 'Oeps! Om spam te voorkomen limiteren we het aantal test bestellingen die je per uur of dag kan plaatsen. Probeer over een uur opnieuw of schakel over naar een betaald abonnement.',
+                        human: $t(`Oeps! Om spam te voorkomen limiteren we het aantal test bestellingen die je per uur of dag kan plaatsen. Probeer over een uur opnieuw of schakel over naar een betaald abonnement.`),
                         field: 'recipients',
                     });
                 }
@@ -110,7 +110,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'duplicate_codes',
                     message: 'Duplicate usage of discount codes',
-                    human: 'Sommige kortingcodes werden dubbel toegepast op jouw bestelling. Kijk het even na, dit is niet toegestaan.',
+                    human: $t(`Sommige kortingcodes werden dubbel toegepast op jouw bestelling. Kijk het even na, dit is niet toegestaan.`),
                     field: 'cart.discountCodes',
                 });
             }
@@ -122,7 +122,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     throw new SimpleError({
                         code: 'invalid_code',
                         message: 'Invalid discount code',
-                        human: 'De kortingscode die je hebt toegevoegd is niet (meer) geldig',
+                        human: $t(`De kortingscode die je hebt toegevoegd is niet (meer) geldig`),
                         field: 'cart.discountCodes',
                     });
                 }
@@ -280,14 +280,14 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         if (!token) {
                             throw new SimpleError({
                                 code: '',
-                                message: 'Betaling via ' + PaymentMethodHelper.getName(payment.method) + ' is onbeschikbaar',
+                                message: $t(`Betaling via {method} is onbeschikbaar`, { method: PaymentMethodHelper.getName(payment.method) }),
                             });
                         }
                         const profileId = organization.privateMeta.mollieProfile?.id ?? await token.getProfileId(webshop.getHost());
                         if (!profileId) {
                             throw new SimpleError({
                                 code: '',
-                                message: 'Betaling via ' + PaymentMethodHelper.getName(payment.method) + ' is tijdelijk onbeschikbaar',
+                                message: $t(`Betaling via {method} is tijdelijk onbeschikbaar`, { method: PaymentMethodHelper.getName(payment.method) }),
                             });
                         }
                         const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
@@ -335,7 +335,9 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         if ((payment.status as any) === PaymentStatus.Failed) {
                             throw new SimpleError({
                                 code: 'payment_failed',
-                                message: 'Betaling via ' + PaymentMethodHelper.getName(payment.method) + ' is onbeschikbaar',
+                                message: $t(`Betaling via {method} is onbeschikbaar`, {
+                                    method: PaymentMethodHelper.getName(payment.method),
+                                }),
                             });
                         }
                     }
