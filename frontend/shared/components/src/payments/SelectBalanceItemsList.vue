@@ -79,7 +79,7 @@ const total = computed(() => {
 const priceBreakdown = computed(() => {
     return [
         {
-            name: $t(`Totaal`),
+            name: $t(`341172ee-281e-4458-aeb1-64ed5b2cc8bb`),
             price: total.value,
         },
     ];

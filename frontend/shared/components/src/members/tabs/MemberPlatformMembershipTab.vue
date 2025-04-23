@@ -157,7 +157,7 @@ function getMembershipsForPeriod(periodId: string) {
 }
 
 function getOrganizationName(membership: MemberPlatformMembership) {
-    return props.member.organizations.find(o => o.id === membership.organizationId)?.name ?? $t(`Onbekende groep`);
+    return props.member.organizations.find(o => o.id === membership.organizationId)?.name ?? $t(`eb6d556a-bcda-4ab4-ad39-3215b4734569`);
 }
 
 async function addMembership(period: RegistrationPeriod) {
@@ -177,7 +177,7 @@ async function deleteMembership(membership: MemberPlatformMembership) {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`Ben je zeker dat je deze aansluiting wilt verwijderen?`), $t(`Ja, verwijderen`))) {
+    if (!await CenteredMessage.confirm($t(`4ab30ed5-3e8e-43ca-b87e-dddf8dd8b5fe`), $t(`3e204a5f-3198-4125-ac32-fcf973e144b2`))) {
         return;
     }
 
@@ -196,7 +196,7 @@ async function deleteMembership(membership: MemberPlatformMembership) {
 
         await platformFamilyManager.isolatedPatch([props.member], patch, false);
 
-        Toast.success($t(`Aansluiting verwijderd`)).show();
+        Toast.success($t(`63b9a0c4-ee88-49b4-8609-dc014bc3e3a3`)).show();
     }
     catch (e) {
         Toast.fromError(e).show();
@@ -242,7 +242,7 @@ async function unlockMembership(membership: MemberPlatformMembership) {
 function getMembershipType(membership: MemberPlatformMembership) {
     return platform.value.config.membershipTypes.find(t => t.id === membership.membershipTypeId) ?? PlatformMembershipType.create({
         id: membership.membershipTypeId,
-        name: $t(`Onbekend`),
+        name: $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`),
     });
 }
 </script>

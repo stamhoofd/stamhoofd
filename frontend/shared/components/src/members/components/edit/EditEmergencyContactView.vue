@@ -65,8 +65,8 @@ const details = computed(() => props.member.patchedMember.details);
 const errors = useErrors();
 const pop = usePop();
 const loading = ref(false);
-const saveText = ref($t(`Opslaan`));
-const title = computed(() => !props.isNew ? `${patched.value.name || $t(`Noodcontactpersoon`)} bewerken` : $t(`Noodcontactpersoon toevoegen`));
+const saveText = ref($t(`bc6b2553-c28b-4e3b-aba3-4fdc2c23db6e`));
+const title = computed(() => !props.isNew ? `${patched.value.name || $t(`757f4504-e8c3-4188-a471-0d5a88c353ea`)} bewerken` : $t(`e01a065d-e946-4fe8-99bc-505c33b055f0`));
 
 const name = computed({
     get: () => patched.value.name,
@@ -93,7 +93,7 @@ async function save() {
         if (name.value.length < 2) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Vul de naam in`),
+                message: $t(`8edc8d31-c902-437c-8f0d-c4afbe52871c`),
                 field: 'name',
             }));
         }
@@ -101,7 +101,7 @@ async function save() {
         if (contactTitle.value.length < 2) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Vul een relatie in`),
+                message: $t(`2c3431a2-2a81-45ff-81d0-822e8fc31060`),
                 field: 'title',
             }));
         }
@@ -124,7 +124,7 @@ async function save() {
         if (props.isNew) {
             const minorMembers = props.member.family.members.filter(m => m.id !== props.member.id);
 
-            if (minorMembers.length > 0 && !await CenteredMessage.confirm($t(`Wil je deze noodcontactpersoon bij alle gezinsleden toevoegen?`), $t(`Overal toevoegen`), $t(`Je kan deze noodcontactpersoon ook automatisch toevoegen bij`) + ' ' + Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t(`en`) + ' ') + '.', $t(`Enkel hier`), false)) {
+            if (minorMembers.length > 0 && !await CenteredMessage.confirm($t(`7e6694ee-7a21-41a3-8df0-dc9e0df35b2f`), $t(`290ab18c-dc62-4d85-a669-dd83c77758e7`), $t(`0e7e79db-62f1-4be9-9464-1552fa6c1216`) + ' ' + Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') + '.', $t(`fe636d8c-6506-4c8b-bb79-9c20fb1bc54d`), false)) {
                 props.member.addEmergencyContact(patched.value);
             }
             else {
@@ -150,7 +150,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value && !loading.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
+    return await CenteredMessage.confirm($t(`c9111e95-2f59-4164-b0af-9fbf434bf6dd`), $t(`de41b0f3-1297-4058-b390-3bfb99e3d4e0`));
 }
 
 defineExpose({

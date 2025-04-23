@@ -82,38 +82,38 @@ if (props.payment && names.length === 0 && waitingListNames.length === 0) {
 }
 
 const title = computed(() => {
-    let t = $t(`Hoera!`) + ' ';
+    let t = $t(`2c11315f-96a5-424d-a1e0-f24f2abf5e8a`) + ' ';
 
     if (names.length > 0) {
         if (names.length > 3) {
-            t += Formatter.joinLast([...names.slice(0, 2), (names.length - 2) + ' ' + $t(`andere leden`)], ', ', ' ' + $t(`en`) + ' ') + ' ' + $t(`zijn ingeschreven`);
+            t += Formatter.joinLast([...names.slice(0, 2), (names.length - 2) + ' ' + $t(`6e6fec93-89e1-4a60-8f96-22936f2f68d7`)], ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') + ' ' + $t(`6a96aea2-95ce-4b01-91ff-d0f83333c951`);
         }
         else if (names.length > 1) {
-            t += Formatter.joinLast(names, ', ', ' ' + $t(`en`) + ' ') + ' ' + $t(`zijn ingeschreven`);
+            t += Formatter.joinLast(names, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') + ' ' + $t(`6a96aea2-95ce-4b01-91ff-d0f83333c951`);
         }
         else {
-            t += names.join('') + ' ' + $t(`is ingeschreven`);
+            t += names.join('') + ' ' + $t(`4ca47c6a-ca4e-4f63-b303-b45536072957`);
         }
     }
 
     if (waitingListNames.length > 0) {
         if (names.length > 0) {
-            t += ' ' + $t(`en`) + ' ';
+            t += ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ';
         }
 
         if (waitingListNames.length > 3) {
-            t += Formatter.joinLast([...waitingListNames.slice(0, 2), (waitingListNames.length - 2) + ' ' + $t(`andere leden`)], ', ', ' ' + $t(`en`) + ' ') + ' ' + $t(`zijn ingeschreven op de wachtlijst`);
+            t += Formatter.joinLast([...waitingListNames.slice(0, 2), (waitingListNames.length - 2) + ' ' + $t(`6e6fec93-89e1-4a60-8f96-22936f2f68d7`)], ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') + ' ' + $t(`6d897353-bd6c-44cc-8044-5f68cc538b2c`);
         }
         else if (waitingListNames.length > 1) {
-            t += Formatter.joinLast(waitingListNames, ', ', ' ' + $t(`en`) + ' ') + ' ' + $t(`zijn ingeschreven op de wachtlijst`);
+            t += Formatter.joinLast(waitingListNames, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') + ' ' + $t(`6d897353-bd6c-44cc-8044-5f68cc538b2c`);
         }
         else {
-            t += waitingListNames.join('') + ' ' + $t(`is ingeschreven op de wachtlijst`);
+            t += waitingListNames.join('') + ' ' + $t(`59ecd638-c6a3-45b1-80bb-96c4e3bdde05`);
         }
     }
 
     if (names.length === 0 && waitingListNames.length === 0) {
-        t += $t(`Gelukt!`);
+        t += $t(`56c85b34-a9f3-46ac-a77c-991a0f463c73`);
     }
 
     return t;

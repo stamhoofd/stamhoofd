@@ -82,7 +82,7 @@ export default class ChoiceRow extends Mixins(NavigationMixin) {
         const menu = new ContextMenu([
             [
                 new ContextMenuItem({
-                    name: $t(`Verplaats omhoog`),
+                    name: $t(`fa96b3e2-08bc-4ce1-9562-e09eb26bcd5b`),
                     icon: "arrow-up",
                     action: () => {
                         this.moveUp()
@@ -90,7 +90,7 @@ export default class ChoiceRow extends Mixins(NavigationMixin) {
                     }
                 }),
                 new ContextMenuItem({
-                    name: $t(`Verplaats omlaag`),
+                    name: $t(`dd2032e6-7a34-4027-a678-dbda939782c1`),
                     icon: "arrow-down",
                     action: () => {
                         this.moveDown()

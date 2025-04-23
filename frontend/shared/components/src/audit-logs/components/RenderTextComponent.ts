@@ -91,7 +91,7 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
                         'overflow': 'hidden',
                     },
                 }),
-                obj.value || $t(`Afbeelding`),
+                obj.value || $t(`f0726317-6979-41b6-bd57-7f6eb3422dc6`),
             ]);
         }
 
@@ -102,7 +102,7 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
                 href: obj.id,
                 target: '_blank',
             }, [
-                obj.value || $t(`Bestand`),
+                obj.value || $t(`108e2ee2-0c29-4f5e-9c34-b9030dd369b9`),
             ]);
         }
 
@@ -223,7 +223,7 @@ async function showHtml(html: string, context: Context) {
     const component = new ComponentWithProperties(NavigationController, {
         root: new ComponentWithProperties(SafeHtmlView, {
             html,
-            title: $t(`Tekst met opmaak`),
+            title: $t(`71a1a391-f437-41e4-b2d4-e9e32121d4ee`),
         }),
     });
 
@@ -244,7 +244,7 @@ async function showPayment(paymentId: string, context: Context) {
                     limit: 1,
                 }));
                 if (payments.results.length === 0) {
-                    Toast.error($t(`Betaling niet (meer) gevonden`)).show();
+                    Toast.error($t(`5e6f043a-6ed5-41eb-b670-d9ac6b63e598`)).show();
                     throw new Error('Payment not found');
                 }
                 return new ComponentWithProperties(PaymentView, {
@@ -271,7 +271,7 @@ async function showMember(memberId: string, context: Context) {
                     limit: 1,
                 }));
                 if (members.results.length === 0) {
-                    Toast.error($t(`Lid niet (meer) gevonden`)).show();
+                    Toast.error($t(`22541ecc-ba4f-4a91-b8d3-8213bfaaea0b`)).show();
                     throw new Error('Member not found');
                 }
                 return new ComponentWithProperties(MemberSegmentedView, {
@@ -298,7 +298,7 @@ async function showEvent(eventId: string, context: Context) {
                     limit: 1,
                 }));
                 if (events.results.length === 0) {
-                    Toast.error($t(`Activiteit niet meer gevonden`)).show();
+                    Toast.error($t(`6f8446d7-f625-4134-bf05-553ba577619f`)).show();
                     throw new Error('Event not found');
                 }
                 return new ComponentWithProperties(EventOverview, {
@@ -325,7 +325,7 @@ async function showOrganization(organizationId: string, context: Context) {
                     limit: 1,
                 }));
                 if (organizations.results.length === 0) {
-                    Toast.error($t(`Organisatie niet meer gevonden`)).show();
+                    Toast.error($t(`6350b2c6-ab40-4a92-873e-f667386055a4`)).show();
                     throw new Error('Event not found');
                 }
                 const OrganizationView = (await import('@stamhoofd/admin-frontend/src/views/organizations/OrganizationView.vue')).default;

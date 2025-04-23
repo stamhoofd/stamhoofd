@@ -121,10 +121,10 @@ const { patched, addPatch, hasChanges, patch } = usePatch(props.parent);
 const errors = useErrors();
 const pop = usePop();
 const loading = ref(false);
-const saveText = ref($t(`Opslaan`));
+const saveText = ref($t(`bc6b2553-c28b-4e3b-aba3-4fdc2c23db6e`));
 const app = useAppContext();
 const parentTypes = ParentTypeHelper.getPublicTypes();
-const title = computed(() => !props.isNew ? `${patched.value.firstName || $t(`Ouder`)} bewerken` : $t(`Ouder toevoegen`));
+const title = computed(() => !props.isNew ? `${patched.value.firstName || $t(`92a1d590-2388-4193-9fac-ad41b6122fe4`)} bewerken` : $t(`eb1bf015-9263-4f25-a7e4-f57b07342fb8`));
 const navigate = useNavigationActions();
 
 const relatedMembers = computed(() => {
@@ -239,14 +239,14 @@ async function save() {
         if (firstName.value.length < 2) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Vul de voornaam in`),
+                message: $t(`7764f616-f742-4704-93ff-22f1dd31f830`),
                 field: 'firstName',
             }));
         }
         if (lastName.value.length < 2) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Vul de achternaam in`),
+                message: $t(`bc27bb72-c06d-4a05-8e22-e920d01cc1f4`),
                 field: 'lastName',
             }));
         }
@@ -259,7 +259,7 @@ async function save() {
                     if (member.patchedMember.details.nationalRegisterNumber === nationalRegisterNumber.value) {
                         se.addError(new SimpleError({
                             code: 'invalid_field',
-                            message: $t(`Dit rijksregisternummer is al in gebruik door`) + ' ' + member.patchedMember.firstName + $t(`. Vul a.u.b. het juiste rijksregisternummer in, dit kan invloed hebben op uw belastingaangifte.`),
+                            message: $t(`a23b0a8b-9048-41f7-8c22-8157cdeec177`) + ' ' + member.patchedMember.firstName + $t(`1e5ac172-0dfe-4861-b299-d0481855efbc`),
                             field: 'nationalRegisterNumber',
                         }));
                     }
@@ -301,7 +301,7 @@ async function save() {
         if (props.member && props.isNew) {
             const minorMembers = family.members.filter(m => m.id !== props.member!.id && m.isPropertyEnabled('parents'));
 
-            if (minorMembers.length > 0 && !await CenteredMessage.confirm($t(`Wil je deze ouder bij alle gezinsleden toevoegen?`), $t(`Overal toevoegen`), $t(`Je kan deze ouder ook automatisch toevoegen bij`) + ' ' + Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t(`en`) + ' ') + '.', $t(`Enkel hier`), false)) {
+            if (minorMembers.length > 0 && !await CenteredMessage.confirm($t(`27091cc2-c42d-457d-8250-05abc7d4937d`), $t(`290ab18c-dc62-4d85-a669-dd83c77758e7`), $t(`81d1f71d-0656-4086-bfd1-de54cd540678`) + ' ' + Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') + '.', $t(`fe636d8c-6506-4c8b-bb79-9c20fb1bc54d`), false)) {
                 props.member.addParent(patched.value);
             }
             else {
@@ -341,7 +341,7 @@ async function modifyAddress(from: Address, to: Address) {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`Wil je dit adres overal wijzigen?`), $t(`Overal wijzigen`), from.shortString() + ' ' + $t(`is ook het adres van`) + ' ' + Formatter.joinLast(occurrences, ', ', ' ' + $t(`en`) + ' ') + $t(`. Als je wilt kan je het adres ook voor hen wijzigen naar`) + ' ' + to.shortString() + '.', $t(`Enkel hier`), false)) {
+    if (!await CenteredMessage.confirm($t(`14a6da51-a82f-43b5-9e6a-2d679985d41a`), $t(`4d5e0d3f-688a-4c8b-bad7-818d976166bf`), from.shortString() + ' ' + $t(`acebb7f5-73f6-448c-842b-361da931462f`) + ' ' + Formatter.joinLast(occurrences, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') + $t(`f5962c80-7c80-4d05-a4fe-8a842270d280`) + ' ' + to.shortString() + '.', $t(`fe636d8c-6506-4c8b-bb79-9c20fb1bc54d`), false)) {
         return;
     }
 
@@ -352,7 +352,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value && !loading.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
+    return await CenteredMessage.confirm($t(`c9111e95-2f59-4164-b0af-9fbf434bf6dd`), $t(`de41b0f3-1297-4058-b390-3bfb99e3d4e0`));
 }
 
 defineExpose({

@@ -90,7 +90,7 @@ export async function downloadDocument($context: SessionContext, document: Docum
             Toast.fromError(e).show();
         }
         else {
-            new Toast($t(`Downloaden geannuleerd`), 'info').show();
+            new Toast($t(`08282842-f352-402d-82b9-4880df4b010f`), 'info').show();
         }
     }
 }
@@ -103,7 +103,7 @@ export async function downloadDocuments($context: SessionContext, documents: Doc
 
     let pendingToast: Toast | null = null;
     try {
-        pendingToast = new Toast($t(`Documenten downloaden...`), 'spinner').setProgress(0).setHide(null).show();
+        pendingToast = new Toast($t(`34f31c26-5b4c-45d8-9446-b2543e767c80`), 'spinner').setProgress(0).setHide(null).show();
         const JSZip = (await import(/* webpackChunkName: "jszip" */ 'jszip')).default;
         const zip = new JSZip();
 
@@ -121,9 +121,9 @@ export async function downloadDocuments($context: SessionContext, documents: Doc
         await Promise.all(promises);
 
         pendingToast?.hide();
-        pendingToast = new Toast($t(`Documenten bundelen in een .zip...`), 'spinner').setHide(null).show();
+        pendingToast = new Toast($t(`7f2e08fe-02a9-4bb5-8c70-82787e2f471e`), 'spinner').setHide(null).show();
         const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
-        await AppManager.shared.downloadFile(blob, $t(`documenten.zip`));
+        await AppManager.shared.downloadFile(blob, $t(`0f54c3b2-d611-4360-8adc-060867632759`));
         pendingToast?.hide();
     }
     catch (e) {
@@ -132,7 +132,7 @@ export async function downloadDocuments($context: SessionContext, documents: Doc
             Toast.fromError(e).show();
         }
         else {
-            new Toast($t(`Downloaden geannuleerd`), 'info').show();
+            new Toast($t(`08282842-f352-402d-82b9-4880df4b010f`), 'info').show();
         }
     }
 }

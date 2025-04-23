@@ -148,9 +148,9 @@ loadFamilyFromUser().catch(console.error);
 
 const title = computed(() => {
     if (patchedBalanceItem.value.price < 0) {
-        return props.isNew ? $t(`Terug te betalen bedrag toevoegen`) : $t(`Terug te betalen bedrag bewerken`);
+        return props.isNew ? $t(`c40f80b1-3553-4639-ac5c-937c45baf05e`) : $t(`6c1f62aa-e2c7-40cb-8cb9-7ea3365d5cf4`);
     }
-    return props.isNew ? $t(`Verschuldigd bedrag toevoegen`) : $t(`Verschuldigd bedrag bewerken`);
+    return props.isNew ? $t(`d7d6da3d-3522-4c21-a03f-ef980380d4ae`) : $t(`620143a1-0620-483c-8cec-16747a8d4856`);
 });
 
 const sortedPayments = computed(() => {
@@ -238,7 +238,7 @@ async function doDelete() {
     if (loading.value) {
         return;
     }
-    if (!(await CenteredMessage.confirm($t(`Deze aanrekening verwijderen?`), $t(`Verwijderen`), $t(`Je kan dit niet ongedaan maken.`)))) {
+    if (!(await CenteredMessage.confirm($t(`7020d061-6349-4b42-8ee3-eca6b6cca87d`), $t(`faae9011-c50d-4ada-aed0-c1b578782b2a`), $t(`6260efe1-ecdb-4a22-a046-7ce84233d11b`)))) {
         return;
     }
     if (loading.value) {

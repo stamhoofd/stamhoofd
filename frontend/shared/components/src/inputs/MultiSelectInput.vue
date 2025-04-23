@@ -54,7 +54,7 @@ export default class MultiSelectInput<T> extends Mixins(NavigationMixin) {
     @Prop({})
         choices: {value: T, label: string, categories?: string[]}[]
 
-    @Prop({ default: $t(`Maak een keuze`) })
+    @Prop({ default: $t(`bad54c0f-e030-48c4-bd75-42ed4aa9be02`) })
         placeholder!: string
 
     get draggableValues() {

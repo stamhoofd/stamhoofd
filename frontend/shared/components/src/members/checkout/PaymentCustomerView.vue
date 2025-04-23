@@ -114,14 +114,14 @@ async function goNext() {
             if (companies.value.length === 0) {
                 throw new SimpleError({
                     code: 'missing_field',
-                    message: $t(`Stel je facturatiegegevens in voor je verder gaat`),
+                    message: $t(`86ebf633-c9d5-459d-8f7b-259d0d3f2ea4`),
                     field: 'company',
                 });
             }
 
             throw new SimpleError({
                 code: 'missing_field',
-                message: $t(`Kies de juiste facturatiegegevens voor je verder gaat`),
+                message: $t(`9ef6547b-c78a-4d2d-bd2e-75bbbc71e6c7`),
                 field: 'company',
             });
         }
@@ -129,7 +129,7 @@ async function goNext() {
         if (customer.company.name.length < 2 || !customer.company.address) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Deze facturatiegegevens zijn niet volledig. Bewerk ze en kijk ze na voor je verder gaat.`),
+                message: $t(`a562ecf9-00ae-48b7-8568-4e762b11e1f3`),
                 field: 'company',
             });
         }

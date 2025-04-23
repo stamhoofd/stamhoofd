@@ -67,7 +67,7 @@ export default class AgeInput extends VueComponent {
         if (!this.modelValue) {
             return ""
         }
-        return $t(`(geboren in`) + ' '+((this.year ?? new Date().getFullYear()) - this.modelValue)+")"
+        return $t(`62013f16-5422-44c4-9993-2596eab2dc97`) + ' '+((this.year ?? new Date().getFullYear()) - this.modelValue)+")"
     }
 
     mounted() {

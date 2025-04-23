@@ -66,7 +66,7 @@ onMounted(() => {
 });
 
 function retry() {
-    if (confirm($t(`Probeer alleen opnieuw als je zeker bent dat je niet hebt betaald! Anders moet je gewoon even wachten.`))) {
+    if (confirm($t(`2166f942-4fce-476f-adf2-d5803ff4ed16`))) {
         if (navigationController.value!.components.length > 1) {
             navigationActions.pop()?.catch(console.error);
         }

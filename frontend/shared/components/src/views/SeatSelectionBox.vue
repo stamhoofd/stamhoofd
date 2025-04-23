@@ -324,7 +324,7 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
         }
         else {
             if (this.isOccupied(row, seat)) {
-                new Toast($t(`Deze plaats is al bezet`), 'error red').show();
+                new Toast($t(`e6bb2b94-051b-4197-b251-8ce9dc1aea44`), 'error red').show();
                 return;
             }
 
@@ -383,7 +383,7 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
             cartReservedSeat.calculatePrice(this.seatingPlan);
 
             if (cartReservedSeat.price > 0) {
-                this.lastPriceToast = new Toast($t(`Deze plaats heeft een meerprijs van`) + ' ' + Formatter.price(cartReservedSeat.price), 'info');
+                this.lastPriceToast = new Toast($t(`5dc8219a-fe1d-495d-9a31-0cbd16c717ee`) + ' ' + Formatter.price(cartReservedSeat.price), 'info');
                 this.lastPriceToast.show();
             }
         }

@@ -95,7 +95,7 @@ const selectedUIFilter = ref(createDefaultUIFilter()) as Ref<null | UIFilter>;
 const yearLabels = computed(() => {
     return years.value.map((y) => {
         if (y === null) {
-            return $t(`Toekomstige`);
+            return $t(`4cb84435-bf36-4b83-9f0d-6028181eae84`);
         }
         return y.toString();
     });
@@ -132,7 +132,7 @@ defineRoutes([
                     event: events.results[0],
                 };
             }
-            Toast.error($t(`Activiteit niet gevonden`)).show();
+            Toast.error($t(`42e0e0d5-b4f9-4774-ad91-bfae7121a29e`)).show();
             throw new Error('Event not found');
         },
 
@@ -207,7 +207,7 @@ const eventSuggestions = computed(() => {
             suggestions.push(
                 Event.create({
                     id: '',
-                    name: $t(`Suggestie`),
+                    name: $t(`2506b55d-cd6e-42e5-a69d-f0d838bfaad2`),
                     startDate: pointer.toJSDate(),
                     endDate: pointer.toJSDate(),
                 }),
@@ -251,7 +251,7 @@ async function addEvent(template?: Event) {
             Toast.error($t('Configureer eerst minstens één soort activiteit. Ga naar \'Instellingen\' → \'Soorten activiteiten\' in het Administratieportaal.')).show();
         }
         else {
-            Toast.error($t(`Activiteiten werden nog niet correct geconfigureerd. Vraag een hoofdbeheerder om dit in orde te brengen.`)).show();
+            Toast.error($t(`28b7fa87-b4b9-45de-aa95-1d7fea6aee73`)).show();
         }
         return;
     }

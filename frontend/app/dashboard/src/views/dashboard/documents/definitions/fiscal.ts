@@ -2,64 +2,64 @@ import { DocumentTemplateDefinition, PropertyFilter, RecordCategory, RecordChoic
 
 export const fiscal = DocumentTemplateDefinition.create({
     type: 'fiscal',
-    name: $t(`Fiscaal attest kinderopvang (281.86)`),
+    name: $t(`2e2c43a8-3709-4947-83e0-3b0345cd7b44`),
     defaultMaxAge: 13,
     defaultMinPrice: 1,
     fieldCategories: [
         RecordCategory.create({
             id: 'organization',
-            name: $t(`Vereniging`),
-            description: $t(`Gegevens van de vereniging of persoon die instaat voor de opvang.`),
+            name: $t(`50ebabe0-8162-486d-b32a-9ef3016256fb`),
+            description: $t(`2e5e2e62-1e0c-406d-96c9-f66e7c8e85bd`),
             records: [
                 RecordSettings.create({
                     id: 'organization.name',
-                    name: $t(`Naam`),
+                    name: $t(`522fb6c5-6d4d-4d9c-94b7-3e282fb0ea1f`),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'organization.companyNumber',
-                    name: $t(`KBO nummer`),
+                    name: $t(`65fd44a4-cc92-49e7-8b44-91a75d601a7f`),
                     required: false,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'organization.address',
-                    name: $t(`Adres`),
+                    name: $t(`2f10996e-ea97-4345-b997-c93198c7d67f`),
                     required: true,
                     type: RecordType.Address,
                 }),
                 RecordSettings.create({
                     id: 'certification.type',
-                    name: $t(`Vergunningstype`),
-                    description: $t(`Vergunningstype bepaalt het type van vergunning in Vak I.`),
+                    name: $t(`7d6fa164-e3f8-4c09-9eb4-9d2828de7128`),
+                    description: $t(`50f3e5f0-8589-43cc-87ec-04c8ed628ed7`),
                     required: true,
                     type: RecordType.ChooseOne,
                     choices: [
                         RecordChoice.create({
                             id: 'exception',
-                            name: $t(`Vak I niet van toepassing`),
-                            description: $t(`Voldoet aan de voorwaarden vermeld in puntje 2 van de document opmerkingen.`),
+                            name: $t(`5b822590-b76a-43d4-a2c9-78825f98c4e7`),
+                            description: $t(`e089fe1b-ae31-4244-9d29-37f21655fe52`),
                         }),
                         RecordChoice.create({
                             id: 'kind-en-gezin',
-                            name: $t(`Kind en Gezin / Opgroeien regie`),
-                            description: $t(`is vergund, erkend, gesubsidieerd of gecontroleerd door of onder toezicht staat van of een kwaliteitslabel heeft ontvangen van Kind en Gezin / Opgroeien regie, het ‘Office de la Naissance et de l’Enfance’ of de regering van de Duitstalige Gemeenschap`),
+                            name: $t(`e201d9ff-c8bb-4b39-8e33-1fa3e8882248`),
+                            description: $t(`72d62e2a-b6e3-4d86-9d40-a316dd8386a1`),
                         }),
                         RecordChoice.create({
                             id: 'authorities',
-                            name: $t(`Gemeenten, gemeenschappen of gewesten`),
-                            description: $t(`is vergund, erkend, gesubsidieerd of gecontroleerd door de lokale openbare besturen of openbare besturen van de gemeenschappen of gewesten`),
+                            name: $t(`20a43c31-e394-4bb4-9b1f-8afd5d5268fa`),
+                            description: $t(`b80c6123-24fb-42fc-9770-b6c251951c58`),
                         }),
                         RecordChoice.create({
                             id: 'foreign',
-                            name: $t(`Buitenlandse instellingen`),
-                            description: $t(`is vergund, erkend, gesubsidieerd of gecontroleerd door of onder toezicht staat van buitenlandse openbare instellingen gevestigd in een andere lidstaat van de Europese Economische Ruimte`),
+                            name: $t(`6c729f25-24a1-4795-9558-dcc478fdb44d`),
+                            description: $t(`2d8e8d29-9cb9-49a2-8824-5285dea824b7`),
                         }),
                         RecordChoice.create({
                             id: 'schools',
-                            name: $t(`Scholen`),
-                            description: $t(`is verbonden met een school gevestigd in de Europese Economische Ruimte of met de inrichtende macht van een school gevestigd in de Europese Economische Ruimte,`),
+                            name: $t(`60f135eb-adb3-4e1a-9ba2-7e6e084a83aa`),
+                            description: $t(`79c1d4a0-f5f3-465d-bf7b-a15b5f2a4bb4`),
                         }),
                     ],
                 }),
@@ -67,24 +67,24 @@ export const fiscal = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             id: 'certification',
-            name: $t(`Certificeringsautoriteit`),
-            description: $t(`De instantie die de opvangsinstantie heeft vergund, erkend, gesubsidieerd, er een kwaliteitslabel heeft aan toegekend of die deze controleert of er toezicht op houdt of die is verbonden met de opvanginstantie in het geval van scholen of hun inrichtende machten.`),
+            name: $t(`4ce7c41a-f020-4949-a889-71549e0f6d0f`),
+            description: $t(`d6686410-12c2-4481-90e1-87e112e65043`),
             records: [
                 RecordSettings.create({
                     id: 'certification.name',
-                    name: $t(`Naam`),
+                    name: $t(`522fb6c5-6d4d-4d9c-94b7-3e282fb0ea1f`),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'certification.companyNumber',
-                    name: $t(`KBO nummer`),
+                    name: $t(`65fd44a4-cc92-49e7-8b44-91a75d601a7f`),
                     required: false,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'certification.address',
-                    name: $t(`Adres`),
+                    name: $t(`2f10996e-ea97-4345-b997-c93198c7d67f`),
                     required: true,
                     type: RecordType.Address,
                 }),
@@ -99,25 +99,25 @@ export const fiscal = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             id: 'signature',
-            name: $t(`Ondertekening`),
-            description: $t(`Persoon die de documenten ondertekent.`),
+            name: $t(`7fec542e-0f75-4dfe-be2f-29e1d3027373`),
+            description: $t(`dd431861-0d75-4c28-8a26-2140465e5556`),
             records: [
                 RecordSettings.create({
                     id: 'signature.name',
-                    name: $t(`Naam`),
+                    name: $t(`522fb6c5-6d4d-4d9c-94b7-3e282fb0ea1f`),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'signature.capacity',
-                    name: $t(`Hoedanigheid`),
+                    name: $t(`bb8c9f3b-3578-4662-b78f-1e0e92f90229`),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'signature.image',
-                    name: $t(`Handtekening`),
-                    description: $t(`Upload je handtekening op een witte achtergrond, met geen of weinig witruimte rondom. Tip: gebruik http://szimek.github.io/signature_pad/`),
+                    name: $t(`9c50bba5-620b-4391-88a2-a69e9034cf00`),
+                    description: $t(`b36e52ad-a913-43ef-a36b-bda1ed04761e`),
                     required: true,
                     type: RecordType.Image,
                     resolutions: [
@@ -134,36 +134,36 @@ export const fiscal = DocumentTemplateDefinition.create({
     documentFieldCategories: [
         RecordCategory.create({
             id: 'debtor',
-            name: $t(`Schuldenaar`),
-            description: $t(`Persoon die heeft betaald, bij voorkeur de ouder die het kind fiscaal ten laste heeft (beide ouders hebben meestal het kind fiscaal ten laste, tenzij men niet getrouwd of niet wettelijk samenwonend is).`),
+            name: $t(`b9c7a57e-6dc1-48a2-bcba-a26c5f59555e`),
+            description: $t(`b1549fce-7655-4e22-9622-48eb70f35e52`),
             records: [
                 RecordSettings.create({
                     id: 'debtor.firstName',
-                    name: $t(`Voornaam`),
+                    name: $t(`efca0579-0543-4636-a996-384bc9f0527e`),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'debtor.lastName',
-                    name: $t(`Achternaam`),
+                    name: $t(`4a5e438e-08a1-411e-9b66-410eea7ded73`),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'debtor.nationalRegisterNumber',
-                    name: $t(`Rijksregisternummer`),
+                    name: $t(`00881b27-7501-4c56-98de-55618be2bf11`),
                     required: false,
                     type: RecordType.Text,
                     warning: RecordWarning.create({
                         id: 'missing.debtor.nationalRegisterNumber',
-                        text: $t(`Rijksregisternummer schuldenaar ontbreekt. Je vult dit best aan bij één van de ouders van dit lid.`),
+                        text: $t(`d05b1cb9-e9cf-46e4-8b27-620b5562d30d`),
                         type: RecordWarningType.Warning,
                         inverted: true,
                     }),
                 }),
                 RecordSettings.create({
                     id: 'debtor.address',
-                    name: $t(`Adres`),
+                    name: $t(`2f10996e-ea97-4345-b997-c93198c7d67f`),
                     required: true,
                     type: RecordType.Address,
                 }),
@@ -171,42 +171,42 @@ export const fiscal = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             id: 'member',
-            name: $t(`Gegevens lid`),
-            description: $t(`Deze gegevens zijn allemaal standaard beschikbaar.`),
+            name: $t(`c3a8a598-5b30-4d37-bc99-9f3157b36246`),
+            description: $t(`74941f69-d7cd-4003-bc5a-18d9b22e03ed`),
             records: [
                 RecordSettings.create({
                     id: 'member.nationalRegisterNumber',
-                    name: $t(`Rijksregisternummer`),
+                    name: $t(`00881b27-7501-4c56-98de-55618be2bf11`),
                     required: false,
                     type: RecordType.Text,
                     warning: RecordWarning.create({
                         id: 'missing.member.nationalRegisterNumber',
-                        text: $t(`Rijksregisternummer lid ontbreekt. Je vult dit best aan bij dit lid.`),
+                        text: $t(`3f5b1183-9db6-4bd4-9187-552b7ae4126c`),
                         type: RecordWarningType.Warning,
                         inverted: true,
                     }),
                 }),
                 RecordSettings.create({
                     id: 'member.firstName',
-                    name: $t(`Voornaam`),
+                    name: $t(`efca0579-0543-4636-a996-384bc9f0527e`),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'member.lastName',
-                    name: $t(`Achternaam`),
+                    name: $t(`4a5e438e-08a1-411e-9b66-410eea7ded73`),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'member.birthDay',
-                    name: $t(`Geboortedatum`),
+                    name: $t(`7d7b5a21-105a-41a1-b511-8639b59024a4`),
                     required: true,
                     type: RecordType.Date,
                 }),
                 RecordSettings.create({
                     id: 'member.address',
-                    name: $t(`Adres`),
+                    name: $t(`2f10996e-ea97-4345-b997-c93198c7d67f`),
                     required: true,
                     type: RecordType.Address,
                 }),
@@ -214,17 +214,17 @@ export const fiscal = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             id: 'price',
-            name: $t(`Prijs`),
-            description: $t(`Het bedrag dat betaald werd voor de inschrijving. Dit kan automatisch uit het systeem gehaald worden, waarbij ook rekening gehouden wordt met kortingen. De dagprijs wordt berekend op basis van de begin en einddatum. Gratis inschrijvingen komen niet in aanmerking voor een fiscale aftrek en daarvoor wordt dus geen document aangemaakt.`),
+            name: $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
+            description: $t(`f3262b38-7afe-485b-bd97-fab76e825818`),
             records: [
                 RecordSettings.create({
                     id: 'registration.price',
-                    name: $t(`Prijs`),
+                    name: $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
                     required: true,
                     type: RecordType.Price,
                     warning: RecordWarning.create({
                         id: 'missing.registration.price',
-                        text: $t(`Het betaalde bedrag ontbreekt. Dit is essentieel om een geldig document af te leveren.`),
+                        text: $t(`325dd5fa-871c-45b4-b732-5c5370c44b03`),
                         type: RecordWarningType.Error,
                         inverted: true,
                     }),
@@ -235,13 +235,13 @@ export const fiscal = DocumentTemplateDefinition.create({
     exportFieldCategories: [
         RecordCategory.create({
             id: 'confirmation',
-            name: $t(`Exporteren naar XML voor Belcotax`),
-            description: $t(`De XML-export is complex, en je moet zorvuldig de documentatie doorlezen voor je hier aan begint.`),
+            name: $t(`15bc5064-cd0d-4052-937b-cade8e19a858`),
+            description: $t(`2c9a2838-607e-4e19-87d9-ce5c1f46f7f0`),
             records: [
                 RecordSettings.create({
                     id: 'confirmation',
-                    name: $t(`Bevestiging`),
-                    label: $t(`Ik bevestig dat ik de documentatie over de XML-export heb gelezen en alle stappen nauwkeurig heb gevolgd.`),
+                    name: $t(`ae4c10ae-478e-48d9-b901-86f3f79df32e`),
+                    label: $t(`079e1823-91db-4ef4-ba7b-94218d6a980e`),
                     required: true,
                     type: RecordType.Checkbox,
                 }),
@@ -249,37 +249,37 @@ export const fiscal = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             id: 'additional-belcotax',
-            name: $t(`Bijkomende informatie`),
-            description: $t(`We hebben nog enkele gegevens nodig die we moeten opnemen in de XML. Vul deze accuraat in.`),
+            name: $t(`1b4a943c-e44d-4f9f-b5bd-08a485ef05d3`),
+            description: $t(`1e58daa1-b5dc-4e51-8c2c-5ce461963f61`),
             records: [
                 RecordSettings.create({
                     id: 'organization.contactName',
-                    name: $t(`Naam contactpersoon`),
+                    name: $t(`084a7b59-d7d6-4352-8fe7-8f9e98ba1483`),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'organization.phone',
-                    name: $t(`Telefoonnummer`),
+                    name: $t(`856aaa1c-bc62-4e45-9ae5-4c7e7dca23ab`),
                     required: true,
                     type: RecordType.Phone,
                 }),
                 RecordSettings.create({
                     id: 'organization.email',
-                    name: $t(`E-mailadres`),
+                    name: $t(`82f4b6ed-afee-4655-9f07-22802e0e7ad9`),
                     required: true,
                     type: RecordType.Email,
-                    description: $t(`Op dit emailadres ontvang je de bevestiging/update van de aangifte.`),
+                    description: $t(`73219854-e149-4797-bae0-de7340b6f304`),
                 }),
                 RecordSettings.create({
                     id: 'organization.companyNumber',
-                    name: $t(`Ondernemingsnummer of refertenummer`),
+                    name: $t(`da1e6727-6f1f-4713-93a5-2ec93092b9d0`),
                     required: true,
                     type: RecordType.Text,
-                    description: $t(`Is jouw vereniging een feitelijke vereniging zonder VZW, dan moet je hier het refertenummer invullen dat je bij Belcotax had aangevraagd.`),
+                    description: $t(`e13d9fec-ff5a-43e0-8cf4-4edc6e576d17`),
                 }),
             ],
         }),
     ],
-    xmlExportDescription: $t(`Het XML-document voor het indienen van de aangifte in Belcotax.`),
+    xmlExportDescription: $t(`bf58c9d8-b970-412f-bcf3-9fd2f037c4ff`),
 });

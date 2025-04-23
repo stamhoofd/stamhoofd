@@ -273,69 +273,69 @@ const showExternalPermissionLevel = computed(() => editorType.value === RecordEd
 
 const availableTypes = [
     {
-        name: $t(`Tekst`),
+        name: $t(`571437e8-8eee-4cdb-bbf8-39a6144bff8c`),
         values: [
             {
                 value: RecordType.Text,
-                name: $t(`Tekstveld (één lijn)`),
+                name: $t(`668f1663-e8d1-4e1c-9397-32a1c2b70022`),
             },
             {
                 value: RecordType.Textarea,
-                name: $t(`Tekstveld (meerdere lijnen)`),
+                name: $t(`99cf6d44-681c-450b-8c5c-74bc75ca0cde`),
             },
             {
                 value: RecordType.Address,
-                name: $t(`Adres`),
+                name: $t(`2f10996e-ea97-4345-b997-c93198c7d67f`),
             },
             {
                 value: RecordType.Email,
-                name: $t(`E-mailadres`),
+                name: $t(`82f4b6ed-afee-4655-9f07-22802e0e7ad9`),
             },
             {
                 value: RecordType.Phone,
-                name: $t(`Telefoonnummer`),
+                name: $t(`856aaa1c-bc62-4e45-9ae5-4c7e7dca23ab`),
             },
             {
                 value: RecordType.Date,
-                name: $t(`Datum`),
+                name: $t(`9ee1052c-9396-4d2d-8247-97dfb45099f6`),
             },
             {
                 value: RecordType.Integer,
-                name: $t(`Getal`),
+                name: $t(`b877974f-ec5a-4e92-8ad2-3169ece7da77`),
             },
             {
                 value: RecordType.Price,
-                name: $t(`Prijs`),
+                name: $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
             },
         ],
     },
     {
-        name: $t(`Aankruisen`),
+        name: $t(`e6ce4fef-ea7e-4218-840e-9435cfaa9931`),
         values: [
             {
                 value: RecordType.Checkbox,
-                name: $t(`Aankruisvakje`),
+                name: $t(`be247511-3af8-4006-b944-19db50d75a89`),
             },
             {
                 value: RecordType.ChooseOne,
-                name: $t(`Keuzemenu (kies één)`),
+                name: $t(`0c57da32-95ac-4e64-a61a-0a7fa104294a`),
             },
             {
                 value: RecordType.MultipleChoice,
-                name: $t(`Keuzemenu (kies meerdere)`),
+                name: $t(`06f06102-d0a6-4b23-84b0-43d53fc87ca1`),
             },
         ],
     },
     {
-        name: $t(`Geavanceerd`),
+        name: $t(`af8afc36-22de-4f22-8235-e1e8f5eef7ca`),
         values: [
             {
                 value: RecordType.Image,
-                name: $t(`Afbeelding of foto`),
+                name: $t(`15a3e04d-9fa1-414c-87aa-22c2bd1d39ac`),
             },
             {
                 value: RecordType.File,
-                name: $t(`Bestand`),
+                name: $t(`108e2ee2-0c29-4f5e-9c34-b9030dd369b9`),
             },
         ],
     },
@@ -343,7 +343,7 @@ const availableTypes = [
 
 const availableFileTypes = [
     {
-        name: $t(`Alles`),
+        name: $t(`4760e3ab-3cb5-4045-b252-ef923dc2bc9d`),
         value: null,
     },
     {
@@ -370,49 +370,49 @@ const canAddWarning = computed(() => {
 
 const warningNonInvertedText = computed(() => {
     if (patchedRecord.value.type === RecordType.Checkbox) {
-        return $t(`Waarschuwing als aangevinkt`);
+        return $t(`eaea9adf-d1c8-48ab-b6e9-4cc8d68e2392`);
     }
-    return $t(`Waarschuwing als ingevuld`);
+    return $t(`87150a09-54be-4640-9203-74d0399f1e02`);
 });
 
 const warningInvertedText = computed(() => {
     if (patchedRecord.value.type === RecordType.Checkbox) {
-        return $t(`Waarschuwing als niet aangevinkt`);
+        return $t(`deb80c9b-6f0d-4185-800f-79e419cc8943`);
     }
-    return $t(`Waarschuwing als niet ingevuld`);
+    return $t(`64b39ce3-9624-4a38-a669-90a50443876f`);
 });
 
 const title = computed(() => {
     if (props.isNew) {
-        return $t(`Nieuwe vraag`);
+        return $t(`dcfc3edf-b906-420d-ac49-d89886824de9`);
     }
-    return $t(`Vraag bewerken`);
+    return $t(`6b58e96c-fbd3-4998-909d-ed25cc758818`);
 });
 
 const labelTitle = computed(() => {
     if (type.value === RecordType.Checkbox) {
-        return $t(`Tekst naast aankruisvakje`);
+        return $t(`fac8120c-d891-42e3-8383-090db955c8ca`);
     }
     if (type.value === RecordType.MultipleChoice) {
-        return $t(`Titel boven keuzemenu`);
+        return $t(`13cac71a-fb4c-46b6-9f17-1a57c5da2420`);
     }
     if (type.value === RecordType.ChooseOne) {
-        return $t(`Titel boven keuzemenu`);
+        return $t(`13cac71a-fb4c-46b6-9f17-1a57c5da2420`);
     }
-    return $t(`Titel boven tekstvak`);
+    return $t(`f019894f-69ad-4999-abc0-8682bd024827`);
 });
 
 const descriptionTitle = computed(() => {
     if (type.value === RecordType.Checkbox) {
-        return $t(`Beschrijving naast aankruisvakje`);
+        return $t(`fa02d08e-aa63-41f0-b9d4-360011c0690d`);
     }
     if (type.value === RecordType.MultipleChoice) {
-        return $t(`Beschrijving onder keuzemenu`);
+        return $t(`33b05ed3-efea-4993-83a1-9c855f6ba427`);
     }
     if (type.value === RecordType.ChooseOne) {
-        return $t(`Beschrijving onder keuzemenu`);
+        return $t(`33b05ed3-efea-4993-83a1-9c855f6ba427`);
     }
-    return $t(`Beschrijving onder tekstvak`);
+    return $t(`4dd7660f-3a18-4791-87b9-0e47115148f0`);
 });
 
 const name = computed({
@@ -503,15 +503,15 @@ const shouldAskCommentsDescription = computed(() => {
 
 const requiredText = computed(() => {
     if (type.value === RecordType.Checkbox) {
-        return $t(`Verplicht aankruisen`);
+        return $t(`8499aa55-27b9-430a-b10e-c356a685d499`);
     }
     if (type.value === RecordType.MultipleChoice) {
-        return $t(`Verplicht om minstens één keuze te selecteren`);
+        return $t(`40bbc5f7-2295-4c7a-a280-3a7b3d6ae8db`);
     }
     if (type.value === RecordType.ChooseOne) {
-        return $t(`Verplicht om een keuze te selecteren`);
+        return $t(`3e726684-099f-4229-8d45-d1bfe0d21d07`);
     }
-    return $t(`Verplicht in te vullen`);
+    return $t(`0169f40b-45fd-4552-979d-095381626df1`);
 });
 
 const type = computed({
@@ -534,8 +534,8 @@ const type = computed({
                 else {
                     patchRecord.value = patchRecord.value.patch({
                         choices: [
-                            RecordChoice.create({ name: $t(`Keuze 1`) }),
-                            RecordChoice.create({ name: $t(`Keuze 2`) }),
+                            RecordChoice.create({ name: $t(`4b9cc9ee-d989-4459-a8d5-727ae490380d`) }),
+                            RecordChoice.create({ name: $t(`a09b08eb-216c-4f07-b05c-0a26a4c580eb`) }),
                         ] as any,
                     });
                 }
@@ -684,7 +684,7 @@ async function save() {
     if (name.value.length < 2) {
         errors.errorBox = new ErrorBox(new SimpleError({
             code: 'invalid_field',
-            message: $t(`Vul een naam in`),
+            message: $t(`396f75d7-e7d9-42d9-a50e-9ace51c92fe6`),
             field: 'name',
         }));
         return;
@@ -712,7 +712,7 @@ async function save() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm($t(`Ben je zeker dat je dit kenmerk wilt verwijderen?`), $t(`Verwijderen`), $t(`Alle hieraan verbonden informatie gaat dan ook mogelijks verloren.`))) {
+    if (!await CenteredMessage.confirm($t(`025e44e2-c48d-4af2-95b4-3e60c98724f6`), $t(`faae9011-c50d-4ada-aed0-c1b578782b2a`), $t(`fa50aa94-4f8a-428a-9b97-8b477176240a`))) {
         return;
     }
 
@@ -733,7 +733,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
+    return await CenteredMessage.confirm($t(`c9111e95-2f59-4164-b0af-9fbf434bf6dd`), $t(`de41b0f3-1297-4058-b390-3bfb99e3d4e0`));
 };
 
 function openPreview() {

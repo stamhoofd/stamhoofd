@@ -45,7 +45,7 @@ const props = withDefaults(
     {
         errorBox: null,
         min: null,
-        title: $t(`Prijs`),
+        title: $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
         group: null,
         defaultMembershipTypeId: null,
     },

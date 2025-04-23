@@ -66,10 +66,10 @@ const props = withDefaults(
 
 const platform = usePlatform();
 
-const title = $t(`Selecteer tags`);
+const title = $t(`4d08ffe7-8296-46e8-9372-e21cedcd73ff`);
 const $saveText = computed(() => {
-    if (!props.tagIds.length) return $t(`Voeg toe`);
-    return $t(`Wijzig selectie`);
+    if (!props.tagIds.length) return $t(`aaf91fd2-250b-4f2e-88a1-21af5747c760`);
+    return $t(`30ea6c91-c638-45f7-9042-13247195743d`);
 });
 
 const $hasChanges = computed(() => {
@@ -131,13 +131,13 @@ async function save() {
     const deletedTags = initialSelection.filter(tag => !allTags.includes(tag));
 
     if (deletedTags.length) {
-        let confirmText = $t(`Ben je zeker dat je alle tags wilt verwijderen?`);
+        let confirmText = $t(`d3e9fd5b-9abc-4473-97e7-0c7734c2f14d`);
 
         if (allTags.length) {
             const deleteCount = deletedTags.length;
             const selectionCount = allTags.length;
             const deletedTagsString = deletedTags.map(t => t.name).join(', ');
-            const selectionText = selectionCount === 1 ? $t(`Er is 1 tag geselecteerd.`) : `Er zijn ${selectionCount} tags geselecteerd.`;
+            const selectionText = selectionCount === 1 ? $t(`7b73af21-99ab-4b47-8e50-e3930ebc3058`) : `Er zijn ${selectionCount} tags geselecteerd.`;
 
             if (deletedTagsString.length > 100) {
                 confirmText = `${selectionText} Ben je zeker dat je ${deleteCount} tags wilt verwijderen?`;
@@ -147,7 +147,7 @@ async function save() {
             }
         }
 
-        const isConfirm = await CenteredMessage.confirm(confirmText, $t(`Ja`));
+        const isConfirm = await CenteredMessage.confirm(confirmText, $t(`1ae8cbc7-9ef5-43db-b9a3-0117dfa43be1`));
         if (!isConfirm) return false;
     }
 

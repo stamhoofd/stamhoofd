@@ -71,7 +71,7 @@ const defaultAgeGroupIdsDescription = computed(() => {
     if (props.responsibility.defaultAgeGroupIds === null) {
         return '';
     }
-    return $t(`Moet gekoppeld worden aan specifieke lokale leeftijdsgroepen`);
+    return $t(`67ff4ca3-6f9e-4f74-92f7-ea63acfdb3b8`);
 });
 
 const mergedRole = computed(() => {

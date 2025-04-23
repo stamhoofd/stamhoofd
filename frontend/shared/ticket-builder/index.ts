@@ -288,9 +288,9 @@ export class TicketBuilder {
         }
         else {
             if (!dryRun) {
-                this.document.text($t(`Bestelling #`) + this.order.number, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 5 * MM, lineGap: 2, paragraphGap: 2 });
+                this.document.text($t(`12be5ac0-8353-43a2-badb-ab3b27d156b3`) + this.order.number, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 5 * MM, lineGap: 2, paragraphGap: 2 });
             }
-            height += this.document.heightOfString($t(`Bestelling #`) + this.order.number, { align: 'left', width: COLUMN_MAX_WIDTH - 5 * MM, lineGap: 2, paragraphGap: 2 });
+            height += this.document.heightOfString($t(`12be5ac0-8353-43a2-badb-ab3b27d156b3`) + this.order.number, { align: 'left', width: COLUMN_MAX_WIDTH - 5 * MM, lineGap: 2, paragraphGap: 2 });
 
             if (!dryRun) {
                 this.document.text(this.order.data.customer.name, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 5 * MM, lineGap: 2, paragraphGap: 2 });
@@ -506,7 +506,7 @@ export class TicketBuilder {
         height = Math.max(height, qrHeight - expectedHeight);
 
         if (!dryRun) {
-            this.document.text($t(`Ticketverkoop via`) + ' ', PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN * 2, lineGap: 2, paragraphGap: 2, continued: true });
+            this.document.text($t(`b8130c70-0aa0-4156-b5e0-6125668b21f8`) + ' ', PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN * 2, lineGap: 2, paragraphGap: 2, continued: true });
             this.document.font('Metropolis-SemiBold');
             this.document.fillColor(COLOR_PRIMARY);
             this.document.text('Stamhoofd', { continued: false, link: I18nController.shared.countryCode === Country.Netherlands ? 'https://www.stamhoofd.nl' : 'https://www.stamhoofd.be' });

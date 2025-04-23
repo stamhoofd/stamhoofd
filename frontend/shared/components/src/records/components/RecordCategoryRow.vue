@@ -69,24 +69,24 @@ function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t(`Wijzig instellingen`),
+                name: $t(`df8def26-260a-431b-a7fe-09fac12f97e0`),
                 icon: 'settings',
                 action: () => editCategory(),
             }),
             new ContextMenuItem({
-                name: $t(`Categorie dupliceren`),
+                name: $t(`d4ac382c-5394-4451-a25b-3b97f6d60168`),
                 icon: 'copy',
                 action: () => addCategory(props.category.duplicate()),
             }),
             new ContextMenuItem({
-                name: $t(`Categorie verwijderen`),
+                name: $t(`4b50022e-7937-4b21-b97f-35af4430ed9a`),
                 icon: 'trash',
                 action: () => deleteCategory(),
             }),
         ],
         [
             new ContextMenuItem({
-                name: $t(`Verplaats omhoog`),
+                name: $t(`fa96b3e2-08bc-4ce1-9562-e09eb26bcd5b`),
                 icon: 'arrow-up',
                 action: () => {
                     up();
@@ -94,7 +94,7 @@ function showContextMenu(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`Verplaats omlaag`),
+                name: $t(`dd2032e6-7a34-4027-a678-dbda939782c1`),
                 icon: 'arrow-down',
                 action: () => {
                     down();
@@ -104,12 +104,12 @@ function showContextMenu(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: $t(`Verplaats naar vragenlijst`),
+                name: $t(`58351618-cc4a-4785-a8c7-dfd741aa9985`),
                 disabled: props.category.childCategories.length !== 0,
                 childMenu: new ContextMenu([
                     [
                         new ContextMenuItem({
-                            name: $t(`Hoofdvragenlijst`),
+                            name: $t(`ba261762-9151-487c-a3a1-deb1c59e2a14`),
                             disabled: true,
                         }),
                     ],
@@ -119,7 +119,7 @@ function showContextMenu(event: MouseEvent) {
                             disabled: c.id === props.category.id,
                             action: async () => {
                                 // Transform into a root category
-                                if (!await CenteredMessage.confirm($t(`Ben je zeker dat je deze vragenlijst wilt verplaatsen?`), $t(`Ja, verplaatsen`), $t(`Deze vragenlijst zal worden verplaatst naar de gekozen vragenlijst (`) + c.name + ').')) {
+                                if (!await CenteredMessage.confirm($t(`e48fd329-0701-47d6-998e-7598691b0200`), $t(`9a384a73-d222-49f8-9203-76b8e525f1ab`), $t(`34760087-cbb3-416b-b4ef-212f15fc07a8`) + c.name + ').')) {
                                     return;
                                 }
 
@@ -145,7 +145,7 @@ function showContextMenu(event: MouseEvent) {
 }
 
 async function deleteCategory() {
-    if (!await CenteredMessage.confirm($t(`Weet je zeker dat je deze vragenlijst wilt verwijderen?`), $t(`Verwijderen`), $t(`Nadat je hebt opgeslagen kan je dit niet meer ongedaan maken`))) {
+    if (!await CenteredMessage.confirm($t(`95557c11-2b92-4a70-8945-99f6c6f7051c`), $t(`faae9011-c50d-4ada-aed0-c1b578782b2a`), $t(`e955be72-7a4e-4a0d-9872-043cf75f1134`))) {
         return;
     }
 

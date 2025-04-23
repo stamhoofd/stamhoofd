@@ -276,7 +276,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
                         new SimpleError({
                             code: 'email_hard_bounce',
                             message: 'Recipient has hard bounced',
-                            human: $t(`Dit e-mailadres is waarschijnlijk ongeldig. We konden eerder geen e-mails naar dit adres sturen.`),
+                            human: $t(`af49a569-ce88-48d9-ac37-81e594e16c03`),
                         }),
                     );
                 }
@@ -290,7 +290,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
                         new SimpleError({
                             code: 'email_spam',
                             message: 'Recipient has marked as spam',
-                            human: $t(`Dit e-mailadres heeft eerder een e-mail als spam gemarkeerd. We kunnen geen e-mails naar dit adres sturen.`),
+                            human: $t(`e6523f56-397e-4127-8bf7-8396f6f25a62`),
                         }),
                     );
                 }
@@ -427,7 +427,7 @@ export async function fillRecipientReplacements(recipient: Recipient, options: {
         Replacement.create({
             token: 'loginDetails',
             value: '',
-            html: recipientUser && recipientUser.hasAccount() ? `<p class="description"><em>${$t('Je kan op het ledenportaal inloggen met')} <strong>${Formatter.escapeHtml(recipientUser.email)}</strong></em></p>` : `<p class="description"><em>${$t('Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres')} <strong>${Formatter.escapeHtml(recipient.email)}</strong>${$t(', dan krijg je automatisch toegang tot alle bestaande gegevens.')}</em></p>`,
+            html: recipientUser && recipientUser.hasAccount() ? `<p class="description"><em>${$t('2fa762f2-c061-4c40-83cb-6ddc3e5f0f7a')} <strong>${Formatter.escapeHtml(recipientUser.email)}</strong></em></p>` : `<p class="description"><em>${$t('c2af5148-15a7-44b1-aa3e-91cfc4c66013')} <strong>${Formatter.escapeHtml(recipient.email)}</strong>${$t('f3aa8253-d88e-41c7-8c98-ed477806c533')}</em></p>`,
         }),
     );
 

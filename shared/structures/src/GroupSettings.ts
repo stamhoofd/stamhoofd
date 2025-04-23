@@ -39,7 +39,7 @@ export class GroupPrice extends AutoEncoder {
     id: string;
 
     @field({ decoder: StringDecoder })
-    name = $t(`Standaardtarief`);
+    name = $t(`e3ef8c27-f909-4725-b97b-2cbbd9f24bb5`);
 
     @field({ decoder: ReduceablePrice })
     price = ReduceablePrice.create({});
@@ -663,84 +663,84 @@ export class GroupSettings extends AutoEncoder {
         if (includeAge && this.minYear && this.maxYear) {
             if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
-                    who += $t(`mannen geboren in`);
+                    who += $t(`8e4c1895-286b-47e7-94c6-fceb63947706`);
                 }
                 else {
-                    who += $t(`jongens geboren in`);
+                    who += $t(`901e5ba0-d0f3-41f8-a611-0a93f469cecd`);
                 }
             }
             else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
                 if (this.forAdults) {
-                    who += $t(`vrouwen geboren in`);
+                    who += $t(`48f7fb2e-28fc-433d-8834-37c9fcfbe862`);
                 }
                 else {
-                    who += $t(`meisjes geboren in`);
+                    who += $t(`d3a6a788-8354-46f1-911e-a452763a5ae8`);
                 }
             }
             else {
-                who += $t(`geboren in`);
+                who += $t(`77019f85-9898-4fda-8ae3-d6ac3bc9ad3b`);
             }
             who += ' ' + (this.minYear) + ' - ' + (this.maxYear);
         }
         else if (includeAge && this.maxYear) {
             if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
-                    who += $t(`mannen geboren in of voor`);
+                    who += $t(`2d09d9be-60e7-4872-8f01-aabd51be4f1a`);
                 }
                 else {
-                    who += $t(`jongens geboren in of voor`);
+                    who += $t(`b9f4f3d8-8f34-4a20-9361-071079b64cf5`);
                 }
             }
             else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
                 if (this.forAdults) {
-                    who += $t(`vrouwen geboren in of voor`);
+                    who += $t(`6c4c2f13-07ce-4ac6-950b-5d28971a753d`);
                 }
                 else {
-                    who += $t(`meisjes geboren in of voor`);
+                    who += $t(`3447343b-372f-4b3c-88ed-8263a8a34557`);
                 }
             }
             else {
-                who += $t(`geboren in of voor`);
+                who += $t(`e3d49378-ea73-4fcd-9113-7c5bc0cc7591`);
             }
             who += ' ' + (this.maxYear);
         }
         else if (includeAge && this.minYear) {
             if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
-                    who += $t(`mannen geboren in of na`);
+                    who += $t(`521b46d2-0e9b-43e8-9a1a-a5e5cb84934a`);
                 }
                 else {
-                    who += $t(`jongens geboren in of na`);
+                    who += $t(`e00ec6db-06f6-4a11-affe-d79c30fdd17a`);
                 }
             }
             else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
                 if (this.forAdults) {
-                    who += $t(`vrouwen geboren in of na`);
+                    who += $t(`441ecbc8-3e95-4820-ac06-253de87162e1`);
                 }
                 else {
-                    who += $t(`meisjes geboren in of na`);
+                    who += $t(`8d49f3be-7c08-4526-af54-783466d3d40d`);
                 }
             }
             else {
-                who += $t(`geboren in of na`);
+                who += $t(`6e4da2b1-9694-49f1-9238-94e784044897`);
             }
             who += ' ' + (this.minYear);
         }
         else if (includeGender) {
             if (this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
-                    who += $t(`mannen`);
+                    who += $t(`da7c4439-18f9-4f20-a1f0-f5f1815d1bb9`);
                 }
                 else {
-                    who += $t(`jongens`);
+                    who += $t(`06ab1d42-107d-46d8-8eba-cb62d12068b9`);
                 }
             }
             else if (this.genderType === GroupGenderType.OnlyFemale) {
                 if (this.forAdults) {
-                    who += $t(`vrouwen`);
+                    who += $t(`128eb9e9-d470-49b0-8342-012e484c4daa`);
                 }
                 else {
-                    who += $t(`meisjes`);
+                    who += $t(`43e158dd-aab2-4f5c-9e35-f56ff556cc51`);
                 }
             }
         }

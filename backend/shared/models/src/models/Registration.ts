@@ -261,7 +261,7 @@ export class Registration extends QueryableModel {
                     }),
                     Replacement.create({
                         token: 'overviewContext',
-                        value: $t(`Inschrijving van`) + ' ' + paymentGeneral.memberNames,
+                        value: $t(`01d5fd7e-2960-4eb4-ab3a-2ac6dcb2e39c`) + ' ' + paymentGeneral.memberNames,
                     }),
                     Replacement.create({
                         token: 'memberNames',

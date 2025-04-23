@@ -64,7 +64,7 @@ const levelPrefix = computed(() => {
             prefixes.push(...tagNames);
         }
         else {
-            prefixes.push($t(`Nationaal`));
+            prefixes.push($t(`81df09d0-56ee-491d-b474-85173b1401dd`));
         }
     }
     else {
@@ -79,7 +79,7 @@ const levelPrefix = computed(() => {
         }
     }
 
-    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`en`) + ' ');
+    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ');
 });
 
 const prefix = computed(() => {
@@ -99,7 +99,7 @@ const prefix = computed(() => {
             prefixes.push(group.name);
         }
     }
-    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`en`) + ' ');
+    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ');
 });
 
 </script>

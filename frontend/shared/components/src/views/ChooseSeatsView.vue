@@ -66,7 +66,7 @@ import SeatSelectionBox from './SeatSelectionBox.vue';
         priceChange: Formatter.priceChange.bind(Formatter),
         priceFree: (p: number) => {
             if (p === 0) {
-                return $t(`Gratis`);
+                return $t(`30e129d7-349d-4369-a8c4-c86b82ce2e01`);
             }
             return Formatter.price(p);
         },
@@ -107,18 +107,18 @@ export default class ChooseSeatsView extends Mixins(NavigationMixin) {
 
     get title() {
         if (this.remainingAmount === 0) {
-            return $t(`Bevestig je plaatsen`);
+            return $t(`0c406033-5a4a-4fa7-b3f2-d8702cf9a493`);
         }
 
         if (this.remainingAmount === this.amount) {
-            return `Kies ${Formatter.pluralText(this.remainingAmount, $t(`plaats`), $t(`plaatsen`))}`;
+            return `Kies ${Formatter.pluralText(this.remainingAmount, $t(`6cf46298-748e-46b3-84ab-646e1e16b3a8`), $t(`df624041-eee5-45b1-9cfb-b9ba48793f9e`))}`;
         }
 
-        return `Kies nog ${Formatter.pluralText(this.remainingAmount, $t(`plaats`), $t(`plaatsen`))}`;
+        return `Kies nog ${Formatter.pluralText(this.remainingAmount, $t(`6cf46298-748e-46b3-84ab-646e1e16b3a8`), $t(`df624041-eee5-45b1-9cfb-b9ba48793f9e`))}`;
     }
 
     get description() {
-        return $t(`Kies in totaal`) + ' ' + Formatter.pluralText(this.amount, $t(`plaats`), $t(`plaatsen`)) + ' ' + $t(`door de plaatsen één voor één aan te klikken. Je kan een plaats deselecteren door er nog eens op te klikken.`);
+        return $t(`91e96a8b-b24b-4c57-a6a7-24bcdeeb1834`) + ' ' + Formatter.pluralText(this.amount, $t(`6cf46298-748e-46b3-84ab-646e1e16b3a8`), $t(`df624041-eee5-45b1-9cfb-b9ba48793f9e`)) + ' ' + $t(`5bb04c82-7366-4c36-ae04-1d2be15b528a`);
     }
 
     get seatingPlanSection() {
@@ -197,7 +197,7 @@ export default class ChooseSeatsView extends Mixins(NavigationMixin) {
 
                 this.errorBox = new ErrorBox(new SimpleError({
                     code: 'adjusted',
-                    message: $t(`We hebben jouw gekozen plaatsen aangepast zodat er minder enkele plaatsen overblijven. Klik opnieuw op "Bevestigen" om verder te gaan.`),
+                    message: $t(`1009735f-288b-469a-a520-ddd9d83c4ff1`),
                 }));
                 return;
             }

@@ -172,7 +172,7 @@ export function getNoPermissionsView() {
         tabs: [
             new TabBarItem({
                 icon: 'key',
-                name: $t(`Geen toegang`),
+                name: $t(`6fef52a1-82a9-456f-a51e-b32eea13b889`),
                 component: new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(NoPermissionsView, {}),
                 }),
@@ -269,13 +269,13 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
 
     const startTab = new TabBarItem({
         icon: 'home',
-        name: $t(`Start`),
+        name: $t(`3e23e0d2-ec8c-44f9-92fa-a1fce10c0185`),
         component: startView,
     });
 
     const membersTab = new TabBarItem({
         icon: 'group',
-        name: $t(`Leden`),
+        name: $t(`fb35c140-e936-4e91-aa92-ef4dfc59fb51`),
         component: new ComponentWithProperties(SplitViewController, {
             root: AsyncComponent(() => import('./views/members/MembersMenu.vue'), {}),
         }),
@@ -283,7 +283,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
 
     const calendarTab = new TabBarItem({
         icon: 'calendar',
-        name: $t(`Activiteiten`),
+        name: $t(`6ec2f1fd-3f8f-4814-9442-e628eea062a3`),
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(ManageEventsView, {}),
         }),
@@ -291,7 +291,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
 
     const webshopsTab = new TabBarItem({
         icon: 'basket',
-        name: $t(`Verkoop`),
+        name: $t(`dcddc3ae-d5cb-4e28-b7bd-a38020ce64ba`),
         component: new ComponentWithProperties(SplitViewController, {
             root: AsyncComponent(() => import('./views/webshops/WebshopsMenu.vue'), {}),
         }),
@@ -315,7 +315,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
 
     const settingsTab = new TabBarItem({
         icon: 'settings',
-        name: $t(`Instellingen`),
+        name: $t(`5ca94078-d742-4e17-abf7-957c4721a559`),
         component: new ComponentWithProperties(SplitViewController, {
             root: AsyncComponent(() => import('./views/dashboard/settings/SettingsView.vue'), {}),
         }),
@@ -323,7 +323,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
 
     const financesTab = new TabBarItem({
         icon: 'calculator',
-        name: $t(`Boekhouding`),
+        name: $t(`9bd091b0-0e9f-41f9-8896-8f2b9e64550c`),
         component: new ComponentWithProperties(SplitViewController, {
             root: AsyncComponent(() => import('./views/dashboard/settings/FinancesView.vue'), {}),
         }),
@@ -331,7 +331,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
 
     const documentsTab = new TabBarItem({
         icon: 'file-filled',
-        name: $t(`Documenten`),
+        name: $t(`57ecaa64-a660-40fd-abf3-0bcf541ed8e6`),
         component: new ComponentWithProperties(SplitViewController, {
             root: AsyncComponent(() => import('./views/dashboard/documents/DocumentTemplatesView.vue'), {}),
         }),
@@ -339,7 +339,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
 
     const auditLogsTab = new TabBarItem({
         icon: 'history',
-        name: $t(`Logboek`),
+        name: $t(`b33a8267-18b5-4775-94b0-64bdcae3bfa4`),
         component: new ComponentWithProperties(SplitViewController, {
             root: new ComponentWithProperties(AuditLogsView, {}),
         }),
@@ -351,7 +351,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
         sharedMoreItems.push(
             new TabBarItem({
                 icon: 'gift',
-                name: $t(`Wat is er nieuw?`),
+                name: $t(`1b84643d-ab39-4c9e-89d9-ebfa98277a40`),
                 badge: whatsNewBadge,
                 action: async function () {
                     window.open(STAMHOOFD.CHANGELOG_URL![STAMHOOFD.fixedCountry ?? reactiveSession.organization?.address?.country ?? ''] ?? STAMHOOFD.CHANGELOG_URL![''], '_blank');
@@ -366,7 +366,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
         sharedMoreItems.push(
             new TabBarItem({
                 icon: 'book',
-                name: $t(`Documentatie`),
+                name: $t(`031cfca3-ca9a-44cc-95b5-03c81948f765`),
                 action: async function () {
                     window.open('https://' + LocalizedDomains.documentation, '_blank');
                 },
@@ -378,7 +378,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
         sharedMoreItems.push(
             new TabBarItem({
                 icon: 'feedback',
-                name: $t(`Feedback`),
+                name: $t(`630ab37a-85c8-4bbd-a281-b87e82a976d5`),
                 action: async function () {
                     const NoltHelper = (await import('./classes/NoltHelper'));
                     await NoltHelper.openNolt(reactiveSession, false);
@@ -422,7 +422,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
 
                         const moreTab = new TabBarItemGroup({
                             icon: 'category',
-                            name: $t(`Meer`),
+                            name: $t(`95bb5f36-a709-4724-bf21-9793911af5d6`),
                             items: [
                                 ...sharedMoreItems, // need to create a new array, don't pass directly!
                             ],

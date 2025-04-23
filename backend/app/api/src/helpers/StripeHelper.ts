@@ -215,7 +215,7 @@ export class StripeHelper {
         if (!stripeAccount) {
             throw new SimpleError({
                 code: '',
-                message: $t(`Betaling via {method} is onbeschikbaar`, { method: PaymentMethodHelper.getName(payment.method) }),
+                message: $t(`b77e1f68-8928-42a2-802b-059fa73bedc3`, { method: PaymentMethodHelper.getName(payment.method) }),
             });
         }
 
@@ -225,7 +225,7 @@ export class StripeHelper {
             throw new SimpleError({
                 code: 'minmum_amount',
                 message: 'The minimum amount for an online payment is € 0,50',
-                human: $t(`Het minimum bedrag voor een online betaling is € 0,50`),
+                human: $t(`dae9058f-0aa7-4fcb-9f1d-fc918c65784b`),
             });
         }
 
@@ -267,7 +267,7 @@ export class StripeHelper {
             const paymentMethod = await stripe.paymentMethods.create({
                 type: payment.method.toLowerCase() as 'bancontact' | 'ideal',
                 billing_details: {
-                    name: payment.customer?.dynamicName || (customer.name.length > 2 ? customer.name : $t(`Onbekend`)),
+                    name: payment.customer?.dynamicName || (customer.name.length > 2 ? customer.name : $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`)),
                     email: payment.customer?.dynamicEmail || customer.email,
                     address: payment.customer?.company?.address
                         ? {
@@ -306,7 +306,7 @@ export class StripeHelper {
                 console.error('Stripe payment intent status is not requires_action', paymentIntent);
                 throw new SimpleError({
                     code: 'invalid_status',
-                    message: $t(`Betaling via`) + ' ' + PaymentMethodHelper.getName(payment.method) + ' ' + $t(`is onbeschikbaar`),
+                    message: $t(`55d699ae-3da4-45ca-a30e-0f194b08edf7`) + ' ' + PaymentMethodHelper.getName(payment.method) + ' ' + $t(`277dc49e-922a-444f-ba2b-b3442d855358`),
                 });
             }
 
@@ -347,7 +347,7 @@ export class StripeHelper {
                 throw new SimpleError({
                     code: 'invalid_price',
                     message: 'De totale prijs van de betaling komt niet overeen met de prijs van de items',
-                    human: $t(`Er ging iets mis bij het aanmaken van de betaling. Probeer opnieuw of gebruik een andere betaalmethode.`),
+                    human: $t(`e66b54d3-70fb-4b40-b3e5-21bc795ba704`),
                     statusCode: 500,
                 });
             }
@@ -389,7 +389,7 @@ export class StripeHelper {
                 console.error('Stripe session has no url', session);
                 throw new SimpleError({
                     code: 'invalid_status',
-                    message: $t(`Betaling via`) + ' ' + PaymentMethodHelper.getName(payment.method) + ' ' + $t(`is onbeschikbaar`),
+                    message: $t(`55d699ae-3da4-45ca-a30e-0f194b08edf7`) + ' ' + PaymentMethodHelper.getName(payment.method) + ' ' + $t(`277dc49e-922a-444f-ba2b-b3442d855358`),
                 });
             }
             paymentUrl = session.url;

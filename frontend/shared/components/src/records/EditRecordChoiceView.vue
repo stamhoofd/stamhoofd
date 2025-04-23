@@ -147,9 +147,9 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
 
     get title(): string {
         if (this.isNew) {
-            return $t(`Nieuwe optie`);
+            return $t(`1fc71f7e-0985-4ea7-afc7-aeb29b5d2d8d`);
         }
-        return $t(`Optie bewerken`);
+        return $t(`d35c5964-e8e9-4a42-bdd0-555ab32eda7c`);
     }
 
     get name() {
@@ -273,7 +273,7 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
     }
 
     async deleteMe() {
-        if (!await CenteredMessage.confirm($t(`Ben je zeker dat je deze optie wilt verwijderen?`), $t(`Verwijderen`))) {
+        if (!await CenteredMessage.confirm($t(`e817f9c6-5714-44b9-93f0-bf698a4d2723`), $t(`faae9011-c50d-4ada-aed0-c1b578782b2a`))) {
             return;
         }
 
@@ -302,7 +302,7 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
         if (!this.hasChanges) {
             return true;
         }
-        return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
+        return await CenteredMessage.confirm($t(`c9111e95-2f59-4164-b0af-9fbf434bf6dd`), $t(`de41b0f3-1297-4058-b390-3bfb99e3d4e0`));
     }
 }
 </script>

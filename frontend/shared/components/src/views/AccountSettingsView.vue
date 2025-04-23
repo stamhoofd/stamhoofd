@@ -299,7 +299,7 @@ async function save() {
             await present(new ComponentWithProperties(ConfirmEmailView, { token: result.verificationToken, email: patched.value.email }).setDisplayStyle('sheet'));
         }
         else {
-            const toast = new Toast($t(`De wijzigingen zijn opgeslagen`), 'success green');
+            const toast = new Toast($t(`5a1df63c-b028-4a77-a2bf-d595a74f29a3`), 'success green');
             toast.show();
         }
 
@@ -324,16 +324,16 @@ async function deleteRequest() {
     await present({
         components: [
             new ComponentWithProperties(DeleteView, {
-                title: $t(`Verwijder jouw account?`),
+                title: $t(`de26c235-6736-40b9-880a-82046fc2da66`),
                 description: `Ben je 100% zeker dat je jouw account wilt verwijderen? Vul dan je huidige e-mailadres in ter bevestiging. Al jouw gegevens gaan verloren. Je kan dit niet ongedaan maken.`,
-                confirmationTitle: $t(`Bevestig je e-mailadres`),
-                confirmationPlaceholder: $t(`Huidige e-mailadres`),
+                confirmationTitle: $t(`6d4c71ba-0757-4792-aab1-a0b7b80e7c30`),
+                confirmationPlaceholder: $t(`6a5dd477-ac82-48a1-9b7a-341192783e22`),
                 confirmationCode,
-                checkboxText: $t(`Ja, ik ben 100% zeker`),
+                checkboxText: $t(`b0427a33-f98d-439d-8625-0727c3cf53c3`),
                 onDelete: async () => {
                     await $context.value.deleteAccount();
 
-                    Toast.success($t(`Je account is verwijderd. Het kan even duren voor jouw aanvraag volledig is verwerkt.`)).show();
+                    Toast.success($t(`df74b936-f96f-4853-9bce-57239b3263f3`)).show();
                     await pop({ force: true });
                     return true;
                 },
@@ -355,7 +355,7 @@ async function disconnectProvider(provider: LoginProviderType) {
     }
     disconnecting = true;
 
-    if (await CenteredMessage.confirm($t(`Ben je zeker dat je deze inlogmethode wilt deactiveren?`), $t(`Ja, deactiveren`))) {
+    if (await CenteredMessage.confirm($t(`5f824a9b-6fda-4aa2-be1b-eca5c82eccef`), $t(`188ff806-6983-4912-ae35-b11e2621c5b5`))) {
         const metaPatch = UserMeta.patch({});
         metaPatch.loginProviderIds.set(provider, null);
 
@@ -368,7 +368,7 @@ async function disconnectProvider(provider: LoginProviderType) {
 
         try {
             await LoginHelper.patchUser($context.value, patch);
-            Toast.success($t(`De inlogmethode is ontkoppeld`)).show();
+            Toast.success($t(`3772eed6-90ea-45a9-90bc-f895f4c80651`)).show();
         }
         catch (e) {
             errors.errorBox = new ErrorBox(e);
@@ -378,7 +378,7 @@ async function disconnectProvider(provider: LoginProviderType) {
 }
 
 async function deletePassword() {
-    if (await CenteredMessage.confirm($t(`Ben je zeker dat je jouw wachtwoord wilt verwijderen?`), $t(`Ja, verwijderen`))) {
+    if (await CenteredMessage.confirm($t(`a5f68615-9c65-4a37-bfb2-dae9774c912c`), $t(`3e204a5f-3198-4125-ac32-fcf973e144b2`))) {
         const patch = NewUser.patch({
             id: $user.value!.id,
             hasPassword: false,
@@ -388,7 +388,7 @@ async function deletePassword() {
 
         try {
             await LoginHelper.patchUser($context.value, patch);
-            Toast.success($t(`Je wachtwoord is verwijderd`)).show();
+            Toast.success($t(`06d6ec0d-c5d9-4251-a749-23c400e61905`)).show();
         }
         catch (e) {
             errors.errorBox = new ErrorBox(e);
@@ -404,7 +404,7 @@ async function connectProvider(provider: LoginProviderType) {
     }
     connecting.value = true;
 
-    if (await CenteredMessage.confirm($t(`Ben je zeker dat je deze inlogmethode wilt koppelen?`), $t(`Ja, koppelen`))) {
+    if (await CenteredMessage.confirm($t(`5fb8075f-4599-406c-a90e-4923be523a0a`), $t(`4b2b58ff-d6fc-46c9-8a99-638b1ce2b0d4`))) {
         // This will redirect, so the loading will stay forever
         await $context.value.startSSO({
             providerType: provider,
@@ -414,7 +414,7 @@ async function connectProvider(provider: LoginProviderType) {
 }
 
 async function logout() {
-    if (await CenteredMessage.confirm($t(`Ben je zeker dat je wilt uitloggen?`), $t(`Uitloggen`))) {
+    if (await CenteredMessage.confirm($t(`034eed1e-a6b2-41ee-8ca1-b6bdacbd0d9c`), $t(`e3398474-26b0-49d4-9f64-bae38495fb4f`))) {
         // Prevent auto sign in via sso
         try {
             sessionStorage.setItem('triedLogin', 'true');

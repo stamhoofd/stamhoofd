@@ -64,7 +64,7 @@ export class EventNotificationViewModel {
     }
 
     get type() {
-        return this.platform.config.eventNotificationTypes.find(t => t.id === this.eventNotification.typeId) ?? EventNotificationType.create({ title: $t(`Onbekend`) });
+        return this.platform.config.eventNotificationTypes.find(t => t.id === this.eventNotification.typeId) ?? EventNotificationType.create({ title: $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`) });
     }
 
     useType() {

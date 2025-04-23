@@ -64,7 +64,7 @@ const priceString = computed(() => {
             if (props.webshop.isAllFree) {
                 return '';
             }
-            return $t(`Gratis`);
+            return $t(`30e129d7-349d-4369-a8c4-c86b82ce2e01`);
         }
         return Formatter.price(priceRanges[0]);
     }
@@ -92,7 +92,7 @@ const stockText = computed(() => {
 
     if (remainingWithoutCart === 0) {
         return {
-            text: $t(`Uitverkocht`),
+            text: $t(`0100521c-b38e-4925-9484-44d44f3dfa09`),
             style: 'error',
         };
     }
@@ -109,7 +109,7 @@ const stockText = computed(() => {
         }
 
         return {
-            text: $t(`Nog {count}`, { count: props.product.getRemainingStockText(remainingWithoutCart) }),
+            text: $t(`3ba66a09-31bc-4bef-9bba-ca44d5480c42`, { count: props.product.getRemainingStockText(remainingWithoutCart) }),
             style: 'warn',
         };
     }
@@ -120,7 +120,7 @@ const stockText = computed(() => {
 
     if (maxOrder && maxOrder.remaining === 0) {
         return {
-            text: $t(`Maximum bereikt`),
+            text: $t(`947eb845-90da-43e5-a3bb-78903f7edd72`),
             style: 'error',
         };
     }
@@ -136,13 +136,13 @@ const stockText = computed(() => {
 
     if (remaining === 0) {
         return {
-            text: $t(`Maximum bereikt`),
+            text: $t(`947eb845-90da-43e5-a3bb-78903f7edd72`),
             style: 'error',
         };
     }
 
     return {
-        text: $t(`Nog {count}`, {count: props.product.getRemainingStockText(remaining)}),
+        text: $t(`3ba66a09-31bc-4bef-9bba-ca44d5480c42`, {count: props.product.getRemainingStockText(remaining)}),
         style: 'warn',
     };
 });
