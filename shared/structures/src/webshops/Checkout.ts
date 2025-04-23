@@ -3,6 +3,8 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import { Formatter } from '@stamhoofd/utility';
 
 import { ValidatedAddress } from '../addresses/Address.js';
+import { compileToInMemoryFilter } from '../filters/InMemoryFilter.js';
+import { checkoutInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions.js';
 import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import { I18n } from '../I18nInterface.js';
 import { ObjectWithRecords, PatchAnswers } from '../members/ObjectWithRecords.js';
@@ -20,8 +22,6 @@ import { DiscountCode } from './DiscountCode.js';
 import { Webshop } from './Webshop.js';
 import { WebshopFieldAnswer } from './WebshopField.js';
 import { AnyCheckoutMethodDecoder, CheckoutMethod, CheckoutMethodType, WebshopDeliveryMethod, WebshopTimeSlot } from './WebshopMetaData.js';
-import { compileToInMemoryFilter } from '../filters/InMemoryFilter.js';
-import { checkoutInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions.js';
 
 export class Checkout extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: WebshopTimeSlot, nullable: true })
@@ -142,26 +142,26 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
     get priceBreakown(): PriceBreakdown {
         const all = [
             {
-                name: Formatter.percentage(this.percentageDiscount) + ' korting',
+                name: Formatter.percentage(this.percentageDiscount) + ' ' + $t(`korting`),
                 price: -this.appliedPercentageDiscount,
             },
             {
-                name: 'Korting',
+                name: $t(`Korting`),
                 price: -this.fixedDiscount,
             },
             {
-                name: 'Leveringskost',
+                name: $t(`Leveringskost`),
                 price: this.deliveryPrice,
             },
             {
-                name: 'Administratiekost',
+                name: $t(`Administratiekost`),
                 price: this.administrationFee,
             },
         ].filter(a => a.price !== 0);
 
         if (all.length > 0) {
             all.unshift({
-                name: 'Subtotaal',
+                name: $t(`Subtotaal`),
                 price: this.cart.priceWithDiscounts,
             });
         }
@@ -169,7 +169,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         return [
             ...all,
             {
-                name: 'Totaal',
+                name: $t(`Totaal`),
                 price: this.totalPrice,
             },
         ];
@@ -236,7 +236,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'cart_empty',
                 message: 'Cart is empty',
-                human: 'Jouw winkelmandje is leeg',
+                human: $t(`Jouw winkelmandje is leeg`),
                 field: 'cart',
             });
         }
@@ -262,7 +262,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'closed',
                 message: 'Orders are closed',
-                human: 'Helaas! Je bent te laat. De bestellingen zijn gesloten.',
+                human: $t(`Helaas! Je bent te laat. De bestellingen zijn gesloten.`),
             });
         }
 
@@ -270,7 +270,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'closed',
                 message: 'Orders are closed',
-                human: 'Nog even geduld. Bestellen kan vanaf ' + Formatter.dateTime(webshop.meta.openAt) + '.',
+                human: $t(`Nog even geduld. Bestellen kan vanaf {date}.`, { date: Formatter.dateTime(webshop.meta.openAt) }),
             });
         }
 
@@ -278,7 +278,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'closed',
                 message: 'Orders are closed',
-                human: 'De webshop is gesloten. Je kan niet langer bestellen.',
+                human: $t(`De webshop is gesloten. Je kan niet langer bestellen.`),
             });
         }
     }
@@ -289,7 +289,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'missing_checkout_method',
                     message: 'Checkout method is required',
-                    human: 'Er zijn enkele instellingen gewijzigd terwijl je aan het bestellen was. Herlaad de pagina en probeer opnieuw.',
+                    human: $t(`Er zijn enkele instellingen gewijzigd terwijl je aan het bestellen was. Herlaad de pagina en probeer opnieuw.`),
                     field: 'checkoutMethod',
                 });
             }
@@ -307,7 +307,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'invalid_checkout_method',
                 message: 'Checkout method is invalid',
-                human: 'Er zijn enkele instellingen gewijzigd terwijl je aan het bestellen was. Herlaad de pagina en probeer opnieuw.',
+                human: $t(`Er zijn enkele instellingen gewijzigd terwijl je aan het bestellen was. Herlaad de pagina en probeer opnieuw.`),
                 field: 'checkoutMethod',
             });
         }
@@ -324,7 +324,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'invalid_data_type',
                 message: 'Invalid data type',
-                human: 'Er ontbreekt data. Probeer het opnieuw of neem contact op met de webshop eigenaar om dit te melden.',
+                human: $t(`Er ontbreekt data. Probeer het opnieuw of neem contact op met de webshop eigenaar om dit te melden.`),
                 field: 'address',
             });
         }
@@ -333,7 +333,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'missing_address',
                 message: 'Checkout address is invalid',
-                human: 'Een leveringsadres is noodzakelijk, herlaad de pagina opnieuw en vul een leveringsadres in.',
+                human: $t(`Een leveringsadres is noodzakelijk, herlaad de pagina opnieuw en vul een leveringsadres in.`),
                 field: 'address',
             });
         }
@@ -358,7 +358,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         throw new SimpleError({
             code: 'region_not_supported',
             message: 'Region not supported',
-            human: 'We leveren jammer genoeg niet op dit adres.',
+            human: $t(`We leveren jammer genoeg niet op dit adres.`),
             field: 'address',
         });
     }
@@ -373,7 +373,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'missing_timeslot',
                 message: 'Checkout timeslot is missings',
-                human: 'Kies een tijdstip, herlaad de pagina opnieuw en maak een keuze.',
+                human: $t(`Kies een tijdstip, herlaad de pagina opnieuw en maak een keuze.`),
                 field: 'timeSlot',
             });
         }
@@ -386,7 +386,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'invalid_timeslot',
                 message: 'Checkout timeslot is invalid',
-                human: 'Het afhaaltijdstip dat je had gekozen werd gewijzigd terwijl je aan het bestellen was, kies een nieuw tijdstip.',
+                human: $t(`Het afhaaltijdstip dat je had gekozen werd gewijzigd terwijl je aan het bestellen was, kies een nieuw tijdstip.`),
                 field: 'timeSlot',
             });
         }
@@ -396,7 +396,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'timeslot_full',
                 message: 'Timeslot has reached maximum orders',
-                human: (availableTimeslots !== 1 ? 'Het gekozen tijdstip is helaas volzet. Kies een ander tijdstip indien mogelijk.' : 'Het evenement is helaas volzet. We aanvaarden geen verdere bestellingen.'),
+                human: (availableTimeslots !== 1 ? $t(`Het gekozen tijdstip is helaas volzet. Kies een ander tijdstip indien mogelijk.`) : $t(`Het evenement is helaas volzet. We aanvaarden geen verdere bestellingen.`)),
                 field: 'timeSlot',
             });
         }
@@ -408,14 +408,15 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'timeslot_full',
                     message: 'Timeslot has reached maximum orders',
-                    human: (availableTimeslots !== 1 ? 'Het gekozen tijdstip is helaas volzet. Kies een ander tijdstip indien mogelijk.' : 'Het evenement is helaas volzet. We aanvaarden geen verdere bestellingen.'),
+                    human: (availableTimeslots !== 1 ? $t(`Het gekozen tijdstip is helaas volzet. Kies een ander tijdstip indien mogelijk.`) : $t(`Het evenement is helaas volzet. We aanvaarden geen verdere bestellingen.`)),
                     field: 'timeSlot',
                 });
             }
             throw new SimpleError({
                 code: 'timeslot_full',
                 message: 'Timeslot has reached maximum persons',
-                human: 'Er ' + (remainingPersons !== 1 ? 'zijn' : 'is') + ' nog maar ' + remainingPersons + ' ' + (remainingPersons !== 1 ? 'plaatsen' : 'plaats') + ' vrij ' + (availableTimeslots !== 1 ? 'op het gekozen tijdstip' : 'voor dit evenement') + '. Jouw mandje is voor ' + this.cart.persons + ' ' + (this.cart.persons !== 1 ? 'personen' : 'persoon') + (availableTimeslots !== 1 ? '. Kies een ander tijdstip indien mogelijk.' : ''),
+                // todo translation
+                human: $t(`Er`) + ' ' + (remainingPersons !== 1 ? $t(`zijn`) : $t(`is`)) + ' ' + $t(`nog maar`) + ' ' + remainingPersons + ' ' + (remainingPersons !== 1 ? $t(`plaatsen`) : $t(`plaats`)) + ' ' + $t(`vrij`) + ' ' + (availableTimeslots !== 1 ? $t(`op het gekozen tijdstip`) : $t(`voor dit evenement`)) + $t(`. Jouw mandje is voor`) + ' ' + this.cart.persons + ' ' + (this.cart.persons !== 1 ? $t(`personen`) : $t(`persoon`)) + (availableTimeslots !== 1 ? $t(`. Kies een ander tijdstip indien mogelijk.`) : ''),
                 field: 'timeSlot',
             });
         }
@@ -438,7 +439,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'invalid_first_name',
                 message: 'Invalid first name',
-                human: 'De voornaam die je hebt opgegeven is ongeldig, corrigeer het voor je verder gaat.',
+                human: $t(`De voornaam die je hebt opgegeven is ongeldig, corrigeer het voor je verder gaat.`),
                 field: 'customer.firstName',
             });
         }
@@ -447,7 +448,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'invalid_last_name',
                 message: 'Invalid last name',
-                human: 'De achternaam die je hebt opgegeven is ongeldig, corrigeer het voor je verder gaat.',
+                human: $t(`De achternaam die je hebt opgegeven is ongeldig, corrigeer het voor je verder gaat.`),
                 field: 'customer.lastName',
             });
         }
@@ -472,7 +473,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'invalid_email',
                 message: 'Invalid email',
-                human: 'Het e-mailadres dat je hebt opgegeven is ongeldig, corrigeer het voor je verder gaat.',
+                human: $t('Het e-mailadres dat je hebt opgegeven is ongeldig, corrigeer het voor je verder gaat.'),
                 field: 'customer.email',
             });
         }
@@ -485,7 +486,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'missing_payment_method',
                 message: 'Missing payment method',
-                human: 'Kies een betaalmethode',
+                human: $t('Kies een betaalmethode'),
                 field: 'paymentMethod',
             });
         }
@@ -493,7 +494,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'invalid_payment_method',
                 message: 'Invalid payment method',
-                human: 'Deze betaalmethode is niet meer beschikbaar. Herlaad eventueel de pagina en probeer opnieuw.',
+                human: $t('Deze betaalmethode is niet meer beschikbaar. Herlaad eventueel de pagina en probeer opnieuw.'),
                 field: 'paymentMethod',
             });
         }

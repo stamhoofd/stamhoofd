@@ -67,7 +67,7 @@ export class TicketPublic extends Ticket {
 
     getTitle() {
         if (!this.isSingle) {
-            return 'Ticket';
+            return $t(`Ticket`);
         }
         return this.items[0].product.name;
     }
@@ -94,9 +94,9 @@ export class TicketPublic extends Ticket {
         const from = this.originalSeat.getNameString(webshop, item.product);
 
         if (isCustomer) {
-            return 'Jouw zitplaats werd gewijzigd van ' + from + ' naar ' + to;
+            return $t(`Jouw zitplaats werd gewijzigd van {from} naar {to}`, { from, to });
         }
-        return 'Deze zitplaats werd gewijzigd van ' + from + ' naar ' + to;
+        return $t(`Deze zitplaats werd gewijzigd van {from} naar {to}`, { from, to });
     }
 
     getIndexDescriptionString(webshop: Webshop | WebshopPreview) {
@@ -125,8 +125,8 @@ export class TicketPublic extends Ticket {
         }
         return [
             {
-                title: 'Plaats',
-                value: 'Onbekende plaats. Jouw toegekende plaats werd waarschijnlijk verwijderd. Neem contact met ons op om dit recht te zetten.',
+                title: $t(`Plaats`),
+                value: $t(`Onbekende plaats. Jouw toegekende plaats werd waarschijnlijk verwijderd. Neem contact met ons op om dit recht te zetten.`),
             },
         ];
     }

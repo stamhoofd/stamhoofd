@@ -15,9 +15,9 @@ export enum OptionSelectionRequirement {
 export class OptionSelectionRequirementHelper {
     static getName(requirement: OptionSelectionRequirement): string {
         switch (requirement) {
-            case OptionSelectionRequirement.Required: return 'Enkel met';
-            case OptionSelectionRequirement.Optional: return 'Met of zonder';
-            case OptionSelectionRequirement.Excluded: return 'Enkel zonder';
+            case OptionSelectionRequirement.Required: return $t(`Enkel met`);
+            case OptionSelectionRequirement.Optional: return $t(`Met of zonder`);
+            case OptionSelectionRequirement.Excluded: return $t(`Enkel zonder`);
         }
     }
 }
@@ -97,7 +97,7 @@ export class ProductSelector extends AutoEncoder {
         const product = webshop.products.find(p => p.id === this.productId);
         if (!product) {
             return {
-                name: 'Onbekend artikel',
+                name: $t(`Onbekend artikel`),
                 footnote: '',
             };
         }
@@ -120,13 +120,13 @@ export class ProductSelector extends AutoEncoder {
         });
 
         if (excludedOptions.length && requiredOptions.length === 0) {
-            footnote = 'Behalve voor keuzes met ' + Formatter.joinLast(excludedOptions.map(o => o.name), ', ', ' of ');
+            footnote = $t(`Behalve voor keuzes met`) + ' ' + Formatter.joinLast(excludedOptions.map(o => o.name), ', ', ' ' + $t(`of`) + ' ');
         }
         else if (excludedOptions.length === 0 && requiredOptions.length) {
-            footnote = 'Enkel indien gekozen voor ' + Formatter.joinLast(requiredOptions.map(o => o.name), ', ', ' en ');
+            footnote = $t(`Enkel indien gekozen voor`) + ' ' + Formatter.joinLast(requiredOptions.map(o => o.name), ', ', ' ' + $t(`en`) + ' ');
         }
         else if (excludedOptions.length && requiredOptions.length) {
-            footnote = 'Enkel indien gekozen voor ' + Formatter.joinLast(requiredOptions.map(o => o.name), ', ', ' en ') + ' en niet gekozen voor ' + Formatter.joinLast(excludedOptions.map(o => o.name), ', ', ' of ');
+            footnote = $t(`Enkel indien gekozen voor`) + ' ' + Formatter.joinLast(requiredOptions.map(o => o.name), ', ', ' ' + $t(`en`) + ' ') + ' ' + $t(`en niet gekozen voor`) + ' ' + Formatter.joinLast(excludedOptions.map(o => o.name), ', ', ' ' + $t(`of`) + ' ');
         }
 
         return {
@@ -290,19 +290,19 @@ export class ProductDiscountSettings extends AutoEncoder {
             if (discount.percentageDiscount) {
                 if (discount.percentageDiscount >= 100 * 100) {
                     if (this.repeatBehaviour !== ProductDiscountRepeatBehaviour.Once) {
-                        descriptions.push('Gratis');
+                        descriptions.push($t(`Gratis`));
                     }
                     else {
-                        descriptions.push('Eén stuk gratis');
+                        descriptions.push($t(`Eén stuk gratis`));
                     }
                 }
                 else {
                     if (this.repeatBehaviour !== ProductDiscountRepeatBehaviour.Once) {
-                        descriptions.push(Formatter.percentage(discount.percentageDiscount) + ' korting');
+                        descriptions.push(Formatter.percentage(discount.percentageDiscount) + ' ' + $t(`korting`));
                     }
                     else {
                         descriptions.push(
-                            'Eén keer ' + Formatter.percentage(discount.percentageDiscount) + ' korting',
+                            $t(`Eén keer`) + ' ' + Formatter.percentage(discount.percentageDiscount) + ' ' + $t(`korting`),
                         );
                     }
                 }
@@ -310,11 +310,11 @@ export class ProductDiscountSettings extends AutoEncoder {
 
             if (discount.discountPerPiece) {
                 if (this.repeatBehaviour !== ProductDiscountRepeatBehaviour.Once) {
-                    descriptions.push(Formatter.price(discount.discountPerPiece) + ' korting per stuk');
+                    descriptions.push(Formatter.price(discount.discountPerPiece) + ' ' + $t(`korting per stuk`));
                 }
                 else {
                     descriptions.push(
-                        'Eén keer ' + Formatter.price(discount.discountPerPiece) + ' korting',
+                        $t(`Eén keer`) + ' ' + Formatter.price(discount.discountPerPiece) + ' ' + $t(`korting`),
                     );
                 }
             }
@@ -323,36 +323,36 @@ export class ProductDiscountSettings extends AutoEncoder {
             let index = 0;
             for (const discount of this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatPattern ? [...this.discounts, ...this.discounts, ...this.discounts] : this.discounts) {
                 index += 1;
-                let s = Formatter.ordinalNumber(index) + ' stuk';
+                let s = Formatter.ordinalNumber(index) + ' ' + $t(`stuk`);
 
                 if (index === this.discounts.length) {
                     if (this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatLast) {
                         if (descriptions.length > 0) {
-                            s = 'overige stuks';
+                            s = $t(`overige stuks`);
                         }
                         else {
-                            s = 'vanaf ' + s;
+                            s = $t(`vanaf`) + ' ' + s;
                         }
                     }
                 }
 
                 if (discount.percentageDiscount) {
                     if (discount.percentageDiscount >= 100 * 100) {
-                        descriptions.push(s + ' gratis');
+                        descriptions.push(s + ' ' + $t(`gratis`));
                     }
                     else {
-                        descriptions.push(Formatter.percentage(discount.percentageDiscount) + ' korting op ' + s);
+                        descriptions.push(Formatter.percentage(discount.percentageDiscount) + ' ' + $t(`korting op`) + ' ' + s);
                     }
                 }
 
                 if (discount.discountPerPiece) {
-                    descriptions.push(Formatter.price(discount.discountPerPiece) + ' korting op ' + s);
+                    descriptions.push(Formatter.price(discount.discountPerPiece) + ' ' + $t(`korting op`) + ' ' + s);
                 }
             }
 
             if (this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatPattern) {
                 if (descriptions.length === 3 && this.discounts[this.discounts.length - 1].percentageDiscount === 100 * 100) {
-                    descriptions = [(this.discounts.length - 1) + ' + 1 gratis'];
+                    descriptions = [(this.discounts.length - 1) + ' ' + $t(`+ 1 gratis`)];
                 }
                 else {
                     descriptions.push('...');
@@ -361,12 +361,12 @@ export class ProductDiscountSettings extends AutoEncoder {
         }
 
         if (descriptions.length === 0) {
-            descriptions.push('Geen korting');
+            descriptions.push($t(`Geen korting`));
         }
 
         return {
             title: titles.join(' '),
-            description: Formatter.capitalizeFirstLetter(Formatter.joinLast(descriptions, ', ', ' en ')),
+            description: Formatter.capitalizeFirstLetter(Formatter.joinLast(descriptions, ', ', ' ' + $t(`en`) + ' ')),
             footnote: footnotes.join('\n'),
         };
     }
@@ -465,12 +465,12 @@ export class Discount extends AutoEncoder {
 
         if (this.orderDiscount.percentageDiscount) {
             titles.push(
-                Formatter.percentage(this.orderDiscount.percentageDiscount) + ' korting',
+                Formatter.percentage(this.orderDiscount.percentageDiscount) + ' ' + $t(`korting`),
             );
         }
         if (this.orderDiscount.fixedDiscount) {
             titles.push(
-                Formatter.price(this.orderDiscount.fixedDiscount) + ' korting',
+                Formatter.price(this.orderDiscount.fixedDiscount) + ' ' + $t(`korting`),
             );
         }
 
@@ -478,7 +478,7 @@ export class Discount extends AutoEncoder {
             const t = productDiscount.getTitle(webshop, isAdmin);
 
             titles.push(
-                t.description + ' op ' + t.title,
+                t.description + ' ' + $t(`op`) + ' ' + t.title,
             );
 
             if (t.footnote) {
@@ -488,7 +488,7 @@ export class Discount extends AutoEncoder {
 
         if (titles.length === 0) {
             return {
-                title: 'Geen korting',
+                title: $t(`Geen korting`),
                 description: '',
                 footnote: '',
             };
@@ -497,14 +497,14 @@ export class Discount extends AutoEncoder {
         if (this.requirements.length) {
             if (this.applyMultipleTimes) {
                 if (this.requirements.length > 1) {
-                    descriptions.push('Per bestelde combinatie van');
+                    descriptions.push($t(`Per bestelde combinatie van`));
                 }
                 else {
-                    descriptions.push('Per besteld');
+                    descriptions.push($t(`Per besteld`));
                 }
             }
             else {
-                descriptions.push('Bij bestellen van minstens');
+                descriptions.push($t(`Bij bestellen van minstens`));
             }
 
             const subdescriptions: string[] = [];
@@ -520,7 +520,7 @@ export class Discount extends AutoEncoder {
                 }
             }
 
-            descriptions.push(Formatter.joinLast(subdescriptions, ', ', ' en '));
+            descriptions.push(Formatter.joinLast(subdescriptions, ', ', ' ' + $t(`en`) + ' '));
         }
 
         return {

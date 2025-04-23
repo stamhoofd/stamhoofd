@@ -56,9 +56,14 @@ export class CartStockHelper {
 
         let more = '';
         if (inCart > 0) {
-            more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart === 1 ? 'zit' : 'zitten'}`;
+            if (inCart === 1) {
+                more = $t(', waarvan er al ${inCart} in jouw winkelmandje zit', { inCart: inCart.toString() });
+            }
+            else {
+                more = $t(', waarvan er al ${inCart} in jouw winkelmandje zitten', { inCart: inCart.toString() });
+            }
         }
-        const text: string | null = `Er ${remainingStock === 1 ? 'is' : 'zijn'} nog maar ${product.getRemainingStockText(remainingStock)} beschikbaar${more}`;
+        const text: string | null = `Er ${remainingStock === 1 ? $t(`is`) : $t(`zijn`)} nog maar ${product.getRemainingStockText(remainingStock)} beschikbaar${more}`;
         return {
             stock: remainingStock,
             remaining: admin ? null : remaining,
@@ -99,14 +104,14 @@ export class CartStockHelper {
 
         let more = '';
         if (inCart > 0) {
-            more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart === 1 ? 'zit' : 'zitten'}`;
+            more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart === 1 ? $t(`zit`) : $t(`zitten`)}`;
         }
-        const text = `Er ${remainingStock === 1 ? 'is' : 'zijn'} nog maar ${product.getRemainingStockText(remainingStock)} van ${productPrice.name} beschikbaar${more}`;
+        const text = `Er ${remainingStock === 1 ? $t(`is`) : $t(`zijn`)} nog maar ${product.getRemainingStockText(remainingStock)} van ${productPrice.name} beschikbaar${more}`;
         return {
             stock: remainingStock,
             remaining: admin ? null : remaining,
             text: remainingStock === 0 ? `${Formatter.capitalizeFirstLetter(productPrice.name)} is uitverkocht` : (remaining < 25 || (amount && remaining <= amount) ? text : null),
-            shortText: remainingStock === 0 ? 'Uitverkocht' : (remaining === 0 ? 'Maximum bereikt' : (remaining < 25 ? `Nog ${product.getRemainingStockText(remaining)}` : null)),
+            shortText: remainingStock === 0 ? $t(`Uitverkocht`) : (remaining === 0 ? $t(`Maximum bereikt`) : (remaining < 25 ? `Nog ${product.getRemainingStockText(remaining)}` : null)),
         };
     }
 
@@ -147,15 +152,15 @@ export class CartStockHelper {
 
         let more = '';
         if (inCart > 0) {
-            more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart === 1 ? 'zit' : 'zitten'}`;
+            more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart === 1 ? $t(`zit`) : $t(`zitten`)}`;
         }
-        const text = `Er ${remainingStock === 1 ? 'is' : 'zijn'} nog maar ${product.getRemainingStockText(remainingStock)} van ${option.name} beschikbaar${more}`;
+        const text = `Er ${remainingStock === 1 ? $t(`is`) : $t(`zijn`)} nog maar ${product.getRemainingStockText(remainingStock)} van ${option.name} beschikbaar${more}`;
 
         return {
             stock: remainingStock,
             remaining: admin ? null : remaining,
             text: remainingStock === 0 ? `${Formatter.capitalizeFirstLetter(option.name)} is uitverkocht` : (remaining < 25 || (amount && remaining <= amount) ? text : null),
-            shortText: remainingStock === 0 ? 'Uitverkocht' : (remaining === 0 ? 'Maximum bereikt' : (remaining < 25 ? `Nog ${product.getRemainingStockText(remaining)}` : null)),
+            shortText: remainingStock === 0 ? $t(`Uitverkocht`) : (remaining === 0 ? $t(`Maximum bereikt`) : (remaining < 25 ? `Nog ${product.getRemainingStockText(remaining)}` : null)),
         };
     }
 
@@ -186,14 +191,14 @@ export class CartStockHelper {
 
         let more = '';
         if (inCart > 0) {
-            more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart === 1 ? 'zit' : 'zitten'}`;
+            more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart === 1 ? $t(`zit`) : $t(`zitten`)}`;
         }
-        const text = `Er ${remainingStock === 1 ? 'is' : 'zijn'} nog maar ${Formatter.pluralText(remainingStock, 'plaats', 'plaatsen')} beschikbaar${more}`;
+        const text = `Er ${remainingStock === 1 ? $t(`is`) : $t(`zijn`)} nog maar ${Formatter.pluralText(remainingStock, $t(`plaats`), $t(`plaatsen`))} beschikbaar${more}`;
 
         return {
             stock: remainingStock,
             remaining,
-            text: remainingStock === 0 ? 'Er zijn geen plaatsen meer beschikbaar' : (remaining < 25 || (amount && remaining <= amount) ? text : null),
+            text: remainingStock === 0 ? $t(`Er zijn geen plaatsen meer beschikbaar`) : (remaining < 25 || (amount && remaining <= amount) ? text : null),
         };
     }
 
@@ -218,7 +223,7 @@ export class CartStockHelper {
 
         let more = '';
         if (inCart > 0) {
-            more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart === 1 ? 'zit' : 'zitten'}`;
+            more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart === 1 ? $t(`zit`) : $t(`zitten`)}`;
         }
 
         const remaining = product.maxPerOrder - inCart;
@@ -228,7 +233,7 @@ export class CartStockHelper {
         return {
             stock: product.maxPerOrder,
             remaining: product.maxPerOrder - inCart,
-            text: !show ? null : ('Je kan maximaal ' + product.getRemainingStockText(product.maxPerOrder) + ' bestellen' + more),
+            text: !show ? null : ($t(`Je kan maximaal`) + ' ' + product.getRemainingStockText(product.maxPerOrder) + ' ' + $t(`bestellen`) + more),
         };
     }
 
@@ -254,8 +259,8 @@ export class CartStockHelper {
             return {
                 stock: 1,
                 remaining: 0,
-                text: 'Je kan maximaal 1 van dit product bestellen',
-                shortText: 'Maximum bereikt',
+                text: $t(`Je kan maximaal 1 van dit product bestellen`),
+                shortText: $t(`Maximum bereikt`),
             };
         }
 

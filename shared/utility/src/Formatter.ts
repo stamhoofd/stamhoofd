@@ -59,8 +59,10 @@ export class Formatter {
             const datetime = DateTime.fromJSDate(index).setZone(this.timezone);
             index = datetime.month;
         }
-        const monthNames = ['januari', 'februari', 'maart', 'april', 'mei', 'juni',
-            'juli', 'augustus', 'september', 'oktober', 'november', 'december',
+
+        // todo translation
+        const monthNames = [$t(`januari`), $t(`februari`), $t(`maart`), $t(`april`), $t(`mei`), $t(`juni`),
+            $t(`juli`), $t(`augustus`), $t(`september`), $t(`oktober`), $t(`november`), $t(`december`),
         ];
         return monthNames[index - 1];
     }
@@ -78,7 +80,9 @@ export class Formatter {
             // Crash protection in case undefined get passed
             return '?';
         }
-        const monthNames = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'];
+
+        // todo translation
+        const monthNames = [$t(`maandag`), $t(`dinsdag`), $t(`woensdag`), $t(`donderdag`), $t(`vrijdag`), $t(`zaterdag`), $t(`zondag`)];
 
         const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
         return monthNames[datetime.weekday - 1];
@@ -111,16 +115,16 @@ export class Formatter {
 
         if (weeks > 0 && dividable === 0) {
             if (weeks === 1) {
-                return '1 week';
+                return $t(`1 week`);
             }
-            return weeks + ' weken';
+            return weeks + ' ' + $t(`weken`);
         }
 
         if (days === 1) {
-            return '1 dag';
+            return $t(`1 dag`);
         }
 
-        return `${days} dagen`;
+        return $t(`{days} dagen`, { days: days.toString() });
     }
 
     static relativeTime(date: Date, options?: { days?: boolean; hours?: boolean }) {
@@ -140,9 +144,9 @@ export class Formatter {
                 return this.dateTime(date, true, true);
             }
             if (days === 1) {
-                return 'één dag geleden';
+                return $t(`één dag geleden`);
             }
-            return days + ' dagen geleden';
+            return $t(`{days} dagen geleden`, { days: days.toString() });
         }
 
         if (hours > 0) {
@@ -151,27 +155,27 @@ export class Formatter {
             }
 
             if (hours === 1) {
-                return 'één uur geleden';
+                return $t(`één uur geleden`);
             }
-            return hours + ' uur geleden';
+            return $t(`{hours} uur geleden`, { hours: hours.toString() });
         }
 
         if (minutes > 0) {
             if (minutes === 1) {
-                return 'één minuut geleden';
+                return $t(`één minuut geleden`);
             }
-            return minutes + ' minuten geleden';
+            return $t(`{minutes} minuten geleden`, { minutes: minutes.toString() });
         }
 
         const seconds = Math.floor(diff / 1000);
         if (seconds > 0) {
             if (seconds === 1) {
-                return 'één seconde geleden';
+                return $t(`één seconde geleden`);
             }
-            return seconds + ' seconden geleden';
+            return $t(`{seconds} seconden geleden`, { seconds: seconds.toString() });
         }
 
-        return 'zojuist';
+        return $t(`zojuist`);
     }
 
     /**
@@ -381,7 +385,7 @@ export class Formatter {
         if (hideZero && this.time(date) === '0:00') {
             return this.date(date, withYear);
         }
-        return this.date(date, withYear) + ' om ' + this.time(date);
+        return this.date(date, withYear) + ' ' + $t(`om`) + ' ' + this.time(date);
     }
 
     static integer(value: number): string {
@@ -497,23 +501,23 @@ export class Formatter {
 
     static ordinalNumber(number: number): string {
         if (number === 1) {
-            return 'eerste';
+            return $t('eerste');
         }
 
         if (number === 2) {
-            return 'tweede';
+            return $t('tweede');
         }
 
         if (number === 3) {
-            return 'derde';
+            return $t('derde');
         }
 
-        return number + 'e';
+        return $t('{number}e', { number: number.toString() });
     }
 
     static pluralText(num: number, singular: string, plural: string): string {
         if (num === 1) {
-            return 'één ' + singular;
+            return $t('één {singular}', { singular });
         }
 
         return this.float(num) + ' ' + plural;
@@ -524,7 +528,7 @@ export class Formatter {
         const firstNames = this.uniqueArray(n.map(n => n.firstName));
         const lastNames = this.uniqueArray(n.map(n => n.lastName));
 
-        return this.joinLast(firstNames, ', ', ' en ') + (lastNames.length > 0 ? (' ' + lastNames.join('-')) : '');
+        return this.joinLast(firstNames, ', ', ' ' + $t('en') + ' ') + (lastNames.length > 0 ? (' ' + lastNames.join('-')) : '');
     }
 
     static firstLetters(str: string, maxLength: number) {

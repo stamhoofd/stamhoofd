@@ -412,16 +412,16 @@ export class CartItem extends AutoEncoder {
 
             if (price === 0) {
                 if (sorted.length === 1) {
-                    parts.push('Gratis');
+                    parts.push($t(`Gratis`));
                 }
                 else {
-                    parts.push(amount + ' gratis');
+                    parts.push(amount + ' ' + $t(`gratis`));
                 }
             }
             else {
                 if (sorted.length === 1 || amount === 1) {
                     if (amount > 1) {
-                        parts.push(Formatter.price(Math.abs(price)) + ' / stuk');
+                        parts.push(Formatter.price(Math.abs(price)) + ' ' + $t(`/ stuk`));
                     }
                     else {
                         parts.push(Formatter.price(Math.abs(price)));
@@ -484,7 +484,7 @@ export class CartItem extends AutoEncoder {
 
         if (this.seats.length) {
             descriptions.push(
-                (this.seats.length === 1 ? 'Plaats' : 'Plaatsen') + ': '
+                (this.seats.length === 1 ? $t(`Plaats`) : $t(`Plaatsen`)) + ': '
                 + this.seats.slice().sort(ReservedSeat.sort).map(s => s.getShortName(this.product)).join(', '),
             );
         }
@@ -528,7 +528,7 @@ export class CartItem extends AutoEncoder {
             errors.addError(new SimpleError({
                 code: 'product_unavailable',
                 message: 'Product unavailable',
-                human: this.product.name + ' is niet meer beschikbaar',
+                human: $t(`{product} is niet meer beschikbaar`, { product: this.product.name }),
             }));
         }
         else {
@@ -539,14 +539,14 @@ export class CartItem extends AutoEncoder {
                     errors.addError(new SimpleError({
                         code: 'product_price_unavailable',
                         message: 'Product price unavailable',
-                        human: 'Er werden keuzemogelijkheden toegevoegd aan ' + this.product.name + ', waar je nu eerst moet uit kiezen.',
+                        human: $t(`Er werden keuzemogelijkheden toegevoegd aan {product}, waar je nu eerst moet uit kiezen.`, { product: this.product.name }),
                     }));
                 }
                 else {
                     errors.addError(new SimpleError({
                         code: 'product_price_unavailable',
                         message: 'Product price unavailable',
-                        human: "De keuzemogelijkheid '" + this.productPrice.name + "' van " + this.product.name + ' is niet meer beschikbaar. Kies een andere.',
+                        human: $t(`De keuzemogelijkheid '{price}' van {product} is niet meer beschikbaar. Kies een andere.`, { price: this.productPrice.name, product: this.product.name }),
                     }));
                 }
             }
@@ -566,7 +566,7 @@ export class CartItem extends AutoEncoder {
                     errors.addError(new SimpleError({
                         code: 'option_menu_unavailable',
                         message: 'Option menu unavailable',
-                        human: 'Eén of meerdere keuzemogelijkheden van ' + this.product.name + ' zijn niet meer beschikbaar',
+                        human: $t(`Eén of meerdere keuzemogelijkheden van {product} zijn niet meer beschikbaar`, { product: this.product.name }),
                     }));
                     continue;
                 }
@@ -583,7 +583,7 @@ export class CartItem extends AutoEncoder {
                     errors.addError(new SimpleError({
                         code: 'option_unavailable',
                         message: 'Option unavailable',
-                        human: 'Eén of meerdere keuzemogelijkheden van ' + this.product.name + ' zijn niet meer beschikbaar',
+                        human: $t(`Eén of meerdere keuzemogelijkheden van {product} zijn niet meer beschikbaar`, { product: this.product.name }),
                     }));
                     continue;
                 }
@@ -598,7 +598,7 @@ export class CartItem extends AutoEncoder {
                     new SimpleError({
                         code: 'missing_menu',
                         message: "Missing menu's " + remainingMenus.filter(m => !m.multipleChoice).map(m => m.name).join(', '),
-                        human: 'Er zijn nieuwe keuzemogelijkheden voor ' + this.product.name + ' waaruit je moet kiezen',
+                        human: $t(`Er zijn nieuwe keuzemogelijkheden voor {product} waaruit je moet kiezen`, { product: this.product.name }),
                     }),
                 );
             }
@@ -666,7 +666,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'product_unavailable',
                     message: 'Product unavailable',
-                    human: this.product.name + ' is niet meer beschikbaar',
+                    human: $t(`{product} is niet meer beschikbaar`, { product: this.product.name }),
                 });
             }
 
@@ -674,7 +674,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'product_price_unavailable',
                     message: 'Product price unavailable',
-                    human: this.productPrice.name + ' is niet meer beschikbaar',
+                    human: $t(`{price} is niet meer beschikbaar`, { price: this.productPrice.name }),
                 });
             }
 
@@ -682,7 +682,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'product_unavailable',
                     message: 'Product unavailable',
-                    human: this.product.name + ' is uitverkocht',
+                    human: $t(`{product} is uitverkocht`, { product: this.product.name }),
                 });
             }
 
@@ -694,7 +694,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'product_unavailable',
                     message: 'Product unavailable',
-                    human: stockDefinition?.text || 'Er zijn nog maar ' + minimumRemaining + ' stuks beschikbaar van ' + this.product.name,
+                    human: stockDefinition?.text || $t(`Er zijn nog maar {count} stuks beschikbaar van {product}`, { count: minimumRemaining.toString(), product: this.product.name }),
                     meta: { recoverable: minimumRemaining > 0 },
                 });
             }
@@ -706,7 +706,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'seating_plan_unavailable',
                     message: 'Invalid seating plan',
-                    human: 'Het zaalplan van ' + this.product.name + ' is niet meer beschikbaar. Herlaad de pagina en probeer opnieuw. Neem contact met ons op als het probleem zich herhaalt.',
+                    human: $t(`Het zaalplan van {product} is niet meer beschikbaar. Herlaad de pagina en probeer opnieuw. Neem contact met ons op als het probleem zich herhaalt.`, { product: this.product.name }),
                 });
             }
 
@@ -732,7 +732,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'seats_unavailable',
                     message: 'Seats unavailable',
-                    human: 'De volgende plaatsen zijn niet meer beschikbaar: ' + invalidSeats.map(s => s.getNameString(webshop, this.product)).join(', '),
+                    human: $t(`De volgende plaatsen zijn niet meer beschikbaar:`) + ' ' + invalidSeats.map(s => s.getNameString(webshop, this.product)).join(', '),
                     meta: { recoverable: true },
                 });
             }
@@ -744,14 +744,14 @@ export class CartItem extends AutoEncoder {
                     throw new SimpleError({
                         code: 'invalid_seats',
                         message: 'Invalid seats',
-                        human: `Kies ${Formatter.pluralText(this.amount, 'plaats', 'plaatsen')}`,
+                        human: $t(`Kies {seats}`, { seats: Formatter.pluralText(this.amount, $t(`plaats`), $t(`plaatsen`)) }),
                         meta: { recoverable: true },
                     });
                 }
                 throw new SimpleError({
                     code: 'invalid_seats',
                     message: 'Invalid seats',
-                    human: `Kies nog ${Formatter.pluralText(this.amount - this.seats.length, 'plaats', 'plaatsen')}`,
+                    human: $t(`Kies nog {seats}`, { seats: Formatter.pluralText(this.amount - this.seats.length, $t(`plaats`), $t(`plaatsen`)) }),
                     meta: { recoverable: true },
                 });
             }
@@ -764,7 +764,7 @@ export class CartItem extends AutoEncoder {
                         throw new SimpleError({
                             code: 'seats_unavailable',
                             message: 'Seats unavailable',
-                            human: 'De volgende plaatsen heb je twee keer gekozen: ' + seat.getNameString(webshop, this.product),
+                            human: $t(`De volgende plaatsen heb je twee keer gekozen:`) + ' ' + seat.getNameString(webshop, this.product),
                         });
                     }
                 }
@@ -785,7 +785,7 @@ export class CartItem extends AutoEncoder {
                     throw new SimpleError({
                         code: 'select_connected_seats',
                         message: 'Select connected seats',
-                        human: 'Pas de plaatsen aan zodat ze aansluiten en geen enkele plaatsen openlaten.',
+                        human: $t(`Pas de plaatsen aan zodat ze aansluiten en geen enkele plaatsen openlaten.`),
                         meta: { recoverable: true },
                     });
                 }
