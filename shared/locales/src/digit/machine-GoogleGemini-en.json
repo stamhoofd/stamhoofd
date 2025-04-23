@@ -15762,5 +15762,13 @@
   "2c94e906-587b-4ff0-b829-c176fb7120f7": {
     "original": "Zonder proefperiode",
     "translation": "Without trial period"
+  },
+  "9e2430e8-5733-414c-9831-f7c455836691": {
+    "original": "{{naam}}",
+    "translation": "{{naam}}"
+  },
+  "61b6890f-3b3e-4d69-96fe-687e1366e738": {
+    "original": "{{nr}}",
+    "translation": "{{nr}}"
   }
 }

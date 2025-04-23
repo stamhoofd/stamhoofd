@@ -15762,5 +15762,13 @@
   "4f7e64c6-4607-446d-9a84-8ebcb7206241": {
     "original": "Kijk na of je nog een ander tabblad open hebt staan met Keeo en sluit deze. Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer de pagina te herladen of in een andere browser te werken.",
     "translation": "Check if you have another tab open with Keeo and close it. Your browser does not support certain functions, which means we cannot keep orders offline if your internet goes down. Try reloading the page or working in a different browser."
+  },
+  "9e2430e8-5733-414c-9831-f7c455836691": {
+    "original": "{{naam}}",
+    "translation": "{{naam}}"
+  },
+  "61b6890f-3b3e-4d69-96fe-687e1366e738": {
+    "original": "{{nr}}",
+    "translation": "{{nr}}"
   }
 }
