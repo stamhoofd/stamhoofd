@@ -366,7 +366,7 @@ export class MollieToken extends QueryableModel {
                 profile: {
                     name: organization.name + ' - Stamhoofd',
                     // url: "https://"+organization.getHost(),
-                    description: 'Betalen van inschrijvingsgelden of webshops voor een vereniging via Stamhoofd (partner).',
+                    description: $t(`Betalen van inschrijvingsgelden of webshops voor een vereniging via Stamhoofd (partner).`),
                     categoryCode: 8398,
                 },
             });

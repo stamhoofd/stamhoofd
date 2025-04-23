@@ -111,7 +111,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Missing subject',
-                human: 'Vul een onderwerp in voor je een e-mail verstuurt',
+                human: $t(`Vul een onderwerp in voor je een e-mail verstuurt`),
             });
         }
 
@@ -119,7 +119,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Missing text',
-                human: 'Vul een tekst in voor je een e-mail verstuurt',
+                human: $t(`Vul een tekst in voor je een e-mail verstuurt`),
             });
         }
 
@@ -127,7 +127,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Missing html',
-                human: 'Vul een tekst in voor je een e-mail verstuurt',
+                human: $t(`Vul een tekst in voor je een e-mail verstuurt`),
             });
         }
 
@@ -135,7 +135,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Missing from',
-                human: 'Vul een afzender in voor je een e-mail verstuurt',
+                human: $t(`Vul een afzender in voor je een e-mail verstuurt`),
             });
         }
 
@@ -152,7 +152,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'too_big_attachments',
                 message: 'Too big attachments',
-                human: 'Jouw bericht is te groot. Grote bijlages verstuur je beter niet via e-mail, je plaatst dan best een link naar de locatie in bv. Google Drive. De maximale grootte van een e-mail is 10MB, inclusief het bericht. Als je grote bestanden verstuurt kan je ze ook proberen te verkleinen.',
+                human: $t(`Jouw bericht is te groot. Grote bijlages verstuur je beter niet via e-mail, je plaatst dan best een link naar de locatie in bv. Google Drive. De maximale grootte van een e-mail is 10MB, inclusief het bericht. Als je grote bestanden verstuurt kan je ze ook proberen te verkleinen.`),
                 field: 'attachments',
             });
         }
@@ -173,7 +173,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'content_type_not_supported',
                     message: 'Content-Type not supported',
-                    human: 'Het bestandstype van jouw bijlage wordt niet ondersteund of is onveilig om in een e-mail te plaatsen. Overweeg om je bestand op bv. Google Drive te zetten en de link in jouw e-mail te zetten.',
+                    human: $t(`Het bestandstype van jouw bijlage wordt niet ondersteund of is onveilig om in een e-mail te plaatsen. Overweeg om je bestand op bv. Google Drive te zetten en de link in jouw e-mail te zetten.`),
                     field: 'attachments',
                 });
             }
@@ -246,7 +246,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Email not found',
-                    human: 'De e-mail die je probeert te versturen bestaat niet meer',
+                    human: $t(`De e-mail die je probeert te versturen bestaat niet meer`),
                 });
             }
             if (upToDate.status === EmailStatus.Sent || upToDate.status === EmailStatus.Failed) {
@@ -281,7 +281,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Missing from',
-                    human: 'Vul een afzender in voor je een e-mail verstuurt',
+                    human: $t(`Vul een afzender in voor je een e-mail verstuurt`),
                 });
             }
 
@@ -304,7 +304,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Email not found',
-                    human: 'De e-mail die je probeert te versturen bestaat niet meer',
+                    human: $t(`De e-mail die je probeert te versturen bestaat niet meer`),
                 });
             }
 
@@ -312,7 +312,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'recipients_not_created',
                     message: 'Failed to create recipients',
-                    human: 'Er ging iets mis bij het aanmaken van de afzenders.',
+                    human: $t(`Er ging iets mis bij het aanmaken van de afzenders.`),
                 });
             }
 

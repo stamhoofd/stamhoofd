@@ -8,11 +8,11 @@ import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHel
 // Assign to a typed variable to assure we have correct type checking in place
 const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
     id: 'event-notifications',
-    name: 'Meldingen',
+    name: $t(`Meldingen`),
     columns: [
         {
             id: 'id',
-            name: 'ID',
+            name: $t(`ID`),
             width: 40,
             getValue: (notification: EventNotification) => ({
                 value: notification.id,
@@ -20,7 +20,7 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
         },
         {
             id: 'name',
-            name: 'Naam activiteit',
+            name: $t(`Naam activiteit`),
             width: 40,
             getValue: (notification: EventNotification) => ({
                 value: notification.events.map(e => e.name).join(', '),
@@ -28,7 +28,7 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
         },
         {
             id: 'organization.name',
-            name: 'Groep',
+            name: $t(`Groep`),
             width: 40,
             getValue: (notification: EventNotification) => ({
                 value: notification.organization.name,
@@ -36,7 +36,7 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
         },
         {
             id: 'organization.uri',
-            name: 'Groepsnummer',
+            name: $t(`Groepsnummer`),
             width: 30,
             getValue: (notification: EventNotification) => ({
                 value: notification.organization.uri,
@@ -44,7 +44,7 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
         },
         {
             id: 'status',
-            name: 'Status',
+            name: $t(`Status`),
             width: 30,
             getValue: (notification: EventNotification) => ({
                 value: Formatter.capitalizeFirstLetter(EventNotificationStatusHelper.getName(notification.status)),
@@ -52,7 +52,7 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
         },
         {
             id: 'feedbackText',
-            name: 'Opmerkingen',
+            name: $t(`Opmerkingen`),
             width: 80,
             getValue: (notification: EventNotification) => ({
                 value: notification.status !== EventNotificationStatus.Accepted ? notification.feedbackText : null,
@@ -65,7 +65,7 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
         },
         {
             id: 'startDate',
-            name: 'Startdatum',
+            name: $t(`Startdatum`),
             width: 20,
             getValue: (notification: EventNotification) => ({
                 value: notification.startDate,
@@ -78,7 +78,7 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
         },
         {
             id: 'endDate',
-            name: 'Einddatum',
+            name: $t(`Einddatum`),
             width: 20,
             getValue: (notification: EventNotification) => ({
                 value: notification.endDate,
@@ -91,7 +91,7 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
         },
         {
             id: 'submittedAt',
-            name: 'Ingediend op',
+            name: $t(`Ingediend op`),
             width: 20,
             getValue: (notification: EventNotification) => ({
                 value: notification.submittedAt,
@@ -104,7 +104,7 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
         },
         {
             id: 'submittedBy',
-            name: 'Ingediend door',
+            name: $t(`Ingediend door`),
             width: 40,
             getValue: (notification: EventNotification) => ({
                 value: notification.submittedBy?.name ?? '',

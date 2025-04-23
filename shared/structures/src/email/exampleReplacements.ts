@@ -1,16 +1,16 @@
 import { Formatter } from '@stamhoofd/utility';
 import { BalanceItem } from '../BalanceItem.js';
-import { Replacement } from '../endpoints/EmailRequest.js';
 import { STPackageType, STPackageTypeHelper } from '../billing/STPackage.js';
+import { Replacement } from '../endpoints/EmailRequest.js';
 
 const exampleBalanceItem = BalanceItem.create({
-    description: 'Voorbeeld item 1',
+    description: $t(`Voorbeeld item 1`),
     amount: 5,
     unitPrice: 1000,
 });
 
 const exampleBalanceItem2 = BalanceItem.create({
-    description: 'Voorbeeld item 2',
+    description: $t(`Voorbeeld item 2`),
     amount: 1,
     unitPrice: 500,
 });
@@ -59,33 +59,33 @@ function getReplacements() {
      * Note: please also add the corresponding smart variable to shared/structures/src/email/EditorSmartVariable.ts
      * and the corresponding buttons to shared/structures/src/email/EditorSmartButton.ts
      */
-    const htmlPlaceholder = '<p class="description">Oeps, er ging iets mis bij het laden van het voorbeeld dat hier moet komen</p>';
-    const textPlaceholder = 'ONTBREEKT';
+    const htmlPlaceholder = `<p class="description">${$t('Oeps, er ging iets mis bij het laden van het voorbeeld dat hier moet komen')}</p>`;
+    const textPlaceholder = $t(`ONTBREEKT`);
 
     return {
         greeting: Replacement.create({
             token: 'greeting',
-            value: 'Dag Jan,',
+            value: $t(`Dag Jan,`),
         }),
         firstName: Replacement.create({
             token: 'firstName',
-            value: 'Jan',
+            value: $t(`Jan`),
         }),
         lastName: Replacement.create({
             token: 'lastName',
-            value: 'Jansen',
+            value: $t(`Jansen`),
         }),
         email: Replacement.create({
             token: 'email',
-            value: 'jan.jansen@voorbeeld.com',
+            value: $t(`jan.jansen@voorbeeld.com`),
         }),
         fromAddress: Replacement.create({
             token: 'fromAddress',
-            value: 'verstuurder@voorbeeld.com',
+            value: $t(`verstuurder@voorbeeld.com`),
         }),
         fromName: Replacement.create({
             token: 'fromName',
-            value: 'Verstuurder',
+            value: $t(`Verstuurder`),
         }),
         paymentUrl: Replacement.create({
             token: 'paymentUrl',
@@ -104,11 +104,11 @@ function getReplacements() {
         }),
         objectName: Replacement.create({
             token: 'objectName',
-            value: 'Jan Jansens',
+            value: $t(`Jan Jansens`),
         }),
         resetUrl: Replacement.create({
             token: 'resetUrl',
-            value: 'https://www.voorbeeld.com/heel-lange-code-waarmee-de-link-beveiligd-wordt',
+            value: $t(`https://www.voorbeeld.com/heel-lange-code-waarmee-de-link-beveiligd-wordt`),
         }),
         confirmEmailUrl: Replacement.create({
             token: 'confirmEmailUrl',
@@ -140,7 +140,7 @@ function getReplacements() {
         }),
         submitterName: Replacement.create({
             token: 'submitterName',
-            value: 'Piet Pieters',
+            value: $t(`Piet Pieters`),
         }),
         eventName: Replacement.create({
             token: 'eventName',
@@ -152,7 +152,7 @@ function getReplacements() {
         }),
         inviterName: Replacement.create({
             token: 'inviterName',
-            value: 'Piet',
+            value: $t(`Piet`),
         }),
         validUntil: Replacement.create({
             token: 'validUntil',
@@ -164,15 +164,15 @@ function getReplacements() {
         }),
         firstNameMember: Replacement.create({
             token: 'firstNameMember',
-            value: 'Klaas',
+            value: $t(`Klaas`),
         }),
         lastNameMember: Replacement.create({
             token: 'lastNameMember',
-            value: 'Klaassen',
+            value: $t(`Klaassen`),
         }),
         registerUrl: Replacement.create({
             token: 'registerUrl',
-            value: 'https://inschrijven.voorbeeld.com',
+            value: $t(`https://inschrijven.voorbeeld.com`),
         }),
         groupName: Replacement.create({
             token: 'groupName',
@@ -192,15 +192,15 @@ function getReplacements() {
         }),
         loginDetails: Replacement.create({
             token: 'loginDetails',
-            html: `<p class="description"><em>Je kan op het ledenportaal inloggen met <strong>${Formatter.escapeHtml('voorbeeld@email.com')}</strong></em></p>`,
+            html: `<p class="description"><em>${$t('Je kan op het ledenportaal inloggen met')} <strong>${Formatter.escapeHtml($t(`voorbeeld@email.com`))}</strong></em></p>`,
         }),
         mailDomain: Replacement.create({
             token: 'mailDomain',
-            value: 'voorbeeld.com',
+            value: $t(`voorbeeld.com`),
         }),
         paymentMethod: Replacement.create({
             token: 'paymentMethod',
-            value: 'Bancontact',
+            value: $t(`Bancontact`),
         }),
         priceToPay: Replacement.create({
             token: 'priceToPay',
@@ -220,11 +220,11 @@ function getReplacements() {
         }),
         overviewContext: Replacement.create({
             token: 'overviewContext',
-            value: 'Inschrijving van Klaas en Piet',
+            value: $t(`Inschrijving van Klaas en Piet`),
         }),
         memberNames: Replacement.create({
             token: 'memberNames',
-            value: 'Klaas en Piet',
+            value: $t(`Klaas en Piet`),
         }),
         overviewTable: Replacement.create({
             token: 'overviewTable',
@@ -280,7 +280,7 @@ function getReplacements() {
         }),
         webshopName: Replacement.create({
             token: 'webshopName',
-            value: 'Demoshop',
+            value: $t(`Demoshop`),
         }),
 
     };

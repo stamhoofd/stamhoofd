@@ -39,7 +39,7 @@ export class GroupPrice extends AutoEncoder {
     id: string;
 
     @field({ decoder: StringDecoder })
-    name = 'Standaardtarief';
+    name = $t(`Standaardtarief`);
 
     @field({ decoder: ReduceablePrice })
     price = ReduceablePrice.create({});
@@ -663,84 +663,84 @@ export class GroupSettings extends AutoEncoder {
         if (includeAge && this.minYear && this.maxYear) {
             if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
-                    who += 'mannen geboren in';
+                    who += $t(`mannen geboren in`);
                 }
                 else {
-                    who += 'jongens geboren in';
+                    who += $t(`jongens geboren in`);
                 }
             }
             else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
                 if (this.forAdults) {
-                    who += 'vrouwen geboren in';
+                    who += $t(`vrouwen geboren in`);
                 }
                 else {
-                    who += 'meisjes geboren in';
+                    who += $t(`meisjes geboren in`);
                 }
             }
             else {
-                who += 'geboren in';
+                who += $t(`geboren in`);
             }
             who += ' ' + (this.minYear) + ' - ' + (this.maxYear);
         }
         else if (includeAge && this.maxYear) {
             if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
-                    who += 'mannen geboren in of voor';
+                    who += $t(`mannen geboren in of voor`);
                 }
                 else {
-                    who += 'jongens geboren in of voor';
+                    who += $t(`jongens geboren in of voor`);
                 }
             }
             else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
                 if (this.forAdults) {
-                    who += 'vrouwen geboren in of voor';
+                    who += $t(`vrouwen geboren in of voor`);
                 }
                 else {
-                    who += 'meisjes geboren in of voor';
+                    who += $t(`meisjes geboren in of voor`);
                 }
             }
             else {
-                who += 'geboren in of voor';
+                who += $t(`geboren in of voor`);
             }
             who += ' ' + (this.maxYear);
         }
         else if (includeAge && this.minYear) {
             if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
-                    who += 'mannen geboren in of na';
+                    who += $t(`mannen geboren in of na`);
                 }
                 else {
-                    who += 'jongens geboren in of na';
+                    who += $t(`jongens geboren in of na`);
                 }
             }
             else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
                 if (this.forAdults) {
-                    who += 'vrouwen geboren in of na';
+                    who += $t(`vrouwen geboren in of na`);
                 }
                 else {
-                    who += 'meisjes geboren in of na';
+                    who += $t(`meisjes geboren in of na`);
                 }
             }
             else {
-                who += 'geboren in of na';
+                who += $t(`geboren in of na`);
             }
             who += ' ' + (this.minYear);
         }
         else if (includeGender) {
             if (this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
-                    who += 'mannen';
+                    who += $t(`mannen`);
                 }
                 else {
-                    who += 'jongens';
+                    who += $t(`jongens`);
                 }
             }
             else if (this.genderType === GroupGenderType.OnlyFemale) {
                 if (this.forAdults) {
-                    who += 'vrouwen';
+                    who += $t(`vrouwen`);
                 }
                 else {
-                    who += 'meisjes';
+                    who += $t(`meisjes`);
                 }
             }
         }

@@ -159,7 +159,7 @@ export class RegisterItem implements ObjectWithRecords {
             if (!this.groupPrice) {
                 // Probably all sold out
                 // Select the first one anyway
-                this.groupPrice = prices[0] ?? GroupPrice.create({ name: 'Ongeldig tarief', id: '' });
+                this.groupPrice = prices[0] ?? GroupPrice.create({ name: $t(`Ongeldig tarief`), id: '' });
             }
         }
         else {
@@ -455,7 +455,7 @@ export class RegisterItem implements ObjectWithRecords {
                 new SimpleError({
                     code: 'product_unavailable',
                     message: 'Product unavailable',
-                    human: 'Er is iets fout met de tariefinstellingen van ' + this.group.settings.name + ', waardoor je nu niet kan inschrijven. Neem contact op met een beheerder en vraag de tariefinstellingen na te kijken.',
+                    human: $t(`Er is iets fout met de tariefinstellingen van {group}, waardoor je nu niet kan inschrijven. Neem contact op met een beheerder en vraag de tariefinstellingen na te kijken.`, { group: this.group.settings.name }),
                 }),
             );
         }
@@ -466,7 +466,9 @@ export class RegisterItem implements ObjectWithRecords {
                     new SimpleError({
                         code: 'product_unavailable',
                         message: 'Product unavailable',
-                        human: 'Eén of meerdere tarieven van ' + this.group.settings.name + ' zijn niet meer beschikbaar',
+                        human: $t(`Eén of meerdere tarieven van {group} zijn niet meer beschikbaar`, {
+                            group: this.group.settings.name,
+                        }),
                         meta: { recoverable: true },
                     }),
                 );
@@ -481,13 +483,15 @@ export class RegisterItem implements ObjectWithRecords {
 
         for (const o of this.options) {
             let index = remainingMenus.findIndex(m => m.id === o.optionMenu.id);
-            if (index == -1) {
+            if (index === -1) {
                 // Check if it has a multiple choice one
                 index = this.group.settings.optionMenus.findIndex(m => m.id === o.optionMenu.id);
                 errors.addError(new SimpleError({
                     code: 'option_menu_unavailable',
                     message: 'Option menu unavailable',
-                    human: 'Eén of meerdere keuzemogelijkheden van ' + this.group.settings.name + ' zijn niet meer beschikbaar',
+                    human: $t(`Eén of meerdere keuzemogelijkheden van {group} zijn niet meer beschikbaar`, {
+                        group: this.group.settings.name,
+                    }),
                     meta: { recoverable: true },
                 }));
                 continue;
@@ -505,7 +509,9 @@ export class RegisterItem implements ObjectWithRecords {
                 errors.addError(new SimpleError({
                     code: 'option_unavailable',
                     message: 'Option unavailable',
-                    human: 'Eén of meerdere keuzemogelijkheden van ' + this.group.settings.name + ' zijn niet meer beschikbaar',
+                    human: $t(`Eén of meerdere keuzemogelijkheden van {group} zijn niet meer beschikbaar`, {
+                        group: this.group.settings.name,
+                    }),
                     meta: { recoverable: true },
                 }));
                 continue;
@@ -521,7 +527,7 @@ export class RegisterItem implements ObjectWithRecords {
                 new SimpleError({
                     code: 'missing_menu',
                     message: "Missing menu's " + remainingMenus.filter(m => !m.multipleChoice).map(m => m.name).join(', '),
-                    human: 'Er zijn nieuwe keuzemogelijkheden voor ' + this.group.settings.name + ' waaruit je moet kiezen',
+                    human: $t(`Er zijn nieuwe keuzemogelijkheden voor {group} waaruit je moet kiezen`, { group: this.group.settings.name }),
                     meta: { recoverable: true },
                 }),
             );
@@ -661,7 +667,7 @@ export class RegisterItem implements ObjectWithRecords {
 
         if (this.replaceRegistrations.length > 0) {
             for (const registration of this.replaceRegistrations) {
-                descriptions.push('Verplaatsen vanaf ' + registration.group.settings.name);
+                descriptions.push($t(`Verplaatsen vanaf`) + ' ' + registration.group.settings.name);
             }
         }
 
@@ -942,7 +948,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_start_date',
                     message: 'Invalid start date',
-                    human: 'De startdatum van de inschrijving moet na de startdatum van de groep zelf zijn',
+                    human: $t(`De startdatum van de inschrijving moet na de startdatum van de groep zelf zijn`),
                     field: 'customStartDate',
                 });
             }
@@ -951,7 +957,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_start_date',
                     message: 'Invalid start date',
-                    human: 'De startdatum van de inschrijving moet voor de einddatum van de groep zijn',
+                    human: $t(`De startdatum van de inschrijving moet voor de einddatum van de groep zijn`),
                     field: 'customStartDate',
                 });
             }
@@ -961,7 +967,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'multiple_organizations',
                 message: 'Cannot add items of multiple organizations to the checkout',
-                human: `Reken eerst jouw huidige winkelmandje af. Inschrijvingen voor ${this.group.settings.name} moeten aan een andere organisatie betaald worden en kan je daardoor niet samen afrekenen.`,
+                human: $t(`Reken eerst jouw huidige winkelmandje af. Inschrijvingen voor {group} moeten aan een andere organisatie betaald worden en kan je daardoor niet samen afrekenen.`, { group: this.group.settings.name }),
                 meta: { recoverable: true },
             });
         }
@@ -971,7 +977,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'missing_waiting_list',
                 message: 'No waiting list',
-                human: `Je kan niet inschrijven voor de wachtlijst`,
+                human: $t(`Je kan niet inschrijven voor de wachtlijst`),
             });
         }
 
@@ -979,7 +985,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'as_organization_disabled',
                 message: 'allowRegistrationsByOrganization disabled',
-                human: 'Inschrijvingen door organisaties zijn niet toegestaan voor ' + this.group.settings.name,
+                human: $t(`Inschrijvingen door organisaties zijn niet toegestaan voor`) + ' ' + this.group.settings.name,
             });
         }
 
@@ -989,7 +995,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_move',
                     message: 'Invalid member in replaceRegistration',
-                    human: 'Je wilt een inschrijving verplaatsen van een ander lid in ruil voor een ander lid. Dit is niet toegestaan.',
+                    human: $t(`Je wilt een inschrijving verplaatsen van een ander lid in ruil voor een ander lid. Dit is niet toegestaan.`),
                     field: 'replaceRegistrations',
                 });
             }
@@ -998,7 +1004,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_move',
                     message: 'Invalid organization in replaceRegistration',
-                    human: 'Je wilt een inschrijving verplaatsen van een andere organisatie. Dit is niet toegestaan.',
+                    human: $t(`Je wilt een inschrijving verplaatsen van een andere organisatie. Dit is niet toegestaan.`),
                     field: 'replaceRegistrations',
                 });
             }
@@ -1007,7 +1013,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_move',
                     message: 'Not allowed to move registrations',
-                    human: 'Enkel beheerders kunnen inschrijvingen verplaatsen.',
+                    human: $t(`Enkel beheerders kunnen inschrijvingen verplaatsen.`),
                     field: 'replaceRegistrations',
                 });
             }
@@ -1020,7 +1026,10 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'already_registered',
                 message: 'Already registered',
-                human: `${this.member.member.firstName} is al ingeschreven voor ${this.group.settings.name}`,
+                human: $t(`{member} is al ingeschreven voor {group}`, {
+                    member: this.member.member.firstName,
+                    group: this.group.settings.name,
+                }),
             });
         }
 
@@ -1029,7 +1038,10 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'maximum_reached',
                 message: 'Maximum reached',
-                human: `Je kan niet meer inschrijven voor ${this.group.settings.name} omdat ${this.member.patchedMember.name} al ingeschreven is voor een groep die je niet kan combineren.`,
+                human: $t(`Je kan niet meer inschrijven voor {group} omdat {member} al ingeschreven is voor een groep die je niet kan combineren.`, {
+                    group: this.group.settings.name,
+                    member: this.member.patchedMember.name,
+                }),
             });
         }
 
@@ -1044,7 +1056,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'not_yet_open',
                         message: 'Not yet open',
-                        human: `De inschrijvingen voor ${this.group.settings.name} zijn nog niet geopend.`,
+                        human: $t(`De inschrijvingen voor {group} zijn nog niet geopend.`, { group: this.group.settings.name }),
                     });
                 }
 
@@ -1052,7 +1064,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'closed',
                         message: 'Closed',
-                        human: `De inschrijvingen voor ${this.group.settings.name} zijn gesloten.`,
+                        human: $t(`De inschrijvingen voor {group} zijn gesloten.`, { group: this.group.settings.name }),
                     });
                 }
             }
@@ -1064,7 +1076,9 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'not_matching',
                         message: 'Not matching: memberDetails',
-                        human: error?.description ?? `${this.member.patchedMember.name} voldoet niet aan de voorwaarden om in te schrijven voor deze groep.`,
+                        human: error?.description ?? $t(`{member} voldoet niet aan de voorwaarden om in te schrijven voor deze groep.`, {
+                            member: this.member.patchedMember.name,
+                        }),
                     });
                 }
             }
@@ -1074,7 +1088,9 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: requireGroupIds',
-                    human: `${this.member.patchedMember.name} voldoet niet aan de voorwaarden om in te schrijven voor deze groep (verplichte inschrijving bij leeftijdsgroep).`,
+                    human: $t(`{member} voldoet niet aan de voorwaarden om in te schrijven voor deze groep (verplichte inschrijving bij leeftijdsgroep).`, {
+                        member: this.member.patchedMember.name,
+                    }),
                 });
             }
 
@@ -1082,7 +1098,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: requireOrganizationIds',
-                    human: `${this.member.patchedMember.name} kan pas inschrijven met een geldige actieve inschrijving  (verplichte inschrijving bij lokale groep).`,
+                    human: $t(`{member} kan pas inschrijven met een geldige actieve inschrijving  (verplichte inschrijving bij lokale groep).`, { member: this.member.patchedMember.name }),
                 });
             }
 
@@ -1090,7 +1106,9 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: requireOrganizationIds',
-                    human: `${this.member.patchedMember.name} kan pas inschrijven met een geldige actieve inschrijving  (verplichte inschrijving in regio).`,
+                    human: $t(`{member} kan pas inschrijven met een geldige actieve inschrijving  (verplichte inschrijving in regio).`, {
+                        member: this.member.patchedMember.name,
+                    }),
                 });
             }
 
@@ -1098,7 +1116,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: requirePlatformMembershipOn',
-                    human: `${this.member.patchedMember.name} kan pas inschrijven met een geldige aansluiting (en dus verzekering) bij de koepel`,
+                    human: $t(`{member} kan pas inschrijven met een geldige aansluiting (en dus verzekering) bij de koepel`, { member: this.member.patchedMember.name }),
                 });
             }
 
@@ -1106,7 +1124,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: requirePlatformMembershipOnRegistrationDate',
-                    human: `${this.member.patchedMember.name} kan pas inschrijven met een geldige aansluiting (en dus verzekering) bij de koepel op de datum van de inschrijving`,
+                    human: $t(`{member} kan pas inschrijven met een geldige aansluiting (en dus verzekering) bij de koepel op de datum van de inschrijving`, { member: this.member.patchedMember.name }),
                 });
             }
 
@@ -1118,7 +1136,9 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'pre_registrations',
                         message: 'Pre registrations',
-                        human: 'Momenteel zijn de voorinschrijvingen nog bezig voor ' + this.group.settings.name + '. Dit is enkel voor bestaande leden' + (this.group.settings.priorityForFamily ? ' en hun broers/zussen' : '') + '.',
+                        human: $t(`Momenteel zijn de voorinschrijvingen nog bezig voor {group}. Dit is enkel voor bestaande leden`, {
+                            group: this.group.settings.name,
+                        }) + (this.group.settings.priorityForFamily ? ' ' + $t(`en hun broers/zussen`) : '') + '.',
                     });
                 }
             }
@@ -1131,7 +1151,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'waiting_list_required',
                         message: 'Waiting list required',
-                        human: `Iedereen moet zich eerst op de wachtlijst inschrijven`,
+                        human: $t(`Iedereen moet zich eerst op de wachtlijst inschrijven`),
                         meta: { recoverable: true },
                     });
                 }
@@ -1140,7 +1160,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'waiting_list_required',
                         message: 'Waiting list required',
-                        human: `Nieuwe leden moeten zich eerst op de wachtlijst inschrijven`,
+                        human: $t(`Nieuwe leden moeten zich eerst op de wachtlijst inschrijven`),
                         meta: { recoverable: true },
                     });
                 }
@@ -1150,7 +1170,9 @@ export class RegisterItem implements ObjectWithRecords {
                         throw new SimpleError({
                             code: 'waiting_list_required',
                             message: 'Waiting list required',
-                            human: `De inschrijvingen voor ${this.group.settings.name} zijn volzet. Je kan wel nog inschrijven voor de wachtlijst`,
+                            human: $t(`De inschrijvingen voor {group} zijn volzet. Je kan wel nog inschrijven voor de wachtlijst`, {
+                                group: this.group.settings.name,
+                            }),
                             meta: { recoverable: true },
                         });
                     }
@@ -1162,7 +1184,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'maximum_reached',
                     message: 'Maximum reached',
-                    human: `De inschrijvingen voor ${this.group.settings.name} zijn volzet`,
+                    human: $t(`De inschrijvingen voor {group} zijn volzet`, { group: this.group.settings.name }),
                     meta: { recoverable: true },
                 });
             }
@@ -1174,7 +1196,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'stock_empty',
                         message: 'Stock empty',
-                        human: `Het tarief ${this.groupPrice.name} is uitverkocht`,
+                        human: $t(`Het tarief {name} is uitverkocht`, { name: this.groupPrice.name }),
                         meta: { recoverable: true },
                     });
                 }
@@ -1185,7 +1207,9 @@ export class RegisterItem implements ObjectWithRecords {
                         throw new SimpleError({
                             code: 'stock_empty',
                             message: 'Stock empty',
-                            human: remaining === 0 ? `De keuzemogelijkheid ${option.option.name} is uitverkocht` : `Er zijn nog maar ${Formatter.pluralText(remaining, 'stuk', 'stuks')} beschikbaar van ${option.option.name}`,
+                            human: remaining === 0
+                                ? $t(`De keuzemogelijkheid {name} is uitverkocht`, { name: option.option.name })
+                                : remaining > 1 ? $t('Er zijn nog maar {count} stuks beschikbaar van {name}', { count: remaining.toString(), name: option.option.name }) : $t('Er is nog maar 1 stuk beschikbaar van {name}', { name: option.option.name }),
                             meta: { recoverable: true },
                         });
                     }
@@ -1195,7 +1219,9 @@ export class RegisterItem implements ObjectWithRecords {
                         throw new SimpleError({
                             code: 'option_max',
                             message: 'Option maximum exceeded',
-                            human: `Het maximum voor de keuzemogelijkheid ${option.option.name} is overschreden`,
+                            human: $t(`Het maximum voor de keuzemogelijkheid {name} is overschreden`, {
+                                name: option.option.name,
+                            }),
                         });
                     }
                 }

@@ -76,7 +76,7 @@ export class RegistrationActionBuilder {
 
         return [
             new MenuTableAction({
-                name: 'Verplaatsen naar',
+                name: $t(`Verplaatsen naar`),
                 priority: 1,
                 groupIndex: 5,
                 needsSelection: true,
@@ -84,7 +84,7 @@ export class RegistrationActionBuilder {
                 enabled: this.hasWrite,
                 childActions: () => [
                     new MenuTableAction({
-                        name: 'Wachtlijsten',
+                        name: $t(`Wachtlijsten`),
                         groupIndex: 0,
                         enabled: this.organization.period.waitingLists.length > 0,
                         childActions: () => [
@@ -112,7 +112,7 @@ export class RegistrationActionBuilder {
     getEditAction(): TableAction<PlatformMember>[] {
         return [
             new InMemoryTableAction({
-                name: 'Inschrijving bewerken',
+                name: $t(`Inschrijving bewerken`),
                 priority: 1,
                 groupIndex: 1,
                 needsSelection: true,
@@ -128,7 +128,7 @@ export class RegistrationActionBuilder {
 
     getUnsubscribeAction(): TableAction<PlatformMember>[] {
         return [new InMemoryTableAction({
-            name: 'Uitschrijven',
+            name: $t(`Uitschrijven`),
             destructive: true,
             priority: 0,
             groupIndex: 7,
@@ -193,7 +193,7 @@ export class RegistrationActionBuilder {
         // Add quick switch action
         return [
             new InMemoryTableAction({
-                name: 'Open beheerderportaal',
+                name: $t(`Open beheerderportaal`),
                 description: organization.name,
                 priority: 0,
                 groupIndex: 5,

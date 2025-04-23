@@ -152,7 +152,7 @@ export class STPackage extends QueryableModel {
             throw new SimpleError({
                 code: 'not_allowed',
                 message: 'Not allowed',
-                human: 'Je kan dit pakket niet verlengen',
+                human: $t(`Je kan dit pakket niet verlengen`),
             });
         }
 
@@ -288,11 +288,11 @@ export class STPackage extends QueryableModel {
                     }),
                     Replacement.create({
                         token: 'validUntil',
-                        value: this.validUntil ? Formatter.dateTime(this.validUntil) : 'nooit',
+                        value: this.validUntil ? Formatter.dateTime(this.validUntil) : $t(`nooit`),
                     }),
                     Replacement.create({
                         token: 'validUntilDate',
-                        value: this.validUntil ? Formatter.date(this.validUntil) : 'nooit',
+                        value: this.validUntil ? Formatter.date(this.validUntil) : $t(`nooit`),
                     }),
                     Replacement.create({
                         token: 'renewUrl',

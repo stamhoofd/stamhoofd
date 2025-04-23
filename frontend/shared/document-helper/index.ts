@@ -90,7 +90,7 @@ export async function downloadDocument($context: SessionContext, document: Docum
             Toast.fromError(e).show();
         }
         else {
-            new Toast('Downloaden geannuleerd', 'info').show();
+            new Toast($t(`Downloaden geannuleerd`), 'info').show();
         }
     }
 }
@@ -103,7 +103,7 @@ export async function downloadDocuments($context: SessionContext, documents: Doc
 
     let pendingToast: Toast | null = null;
     try {
-        pendingToast = new Toast('Documenten downloaden...', 'spinner').setProgress(0).setHide(null).show();
+        pendingToast = new Toast($t(`Documenten downloaden...`), 'spinner').setProgress(0).setHide(null).show();
         const JSZip = (await import(/* webpackChunkName: "jszip" */ 'jszip')).default;
         const zip = new JSZip();
 
@@ -121,9 +121,9 @@ export async function downloadDocuments($context: SessionContext, documents: Doc
         await Promise.all(promises);
 
         pendingToast?.hide();
-        pendingToast = new Toast('Documenten bundelen in een .zip...', 'spinner').setHide(null).show();
+        pendingToast = new Toast($t(`Documenten bundelen in een .zip...`), 'spinner').setHide(null).show();
         const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
-        await AppManager.shared.downloadFile(blob, 'documenten.zip');
+        await AppManager.shared.downloadFile(blob, $t(`documenten.zip`));
         pendingToast?.hide();
     }
     catch (e) {
@@ -132,7 +132,7 @@ export async function downloadDocuments($context: SessionContext, documents: Doc
             Toast.fromError(e).show();
         }
         else {
-            new Toast('Downloaden geannuleerd', 'info').show();
+            new Toast($t(`Downloaden geannuleerd`), 'info').show();
         }
     }
 }

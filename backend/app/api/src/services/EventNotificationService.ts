@@ -132,7 +132,7 @@ export class EventNotificationService {
         }
         const events = EventNotification.events.isLoaded(notification) ? notification.events : await EventNotification.events.load(notification);
         const type = await this.validateType(notification);
-        let submitterName = 'Anoniem';
+        let submitterName = $t(`Anoniem`);
 
         if (notification.submittedBy) {
             const user = await User.getByID(notification.submittedBy);

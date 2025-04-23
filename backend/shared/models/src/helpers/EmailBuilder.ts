@@ -276,7 +276,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
                         new SimpleError({
                             code: 'email_hard_bounce',
                             message: 'Recipient has hard bounced',
-                            human: 'Dit e-mailadres is waarschijnlijk ongeldig. We konden eerder geen e-mails naar dit adres sturen.',
+                            human: $t(`Dit e-mailadres is waarschijnlijk ongeldig. We konden eerder geen e-mails naar dit adres sturen.`),
                         }),
                     );
                 }
@@ -290,7 +290,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
                         new SimpleError({
                             code: 'email_spam',
                             message: 'Recipient has marked as spam',
-                            human: 'Dit e-mailadres heeft eerder een e-mail als spam gemarkeerd. We kunnen geen e-mails naar dit adres sturen.',
+                            human: $t(`Dit e-mailadres heeft eerder een e-mail als spam gemarkeerd. We kunnen geen e-mails naar dit adres sturen.`),
                         }),
                     );
                 }
@@ -427,7 +427,7 @@ export async function fillRecipientReplacements(recipient: Recipient, options: {
         Replacement.create({
             token: 'loginDetails',
             value: '',
-            html: recipientUser && recipientUser.hasAccount() ? `<p class="description"><em>Je kan op het ledenportaal inloggen met <strong>${Formatter.escapeHtml(recipientUser.email)}</strong></em></p>` : `<p class="description"><em>Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres <strong>${Formatter.escapeHtml(recipient.email)}</strong>, dan krijg je automatisch toegang tot alle bestaande gegevens.</em></p>`,
+            html: recipientUser && recipientUser.hasAccount() ? `<p class="description"><em>${$t('Je kan op het ledenportaal inloggen met')} <strong>${Formatter.escapeHtml(recipientUser.email)}</strong></em></p>` : `<p class="description"><em>${$t('Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres')} <strong>${Formatter.escapeHtml(recipient.email)}</strong>${$t(', dan krijg je automatisch toegang tot alle bestaande gegevens.')}</em></p>`,
         }),
     );
 

@@ -1,6 +1,6 @@
 import { Toast } from '@stamhoofd/components';
 import { AppManager } from '@stamhoofd/networking';
-import { CartItem, CheckoutMethodType, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivateOrder, ProductType, ReservedSeat, WebshopPreview } from '@stamhoofd/structures';
+import { CartItem, CheckoutMethodType, OrderStatusHelper, PaymentMethodHelper, PrivateOrder, ProductType, ReservedSeat, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import XLSX from 'xlsx';
 
@@ -58,7 +58,7 @@ export class OrdersExcelExport {
             for (const item of order.data.cart.items) {
                 // Produce prices
                 if (item.product.prices.length > 1) {
-                    const name = 'Prijskeuze';
+                    const name = $t(`Prijskeuze`);
 
                     if (!optionColumns.has(Formatter.slug(name))) {
                         optionColumns.set(Formatter.slug(name), optionColumns.size);
@@ -68,7 +68,7 @@ export class OrdersExcelExport {
 
                 // Ticket date/time
                 if ((item.product.type === ProductType.Ticket || item.product.type === ProductType.Voucher) && item.product.dateRange) {
-                    const name = 'Ticketdatum';
+                    const name = $t(`Ticketdatum`);
 
                     if (!optionColumns.has(Formatter.slug(name))) {
                         optionColumns.set(Formatter.slug(name), optionColumns.size);
@@ -101,44 +101,44 @@ export class OrdersExcelExport {
         // Columns
         const wsData: RowValue[][] = [
             [
-                'Bestelnummer',
-                'Besteldatum',
-                'Voornaam',
-                'Achternaam',
-                'E-mail',
-                'GSM-nummer',
+                $t(`Bestelnummer`),
+                $t(`Besteldatum`),
+                $t(`Voornaam`),
+                $t(`Achternaam`),
+                $t(`E-mail`),
+                $t(`GSM-nummer`),
                 ...answerNames,
-                'Notities',
-                'Aantal',
-                'Stukprijs',
-                'Eenmalige extra kost',
-                'Korting',
-                'Prijs',
-                'Artikel',
+                $t(`Notities`),
+                $t(`Aantal`),
+                $t(`Stukprijs`),
+                $t(`Eenmalige extra kost`),
+                $t(`Korting`),
+                $t(`Prijs`),
+                $t(`Artikel`),
                 ...optionNames,
-                'Plaatsen',
+                $t(`Plaatsen`),
 
                 // Duplicates
-                'Afhaalmethode',
-                'Leveringsadres / afhaallocatie',
-                'Datum',
-                'Tijdstip',
-                'Betaalmethode',
-                'Betaald',
-                'Status',
-                'Kortingscode',
+                $t(`Afhaalmethode`),
+                $t(`Leveringsadres / afhaallocatie`),
+                $t(`Datum`),
+                $t(`Tijdstip`),
+                $t(`Betaalmethode`),
+                $t(`Betaald`),
+                $t(`Status`),
+                $t(`Kortingscode`),
             ],
         ];
 
         for (const order of orders) {
             let checkoutType = '/';
             let address = '/';
-            if (order.data.checkoutMethod?.type == CheckoutMethodType.Takeout) {
-                checkoutType = 'Afhalen';
+            if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
+                checkoutType = $t(`Afhalen`);
                 address = order.data.checkoutMethod.name;
             }
-            else if (order.data.checkoutMethod?.type == CheckoutMethodType.Delivery) {
-                checkoutType = 'Levering' + (order.data.checkoutMethod.name.length > 0 ? '(' + order.data.checkoutMethod.name + ')' : '');
+            else if (order.data.checkoutMethod?.type === CheckoutMethodType.Delivery) {
+                checkoutType = $t(`Levering {name}`, { name: order.data.checkoutMethod.name.length > 0 ? '(' + order.data.checkoutMethod.name + ')' : '' });
                 address = order.data.address?.toString() ?? '??';
             }
 
@@ -165,7 +165,7 @@ export class OrdersExcelExport {
 
                 // Product price
                 if (item.product.prices.length > 1) {
-                    const columnName = 'Prijskeuze';
+                    const columnName = $t(`Prijskeuze`);
                     const index = optionColumns.get(Formatter.slug(columnName));
                     if (index !== undefined) {
                         options[index] = item.productPrice.name;
@@ -173,7 +173,7 @@ export class OrdersExcelExport {
                 }
 
                 if ((item.product.type === ProductType.Ticket || item.product.type === ProductType.Voucher) && item.product.dateRange) {
-                    const columnName = 'Ticketdatum';
+                    const columnName = $t(`Ticketdatum`);
                     const index = optionColumns.get(Formatter.slug(columnName));
                     if (index !== undefined) {
                         options[index] = item.product.dateRange.toString();
@@ -263,7 +263,7 @@ export class OrdersExcelExport {
                     order.data.timeSlot ? Formatter.capitalizeFirstLetter(Formatter.dateWithDay(order.data.timeSlot.date)) : '/',
                     order.data.timeSlot ? Formatter.minutes(order.data.timeSlot.startTime) + ' - ' + Formatter.minutes(order.data.timeSlot.endTime) : '/',
                     PaymentMethodHelper.getNameCapitalized(order.data.paymentMethod),
-                    order.payment?.paidAt === null ? 'Nog niet betaald' : 'Betaald',
+                    order.payment?.paidAt === null ? $t(`Nog niet betaald`) : $t(`Betaald`),
                     OrderStatusHelper.getName(order.status),
                     order.data.discountCodes.map(d => d.code).join(', '),
                 ]);
@@ -324,28 +324,28 @@ export class OrdersExcelExport {
         // Columns
         const wsData: RowValue[][] = [
             [
-                'Bestelnummer',
-                'Besteldatum',
-                'Voornaam',
-                'Achternaam',
-                'E-mail',
-                'GSM-nummer',
+                $t(`Bestelnummer`),
+                $t(`Besteldatum`),
+                $t(`Voornaam`),
+                $t(`Achternaam`),
+                $t(`E-mail`),
+                $t(`GSM-nummer`),
                 ...answerNames,
-                'Notities',
-                'Afhaalmethode',
-                'Leveringsadres / afhaallocatie',
-                'Datum',
-                'Tijdstip',
-                'Subtotaal',
-                'Korting',
-                'Leveringskost',
-                'Administratiekosten',
-                'Totaal',
-                'Betaalmethode',
-                'Betaald',
-                'Status',
-                'Kortingscode',
-                ...(shouldIncludeSettements ? ['Uitbetalingsdatum', 'Uitbetalingsmededeling'] : []),
+                $t(`Notities`),
+                $t(`Afhaalmethode`),
+                $t(`Leveringsadres / afhaallocatie`),
+                $t(`Datum`),
+                $t(`Tijdstip`),
+                $t(`Subtotaal`),
+                $t(`Korting`),
+                $t(`Leveringskost`),
+                $t(`Administratiekosten`),
+                $t(`Totaal`),
+                $t(`Betaalmethode`),
+                $t(`Betaald`),
+                $t(`Status`),
+                $t(`Kortingscode`),
+                ...(shouldIncludeSettements ? [$t(`Uitbetalingsdatum`), $t(`Uitbetalingsmededeling`)] : []),
                 ...itemNames,
             ],
         ];
@@ -353,12 +353,12 @@ export class OrdersExcelExport {
         for (const order of orders) {
             let checkoutType = '/';
             let address = '/';
-            if (order.data.checkoutMethod?.type == CheckoutMethodType.Takeout) {
-                checkoutType = 'Afhalen';
+            if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
+                checkoutType = $t(`Afhalen`);
                 address = order.data.checkoutMethod.name;
             }
-            else if (order.data.checkoutMethod?.type == CheckoutMethodType.Delivery) {
-                checkoutType = 'Levering' + (order.data.checkoutMethod.name.length > 0 ? '(' + order.data.checkoutMethod.name + ')' : '');
+            else if (order.data.checkoutMethod?.type === CheckoutMethodType.Delivery) {
+                checkoutType = $t(`Levering {name}`, { name: order.data.checkoutMethod.name.length > 0 ? '(' + order.data.checkoutMethod.name + ')' : '' });
                 address = order.data.address?.toString() ?? '??';
             }
 
@@ -431,7 +431,7 @@ export class OrdersExcelExport {
                     format: '€0.00',
                 },
                 PaymentMethodHelper.getNameCapitalized(order.data.paymentMethod),
-                order.pricePaid < order.totalToPay ? 'Nog niet betaald' : 'Betaald',
+                order.pricePaid < order.totalToPay ? $t(`Nog niet betaald`) : $t(`Betaald`),
                 OrderStatusHelper.getName(order.status),
                 order.data.discountCodes.map(d => d.code).join(', '),
                 ...(shouldIncludeSettements
@@ -454,12 +454,12 @@ export class OrdersExcelExport {
         // Columns
         const wsData: RowValue[][] = [
             [
-                'ID',
-                'Mededeling',
-                'Datum',
-                'Totaal uitbetaald',
-                'Totaal van deze bestellingen',
-                'Transactiekosten (incl. BTW)',
+                $t(`ID`),
+                $t(`Mededeling`),
+                $t(`Datum`),
+                $t(`Totaal uitbetaald`),
+                $t(`Totaal van deze bestellingen`),
+                $t(`Transactiekosten (incl. BTW)`),
             ],
         ];
 
@@ -525,9 +525,9 @@ export class OrdersExcelExport {
         // Columns
         const wsData: RowValue[][] = [
             [
-                'Artikel',
-                'Variant',
-                'Aantal',
+                $t(`Artikel`),
+                $t(`Variant`),
+                $t(`Aantal`),
             ],
         ];
 
@@ -571,23 +571,23 @@ export class OrdersExcelExport {
         const shouldIncludeSettements = false;
 
         /* Add the worksheet to the workbook */
-        XLSX.utils.book_append_sheet(wb, this.createOrderLines(webshop, orders), 'Artikel per lijn');
-        XLSX.utils.book_append_sheet(wb, this.createOrders(orders, shouldIncludeSettements), 'Bestelling per lijn');
-        XLSX.utils.book_append_sheet(wb, this.createProducts(orders), 'Totalen');
+        XLSX.utils.book_append_sheet(wb, this.createOrderLines(webshop, orders), $t(`Artikel per lijn`));
+        XLSX.utils.book_append_sheet(wb, this.createOrders(orders, shouldIncludeSettements), $t(`Bestelling per lijn`));
+        XLSX.utils.book_append_sheet(wb, this.createProducts(orders), $t(`Totalen`));
 
         if (shouldIncludeSettements) {
-            XLSX.utils.book_append_sheet(wb, this.createSettlements(orders), 'Uitbetalingen');
+            XLSX.utils.book_append_sheet(wb, this.createSettlements(orders), $t(`Uitbetalingen`));
         }
 
         if (AppManager.shared.downloadFile) {
             const data: ArrayBuffer = XLSX.write(wb, { type: 'array' });
             const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            AppManager.shared.downloadFile(blob, 'bestellingen.xlsx').catch((e) => {
+            AppManager.shared.downloadFile(blob, $t(`bestellingen.xlsx`)).catch((e) => {
                 Toast.fromError(e).show();
             });
         }
         else {
-            XLSX.writeFile(wb, 'bestellingen.xlsx');
+            XLSX.writeFile(wb, $t(`bestellingen.xlsx`));
         }
     }
 }

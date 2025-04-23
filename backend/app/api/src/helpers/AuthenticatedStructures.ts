@@ -35,7 +35,7 @@ export class AuthenticatedStructures {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: 'Permission denied',
-                    human: 'Je hebt geen toegang tot deze betaling',
+                    human: $t(`Je hebt geen toegang tot deze betaling`),
                 });
             }
         }
@@ -611,7 +611,7 @@ export class AuthenticatedStructures {
                 throw new SimpleError({
                     code: 'organization_not_found',
                     message: 'Organization not found',
-                    human: 'Organisatie niet gevonden',
+                    human: $t(`Organisatie niet gevonden`),
                 });
             }
 
@@ -647,7 +647,7 @@ export class AuthenticatedStructures {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: 'Permission denied',
-                    human: 'Je hebt geen toegang tot de orders van deze webshop',
+                    human: $t(`Je hebt geen toegang tot de orders van deze webshop`),
                 });
             }
         }
@@ -681,7 +681,7 @@ export class AuthenticatedStructures {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: 'Permission denied',
-                    human: 'Je hebt geen toegang tot de documenten van deze template',
+                    human: $t(`Je hebt geen toegang tot de documenten van deze template`),
                 });
             }
         }
@@ -714,7 +714,7 @@ export class AuthenticatedStructures {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: 'Permission denied',
-                    human: 'Je hebt geen toegang tot de tickets van deze webshop',
+                    human: $t(`Je hebt geen toegang tot de tickets van deze webshop`),
                 });
             }
         }
@@ -961,13 +961,13 @@ export class AuthenticatedStructures {
                     if (user.permissions?.platform !== null) {
                         userStruct = NamedObject.create({
                             id: '',
-                            name: 'Beheerder van ' + Platform.shared.config.name,
+                            name: $t(`Beheerder van`) + ' ' + Platform.shared.config.name,
                         });
                     }
                     else {
                         userStruct = NamedObject.create({
                             id: '',
-                            name: 'Onbekend',
+                            name: $t(`Onbekend`),
                         });
                     }
                 }
@@ -986,7 +986,7 @@ export class AuthenticatedStructures {
                 const org = organizations.find(o => o.id === log.organizationId);
                 replacements.set('org', AuditLogReplacement.create({
                     id: log.organizationId,
-                    value: org?.name ?? 'verwijderde vereniging',
+                    value: org?.name ?? $t(`verwijderde vereniging`),
                     type: AuditLogReplacementType.Organization,
                 }));
             }
