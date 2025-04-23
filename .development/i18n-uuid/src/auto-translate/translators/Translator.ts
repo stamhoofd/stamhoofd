@@ -74,7 +74,7 @@ export abstract class Translator implements ITranslator {
 
         const prompt = `Translate the values of the json array from ${originalLocal} to ${targetLocal}.${consistentWordsText}
 
-Important: do not translate words between curly brackets (even if it is a consistent word). For example {vereniging} must remain {vereniging}.
+Important: do not translate words between curly brackets (even if it is a consistent word). For example {een-voorbeeld} must remain {een-voorbeeld}.
 
 Translate this array: ${JSON.stringify(batch)}`;
 
