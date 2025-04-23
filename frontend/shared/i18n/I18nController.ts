@@ -2,7 +2,7 @@
 import { HistoryManager } from '@simonbackx/vue-app-navigation';
 import { countries, languages } from '@stamhoofd/locales';
 import { SessionContext, Storage, UrlHelper } from '@stamhoofd/networking';
-import { Address, Country, CountryCode, countryToCode } from '@stamhoofd/structures';
+import { Address, Country, CountryCode, countryToCode, Language } from '@stamhoofd/structures';
 import { I18n } from './I18n';
 
 export function useTranslate(): typeof I18n.prototype.$t {
@@ -36,12 +36,12 @@ export class I18nController {
     static fixedCountry = false;
 
     namespace = '';
-    language = '';
+    language = Language.Dutch;
     countryCode: CountryCode = Country.Belgium;
 
     // Used for SEO
     defaultCountryCode: CountryCode = Country.Belgium;
-    defaultLanguage = 'nl';
+    defaultLanguage = Language.Dutch;
 
     // Allows you to set and remove meta data
     // vueMetaApp?: VueMetaApp
@@ -52,7 +52,7 @@ export class I18nController {
         return this.language + '-' + this.countryCode;
     }
 
-    constructor($context: SessionContext | undefined | null, language: string, country: Country, namespace: string) {
+    constructor($context: SessionContext | undefined | null, language: Language, country: Country, namespace: string) {
         this.$context = $context;
         this.namespace = namespace;
         this.language = language;
@@ -80,7 +80,7 @@ export class I18nController {
     }
 
     async switchToLocale(options: {
-        language?: string;
+        language?: Language;
         country?: Country;
     }) {
         if ((options.country ?? this.countryCode) == this.countryCode && (options.language ?? this.language) == this.language) {
@@ -91,10 +91,10 @@ export class I18nController {
         this.correctLocale();
 
         // Update url's
-        this.updateUrl();
-
-        // Load locale
-        await this.loadLocale();
+        await Promise.all([
+            this.updateUrl(),
+            this.loadLocale(),
+        ]);
 
         this.saveLocaleToStorage().catch(console.error);
     }
@@ -115,7 +115,7 @@ export class I18nController {
         }
     }
 
-    updateUrl() {
+    async updateUrl() {
         if (I18nController.shared && I18nController.addUrlPrefix && (I18nController.skipUrlPrefixForLocale === undefined || I18nController.skipUrlPrefixForLocale !== I18nController.shared.locale)) {
             if (I18nController.fixedCountry || STAMHOOFD.fixedCountry) {
                 UrlHelper.localePrefix = I18nController.shared.language;
@@ -127,36 +127,45 @@ export class I18nController {
         else {
             UrlHelper.localePrefix = '';
         }
-        HistoryManager.updateUrl();
+        await HistoryManager.updateUrl();
+    }
+
+    get validLocales() {
+        // todo: make platform specific
+        return {
+            [Country.Belgium]: [Language.Dutch, Language.English],
+            [Country.Netherlands]: [Language.Dutch, Language.English],
+        } as Record<string, undefined | (Language[])>;
+    }
+
+    get availableLanguages(): Language[] {
+        return this.validLocales[this.countryCode] ?? [];
     }
 
     correctLocale() {
         // Some locales are invalid
-        const validLocales: Record<string, undefined | string[]> = {
-            [Country.Belgium]: ['nl', 'en'],
-            [Country.Netherlands]: ['nl', 'en'],
-        };
+        const validLocales = this.validLocales;
 
         if (!(this.countryCode in validLocales)) {
             // Find first coutnry with same language
             for (const country of countries) {
                 if (validLocales[country]?.includes(this.language)) {
-                    this.setCountryCode(country as Country);
+                    this.setCountryCode(country);
                     console.info('[I18n] Corrected country to ' + country);
                     return;
                 }
             }
 
             // Fallback
-            this.setCountryCode(countries[0] as Country);
+            this.setCountryCode(countries[0]);
             this.language = validLocales[this.countryCode]![0];
             console.info('[I18n] Corrected country to ' + this.countryCode + ' and language to ' + this.language);
             return;
         }
 
         if (!validLocales[this.countryCode]?.includes(this.language)) {
-            if (validLocales[this.countryCode]?.includes('en')) {
-                this.language = 'en';
+            if (validLocales[this.countryCode]?.includes(Language.English)) {
+                this.language = Language.English;
                 console.info('[I18n] Corrected language to en');
                 return;
             }
@@ -186,13 +195,13 @@ export class I18nController {
         i18n.setLocale(locale, this.language, this.countryCode);
     }
 
-    static async getLocaleFromStorage(): Promise<{ language?: string; country?: string }> {
+    static async getLocaleFromStorage(): Promise<{ language?: Language; country?: Country }> {
         const country = await Storage.keyValue.getItem('country');
         const language = await Storage.keyValue.getItem('language');
 
         return {
-            country: country && countries.includes(country) ? country : undefined,
-            language: language && languages.includes(language) ? language : undefined,
+            country: country && this.isValidCountry(country) ? country : undefined,
+            language: language && this.isValidLanguage(language) ? language : undefined,
         };
     }
 
@@ -208,17 +217,17 @@ export class I18nController {
             const l = locale.substr(0, 2).toLowerCase();
             const c = locale.substr(3, 2).toUpperCase();
 
-            return languages.includes(l) && countries.includes(c);
+            return this.isValidLanguage(l) && this.isValidCountry(c);
         }
         return false;
     }
 
-    static isValidLanguage(language: string) {
-        return languages.includes(language);
+    static isValidLanguage(language: string): language is Language {
+        return languages.includes(language as Language);
     }
 
     static isValidCountry(country: string): country is Country {
-        return countries.includes(country);
+        return countries.includes(country as Country);
     }
 
     static async loadDefault($context: SessionContext | null | undefined, defaultCountry?: Country, defaultLanguage?: string, country?: Country) {
@@ -258,7 +267,7 @@ export class I18nController {
         else if (parts.length >= 1 && (this.fixedCountry || STAMHOOFD.fixedCountry) && parts[0].length == 2) {
             const l = parts[0].substr(0, 2).toLowerCase();
 
-            if (!language && languages.includes(l)) {
+            if (!language && this.isValidLanguage(l)) {
                 console.info('[I18n] Using language from url', l);
                 language = l;
                 needsSave = true;
@@ -329,7 +338,7 @@ export class I18nController {
         if (!isPrerender) {
             if (!language && navigator.language && navigator.language.length >= 2) {
                 const l = navigator.language.substr(0, 2).toLowerCase();
-                if (languages.includes(l)) {
+                if (this.isValidLanguage(l)) {
                     language = l;
                     console.info('[I18n] Using browser language', l);
                 }
@@ -435,7 +444,7 @@ export class I18nController {
 
         // Update meta data
         def.updateMetaData();
-        def.updateUrl();
+        await def.updateUrl();
 
         await def.loadLocale();
     }

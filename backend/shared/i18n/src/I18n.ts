@@ -1,13 +1,13 @@
 import { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { logger, StyledText } from '@simonbackx/simple-logging';
 import { countries, languages } from '@stamhoofd/locales';
-import { Country } from '@stamhoofd/structures';
+import { Country, Language } from '@stamhoofd/structures';
 import { promises as fs } from 'fs';
 import path from 'path';
 
 export class I18n {
     static loadedLocales: Map<string, Map<string, string>> = new Map();
-    static defaultLanguage = 'nl';
+    static defaultLanguage = Language.Dutch;
     static defaultCountry = Country.Belgium;
 
     static async load() {
@@ -55,7 +55,7 @@ export class I18n {
 
     static isValidLocale(locale: string) {
         if (locale.length == 5 && locale.substr(2, 1) == '-') {
-            const l = locale.substr(0, 2).toLowerCase();
+            const l = locale.substr(0, 2).toLowerCase() as Language;
             const c = locale.substr(3, 2).toUpperCase();
 
             return languages.includes(l) && (countries as string[]).includes(c);
@@ -63,7 +63,7 @@ export class I18n {
         return false;
     }
 
-    language = '';
+    language = Language.Dutch;
     country = Country.Belgium;
 
     // Reference to messages in loadedLocales
@@ -73,7 +73,7 @@ export class I18n {
         return this.language + '-' + this.country;
     }
 
-    constructor(language: string, country: Country) {
+    constructor(language: Language, country: Country) {
         this.language = language;
         this.country = country;
         this.correctLanguageCountryCombination();
@@ -110,7 +110,7 @@ export class I18n {
         this.country = I18n.defaultCountry;
         while (!I18n.isValidLocale(this.locale)) {
             const index = countries.indexOf(this.country);
-            if (index == countries.length - 1) {
+            if (index === countries.length - 1) {
                 // Last country
                 this.language = I18n.defaultLanguage;
                 this.country = I18n.defaultCountry;
@@ -121,7 +121,7 @@ export class I18n {
     }
 
     switchToLocale(options: {
-        language?: string;
+        language?: Language;
         country?: Country;
     }) {
         this.country = options.country ?? this.country;
@@ -148,7 +148,7 @@ export class I18n {
         // Try using custom property
         const localeHeader = request.headers['x-locale'];
         if (localeHeader && typeof localeHeader === 'string' && this.isValidLocale(localeHeader)) {
-            const l = localeHeader.substr(0, 2).toLowerCase();
+            const l = localeHeader.substr(0, 2).toLowerCase() as Language;
             const c = localeHeader.substr(3, 2).toUpperCase() as Country;
 
             const i18n = new I18n(l, c);
@@ -167,19 +167,19 @@ export class I18n {
                 const localeSplit = trimmed.split(';');
                 const locale = localeSplit[0];
 
-                if (locale.length == 2) {
+                if (locale.length === 2) {
                     // Language
-                    if (languages.includes(locale)) {
+                    if (languages.includes(locale as Language)) {
                         // Use a default country
                         // Country can get overriden when matching a organization
                         // using .setCountry(country) method
-                        const i18n = new I18n(locale, Country.Belgium);
+                        const i18n = new I18n(locale as Language, Country.Belgium);
                         (request as any)._cached_i18n = i18n;
                         return i18n;
                     }
                 }
                 else if (locale.length === 5 && this.isValidLocale(locale)) {
-                    const l = locale.substr(0, 2).toLowerCase();
+                    const l = locale.substr(0, 2).toLowerCase() as Language;
                     const c = locale.substr(3, 2).toUpperCase() as Country;
 
                     // Lang + country

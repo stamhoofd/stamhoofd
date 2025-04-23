@@ -37,7 +37,26 @@
                 </div>
             </form>
 
-            <hr><STList>
+            <hr>
+
+            <STList>
+                <STListItem v-if="hasLanguages" :selectable="true" @click.prevent="switchLanguage">
+                    <template #left>
+                        <span class="icon language" />
+                    </template>
+
+                    <h3 class="style-title-list">
+                        Taal wijzigen
+                    </h3>
+                    <p class="style-description-small">
+                        {{ LanguageHelper.getNativeName(I18nController.shared.language) }}
+                    </p>
+
+                    <template #right>
+                        <span class="icon arrow-down-small" />
+                    </template>
+                </STListItem>
+
                 <STListItem v-if="passwordEnabled" :selectable="true" @click.prevent="openChangePassword">
                     <template #left>
                         <span class="icon key" />
@@ -183,10 +202,10 @@
 <script lang="ts" setup>
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, useDismiss, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ChangePasswordView, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, Toast, useContext, useErrors, useLoginMethod, useLoginMethodEnabled, usePatch, usePlatform, useUser, useValidation } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { CenteredMessage, ChangePasswordView, ConfirmEmailView, ContextMenu, ContextMenuItem, EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, Toast, useContext, useErrors, useLoginMethod, useLoginMethodEnabled, usePatch, usePlatform, useUser, useValidation } from '@stamhoofd/components';
+import { I18nController, useTranslate } from '@stamhoofd/frontend-i18n';
 import { LoginHelper } from '@stamhoofd/networking';
-import { LoginMethod, LoginProviderType, NewUser, UserMeta } from '@stamhoofd/structures';
+import { LanguageHelper, LoginMethod, LoginProviderType, NewUser, UserMeta } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 import DeleteView from './DeleteView.vue';
 
@@ -210,6 +229,7 @@ const email = computed({
 const passwordEnabled = useLoginMethodEnabled(email, LoginMethod.Password);
 const ssoEnabled = useLoginMethodEnabled(email, LoginMethod.SSO);
 const googleEnabled = useLoginMethodEnabled(email, LoginMethod.Google);
+const hasLanguages = I18nController.shared.availableLanguages.length > 1;
 
 const ssoConfig = useLoginMethod(LoginMethod.SSO);
 const googleConfig = useLoginMethod(LoginMethod.Google);
@@ -290,6 +310,29 @@ async function save() {
     finally {
         saving.value = false;
     }
+}
+
+async function switchLanguage(event: MouseEvent) {
+    const menu = new ContextMenu([
+        I18nController.shared.availableLanguages.map((language) => {
+            return new ContextMenuItem({
+                name: LanguageHelper.getNativeName(language),
+                selected: language === I18nController.shared.language,
+                action: async () => {
+                    await I18nController.shared.switchToLocale({
+                        language,
+                    });
+
+                    // Reload full page
+                    window.location.reload();
+                },
+            });
+        }),
+    ]);
+
+    await menu.show({
+        clickEvent: event,
+    });
 }
 
 async function deleteRequest() {

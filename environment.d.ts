@@ -19,6 +19,14 @@ declare enum Country {
     Other = 'OTHER',
 }
 
+// This is duplicated from Language.ts because it otherwise doesn't work correclty and causes to many circular dependencies
+declare enum Language {
+    Dutch = 'nl',
+    English = 'en',
+    French = 'fr',
+}
+
+
 /**
  * Stamhoofd uses a global variable to store some configurations. We don't use process.env because we can only store 
  * strings into those files. And we need objects for our localized domains (different domains for each locale). 
@@ -38,11 +46,12 @@ declare global {
 
     type LocalizedDomain = Localized<string>;
     type GlobalCountry = Country;
+    type GlobalLanguage = Language;
     const enum MemberNumberAlgorithm {
         KSA = 'KSA',
         Incremental = 'Incremental',
     }
-    
+
     type StamhoofdDomains = {
         dashboard: string,                      // requires both www + non-www DNS record
         registration?: LocalizedDomain,         // Optional. Set to undefined for platforms. requires wildcard prefix DNS
@@ -272,5 +281,5 @@ declare global {
 
     const $t: (key: string, replace?: Record<string, string>) => string
     const $getCountry: () => Country
-    const $getLanguage: () => string
+    const $getLanguage: () => Language
 }
