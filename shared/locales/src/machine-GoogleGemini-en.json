@@ -15742,5 +15742,29 @@
   "2c94e906-587b-4ff0-b829-c176fb7120f7": {
     "original": "Zonder proefperiode",
     "translation": "Without trial period"
+  },
+  "9e2430e8-5733-414c-9831-f7c455836691": {
+    "original": "{{naam}}",
+    "translation": "{{naam}}"
+  },
+  "61b6890f-3b3e-4d69-96fe-687e1366e738": {
+    "original": "{{nr}}",
+    "translation": "{{nr}}"
+  },
+  "bf7f8c10-b6b5-4edb-90d8-a550d061dea6": {
+    "original": "Geef deze beheerders snel lees of bewerk toegang tot alle onderdelen van jouw vereniging.",
+    "translation": "Give these administrators quick read or edit access to all parts of your association."
+  },
+  "d431d7b4-8cdd-4307-bb73-2c570fc1a0fa": {
+    "original": "Toegang tot verenigingen",
+    "translation": "Access to associations"
+  },
+  "31982300-fbbf-4f5a-b7ce-26738bd2b23d": {
+    "original": "Je kan een beheerder volledige toegang geven tot alle verenigingen (en dus ook de leden van die vereniging), of per tag de toegang regelen.",
+    "translation": "You can give an administrator full access to all associations (and thus also the members of that association), or regulate access per tag."
+  },
+  "9ec8b45b-3321-4c1a-90bb-74e22c3e7f09": {
+    "original": "Een hoofdbeheerder van jouw vereniging moet eerst e-mailadressen instellen voor je een e-mail kan versturen.",
+    "translation": "A head administrator of your association must first set up email addresses before you can send an email."
   }
 }
