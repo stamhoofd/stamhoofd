@@ -152,7 +152,7 @@ const noGroupsMessage = computed(() => {
         return $t(`2ae30b48-9f5d-4e55-9b7d-41a792704442`, { organization: organizationName ?? '', member: firstName });
     }
 
-    return $t(`{member} kan je op dit moment niet inschrijven bij {organization}. Dit kan het geval zijn als: de inschrijvingen gesloten zijn of als dit lid in geen enkele groep 'past' (bv. leeftijd).`, {
+    return $t(`90c49f44-4daa-4746-8fda-3558c588e651`, {
         member: firstName,
         organization: organizationName ?? '',
     });

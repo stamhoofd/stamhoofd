@@ -58,7 +58,7 @@
                 </Checkbox>
 
                 <p v-if="percentage && exampleAdministrationFee1" class="style-description-small">
-                    {{ $t('Voorbeeld: de aangerekende administratiekost bedraagt {exampleAdministrationFee1} op een bedrag van {exampleAdministrationFeeValue1}, en {exampleAdministrationFee2} op een bedrag van {exampleAdministrationFeeValue2}.', {
+                    {{ $t('76a41c36-99d1-467c-a243-3a30a56c272e', {
                         exampleAdministrationFee1: formatPrice(exampleAdministrationFee1),
                         exampleAdministrationFeeValue1: formatPrice(exampleAdministrationFeeValue1),
                         exampleAdministrationFee2: formatPrice(exampleAdministrationFee2),

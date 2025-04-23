@@ -466,7 +466,7 @@ export class RegisterItem implements ObjectWithRecords {
                     new SimpleError({
                         code: 'product_unavailable',
                         message: 'Product unavailable',
-                        human: $t(`Eén of meerdere tarieven van {group} zijn niet meer beschikbaar`, {
+                        human: $t(`e7658433-afc4-4963-8ddf-afc1bda26bef`, {
                             group: this.group.settings.name,
                         }),
                         meta: { recoverable: true },
@@ -489,7 +489,7 @@ export class RegisterItem implements ObjectWithRecords {
                 errors.addError(new SimpleError({
                     code: 'option_menu_unavailable',
                     message: 'Option menu unavailable',
-                    human: $t(`Eén of meerdere keuzemogelijkheden van {group} zijn niet meer beschikbaar`, {
+                    human: $t(`e883ae60-e858-4bcf-9e60-5d03986459c2`, {
                         group: this.group.settings.name,
                     }),
                     meta: { recoverable: true },
@@ -509,7 +509,7 @@ export class RegisterItem implements ObjectWithRecords {
                 errors.addError(new SimpleError({
                     code: 'option_unavailable',
                     message: 'Option unavailable',
-                    human: $t(`Eén of meerdere keuzemogelijkheden van {group} zijn niet meer beschikbaar`, {
+                    human: $t(`e883ae60-e858-4bcf-9e60-5d03986459c2`, {
                         group: this.group.settings.name,
                     }),
                     meta: { recoverable: true },
@@ -1026,7 +1026,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'already_registered',
                 message: 'Already registered',
-                human: $t(`{member} is al ingeschreven voor {group}`, {
+                human: $t(`40b728b0-6784-47bb-9ffe-53e7c88e638b`, {
                     member: this.member.member.firstName,
                     group: this.group.settings.name,
                 }),
@@ -1038,7 +1038,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'maximum_reached',
                 message: 'Maximum reached',
-                human: $t(`Je kan niet meer inschrijven voor {group} omdat {member} al ingeschreven is voor een groep die je niet kan combineren.`, {
+                human: $t(`73430be0-1a07-4730-9e2e-72528992767d`, {
                     group: this.group.settings.name,
                     member: this.member.patchedMember.name,
                 }),
@@ -1076,7 +1076,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'not_matching',
                         message: 'Not matching: memberDetails',
-                        human: error?.description ?? $t(`{member} voldoet niet aan de voorwaarden om in te schrijven voor deze groep.`, {
+                        human: error?.description ?? $t(`e24f82f9-a11d-45bc-9719-3ebdfd1f28d6`, {
                             member: this.member.patchedMember.name,
                         }),
                     });
@@ -1088,7 +1088,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: requireGroupIds',
-                    human: $t(`{member} voldoet niet aan de voorwaarden om in te schrijven voor deze groep (verplichte inschrijving bij leeftijdsgroep).`, {
+                    human: $t(`6deb2a31-fcc5-4961-bcd8-01cb8332411b`, {
                         member: this.member.patchedMember.name,
                     }),
                 });
@@ -1106,7 +1106,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: requireOrganizationIds',
-                    human: $t(`{member} kan pas inschrijven met een geldige actieve inschrijving  (verplichte inschrijving in regio).`, {
+                    human: $t(`4ea84d3f-63f5-4ab0-bab2-a5c72fa0111d`, {
                         member: this.member.patchedMember.name,
                     }),
                 });
@@ -1136,7 +1136,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'pre_registrations',
                         message: 'Pre registrations',
-                        human: $t(`Momenteel zijn de voorinschrijvingen nog bezig voor {group}. Dit is enkel voor bestaande leden`, {
+                        human: $t(`b2486175-6dbd-4aa4-a57c-dc7e322fcd31`, {
                             group: this.group.settings.name,
                         }) + (this.group.settings.priorityForFamily ? ' ' + $t(`4837a21c-e894-45fb-873f-1b09cbebc495`) : '') + '.',
                     });
@@ -1170,7 +1170,7 @@ export class RegisterItem implements ObjectWithRecords {
                         throw new SimpleError({
                             code: 'waiting_list_required',
                             message: 'Waiting list required',
-                            human: $t(`De inschrijvingen voor {group} zijn volzet. Je kan wel nog inschrijven voor de wachtlijst`, {
+                            human: $t(`83f622e4-0ef5-4965-8d6d-10860df30a87`, {
                                 group: this.group.settings.name,
                             }),
                             meta: { recoverable: true },
@@ -1219,7 +1219,7 @@ export class RegisterItem implements ObjectWithRecords {
                         throw new SimpleError({
                             code: 'option_max',
                             message: 'Option maximum exceeded',
-                            human: $t(`Het maximum voor de keuzemogelijkheid {name} is overschreden`, {
+                            human: $t(`c006386b-0590-40c9-ae62-c4b7ade939f0`, {
                                 name: option.option.name,
                             }),
                         });

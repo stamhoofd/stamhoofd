@@ -19450,5 +19450,93 @@
   "e122d6c9-a452-4c70-9868-f53c2520aedc": {
     "original": "todo",
     "translation": "todo"
+  },
+  "b9bac60d-1fd8-43e7-9c9d-4b9b5227f9d6": {
+    "original": "Vul ontbrekende gegevens aan van {member}",
+    "translation": "Fill in the missing data of {member}"
+  },
+  "77e44908-5498-4b91-9b4f-8e55cb282dc5": {
+    "original": "Enkele gegevens van {member} ontbreken. Vul deze aan.",
+    "translation": "Some data of {member} is missing. Please fill it in."
+  },
+  "69385e1a-413f-4583-9061-67072d0742b9": {
+    "original": "Voeg e-mailadres toe van {member}",
+    "translation": "Add {member}'s email address"
+  },
+  "f7999a55-e73a-49c4-ac9f-f5030d96ba43": {
+    "original": "todo",
+    "translation": "todo"
+  },
+  "d7fdebd4-7c3c-4316-b862-7ed777ff36ad": {
+    "original": "todo",
+    "translation": "todo"
+  },
+  "04ff85c0-eb98-46b8-975b-8fd136ddc49a": {
+    "original": "Een {name} moet minimum {days} duren",
+    "translation": "A {name} must last at least {days}"
+  },
+  "a7d005aa-ceaa-4323-8fac-a02fce174023": {
+    "original": "Een {name} mag maximaal {days} duren",
+    "translation": "A {name} may last a maximum of {days}"
+  },
+  "76a41c36-99d1-467c-a243-3a30a56c272e": {
+    "original": "Voorbeeld: de aangerekende administratiekost bedraagt {exampleAdministrationFee1} op een bedrag van {exampleAdministrationFeeValue1}, en {exampleAdministrationFee2} op een bedrag van {exampleAdministrationFeeValue2}.",
+    "translation": "Example: the charged administration costs amount to {exampleAdministrationFee1} on an amount of {exampleAdministrationFeeValue1}, and {exampleAdministrationFee2} on an amount of {exampleAdministrationFeeValue2}."
+  },
+  "90c49f44-4daa-4746-8fda-3558c588e651": {
+    "original": "{member} kan je op dit moment niet inschrijven bij {organization}. Dit kan het geval zijn als: de inschrijvingen gesloten zijn of als dit lid in geen enkele groep 'past' (bv. leeftijd).",
+    "translation": "You cannot register {member} with {organization} at this moment. This may be the case if: registrations are closed or if this member does not fit into any group (e.g. age)."
+  },
+  "492cd771-4145-4249-a009-147e11a6904f": {
+    "original": "Je moet nog {price} betalen aan {name}, via het tabblad Boekhouding.",
+    "translation": "You still need to pay {price} to {name}, via the Accounting tab."
+  },
+  "9526c69d-cdbf-4c90-ae2b-a7a274e42c3c": {
+    "original": "Voeg het e-mailadres waarmee je inlogt ({email}) toe bij {member}, anders wordt jouw account losgekoppeld van dit lid. Of wijzig het e-mailadres waarmee je inlogt.",
+    "translation": "Add the email address you log in with ({email}) to {member}, otherwise your account will be disconnected from this member. Or change the email address you log in with."
+  },
+  "e7658433-afc4-4963-8ddf-afc1bda26bef": {
+    "original": "Eén of meerdere tarieven van {group} zijn niet meer beschikbaar",
+    "translation": "One or more tariffs of {group} are no longer available"
+  },
+  "e883ae60-e858-4bcf-9e60-5d03986459c2": {
+    "original": "Eén of meerdere keuzemogelijkheden van {group} zijn niet meer beschikbaar",
+    "translation": "One or more options of {group} are no longer available"
+  },
+  "40b728b0-6784-47bb-9ffe-53e7c88e638b": {
+    "original": "{member} is al ingeschreven voor {group}",
+    "translation": "{member} is already registered for {group}"
+  },
+  "73430be0-1a07-4730-9e2e-72528992767d": {
+    "original": "Je kan niet meer inschrijven voor {group} omdat {member} al ingeschreven is voor een groep die je niet kan combineren.",
+    "translation": "You can no longer register for {group} because {member} is already registered for a group that you cannot combine."
+  },
+  "e24f82f9-a11d-45bc-9719-3ebdfd1f28d6": {
+    "original": "{member} voldoet niet aan de voorwaarden om in te schrijven voor deze groep.",
+    "translation": "{member} does not meet the conditions to register for this group."
+  },
+  "6deb2a31-fcc5-4961-bcd8-01cb8332411b": {
+    "original": "{member} voldoet niet aan de voorwaarden om in te schrijven voor deze groep (verplichte inschrijving bij leeftijdsgroep).",
+    "translation": "{member} does not meet the conditions to register for this group (mandatory registration with age group)."
+  },
+  "4ea84d3f-63f5-4ab0-bab2-a5c72fa0111d": {
+    "original": "{member} kan pas inschrijven met een geldige actieve inschrijving  (verplichte inschrijving in regio).",
+    "translation": "{member} can only register with a valid active registration (mandatory registration in region)."
+  },
+  "b2486175-6dbd-4aa4-a57c-dc7e322fcd31": {
+    "original": "Momenteel zijn de voorinschrijvingen nog bezig voor {group}. Dit is enkel voor bestaande leden",
+    "translation": "Pre-registrations are currently underway for {group}. This is only for existing members"
+  },
+  "83f622e4-0ef5-4965-8d6d-10860df30a87": {
+    "original": "De inschrijvingen voor {group} zijn volzet. Je kan wel nog inschrijven voor de wachtlijst",
+    "translation": "Registrations for {group} are full. You can still register for the waiting list"
+  },
+  "c006386b-0590-40c9-ae62-c4b7ade939f0": {
+    "original": "Het maximum voor de keuzemogelijkheid {name} is overschreden",
+    "translation": "The maximum for the option {name} has been exceeded"
+  },
+  "96e61729-ea9c-45bf-82da-56e6a92e6b91": {
+    "original": "todo",
+    "translation": "todo"
   }
 }
