@@ -150,14 +150,14 @@ useValidation(errors.validator, () => {
     if (firstName.value.trim().length < 2) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: 'Vul de voornaam in',
+            message: $t(`Vul de voornaam in`),
             field: 'firstName',
         }));
     }
     if (lastName.value.trim().length < 2) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: 'Vul de achternaam in',
+            message: $t(`Vul de achternaam in`),
             field: 'lastName',
         }));
     }
@@ -200,12 +200,12 @@ useValidation(errors.validator, () => {
 const lidSuffix = computed(() => {
     if (firstName.value.length < 2) {
         if (props.member.patchedMember.details.defaultAge < 24) {
-            return ' van dit lid';
+            return ' ' + $t(`van dit lid`);
         }
         return '';
     }
     if (props.member.patchedMember.details.defaultAge < 24) {
-        return ' van ' + firstName.value;
+        return ' ' + $t(`van`) + ' ' + firstName.value;
     }
     return '';
 });
@@ -289,7 +289,7 @@ function setEmail(index: number, value: string) {
 async function showBirthDayMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [new ContextMenuItem({
-            name: 'Volgjaar toevoegen',
+            name: $t(`Volgjaar toevoegen`),
             action: () => addTrackingYear(),
         })],
     ]);

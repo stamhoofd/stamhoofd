@@ -64,7 +64,7 @@ const priceString = computed(() => {
             if (props.webshop.isAllFree) {
                 return '';
             }
-            return 'Gratis';
+            return $t(`Gratis`);
         }
         return Formatter.price(priceRanges[0]);
     }
@@ -92,7 +92,7 @@ const stockText = computed(() => {
 
     if (remainingWithoutCart === 0) {
         return {
-            text: 'Uitverkocht',
+            text: $t(`Uitverkocht`),
             style: 'error',
         };
     }
@@ -109,7 +109,7 @@ const stockText = computed(() => {
         }
 
         return {
-            text: 'Nog ' + props.product.getRemainingStockText(remainingWithoutCart),
+            text: $t(`Nog {count}`, { count: props.product.getRemainingStockText(remainingWithoutCart) }),
             style: 'warn',
         };
     }
@@ -120,7 +120,7 @@ const stockText = computed(() => {
 
     if (maxOrder && maxOrder.remaining === 0) {
         return {
-            text: 'Maximum bereikt',
+            text: $t(`Maximum bereikt`),
             style: 'error',
         };
     }
@@ -136,13 +136,13 @@ const stockText = computed(() => {
 
     if (remaining === 0) {
         return {
-            text: 'Maximum bereikt',
+            text: $t(`Maximum bereikt`),
             style: 'error',
         };
     }
 
     return {
-        text: 'Nog ' + props.product.getRemainingStockText(remaining),
+        text: $t(`Nog {count}`, {count: props.product.getRemainingStockText(remaining)}),
         style: 'warn',
     };
 });

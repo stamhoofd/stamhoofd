@@ -41,8 +41,8 @@ const props =
 const pop = usePop();
 const errors = useErrors();
 
-const deleteText = 'Verwijderen';
-const cancelText = 'Annuleren';
+const deleteText = $t(`Verwijderen`);
+const cancelText = $t(`Annuleren`);
 const confirmationCodeInput = ref('');
 const isConfirm = ref(false);
 const disabled = computed(() => confirmationCodeInput.value.toLowerCase() !== props.confirmationCode.toLowerCase());
@@ -54,7 +54,7 @@ useValidation(errors.validator, () => {
     if (!isConfirm.value) {
         se.addError(new SimpleError({
             code: "invalid_field",
-            message: "Bevestig de actie",
+            message: $t(`Bevestig de actie`),
             field: "isConfirm"
         }))
     }

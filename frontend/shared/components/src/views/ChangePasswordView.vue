@@ -62,7 +62,7 @@ export default class ChangePasswordView extends Mixins(NavigationMixin) {
         if (this.password !== this.passwordRepeat) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: '',
-                message: 'De ingevoerde wachtwoorden komen niet overeen',
+                message: $t(`De ingevoerde wachtwoorden komen niet overeen`),
             }));
             return;
         }
@@ -70,7 +70,7 @@ export default class ChangePasswordView extends Mixins(NavigationMixin) {
         if (this.password.length < 8) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: '',
-                message: 'Jouw wachtwoord moet uit minstens 8 karakters bestaan.',
+                message: $t(`Jouw wachtwoord moet uit minstens 8 karakters bestaan.`),
             }));
             return;
         }
@@ -79,7 +79,7 @@ export default class ChangePasswordView extends Mixins(NavigationMixin) {
         try {
             await LoginHelper.changePassword(this.$context, this.password);
             this.dismiss({ force: true });
-            new Toast('Jouw nieuwe wachtwoord is opgeslagen', 'success').show();
+            new Toast($t(`Jouw nieuwe wachtwoord is opgeslagen`), 'success').show();
         }
         catch (e) {
             this.loading = false;

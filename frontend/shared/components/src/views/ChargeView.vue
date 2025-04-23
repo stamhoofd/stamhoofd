@@ -121,7 +121,7 @@ const dueAt = ref(null);
 
 const priceBreakdown = computed(() => {
     return [{
-        name: 'Totaal',
+        name: $t(`Totaal`),
         price: total.value,
     }];
 });
@@ -153,7 +153,7 @@ useValidation(errors.validator, () => {
     if (selectedOrganization.value === null) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: 'Organisatie is verplicht',
+            message: $t(`Organisatie is verplicht`),
             field: 'organization',
         }));
     }
@@ -163,7 +163,7 @@ useValidation(errors.validator, () => {
     if (descriptionNormalized.length === 0) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: 'Beschrijving is verplicht',
+            message: $t(`Beschrijving is verplicht`),
             field: 'description',
         }));
     }
@@ -171,7 +171,7 @@ useValidation(errors.validator, () => {
     if (price.value === 0) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: 'Bedrag kan niet 0 zijn',
+            message: $t(`Bedrag kan niet 0 zijn`),
             field: 'price',
         }));
     }
@@ -230,7 +230,7 @@ async function save() {
             owner,
         });
 
-        new Toast('Het bedrag werd aangerekend', 'success green').show();
+        new Toast($t(`Het bedrag werd aangerekend`), 'success green').show();
 
         await pop({ force: true });
     }

@@ -292,16 +292,16 @@ const cartEnabled = computed(() => props.webshop.shouldEnableCart);
 const withSeats = computed(() => props.cartItem.product.seatingPlanId !== null);
 const suffixSingular = computed(() => {
     if (props.cartItem.product.type === ProductType.Ticket) {
-        return 'ticket';
+        return $t(`ticket`);
     }
-    return props.cartItem.product.type === ProductType.Person ? 'persoon' : 'stuk';
+    return props.cartItem.product.type === ProductType.Person ? $t(`persoon`) : $t(`stuk`);
 });
 
 const suffix = computed(() => {
     if (props.cartItem.product.type === ProductType.Ticket) {
-        return 'tickets';
+        return $t(`tickets`);
     }
-    return props.cartItem.product.type === ProductType.Person ? 'personen' : 'stuks';
+    return props.cartItem.product.type === ProductType.Person ? $t(`personen`) : $t(`stuks`);
 });
 
 const image = computed(() => props.cartItem.product.images[0]?.getResolutionForSize(600, undefined));
