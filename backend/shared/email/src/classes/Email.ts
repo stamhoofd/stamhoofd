@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
-import { Country } from '@stamhoofd/structures';
+import { Country, Language } from '@stamhoofd/structures';
 import { DataValidator, Formatter, sleep } from '@stamhoofd/utility';
 import htmlToText from 'html-to-text';
 import nodemailer from 'nodemailer';
@@ -535,7 +535,7 @@ class EmailStatic {
     getWebmasterFromEmail() {
         return {
             name: STAMHOOFD.platformName ?? 'Stamhoofd',
-            email: 'webmaster@' + (new I18n('nl', Country.Belgium).localizedDomains.defaultTransactionalEmail()),
+            email: 'webmaster@' + (new I18n(Language.Dutch, Country.Belgium).localizedDomains.defaultTransactionalEmail()),
         };
     }
 

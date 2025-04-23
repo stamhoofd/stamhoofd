@@ -3,7 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { QueryableModel } from '@stamhoofd/sql';
-import { Address, Country, DNSRecordStatus, EmailTemplateType, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, PrivatePaymentConfiguration, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
+import { Address, Country, DNSRecordStatus, EmailTemplateType, Language, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, PrivatePaymentConfiguration, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
 import { AWSError } from 'aws-sdk';
 import SES from 'aws-sdk/clients/sesv2';
 import { PromiseResult } from 'aws-sdk/lib/request';
@@ -103,7 +103,7 @@ export class Organization extends QueryableModel {
      * Return default locale confiruation
      */
     get i18n() {
-        return new I18n('nl', this.address.country);
+        return new I18n(Language.Dutch, this.address.country);
     }
 
     /**
@@ -423,7 +423,7 @@ export class Organization extends QueryableModel {
         bcc?: boolean;
     }) {
         const recipients = await this.getAdminRecipients();
-        const defaultI18n = new I18n('nl', Country.Belgium);
+        const defaultI18n = new I18n(Language.Dutch, Country.Belgium);
         const i18n = this.i18n;
 
         const replaceAll = [
