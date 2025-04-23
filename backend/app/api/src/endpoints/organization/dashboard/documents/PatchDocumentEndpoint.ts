@@ -40,7 +40,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
         for (const patch of request.body.getPatches()) {
             const document = await Document.getByID(patch.id);
             if (!document || !(await Context.auth.canAccessDocument(document, PermissionLevel.Write))) {
-                throw Context.auth.notFoundOrNoAccess($t(`Onbekend document`));
+                throw Context.auth.notFoundOrNoAccess($t(`a9860203-6a6d-4612-b4d4-7851e47d4dad`));
             }
 
             if (patch.data) {
@@ -57,7 +57,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                     throw new SimpleError({
                         code: 'not_found',
                         message: 'Document not found',
-                        human: $t(`Document niet gevonden`),
+                        human: $t(`b6ffe33d-566e-4c9a-85b2-82930d653548`),
                     });
                 }
 
@@ -78,7 +78,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Document template not found',
-                    human: $t(`Document template niet gevonden`),
+                    human: $t(`f428c3d5-9b0f-485b-971e-b7e5d76533d4`),
                 });
             }
             const document = new Document();
@@ -97,7 +97,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                     throw new SimpleError({
                         code: 'not_found',
                         message: 'Registration not found',
-                        human: $t(`Inschrijving niet gevonden`),
+                        human: $t(`5756fd57-7f2b-4ce4-8be1-ba0dd4313c75`),
                     });
                 }
                 document.registrationId = put.registrationId;
@@ -109,7 +109,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                     throw new SimpleError({
                         code: 'not_found',
                         message: 'Member not found',
-                        human: $t(`Lid niet gevonden`),
+                        human: $t(`9cfa48c7-980c-4cd5-85ed-2656db040b4c`),
                     });
                 }
                 document.memberId = put.memberId;

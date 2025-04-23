@@ -53,7 +53,7 @@ export class GetStripeLoginLinkEndpoint extends Endpoint<Params, Query, Body, Re
         if (!model || model.organizationId !== organization.id || model.status !== 'active') {
             throw new SimpleError({
                 code: 'not_found',
-                message: $t(`Account niet gevonden`),
+                message: $t(`e5f6d64c-b3fe-4c8a-a711-ebdb14098c98`),
                 statusCode: 400,
             });
         }

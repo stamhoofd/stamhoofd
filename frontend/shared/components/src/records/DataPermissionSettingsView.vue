@@ -1,47 +1,47 @@
 <template>
     <SaveView :disabled="!hasChanges" :loading="saving" :title="$t(`Toestemming gegevensverzameling`)" @save="save">
         <h1>
-            {{ $t('Toestemming gegevensverzameling') }}
+            {{ $t('3936222c-5399-4d5e-9543-e483fa4f058a') }}
         </h1>
         <p>
-            {{ $t('Verzamel je gevoelige informatie? Dan moet je daar in de meeste gevallen toestemming voor vragen volgens de GDPR-wetgeving. We raden je aan om altijd toestemming te vragen zodra je ook maar een beetje twijfelt. In onze gids geven we enkele voorbeelden, lees die zeker na.') }} <a :href="$domains.getDocs('toestemming-gegevens-verzamelen')" class="inline-link" target="_blank" rel="noopener">
-                {{ $t('Lees onze gids') }}
+            {{ $t('30fe36de-4e4e-42e3-a2f9-7740b028b415') }} <a :href="$domains.getDocs('toestemming-gegevens-verzamelen')" class="inline-link" target="_blank" rel="noopener">
+                {{ $t('d6386cef-8e84-4107-920a-03db17372613') }}
             </a>
         </p>
 
         <p class="info-box">
-            {{ $t('Je kan toestemming nooit verplichten volgens de GDPR-wetgeving. Als een lid geen toestemming geeft, kan je enkel gegevens verzamelen die noodzakelijk zijn (zoals bepaald volgens de vijf verwerkingsgronden in de GDPR-wetgeving). We verbergen automatisch vragen waarvoor toestemming noodzakelijk is in dat geval.') }}
+            {{ $t('ca8ee961-5e7e-4d1f-9516-87879c277e14') }}
         </p>
 
-        <hr><h2>{{ $t('Wijzig uitleg voor leden') }}</h2>
-        <p>{{ $t('Kies zelf de uitleg en titels die zichtbaar zijn op het moment we naar toestemming vragen') }}</p>
+        <hr><h2>{{ $t('b2a56f24-fea4-4874-90be-f2d15e93e862') }}</h2>
+        <p>{{ $t('c7dc695c-d0d0-4a3e-9945-51696a8850be') }}</p>
 
-        <STInputBox class="max" :title="$t(`Titel`)">
+        <STInputBox class="max" :title="$t(`cbe7db4a-b65b-452b-a5d2-d369182fd28f`)">
             <input v-model="title" class="input" :placeholder="inheritedDataPermission?.title || DataPermissionsSettings.defaultTitle">
         </STInputBox>
 
-        <STInputBox class="max" :title="$t(`Beschrijving`)">
-            <textarea v-model="description" class="input" :placeholder="$t(`Optioneel`)" />
+        <STInputBox class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
+            <textarea v-model="description" class="input" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" />
         </STInputBox>
 
-        <STInputBox class="max" :title="$t(`Tekst naast aankruisvakje`)">
+        <STInputBox class="max" :title="$t(`5886d034-5962-4d4c-99f3-35733367a20b`)">
             <input v-model="checkboxLabel" class="input" :placeholder="inheritedDataPermission?.checkboxLabel || DataPermissionsSettings.defaultCheckboxLabel">
         </STInputBox>
         <p class="style-description-small">
-            {{ $t('Deze tekst is zichtbaar naast het aankruisvakje (dat ze moeten aanvinken als ze de toestemming geven).') }}
+            {{ $t('929bd872-8953-4a6e-a277-a75f9e14e5e4') }}
         </p>
 
-        <hr><h2>{{ $t('Waarschuwing voor beheerder') }}</h2>
-        <p>{{ $t('Als een lid geen toestemming gaf, dan tonen we dit als waarschuwing als je dat lid bekijkt als beheerder. Je kan zelf de tekst in deze waarschuwing wijzigen. Dit is niet zichtbaar voor de leden zelf.') }}</p>
+        <hr><h2>{{ $t('00ca2877-3df2-4a3e-a749-c3313045d1f9') }}</h2>
+        <p>{{ $t('d4433860-9f94-4e9f-96c1-3a81ca7064fc') }}</p>
 
-        <STInputBox class="max" :title="$t(`Waarschuwingstekst voor beheerder`)">
+        <STInputBox class="max" :title="$t(`3ea9a45c-0b2c-4ed5-9307-d05cbabe8e0d`)">
             <input v-model="warningText" class="input" :placeholder="inheritedDataPermission?.warningText || DataPermissionsSettings.defaultWarningText">
         </STInputBox>
 
-        <hr><h2>{{ $t('Waarschuwing voor lid') }}</h2>
-        <p>{{ $t('Als een lid geen toestemming geeft, dan tonen we dit als waarschuwing bij het aankruisvakje. Je kan zelf de tekst in deze waarschuwing wijzigen.') }}</p>
+        <hr><h2>{{ $t('de540668-74ff-46a3-a6f6-0b82f4c6cd36') }}</h2>
+        <p>{{ $t('269c6b82-ddc0-4530-9ac6-5057127d2426') }}</p>
 
-        <STInputBox class="max" :title="$t(`Waarschuwingstekst voor lid (optioneel)`)">
+        <STInputBox class="max" :title="$t(`a226a0aa-0706-4312-b51a-3712299c8b00`)">
             <input v-model="checkboxWarning" class="input" :placeholder="checkboxWarningPlaceholder">
         </STInputBox>
     </SaveView>

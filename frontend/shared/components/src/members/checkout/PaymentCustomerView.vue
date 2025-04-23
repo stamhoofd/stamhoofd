@@ -1,12 +1,12 @@
 <template>
-    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('Doorgaan')" data-submit-last-field :disabled="companies.length === 0" :title="$t(`Jouw gegevens`)" @save="goNext">
-        <h1>{{ $t('Facturatiegegevens') }}</h1>
-        <p>{{ $t('Deze gegevens komen op jouw betaalbewijs. Zorg dat ze in orde zijn, je kan ze later niet meer wijzigen.') }}</p>
+    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('c72a9ab2-98a0-4176-ba9b-86fe009fa755')" data-submit-last-field :disabled="companies.length === 0" :title="$t(`38bea62e-0765-4fbf-a6f3-4e21cc4cc2ef`)" @save="goNext">
+        <h1>{{ $t('f777a982-6f69-41cc-bef1-18d146e870db') }}</h1>
+        <p>{{ $t('6bc5d58e-d6e4-44fd-a0b1-6f4477457915') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="companies.length === 0" class="info-box">
-            {{ $t('Je hebt nog geen facturatiegegevens toegevoegd aan jouw vereniging. Stel deze eerst in voor je verder gaat.') }}
+            {{ $t('b2fbd227-40a3-495d-9826-0e199000cda9') }}
         </p>
 
         <STList v-else>
@@ -19,13 +19,13 @@
                 </h3>
 
                 <p v-if="company.VATNumber" class="style-description-small">
-                    {{ company.VATNumber }} {{ $t('(BTW-plichtig)') }}
+                    {{ company.VATNumber }} {{ $t('9f72f8ee-74c7-4757-b1dc-948f632114f2') }}
                 </p>
                 <p v-else-if="company.companyNumber" class="style-description-small">
-                    {{ company.companyNumber }} {{ $t('(niet BTW-plichtig)') }}
+                    {{ company.companyNumber }} {{ $t('d127a845-d79d-4bd5-9335-a302123f56a0') }}
                 </p>
                 <p v-else class="style-description-small">
-                    {{ $t('Feitelijke vereniging') }}
+                    {{ $t('594307a3-05b8-47cf-81e2-59fb6254deba') }}
                 </p>
 
                 <p v-if="company.address" class="style-description-small">
@@ -40,11 +40,11 @@
 
         <p v-if="auth.hasFullAccess()" class="style-button-bar">
             <button v-if="companies.length === 0" type="button" class="button primary" @click="editInvoiceSettings">
-                <span>{{ $t('Instellen') }}</span>
+                <span>{{ $t('f624c73d-afc6-4d15-ac75-fc4527dbfef2') }}</span>
             </button>
             <button v-else type="button" class="button text" @click="editInvoiceSettings">
                 <span class="icon edit" />
-                <span>{{ $t('Bewerk') }}</span>
+                <span>{{ $t('f31b5c28-56a6-4a21-b1de-dcb4f7f5b6c8') }}</span>
             </button>
         </p>
         <p v-else class="warning-box">

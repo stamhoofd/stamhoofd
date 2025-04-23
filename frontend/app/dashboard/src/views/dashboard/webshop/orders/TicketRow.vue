@@ -4,10 +4,10 @@
             {{ name }}
             <span v-if="ticket.getIndexText()" class="ticket-index">{{ ticket.getIndexText() }}</span>
         </h3>
-        <p v-if="isSingle && order" class="style-description-small" v-text="$t('Bestelling #')+order.number" />
+        <p v-if="isSingle && order" class="style-description-small" v-text="$t('1a2a842e-4f98-4818-911b-c9634aca4214')+order.number" />
         <p v-if="isSingle && order" class="style-description-small" v-text="order.data.customer.name" />
         <p v-if="!isSingle && !cartItem" class="style-description-small">
-            <span class="style-tag error">{{ $t('Verwijderd ticket') }}</span>
+            <span class="style-tag error">{{ $t('d942f8fe-5c83-4b7f-badf-b6be91762be7') }}</span>
         </p>
         <p v-if="cartItem && cartItem.description" class="style-description-small pre-wrap" v-text="cartItem.description" />
         <p v-if="cartItem && cartItem.product.location" class="style-description-small" v-text="cartItem.product.location.name" />

@@ -36,7 +36,7 @@ export class ChargeOrganizationsEndpoint extends Endpoint<Params, Query, Body, R
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid description',
-                human: $t(`Beschrijving is verplicht`),
+                human: $t(`2449fba5-99dc-496f-a9d6-a67263d56616`),
                 field: 'description',
             });
         }
@@ -45,7 +45,7 @@ export class ChargeOrganizationsEndpoint extends Endpoint<Params, Query, Body, R
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid price',
-                human: $t(`Bedrag kan niet 0 zijn`),
+                human: $t(`1e165aac-8a58-45c5-bdd8-c58131a7b7f5`),
                 field: 'price',
             });
         }
@@ -54,7 +54,7 @@ export class ChargeOrganizationsEndpoint extends Endpoint<Params, Query, Body, R
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid amount',
-                human: $t(`Aantal kan niet 0 zijn`),
+                human: $t(`0bdf4953-1eae-41fd-b142-5ad3287f17a7`),
                 field: 'amount',
             });
         }
@@ -63,7 +63,7 @@ export class ChargeOrganizationsEndpoint extends Endpoint<Params, Query, Body, R
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid organization id',
-                human: $t(`Organisatie is verplicht`),
+                human: $t(`ae7ac6ab-bb02-4cd6-823f-7076e4ce6f6c`),
                 field: 'organizationId',
             });
         }
@@ -85,7 +85,7 @@ export class ChargeOrganizationsEndpoint extends Endpoint<Params, Query, Body, R
             throw new SimpleError({
                 code: 'charge_pending',
                 message: 'Charge organizations already pending',
-                human: $t(`Er is al een aanrekening bezig, even geduld.`),
+                human: $t(`d2b84fdd-035b-4307-a897-000081aa814f`),
             });
         }
 

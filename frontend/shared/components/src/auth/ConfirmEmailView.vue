@@ -5,20 +5,20 @@
                 <LoadingButton :loading="retrying">
                     <button class="button text" type="button" @click="retry">
                         <span class="icon retry" />
-                        <span>{{ $t('Opnieuw') }}</span>
+                        <span>{{ $t('7889a8f8-a31e-4291-b8e7-6169e68ed6b4') }}</span>
                     </button>
                 </LoadingButton>
             </template>
         </STNavigationBar>
         <img src="@stamhoofd/assets/images/illustrations/email.svg" class="email-illustration"><main class="center">
             <h1 v-if="!login">
-                {{ $t('Vul de code uit de e-mail in') }}
+                {{ $t('5cb65126-68af-4cdc-8ecf-836471dbd536') }}
             </h1>
             <h1 v-else>
-                {{ $t('Verifieer jouw e-mailadres') }}
+                {{ $t('0169b51e-08fb-43b0-a161-01d65335a297') }}
             </h1>
 
-            <p>{{ $t("Er werd een e-mail verstuurd naar '{email}'. Vul de code uit de e-mail in of klik op de link in de e-mail en wacht enkele seconden. E-mail niet ontvangen? Kijk in jouw spambox!", {email}) }}</p>
+            <p>{{ $t("58c24560-069c-4c85-a879-fe00c534bf14", {email}) }}</p>
 
             <div><CodeInput v-model="code" @complete="submit" /></div>
 
@@ -29,7 +29,7 @@
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary full" type="button">
-                        <span>{{ $t('Doorgaan') }}</span>
+                        <span>{{ $t('c72a9ab2-98a0-4176-ba9b-86fe009fa755') }}</span>
                         <span class="icon arrow-right" />
                     </button>
                 </LoadingButton>

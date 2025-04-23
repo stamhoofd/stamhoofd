@@ -2,7 +2,7 @@
     <div class="st-view">
         <STNavigationBar :title="title" />
         <main ref="main">
-            <h1>{{ $t('Inhoud') }}</h1>
+            <h1>{{ $t('ffefe12f-b125-412a-8dab-0468eeb0f048') }}</h1>
             <iframe ref="iframeRef" sandbox="" />
         </main>
     </div>

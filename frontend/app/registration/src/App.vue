@@ -73,10 +73,10 @@ export default class App extends VueComponent {
                     
                 if (token && code) {
                     UrlHelper.shared.clear()
-                    const toast = new Toast($t(`E-mailadres valideren...`), "spinner").setHide(null).show()
+                    const toast = new Toast($t(`6e39ca2a-d279-41d3-b68d-eb17dd4f4331`), "spinner").setHide(null).show()
                     LoginHelper.verifyEmail(session, code, token).then(() => {
                         toast.hide()
-                        new Toast($t(`E-mailadres is gevalideerd`), "success green").show()
+                        new Toast($t(`e35060cc-3e63-4b78-9e79-d160401053f5`), "success green").show()
                     }).catch(e => {
                         toast.hide()
                         CenteredMessage.fromError(e).addCloseButton().show()

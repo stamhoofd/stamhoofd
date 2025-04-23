@@ -10,13 +10,13 @@
             <STInputBox :title="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') ">
                 <input v-model="name" class="input" type="text" :placeholder="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') ">
             </STInputBox>
-            <STInputBox error-fields="behaviour" :error-box="errors.errorBox" :title="$t(`Type`)">
+            <STInputBox error-fields="behaviour" :error-box="errors.errorBox" :title="$t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)">
                 <Dropdown v-model="behaviour">
                     <option :value="PlatformMembershipTypeBehaviour.Period">
-                        {{ $t('Vaste periode') }}
+                        {{ $t('c56506a1-14a9-4179-bbab-5eac533ff730') }}
                     </option>
                     <option :value="PlatformMembershipTypeBehaviour.Days">
-                        {{ $t('Per dag') }}
+                        {{ $t('a85bd4c0-52f7-4bf0-86c2-234a97c679bc') }}
                     </option>
                 </Dropdown>
             </STInputBox>
@@ -30,7 +30,7 @@
         <p>{{ $t('8004af94-7b57-4ce2-aa9b-a6658684116d') }}</p>
 
         <p v-if="sortedPeriods.length === 0" class="info-box">
-            {{ $t('Je hebt nog geen instellingen toegevoegd.') }}
+            {{ $t('b19e199f-2b0e-444c-a4ee-0cdd0b3c6a35') }}
         </p>
         <STList v-else>
             <PlatformMembershipTypeConfigRow v-for="{period, config} of sortedPeriods" :key="period.id" :config="config" :period="period" :type="type" @click="editPeriod(config, period)" />

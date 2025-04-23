@@ -3,20 +3,20 @@
         <STNavigationBar :title="$t(`Winkelmandje`)" />
         <main class="center">
             <h1>
-                {{ $t('Winkelmandje') }}
+                {{ $t('5e2654f2-6423-47bc-b7e7-054e41bf287f') }}
             </h1>
 
             <p v-if="cart.price">
-                {{ $t('Voeg alle inschrijvingen toe aan het mandje en reken in één keer af.') }}
+                {{ $t('18650de1-4791-4334-ac74-2ab6848f9a28') }}
             </p>
             <p v-else>
-                {{ $t('Voeg alle inschrijvingen toe aan het mandje en bevestig ze.') }}
+                {{ $t('00bd2458-2429-41bf-803b-c74a58736265') }}
             </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <p v-if="cart.isEmpty" class="info-box">
-                {{ $t("Jouw mandje is leeg. Schrijf een lid in via het tabblad 'Start'.") }}
+                {{ $t("8def4c64-356c-496f-ad1e-0ecb5b7892a4") }}
             </p>
 
             <template v-else>
@@ -29,8 +29,8 @@
                 <p class="style-button-bar right-align">
                     <LoadingButton :loading="loading">
                         <button class="button primary" type="button" @click="goToCheckout">
-                            <span v-if="checkout.totalPrice">{{ $t('Afrekenen') }}</span>
-                            <span v-else>{{ $t('Bevestigen') }}</span>
+                            <span v-if="checkout.totalPrice">{{ $t('c6b88f05-a46b-40cc-895a-8652cd9857f3') }}</span>
+                            <span v-else>{{ $t('7de2e636-dcec-44b1-a681-daeb9cd85316') }}</span>
 
                             <span class="icon arrow-right" />
                         </button>

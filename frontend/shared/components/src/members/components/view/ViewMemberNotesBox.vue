@@ -2,7 +2,7 @@
     <div v-if="notes">
         <div class="hover-box container">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('Notities') }}</div>
+                <div>{{ $t('7f3af27c-f057-4ce3-8385-36dfb99745e8') }}</div>
                 <div class="hover-show">
                     <button v-if="hasWrite" type="button" class="button icon edit gray" @click.prevent="editThisMember" />
                 </div>

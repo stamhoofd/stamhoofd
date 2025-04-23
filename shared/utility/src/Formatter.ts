@@ -61,8 +61,8 @@ export class Formatter {
         }
 
         // todo translation
-        const monthNames = [$t(`januari`), $t(`februari`), $t(`maart`), $t(`april`), $t(`mei`), $t(`juni`),
-            $t(`juli`), $t(`augustus`), $t(`september`), $t(`oktober`), $t(`november`), $t(`december`),
+        const monthNames = [$t(`29fbce51-68a6-4733-9ee5-65897d71d37c`), $t(`5679c122-7063-478c-868f-97f8d01748f3`), $t(`ccf1e00d-f719-4718-9555-25acfe285c8c`), $t(`7b92fc9f-883f-43ff-acf7-3490b419bf94`), $t(`0ae99c01-f294-4442-99a3-cef8a2e23788`), $t(`7ea3c6c8-94cc-4fa1-bc8d-8f53f1951db1`),
+            $t(`9b819734-da73-4243-9d6c-9e0603170061`), $t(`8caa99d4-ef69-43e3-a14c-e09e62e629b0`), $t(`07394488-70c1-4c7c-9e20-29bda64b53d0`), $t(`3c390322-a9dd-43c7-9f2a-3d766d021169`), $t(`b9bab2b4-5621-4133-b4e4-72fbacb1c203`), $t(`3476c558-2f2c-4fbf-b745-e4d09d79a819`),
         ];
         return monthNames[index - 1];
     }
@@ -82,7 +82,7 @@ export class Formatter {
         }
 
         // todo translation
-        const monthNames = [$t(`maandag`), $t(`dinsdag`), $t(`woensdag`), $t(`donderdag`), $t(`vrijdag`), $t(`zaterdag`), $t(`zondag`)];
+        const monthNames = [$t(`9f872d61-a2e3-4e8b-9a73-dfcf8c2e466e`), $t(`795a3c1a-62ca-4c6b-9165-e1740ddb95ef`), $t(`48f788e9-feb9-451e-a036-5dc25b233893`), $t(`1d96b17c-1c1f-4679-9bba-61be0eda3cf7`), $t(`1b7a2a1f-8d62-4c3d-95f1-911a0a8407f7`), $t(`7ab415c5-4e09-4165-89f8-035b80eda1a7`), $t(`8c0f8856-855b-4105-a77e-3d883ac7f641`)];
 
         const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
         return monthNames[datetime.weekday - 1];
@@ -115,16 +115,16 @@ export class Formatter {
 
         if (weeks > 0 && dividable === 0) {
             if (weeks === 1) {
-                return $t(`1 week`);
+                return $t(`9965a103-1ff5-444d-99f4-39fb0adb903b`);
             }
-            return weeks + ' ' + $t(`weken`);
+            return weeks + ' ' + $t(`df3cfead-38d4-478b-b769-8c410a199a30`);
         }
 
         if (days === 1) {
-            return $t(`1 dag`);
+            return $t(`bab8eb22-0fdf-4840-bcf0-3fcce710e429`);
         }
 
-        return $t(`{days} dagen`, { days: days.toString() });
+        return $t(`2b7f5d07-3f1a-4aeb-8dd4-b398dfb5eb8c`, { days: days.toString() });
     }
 
     static relativeTime(date: Date, options?: { days?: boolean; hours?: boolean }) {
@@ -144,9 +144,9 @@ export class Formatter {
                 return this.dateTime(date, true, true);
             }
             if (days === 1) {
-                return $t(`één dag geleden`);
+                return $t(`f2410f5c-475c-47fb-a50c-27b9467e29d9`);
             }
-            return $t(`{days} dagen geleden`, { days: days.toString() });
+            return $t(`63ba061b-a809-44a3-8b1e-c6e35f6147de`, { days: days.toString() });
         }
 
         if (hours > 0) {
@@ -155,27 +155,27 @@ export class Formatter {
             }
 
             if (hours === 1) {
-                return $t(`één uur geleden`);
+                return $t(`4662f109-d369-4892-b7b2-dfc975f3b2ef`);
             }
-            return $t(`{hours} uur geleden`, { hours: hours.toString() });
+            return $t(`561954e1-e7c2-4b0c-88b3-29140e7020a5`, { hours: hours.toString() });
         }
 
         if (minutes > 0) {
             if (minutes === 1) {
-                return $t(`één minuut geleden`);
+                return $t(`cdc1ea2a-5cc4-4c47-bbd1-eea90b7612be`);
             }
-            return $t(`{minutes} minuten geleden`, { minutes: minutes.toString() });
+            return $t(`771b03ee-23b2-40b2-b418-01a116066919`, { minutes: minutes.toString() });
         }
 
         const seconds = Math.floor(diff / 1000);
         if (seconds > 0) {
             if (seconds === 1) {
-                return $t(`één seconde geleden`);
+                return $t(`7a6279fd-feba-47de-b66b-ea99f08e9800`);
             }
-            return $t(`{seconds} seconden geleden`, { seconds: seconds.toString() });
+            return $t(`aae5e3da-7bc1-4d0a-bf0b-56b97c017ba2`, { seconds: seconds.toString() });
         }
 
-        return $t(`zojuist`);
+        return $t(`5e3c0459-3ee0-4c2f-9657-5e189dbf749d`);
     }
 
     /**
@@ -385,7 +385,7 @@ export class Formatter {
         if (hideZero && this.time(date) === '0:00') {
             return this.date(date, withYear);
         }
-        return this.date(date, withYear) + ' ' + $t(`om`) + ' ' + this.time(date);
+        return this.date(date, withYear) + ' ' + $t(`8ae93138-5aeb-4bd4-8845-d57c1e2d62f2`) + ' ' + this.time(date);
     }
 
     static integer(value: number): string {
@@ -501,23 +501,23 @@ export class Formatter {
 
     static ordinalNumber(number: number): string {
         if (number === 1) {
-            return $t('eerste');
+            return $t('2e8a79b3-6393-4ce7-87bf-f293ec1b1f83');
         }
 
         if (number === 2) {
-            return $t('tweede');
+            return $t('feb4d546-e2b2-4b2c-ba14-6303ae9e0769');
         }
 
         if (number === 3) {
-            return $t('derde');
+            return $t('e8962830-bc23-4af4-9909-d665a37f805d');
         }
 
-        return $t('{number}e', { number: number.toString() });
+        return $t('8abddd1b-0359-42fa-ab4d-707f39d84852', { number: number.toString() });
     }
 
     static pluralText(num: number, singular: string, plural: string): string {
         if (num === 1) {
-            return $t('één {singular}', { singular });
+            return $t('77477737-3b6b-4e1b-9fd8-006981cf53eb', { singular });
         }
 
         return this.float(num) + ' ' + plural;
@@ -528,7 +528,7 @@ export class Formatter {
         const firstNames = this.uniqueArray(n.map(n => n.firstName));
         const lastNames = this.uniqueArray(n.map(n => n.lastName));
 
-        return this.joinLast(firstNames, ', ', ' ' + $t('en') + ' ') + (lastNames.length > 0 ? (' ' + lastNames.join('-')) : '');
+        return this.joinLast(firstNames, ', ', ' ' + $t('6a156458-b396-4d0f-b562-adb3e38fc51b') + ' ') + (lastNames.length > 0 ? (' ' + lastNames.join('-')) : '');
     }
 
     static firstLetters(str: string, maxLength: number) {

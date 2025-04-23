@@ -55,7 +55,7 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Ticket not found',
-                    human: $t(`Dit ticket bestaat niet`),
+                    human: $t(`d7f095ca-0f05-4c8a-9a65-bbbf69b28af0`),
                 });
             }
 
@@ -67,7 +67,7 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     throw new SimpleError({
                         code: 'not_found',
                         message: 'Ticket not found',
-                        human: $t(`Dit ticket bestaat niet`),
+                        human: $t(`d7f095ca-0f05-4c8a-9a65-bbbf69b28af0`),
                     });
                 }
 
@@ -79,7 +79,7 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         throw new SimpleError({
                             code: 'not_found',
                             message: 'Ticket not found',
-                            human: $t(`Dit ticket bestaat niet`),
+                            human: $t(`d7f095ca-0f05-4c8a-9a65-bbbf69b28af0`),
                         });
                     }
 

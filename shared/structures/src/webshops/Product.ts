@@ -374,22 +374,22 @@ export class Product extends AutoEncoder {
     getRemainingStockText(stock: number): string {
         if (stock === 1) {
             if (this.type === ProductType.Ticket) {
-                return $t(`één ticket`);
+                return $t(`ebdf6e40-7fb8-4936-b5cf-34019be1181f`);
             }
             if (this.type === ProductType.Person) {
-                return $t(`één persoon`);
+                return $t(`c7f082b3-5d38-4c53-88d3-a8d0fd1eaa39`);
             }
-            return $t(`één stuk`);
+            return $t(`8045db66-859a-4b4c-899f-d2a0d26b15dc`);
         }
 
         if (this.type === ProductType.Ticket) {
-            return stock + ' ' + $t(`tickets`);
+            return stock + ' ' + $t(`8096d9e3-1bb3-4015-911d-9e13388e8bfd`);
         }
 
         if (this.type === ProductType.Person) {
-            return stock + ' ' + $t(`personen`);
+            return stock + ' ' + $t(`b78c8455-7e28-47b2-b2fd-ba6a82302976`);
         }
-        return stock + ' ' + $t(`stuks`);
+        return stock + ' ' + $t(`7d5de81e-9ae9-4ec6-86e1-844ca6a75fb1`);
     }
 
     get stockText(): string | null {
@@ -398,34 +398,34 @@ export class Product extends AutoEncoder {
         }
 
         if (this.remainingStockWithOptions === 0) {
-            return $t(`Uitverkocht`);
+            return $t(`44ba544c-3db6-4f35-b7d1-b63fdcadd9ab`);
         }
 
-        return $t(`Nog`) + ' ' + this.getRemainingStockText(this.remainingStockWithOptions);
+        return $t(`07f945bf-649b-4138-a91e-9306a9a96955`) + ' ' + this.getRemainingStockText(this.remainingStockWithOptions);
     }
 
     get isEnabledTextLong() {
         if (this.hidden) {
-            return $t(`Verborgen`);
+            return $t(`6276d07c-bd0d-4117-b46c-e3f7b0dbb1e5`);
         }
 
         if (!this.enabled) {
-            return $t(`Onbeschikbaar`);
+            return $t(`11b3bb72-0edb-401e-9c60-47fbb2d132fc`);
         }
 
         if (this.enableInFuture && this.enableAfter) {
             if (this.disableAfter) {
-                return $t(`Beschikbaar vanaf`) + ' ' + Formatter.dateTime(this.enableAfter) + ' ' + $t(`tot`) + ' ' + Formatter.dateTime(this.disableAfter);
+                return $t(`84df66e6-0c41-4116-bdca-ebfe6c052f2c`) + ' ' + Formatter.dateTime(this.enableAfter) + ' ' + $t(`3e515054-91e7-43ed-a9ce-563b626f337d`) + ' ' + Formatter.dateTime(this.disableAfter);
             }
-            return $t(`Beschikbaar vanaf`) + ' ' + Formatter.dateTime(this.enableAfter);
+            return $t(`84df66e6-0c41-4116-bdca-ebfe6c052f2c`) + ' ' + Formatter.dateTime(this.enableAfter);
         }
 
         if (!this.isEnabled) {
-            return $t(`Onbeschikbaar`);
+            return $t(`11b3bb72-0edb-401e-9c60-47fbb2d132fc`);
         }
 
         if (this.disableAfter) {
-            return $t(`Beschikbaar tot`) + ' ' + Formatter.dateTime(this.disableAfter);
+            return $t(`e7fb630e-23d6-4947-baee-dfb6434f1132`) + ' ' + Formatter.dateTime(this.disableAfter);
         }
     }
 
@@ -437,7 +437,7 @@ export class Product extends AutoEncoder {
         if (this.disableAfter) {
             const diff = this.disableAfter.getTime() - new Date().getTime();
             if (diff < 24 * 60 * 60 * 1000) {
-                return $t(`Beschikbaar tot`) + ' ' + Formatter.time(this.disableAfter);
+                return $t(`e7fb630e-23d6-4947-baee-dfb6434f1132`) + ' ' + Formatter.time(this.disableAfter);
             }
         }
         return null;

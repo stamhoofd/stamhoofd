@@ -6,37 +6,37 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="!hasPayments(patchedBalanceItem)" class="warning-box">
-            {{ $t('Een afrekening (= de schuld) wijzigen die al gebruikt werd in een aangemaakte betaling (= hoe de schuld betaald werd) zal enkel het openstaande bedrag wijzigen. Een betaling is niet meer aanpasbaar na het aanmaken ervan. Indien je het bedrag van een betaling wilt wijzigen moet je ofwel een extra betaling aanmaken voor het verschil of de betaling annuleren en opnieuw aanmaken.') }}
+            {{ $t('8a4c3084-e54d-474e-94b2-6e8d2bbc9f5e') }}
         </p>
 
         <div class="split-inputs">
             <div>
-                <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t(`Beschrijving`)">
-                    <input ref="firstInput" v-model="description" class="input" type="text" autocomplete="off" :disabled="!!balanceItem.relations.size" :placeholder="$t(`Bv. Aankoop T-shirt`)">
+                <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
+                    <input ref="firstInput" v-model="description" class="input" type="text" autocomplete="off" :disabled="!!balanceItem.relations.size" :placeholder="$t(`e61decd2-e7a4-4be9-b9d4-c46710faa1a7`)">
                 </STInputBox>
                 <p v-if="balanceItem.relations.size" class="style-description-small">
-                    {{ $t('Dit is een verschuldigd bedrag dat automatisch werd aangemaakt door {platform}', {platform: platform.config.name}) }}
+                    {{ $t('3dbf1fab-6adf-4050-a5dd-5c78886035cb', {platform: platform.config.name}) }}
                 </p>
             </div>
             <div>
-                <STInputBox error-fields="createdAt" :error-box="errors.errorBox" :title="$t(`Verschuldigd sinds`)">
+                <STInputBox error-fields="createdAt" :error-box="errors.errorBox" :title="$t(`ab0535e6-bbaa-4961-a34f-aca39ef0d785`)">
                     <DateSelection v-model="createdAt" />
                 </STInputBox>
             </div>
         </div>
 
         <div class="split-inputs">
-            <STInputBox error-fields="unitPrice" :error-box="errors.errorBox" :title="$t(`Eenheidsprijs`)">
-                <PriceInput v-model="unitPrice" :min="null" :placeholder="$t(`Gratis`)" />
+            <STInputBox error-fields="unitPrice" :error-box="errors.errorBox" :title="$t(`bab8d047-63db-4d0f-82c7-3a8d69a85745`)">
+                <PriceInput v-model="unitPrice" :min="null" :placeholder="$t(`99e41cea-bce3-4329-8b17-e3487c4534ac`)" />
             </STInputBox>
 
-            <STInputBox error-fields="amount" :error-box="errors.errorBox" :title="$t(`Aantal`)">
-                <NumberInput v-model="amount" :min="Math.min(1, balanceItem.amount)" :stepper="true" :placeholder="$t(`1`)" />
+            <STInputBox error-fields="amount" :error-box="errors.errorBox" :title="$t(`697df3e7-fbbf-421d-81c2-9c904dce4842`)">
+                <NumberInput v-model="amount" :min="Math.min(1, balanceItem.amount)" :stepper="true" :placeholder="$t(`bfcceb79-e614-4e9c-9fba-0ec2bd3f8f2a`)" />
             </STInputBox>
         </div>
         <template v-if="$feature('member-trials') && (patchedBalanceItem.price >= 0 || dueAt !== null)">
-            <STInputBox error-fields="dueAt" :error-box="errors.errorBox" :title="$t(`Te betalen tegen*`)">
-                <DateSelection v-model="dueAt" :required="false" :time="{hours: 0, minutes: 0, seconds: 0}" :placeholder="$t(`Onmiddelijk`)" />
+            <STInputBox error-fields="dueAt" :error-box="errors.errorBox" :title="$t(`bf30128b-4c99-4a97-b4d2-1a4e62f33f41`)">
+                <DateSelection v-model="dueAt" :required="false" :time="{hours: 0, minutes: 0, seconds: 0}" :placeholder="$t(`ef2b5d01-756d-46d0-8e1d-a200f43a3921`)" />
             </STInputBox>
             <p class="style-description-small">
                 {{ $t('15b6f0c8-6287-4b4d-bf34-4da2f4a0e575') }}
@@ -45,11 +45,11 @@
         <PriceBreakdownBox :price-breakdown="patchedBalanceItem.priceBreakown" />
 
         <template v-if="family && family.members.length >= (originalMemberId ? 2 : 1)">
-            <hr><h2>{{ $t('Lid') }}</h2>
-            <p>{{ $t('Selecteer welk lid het bedrag verschuldigd is.') }}</p>
+            <hr><h2>{{ $t('f4052a0b-9564-49c4-a6b6-41af3411f3b0') }}</h2>
+            <p>{{ $t('00c61f8a-204c-41d5-abbb-7da96675b0e3') }}</p>
 
             <p v-if="!memberId" class="warning-box">
-                {{ $t('Je koppelt een verschuldigd bedrag best aan een lid en niet aan een account. Dan kan iedereen binnen het gezin het openstaande bedrag betalen.') }}
+                {{ $t('14c1d37c-a2df-428f-b62a-27259600aadc') }}
             </p>
 
             <STList>
@@ -62,7 +62,7 @@
                         {{ m.patchedMember.name }}
                     </h3>
                     <p v-if="!memberId" class="style-description-small">
-                        {{ $t('Lid') }}
+                        {{ $t('f4052a0b-9564-49c4-a6b6-41af3411f3b0') }}
                     </p>
                 </STListItem>
 
@@ -75,18 +75,18 @@
                         {{ user.name }} ({{ user.email }})
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Account') }}
+                        {{ $t('ac747fb2-d391-499b-8cee-1ed7241e6177') }}
                     </p>
                 </STListItem>
             </STList>
         </template>
 
         <template v-if="!isNew && hasPayments(patchedBalanceItem)">
-            <hr><h2>{{ $t('Betalingen') }}</h2>
-            <p>{{ $t('Een openstaand bedrag kan door een lid betaald worden via het ledenportaal. Daar kan men via één van de ingestelde betaalmethodes afrekenen. Meerdere openstaande bedragen (ook over meerdere leden heen als een account meerdere leden beheert) kunnen in één keer betaald worden, vandaar dat het bedrag van een betaling vaak hoger is dan het bedrag van een individuele afrekening.') }}</p>
+            <hr><h2>{{ $t('290c7beb-61c7-425d-b35e-333aba83bbc5') }}</h2>
+            <p>{{ $t('a4474840-0a73-4268-8d06-be3361fe5fc7') }}</p>
 
             <p v-if="patchedBalanceItem.payments.length === 0" class="info-box">
-                {{ $t('Er werd nog geen betaling aangemaakt voor deze afrekening') }}
+                {{ $t('a051f89d-5456-4990-a9c1-37094445ad58') }}
             </p>
 
             <STList v-else>
@@ -94,17 +94,17 @@
             </STList>
 
             <template v-if="outstanding.pending === 0 && outstanding.paid === 0">
-                <hr><h2>{{ $t('Acties') }}</h2>
+                <hr><h2>{{ $t('dc052084-eea5-407e-8775-237bf550895a') }}</h2>
 
                 <STList>
                     <STListItem :selectable="true" @click="doDelete">
                         <h2 class="style-title-list">
-                            {{ $t('Verwijder deze aanrekening') }}
+                            {{ $t('382c3c3e-7ac0-4d9d-871f-2316c85b51ae') }}
                         </h2>
                         <template #right>
                             <button type="button" class="button secundary danger hide-smartphone">
                                 <span class="icon trash" />
-                                <span>{{ $t('Verwijderen') }}</span>
+                                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
                             </button>
                             <button type="button" class="button icon trash only-smartphone" />
                         </template>

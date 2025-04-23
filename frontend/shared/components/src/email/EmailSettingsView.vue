@@ -4,10 +4,10 @@
 
         <main>
             <h1>
-                {{ $t('E-mailadressen') }}
+                {{ $t('7766ee8a-cd92-4d6f-a3fa-f79504fbcdda') }}
             </h1>
 
-            <p>{{ $t('Wijzig de e-mailadressen waarmee je e-mails kan versturen. Alle informatie over e-mailadressen en e-mails vind je op') }} <a class="inline-link" :href="$domains.getDocs('e-mailadressen-instellen')" target="_blank">{{ $t('deze pagina') }}</a>.</p>
+            <p>{{ $t('ecc5560e-bd85-4f2a-bbb2-d0a26f8ead45') }} <a class="inline-link" :href="$domains.getDocs('e-mailadressen-instellen')" target="_blank">{{ $t('3280290b-f43e-4e95-a7bd-3c13a153888b') }}</a>.</p>
 
             <STList>
                 <STListItem v-for="email in emails" :key="email.id" :selectable="true" class="right-stack" @click="editEmail(email)">
@@ -19,14 +19,14 @@
                     </p>
 
                     <template #right>
-                        <span v-if="email.default" class="style-tag">{{ $t('Standaard') }}</span>
+                        <span v-if="email.default" class="style-tag">{{ $t('b67ee618-6873-4dfe-84b6-faa51f37d661') }}</span>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
             </STList>
 
             <p v-if="emails.length === 0" class="info-box">
-                {{ $t('Je hebt nog geen e-mailadressen toegevoegd.') }}
+                {{ $t('82395203-b523-4188-b304-0b07aea519cf') }}
             </p>
         </main>
 
@@ -34,7 +34,7 @@
             <template #right>
                 <button class="button primary" type="button" @click="addEmail">
                     <span class="icon add" />
-                    <span>{{ $t('E-mailadres toevoegen') }}</span>
+                    <span>{{ $t('c5602934-95a8-437d-b576-eda8d9e6565e') }}</span>
                 </button>
             </template>
         </STToolbar>

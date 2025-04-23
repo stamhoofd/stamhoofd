@@ -5,10 +5,10 @@
                 <template #left>
                     <Checkbox v-model="fullAccess" :disabled="lockedFullAccess" />
                 </template>
-                {{ $t('Hoofdbeheerder') }}
+                {{ $t('06e0f25f-f601-4359-a95d-b72fd79ecbdd') }}
 
                 <template #right>
-                    {{ $t('Kan alles bekijken en bewerken') }}
+                    {{ $t('10bb866a-a7d2-4684-9159-ae288742e069') }}
                 </template>
             </STListItem>
 
@@ -21,13 +21,13 @@
         </STList>
 
         <p v-if="roles.length === 0" class="info-box">
-            {{ $t('Je hebt nog geen rollen aangemaakt. Maak een rol aan om beheerders op te delen.') }}
+            {{ $t('74237967-b1be-405e-95bb-15ef1905742c') }}
         </p>
 
         <p class="style-button-bar">
             <button class="button text" type="button" @click="editRoles">
                 <span class="icon edit" />
-                <span>{{ $t('Rollen bewerken') }}</span>
+                <span>{{ $t('b567999b-ea60-41e8-b3a8-abf4247ab0f5') }}</span>
             </button>
         </p>
     </div>

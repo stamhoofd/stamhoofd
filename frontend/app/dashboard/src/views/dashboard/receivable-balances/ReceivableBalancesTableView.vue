@@ -1,7 +1,7 @@
 <template>
     <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :actions="actions" :all-columns="allColumns" :prefix-column="allColumns[0]" :Route="Route">
         <p class="style-description">
-            {{ $t('De openstaande bedragen kunnen soms herhaald worden als er meerdere ouders of e-mailadressen zijn ingesteld bij een lid.') }}
+            {{ $t('e322ea15-9df9-4654-bccc-c7147f35e18f') }}
         </p>
 
         <template #empty>

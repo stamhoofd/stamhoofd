@@ -19,7 +19,7 @@
                     </p>
 
                     <template #right>
-                        <span v-if="user && member.id === user.memberId" v-color="member" class="style-tag">{{ $t('Dit ben jij') }}</span>
+                        <span v-if="user && member.id === user.memberId" v-color="member" class="style-tag">{{ $t('c0736ebd-de06-4d78-a009-7fc4ba5096a8') }}</span>
                         <span class="icon gray arrow-right-small" />
                     </template>
                 </STListItem>
@@ -30,7 +30,7 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('Nieuw lid toevoegen') }}
+                        {{ $t('9a04effd-d9c3-43ae-b905-019e92dd5101') }}
                     </h2>
 
                     <template #right>
@@ -50,7 +50,7 @@ import { computed } from 'vue';
 
 const memberManager = useMemberManager();
 const members = computed(() => memberManager.family.members);
-const title = $t(`Wie wil je inschrijven?`);
+const title = $t(`3cda0fb7-c901-439d-af68-6478d70157be`);
 const user = useUser();
 
 const isAcceptingNewMembers = computed(() => memberManager.isAcceptingNewMembers);

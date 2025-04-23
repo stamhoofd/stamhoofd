@@ -32,10 +32,10 @@
         <template v-if="item.totalPrice !== 0">
             <footer v-if="item.checkout.isAdminFromSameOrganization">
                 <p v-if="item.totalPrice >= 0" class="style-price">
-                    {{ $t('Openstaand bedrag stijgt met {price}', {price: formatPrice(item.totalPrice)}) }}
+                    {{ $t('8f5787b9-ad3e-41e2-b996-9e7704688b13', {price: formatPrice(item.totalPrice)}) }}
                 </p>
                 <p v-else class="style-price">
-                    {{ $t('Openstaand bedrag daalt met {price}', {price: formatPrice(-item.totalPrice)}) }}
+                    {{ $t('2f76634a-16b6-494c-90b1-b70644b6503b', {price: formatPrice(-item.totalPrice)}) }}
                 </p>
             </footer>
             <footer v-else>
@@ -48,7 +48,7 @@
         <template v-if="item.calculatedPriceDueLater > 0">
             <footer>
                 <p class="style-price">
-                    {{ formatPrice(item.calculatedPriceDueLater) }} {{ $t('later te betalen') }}
+                    {{ formatPrice(item.calculatedPriceDueLater) }} {{ $t('c8f348d5-d497-48dd-b7a2-c9c6d8f99199') }}
                 </p>
             </footer>
         </template>
@@ -57,7 +57,7 @@
             {{ item.cartError.getHuman() }}
 
             <span v-if="canEdit" class="button text">
-                <span>{{ $t('Corrigeren') }}</span>
+                <span>{{ $t('43735610-03c1-494b-b76b-74a13a560880') }}</span>
                 <span class="icon arrow-right-small" />
             </span>
         </p>

@@ -3,11 +3,11 @@
         <STNavigationBar :title="$t(`Gegevens nakijken`)" />
 
         <main>
-            <h1>{{ $t('Gegevens nakijken') }}</h1>
+            <h1>{{ $t('d14e4e63-c77d-44d9-b8d0-adf05e299303') }}</h1>
 
             <template v-if="members.length > 0">
                 <hr><h2>
-                    <div>{{ $t('Leden') }}</div>
+                    <div>{{ $t('97dc1e85-339a-4153-9413-cca69959d731') }}</div>
                 </h2>
 
                 <STList class="illustration-list">
@@ -37,12 +37,12 @@
                 </STList>
             </template>
             <p v-else class="info-box">
-                {{ $t('Er zijn nog geen leden gekoppeld met jouw account.') }}
+                {{ $t('a88bd350-756b-4fcd-ba06-585fabd0e197') }}
             </p>
 
             <template v-if="parents.length">
-                <hr><h2>{{ $t('Ouders') }}</h2>
-                <p>{{ $t('Ouders hebben automatisch toegang tot de gegevens van hun (minderjarige) kinderen. Vul dus de juiste e-mailadresen in voor elke ouder, zo ontvangt iedereen ook belangrijke communicatie.') }}</p>
+                <hr><h2>{{ $t('00306f91-9f66-4cc3-9c8e-36c08f9964d7') }}</h2>
+                <p>{{ $t('b3304780-9d9a-47c2-97f5-13b6fbb03307') }}</p>
 
                 <STList class="illustration-list">
                     <STListItem v-for="parent in parents" :key="parent.id" class="right-stack" :selectable="true" @click.stop="editParent(parent)">
@@ -71,7 +71,7 @@
             </template>
 
             <template v-if="addresses.length">
-                <hr><h2>{{ $t('Adressen') }}</h2>
+                <hr><h2>{{ $t('d86b0f9d-ad2d-4bb6-9ea0-b41a7925094f') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem v-for="address in addresses" :key="address.toString()" class="right-stack" :selectable="false">

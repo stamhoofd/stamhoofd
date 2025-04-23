@@ -1,54 +1,54 @@
 <template>
-    <SaveView :loading="saving" :disabled="!hasChanges" :error-box="errors.errorBox" :title="$t(`Login methode configuratie`)" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChanges" :error-box="errors.errorBox" :title="$t(`4f208599-c312-48ba-905b-320cacf05708`)" @save="save">
         <h1>
-            {{ $t('Login methode configuratie ({method})', {method: loginMethod}) }}
+            {{ $t('c5b0dabc-db2d-4a17-b805-1f1db9a5aa0f', {method: loginMethod}) }}
         </h1>
         <p>
-            {{ $t('Bepaal de voorwaarden en benamign van deze login methode.') }}
+            {{ $t('7109c9f9-d44a-4d0e-a56a-7193f9218bd7') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox error-fields="fullName" :error-box="errors.errorBox" :title="$t(`Volledige naam`)">
-            <input ref="firstInput" v-model="fullName" class="input" type="text" autocomplete="off" :placeholder="$t(`Optioneel`)">
+        <STInputBox error-fields="fullName" :error-box="errors.errorBox" :title="$t(`e4b3d2af-dee8-4f55-88e9-a229513d347c`)">
+            <input ref="firstInput" v-model="fullName" class="input" type="text" autocomplete="off" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)">
         </STInputBox>
 
-        <STInputBox error-fields="shortName" :error-box="errors.errorBox" :title="$t(`Korte naam`)">
-            <input ref="firstInput" v-model="shortName" class="input" type="text" autocomplete="off" :placeholder="$t(`Optioneel`)">
+        <STInputBox error-fields="shortName" :error-box="errors.errorBox" :title="$t(`8bc9dc7d-7dba-4712-9e4d-c3a64c43cb26`)">
+            <input ref="firstInput" v-model="shortName" class="input" type="text" autocomplete="off" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)">
         </STInputBox>
 
-        <STInputBox error-fields="loginButtonText" :error-box="errors.errorBox" :title="$t(`Login knop text`)">
-            <input ref="firstInput" v-model="loginButtonText" class="input" type="text" autocomplete="off" :placeholder="$t(`Optioneel`)">
+        <STInputBox error-fields="loginButtonText" :error-box="errors.errorBox" :title="$t(`6fa093d9-7a49-4007-8b73-446d04d3fd12`)">
+            <input ref="firstInput" v-model="loginButtonText" class="input" type="text" autocomplete="off" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)">
         </STInputBox>
 
-        <ArrayInput v-model="allowlist" :default-value="() => ''" :title="$t(`Toegestane domeinnamen`)">
+        <ArrayInput v-model="allowlist" :default-value="() => ''" :title="$t(`0999529a-9b4f-417a-95da-120f5daabf24`)">
             <template #item="{index, modelValue, updateModelValue}">
-                <input :value="modelValue" class="input" type="text" :placeholder="$t(`Domeinnaam`) + ' ' + (index + 1)" autocomplete="off" @input="updateModelValue(($event.target as HTMLInputElement).value || '')">
+                <input :value="modelValue" class="input" type="text" :placeholder="$t(`30e5c996-ef97-4ad6-8503-049163cd197d`) + ' ' + (index + 1)" autocomplete="off" @input="updateModelValue(($event.target as HTMLInputElement).value || '')">
             </template>
 
             <template #empty>
                 <p class="style-description-small">
-                    {{ $t('Alle emaildomeinnamen zijn toegestaan') }}
+                    {{ $t('49b896d1-9e3c-4a5b-bb35-88cdf9febbf3') }}
                 </p>
             </template>
         </ArrayInput>
         <p v-if="allowlist.length" class="style-description-small">
-            {{ $t('Enkel e-mailadressen met deze domeinnamen kunnen deze login methode gebruiken.') }}
+            {{ $t('64542640-1f4f-4f9f-a277-86ccbd69d2a9') }}
         </p>
 
-        <ArrayInput v-model="blocklist" :default-value="() => ''" :title="$t(`Uitgesloten domeinnamen`)">
+        <ArrayInput v-model="blocklist" :default-value="() => ''" :title="$t(`56bf5802-724f-451b-8ed4-533cd46fbbe2`)">
             <template #item="{index, modelValue, updateModelValue}">
-                <input :value="modelValue" class="input" type="text" :placeholder="$t(`Domeinnaam`) + ' ' + (index + 1)" autocomplete="off" @input="updateModelValue(($event.target as HTMLInputElement).value || '')">
+                <input :value="modelValue" class="input" type="text" :placeholder="$t(`30e5c996-ef97-4ad6-8503-049163cd197d`) + ' ' + (index + 1)" autocomplete="off" @input="updateModelValue(($event.target as HTMLInputElement).value || '')">
             </template>
 
             <template #empty>
                 <p class="style-description-small">
-                    {{ $t('Geen uitgesloten domeinnamen') }}
+                    {{ $t('2954282d-0883-48ed-b677-98f8b865b2ca') }}
                 </p>
             </template>
         </ArrayInput>
         <p class="style-description-small">
-            {{ $t('E-mailadressen met deze domeinnamen kunnen deze login methode niet gebruiken.') }}
+            {{ $t('d346b6d1-87e5-452d-a3c2-b1f0e41acedb') }}
         </p>
     </SaveView>
 </template>

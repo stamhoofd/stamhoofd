@@ -44,7 +44,7 @@ async function save() {
                 premiseTypes: patch.value,
             }),
         }));
-        new Toast($t(`De wijzigingen zijn opgeslagen`), 'success green').show();
+        new Toast($t(`17017abf-c2e0-4479-86af-300ad37347aa`), 'success green').show();
         await pop({ force: true });
     }
     catch (e) {

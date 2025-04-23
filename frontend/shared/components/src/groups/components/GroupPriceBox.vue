@@ -1,7 +1,7 @@
 <template>
     <div>
-        <STInputBox v-if="!isSingle" error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
-            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`Naam van dit tarief`)">
+        <STInputBox v-if="!isSingle" error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
+            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`8435ecfa-0baa-486d-a3fd-b9dafded1cab`)">
         </STInputBox>
 
         <ReduceablePriceInput v-model="groupPrice" :group="group" :error-box="errors.errorBox" :validator="errors.validator" :default-membership-type-id="defaultMembershipTypeId" />
@@ -13,10 +13,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Verborgen') }}
+                    {{ $t('6276d07c-bd0d-4117-b46c-e3f7b0dbb1e5') }}
                 </h3>
                 <p v-if="hidden" class="style-description-small">
-                    {{ $t('Deze keuze wordt onzichtbaar in het ledenportaal en is enkel manueel toe te voegen door een beheerder.') }}
+                    {{ $t('9562217e-b18e-480e-ad7f-7fd6596dddd6') }}
                 </p>
             </STListItem>
 
@@ -26,7 +26,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Beperk het beschikbare aantal stuks (waarvan nu {stock} ingenomen of gereserveerd)', {stock: usedStock.toString()}) }}
+                    {{ $t('1fab526d-79d9-4b49-8717-aac1c8a3010a', {stock: usedStock.toString()}) }}
                 </h3>
 
                 <div v-if="useStock" class="split-inputs option" @click.stop.prevent>

@@ -5,22 +5,22 @@
         </h1>
 
         <p v-if="allowChildCategories && type === RecordEditorType.PlatformMember" class="style-description">
-            {{ $t('Een vragenlijst bevat één of meerdere persoonsgegevens, eventueel opgedeeld in categorieën. Lees') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('hier') }}</a> {{ $t('meer informatie na over hoe je een vragenlijst kan instellen.') }}
+            {{ $t('73a3d0bc-55a4-47e6-b650-27bb961a0721') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('0487c3b0-3f93-4344-a34a-9a9198f37023') }}</a> {{ $t('69551005-512c-4240-8e20-fd546cefafaa') }}
         </p>
         <p v-else class="style-description">
-            {{ $t('Lees') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('hier') }}</a> {{ $t('meer informatie na over hoe je een vragenlijst kan instellen.') }}
+            {{ $t('8485e7ea-6d66-4f2c-b92a-bd44cb2f4eb4') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('0487c3b0-3f93-4344-a34a-9a9198f37023') }}</a> {{ $t('69551005-512c-4240-8e20-fd546cefafaa') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Titel`)">
-                <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`Titel`)">
+            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`cbe7db4a-b65b-452b-a5d2-d369182fd28f`)">
+                <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`cbe7db4a-b65b-452b-a5d2-d369182fd28f`)">
             </STInputBox>
         </div>
 
-        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`Beschrijving`)">
-            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`Optioneel`)" />
+        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" />
         </STInputBox>
 
         <STList v-if="(settings.toggleDefaultEnabled && allowChildCategories) || !patchedCategory.defaultEnabled">
@@ -30,20 +30,20 @@
                 </template>
 
                 <h3 v-if="app === 'admin'" class="style-title-list">
-                    {{ $t('Verplicht ingeschakeld voor alle leden ingeschreven bij minstens één standaard-leeftijdsgroep') }}
+                    {{ $t('3c283583-6a2d-497e-abe4-0e67852497b7') }}
                 </h3>
                 <h3 v-else class="style-title-list">
-                    {{ $t('Verplicht ingeschakeld voor alle leden (behalve wachtlijsten en activiteiten)') }}
+                    {{ $t('090e5afe-2d7a-4948-9f3b-56a3fb4919aa') }}
                 </h3>
 
                 <p class="style-description-small">
-                    {{ $t("Schakel je dit uit, dan staat deze vragenlijst standaard uit maar kan deze op lagere niveau's worden ingeschakeld. Zo behoud je maximale flexibiliteit.") }}
+                    {{ $t("2a38f9c1-2904-4b14-a477-40c7ada7b743") }}
                 </p>
             </STListItem>
         </STList>
 
         <hr><p v-if="records.length === 0 && categories.length === 0" class="info-box">
-            {{ $t('Deze vragenlijst is leeg en zal nog niet getoond worden.') }}
+            {{ $t('86e7714a-6658-4efd-9cd2-00ba243b4d10') }}
         </p>
 
         <STList :model-value="getDraggableRecords(patchedCategory).computed.value" :draggable="true" @update:model-value="newValue => getDraggableRecords(patchedCategory).computed.value = newValue!">
@@ -55,13 +55,13 @@
         <p class="style-button-bar">
             <button class="button text" type="button" @click="addRecord()">
                 <span class="icon add" />
-                <span v-if="categories.length === 0">{{ $t('Vraag') }}</span>
-                <span v-else>{{ $t('Algemene vraag') }}</span>
+                <span v-if="categories.length === 0">{{ $t('00b57923-c4f1-47ab-a90a-275d192e53e8') }}</span>
+                <span v-else>{{ $t('7a153144-a909-4c8c-bb35-54aac1c9aef3') }}</span>
             </button>
 
             <button v-if="allowChildCategories" class="button text" type="button" @click="addCategory()">
                 <span class="icon add" />
-                <span>{{ $t('Categorie') }}</span>
+                <span>{{ $t('502dc65d-e8d3-4b20-a478-a76ca9084e60') }}</span>
             </button>
         </p>
 
@@ -81,7 +81,7 @@
             </p>
 
             <p v-if="c.records.length === 0" class="info-box">
-                {{ $t('Deze categorie bevat nog geen vragen.') }}
+                {{ $t('e60901dd-8a37-48e1-9223-ed444f1d1d4b') }}
             </p>
 
             <p v-if="c.description" class="style-description-block style-em pre-wrap" v-text="c.description" />
@@ -94,15 +94,15 @@
         </div>
 
         <div v-if="defaultEnabled && (hasFilters || (allowChildCategories && patchedCategory.getAllRecords().length > 1))" class="container">
-            <hr><h2>{{ $t('Slim in- en uitschakelen') }}</h2>
+            <hr><h2>{{ $t('6ba4f526-8b64-4902-903b-7cb176684151') }}</h2>
             <p v-if="!hasFilters">
-                {{ $t('Je kan kiezen wanneer deze stap overgeslagen kan worden.') }}
+                {{ $t('bb4843f4-d853-4953-8869-7d9c6c12b974') }}
             </p>
             <p v-else-if="allowChildCategories && patchedCategory.getAllRecords().length > 1">
-                {{ $t('Je kan kiezen wanneer deze vragen van toepassing zijn, en of deze stap overgeslagen kan worden.') }}
+                {{ $t('d68cc8ee-9d6c-471a-a532-6ad566cf1ea1') }}
             </p>
             <p v-else>
-                {{ $t('Je kan kiezen wanneer deze vragen van toepassing zijn.') }}
+                {{ $t('273ea198-4956-4645-a4a5-fb0566b871c5') }}
             </p>
 
             <PropertyFilterInput v-model="filter" :allow-optional="allowChildCategories && patchedCategory.getAllRecords().length > 1" :builder="filterBuilder" />

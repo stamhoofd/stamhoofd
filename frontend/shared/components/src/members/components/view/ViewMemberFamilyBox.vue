@@ -2,10 +2,10 @@
     <div v-if="familyMembers.length > 0" class="hover-box container">
         <hr><h2>
             <template v-if="member.patchedMember.details.defaultAge <= 30 && Math.abs(maxFamilyAge - member.patchedMember.details.defaultAge) <= 14">
-                {{ $t('Broers &amp; zussen') }}
+                {{ $t('9bc4abf4-e439-4992-a32e-79a1553af72e') }}
             </template>
             <template v-else>
-                {{ $t('Familie') }}
+                {{ $t('ba70e3cd-ccdb-4742-b6c9-50bdd1c73da0') }}
             </template>
         </h2>
 

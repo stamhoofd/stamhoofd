@@ -20,7 +20,7 @@ async function markPaymentsPaid(context: SessionContext, payments: PaymentGenera
         }
 
         if (![PaymentMethod.Unknown, PaymentMethod.Transfer, PaymentMethod.PointOfSale].includes(payment.method)) {
-            new Toast($t(`Je kan de betaalstatus van online betalingen niet wijzigen`), 'error red').setHide(4000).show();
+            new Toast($t(`2dff49a1-ae28-487c-9664-284ea32d5363`), 'error red').setHide(4000).show();
             return;
         }
 
@@ -43,7 +43,7 @@ async function markPaymentsPaid(context: SessionContext, payments: PaymentGenera
     }
 
     if (data.changes.length > 0) {
-        if (!await CenteredMessage.confirm($t(`Ben je zeker?`), paid ? $t(`Markeer als betaald`) : $t(`Markeer als niet betaald`), paid && hasOrder ? $t(`De besteller(s) van bestellingen ontvangen in sommige gevallen een automatische e-mail.`) : undefined)) {
+        if (!await CenteredMessage.confirm($t(`c8217f03-4005-47e7-b032-69f59dd05499`), paid ? $t(`aca879f0-55d3-4964-a8ad-0eedf18228fb`) : $t(`b3d75fdd-8231-4a1f-a1b3-5c6401d90a75`), paid && hasOrder ? $t(`0a79a933-90a4-477e-9598-b64d6bb28281`) : undefined)) {
             return;
         }
 
@@ -58,7 +58,7 @@ async function markPaymentsPaid(context: SessionContext, payments: PaymentGenera
 
             deepSetArray(payments, response.data);
 
-            new Toast($t(`Betaalstatus gewijzigd`), 'success').setHide(3000).show();
+            new Toast($t(`8076e99d-cac2-4fb6-84e0-d893d9b3c205`), 'success').setHide(3000).show();
 
             for (const payment of response.data) {
                 GlobalEventBus.sendEvent('paymentPatch', payment).catch(console.error);
@@ -69,6 +69,6 @@ async function markPaymentsPaid(context: SessionContext, payments: PaymentGenera
         }
     }
     else {
-        new Toast(paid ? $t(`Al gemarkeerd als betaald`) : payments.length === 1 ? $t(`Deze betaling werd nog niet betaald`) : $t(`Deze betalingen werden nog niet betaald`), 'error red').setHide(2000).show();
+        new Toast(paid ? $t(`37848bd6-919a-4f31-bfc7-e0e809e68847`) : payments.length === 1 ? $t(`d9e58e49-d5d5-4a89-9e6a-1bd8eaf0cb1e`) : $t(`d23f91da-079b-40fe-9da1-14b9ac7e65ab`), 'error red').setHide(2000).show();
     }
 }

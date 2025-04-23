@@ -5,7 +5,7 @@
                 <select v-model="day" autocomplete="bday-day" name="bday-day" @change="updateDate">
                     <!-- name is needed for autocomplete in safari -->
                     <option :disabled="required" :value="null">
-                        {{ $t('Dag') }}
+                        {{ $t('9ea48ee8-ed13-43f7-a900-82630b911b7a') }}
                     </option>
                     <option v-for="day in 31" :key="day" :value="day" autocomplete="bday-day">
                         {{ day }}
@@ -16,7 +16,7 @@
             <div class="input-icon-container right icon arrow-down-small gray">
                 <select v-model="month" autocomplete="bday-month" name="bday-month" @change="updateDate">
                     <option :disabled="required" :value="null">
-                        {{ $t('Maand') }}
+                        {{ $t('30a79bd4-2e8d-4bd4-97be-f23d04c337c8') }}
                     </option>
                     <option v-for="month in 12" :key="month" :value="month" autocomplete="bday-month">
                         {{ monthText(month) }}
@@ -27,7 +27,7 @@
             <div class="input-icon-container right icon arrow-down-small gray">
                 <select v-model="year" autocomplete="bday-year" name="bday-year" @change="updateDate">
                     <option :disabled="required" :value="null">
-                        {{ $t('Jaar') }}
+                        {{ $t('f88a59b7-e4ab-453b-96f2-8b1b60cb2fc0') }}
                     </option>
                     <option v-for="year in 100" :key="year" :value="currentYear - year + 1" autocomplete="bday-year">
                         {{ currentYear - year + 1 }}

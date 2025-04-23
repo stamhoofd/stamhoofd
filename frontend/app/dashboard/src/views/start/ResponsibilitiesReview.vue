@@ -6,19 +6,19 @@
             </template>
 
             <p v-if="!$organizationBasedResponsibilities.length" class="info-box">
-                {{ $t('Er zijn geen ingebouwde functies.') }}
+                {{ $t('3d43c0ab-d755-43ef-af26-f29cfe3743d5') }}
             </p>
 
             <div v-if="$rowCategories" class="container">
                 <div v-if="$rowCategories.requiredRows.length" class="container">
-                    <hr><h2>{{ $t('Verplichte functies') }}</h2>
+                    <hr><h2>{{ $t('31e85868-a04b-42be-bf89-0b691378852c') }}</h2>
                     <STList class="info">
                         <ResponsibilityReview v-for="row in $rowCategories.requiredRows" :key="row.responsibility.id" :responsibility="row.responsibility" :group="row.group" :members="row.members" :count="row.count" :progress="row.progress" :total="row.total" />
                     </STList>
                 </div>
 
                 <div v-if="$rowCategories.optionalRows.length" class="container">
-                    <hr><h2>{{ $t('Optionele functies') }}</h2>
+                    <hr><h2>{{ $t('f4caaf58-4248-4f91-9e76-c8cec82f528d') }}</h2>
                     <STList class="info">
                         <ResponsibilityReview v-for="row in $rowCategories.optionalRows" :key="row.responsibility.id" :responsibility="row.responsibility" :group="row.group" :members="row.members" :count="row.count" :progress="row.progress" :total="row.total" />
                     </STList>

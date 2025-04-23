@@ -412,16 +412,16 @@ export class CartItem extends AutoEncoder {
 
             if (price === 0) {
                 if (sorted.length === 1) {
-                    parts.push($t(`Gratis`));
+                    parts.push($t(`99e41cea-bce3-4329-8b17-e3487c4534ac`));
                 }
                 else {
-                    parts.push(amount + ' ' + $t(`gratis`));
+                    parts.push(amount + ' ' + $t(`50af1227-4f3d-46bb-a832-b62c4e3bc6ab`));
                 }
             }
             else {
                 if (sorted.length === 1 || amount === 1) {
                     if (amount > 1) {
-                        parts.push(Formatter.price(Math.abs(price)) + ' ' + $t(`/ stuk`));
+                        parts.push(Formatter.price(Math.abs(price)) + ' ' + $t(`4edf400a-ac16-4442-8561-e66ed2f785b5`));
                     }
                     else {
                         parts.push(Formatter.price(Math.abs(price)));
@@ -484,7 +484,7 @@ export class CartItem extends AutoEncoder {
 
         if (this.seats.length) {
             descriptions.push(
-                (this.seats.length === 1 ? $t(`Plaats`) : $t(`Plaatsen`)) + ': '
+                (this.seats.length === 1 ? $t(`8435edb8-619e-4ddf-b5c8-4d1a2bc44acc`) : $t(`2a3d1996-17cd-4ef7-827b-63f2f9b5b84a`)) + ': '
                 + this.seats.slice().sort(ReservedSeat.sort).map(s => s.getShortName(this.product)).join(', '),
             );
         }
@@ -528,7 +528,7 @@ export class CartItem extends AutoEncoder {
             errors.addError(new SimpleError({
                 code: 'product_unavailable',
                 message: 'Product unavailable',
-                human: $t(`{product} is niet meer beschikbaar`, { product: this.product.name }),
+                human: $t(`b3468d2d-269d-4330-9bb7-580920d2d080`, { product: this.product.name }),
             }));
         }
         else {
@@ -539,14 +539,14 @@ export class CartItem extends AutoEncoder {
                     errors.addError(new SimpleError({
                         code: 'product_price_unavailable',
                         message: 'Product price unavailable',
-                        human: $t(`Er werden keuzemogelijkheden toegevoegd aan {product}, waar je nu eerst moet uit kiezen.`, { product: this.product.name }),
+                        human: $t(`349ac252-348b-42ae-aa9c-708a25db03f6`, { product: this.product.name }),
                     }));
                 }
                 else {
                     errors.addError(new SimpleError({
                         code: 'product_price_unavailable',
                         message: 'Product price unavailable',
-                        human: $t(`De keuzemogelijkheid '{price}' van {product} is niet meer beschikbaar. Kies een andere.`, { price: this.productPrice.name, product: this.product.name }),
+                        human: $t(`c3862722-84b2-4eca-b8cd-dd3f2a9f95c7`, { price: this.productPrice.name, product: this.product.name }),
                     }));
                 }
             }
@@ -566,7 +566,7 @@ export class CartItem extends AutoEncoder {
                     errors.addError(new SimpleError({
                         code: 'option_menu_unavailable',
                         message: 'Option menu unavailable',
-                        human: $t(`Eén of meerdere keuzemogelijkheden van {product} zijn niet meer beschikbaar`, { product: this.product.name }),
+                        human: $t(`609af825-3468-407d-a033-170d75b51075`, { product: this.product.name }),
                     }));
                     continue;
                 }
@@ -583,7 +583,7 @@ export class CartItem extends AutoEncoder {
                     errors.addError(new SimpleError({
                         code: 'option_unavailable',
                         message: 'Option unavailable',
-                        human: $t(`Eén of meerdere keuzemogelijkheden van {product} zijn niet meer beschikbaar`, { product: this.product.name }),
+                        human: $t(`609af825-3468-407d-a033-170d75b51075`, { product: this.product.name }),
                     }));
                     continue;
                 }
@@ -598,7 +598,7 @@ export class CartItem extends AutoEncoder {
                     new SimpleError({
                         code: 'missing_menu',
                         message: "Missing menu's " + remainingMenus.filter(m => !m.multipleChoice).map(m => m.name).join(', '),
-                        human: $t(`Er zijn nieuwe keuzemogelijkheden voor {product} waaruit je moet kiezen`, { product: this.product.name }),
+                        human: $t(`362767ca-4cfb-4ecd-a8d7-7831c40f39df`, { product: this.product.name }),
                     }),
                 );
             }
@@ -666,7 +666,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'product_unavailable',
                     message: 'Product unavailable',
-                    human: $t(`{product} is niet meer beschikbaar`, { product: this.product.name }),
+                    human: $t(`b3468d2d-269d-4330-9bb7-580920d2d080`, { product: this.product.name }),
                 });
             }
 
@@ -674,7 +674,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'product_price_unavailable',
                     message: 'Product price unavailable',
-                    human: $t(`{price} is niet meer beschikbaar`, { price: this.productPrice.name }),
+                    human: $t(`325ccc3a-41a6-462e-81db-2efb0235e3eb`, { price: this.productPrice.name }),
                 });
             }
 
@@ -682,7 +682,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'product_unavailable',
                     message: 'Product unavailable',
-                    human: $t(`{product} is uitverkocht`, { product: this.product.name }),
+                    human: $t(`7701d42d-eef3-419b-b1fb-85443d117554`, { product: this.product.name }),
                 });
             }
 
@@ -694,7 +694,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'product_unavailable',
                     message: 'Product unavailable',
-                    human: stockDefinition?.text || $t(`Er zijn nog maar {count} stuks beschikbaar van {product}`, { count: minimumRemaining.toString(), product: this.product.name }),
+                    human: stockDefinition?.text || $t(`ade1f338-f45e-4384-9520-9d20cfe5311e`, { count: minimumRemaining.toString(), product: this.product.name }),
                     meta: { recoverable: minimumRemaining > 0 },
                 });
             }
@@ -706,7 +706,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'seating_plan_unavailable',
                     message: 'Invalid seating plan',
-                    human: $t(`Het zaalplan van {product} is niet meer beschikbaar. Herlaad de pagina en probeer opnieuw. Neem contact met ons op als het probleem zich herhaalt.`, { product: this.product.name }),
+                    human: $t(`6f4d58c7-25d2-407e-901a-f3c03a7e0ab3`, { product: this.product.name }),
                 });
             }
 
@@ -732,7 +732,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'seats_unavailable',
                     message: 'Seats unavailable',
-                    human: $t(`De volgende plaatsen zijn niet meer beschikbaar:`) + ' ' + invalidSeats.map(s => s.getNameString(webshop, this.product)).join(', '),
+                    human: $t(`2fd43e7b-2c16-4695-bdb4-f3095952d36d`) + ' ' + invalidSeats.map(s => s.getNameString(webshop, this.product)).join(', '),
                     meta: { recoverable: true },
                 });
             }
@@ -744,14 +744,14 @@ export class CartItem extends AutoEncoder {
                     throw new SimpleError({
                         code: 'invalid_seats',
                         message: 'Invalid seats',
-                        human: $t(`Kies {seats}`, { seats: Formatter.pluralText(this.amount, $t(`plaats`), $t(`plaatsen`)) }),
+                        human: $t(`5d8d7f45-85ae-44d0-b8ac-b7db850003ba`, { seats: Formatter.pluralText(this.amount, $t(`886ea5ba-4715-43a2-88b6-4715df3cfa2c`), $t(`a76b6d3c-05a1-4c71-9f88-077261a4e595`)) }),
                         meta: { recoverable: true },
                     });
                 }
                 throw new SimpleError({
                     code: 'invalid_seats',
                     message: 'Invalid seats',
-                    human: $t(`Kies nog {seats}`, { seats: Formatter.pluralText(this.amount - this.seats.length, $t(`plaats`), $t(`plaatsen`)) }),
+                    human: $t(`2858b401-42b8-4a95-8bd1-d67addbda5e1`, { seats: Formatter.pluralText(this.amount - this.seats.length, $t(`886ea5ba-4715-43a2-88b6-4715df3cfa2c`), $t(`a76b6d3c-05a1-4c71-9f88-077261a4e595`)) }),
                     meta: { recoverable: true },
                 });
             }
@@ -764,7 +764,7 @@ export class CartItem extends AutoEncoder {
                         throw new SimpleError({
                             code: 'seats_unavailable',
                             message: 'Seats unavailable',
-                            human: $t(`De volgende plaatsen heb je twee keer gekozen:`) + ' ' + seat.getNameString(webshop, this.product),
+                            human: $t(`794b3f34-9dd2-4097-af25-af094431fba0`) + ' ' + seat.getNameString(webshop, this.product),
                         });
                     }
                 }
@@ -785,7 +785,7 @@ export class CartItem extends AutoEncoder {
                     throw new SimpleError({
                         code: 'select_connected_seats',
                         message: 'Select connected seats',
-                        human: $t(`Pas de plaatsen aan zodat ze aansluiten en geen enkele plaatsen openlaten.`),
+                        human: $t(`a751a023-570b-46ad-8aaa-7b0c4412cbe8`),
                         meta: { recoverable: true },
                     });
                 }

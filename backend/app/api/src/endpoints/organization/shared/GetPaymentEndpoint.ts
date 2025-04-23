@@ -34,7 +34,7 @@ export class GetPaymentEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Payment not found',
-                human: $t(`Je hebt geen toegang tot deze betaling`),
+                human: $t(`6024d1b5-f0a0-42f4-b972-636286edf929`),
             });
         }
 

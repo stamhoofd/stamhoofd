@@ -8,14 +8,14 @@
             </h1>
 
             <p v-if="isDraft" class="warning-box">
-                {{ $t('Dit document is nog een kladversie. Nu kan je alles nog wijzigen, maar ze is nog niet zichtbaar voor leden. Publiceer het document via de knop onderaan nadat je alles hebt nagekeken.') }}
+                {{ $t('eda9c1b1-f601-492a-b13e-cf88c5249a7b') }}
             </p>
             <p v-else class="success-box">
-                {{ $t('Dit document is zichtbaar in het ledenportaal.') }}
+                {{ $t('26089c85-ad50-4c71-9013-4fadc243c12e') }}
             </p>
 
             <p v-if="!isDraft && template.updatesEnabled" class="warning-box">
-                {{ $t('We raden aan om automatische wijzigingen uit te schakelen zodra alle documenten volledig zijn (of als leden voldoende kans hebben gehad om ontbrekende gegevens aan te vullen). Anders riskeer je dat documenten nog worden gewijzigd of verwijderd als leden worden uitgeschreven.') }}
+                {{ $t('2c3cdda4-5e44-4c2b-bdc9-bb4c554e2894') }}
             </p>
 
             <STList class="illustration-list">
@@ -24,10 +24,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/agreement.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Documenten') }}
+                        {{ $t('a01ee6b1-f27f-4ad2-a87c-28bce4dedfbd') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Bekijk en bewerk de aangemaakte documenten.') }}
+                        {{ $t('7b0f4117-9e6f-4c1b-b56e-c154b5defce3') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -39,10 +39,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Instellingen') }}
+                        {{ $t('bab38c80-8ab6-4cb7-80c3-1f607057e45d') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Wijzig de invulvelden en de instellingen van het document.') }}
+                        {{ $t('eb865045-d332-47f7-bb52-0eaa58785d67') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -54,7 +54,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/code-export.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Exporteren naar XML') }}
+                        {{ $t('6ba23b70-c6d5-46d2-815e-44955ce48eaf') }}
                     </h2>
                     <p class="style-description">
                         {{ xmlExportDescription }}
@@ -65,57 +65,57 @@
                 </STListItem>
             </STList>
 
-            <hr><h2>{{ $t('Automatische wijzigingen') }}</h2>
+            <hr><h2>{{ $t('e9d4d5fb-ec7f-4a42-acc8-8f52a9bd4e7a') }}</h2>
             <p>{{ $t('fa988b87-6665-43e4-a177-77031826e9a8') }}</p>
 
             <Checkbox :model-value="template.updatesEnabled" :disabled="settingUpdatesEnabled" @update:model-value="toggleUpdatesEnabled">
-                {{ $t('Documenten automatisch wijzigen') }}
+                {{ $t('ecbe0afb-6a6c-4b67-8b11-3a75a182c344') }}
             </Checkbox>
 
-            <hr><h2>{{ $t('Acties') }}</h2>
+            <hr><h2>{{ $t('dc052084-eea5-407e-8775-237bf550895a') }}</h2>
 
             <STList>
                 <STListItem v-if="isDraft" :selectable="true" @click="publishTemplate()">
                     <h2 class="style-title-list">
-                        {{ $t('Document publiceren') }}
+                        {{ $t('38427cc3-27c9-4463-acdf-a2d073a8cdb7') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Maak alle documenten toegankelijk voor alle leden.') }}
+                        {{ $t('bd4b350e-d06a-44aa-a2d6-a5ae140373ca') }}
                     </p>
                     <template #right>
                         <button type="button" class="button secundary green hide-smartphone">
                             <span class="icon success" />
-                            <span>{{ $t('Publiceer') }}</span>
+                            <span>{{ $t('bd4ad024-9855-4623-9ef4-db5162466f53') }}</span>
                         </button>                    <button type="button" class="button icon success only-smartphone" />
                     </template>
                 </STListItem>
 
                 <STListItem v-if="!isDraft" :selectable="true" @click="draftTemplate()">
                     <h2 class="style-title-list">
-                        {{ $t('Terug naar klad') }}
+                        {{ $t('28486bd5-7acc-4a49-84cf-8fbc2b2ba8b9') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Maak dit document terug onzichtbaar voor alle leden.') }}
+                        {{ $t('523d8098-13ec-4ef5-9851-c1bf768efdd6') }}
                     </p>
                     <template #right>
                         <button type="button" class="button secundary hide-smartphone">
                             <span class="icon edit" />
-                            <span>{{ $t('Naar klad') }}</span>
+                            <span>{{ $t('782a7bd5-552f-46a3-b0e3-c18a71eb0ddc') }}</span>
                         </button>                    <button type="button" class="button icon edit only-smartphone" />
                     </template>
                 </STListItem>
 
                 <STListItem v-if="isDraft" :selectable="true" @click="deleteTemplate()">
                     <h2 class="style-title-list">
-                        {{ $t('Document verwijderen') }}
+                        {{ $t('34869ab8-e70a-4d28-8805-b6afed8aacf2') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Verwijder alle documenten definitief.') }}
+                        {{ $t('9db9e26b-a180-48f1-b19e-c4f468dda563') }}
                     </p>
                     <template #right>
                         <button type="button" class="button secundary danger hide-smartphone">
                             <span class="icon trash" />
-                            <span>{{ $t('Verwijder') }}</span>
+                            <span>{{ $t('1bb244c4-6ffb-4969-91e6-ea70f16ac5a4') }}</span>
                         </button>                    <button type="button" class="button icon trash only-smartphone" />
                     </template>
                 </STListItem>

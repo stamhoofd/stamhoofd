@@ -17,9 +17,9 @@
                 <p class="price">
                     {{ priceString }}
 
-                    <span v-if="product.enableInFuture" class="style-tag">{{ $t('Vanaf {date}', {date: product.enableAfter ? formatDateTime(product.enableAfter) : '?'}) }}</span>
-                    <span v-else-if="!product.isEnabled && !admin" class="style-tag error">{{ $t('Onbeschikbaar') }}</span>
-                    <span v-else-if="product.isSoldOut" class="style-tag error">{{ $t('Uitverkocht') }}</span>
+                    <span v-if="product.enableInFuture" class="style-tag">{{ $t('56954008-cc3d-4460-afaa-f986d1f35d24', {date: product.enableAfter ? formatDateTime(product.enableAfter) : '?'}) }}</span>
+                    <span v-else-if="!product.isEnabled && !admin" class="style-tag error">{{ $t('11b3bb72-0edb-401e-9c60-47fbb2d132fc') }}</span>
+                    <span v-else-if="product.isSoldOut" class="style-tag error">{{ $t('44ba544c-3db6-4f35-b7d1-b63fdcadd9ab') }}</span>
                     <span v-else-if="stockText !== null" class="style-tag" :class="stockText.style">{{ stockText.text }}</span>
                 </p>
             </div>

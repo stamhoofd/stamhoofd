@@ -251,7 +251,7 @@ export class WebshopManager {
 
             DBOpenRequest.onblocked = function (e) {
                 console.log('DB open blocked', e);
-                new Toast($t(`Er staat een ander tabblad open van Stamhoofd die werkt in een oudere versie. Sluit die eerst af.`), 'error red').setHide(15 * 1000).show();
+                new Toast($t(`0b6274d7-7a42-4ab3-bc65-5a76c23d07ff`), 'error red').setHide(15 * 1000).show();
             };
 
             DBOpenRequest.onerror = (event) => {
@@ -269,7 +269,7 @@ export class WebshopManager {
                 resolved = true;
                 reject(new SimpleError({
                     code: 'not_supported',
-                    message: $t('Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer de pagina te herladen of in een andere browser te werken.'),
+                    message: $t('5f963722-4ad9-4d5e-91cc-75eac8218349'),
                 }));
             };
 
@@ -343,7 +343,7 @@ export class WebshopManager {
                     // Abort
                     reject(new SimpleError({
                         code: 'not_supported',
-                        message: $t('Kijk na of je nog een ander tabblad open hebt staan met Stamhoofd en sluit deze. Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer de pagina te herladen of in een andere browser te werken.'),
+                        message: $t('4f7e64c6-4607-446d-9a84-8ebcb7206241'),
                     }));
                 }
             }, 2000);

@@ -43,7 +43,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
 
         for (const id of request.body.getDeletes()) {
             if (!Context.auth.hasPlatformFullAccess()) {
-                throw Context.auth.error($t(`Enkel een platform hoofdbeheerder kan groepen verwijderen`));
+                throw Context.auth.error($t(`d01932d9-e958-4b29-98f2-cc5ff6be29d3`));
             }
 
             const organization = await Organization.getByID(id);
@@ -55,7 +55,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'cannot_delete_membership_organization',
                     message: 'Cannot delete membership organization',
-                    human: $t(`Je kan de hoofdgroep niet verwijderen. Als je dit toch wil doen, kan je eerst een andere vereniging instellen als hoofdgroep via ')Boekhouding en aansluitingen'.`),
+                    human: $t(`a1f57ce7-a96a-4c8d-b43f-79a07a78114f`),
                 });
             }
 
@@ -65,7 +65,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
         // Organization creation
         for (const { put } of request.body.getPuts()) {
             if (!Context.auth.hasPlatformFullAccess()) {
-                throw Context.auth.error($t(`Enkel een platform hoofdbeheerder kan nieuwe groepen aanmaken`));
+                throw Context.auth.error($t(`83826ae8-fd89-46c2-ad3f-8f77aadd65b2`));
             }
 
             if (put.name.length < 4) {
@@ -73,7 +73,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Should not be empty',
-                        human: $t(`Je bent de naam van je organisatie vergeten in te vullen`),
+                        human: $t(`3f37782a-c07f-457d-994f-f1cc075cff44`),
                         field: 'organization.name',
                     });
                 }
@@ -81,7 +81,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Field is too short',
-                    human: $t(`Kijk de naam van je organisatie na, deze is te kort. Vul eventueel aan met de gemeente.`),
+                    human: $t(`0e82abec-5467-45d8-ba89-9b9fd10c085d`),
                     field: 'organization.name',
                 });
             }
@@ -92,7 +92,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Field is too long',
-                    human: $t(`De naam van de vereniging is te lang. Probeer de naam wat te verkorten en probeer opnieuw.`),
+                    human: $t(`c4d225ea-8e41-4829-bf0c-bc04755492de`),
                     field: 'organization.name',
                 });
             }
@@ -102,7 +102,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'name_taken',
                     message: 'An organization with the same name already exists',
-                    human: $t(`Er bestaat al een vereniging met dezelfde URI. Pas deze aan zodat deze uniek is, en controleer of deze vereniging niet al bestaat.`),
+                    human: $t(`6e675a7d-b124-4507-bf0c-9b70013e98ca`),
                     field: 'name',
                 });
             }
@@ -113,7 +113,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'name_taken',
                     message: 'An organization with the same name already exists',
-                    human: $t(`Er bestaat al een vereniging met dezelfde naam. Voeg bijvoorbeeld de naam van je gemeente toe.`),
+                    human: $t(`19e5262f-9dc1-40d9-b905-bda8462b6046`),
                     field: 'name',
                 });
             }

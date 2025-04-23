@@ -41,7 +41,7 @@ export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         if (user.id == request.params.id) {
             throw new SimpleError({
                 code: 'permission_denied',
-                message: $t(`Je kan jezelf niet verwijderen`),
+                message: $t(`253f8a6e-bef8-4a3a-8a7c-2580d8bad49c`),
             });
         }
 
@@ -49,7 +49,7 @@ export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         if (!editUser || !Context.auth.checkScope(editUser.organizationId)) {
             throw new SimpleError({
                 code: 'permission_denied',
-                message: $t(`Je hebt geen toegang om deze gebruiker te verwijderen`),
+                message: $t(`dd63dfe1-1a13-476b-b729-10b9df944e88`),
             });
         }
 

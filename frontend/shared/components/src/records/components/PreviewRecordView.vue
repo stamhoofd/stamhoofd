@@ -1,12 +1,12 @@
 <template>
     <div class="st-view preview-record-view">
-        <STNavigationBar :title="$t(`Voorbeeld`)" />
+        <STNavigationBar :title="$t(`38e2c1aa-13f6-4339-8cfd-68c2603beb51`)" />
 
         <main>
             <h1>
-                {{ $t('Voorbeeld bekijken') }}
+                {{ $t('0e35cf4e-81ea-41f3-973e-d7b9421363dc') }}
             </h1>
-            <p>{{ $t('Hieronder zie je hoe het formulier van de vraag/kenmerk eruit ziet.') }}</p>
+            <p>{{ $t('8ea4aba7-c146-4935-9117-7e66a35ef6c8') }}</p>
 
             <hr><RecordAnswerInput :record="record" :answers="recordAnswers" :validator="validator" @patch="addPatch" />
 
@@ -18,7 +18,7 @@
         <STToolbar>
             <template #right>
                 <button class="button secundary" type="button" @click="dismiss">
-                    {{ $t('Sluiten') }}
+                    {{ $t('bef7a2f9-129a-4e1c-b8d2-9003ff0a1f8b') }}
                 </button>
             </template>
         </STToolbar>

@@ -12,7 +12,7 @@
                 </button>
                 <a v-else-if="organization.website" class="button text limit-space" :href="organization.website" target="_blank" rel="nofollow noreferrer noopener">
                     <span class="icon external" />
-                    <span>{{ $t('Terug naar website') }}</span>
+                    <span>{{ $t('6de2861f-64bc-44fe-af80-5742c91d03d6') }}</span>
                 </a>
                 <button v-if="cartEnabled" class="primary button" type="button" @click="openCart(true)">
                     <span class="icon basket" />
@@ -34,16 +34,16 @@
                     <p v-else-if="webshop.meta.description.text" class="description" v-text="webshop.meta.description.text" />
 
                     <p v-if="showOpenAt" class="info-box">
-                        {{ $t('Bestellen kan vanaf') }} {{ webshop.meta.openAt ? formatDateTime(webshop.meta.openAt) : '?' }}
+                        {{ $t('239f3ae0-a3c7-4c39-98d8-f2de79539f21') }} {{ webshop.meta.openAt ? formatDateTime(webshop.meta.openAt) : '?' }}
                     </p>
                     <p v-else-if="closed" class="info-box">
-                        {{ $t('Bestellingen zijn gesloten') }}
+                        {{ $t('44cbcf37-42a8-46f1-81fb-d0d3184b76de') }}
                     </p>
                     <p v-else-if="almostClosed" class="info-box">
-                        {{ $t('Bestellen kan tot') }} {{ webshop.meta.availableUntil ? formatTime(webshop.meta.availableUntil) : '?' }}
+                        {{ $t('21f590bf-891a-4b07-a7f5-b7ca1cf28c24') }} {{ webshop.meta.availableUntil ? formatTime(webshop.meta.availableUntil) : '?' }}
                     </p>
                     <p v-if="categories.length === 0 && products.length === 0" class="info-box">
-                        {{ $t('Momenteel is er niets beschikbaar.') }}
+                        {{ $t('d03225ed-db4a-4cd2-8df4-8932b6820b17') }}
                     </p>
                 </header>
 

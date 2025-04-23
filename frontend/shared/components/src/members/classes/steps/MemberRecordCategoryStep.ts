@@ -53,7 +53,7 @@ export class MemberRecordCategoryStep implements EditMemberStep {
             title: recordCategory.name,
             member: manager.member,
             component: markRaw(EditMemberRecordCategoryBox),
-            saveText: $t(`Doorgaan`),
+            saveText: $t(`c72a9ab2-98a0-4176-ba9b-86fe009fa755`),
             category: recordCategory,
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);

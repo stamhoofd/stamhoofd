@@ -4,7 +4,7 @@
 
         <main class="center">
             <h1>
-                {{ $t('Instellingen') }}
+                {{ $t('bab38c80-8ab6-4cb7-80c3-1f607057e45d') }}
             </h1>
 
             <STList class="illustration-list">
@@ -144,7 +144,7 @@
                 </STListItem>
             </STList>
 
-            <hr><h2>{{ $t('Gegevensverzameling') }}</h2>
+            <hr><h2>{{ $t('05e6464f-8db4-4c12-9bfe-527afc83d412') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Records)">
@@ -208,7 +208,7 @@
                 </STListItem>
             </STList>
 
-            <hr><h2>{{ $t('E-mails') }}</h2>
+            <hr><h2>{{ $t('cce92c4c-1cdf-4a22-9f1a-89f888046cde') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailSettings)">
@@ -216,10 +216,10 @@
                         <img src="~@stamhoofd/assets/images/illustrations/email.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('E-mailadressen') }}
+                        {{ $t('7766ee8a-cd92-4d6f-a3fa-f79504fbcdda') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Wijzig de e-mailadressen waaruit e-mails verzonden kunnen worden.') }}
+                        {{ $t('bb6d79a2-f70f-4494-924e-7ebc27a4f0da') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -231,10 +231,10 @@
                         <img src="~@stamhoofd/assets/images/illustrations/email-template.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('E-mailsjablonen') }}
+                        {{ $t('f0b50a39-d4fd-4f97-802d-a599b00030fd') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Wijzig de inhoud van automatische en opgeslagen e-mails.') }}
+                        {{ $t('ba4eeb34-6c93-4537-92ac-ea4f30c28fbb') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -242,7 +242,7 @@
                 </STListItem>
             </STList>
 
-            <hr><h2>{{ $t('Ongebruikte functionaliteiten') }}</h2>
+            <hr><h2>{{ $t('109d60b0-5a19-4d15-9320-483e383f9f89') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem v-if="platform.config.defaultAgeGroups.length === 0" :selectable="true" class="left-center" @click="$navigate(Routes.DefaultAgeGroups)">
@@ -336,7 +336,7 @@
                 </STListItem>
             </STList>
 
-            <hr><h2>{{ $t('Geavanceerd') }}</h2>
+            <hr><h2>{{ $t('6a11d3a7-6348-4aca-893e-0f026e5eb8b0') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Labs)">
@@ -344,10 +344,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/experiment.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Experimenten') }}
+                        {{ $t('5a5c1ed2-516e-43a1-9e64-25a7f6190ed3') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Probeer als eerste nieuwe functies uit die in ontwikkeling zijn.') }}
+                        {{ $t('0e276c36-671b-442a-89a0-ad87f5a947f3') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -359,10 +359,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/lock.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Single-Sign-On (SSO)') }}
+                        {{ $t('662467b7-da51-4fe2-bff4-784c8f028e58') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Configureer een externe authenticatie server') }}
+                        {{ $t('1a4edf37-9d52-4a9d-b535-5e098236a61e') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -374,10 +374,10 @@
                         <img src="@stamhoofd/assets/images/partners/google/google-50.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Sign in with Google') }}
+                        {{ $t('592f4d78-1019-4b7f-b5ec-0f62eadf7c2b') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Configureer login via Google') }}
+                        {{ $t('8387199f-9705-4f77-8440-3ea0a697af2a') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -449,7 +449,7 @@ defineRoutes([
                             recordsConfiguration: patch,
                         }),
                     }));
-                    Toast.success($t(`De aanpassingen zijn opgeslagen`)).show();
+                    Toast.success($t(`f2d84e17-1901-4d6b-98e2-228d670aead7`)).show();
                 },
             };
         },
@@ -468,7 +468,7 @@ defineRoutes([
                             financialSupport: isNew ? FinancialSupportSettings.create({}).patch(patch) : patch,
                         }),
                     }));
-                    Toast.success($t(`De aanpassingen zijn opgeslagen`)).show();
+                    Toast.success($t(`f2d84e17-1901-4d6b-98e2-228d670aead7`)).show();
                 },
             };
         },
@@ -488,7 +488,7 @@ defineRoutes([
                             dataPermission: isNew ? DataPermissionsSettings.create({}).patch(patch) : patch,
                         }),
                     }));
-                    Toast.success($t(`De aanpassingen zijn opgeslagen`)).show();
+                    Toast.success($t(`f2d84e17-1901-4d6b-98e2-228d670aead7`)).show();
                 },
             };
         },
@@ -568,7 +568,7 @@ defineRoutes([
                         }),
                     }));
 
-                    Toast.success($t(`De aanpassingen zijn opgeslagen`)).show();
+                    Toast.success($t(`f2d84e17-1901-4d6b-98e2-228d670aead7`)).show();
                 },
             };
         },

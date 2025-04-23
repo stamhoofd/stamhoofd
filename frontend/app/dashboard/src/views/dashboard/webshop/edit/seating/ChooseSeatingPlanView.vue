@@ -1,10 +1,10 @@
 <template>
-    <SaveView :disabled="!hasChanges" :title="$t(`Zaalplan`)" @save="save">
+    <SaveView :disabled="!hasChanges" :title="$t(`9a9c02aa-ea5a-4882-be31-e650e80f56ec`)" @save="save">
         <h1>
-            {{ $t('Kies een zaalplan') }}
+            {{ $t('a035d80f-55ec-4ceb-91ee-19a1632a022f') }}
         </h1>
         <p>
-            {{ $t('Je kan een zaalplan aanmaken of een bestaand zaalplan kiezen. Je kan in de loop van een evenement wijzigingen maken aan een zaalplan of zelfs een ander zaalplan kiezen op voorwaarde dat dezelfde rij en zetelnummers gebruikt worden.') }}
+            {{ $t('aec69675-a97a-4f16-8dbd-91dad7954228') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -16,10 +16,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Geen zetelselectie') }}
+                    {{ $t('0fb07d44-b0e4-4235-89d8-8e23b4cde498') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Er worden geen plaatsen aan tickets gekoppeld.') }}
+                    {{ $t('d95da277-7a38-4a3b-874b-f20491427679') }}
                 </p>
             </STListItem>
 
@@ -32,11 +32,11 @@
                     {{ plan.name }}
                 </h3>
                 <p v-if="plan.seatCount > 1" class="style-description-small">
-                    {{ plan.seatCount }} {{ $t('plaatsen') }}
+                    {{ plan.seatCount }} {{ $t('a76b6d3c-05a1-4c71-9f88-077261a4e595') }}
                 </p>
 
                 <p v-if="isFromOtherWebshop(plan)" class="style-description-small">
-                    {{ $t('Dit zaalplan is van een andere webshop ({name}). Door het te kiezen wordt een kopie toegevoegd aan deze webshop. Aanpassingen worden niet overgenomen in bestaande webshops.', {name: getWebshopFor(plan)?.meta?.name ?? 'Onbekend'}) }}
+                    {{ $t('d87da00e-fea0-426d-a055-dd53e78f6eb2', {name: getWebshopFor(plan)?.meta?.name ?? 'Onbekend'}) }}
                 </p>
 
                 <template #right>
@@ -49,11 +49,11 @@
         <p>
             <button class="button text" type="button" @click="addSeatingPlan">
                 <span class="icon add" />
-                <span>{{ $t('Zaalplan aanmaken') }}</span>
+                <span>{{ $t('95935651-4fc3-4a1a-9f36-8d15b089425b') }}</span>
             </button>
         </p>
 
-        <hr><h2>{{ $t('Acties') }}</h2>
+        <hr><h2>{{ $t('dc052084-eea5-407e-8775-237bf550895a') }}</h2>
 
         <STList class="illustration-list">
             <STListItem :selectable="true" class="left-center" element-name="label">
@@ -62,7 +62,7 @@
                 </template>
 
                 <h2 class="style-title-list">
-                    {{ $t('Importeer zaalplan') }}
+                    {{ $t('b33fe025-bf02-45da-868a-fef0f2076b3f') }}
                 </h2>
                 <p class="style-description">
                     {{ $t('5c7d8f29-9d83-4f33-9d6b-0f947e384f75') }}

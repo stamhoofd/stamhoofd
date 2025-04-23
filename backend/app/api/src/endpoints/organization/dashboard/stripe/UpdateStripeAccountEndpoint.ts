@@ -38,7 +38,7 @@ export class UpdateStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
         // Search account in database
         const model = await StripeAccount.getByID(request.params.id);
         if (!model || model.organizationId !== organization.id) {
-            throw Context.auth.notFoundOrNoAccess($t(`Account niet gevonden`));
+            throw Context.auth.notFoundOrNoAccess($t(`e5f6d64c-b3fe-4c8a-a711-ebdb14098c98`));
         }
 
         // Get account

@@ -16,7 +16,7 @@
                 <div v-if="event.meta.description.html" class="description style-wysiwyg gray large" v-html="event.meta.description.html" />
 
                 <p v-if="differentOrganization" class="info-box icon basket">
-                    {{ $t('Reken eerst jouw huidige winkelmandje af. Je kan de huidige inhoud van jouw winkelmandje niet samen afrekenen met de inschrijving voor deze activiteit.') }}
+                    {{ $t('97ea7ffc-c5a0-4bb8-a2c5-ec1ae003a371') }}
                 </p>
 
                 <EventInfoTable :event="event" :family="memberManager.family" />
@@ -24,7 +24,7 @@
                 <template v-if="!$isMobile && event.group">
                     <hr><p class="style-button-bar right-align">
                         <button class="button primary" type="button" :disabled="!!differentOrganization" @click="openGroup">
-                            <span>{{ $t('Inschrijven') }}</span>
+                            <span>{{ $t('eb52f3e4-1daa-41d6-8716-18785bdc8a8d') }}</span>
                             <span class="icon arrow-right" />
                         </button>
                     </p>
@@ -34,7 +34,7 @@
             <STToolbar v-if="$isMobile && event.group">
                 <template #right>
                     <button class="button primary" type="button" :disabled="!!differentOrganization" @click="openGroup">
-                        <span>{{ $t('Inschrijven') }}</span>
+                        <span>{{ $t('eb52f3e4-1daa-41d6-8716-18785bdc8a8d') }}</span>
                         <span class="icon arrow-right" />
                     </button>
                 </template>
@@ -73,7 +73,7 @@ const levelPrefix = computed(() => {
             prefixes.push(...tagNames);
         }
         else {
-            prefixes.push($t(`Nationaal`));
+            prefixes.push($t(`33c4f792-005f-4fb1-ad98-397dd92038aa`));
         }
     }
     else {
@@ -81,7 +81,7 @@ const levelPrefix = computed(() => {
         prefixes.push(groupOrganization.value?.name ?? props.event.organizationId);
     }
 
-    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`en`) + ' ');
+    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ');
 });
 
 const chooseFamilyMembersForGroup = useChooseFamilyMembersForGroup();

@@ -1,14 +1,14 @@
 <template>
     <LoadingViewTransition>
         <div v-if="!loading" class="st-view background">
-            <STNavigationBar :title="$t(`Beheerders`)">
+            <STNavigationBar :title="$t(`05dff2a6-72fa-4054-ab7f-8e04dc7c7ed9`)">
                 <template #right>
                     <button class="button navigation icon add" aria-label="Nieuwe beheerder" type="button" @click="createUser" />
                 </template>
             </STNavigationBar>
 
             <main>
-                <h1>{{ $t('API-keys') }}</h1>
+                <h1>{{ $t('a5b3b5e6-70c0-4818-9548-01f810477cd2') }}</h1>
                 <p>{{ $t('4d995169-f792-40f5-addf-60d8aed00362') }}</p>
 
                 <STList class="illustration-list">
@@ -17,10 +17,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/laptop-add.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Nieuwe API-key') }}
+                            {{ $t('e5c619de-2d3d-470f-857b-185912b9784e') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Maak een nieuwe key aan.') }}
+                            {{ $t('af0a4e82-1872-4c61-9b80-fbfb52ef1278') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -28,10 +28,10 @@
                     </STListItem>
                 </STList>
 
-                <hr><h2>{{ $t('Alle API-keys') }}</h2>
+                <hr><h2>{{ $t('cb3e6e8b-ebff-4021-9234-74e33ae44858') }}</h2>
 
                 <p v-if="apiUsers.length === 0" class="info-box">
-                    {{ $t('Nog geen API-keys aangemaakt') }}
+                    {{ $t('c2dad537-31e8-412c-8002-c7210d6f33d0') }}
                 </p>
                 <STList v-else>
                     <STListItem v-for="user in apiUsers" :key="user.id" :selectable="true" class="right-stack" @click="editUser(user)">
@@ -46,10 +46,10 @@
                             {{ permissionList(user) }}
                         </p>
                         <p class="style-description-small">
-                            {{ $t('Aangemaakt op') }} {{ formatDate(user.createdAt) }}
+                            {{ $t('b6391640-1e01-47f9-913d-360fb0903b75') }} {{ formatDate(user.createdAt) }}
                         </p>
                         <p class="style-description-small">
-                            {{ $t('Geldig tot') }} {{ formatDate(user.expiresAt) }}
+                            {{ $t('52ab641f-5864-4fac-8c52-0df00ad7e0a9') }} {{ formatDate(user.expiresAt) }}
                         </p>
 
                         <template #right>
@@ -126,7 +126,7 @@ export default class ApiUsersView extends Mixins(NavigationMixin) {
         const list: string[] = [];
         const o = user.permissions?.organizationPermissions.get(this.organization.id);
         if (o?.level === PermissionLevel.Full) {
-            list.push($t(`Hoofdbeheerders`));
+            list.push($t(`feff031d-9953-443f-ae78-eee68cec0fb7`));
         }
 
         for (const role of o?.roles ?? []) {

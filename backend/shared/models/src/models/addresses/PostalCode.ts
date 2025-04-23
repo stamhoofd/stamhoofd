@@ -92,7 +92,7 @@ export class PostalCode extends QueryableModel {
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid city. Suggestions: ' + Formatter.joinLast(cities.map(c => c.name), ', ', ' of ') + '?',
-                            human: $t(`Welke gemeente bedoel je precies?`) + ' ' + Formatter.joinLast(cities.map(c => c.name), ', ', ' ' + $t(`of`) + ' ') + '?',
+                            human: $t(`8c2fe8b6-416a-47e5-b77b-20c8192ad0c7`) + ' ' + Formatter.joinLast(cities.map(c => c.name), ', ', ' ' + $t(`411cf334-eebb-4f27-beb6-d81bd544c3f5`) + ' ') + '?',
                             field: 'city',
                         });
                     }

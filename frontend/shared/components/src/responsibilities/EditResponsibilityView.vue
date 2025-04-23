@@ -15,48 +15,48 @@
         </STInputBox>
 
         <Checkbox v-if="app === 'admin'" v-model="notOrganizationBased">
-            {{ $t('Nationale functie') }}
+            {{ $t('e1c5c8b7-0ae4-46d5-b7e9-1d97f388f080') }}
         </Checkbox>
 
         <template v-if="organizationBased && app === 'admin'">
-            <hr><h2>{{ $t('Vereisten') }}</h2>
+            <hr><h2>{{ $t('d6ee7c6e-8614-44cc-adab-24ff88ec262c') }}</h2>
 
             <div class="split-inputs">
-                <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`Minimum aantal (optioneel)`)">
+                <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`17dc0c45-14fb-4296-9b1d-1dddccf3970e`)">
                     <NumberInput v-model="minimumMembers" :required="false" :placeholder="$t(`Geen`)" />
                 </STInputBox>
 
-                <STInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`Maximum aantal (optioneel)`)">
-                    <NumberInput v-model="maximumMembers" :required="false" :placeholder="$t(`Onbeperkt`)" />
+                <STInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`74797680-f43e-49dc-ba7e-c60990a76946`)">
+                    <NumberInput v-model="maximumMembers" :required="false" :placeholder="$t(`f5f56168-1922-4a23-b376-20a7738bfa66`)" />
                 </STInputBox>
             </div>
         </template>
 
         <JumpToContainer :visible="organizationTagIds !== null">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('Groepen') }}</div>
+                <div>{{ $t('edfc89fe-a16e-4789-bda9-1529f8a97f7c') }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="organizationTagIds = null" />
                 </div>
             </h2>
-            <p>{{ $t('Kies voor welke lokale groepen deze functie beschikbaar is.') }}</p>
+            <p>{{ $t('c2f17e85-ff68-46fc-9410-6fb6c8a6843f') }}</p>
 
             <TagIdsInput v-model="organizationTagIds" :validator="errors.validator" />
         </JumpToContainer>
 
         <JumpToContainer :visible="defaultAgeGroupIds !== null">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('Leeftijdsgroepen') }}</div>
+                <div>{{ $t('5271f407-ec58-4802-ac69-7f357bc3cfc7') }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="defaultAgeGroupIds = null" />
                 </div>
             </h2>
 
-            <p>{{ $t('Deze functie moet gekoppeld worden aan een specifieke inschrijvingsgroep van een lokale groep. Hier kan je die lokale leeftijdsgroepen beperken tot een aantal standaard leeftijdsgroepen.') }}</p>
+            <p>{{ $t('9b1dac9d-57f9-4589-aa9c-6d97be960bef') }}</p>
 
             <DefaultAgeGroupIdsInput v-model="defaultAgeGroupIds" :validator="errors.validator" :should-select-at-least-one="true" />
 
-            <hr><h2>{{ $t('Automatische rechten voor gekoppelde leeftijdsgroep') }}</h2>
+            <hr><h2>{{ $t('39fa6554-b6bd-4885-adcc-33b6a037b2c3') }}</h2>
 
             <p>{{ $t('022aad3d-6250-4000-9336-4ae7e8e75c23') }}</p>
 
@@ -66,7 +66,7 @@
                         <Radio v-model="groupPermissionLevel" :value="PermissionLevel.None" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Geen') }}
+                        {{ $t('45ff02db-f404-4d91-853f-738d55c40cb6') }}
                     </h3>
                 </STListItem>
 
@@ -75,7 +75,7 @@
                         <Radio v-model="groupPermissionLevel" :value="PermissionLevel.Read" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Lezen') }}
+                        {{ $t('7afc105f-d34d-4b93-9b33-a6cc08c818ee') }}
                     </h3>
                 </STListItem>
 
@@ -84,7 +84,7 @@
                         <Radio v-model="groupPermissionLevel" :value="PermissionLevel.Write" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Lezen en bewerken') }}
+                        {{ $t('d70ee185-cd15-4800-97a0-3de05d6db151') }}
                     </h3>
                 </STListItem>
 
@@ -93,7 +93,7 @@
                         <Radio v-model="groupPermissionLevel" :value="PermissionLevel.Full" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Volledige toegang') }}
+                        {{ $t('c2296305-99a9-497a-aed3-7bb3d2293ce8') }}
                     </h3>
                 </STListItem>
             </STList>
@@ -108,7 +108,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Beperk tot bepaalde lokale groepen (tags)') }}
+                            {{ $t('4b7c05e2-de83-4cb4-9438-3fd74181ee6f') }}
                         </h3>
                     </STListItem>
 
@@ -118,11 +118,11 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Koppel de functie aan leeftijdsgroepen') }}
+                            {{ $t('789d73f7-1db6-4f78-8042-93344495f9b2') }}
                         </h3>
 
                         <p class="style-description-small">
-                            {{ $t('De functie moet dan worden toegekend aan een specifieke inschrijvingsgroep') }}
+                            {{ $t('671cfb26-2018-4186-aa06-f167102db2b1') }}
                         </p>
                     </STListItem>
                 </template>
@@ -133,17 +133,17 @@
                     </template>
 
                     <h3 v-if="!permissions" class="style-title-list">
-                        {{ $t('Automatisch rechten toekennen') }}
+                        {{ $t('1403efde-6581-4447-b77d-95bf1307b6e2') }}
                     </h3>
                     <h3 v-else class="style-title-list">
-                        {{ $t('Gekoppelde rechten aanpassen') }}
+                        {{ $t('4524e0f6-e1a7-4130-b5aa-d6b08a4ae517') }}
                     </h3>
 
                     <p v-if="organizationBased" class="style-description-small">
-                        {{ $t('Stel in welke rechten deze leden automatisch krijgen tot het beheerderportaal') }}
+                        {{ $t('b1d424aa-4d55-48f7-80c1-d6d4b5708f07') }}
                     </p>
                     <p v-else class="style-description-small">
-                        {{ $t('Stel in welke rechten deze leden automatisch krijgen tot het administratieportaal') }}
+                        {{ $t('9f5646d9-5526-4c3c-9a47-858374749d8e') }}
                     </p>
                 </STListItem>
             </STList>

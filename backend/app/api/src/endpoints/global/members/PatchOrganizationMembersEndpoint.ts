@@ -122,7 +122,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 throw new SimpleError({
                     code: 'missing_organization',
                     message: 'Missing organization',
-                    human: $t(`Je moet een organisatie selecteren voor dit lid`),
+                    human: $t(`2bb4647b-a3b8-453e-8b75-41c290910fc8`),
                     statusCode: 400,
                 });
             }
@@ -173,7 +173,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'not_allowed',
                         message: 'Cannot override details',
-                        human: $t(`Er ging iets mis bij het aanpassen van de gegevens van dit lid. Probeer het later opnieuw en neem contact op als het probleem zich blijft voordoen.`),
+                        human: $t(`b66ef4c3-9931-4fc3-9da1-c023857684fa`),
                         field: 'details',
                     });
                 }
@@ -218,7 +218,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             // Update responsibilities
             for (const patchResponsibility of patch.responsibilities.getPatches()) {
                 if (!Context.auth.hasPlatformFullAccess() && !(organization && await Context.auth.hasFullAccess(organization.id))) {
-                    throw Context.auth.error($t(`Je hebt niet voldoende rechten om functies van leden aan te passen`));
+                    throw Context.auth.error($t(`1d1b5807-af39-400b-8dea-2f222ee668ae`));
                 }
 
                 const responsibilityRecord = await MemberResponsibilityRecord.getByID(patchResponsibility.id);
@@ -226,21 +226,21 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'permission_denied',
                         message: "You don't have permissions to access this endpoint",
-                        human: $t(`Je hebt geen toegang om deze functie te wijzigen`),
+                        human: $t(`738fc35a-da77-4e1a-8233-9ff651781f65`),
                     });
                 }
 
                 const responsibility = platform.config.responsibilities.find(r => r.id === patchResponsibility.responsibilityId);
 
                 if (responsibility && !responsibility.organizationBased && !Context.auth.hasPlatformFullAccess()) {
-                    throw Context.auth.error($t(`Je hebt niet voldoende rechten om deze functie aan te passen`));
+                    throw Context.auth.error($t(`e2ceec71-367c-4cfd-98f3-b0ec0c83e2c2`));
                 }
 
                 // Allow patching begin and end date
                 if (patchResponsibility.endDate !== undefined) {
                     if (responsibilityRecord.endDate) {
                         if (!Context.auth.hasPlatformFullAccess()) {
-                            throw Context.auth.error($t(`Je hebt niet voldoende rechten om reeds beëindigde functies aan te passen`));
+                            throw Context.auth.error($t(`fd88b6ba-1f0b-4e82-9c5b-7c7a3ac8f4fa`));
                         }
                     }
                     responsibilityRecord.endDate = patchResponsibility.endDate;
@@ -248,7 +248,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
                 if (patchResponsibility.startDate !== undefined) {
                     if (patchResponsibility.startDate.getTime() > Date.now() + 5 * 60 * 1000) {
-                        throw Context.auth.error($t(`Je kan de startdatum van een functie niet in de toekomst zetten`));
+                        throw Context.auth.error($t(`84c2346e-40b2-4b38-9b2d-e1fcba6f1202`));
                     }
                     if (patchResponsibility.startDate.getTime() > Date.now()) {
                         patchResponsibility.startDate = new Date(); // force now
@@ -257,7 +257,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     const daysDiff = Math.abs((new Date().getTime() - patchResponsibility.startDate.getTime()) / (1000 * 60 * 60 * 24));
 
                     if (daysDiff > 60 && !Context.auth.hasPlatformFullAccess()) {
-                        throw Context.auth.error($t(`Je kan de startdatum van een functie niet zoveel verplaatsen`));
+                        throw Context.auth.error($t(`dc0c8bff-7b16-4597-adfb-cd6a4d7d4bf1`));
                     }
                     responsibilityRecord.startDate = patchResponsibility.startDate;
                 }
@@ -274,7 +274,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             // Create responsibilities
             for (const { put } of patch.responsibilities.getPuts()) {
                 if (!Context.auth.hasPlatformFullAccess() && !(organization && await Context.auth.hasFullAccess(organization.id))) {
-                    throw Context.auth.error($t(`Je hebt niet voldoende rechten om functies van leden aan te passen`));
+                    throw Context.auth.error($t(`1d1b5807-af39-400b-8dea-2f222ee668ae`));
                 }
 
                 const platformResponsibility = platform.config.responsibilities.find(r => r.id === put.responsibilityId);
@@ -284,7 +284,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid organization',
-                        human: $t(`Deze vereniging bestaat niet`),
+                        human: $t(`31757907-4cdd-4f0e-bb9d-cba9c1d997e4`),
                         field: 'organizationId',
                     });
                 }
@@ -294,7 +294,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid responsibility',
-                        human: $t(`Deze functie bestaat niet`),
+                        human: $t(`03114785-acf5-4bba-a3b5-15d3ac4ae17c`),
                         field: 'responsibilityId',
                     });
                 }
@@ -303,7 +303,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid organization',
-                        human: $t(`Deze functie kan niet worden toegewezen aan deze vereniging`),
+                        human: $t(`ed22b0bb-8ae7-4ef0-a139-1bc11b2a719e`),
                         field: 'organizationId',
                     });
                 }
@@ -345,7 +345,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid organization',
-                        human: $t(`Deze functie is niet beschikbaar voor deze vereniging`),
+                        human: $t(`aa39f949-6fe5-4ed2-acb7-ff3d138cf243`),
                         field: 'organizationId',
                     });
                 }
@@ -355,7 +355,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Missing groupId',
-                            human: $t(`Kies een leeftijdsgroep waarvoor je deze functie wilt toekennen`),
+                            human: $t(`8bfe005a-a98a-48d6-afbf-bcca487b064b`),
                             field: 'groupId',
                         });
                     }
@@ -365,7 +365,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid groupId',
-                            human: $t(`Deze leeftijdsgroep bestaat niet`),
+                            human: $t(`ca86d6ef-990e-42a4-834c-1c94622c95ef`),
                             field: 'groupId',
                         });
                     }
@@ -374,7 +374,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid groupId',
-                            human: $t(`Deze leeftijdsgroep komt niet in aanmerking voor deze functie`),
+                            human: $t(`aed1d5e3-1d42-46d4-a9c1-ac13bdffc2bd`),
                             field: 'groupId',
                         });
                     }
@@ -386,7 +386,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 model.endDate = put.endDate;
 
                 if (put.startDate.getTime() > Date.now() + 5 * 60 * 1000) {
-                    throw Context.auth.error($t(`Je kan de startdatum van een functie niet in de toekomst zetten`));
+                    throw Context.auth.error($t(`84c2346e-40b2-4b38-9b2d-e1fcba6f1202`));
                 }
 
                 if (put.startDate.getTime() > Date.now()) {
@@ -394,7 +394,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
 
                 if (put.endDate && put.endDate > new Date(Date.now() + 60 * 1000)) {
-                    throw Context.auth.error($t(`Je kan de einddatum van een functie niet in de toekomst zetten - kijk indien nodig je systeemtijd na`));
+                    throw Context.auth.error($t(`5c6106e8-6785-4f72-b0c7-00a940240019`));
                 }
 
                 model.startDate = put.startDate;
@@ -421,7 +421,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid email',
-                        human: $t(`Je kan een account niet de toegang ontzeggen tot een lid als het e-mailadres nog steeds is opgeslagen als onderdeel van de gegevens van dat lid. Verwijder eerst het e-mailadres uit de gegevens van het lid en ontkoppel daarna het account.`),
+                        human: $t(`dcb9cd60-ddfe-403d-bfb7-d1c7b63e2fdf`),
                     });
                 }
 
@@ -457,13 +457,13 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid organization',
-                        human: $t(`Je kan geen aansluitingen maken voor een andere vereniging`),
+                        human: $t(`601c15e5-cfb0-4c34-af03-7dfc55e39d36`),
                         field: 'organizationId',
                     });
                 }
 
                 if (!await Context.auth.hasFullAccess(put.organizationId)) {
-                    throw Context.auth.error($t(`Je hebt niet voldoende rechten om deze aansluiting toe te voegen`));
+                    throw Context.auth.error($t(`9c632c7f-242e-44a1-b8ad-335b613075d8`));
                 }
 
                 const putForOrganization = await Context.auth.getOrganization(put.organizationId);
@@ -475,7 +475,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         code: 'invalid_field',
                         field: 'membershipTypeId',
                         message: 'Invalid membership type',
-                        human: $t(`Dit aansluitingstype bestaat niet`),
+                        human: $t(`fa79b34e-deef-4379-9c80-8795b0f5eaa3`),
                     });
                 }
 
@@ -497,7 +497,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         code: 'invalid_field',
                         field: 'membershipTypeId',
                         message: 'Invalid membership type',
-                        human: $t(`Dit aansluitingstype is niet toegestaan voor dit lid`),
+                        human: $t(`a17551ff-5097-4f09-a8bb-19fe377f2b98`),
                     });
                 }
 
@@ -543,7 +543,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         code: 'invalid_field',
                         field: 'startDate',
                         message: 'Invalid start date',
-                        human: $t(`Je kan geen aansluiting toevoegen die overlapt met een bestaande aansluiting van hetzelfde type`),
+                        human: $t(`faf8b6bb-2727-4d2f-847f-203cf3979dfb`),
                     });
                 }
 
@@ -561,12 +561,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         code: 'invalid_field',
                         field: 'id',
                         message: 'Invalid id',
-                        human: $t(`Deze aansluiting bestaat niet`),
+                        human: $t(`ee79372d-c14d-41ab-afb1-336acbe52687`),
                     });
                 }
 
                 if (!await Context.auth.hasFullAccess(membership.organizationId)) {
-                    throw Context.auth.error($t(`Je hebt niet voldoende rechten om deze aansluiting aan te passen`));
+                    throw Context.auth.error($t(`fa5797d7-dafb-469a-a75c-b3b8a6a08737`));
                 }
 
                 if (membership.periodId !== platform.periodId) {
@@ -619,12 +619,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         code: 'invalid_field',
                         field: 'id',
                         message: 'Invalid id',
-                        human: $t(`Deze aansluiting bestaat niet`),
+                        human: $t(`ee79372d-c14d-41ab-afb1-336acbe52687`),
                     });
                 }
 
                 if (!await Context.auth.hasFullAccess(membership.organizationId)) {
-                    throw Context.auth.error($t(`Je hebt niet voldoende rechten om deze aansluiting te verwijderen`));
+                    throw Context.auth.error($t(`c3cca571-d543-4ca7-9da1-1e5570f5063a`));
                 }
 
                 if (membership.periodId !== platform.periodId) {
@@ -654,14 +654,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid invoice',
-                            human: $t(`Je kan geen aansluiting verwijderen die vergrendeld is`),
+                            human: $t(`be7d7286-9c3f-41f9-9378-b028754c8533`),
                         });
                     }
 
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid invoice',
-                        human: $t(`Je kan geen aansluiting verwijderen die al werd gefactureerd`),
+                        human: $t(`1a7b41da-9bd3-4019-9ed4-39e742f99f41`),
                     });
                 }
 
@@ -709,7 +709,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         for (const id of ids) {
             const member = await Member.getWithRegistrations(id);
             if (!member || !await Context.auth.canDeleteMember(member)) {
-                throw Context.auth.error($t(`Je hebt niet voldoende rechten om dit lid te verwijderen`));
+                throw Context.auth.error($t(`39f5696c-3755-429f-b0da-a0ca920ed11e`));
             }
 
             await MemberUserSyncer.onDeleteMember(member);
@@ -901,14 +901,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
             catch (e) {
                 Email.sendWebmaster({
-                    subject: $t(`[Limiet] Limiet bereikt voor aantal beveiligingscodes`),
-                    text: $t(`Beste, \nDe limiet werd bereikt voor het aantal beveiligingscodes per dag. \nNaam lid:`) + ' ' + member.details.name + ' ' + $t(`(ID:`) + ' ' + member.id + ')' + '\n\n' + e.message + '\n\nStamhoofd',
+                    subject: $t(`04cb945a-28aa-4f3e-95b3-16455cdd8892`),
+                    text: $t(`5f7b1766-eb58-4471-bff7-60f3fc66fe41`) + ' ' + member.details.name + ' ' + $t(`7254f2f6-0d15-4e81-85cf-cff6438c9e98`) + ' ' + member.id + ')' + '\n\n' + e.message + '\n\nStamhoofd',
                 });
 
                 throw new SimpleError({
                     code: 'too_many_tries',
                     message: 'Too many securityCodes limited',
-                    human: $t(`Oeps! Om spam te voorkomen limiteren we het aantal beveiligingscodes die je kan proberen. Probeer morgen opnieuw.`),
+                    human: $t(`ddb1b9de-cc00-4960-ba36-fa70429cbac1`),
                     field: 'details.securityCode',
                 });
             }

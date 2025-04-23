@@ -137,7 +137,7 @@ export class SessionManagerStatic {
                         throw new SimpleError({
                             code: 'invalid_organization',
                             message: e.message,
-                            human: $t(`Deze vereniging bestaat niet (meer)`),
+                            human: $t(`67221175-c027-47be-bb1b-2a535cb9fc5f`),
                         });
                     }
                 }
@@ -147,7 +147,7 @@ export class SessionManagerStatic {
                     throw new SimpleError({
                         code: 'network_error',
                         message: e.message,
-                        human: $t(`We konden geen verbinding maken met internet. Kijk jouw internetverbinding na en probeer opnieuw.`),
+                        human: $t(`a76c1371-da18-4998-970d-ec4f443d5664`),
                     });
                 }
 
@@ -294,7 +294,7 @@ export class SessionManagerStatic {
                 throw new SimpleError({
                     code: 'invalid_organization',
                     message: e.message,
-                    human: $t(`Deze vereniging bestaat niet (meer)`),
+                    human: $t(`67221175-c027-47be-bb1b-2a535cb9fc5f`),
                 });
             }
             throw e;

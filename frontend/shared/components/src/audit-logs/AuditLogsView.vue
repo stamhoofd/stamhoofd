@@ -4,24 +4,24 @@
 
         <main class="center">
             <h1>
-                {{ $t('Logboek') }}
+                {{ $t('1b5413cd-5858-4a73-872b-5b6b26345039') }}
             </h1>
-            <p>{{ $t('In het logboek worden alle gebeurtenissen geregistreerd. Enkel hoofdbeheerders hebben toegang tot het logboek.') }}</p>
+            <p>{{ $t('13f40024-23b0-4ce0-b472-8cbb86e30668') }}</p>
 
             <div class="input-with-buttons">
                 <div>
                     <div class="split-inputs">
-                        <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`Vanaf`)">
-                            <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" :required="false" :placeholder="$t(`Begin`)" />
+                        <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`22761311-3065-49fd-82ca-bc60aae3c975`)">
+                            <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" :required="false" :placeholder="$t(`2aa1f986-93d6-410c-9746-70c02fb4f5ea`)" />
                         </STInputBox>
 
-                        <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t(`Tot en met`)">
-                            <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" :required="false" :placeholder="$t(`Nu`)" />
+                        <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t(`feaf0054-1b99-4526-821e-3c63e64574a0`)">
+                            <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" :required="false" :placeholder="$t(`92be5ac5-79f3-4f2c-9525-7c11f173931a`)" />
                         </STInputBox>
                     </div>
 
                     <p class="style-description-small">
-                        {{ $t('Snel selecteren:') }} <span v-for="(suggestion, index) in dateRangeSuggestions" :key="suggestion.name">
+                        {{ $t('e0581b7e-aaa2-4e8e-85fc-6a1b9ed4900a') }} <span v-for="(suggestion, index) in dateRangeSuggestions" :key="suggestion.name">
                             <button type="button" class="inline-link" :class="isSuggestionSelected(suggestion) ? {secundary: false} : {secundary: true}" @click="selectSuggestion(suggestion)">
                                 {{ suggestion.name }}
                             </button><template v-if="index < dateRangeSuggestions.length - 1">, </template>
@@ -31,7 +31,7 @@
                 <div>
                     <button type="button" class="button text" @click="editFilter">
                         <span class="icon filter" />
-                        <span class="hide-small">{{ $t('Filter') }}</span>
+                        <span class="hide-small">{{ $t('de5706ec-7edc-4e62-b3f7-d6e414720480') }}</span>
                         <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary" />
                     </button>
                 </div>
@@ -45,7 +45,7 @@
                 </STList>
             </div>
 
-            <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`Geen logs gevonden`)" />
+            <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`f1972be3-b3c8-42ff-916b-a6ad51dd9f2e`)" />
         </main>
     </div>
 </template>

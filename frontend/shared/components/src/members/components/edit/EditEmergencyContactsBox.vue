@@ -1,16 +1,16 @@
 <template>
     <div class="container">
-        <Title v-bind="$attrs" :title="$t(`Noodcontactpersonen`)" />
+        <Title v-bind="$attrs" :title="$t(`36756394-4c8d-4b0d-bc88-9fe1d58caf1d`)" />
 
         <p v-if="member.isPropertyEnabled('parents')" class="style-description-block">
-            {{ $t('Voeg geen ouders toe als noodcontactpersoon. Ouders worden altijd als eerste gecontacteerd in geval van nood.') }}
+            {{ $t('84d9b7f0-3493-401b-a9ab-04b530373971') }}
         </p>
 
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="visibleContacts.length === 0" class="info-box">
-            {{ $t('Er zijn nog geen noodcontactpersonen toegevoegd. Voeg een noodcontact van {member} toe via de knop hieronder.', {member: member.patchedMember.details.firstName}) }}
+            {{ $t('4220243d-1c75-4eae-a5fa-08e77399376e', {member: member.patchedMember.details.firstName}) }}
         </p>
 
         <STList v-if="visibleContacts.length > 0" :with-animation="true">
@@ -29,12 +29,12 @@
                 <template #right>
                     <span v-if="!isContactSelected(contact)" class="button text limit-space">
                         <span class="icon add" />
-                        <span>{{ $t('Toevoegen') }}</span>
+                        <span>{{ $t('36ba68cb-2159-4179-8ded-89e73d47cd87') }}</span>
                     </span>
 
                     <button v-else class="button text limit-space" type="button" @click.stop="editContact(contact)">
                         <span class="icon edit" />
-                        <span>{{ $t('Bewerken') }}</span>
+                        <span>{{ $t('ad3ad207-6470-4f3e-aaf4-1ea5ea8b85ad') }}</span>
                     </button>
                 </template>
             </STListItem>
@@ -43,7 +43,7 @@
         <div class="style-button-bar">
             <button type="button" class="button text" :class="{selected: visibleContacts.length <= 0}" @click="addContact()">
                 <span class="icon add" />
-                <span>{{ $t('Contact toevoegen') }}</span>
+                <span>{{ $t('fc4c1e2a-e375-4f25-9953-f8c6b2a86a09') }}</span>
             </button>
         </div>
     </div>

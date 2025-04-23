@@ -1,13 +1,13 @@
 <template>
     <div class="property-filter-value-input">
-        <STInputBox v-if="!isAlwaysEnabled() || hasFilters" class="max" :title="$t(`Wanneer ingeschakeld?`)">
+        <STInputBox v-if="!isAlwaysEnabled() || hasFilters" class="max" :title="$t(`f193133e-143e-48fa-8d13-afcc01031343`)">
             <STList>
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
                         <Radio :model-value="isAlwaysEnabled()" :value="true" @update:model-value="setAlwaysEnabled()" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Altijd') }}
+                        {{ $t('8a4842b5-6304-4b02-a8c5-4b837edcd77d') }}
                     </h3>
                 </STListItem>
 
@@ -16,7 +16,7 @@
                         <Radio :model-value="isAlwaysEnabled()" :value="false" @update:model-value="setEnabledWhen(true)" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Als...') }}
+                        {{ $t('a606fec7-273d-4642-b871-002d3f702a21') }}
                     </h3>
                     <p class="style-description-small">
                         {{ enabledText }}
@@ -24,21 +24,21 @@
                     <template #right>
                         <button v-if="!isAlwaysEnabled()" class="button text" type="button" @click="setEnabledWhen(false)">
                             <span class="icon edit" />
-                            <span class="hide-small">{{ $t('Wijzig') }}</span>
+                            <span class="hide-small">{{ $t('ab817255-45d5-4eb8-970c-ea927730532b') }}</span>
                         </button>
                     </template>
                 </STListItem>
             </STList>
         </STInputBox>
 
-        <STInputBox v-if="allowOptional" class="max" :title="$t(`Wanneer verplicht invullen?`) + '*'">
+        <STInputBox v-if="allowOptional" class="max" :title="$t(`879e4842-92f2-4e15-8a47-0f8e9d79770f`) + '*'">
             <STList>
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
                         <Radio :model-value="isAlwaysRequired()" :value="true" @update:model-value="setAlwaysRequired()" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Stap kan niet worden overgeslagen') }}
+                        {{ $t('bb7446b4-b23b-4455-861f-d7c70514b3eb') }}
                     </h3>
                 </STListItem>
 
@@ -47,7 +47,7 @@
                         <Radio :model-value="isNeverRequired()" :value="true" @update:model-value="setNeverRequired()" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Stap kan altijd worden overgeslagen') }}
+                        {{ $t('c319b21a-5f49-4557-8735-5240dc722c26') }}
                     </h3>
                 </STListItem>
 
@@ -56,7 +56,7 @@
                         <Radio :model-value="!isAlwaysRequired() && !isNeverRequired()" :value="true" @update:model-value="setRequiredWhen(true)" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Als...') }}
+                        {{ $t('a606fec7-273d-4642-b871-002d3f702a21') }}
                     </h3>
                     <p class="style-description-small">
                         {{ requiredText }}
@@ -64,14 +64,14 @@
                     <template #right>
                         <button v-if="!isAlwaysRequired() && !isNeverRequired()" class="button text" type="button" @click="setRequiredWhen(false)">
                             <span class="icon edit" />
-                            <span class="hide-small">{{ $t('Wijzig') }}</span>
+                            <span class="hide-small">{{ $t('ab817255-45d5-4eb8-970c-ea927730532b') }}</span>
                         </button>
                     </template>
                 </STListItem>
             </STList>
         </STInputBox>
         <p v-if="allowOptional" class="style-description-small">
-            * {{ $t("Als een vragenlijst niet verplicht is, zal men de stap kunnen overslaan zolang nog niets werd ingevuld. Meestal is het niet nodig om dit te gebruiken. Als de vragenlijst altijd verplicht is om in te vullen, kan je ook nog steeds optionele vragen in die lijst hebben. Meestal is het gewoon duidelijker om optionele vragen te gebruiken. Maar soms wil je bijvoorbeeld 'alles invullen' of 'niets invullen', dan kan je dit best gebruiken.") }}
+            * {{ $t("63b03f2b-6f8c-465f-9a4f-328fd67131e3") }}
         </p>
 
         <div v-if="isDevelopment">

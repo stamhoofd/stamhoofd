@@ -37,7 +37,7 @@ export class GetDocumentTemplateXMLEndpoint extends Endpoint<Params, Query, Body
 
         const template = await DocumentTemplate.getByID(request.params.id);
         if (!template || !await Context.auth.canAccessDocumentTemplate(template)) {
-            throw Context.auth.notFoundOrNoAccess($t(`Onbekend document`));
+            throw Context.auth.notFoundOrNoAccess($t(`a9860203-6a6d-4612-b4d4-7851e47d4dad`));
         }
 
         // Update documents

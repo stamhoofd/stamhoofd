@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`Notificaties`)" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`7038dda8-b702-4a80-9846-e12440291620`)" @save="save">
         <h1>
             {{ $t('ac0594f0-af79-465b-84d5-568da90af8b6') }}
         </h1>
@@ -15,7 +15,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Inschakelen') }}
+                    {{ $t('009f37ee-d43c-42d1-a336-784ea72a393b') }}
                 </h3>
 
                 <p class="style-description-small">
@@ -26,8 +26,8 @@
 
         <template v-if="enabled">
             <div v-if="(patched.privateMeta?.emails ?? []).length" class="container">
-                <hr><h2>{{ $t('E-mailadres') }}</h2>
-                <p>{{ $t('Kies een e-mailadres vanwaar je de e-mails wilt versturen. Je kan extra e-mailadressen toevoegen via de instellingen van e-mailadressen.') }}</p>
+                <hr><h2>{{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }}</h2>
+                <p>{{ $t('fbe87ec5-37fa-46c7-9ae4-fd9b43de8e96') }}</p>
 
                 <STList>
                     <STListItem :selectable="true" element-name="label">
@@ -36,7 +36,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Standaard e-mailadres') }}
+                            {{ $t('b1bd0cb8-0256-48e8-8b65-9a82314a49a4') }}
                         </h3>
                     </STListItem>
                     <STListItem v-for="email in patched.privateMeta?.emails ?? []" :key="email.id" :selectable="true" element-name="label">
@@ -56,14 +56,14 @@
             </div>
 
             <div class="container">
-                <hr><h2>{{ $t('Geavanceerd') }}</h2>
+                <hr><h2>{{ $t('6a11d3a7-6348-4aca-893e-0f026e5eb8b0') }}</h2>
                 <p>{{ $t('18cbfdea-798d-4efc-aad8-f6897c9efb2c') }}</p>
 
-                <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`Minimum dagen tussen herinneringmails`)">
+                <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`5fbb90ca-384f-4f17-b7c5-5d05511211d1`)">
                     <NumberInput v-model="minimumDaysBetween" placeholder="" suffix="dagen" suffix-singular="dag" :min="1" :stepper="true" />
                 </STInputBox>
 
-                <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`Maximum e-mails`)">
+                <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`cd7d36a1-050e-4457-8dfd-1c81d3654189`)">
                     <NumberInput v-model="maximumReminderEmails" placeholder="" suffix="e-mails" suffix-singular="e-mail" :min="1" :stepper="true" />
                 </STInputBox>
             </div>

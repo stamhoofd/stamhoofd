@@ -59,7 +59,7 @@ export class MemberFinancialSupportStep implements EditMemberStep {
             title: config?.title ?? FinancialSupportSettings.defaultTitle,
             member: manager.member,
             component: markRaw(EditMemberFinancialSupportBox),
-            saveText: $t(`Doorgaan`),
+            saveText: $t(`c72a9ab2-98a0-4176-ba9b-86fe009fa755`),
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate)
             }

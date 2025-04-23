@@ -1,64 +1,64 @@
 <template>
-    <SaveView :loading="saving" :title="isNew ? $t(`Nieuwe beheerder`) : user.name" :disabled="!isNew && !hasChanges" @save="save">
+    <SaveView :loading="saving" :title="isNew ? $t(`de44cdb8-fb65-4e7b-b57a-ae0571db1ab4`) : user.name" :disabled="!isNew && !hasChanges" @save="save">
         <template v-if="!getPermissions(user)">
             <h1 v-if="isNew">
-                {{ $t('Account toevoegen') }}
+                {{ $t('fa7b2b7e-57a0-435c-b4e5-0ce5d4d82407') }}
             </h1>
             <h1 v-else>
-                {{ $t('Account bewerken') }}
+                {{ $t('da046234-ae13-4c33-9556-b58a8c0eb9af') }}
             </h1>
         </template>
         <template v-else>
             <h1 v-if="isNew">
-                {{ $t('Externe beheerder toevoegen') }}
+                {{ $t('35a636fb-a11c-4cbd-b648-3332cde7b587') }}
             </h1>
             <h1 v-else-if="!user.memberId">
-                {{ $t('Externe beheerder bewerken') }}
+                {{ $t('9be57c4c-f9e2-40c2-932b-99b0a330365c') }}
             </h1>
             <h1 v-else>
-                {{ $t('Interne beheerder bewerken') }}
+                {{ $t('992282bb-d879-4cde-90bc-afb558a3026f') }}
             </h1>
         </template>
 
         <LoadingButton v-if="getPermissions(user) && !isNew && !user.hasAccount" :loading="sendingInvite">
             <button class="warning-box with-button" type="button" :class="{selectable: !didSendInvite}" @click="resendInvite">
-                {{ $t('Deze beheerder heeft nog geen account aangemaakt') }}
+                {{ $t('32e29a00-7799-49ec-9755-30a1e429fea4') }}
 
                 <span class="button text" :class="{disabled: didSendInvite}">
-                    {{ $t('Uitnodiging opnieuw versturen') }}
+                    {{ $t('fdca4ebb-8515-4e97-9474-2658d5c47436') }}
                 </span>
             </button>
         </LoadingButton>
 
         <p v-if="getPermissions(user) && !user.memberId" class="info-box">
-            {{ $t('Deze beheerder is niet gekoppeld aan een ingeschreven lid, en is daarom extern. Zorg dat het e-mailadres overeen komt met het e-mailadres van een lid zelf.') }}
+            {{ $t('933f7954-e0bb-4e04-bd4a-9c4ea07fee74') }}
         </p>
 
         <STErrorsDefault :error-box="$errors.errorBox" />
-        <STInputBox error-fields="firstName,lastName" :error-box="$errors.errorBox" :title="$t(`Naam`)">
+        <STInputBox error-fields="firstName,lastName" :error-box="$errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
             <div class="input-group">
                 <div>
-                    <input v-model="firstName" enterkeyhint="next" class="input" type="text" autocomplete="given-name" :disabled="!canEditDetails" :placeholder="$t(`Voornaam`)">
+                    <input v-model="firstName" enterkeyhint="next" class="input" type="text" autocomplete="given-name" :disabled="!canEditDetails" :placeholder="$t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`)">
                 </div>
                 <div>
-                    <input v-model="lastName" enterkeyhint="next" class="input" type="text" autocomplete="family-name" :disabled="!canEditDetails" :placeholder="$t(`Achternaam`)">
+                    <input v-model="lastName" enterkeyhint="next" class="input" type="text" autocomplete="family-name" :disabled="!canEditDetails" :placeholder="$t(`171bd1df-ed4b-417f-8c5e-0546d948469a`)">
                 </div>
             </div>
         </STInputBox>
 
-        <EmailInput v-model="email" :validator="$errors.validator" :required="true" :disabled="!canEditDetails" :title="$t(`E-mailadres`)" :placeholder="$t(`E-mailadres`)" />
+        <EmailInput v-model="email" :validator="$errors.validator" :required="true" :disabled="!canEditDetails" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" :placeholder="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" />
 
         <template v-if="getUnloadedPermissions(user)">
             <div v-if="!user.memberId || getUnloadedPermissions(user)" class="container">
-                <hr><h2>{{ $t('Externe beheerdersrollen') }}</h2>
-                <p>{{ $t('Je kan externe beheerders verschillende rollen toekennen (alternatief voor functies die je aan leden kan koppelen). Een externe beheerder zonder rollen heeft geen enkele toegang.') }}</p>
+                <hr><h2>{{ $t('697d96d8-17dc-4e98-8571-87153985f3a1') }}</h2>
+                <p>{{ $t('a6008859-e90b-4219-b64d-9ebc6e88f25c') }}</p>
 
                 <EditUserPermissionsBox :user="patched" @patch:user="(event) => addPatch(event)" />
             </div>
 
             <div v-if="resources.length" class="container">
-                <hr><h2>{{ $t('Individuele toegang') }}</h2>
-                <p>{{ $t('Beheerders kunnen automatisch toegang krijgen tot een onderdeel als ze het zelf hebben aangemaakt maar anders niet automatisch toegang zouden hebben (bv. aanmaken van nieuwe webshops). Sowieso is het aan te raden om dit om te zetten in beheerdersrollen, aangezien die eenvoudiger te beheren zijn.') }}</p>
+                <hr><h2>{{ $t('12cf18a0-ce20-4cec-8622-a55ed1ab65d7') }}</h2>
+                <p>{{ $t('053d536d-3096-4450-8879-bb0fad04d96b') }}</p>
 
                 <STList>
                     <ResourcePermissionRow v-for="resource in resources" :key="resource.id" :role="permissions.unloadedPermissions!" :resource="resource" :configurable-access-rights="[]" type="resource" @patch:role="addPermissionPatch" />
@@ -66,19 +66,19 @@
             </div>
         </template>
         <p v-else class="style-description-small">
-            {{ $t('Dit account is geen beheerder.') }}
+            {{ $t('14637b25-c719-40bc-a4c3-6108341c7c40') }}
         </p>
         <code v-if="STAMHOOFD.environment === 'development'" class="style-code">{{ JSON.stringify(getUnloadedPermissions(user)?.encode({version: 1000}), undefined, '    ') }}</code>
 
         <template v-if="!isNew && getUnloadedPermissions(user)">
             <hr v-if="!isNew"><h2>
-                {{ $t('Verwijderen') }}
+                {{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}
             </h2>
-            <p>{{ $t('Je kan een beheerder verwijderen. Het account blijft dan behouden maar de beheerder verliest alle toegangsrechten.') }}</p>
+            <p>{{ $t('45b52b33-dfa4-4afa-81d2-d598626b2701') }}</p>
 
             <button class="button secundary danger" type="button" @click="doDelete()">
                 <span class="icon trash" />
-                <span>{{ $t('Verwijderen') }}</span>
+                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
             </button>
         </template>
     </SaveView>

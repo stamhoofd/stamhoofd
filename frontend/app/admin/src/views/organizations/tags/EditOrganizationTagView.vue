@@ -6,12 +6,12 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Titel`)">
-            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`Naam van deze tag`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`cbe7db4a-b65b-452b-a5d2-d369182fd28f`)">
+            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`3446a6ac-5bda-4564-a268-5c7a66d74ff9`)">
         </STInputBox>
 
-        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`Beschrijving`)">
-            <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`Optioneel. Korte beschrijving van het doel van deze tag.`)" />
+        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`8d767b75-7a76-4cb7-b4b1-36d596f1848c`)" />
         </STInputBox>
         <div class="container">
             <hr><h2>{{ $t('b381ed6f-c509-418d-9668-7c161a0fa652') }}</h2>
@@ -72,7 +72,7 @@ const props = defineProps<{
 }>();
 
 const $t = useTranslate();
-const title = computed(() => props.isNew ? $t(`Nieuwe tag`) : Formatter.capitalizeFirstLetter($t('cd52133a-d8bf-4dde-a924-962f3f0e3fe9', { tagType: getOrganizationTagTypeName(props.tag.type) })));
+const title = computed(() => props.isNew ? $t(`969ae056-dd8b-49ba-aeb5-ca810c65f599`) : Formatter.capitalizeFirstLetter($t('cd52133a-d8bf-4dde-a924-962f3f0e3fe9', { tagType: getOrganizationTagTypeName(props.tag.type) })));
 const pop = usePop();
 
 const patch = ref(new PatchableArray()) as Ref<PatchableArrayAutoEncoder<OrganizationTag>>;
@@ -81,7 +81,7 @@ if (props.isNew) {
 }
 
 const allPatchedTags = computed(() => patch.value.applyTo(props.allTags) as OrganizationTag[]);
-const patched = computed(() => getPatchedTag(props.tag.id) ?? OrganizationTag.create({ name: $t(`Onbekende tag`) }));
+const patched = computed(() => getPatchedTag(props.tag.id) ?? OrganizationTag.create({ name: $t(`6748967b-c512-454f-9d30-a1a42e2814bc`) }));
 
 const hasChanges = computed(() => patch.value.changes.length > 0);
 
@@ -112,7 +112,7 @@ const save = async () => {
         if (name.value.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Gelieve een naam in te vullen`),
+                message: $t(`f1755667-e6d5-4532-95a9-019c04c509bc`),
                 field: 'name',
             });
         }
@@ -132,7 +132,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`Ben je zeker dat je deze tag wilt verwijderen?`), $t(`Verwijderen`))) {
+    if (!await CenteredMessage.confirm($t(`c05ea3d6-e656-4ede-a87e-7f46b0598663`), $t(`63af93aa-df6a-4937-bce8-9e799ff5aebd`))) {
         return;
     }
 
@@ -219,7 +219,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
+    return await CenteredMessage.confirm($t(`4f0d330f-f2d2-4fbf-a4b4-267d939db1ee`), $t(`335dc08b-97e1-4f01-9356-b47f741225e4`));
 };
 
 defineExpose({

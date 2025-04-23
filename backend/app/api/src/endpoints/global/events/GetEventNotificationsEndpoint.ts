@@ -142,7 +142,7 @@ export class GetEventNotificationsEndpoint extends Endpoint<Params, Query, Body,
 
         for (const notification of notifications) {
             if (!await Context.auth.canAccessEventNotification(notification)) {
-                throw Context.auth.error($t(`Je hebt geen toegang om deze melding te bekijken`));
+                throw Context.auth.error($t(`f18f19ca-c56b-49ad-b131-244cbebb6b1f`));
             }
         }
 

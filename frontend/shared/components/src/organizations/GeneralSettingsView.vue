@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :disabled="!hasSomeChanges" :title="$t(`Algemeen`)" @save="save">
+    <SaveView :loading="saving" :disabled="!hasSomeChanges" :title="$t(`35757756-d817-419d-82dd-1ba14128af30`)" @save="save">
         <h1>
             {{ title }}
         </h1>
@@ -20,7 +20,7 @@
             </div>
 
             <div>
-                <STInputBox :title="$t('Groepsnummer')" :error-box="errors.errorBox">
+                <STInputBox :title="$t('4c61c43e-ed3c-418e-8773-681d19323520')" :error-box="errors.errorBox">
                     <input id="organization-uri" :value="uri" class="input" type="text" disabled>
                 </STInputBox>
 
@@ -32,11 +32,11 @@
             </div>
         </div>
 
-        <hr><h2>{{ $t('Facturatiegegevens') }}</h2>
-        <p>{{ $t('Voeg één of meerdere juridische entiteiten toe. Als je zowel een feitelijke vereniging als een VZW hebt, voeg ze dan beide toe. De eerste in de lijst wordt standaard gebruikt als je betalingen uitvoert.') }}</p>
+        <hr><h2>{{ $t('f777a982-6f69-41cc-bef1-18d146e870db') }}</h2>
+        <p>{{ $t('ca923d49-c9c1-4c39-9e52-96b88a0223ed') }}</p>
 
         <p v-if="draggableCompanies.length === 0" class="info-box">
-            {{ $t('Geen facturatiegegevens toegevoegd') }}
+            {{ $t('c1ac06d0-6ffc-463a-a720-2e8b3d26d58e') }}
         </p>
 
         <STList v-else v-model="draggableCompanies" :draggable="true">
@@ -50,20 +50,20 @@
                     </h3>
 
                     <p v-if="company.VATNumber" class="style-description-small">
-                        {{ company.VATNumber }} {{ $t('(BTW-plichtig)') }}
+                        {{ company.VATNumber }} {{ $t('9f72f8ee-74c7-4757-b1dc-948f632114f2') }}
                     </p>
                     <p v-else-if="company.companyNumber" class="style-description-small">
                         {{ company.companyNumber }}
                     </p>
                     <p v-else class="style-description-small">
-                        {{ $t('Feitelijke vereniging') }}
+                        {{ $t('594307a3-05b8-47cf-81e2-59fb6254deba') }}
                     </p>
 
                     <p v-if="company.address" class="style-description-small">
                         {{ company.address.shortString() }}
                     </p>
                     <p v-else class="style-description-small">
-                        <span class="style-tag error">{{ $t('Adres ontbreekt') }}</span>
+                        <span class="style-tag error">{{ $t('aad50919-a9bc-4f59-8bf9-28c61f2bd4d7') }}</span>
                     </p>
 
                     <p v-if="company.administrationEmail" class="style-description-small">
@@ -72,7 +72,7 @@
 
                     <template #right>
                         <span v-if="index === 0" class="style-tag">
-                            {{ $t('Standaard') }}
+                            {{ $t('b67ee618-6873-4dfe-84b6-faa51f37d661') }}
                         </span>
                         <span class="button icon drag gray" @click.stop @contextmenu.stop />
                         <span class="icon arrow-right-small gray" />
@@ -84,7 +84,7 @@
         <p class="style-button-bar">
             <button class="button text" type="button" @click="addCompany">
                 <span class="icon add" />
-                <span>{{ $t('Toevoegen') }}</span>
+                <span>{{ $t('36ba68cb-2159-4179-8ded-89e73d47cd87') }}</span>
             </button>
         </p>
 

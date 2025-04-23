@@ -490,15 +490,15 @@ export class MemberDetails extends AutoEncoder {
             if (age) {
                 if (group.settings.minAge && age < group.settings.minAge) {
                     return {
-                        message: $t(`Te jong`),
-                        description: this.firstName + ' ' + $t(`is te jong. Inschrijvingen is beperkt tot leden`) + ' ' + (group.settings.getAgeGenderDescription({ includeAge: true }) ?? ''),
+                        message: $t(`02313223-edde-443f-8620-8951e696e77e`),
+                        description: this.firstName + ' ' + $t(`9ee1ffee-ea40-44ec-b237-947efafb4573`) + ' ' + (group.settings.getAgeGenderDescription({ includeAge: true }) ?? ''),
                     };
                 }
 
                 if (group.settings.maxAge && age > group.settings.maxAge) {
                     return {
-                        message: $t(`Te oud`),
-                        description: this.firstName + ' ' + $t(`is te jong. Inschrijvingen is beperkt tot leden`) + ' ' + (group.settings.getAgeGenderDescription({ includeAge: true }) ?? ''),
+                        message: $t(`af16be1f-5031-4d6d-82f6-85f63fa17500`),
+                        description: this.firstName + ' ' + $t(`9ee1ffee-ea40-44ec-b237-947efafb4573`) + ' ' + (group.settings.getAgeGenderDescription({ includeAge: true }) ?? ''),
                     };
                 }
             }
@@ -506,15 +506,15 @@ export class MemberDetails extends AutoEncoder {
 
         if (this.gender == Gender.Male && group.settings.genderType == GroupGenderType.OnlyFemale) {
             return {
-                message: $t(`Enkel`) + ' ' + group.settings.getAgeGenderDescription({ includeGender: true }),
-                description: $t(`Inschrijvingen is beperkt tot`) + ' ' + group.settings.getAgeGenderDescription({ includeGender: true }),
+                message: $t(`b34be63d-0883-42b5-9d06-b245f065c84d`) + ' ' + group.settings.getAgeGenderDescription({ includeGender: true }),
+                description: $t(`3577e123-cb6a-4d2b-8289-b7bbdb1ba57b`) + ' ' + group.settings.getAgeGenderDescription({ includeGender: true }),
             };
         }
 
         if (this.gender == Gender.Female && group.settings.genderType == GroupGenderType.OnlyMale) {
             return {
-                message: $t(`Enkel`) + ' ' + group.settings.getAgeGenderDescription({ includeGender: true }),
-                description: $t(`Inschrijvingen is beperkt tot`) + ' ' + group.settings.getAgeGenderDescription({ includeGender: true }),
+                message: $t(`b34be63d-0883-42b5-9d06-b245f065c84d`) + ' ' + group.settings.getAgeGenderDescription({ includeGender: true }),
+                description: $t(`3577e123-cb6a-4d2b-8289-b7bbdb1ba57b`) + ' ' + group.settings.getAgeGenderDescription({ includeGender: true }),
             };
         }
 

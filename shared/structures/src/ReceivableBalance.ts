@@ -27,10 +27,10 @@ export function getReceivableBalanceTypeName(type: ReceivableBalanceType, $t: Tr
  */
 export function getReceivableBalanceTypeNameNotTranslated(type: ReceivableBalanceType): string {
     switch (type) {
-        case ReceivableBalanceType.organization: return $t(`vereniging`);
-        case ReceivableBalanceType.member: return $t(`lid`);
-        case ReceivableBalanceType.user: return $t(`account`);
-        case ReceivableBalanceType.registration: return $t(`inschrijving`);
+        case ReceivableBalanceType.organization: return $t(`e5f00b6a-9424-46b7-ada2-9474160189c4`);
+        case ReceivableBalanceType.member: return $t(`5173cc6a-ed5a-4c13-9b17-e2499ebffbd5`);
+        case ReceivableBalanceType.user: return $t(`269872df-ab70-4eae-b671-ab9246162d4e`);
+        case ReceivableBalanceType.registration: return $t(`b8af36e8-ea5a-4e8a-a7ae-c3e4b5497567`);
     }
 }
 export class ReceivableBalanceObjectContact extends AutoEncoder {

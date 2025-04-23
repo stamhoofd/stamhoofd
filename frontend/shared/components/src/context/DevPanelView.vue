@@ -1,10 +1,10 @@
 <template>
     <SaveView :loading="saving" :title="$t(`Developers`)" @save="save">
         <h1>
-            {{ $t('Developers') }}
+            {{ $t('f6de6c56-6326-42b2-b586-2bf607e058a7') }}
         </h1>
 
-        <hr><h2>{{ $t('Kanaal') }}</h2>
+        <hr><h2>{{ $t('e909e3d1-516f-4284-8923-0390c95ae290') }}</h2>
         <STList>
             <STListItem v-for="r in availableChannels" :key="r.url" :selectable="true" element-name="label">
                 <template #left>
@@ -22,9 +22,9 @@
                     <Radio v-model="releaseChannel" value="custom" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Custom') }}
+                    {{ $t('0d256e87-ab44-4051-9efc-4749c8edb0c0') }}
                 </h3>
-                <input v-if="releaseChannel === 'custom'" v-model="customChannel" type="text" class="input option" :placeholder="$t(`Vul een URL in`)">
+                <input v-if="releaseChannel === 'custom'" v-model="customChannel" type="text" class="input option" :placeholder="$t(`761c7de2-e697-4c39-9970-82d05fc886ca`)">
             </STListItem>
         </STList>
     </SaveView>

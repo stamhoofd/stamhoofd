@@ -1,20 +1,20 @@
 <template>
     <SaveView class="auto" data-submit-last-field save-icon="lock" :title="$t(`Wachtwoord wijzigen`)" @save="submit">
         <h1 v-if="$context.user?.hasPassword">
-            {{ $t('Wachtwoord wijzigen') }}
+            {{ $t('cc1728cb-e600-4888-ad64-6ee498da11e0') }}
         </h1>
         <h1 v-else>
-            {{ $t('Wachtwoord instellen') }}
+            {{ $t('2dd603e2-2caf-4573-8d8b-6ce8ff1dfda6') }}
         </h1>
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <input id="username" style="display: none;" type="text" name="username" autocomplete="username" :value="email"><STInputBox :title="$t(`Kies een wachtwoord`)">
-            <input id="new-password" v-model="password" class="input" enterkeyhint="next" autocomplete="new-password" type="password" :placeholder="$t(`Kies een nieuw wachtwoord`)">
+        <input id="username" style="display: none;" type="text" name="username" autocomplete="username" :value="email"><STInputBox :title="$t(`adf7def3-6328-4261-a390-6cd006737aaf`)">
+            <input id="new-password" v-model="password" class="input" enterkeyhint="next" autocomplete="new-password" type="password" :placeholder="$t(`722ac9a8-7ccb-4e3b-aa51-77132c19b2bb`)">
         </STInputBox>
 
-        <STInputBox :title="$t(`Herhaal wachtwoord`)">
-            <input id="confirm-password" v-model="passwordRepeat" enterkeyhint="go" class="input" autocomplete="new-password" type="password" :placeholder="$t(`Herhaal nieuw wachtwoord`)">
+        <STInputBox :title="$t(`ed8aef93-717e-406c-a779-2465dcd07baa`)">
+            <input id="confirm-password" v-model="passwordRepeat" enterkeyhint="go" class="input" autocomplete="new-password" type="password" :placeholder="$t(`79537e4c-5363-4f06-9d82-9b1b007add73`)">
         </STInputBox>
 
         <PasswordStrength v-model="password" />

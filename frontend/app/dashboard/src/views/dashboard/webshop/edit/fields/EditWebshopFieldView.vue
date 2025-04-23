@@ -1,45 +1,45 @@
 <template>
     <SaveView :title="isNew ? $t(`Vraag toevoegen`) : $t(`Vraag bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            {{ $t('Vraag toevoegen') }}
+            {{ $t('40b3b89e-4d82-4d6c-b49d-1e084802ee2e') }}
         </h1>
         <h1 v-else>
-            {{ $t('Vraag bewerken') }}
+            {{ $t('18d8f60a-ec12-405e-b26a-ed9ba39fefe4') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
-            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`Naam van deze keuze`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`1539d481-12bf-4814-9fe3-3770eaecdda8`)">
         </STInputBox>
 
-        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t(`Beschrijving`)">
-            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`Optioneel`)" />
+        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" />
         </STInputBox>
         <p class="style-description-small">
-            {{ $t('Deze tekst is zichtbaar in het klein onder het tekstvak (zoals deze tekst).') }}
+            {{ $t('b230e824-be5c-45a0-b9c4-fc5f7688ec50') }}
         </p>
 
         <Checkbox v-model="required">
-            {{ $t('Verplicht invullen') }}
+            {{ $t('c71e34a3-bffd-46a7-88d0-da3e95432130') }}
         </Checkbox>
 
         <template v-if="required">
-            <STInputBox error-fields="placeholder" :error-box="errors.errorBox" :title="$t(`Placeholder`)+'*'">
-                <input v-model="placeholder" class="input" type="text" autocomplete="off" :placeholder="$t(`Tekst in lege velden`)">
+            <STInputBox error-fields="placeholder" :error-box="errors.errorBox" :title="$t(`0c35caa6-6240-4a92-9d89-78acf2c79fc0`)+'*'">
+                <input v-model="placeholder" class="input" type="text" autocomplete="off" :placeholder="$t(`caa8166a-c0cc-4579-97b9-b57fd7f0a00d`)">
             </STInputBox>
             <p class="style-description-small">
-                * {{ $t("Dit is de tekst die zichtbaar is in het veld als het leeg is. Bv. 'Vul hier jouw naam in'. Hou het kort.") }}
+                * {{ $t("54855ccd-0723-4512-be9b-daf3341a3b2a") }}
             </p>
         </template>
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('Verwijder deze vraag') }}
+                {{ $t('7b67c672-eb69-4f0f-903e-88b34c67e860') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('Verwijderen') }}</span>
+                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
             </button>
         </div>
     </SaveView>

@@ -7,12 +7,12 @@
         <STErrorsDefault :error-box="errors.errorBox" />
         <div class="split-inputs">
             <div>
-                <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
-                    <input v-model="name" class="input" nmae="name" type="text" autocomplete="name" :placeholder="$t(`Naam`)">
+                <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
+                    <input v-model="name" class="input" nmae="name" type="text" autocomplete="name" :placeholder="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
                 </STInputBox>
 
-                <STInputBox error-fields="title" :error-box="errors.errorBox" :title="$t(`Relatie`)+'*'">
-                    <input v-model="contactTitle" list="emergency-contact-types" class="input" name="type" type="text" :placeholder="$t(`Bv. buurman`)"><datalist id="emergency-contact-types">
+                <STInputBox error-fields="title" :error-box="errors.errorBox" :title="$t(`7fe874c2-4d8c-45f8-8c84-c78422a55ab4`)+'*'">
+                    <input v-model="contactTitle" list="emergency-contact-types" class="input" name="type" type="text" :placeholder="$t(`6f54efef-178e-4f56-9645-4cd4690cbe0f`)"><datalist id="emergency-contact-types">
                         <option v-if="details && details.parents.length === 0" value="Vader" />
                         <option v-if="details && details.parents.length === 0" value="Moeder" />
                         <option v-if="details && details.parents.length === 0" value="Ouder" />
@@ -31,7 +31,7 @@
                     </datalist>
                 </STInputBox>
                 <p class="style-description-small">
-                    *{{ $t('Vul gelijk welke benaming in met het toetsenbord of kies één uit de lijst.') }}
+                    *{{ $t('f3745dfa-564f-488a-a607-88239430be82') }}
                 </p>
             </div>
 

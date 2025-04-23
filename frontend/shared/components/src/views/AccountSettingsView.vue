@@ -6,32 +6,32 @@
             <h1>
                 {{ $t("a48e6035-5e61-4fc7-9ac4-89016e7174fe") }}
             </h1>
-            <p>{{ $t('Met een account kan je één of meerdere leden beheren.') }}</p>
+            <p>{{ $t('76741df9-b885-4143-b2eb-210329e23169') }}</p>
 
             <p v-if="isUserModeOrganization && patched.organizationId === null" class="error-box icon privacy">
-                {{ $t('Dit is een platform account') }}
+                {{ $t('8539962c-88cc-48f1-b51d-db922ff42c04') }}
             </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <form @submit.prevent="save">
-                <STInputBox v-if="firstName || lastName || usesPassword" error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`Mijn naam`)">
+                <STInputBox v-if="firstName || lastName || usesPassword" error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`d9f16258-ce87-41ad-a5d4-a66ad6bd514d`)">
                     <div class="input-group">
                         <div>
-                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :disabled="!usesPassword" :placeholder="$t(`Voornaam`)">
+                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :disabled="!usesPassword" :placeholder="$t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`)">
                         </div>
                         <div>
-                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :disabled="!usesPassword" :placeholder="$t(`Achternaam`)">
+                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :disabled="!usesPassword" :placeholder="$t(`171bd1df-ed4b-417f-8c5e-0546d948469a`)">
                         </div>
                     </div>
                 </STInputBox>
 
-                <EmailInput v-model="email" :validator="errors.validator" autocomplete="email" :disabled="!usesPassword" :title="$t(`E-mailadres`)" :placeholder="$t(`Vul jouw e-mailadres hier in`)" />
+                <EmailInput v-model="email" :validator="errors.validator" autocomplete="email" :disabled="!usesPassword" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" :placeholder="$t(`55d8cd6e-91d1-4cbe-b9b4-f367bbf37b62`)" />
 
                 <div v-if="usesPassword" class="style-button-bar">
                     <LoadingButton :loading="saving">
                         <button id="submit" class="button primary" type="submit" :disabled="!hasChanges">
-                            <span>{{ $t('Opslaan') }}</span>
+                            <span>{{ $t('a103aa7c-4693-4bd2-b903-d14b70bfd602') }}</span>
                         </button>
                     </LoadingButton>
                 </div>
@@ -63,10 +63,10 @@
                     </template>
 
                     <h3 v-if="usesPassword" class="style-title-list">
-                        {{ $t('Wachtwoord wijzigen') }}
+                        {{ $t('cc1728cb-e600-4888-ad64-6ee498da11e0') }}
                     </h3>
                     <h3 v-else class="style-title-list">
-                        {{ $t('Wachtwoord instellen') }}
+                        {{ $t('2dd603e2-2caf-4573-8d8b-6ce8ff1dfda6') }}
                     </h3>
                 </STListItem>
 
@@ -76,10 +76,10 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('Google account koppelen') }}
+                        {{ $t('e0d2207c-2f86-4f94-881e-a1696b9e463b') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Je kan dan inloggen via je Google account als alternatieve loginmethode') }}
+                        {{ $t('bcd5dd71-e93e-4d19-ba21-18ff079dba55') }}
                     </p>
                 </STListItem>
 
@@ -89,7 +89,7 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('{sso} activeren', {sso: ssoConfig?.fullName || $t('Single-Sign-On (SSO)') }) }}
+                        {{ $t('9ca710ba-28cc-4008-9e10-9c61a1da3c2e', {sso: ssoConfig?.fullName || $t('662467b7-da51-4fe2-bff4-784c8f028e58') }) }}
                     </h3>
                 </STListItem>
 
@@ -99,7 +99,7 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('Uitloggen') }}
+                        {{ $t('ecefb25b-4125-4df3-883b-73ddc301529e') }}
                     </h3>
                 </STListItem>
 
@@ -111,7 +111,7 @@
                     </template>
 
                     <h3 class="style-title-list red">
-                        {{ $t('Account verwijderen') }}
+                        {{ $t('1a202159-1cde-460c-b30e-8369cb6d34b7') }}
                     </h3>
                 </STListItem>
             </STList>
@@ -126,7 +126,7 @@
 
             <div v-if="googleConfig && googleEnabled && usesGoogle && (passwordEnabled || ssoEnabled)" class="container">
                 <hr><h2>{{ googleConfig.fullName || 'Inloggen met Google' }}</h2>
-                <p>{{ $t('Je gebruikt Google om in te loggen op jouw account. Je kan inloggen met Google deactiveren voor jouw account.') }}</p>
+                <p>{{ $t('25f4a491-db39-43e0-9424-96217321efc7') }}</p>
 
                 <STList>
                     <STListItem :selectable="true" @click.prevent="disconnectProvider(LoginProviderType.Google)">
@@ -142,7 +142,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Google deactiveren') }}
+                            {{ $t('0fdf16ae-29b4-4524-be32-dcbd571944df') }}
                         </h3>
                     </STListItem>
                 </STList>
@@ -150,7 +150,7 @@
 
             <div v-if="ssoConfig && ssoEnabled && usesSSO && (passwordEnabled || googleEnabled)" class="container">
                 <hr><h2>{{ ssoConfig.fullName || 'Single-Sign-On (SSO)' }}</h2>
-                <p>{{ $t('Je gebruikt {sso} om in te loggen op jouw account. Als je wilt kan je die inlogmethode deactiveren voor jouw account.', {sso: ssoConfig.shortName || 'SSO'}) }}</p>
+                <p>{{ $t('a1be09e1-a95a-4597-977a-a062e46bc76e', {sso: ssoConfig.shortName || 'SSO'}) }}</p>
 
                 <STList>
                     <STListItem :selectable="true" @click.prevent="disconnectProvider(LoginProviderType.SSO)">
@@ -166,15 +166,15 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('{sso} deactiveren', {sso: ssoConfig.shortName || 'SSO'}) }}
+                            {{ $t('1b6b261b-b5d1-4f61-96f9-a4ce241e5e02', {sso: ssoConfig.shortName || 'SSO'}) }}
                         </h3>
                     </STListItem>
                 </STList>
             </div>
 
             <div v-if="passwordEnabled && usesPassword && (usesGoogle || usesSSO)" class="container">
-                <hr><h2>{{ $t('Inloggen met wachtwoord') }}</h2>
-                <p>{{ $t('Je kan momenteel ook inloggen met een wachtwoord op je account. Als je wilt kan je jouw wachtwoord verwijderen zodat je enkel via je andere ingestelde loginmethode kan inloggen.') }}</p>
+                <hr><h2>{{ $t('a3face2a-de93-4388-bd47-675901902508') }}</h2>
+                <p>{{ $t('ea51eb19-b496-4663-9404-bb1a14385bbd') }}</p>
 
                 <STList>
                     <STListItem :selectable="true" @click.prevent="deletePassword">
@@ -190,7 +190,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Wachtwoord verwijderen') }}
+                            {{ $t('a7ca7ce4-b5e8-471a-b35a-63613e96c653') }}
                         </h3>
                     </STListItem>
                 </STList>

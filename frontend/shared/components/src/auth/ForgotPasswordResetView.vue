@@ -9,25 +9,25 @@
 
                 <STErrorsDefault :error-box="errorBox" />
 
-                <STInputBox v-if="!hasAccount" error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`Jouw naam`)">
+                <STInputBox v-if="!hasAccount" error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`f50f1057-e8a0-472e-ae14-2f393f79db53`)">
                     <div class="input-group">
                         <div>
-                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`Voornaam`)">
+                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`)">
                         </div>
                         <div>
-                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :placeholder="$t(`Achternaam`)">
+                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :placeholder="$t(`171bd1df-ed4b-417f-8c5e-0546d948469a`)">
                         </div>
                     </div>
                 </STInputBox>
-                <EmailInput v-model="email" :validator="validator" autocomplete="username" :title="$t(`Persoonlijk e-mailadres`)" :placeholder="$t(`Vul jouw e-mailadres hier in`)" />
+                <EmailInput v-model="email" :validator="validator" autocomplete="username" :title="$t(`26cb7015-6d17-4c3b-8b94-f44f38576854`)" :placeholder="$t(`55d8cd6e-91d1-4cbe-b9b4-f367bbf37b62`)" />
                 <div class="split-inputs">
                     <div>
-                        <STInputBox :title="$t(`Kies een nieuw wachtwoord`)">
-                            <input v-model="password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`Kies een nieuw wachtwoord`)">
+                        <STInputBox :title="$t(`722ac9a8-7ccb-4e3b-aa51-77132c19b2bb`)">
+                            <input v-model="password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`722ac9a8-7ccb-4e3b-aa51-77132c19b2bb`)">
                         </STInputBox>
 
-                        <STInputBox :title="$t(`Herhaal wachtwoord`)">
-                            <input v-model="passwordRepeat" class="input" autocomplete="new-password" type="password" :placeholder="$t(`Herhaal nieuw wachtwoord`)">
+                        <STInputBox :title="$t(`ed8aef93-717e-406c-a779-2465dcd07baa`)">
+                            <input v-model="passwordRepeat" class="input" autocomplete="new-password" type="password" :placeholder="$t(`79537e4c-5363-4f06-9d82-9b1b007add73`)">
                         </STInputBox>
                     </div>
                     <div>

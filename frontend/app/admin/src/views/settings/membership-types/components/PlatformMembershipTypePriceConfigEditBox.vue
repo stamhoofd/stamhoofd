@@ -3,7 +3,7 @@
         <hr><template v-if="hasMultiplePrices">
             <h2 v-if="showStartDate" class="style-with-button">
                 <div>
-                    {{ $t('Prijs vanaf') }} {{ startDate ? formatDate(startDate) : '?' }}
+                    {{ $t('49a1a0a5-72fa-4170-89f5-8dfa78f2eef7') }} {{ startDate ? formatDate(startDate) : '?' }}
                 </div>
                 <div>
                     <button class="button text" type="button" @click="emits('delete')">
@@ -13,7 +13,7 @@
                 </div>
             </h2>
             <h2 v-else>
-                {{ $t('Standaardprijs') }}
+                {{ $t('72974c5e-47ab-4c11-815c-e3d7a0f76b51') }}
             </h2>
         </template>
 
@@ -24,8 +24,8 @@
         <STList>
             <STListItem v-for="[tagId, reduceablePrice] of patched.prices" :key="tagId">
                 <PlatformMembershipTypeReduceablePriceEditRow :model-value="reduceablePrice" :tag-id="tagId" :show-price-per-day="showPricePerDay" :error-box="errorBox" :validator="validator" @update:model-value="patchReduceablePrice(tagId, $event)">
-                    <STInputBox v-if="!tagId && (showPricePerDay || pricePerDay)" :error-box="errorBox" :title="$t(`Prijs per dag`)">
-                        <PriceInput v-model="pricePerDay" :placeholder="$t(`Prijs per dag`)" />
+                    <STInputBox v-if="!tagId && (showPricePerDay || pricePerDay)" :error-box="errorBox" :title="$t(`35d99159-ef2f-48d5-a34b-a648497a3ac7`)">
+                        <PriceInput v-model="pricePerDay" :placeholder="$t(`35d99159-ef2f-48d5-a34b-a648497a3ac7`)" />
                     </STInputBox>
                 </PlatformMembershipTypeReduceablePriceEditRow>
                 <template #right>

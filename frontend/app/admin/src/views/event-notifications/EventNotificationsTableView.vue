@@ -188,7 +188,7 @@ async function openMail(selection: TableActionSelection<EventNotification>) {
         throw new SimpleError({
             code: 'not_implemented',
             message: 'Not implemented',
-            human: $t(`Deze functie is nog niet beschikbaar`),
+            human: $t(`63d685f9-57f4-4cef-bdd2-c1ec5d3af778`),
         });
     }
 
@@ -222,7 +222,7 @@ async function exportToExcel(selection: TableActionSelection<ObjectType>) {
 }
 
 actions.push(new AsyncTableAction({
-    name: $t(`E-mailen`),
+    name: $t(`f92ad3ab-8743-4d37-8b3f-c9d5ca756b16`),
     icon: 'email',
     priority: 12,
     groupIndex: 3,
@@ -233,7 +233,7 @@ actions.push(new AsyncTableAction({
 
 actions.push(
     new AsyncTableAction({
-        name: $t(`Exporteren naar Excel`),
+        name: $t(`0302eaa0-ce2a-4ef0-b652-88b26b9c53e9`),
         icon: 'download',
         priority: 11,
         groupIndex: 3,

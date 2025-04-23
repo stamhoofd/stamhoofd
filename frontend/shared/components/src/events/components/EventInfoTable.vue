@@ -43,11 +43,11 @@
             </template>
 
             <h2 class="style-title-list">
-                <span v-if="event.group.notYetOpen && event.group.settings.registrationEndDate">{{ $t('Inschrijven mogelijk van') }} {{ Formatter.dateRange(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date(), event.group.settings.registrationEndDate, ' tot ') }}</span>
-                <span v-else-if="event.group.notYetOpen">{{ $t('Inschrijven mogelijk vanaf') }} {{ Formatter.startDate(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date()) }}</span>
-                <span v-else-if="event.group.closed">{{ $t('De inschrijvingen zijn gesloten') }}</span>
-                <span v-else-if="event.group.settings.registrationEndDate">{{ $t('Inschrijven kan tot') }} {{ Formatter.endDate(event.group.settings.registrationEndDate) }}</span>
-                <span v-else>{{ $t('Inschrijvingen zijn geopend') }}</span>
+                <span v-if="event.group.notYetOpen && event.group.settings.registrationEndDate">{{ $t('7aa189c8-5a21-4c4f-99c9-98e26119ee9b') }} {{ Formatter.dateRange(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date(), event.group.settings.registrationEndDate, ' tot ') }}</span>
+                <span v-else-if="event.group.notYetOpen">{{ $t('3132b88b-2b83-4b1b-8ce6-3fe856779d14') }} {{ Formatter.startDate(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date()) }}</span>
+                <span v-else-if="event.group.closed">{{ $t('2d68fac2-1437-4c4e-9fa1-6e0ff4e81274') }}</span>
+                <span v-else-if="event.group.settings.registrationEndDate">{{ $t('dd3e1e64-a4fe-4737-bd7a-270c648628fd') }} {{ Formatter.endDate(event.group.settings.registrationEndDate) }}</span>
+                <span v-else>{{ $t('54b3473d-ba8c-49f3-b4f3-638c10dffa22') }}</span>
             </h2>
 
             <p v-if="app !== 'registration' && !event.group.closed && (organization && event.organizationId !== organization.id && !event.group.settings.allowRegistrationsByOrganization)" class="style-description-small">

@@ -41,21 +41,21 @@ export enum BalanceItemType {
 
 export function getBalanceItemStatusName(type: BalanceItemStatus): string {
     switch (type) {
-        case BalanceItemStatus.Hidden: return $t(`Verborgen`);
-        case BalanceItemStatus.Due: return $t(`Verschuldigd`);
-        case BalanceItemStatus.Canceled: return $t(`Geannuleerd`);
+        case BalanceItemStatus.Hidden: return $t(`6276d07c-bd0d-4117-b46c-e3f7b0dbb1e5`);
+        case BalanceItemStatus.Due: return $t(`444e0d53-5c4b-4fae-afa6-c5e14224e6e7`);
+        case BalanceItemStatus.Canceled: return $t(`72fece9f-e932-4463-9c2b-6e8b22a98f15`);
     }
 }
 
 export function getBalanceItemTypeName(type: BalanceItemType): string {
     switch (type) {
-        case BalanceItemType.Registration: return $t(`Inschrijving`);
-        case BalanceItemType.AdministrationFee: return $t(`Administratiekosten`);
-        case BalanceItemType.FreeContribution: return $t(`Vrije bijdrage`);
-        case BalanceItemType.Order: return $t(`Webshopbestelling`);
-        case BalanceItemType.Other: return $t(`Andere`);
-        case BalanceItemType.PlatformMembership: return $t(`Aansluiting`);
-        case BalanceItemType.CancellationFee: return $t(`Annuleringskosten`);
+        case BalanceItemType.Registration: return $t(`1957d902-4a2a-4b9b-bc5c-83145a5731f7`);
+        case BalanceItemType.AdministrationFee: return $t(`be98be36-f796-4f96-b054-4d2a09be3d79`);
+        case BalanceItemType.FreeContribution: return $t(`16ca0372-9c8f-49f0-938d-aee012e59f8c`);
+        case BalanceItemType.Order: return $t(`41066a52-1fe1-41e9-8292-2b1f376fcc65`);
+        case BalanceItemType.Other: return $t(`8f7475aa-c110-49b2-8017-1a6dd0fe72f9`);
+        case BalanceItemType.PlatformMembership: return $t(`c0277e8e-a2e0-4ec3-9339-c2e1be2e6e2d`);
+        case BalanceItemType.CancellationFee: return $t(`ac2be546-732b-4c1a-ace3-c9076795afa0`);
     }
 }
 
@@ -83,24 +83,24 @@ export enum BalanceItemRelationType {
 
 export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): string {
     switch (type) {
-        case BalanceItemRelationType.Webshop: return $t(`Webshop`);
-        case BalanceItemRelationType.Group: return $t(`Inschrijving`);
-        case BalanceItemRelationType.GroupPrice: return $t(`Tarief`);
-        case BalanceItemRelationType.GroupOptionMenu: return $t(`Keuzemenu`);
-        case BalanceItemRelationType.GroupOption: return $t(`Keuze`);
-        case BalanceItemRelationType.Member: return $t(`Lid`);
+        case BalanceItemRelationType.Webshop: return $t(`e38c0b49-b038-4c9c-9653-fe1e4a078226`);
+        case BalanceItemRelationType.Group: return $t(`1957d902-4a2a-4b9b-bc5c-83145a5731f7`);
+        case BalanceItemRelationType.GroupPrice: return $t(`ae21b9bf-7441-4f38-b789-58f34612b7af`);
+        case BalanceItemRelationType.GroupOptionMenu: return $t(`792ebf47-4ad3-4d9c-a4ab-f315b715e70e`);
+        case BalanceItemRelationType.GroupOption: return $t(`6c80efa8-5658-4728-ba95-d0536fdd25bd`);
+        case BalanceItemRelationType.Member: return $t(`f4052a0b-9564-49c4-a6b6-41af3411f3b0`);
         case BalanceItemRelationType.MembershipType: return 'Aansluitingstype';
     }
 }
 
 export function getBalanceItemRelationTypeDescription(type: BalanceItemRelationType): string {
     switch (type) {
-        case BalanceItemRelationType.Webshop: return $t(`Webshop geassocieerd aan dit item`);
-        case BalanceItemRelationType.Group: return $t(`Naam van de groep of activiteit geassocieerd aan dit item`);
-        case BalanceItemRelationType.GroupPrice: return $t(`Tarief dat gekozen werd voor de groep of activiteit`);
-        case BalanceItemRelationType.GroupOptionMenu: return $t(`Naam van het keuzemenu waaruit gekozen werd`);
-        case BalanceItemRelationType.GroupOption: return $t(`De gekozen optie van het keuzemenu waarvoor betaald werd. Als er meerdere keuzes gekozen werden, dan wordt er per keuze een apart item aangemaakt.`);
-        case BalanceItemRelationType.Member: return $t(`Naam van het lid geassocieerd aan dit item`);
+        case BalanceItemRelationType.Webshop: return $t(`efe60194-1a71-45d2-9e12-f6965c266306`);
+        case BalanceItemRelationType.Group: return $t(`869faa9e-f446-4500-83e8-93684eac259d`);
+        case BalanceItemRelationType.GroupPrice: return $t(`5287b557-b8ed-4580-af63-8b69f1b8c120`);
+        case BalanceItemRelationType.GroupOptionMenu: return $t(`12f6ad95-f1e2-4065-b8fb-369186bf0f91`);
+        case BalanceItemRelationType.GroupOption: return $t(`c18b4ad6-4b29-43bf-bb6d-7e3c34ffe80a`);
+        case BalanceItemRelationType.Member: return $t(`15cd9dab-e1d5-4f02-b260-bd587ba3cf1e`);
         case BalanceItemRelationType.MembershipType: return 'Naam van het aansluitingstype geassocieerd aan dit item';
     }
 }
@@ -317,13 +317,13 @@ export class BalanceItem extends AutoEncoder {
         switch (this.type) {
             case BalanceItemType.Registration: {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
-                const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`Onbekende inschrijvingsgroep`);
+                const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`0a54d0a3-e963-447a-81ac-6982a7508649`);
 
                 if (option) {
-                    return $t(`keuzeoptie voor`) + ' ' + group;
+                    return $t(`973d141e-441d-41b8-ad43-06f71c10126f`) + ' ' + group;
                 }
 
-                return $t(`inschrijving voor`) + ' ' + group;
+                return $t(`7a6a379d-97fb-4874-bdcf-48be82a76087`) + ' ' + group;
             }
             case BalanceItemType.CancellationFee: {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
@@ -331,18 +331,18 @@ export class BalanceItem extends AutoEncoder {
 
                 if (group) {
                     if (option) {
-                        return $t(`annuleringskost voor keuzeoptie bij`) + ' ' + group;
+                        return $t(`bfa4c1b3-9613-49c1-ad3d-360f533a4086`) + ' ' + group;
                     }
 
-                    return $t(`annuleringskost voor inschrijving bij`) + ' ' + group;
+                    return $t(`f94551a3-b971-44d8-9c92-4686653d118b`) + ' ' + group;
                 }
-                return $t(`annuleringskost`);
+                return $t(`156e42fb-1e0b-4bfc-b8bf-9bcc76b2b895`);
             }
-            case BalanceItemType.AdministrationFee: return $t(`administratiekosten`);
-            case BalanceItemType.FreeContribution: return $t(`vrije bijdrage`);
-            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name || $t(`onbekende webshop`);
+            case BalanceItemType.AdministrationFee: return $t(`13fbbe0e-5326-4cc8-928e-5fc50b27654a`);
+            case BalanceItemType.FreeContribution: return $t(`1a36fef2-0e2f-4dca-b661-7274ef63dbb5`);
+            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name || $t(`b05702b7-72bc-4dbd-8197-cf758442dc5f`);
             case BalanceItemType.Other: return this.description;
-            case BalanceItemType.PlatformMembership: return $t(`aansluiting voor`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t(`onbekend aansluitingstype`);
+            case BalanceItemType.PlatformMembership: return $t(`03df4cd8-446f-4f40-8d27-90a51bb5a6ba`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t(`ab4ad0cf-53df-4f35-96a8-59747075417f`);
         }
     }
 
@@ -352,14 +352,14 @@ export class BalanceItem extends AutoEncoder {
     get category(): string {
         switch (this.type) {
             case BalanceItemType.Registration: {
-                return this.relations.get(BalanceItemRelationType.Group)?.name ?? $t(`onbekende inschrijvingsgroep`);
+                return this.relations.get(BalanceItemRelationType.Group)?.name ?? $t(`9fb913bf-ebc1-48aa-885e-73f24b8da239`);
             }
-            case BalanceItemType.CancellationFee: return this.relations.get(BalanceItemRelationType.Group)?.name ?? this.relations.get(BalanceItemRelationType.Webshop)?.name ?? this.relations.get(BalanceItemRelationType.MembershipType)?.name ?? $t(`annuleringskosten`);
-            case BalanceItemType.AdministrationFee: return $t(`administratiekosten`);
-            case BalanceItemType.FreeContribution: return $t(`vrije bijdrage`);
-            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name ?? $t(`onbekende webshop`);
+            case BalanceItemType.CancellationFee: return this.relations.get(BalanceItemRelationType.Group)?.name ?? this.relations.get(BalanceItemRelationType.Webshop)?.name ?? this.relations.get(BalanceItemRelationType.MembershipType)?.name ?? $t(`77828342-0662-4a7c-846b-e4fb4ae91553`);
+            case BalanceItemType.AdministrationFee: return $t(`13fbbe0e-5326-4cc8-928e-5fc50b27654a`);
+            case BalanceItemType.FreeContribution: return $t(`1a36fef2-0e2f-4dca-b661-7274ef63dbb5`);
+            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name ?? $t(`b05702b7-72bc-4dbd-8197-cf758442dc5f`);
             case BalanceItemType.Other: return this.description;
-            case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name ?? $t(`aansluitingen`);
+            case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name ?? $t(`5026a42a-66ad-4cc1-9400-c7c1407bc7c0`);
         }
     }
 
@@ -372,8 +372,8 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Registration: {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
                 if (option) {
-                    const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`Onbekende inschrijvingsgroep`);
-                    return $t(`Keuzeoptie`) + ' ' + group;
+                    const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`0a54d0a3-e963-447a-81ac-6982a7508649`);
+                    return $t(`ab7efbf3-6dff-4237-93ba-4ac34f75765b`) + ' ' + group;
                 }
                 break;
             }
@@ -394,18 +394,18 @@ export class BalanceItem extends AutoEncoder {
     get priceBreakown(): PriceBreakdown {
         const all = [
             {
-                name: $t(`Reeds betaald`),
+                name: $t(`057ffcea-70b1-44a9-ad01-c60f6fbd7393`),
                 price: this.pricePaid,
             },
             {
-                name: $t(`In verwerking`),
+                name: $t(`ac279f6b-0c7c-4ef1-9178-1fd030fe7cc8`),
                 price: this.pricePending,
             },
         ].filter(a => a.price !== 0);
 
         if (all.length > 0) {
             all.unshift({
-                name: $t(`Totaalprijs`),
+                name: $t(`8dfbd01b-feb1-4b7e-a1f1-2daf19fb2775`),
                 price: this.price,
             });
         }
@@ -413,7 +413,7 @@ export class BalanceItem extends AutoEncoder {
         return [
             ...all,
             {
-                name: this.priceOpen < 0 ? $t(`Terug te betalen`) : $t(`Te betalen`),
+                name: this.priceOpen < 0 ? $t(`c59769e0-b0fa-42f3-b713-82a2d7237a9c`) : $t(`18aed6d0-0880-4d06-9260-fe342e6e8064`),
                 price: Math.abs(this.priceOpen),
             },
         ];
@@ -450,18 +450,18 @@ export class BalanceItem extends AutoEncoder {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
                 if (option) {
                     const optionMenu = this.relations.get(BalanceItemRelationType.GroupOptionMenu);
-                    return (optionMenu?.name ?? $t(`Onbekend`)) + ': ' + option.name;
+                    return (optionMenu?.name ?? $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`)) + ': ' + option.name;
                 }
-                const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`Onbekende inschrijvingsgroep`);
+                const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`0a54d0a3-e963-447a-81ac-6982a7508649`);
                 const price = this.relations.get(BalanceItemRelationType.GroupPrice)?.name;
-                return $t(`Inschrijving voor`) + ' ' + group + (price && price !== 'Standaardtarief' ? ' (' + price + ')' : '');
+                return $t(`d07f7f84-0d5d-43fd-a7df-f58ca0f3245d`) + ' ' + group + (price && price !== 'Standaardtarief' ? ' (' + price + ')' : '');
             }
-            case BalanceItemType.CancellationFee: return $t(`Annuleringskosten`);
-            case BalanceItemType.AdministrationFee: return $t(`Administratiekosten`);
-            case BalanceItemType.FreeContribution: return $t(`Vrije bijdrage`);
-            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name || $t(`Onbekende webshop`);
+            case BalanceItemType.CancellationFee: return $t(`ac2be546-732b-4c1a-ace3-c9076795afa0`);
+            case BalanceItemType.AdministrationFee: return $t(`be98be36-f796-4f96-b054-4d2a09be3d79`);
+            case BalanceItemType.FreeContribution: return $t(`16ca0372-9c8f-49f0-938d-aee012e59f8c`);
+            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name || $t(`8ce0947e-8681-4abd-b8ef-27d0218fa4a1`);
             case BalanceItemType.Other: return this.description;
-            case BalanceItemType.PlatformMembership: return $t(`Aansluiting voor`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t(`Onbekend aansluitingstype`);
+            case BalanceItemType.PlatformMembership: return $t(`0495e7f0-10bf-4cd9-8d93-1a8b62ce19aa`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t(`25589636-c28d-4c5b-9b5c-0f1cfd4037ef`);
         }
     }
 
@@ -474,8 +474,8 @@ export class BalanceItem extends AutoEncoder {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
                 let prefix = '';
                 if (option) {
-                    const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`Onbekende inschrijvingsgroep`);
-                    prefix = $t(`Keuzeoptie`) + ' ' + group;
+                    const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`0a54d0a3-e963-447a-81ac-6982a7508649`);
+                    prefix = $t(`ab7efbf3-6dff-4237-93ba-4ac34f75765b`) + ' ' + group;
                 }
                 const member = this.relations.get(BalanceItemRelationType.Member);
                 if (member) {
@@ -506,7 +506,7 @@ export class BalanceItem extends AutoEncoder {
         const grouped = GroupedBalanceItems.group(BalanceItem.filterBalanceItems(items));
 
         if (grouped.length === 0) {
-            return '<p class="description">' + $t('Geen openstaand bedrag') + '</p>';
+            return '<p class="description">' + $t('4c4f6571-f7b5-469d-a16f-b1547b43a610') + '</p>';
         }
 
         let str = '';
@@ -527,14 +527,14 @@ export class BalanceItem extends AutoEncoder {
                 }
             }
             else if (item.status === BalanceItemStatus.Canceled) {
-                prefix = $t(`Geannuleerd`);
+                prefix = $t(`72fece9f-e932-4463-9c2b-6e8b22a98f15`);
                 prefixClass = 'error';
             }
             else if (item.priceOpen < 0 && item.pricePaid > item.price && item.pricePaid > 0) {
-                prefix = $t(`Te veel betaald`);
+                prefix = $t(`0c39a71f-be73-4404-8af0-cd9f238d2060`);
             }
             else if (item.priceOpen < 0) {
-                prefix = $t(`Terug te krijgen`);
+                prefix = $t(`bdf22906-037e-4221-8d3e-113bc62da28e`);
             }
 
             if (!item.isDue) {

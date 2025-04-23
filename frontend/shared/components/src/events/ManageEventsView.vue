@@ -4,26 +4,26 @@
             <template #right>
                 <button v-if="canWriteSomeEvent" type="button" class="button text navigation" @click="addEvent()">
                     <span class="icon add" />
-                    <span>{{ $t('Nieuw') }}</span>
+                    <span>{{ $t('e69989bf-c310-49b4-aff1-b9c84cfe5760') }}</span>
                 </button>
             </template>
         </STNavigationBar>
 
         <main class="center">
             <h1>
-                {{ $t('Activiteiten') }}
+                {{ $t('d9b4472a-a395-4877-82fd-da6cb0140594') }}
             </h1>
 
             <div class="input-with-buttons">
                 <div>
                     <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`Zoeken`)">
+                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`01e2b860-7045-4a0c-84ca-2303346d14b2`)">
                     </form>
                 </div>
                 <div>
                     <button type="button" class="button text" @click="editFilter">
                         <span class="icon filter" />
-                        <span class="hide-small">{{ $t('Filter') }}</span>
+                        <span class="hide-small">{{ $t('de5706ec-7edc-4e62-b3f7-d6e414720480') }}</span>
                         <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary" />
                     </button>
                 </div>
@@ -33,7 +33,7 @@
 
             <template v-if="selectedYear === null && suggestionsGroup">
                 <Checkbox v-model="addSuggestions">
-                    {{ $t('Toon wekelijkse suggesties voor') }} {{ suggestionsGroup.settings.name }}
+                    {{ $t('66812919-eadf-4906-96a5-35677c4b6ccb') }} {{ suggestionsGroup.settings.name }}
                 </Checkbox>
 
                 <hr>
@@ -47,7 +47,7 @@
                 </STList>
             </div>
 
-            <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`Geen activiteiten gevonden`)" />
+            <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`2a4caf43-3e88-45b6-b337-4c7036130769`)" />
         </main>
     </div>
 </template>

@@ -15,11 +15,11 @@
             </STList>
         </div>
 
-        <hr><h2>{{ $t('Externe beheerdersrollen') }}</h2>
-        <p>{{ $t('Je kan toegang geven aan externe beheerders (beheerders die geen lid zijn) via externe beheerdersrollen.') }}</p>
+        <hr><h2>{{ $t('697d96d8-17dc-4e98-8571-87153985f3a1') }}</h2>
+        <p>{{ $t('cf6faf7d-57e2-455c-89e2-837b09c612f8') }}</p>
 
         <p v-if="roles.length === 0" class="info-box">
-            {{ $t('Je hebt nog geen beheerdersrollen aangemaakt. Hoofdbeheerders kunnen beheerdersrollen wijzigen via Instellingen → Beheerders. Daarna kan je de toegang hier verdelen.') }}
+            {{ $t('4aebc029-a507-466a-b766-d28adb967966') }}
         </p>
 
         <STList>

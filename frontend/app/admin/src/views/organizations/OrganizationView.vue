@@ -2,9 +2,9 @@
     <div class="st-view">
         <STNavigationBar :title="title">
             <template #right>
-                <button v-if="hasWrite" class="button icon navigation edit" type="button" :v-tooltip="$t(`'Bewerken'`)" @click="editOrganization" />
-                <button v-if="hasPrevious || hasNext" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('Ga naar vorige groep')" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('Ga naar volgende groep')" @click="goForward" />
+                <button v-if="hasWrite" class="button icon navigation edit" type="button" :v-tooltip="$t(`d327935e-c900-4231-a572-1a7f7821654f`)" @click="editOrganization" />
+                <button v-if="hasPrevious || hasNext" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('bdd3230e-7a76-4b7a-b9a8-60bdf200d464')" @click="goBack" />
+                <button v-if="hasNext || hasPrevious" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('88b87e7b-add1-4551-8135-a1d3dc96da9c')" @click="goForward" />
             </template>
         </STNavigationBar>
 
@@ -17,7 +17,7 @@
             </h1>
 
             <p v-if="!organization.active" class="error-box">
-                {{ $t('Deze groep is inactief. Deze kan niet meer gebruikt worden en bestaat enkel nog voor archiveringsdoeleinden.') }}
+                {{ $t('8ccdb08d-3127-4fc7-ba15-5a0af262bcc8') }}
             </p>
 
             <STList class="info">
@@ -38,13 +38,13 @@
                         {{ company.name }}
                     </p>
                     <p v-if="company.VATNumber" v-copyable class="style-description-small style-copyable">
-                        {{ company.VATNumber }} {{ $t('(BTW-plichtig)') }}
+                        {{ company.VATNumber }} {{ $t('9f72f8ee-74c7-4757-b1dc-948f632114f2') }}
                     </p>
                     <p v-else-if="company.companyNumber" v-copyable class="style-description-small style-copyable">
                         {{ company.companyNumber }}
                     </p>
                     <p v-else class="style-description-small">
-                        {{ $t('Feitelijke vereniging') }}
+                        {{ $t('594307a3-05b8-47cf-81e2-59fb6254deba') }}
                     </p>
 
                     <p v-if="company.address" v-copyable class="style-description-small style-copyable">
@@ -218,7 +218,7 @@ const title = computed(() => {
 });
 
 const tagStringList = computed(() => {
-    return props.organization.meta.tags.map(id => platform.value.config.tags.find(t => t.id === id)?.name ?? $t(`onbekend`)).join(', ');
+    return props.organization.meta.tags.map(id => platform.value.config.tags.find(t => t.id === id)?.name ?? $t(`2c848249-09d3-46b4-b09e-ea3357add631`)).join(', ');
 });
 
 const setupSteps = computed(() => props.organization.period.setupSteps);

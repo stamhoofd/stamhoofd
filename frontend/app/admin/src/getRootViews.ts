@@ -27,7 +27,7 @@ export function getNoPermissionsView() {
         tabs: [
             new TabBarItem({
                 icon: 'key',
-                name: $t(`Geen toegang`),
+                name: $t(`31d1b160-113c-41b8-88c1-47ff191c52f1`),
                 component: new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(NoPermissionsView, {}),
                 }),
@@ -54,17 +54,17 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
         root: new ComponentWithProperties(OrganizationsMenu, {}),
     });
 
-    setTitleSuffix($t(`Administratie`));
+    setTitleSuffix($t(`13b501d3-2ffc-460e-9cc5-9858b21ba842`));
 
     const startTab = new TabBarItem({
         icon: 'home',
-        name: $t(`Start`),
+        name: $t(`04548161-abc0-4bea-bdd3-fdbacddc22f8`),
         component: startView,
     });
 
     const membersTab = new TabBarItem({
         icon: 'group',
-        name: $t(`Leden`),
+        name: $t(`97dc1e85-339a-4153-9413-cca69959d731`),
         component: membersTableView,
     });
 
@@ -76,7 +76,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
 
     const calendarTab = new TabBarItem({
         icon: 'calendar',
-        name: $t(`Activiteiten`),
+        name: $t(`d9b4472a-a395-4877-82fd-da6cb0140594`),
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(ManageEventsView, {}),
         }),
@@ -84,7 +84,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
 
     const financesTab = new TabBarItem({
         icon: 'calculator',
-        name: $t(`Boekhouding en aansluitingen`),
+        name: $t(`bc00376e-db0e-4ace-aecc-9bfc05ee573e`),
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(ChargeMembershipsView, {}),
         }),
@@ -92,7 +92,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
 
     const eventNotificationsTab = new TabBarItem({
         icon: 'notification',
-        name: $t(`Kampmeldingen`),
+        name: $t(`caf486c6-818a-4d2b-9fdb-728c6af71481`),
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(EventNotificationsTableView, {}),
         }),
@@ -100,7 +100,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
 
     const auditLogsTab = new TabBarItem({
         icon: 'history',
-        name: $t(`Logboek`),
+        name: $t(`1b5413cd-5858-4a73-872b-5b6b26345039`),
         component: new ComponentWithProperties(SplitViewController, {
             root: new ComponentWithProperties(AuditLogsView, {}),
         }),
@@ -108,7 +108,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
 
     const settingsTab = new TabBarItem({
         icon: 'settings',
-        name: $t(`Instellingen`),
+        name: $t(`bab38c80-8ab6-4cb7-80c3-1f607057e45d`),
         component: settingsView,
     });
 
@@ -129,7 +129,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
 
                         const moreTab = new TabBarItemGroup({
                             icon: 'category',
-                            name: $t(`Meer`),
+                            name: $t(`8c84aea8-4118-4cbf-a026-f86ae6bb2ceb`),
                             items: [],
                         });
 

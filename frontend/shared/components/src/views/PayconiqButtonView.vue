@@ -1,14 +1,14 @@
 <template>
     <div class="st-view payconiq-button-view">
-        <STNavigationBar :title="$t(`Payconiq by Bancontact`)" />
+        <STNavigationBar :title="$t(`a4dde8e6-d0f7-4ad6-b880-cf5467771770`)" />
 
         <main>
-            <h1>{{ $t('Betaal met Payconiq by Bancontact') }}</h1>
+            <h1>{{ $t('7e35e52f-d862-4775-b24e-394e20470880') }}</h1>
             <p class="style-description">
-                {{ $t('Je hebt één van volgende apps nodig om te kunnen betalen: Payconiq by Bancontact, KBC Mobile, ING Banking, Belfius, BNP Paribas Fortis, Fintro, Hello Bank!, Argenta of Crelan.') }}
+                {{ $t('b3bdadbd-5c9c-461d-8607-6f9cd5c2640d') }}
             </p>
             <p class="style-description">
-                {{ $t("Klik op de volgende pagina op 'Kies een andere app' als je met een andere app dan Payconiq by Bancontact wilt betalen.") }}
+                {{ $t("630a85b7-2e2a-4e94-a8a2-f77bd80b78ed") }}
             </p>
         </main>
 
@@ -16,11 +16,11 @@
             <template #right>
                 <button class="button secundary" type="button" @click="helpMe">
                     <span class="icon help" />
-                    <span>{{ $t('Het lukt niet') }}</span>
+                    <span>{{ $t('809b7c07-e6fb-4d65-806d-7ec52cc8b3b8') }}</span>
                 </button>
                 <LoadingButton :loading="payment && payment.status === 'Pending'">
                     <a :href="paymentUrl" class="button primary open-app">
-                        <span class="icon external" /><span>{{ $t('Open de app') }}</span>
+                        <span class="icon external" /><span>{{ $t('ab4cda2d-03fa-4e19-a4a5-5ec2fe0d7187') }}</span>
                     </a>
                 </LoadingButton>
             </template>

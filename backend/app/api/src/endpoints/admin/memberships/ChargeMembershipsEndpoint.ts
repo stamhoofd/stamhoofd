@@ -34,7 +34,7 @@ export class ChargeMembershipsEndpoint extends Endpoint<Params, Query, Body, Res
             throw new SimpleError({
                 code: 'charge_pending',
                 message: 'Charge already pending',
-                human: $t(`Er is al een aanrekening bezig, even geduld.`),
+                human: $t(`d2b84fdd-035b-4307-a897-000081aa814f`),
             });
         }
 

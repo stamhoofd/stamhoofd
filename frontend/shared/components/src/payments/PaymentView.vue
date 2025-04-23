@@ -2,8 +2,8 @@
     <div class="st-view payment-view">
         <STNavigationBar :title="title">
             <template #right>
-                <button v-if="hasPrevious || hasNext" v-tooltip="$t('Ga naar de vorige')" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" v-tooltip="$t('Ga naar de volgende')" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goForward" />
+                <button v-if="hasPrevious || hasNext" v-tooltip="$t('03b92fed-e144-4ace-a931-dc8421734bcd')" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
+                <button v-if="hasNext || hasPrevious" v-tooltip="$t('187657c7-d1ad-4047-a693-ab0e215d41fc')" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goForward" />
             </template>
         </STNavigationBar>
 
@@ -16,24 +16,24 @@
             <h1 class="style-navigation-title with-icons">
                 <span class="icon-spacer">{{ title }}</span>
 
-                <span v-if="payment.isPending" v-tooltip="$t('In verwerking')" class="icon small hourglass primary" />
-                <span v-if="payment.isFailed" v-tooltip="$t('Mislukt')" class="icon small disabled error" />
+                <span v-if="payment.isPending" v-tooltip="$t('ac279f6b-0c7c-4ef1-9178-1fd030fe7cc8')" class="icon small hourglass primary" />
+                <span v-if="payment.isFailed" v-tooltip="$t('c25c4919-ea71-4874-8573-d02242040f6f')" class="icon small disabled error" />
             </h1>
 
             <template v-if="canWrite">
                 <p v-if="payment.type === PaymentType.Reallocation">
-                    {{ $t('Een saldoverrekening kan manueel of automatisch voorkomen. Stel dat iemand betaalde voor een evenement, maar dat op tijd annuleerde, dan kan dat tegoed gebruikt worden om bijvoorbeeld iets anders volledig of gedeeltelijk te betalen voor hetzelfde bedrag. {platform} maakt automatische saldoverrekeningen aan voor gelijkaardige items, bv. als je een inschrijving hebt gewijzigd.', {platform: platform.config.name}) }}
+                    {{ $t('1e5a1fda-ef7e-4719-ae84-907d10b31457', {platform: platform.config.name}) }}
                 </p>
                 <p v-if="payment.method === PaymentMethod.Transfer && payment.isFailed" class="error-box">
-                    {{ $t('Deze overschrijving werd geannuleerd en is niet langer zichtbaar. Ontvang je toch nog de betaling? Heractiveer de overschrijving dan terug.') }}
+                    {{ $t('c3ab8dd2-19f1-40b8-82cf-1e6185307605') }}
                 </p>
 
                 <p v-if="payment.isPending && payment.method === PaymentMethod.Transfer && payment.isOverDue && payment.type == PaymentType.Payment" class="warning-box">
-                    {{ $t('Annuleer een betaling als je deze nog niet hebt ontvangen. Op die manier weet het systeem dat, en zullen de automatische herinneringssystemen correct werken. Het openstaande bedrag zal dan ook terug worden verhoogd waardoor een nieuwe betaalpoging mogelijk is.') }}
+                    {{ $t('a5474f96-5271-4257-92ab-c6d8ccb7f7e9') }}
                 </p>
 
                 <p v-if="payment.isPending && payment.type == PaymentType.Refund" class="warning-box">
-                    {{ $t("Je laat een terugbetaling best niet op 'in verwerking' staan. Annuleer de terugbetaling als je deze nog niet hebt uitgevoerd.") }}
+                    {{ $t("2f003407-e359-4e94-af1c-90b207464090") }}
                 </p>
             </template>
 
@@ -42,7 +42,7 @@
             <STList class="info">
                 <STListItem v-if="payment.price">
                     <h3 class="style-definition-label">
-                        {{ $t('Totaalbedrag') }}
+                        {{ $t('8694e53a-8dc4-42dd-9fbb-c38057ed8403') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(payment.price) }}
@@ -51,7 +51,7 @@
 
                 <STListItem v-if="payment.method === 'Transfer'">
                     <h3 class="style-definition-label">
-                        {{ $t('Mededeling') }}
+                        {{ $t('136b7ba4-7611-4ee4-a46d-60758869210f') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ payment.transferDescription }}
@@ -60,10 +60,10 @@
 
                 <STListItem v-if="payment.method === 'Transfer' && payment.transferSettings">
                     <h3 v-if="payment.price >= 0" class="style-definition-label">
-                        {{ $t('Betalen aan') }}
+                        {{ $t('6da2935e-b763-415f-b4ff-1923623c766c') }}
                     </h3>
                     <h3 v-else class="style-definition-label">
-                        {{ $t('Terugbetaald vanaf') }}
+                        {{ $t('8bf7e685-075f-4d67-887b-d01070df9b6f') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ payment.transferSettings }}
@@ -72,50 +72,50 @@
 
                 <STListItem v-if="isManualMethod">
                     <h3 class="style-definition-label">
-                        {{ $t('Aangemaakt op') }}
+                        {{ $t('b6391640-1e01-47f9-913d-360fb0903b75') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDate(payment.createdAt) }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('Om {time}', {time: formatTime(payment.createdAt)}) }}
+                        {{ $t('c6a1f96a-0e71-44c1-89a2-20bfd206d9c6', {time: formatTime(payment.createdAt)}) }}
                     </p>
                 </STListItem>
 
                 <STListItem v-if="payment.paidAt">
                     <h3 v-if="payment.price == 0" class="style-definition-label">
-                        {{ $t('Geboekt op') }}
+                        {{ $t('37260a82-e32b-4ba3-b5c5-cb78fb25b94d') }}
                     </h3>
                     <h3 v-else-if="payment.price >= 0" class="style-definition-label">
-                        {{ $t('Betaald op') }}
+                        {{ $t('445f778c-5d66-44d3-af4a-84254a4475ea') }}
                     </h3>
                     <h3 v-else class="style-definition-label">
-                        {{ $t('Terugbetaald op') }}
+                        {{ $t('7cea4ccc-16d1-42ae-87af-34a603013577') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDate(payment.paidAt) }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('Om {time}', {time: formatTime(payment.paidAt)}) }}
+                        {{ $t('c6a1f96a-0e71-44c1-89a2-20bfd206d9c6', {time: formatTime(payment.paidAt)}) }}
                     </p>
                 </STListItem>
 
                 <STListItem v-if="payment.iban">
                     <h3 class="style-definition-label">
-                        {{ $t('Betaald via IBAN') }}
+                        {{ $t('8c09c44f-8cf2-4efa-8f67-fd845a747d4a') }}
                     </h3>
 
                     <p class="style-definition-text">
                         {{ payment.iban }}
                     </p>
                     <p v-if="payment.ibanName" class="style-description-small">
-                        {{ $t('Op naam van {name}', {name: payment.ibanName}) }}
+                        {{ $t('1663859d-2802-4317-9bd9-c8fc61d2baca', {name: payment.ibanName}) }}
                     </p>
                 </STListItem>
 
                 <STListItem v-if="payment.settlement" class="right-description right-stack">
                     <h3 class="style-definition-label">
-                        {{ $t('Uitbetaald op') }}
+                        {{ $t('8dead18a-892c-458e-9ef1-39f49a9b5807') }}
                     </h3>
 
                     <p class="style-definition-text">
@@ -125,7 +125,7 @@
 
                 <STListItem v-if="payment.transferFee">
                     <h3 class="style-definition-label">
-                        {{ $t('Transactiekost') }}
+                        {{ $t('a483f935-9647-4904-b71e-8918ef3ad222') }}
                     </h3>
 
                     <p class="style-definition-text">
@@ -133,33 +133,33 @@
                     </p>
                     <p class="style-description-small">
                         <template v-if="VATPercentage > 0">
-                            {{ $t('Incl. {percentage}% BTW —', {percentage: VATPercentage.toString()}) }}
-                        </template> <a :href="$domains.getDocs('transactiekosten-inhouding')" class="inline-link" target="_blank">{{ $t('Meer info') }}</a>
+                            {{ $t('a95a8551-7686-4df2-92aa-2c453bba6bf6', {percentage: VATPercentage.toString()}) }}
+                        </template> <a :href="$domains.getDocs('transactiekosten-inhouding')" class="inline-link" target="_blank">{{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}</a>
                     </p>
                 </STListItem>
             </STList>
 
-            <hr><h2>{{ $t('Facturatiegegevens') }}</h2>
+            <hr><h2>{{ $t('f777a982-6f69-41cc-bef1-18d146e870db') }}</h2>
 
             <p v-if="!payment.customer" class="info-box">
-                {{ $t('Deze betaling heeft geen facturatiegegevens.') }}
+                {{ $t('cc6a87de-8228-4a0b-8d31-b9805556c6b8') }}
             </p>
             <STList v-else-if="payment.customer.company" class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('Bedrijfsnaam') }}
+                        {{ $t('e016131d-770c-45fe-b6e9-5631761cbab2') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ payment.customer.company.name }}
                     </p>
                     <p v-if="!payment.customer.company.VATNumber && !payment.customer.company.companyNumber" class="style-description">
-                        {{ $t('Feitelijke vereniging') }}
+                        {{ $t('594307a3-05b8-47cf-81e2-59fb6254deba') }}
                     </p>
                 </STListItem>
 
                 <STListItem v-if="payment.customer.company.VATNumber">
                     <h3 class="style-definition-label">
-                        {{ $t('BTW-nummer') }}
+                        {{ $t('4d2a6054-26bf-49ed-b91f-59a8819e6436') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ payment.customer.company.VATNumber || 'Niet BTW-plichtig' }}
@@ -168,7 +168,7 @@
 
                 <STListItem v-if="payment.customer.company.companyNumber && (!payment.customer.company.VATNumber || (payment.customer.company.companyNumber !== payment.customer.company.VATNumber && payment.customer.company.companyNumber !== payment.customer.company.VATNumber.slice(2)))">
                     <h3 class="style-definition-label">
-                        {{ $t('Ondernemingsnummer') }}
+                        {{ $t('fb64a034-071e-45d6-8d78-6b5f291ee5f9') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ payment.customer.company.companyNumber || 'Niet BTW-plichtig' }}
@@ -177,7 +177,7 @@
 
                 <STListItem v-if="payment.customer.company.address">
                     <h3 class="style-definition-label">
-                        {{ $t('Adres') }}
+                        {{ $t('f7e792ed-2265-41e9-845f-e3ce0bc5da7c') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ payment.customer.company.address.toString() }}
@@ -186,7 +186,7 @@
 
                 <STListItem v-if="payment.customer.company.administrationEmail">
                     <h3 class="style-definition-label">
-                        {{ $t('E-mailadres') }}
+                        {{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ payment.customer.company.administrationEmail }}
@@ -195,7 +195,7 @@
 
                 <STListItem v-if="payment.customer.name">
                     <h3 class="style-definition-label">
-                        {{ $t('Contactpersoon') }}
+                        {{ $t('2cb138d8-38c3-4ca8-baa8-64bcd32fb2eb') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ payment.customer.name }}
@@ -209,7 +209,7 @@
             <STList v-else class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('Contactpersoon') }}
+                        {{ $t('2cb138d8-38c3-4ca8-baa8-64bcd32fb2eb') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ payment.customer.name || 'Naamloos' }}
@@ -221,20 +221,20 @@
             </STList>
 
             <template v-if="isManualMethod && canWrite">
-                <hr><h2>{{ $t('Acties') }}</h2>
+                <hr><h2>{{ $t('dc052084-eea5-407e-8775-237bf550895a') }}</h2>
 
                 <STList>
                     <STListItem v-if="payment.isFailed && payment.type === PaymentType.Payment" :selectable="true" @click="markPending">
                         <h2 class="style-title-list">
-                            {{ $t('Heractiveer') }}
+                            {{ $t('49238d23-bcfc-4470-85bb-4249e618e752') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t("Wijzig de status terug naar 'wacht op betaling'.") }}
+                            {{ $t("e93f8565-8fc6-4073-94f3-95d42c19d9a0") }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary hide-smartphone">
                                 <span class="icon clock" />
-                                <span>{{ $t('Heractiveer') }}</span>
+                                <span>{{ $t('49238d23-bcfc-4470-85bb-4249e618e752') }}</span>
                             </button>
                             <button type="button" class="button icon success only-smartphone" />
                         </template>
@@ -242,15 +242,15 @@
 
                     <STListItem v-if="(payment.isPending && payment.type === PaymentType.Payment) || (payment.isFailed && payment.type !== PaymentType.Payment)" :selectable="true" @click="markPaid">
                         <h2 class="style-title-list">
-                            {{ $t('Markeer als betaald') }}
+                            {{ $t('aca879f0-55d3-4964-a8ad-0eedf18228fb') }}
                         </h2>
                         <p v-if="payment.webshopIds.length" class="style-description">
-                            {{ $t('Stuurt mogelijks een automatische e-mail ter bevestiging.') }}
+                            {{ $t('9e211b50-4422-411f-9c77-8e036e2a2416') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary hide-smartphone">
                                 <span class="icon success" />
-                                <span>{{ $t('Betaald') }}</span>
+                                <span>{{ $t('1c1933f1-fee4-4e7d-9c89-57593fd5bed3') }}</span>
                             </button>
                             <button type="button" class="button icon success only-smartphone" />
                         </template>
@@ -258,39 +258,39 @@
 
                     <STListItem v-if="payment.isSucceeded && payment.type === PaymentType.Payment" :selectable="true" @click="markPending">
                         <h2 class="style-title-list">
-                            {{ $t('Toch niet betaald') }}
+                            {{ $t('3a66a01a-b0be-4696-b8ac-47c2e5532571') }}
                         </h2>
                         <p v-if="payment.method === 'Transfer'" class="style-description">
-                            {{ $t('Overschrijving per ongeluk gemarkeerd als betaald? Maak dat hiermee ongedaan.') }}
+                            {{ $t('c3e75c59-a5a9-494a-aa75-d8528dcb6158') }}
                         </p>
                         <p v-else class="style-description">
-                            {{ $t('Betaling per ongeluk gemarkeerd als betaald? Maak dat hiermee ongedaan.') }}
+                            {{ $t('4ac815c1-b06d-4fdb-a88a-2e4222ca535b') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary hide-smartphone">
                                 <span class="icon undo" />
-                                <span>{{ $t('Niet betaald') }}</span>
+                                <span>{{ $t('8e65de81-dc74-4bc0-8d73-6440d754b6a4') }}</span>
                             </button><button type="button" class="button icon undo only-smartphone" />
                         </template>
                     </STListItem>
 
                     <STListItem v-if="payment.isPending || (payment.isSucceeded && payment.type !== PaymentType.Payment)" :selectable="true" @click="markFailed">
                         <h2 class="style-title-list">
-                            {{ $t('Annuleren') }}
+                            {{ $t('bc53d7e6-3dbc-45ec-beeb-5f132fcbedb9') }}
                         </h2>
                         <p v-if="payment.type !== PaymentType.Payment" class="style-description">
-                            {{ $t('Maak deze transactie ongedaan') }}
+                            {{ $t('5c940c27-7609-443e-941c-52cd29067f9b') }}
                         </p>
                         <p v-else-if="payment.method === 'Transfer'" class="style-description">
-                            {{ $t('Annuleer de overschrijving als deze niet op tijd betaald werd.') }}
+                            {{ $t('0eb27185-1a20-4862-84e4-e0e12a7f5c9d') }}
                         </p>
                         <p v-else class="style-description">
-                            {{ $t('Annuleer de betaling als je denkt dat deze niet meer betaald zal worden.') }}
+                            {{ $t('27c58a31-738e-42a2-926f-97d83c0dd2a3') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary danger hide-smartphone">
                                 <span class="icon canceled" />
-                                <span>{{ $t('Annuleren') }}</span>
+                                <span>{{ $t('bc53d7e6-3dbc-45ec-beeb-5f132fcbedb9') }}</span>
                             </button><button type="button" class="button icon canceled only-smartphone" />
                         </template>
                     </STListItem>
@@ -298,7 +298,7 @@
             </template>
 
             <template v-if="payment.balanceItemPayments.length">
-                <hr><h2>{{ $t('Overzicht') }}</h2>
+                <hr><h2>{{ $t('4385bcc8-1643-4352-b766-a658e4c33f80') }}</h2>
                 <STList>
                     <STListItem v-for="item in sortedItems" :key="item.id">
                         <template #left>

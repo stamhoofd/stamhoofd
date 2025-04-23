@@ -3,26 +3,26 @@
         <STNavigationBar :title="$t(`Account aanmaken`)" />
 
         <main class="center">
-            <h1>{{ $t('Account aanmaken') }}</h1>
+            <h1>{{ $t('657d0ca3-739f-48bc-b4c0-b4c326b59834') }}</h1>
             <p v-if="!lock">
-                {{ $t('Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.') }}
+                {{ $t('24183997-792a-47c5-b43d-53ba713f80f1') }}
             </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="true" name="username" :validator="errors.validator" autocomplete="username" :disabled="lock !== null" :title="$t(`Persoonlijk e-mailadres`)" :placeholder="$t(`Vul jouw e-mailadres hier in`)" />
+            <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="true" name="username" :validator="errors.validator" autocomplete="username" :disabled="lock !== null" :title="$t(`26cb7015-6d17-4c3b-8b94-f44f38576854`)" :placeholder="$t(`55d8cd6e-91d1-4cbe-b9b4-f367bbf37b62`)" />
             <p v-if="lock" class="style-description-small">
                 {{ lock }}
             </p>
 
             <div class="split-inputs">
                 <div>
-                    <STInputBox :title="$t(`Kies een wachtwoord`)">
-                        <input id="new-password" v-model="password" name="new-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`Kies een nieuw wachtwoord`)" @input="(event) => password = event.target.value" @change="(event) => password = event.target.value">
+                    <STInputBox :title="$t(`adf7def3-6328-4261-a390-6cd006737aaf`)">
+                        <input id="new-password" v-model="password" name="new-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`722ac9a8-7ccb-4e3b-aa51-77132c19b2bb`)" @input="(event) => password = event.target.value" @change="(event) => password = event.target.value">
                     </STInputBox>
 
-                    <STInputBox :title="$t(`Herhaal wachtwoord`)">
-                        <input id="confirm-password" v-model="passwordRepeat" name="confirm-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`Kies een nieuw wachtwoord`)" @input="(event) => passwordRepeat = event.target.value" @change="(event) => passwordRepeat = event.target.value">
+                    <STInputBox :title="$t(`ed8aef93-717e-406c-a779-2465dcd07baa`)">
+                        <input id="confirm-password" v-model="passwordRepeat" name="confirm-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`722ac9a8-7ccb-4e3b-aa51-77132c19b2bb`)" @input="(event) => passwordRepeat = event.target.value" @change="(event) => passwordRepeat = event.target.value">
                     </STInputBox>
                 </div>
                 <div>
@@ -34,7 +34,7 @@
                 <LoadingButton :loading="loading" class="block input-spacing">
                     <button id="submit" class="button primary" type="submit">
                         <span class="icon lock" />
-                        <span>{{ $t('Account aanmaken') }}</span>
+                        <span>{{ $t('657d0ca3-739f-48bc-b4c0-b4c326b59834') }}</span>
                     </button>
                 </LoadingButton>
             </SignupPoliciesBox>

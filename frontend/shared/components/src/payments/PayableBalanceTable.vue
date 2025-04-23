@@ -1,13 +1,13 @@
 <template>
     <div v-if="filteredItems.length !== 0 || !showName" class="container">
         <hr><h2>
-            {{ $t('Openstaand') }}<template v-if="showName">
-                {{ $t('bij {organization}', {organization: item.organization.name}) }}
+            {{ $t('a44d9f94-a83a-49b9-9a89-833b7873fc74') }}<template v-if="showName">
+                {{ $t('0498fb6b-f89e-4352-9602-8abaf986efa3', {organization: item.organization.name}) }}
             </template>
         </h2>
 
         <p v-if="filteredItems.length === 0" class="info-box">
-            {{ $t('Je hebt geen openstaande schulden') }}
+            {{ $t('7fc1d8ac-e765-41e9-a440-c5fddb30c1af') }}
         </p>
         <template v-else>
             <GroupedBalanceList :item="item" />
@@ -16,7 +16,7 @@
 
             <p class="style-button-bar right-align">
                 <button class="button primary" type="button" @click="checkout">
-                    <span>{{ $t('Betalen') }}</span>
+                    <span>{{ $t('e3f37ccd-a27c-4455-96f4-e33b74ae879e') }}</span>
                     <span class="icon arrow-right" />
                 </button>
             </p>

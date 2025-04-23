@@ -1,7 +1,7 @@
 <template>
     <div class="hover-box container">
         <hr><h2 class="style-with-button">
-            <span class="icon-spacer">{{ $t('Acties') }}</span>
+            <span class="icon-spacer">{{ $t('dc052084-eea5-407e-8775-237bf550895a') }}</span>
         </h2>
 
         <STList>
@@ -11,7 +11,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Gegevens wijzigen') }}
+                    {{ $t('d549cddb-5a1b-4ea9-a7a6-c013029067b2') }}
                 </h3>
             </STListItem>
 
@@ -21,7 +21,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('{member} inschrijven', {member: props.member.patchedMember.firstName}) }}
+                    {{ $t('890ba51d-2bf0-4966-bf80-407a294f55c9', {member: props.member.patchedMember.firstName}) }}
                 </h3>
             </STListItem>
 
@@ -31,7 +31,7 @@
                 </template>
 
                 <h3 class="style-title-list red">
-                    {{ $t('Definitief verwijderen') }}
+                    {{ $t('6381fb21-c5be-4318-ba47-a5ee669335a7') }}
                 </h3>
             </STListItem>
         </STList>

@@ -1,16 +1,16 @@
 <template>
-    <SaveView :title="title" :loading="loading" :save-text="isDuplicate ? $t('Doorgaan') : saveText" @save="save">
+    <SaveView :title="title" :loading="loading" :save-text="isDuplicate ? $t('c72a9ab2-98a0-4176-ba9b-86fe009fa755') : saveText" @save="save">
         <template v-if="isDuplicate">
-            <h1>{{ $t('Krijg toegang tot de gegevens van {member}', {member: cloned.patchedMember.details.firstName}) }}</h1>
-            <p>{{ $t('{member} is al gekend in ons systeem, maar jouw e-mailadres niet. Om toegang te krijgen heb je de beveiligingscode nodig.', {member: cloned.patchedMember.details.firstName}) }}</p>
+            <h1>{{ $t('f59ba68b-d007-40f2-9b87-fc5605ec55ea', {member: cloned.patchedMember.details.firstName}) }}</h1>
+            <p>{{ $t('9474f01d-e447-4a95-986e-247917765ecb', {member: cloned.patchedMember.details.firstName}) }}</p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <STInputBox error-fields="code" :error-box="errors.errorBox" class="max" :title="$t(`Beveiligingscode`)">
+            <STInputBox error-fields="code" :error-box="errors.errorBox" class="max" :title="$t(`ba5f8036-1788-408a-8c44-1db80a53c087`)">
                 <CodeInput v-model="code" :code-length="16" :space-length="4" :numbers-only="false" @complete="save" />
             </STInputBox>
 
-            <hr><h2>{{ $t('Waar vind ik deze code?') }}</h2>
+            <hr><h2>{{ $t('61b95651-a851-4a09-9850-9be0542b4c79') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem class="left-center">
@@ -18,7 +18,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/communication.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Vraag de code aan jouw leiding') }}
+                        {{ $t('3292499d-c4db-4429-9f90-c6ce25713d2d') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('f5229cc1-c908-4409-855a-1dba40371815') }}
@@ -30,10 +30,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/email.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Zoek de code onderaan een e-mail die je van ons kreeg') }}
+                        {{ $t('0de51cb5-c474-4ec9-9218-4d6709628675') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Zoek de laatste (recente) e-mail die je van ons kreeg op een e-mailadres die we wél kennen. Daar vind je normaal een beveiligingscode.') }}
+                        {{ $t('52161405-1c8f-4abc-adc3-969bcb0f607f') }}
                     </p>
                 </STListItem>
             </STList>

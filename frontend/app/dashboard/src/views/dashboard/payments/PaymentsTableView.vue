@@ -1,7 +1,7 @@
 <template>
     <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :default-sort-column="allColumns.find(c => c.id === 'createdAt')" :default-filter="defaultFilter" :title="title" :column-configuration-id="configurationId" :actions="actions" :all-columns="allColumns" :Route="Route">
         <template #empty>
-            {{ $t('Geen betalingen gevonden') }}
+            {{ $t('763f791b-dd8d-4cb2-aa57-3d93f33a7c8e') }}
         </template>
     </ModernTableView>
 </template>

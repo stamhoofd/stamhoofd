@@ -1,63 +1,63 @@
 <template>
-    <SaveView :title="isNew ? typeName+' ' + $t(`toevoegen`) : name+' ' + $t(`bewerken`)" :disabled="!hasChanges" class="product-edit-view" @save="save">
+    <SaveView :title="isNew ? typeName+' ' + $t(`34bfcf6f-ac25-45e2-a26b-614384e34923`) : name+' ' + $t(`8455850d-829f-412f-bf1f-eedb2caa9f57`)" :disabled="!hasChanges" class="product-edit-view" @save="save">
         <h1 v-if="isNew">
-            {{ typeName }} {{ $t('toevoegen') }}
+            {{ typeName }} {{ $t('06da1310-e17c-475e-bcd3-bb47844c24c1') }}
         </h1>
         <h1 v-else>
-            {{ name || typeName }} {{ $t('bewerken') }}
+            {{ name || typeName }} {{ $t('ee3bc635-c294-4134-9155-7a74f47dec4f') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
-                <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t(`Naam`) + ' '+typeName" autocomplete="off" enterkeyhint="next">
+            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
+                <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`) + ' '+typeName" autocomplete="off" enterkeyhint="next">
             </STInputBox>
-            <STInputBox v-if="isTicket" error-fields="type" :error-box="errors.errorBox" :title="$t(`Type`)">
+            <STInputBox v-if="isTicket" error-fields="type" :error-box="errors.errorBox" :title="$t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)">
                 <Dropdown v-model="type">
                     <option value="Ticket">
-                        {{ $t('Ticket') }}
+                        {{ $t('de971042-551d-43d2-ab47-e76132156887') }}
                     </option>
                     <option value="Voucher">
-                        {{ $t('Voucher') }}
+                        {{ $t('325f85b1-ff89-4bde-a2df-1328c8ea4a3a') }}
                     </option>
                 </Dropdown>
             </STInputBox>
 
-            <STInputBox v-else error-fields="type" :error-box="errors.errorBox" :title="$t(`Type`)">
+            <STInputBox v-else error-fields="type" :error-box="errors.errorBox" :title="$t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)">
                 <Dropdown v-model="type">
                     <option value="Product">
-                        {{ $t('Stuks') }}
+                        {{ $t('e1f32f18-acac-4339-883c-09897ffbd691') }}
                     </option>
                     <option value="Person">
-                        {{ $t('Personen') }}
+                        {{ $t('9b451e56-b7ae-48ff-811a-a0b4a0175b12') }}
                     </option>
                 </Dropdown>
             </STInputBox>
         </div>
 
-        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`Beschrijving`)">
-            <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`Beschrijving van dit artikel`)" />
+        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`8b049701-1a5f-4b35-bac8-e2b28309ac5f`)" />
         </STInputBox>
 
         <template v-if="isTicket">
-            <hr><h2>{{ $t('Locatie') }}</h2>
+            <hr><h2>{{ $t('7eec15d0-4d60-423f-b860-4f3824271578') }}</h2>
             <ProductSelectLocationInput v-model="location" :locations="allLocations" :validator="errors.validator" @modify="modifyLocation" />
 
-            <hr><h2>{{ $t('Datum en tijd') }}</h2>
+            <hr><h2>{{ $t('436890b3-9e42-4886-98fa-c42c2ac8420a') }}</h2>
             <ProductSelectDateRangeInput v-model="dateRange" :date-ranges="allDateRanges" :validator="errors.validator" @modify="modifyDateRange" />
         </template>
 
         <hr><h2 class="style-with-button">
-            <div>{{ $t('Prijzen') }}</div>
+            <div>{{ $t('2b96c0b9-6c20-4962-8e99-ff898d893a0d') }}</div>
             <div>
                 <button class="button text only-icon-smartphone" type="button" @click="addProductPrice">
                     <span class="icon add" />
-                    <span>{{ $t('Prijs') }}</span>
+                    <span>{{ $t('52bff8d2-52af-4d3f-b092-96bcfa4c0d03') }}</span>
                 </button>
             </div>
         </h2>
-        <p>{{ $t("Je kan een artikel meerdere prijzen geven en aan elke prijs een naam geven. Bv. small, medium en large. Naast meerdere prijzen kan je ook meerdere keuzemenu's toevoegen (zie onder).") }}</p>
+        <p>{{ $t("b81de0d8-04af-48b7-8df4-a5fa51fa60ce") }}</p>
 
         <ProductPriceBox v-if="patchedProduct.prices.length === 1" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errors.errorBox" @patch="addProductPatch($event)" />
 
@@ -71,13 +71,13 @@
 
         <template v-if="fields.length">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('Tekstvelden / open vragen') }}</div>
+                <div>{{ $t('b8f96d3c-0bd8-493f-834c-aa783bf064ff') }}</div>
                 <div>
                     <button class="button icon add" type="button" @click="addField" />
                 </div>
             </h2>
 
-            <p>{{ $t("Open vragen zijn vragen (bv. 'naam op de trui') waarbij bestellers zelf tekst kunnen intypen. Let op: voeg hier geen vragen toe die op bestelniveau moeten komen (want dan moet de gebruiker die meerdere keren beantwoorden), dat kan je doen in de instellingen van de webshop zelf.") }}</p>
+            <p>{{ $t("2e53d1ef-56be-45f0-a71b-9cf0fddc481d") }}</p>
 
             <WebshopFieldsBox :fields="fields" @patch="addFieldsPatch" />
         </template>
@@ -88,7 +88,7 @@
                     <span class="icon seat gray" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Zaalplan') }}
+                    {{ $t('9a9c02aa-ea5a-4882-be31-e650e80f56ec') }}
                 </h3>
 
                 <p class="style-description-small">
@@ -107,10 +107,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Keuzemenu') }}
+                    {{ $t('792ebf47-4ad3-4d9c-a4ab-f315b715e70e') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t(`Laat bestellers een keuze maken uit een lijst met opties, al dan niet met een meerprijs. Bv. "Kies je extra's" met daarin bijvoorbeeld "Kaas op je spaghetti"`) }}
+                    {{ $t(`62d2a48e-46eb-4b9a-8546-66ec8c482cc9`) }}
                 </p>
             </STListItem>
 
@@ -120,10 +120,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Tekstveld (open vraag)') }}
+                    {{ $t('04886108-0006-454b-909e-1703681ea5d2') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t("Stel een open vraag (bv. 'naam op de trui') waarbij men zelf tekst kan intypen. Let op: voeg hier geen vragen toe die op bestelniveau moeten komen (want dan moet de gebruiker die meerdere keren beantwoorden), dat kan je doen in de instellingen van de webshop zelf.") }}
+                    {{ $t("bd8e47cd-5d0a-4ca3-b5d2-947e6f7a8299") }}
                 </p>
             </STListItem>
 
@@ -132,10 +132,10 @@
                     <span class="icon seat gray" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Zetelselectie instellen') }}
+                    {{ $t('6e9e9551-10d9-4a06-a850-759c85259c3b') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Laat bestellers hun zetel kiezen bij het bestellen. Ideaal voor bijvoorbeeld een dansvoorstelling met vaste plaatsen.') }}
+                    {{ $t('6aadf67e-a488-4b32-a838-10a0bf1eb78a') }}
                 </p>
             </STListItem>
 
@@ -146,10 +146,10 @@
 
                 <UploadButton v-model="image" :resolutions="resolutions" element-name="div">
                     <h3 class="style-title-list">
-                        {{ $t('Foto toevoegen') }}
+                        {{ $t('acae105a-788b-434a-b476-36764427b635') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t("Voeg een foto toe aan dit artikel. Knip bij voorkeur zelf je foto's wat bij zodat ze mooi weergegeven worden voor je ze uploadt.") }}
+                        {{ $t("3e03282d-99d2-4505-b74f-0d5a6d57a8a8") }}
                     </p>
                 </UploadButton>
             </STListItem>
@@ -157,13 +157,13 @@
 
         <template v-if="image">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('Foto') }}</div>
+                <div>{{ $t('1e7d9358-7f2a-455b-b676-8fb09e26cb3c') }}</div>
                 <div>
                     <button v-if="image" type="button" class="button text only-icon-smartphone" @click="image = null">
                         <span class="icon trash" />
-                        <span>{{ $t('Verwijderen') }}</span>
+                        <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
                     </button>
-                    <UploadButton v-model="image" :text="image ? $t(`Vervangen`) : $t(`Uploaden`)" :resolutions="resolutions" />
+                    <UploadButton v-model="image" :text="image ? $t(`b7c71a71-9523-4748-a6cd-80b9314b05b2`) : $t(`5be27263-6804-4f1c-92b0-f20cdacc141b`)" :resolutions="resolutions" />
                 </div>
             </h2>
 
@@ -173,8 +173,8 @@
         </template>
 
         <hr><h2>
-            {{ $t('Beschikbaarheid') }}
-            <span v-if="remainingStock !== null" class="title-suffix">{{ $t('nog') }} {{ remainingStock }} {{ $t('beschikbaar') }}</span>
+            {{ $t('bf2af52c-de5d-4089-b46d-9be48594cdb4') }}
+            <span v-if="remainingStock !== null" class="title-suffix">{{ $t('949b7f3f-3aac-4e9c-9b54-d109486eb28a') }} {{ remainingStock }} {{ $t('0467006a-7ded-4e4f-acec-986d013bea6b') }}</span>
         </h2>
 
         <STList>
@@ -184,10 +184,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Verbergen op webshop') }}
+                    {{ $t('9b385bc1-0c3b-4476-b31d-a8598e381ca4') }}
                 </h3>
                 <p v-if="hidden" class="style-description-small">
-                    {{ $t('Dit artikel wordt onzichtbaar op de webshop en is enkel te bestellen door manueel een bestelling in te geven als beheerder.') }}
+                    {{ $t('2aa82e9f-9d78-420d-8606-88dca2bb4bef') }}
                 </p>
             </STListItem>
 
@@ -198,10 +198,10 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('Onbeschikbaar') }}
+                        {{ $t('11b3bb72-0edb-401e-9c60-47fbb2d132fc') }}
                     </h3>
                     <p v-if="disabled" class="style-description-small">
-                        {{ $t('Zichtbaar op de webshop, maar niet mogelijk om te bestellen.') }}
+                        {{ $t('3cd822c4-329e-4e07-97b0-cdb04239b851') }}
                     </p>
                 </STListItem>
 
@@ -212,10 +212,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Beschikbaar vanaf datum') }}
+                            {{ $t('c06b7729-059e-46d2-b701-825fa063f315') }}
                         </h3>
                         <p v-if="useEnableAfter" class="style-description-small">
-                            {{ $t('Zichtbaar op de webshop, maar pas te bestellen vanaf een bepaalde datum.') }}
+                            {{ $t('1631299a-246c-4923-bc48-a09c6ead77b5') }}
                         </p>
 
                         <div v-if="useEnableAfter" class="split-inputs option">
@@ -232,10 +232,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Onbeschikbaar na datum') }}
+                            {{ $t('a0f96736-4411-4439-bb4b-819dd77fca22') }}
                         </h3>
                         <p v-if="useDisableAfter" class="style-description-small">
-                            {{ $t('Zichtbaar op de webshop, maar niet meer te bestellen na een bepaalde datum.') }}
+                            {{ $t('53b8e515-daa7-40ee-8140-c5a6e851a829') }}
                         </p>
 
                         <div v-if="useDisableAfter" class="split-inputs option">
@@ -252,11 +252,11 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Beperk het beschikbare aantal stuks (waarvan nu') }} {{ usedStock }} {{ $t('verkocht of gereserveerd)') }}
+                            {{ $t('838d249e-8efd-43d7-8026-6e48e9525117') }} {{ usedStock }} {{ $t('aa112df2-654a-4c87-840c-d63823adcca4') }}
                         </h3>
 
                         <p v-if="useStock" class="style-description-small">
-                            {{ $t('Geannuleerde en verwijderde bestellingen worden niet meegerekend.') }}
+                            {{ $t('31a4cf98-1e98-491e-855c-2b5a5703b254') }}
                         </p>
 
                         <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
@@ -272,7 +272,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Wijzig aantal verkochte stuks manueel (nu') }} {{ usedStock }} {{ $t('verkocht)') }}
+                            {{ $t('bf1d7fcd-4f47-4263-8d0b-f7f6dc69e485') }} {{ usedStock }} {{ $t('5625d838-6f25-4e2d-9730-e1fbf3b29a8f') }}
                         </h3>
 
                         <div v-if="resetStock" class="split-inputs option" @click.stop.prevent>
@@ -282,7 +282,7 @@
                         </div>
 
                         <p class="style-description">
-                            {{ $t('Geannuleerde en verwijderde bestellingen worden niet meegerekend.') }}
+                            {{ $t('31a4cf98-1e98-491e-855c-2b5a5703b254') }}
                         </p>
                     </STListItem>
 
@@ -292,11 +292,11 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Beperk het maximaal aantal stuks per bestelling') }}
+                            {{ $t('1b0436fb-8c06-4bfc-95c0-391563172a39') }}
                         </h3>
 
                         <p v-if="useMaxPerOrder" class="style-description-small">
-                            {{ $t('Het aantal stuks wordt geteld over alle mogelijke keuzes heen en wordt niet gecommuniceerd tenzij men over de limiet gaat.') }}
+                            {{ $t('e4f5dc91-fb2a-4490-982f-8f8df2d70b3d') }}
                         </p>
 
                         <div v-if="useMaxPerOrder" class="split-inputs option" @click.stop.prevent>
@@ -314,22 +314,22 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Keuze voor aantal stuks verbergen') }}
+                    {{ $t('3b458b67-2585-486a-96ba-80c9f5711d20') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Als je dit aanzet kan er maar één stuk besteld worden per unieke combinatie van keuzes en open vragen.') }}
+                    {{ $t('5d52a9c2-e473-494a-a0e5-e087682534a6') }}
                 </p>
             </STListItem>
         </STList>
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('Verwijder dit artikel') }}
+                {{ $t('64bcb0ba-44aa-4ae0-8ab9-84062289cbb1') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('Verwijderen') }}</span>
+                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
             </button>
         </div>
     </SaveView>

@@ -37,7 +37,7 @@ export class EventPermissionChecker {
             throw new SimpleError({
                 code: 'permission_denied',
                 message:
-                    $t(`Je hebt geen toegangsrechten om een activiteit te beheren.`),
+                    $t(`6677e555-3a1c-4628-8271-98e388c10191`),
                 statusCode: 403,
             });
         }
@@ -52,7 +52,7 @@ export class EventPermissionChecker {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Organization not found',
-                    human: $t(`De activiteit werd niet gevonden`),
+                    human: $t(`c5f3d2c3-9d7a-473d-ba91-63ce104a2de5`),
                 });
             }
 
@@ -90,7 +90,7 @@ export class EventPermissionChecker {
             throw new SimpleError({
                 code: 'permission_denied',
                 message:
-                    $t(`Je hebt geen toegangsrechten om een activiteit te beheren.`),
+                    $t(`6677e555-3a1c-4628-8271-98e388c10191`),
                 statusCode: 403,
             });
         }
@@ -144,7 +144,7 @@ export class EventPermissionChecker {
             throw new SimpleError({
                 code: 'permission_denied',
                 message:
-                    $t(`Je kan geen activiteit beheren voor deze organisatie.`),
+                    $t(`c07f0ada-fdc9-4919-adb4-4c7a2c7acef4`),
                 statusCode: 403,
             });
         }
@@ -158,7 +158,7 @@ export class EventPermissionChecker {
             throw new SimpleError({
                 code: 'permission_denied',
                 message:
-                    $t(`Je hebt geen toegangsrechten om een activiteit te beheren voor deze organisatie.`),
+                    $t(`f97b2b0d-ae0c-472b-9c4f-81fe13af221e`),
                 statusCode: 403,
             });
         }
@@ -174,7 +174,7 @@ export class EventPermissionChecker {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message:
-                            $t(`Je hebt geen toegangsrechten om een activiteit te beheren voor deze organisatie.`),
+                            $t(`f97b2b0d-ae0c-472b-9c4f-81fe13af221e`),
                     statusCode: 403,
                 });
             }
@@ -191,7 +191,7 @@ export class EventPermissionChecker {
                     throw new SimpleError({
                         code: 'permission_denied',
                         message:
-                            $t(`Je hebt geen toegangsrechten om een activiteit te beheren voor deze groep(en).`),
+                            $t(`82b6b325-3175-4e18-940c-39044d84f1f8`),
                         statusCode: 403,
                     });
                 }
@@ -210,7 +210,7 @@ export class EventPermissionChecker {
             throw new SimpleError({
                 code: 'permission_denied',
                 message:
-                    $t(`Je hebt geen toegangsrechten om een nationale activiteit te beheren.`),
+                    $t(`83be96ad-4b19-42ef-a1d1-45e69d4c8540`),
                 statusCode: 403,
             });
         }
@@ -228,7 +228,7 @@ export class EventPermissionChecker {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message:
-                        $t(`Je hebt geen toegangsrechten om een nationale activiteit te beheren voor alle groepen.`),
+                        $t(`321ec06c-2977-45a4-b37f-8c94bc48cd8a`),
                     statusCode: 403,
                 });
             }
@@ -245,7 +245,7 @@ export class EventPermissionChecker {
                     throw new SimpleError({
                         code: 'permission_denied',
                         message:
-                            $t(`Je hebt geen toegangsrechten om een regionale activiteit te beheren voor deze regio('s).`),
+                            $t(`d13353bc-a746-49dc-a2c2-652a35c593fc`),
                         statusCode: 403,
                     });
                 }

@@ -6,7 +6,7 @@
 
         <template v-if="canSaveDraft" #toolbar>
             <button class="button secundary" type="button" @click="saveDraft">
-                {{ $t('Opslaan als klad') }}
+                {{ $t('650e0758-203c-474f-8b51-da33f39de29c') }}
             </button>
         </template>
     </SaveView>

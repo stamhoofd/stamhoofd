@@ -19,7 +19,7 @@
                 {{ role.name }}
             </h2>
             <p v-if="isMe" class="style-description-small">
-                {{ $t('Jij zit in deze groep') }}
+                {{ $t('703dec5e-fc37-4ab5-aaa8-4b7d0ed5589a') }}
             </p>
         </template>
 

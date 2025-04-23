@@ -5,7 +5,7 @@
                 <span class="icon user-admin-layer-1" />
                 <span class="icon user-admin-layer-2 yellow" />
             </span>
-            <span v-else-if="mergedRole.isEmpty" class="icon layered" :v-tooltip="$t('Heeft geen rol')">
+            <span v-else-if="mergedRole.isEmpty" class="icon layered" :v-tooltip="$t('3bb4e938-ca4e-4318-a86d-002ba6035fd0')">
                 <span class="icon user-blocked-layer-1" />
                 <span class="icon user-blocked-layer-2 red" />
             </span>
@@ -14,7 +14,7 @@
 
         <h2 class="style-title-list">
             {{ responsibility.name }} <template v-if="group">
-                {{ $t('van') }} {{ group.settings.name }}
+                {{ $t('e9ec956f-3a71-4460-b09d-dfec22a1aaf0') }} {{ group.settings.name }}
             </template>
         </h2>
         <p class="style-description-small">
@@ -22,7 +22,7 @@
         </p>
 
         <p class="style-description-small">
-            {{ $t('Rechten') }}: {{ capitalizeFirstLetter(roleDescription) }}
+            {{ $t('52acb4e7-fb83-4406-8119-9adbda0ecc22') }}: {{ capitalizeFirstLetter(roleDescription) }}
         </p>
 
         <template #right>

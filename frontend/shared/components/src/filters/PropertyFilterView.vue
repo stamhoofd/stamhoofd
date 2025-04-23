@@ -21,10 +21,10 @@
         <STToolbar>
             <template #right>
                 <button class="button secundary" type="button" @click="cancel">
-                    {{ $t('Annuleren') }}
+                    {{ $t('bc53d7e6-3dbc-45ec-beeb-5f132fcbedb9') }}
                 </button>
                 <button class="button primary" type="button" @click="save">
-                    {{ $t('Opslaan') }}
+                    {{ $t('a103aa7c-4693-4bd2-b903-d14b70bfd602') }}
                 </button>
             </template>
         </STToolbar>

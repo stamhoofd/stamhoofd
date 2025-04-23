@@ -16,7 +16,7 @@ import { UIFilter, UIFilterBuilder, UIFilterBuilders } from './UIFilter';
 
 export const paymentsUIFilterBuilders: UIFilterBuilders = [
     new MultipleChoiceFilterBuilder({
-        name: $t(`Betaalmethode`),
+        name: $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`),
         options: Object.values(PaymentMethod).map((method) => {
             return new MultipleChoiceUIFilterOption(PaymentMethodHelper.getNameCapitalized(method), method);
         }),
@@ -28,7 +28,7 @@ export const paymentsUIFilterBuilders: UIFilterBuilders = [
     }),
 
     new MultipleChoiceFilterBuilder({
-        name: $t(`Status`),
+        name: $t(`e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5`),
         options: Object.values(PaymentStatus).map((method) => {
             return new MultipleChoiceUIFilterOption(PaymentStatusHelper.getNameCapitalized(method), method);
         }),
@@ -50,19 +50,19 @@ paymentsUIFilterBuilders.unshift(
 // This one should match memberWithRegistrationsBlobInMemoryFilterCompilers
 export const memberWithRegistrationsBlobUIFilterBuilders: UIFilterBuilders = [
     new NumberFilterBuilder({
-        name: $t(`Leeftijd`),
+        name: $t(`e96d9ea7-f8cc-42c6-b23d-f46e1a56e043`),
         key: 'age',
     }),
     new DateFilterBuilder({
-        name: $t(`Geboortedatum`),
+        name: $t(`f3b87bd8-e36c-4fb8-917f-87b18ece750e`),
         key: 'birthDay',
     }),
     new MultipleChoiceFilterBuilder({
-        name: $t(`Gender`),
+        name: $t(`fd3fea4f-73c7-4c8d-90cd-80ea90e53b98`),
         options: [
-            new MultipleChoiceUIFilterOption($t(`Vrouw`), Gender.Female),
-            new MultipleChoiceUIFilterOption($t(`Man`), Gender.Male),
-            new MultipleChoiceUIFilterOption($t(`Andere`), Gender.Other),
+            new MultipleChoiceUIFilterOption($t(`06466432-eca6-41d0-a3d6-f262f8d6d2ac`), Gender.Female),
+            new MultipleChoiceUIFilterOption($t(`b54b9706-4c0c-46a6-9027-37052eb76b28`), Gender.Male),
+            new MultipleChoiceUIFilterOption($t(`8f7475aa-c110-49b2-8017-1a6dd0fe72f9`), Gender.Other),
         ],
         wrapper: {
             gender: {
@@ -85,23 +85,23 @@ export function useMemberWithRegistrationsBlobFilterBuilders() {
 
         if (recordConfiguration.birthDay) {
             all.push(new DateFilterBuilder({
-                name: $t(`Geboortedatum`),
+                name: $t(`f3b87bd8-e36c-4fb8-917f-87b18ece750e`),
                 key: 'birthDay',
             }));
 
             all.push(new NumberFilterBuilder({
-                name: $t(`Leeftijd`),
+                name: $t(`e96d9ea7-f8cc-42c6-b23d-f46e1a56e043`),
                 key: 'age',
             }));
         }
 
         if (recordConfiguration.gender) {
             all.push(new MultipleChoiceFilterBuilder({
-                name: $t(`Gender`),
+                name: $t(`fd3fea4f-73c7-4c8d-90cd-80ea90e53b98`),
                 options: [
-                    new MultipleChoiceUIFilterOption($t(`Vrouw`), Gender.Female),
-                    new MultipleChoiceUIFilterOption($t(`Man`), Gender.Male),
-                    new MultipleChoiceUIFilterOption($t(`Andere`), Gender.Other),
+                    new MultipleChoiceUIFilterOption($t(`06466432-eca6-41d0-a3d6-f262f8d6d2ac`), Gender.Female),
+                    new MultipleChoiceUIFilterOption($t(`b54b9706-4c0c-46a6-9027-37052eb76b28`), Gender.Male),
+                    new MultipleChoiceUIFilterOption($t(`8f7475aa-c110-49b2-8017-1a6dd0fe72f9`), Gender.Other),
                 ],
                 wrapper: {
                     gender: {
@@ -134,25 +134,25 @@ export function useRegisterItemFilterBuilders() {
     return (group: Group) => {
         const all: UIFilterBuilders = [
             new NumberFilterBuilder({
-                name: $t(`Leeftijd`),
+                name: $t(`e96d9ea7-f8cc-42c6-b23d-f46e1a56e043`),
                 key: 'age',
                 wrapper: {
                     member: FilterWrapperMarker,
                 },
             }),
             new DateFilterBuilder({
-                name: $t(`Geboortedatum`),
+                name: $t(`f3b87bd8-e36c-4fb8-917f-87b18ece750e`),
                 key: 'birthDay',
                 wrapper: {
                     member: FilterWrapperMarker,
                 },
             }),
             new MultipleChoiceFilterBuilder({
-                name: $t(`Gender`),
+                name: $t(`fd3fea4f-73c7-4c8d-90cd-80ea90e53b98`),
                 options: [
-                    new MultipleChoiceUIFilterOption($t(`Vrouw`), Gender.Female),
-                    new MultipleChoiceUIFilterOption($t(`Man`), Gender.Male),
-                    new MultipleChoiceUIFilterOption($t(`Andere`), Gender.Other),
+                    new MultipleChoiceUIFilterOption($t(`06466432-eca6-41d0-a3d6-f262f8d6d2ac`), Gender.Female),
+                    new MultipleChoiceUIFilterOption($t(`b54b9706-4c0c-46a6-9027-37052eb76b28`), Gender.Male),
+                    new MultipleChoiceUIFilterOption($t(`8f7475aa-c110-49b2-8017-1a6dd0fe72f9`), Gender.Other),
                 ],
                 wrapper: {
                     member: {
@@ -167,7 +167,7 @@ export function useRegisterItemFilterBuilders() {
         // Add price filter
         all.push(
             new MultipleChoiceFilterBuilder({
-                name: $t(`Tarief`),
+                name: $t(`ae21b9bf-7441-4f38-b789-58f34612b7af`),
                 options: [
                     ...group.settings.prices.map((price) => {
                         return new MultipleChoiceUIFilterOption(price.name, price.id);
@@ -465,8 +465,8 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
                 new MultipleChoiceFilterBuilder({
                     name: $t('87d9975e-d0ac-41d4-8472-dedcfaa571cb'),
                     options: [
-                        new MultipleChoiceUIFilterOption($t(`Met actieve proefperiode`), true),
-                        new MultipleChoiceUIFilterOption($t(`Zonder proefperiode`), false),
+                        new MultipleChoiceUIFilterOption($t(`be88b0da-348e-4394-b36c-1136af8aef7d`), true),
+                        new MultipleChoiceUIFilterOption($t(`2c94e906-587b-4ff0-b829-c176fb7120f7`), false),
                     ],
                     wrapFilter: (f: StamhoofdFilter) => {
                         const choices = Array.isArray(f) ? f : [f];
@@ -1103,9 +1103,9 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                     new MultipleChoiceFilterBuilder({
                         name: financialSupportSettings.financialSupportSettings.value.title,
                         options: [
-                            new MultipleChoiceUIFilterOption($t(`Ingeschakeld`), true),
-                            new MultipleChoiceUIFilterOption($t(`Uitgeschakeld`), false),
-                            new MultipleChoiceUIFilterOption($t(`Onbepaald`), null),
+                            new MultipleChoiceUIFilterOption($t(`e8339839-a2d6-4a98-ae6b-091fb658d25f`), true),
+                            new MultipleChoiceUIFilterOption($t(`3729f1c6-ec66-4530-9012-48e0821c0bc1`), false),
+                            new MultipleChoiceUIFilterOption($t(`3cbc8829-a005-42be-9d10-d6a6efba1de1`), null),
                         ],
                         wrapper: {
                             'details.requiresFinancialSupport': {
@@ -1118,8 +1118,8 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
 
             all.push(
                 new GroupUIFilterBuilder({
-                    name: $t(`huidige inschrijving`),
-                    description: $t(`Filter op leden die een actieve inschrijving heeft die aan deze voorwaarden voldoet.`),
+                    name: $t(`3c904919-303b-40a9-a67c-3a406692ac87`),
+                    description: $t(`4fb3dc46-fcd1-4aa4-a427-2f903aa231ef`),
                     builders: registrationFilters.value.filter(f => f.name !== 'Werkjaar'),
                     wrapper: {
                         registrations: {
@@ -1229,8 +1229,8 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
 
                 all.push(
                     new GroupUIFilterBuilder({
-                        name: $t(`historische functie`),
-                        description: $t(`Filter op leden die een functie hadden die aan deze voorwaarden voldoet.`),
+                        name: $t(`4e4aca2d-1947-4a9a-9182-1aa7bad87474`),
+                        description: $t(`37427bf2-d1bd-466a-b92b-414390bf1fe5`),
                         builders: responsibilitiesFilters,
                         wrapper: {
                             responsibilities: {
@@ -1272,12 +1272,12 @@ checkoutUIFilterBuilders.unshift(
 
 export const cachedOutstandingBalanceUIFilterBuilders: UIFilterBuilders = [
     new NumberFilterBuilder({
-        name: $t(`Openstaand bedrag`),
+        name: $t(`40d7ac9f-f62d-4a9d-8b2f-5fcfb938c12f`),
         type: NumberFilterFormat.Currency,
         key: 'amountOpen',
     }),
     new NumberFilterBuilder({
-        name: $t(`Bedrag in verwerking`),
+        name: $t(`5e73bf1c-6413-4fa5-8049-bff5faf4d8ea`),
         type: NumberFilterFormat.Currency,
         key: 'amountPending',
     }),
@@ -1308,19 +1308,19 @@ cachedOutstandingBalanceUIFilterBuilders.unshift(
 
 const organizationMemberUIFilterBuilders: UIFilterBuilders = [
     new StringFilterBuilder({
-        name: $t(`Naam`),
+        name: $t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`),
         key: 'name',
     }),
     new StringFilterBuilder({
-        name: $t(`Voornaam`),
+        name: $t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`),
         key: 'firstName',
     }),
     new StringFilterBuilder({
-        name: $t(`Achternaam`),
+        name: $t(`171bd1df-ed4b-417f-8c5e-0546d948469a`),
         key: 'lastName',
     }),
     new StringFilterBuilder({
-        name: $t(`E-mailadres`),
+        name: $t(`7400cdce-dfb4-40e7-996b-4817385be8d8`),
         key: 'email',
     }),
 ];
@@ -1342,17 +1342,17 @@ export function useGetOrganizationUIFilterBuilders() {
     const getOrganizationUIFilterBuilders = (user: User | null) => {
         const all = [
             new StringFilterBuilder({
-                name: $t(`Naam`),
+                name: $t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`),
                 key: 'name',
             }),
 
             new StringFilterBuilder({
-                name: $t(`Gemeente`),
+                name: $t(`54b992a4-20e1-4232-8d2e-93c9353c6af3`),
                 key: 'city',
             }),
 
             new StringFilterBuilder({
-                name: $t(`Postcode`),
+                name: $t(`5ed579c6-bfe4-453b-bc13-5e38690849e1`),
                 key: 'postalCode',
             }),
 
@@ -1362,7 +1362,7 @@ export function useGetOrganizationUIFilterBuilders() {
             }),
 
             new GroupUIFilterBuilder({
-                name: $t(`Leden`),
+                name: $t(`97dc1e85-339a-4153-9413-cca69959d731`),
                 description: $t('6bf80a05-84b0-47ba-ad41-66e2a106669b'),
                 builders: organizationMemberUIFilterBuilders,
                 wrapper: {
@@ -1372,10 +1372,10 @@ export function useGetOrganizationUIFilterBuilders() {
                 },
             }),
             new MultipleChoiceFilterBuilder({
-                name: $t(`Actief`),
+                name: $t(`1bb1402a-c26b-4516-bbe1-08aff32ee3e8`),
                 options: [
-                    new MultipleChoiceUIFilterOption($t(`Actief`), 1),
-                    new MultipleChoiceUIFilterOption($t(`Inactief`), 0),
+                    new MultipleChoiceUIFilterOption($t(`1bb1402a-c26b-4516-bbe1-08aff32ee3e8`), 1),
+                    new MultipleChoiceUIFilterOption($t(`ddfa1e2d-bb72-4781-8754-d5002249f30d`), 0),
                 ],
                 wrapper: {
                     active: {
@@ -1404,7 +1404,7 @@ export function useGetOrganizationUIFilterBuilders() {
 
             all.push(
                 new MultipleChoiceFilterBuilder({
-                    name: $t(`Voltooide vlagmomenten`),
+                    name: $t(`95fc75cf-bf23-4895-bb64-dfec3944596c`),
                     multipleChoiceConfiguration: {
                         isSubjectPlural: true,
                         mode: MultipleChoiceUIFilterMode.And,
@@ -1542,9 +1542,9 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
     const all: UIFilterBuilder<UIFilter>[] = [];
 
     const organizationFilter = new MultipleChoiceFilterBuilder({
-        name: $t(`Lokale groep`),
+        name: $t(`6aedccdb-08e6-42c5-ae54-cb26c181ab02`),
         options: [
-            new MultipleChoiceUIFilterOption($t(`Nationale activiteiten`), null),
+            new MultipleChoiceUIFilterOption($t(`208e986f-e479-4846-bf51-e557a5d38994`), null),
             ...organizations.map(org => new MultipleChoiceUIFilterOption(org.name, org.id)),
         ],
         wrapper: {
@@ -1556,9 +1556,9 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
     all.push(organizationFilter);
 
     const tagsFilter = new MultipleChoiceFilterBuilder({
-        name: $t(`Regio`),
+        name: $t(`2faa00db-5af7-4556-ac49-5b15abf2182f`),
         options: [
-            new MultipleChoiceUIFilterOption($t(`Alles`), null),
+            new MultipleChoiceUIFilterOption($t(`3743b6e2-1c6b-4831-a228-6ef082377e3b`), null),
             ...platform.config.tags.map(tag => new MultipleChoiceUIFilterOption(tag.name, tag.id)),
         ],
         wrapper: {
@@ -1573,9 +1573,9 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
     const allTags = organizations.flatMap(organization => organization.meta.tags);
 
     const defaultAgeGroupFilter = new MultipleChoiceFilterBuilder({
-        name: $t(`Standaard leeftijdsgroep`),
+        name: $t(`494ad9b9-c644-4b71-bd38-d6845706231f`),
         options: [
-            new MultipleChoiceUIFilterOption($t(`Iedereen`), null),
+            new MultipleChoiceUIFilterOption($t(`fd0de77c-fa11-465b-9a6e-27a766a54efc`), null),
             ...platform.config.defaultAgeGroups.filter(defaultAgeGroup => defaultAgeGroup.isEnabledForTags(allTags)).map(g => new MultipleChoiceUIFilterOption(g.name, g.id)),
         ],
         wrapper: {
@@ -1587,10 +1587,10 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
     all.push(defaultAgeGroupFilter);
 
     const groupFilter = new MultipleChoiceFilterBuilder({
-        name: $t(`Inschrijvingsgroep`),
+        name: $t(`f52db2d7-c0f5-4f9c-b567-62f657787339`),
         allowCreation: organizations.length > 0,
         options: [
-            new MultipleChoiceUIFilterOption($t(`Iedereen`), null),
+            new MultipleChoiceUIFilterOption($t(`fd0de77c-fa11-465b-9a6e-27a766a54efc`), null),
             ...organizations
                 .flatMap(organization => organization.period.getCategoryTree({ permissions }).getAllGroups().map((g) => {
                     return new MultipleChoiceUIFilterOption((organizations.length > 1 ? (organization.name + ' - ') : '') + g.settings.name, g.id);
@@ -1606,7 +1606,7 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
 
     if (app !== 'registration') {
         const typeFilter = new MultipleChoiceFilterBuilder({
-            name: $t(`Type`),
+            name: $t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`),
             options: [
                 ...platform.config.eventTypes.map(type => new MultipleChoiceUIFilterOption(type.name, type.id)),
             ],
@@ -1634,7 +1634,7 @@ export function useAuditLogUIFilterBuilders() {
     const all: UIFilterBuilder<UIFilter>[] = [];
 
     const typeFilter = new MultipleChoiceFilterBuilder({
-        name: $t(`Type`),
+        name: $t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`),
         options: [
             ...Object.values(AuditLogType).map(type => new MultipleChoiceUIFilterOption(getAuditLogTypeName(type), type)),
         ],
@@ -1663,7 +1663,7 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
             key: 'number',
         }),
         new MultipleChoiceFilterBuilder({
-            name: $t(`Status`),
+            name: $t(`e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5`),
             options: Object.values(OrderStatus)
                 .filter(s => s !== OrderStatus.Deleted)
                 .map((status) => {
@@ -1676,24 +1676,24 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
             },
         }),
         new StringFilterBuilder({
-            name: $t(`Naam`),
+            name: $t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`),
             key: 'name',
         }),
         new StringFilterBuilder({
-            name: $t(`E-mailadres`),
+            name: $t(`7400cdce-dfb4-40e7-996b-4817385be8d8`),
             key: 'email',
         }),
     ];
 
     if (preview.meta.phoneEnabled) {
         builders.push(new StringFilterBuilder({
-            name: $t(`Telefoonnummer`),
+            name: $t(`de70b659-718d-445a-9dca-4d14e0a7a4ec`),
             key: 'phone',
         }));
     }
 
     builders.push(new MultipleChoiceFilterBuilder({
-        name: $t(`Betaalmethode`),
+        name: $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`),
         options: Object.values(PaymentMethod).map((paymentMethod) => {
             return new MultipleChoiceUIFilterOption(PaymentMethodHelper.getNameCapitalized(paymentMethod), paymentMethod);
         }),
@@ -1708,7 +1708,7 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
 
     if (distinctCheckoutMethods.length > 1) {
         builders.push(new MultipleChoiceFilterBuilder({
-            name: $t(`Methode`),
+            name: $t(`389460d3-8e4b-4238-8d57-a106ec987bcd`),
             options: distinctCheckoutMethods.map((checkoutMethod) => {
                 return new MultipleChoiceUIFilterOption(Formatter.capitalizeFirstLetter(CheckoutMethodTypeHelper.getName(checkoutMethod)), checkoutMethod);
             }),
@@ -1722,16 +1722,16 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
 
     builders.push(
         new DateFilterBuilder({
-            name: $t(`Besteldatum`),
+            name: $t(`5dd11b77-abf6-4449-ac3f-74ac1edb5d65`),
             key: 'validAt',
         }),
         new NumberFilterBuilder({
-            name: $t(`Bedrag`),
+            name: $t(`a023893e-ab2c-4215-9981-76ec16336911`),
             key: 'totalPrice',
             type: NumberFilterFormat.Currency,
         }),
         new NumberFilterBuilder({
-            name: $t(`Aantal`),
+            name: $t(`697df3e7-fbbf-421d-81c2-9c904dce4842`),
             key: 'amount',
         }),
     );
@@ -1747,7 +1747,7 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
     if (dateCount > 1) {
         builders.push(
             new DateFilterBuilder({
-                name: (hasDelivery && nonDeliveryCount > 0) ? $t(`Afhaal/leverdatum`) : (hasDelivery ? $t(`Leverdatum`) : $t(`Afhaaldatum`)),
+                name: (hasDelivery && nonDeliveryCount > 0) ? $t(`3c712881-ef26-474f-a431-dd1c74011260`) : (hasDelivery ? $t(`1e5d1c96-1c8d-4608-b68d-c5e395874aab`) : $t(`26bf686d-2d75-44d3-8ade-d99e939be9b2`)),
                 key: 'timeSlotDate',
             }));
     }
@@ -1757,14 +1757,14 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
         // todo: maybe group
         builders.push(
             new NumberFilterBuilder({
-                name: $t(`Tijdstip einde`),
+                name: $t(`4f4fd620-9852-495b-9899-1c598b49924a`),
                 key: 'timeSlotEndTime',
                 type: NumberFilterFormat.TimeMinutes,
             }));
 
         builders.push(
             new NumberFilterBuilder({
-                name: $t(`Tijdstip start`),
+                name: $t(`bc92bec8-a315-4f67-8bee-7c210e19b8ef`),
                 key: 'timeSlotStartTime',
                 type: NumberFilterFormat.TimeMinutes,
             }));
@@ -1778,19 +1778,19 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
 export function getDocumentsUIFilterBuilders() {
     const builders: UIFilterBuilders = [
         new StringFilterBuilder({
-            name: $t(`Volgnummer`),
+            name: $t(`bb5c03d2-d684-40b6-9aa9-6f0877f41441`),
             key: 'id',
         }),
         new NumberFilterBuilder({
-            name: $t(`Nummer`),
+            name: $t(`89eafa94-6447-4608-a71e-84752eab10c8`),
             key: 'number',
         }),
         new StringFilterBuilder({
-            name: $t(`Beschrijving`),
+            name: $t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`),
             key: 'description',
         }),
         new MultipleChoiceFilterBuilder({
-            name: $t(`status`),
+            name: $t(`62a07ea0-53ad-4962-88ff-26ea1ab493b0`),
             options: Object.values(DocumentStatus).map((status) => {
                 return new MultipleChoiceUIFilterOption(
                     Formatter.capitalizeFirstLetter(DocumentStatusHelper.getName(status)),

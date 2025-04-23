@@ -88,7 +88,7 @@ export class EventNotificationViewModel {
                 if (this.isSaving) {
                     throw new SimpleError({
                         code: 'saving',
-                        message: $t('Al bezig met opslaan... Even geduld.'),
+                        message: $t('3f34c1d2-0305-432f-b789-7d334a7c093b'),
                     });
                 }
                 this.isSaving = true;
@@ -139,7 +139,7 @@ export class EventNotificationViewModel {
                 if (this.isSaving) {
                     throw new SimpleError({
                         code: 'saving',
-                        message: $t('Al bezig met opslaan... Even geduld.'),
+                        message: $t('3f34c1d2-0305-432f-b789-7d334a7c093b'),
                     });
                 }
                 this.isSaving = true;

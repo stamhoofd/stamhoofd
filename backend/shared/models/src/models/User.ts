@@ -456,7 +456,7 @@ export class User extends QueryableModel {
                 throw new SimpleError({
                     code: 'duplicate_login_provider',
                     message: 'This account is already linked to another account',
-                    human: $t(`Er is een ander extern account gekoppeld aan deze gebruiker. Het is niet mogelijk om in te loggen op dit account. Ontkoppel eerst je andere account.`),
+                    human: $t(`d4f1cb82-1e15-421a-8218-37cd3066436c`),
                     statusCode: 400,
                 });
             }
@@ -467,7 +467,7 @@ export class User extends QueryableModel {
                 throw new SimpleError({
                     code: 'password_based_account',
                     message: 'This user uses a password to login. Log in with the password and link the external account through the settings.',
-                    human: $t(`Log eerst in met je bestaande wachtwoord en koppel daarna de nieuwe login methode via je account instellingen.`),
+                    human: $t(`0154f68a-7458-4b87-91f2-5d04be0737fd`),
                     statusCode: 400,
                 });
             }

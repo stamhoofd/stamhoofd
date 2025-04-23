@@ -2,13 +2,13 @@
     <div class="st-view invalid-page-view">
         <main class="limit-width">
             <h1 v-if="!errorBox">
-                {{ $t('Deze webshop bestaat niet') }}
+                {{ $t('8b54b2c4-e7bb-4efe-8e7e-a02a2fa6667e') }}
             </h1>
             <h1 v-else>
-                {{ $t('Er ging iets mis') }}
+                {{ $t('44e0c667-07c5-4ff9-8bf2-623d9aa91219') }}
             </h1>
 
-            <p>{{ $t('Kijk even na of de link klopt of probeer later opnieuw.') }}</p>
+            <p>{{ $t('9c2198f2-9234-42e8-8783-3684d37a513e') }}</p>
 
             <STErrorsDefault :error-box="errorBox" />
 
@@ -20,7 +20,7 @@
                         </a>
                     </aside>
                     <div>
-                        <a :href="'https://'+$domains.marketing+'/webshops'">{{ $t('Webshop via') }} <Logo /></a>
+                        <a :href="'https://'+$domains.marketing+'/webshops'">{{ $t('9c3179f1-549a-4f72-975b-96b1baf0f239') }} <Logo /></a>
                     </div>
                 </div>
             </div>

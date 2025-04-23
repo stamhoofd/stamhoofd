@@ -3,14 +3,14 @@
         <STNavigationBar :title="$t(`Administratieportaal`)" />
         <main class="center">
             <h1>
-                {{ $t('Administratieportaal') }}
+                {{ $t('6bdca00a-b7ec-413e-b57a-3e192a53564f') }}
             </h1>
 
             <p v-if="auth.hasPlatformFullAccess()">
-                {{ $t('Welkom op het administratieportaal. Hier kan je alle leden of groepen opzoeken, nationale/regionale activiteiten aanmaken, of de instellingen op koepelniveau wijzigen.') }}
+                {{ $t('315fdb48-3f61-4795-9a40-c08c61fcd926') }}
             </p>
             <p v-else>
-                {{ $t('Welkom op het administratieportaal. Hier kan je alle leden of groepen opzoeken of nationale/regionale activiteiten aanmaken.') }}
+                {{ $t('607105b3-ba57-4818-9523-72923e3cdc8b') }}
             </p>
         </main>
     </section>

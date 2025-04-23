@@ -1,5 +1,5 @@
 <template>
-    <span v-if="getResponsibilityMergedRole(responsibility, group?.id).isEmpty" class="icon layered" :v-tooltip="$t('Heeft geen automatische rechten')">
+    <span v-if="getResponsibilityMergedRole(responsibility, group?.id).isEmpty" class="icon layered" :v-tooltip="$t('973b8b5e-9c84-4e86-aae8-da7ae1a1ad6a')">
         <span class="icon user-blocked-layer-1" />
         <span class="icon user-blocked-layer-2 red" />
     </span>

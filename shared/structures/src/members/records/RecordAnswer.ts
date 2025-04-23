@@ -49,7 +49,7 @@ export class RecordAnswer extends AutoEncoder {
     }
 
     get stringValue() {
-        return $t(`Onbekend`);
+        return $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`);
     }
 
     get objectValue(): string | number | boolean | null | Date | object {
@@ -208,7 +208,7 @@ export class RecordTextAnswer extends RecordAnswer {
         if (this.settings.required && (this.value === null || this.value.length === 0)) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Dit veld is verplicht`),
+                message: $t(`22531919-79f1-466f-b58d-30f709973ffb`),
                 field: 'input',
             });
         }
@@ -217,7 +217,7 @@ export class RecordTextAnswer extends RecordAnswer {
             if (!DataValidator.verifyBelgianNationalNumber(this.value)) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: "'" + (this.value) + $t(`' is geen geldig rijksregisternummer. Je kan dit nummer vinden op de achterkant van de identiteitskaart, in de vorm van JJ.MM.DD-XXX.XX. Kijk na op typefouten.`),
+                    message: "'" + (this.value) + $t(`77629645-c956-41ec-a7b1-837db4a30955`),
                     field: 'input',
                 });
             }
@@ -251,7 +251,7 @@ export class RecordCheckboxAnswer extends RecordAnswer {
     }
 
     get stringValue() {
-        return this.selected ? $t(`Aangevinkt`) : $t(`Niet aangevinkt`);
+        return this.selected ? $t(`ff791e99-3fe7-4f02-8219-32bcbeef2ab0`) : $t(`fc34f24a-1821-4ebc-a770-bf3368a98275`);
     }
 
     get objectValue() {
@@ -260,7 +260,7 @@ export class RecordCheckboxAnswer extends RecordAnswer {
 
     get excelValues() {
         return [{
-            value: this.selected ? (this.comments ? this.comments : $t(`Ja`)) : $t(`Nee`),
+            value: this.selected ? (this.comments ? this.comments : $t(`de05b76e-191f-4c55-900d-5e396c819bc0`)) : $t(`467bcb0a-f89a-4b9c-8ecd-c44a0c951049`),
             format: null,
         }];
     }
@@ -269,7 +269,7 @@ export class RecordCheckboxAnswer extends RecordAnswer {
         if (this.settings.required && !this.selected) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Dit is verplicht`),
+                message: $t(`11135109-1f06-4937-ad14-bf1d2c4557ab`),
                 field: 'input',
             });
         }
@@ -321,7 +321,7 @@ export class RecordMultipleChoiceAnswer extends RecordAnswer {
         if (this.settings.required && this.selectedChoices.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Duid minstens één keuze aan`),
+                message: $t(`1c762269-151c-4787-9050-92d1798a7af0`),
                 field: 'input',
             });
         }
@@ -372,7 +372,7 @@ export class RecordChooseOneAnswer extends RecordAnswer {
         if (this.settings.required && this.selectedChoice === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Duid een keuze aan`),
+                message: $t(`ef8843bc-57b0-4d63-aa44-c63cbe8ec76a`),
                 field: 'input',
             });
         }
@@ -399,7 +399,7 @@ export class RecordAddressAnswer extends RecordAnswer {
         if (this.settings.required && this.address === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Verplicht in te vullen`),
+                message: $t(`98b6e6a5-1995-4827-b2cb-e02de0fc9f65`),
                 field: 'input',
             });
         }
@@ -451,7 +451,7 @@ export class RecordDateAnswer extends RecordAnswer {
         if (this.settings.required && this.dateValue === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Verplicht in te vullen`),
+                message: $t(`98b6e6a5-1995-4827-b2cb-e02de0fc9f65`),
                 field: 'input',
             });
         }
@@ -489,7 +489,7 @@ export class RecordIntegerAnswer extends RecordAnswer {
         if (this.settings.required && (this.value === null)) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Dit veld is verplicht`),
+                message: $t(`22531919-79f1-466f-b58d-30f709973ffb`),
                 field: 'input',
             });
         }
@@ -522,7 +522,7 @@ export class RecordImageAnswer extends RecordAnswer {
         if (this.settings.required && this.image === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Verplicht in te vullen`),
+                message: $t(`98b6e6a5-1995-4827-b2cb-e02de0fc9f65`),
                 field: 'input',
             });
         }
@@ -553,7 +553,7 @@ export class RecordFileAnswer extends RecordAnswer {
         if (this.settings.required && this.file === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Verplicht in te vullen`),
+                message: $t(`98b6e6a5-1995-4827-b2cb-e02de0fc9f65`),
                 field: 'input',
             });
         }

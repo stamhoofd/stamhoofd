@@ -74,7 +74,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Period not found',
-                    human: $t(`Je kan geen wijzigingen meer aanbrengen in`) + ' ' + period.getStructure().name + ' ' + $t(`omdat deze is afgesloten`),
+                    human: $t(`d19ec3c4-6320-4f65-8890-74ba1a5bc375`) + ' ' + period.getStructure().name + ' ' + $t(`cb4b72b3-3990-4870-ab85-08ef7c7eadaa`),
                     statusCode: 404,
                 });
             }
@@ -120,7 +120,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                             }
 
                             if (!await Context.auth.canCreateGroupInCategory(organization.id, category)) {
-                                throw Context.auth.error($t(`Je hebt geen toegangsrechten om groepen toe te voegen in deze categorie`));
+                                throw Context.auth.error($t(`cdee3a74-4c03-46bc-ade1-7b8275a85400`));
                             }
 
                             // Only process puts
@@ -144,7 +144,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                             code: 'invalid_field',
                             field: 'categories',
                             message: 'Cannot have groups and categories combined',
-                            human: $t(`Een categorie kan niet zowel groepen als subcategorieën bevatten. Mogelijks zijn meerdere mensen tegelijk aanpassingen aan het maken aan de categorieën. Herlaadt de pagina en probeer opnieuw.`),
+                            human: $t(`c3834052-ea84-4d95-bc67-194e233cb11a`),
                         });
                     }
                 }
@@ -165,7 +165,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                         const isDeleted = refCountAfter < refCountBefore;
 
                         if (isDeleted) {
-                            throw Context.auth.error($t(`Je hebt geen toegangsrechten om deze vergrendelde categorie te verwijderen.`));
+                            throw Context.auth.error($t(`55ddf8ff-ffcf-4577-bcbf-78c82637f245`));
                         }
                     }
 
@@ -173,11 +173,11 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
                     if (!categoryAfter) {
                         if (locked) {
-                            throw Context.auth.error($t(`Je hebt geen toegangsrechten om deze vergrendelde categorie te verwijderen.`));
+                            throw Context.auth.error($t(`55ddf8ff-ffcf-4577-bcbf-78c82637f245`));
                         }
                     }
                     else if (locked !== categoryAfter.settings.locked) {
-                        throw Context.auth.error($t(`Je hebt geen toegangsrechten om deze categorie te vergrendelen of ontgrendelen.`));
+                        throw Context.auth.error($t(`a8982f4f-0c87-4f22-8f43-33ca26b73fc4`));
                     }
 
                     if (!locked || !categoryAfter) {
@@ -188,7 +188,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     const settingsAfter = categoryAfter.settings;
 
                     if (settingsBefore.name !== settingsAfter.name) {
-                        throw Context.auth.error($t(`Je hebt geen toegangsrechten de naam van deze vergrendelde categorie te wijzigen.`));
+                        throw Context.auth.error($t(`2529c09e-f582-486a-b3eb-a8b96d8efa26`));
                     }
                 }
             }
@@ -256,7 +256,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             throw new SimpleError({
                 code: 'invalid_default_age_group',
                 message: 'Invalid default age group',
-                human: $t(`De standaard leeftijdsgroep is niet beschikbaar voor deze organisatie`),
+                human: $t(`d81fc0f4-14e5-499c-9749-dd8941cdeb45`),
                 statusCode: 400,
             });
         }
@@ -264,7 +264,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         throw new SimpleError({
             code: 'invalid_default_age_group',
             message: 'Invalid default age group',
-            human: $t(`De standaard leeftijdsgroep is ongeldig`),
+            human: $t(`79672bcc-aa78-4d1d-ab82-f7c3c01ab4ff`),
             statusCode: 400,
         });
     }
@@ -313,7 +313,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
     static async deleteGroup(id: string) {
         const model = await Group.getByID(id);
         if (!model || !await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
-            throw Context.auth.error($t(`Je hebt geen toegangsrechten om deze groep te verwijderen`));
+            throw Context.auth.error($t(`ab05b3fe-fb52-49d7-a7d5-2d3bcc6dde3e`));
         }
 
         model.deletedAt = new Date();
@@ -324,7 +324,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         const model = await Group.getByID(struct.id);
 
         if (!model || !await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
-            throw Context.auth.error($t(`Je hebt geen toegangsrechten om deze groep te wijzigen`));
+            throw Context.auth.error($t(`0d382103-4a15-4f12-8e3d-feb4d184639d`));
         }
 
         if (struct.settings) {
@@ -343,7 +343,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 throw new SimpleError({
                     code: 'missing_permissions',
                     message: 'You cannot restrict your own permissions',
-                    human: $t(`Je kan je eigen volledige toegang tot deze inschrijvingsgroep niet verwijderen. Vraag aan een hoofdbeheerder om jouw toegang te verwijderen.`),
+                    human: $t(`8c220808-51af-4ea3-a941-9e9e39cd8d20`),
                 });
             }
         }
@@ -423,7 +423,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                             code: 'invalid_field',
                             field: 'waitingList',
                             message: 'Waiting list group is already used in another period',
-                            human: $t(`Een wachtlijst kan momenteel niet gedeeld worden tussen verschillende werkjaren`),
+                            human: $t(`b906c293-2afa-4ebe-9b33-2d64ab46da34`),
                         });
                     }
 
@@ -461,7 +461,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     // Ok
                 }
                 else {
-                    throw Context.auth.error($t(`Je hebt geen toegangsrechten om groepen toe te voegen`));
+                    throw Context.auth.error($t(`153a7443-e2d9-4126-8e10-089b54964fb8`));
                 }
             }
         }
@@ -513,7 +513,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 throw new SimpleError({
                     code: 'missing_permissions',
                     message: 'You cannot restrict your own permissions',
-                    human: $t(`Je kan geen inschrijvingsgroep maken zonder dat je zelf volledige toegang hebt tot de nieuwe groep`),
+                    human: $t(`4f4e52b6-288d-4893-a82b-15be8d07acbc`),
                 });
             }
         }

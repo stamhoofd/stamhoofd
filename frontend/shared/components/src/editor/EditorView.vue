@@ -53,15 +53,15 @@
                 <STList>
                     <STListItem class="no-padding right-stack">
                         <div class="list-input-box">
-                            <span>{{ $t('Link:') }}</span>
+                            <span>{{ $t('10b83895-551f-4892-9b58-b7b62db58726') }}</span>
 
-                            <input ref="linkInput" v-model="editLink" class="list-input" type="url" enterkeyhint="go" :placeholder="$t(`https://`)">
+                            <input ref="linkInput" v-model="editLink" class="list-input" type="url" enterkeyhint="go" :placeholder="$t(`780fa99d-7109-4f57-934b-1f4c5643a794`)">
                         </div>
                         <template #right>
                             <button class="button text" type="submit" @mousedown.prevent>
                                 {{ editLink.length === 0 ? "Sluiten" : "Opslaan" }}
                             </button>
-                            <button v-if="editor.isActive('link')" class="button icon trash gray" type="button" :v-tooltip="$t('Link verwijderen')" @mousedown.prevent @click.stop.prevent="clearLink()" />
+                            <button v-if="editor.isActive('link')" class="button icon trash gray" type="button" :v-tooltip="$t('025d14dd-57d4-4ec4-aa85-ddf9ddf98b6f')" @mousedown.prevent @click.stop.prevent="clearLink()" />
                         </template>
                     </STListItem>
                 </STList>
@@ -70,12 +70,12 @@
         <STToolbar v-if="!$isMobile && !$isIOS && !$isAndroid">
             <template #right>
                 <div class="editor-button-bar">
-                    <button class="button icon text-style" :class="{ 'is-active': showTextStyles }" type="button" :v-tooltip="$t('Toon/verberg tekst opties')" @mousedown.prevent @click.prevent="showTextStyles = !showTextStyles" />
-                    <hr><button v-if="smartVariables.length > 0" class="button icon wand" type="button" :v-tooltip="$t('Magische tekstvervanging')" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
-                    <button class="button icon hr" type="button" :v-tooltip="$t('Horizontale lijn')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
-                    <button class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" :v-tooltip="$t('Link toevoegen')" @click.prevent="openLinkEditor()" @mousedown.prevent />
+                    <button class="button icon text-style" :class="{ 'is-active': showTextStyles }" type="button" :v-tooltip="$t('24c13e07-66e8-421d-9dde-c69758395be8')" @mousedown.prevent @click.prevent="showTextStyles = !showTextStyles" />
+                    <hr><button v-if="smartVariables.length > 0" class="button icon wand" type="button" :v-tooltip="$t('52395130-fb1f-4508-951a-067dd6324575')" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
+                    <button class="button icon hr" type="button" :v-tooltip="$t('6ec5c3ba-7b6d-4ceb-9950-e152bed49b0a')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
+                    <button class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" :v-tooltip="$t('f501785a-7e57-4184-8cf0-a3413ad2f2a4')" @click.prevent="openLinkEditor()" @mousedown.prevent />
                     <UploadButton :resolutions="imageResolutions" @update:model-value="insertImage" @mousedown.native.prevent>
-                        <div class="button icon image" type="button" :v-tooltip="$t('Afbeelding toevoegen')" />
+                        <div class="button icon image" type="button" :v-tooltip="$t('91b1faf7-de10-46f3-9338-5930134da354')" />
                     </UploadButton>
                     <slot name="buttons" />
                 </div>
@@ -89,12 +89,12 @@
             </template>
         </STToolbar>
         <STButtonToolbar v-else-if="!showLinkEditor" class="sticky" @mousedown.prevent>
-            <button class="button icon text-style" type="button" :v-tooltip="$t('Toon/verberg tekst opties')" @click.prevent="openTextStyles($event)" @mousedown.prevent />
-            <button v-if="smartVariables.length > 0" class="button icon wand" type="button" :v-tooltip="$t('Slimme tekstvervanging')" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
-            <button class="button icon hr" type="button" :v-tooltip="$t('Horizontale lijn')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
-            <button class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" :v-tooltip="$t('Link toevoegen')" @click="openLinkEditor()" @mousedown.prevent />
+            <button class="button icon text-style" type="button" :v-tooltip="$t('24c13e07-66e8-421d-9dde-c69758395be8')" @click.prevent="openTextStyles($event)" @mousedown.prevent />
+            <button v-if="smartVariables.length > 0" class="button icon wand" type="button" :v-tooltip="$t('130a074e-ce12-4bf1-9898-c49a3c00006e')" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
+            <button class="button icon hr" type="button" :v-tooltip="$t('6ec5c3ba-7b6d-4ceb-9950-e152bed49b0a')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
+            <button class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" :v-tooltip="$t('f501785a-7e57-4184-8cf0-a3413ad2f2a4')" @click="openLinkEditor()" @mousedown.prevent />
             <UploadButton :resolutions="imageResolutions" @update:model-value="insertImage" @mousedown.prevent>
-                <div class="button icon image" type="button" :v-tooltip="$t('Afbeelding toevoegen')" />
+                <div class="button icon image" type="button" :v-tooltip="$t('91b1faf7-de10-46f3-9338-5930134da354')" />
             </UploadButton>
             <slot name="buttons" />
         </STButtonToolbar>
@@ -341,7 +341,7 @@ function insertImage(image: Image | null) {
         return;
     }
     editor.value.chain().focus().setImage({ src: resolution.file.getPublicPath(), alt: image.source.name ?? undefined, width: resolution.width, height: resolution.height }).run();
-    new Toast($t('Beperk het gebruik van afbeeldingen in e-mails. Afbeeldingen worden bestraft door spamfilters, en e-mails komen daardoor vaker bij spam terecht.'), 'info').show();
+    new Toast($t('5d8131bf-38a0-4c8c-b266-e30caa7aa270'), 'info').show();
 }
 //
 async function openTextStyles(event: MouseEvent) {

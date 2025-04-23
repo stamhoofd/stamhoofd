@@ -73,7 +73,7 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
             return Replacement.create({
                 token: 'loginDetails',
                 value: '',
-                html: this.hasAccount(email) ? `<p class="description"><em>${$t('Je kan op het ledenportaal inloggen met')} <strong>${formattedEmail}</strong>.${suffix}</em></p>` : `<p class="description"><em>${$t('Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres')} <strong>${formattedEmail}</strong>${$t(', dan krijg je automatisch toegang tot alle bestaande gegevens.')}${suffix}</em></p>`,
+                html: this.hasAccount(email) ? `<p class="description"><em>${$t('467951bf-92b1-417b-a56b-19ce254c3571')} <strong>${formattedEmail}</strong>.${suffix}</em></p>` : `<p class="description"><em>${$t('3c710008-5f1f-477b-9ba3-b355d47bf858')} <strong>${formattedEmail}</strong>${$t('adc70733-1f21-4e69-9b90-e56d5a80a6d6')}${suffix}</em></p>`,
             });
         };
 

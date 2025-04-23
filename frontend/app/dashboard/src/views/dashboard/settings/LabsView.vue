@@ -1,14 +1,14 @@
 <template>
     <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`Experimenten`)" @save="save">
         <h1>
-            {{ $t('Experimenten') }}
+            {{ $t('5a5c1ed2-516e-43a1-9e64-25a7f6190ed3') }}
         </h1>
 
-        <p>{{ $t('Hier kan je functies aanzetten die we nog aan het uittesten zijn, of functies die enkel voor geavanceerdere gebruikers nodig zijn.') }}</p>
+        <p>{{ $t('cdd2999b-28bf-4b9b-ba31-371cd3021923') }}</p>
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <hr><h2>{{ $t('Ontwikkelaars') }}</h2>
+        <hr><h2>{{ $t('e580ade8-d2b5-44e0-b712-2e66f5bce0c6') }}</h2>
 
         <STList class="illustration-list">
             <STListItem :selectable="true" class="left-center" @click="openApiUsers(true)">
@@ -16,7 +16,7 @@
                     <img src="@stamhoofd/assets/images/illustrations/laptop.svg">
                 </template>
                 <h2 class="style-title-list">
-                    {{ $t('API-keys') }}
+                    {{ $t('a5b3b5e6-70c0-4818-9548-01f810477cd2') }}
                 </h2>
                 <p class="style-description">
                     {{ $t('4d995169-f792-40f5-addf-60d8aed00362') }}
@@ -31,10 +31,10 @@
                     <img src="@stamhoofd/assets/images/illustrations/box-download.svg">
                 </template>
                 <h2 class="style-title-list">
-                    {{ $t('Exporteer instellingen') }}
+                    {{ $t('a6b4a111-2b23-4f15-bfb9-45c784a7159b') }}
                 </h2>
                 <p class="style-description">
-                    {{ $t('Maak een kopie van de instellingen van jouw vereniging.') }}
+                    {{ $t('1985f023-e846-4ea2-9526-b24358c7a294') }}
                 </p>
                 <template #right>
                     <LoadingButton :loading="downloadingSettings">
@@ -48,10 +48,10 @@
                     <img src="@stamhoofd/assets/images/illustrations/box-upload.svg">
                 </template>
                 <h2 class="style-title-list">
-                    {{ $t('Importeer instellingen') }}
+                    {{ $t('7b742cf1-1f8d-4848-b893-db0f34dac948') }}
                 </h2>
                 <p class="style-description">
-                    {{ $t('Overschrijf alle instellingen.') }}
+                    {{ $t('2dc53487-2eb6-408c-beef-5e00c7a4b5b9') }}
                 </p>
                 <template #right>
                     <LoadingButton :loading="uploadingSettings">
@@ -61,7 +61,7 @@
             </STListItem>
         </STList>
 
-        <hr><h2>{{ $t('Geavanceerde instellingen') }}</h2>
+        <hr><h2>{{ $t('ae010586-e7f2-4551-a486-77d4a92ec76b') }}</h2>
 
         <STList>
             <STListItem v-if="!enableBuckaroo && false" :selectable="true" element-name="label">
@@ -70,38 +70,38 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Mollie (betaalprovider)') }}
+                    {{ $t('55aa8ece-1684-4c56-81ff-5fb40758d0fa') }}
                 </h3>
 
                 <p class="style-description-small">
-                    {{ $t('Hou er rekening mee dat de tarieven van Mollie anders zijn dan die van Stripe.') }} <a :href="$domains.getDocs('transactiekosten')" class="inline-link" target="_blank">{{ $t('Meer info') }}</a>
+                    {{ $t('76a35b17-68d8-4d2f-8022-755b4033dc46') }} <a :href="$domains.getDocs('transactiekosten')" class="inline-link" target="_blank">{{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}</a>
                 </p>
             </STListItem>
         </STList>
 
         <div v-if="isStamhoofd" key="stamhoofd-settings" class="container">
             <hr><h2>
-                {{ $t('Platforminstellingen (enkel voor platformbeheerders)') }}
+                {{ $t('a0044037-18fd-465d-8907-9f7064342279') }}
             </h2>
 
             <Checkbox v-model="useTestPayments">
-                {{ $t('Activeer test-modus voor betalingen') }}
+                {{ $t('02fe4c35-562f-429c-9250-dbd25ca01357') }}
             </Checkbox>
 
             <Checkbox :model-value="getFeatureFlag('sso')" @update:model-value="setFeatureFlag('sso', !!$event)">
-                {{ $t('Single-Sign-On') }}
+                {{ $t('8cdbbc91-88ab-4d25-8f42-b34369e959f0') }}
             </Checkbox>
 
             <Checkbox :model-value="getFeatureFlag('webshop-auth')" @update:model-value="setFeatureFlag('webshop-auth', !!$event)">
-                {{ $t('Webshop auth') }}
+                {{ $t('5573d401-88aa-4221-9ed7-44380d970177') }}
             </Checkbox>
 
             <Checkbox :model-value="getFeatureFlag('organization-receivable-balances')" @update:model-value="setFeatureFlag('organization-receivable-balances', !!$event)">
-                {{ $t('Openstaande bedragen tussen verenigingen') }}
+                {{ $t('47e866d9-5349-4318-b779-161da61c2250') }}
             </Checkbox>
 
             <hr><button class="button text" type="button" @click="applyDiscountCode">
-                <span class="icon gift" /><span>{{ $t('Kortingscode toepassen') }}</span>
+                <span class="icon gift" /><span>{{ $t('5a58b689-5269-40a0-907e-c977b293c2fa') }}</span>
             </button>
         </div>
     </SaveView>

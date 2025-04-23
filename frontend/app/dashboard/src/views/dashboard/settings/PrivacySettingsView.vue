@@ -1,33 +1,33 @@
 <template>
     <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`Privacy`)" @save="save">
         <h1>
-            {{ $t('Privacy') }}
+            {{ $t('9ce28983-01ef-44bc-bc02-b76575bda1ce') }}
         </h1>
         <p>
-            {{ $t('Om in orde te zijn met de GDPR-wetgeving moet je jullie privacyvoorwaarden instellen.') }}
+            {{ $t('ec02ca17-cd7e-4416-b22f-b63aef41be2a') }}
         </p>
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <STInputBox error-fields="privacy" :error-box="errorBox" class="max" :title="$t(`Waar staan de privacyvoorwaarden?`)">
+        <STInputBox error-fields="privacy" :error-box="errorBox" class="max" :title="$t(`0ea39adf-90dc-43bd-aa66-c95cf1a42cf1`)">
             <RadioGroup>
                 <Radio v-model="selectedPrivacyType" value="none">
-                    {{ $t('Geen') }}
+                    {{ $t('45ff02db-f404-4d91-853f-738d55c40cb6') }}
                 </Radio>
                 <Radio v-model="selectedPrivacyType" value="website">
-                    {{ $t('Op onze website') }}
+                    {{ $t('321a898b-ec70-44e3-a511-f2353061cd66') }}
                 </Radio>
                 <Radio v-model="selectedPrivacyType" value="file">
-                    {{ $t('Zelf PDF-bestand aanleveren') }}
+                    {{ $t('a10aa0f7-592b-434c-bebe-2974943c392c') }}
                 </Radio>
             </RadioGroup>
         </STInputBox>
 
-        <STInputBox v-if="selectedPrivacyType === 'website'" key="website" error-fields="privacyPolicyUrl" :error-box="errorBox" :title="$t(`Volledige link naar privacyvoorwaarden`)">
+        <STInputBox v-if="selectedPrivacyType === 'website'" key="website" error-fields="privacyPolicyUrl" :error-box="errorBox" :title="$t(`0eacaeba-c809-40fb-823d-af2d283d22e3`)">
             <input v-model="privacyPolicyUrl" class="input" type="url" :placeholder="$t('daf8a992-77cd-4c20-8bca-5c692fd1e431')">
         </STInputBox>
 
-        <FileInput v-if="selectedPrivacyType === 'file'" key="file" v-model="privacyPolicyFile" :validator="validator" :required="false" :title="$t(`Kies een bestand`)" />
+        <FileInput v-if="selectedPrivacyType === 'file'" key="file" v-model="privacyPolicyFile" :validator="validator" :required="false" :title="$t(`2e45c772-02e9-431d-8273-79b3d10b0638`)" />
     </SaveView>
 </template>
 

@@ -1,32 +1,32 @@
 <template>
-    <SaveView :loading="saving" :disabled="!hasChangesFull" :title="$t(`E-mailadres`)" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChangesFull" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" @save="save">
         <h1 v-if="isNew">
-            {{ $t('E-mailadres toevoegen') }}
+            {{ $t('c5602934-95a8-437d-b576-eda8d9e6565e') }}
         </h1>
         <h1 v-else>
-            {{ $t('E-mailadres bewerken') }}
+            {{ $t('ed3e84f0-7ab3-467b-948f-0423ccbf2056') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam / aanspreking (optioneel)`)">
-            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`Optioneel. bv. Webshopverantwoordelijke`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`a059bcec-d0a2-42c4-a7fc-0fade27c9b0e`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`23302106-6c68-4b4a-8d48-6a7c0debdeb8`)">
         </STInputBox>
 
-        <EmailInput v-model="emailAddress" :validator="errors.validator" :title="$t(`E-mailadres`)" :placeholder="$t(`E-mailadres waarmee je wilt versturen`)" />
+        <EmailInput v-model="emailAddress" :validator="errors.validator" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" :placeholder="$t(`70c99ed2-97be-4252-b7c4-6cd46d5c9513`)" />
 
         <Checkbox v-model="isDefault">
             <h3 class="style-title-list">
-                {{ $t('Standaard e-mailadres') }}
+                {{ $t('b1bd0cb8-0256-48e8-8b65-9a82314a49a4') }}
             </h3>
             <p class="style-description-small">
-                {{ $t('Voor algemene e-mails of voor antwoorden op automatische e-mails als domeinnaam niet ingesteld is (bv. als antwoord op bestelbevestiging).') }}
+                {{ $t('85f5de69-bc8a-4f8d-be68-e6b05f6affce') }}
             </p>
         </Checkbox>
 
         <template v-if="enableMemberModule && groups.length">
-            <hr><h2>{{ $t('Inschrijvingsgroepen') }}</h2>
+            <hr><h2>{{ $t('c0b96584-ebf2-452b-89e2-0bea5e63eb74') }}</h2>
             <p class="st-list-description">
-                {{ $t('Selecteer de groepen die standaard met dit e-mailadres moeten versturen.') }}
+                {{ $t('a481dcc6-d66e-4098-adc4-66ae9b1ed35f') }}
             </p>
 
             <STList>
@@ -42,9 +42,9 @@
         </template>
 
         <template v-if="enableWebshopModule && webshops.length">
-            <hr><h2>{{ $t('Webshops') }}</h2>
+            <hr><h2>{{ $t('e85a86ee-7751-4791-984b-f67dc1106f6b') }}</h2>
             <p class="st-list-description">
-                {{ $t('Selecteer de webshops waarvoor we dit e-mailadres moeten gebruiken (bv. bestelbevestiging).') }}
+                {{ $t('6fbddfd5-c9af-492a-819f-a22370084cb6') }}
             </p>
 
             <STList>
@@ -61,12 +61,12 @@
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('Verwijderen') }}
+                {{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('Verwijderen') }}</span>
+                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
             </button>
         </div>
     </SaveView>

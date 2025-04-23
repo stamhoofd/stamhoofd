@@ -5,7 +5,7 @@
                 {{ record.name }}
             </h3>
             <p v-if="!answer" class="style-definition-text">
-                <span>{{ $t('Niet ingevuld') }}</span>
+                <span>{{ $t('e9f2788a-72fe-43d4-b4e3-0191af2ea090') }}</span>
             </p>
             <template v-else-if="recordCheckboxAnswer">
                 <p class="style-definition-text">
@@ -15,7 +15,7 @@
                 </p>
             </template>
             <p v-else-if="recordFileAnswer" class="style-definition-text">
-                <span v-if="!recordFileAnswer.file">{{ $t('Leeg') }}</span>
+                <span v-if="!recordFileAnswer.file">{{ $t('3e8d9718-569f-4243-b9ba-ae8f3df6d598') }}</span>
                 <template v-else>
                     <a :href="recordFileAnswer.file?.getPublicPath()" target="_blank" class="button text">
                         <span class="icon download" />
@@ -42,7 +42,7 @@
             <p v-if="recordCheckboxAnswer?.comments" v-copyable class="style-description-small pre-wrap" v-text="recordCheckboxAnswer.comments" />
         </template>
         <p v-if="recordsWithAnswers.filter(({recordCheckboxAnswer}) => recordCheckboxAnswer?.selected).length === 0" class="style-description">
-            {{ $t('Geen') }}
+            {{ $t('45ff02db-f404-4d91-853f-738d55c40cb6') }}
         </p>
     </template>
 

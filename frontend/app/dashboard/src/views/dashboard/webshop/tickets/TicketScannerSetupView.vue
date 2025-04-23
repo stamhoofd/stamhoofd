@@ -4,26 +4,26 @@
 
         <main>
             <h1>
-                {{ $t('Tickets scannen') }}
+                {{ $t('213bb888-16d4-4cdc-b917-6e6ec8b6fc84') }}
             </h1>
 
             <Spinner v-if="(isLoading && shouldFilter) || isChecking" />
             <p v-else-if="shouldFilter && !isLoading && (ticketProducts.length > 1 || disabledProducts.length)">
-                {{ $t(`Vink hieronder de tickets aan die je wilt scannen en klik op "starten". Zo scan je niet per ongeluk een ongeldig ticket als je verschillende scanpunten hebt op je evenement (bv. drankkaarten en inkomtickets apart).`) }}
+                {{ $t(`6b2de32e-471e-4e77-97d0-a800856ee5ba`) }}
             </p>
             <p v-else>
-                {{ $t(`Klik op "starten" om te beginnen.`) }}
+                {{ $t(`a2d46fc7-a82b-49ba-a2c8-98fe91a1c4d9`) }}
             </p>
 
             <p v-if="noDatabaseSupport" class="error-box">
-                {{ $t('Dit appartaat ondersteunt de scanner niet. Probeer in een moderne browser, op een smartphone en zorg ervoor dat je niet in privé modus surft (dat voorkomt de noodzakelijk opslag van tickets als het internet wegvalt).') }}
+                {{ $t('fd3f86b0-c773-4c11-8c24-72fc990975c3') }}
             </p>
 
             <a v-if="STAMHOOFD.platformName === 'stamhoofd'" class="info-box icon download selectable" href="https://files.stamhoofd.be/website/docs/tickets-checklist.pdf" download="tickets-checklist.pdf" target="_blank">
-                {{ $t('Download de checklist voor het scannen van tickets') }}
+                {{ $t('7021a7ac-e143-4a28-b810-f6f4fc88c3df') }}
             </a>
             <a v-else class="info-box icon download selectable" href="https://files.stamhoofd.be/website/docs/tickets-checklist-whitelabel.pdf" download="tickets-checklist.pdf" target="_blank">
-                {{ $t('Download de checklist voor het scannen van tickets') }}
+                {{ $t('7021a7ac-e143-4a28-b810-f6f4fc88c3df') }}
             </a>
 
             <template v-if="shouldFilter && !isLoading && (ticketProducts.length > 1 || disabledProducts.length)">
@@ -52,7 +52,7 @@
             <template #right>
                 <button class="button primary" type="button" @click="start">
                     <span class="icon play" />
-                    <span>{{ $t('Starten') }}</span>
+                    <span>{{ $t('8e829200-f906-49c1-a17e-dbfb193ed9f9') }}</span>
                 </button>
             </template>
         </STToolbar>

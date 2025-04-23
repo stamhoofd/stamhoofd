@@ -7,7 +7,7 @@
                     -
                 </template>
                 <a v-if="organization.website" :href="organization.website" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
-                    {{ $t('Website') }}
+                    {{ $t('f6c4cd8c-97e5-40d0-9331-69d15e100726') }}
                 </a>
 
                 <template v-for="policy in policies" :key="policy.id">
@@ -22,7 +22,7 @@
                 </template>
 
                 <a v-if="privacyUrl" :href="privacyUrl" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
-                    {{ $t('Privacyvoorwaarden') }}
+                    {{ $t('9f4f2cef-7466-42e3-bca3-d3bfd9f29aa4') }}
                 </a>
 
                 <template v-if="isLoggedIn">
@@ -30,16 +30,16 @@
                 </template>
 
                 <button v-if="isLoggedIn" class="inline-link secundary" type="button" @click="logout">
-                    {{ $t('Uitloggen') }}
+                    {{ $t('ecefb25b-4125-4df3-883b-73ddc301529e') }}
                 </button>
 
                 <br>
             </aside>
             <div v-if="STAMHOOFD.platformName !== 'stamhoofd'" class="style-wysiwyg gray no-underline-links" v-html="platform.config.shopFooterText.html" />
             <div v-else>
-                <a v-if="hasTickets" :href="'https://'+$domains.marketing+'?utm_medium=webshop'">{{ $t('Verkoop ook tickets via') }} <Logo /></a>
-                <a v-else-if="isWebshop" :href="'https://'+$domains.marketing+'?utm_medium=webshop'">{{ $t('Bouw je webshop via') }} <Logo /></a>
-                <a v-else :href="'https://'+$domains.marketing+'/ledenadministratie?utm_medium=ledenportaal'">{{ $t('Ledenadministratie via') }} <Logo /></a>
+                <a v-if="hasTickets" :href="'https://'+$domains.marketing+'?utm_medium=webshop'">{{ $t('e5749f83-1a33-4185-a07a-b2beea3b69ca') }} <Logo /></a>
+                <a v-else-if="isWebshop" :href="'https://'+$domains.marketing+'?utm_medium=webshop'">{{ $t('e38c80b5-b3be-48dd-8646-2c386477b1e5') }} <Logo /></a>
+                <a v-else :href="'https://'+$domains.marketing+'/ledenadministratie?utm_medium=ledenportaal'">{{ $t('6a5df3c9-cb80-4f5d-9b5d-94e180bac851') }} <Logo /></a>
             </div>
         </div>
     </div>

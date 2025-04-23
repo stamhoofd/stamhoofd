@@ -11,11 +11,11 @@
                 <STErrorsDefault :error-box="errors.errorBox" />
 
                 <p v-if="summary && summary.running" class="info-box icon clock">
-                    {{ $t('Er is momenteel een aanrekening bezig. Wacht tot deze is afgelopen.') }}
+                    {{ $t('65835e04-2a3a-45cb-ab98-31aac58c882b') }}
                 </p>
                 <template v-else>
                     <template v-if="membershipOrganization">
-                        <hr><h2>{{ $t('Boekhouding') }} {{ membershipOrganization.name }}</h2>
+                        <hr><h2>{{ $t('5d5cb596-1b5b-4ec3-98dd-2c0f012d9093') }} {{ membershipOrganization.name }}</h2>
 
                         <STList class="illustration-list">
                             <STListItem :selectable="true" class="left-center" element-name="a" :href="'/beheerders/' + membershipOrganization.uri + '/boekhouding/exporteren'">
@@ -80,14 +80,14 @@
                         </STList>
                     </template>
                     <hr><h2>
-                        {{ $t('Aansluitingen aanrekenen') }}
+                        {{ $t('f3d64c72-9a4e-4de2-8329-39e387fbc933') }}
                     </h2>
                     <p>
                         {{ $t("4a2a630f-3396-404f-9316-d660df9935a9") }}
                     </p>
 
                     <div class="style-stats-grid">
-                        <STInputBox :title="$t(`Nieuwe aansluitingen`)">
+                        <STInputBox :title="$t(`44b42e50-8012-4bd7-b4a5-44a80acc61dc`)">
                             <p class="style-price-big">
                                 <span v-if="!summary" class="style-placeholder-skeleton" />
                                 <span v-else>
@@ -96,7 +96,7 @@
                             </p>
                         </STInputBox>
 
-                        <STInputBox :title="$t(`Unieke leden`)">
+                        <STInputBox :title="$t(`082fff79-1ecd-450b-a2ed-a5cef7769f0f`)">
                             <p class="style-price-big">
                                 <span v-if="!summary" class="style-placeholder-skeleton" />
                                 <span v-else>
@@ -105,7 +105,7 @@
                             </p>
                         </STInputBox>
 
-                        <STInputBox :title="$t(`Totaal bedrag`)">
+                        <STInputBox :title="$t(`da735211-2f9d-45bf-a688-d76aaf796cc4`)">
                             <p class="style-price-big">
                                 <span v-if="!summary" class="style-placeholder-skeleton" />
                                 <span v-else>
@@ -114,7 +114,7 @@
                             </p>
                         </STInputBox>
 
-                        <STInputBox :title="$t(`Unieke groepen`)">
+                        <STInputBox :title="$t(`f18328bd-8ede-47ca-b38a-85fc0890eccf`)">
                             <p class="style-price-big">
                                 <span v-if="!summary" class="style-placeholder-skeleton" />
                                 <span v-else>

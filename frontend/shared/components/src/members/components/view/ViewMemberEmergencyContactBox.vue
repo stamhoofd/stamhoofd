@@ -5,7 +5,7 @@
         </h2>
 
         <dl class="details-grid hover">
-            <dt>{{ $t('Naam') }}</dt>
+            <dt>{{ $t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') }}</dt>
             <dd v-copyable>
                 {{ emergencyContact.name }}
             </dd>

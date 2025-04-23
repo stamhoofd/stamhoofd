@@ -8,7 +8,7 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="groupedResponsibilites.length === 0" class="info-box">
-            {{ $t('Geen functies gevonden') }}
+            {{ $t('f743df11-3d56-4c4a-a0eb-df8f818ba4e1') }}
         </p>
 
         <div v-for="({title: groupTitle, responsibilities}, index) of groupedResponsibilites" :key="''+index" class="container">
@@ -24,7 +24,7 @@
 
                     <h2 class="style-title-list">
                         {{ responsibility.name }}<template v-if="group">
-                            {{ $t('van') }} {{ group.settings.name }}
+                            {{ $t('e9ec956f-3a71-4460-b09d-dfec22a1aaf0') }} {{ group.settings.name }}
                         </template>
                     </h2>
                     <p v-if="group && selectedOrganization && group.periodId === selectedOrganization?.period.period.id" class="style-description-small">
@@ -35,7 +35,7 @@
                     </p>
 
                     <p class="style-description-small">
-                        {{ $t('Rechten') }}: {{ getResponsibilityMergedRoleDescription(responsibility, group?.id) }}
+                        {{ $t('52acb4e7-fb83-4406-8119-9adbda0ecc22') }}: {{ getResponsibilityMergedRoleDescription(responsibility, group?.id) }}
                     </p>
 
                     <p v-if="getResponsibilityEnabledDescription(responsibility, group?.id)" class="style-description-small">
@@ -70,7 +70,7 @@
                     </p>
 
                     <p class="style-description-small">
-                        {{ $t('Rechten') }}: {{ getResponsibilityRecordMergedRoleDescription(record) }}
+                        {{ $t('52acb4e7-fb83-4406-8119-9adbda0ecc22') }}: {{ getResponsibilityRecordMergedRoleDescription(record) }}
                     </p>
 
                     <p v-if="getResponsibilityRecordEnabledDescription(record)" class="style-description-small">

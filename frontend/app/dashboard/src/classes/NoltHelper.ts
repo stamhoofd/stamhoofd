@@ -21,14 +21,14 @@ export async function openNolt($context: SessionContext, check = false) {
 
         // Request permission if coming from an untrusted domain
         if (!url || (url.hostname !== STAMHOOFD.NOLT_URL && url.hostname !== 'www.stamhoofd.be' && url.hostname !== 'www.stamhoofd.nl')) {
-            if (!await CenteredMessage.confirm($t(`Wil je inloggen in het feedback systeem?`), $t(`Ja, open Feedback`), $t(`Je logt in op het feedback systeem met dit account: {email}. Je kan eerst van vereniging veranderen als je met een ander account wilt inloggen.`, { email: $context.user!.email }), undefined, false)) {
+            if (!await CenteredMessage.confirm($t(`1ff9f2e7-bf47-4206-bc03-ec43cfc33b65`), $t(`c4135e6a-2dab-4a8d-810d-252bd5552a22`), $t(`3573c612-1241-4b48-8ed5-8f11b8860e23`, { email: $context.user!.email }), undefined, false)) {
                 return;
             }
         }
     }
 
     // Create token
-    const toast = new Toast($t(`Feedback systeem openen...`), $t(`spinner`)).setHide(null).show();
+    const toast = new Toast($t(`ce7d2ca1-bda6-4701-b6a9-3e0cd7ac23c2`), $t(`619a9ba5-895c-4334-a126-a1c4b780e87b`)).setHide(null).show();
     try {
         const response = await $context.authenticatedServer!.request({
             method: 'POST',

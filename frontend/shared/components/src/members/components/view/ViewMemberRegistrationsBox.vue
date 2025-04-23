@@ -11,15 +11,15 @@
         </h2>
 
         <button v-if="!member.family.checkout.cart.isEmpty && app === 'registration'" class="info-box selectable icon" type="button" @click="openCart">
-            <span>{{ $t('Er staan inschrijvingen klaar in je mandje. Reken ze af om ze definitief te maken.') }}</span>
+            <span>{{ $t('8b7dab90-8fea-4a23-8766-431ce27edaec') }}</span>
             <span class="button icon arrow-right-small" />
         </button>
         <template v-else>
             <p v-if="visibleRegistrations.length === 0 && period.id === defaultPeriod.id" class="info-box">
-                {{ $t('{member} is niet ingeschreven', {member: member.patchedMember.firstName}) }}
+                {{ $t('74f14f24-6c35-4c61-a857-134408b0a2b4', {member: member.patchedMember.firstName}) }}
             </p>
             <p v-else-if="visibleRegistrations.length === 0" class="info-box">
-                {{ $t('{member} was niet ingeschreven', {member: member.patchedMember.firstName}) }}
+                {{ $t('0985547b-d5fb-4ae7-9e09-1773e7918960', {member: member.patchedMember.firstName}) }}
             </p>
         </template>
 
@@ -32,7 +32,7 @@
 
         <footer v-if="hasDeleted && !showDeleted" class="style-button-bar">
             <button class="button text" type="button" @click="showDeleted = true;">
-                {{ $t('Toon beëindigde inschrijvingen') }}
+                {{ $t('b0a3b188-34ec-4046-a6eb-24ddb2f816cf') }}
             </button>
         </footer>
     </article>

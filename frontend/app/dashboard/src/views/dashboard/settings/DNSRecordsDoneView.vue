@@ -1,24 +1,24 @@
 <template>
     <div id="dns-records-view" class="st-view">
-        <STNavigationBar :title="$t(`Gelukt!`)" />
+        <STNavigationBar :title="$t(`d1c4153d-1ee3-4f7b-a95c-ebb6f010a76a`)" />
 
         <main>
             <h1>
-                {{ $t('Gelukt! Jouw domeinnaam wordt binnenkort actief') }}
+                {{ $t('fab17919-181e-4ed5-a4b1-aca110d5200f') }}
             </h1>
 
             <p v-if="enableMemberModule" class="st-list-description">
-                {{ $t('Het kan nog even duren voor jouw aanpassingen zich verspreid hebben over het internet. Binnenkort worden e-mails naar jouw leden automatisch vanaf @{mailDomain} verstuurd. Jullie ledenportaal zal waarschijnlijk al iets sneller beschikbaar zijn op {registerDomain}.', {mailDomain, registerDomain}) }}
+                {{ $t('af699619-5a29-4df0-8c40-0047f6f5a7b3', {mailDomain, registerDomain}) }}
             </p>
             <p v-else class="st-list-description">
-                {{ $t('Het kan nog even duren voor jouw aanpassingen zich verspreid hebben over het internet. Binnenkort worden e-mails automatisch vanaf @{mailDomain} verstuurd.', {mailDomain}) }}
+                {{ $t('74bef3e3-7fad-483d-9232-9e6626a7ff30', {mailDomain}) }}
             </p>
         </main>
 
         <STToolbar>
             <template #right>
                 <button class="button primary" @click="dismiss">
-                    {{ $t('Sluiten') }}
+                    {{ $t('bef7a2f9-129a-4e1c-b8d2-9003ff0a1f8b') }}
                 </button>
             </template>
         </STToolbar>

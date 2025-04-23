@@ -1,14 +1,14 @@
 <template>
     <div id="dns-records-view" class="st-view">
-        <STNavigationBar :title="$t(`Instellingen`)" />
+        <STNavigationBar :title="$t(`bab38c80-8ab6-4cb7-80c3-1f607057e45d`)" />
 
         <main>
             <h1>
-                {{ $t('Pas de volgende instellingen aan') }}
+                {{ $t('7087e475-b3a9-492c-9d56-bfa3e763e713') }}
             </h1>
 
             <p class="st-list-description">
-                {{ $t('Stel de volgende DNS-instellingen in voor jouw domeinnaam. Dit kan je meestal doen in het klantenpaneel van jouw registrar (bv. Combell, Versio, Transip, One.com, GoDaddy...) waar je je domeinnaam hebt gekocht.') }}
+                {{ $t('1b2d46a6-22a9-485f-bb00-84facfa33d85') }}
             </p>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -18,10 +18,10 @@
             </div>
 
             <p class="warning-box">
-                {{ $t('Kijk alles goed na voor je aanpassingen maakt, verwijder zeker geen bestaande DNS-records. Als je DNS-records verwijdert, kan jouw huidige website onbereikbaar worden.') }}
+                {{ $t('136b3eb5-4c3a-46d5-87f1-25293225a875') }}
             </p>
             <p class="warning-box">
-                {{ $t('Het kan tot 24 uur duren tot de aanpassingen zijn doorgevoerd, in de meeste gevallen zou het binnen 1 uur al in orde moeten zijn. Je mag dit scherm sluiten als je de aanpassingen hebt gemaakt, we blijven op de achtergrond proberen en sturen jou een mailtje als alles in orde is.') }}
+                {{ $t('e1f9cde6-19dd-4c2d-93f2-1d962c823d1f') }}
             </p>
         </main>
 
@@ -29,7 +29,7 @@
             <template #right>
                 <LoadingButton :loading="saving">
                     <button class="button primary" type="button" @click="validate">
-                        {{ $t('Verifieer') }}
+                        {{ $t('381ebb39-0c79-4919-aa9c-b68375a98ad4') }}
                     </button>
                 </LoadingButton>
             </template>

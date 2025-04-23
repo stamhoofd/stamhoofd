@@ -1,26 +1,26 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
-        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" class="mail-view" :loading="sending" :save-text="$t('Versturen')" :replacements="replacements" :title="$t(`Nieuwe e-mail`)" @save="send">
+        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" class="mail-view" :loading="sending" :save-text="$t('d1e7abf8-20ac-49e5-8e0c-cc7fab78fc6b')" :replacements="replacements" :title="$t(`Nieuwe e-mail`)" @save="send">
             <h1 class="style-navigation-title">
-                {{ $t('Nieuwe e-mail') }}
+                {{ $t('59367bfa-a918-4475-8d90-d9e3d6c71ad8') }}
             </h1>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <!-- Buttons -->
             <template #buttons>
-                <label v-tooltip="$t('Bijlage toevoegen')" class="button icon attachment">
+                <label v-tooltip="$t('d76495d1-251b-4cf1-9ca1-7e7ac33a046f')" class="button icon attachment">
                     <input type="file" multiple="true" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile"><span v-if="$isMobile && files.length > 0" class="style-bubble">{{ files.length }}</span>
                 </label>
 
-                <hr v-if="canOpenTemplates"><button v-if="canOpenTemplates" v-tooltip="$t('Sjablonen')" class="button icon email-template" type="button" @click="openTemplates" />
+                <hr v-if="canOpenTemplates"><button v-if="canOpenTemplates" v-tooltip="$t('20bacd85-5b82-4396-bbd5-b6d88e7d90e4')" class="button icon email-template" type="button" @click="openTemplates" />
             </template>
 
             <!-- List -->
             <template #list>
                 <STListItem class="no-padding right-stack">
                     <div class="list-input-box">
-                        <span>{{ $t('Aan') }}:</span>
+                        <span>{{ $t('17a71942-a3d7-4d19-97bb-307cabffc1d6') }}:</span>
 
                         <div v-if="onlyOption" class="list-input">
                             {{ toDescription }}
@@ -37,13 +37,13 @@
                 </STListItem>
                 <STListItem class="no-padding" element-name="label">
                     <div class="list-input-box">
-                        <span>{{ $t('Onderwerp') }}:</span>
-                        <input id="mail-subject" v-model="subject" class="list-input" type="text" :placeholder="$t(`Typ hier het onderwerp van je e-mail`)">
+                        <span>{{ $t('709a5ff3-8d79-447b-906d-2c3cdabb41cf') }}:</span>
+                        <input id="mail-subject" v-model="subject" class="list-input" type="text" :placeholder="$t(`13b42902-e159-4e6a-8562-e87c9c691c8b`)">
                     </div>
                 </STListItem>
                 <STListItem v-if="emails.length > 0" class="no-padding" element-name="label">
                     <div class="list-input-box">
-                        <span>{{ $t('Van') }}:</span>
+                        <span>{{ $t('01b5d104-748c-4801-a369-4eab05809fcf') }}:</span>
 
                         <div class="input-icon-container right icon arrow-down-small gray">
                             <select v-model="selectedEmailAddress" class="list-input">
@@ -85,14 +85,14 @@
             <!-- Warnings and errors -->
             <template v-if="emails.length === 0">
                 <p v-if="auth.hasFullAccess()" class="warning-box selectable with-button" @click="manageEmails">
-                    {{ $t('Stel eerst jouw e-mailadressen in') }}
+                    {{ $t('ae013398-3667-40ff-ad66-c0cd0050f35c') }}
                     <span class="button text inherit-color">
                         <span class="icon settings" />
-                        <span>{{ $t('Wijzigen') }}</span>
+                        <span>{{ $t('9ee80b2b-1edd-4ae0-9d18-374b3c1f864a') }}</span>
                     </span>
                 </p>
                 <p v-else class="warning-box">
-                    {{ $t('Een hoofdbeheerder van jouw vereniging moet eerst e-mailadressen instellen voor je een e-mail kan versturen.') }}
+                    {{ $t('9ec8b45b-3321-4c1a-90bb-74e22c3e7f09') }}
                 </p>
             </template>
         </editorview>

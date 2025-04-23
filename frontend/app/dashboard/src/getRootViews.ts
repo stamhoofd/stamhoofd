@@ -218,7 +218,7 @@ export async function getScopedAutoRoot(session: SessionContext, options: { init
                         else {
                             throw new SimpleError({
                                 code: 'infinite_redirect',
-                                message: $t('Er ging iets mis: te veel doorverwijzingen.'),
+                                message: $t('a600bbdb-779a-4f6d-bc60-16c15eeaebe9'),
                             });
                         }
                         return new ComponentWithProperties({}, {});

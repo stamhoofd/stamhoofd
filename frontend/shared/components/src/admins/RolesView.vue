@@ -1,14 +1,14 @@
 <template>
-    <SaveView :loading-view="loading" :error-box="errors.errorBox" class="st-view background" :loading="saving" :disabled="!hasChanges" :title="$t(`Rollen`)" @save="save">
+    <SaveView :loading-view="loading" :error-box="errors.errorBox" class="st-view background" :loading="saving" :disabled="!hasChanges" :title="$t(`83ce9418-2abf-4d9b-a6b4-312df7ac4837`)" @save="save">
         <template #buttons>
             <button class="button icon add navigation" aria-label="Nieuwe beheerder" type="button" @click="addRole" />
         </template>
 
-        <h1>{{ $t('Externe beheerdersrollen') }}</h1>
+        <h1>{{ $t('697d96d8-17dc-4e98-8571-87153985f3a1') }}</h1>
         <p>{{ $t('9021f6b0-d1ae-422b-9651-48c7f5383b0b') }}</p>
 
         <p class="info-box">
-            {{ $t('Het concept van leden, beheerders en accounts kan verwarrend zijn. Het verschil zit hem in het feit dat leden beheerd kunnen worden door meerdere accounts (= een e-mailadres met wachtwoord waarmee je kan inloggen). Rechten en rollen worden aan accounts toegekend, terwijl je functies kan toekennen aan leden (= iemand die is ingeschreven voor een leeftijdsgroep).') }}
+            {{ $t('49da8533-b5b6-4ca1-9cd5-1ff8dc6486eb') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -23,10 +23,10 @@
                 </template>
 
                 <h2 class="style-title-list">
-                    {{ $t('Hoofdbeheerder') }}
+                    {{ $t('06e0f25f-f601-4359-a95d-b72fd79ecbdd') }}
                 </h2>
                 <p class="style-description-small">
-                    {{ $t('Volledige toegang') }}
+                    {{ $t('c2296305-99a9-497a-aed3-7bb3d2293ce8') }}
                 </p>
 
                 <template #right>
@@ -55,7 +55,7 @@
                                 {{ getAdminsForRole(role) }}
                             </span>
                             <span v-else class="style-tag warn">
-                                {{ $t('Ongebruikt') }}
+                                {{ $t('2f5d5e2d-cc3b-4cf6-8f4e-97b72a106163') }}
                             </span>
                             <span class="button icon drag gray" @click.stop @contextmenu.stop />
                             <span class="icon arrow-right-small gray" />

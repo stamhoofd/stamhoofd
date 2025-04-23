@@ -33,12 +33,12 @@ export function useSwitchablePeriod(options?: { onSwitch?: () => void | Promise<
                         if (!organizationPeriod) {
                             // Can not start if ended, or if not starging withing 2 months
                             if (p.endDate < new Date() || p.startDate < organization.period.period.startDate) {
-                                new CenteredMessage($t(`Niet beschikbaar`), $t(`Deze periode is niet beschikbaar voor jouw organisatie.`)).addCloseButton().show();
+                                new CenteredMessage($t(`9128d20d-f23a-4d1e-a631-c61a25ade53c`), $t(`b34e7f10-2e03-42f5-b865-2d88571d2a6e`)).addCloseButton().show();
                                 return false;
                             }
 
                             if (p.startDate.getTime() > new Date().getTime() + 1000 * 60 * 60 * 24 * 62 && STAMHOOFD.environment !== 'development') {
-                                new CenteredMessage($t(`Niet beschikbaar`), $t('275f674b-bf05-4d34-a1ff-105a1563fbcc')).addCloseButton().show();
+                                new CenteredMessage($t(`9128d20d-f23a-4d1e-a631-c61a25ade53c`), $t('275f674b-bf05-4d34-a1ff-105a1563fbcc')).addCloseButton().show();
                                 return false;
                             }
 
@@ -60,7 +60,7 @@ export function useSwitchablePeriod(options?: { onSwitch?: () => void | Promise<
                             return true;
                         }
 
-                        new Toast($t(`Je bekijkt nu`) + ' ' + p.name, 'success').show();
+                        new Toast($t(`253b64ce-1507-4655-a75d-ae046e983329`) + ' ' + p.name, 'success').show();
                         period.value = organizationPeriod;
 
                         if (options?.onSwitch) {

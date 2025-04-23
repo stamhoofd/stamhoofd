@@ -69,7 +69,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid event',
-                        human: $t(`Dit evenement bestaat niet of is niet van jouw organisatie`),
+                        human: $t(`4275fbbe-9921-454e-852c-9c53a9803f1f`),
                         field: 'events',
                     });
                 }

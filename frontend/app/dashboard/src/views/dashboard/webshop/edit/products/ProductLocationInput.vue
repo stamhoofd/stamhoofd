@@ -1,9 +1,9 @@
 <template>
     <div class="product-location-input">
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Locatienaam`)">
-            <input v-model="name" class="input" :placeholder="$t(`bv. Gemeentelijke feestzaal`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`3c6084da-ce6f-4d03-b213-42def4eabbb7`)">
+            <input v-model="name" class="input" :placeholder="$t(`e32f1f4e-e834-47a1-a7cb-a807170b6871`)">
         </STInputBox>
-        <AddressInput v-model="address" :validator="validator" :required="false" :title="$t(`Adres (optioneel)`)" />
+        <AddressInput v-model="address" :validator="validator" :required="false" :title="$t(`5e85d1ac-98a4-4cfb-a0ce-f06e427d73b3`)" />
     </div>
 </template>
 

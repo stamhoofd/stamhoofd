@@ -3,7 +3,7 @@
         <STGradientBackground v-if="!platform.config.horizontalLogo" />
 
         <div class="st-view">
-            <STNavigationBar :large="!isNative" class="transparent" :title="$t(`Beheer jouw groep`)" />
+            <STNavigationBar :large="!isNative" class="transparent" :title="$t(`5eb72046-9ec6-4072-89ff-5c123636afbe`)" />
 
             <main class="flex center small organization-selection-view">
                 <h1>
@@ -33,7 +33,7 @@
                                 {{ getAppDescription(option.app, option.organization) }}
                             </p>
                             <p v-if="option.userDescription" class="style-description-small style-em">
-                                {{ $t('Ingelogd als') }} {{ option.userDescription }}
+                                {{ $t('2dfdd151-6245-4f46-ba42-695a09b74607') }} {{ option.userDescription }}
                             </p>
 
                             <span v-if="option.userDescription" class="icon gray sync floating" />
@@ -44,18 +44,18 @@
                 </template>
 
                 <p v-if="!loadingResults && visibleOptions.length === 0 && query" class="info-box">
-                    {{ $t('Geen verenigingen gevonden. Probeer te zoeken op postcode of naam. Is jouw vereniging nog niet aangesloten? Maak dan eerst een vereniging aan.') }}
+                    {{ $t('7046d9e3-c3ce-406b-af52-fd2c81220867') }}
                 </p>
 
                 <footer v-if="!isPlatform">
                     <a v-if="!isNative" href="/aansluiten" class="button text full selected" @click.prevent="$navigate('join')">
                         <span class="icon add" />
-                        <span>{{ $t('Mijn vereniging aansluiten') }}</span>
+                        <span>{{ $t('5b3e65b1-9444-4b65-a032-e184ed7c2471') }}</span>
                     </a>
 
                     <button class="button text full" type="button" @click="help">
                         <span class="icon help" />
-                        <span>{{ $t('Mijn vereniging staat er niet tussen') }}</span>
+                        <span>{{ $t('2aead74c-c67c-4844-8ba2-f7f930b35b5e') }}</span>
                     </button>
                 </footer>
 

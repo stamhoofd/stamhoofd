@@ -166,19 +166,19 @@ export class AuditLogReplacement extends AutoEncoder {
         }
 
         if (this.type === AuditLogReplacementType.Html) {
-            return this.description || $t(`Bekijk inhoud`);
+            return this.description || $t(`7495a021-71f6-464f-b742-4e79206f4d7f`);
         }
 
         if (this.type === AuditLogReplacementType.LongText) {
-            return this.description || $t(`Bekijk inhoud`);
+            return this.description || $t(`7495a021-71f6-464f-b742-4e79206f4d7f`);
         }
 
         if (this.type === AuditLogReplacementType.Image) {
-            return $t(`Afbeelding`);
+            return $t(`31a0612a-b8a3-481d-9738-80be685a8680`);
         }
 
         if (this.type === AuditLogReplacementType.File) {
-            return $t(`Bestand`);
+            return $t(`6e9064fc-f18e-40c7-b36b-e544a4801b2d`);
         }
         return this.value;
     }

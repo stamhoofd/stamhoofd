@@ -2,24 +2,24 @@
     <div>
         <dl class="details-grid dns-records" :class="{ success: record.status === 'Valid' }">
             <template v-if="record.optional">
-                <dt>{{ $t('Optioneel') }}</dt>
-                <dd>{{ $t('Deze record is optioneel') }}</dd>
+                <dt>{{ $t('9e0461d2-7439-4588-837c-750de6946287') }}</dt>
+                <dd>{{ $t('9abb03cf-d76c-4f97-afea-76982042b1ad') }}</dd>
             </template>
 
-            <dt>{{ $t('Type') }}</dt>
+            <dt>{{ $t('6c9d45e5-c9f6-49c8-9362-177653414c7e') }}</dt>
             <dd>{{ record.type }}</dd>
 
-            <dt>{{ $t('Naam') }}</dt>
-            <dd v-copyable class="selectable" :v-tooltip="$t('Klik om te kopiëren')">
+            <dt>{{ $t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') }}</dt>
+            <dd v-copyable class="selectable" :v-tooltip="$t('6b0bca07-3cba-45cf-bc94-e3217e59a69f')">
                 {{ record.name }}
             </dd>
 
-            <dt>{{ $t('Waarde') }}</dt>
-            <dd v-copyable class="selectable" :v-tooltip="$t('Klik om te kopiëren')">
+            <dt>{{ $t('6a8b6166-a8f9-41b8-81e7-a12180de762e') }}</dt>
+            <dd v-copyable class="selectable" :v-tooltip="$t('6b0bca07-3cba-45cf-bc94-e3217e59a69f')">
                 {{ record.value }}
             </dd>
 
-            <dt>{{ $t('TTL') }}</dt>
+            <dt>{{ $t('116f6ca0-c077-4468-b79b-d329f6a8db77') }}</dt>
             <dd v-copyable class="selectable">
                 3600
             </dd>

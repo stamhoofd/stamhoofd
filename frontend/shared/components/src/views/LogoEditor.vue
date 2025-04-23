@@ -2,39 +2,39 @@
     <div>
         <div v-if="darkMode === 'Off' || darkMode === 'Auto'" class="split-inputs">
             <div>
-                <ImageInput v-model="horizontalLogo" :placeholder="horizontalLogoPlaceholder" :validator="validator" :resolutions="horizontalLogoResolutions" :required="false" :title="$t(`Horizontaal`)" />
+                <ImageInput v-model="horizontalLogo" :placeholder="horizontalLogoPlaceholder" :validator="validator" :resolutions="horizontalLogoResolutions" :required="false" :title="$t(`872ed300-befc-44a1-b989-1c0af2f2ab23`)" />
 
                 <p class="style-description-small">
-                    {{ $t('Voor grotere schermen.') }}
+                    {{ $t('573cb04e-77e2-408c-aecd-abd36759a0fc') }}
                 </p>
             </div>
 
             <div>
-                <ImageInput v-model="squareLogo" :placeholder="squareLogoPlaceholder" :validator="validator" :resolutions="squareLogoResolutions" :required="false" :title="$t(`Vierkant`)" />
+                <ImageInput v-model="squareLogo" :placeholder="squareLogoPlaceholder" :validator="validator" :resolutions="squareLogoResolutions" :required="false" :title="$t(`408b5a17-3902-4483-b9cb-38d581ad3b97`)" />
                 <p class="style-description-small">
-                    {{ $t('Voor op kleine schermen. Laat tekst zoveel mogelijk weg uit dit logo.') }}
+                    {{ $t('b0bcf568-cbb0-4c55-9401-54a8bbcc2e72') }}
                 </p>
             </div>
         </div>
         <div v-if="darkMode === 'On' || darkMode === 'Auto'" class="split-inputs">
             <div>
-                <ImageInput v-model="horizontalLogoDark" :placeholder="horizontalLogoDarkPlaceholder" :validator="validator" :resolutions="horizontalLogoResolutions" :required="false" :dark="true" :title="$t(`Horizontaal op donkere achtergrond`)" />
+                <ImageInput v-model="horizontalLogoDark" :placeholder="horizontalLogoDarkPlaceholder" :validator="validator" :resolutions="horizontalLogoResolutions" :required="false" :dark="true" :title="$t(`b460f9b2-ffd8-48c4-b4e0-57c360f0affc`)" />
 
                 <p class="style-description-small">
-                    {{ $t('Voor grotere schermen. In donkere modus.') }}
+                    {{ $t('b511b29e-c50f-4332-a357-9f25d3277fd9') }}
                 </p>
             </div>
 
             <div>
-                <ImageInput v-model="squareLogoDark" :placeholder="squareLogoDarkPlaceholder" :validator="validator" :resolutions="squareLogoResolutions" :required="false" :dark="true" :title="$t(`Vierkant`)" />
+                <ImageInput v-model="squareLogoDark" :placeholder="squareLogoDarkPlaceholder" :validator="validator" :resolutions="squareLogoResolutions" :required="false" :dark="true" :title="$t(`408b5a17-3902-4483-b9cb-38d581ad3b97`)" />
                 <p class="style-description-small">
-                    {{ $t('Voor op kleine schermen. In donkere modus. Laat tekst zoveel mogelijk weg uit dit logo.') }}
+                    {{ $t('7e37a459-c43c-4123-a42d-acc9d8a0e624') }}
                 </p>
             </div>
         </div>
 
         <Checkbox v-model="expandLogo">
-            {{ $t('Logo groter weergeven (afgeraden)') }}
+            {{ $t('9e68d551-a532-4681-9040-95e4c0f673aa') }}
         </Checkbox>
     </div>
 </template>

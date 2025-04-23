@@ -87,7 +87,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'cannot_lock_current_period',
                         message: 'Current registration period cannot be locked',
-                        human: $t(`Het huidige werkjaar kan niet vergrendeld worden`),
+                        human: $t(`1401fb57-4172-4211-acdb-0afbc87af86e`),
                     });
                 }
             }
@@ -117,7 +117,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'cannot_lock_current_period',
                         message: 'Current registration period cannot be locked',
-                        human: $t(`Het huidige werkjaar kan niet vergrendeld worden`),
+                        human: $t(`1401fb57-4172-4211-acdb-0afbc87af86e`),
                     });
                 }
             }

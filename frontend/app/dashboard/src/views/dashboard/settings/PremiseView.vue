@@ -16,7 +16,7 @@
             <AddressInput v-model="address" :title="$t('622c0dd7-cddd-4417-9bfd-5f6aca2480f5')" :validator="errors.validator" :required="true" :link-country-to-locale="true" error-fields="address" />
 
             <div v-if="platformPremiseTypes.length || originalPremiseTypeIds.size" class="container">
-                <hr><h2>{{ $t('Type') }}</h2>
+                <hr><h2>{{ $t('6c9d45e5-c9f6-49c8-9362-177653414c7e') }}</h2>
                 <STList>
                     <STListItem v-for="premiseType of platformPremiseTypes" :key="premiseType.id" :selectable="true" element-name="label" class="hover-box">
                         <template #left>
@@ -33,7 +33,7 @@
 
                         <template #right>
                             <span v-if="premiseTypeWarnings.has(premiseType.id)" v-tooltip="premiseTypeWarnings.get(premiseType.id)" class="icon warning yellow" />
-                            <span v-else-if="isPremiseTypeDisabled(premiseType)" class="icon info-circle hover-show" :v-tooltip="$t('Het maximum aantal van dit type is bereikt. Verwijder eerst een ander lokaal van dit type om dit type te selecteren.')" />
+                            <span v-else-if="isPremiseTypeDisabled(premiseType)" class="icon info-circle hover-show" :v-tooltip="$t('e70a9465-ddc1-4afa-841f-e73a7e50c19c')" />
                         </template>
                     </STListItem>
                     <STListItem v-if="hasUnknownType" :selectable="true" element-name="label">
@@ -42,10 +42,10 @@
                         </template>
                         <div class="checkbox-label">
                             <h2 class="style-title-list">
-                                {{ $t('Onbekend') }}
+                                {{ $t('49e90fda-d262-4fe7-a2e2-d6b48abc8e2b') }}
                             </h2>
                             <p class="style-description-small">
-                                {{ $t('Dit type lokaal is onbekend. Waarschijnlijk is deze verwijderd.') }}
+                                {{ $t('22e2c93e-c93d-466c-b749-4b723f22e0eb') }}
                             </p>
                         </div>
                     </STListItem>

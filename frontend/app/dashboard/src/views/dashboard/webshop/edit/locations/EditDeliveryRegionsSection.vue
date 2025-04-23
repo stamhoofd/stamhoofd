@@ -1,11 +1,11 @@
 <template>
     <div class="container">
-        <hr><h2>{{ $t('Leveringsgebied') }}</h2>
-        <p>{{ $t('Voeg de gemeenten, provincies en landen toe waarin je wilt leveren.') }}</p>
+        <hr><h2>{{ $t('cfeed757-1e11-4fb0-ab01-e5980918d078') }}</h2>
+        <p>{{ $t('815dc19b-7cd0-48e4-9b84-3004f92ad36a') }}</p>
 
         <LoadingButton :loading="loadingSearch" class="edit-regions-search-bar block">
             <div class="input-icon-container icon search gray">
-                <input v-model="searchQuery" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" spellcheck="false" autocapitalize="off" class="input" :placeholder="$t(`Toevoegen`)">
+                <input v-model="searchQuery" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" spellcheck="false" autocapitalize="off" class="input" :placeholder="$t(`36ba68cb-2159-4179-8ded-89e73d47cd87`)">
             </div>
         </LoadingButton>
 

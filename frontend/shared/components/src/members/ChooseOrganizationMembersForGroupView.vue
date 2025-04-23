@@ -1,24 +1,24 @@
 <template>
-    <SaveView :save-text="$t('Bevestigen')" main-class="flex" :save-badge="cartLength" :disabled="cartLength === 0" :loading="saving" :title="$t(`Inschrijvingen wijzigen`)" @save="goToCheckout">
+    <SaveView :save-text="$t('7de2e636-dcec-44b1-a681-daeb9cd85316')" main-class="flex" :save-badge="cartLength" :disabled="cartLength === 0" :loading="saving" :title="$t(`809b158a-2a1f-459f-a60c-4ae5c69fbe8e`)" @save="goToCheckout">
         <p v-if="!checkout.isAdminFromSameOrganization && checkout.singleOrganization" class="style-title-prefix">
             {{ checkout.singleOrganization.name }}
         </p>
         <h1 v-if="group && isOnlyDeleting">
-            {{ $t('Uitschrijven voor') }} {{ group.settings.name }}
+            {{ $t('3b62fa55-becc-4ffb-b15d-f64528033953') }} {{ group.settings.name }}
         </h1>
         <h1 v-else-if="group">
-            {{ $t('Inschrijvingen voor') }} {{ group.settings.name }}
+            {{ $t('f640fb74-eee1-43cf-8b28-0c6ff17da4d2') }} {{ group.settings.name }}
         </h1>
         <h1 v-else>
-            {{ $t('Winkelmandje') }}
+            {{ $t('5e2654f2-6423-47bc-b7e7-054e41bf287f') }}
         </h1>
 
         <p v-if="checkout.totalPrice && checkout.isAdminFromSameOrganization" class="info-box">
-            {{ $t('De kosten zullen aan het openstaande bedrag van elk lid worden toegevoegd. Leden kunnen dit betalen via het ledenportaal.') }}
+            {{ $t('8fa09d5b-957e-49c0-b02f-2aca8e17eb24') }}
         </p>
 
         <p v-if="checkout.totalPrice && contextOrganization && checkout.asOrganizationId && !checkout.isAdminFromSameOrganization" class="warning-box">
-            {{ $t('Je betaalt deze inschrijvingen in naam van {organization}. Je moet zelf de kosten aan je leden doorrekenen indien gewenst.', {organization: contextOrganization.name}) }}
+            {{ $t('0696b0bc-d2e2-4dc5-88d3-7ee188953cdf', {organization: contextOrganization.name}) }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -30,18 +30,18 @@
         </STList>
 
         <p v-if="checkout.cart.isEmpty" class="info-box">
-            {{ $t('Voeg de leden toe die je wilt inschrijven') }}
+            {{ $t('7a4b32f3-2459-4dde-aad7-12a9e1349ae0') }}
         </p>
 
         <p v-if="group && !isOnlyDeleting" class="style-button-bar">
             <button type="button" class="button text" @click="searchMembers">
                 <span class="icon search" />
-                <span>{{ $t('Zoek bestaande leden') }}</span>
+                <span>{{ $t('9ef4a12d-ad85-4ee4-8604-c8a07d4e37f3') }}</span>
             </button>
 
             <button type="button" class="button text" @click="addMember">
                 <span class="icon add" />
-                <span>{{ $t('Splinternieuw lid') }}</span>
+                <span>{{ $t('ea4f66eb-cabd-466d-80a6-a7019d8137dc') }}</span>
             </button>
         </p>
 
@@ -53,11 +53,11 @@
                 {{ $t('b263fa75-5a47-43a6-94a5-95eeac94567f') }}
             </p>
 
-            <STInputBox :title="$t(`Percentage`)">
-                <PermyriadInput v-model="checkout.cancellationFeePercentage" :min="0" :max="10000" :placeholder="$t(`0`)" />
+            <STInputBox :title="$t(`dd61d33b-367e-4e40-8ac6-84c286b931bc`)">
+                <PermyriadInput v-model="checkout.cancellationFeePercentage" :min="0" :max="10000" :placeholder="$t(`085e5b60-8c26-49b2-bba3-04dd38b3a891`)" />
             </STInputBox>
             <p v-if="checkout.cancellationFeePercentage !== 0 && checkout.cancellationFeePercentage !== 10000" class="style-description-small">
-                {{ $t('De annuleringskost wordt individueel en rekenkundig afgerond op 1 cent.') }}
+                {{ $t('13978903-0724-4935-a004-b9dbd4fe1ab1') }}
             </p>
         </div>
 

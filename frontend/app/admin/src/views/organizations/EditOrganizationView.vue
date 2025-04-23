@@ -52,7 +52,7 @@
             <hr><h2>{{ $t('97475ade-4e97-4989-b2f4-fecd534db3c4') }}</h2>
 
             <STList>
-                <CheckboxListItem v-model="active" :label="$t('97475ade-4e97-4989-b2f4-fecd534db3c4')" :description="$t(`Leden kunnen geen inactieve groepen vinden of erbij inloggen.`)" />
+                <CheckboxListItem v-model="active" :label="$t('97475ade-4e97-4989-b2f4-fecd534db3c4')" :description="$t(`3f4fbe8a-bd28-432e-a54f-04067e5f83d5`)" />
             </STList>
         </template>
     </SaveView>

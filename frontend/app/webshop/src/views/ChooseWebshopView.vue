@@ -8,7 +8,7 @@
             <template #right>
                 <a v-if="organization.website" class="button text limit-space" :href="organization.website" target="_blank" rel="nofollow noreferrer noopener">
                     <span class="icon external" />
-                    <span>{{ $t('Terug naar website') }}</span>
+                    <span>{{ $t('6de2861f-64bc-44fe-af80-5742c91d03d6') }}</span>
                 </a>
             </template>
         </STNavigationBar>
@@ -16,7 +16,7 @@
         <main class="with-legal">
             <div v-if="webshops.length > 0" class="box">
                 <main>
-                    <h1>{{ $t('Onze webshops') }}</h1>
+                    <h1>{{ $t('ee9ae612-2453-4e3c-8ff2-b8c89a63a154') }}</h1>
 
                     <STList>
                         <STListItem v-for="webshop of webshops" :key="webshop.id" element-name="a" :selectable="true" :href="'https://'+webshop.getUrl(organization)" class="left-center">
@@ -39,9 +39,9 @@
             </div>
             <div v-else class="box">
                 <main>
-                    <h1>{{ $t('Onze webshops') }}</h1>
+                    <h1>{{ $t('ee9ae612-2453-4e3c-8ff2-b8c89a63a154') }}</h1>
                     <p class="info-box">
-                        {{ $t('We organiseren momenteel helaas geen verkoop. Kom later nog eens terug.') }}
+                        {{ $t('d1048e80-095f-4fda-9ff2-eed515fef882') }}
                     </p>
                 </main>
             </div>

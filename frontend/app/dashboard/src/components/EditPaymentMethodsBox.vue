@@ -2,13 +2,13 @@
     <LoadingBoxTransition :loading="loadingStripeAccounts">
         <div class="container">
             <STErrorsDefault :error-box="errors.errorBox" />
-            <STInputBox v-if="(stripeAccountObject === null && stripeAccounts.length > 0) || stripeAccounts.length > 1 || (stripeAccounts.length > 0 && hasMollieOrBuckaroo)" error-fields="stripeAccountId" :title="$t(`Betaalaccount`)">
+            <STInputBox v-if="(stripeAccountObject === null && stripeAccounts.length > 0) || stripeAccounts.length > 1 || (stripeAccounts.length > 0 && hasMollieOrBuckaroo)" error-fields="stripeAccountId" :title="$t(`217f3390-3eef-4f35-bd23-ab3c155f2622`)">
                 <Dropdown v-model="stripeAccountId">
                     <option v-if="hasMollieOrBuckaroo" :value="null">
                         {{ mollieOrBuckarooName }}
                     </option>
                     <option v-else :value="null">
-                        {{ $t('Geen') }}
+                        {{ $t('45ff02db-f404-4d91-853f-738d55c40cb6') }}
                     </option>
                     <option v-for="account in stripeAccounts" :key="account.id" :value="account.id">
                         {{ account.meta.settings.dashboard.display_name }} - {{ account.meta.business_profile.name }}, xxxx {{ account.meta.bank_account_last4 }} - {{ account.accountId }}
@@ -18,7 +18,7 @@
             <p v-if="stripeAccountObject && stripeAccountObject.warning" :class="stripeAccountObject.warning.type + '-box'">
                 {{ stripeAccountObject.warning.text }}
                 <a :href="$domains.getDocs('documenten-stripe-afgekeurd')" target="_blank" class="button text">
-                    {{ $t('Meer info') }}
+                    {{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}
                 </a>
             </p>
 
@@ -40,21 +40,21 @@
             </STList>
 
             <template v-if="showAdministrationFee">
-                <hr><h2>{{ $t('Administratiekosten') }}</h2>
+                <hr><h2>{{ $t('be98be36-f796-4f96-b054-4d2a09be3d79') }}</h2>
                 <p>{{ $t('b091538b-014e-4db2-8241-9ed98e0c51c7') }}</p>
 
                 <div class="split-inputs">
-                    <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`Vaste kost`)">
-                        <PriceInput v-model="fixed" :min="0" :required="true" :placeholder="$t(`Vaste kost`)" />
+                    <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`f67ccf42-d4a8-4fe6-b7dc-91f43726646e`)">
+                        <PriceInput v-model="fixed" :min="0" :required="true" :placeholder="$t(`f67ccf42-d4a8-4fe6-b7dc-91f43726646e`)" />
                     </STInputBox>
 
-                    <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`Percentage`)">
-                        <PermyriadInput v-model="percentage" :required="true" :placeholder="$t(`Percentage`)" />
+                    <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`dd61d33b-367e-4e40-8ac6-84c286b931bc`)">
+                        <PermyriadInput v-model="percentage" :required="true" :placeholder="$t(`dd61d33b-367e-4e40-8ac6-84c286b931bc`)" />
                     </STInputBox>
                 </div>
 
                 <Checkbox v-if="fixed > 0" v-model="zeroIfZero">
-                    {{ $t('Reken geen administratiekosten aan als het totaalbedrag 0 euro is') }}
+                    {{ $t('29c16366-9962-4b22-a8bb-55c5a8467315') }}
                 </Checkbox>
 
                 <p v-if="percentage && exampleAdministrationFee1" class="style-description-small">
@@ -117,7 +117,7 @@ if (props.validator) {
         if (loadingStripeAccounts.value) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'loading',
-                message: $t(`Nog bezig met laden. Even geduld.`),
+                message: $t(`45285899-60e2-42c6-bb51-fdd16fe651e4`),
             }));
             return false;
         }
@@ -125,7 +125,7 @@ if (props.validator) {
         if (props.config.paymentMethods.length === 0) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'no_payment_methods',
-                message: $t(`Je moet minimaal één betaalmethode selecteren`),
+                message: $t(`740c41c3-7f19-4a5b-bd49-7e7d228e2187`),
             }));
             return false;
         }
@@ -179,7 +179,7 @@ async function loadStripeAccounts() {
     }
     catch (e) {
         console.error(e);
-        new Toast($t(`Er is een fout opgetreden bij het ophalen van de betaalaccounts`), 'error red').show();
+        new Toast($t(`2384baa0-50ca-4003-8d3a-af0beb18fec2`), 'error red').show();
     }
     loadingStripeAccounts.value = false;
 }
@@ -292,25 +292,25 @@ function getDescription(paymentMethod: PaymentMethod): string {
         case PaymentMethod.Payconiq:
             return providerText(provider, {
                 [PaymentProvider.Payconiq]: '',
-                [PaymentProvider.Buckaroo]: $t(`Via Buckaroo`),
+                [PaymentProvider.Buckaroo]: $t(`70ee9a44-6cd7-49a1-9852-8519c23ec13a`),
             });
         case PaymentMethod.Bancontact:
             return providerText(provider, {
-                [PaymentProvider.Buckaroo]: $t(`Via Buckaroo`),
-                [PaymentProvider.Mollie]: $t(`Via Mollie`),
+                [PaymentProvider.Buckaroo]: $t(`70ee9a44-6cd7-49a1-9852-8519c23ec13a`),
+                [PaymentProvider.Mollie]: $t(`4db6cde7-274f-4202-9351-3e9ce82794c1`),
                 [PaymentProvider.Stripe]: '',
             });
 
         case PaymentMethod.iDEAL:
             return providerText(provider, {
-                [PaymentProvider.Buckaroo]: $t(`Via Buckaroo`),
-                [PaymentProvider.Mollie]: $t(`Via Mollie`),
+                [PaymentProvider.Buckaroo]: $t(`70ee9a44-6cd7-49a1-9852-8519c23ec13a`),
+                [PaymentProvider.Mollie]: $t(`4db6cde7-274f-4202-9351-3e9ce82794c1`),
                 [PaymentProvider.Stripe]: '',
             });
         case PaymentMethod.CreditCard:
             return providerText(provider, {
-                [PaymentProvider.Buckaroo]: $t(`Via Buckaroo`),
-                [PaymentProvider.Mollie]: $t(`Via Mollie`),
+                [PaymentProvider.Buckaroo]: $t(`70ee9a44-6cd7-49a1-9852-8519c23ec13a`),
+                [PaymentProvider.Mollie]: $t(`4db6cde7-274f-4202-9351-3e9ce82794c1`),
                 [PaymentProvider.Stripe]: '',
             });
         case PaymentMethod.Unknown: return '';
@@ -325,36 +325,36 @@ function getSettingsDescription(paymentMethod: PaymentMethod): string {
 
     if (settings) {
         if (settings.minimumAmount !== 0) {
-            texts.push($t(`Vanaf minimum`) + ' ' + Formatter.price(settings.minimumAmount));
+            texts.push($t(`84e54416-464f-4ca6-a685-def2a0a9c135`) + ' ' + Formatter.price(settings.minimumAmount));
         }
 
         if (settings.warningText) {
             if (settings.warningAmount !== null) {
-                texts.push($t(`Met waarschuwing vanaf`) + ' ' + Formatter.price(settings.warningAmount));
+                texts.push($t(`7972bd35-3bb5-4dae-9771-8d4765646f61`) + ' ' + Formatter.price(settings.warningAmount));
             }
             else {
-                texts.push($t(`Met waarschuwing`));
+                texts.push($t(`88edcbb7-c3b2-4531-8796-f0c6782fa76e`));
             }
         }
 
         if (settings.companiesOnly) {
-            texts.push($t(`Niet beschikbaar voor particulieren`));
+            texts.push($t(`8bec9f71-c41d-485f-b0f5-95a40b695884`));
         }
     }
 
     if (paymentMethod === PaymentMethod.Transfer) {
         if (!props.config.transferSettings.iban) {
-            texts.push($t(`Nog geen bankrekeningnummer ingesteld`));
+            texts.push($t(`8e243505-26f6-4505-9317-c871fa1df324`));
         }
         else {
-            texts.push($t(`Rekeningnummer:`) + ' ' + props.config.transferSettings.iban);
+            texts.push($t(`475a6b09-e71d-4160-a87e-d4a3844116c3`) + ' ' + props.config.transferSettings.iban);
         }
 
         if (props.config.transferSettings.creditor) {
-            texts.push($t(`Begunstigde:`) + ' ' + props.config.transferSettings.creditor);
+            texts.push($t(`0cfac4d3-1840-4b12-b9d7-b9f40e49d664`) + ' ' + props.config.transferSettings.creditor);
         }
 
-        texts.push($t(`Mededeling:`) + ' ' + transferTypes.value.find(t => t.value === props.config.transferSettings.type)?.name + (prefix.value && props.config.transferSettings.type !== TransferDescriptionType.Structured ? ' (' + prefix.value + ')' : ''));
+        texts.push($t(`e54dd641-9788-4514-b866-86f602892fb2`) + ' ' + transferTypes.value.find(t => t.value === props.config.transferSettings.type)?.name + (prefix.value && props.config.transferSettings.type !== TransferDescriptionType.Structured ? ' (' + prefix.value + ')' : ''));
     }
 
     return texts.join('\n');
@@ -380,7 +380,7 @@ function setPaymentMethod(method: PaymentMethod, enabled: boolean, force = false
     }
     else {
         if (!force && props.choices === null && props.config.paymentMethods.length === 1) {
-            new Toast($t(`Je moet minimaal één betaalmethode accepteren`), 'error red').show();
+            new Toast($t(`4df013df-328f-47b6-b90a-fc40813d3c0a`), 'error red').show();
             return;
         }
 
@@ -408,9 +408,9 @@ const hasMollieOrBuckaroo = computed(() => {
 
 const mollieOrBuckarooName = computed(() => {
     if (organization.value.privateMeta?.buckarooSettings !== null) {
-        return $t(`Buckaroo`);
+        return $t(`f5fc5d6b-49ef-4b3d-80b7-90e1f81220fa`);
     }
-    return $t(`Mollie`);
+    return $t(`b8cf0b1f-04c4-4a85-9a19-027a5326fd11`);
 });
 
 function getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined {
@@ -429,7 +429,7 @@ function getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined
     switch (paymentMethod) {
         case PaymentMethod.Payconiq: {
             if ((organization.value.privateMeta?.payconiqApiKey ?? '').length === 0) {
-                return $t(`Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalmethodes). Daar vind je ook meer informatie.`);
+                return $t(`60bbe710-43e0-4a19-996c-ded3f25c1c39`);
             }
             break;
         }
@@ -439,7 +439,7 @@ function getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined
         case PaymentMethod.DirectDebit:
         case PaymentMethod.Bancontact: {
             if (stripeAccountObject.value) {
-                return PaymentMethodHelper.getNameCapitalized(paymentMethod) + ' ' + $t(`is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de vereniging niet werd ingevuld.`);
+                return PaymentMethodHelper.getNameCapitalized(paymentMethod) + ' ' + $t(`79cb9c3d-fe24-46cb-84bd-f1aa5fd625c5`);
             }
             break;
         }
@@ -512,11 +512,11 @@ const transferTypes = computed(() => {
         },
         {
             value: TransferDescriptionType.Reference,
-            name: props.type === 'registration' ? $t(`Naam van lid/leden`) : $t(`Bestelnummer`),
+            name: props.type === 'registration' ? $t(`1add2f6b-1c51-49f9-9fe3-a9a1ad62ad07`) : $t(`4d496edf-0203-4df3-a6e9-3e58d226d6c5`),
         },
         {
             value: TransferDescriptionType.Fixed,
-            name: $t(`Vaste mededeling`),
+            name: $t(`610a54d0-5ae5-4e4c-bac3-205fd56b65c8`),
         },
     ];
 });

@@ -62,7 +62,7 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
         for (const patch of request.body.getPatches()) {
             const template = await DocumentTemplate.getByID(patch.id);
             if (!template || !await Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Full)) {
-                throw Context.auth.notFoundOrNoAccess($t(`Onbekende template`));
+                throw Context.auth.notFoundOrNoAccess($t(`148bfab7-ca0e-4fac-8a0a-302ca7855fc8`));
             }
 
             if (patch.privateSettings) {
@@ -100,7 +100,7 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Template not found',
-                    human: $t(`Template niet gevonden`),
+                    human: $t(`10aa55e6-5ad6-4ac1-8e7f-3a414e26e22e`),
                 });
             }
 

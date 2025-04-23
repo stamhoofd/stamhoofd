@@ -4,7 +4,7 @@
             {{ title }}
         </h1>
 
-        <p>{{ $t('Alle informatie over de verschillen tussen elke betaalmethode vind je op') }} <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-inschrijvingen-instellen')" target="_blank">{{ $t('deze pagina') }}</a>.</p>
+        <p>{{ $t('d305770f-19df-45bd-8ca1-787c146a54d7') }} <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-inschrijvingen-instellen')" target="_blank">{{ $t('3280290b-f43e-4e95-a7bd-3c13a153888b') }}</a>.</p>
 
         <div v-if="isReview" class="container">
             <ReviewCheckbox :data="review.$reviewCheckboxData" />

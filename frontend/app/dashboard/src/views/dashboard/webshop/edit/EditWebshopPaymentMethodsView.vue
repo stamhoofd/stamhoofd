@@ -1,7 +1,7 @@
 <template>
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
-        <p>{{ $t('Zoek je informatie over alle betaalmethodes, neem dan een kijkje op') }} <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-webshops-instellen')" target="_blank">{{ $t('deze pagina') }}</a>.</p>
+        <p>{{ $t('ac5ca0b0-0b1d-47bc-ab42-c23153dd7521') }} <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-webshops-instellen')" target="_blank">{{ $t('3280290b-f43e-4e95-a7bd-3c13a153888b') }}</a>.</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 

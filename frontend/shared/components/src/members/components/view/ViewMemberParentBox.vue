@@ -5,7 +5,7 @@
         </h2>
 
         <dl class="details-grid hover">
-            <dt>{{ $t('Naam') }}</dt>
+            <dt>{{ $t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') }}</dt>
             <dd v-copyable>
                 {{ parent.name }}
             </dd>
@@ -18,21 +18,21 @@
             </template>
 
             <template v-if="parent.email">
-                <dt>{{ $t('E-mailadres') }} {{ parent.alternativeEmails.length ? '1' : '' }}</dt>
+                <dt>{{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }} {{ parent.alternativeEmails.length ? '1' : '' }}</dt>
                 <dd v-copyable>
                     {{ parent.email }}
                 </dd>
             </template>
 
             <template v-for="(email, index) of parent.alternativeEmails" :key="index">
-                <dt>{{ $t('E-mailadres') }} {{ index + 2 }}</dt>
+                <dt>{{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }} {{ index + 2 }}</dt>
                 <dd v-copyable>
                     {{ email }}
                 </dd>
             </template>
 
             <template v-if="parent.address">
-                <dt>{{ $t('Adres') }}</dt>
+                <dt>{{ $t('f7e792ed-2265-41e9-845f-e3ce0bc5da7c') }}</dt>
                 <dd v-copyable>
                     {{ parent.address.street }} {{ parent.address.number }}<br><template v-if="parent.address.country !== currentCountry">
                         <br>
@@ -41,7 +41,7 @@
             </template>
 
             <template v-if="parent.nationalRegisterNumber && parent.nationalRegisterNumber !== NationalRegisterNumberOptOut">
-                <dt>{{ $t('Rijksregisternummer') }}</dt>
+                <dt>{{ $t('439176a5-dd35-476b-8c65-3216560cac2f') }}</dt>
                 <dd v-copyable>
                     {{ parent.nationalRegisterNumber }}
                 </dd>

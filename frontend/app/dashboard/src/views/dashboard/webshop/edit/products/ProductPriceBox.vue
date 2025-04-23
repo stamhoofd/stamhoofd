@@ -1,11 +1,11 @@
 <template>
     <div>
-        <STInputBox v-if="!isSingle" error-fields="name" :error-box="errorBox" :title="$t(`Naam`)">
-            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`Naam van deze keuze`)">
+        <STInputBox v-if="!isSingle" error-fields="name" :error-box="errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`1539d481-12bf-4814-9fe3-3770eaecdda8`)">
         </STInputBox>
 
-        <STInputBox error-fields="price" :error-box="errorBox" :title="$t(`Prijs`)">
-            <PriceInput v-model="price" :min="null" :placeholder="$t(`Gratis`)" />
+        <STInputBox error-fields="price" :error-box="errorBox" :title="$t(`52bff8d2-52af-4d3f-b092-96bcfa4c0d03`)">
+            <PriceInput v-model="price" :min="null" :placeholder="$t(`99e41cea-bce3-4329-8b17-e3487c4534ac`)" />
         </STInputBox>
 
         <STList>
@@ -15,19 +15,19 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Korting vanaf een bepaald aantal stuks') }}
+                    {{ $t('3eaf07f2-4c9f-418a-b494-95b26a2352da') }}
                 </h3>
                 <p v-if="useDiscount" class="style-description-small" @click.stop.prevent>
-                    {{ $t("De prijs met korting wordt op het totale aantal toegepast. Als je keuzemenu's en meerdere prijzen hebt, dan tellen we de aantallen met andere keuzes op om het totaal te bepalen (bv. één grote spaghetti met kaas en één kleine spaghetti zonder kaas → telt als twee spaghetti's). Als je dat niet wilt voeg je beter verschillende producten toe.") }}
+                    {{ $t("a44947d8-7021-4398-ad41-7067dac8ae64") }}
                 </p>
 
                 <div v-if="useDiscount" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox error-fields="discountPrice" :error-box="errorBox" :title="$t(`Prijs met korting`)">
-                        <PriceInput v-model="discountPrice" :min="null" :placeholder="$t(`Gratis`)" />
+                    <STInputBox error-fields="discountPrice" :error-box="errorBox" :title="$t(`a9f97aed-ed48-41b7-a2d3-9bbab28981d8`)">
+                        <PriceInput v-model="discountPrice" :min="null" :placeholder="$t(`99e41cea-bce3-4329-8b17-e3487c4534ac`)" />
                     </STInputBox>
 
-                    <STInputBox error-fields="discountAmount" :error-box="errorBox" :title="$t(`Vanaf aantal stuks`)">
-                        <NumberInput v-model="discountAmount" :min="2" :stepper="true" :placeholder="$t(`Gratis`)" />
+                    <STInputBox error-fields="discountAmount" :error-box="errorBox" :title="$t(`f4306def-3d82-420c-98d5-795879461006`)">
+                        <NumberInput v-model="discountAmount" :min="2" :stepper="true" :placeholder="$t(`99e41cea-bce3-4329-8b17-e3487c4534ac`)" />
                     </STInputBox>
                 </div>
             </STListItem>
@@ -38,10 +38,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Verbergen op webshop') }}
+                    {{ $t('9b385bc1-0c3b-4476-b31d-a8598e381ca4') }}
                 </h3>
                 <p v-if="hidden" class="style-description-small">
-                    {{ $t('Deze keuze wordt onzichtbaar op de webshop en is enkel te bestellen door manueel een bestelling in te geven als beheerder.') }}
+                    {{ $t('5bd19019-212a-4c0a-9f22-4eb38b3699df') }}
                 </p>
             </STListItem>
 
@@ -51,11 +51,11 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Beperk het beschikbare aantal stuks (waarvan nu {stock} verkocht of gereserveerd)', {stock: usedStock.toString()}) }}
+                    {{ $t('45807c1e-fb46-496f-9584-9081c56e193c', {stock: usedStock.toString()}) }}
                 </h3>
 
                 <p v-if="useStock" class="style-description-small">
-                    {{ $t('Geannuleerde en verwijderde bestellingen worden niet meegerekend.') }}
+                    {{ $t('31a4cf98-1e98-491e-855c-2b5a5703b254') }}
                 </p>
 
                 <div v-if="useStock" class="split-inputs option" @click.stop.prevent>

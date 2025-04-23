@@ -1,30 +1,30 @@
 <template>
     <SaveView :title="isNew ? $t(`Keuzemenu toevoegen`) : $t(`Keuzemenu bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            {{ $t('Keuzemenu toevoegen') }}
+            {{ $t('f334796c-dc6b-45f0-825e-c8f2eeae931b') }}
         </h1>
         <h1 v-else>
-            {{ $t('Keuzemenu bewerken') }}
+            {{ $t('23592db3-6fa9-48b0-9660-78eff742219d') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
-            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`bv. Kies je extra's`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`7d80640e-7ecc-40b0-86df-4f375d9fd300`)">
         </STInputBox>
 
         <Checkbox v-model="multipleChoice">
-            {{ $t('Meerkeuze') }}
+            {{ $t('d95331fe-56b0-4423-b485-5f600b6ab49c') }}
         </Checkbox>
         <p class="style-description">
-            {{ $t("Bij meerkeuze kunnen bestellers geen, één of meerdere keuzes aanduiden. In het andere geval moet er exact één keuze gemaakt worden (of je voegt nog een extra optie 'geen' toe).") }}
+            {{ $t("ad0d3d8a-67b1-4eb1-bce3-159acfecbaa0") }}
         </p>
 
         <hr><h2 class="style-with-button">
-            <div>{{ $t('Keuzes') }}</div>
+            <div>{{ $t('6c90965a-8334-43e6-8494-031e2932bc45') }}</div>
             <div>
                 <button class="button text only-icon-smartphone" type="button" @click="addOption">
                     <span class="icon add" />
-                    <span>{{ $t('Keuze') }}</span>
+                    <span>{{ $t('6c80efa8-5658-4728-ba95-d0536fdd25bd') }}</span>
                 </button>
             </div>
         </h2>
@@ -33,12 +33,12 @@
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('Verwijder dit keuzemenu') }}
+                {{ $t('c73c2d8c-9f00-457b-a6e5-24c45c383228') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('Verwijderen') }}</span>
+                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
             </button>
         </div>
     </SaveView>

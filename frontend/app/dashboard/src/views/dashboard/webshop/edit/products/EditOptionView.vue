@@ -1,19 +1,19 @@
 <template>
-    <SaveView :title="isNew ? $t(`Keuze toevoegen`) : name+' ' + $t(`bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`Keuze toevoegen`) : name+' ' + $t(`8455850d-829f-412f-bf1f-eedb2caa9f57`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            {{ $t('Keuze toevoegen') }}
+            {{ $t('f6afa644-22ef-4996-96d5-1f483cdc3255') }}
         </h1>
         <h1 v-else>
-            {{ name }} {{ $t('bewerken') }}
+            {{ name }} {{ $t('ee3bc635-c294-4134-9155-7a74f47dec4f') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
-            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`Naam van deze keuze`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`1539d481-12bf-4814-9fe3-3770eaecdda8`)">
         </STInputBox>
 
-        <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`Meer of minkost`)">
-            <PriceInput v-model="price" :min="null" :placeholder="$t(`+ 0 euro`)" />
+        <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`295faf23-65af-4820-80de-fa6abfe751e3`)">
+            <PriceInput v-model="price" :min="null" :placeholder="$t(`ef6ac7e5-de7e-4e2e-802f-de730294f05d`)" />
         </STInputBox>
 
         <STList>
@@ -23,11 +23,11 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Beperk het beschikbare aantal stuks (waarvan nu {stock} verkocht of gereserveerd)', {stock: usedStock.toString()}) }}
+                    {{ $t('45807c1e-fb46-496f-9584-9081c56e193c', {stock: usedStock.toString()}) }}
                 </h3>
 
                 <p v-if="useStock" class="style-description-small">
-                    {{ $t('Geannuleerde en verwijderde bestellingen worden niet meegerekend.') }}
+                    {{ $t('31a4cf98-1e98-491e-855c-2b5a5703b254') }}
                 </p>
 
                 <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
@@ -40,12 +40,12 @@
 
         <div v-if="!isNew && !isSingle" class="container">
             <hr><h2>
-                {{ $t('Verwijder deze keuze') }}
+                {{ $t('9c668242-0cd3-4d73-a238-4fea31a417b8') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('Verwijderen') }}</span>
+                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
             </button>
         </div>
     </SaveView>

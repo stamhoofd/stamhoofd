@@ -9,7 +9,7 @@
                 <template #right>
                     <a v-if="organization.website" class="button text limit-space" :href="organization.website" target="_blank" rel="nofollow noreferrer noopener">
                         <span class="icon external" />
-                        <span>{{ $t('Terug naar website') }}</span>
+                        <span>{{ $t('6de2861f-64bc-44fe-af80-5742c91d03d6') }}</span>
                     </a>
                 </template>
             </STNavigationBar>
@@ -17,14 +17,14 @@
             <main>
                 <div class="box">
                     <main>
-                        <h1>{{ $t('Inloggen') }}</h1>
+                        <h1>{{ $t('1627a32a-56b8-4c74-8715-b885c1795af6') }}</h1>
                         <p>
-                            {{ $t('Om deze pagina te bekijken moet je eerst inloggen via onderstaande knop.') }}
+                            {{ $t('5069be1b-b060-436f-97bc-3a927f906a1a') }}
                         </p>
 
                         <p>
                             <button type="button" class="button primary" @click="login">
-                                {{ $t('Inloggen') }}
+                                {{ $t('1627a32a-56b8-4c74-8715-b885c1795af6') }}
                             </button>
                         </p>
                     </main>

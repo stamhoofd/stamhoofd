@@ -1,7 +1,7 @@
 <template>
     <div class="payconiq-banner-view">
         <button class="payconiq-close button icon close white" type="button" @click="close" />
-        <h1>{{ $t('Scan en betaal met Payconiq by Bancontact') }}</h1>
+        <h1>{{ $t('7f7be6dc-a859-4f3c-af9f-bb24221aa21c') }}</h1>
 
         <div class="payconiq-logo" />
 
@@ -15,7 +15,7 @@
             </p>
         </LoadingButton>
 
-        <p>{{ $t('Of scan met een ondersteunende bank app') }}</p>
+        <p>{{ $t('c9eeb8e9-61f7-4ca0-a4e4-01681fc32245') }}</p>
     </div>
 </template>
 

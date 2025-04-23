@@ -54,7 +54,7 @@ export class CheckoutManager {
     }
 
     async applyCode(code: string) {
-        const toast = new Toast($t(`Kortingscode toepassen`), 'spinner').setHide(null).show();
+        const toast = new Toast($t(`5a58b689-5269-40a0-907e-c977b293c2fa`), 'spinner').setHide(null).show();
 
         try {
             // Validate code
@@ -70,10 +70,10 @@ export class CheckoutManager {
             this.saveCheckout()
 
             if (this.checkout.discountCodes.find(c => c.code === code)) {
-                new Toast($t(`Kortingscode toegepast`), 'success primary').setHide(10 * 1000).show();
+                new Toast($t(`4f7b348e-413a-48c3-9fc8-314831d7518d`), 'success primary').setHide(10 * 1000).show();
                 return true;
             } else {
-                new Toast($t(`Ongeldige kortingscode`) + ' '+code, 'red error').setHide(10 * 1000).show();
+                new Toast($t(`8bae7158-e8bd-4e76-80de-acd9a1b323ad`) + ' '+code, 'red error').setHide(10 * 1000).show();
                 return false;
             }
             

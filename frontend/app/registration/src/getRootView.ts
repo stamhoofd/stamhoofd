@@ -82,7 +82,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
 
     const calendarTab = new TabBarItem({
         icon: 'calendar',
-        name: $t(`Activiteiten`),
+        name: $t(`d9b4472a-a395-4877-82fd-da6cb0140594`),
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(EventsOverview, {}),
         }),
@@ -103,13 +103,13 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
                         tabs: [
                             new TabBarItem({
                                 icon: 'home',
-                                name: $t(`Start`),
+                                name: $t(`04548161-abc0-4bea-bdd3-fdbacddc22f8`),
                                 component: startView,
                             }),
                             ...(enableEvents ? [calendarTab] : []),
                             new TabBarItem({
                                 icon: 'basket',
-                                name: $t(`Mandje`),
+                                name: $t(`88db9833-34e4-488a-9f74-b6e230c69dc1`),
                                 component: cartRoot,
                                 badge: computed(() => $memberManager.family.checkout.cart.count == 0 ? '' : $memberManager.family.checkout.cart.count.toFixed(0)),
                             }),

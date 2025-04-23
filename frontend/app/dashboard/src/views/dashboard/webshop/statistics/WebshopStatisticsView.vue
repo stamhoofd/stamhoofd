@@ -4,7 +4,7 @@
 
         <main>
             <h1>
-                {{ $t('Statistieken') }}
+                {{ $t('121c350e-012c-4bf7-a2bc-2c07b7c433c8') }}
             </h1>
 
             <hr><div class="graph-grid">
@@ -12,7 +12,7 @@
             </div>
 
             <hr><div class="stats-grid">
-                <STInputBox :title="$t(`Bestellingen`)">
+                <STInputBox :title="$t(`fc1cc5ad-1590-422d-96a5-4523f10fcab1`)">
                     <p class="style-statistic">
                         <span>
                             {{ loading ? '-' : totalOrders }}
@@ -24,7 +24,7 @@
                 </STInputBox>
 
                 <template v-if="hasTickets">
-                    <STInputBox :title="$t(`Tickets`)">
+                    <STInputBox :title="$t(`b40d200c-4265-4d58-a7f4-7c2498b062b9`)">
                         <p class="style-statistic">
                             {{ loading ? '-' : totalTickets }}
                         </p>
@@ -35,7 +35,7 @@
                 </template>
 
                 <template v-if="hasVouchers">
-                    <STInputBox :title="$t(`Vouchers`)">
+                    <STInputBox :title="$t(`c2ee9504-b07a-4d79-bd25-c14a1bba4d59`)">
                         <p class="style-statistic">
                             {{ loading ? '-' : totalVouchers }}
                         </p>
@@ -66,8 +66,8 @@
                 </STList>
             </div>
 
-            <hr><h2>{{ $t('Info') }}</h2>
-            <p>{{ $t('Geannuleerde bestellingen of verwijderde bestellingen worden niet meegeteld in de statistieken.') }}</p>
+            <hr><h2>{{ $t('33adbc14-dd1a-43a7-a015-98a3322b58c5') }}</h2>
+            <p>{{ $t('16d29c4e-f292-4a77-a995-c4fa9ae76200') }}</p>
         </main>
     </div>
 </template>

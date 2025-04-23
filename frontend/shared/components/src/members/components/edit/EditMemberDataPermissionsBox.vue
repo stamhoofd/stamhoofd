@@ -6,12 +6,12 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <Checkbox v-model="dataPermissions" :indeterminate="!dataPermissionsChangeDate">
-            {{ $t('Er werd toestemming gegeven') }}
+            {{ $t('f1f52196-360d-4d73-bf72-473d8df81d64') }}
         </Checkbox>
 
         <p v-if="!willMarkReviewed && dataPermissionsChangeDate" class="style-description-small">
-            {{ $t('Laatst nagekeken op') }} {{ formatDate(dataPermissionsChangeDate) }}. <button type="button" class="inline-link" :v-tooltip="$t('Het lid zal deze stap terug moeten doorlopen via het ledenportaal')" @click="clear">
-                {{ $t('Wissen') }}
+            {{ $t('78dedb37-a33d-4907-8034-43345eea18a0') }} {{ formatDate(dataPermissionsChangeDate) }}. <button type="button" class="inline-link" :v-tooltip="$t('1452c1a3-6203-4ab2-92c4-c0496661cd21')" @click="clear">
+                {{ $t('74366859-3259-4393-865e-9baa8934327a') }}
             </button>.
         </p>
         <p v-if="!dataPermissionsChangeDate" class="style-description-small">

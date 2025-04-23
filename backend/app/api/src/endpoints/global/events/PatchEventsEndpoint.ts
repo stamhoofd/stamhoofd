@@ -63,7 +63,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Empty groups',
-                    human: $t(`Kies minstens één leeftijdsgroep`),
+                    human: $t(`93faf169-b78d-4ad2-b13b-3b974267a632`),
                 });
             }
 
@@ -71,7 +71,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Empty default age groups',
-                    human: $t(`Kies minstens één standaard leeftijdsgroep`),
+                    human: $t(`2712befc-5cc5-4013-b8df-ec0861a82c36`),
                 });
             }
 
@@ -79,7 +79,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Empty organization tag ids',
-                    human: $t(`Kies minstens één tag`),
+                    human: $t(`30230574-2956-4e40-ba11-5523c24c0af8`),
                 });
             }
 
@@ -136,7 +136,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Event not found',
-                    human: $t(`De activiteit werd niet gevonden`),
+                    human: $t(`c5f3d2c3-9d7a-473d-ba91-63ce104a2de5`),
                 });
             }
 
@@ -146,7 +146,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Cannot patch organizationCache',
-                    human: $t(`Je kan de organizationCache niet aanpassen via een patch`),
+                    human: $t(`74e6eba6-596c-4e55-b178-b2a5fdbca581`),
                     field: 'meta.organizationCache',
                 });
             }
@@ -166,7 +166,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Empty groups',
-                    human: $t(`Kies minstens één leeftijdsgroep`),
+                    human: $t(`93faf169-b78d-4ad2-b13b-3b974267a632`),
                 });
             }
 
@@ -174,7 +174,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Empty default age groups',
-                    human: $t(`Kies minstens één standaard leeftijdsgroep`),
+                    human: $t(`2712befc-5cc5-4013-b8df-ec0861a82c36`),
                 });
             }
 
@@ -182,7 +182,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Empty organization tag ids',
-                    human: $t(`Kies minstens één tag`),
+                    human: $t(`30230574-2956-4e40-ba11-5523c24c0af8`),
                 });
             }
 
@@ -320,7 +320,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid typeId',
-                human: $t(`Dit type activiteit wordt niet ondersteund`),
+                human: $t(`6b36fc82-d88c-49cc-ae94-4653ad37b3e3`),
                 field: 'typeId',
             });
         }
@@ -334,7 +334,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Name is too short',
-                human: $t(`Vul een naam voor je activiteit in`),
+                human: $t(`53a66432-0bf5-4193-9eb8-dbd52d86a1f8`),
                 field: 'name',
             });
         }
@@ -343,7 +343,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: 'invalid_dates',
                 message: 'End date is before start date',
-                human: $t(`De einddatum moet na de startdatum liggen`),
+                human: $t(`318924c0-7a79-4cfa-b206-ffc27c4d32b7`),
                 field: 'endDate',
             });
         }
@@ -362,7 +362,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     message: 'An event with this type has a minimum of ' + type.minimumDays + ' days',
                     human: $t(`Een {name} moet minimum {days} duren`, {
                         name: type.name,
-                        days: Formatter.pluralText(type.minimumDays, $t(`dag`), $t(`dagen`)),
+                        days: Formatter.pluralText(type.minimumDays, $t(`a6279389-a070-49c9-a085-bb312555e419`), $t(`fca0ce20-d696-4966-a50c-441f54f046c4`)),
                     }),
                     field: 'startDate',
                 });
@@ -374,7 +374,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     message: 'An event with this type has a maximum of ' + type.maximumDays + ' days',
                     human: $t(`Een {name} mag maximaal {days} duren`, {
                         name: type.name,
-                        days: Formatter.pluralText(type.maximumDays, $t(`dag`), $t(`dagen`)),
+                        days: Formatter.pluralText(type.maximumDays, $t(`a6279389-a070-49c9-a085-bb312555e419`), $t(`fca0ce20-d696-4966-a50c-441f54f046c4`)),
                     }),
                     field: 'startDate',
                 });
@@ -399,7 +399,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'type_maximum_reached',
                         message: 'Maximum number of events with this type reached',
-                        human: $t(`Het maximum aantal voor`) + ' ' + type.name + ' ' + $t(`is bereikt (`) + type.maximum + ')',
+                        human: $t(`fb7df531-0f89-4841-b685-7b2cfb5b507d`) + ' ' + type.name + ' ' + $t(`073d20dc-88f3-4145-89f5-13cc8ad90207`) + type.maximum + ')',
                         field: 'typeId',
                     });
                 }
@@ -408,7 +408,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'invalid_period',
                     message: 'No period found for this start date',
-                    human: $t(`Oeps, je kan nog geen evenementen van dit type aanmaken in deze periode`),
+                    human: $t(`7a38bf9d-4df7-4827-85dc-327ffe6cd50a`),
                     field: 'startDate',
                 });
             }
@@ -426,7 +426,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty number',
-                human: $t(`De locatie is verplicht voor deze soort activiteit.`),
+                human: $t(`6b72f8bd-cd5b-423f-a556-be102d3c22e9`),
                 field: 'event_required',
             });
         }

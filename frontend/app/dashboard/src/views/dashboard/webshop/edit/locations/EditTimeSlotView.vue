@@ -1,39 +1,39 @@
 <template>
     <SaveView :title="isNew ? $t(`Tijdvak toevoegen`) : $t(`Tijdvak bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            {{ $t('Tijdvak toevoegen') }}
+            {{ $t('4fab2bfd-3731-4574-9165-584165f00352') }}
         </h1>
         <h1 v-else>
-            {{ $t('Tijdvak bewerken') }}
+            {{ $t('beb8d8e8-9ea2-4976-82b8-ca7956cc57cc') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox error-fields="date" :error-box="errors.errorBox" :title="$t(`Datum`)">
+        <STInputBox error-fields="date" :error-box="errors.errorBox" :title="$t(`40aabd99-0331-4267-9b6a-a87c06b3f7fe`)">
             <DateSelection v-model="date" />
         </STInputBox>
 
-        <TimeMinutesInput v-model="startTime" :validator="errors.validator" :title="$t(`Van`)" />
-        <TimeMinutesInput v-model="endTime" :validator="errors.validator" :title="$t(`Tot`)" />
+        <TimeMinutesInput v-model="startTime" :validator="errors.validator" :title="$t(`01b5d104-748c-4801-a369-4eab05809fcf`)" />
+        <TimeMinutesInput v-model="endTime" :validator="errors.validator" :title="$t(`91310731-bddd-4ad3-b5fb-182237699f20`)" />
 
-        <STInputBox error-fields="maxOrders" :error-box="errors.errorBox" :title="$t(`Maximum aantal bestellingen`)">
-            <NumberInput v-model="maxOrders" :required="false" :placeholder="$t(`Geen limiet`)" />
+        <STInputBox error-fields="maxOrders" :error-box="errors.errorBox" :title="$t(`fcb7332b-ae0e-4262-9220-bd38e44a42a9`)">
+            <NumberInput v-model="maxOrders" :required="false" :placeholder="$t(`3433bd78-f07f-4661-ba9e-28b76c468d58`)" />
         </STInputBox>
         <p v-if="remainingOrders !== null && remainingOrders !== maxOrders" class="style-description">
-            {{ $t('Nog {orders} bestellingen', {orders: remainingOrders === 0 ? '0' : remainingOrders?.toString() ?? ''}) }}
+            {{ $t('40758899-6ad8-46ea-a196-4b03ccd80751', {orders: remainingOrders === 0 ? '0' : remainingOrders?.toString() ?? ''}) }}
         </p>
 
-        <STInputBox error-fields="maxPersons" :error-box="errors.errorBox" :title="$t(`Maximum aantal personen`)">
-            <NumberInput v-model="maxPersons" :required="false" :placeholder="$t(`Geen limiet`)" />
+        <STInputBox error-fields="maxPersons" :error-box="errors.errorBox" :title="$t(`7b1a3b35-1f6b-4cb7-8675-35302454a3b9`)">
+            <NumberInput v-model="maxPersons" :required="false" :placeholder="$t(`3433bd78-f07f-4661-ba9e-28b76c468d58`)" />
         </STInputBox>
         <p v-if="remainingPersons !== null && remainingPersons !== maxPersons" class="style-description">
-            {{ $t('Nog {persons} personen', {persons: remainingPersons === 0 ? '0' : remainingPersons?.toString() ?? ''}) }}
+            {{ $t('101cfdc7-4cb2-4c71-a25f-9b5af9933624', {persons: remainingPersons === 0 ? '0' : remainingPersons?.toString() ?? ''}) }}
         </p>
 
         <div v-if="!isNew" class="container">
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('Verwijderen') }}</span>
+                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
             </button>
         </div>
     </SaveView>

@@ -36,10 +36,10 @@ export enum PaymentType {
 export class PaymentTypeHelper {
     static getName(type: PaymentType): string {
         switch (type) {
-            case PaymentType.Payment: return $t(`betaling`);
-            case PaymentType.Refund: return $t(`terugbetaling`);
-            case PaymentType.Chargeback: return $t(`terugvordering`);
-            case PaymentType.Reallocation: return $t(`saldoverrekening`);
+            case PaymentType.Payment: return $t(`bc90ce0a-2273-4942-9ce9-45fead8f928c`);
+            case PaymentType.Refund: return $t(`48d1c259-80aa-461a-b5dc-f3a54f498bc5`);
+            case PaymentType.Chargeback: return $t(`61ab73b5-ab85-4cfd-829f-3ffbbf502e3b`);
+            case PaymentType.Reallocation: return $t(`fb3fe84c-55d4-4507-adc9-85a3a36a589f`);
         }
     }
 

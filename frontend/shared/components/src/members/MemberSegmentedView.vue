@@ -2,8 +2,8 @@
     <div class="st-view member-segmented-view">
         <STNavigationBar :title="member.member.details.name">
             <template #right>
-                <button v-if="hasPrevious || hasNext" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('Ga naar vorige lid')" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('Ga naar volgende lid')" @click="goForward" />
+                <button v-if="hasPrevious || hasNext" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('0b44456e-1338-4468-ba71-5aabc171555f')" @click="goBack" />
+                <button v-if="hasNext || hasPrevious" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('4b09d022-aac5-49da-80c2-9c2dcd2f642c')" @click="goForward" />
 
                 <button v-if="hasWrite" v-tooltip="$t('f2eb0c04-0dca-4c8e-b920-7044a65aee6a')" class="button icon navigation edit" type="button" @click="editThisMember" />
                 <button v-long-press="(e) => showContextMenu(e)" class="button icon navigation more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
@@ -13,8 +13,8 @@
         <main>
             <h1 class="style-navigation-title with-icons">
                 <span class="icon-spacer">{{ member.member.details.firstName }}</span>
-                <span v-if="member.member.details.gender === Gender.Male" v-tooltip="member.member.details.defaultAge >= 18 ? $t('Man') : $t('Jongen')" class="icon male blue icon-spacer" />
-                <span v-if="member.member.details.gender === Gender.Female" v-tooltip="member.member.details.defaultAge >= 18 ? $t('Vrouw') : $t('Meisje')" class="icon female pink icon-spacer" />
+                <span v-if="member.member.details.gender === Gender.Male" v-tooltip="member.member.details.defaultAge >= 18 ? $t('b54b9706-4c0c-46a6-9027-37052eb76b28') : $t('177eba5b-b06f-49dd-8d48-578934c635bb')" class="icon male blue icon-spacer" />
+                <span v-if="member.member.details.gender === Gender.Female" v-tooltip="member.member.details.defaultAge >= 18 ? $t('06466432-eca6-41d0-a3d6-f262f8d6d2ac') : $t('dba51db1-ce45-4e09-9a2f-fcea4a7fa46e')" class="icon female pink icon-spacer" />
             </h1>
 
             <SegmentedControl v-model="tab" :items="tabComponents" :labels="tabLabels" />

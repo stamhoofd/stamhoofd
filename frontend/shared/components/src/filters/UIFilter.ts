@@ -140,7 +140,7 @@ export abstract class UIFilter {
         if (typeof filter !== 'object') {
             throw new SimpleError({
                 code: 'filter_invert_fail',
-                message: $t('Inverteren van de filter is mislukt'),
+                message: $t('bc166ef0-20df-40b7-abac-b56bb51376bd'),
             });
         }
 
@@ -188,30 +188,30 @@ export function filterToString(filter: StamhoofdFilter, builder: UIFilterBuilder
     if (uiFilter) {
         return uiFilter.description;
     }
-    return $t(`Onleesbare filter`);
+    return $t(`f2d06f56-bc53-46ea-932f-bd6ba9d6ac86`);
 }
 
 export function propertyFilterToString(filter: PropertyFilter, builder: UIFilterBuilder) {
     if (filter.enabledWhen === null || isEmptyFilter(filter.enabledWhen)) {
         if (filter.requiredWhen === null) {
-            return $t(`Optioneel`);
+            return $t(`9e0461d2-7439-4588-837c-750de6946287`);
         }
         if (isEmptyFilter(filter.requiredWhen)) {
-            return $t(`Verplicht`);
+            return $t(`bbe18b42-bbd7-4c1f-9f1c-367b27e5c18d`);
         }
 
-        return $t(`Verplicht in te vullen als:`) + ' ' + filterToString(filter.requiredWhen, builder) + ' ' + $t(`(anders optioneel)`);
+        return $t(`41064b7e-368b-4f93-a5a1-3f5f4a80e5b5`) + ' ' + filterToString(filter.requiredWhen, builder) + ' ' + $t(`cc8f2893-37b9-43b5-a631-7d39bdfd486c`);
     }
 
     const enabledDescription = filterToString(filter.enabledWhen, builder);
 
     if (filter.requiredWhen === null) {
-        return $t(`Wordt enkel gevraagd als:`) + ' ' + enabledDescription + ' ' + $t(`(optioneel)`);
+        return $t(`a173945b-fd40-4500-b1e0-bf6d3016c7c4`) + ' ' + enabledDescription + ' ' + $t(`49b1c5d0-0511-42f0-a9fe-791572ba96f9`);
     }
 
     if (isEmptyFilter(filter.requiredWhen)) {
-        return $t(`Wordt enkel gevraagd als:`) + ' ' + enabledDescription;
+        return $t(`a173945b-fd40-4500-b1e0-bf6d3016c7c4`) + ' ' + enabledDescription;
     }
 
-    return $t(`Wordt enkel gevraagd als:`) + ' ' + enabledDescription + ' ' + $t(`(enkel verplicht invullen als:`) + ' ' + filterToString(filter.requiredWhen, builder) + ')';
+    return $t(`a173945b-fd40-4500-b1e0-bf6d3016c7c4`) + ' ' + enabledDescription + ' ' + $t(`f9ea9a60-9957-49ba-8d25-76b3e1d539a2`) + ' ' + filterToString(filter.requiredWhen, builder) + ')';
 }

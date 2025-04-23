@@ -2,7 +2,7 @@
     <LoadingBoxTransition v-if="actions.length || loading" :error-box="errorBox">
         <div v-if="actions.length" key="view" class="container">
             <hr><h2>
-                {{ $t('Snelle acties') }}
+                {{ $t('5400f4c3-d47a-44c9-b53a-62d0111c6d98') }}
             </h2>
 
             <STList>

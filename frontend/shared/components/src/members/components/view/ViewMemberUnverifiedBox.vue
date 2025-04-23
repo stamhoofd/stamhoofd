@@ -2,9 +2,9 @@
     <div v-if="shouldShow">
         <div class="hover-box container">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('Niet-geverifieerde gegevens') }}</div>
+                <div>{{ $t('94823cfc-f583-4288-bf44-0a7cfec9e61f') }}</div>
             </h2>
-            <p>{{ $t('Deze gegevens konden niet automatisch toegewezen worden aan het lid of aan een ouder.') }}</p>
+            <p>{{ $t('47e082e2-def8-4c2a-909e-5f8d3b17f92c') }}</p>
             <dl class="details-grid hover">
                 <template v-for="(email, index) of unverifiedEmails">
                     <MemberDetailWithButton :label="formatWithIndex('E-mailadres', index, unverifiedEmails)" :value="email" icon="trash" color="gray" :on-click="() => deleteEmail(email)" />

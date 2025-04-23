@@ -124,7 +124,7 @@ export class MemberActionBuilder {
             }
             return this.organizations.map((org) => {
                 return new MenuTableAction({
-                    name: $t(`Inschrijven bij`) + ' ' + org.name,
+                    name: $t(`26a122e0-4312-4473-90c6-85f5c9f678be`) + ' ' + org.name,
                     groupIndex: 0,
                     childActions: () => this.getRegisterActions(org),
                 });
@@ -133,7 +133,7 @@ export class MemberActionBuilder {
 
         return [
             new MenuTableAction({
-                name: $t(`Wachtlijsten`),
+                name: $t(`93d604bc-fddf-434d-a993-e6e456d32231`),
                 groupIndex: 0,
                 enabled: organization.period.waitingLists.length > 0,
                 childActions: () => [
@@ -170,7 +170,7 @@ export class MemberActionBuilder {
 
         return [
             new MenuTableAction({
-                name: $t(`Verplaatsen naar`),
+                name: $t(`507c48cb-35ae-4c94-bc7a-4611360409c8`),
                 priority: 1,
                 groupIndex: 5,
                 needsSelection: true,
@@ -178,7 +178,7 @@ export class MemberActionBuilder {
                 enabled: this.hasWrite,
                 childActions: () => [
                     new MenuTableAction({
-                        name: $t(`Wachtlijsten`),
+                        name: $t(`93d604bc-fddf-434d-a993-e6e456d32231`),
                         groupIndex: 0,
                         enabled: organization.period.waitingLists.length > 0,
                         childActions: () => [
@@ -218,14 +218,14 @@ export class MemberActionBuilder {
 
         return [
             new InMemoryTableAction({
-                name: $t(`Toon geschiedenis`),
+                name: $t(`a5cf8db3-5fb8-4a4c-9940-31d758433f23`),
                 priority: 1,
                 groupIndex: 6,
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (members: PlatformMember[]) => {
                     if (members.length > 100) {
-                        Toast.error($t(`Te veel leden geselecteerd`)).show();
+                        Toast.error($t(`dc5db5f5-4027-42fa-a998-1535e2c3a82a`)).show();
                         return;
                     }
                     await this.present({
@@ -249,7 +249,7 @@ export class MemberActionBuilder {
 
         return [
             new InMemoryTableAction({
-                name: $t(`Inschrijving bewerken`),
+                name: $t(`ffe15b57-4e70-4657-9a0b-af860eed503e`),
                 priority: 1,
                 groupIndex: 1,
                 needsSelection: true,
@@ -269,7 +269,7 @@ export class MemberActionBuilder {
         }
 
         return [new InMemoryTableAction({
-            name: $t(`Uitschrijven`),
+            name: $t(`69aaebd1-f031-4237-8150-56e377310cf5`),
             destructive: true,
             priority: 0,
             groupIndex: 7,
@@ -319,7 +319,7 @@ export class MemberActionBuilder {
     getActions(options: { includeDelete?: boolean; includeMove?: boolean; includeEdit?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}): TableAction<PlatformMember>[] {
         const actions = [
             new InMemoryTableAction({
-                name: $t(`Gegevens bewerken`),
+                name: $t(`28f20fae-6270-4210-b49d-68b9890dbfaf`),
                 icon: 'edit',
                 priority: 2,
                 groupIndex: 1,
@@ -332,7 +332,7 @@ export class MemberActionBuilder {
             }),
 
             new InMemoryTableAction({
-                name: $t(`Functies bewerken`),
+                name: $t(`331c7c4f-7317-4ec5-b9eb-02f324129ee1`),
                 icon: 'star',
                 priority: 0,
                 groupIndex: 1,
@@ -345,7 +345,7 @@ export class MemberActionBuilder {
             }),
 
             new AsyncTableAction({
-                name: $t(`E-mailen`),
+                name: $t(`f92ad3ab-8743-4d37-8b3f-c9d5ca756b16`),
                 icon: 'email',
                 priority: 12,
                 groupIndex: 3,
@@ -355,7 +355,7 @@ export class MemberActionBuilder {
             }),
 
             new AsyncTableAction({
-                name: $t(`Exporteren naar Excel`),
+                name: $t(`0302eaa0-ce2a-4ef0-b652-88b26b9c53e9`),
                 icon: 'download',
                 priority: 11,
                 groupIndex: 3,
@@ -366,7 +366,7 @@ export class MemberActionBuilder {
                 },
             }),
             new MenuTableAction({
-                name: $t(`Inschrijven voor`),
+                name: $t(`800d8458-da0f-464f-8b82-4e28599c8598`),
                 priority: 1,
                 groupIndex: 5,
                 needsSelection: true,
@@ -383,7 +383,7 @@ export class MemberActionBuilder {
         if (options.includeDelete) {
             actions.push(
                 new InMemoryTableAction({
-                    name: $t(`Definitief verwijderen`),
+                    name: $t(`6381fb21-c5be-4318-ba47-a5ee669335a7`),
                     destructive: true,
                     priority: 1,
                     groupIndex: 100,
@@ -412,7 +412,7 @@ export class MemberActionBuilder {
             options: [
                 {
                     id: 'all',
-                    name: $t(`Alle leden`),
+                    name: $t(`379d43fb-034f-4280-bb99-ea658eaec729`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.Members,
@@ -423,12 +423,12 @@ export class MemberActionBuilder {
                 },
                 {
                     id: 'none',
-                    name: $t(`Geen leden`),
+                    name: $t(`2035a033-bd26-492b-8d91-473b2a033029`),
                     value: [],
                 },
                 {
                     id: 'adults',
-                    name: $t(`Alle volwassen leden`),
+                    name: $t(`756cf0cd-8992-452a-9eb8-46e1c7ca5650`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.Members,
@@ -452,7 +452,7 @@ export class MemberActionBuilder {
             options: [
                 {
                     id: 'minors',
-                    name: $t(`Ouders van minderjarige leden`),
+                    name: $t(`f6b27311-6878-4d14-90de-7a49a7f2b8f2`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.MemberParents,
@@ -470,7 +470,7 @@ export class MemberActionBuilder {
                 },
                 {
                     id: 'all',
-                    name: $t(`Alle ouders`),
+                    name: $t(`5c6c917c-c07c-4825-9f58-a8dade4e4875`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.MemberParents,
@@ -481,7 +481,7 @@ export class MemberActionBuilder {
                 },
                 {
                     id: 'none',
-                    name: $t(`Geen ouders`),
+                    name: $t(`71065f0c-5d13-4b38-ba35-9b17aca66fbf`),
                     value: [],
                 },
             ],
@@ -492,12 +492,12 @@ export class MemberActionBuilder {
             options: [
                 {
                     id: 'none',
-                    name: $t(`Geen niet-geverifieerde adressen`),
+                    name: $t(`2f4a25b4-1c98-4449-9ba1-75418393f0c9`),
                     value: [],
                 },
                 {
                     id: 'minors',
-                    name: $t(`Niet-geverifieerde adressen van minderjarige leden`),
+                    name: $t(`62844f9d-a3d3-4b83-bafe-e8e97bc6aa3b`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.MemberUnverified,
@@ -515,7 +515,7 @@ export class MemberActionBuilder {
                 },
                 {
                     id: 'all',
-                    name: $t(`Alle niet-geverifieerde adressen`),
+                    name: $t(`09c2a259-7c8f-4a97-8eb2-05fa9d56865e`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.MemberUnverified,
@@ -558,7 +558,7 @@ export class MemberActionBuilder {
             components: [
                 new ComponentWithProperties(MemberStepView, {
                     member,
-                    title: member.member.firstName + ' ' + $t(`bewerken`),
+                    title: member.member.firstName + ' ' + $t(`ee3bc635-c294-4134-9155-7a74f47dec4f`),
                     component: markRaw(EditMemberAllBox),
                     saveHandler: async ({ dismiss }: NavigationActions) => {
                         await dismiss({ force: true });
@@ -574,7 +574,7 @@ export class MemberActionBuilder {
             components: [
                 new ComponentWithProperties(MemberStepView, {
                     member,
-                    title: $t(`Functies van`) + ' ' + member.member.firstName,
+                    title: $t(`53ffa1a5-9b55-4ff9-9c97-eeaf54ce6b47`) + ' ' + member.member.firstName,
                     component: markRaw(EditMemberResponsibilitiesBox),
                     saveHandler: async ({ dismiss }: NavigationActions) => {
                         await dismiss({ force: true });
@@ -589,7 +589,7 @@ export class MemberActionBuilder {
         if (members.length > 1) {
             throw new SimpleError({
                 code: 'not-supported',
-                message: $t('Meerdere leden verwijderen is niet ondersteund'),
+                message: $t('2fcd7b68-2fd1-4b8c-afae-4dc60dcd96a5'),
             });
         }
 
@@ -601,10 +601,10 @@ export class MemberActionBuilder {
                 new ComponentWithProperties(DeleteView, {
                     title: `${name} definitief verwijderen?`,
                     description: `Ben je 100% zeker dat je ${name} wilt verwijderen? Vul dan de volledige naam van het lid in ter bevestiging. De volledige geschiedenis gaat verloren. Probeer dit absoluut te vermijden en enkel voor uitzonderingen te gebruiken.`,
-                    confirmationTitle: $t(`Bevestig de naam van het lid`),
-                    confirmationPlaceholder: $t(`Volledige naam`),
+                    confirmationTitle: $t(`c15132d6-f507-46eb-8584-e36e7ce343c5`),
+                    confirmationPlaceholder: $t(`e4b3d2af-dee8-4f55-88e9-a229513d347c`),
                     confirmationCode: name,
-                    checkboxText: $t(`Ja, ik ben 100% zeker`),
+                    checkboxText: $t(`738eb984-4a2e-455d-b6d5-5204173039dc`),
                     onDelete: async () => {
                         const patch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
                         for (const member of members) {
@@ -614,7 +614,7 @@ export class MemberActionBuilder {
                         await this.platformFamilyManager.isolatedPatch(members, patch);
                         GlobalEventBus.sendEvent('members-deleted', members).catch(console.error);
 
-                        Toast.success(Formatter.capitalizeFirstLetter(Formatter.pluralText(members.length, $t(`lid`), $t(`leden`))) + ' ' + $t(`verwijderd`)).show();
+                        Toast.success(Formatter.capitalizeFirstLetter(Formatter.pluralText(members.length, $t(`5173cc6a-ed5a-4c13-9b17-e2499ebffbd5`), $t(`39c566d6-520d-4048-bb1a-53eeea3ccea7`))) + ' ' + $t(`0fe765e4-3ec6-43aa-8cae-ef6d89939c85`)).show();
                         return true;
                     },
                 }),

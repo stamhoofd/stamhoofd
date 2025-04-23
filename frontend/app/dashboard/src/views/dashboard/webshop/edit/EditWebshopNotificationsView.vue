@@ -1,11 +1,11 @@
 <template>
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
-        <p>{{ $t('Voeg e-mailadressen toe waarop je automatisch een e-mail wilt ontvangen als er nieuwe bestellingen binnen komen. Gebruik deze functie alleen als je geen grote aantallen bestellingen per dag verwacht.') }}</p>
+        <p>{{ $t('cefd590d-9b21-48fc-8069-db560468e724') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <EmailInput v-for="n in emailCount" :key="n" :title="$t(`E-mailadres`) + ' '+n" :model-value="getEmail(n - 1)" :validator="errors.validator" :placeholder="$t(`E-mailadres`)" @update:model-value="setEmail(n - 1, $event)">
+        <EmailInput v-for="n in emailCount" :key="n" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`) + ' '+n" :model-value="getEmail(n - 1)" :validator="errors.validator" :placeholder="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" @update:model-value="setEmail(n - 1, $event)">
             <template #right>
                 <span v-if="isBlocked(n-1)" v-tooltip="getInvalidEmailDescription(n-1)" class="icon warning yellow" />
                 <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" />
@@ -13,7 +13,7 @@
         </EmailInput>
 
         <p v-if="emailCount === 0" class="info-box">
-            {{ $t('Er zijn nog geen e-mailadressen ingesteld die een e-mail ontvangen bij nieuwe bestellingen.') }}
+            {{ $t('e6c3ac24-00f5-4bee-b5b6-bf12c073ff7f') }}
         </p>
 
         <button v-for="suggestion in suggestions" :key="suggestion" class="button text" type="button" @click="addEmail(suggestion)">
@@ -23,7 +23,7 @@
 
         <button class="button text" type="button" @click="addEmail('')">
             <span class="icon add" />
-            <span>{{ $t('Ander e-mailadres') }}</span>
+            <span>{{ $t('31738583-bdca-42de-9698-1c11f9deac7e') }}</span>
         </button>
     </SaveView>
 </template>
