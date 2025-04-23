@@ -5,6 +5,7 @@ import { eslintFormatter } from "./eslint-formatter";
 import { fileCache } from "./FileCache";
 import { getChangedFiles } from "./git-helper";
 import { getVueTemplateMatchCount, TranslateVueFileOptions, translateVueTemplate } from "./translate-vue-template";
+import { getTotalMatchCount, translateTypescript, TypescriptTranslatorOptions } from "./typescript-translator";
 
 interface TranslateVueFilesOptions {
     replaceChangesOnly?: boolean;
@@ -100,12 +101,22 @@ export async function translateVueFileHelper(filePath: string, options: Translat
         return;
     }
 
-    const translation = await translateVueTemplate(templateContent, fileOptions);
+    const templateTranslation = await translateVueTemplate(templateContent, fileOptions);
+    let newFileContent = replaceTemplate(fileContent, templateTranslation);
+
+    const scriptContent = getScriptContent(fileContent);
+    let scriptTranslation = scriptContent;
+
+    if(scriptContent !== null) {
+        scriptTranslation = await translateTypescript(scriptContent, fileOptions);
+        newFileContent = replaceScript(fileContent, scriptTranslation, scriptContent);
+    }
+
     if(!isDoubt) {
         fileCache.addFile(filePath);
     }
 
-    if(translation !== templateContent) {
+    if(templateTranslation !== templateContent || scriptContent !== scriptTranslation) {
         const infoText = options.dryRun ? 'Completed with changes (dry-run)' : 'Write file';
 
         console.log(chalk.magenta(`
@@ -113,8 +124,6 @@ ${infoText}: `) + chalk.gray(filePath) + `
 `)
 
         if(!options.dryRun) {
-            const newFileContent = replaceTemplate(fileContent, translation);
-            
             fs.writeFileSync(filePath, newFileContent);
 
             if(options.doFix) {
@@ -146,9 +155,14 @@ async function getVueFileMatchCount(filePath: string, options: TranslateVueFileH
 
     const fileContent = fs.readFileSync(filePath, "utf8");
     const templateContent = getVueTemplate(fileContent);
+    const typescriptContent = getScriptContent(fileContent);
 
     if(templateContent === null) {
         return 0;
+    }
+
+    if(typescriptContent !== null) {
+        return await getVueTemplateMatchCount(templateContent, fileOptions) + await getScriptMatchCount(typescriptContent, fileOptions);
     }
 
     return await getVueTemplateMatchCount(templateContent, fileOptions);
@@ -166,7 +180,27 @@ function getVueTemplate(vueFileContent: string): string | null {
     return match[0] ?? null;
 }
 
+function getScriptContent(vueFileContent: string): string | null {
+    const regex = /<script.*>((?:.|\n)+)<\/script>/;
+
+    const match = vueFileContent.match(regex);
+
+    if(match === null) {
+        return null;
+    }
+
+    return match[1] ?? null;
+}
+
+async function getScriptMatchCount(scriptContent: string, options: TypescriptTranslatorOptions): Promise<number> {
+    return await getTotalMatchCount(scriptContent, options);
+}
+
 function replaceTemplate(vueFileContent: string, templateContent: string) {
     const templateRegex = /<template>((?:.|\n)+)<\/template>/;
     return vueFileContent.replace(templateRegex, templateContent);
+}
+
+function replaceScript(vueFileContent: string, scriptTranslation: string, scriptContent: string) {
+    return vueFileContent.replace(scriptContent, scriptTranslation);
 }

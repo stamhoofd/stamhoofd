@@ -108,7 +108,6 @@ export async function translateTypescriptFileHelper(filePath: string, options: T
         fileCache.addFile(filePath);
     }
     
-
     if(translation !== fileContent) {
         const infoText = options.dryRun ? 'Completed with changes (dry-run)' : 'Write file';
 
