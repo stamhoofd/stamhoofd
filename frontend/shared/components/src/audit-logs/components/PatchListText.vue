@@ -36,19 +36,19 @@ function getRenderText(item: AuditLogPatchItem): any[] {
     ];
 
     if (item.type === AuditLogPatchItemType.Added) {
-        text.push(' toegevoegd');
+        text.push(' ' + $t(`toegevoegd`));
     }
 
     if (item.type === AuditLogPatchItemType.Removed) {
-        text.push(' verwijderd');
+        text.push(' ' + $t(`verwijderd`));
     }
 
     if (item.type === AuditLogPatchItemType.Changed) {
-        text.push(' aangepast');
+        text.push(' ' + $t(`aangepast`));
     }
 
     if (item.type === AuditLogPatchItemType.Reordered) {
-        text.push(' volgorde gewijzigd');
+        text.push(' ' + $t(`volgorde gewijzigd`));
     }
 
     if ((item.oldValue && (item.oldValue.toString() || item.oldValue.type !== AuditLogReplacementType.Uuid)) || (item.value && (item.value.toString() || item.value.type !== AuditLogReplacementType.Uuid))) {
@@ -71,7 +71,7 @@ function getRenderText(item: AuditLogPatchItem): any[] {
     }
     else {
         if (!item.type) {
-            text.push(' aangepast');
+            text.push(' ' + $t(`aangepast`));
         }
     }
 

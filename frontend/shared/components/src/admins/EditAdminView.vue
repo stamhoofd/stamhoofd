@@ -147,14 +147,14 @@ const save = async () => {
     if ((firstName.value?.length ?? 0) < 2) {
         errors.addError(new SimpleError({
             code: 'invalid_field',
-            message: 'Vul de voornaam in',
+            message: $t(`Vul de voornaam in`),
             field: 'firstName',
         }));
     }
     if ((lastName.value?.length ?? 0) < 2) {
         errors.addError(new SimpleError({
             code: 'invalid_field',
-            message: 'Vul de achternaam in',
+            message: $t(`Vul de achternaam in`),
             field: 'lastName',
         }));
     }
@@ -187,7 +187,7 @@ const save = async () => {
                 decoder: UserWithMembers as Decoder<UserWithMembers>,
             });
             user = response.data;
-            new Toast('Beheerder ' + user.firstName + ' is toegevoegd en heeft een uitnodiging via email ontvangen.', 'success').setHide(5000).show();
+            new Toast($t(`Beheerder`) + ' ' + user.firstName + ' ' + $t(`is toegevoegd en heeft een uitnodiging via email ontvangen.`), 'success').setHide(5000).show();
         }
         else {
             const response = await $context.value.authenticatedServer.request({
@@ -197,7 +197,7 @@ const save = async () => {
                 decoder: UserWithMembers as Decoder<UserWithMembers>,
             });
             user = response.data;
-            new Toast('Beheerder ' + user.firstName + ' is aangepast', 'success').setHide(2000).show();
+            new Toast($t(`Beheerder`) + ' ' + user.firstName + ' ' + $t(`is aangepast`), 'success').setHide(2000).show();
         }
 
         // Copy all data
@@ -225,7 +225,7 @@ const doDelete = async () => {
         return false;
     }
 
-    if (!await CenteredMessage.confirm('Ben je zeker dat je deze beheerder wilt verwijderen?', 'Verwijderen')) {
+    if (!await CenteredMessage.confirm($t(`Ben je zeker dat je deze beheerder wilt verwijderen?`), $t(`Verwijderen`))) {
         return false;
     }
 
@@ -252,7 +252,7 @@ const doDelete = async () => {
 
         await pop({ force: true });
 
-        new Toast('Beheerder ' + props.user.firstName + ' is verwijderd', 'success').setHide(2000).show();
+        new Toast($t(`Beheerder`) + ' ' + props.user.firstName + ' ' + $t(`is verwijderd`), 'success').setHide(2000).show();
     }
     catch (e) {
         console.error(e);
@@ -264,7 +264,7 @@ const doDelete = async () => {
 const resendInvite = async () => {
     // We can send a new invite by just recreating the admin (the API will merge with existing admins)
     if (hasChanges.value || props.isNew) {
-        new CenteredMessage('Wijzigingen niet opgeslagen', 'Voor je een uitnodiging opnieuw kan versturen moet je alle wijzigingen opslaan of annuleren.').addCloseButton().show();
+        new CenteredMessage($t(`Wijzigingen niet opgeslagen`), $t(`Voor je een uitnodiging opnieuw kan versturen moet je alle wijzigingen opslaan of annuleren.`)).addCloseButton().show();
         return;
     }
     if (sendingInvite.value) {
@@ -285,7 +285,7 @@ const resendInvite = async () => {
         props.user.set(response.data);
         didSendInvite.value = true;
 
-        new Toast('Uitnodiging verzonden naar ' + props.user.email, 'success').setHide(2000).show();
+        new Toast($t(`Uitnodiging verzonden naar`) + ' ' + props.user.email, 'success').setHide(2000).show();
     }
     catch (e) {
         console.error(e);
@@ -313,7 +313,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
 };
 
 defineExpose({

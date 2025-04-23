@@ -64,7 +64,7 @@ export default class ForgotPasswordView extends Mixins(NavigationMixin) {
             });
 
             this.dismiss({ force: true });
-            new Toast('Je hebt een e-mail ontvangen waarmee je een nieuw wachtwoord kan instellen', 'success').show();
+            new Toast($t(`Je hebt een e-mail ontvangen waarmee je een nieuw wachtwoord kan instellen`), 'success').show();
         }
         catch (e) {
             this.errorBox = new ErrorBox(e);

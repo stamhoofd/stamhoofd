@@ -267,7 +267,7 @@ const props = withDefaults(
 
 const errors = useErrors();
 const { hasChanges, patched, addPatch, patch } = usePatch(props.event);
-const title = computed(() => props.isNew ? 'Activiteit toevoegen' : 'Activiteit bewerken');
+const title = computed(() => props.isNew ? $t(`Activiteit toevoegen`) : $t(`Activiteit bewerken`));
 const saving = ref(false);
 const deleting = ref(false);
 const $t = useTranslate();
@@ -462,7 +462,7 @@ const isNationalActivity = computed({
             const organizationId = props.event.organizationId || organization.value?.id;
 
             if (!organizationId) {
-                chooseOrganizer('Kies een organisator', canSelectOrganization).catch(console.error);
+                chooseOrganizer($t(`Kies een organisator`), canSelectOrganization).catch(console.error);
                 return;
             }
             addPatch({
@@ -610,7 +610,7 @@ async function save() {
             if (!location.value) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: 'De locatie is verplicht voor deze soort activiteit.',
+                    message: $t(`De locatie is verplicht voor deze soort activiteit.`),
                     field: 'event_required',
                 });
             }
@@ -619,7 +619,7 @@ async function save() {
         if (patched.value.meta.groups !== null && patched.value.meta.groups?.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Kies minstens één leeftijdsgroep.',
+                message: $t(`Kies minstens één leeftijdsgroep.`),
             });
         }
         // #endregion

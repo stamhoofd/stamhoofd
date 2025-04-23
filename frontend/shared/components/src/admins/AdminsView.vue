@@ -233,11 +233,11 @@ const permissionList = (user: User) => {
     const list: string[] = [];
     const permissions = getPermissions(user);
     if (!permissions) {
-        return 'Geen toegangsrechten';
+        return $t(`Geen toegangsrechten`);
     }
 
     if (permissions.hasFullAccess()) {
-        list.push('Hoofdbeheerders');
+        list.push($t(`Hoofdbeheerders`));
     }
 
     for (const role of getUnloadedPermissions(user)?.roles ?? []) {
@@ -245,7 +245,7 @@ const permissionList = (user: User) => {
     }
 
     if (list.length === 0) {
-        return 'Geen toegangsrechten';
+        return $t(`Geen toegangsrechten`);
     }
     return list.join(', ');
 };
