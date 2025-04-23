@@ -76,7 +76,7 @@
                         </template>
                     </NRNInput>
                     <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
-                        {{ $t('d3f34f6e-07a2-4da1-a7fa-ce65433d5c60') }} {{ firstName || 'dit lid' }} {{ $t('7a0f3480-bd4b-47cb-8947-09aead00896d') }} <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
+                        {{ $t('77f48757-5c36-47a6-8ce2-d676eef1e778', {member: firstName || $t('dit lid')}) }} <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
                             {{ $t('db9b9618-9f98-4b43-9619-4db64c0d7e68') }}
                         </button>.
                     </p>

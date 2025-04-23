@@ -10519,14 +10519,6 @@
     "original": "Daarnaast kan je in één van de volgende stappen één of meerdere ouders toevoegen, met een e-mailadres, die ook toegang krijgen. Vul hier enkel een e-mailadres van {member} zelf in.",
     "translation": "De plus, vous pouvez, dans l'une des étapes suivantes, ajouter un ou plusieurs parents, avec une adresse e-mail, qui auront également accès. Saisissez ici uniquement une adresse e-mail de {member} lui-même."
   },
-  "d3f34f6e-07a2-4da1-a7fa-ce65433d5c60": {
-    "original": "Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. Heeft",
-    "translation": "Le numéro de registre national est utilisé pour établir les attestations fiscales. A"
-  },
-  "7a0f3480-bd4b-47cb-8947-09aead00896d": {
-    "original": "geen Belgische nationaliteit,",
-    "translation": "pas de nationalité belge,"
-  },
   "db9b9618-9f98-4b43-9619-4db64c0d7e68": {
     "original": "klik dan hier",
     "translation": "cliquez ici"
@@ -19538,5 +19530,17 @@
   "96e61729-ea9c-45bf-82da-56e6a92e6b91": {
     "original": "todo",
     "translation": "todo"
+  },
+  "77f48757-5c36-47a6-8ce2-d676eef1e778": {
+    "original": "Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. Heeft {member} geen Belgische nationaliteit,",
+    "translation": "Le numéro de registre national est utilisé pour établir les attestations fiscales. {member} ne possède pas la nationalité belge,"
+  },
+  "269872df-ab70-4eae-b671-ab9246162d4e": {
+    "original": "todo",
+    "translation": "todo"
+  },
+  "ee3bc635-c294-4134-9155-7a74f47dec4f": {
+    "original": "bewerken",
+    "translation": "éditer"
   }
 }

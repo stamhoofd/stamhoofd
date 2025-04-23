@@ -2910,9 +2910,8 @@
   "91fc8702-78ff-4455-9b11-31cda91b4b39": "één van de ingevoerde e-mailadressen.",
   "3ccc6dce-69a4-46d4-8874-8cf8431239f4": "het ingevoerde e-mailadres.",
   "670684e7-bfa6-48d1-8260-16739b2b47b7": "Daarnaast kan je in één van de volgende stappen één of meerdere ouders toevoegen, met een e-mailadres, die ook toegang krijgen. Vul hier enkel een e-mailadres van {member} zelf in.",
-  "d3f34f6e-07a2-4da1-a7fa-ce65433d5c60": "Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. Heeft",
-  "7a0f3480-bd4b-47cb-8947-09aead00896d": "geen Belgische nationaliteit,",
   "db9b9618-9f98-4b43-9619-4db64c0d7e68": "klik dan hier",
+  "ee3bc635-c294-4134-9155-7a74f47dec4f": "bewerken",
   "c6b0d0d0-ec52-4716-92b1-db4473b4d6e9": "Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit,",
   "a611c2d2-0ac2-430e-8a0f-df2b95bb66cf": "Geboortedatum (optioneel)",
   "0cec2d36-929c-4359-8116-d905c5d0074c": "Identificeert zich als...",
@@ -4895,5 +4894,7 @@
   "b2486175-6dbd-4aa4-a57c-dc7e322fcd31": "Momenteel zijn de voorinschrijvingen nog bezig voor {group}. Dit is enkel voor bestaande leden",
   "83f622e4-0ef5-4965-8d6d-10860df30a87": "De inschrijvingen voor {group} zijn volzet. Je kan wel nog inschrijven voor de wachtlijst",
   "c006386b-0590-40c9-ae62-c4b7ade939f0": "Het maximum voor de keuzemogelijkheid {name} is overschreden",
-  "96e61729-ea9c-45bf-82da-56e6a92e6b91": "todo"
+  "96e61729-ea9c-45bf-82da-56e6a92e6b91": "todo",
+  "77f48757-5c36-47a6-8ce2-d676eef1e778": "Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. Heeft {member} geen Belgische nationaliteit,",
+  "269872df-ab70-4eae-b671-ab9246162d4e": "todo"
 }

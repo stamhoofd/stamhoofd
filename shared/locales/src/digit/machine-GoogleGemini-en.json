@@ -9855,18 +9855,6 @@
     "original": "Daarnaast kan je in één van de volgende stappen één of meerdere ouders toevoegen, met een e-mailadres, die ook toegang krijgen. Vul hier enkel een e-mailadres van {member} zelf in.",
     "translation": "In addition, in one of the following steps you can add one or more parents, with an email address, who will also get access. Only enter an email address of {member} here."
   },
-  "d3f34f6e-07a2-4da1-a7fa-ce65433d5c60": {
-    "original": "Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. Heeft",
-    "translation": "The national registration number is used to create tax certificates. Has"
-  },
-  "7a0f3480-bd4b-47cb-8947-09aead00896d": {
-    "original": "geen Belgische nationaliteit,",
-    "translation": "no Belgian nationality,"
-  },
-  "db9b9618-9f98-4b43-9619-4db64c0d7e68": {
-    "original": "klik dan hier",
-    "translation": "click here"
-  },
   "c6b0d0d0-ec52-4716-92b1-db4473b4d6e9": {
     "original": "Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit,",
     "translation": "You will not receive tax certificates.  Still have Belgian nationality,"
@@ -9961,7 +9949,7 @@
   },
   "b059530c-5267-49a7-b2ee-c7ae33f0c573": {
     "original": "Heeft {name} geen Belgische nationaliteit,",
-    "translation": "Does {name} not have Belgian nationality,"
+    "translation": "If {name} does not have the Belgian nationality,"
   },
   "80e0424d-40a8-4ce8-94e4-2e0394d6f39c": {
     "original": "E-mailadres van ouder",
@@ -19538,5 +19526,21 @@
   "96e61729-ea9c-45bf-82da-56e6a92e6b91": {
     "original": "todo",
     "translation": "todo"
+  },
+  "77f48757-5c36-47a6-8ce2-d676eef1e778": {
+    "original": "Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. Heeft {member} geen Belgische nationaliteit,",
+    "translation": "The national registration number is used to create tax certificates. If {member} does not have the Belgian nationality,"
+  },
+  "269872df-ab70-4eae-b671-ab9246162d4e": {
+    "original": "todo",
+    "translation": "todo"
+  },
+  "ee3bc635-c294-4134-9155-7a74f47dec4f": {
+    "original": "bewerken",
+    "translation": "edit"
+  },
+  "db9b9618-9f98-4b43-9619-4db64c0d7e68": {
+    "original": "klik dan hier",
+    "translation": "click here"
   }
 }
