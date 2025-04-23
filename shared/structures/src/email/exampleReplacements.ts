@@ -4,13 +4,15 @@ import { STPackageType, STPackageTypeHelper } from '../billing/STPackage.js';
 import { Replacement } from '../endpoints/EmailRequest.js';
 
 const exampleBalanceItem = BalanceItem.create({
-    description: $t(`4d3280e1-101e-4fa5-8739-1fb529bce9c3`),
+    // todo translations
+    description: 'Voorbeeld item 1',
     amount: 5,
     unitPrice: 1000,
 });
 
 const exampleBalanceItem2 = BalanceItem.create({
-    description: $t(`241a2f9f-52ab-4e02-a09b-a31ff9ab6cd9`),
+    // todo translations
+    description: 'Voorbeeld item 2',
     amount: 1,
     unitPrice: 500,
 });
