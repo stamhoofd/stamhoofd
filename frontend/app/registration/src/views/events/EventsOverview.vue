@@ -79,7 +79,7 @@ useVisibilityChange(() => {
 });
 
 enum Routes {
-    Event = 'activiteit',
+    Event = $t(`activiteit`),
 }
 
 defineRoutes([
@@ -109,7 +109,7 @@ defineRoutes([
                     event: events.results[0],
                 };
             }
-            Toast.error('Activiteit niet gevonden').show();
+            Toast.error($t(`Activiteit niet gevonden`)).show();
             throw new Error('Event not found');
         },
 

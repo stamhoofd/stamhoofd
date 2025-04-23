@@ -44,7 +44,7 @@ const editMember = useEditMember();
 const app = useAppContext();
 
 async function doEdit() {
-    await editMember(props.member, { title: 'Gegevens bewerken' });
+    await editMember(props.member, { title: $t(`Gegevens bewerken`) });
 }
 
 </script>

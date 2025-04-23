@@ -58,21 +58,21 @@ export default class AcceptTermsView extends Mixins(NavigationMixin) {
             if (!this.acceptPrivacy) {
                 throw new SimpleError({
                     code: 'read_privacy',
-                    message: 'Je moet kennis hebben genomen van het privacybeleid.',
+                    message: $t(`Je moet kennis hebben genomen van het privacybeleid.`),
                 });
             }
 
             if (!this.acceptTerms) {
                 throw new SimpleError({
                     code: 'read_privacy',
-                    message: 'Je moet akkoord gaan met de algemene voorwaarden.',
+                    message: $t(`Je moet akkoord gaan met de algemene voorwaarden.`),
                 });
             }
 
             if (!this.acceptDataAgreement) {
                 throw new SimpleError({
                     code: 'read_privacy',
-                    message: 'Je moet akkoord gaan met de verwerkersovereenkomst.',
+                    message: $t(`Je moet akkoord gaan met de verwerkersovereenkomst.`),
                 });
             }
 

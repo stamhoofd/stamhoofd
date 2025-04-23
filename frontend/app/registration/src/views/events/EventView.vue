@@ -73,7 +73,7 @@ const levelPrefix = computed(() => {
             prefixes.push(...tagNames);
         }
         else {
-            prefixes.push('Nationaal');
+            prefixes.push($t(`Nationaal`));
         }
     }
     else {
@@ -81,7 +81,7 @@ const levelPrefix = computed(() => {
         prefixes.push(groupOrganization.value?.name ?? props.event.organizationId);
     }
 
-    return Formatter.joinLast(prefixes, ', ', ' en ');
+    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`en`) + ' ');
 });
 
 const chooseFamilyMembersForGroup = useChooseFamilyMembersForGroup();
