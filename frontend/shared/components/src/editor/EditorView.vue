@@ -111,7 +111,7 @@ import Underline from '@tiptap/extension-underline';
 import StarterKit from '@tiptap/starter-kit';
 import { Editor, EditorContent } from '@tiptap/vue-3';
 
-import { useCanPop, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
+import { useCanPop, useCanDismiss, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
 import { DataValidator } from '@stamhoofd/utility';
 import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue';
 import UploadButton from '../inputs/UploadButton.vue';
@@ -194,6 +194,7 @@ const showTextStyles = ref(false);
 const editLink = ref('');
 const showLinkEditor = ref(false);
 const canPop = useCanPop();
+const canDismiss = useCanDismiss();
 const pop = usePop();
 const dismiss = useDismiss();
 const editor = ref(buildEditor());
