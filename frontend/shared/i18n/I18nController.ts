@@ -227,12 +227,12 @@ export class I18nController {
     }
 
     static isValidCountry(country: string): country is Country {
-        return countries.includes(country as Country);
+        return STAMHOOFD.fixedCountry ? ((country as any) === STAMHOOFD.fixedCountry) : countries.includes(country as Country);
     }
 
-    static async loadDefault($context: SessionContext | null | undefined, defaultCountry?: Country, defaultLanguage?: string, country?: Country) {
+    static async loadDefault($context: SessionContext | null | undefined, defaultCountry?: Country, defaultLanguage?: Language, country?: Country) {
         const namespace = STAMHOOFD.translationNamespace;
-        let language: string | undefined = undefined;
+        let language: Language | undefined = undefined;
         let needsSave = false;
 
         // Check country if passed
@@ -241,40 +241,7 @@ export class I18nController {
             country = undefined;
         }
 
-        // 1: check the URL. Does it start with a locale or not?
-        const parts = UrlHelper.initial.getParts({ removeLocale: false });
-        if (parts.length >= 1 && this.isValidLocale(parts[0])) {
-            const l = parts[0].substr(0, 2).toLowerCase();
-            const c = parts[0].substr(3, 2).toUpperCase();
-
-            if (!language) {
-                console.info('[I18n] Using language from url', l);
-                language = l;
-                needsSave = true;
-            }
-
-            if (!country && this.isValidCountry(c)) {
-                console.info('[I18n] Using country from url', c);
-                country = c;
-                needsSave = true;
-            }
-            else {
-                if (country !== c) {
-                    console.warn('[I18n] Ignored country from url', c);
-                }
-            }
-        }
-        else if (parts.length >= 1 && (this.fixedCountry || STAMHOOFD.fixedCountry) && parts[0].length == 2) {
-            const l = parts[0].substr(0, 2).toLowerCase();
-
-            if (!language && this.isValidLanguage(l)) {
-                console.info('[I18n] Using language from url', l);
-                language = l;
-                needsSave = true;
-            }
-        }
-
-        // 2. Get by storage
+        // 1. Get by storage (always preferred)
         const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 
         if (!isPrerender) {
@@ -288,10 +255,48 @@ export class I18nController {
                     language = storage.language;
                 }
 
-                if (!country && storage.country && this.isValidCountry(storage.country)) {
+                if (!country && storage.country) {
                     console.info('Using stored country', storage.country);
                     country = storage.country;
                 }
+            }
+        }
+
+        // 2: check the URL. Does it start with a locale or not?
+        const parts = UrlHelper.initial.getParts({ removeLocale: false });
+        if (parts.length >= 1 && this.isValidLocale(parts[0])) {
+            const l = parts[0].substr(0, 2).toLowerCase();
+            const c = parts[0].substr(3, 2).toUpperCase();
+
+            if (!language && this.isValidLanguage(l)) {
+                console.info('[I18n] Using language from url', l);
+                language = l;
+                needsSave = true;
+            }
+            else {
+                if (language !== l) {
+                    console.warn('[I18n] Ignored language from url', l);
+                }
+            }
+
+            if (!country && this.isValidCountry(c)) {
+                console.info('[I18n] Using country from url', c);
+                country = c;
+                needsSave = true;
+            }
+            else {
+                if (country as string !== c) {
+                    console.warn('[I18n] Ignored country from url', c);
+                }
+            }
+        }
+        else if (parts.length >= 1 && (this.fixedCountry || STAMHOOFD.fixedCountry) && parts[0].length === 2) {
+            const l = parts[0].substr(0, 2).toLowerCase();
+
+            if (!language && this.isValidLanguage(l)) {
+                console.info('[I18n] Using language from url', l);
+                language = l;
+                needsSave = true;
             }
         }
 
