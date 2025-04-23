@@ -66,13 +66,13 @@
     "i18n-ally.keepFulfilled": false,
     "i18n-ally.keystyle": "flat",
     "i18n-ally.localesPaths": [
-        "shared/locales/src"
+        "shared/locales/dist/keeo"
     ],
     "i18n-ally.annotationInPlace": false,
     "i18n-ally.extract.keyMaxLength": 1000,
     "i18n-ally.indent": 4,
     "i18n-ally.tabStyle": "space",
-    "i18n-ally.sourceLanguage": "nl",
+    "i18n-ally.sourceLanguage": "nl-BE",
     "i18n-ally.languageTagSystem": "none",
     "i18n-ally.enabledParsers": ["json"],
     "i18n-ally.dirStructure": "file",
