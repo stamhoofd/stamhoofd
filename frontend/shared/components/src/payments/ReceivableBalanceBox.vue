@@ -8,7 +8,7 @@
                 <BalancePriceBreakdown :item="detailedItem" />
             </template>
             <p v-else class="info-box">
-                {{ $t('Geen openstaand bedrag') }}
+                {{ $t('4c4f6571-f7b5-469d-a16f-b1547b43a610') }}
             </p>
 
             <STList v-if="hasWrite">
@@ -21,10 +21,10 @@
                         </IconContainer>
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Item toevoegen') }}
+                        {{ $t('f2babc21-ce3a-4000-acb5-c1623b7b9e43') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Voeg een item toe aan het openstaand bedrag of geef een tegoed') }}
+                        {{ $t('b79653ad-3b9b-4586-bd26-cbca7ccb2ecf') }}
                     </p>
 
                     <template #right>
@@ -42,10 +42,10 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('Betaling registreren') }}
+                        {{ $t('b60dbf08-bc14-4cf0-81c4-a4bcb20e28cd') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Via een betaling kan je één of meerdere items markeren als betaald') }}
+                        {{ $t('98b14eb7-4a8c-42a4-ab84-fec2c2322a17') }}
                     </p>
 
                     <template #right>
@@ -63,10 +63,10 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('Terugbetaling registreren') }}
+                        {{ $t('81f26de9-5a67-4ea2-985e-069aa4803409') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Via een betaling kan je één of meerdere items markeren als betaald') }}
+                        {{ $t('98b14eb7-4a8c-42a4-ab84-fec2c2322a17') }}
                     </p>
 
                     <template #right>
@@ -76,38 +76,38 @@
             </STList>
 
             <template v-if="item.objectType === ReceivableBalanceType.member || item.objectType === ReceivableBalanceType.user">
-                <hr><h2>{{ $t('Hoe kan men dit betalen?') }}</h2>
-                <p>{{ $t("Leden kunnen hun openstaand bedrag betalen door naar het ledenportaal te gaan. Bovenaan zullen ze bij 'snelle acties' een knop zien waarmee ze hun openstaand bedrag kunnen betalen (je kan een e-mail sturen met een inlogknop om naar het ledenportaal te gaan).") }}</p>
+                <hr><h2>{{ $t('683a45ce-773c-4867-b656-1344beb5bd55') }}</h2>
+                <p>{{ $t("0d7ce596-ad47-490d-b619-0cb1f1ae84ec") }}</p>
                 <p v-if="detailedItem.amountPending !== 0" class="style-description-block">
-                    {{ $t('Opgelet, het deel dat in verwerking is kan niet betaald worden via het ledenportaal. Je kan wel de betalingen die in verwerking zijn annuleren zodat ze via een andere betaalmethode betaald kunnen worden via het ledenportaal. Bijvoorbeeld een overschrijving die al lang niet betaald werd kan je annuleren om vervolgens een nieuw betaalverzoek te versturen van het openstaande bedrag.') }}
+                    {{ $t('60b43285-c778-483c-bdeb-8c90b732f3e7') }}
                 </p>
                 <p v-if="detailedItem.amountOpen !== 0" class="style-description-block">
-                    {{ $t("Je kan zelf ook manueel een betaling toevoegen (bv. als er ter plaatse werd betaald, of via een overschrijving die niet in het systeem is opgenomen) via de knop 'Betaling/terugbetaling registreren' hierboven.") }}
+                    {{ $t("2c4beec1-1431-4082-8f8c-157109f60d46") }}
                 </p>
             </template>
 
             <template v-if="pendingPayments.length > 0">
-                <hr><h2>{{ $t('In verwerking') }}</h2>
-                <p>{{ $t('Bij betalingen via overschrijving of domiciliëring kan het even duren voor een betaling wordt bevestigd.') }}</p>
+                <hr><h2>{{ $t('ac279f6b-0c7c-4ef1-9178-1fd030fe7cc8') }}</h2>
+                <p>{{ $t('f06c6769-1e42-4a15-b44d-f74a32980d26') }}</p>
 
                 <STList>
                     <PaymentRow v-for="payment of pendingPayments" :key="payment.id" :payments="pendingPayments" :payment="payment" />
                 </STList>
             </template>
 
-            <hr><h2>{{ $t('Betalingen') }}</h2>
+            <hr><h2>{{ $t('290c7beb-61c7-425d-b35e-333aba83bbc5') }}</h2>
 
             <p v-if="succeededPayments.length === 0" class="info-box">
-                {{ $t('Je hebt nog geen betalingen ontvangen') }}
+                {{ $t('a0b932dc-3f60-45a5-aca3-32918474e315') }}
             </p>
 
             <STList v-else>
                 <PaymentRow v-for="payment of succeededPayments" :key="payment.id" :payment="payment" :payments="succeededPayments" />
             </STList>
 
-            <hr><h2>{{ $t('Contactpersonen') }}</h2>
+            <hr><h2>{{ $t('c4fe92c5-851c-422a-842b-da21e56e6f4c') }}</h2>
 
-            <p>{{ $t('Deze personen ontvangen een e-mail bij elke communicatie rond dit openstaand bedrag.') }}</p>
+            <p>{{ $t('18bfe74f-21d2-4eec-aced-31f6e8383cda') }}</p>
 
             <STList v-if="detailedItem.object.contacts.length" class="info">
                 <STListItem v-for="(contact, index) of detailedItem.object.contacts" :key="index">
@@ -120,7 +120,7 @@
                 </STListItem>
             </STList>
             <p v-else class="info-box">
-                {{ $t('Geen contactpersonen gevonden') }}
+                {{ $t('6b4ac7f1-7e9f-489b-87e0-58fc493209f2') }}
             </p>
         </div>
     </LoadingBoxTransition>

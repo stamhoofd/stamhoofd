@@ -19,10 +19,10 @@ export enum DocumentStatus {
 export class DocumentStatusHelper {
     static getName(status: DocumentStatus): string {
         switch (status) {
-            case DocumentStatus.Draft: return $t(`Klad`);
-            case DocumentStatus.MissingData: return $t(`Onvolledig`);
-            case DocumentStatus.Published: return $t(`Gepubliceerd`);
-            case DocumentStatus.Deleted: return $t(`Verwijderd`);
+            case DocumentStatus.Draft: return $t(`a4b33491-0ace-4b39-aba6-79371659fd51`);
+            case DocumentStatus.MissingData: return $t(`21b3891d-7c0e-49ca-ae35-d77d54e9f0c3`);
+            case DocumentStatus.Published: return $t(`362f9b8f-9f87-49bc-8dda-d6014ab9de3f`);
+            case DocumentStatus.Deleted: return $t(`fb738914-5429-4d24-9eac-564caa299996`);
         }
     }
 
@@ -129,7 +129,7 @@ export class DocumentTemplateDefinition extends AutoEncoder {
 
 export class DocumentTemplateGroup extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: StringDecoder, field: 'groupId' })
-    @field({ decoder: NamedObject, version: 344, upgrade: (old: any) => NamedObject.create({ id: old, name: $t(`Onbekend`) }) })
+    @field({ decoder: NamedObject, version: 344, upgrade: (old: any) => NamedObject.create({ id: old, name: $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`) }) })
     group: NamedObject;
 
     /**

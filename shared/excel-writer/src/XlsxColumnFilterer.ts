@@ -19,7 +19,7 @@ export class XlsxColumnFilterer<T> {
                 throw new SimpleError({
                     code: 'invalid_sheet',
                     message: 'Invalid sheet ' + id,
-                    human: $t(`Ongeldig werkblad {sheet}, deze wordt niet (meer) ondersteund`, { sheet: id }),
+                    human: $t(`ece8f68a-bde5-4734-b1bd-284b1d1df005`, { sheet: id }),
                     statusCode: 400,
                 });
             }
@@ -109,7 +109,7 @@ export class XlsxColumnFilterer<T> {
                     throw new SimpleError({
                         code: 'invalid_column',
                         message: 'Invalid column ' + id,
-                        human: $t(`Ongeldige kolom {column}, deze wordt niet (meer) ondersteund`, { column: id }),
+                        human: $t(`b99c5cca-eb86-4d02-96db-fcd3c52fc96c`, { column: id }),
                         statusCode: 400,
                     });
                 }
@@ -128,7 +128,7 @@ export class XlsxColumnFilterer<T> {
             throw new SimpleError({
                 code: 'no_columns',
                 message: 'No columns selected',
-                human: $t(`Geen enkele kolom is geselecteerd`),
+                human: $t(`54edac94-5527-4d6e-89e8-525503159287`),
                 statusCode: 400,
             });
         }

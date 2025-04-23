@@ -243,7 +243,7 @@ export class RegisterCheckout {
             throw new SimpleError({
                 code: 'forbidden',
                 message: 'Permission denied: you are not allowed to delete registrations',
-                human: $t(`Oeps, je hebt geen rechten om inschrijvingen te verwijderen.`),
+                human: $t(`9889c815-5026-4b38-b62a-bb1e438e82b0`),
             });
         }
 
@@ -271,26 +271,26 @@ export class RegisterCheckout {
     get priceBreakown(): PriceBreakdown {
         const all = [
             {
-                name: $t(`Administratiekost`),
+                name: $t(`307f8b34-7f74-4045-9335-c7f0d7649b70`),
                 price: this.administrationFee,
             },
             {
-                name: $t(`Vrije bijdrage`),
+                name: $t(`16ca0372-9c8f-49f0-938d-aee012e59f8c`),
                 price: this.freeContribution,
             },
             {
-                name: $t(`Terugbetaling`),
+                name: $t(`35443bbe-49e8-488e-bb71-c28f30d63f4a`),
                 price: -this.cart.refund,
             },
             {
-                name: $t(`Later te betalen`),
+                name: $t(`7e1d2f82-ca2d-4acc-ab37-88834e63c999`),
                 price: this.cart.priceDueLater,
             },
         ].filter(a => a.price !== 0);
 
         if (all.length > 0) {
             all.unshift({
-                name: $t(`Subtotaal`),
+                name: $t(`8a04f032-01e5-4ee0-98fb-6f36bf971080`),
                 price: this.cart.price,
             });
         }
@@ -298,7 +298,7 @@ export class RegisterCheckout {
         return [
             ...all,
             {
-                name: this.cart.priceDueLater ? $t(`Nu te betalen`) : $t(`Totaal`),
+                name: this.cart.priceDueLater ? $t(`bedb1bf7-9b38-4ef4-a1f3-53ade0f56352`) : $t(`e67d0122-6f15-46c6-af94-92a79268710a`),
                 price: this.totalPrice,
             },
         ];

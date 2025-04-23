@@ -41,7 +41,7 @@ export class PatchApiUserEndpoint extends Endpoint<Params, Query, Body, Response
         const editUser = request.body.id === user.id ? user : await User.getByID(request.body.id);
 
         if (!editUser || !await Context.auth.canAccessUser(editUser, PermissionLevel.Write) || !editUser.isApiUser) {
-            throw Context.auth.notFoundOrNoAccess($t(`Je hebt geen toegang om deze API-user te wijzigen`));
+            throw Context.auth.notFoundOrNoAccess($t(`cd099f48-7a5e-4993-854d-697104201871`));
         }
 
         editUser.firstName = request.body.name ?? editUser.name;
@@ -96,7 +96,7 @@ export class PatchApiUserEndpoint extends Endpoint<Params, Query, Body, Response
             const rateLimits = request.body.meta.rateLimits;
             if (rateLimits && rateLimits !== editUser.meta?.rateLimits) {
                 if (!Context.auth.hasPlatformFullAccess()) {
-                    throw Context.auth.error($t('Je hebt geen rechten om de rate limits van API-keys te wijzigen'));
+                    throw Context.auth.error($t('370932fc-6614-44be-bb8f-ff921305fadd'));
                 }
 
                 editUser.meta = editUser.meta ?? UserMeta.create({});

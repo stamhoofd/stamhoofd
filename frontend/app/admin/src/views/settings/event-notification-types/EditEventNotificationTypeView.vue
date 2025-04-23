@@ -22,13 +22,13 @@
 
         <hr><h2>{{ $t('1a559b46-1863-4782-8cb5-ee6517a2e91d') }}</h2>
         <p>
-            {{ $t('Lees') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('hier') }}</a> {{ $t('meer informatie na over hoe je een vragenlijst kan instellen.') }}
+            {{ $t('8485e7ea-6d66-4f2c-b92a-bd44cb2f4eb4') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('0487c3b0-3f93-4344-a34a-9a9198f37023') }}</a> {{ $t('69551005-512c-4240-8e20-fd546cefafaa') }}
         </p>
 
         <EditRecordCategoriesBox :categories="patched.recordCategories" :settings="editorSettings" @patch:categories="addPatch({recordCategories: $event})" />
 
-        <hr><h2>{{ $t('Deadlines') }}</h2>
-        <p>{{ $t('Via deadlines kan je instellen wanneer de leiding een kampmelding moet invullen.') }}</p>
+        <hr><h2>{{ $t('49dd6919-a853-4004-b817-ae811de527ab') }}</h2>
+        <p>{{ $t('2562f83d-522d-47a5-b8ad-b918d14c3cb2') }}</p>
 
         <STList v-if="patched.deadlines.length">
             <EventNotificationDeadlineRow v-for="deadline in patched.deadlines" :key="deadline.id" :deadline="deadline" @click="editDeadline(deadline)" />

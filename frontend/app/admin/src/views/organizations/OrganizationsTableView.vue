@@ -121,7 +121,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'name',
-        name: $t(`Naam`),
+        name: $t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`),
         getValue: organization => organization.name,
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -130,9 +130,9 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, boolean>({
         id: 'status',
-        name: $t(`Status`),
+        name: $t(`e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5`),
         getValue: organization => organization.active,
-        format: active => active ? $t(`Actief`) : $t(`Inactief`),
+        format: active => active ? $t(`1bb1402a-c26b-4516-bbe1-08aff32ee3e8`) : $t(`ddfa1e2d-bb72-4781-8754-d5002249f30d`),
         getStyle: active => active ? 'success' : 'error',
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -143,33 +143,33 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'city',
-        name: $t(`Gemeente`),
+        name: $t(`54b992a4-20e1-4232-8d2e-93c9353c6af3`),
         getValue: organization => organization.address.city,
         minimumWidth: 100,
         recommendedWidth: 200,
     }),
     new Column<ObjectType, string[]>({
         id: 'tags',
-        name: $t(`Tags`),
+        name: $t(`b1dd12f9-89d8-446b-8005-6be3a812a2b2`),
         allowSorting: false,
-        getValue: organization => organization.meta.tags.map(t => platform.value.config.tags.find(tt => tt.id === t)?.name ?? $t(`Onbekend`)),
-        format: tags => tags.length === 0 ? $t(`Geen`) : tags.join(', '),
+        getValue: organization => organization.meta.tags.map(t => platform.value.config.tags.find(tt => tt.id === t)?.name ?? $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`)),
+        format: tags => tags.length === 0 ? $t(`45ff02db-f404-4d91-853f-738d55c40cb6`) : tags.join(', '),
         getStyle: tags => tags.length === 0 ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 300,
     }),
     new Column<ObjectType, { completed: number; total: number }>({
         id: 'setupSteps',
-        name: $t(`Vlagmoment`),
+        name: $t(`d8b63805-2fa5-4bb8-bb01-97adf9898497`),
         allowSorting: false,
         getValue: organization => organization.period.setupSteps.getProgress(),
         format: (progress) => {
             const { completed, total } = progress;
             if (total === 0) {
-                return $t(`Geen`);
+                return $t(`45ff02db-f404-4d91-853f-738d55c40cb6`);
             }
             if (completed >= total) {
-                return $t(`Voltooid`);
+                return $t(`1e1637ef-4133-4f30-973d-bd913387961e`);
             }
             return `${progress.completed}/${progress.total}`;
         },
@@ -315,7 +315,7 @@ if (auth.hasPlatformFullAccess()) {
     );
 
     actions.push(new AsyncTableAction({
-        name: $t(`E-mailen`),
+        name: $t(`f92ad3ab-8743-4d37-8b3f-c9d5ca756b16`),
         icon: 'email',
         priority: 12,
         groupIndex: 3,
@@ -325,7 +325,7 @@ if (auth.hasPlatformFullAccess()) {
     }));
 
     actions.push(new AsyncTableAction({
-        name: $t(`Bedrag aanrekenen`),
+        name: $t(`4273d00c-7b8b-48ec-906d-80d6feb23655`),
         icon: 'calculator',
         priority: 13,
         groupIndex: 4,
@@ -336,7 +336,7 @@ if (auth.hasPlatformFullAccess()) {
 
     actions.push(
         new AsyncTableAction({
-            name: $t(`Exporteren naar Excel`),
+            name: $t(`0302eaa0-ce2a-4ef0-b652-88b26b9c53e9`),
             icon: 'download',
             priority: 11,
             groupIndex: 3,

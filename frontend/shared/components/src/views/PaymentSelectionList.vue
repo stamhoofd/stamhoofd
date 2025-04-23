@@ -13,7 +13,7 @@
                 <h2 :class="{ 'style-title-list': !!getDescription(paymentMethod) }">
                     {{ getName(paymentMethod) }}
 
-                    <span v-if="paymentMethod === 'Payconiq' && hasNonPayconiq" class="style-tag inline-first">{{ $t('Meest gebruikt') }}</span>
+                    <span v-if="paymentMethod === 'Payconiq' && hasNonPayconiq" class="style-tag inline-first">{{ $t('a841013e-9ea0-4c17-9225-31a6a09d98c4') }}</span>
                 </h2>
                 <p v-if="getDescription(paymentMethod)" class="style-description-small">
                     {{ getDescription(paymentMethod) }}

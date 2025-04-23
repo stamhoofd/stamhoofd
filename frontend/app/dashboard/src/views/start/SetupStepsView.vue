@@ -5,12 +5,12 @@
                 {{ $t('a654551b-6dcd-48a9-a5c5-4609fdcba5f3') }}
 
                 <button class="button text" type="button">
-                    {{ $t('Toon stappen') }}
+                    {{ $t('72f84037-1626-49e6-ab24-c657a51266a5') }}
                 </button>
             </p>
             <div v-else key="steps" class="container">
                 <hr><h2>{{ $t('8e77d1c1-87dc-4fdb-ad6e-13145bc96f78') }}</h2>
-                <p>{{ $t('cd60d49f-9fc8-4fb7-b574-1231874c1d43') }} <a :href="$domains.getDocs('vlagmoment')" class="inline-link" target="_blank">{{ $t('Meer info') }}</a></p>
+                <p>{{ $t('cd60d49f-9fc8-4fb7-b574-1231874c1d43') }} <a :href="$domains.getDocs('vlagmoment')" class="inline-link" target="_blank">{{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}</a></p>
                 <SetupStepRows :steps="$setupSteps" list-type="todo" @select="onClickStep" />
             </div>
         </TransitionFade>

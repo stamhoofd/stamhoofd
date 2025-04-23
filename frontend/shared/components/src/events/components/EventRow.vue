@@ -14,7 +14,7 @@
         </p>
 
         <p v-if="prefix" class="style-description-small">
-            {{ $t('Voor') }} {{ prefix }}
+            {{ $t('60898eb6-b3e7-44ef-820c-3bd57b4c6bca') }} {{ prefix }}
         </p>
 
         <p v-if="event.meta.location?.name || event.meta.location?.address?.city" class="style-description-small">
@@ -22,9 +22,9 @@
         </p>
 
         <p v-if="event.group" class="style-description-small">
-            <span v-if="event.group.notYetOpen">{{ $t('Inschrijvingen starten op') }} {{ Formatter.date(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date()) }}</span>
-            <span v-else-if="event.group.closed">{{ $t('Inschrijvingen gesloten') }}</span>
-            <span v-else>{{ $t('Inschrijvingen open') }}</span>
+            <span v-if="event.group.notYetOpen">{{ $t('4837760e-e747-427f-a976-0acbc786365f') }} {{ Formatter.date(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date()) }}</span>
+            <span v-else-if="event.group.closed">{{ $t('8222f272-8e50-4d5d-9e30-ddd534c30081') }}</span>
+            <span v-else>{{ $t('5e56d87a-0c2b-412c-8a84-92091856e538') }}</span>
         </p>
 
         <p v-if="event.group && app !== 'registration'" class="style-description-small">
@@ -32,7 +32,7 @@
         </p>
 
         <template #right>
-            <span v-if="!event.meta.visible" class="icon gray eye-off" :v-tooltip="$t('Verborgen')" />
+            <span v-if="!event.meta.visible" class="icon gray eye-off" :v-tooltip="$t('6276d07c-bd0d-4117-b46c-e3f7b0dbb1e5')" />
             <span v-if="event.id" class="icon arrow-right-small gray" />
             <span v-else class="icon add gray" />
         </template>

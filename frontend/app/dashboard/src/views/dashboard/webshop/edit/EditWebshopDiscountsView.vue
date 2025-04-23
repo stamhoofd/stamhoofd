@@ -3,8 +3,8 @@
         <h1>{{ viewTitle }}</h1>
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <hr><h2>{{ $t('Algemene kortingen') }}</h2>
-        <p>{{ $t('Algemene kortingen worden automatisch toegepast op alle bestellingen, eventueel onder bepaalde voorwaarden.') }}</p>
+        <hr><h2>{{ $t('9bbdb9e4-fc41-4135-8ad1-f55f61a7aa63') }}</h2>
+        <p>{{ $t('180981ba-a251-4d5f-bcfa-6256b238b5c5') }}</p>
 
         <STList v-if="defaultDiscounts.length">
             <STListItem v-for="discount of defaultDiscounts" :key="discount.id" class="right-description right-stack" :selectable="true" @click="editDiscount(discount)">
@@ -25,12 +25,12 @@
         <p>
             <button class="button text" type="button" @click="addDiscount">
                 <span class="icon add" />
-                <span>{{ $t('Algemene korting') }}</span>
+                <span>{{ $t('6a35dc73-d0b6-4785-acb8-0a49460abbf0') }}</span>
             </button>
         </p>
 
-        <hr><h2>{{ $t('Kortingscodes') }}</h2>
-        <p>{{ $t('Bestellers kunnen een kortingscode inruilen door een link te gebruiken of door manueel de code in te typen bij het openen van het winkelmandje.') }}</p>
+        <hr><h2>{{ $t('8b322fca-7359-434a-9813-0ab2565cc2a6') }}</h2>
+        <p>{{ $t('29f1eed1-3fc5-4714-98f4-4c71d63d0d65') }}</p>
 
         <Spinner v-if="fetchingDiscountCodes" />
         <div v-else>
@@ -41,10 +41,10 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('Sta invullen van kortingscodes toe') }}
+                        {{ $t('7bae6892-1011-4c14-8708-2d7d016831e1') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Als je dit uitschakelt kunnen bestellers enkel een kortingscode gebruiken via een link.') }}
+                        {{ $t('7e21be30-cf02-497c-9157-2fea6aefc26f') }}
                     </p>
                 </STListItem>
 
@@ -60,7 +60,7 @@
                         {{ discountCode.description }}
                     </p>
                     <p class="style-description-small">
-                        {{ discountCode.usageCount }} {{ $t('keer gebruikt') }}
+                        {{ discountCode.usageCount }} {{ $t('cf404a1c-892b-42f5-b0e6-9dc88f0917fa') }}
                     </p>
 
                     <template #right>
@@ -69,14 +69,14 @@
                 </STListItem>
             </STList>
             <p v-else class="info-box">
-                {{ $t('Je hebt nog geen kortingscodes aangemaakt voor deze webshop') }}
+                {{ $t('1ec72626-a767-4f6d-b864-64443633ec98') }}
             </p>
         </div>
 
         <p>
             <button class="button text" type="button" @click="addDiscountCode">
                 <span class="icon add" />
-                <span>{{ $t('Kortingscode') }}</span>
+                <span>{{ $t('46a3962f-7d21-4cf4-b3a9-bfec8007e68a') }}</span>
             </button>
         </p>
     </SaveView>

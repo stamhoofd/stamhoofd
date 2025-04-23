@@ -86,7 +86,7 @@ export default class EditGroupMixin extends Mixins(NavigationMixin) {
         if (!this.hasChanges) {
             return true;
         }
-        return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
+        return await CenteredMessage.confirm($t(`4f0d330f-f2d2-4fbf-a4b4-267d939db1ee`), $t(`335dc08b-97e1-4f01-9356-b47f741225e4`));
     }
 
     validate(): Promise<void> | void {

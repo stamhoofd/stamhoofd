@@ -22,10 +22,10 @@
                 <div v-if="index < filters.length - 1" class="group-ui-filter-mode" @click.stop>
                     <Dropdown :model-value="filter.mode" @update:model-value="setFilterMode($event, index)">
                         <option :value="GroupUIFilterMode.And">
-                            {{ $t('En') }}
+                            {{ $t('ebf4d767-4f8f-4f6c-9130-e3b4e8819add') }}
                         </option>
                         <option :value="GroupUIFilterMode.Or">
-                            {{ $t('Of') }}
+                            {{ $t('5df94168-bd59-43b9-986d-57a9c6f7a9b5') }}
                         </option>
                     </Dropdown>
                 </div>
@@ -39,7 +39,7 @@
         </template>
     </STList>
     <p v-else>
-        {{ $t('Geen filters') }}
+        {{ $t('f773f4fc-c4e9-4792-a0a4-c9e969f0b245') }}
     </p>
 </template>
 

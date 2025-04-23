@@ -96,14 +96,14 @@ async function checkGlobalRoutes() {
         const code = queryString.get('code');
 
         if (token && code) {
-            const toast = new Toast($t(`E-mailadres valideren...`), 'spinner').setHide(null).show();
+            const toast = new Toast($t(`6e39ca2a-d279-41d3-b68d-eb17dd4f4331`), 'spinner').setHide(null).show();
 
             try {
                 const session = reactive(parts[1] ? await SessionContext.createFrom({ organizationId: parts[1] }) : new SessionContext(null)) as SessionContext;
                 await session.loadFromStorage();
                 await LoginHelper.verifyEmail(session, code, token);
                 toast.hide();
-                new Toast($t(`E-mailadres is gevalideerd`), 'success green').show();
+                new Toast($t(`e35060cc-3e63-4b78-9e79-d160401053f5`), 'success green').show();
 
                 const dashboardContext = await getScopedAutoRoot(session);
                 await ReplaceRootEventBus.sendEvent('replace', dashboardContext);
@@ -169,7 +169,7 @@ onMounted(async () => {
 });
 
 async function unsubscribe(id: string, token: string, type: 'all' | 'marketing') {
-    const toast = new Toast($t(`Bezig met uitschrijven...`), 'spinner').setHide(null).show();
+    const toast = new Toast($t(`eefdb3b1-ae26-420d-b1a5-d24997ec3305`), 'spinner').setHide(null).show();
 
     try {
         const response = await NetworkManager.server.request({
@@ -189,14 +189,14 @@ async function unsubscribe(id: string, token: string, type: 'all' | 'marketing')
         const fieldName = type === 'all' ? 'unsubscribedAll' : 'unsubscribedMarketing';
 
         if (details[fieldName]) {
-            if (!await CenteredMessage.confirm($t(`Je bent al uitgeschreven`), $t(`Terug inschrijven op e-mails`), $t(`Je ontvangt momenteel geen e-mails van {name} op {email}. Toch een e-mail ontvangen? Stuur hem door naar {complaintEmail}`, { name: details.organization?.name ?? Platform.shared.config.name, email: details.email, complaintEmail: $t('edac937d-5eda-445e-8bba-2c2b353d3f27') }))) {
+            if (!await CenteredMessage.confirm($t(`5aa1ac8b-626e-496b-bbd9-e97aebb19937`), $t(`35f6fc8e-b63e-4e88-8324-2660c5280d5d`), $t(`fe5a96e6-a7e6-4fe8-9b3f-8ef27bb204bb`, { name: details.organization?.name ?? Platform.shared.config.name, email: details.email, complaintEmail: $t('edac937d-5eda-445e-8bba-2c2b353d3f27') }))) {
                 return;
             }
 
             unsubscribe = false;
         }
         else {
-            if (!await CenteredMessage.confirm($t(`Wil je dat we jou geen e-mails meer sturen?`), $t(`Ja, uitschrijven`), $t(`Hierna ontvang je geen e-mails van {name} op {email}`, { name: details.organization?.name ?? Platform.shared.config.name, email: details.email }))) {
+            if (!await CenteredMessage.confirm($t(`4a7194b9-bcaf-498b-af75-6065f08f2a8e`), $t(`48b16d15-edcd-423a-abc3-a203a9c5d09e`), $t(`f2fef1b6-c586-4d28-b11d-6dad0974af93`, { name: details.organization?.name ?? Platform.shared.config.name, email: details.email }))) {
                 return;
             }
             toast.show();
@@ -214,10 +214,10 @@ async function unsubscribe(id: string, token: string, type: 'all' | 'marketing')
         toast.hide();
 
         if (unsubscribe) {
-            new Toast($t(`Top! Je ontvangt geen e-mails meer.`), 'success').setHide(15 * 1000).show();
+            new Toast($t(`26e5dfeb-3e71-4d1a-8580-350d19efbacd`), 'success').setHide(15 * 1000).show();
         }
         else {
-            new Toast($t(`Je ontvangt vanaf nu terug e-mails.`), 'success').setHide(15 * 1000).show();
+            new Toast($t(`f7cb59de-5024-4a84-bb81-c10961911e35`), 'success').setHide(15 * 1000).show();
         }
     }
     catch (e) {

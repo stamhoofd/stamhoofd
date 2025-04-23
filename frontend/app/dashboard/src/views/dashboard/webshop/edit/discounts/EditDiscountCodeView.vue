@@ -1,31 +1,31 @@
 <template>
     <SaveView :title="isNew ? $t(`Kortingscode toevoegen`) : $t(`Kortingscode bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            {{ $t('Kortingscode toevoegen') }}
+            {{ $t('ccdda763-4c52-4a25-94ed-458b601be3a4') }}
         </h1>
         <h1 v-else>
-            {{ $t('Kortingscode bewerken') }}
+            {{ $t('2c80a707-f641-49ac-a05c-55962b4c9660') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox error-fields="code" :error-box="errors.errorBox" :title="$t(`Code`)">
-            <input v-model="code" class="input" type="text" autocomplete="off" :placeholder="$t(`Bv. BLACK-FRIDAY`)" @blur="cleanCode">
+        <STInputBox error-fields="code" :error-box="errors.errorBox" :title="$t(`55a6f957-af81-40b3-8c83-2096f22044c8`)">
+            <input v-model="code" class="input" type="text" autocomplete="off" :placeholder="$t(`93258b4f-4bbd-40bb-a0d4-7e1112f7aeaf`)" @blur="cleanCode">
         </STInputBox>
         <p v-if="!code" class="style-description-small">
-            {{ $t('Kies zelf een code of') }} <button type="button" class="inline-link" @click="generateCode()">
-                {{ $t('genereer één willekeurig') }}
+            {{ $t('fe53474b-5d28-4a53-8478-0d32bc415102') }} <button type="button" class="inline-link" @click="generateCode()">
+                {{ $t('88f0ad0c-254c-4496-829a-92c2ef9d7272') }}
             </button>
         </p>
         <p v-else class="style-description-small">
-            {{ $t('De kortingscode kan gebruikt worden via') }} <span v-copyable="'https://'+link" class="style-copyable style-inline-code">{{ link }}</span>
+            {{ $t('072a6888-a4a5-452a-9544-7e376db90540') }} <span v-copyable="'https://'+link" class="style-copyable style-inline-code">{{ link }}</span>
         </p>
 
-        <STInputBox class="max" error-fields="description" :error-box="errors.errorBox" :title="$t(`Beschrijving`)">
-            <textarea v-model="description" class="input" autocomplete="off" :placeholder="$t(`Optioneel`)" />
+        <STInputBox class="max" error-fields="description" :error-box="errors.errorBox" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
+            <textarea v-model="description" class="input" autocomplete="off" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" />
         </STInputBox>
         <p class="style-description-small">
-            {{ $t('De beschrijving is een interne referentie, en is niet zichtbaar voor bestellers.') }}
+            {{ $t('9d9a920b-4ab2-4ba2-9c17-58dc2d7fff2b') }}
         </p>
 
         <STList>
@@ -35,7 +35,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Beperk aantal keer te gebruiken (waarvan al {count} keer gebruikt)', {count: patchedDiscountCode.usageCount.toString()}) }}
+                    {{ $t('f884e374-a539-4c27-ad5f-18b890e97141', {count: patchedDiscountCode.usageCount.toString()}) }}
                 </h3>
 
                 <div v-if="useMaximumUsage" class="split-inputs option" @click.stop.prevent>
@@ -47,9 +47,9 @@
         </STList>
 
         <hr><h2>
-            {{ $t('Kortingen') }}
+            {{ $t('2173a56e-ee80-4e8d-9551-20f061fff7b9') }}
         </h2>
-        <p>{{ $t('Je kan één of meerdere kortingen verbinden aan een kortingscode.') }}</p>
+        <p>{{ $t('3995a793-8451-4e7e-a74d-9a66d8114d9c') }}</p>
 
         <STList v-if="patchedDiscountCode.discounts.length">
             <STListItem v-for="discount of patchedDiscountCode.discounts" :key="discount.id" class="right-description right-stack" :selectable="true" @click="editDiscount(discount)">
@@ -70,18 +70,18 @@
         <p>
             <button class="button text" type="button" @click="addDiscount">
                 <span class="icon add" />
-                <span>{{ $t('Korting toevoegen') }}</span>
+                <span>{{ $t('46681ff6-bc40-4da6-9c3f-f8f335d72633') }}</span>
             </button>
         </p>
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('Verwijder deze code') }}
+                {{ $t('ca70e639-c7f8-40d7-9054-9c01711d3f5b') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('Verwijderen') }}</span>
+                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
             </button>
         </div>
     </SaveView>

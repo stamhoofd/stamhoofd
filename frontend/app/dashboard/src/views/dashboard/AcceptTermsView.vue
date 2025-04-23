@@ -1,24 +1,24 @@
 <template>
-    <SaveView :loading="loading" :title="$t(`Aangepaste overeenkomsten`)" @save="save">
+    <SaveView :loading="loading" :title="$t(`4b52f8cb-2b1a-42ff-ab7e-c209e7874649`)" @save="save">
         <h1>
-            {{ $t('Bekijk de aangepaste overeenkomsten') }}
+            {{ $t('770381c5-61af-483c-a21f-f55a63baba3a') }}
         </h1>
 
         <p>
-            {{ $t('We hebben een wijziging aangebracht in onze algemene voorwaarden, privacyvoorwaarden en verwerkingsovereenkomst. Bekijk deze eerst en accepteer de nieuwe overeenkomsten voor je verder gaat.') }}
+            {{ $t('2615ff5c-0ef3-4c6d-87c7-3caf7671a94a') }}
         </p>
         <STErrorsDefault :error-box="errorBox" />
 
         <Checkbox v-model="acceptPrivacy" class="long-text">
-            {{ $t('Ik heb kennis genomen van') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/privacy'" target="_blank">{{ $t('het privacybeleid') }}</a>.
+            {{ $t('df2f7ae1-ad07-4ec4-94c0-939dd3f6bc8d') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/privacy'" target="_blank">{{ $t('005c5e2d-8185-46e7-b1a0-4e4eaaf60d41') }}</a>.
         </Checkbox>
 
         <Checkbox v-model="acceptTerms" class="long-text">
-            {{ $t('Ik heb') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/algemene-voorwaarden'" target="_blank">{{ $t('de algemene voorwaarden') }}</a> {{ $t('gelezen en ga hiermee akkoord in naam van mijn vereniging.') }}
+            {{ $t('b22d5516-2644-4f4a-bcb5-ad93b82a0d61') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/algemene-voorwaarden'" target="_blank">{{ $t('1943d3e6-4550-4240-b2f7-5aaa74e55f5d') }}</a> {{ $t('da2d2d9e-07cc-471e-963a-7915c7698ba9') }}
         </Checkbox>
 
         <Checkbox v-model="acceptDataAgreement" class="long-text">
-            {{ $t('Ik heb') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/verwerkersovereenkomst'" target="_blank">{{ $t('de verwerkersovereenkomst') }}</a> {{ $t('gelezen en ga hiermee akkoord in naam van mijn vereniging.') }}
+            {{ $t('b22d5516-2644-4f4a-bcb5-ad93b82a0d61') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/verwerkersovereenkomst'" target="_blank">{{ $t('2b08e5d7-6acc-4d7f-ad1a-30f349a79fe9') }}</a> {{ $t('da2d2d9e-07cc-471e-963a-7915c7698ba9') }}
         </Checkbox>
     </SaveView>
 </template>
@@ -58,21 +58,21 @@ export default class AcceptTermsView extends Mixins(NavigationMixin) {
             if (!this.acceptPrivacy) {
                 throw new SimpleError({
                     code: 'read_privacy',
-                    message: $t(`Je moet kennis hebben genomen van het privacybeleid.`),
+                    message: $t(`ca416d8b-8535-4680-a421-3c49cfff8e55`),
                 });
             }
 
             if (!this.acceptTerms) {
                 throw new SimpleError({
                     code: 'read_privacy',
-                    message: $t(`Je moet akkoord gaan met de algemene voorwaarden.`),
+                    message: $t(`cebbc813-84c2-4f11-a144-1d1632bfb0f5`),
                 });
             }
 
             if (!this.acceptDataAgreement) {
                 throw new SimpleError({
                     code: 'read_privacy',
-                    message: $t(`Je moet akkoord gaan met de verwerkersovereenkomst.`),
+                    message: $t(`92e9d94a-20c9-482a-a528-fd3c8a8fdded`),
                 });
             }
 

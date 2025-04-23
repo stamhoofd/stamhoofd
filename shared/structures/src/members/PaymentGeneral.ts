@@ -64,12 +64,12 @@ export class PaymentGeneral extends Payment {
             return id ? [id] : [];
         });
 
-        return Formatter.joinLast(Formatter.uniqueArray(ids), ', ', ' ' + $t(`en`) + ' ');
+        return Formatter.joinLast(Formatter.uniqueArray(ids), ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ');
     }
 
     getDetailsHTMLTable(): string {
         let str = '';
-        str += `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><tr><th>${$t('Beschrijving')}</th><th>${$t('Prijs')}</th></tr></thead><tbody>`;
+        str += `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><tr><th>${$t('3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d')}</th><th>${$t('52bff8d2-52af-4d3f-b092-96bcfa4c0d03')}</th></tr></thead><tbody>`;
 
         for (const balanceItemPayment of this.balanceItemPayments) {
             str += `<tr><td><h4>${Formatter.escapeHtml(balanceItemPayment.balanceItem.description)}</h4></td><td>${Formatter.escapeHtml(Formatter.price(balanceItemPayment.price))}</td></tr>`;
@@ -98,6 +98,6 @@ export class PaymentGeneral extends Payment {
             }
         }
 
-        return Formatter.capitalizeFirstLetter(Formatter.joinLast(arr, ', ', ' ' + $t(`en`) + ' '));
+        return Formatter.capitalizeFirstLetter(Formatter.joinLast(arr, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' '));
     }
 }

@@ -1,20 +1,20 @@
 <template>
     <div v-if="member.patchedMember.users.length > 0" class="hover-box container">
         <hr><h2 class="style-with-button">
-            <span class="icon-spacer">{{ $t('Accounts') }}</span>
+            <span class="icon-spacer">{{ $t('9b625e82-f571-4fc6-a83b-47cb14ac1739') }}</span>
             <a v-if="!$isTouch && app !== 'registration'" class="button icon gray help" target="_blank" :href="$domains.getDocs('leden-beheren-met-meerdere-ouders')" />
         </h2>
-        <p>{{ $t('Dit zijn alle e-mailadressen die toegang hebben tot de gegevens van {member}. Hierop kan je inloggen of een account aanmaken.', {member: member.patchedMember.firstName}) }}</p>
+        <p>{{ $t('db162d2e-be1b-4e8a-9915-b1e58ffa0aca', {member: member.patchedMember.firstName}) }}</p>
         <STList>
             <STListItem v-for="user in sortedUsers" :key="user.id" class="hover-box">
                 <template v-if="user.hasAccount && user.verified" #left>
                     <span class="icon user small" />
                 </template>
                 <template v-else-if="user.hasAccount && !user.verified" #left>
-                    <span class="icon email small" :v-tooltip="$t('Deze gebruiker moet het e-mailadres nog verifiëren.')" />
+                    <span class="icon email small" :v-tooltip="$t('726b28db-0878-4441-8cc9-a75ed6734a24')" />
                 </template>
                 <template v-else #left>
-                    <span class="icon email small" :v-tooltip="$t('Deze gebruiker moet eerst registreren op dit emailadres en daarbij een wachtwoord instellen.')" />
+                    <span class="icon email small" :v-tooltip="$t('d900b182-3fd8-4607-824f-b4a1f4a60e6c')" />
                 </template>
                 <template v-if="(user.firstName || user.lastName) && (user.name !== member.patchedMember.name)">
                     <h3 v-if="user.firstName || user.lastName" class="style-title-list">
@@ -28,16 +28,16 @@
                     {{ user.email }}
                 </h3>
                 <p v-if="!user.hasAccount" class="style-description-small">
-                    {{ $t('Kan registreren') }}
+                    {{ $t('5c0fc25a-cd75-4a2b-8870-941d85458f46') }}
                 </p>
                 <p v-else-if="!user.verified" class="style-description-small">
-                    {{ $t('E-mailadres nog niet geverifieerd') }}
+                    {{ $t('34025f30-1ef4-43db-8a15-902c681dd791') }}
                 </p>
                 <p v-if="user.memberId === member.id" class="style-description-small">
-                    {{ $t('Dit is een account van {member} zelf', {member: member.patchedMember.firstName}) }}
+                    {{ $t('8e6f7cf0-e785-4d26-b6cf-80ddb912e87b', {member: member.patchedMember.firstName}) }}
                 </p>
                 <p v-if="user.permissions && app !== 'registration'" class="style-description-small">
-                    {{ $t('Heeft toegang tot beheerdersportaal') }}
+                    {{ $t('50f0a76c-4b6c-47cb-8f95-e11c179c4e6a') }}
                 </p>
                 <template v-if="app !== 'registration' && hasWrite && user.hasAccount" #right>
                     <LoadingButton :loading="isDeletingUser(user)" class="hover-show">

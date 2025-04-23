@@ -3,23 +3,23 @@
         <STNavigationBar :title="$t(`Betalingen`)" />
 
         <main>
-            <h1>{{ $t('Betalingen') }}</h1>
+            <h1>{{ $t('290c7beb-61c7-425d-b35e-333aba83bbc5') }}</h1>
 
             <PayableBalanceTable v-for="item in collection.organizations" :key="item.organization.id" :item="item" :show-name="!singleOrganization" />
 
             <template v-if="pendingPayments.length > 0">
-                <hr><h2>{{ $t('In verwerking') }}</h2>
-                <p>{{ $t('Bij betalingen via overschrijving of domiciliëring kan het even duren voor we een betaling ontvangen en bevestigen. Je kan hier de status opvolgen.') }}</p>
+                <hr><h2>{{ $t('ac279f6b-0c7c-4ef1-9178-1fd030fe7cc8') }}</h2>
+                <p>{{ $t('d0099dec-d92f-41dc-9e42-7409de459d71') }}</p>
 
                 <STList>
                     <PaymentRow v-for="payment of pendingPayments" :key="payment.id" :payments="pendingPayments" :payment="payment" />
                 </STList>
             </template>
 
-            <hr><h2>{{ $t('Betalingen') }}</h2>
+            <hr><h2>{{ $t('290c7beb-61c7-425d-b35e-333aba83bbc5') }}</h2>
 
             <p v-if="succeededPayments.length === 0" class="info-box">
-                {{ $t('Je hebt nog geen betalingen gedaan') }}
+                {{ $t('24b3d716-8db4-49c6-991d-239d5824e34d') }}
             </p>
 
             <STList v-else>

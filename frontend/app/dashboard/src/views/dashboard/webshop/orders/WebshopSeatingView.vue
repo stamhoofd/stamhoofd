@@ -9,7 +9,7 @@
 
             <main>
                 <h1 class="style-navigation-title">
-                    {{ $t('Zaaloverzicht') }}
+                    {{ $t('6a49e896-3491-4f6e-a947-d180fce6c6e8') }}
                 </h1>
 
                 <button v-if="selectedProduct && availableProducts.length > 1" class="button text inline" type="button" @click="chooseProduct">
@@ -18,7 +18,7 @@
                 </button>
 
                 <p v-if="webshop !== null && selectedProduct && duplicateSeats.length" class="error-box">
-                    {{ $t('Dubbele boekingen gedetecteerd voor plaatsen') }}: {{ duplicateSeats.map(s => s.getNameString(webshop!, selectedProduct!)).join(', ') }}
+                    {{ $t('d6972a60-97a1-4065-83f2-95638c866efd') }}: {{ duplicateSeats.map(s => s.getNameString(webshop!, selectedProduct!)).join(', ') }}
                 </p>
 
                 <div v-for="section of sections" :key="section.id" class="container">

@@ -9,7 +9,7 @@
         <p>
             <button class="button text" type="button" @click="addCategory()">
                 <span class="icon add" />
-                <span>{{ $t('Nieuwe vragenlijst') }}</span>
+                <span>{{ $t('9a390ab2-bb28-49dc-9837-b389f5877c53') }}</span>
             </button>
         </p>
     </div>

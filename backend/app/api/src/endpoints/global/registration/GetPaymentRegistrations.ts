@@ -33,7 +33,7 @@ export class GetPaymentRegistrations extends Endpoint<Params, Query, Body, Respo
         if (!payment) {
             throw new SimpleError({
                 code: '',
-                message: $t(`Deze link is ongeldig`),
+                message: $t(`35b369bd-5766-41d1-8da3-3d362e316c1a`),
             });
         }
         const registrations = await Member.getRegistrationWithMembersForPayment(payment.id);
@@ -45,7 +45,7 @@ export class GetPaymentRegistrations extends Endpoint<Params, Query, Body, Respo
             if (!authorizedMembers.includes(registration.member.id)) {
                 throw new SimpleError({
                     code: '',
-                    message: $t(`Deze link is ongeldig`),
+                    message: $t(`35b369bd-5766-41d1-8da3-3d362e316c1a`),
                 });
             }
         }

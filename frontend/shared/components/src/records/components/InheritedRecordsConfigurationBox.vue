@@ -2,26 +2,26 @@
     <STList>
         <STListItem element-name="label" :selectable="!dataPermissions.locked.value">
             <template #left>
-                <Checkbox v-model="dataPermissions.enabled.value" v-tooltip="dataPermissions.locked.value ? $t('Verplicht op een hoger niveau') : ''" :disabled="dataPermissions.locked.value" />
+                <Checkbox v-model="dataPermissions.enabled.value" v-tooltip="dataPermissions.locked.value ? $t('cc347bb2-99d1-4320-85d4-943117eb2271') : ''" :disabled="dataPermissions.locked.value" />
             </template>
             <p class="style-title-list">
-                {{ $t('Toestemming gegevensverzameling') }}
+                {{ $t('3936222c-5399-4d5e-9543-e483fa4f058a') }}
             </p>
         </STListItem>
 
         <STListItem element-name="label" :selectable="!financialSupport.locked.value" class="right-stack">
             <template #left>
-                <Checkbox v-model="financialSupport.enabled.value" v-tooltip="dataPermissions.locked.value ? $t('Verplicht op een hoger niveau') : ''" :disabled="financialSupport.locked.value" />
+                <Checkbox v-model="financialSupport.enabled.value" v-tooltip="dataPermissions.locked.value ? $t('cc347bb2-99d1-4320-85d4-943117eb2271') : ''" :disabled="financialSupport.locked.value" />
             </template>
             <p class="style-title-list">
                 {{ financialSupportSettings.title }}
-                <span v-tooltip="$t('Vereist toestemming voor gegevensverzameling')" class="gray small icon privacy" />
+                <span v-tooltip="$t('83e663a6-e62d-4dac-a2df-d7a9a90774d2')" class="gray small icon privacy" />
             </p>
         </STListItem>
 
         <STListItem v-for="property of properties" :key="property.value.title" element-name="label" :selectable="!property.value.locked">
             <template #left>
-                <Checkbox v-model="property.value.enabled" v-tooltip="property.value.locked ? $t('Verplicht op een hoger niveau') : ''" :disabled="property.value.locked" />
+                <Checkbox v-model="property.value.enabled" v-tooltip="property.value.locked ? $t('cc347bb2-99d1-4320-85d4-943117eb2271') : ''" :disabled="property.value.locked" />
             </template>
 
             <p v-if="property.value.configuration" class="style-title-prefix-list">
@@ -36,7 +36,7 @@
             </p>
 
             <p v-if="!groupLevel && property.value.configuration && property.value.configuration.isAlwaysEnabledAndRequired && property.value.options?.preventAlways" class="error-box">
-                {{ property.value.options?.warning ?? $t('Dit werd onjuist ingesteld') }}
+                {{ property.value.options?.warning ?? $t('cfbb0a9e-e6ce-4e40-ae55-bd7388f98eb9') }}
             </p>
 
             <template v-if="!property.value.locked && property.value.enabled" #right>
@@ -46,7 +46,7 @@
 
         <STListItem v-for="category of inheritedRecordsConfiguration?.recordCategories ?? []" :key="category.id" element-name="label" :selectable="!getRefForInheritedCategory(category.id).value.locked" class="right-stack">
             <template #left>
-                <Checkbox v-model="getRefForInheritedCategory(category.id).value.enabled" v-tooltip="getRefForInheritedCategory(category.id).value.locked ? $t('Verplicht op een hoger niveau') : ''" :disabled="getRefForInheritedCategory(category.id).value.locked" />
+                <Checkbox v-model="getRefForInheritedCategory(category.id).value.enabled" v-tooltip="getRefForInheritedCategory(category.id).value.locked ? $t('cc347bb2-99d1-4320-85d4-943117eb2271') : ''" :disabled="getRefForInheritedCategory(category.id).value.locked" />
             </template>
 
             <p v-if="getRefForInheritedCategory(category.id).value.configuration" class="style-title-prefix-list">
@@ -54,7 +54,7 @@
             </p>
             <p class="style-title-list">
                 {{ getRefForInheritedCategory(category.id).value.title }}
-                <span v-if="getRefForInheritedCategory(category.id).value.requiresDataPermissions" v-tooltip="$t('Vereist toestemming voor gegevensverzameling')" class="gray icon privacy small" />
+                <span v-if="getRefForInheritedCategory(category.id).value.requiresDataPermissions" v-tooltip="$t('83e663a6-e62d-4dac-a2df-d7a9a90774d2')" class="gray icon privacy small" />
             </p>
             <template #right>
                 <button class="button gray icon eye" type="button" @click.stop="previewCategory(category)" />

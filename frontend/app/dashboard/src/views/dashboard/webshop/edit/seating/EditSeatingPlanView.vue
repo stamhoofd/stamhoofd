@@ -6,11 +6,11 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="$isMobile" class="warning-box">
-            {{ $t('We raden aan om een zaalplan op te bouwen via een computer of tablet met toetsenbord.') }}
+            {{ $t('c2a80b2c-ee46-4ad4-874c-e7c55b8bf1ea') }}
         </p>
 
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam zaal`)">
-            <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t(`bv. Sportpaleis`)" autocomplete="off" enterkeyhint="next">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`5679e683-857d-4d15-8945-6f7e83b29ed6`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t(`de283a30-530c-432d-a0dd-b7b779c8e2ae`)" autocomplete="off" enterkeyhint="next">
         </STInputBox>
 
         <STList>
@@ -20,16 +20,16 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Verplicht optimale zaalbezetting') }}
+                    {{ $t('07c62d80-a20a-40dd-a256-cb96114a0747') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Zorg dat het niet mogelijk is om maar één plaats tussen te laten.') }}
+                    {{ $t('159724b0-4a18-4dcc-8ca5-93f690ea7276') }}
                 </p>
             </STListItem>
         </STList>
 
-        <hr><h2>{{ $t('Zetelcategorieën') }}</h2>
-        <p>{{ $t('Maak een zetelcategorie aan om een meerprijs in rekening te brengen voor sommige zetels of bepaalde zetels te reserveren. Selecteer daarna een rij of een zetel en klik op rechtermuisknop om de categorie van die rij of zetel te wijzigen.') }}</p>
+        <hr><h2>{{ $t('033ff0c0-aad1-4982-9103-fa0af111b844') }}</h2>
+        <p>{{ $t('704593e1-dcb5-459e-b346-47ea2647da52') }}</p>
         <STList>
             <STListItem v-for="category in patchedSeatingPlan.categories" :key="category.id" :selectable="true" element-name="button" @click="editCategory(category)">
                 <template #left>
@@ -44,7 +44,7 @@
                     <span class="icon add gray" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Nieuwe categorie') }}
+                    {{ $t('97ddbaef-0a49-4b53-893d-4c77dad6f52b') }}
                 </h3>
             </STListItem>
         </STList>
@@ -57,8 +57,8 @@
                 </div>
             </h2>
 
-            <STInputBox v-if="patchedSeatingPlan.sections.length > 1" :error-box="errors.errorBox" :error-fields="'sections['+section.id+'].name'" :title="$t(`Naam`)">
-                <input :value="section.name" class="input" type="text" :placeholder="$t(`bv. Middenplein`)" autocomplete="off" enterkeyhint="next" @input="setSectionName(section, ($event as any).target.value)">
+            <STInputBox v-if="patchedSeatingPlan.sections.length > 1" :error-box="errors.errorBox" :error-fields="'sections['+section.id+'].name'" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
+                <input :value="section.name" class="input" type="text" :placeholder="$t(`81eb8b52-1db5-450c-a7de-fbc5fd0cfc00`)" autocomplete="off" enterkeyhint="next" @input="setSectionName(section, ($event as any).target.value)">
             </STInputBox>
 
             <EditSeatingPlanSectionBox :seating-plan="patchedSeatingPlan" :seating-plan-section="section" :validator="errors.validator" @patch="addPatch($event)" />
@@ -67,12 +67,12 @@
         <hr><p>
             <button class="button text" type="button" @click="addSection">
                 <span class="icon add" />
-                <span>{{ $t('Zone toevoegen') }}</span>
+                <span>{{ $t('3946d93e-f7ed-4dd9-9176-171e133d3558') }}</span>
             </button>
         </p>
 
         <template v-if="!isNew">
-            <hr><h2>{{ $t('Acties') }}</h2>
+            <hr><h2>{{ $t('dc052084-eea5-407e-8775-237bf550895a') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="downloadSettings">
@@ -81,10 +81,10 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('Exporteer zaalplan') }}
+                        {{ $t('5c031764-a911-4861-b09e-621058dcf6d4') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Sla een kopie van jouw zaalplan op zodat je het kan delen met andere verenigingen.') }}
+                        {{ $t('02f2c884-7524-4c41-90c9-746a074185aa') }}
                     </p>
 
                     <template #right>

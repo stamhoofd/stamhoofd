@@ -40,7 +40,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             throw new SimpleError({
                 code: 'not_found',
                 human: 'Email not found',
-                message: $t(`Deze e-mail bestaat niet of is verwijderd`),
+                message: $t(`9ddb6616-f62d-4c91-82a9-e5cf398e4c4a`),
                 statusCode: 404,
             });
         }
@@ -49,7 +49,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             throw new SimpleError({
                 code: 'not_draft',
                 human: 'Email is not a draft',
-                message: $t(`Deze e-mail is al verzonden en kan niet meer aangepast worden`),
+                message: $t(`298b5a46-2899-4aa1-89df-9b634c20806b`),
                 statusCode: 400,
             });
         }
@@ -112,7 +112,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     throw new SimpleError({
                         code: "missing_unsubscribe_button",
                         message: "Missing unsubscribe button",
-                        human: $t(`Je moet een ‘uitschrijven’-knop of link toevoegen onderaan je e-mail. Klik daarvoor onderaan op het ‘toverstaf’ icoontje en kies voor ‘Knop om uit te schrijven voor e-mails’. Dit is verplicht volgens de GDPR-wetgeving, maar het zorgt ook voor een betere e-mail reputatie omdat minder e-mails als spam worden gemarkeerd.`),
+                        human: $t(`dd55e04b-e5d9-4d9a-befc-443eef4175a8`),
                         field: "html"
                     })
                 }
@@ -124,7 +124,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     throw new SimpleError({
                         code: "missing_unsubscribe_button",
                         message: "Missing unsubscribe button",
-                        human: $t(`Je moet een ‘uitschrijven’-knop of link toevoegen onderaan je e-mail. Klik daarvoor onderaan op het ‘toverstaf’ icoontje en kies voor ‘Knop om uit te schrijven voor e-mails’. Dit is verplicht volgens de GDPR-wetgeving, maar het zorgt ook voor een betere e-mail reputatie omdat minder e-mails als spam worden gemarkeerd.`),
+                        human: $t(`dd55e04b-e5d9-4d9a-befc-443eef4175a8`),
                         field: "text"
                     })
                 }

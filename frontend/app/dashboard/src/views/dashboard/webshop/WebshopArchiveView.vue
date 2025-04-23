@@ -4,9 +4,9 @@
 
         <main>
             <h1>
-                {{ $t('Webshop archief') }}
+                {{ $t('b2e7a448-e564-4549-8ddb-0d7a795ed505') }}
             </h1>
-            <p>{{ $t('Deze webshops werden gearchiveerd en zijn niet langer actief.') }}</p>
+            <p>{{ $t('d9fc0ab0-8b03-4822-87b1-3e60c6438634') }}</p>
 
             <STList>
                 <STListItem v-for="webshop in webshops" :key="webshop.id" :selectable="true" @click="openWebshop(webshop)">

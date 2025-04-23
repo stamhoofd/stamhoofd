@@ -9,15 +9,15 @@
         </p>
 
         <p v-if="group.minAge && group.maxAge" class="style-description">
-            {{ group.minAge }} - {{ group.maxAge }} {{ $t('jaar') }}
+            {{ group.minAge }} - {{ group.maxAge }} {{ $t('608082c7-ce63-43c9-a577-ebaf56c4df82') }}
         </p>
 
         <p v-if="!group.defaultMembershipTypeId" class="style-description">
-            {{ $t('Geen automatische aansluiting') }}
+            {{ $t('c3bc8e44-f842-4bff-9aa0-d89028f6427a') }}
         </p>
 
         <p v-if="group.minimumRequiredMembers" class="style-description">
-            {{ $t('Minimum') }} {{ Formatter.pluralText(group.minimumRequiredMembers, 'lid', 'leden') }}
+            {{ $t('e0a54e0c-03b3-43c6-b4ca-962c5b1d6772') }} {{ Formatter.pluralText(group.minimumRequiredMembers, 'lid', 'leden') }}
         </p>
 
         <template #right>

@@ -132,7 +132,7 @@ export class UpdateStatus {
         // Set the version on next reload
         await CapacitorUpdater.next(version);
 
-        new Toast($t('Herlaad om de nieuwste update toe te passen'), $t(`download`)).setButton(new ToastButton($t(`Herladen`), () => {
+        new Toast($t('b4cb2ff2-bb82-417d-bf01-6af09e996357'), $t(`44a86a23-a189-421b-b53a-8f922c17ab78`)).setButton(new ToastButton($t(`1529d78d-800f-415a-8e56-b756a8bc6449`), () => {
             CapacitorUpdater.set(version).catch((e) => {
                 Toast.fromError(e as Error).show();
             });
@@ -208,13 +208,13 @@ export class UpdateStatus {
             }
 
             if (this.options.visibleCheck && this.status === 'checking') {
-                new Toast($t(`Er is een fout opgetreden bij het controleren op updates. Probeer het later opnieuw.`), 'error red').show();
+                new Toast($t(`fd9b8517-78de-4e10-9995-d248b672ff7b`), 'error red').show();
             }
             else if (this.status === 'downloading' && (this.options.visibleCheck || this.options.visibleDownload)) {
-                new Toast($t(`Er is een fout opgetreden bij het downloaden van de update. Probeer het later opnieuw.`), 'error red').show();
+                new Toast($t(`a5a6a243-1ce0-460d-ac8f-7957c39e5e13`), 'error red').show();
             }
             else if (this.status === 'installing' && (this.options.visibleCheck || this.options.visibleDownload)) {
-                new Toast($t(`Er is een fout opgetreden bij het installeren van de update. Probeer het later opnieuw.`), 'error red').show();
+                new Toast($t(`71a6c292-6ea9-41f7-bff7-740ab42842a9`), 'error red').show();
             }
         }
     }

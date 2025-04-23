@@ -14,7 +14,7 @@
 
         <slot v-else name="empty">
             <p class="style-description-small">
-                {{ $t('Geen items') }}
+                {{ $t('7c114d86-2858-47e2-bd5c-4d59f9fa2c39') }}
             </p>
         </slot>
 

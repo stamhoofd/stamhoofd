@@ -1,7 +1,7 @@
 <template>
     <div ref="root" class="edit-seating-plan-section-box" data-disable-enter-focus>
         <div class="undo-buttons">
-            <button type="button" class="button icon flip-vertical gray" :v-tooltip="$t('Spiegel verticaal')" @click="flip" />
+            <button type="button" class="button icon flip-vertical gray" :v-tooltip="$t('bcf3f4d7-9e95-4d7a-ab21-9d2fc98239a1')" @click="flip" />
             <button type="button" class="button icon undo gray" :disabled="!canUndo()" @click="undo" />
             <button type="button" class="button icon redo gray" :disabled="!canRedo()" @click="redo" />
         </div>
@@ -10,12 +10,12 @@
                 <p class="button-row">
                     <button class="button text" type="button" @click="addRow($event, false)">
                         <span class="icon add" />
-                        <span>{{ $t('Rij') }}</span>
+                        <span>{{ $t('c803096c-c719-4dd8-bebd-a108c514bb5d') }}</span>
                     </button>
 
                     <button class="button text" type="button" @click="addRow($event, true)">
                         <span class="icon add" />
-                        <span>{{ $t('Gang') }}</span>
+                        <span>{{ $t('8204095c-59bf-44ce-98a8-a4e9f8755482') }}</span>
                     </button>
                 </p>
 
@@ -56,22 +56,22 @@
                 <p class="button-row">
                     <button class="button text" type="button" @click="addRowBottom($event, false)">
                         <span class="icon add" />
-                        <span>{{ $t('Rij') }}</span>
+                        <span>{{ $t('c803096c-c719-4dd8-bebd-a108c514bb5d') }}</span>
                     </button>
 
                     <button class="button text" type="button" @click="addRowBottom($event, true)">
                         <span class="icon add" />
-                        <span>{{ $t('Gang') }}</span>
+                        <span>{{ $t('8204095c-59bf-44ce-98a8-a4e9f8755482') }}</span>
                     </button>
                 </p>
             </div>
         </div>
         <p v-if="!isMobile" class="style-description-small">
-            {{ $t('Voeg rijen en gangen toe. Binnen een rij kan je verticale gangen maken door een stoel aan te klikken met je rechtermuisknop en een gang links of rechts in te voegen. Je kan ook een stoel selecteren en wijzigen in een gang. Je kan tekst in een gang plaatsen ter informatie, bijvoorbeeld om ingangen en het podium aan te geven. Je kan de breedte van een gang of stoel wijzigen met je rechtermuisknop. Hou') }} <template v-if="$isMac || $isIOS">
-                {{ $t('Command(⌘)') }}
+            {{ $t('098e9e3f-3a74-4244-9440-c076eea731b2') }} <template v-if="$isMac || $isIOS">
+                {{ $t('f4155ecb-b961-4b07-8c4a-69e2d2518a52') }}
             </template><template v-else>
-                {{ $t('Ctrl') }}
-            </template> {{ $t('en/of Shift(⇧) ingedrukt om meerdere stoelen te selecteren. Gebruik de Enter(⏎) toetst om snel stoelen toe te voegen. Gebruik Backspace(⌫) om een stoel of rij te verwijderen. Gebruik de pijltjestoetsen om snel te navigeren.') }}
+                {{ $t('cdfd1cea-e2d5-41bf-80f7-bc62303b6c70') }}
+            </template> {{ $t('f1e7568d-b058-4a73-a48c-f2636750d330') }}
         </p>
         <STErrorsDefault :error-box="errors.errorBox" />
     </div>

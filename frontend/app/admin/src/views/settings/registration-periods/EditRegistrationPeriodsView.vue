@@ -7,7 +7,7 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="sortedPeriods.length && patchedPlatform.period.id !== sortedPeriods[0].id && (sortedPeriods[0].startDate.getTime() - new Date().getTime()) < 1000 * 60 * 60 * 24 * 30 * 2">
-            <hr><h2>{{ $t('Overschakelen naar') }} {{ sortedPeriods[0].nameShort }}</h2>
+            <hr><h2>{{ $t('3b3be211-9a70-4345-abd6-760b39cef51d') }} {{ sortedPeriods[0].nameShort }}</h2>
             <p>{{ $t("31e91d3b-16e5-4608-9390-75e61d4d090d") }}</p>
 
             <ul class="style-list">
@@ -21,7 +21,7 @@
             <p class="style-button-bar">
                 <button class="button primary" type="button" @click="setCurrent(sortedPeriods[0])">
                     <span class="icon flag" />
-                    <span>{{ $t('Overschakelen naar') }} {{ sortedPeriods[0].nameShort }}</span>
+                    <span>{{ $t('3b3be211-9a70-4345-abd6-760b39cef51d') }} {{ sortedPeriods[0].nameShort }}</span>
                 </button>
             </p>
 
@@ -130,7 +130,7 @@ async function showContextMenu(event: MouseEvent, period: RegistrationPeriod) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t(`Instellen als huidige`),
+                name: $t(`5119aacc-24c1-43e6-b025-0efa7ea60ea3`),
                 disabled: patchedPlatform.value.period.id === period.id,
                 action: () => {
                     setCurrent(period);
@@ -172,7 +172,7 @@ async function save() {
             await platformManager.value.patch(platformPatch.value, false);
         }
 
-        new Toast($t(`De wijzigingen zijn opgeslagen`), 'success green').show();
+        new Toast($t(`17017abf-c2e0-4479-86af-300ad37347aa`), 'success green').show();
 
         if (changedPeriod) {
             new Toast($t('671147bd-cf0e-42fc-b456-18ce7d75b867'), 'info').setHide(20 * 1000).show();

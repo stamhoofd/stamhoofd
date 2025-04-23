@@ -29,20 +29,20 @@
                             </template>
 
                             <p v-if="membership.isTrial" class="style-title-prefix-list theme-secundary">
-                                <span>{{ $t('Proefperiode') }}</span>
+                                <span>{{ $t('4d4c0732-2875-4de8-afae-d8b2687ff279') }}</span>
                             </p>
                             <h3 class="style-title-list">
                                 <span>{{ getMembershipType(membership).name }}</span>
 
                                 <span v-if="membership.freeAmount" class="style-tag discount inline-first">
-                                    {{ $t('{days} gratis', {days: Formatter.pluralText(membership.freeAmount, $t('dag'), $t('dagen'))}) }}
+                                    {{ $t('577e6929-3751-47ae-9653-e43e10978119', {days: Formatter.pluralText(membership.freeAmount, $t('a6279389-a070-49c9-a085-bb312555e419'), $t('fca0ce20-d696-4966-a50c-441f54f046c4'))}) }}
                                 </span>
                             </h3>
-                            <p v-tooltip="$t('Toegevoegd op {date}', {date: formatDate(membership.createdAt, true)})" class="style-description-small style-tooltip">
+                            <p v-tooltip="$t('af4f2898-e5a5-4f08-a6c3-62c389e793e9', {date: formatDate(membership.createdAt, true)})" class="style-description-small style-tooltip">
                                 {{ capitalizeFirstLetter(formatDateRange(membership.startDate, membership.expireDate ?? membership.endDate)) }}
                             </p>
                             <p v-if="membership.trialUntil && membership.trialUntil > now" class="style-description-small">
-                                {{ $t('Proefperiode tot {date}', {date: formatDate(membership.trialUntil, true)}) }}
+                                {{ $t('c38818cb-2337-451b-afac-69f22b700d43', {date: formatDate(membership.trialUntil, true)}) }}
                             </p>
 
                             <p v-if="membership.organizationId === platform.membershipOrganizationId" class="style-description-small">
@@ -64,7 +64,7 @@
                             </p>
 
                             <p v-if="membership.expireDate && membership.expireDate < now && membership.endDate > now" class="style-description-small">
-                                {{ $t('Verlopen. Verleng de aansluiting om de verzekering te behouden.') }}
+                                {{ $t('a74f6f39-1eb6-45c4-96e2-6719d9a4401d') }}
                             </p>
 
                             <p v-if="membership.generated && auth.hasPlatformFullAccess()" class="style-description-small">
@@ -90,7 +90,7 @@
                     <p v-if="hasFull && !period.locked">
                         <button type="button" class="button text" @click="addMembership(period)">
                             <span class="icon add" />
-                            <span>{{ $t('Aansluiting of verzekering toevoegen in {period}', {period: period.name}) }}</span>
+                            <span>{{ $t('9a60989a-61d2-4596-adac-d9ec6befe218', {period: period.name}) }}</span>
                         </button>
                     </p>
                 </div>

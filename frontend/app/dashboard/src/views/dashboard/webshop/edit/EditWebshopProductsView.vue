@@ -24,23 +24,23 @@
         <p v-if="webshop.categories.length === 0">
             <button class="button text" type="button" @click="addProduct">
                 <span class="icon add" />
-                <span v-if="isTickets">{{ $t('Ticket toevoegen') }}</span>
-                <span v-else>{{ $t('Artikel toevoegen') }}</span>
+                <span v-if="isTickets">{{ $t('ede8c6c4-9062-46a5-b873-1671c39f2edf') }}</span>
+                <span v-else>{{ $t('dfdcd5e4-c2a2-4667-b77b-435eef982693') }}</span>
             </button>
         </p>
 
         <p>
             <button class="button text" type="button" @click="addCategory">
                 <span class="icon add" />
-                <span v-if="webshop.categories.length === 0 && webshop.products.length > 0">{{ $t('Opdelen in categorieën') }}</span>
-                <span v-else>{{ $t('Categorie toevoegen') }}</span>
+                <span v-if="webshop.categories.length === 0 && webshop.products.length > 0">{{ $t('14dcbad9-e83b-4ff9-8f39-2a059d4caaf5') }}</span>
+                <span v-else>{{ $t('2e3852ef-423e-4fcc-82bb-c886a6c61050') }}</span>
             </button>
         </p>
 
         <template v-if="webshop.canEnableCart">
-            <hr><h2>{{ $t('Winkelmandje') }}</h2>
+            <hr><h2>{{ $t('5e2654f2-6423-47bc-b7e7-054e41bf287f') }}</h2>
             <p>
-                {{ $t('Met een winkelmandje kunnen bezoekers meerdere artikel combinaties in één keer bestellen. Zet je het uit, dan kunnen bezoekers meteen afrekenen na het selecteren van een artikel. Voor formulieren waar je maar één ingevuld formulier (= artikel) verwacht, is het vaak nuttig om het uit te zetten.') }}
+                {{ $t('d0990170-4ad6-48d7-a3d6-d4ac7d9f803c') }}
             </p>
 
             <STList>
@@ -49,7 +49,7 @@
                         <Checkbox v-model="cartEnabled" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Winkelmandje gebruiken') }}
+                        {{ $t('a5a76740-30d3-4b35-961c-558756998db3') }}
                     </h3>
                 </STListItem>
             </STList>

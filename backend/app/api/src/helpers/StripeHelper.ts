@@ -10,7 +10,7 @@ export class StripeHelper {
         return new SimpleError({
             code: 'not_configured',
             message: 'Stripe is not yet configured for this platform',
-            human: $t('Stripe is nog niet geconfigureerd voor dit platform'),
+            human: $t('4f1361c2-c860-46e7-a242-933bfe56a7ed'),
         });
     }
 

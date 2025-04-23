@@ -61,7 +61,7 @@ export class CreateApiUserEndpoint extends Endpoint<Params, Query, Body, Respons
             const rateLimits = request.body.meta.rateLimits;
             if (rateLimits) {
                 if (!Context.auth.hasPlatformFullAccess()) {
-                    throw Context.auth.error($t('Je hebt geen rechten om de rate limits van API-keys te wijzigen'));
+                    throw Context.auth.error($t('370932fc-6614-44be-bb8f-ff921305fadd'));
                 }
 
                 admin.meta = admin.meta ?? UserMeta.create({});

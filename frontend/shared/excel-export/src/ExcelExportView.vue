@@ -1,14 +1,14 @@
 <template>
     <SaveView :loading="exporting" save-icon="download" @save="startExport">
         <h1>
-            {{ $t('Exporteren naar Excel') }}
+            {{ $t('0302eaa0-ce2a-4ef0-b652-88b26b9c53e9') }}
         </h1>
 
         <ScrollableSegmentedControl v-if="workbook.sheets.length > 1" v-model="visibleSheet" :items="workbook.sheets">
             <template #item="{item}">
                 <span>{{ item.name }}</span>
 
-                <span v-if="item.enabledCount === 0" class="icon disabled small" :v-tooltip="$t('Dit werkblad wordt niet mee geëxporteerd')" />
+                <span v-if="item.enabledCount === 0" class="icon disabled small" :v-tooltip="$t('7501399f-4ff3-421b-b27a-2b56ca5f6ce9')" />
             </template>
         </ScrollableSegmentedControl>
 
@@ -25,10 +25,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Rij toevoegen met categorienaam') }}
+                    {{ $t('5bb88d15-fd82-4d5d-8efc-43e2443d912d') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Een extra rij boven de kolomnamen met de categorie van elke kolom, voor een duidelijkere weergave.') }}
+                    {{ $t('cd511a0e-71cc-44bb-8107-7de1a18dab9d') }}
                 </p>
             </STListItem>
         </STList>

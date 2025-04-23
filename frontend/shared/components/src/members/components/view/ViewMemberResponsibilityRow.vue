@@ -13,11 +13,11 @@
         </h3>
 
         <p v-if="responsibility.startDate" class="style-description-small">
-            {{ $t('Sinds {date}', {date: formatDate(responsibility.startDate, true)}) }}
+            {{ $t('5e3c6c2c-5816-46fd-82f6-db3562c446d4', {date: formatDate(responsibility.startDate, true)}) }}
         </p>
 
         <p v-if="responsibility.endDate" class="style-description-small">
-            {{ $t('Loopt automatisch af op {date}', {date: formatDateTime(responsibility.endDate) }) }}
+            {{ $t('06882818-006a-4070-aa0f-c805bb2a53d4', {date: formatDateTime(responsibility.endDate) }) }}
         </p>
 
         <template #right>

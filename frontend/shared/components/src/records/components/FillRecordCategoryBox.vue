@@ -1,7 +1,7 @@
 <template>
     <div v-if="!category.isEnabled(value)" class="container">
         <p v-if="STAMHOOFD.environment === 'development'" class="error-box">
-            {{ $t('This category should be invisible. Check if the record categories are filtered using .filter(c => c.isEnabled(value))') }}
+            {{ $t('02b0533d-31b1-44ce-a22b-47d7f90adea8') }}
         </p>
     </div>
     <div v-else class="container">
@@ -19,7 +19,7 @@
                 </span>
             </div>
             <div>
-                <button v-if="!markReviewed && hasAnswers" type="button" class="button icon trash" :v-tooltip="$t('Wis alle antwoorden')" @click="clearAnswers" />
+                <button v-if="!markReviewed && hasAnswers" type="button" class="button icon trash" :v-tooltip="$t('dd1f78c5-9a9e-4535-8527-3f50619860c7')" @click="clearAnswers" />
             </div>
         </h2>
 
@@ -38,15 +38,15 @@
         </div>
 
         <p v-if="!markReviewed && lastReviewed" class="style-description-small">
-            {{ $t('Laatst nagekeken op {date}', {date: formatDate(lastReviewed)}) }}<template v-if="isLastReviewIncomplete">
-                {{ $t('(onvolledig)') }}
+            {{ $t('46f4bb39-74c1-43fc-9000-ec7ef9574f03', {date: formatDate(lastReviewed)}) }}<template v-if="isLastReviewIncomplete">
+                {{ $t('5811ac7a-ecb4-4ef4-8cbd-1a7c437c9c2e') }}
             </template>. <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
-                {{ $t('Markeer als nagekeken') }}
+                {{ $t('168f25d2-74c1-4c18-818a-796e7a8fee41') }}
             </button>
         </p>
         <p v-if="!markReviewed && !lastReviewed" class="style-description-small">
-            {{ $t('Nog nooit nagekeken.') }} <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
-                {{ $t('Markeer als nagekeken') }}
+            {{ $t('252a9a8f-4310-4ee6-98de-d6405ca544f1') }} <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
+                {{ $t('168f25d2-74c1-4c18-818a-796e7a8fee41') }}
             </button>
         </p>
     </div>

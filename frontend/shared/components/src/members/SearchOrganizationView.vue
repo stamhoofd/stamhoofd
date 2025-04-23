@@ -7,7 +7,7 @@
             <p v-if="description" class="style-description-block pre-wrap" v-text="description" />
 
             <form class="search-box input-icon-container icon search gray" @submit.prevent>
-                <input ref="input" v-model="query" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`Zoek op naam of postcode`)">
+                <input ref="input" v-model="query" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`d510896c-f601-4eb6-973e-5bd494a5c207`)">
             </form>
 
             <Spinner v-if="loadingResults" class="gray center" />

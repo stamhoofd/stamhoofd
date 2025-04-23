@@ -5,19 +5,19 @@
         <main>
             <h1>
                 <span class="icon warning yellow" />
-                <span>{{ $t('Ticket al gescand') }}</span>
+                <span>{{ $t('4ac91a6b-7e0d-4ebc-9698-2543ef654b63') }}</span>
             </h1>
             <p class="ticket-secret">
                 {{ ticket.secret }}
             </p>
             <p class="style-description">
-                {{ $t('Let op dat je hetzelfde ticket niet meerdere keren scant en zo hergebruik van een ticket mogelijk maakt.') }}
+                {{ $t('21c8577c-7124-41e3-8bda-3692b917fdba') }}
             </p>
 
             <STList class="info">
                 <STListItem v-if="ticket.scannedAt">
                     <h3 class="style-definition-label">
-                        {{ $t('Tijdstip') }}
+                        {{ $t('7853cca1-c41a-4687-9502-190849405f76') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDateTime(ticket.scannedAt) }}
@@ -26,7 +26,7 @@
 
                 <STListItem v-if="ticket.scannedBy">
                     <h3 class="style-definition-label">
-                        {{ $t('Gescand door') }}
+                        {{ $t('dcb6acd6-9b5a-4a2e-af6e-441a8264dee0') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ ticket.scannedBy }}
@@ -38,10 +38,10 @@
         <STToolbar>
             <template #right>
                 <button class="button secundary" type="button" @click="viewTicket">
-                    {{ $t('Ticket toch bekijken') }}
+                    {{ $t('90a3142d-c6a4-4e52-a4d7-db2e78fabacc') }}
                 </button>
                 <button class="button primary" type="button" @click="() => pop()">
-                    {{ $t('Terug') }}
+                    {{ $t('1b311bbf-8cc3-4b91-a019-f80a062d8d4d') }}
                 </button>
             </template>
         </STToolbar>

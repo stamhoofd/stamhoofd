@@ -2,7 +2,7 @@
     <SaveView :title="title" :disabled="!$hasChanges" :save-text="$saveText" @save="save">
         <h1>{{ title }}<span v-show="$selectedTags.size > 0" class="selection-count">{{ " (" + $selectedTags.size + ")" }}</span></h1>
         <form class="search-box input-icon-container icon search gray" @submit.prevent>
-            <input ref="input" v-model="$searchString" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`Zoek tag`)">
+            <input ref="input" v-model="$searchString" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`8eaadab8-a8c2-4c8d-8119-e374ca0180cf`)">
         </form>
         <hr><STList>
             <STListItem v-for="tag in $searchResult" :key="tag.id" :selectable="true" @click="toggleSelect(tag)">
@@ -17,12 +17,12 @@
             </STListItem>
         </STList>
         <p v-if="!$searchResult.length" class="style-description-large">
-            {{ $t('Er zijn geen resultaten gevonden.') }}
+            {{ $t('6944b7fa-f1c3-42ed-bd86-f43940baa745') }}
         </p>
 
         <TransitionFade>
             <div v-if="$selectedOutsideSearch.length" class="container">
-                <hr><h2>{{ $t('Selectie buiten zoekresultaat') }}</h2>
+                <hr><h2>{{ $t('8ca17e18-aaa5-46d4-8c2b-d57bf805f7d3') }}</h2>
                 <STList :draggable="false">
                     <STListItem v-for="tag in $selectedOutsideSearch" :key="tag.id" :selectable="true" @click="toggleSelect(tag)">
                         <template #left>

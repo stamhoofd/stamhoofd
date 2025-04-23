@@ -622,7 +622,7 @@ export class DocumentTemplate extends QueryableModel {
                 throw new SimpleError({
                     code: 'invalid_document_number',
                     message: 'Expected document number to be ' + (lastNumber + 1) + ' but got ' + document.number,
-                    human: $t(`Er ging iets mis bij het nummeren van de documenten (ben je zeker dat je geen documenten hebt verwijderd of toegevoegd sinds de vorige export?). Als je de export nog niet hebt gebruikt in Belcotax kan je de nummering resetten en de export opnieuw proberen.`),
+                    human: $t(`7fd5e5f1-6ff5-48a5-beae-36776935ec90`),
                 });
             }
             lastNumber = document.number;

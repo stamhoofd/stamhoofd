@@ -1,6 +1,6 @@
 <template>
     <div class="st-menu st-view">
-        <STNavigationBar :title="$t(`Groepen`)">
+        <STNavigationBar :title="$t(`edfc89fe-a16e-4789-bda9-1529f8a97f7c`)">
             <template #right>
                 <button v-if="hasFullAccess" class="navigation button icon settings" type="button" @click="hasFullAccess && navigate(Routes.Tags)" />
             </template>
@@ -166,7 +166,7 @@ function tagIdsToTags(tagIds: string[]): OrganizationTag[] {
 }
 
 function getTagById(id: string): OrganizationTag {
-    return tags.value.find(t => t.id === id) ?? OrganizationTag.create({ id, name: $t(`Onbekende tag`) });
+    return tags.value.find(t => t.id === id) ?? OrganizationTag.create({ id, name: $t(`6748967b-c512-454f-9d30-a1a42e2814bc`) });
 }
 
 async function navigateToTag(tag: OrganizationTag) {

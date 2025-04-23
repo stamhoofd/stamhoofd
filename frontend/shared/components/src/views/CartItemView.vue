@@ -27,15 +27,15 @@
             </p>
 
             <p v-else-if="cartItem.product.isSoldOut" class="warning-box">
-                {{ $t('Dit artikel is uitverkocht') }}
+                {{ $t('f3109566-4bdf-485d-93e8-384857eb585e') }}
             </p>
 
             <p v-else-if="areSeatsSoldOut" class="warning-box">
-                {{ $t('Alle plaatsen zijn volzet') }}
+                {{ $t('37dfb251-cd3a-409c-8fd0-30de600d2db0') }}
             </p>
 
             <p v-else-if="!canOrder" class="warning-box">
-                {{ $t('Je hebt het maximaal aantal stuks bereikt dat je nog kan bestellen van dit artikel') }}
+                {{ $t('351070c7-5df7-4c0b-8371-476e6737e941') }}
             </p>
 
             <p v-else-if="cartItem.product.closesSoonText" class="info-box">
@@ -43,7 +43,7 @@
             </p>
 
             <p v-if="remainingReduced > 0" class="info-box">
-                {{ $t('Bestel je {amount} of meer stuks, dan betaal je maar {price} per stuk!', {amount: cartItem.productPrice.discountAmount.toString(), price: formatPrice(discountPrice) }) }}
+                {{ $t('cf335b59-ab51-4975-9c09-45325d7eb90c', {amount: cartItem.productPrice.discountAmount.toString(), price: formatPrice(discountPrice) }) }}
             </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
@@ -51,7 +51,7 @@
             <STList v-if="(cartItem.product.type === 'Ticket' || cartItem.product.type === 'Voucher') && cartItem.product.location" class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('Locatie') }}
+                        {{ $t('7eec15d0-4d60-423f-b860-4f3824271578') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ cartItem.product.location.name }}
@@ -63,7 +63,7 @@
 
                 <STListItem v-if="cartItem.product.dateRange">
                     <h3 class="style-definition-label">
-                        {{ $t('Wanneer?') }}
+                        {{ $t('13081716-3941-44b8-87b4-398ab2288419') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDateRange(cartItem.product.dateRange) }}
@@ -101,7 +101,7 @@
             <FieldBox v-for="field in cartItem.product.customFields" :key="field.id" :field="field" :answers="cartItem.fieldAnswers" :error-box="errors.errorBox" />
 
             <template v-if="canOrder && canSelectAmount">
-                <hr><h2>{{ $t('Aantal') }}</h2>
+                <hr><h2>{{ $t('697df3e7-fbbf-421d-81c2-9c904dce4842') }}</h2>
 
                 <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" />
 
@@ -116,17 +116,17 @@
         <STToolbar v-if="canOrder">
             <template #right>
                 <button v-if="willNeedSeats" class="button primary" type="submit">
-                    <span>{{ $t('Kies plaatsen') }}</span>
+                    <span>{{ $t('88fa4580-52a2-4b79-aa03-cd31eb98f3e1') }}</span>
                     <span class="icon arrow-right" />
                 </button>
                 <button v-else-if="oldItem && cartEnabled" class="button primary" type="submit">
                     <span class="icon basket" />
-                    <span>{{ $t('Opslaan') }}</span>
+                    <span>{{ $t('a103aa7c-4693-4bd2-b903-d14b70bfd602') }}</span>
                 </button>
                 <button v-else class="button primary" type="submit">
                     <span v-if="cartEnabled" class="icon basket" />
-                    <span v-if="cartEnabled">{{ $t('Toevoegen') }}</span>
-                    <span v-else>{{ $t('Doorgaan') }}</span>
+                    <span v-if="cartEnabled">{{ $t('36ba68cb-2159-4179-8ded-89e73d47cd87') }}</span>
+                    <span v-else>{{ $t('c72a9ab2-98a0-4176-ba9b-86fe009fa755') }}</span>
                     <span v-if="!cartEnabled" class="icon arrow-right" />
                 </button>
             </template>

@@ -18,7 +18,7 @@ export const MembershipCharger = {
             throw new SimpleError({
                 code: 'missing_membership_organization',
                 message: 'Missing membershipOrganizationId',
-                human: $t(`Er is geen lokale groep verantwoordelijk voor de aanrekening van aansluitingen geconfigureerd`),
+                human: $t(`dd9d20ea-cf50-46be-8eb3-5c85bc5f30c8`),
             });
         }
 
@@ -98,7 +98,7 @@ export const MembershipCharger = {
                 const balanceItem = new BalanceItem();
                 balanceItem.unitPrice = membership.price;
                 balanceItem.amount = 1;
-                balanceItem.description = Formatter.dateNumber(membership.startDate, true) + ' ' + $t(`tot`) + ' ' + Formatter.dateNumber(membership.expireDate ?? membership.endDate, true);
+                balanceItem.description = Formatter.dateNumber(membership.startDate, true) + ' ' + $t(`3e515054-91e7-43ed-a9ce-563b626f337d`) + ' ' + Formatter.dateNumber(membership.expireDate ?? membership.endDate, true);
                 balanceItem.relations = new Map([
                     [
                         BalanceItemRelationType.Member,

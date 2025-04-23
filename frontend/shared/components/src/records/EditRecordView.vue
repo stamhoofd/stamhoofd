@@ -4,20 +4,20 @@
             {{ title }}
         </h1>
         <p>
-            {{ $t('Lees') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('hier') }}</a> {{ $t('meer informatie na over hoe je een vraag kan instellen.') }}
+            {{ $t('8485e7ea-6d66-4f2c-b92a-bd44cb2f4eb4') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('0487c3b0-3f93-4344-a34a-9a9198f37023') }}</a> {{ $t('0759d023-2306-4601-911e-5af949960753') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
             <div>
-                <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam (kort)`)">
-                    <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`bv. Toestemming publicatie foto’s`)">
+                <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`21d2abc5-55c1-4ad2-a7ba-44061fae2fd1`)">
+                    <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`79e3b4c3-e117-4907-942b-a0e06e01a573`)">
                 </STInputBox>
             </div>
 
             <div>
-                <STInputBox error-fields="type" :error-box="errors.errorBox" :title="$t(`Type`)">
+                <STInputBox error-fields="type" :error-box="errors.errorBox" :title="$t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)">
                     <Dropdown v-model="type">
                         <optgroup v-for="group in availableTypes" :key="group.name" :label="group.name">
                             <option v-for="_type in group.values" :key="_type.value" :value="_type.value">
@@ -27,7 +27,7 @@
                     </Dropdown>
                 </STInputBox>
 
-                <STInputBox v-if="type === RecordType.File" error-fields="fileType" :error-box="errors.errorBox" :title="$t(`Bestandtype`)">
+                <STInputBox v-if="type === RecordType.File" error-fields="fileType" :error-box="errors.errorBox" :title="$t(`af55bdcd-8177-4560-ab5a-f45adb52d87c`)">
                     <Dropdown v-model="fileType">
                         <option v-for="item in availableFileTypes" :key="item.value" :value="item.value">
                             {{ item.name }}
@@ -41,16 +41,16 @@
             {{ requiredText }}
         </Checkbox>
         <Checkbox v-if="type === RecordType.Checkbox" v-model="askComments">
-            {{ $t('Voeg tekstvak toe indien aangevinkt') }}
+            {{ $t('3fd57fae-8af6-4ca4-b551-7b5dbefd1547') }}
         </Checkbox>
 
         <div v-if="type === RecordType.MultipleChoice || type === RecordType.ChooseOne" class="container">
             <hr><h2 class="style-with-button with-list">
-                <div>{{ $t('Keuzeopties') }}</div>
+                <div>{{ $t('84017949-ee42-4297-8fa2-f89b85e8cf40') }}</div>
                 <div>
                     <button class="button text" type="button" @click="addChoice">
                         <span class="icon add" />
-                        <span>{{ $t('Nieuw') }}</span>
+                        <span>{{ $t('e69989bf-c310-49b4-aff1-b9c84cfe5760') }}</span>
                     </button>
                 </div>
             </h2>
@@ -62,56 +62,56 @@
             </STList>
 
             <p v-else class="info-box">
-                <span>{{ $t('Geen keuzemogelijkheden. Voeg een keuze toe via de') }} <span class="icon add middle" />{{ $t('-knop.') }}</span>
+                <span>{{ $t('8ba6ec31-c0f8-4104-aa4b-5169a7b43781') }} <span class="icon add middle" />{{ $t('2b6f5a92-33fe-4541-87ca-3677a9f44d9f') }}</span>
             </p>
         </div>
 
         <hr><h2 class="style-with-button">
-            <div>{{ $t('Beschrijving') }}</div>
+            <div>{{ $t('3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d') }}</div>
             <div>
                 <button class="button text" type="button" @click="openPreview">
                     <span class="icon eye" />
-                    <span>{{ $t('Voorbeeld') }}</span>
+                    <span>{{ $t('38e2c1aa-13f6-4339-8cfd-68c2603beb51') }}</span>
                 </button>
             </div>
         </h2>
-        <p>{{ $t('Bepaal hoe men deze vraag kan beantwoorden door extra verduidelijking te voorzien.') }}</p>
+        <p>{{ $t('46374fd8-2e04-4008-a437-ef8da0857400') }}</p>
 
         <STInputBox :title="labelTitle" error-fields="label" :error-box="errors.errorBox" class="max">
             <input v-model="label" class="input" type="text" :placeholder="name" autocomplete="off" enterkeyhint="next">
         </STInputBox>
 
         <STInputBox :title="descriptionTitle" error-fields="description" :error-box="errors.errorBox" class="max">
-            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`Optioneel`)" />
+            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" />
         </STInputBox>
         <p class="style-description-small">
-            {{ $t('Gebruik deze tekst voor een langere uitleg bij het instellen van dit kenmerk, enkel indien dat echt nodig is.') }}
+            {{ $t('ee593263-9493-4a9c-a3e5-fe0a4e596887') }}
         </p>
 
-        <STInputBox v-if="shouldAskInputPlaceholder" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`Tekst in leeg tekstvak`)">
-            <input v-model="inputPlaceholder" class="input" type="text" autocomplete="off" :placeholder="$t(`bv. 'Vul hier jouw naam in'`)">
+        <STInputBox v-if="shouldAskInputPlaceholder" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`111715d8-0347-4e60-80fc-e405999430ee`)">
+            <input v-model="inputPlaceholder" class="input" type="text" autocomplete="off" :placeholder="$t(`4f04a0fd-f7f9-46b0-9fe0-3d4b443c7f37`)">
         </STInputBox>
         <p class="style-description-small">
-            {{ $t('Het is netter als je een tekst in lege tekstvakken instelt. Je kan van deze plaats gebruik maken om een voorbeeld te geven, om het duidelijker te maken (zoals we zelf doen hierboven).') }}
+            {{ $t('9f3d1ce2-aa2e-421b-84f1-07e875e9e4a8') }}
         </p>
 
-        <STInputBox v-if="shouldAskCommentsDescription" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`Tekst onder tekstvak`)">
-            <textarea v-model="commentsDescription" class="input" type="text" autocomplete="off" :placeholder="$t(`Optioneel`)" />
+        <STInputBox v-if="shouldAskCommentsDescription" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`5a3c9444-fcf0-408c-99fc-4e5395c37eb0`)">
+            <textarea v-model="commentsDescription" class="input" type="text" autocomplete="off" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" />
         </STInputBox>
         <p v-if="shouldAskCommentsDescription" class="style-description-small">
-            {{ $t('Laat hier eventueel extra instructies achter onder het tekstveld, als het aankruisvakje is aangevinkt.') }}
+            {{ $t('b8e94451-af94-47ac-8e2c-b39301d3e829') }}
         </p>
 
         <template v-if="showExternalPermissionLevel">
-            <hr><h2>{{ $t('Zichtbaarheid voor leden') }}</h2>
-            <p>{{ $t('Beperk de zichtbaarheid van deze vraag voor leden. De toegangsrechten voor beheerders worden hier onafhankelijk van geregeld via de instellingen van functies en beheerdersrollen.') }}</p>
+            <hr><h2>{{ $t('e5c00498-7be5-4dca-94e5-8f73edfcbda0') }}</h2>
+            <p>{{ $t('78e39cfd-8a14-4db6-aeac-76976a40206f') }}</p>
             <STList>
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
                         <Radio v-model="externalPermissionLevel" :value="PermissionLevel.None" name="righstForNonAdmins" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Niet zichtbaar') }}
+                        {{ $t('65893f5f-e4f6-487a-b0ea-077fe620cb31') }}
                     </h3>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label">
@@ -119,7 +119,7 @@
                         <Radio v-model="externalPermissionLevel" :value="PermissionLevel.Read" name="righstForNonAdmins" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Enkel lezen') }}
+                        {{ $t('103e19d1-d82d-4270-81f9-af4e7f33b13e') }}
                     </h3>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label">
@@ -127,15 +127,15 @@
                         <Radio v-model="externalPermissionLevel" :value="PermissionLevel.Write" name="righstForNonAdmins" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Bewerken') }}
+                        {{ $t('ad3ad207-6470-4f3e-aaf4-1ea5ea8b85ad') }}
                     </h3>
                 </STListItem>
             </STList>
         </template>
 
         <template v-if="canAddWarning">
-            <hr><h2>{{ $t('Waarschuwing') }}</h2>
-            <p>{{ $t('Soms wil je dat iets opvalt voor beheerders, dat kan je bereiken met waarschuwingen. Die zijn zichtbaar voor beheerders als dit kenmerk een bepaalde waarde heeft.') }}</p>
+            <hr><h2>{{ $t('509ab71d-f9e0-4f2a-8683-590b6363b32d') }}</h2>
+            <p>{{ $t('5c832a65-7b8d-4e3d-a55d-291567ddb71a') }}</p>
 
             <STList>
                 <STListItem :selectable="true" element-name="label">
@@ -143,7 +143,7 @@
                         <Radio v-model="warningInverted" :value="null" name="warningInverted" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Geen waarschuwing') }}
+                        {{ $t('7042e593-92bc-4166-9eff-8379f4d80754') }}
                     </h3>
                 </STListItem>
 
@@ -166,21 +166,21 @@
                 </STListItem>
             </STList>
 
-            <STInputBox v-if="warningText !== null" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`Waarschuwingstekst`)">
-                <input v-model="warningText" class="input" type="text" autocomplete="off" :placeholder="$t(`bv. 'Geen toestemming om foto's te maken'`)">
+            <STInputBox v-if="warningText !== null" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`73dbf494-16a3-4e9a-8cbe-5170334209c0`)">
+                <input v-model="warningText" class="input" type="text" autocomplete="off" :placeholder="$t(`fd5e3142-7a0e-4305-8a49-35f2f4d89083`)">
             </STInputBox>
 
-            <STInputBox v-if="warningType" class="max" :title="$t(`Type`)">
+            <STInputBox v-if="warningType" class="max" :title="$t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)">
                 <STList>
                     <STListItem :selectable="true" element-name="label">
                         <template #left>
                             <Radio v-model="warningType" :value="RecordWarningType.Info" name="warningType" />
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('Informatief') }}
+                            {{ $t('fd69163a-0141-4540-af7a-ef2b45682383') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('Grijze achtergrond. Voor minder belangrijke zaken') }}
+                            {{ $t('90eed78f-7d02-4433-ba89-42da46201282') }}
                         </p>
                     </STListItem>
 
@@ -189,10 +189,10 @@
                             <Radio v-model="warningType" :value="RecordWarningType.Warning" name="warningType" />
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('Waarschuwing') }}
+                            {{ $t('509ab71d-f9e0-4f2a-8683-590b6363b32d') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('Gele achtergrond') }}
+                            {{ $t('aef8493c-6d75-4270-ba4c-f9f09b65caf7') }}
                         </p>
                     </STListItem>
 
@@ -201,10 +201,10 @@
                             <Radio v-model="warningType" :value="RecordWarningType.Error" name="warningType" />
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('Foutmelding') }}
+                            {{ $t('b4714037-0561-4ce1-9601-9fd753fd9825') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t("Voor zaken die echt heel belangrijk zijn. Probeer dit weinig te gebruiken, zet niet alles op 'foutmelding', anders valt het niet meer op.") }}
+                            {{ $t("e34424b4-80ff-46a2-987e-85f89cfd806c") }}
                         </p>
                     </STListItem>
                 </STList>
@@ -212,20 +212,20 @@
         </template>
 
         <template v-if="settings.dataPermission">
-            <hr><h2>{{ $t('Toestemming gegevensverzameling') }}</h2>
+            <hr><h2>{{ $t('3936222c-5399-4d5e-9543-e483fa4f058a') }}</h2>
             <p>
-                {{ $t('Verzamel je gevoelige informatie? Dan moet je daar in de meeste gevallen toestemming voor vragen volgens de GDPR-wetgeving. We raden je aan om altijd toestemming te vragen zodra je ook maar een beetje twijfelt. In onze gids geven we enkele voorbeelden, lees die zeker na.') }} <a :href="$domains.getDocs('toestemming-gegevens-verzamelen')" class="inline-link" target="_blank" rel="noopener">
-                    {{ $t('Lees onze gids') }}
+                {{ $t('30fe36de-4e4e-42e3-a2f9-7740b028b415') }} <a :href="$domains.getDocs('toestemming-gegevens-verzamelen')" class="inline-link" target="_blank" rel="noopener">
+                    {{ $t('d6386cef-8e84-4107-920a-03db17372613') }}
                 </a>
             </p>
 
             <Checkbox v-model="sensitive">
-                {{ $t('Ik heb toestemming nodig om deze informatie te verzamelen, of de antwoorden zijn (of bevatten mogelijks) gevoelige informatie') }}
+                {{ $t('09121186-9d8a-4bbb-ad08-080bb8a2d29f') }}
             </Checkbox>
         </template>
 
         <div v-if="hasFilters" class="container">
-            <hr><h2>{{ $t('Slim in- en uitschakelen') }}</h2>
+            <hr><h2>{{ $t('6ba4f526-8b64-4902-903b-7cb176684151') }}</h2>
 
             <PropertyFilterInput v-model="filter" :allow-optional="false" :builder="filterBuilder" />
         </div>

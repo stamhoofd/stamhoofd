@@ -245,7 +245,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'timeout',
                     message: 'Query took too long',
-                    human: $t(`Deze opzoeking is te complex en duurt te lang. Probeer een eenvoudigere zoekopdracht of probeer terug op een rustiger tijdstip.`),
+                    human: $t(`dce51638-6129-448b-8a15-e6d778f3a76a`),
                 });
             }
             throw error;

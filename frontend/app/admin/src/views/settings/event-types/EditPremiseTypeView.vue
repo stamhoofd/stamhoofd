@@ -19,7 +19,7 @@
         <hr><h2>{{ $t('1d742718-992d-4487-9c5e-a4ac46841a27') }}</h2>
 
         <p class="style-description-small">
-            {{ $t('Stel optioneel limieten voor het aantal lokalen van deze soort per groep in.') }}
+            {{ $t('b82a5b97-5abe-4f63-97fe-a738d9698039') }}
         </p>
 
         <div class="split-inputs">

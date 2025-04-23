@@ -6,26 +6,26 @@
 
             <template v-if="!checkout || !checkout.isAdminFromSameOrganization">
                 <p v-if="names.length > 0">
-                    {{ $t('Je ontvangt een extra bevestiging via e-mail. Als er in de toekomst gegevens wijzigen kan je die vanaf nu beheren via het ledenportaal.') }}
+                    {{ $t('98d05123-a351-4fb7-a0d7-87f46bcd127d') }}
                 </p>
 
                 <p v-else-if="waitingListNames.length > 0">
-                    {{ $t('We houden je op de hoogte van jouw status op de wachtlijst.') }}
+                    {{ $t('6f719fff-fd1f-4aee-91c1-605ef3d700e3') }}
                 </p>
 
                 <p v-else>
-                    {{ $t('Jouw betaling is gelukt.') }}
+                    {{ $t('8ff9d707-c8f8-4d37-85d1-fc578ef31f50') }}
                 </p>
             </template>
             <p v-else>
-                {{ $t('Er werden mogelijks automatische e-mails uitgestuurd als die ingesteld stonden.') }}
+                {{ $t('4bb7718d-8198-41c6-b480-d71cd2eeae8b') }}
             </p>
         </main>
 
         <STToolbar>
             <template #right>
                 <button class="button primary" type="button" @click="dismiss({ force: true })">
-                    <span>{{ $t('Sluiten') }}</span>
+                    <span>{{ $t('bef7a2f9-129a-4e1c-b8d2-9003ff0a1f8b') }}</span>
                     <span class="icon arrow-right" />
                 </button>
             </template>

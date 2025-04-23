@@ -5,13 +5,13 @@
         </h2>
 
         <p v-if="!category.productIds.length" class="style-description">
-            {{ $t('Leeg') }}
+            {{ $t('3e8d9718-569f-4243-b9ba-ae8f3df6d598') }}
         </p>
         <p v-else-if="category.productIds.length === 1" class="style-description">
-            {{ $t('Eén artikel') }}
+            {{ $t('dfc24665-451c-45db-a8bf-edf197925154') }}
         </p>
         <p v-else class="style-description">
-            {{ category.productIds.length }} {{ $t('artikels') }}
+            {{ category.productIds.length }} {{ $t('529bf7e5-606a-42ae-aaba-82d74e8c8037') }}
         </p>
 
         <template #right>

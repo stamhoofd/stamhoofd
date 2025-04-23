@@ -3,7 +3,7 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
-        <p>{{ $t('Voeg voorwaarden toe die bij het registereren staan vermeldt of geaccepteerd moeten worden.') }}</p>
+        <p>{{ $t('08aa378f-6e1d-4882-965f-756108c677e1') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -16,7 +16,7 @@
         <p>
             <button class="button text" type="button" @click="addPolicy">
                 <span class="icon add" />
-                <span>{{ $t('Voorwaarden') }}</span>
+                <span>{{ $t('23229877-c51f-4e18-8563-88315be182aa') }}</span>
             </button>
         </p>
     </SaveView>
@@ -123,7 +123,7 @@ async function save() {
             return;
         }
         await platformManager.value.patch(patch.value);
-        new Toast($t(`De wijzigingen zijn opgeslagen`), 'success green').show();
+        new Toast($t(`17017abf-c2e0-4479-86af-300ad37347aa`), 'success green').show();
         await pop({ force: true });
     }
     catch (e) {

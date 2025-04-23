@@ -64,46 +64,46 @@ export function getRecordTypeName(type: RecordType) {
     const all = [
         {
             value: RecordType.Text,
-            name: $t(`Tekstveld (één lijn)`),
+            name: $t(`f21f351e-d844-440c-9118-7a395459a5f1`),
         },
         {
             value: RecordType.Textarea,
-            name: $t(`Tekstveld (meerdere lijnen)`),
+            name: $t(`c1f20884-94f6-4420-87c2-49c5d1398261`),
         },
         {
             value: RecordType.Address,
-            name: $t(`Adres`),
+            name: $t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`),
         },
         {
             value: RecordType.Email,
-            name: $t(`E-mailadres`),
+            name: $t(`7400cdce-dfb4-40e7-996b-4817385be8d8`),
         },
         {
             value: RecordType.Phone,
-            name: $t(`Telefoonnummer`),
+            name: $t(`de70b659-718d-445a-9dca-4d14e0a7a4ec`),
         },
         {
             value: RecordType.Date,
-            name: $t(`Datum`),
+            name: $t(`40aabd99-0331-4267-9b6a-a87c06b3f7fe`),
         },
         {
             value: RecordType.Checkbox,
-            name: $t(`Aankruisvakje`),
+            name: $t(`f8e1d0e8-28ab-45f5-83e1-302950647d41`),
         },
         {
             value: RecordType.ChooseOne,
-            name: $t(`Keuzemenu (kies één)`),
+            name: $t(`b27916ed-72d6-497b-8944-dcb5cb3f94c8`),
         },
         {
             value: RecordType.MultipleChoice,
-            name: $t(`Keuzemenu (kies meerdere)`),
+            name: $t(`d3e7fd3e-a7ad-44a7-80f2-f94ba10c788f`),
         },
         {
             value: RecordType.File,
-            name: $t(`Bestand`),
+            name: $t(`6e9064fc-f18e-40c7-b36b-e544a4801b2d`),
         },
     ];
-    return all.find(t => t.value === type)?.name ?? $t(`Onbekend`);
+    return all.find(t => t.value === type)?.name ?? $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`);
 }
 
 export enum RecordWarningType {
@@ -267,7 +267,7 @@ export class RecordSettings extends BaseRecordSettings {
     getDiffValue() {
         const type = getRecordTypeName(this.type);
         if (this.required) {
-            return $t(`Verplicht`) + ' ' + type;
+            return $t(`bbe18b42-bbd7-4c1f-9f1c-367b27e5c18d`) + ' ' + type;
         }
         return type;
     }
@@ -283,7 +283,7 @@ export class RecordSettings extends BaseRecordSettings {
         if (this.required && !answer) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Dit veld is verplicht`),
+                message: $t(`22531919-79f1-466f-b58d-30f709973ffb`),
                 field: this.id,
             });
         }

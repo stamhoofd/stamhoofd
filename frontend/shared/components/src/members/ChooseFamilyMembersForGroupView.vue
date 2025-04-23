@@ -1,10 +1,10 @@
 <template>
     <ExternalOrganizationContainer v-slot="{externalOrganization: groupOrganization}" :organization-id="group.organizationId" @update="setOrganization">
-        <SaveView :save-text="$t('Doorgaan')" :title="group.settings.name" @save="goNext">
+        <SaveView :save-text="$t('c72a9ab2-98a0-4176-ba9b-86fe009fa755')" :title="group.settings.name" @save="goNext">
             <p v-if="!checkout.isAdminFromSameOrganization" class="style-title-prefix">
                 {{ groupOrganization!.name }}
             </p>
-            <h1>{{ $t('Inschrijven voor') }} {{ group.settings.name }}</h1>
+            <h1>{{ $t('800d8458-da0f-464f-8b82-4e28599c8598') }} {{ group.settings.name }}</h1>
 
             <p v-if="hasNoMembers" class="info-box">
                 {{ $t('d5e39906-8c0b-4006-bab5-96827f8daa53') }}

@@ -84,7 +84,7 @@ export class Toast {
         }
 
         if (Request.isNetworkError((errors as Error))) {
-            return new Toast($t(`Geen of slechte internetverbinding`), 'error red');
+            return new Toast($t(`34b25231-f7d6-41f4-aa83-5d8f973e9890`), 'error red');
         }
         return new Toast(simpleErrors.getHuman(), 'error red');
     }

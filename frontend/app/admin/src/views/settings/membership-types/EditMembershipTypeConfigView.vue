@@ -16,7 +16,7 @@
             </STInputBox>
         </div>
         <p v-if="type.behaviour === PlatformMembershipTypeBehaviour.Days" class="style-description-small">
-            {{ $t('Het is enkel mogelijk om de aansluiting binnen de start- en einddata aan te vragen.') }}
+            {{ $t('ec5437dc-5d11-4092-8ab7-e9090af1f71a') }}
         </p>
 
         <STInputBox v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period" :title="$t('b0215bc3-b94d-47de-99d2-4dcb9f59b299')" error-fields="expireDate" :error-box="errors.errorBox">
@@ -35,8 +35,8 @@
             </button>
         </p>
 
-        <hr><STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`Gratis per lokale groep`)">
-            <NumberInput v-model="amountFree" :suffix="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dagen' : 'leden'" :suffix-singular="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dag' : 'lid'" :placeholder="$t(`Geen`)" />
+        <hr><STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`7a010291-3eac-4690-b6d8-2972d3ab8e58`)">
+            <NumberInput v-model="amountFree" :suffix="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dagen' : 'leden'" :suffix-singular="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dag' : 'lid'" :placeholder="$t(`45ff02db-f404-4d91-853f-738d55c40cb6`)" />
         </STInputBox>
 
         <template v-if="$feature('member-trials')">
@@ -44,7 +44,7 @@
                 <NumberInput v-model="trialDays" suffix="dagen" suffix-singular="dag" :min="0" />
             </STInputBox>
             <p class="style-description-small">
-                * {{ $t('Enkel voor nieuwe leden') }}
+                * {{ $t('513b343f-6a4e-402c-90c4-c0d73e4f65a3') }}
             </p>
         </template>
     </SaveView>
@@ -107,7 +107,7 @@ const save = async () => {
         if (patched.value.expireDate && (patched.value.expireDate.getTime() > patched.value.endDate.getTime() || patched.value.expireDate.getTime() < patched.value.startDate.getTime())) {
             throw new SimpleError({
                 code: 'invalid_date_range',
-                message: $t(`De vervaldatum moet tussen de start- en einddatum liggen`),
+                message: $t(`de1f0a0d-4251-41db-bc28-c332cc20dc8b`),
                 field: 'expireDate',
             });
         }

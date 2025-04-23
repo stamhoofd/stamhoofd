@@ -50,7 +50,7 @@ export const OrderLogger = new ModelLogger(Order, {
                 id: model.id,
                 value: model.number ? `bestelling #${model.number}` : `bestelling van ${model.data.customer.name}`,
                 type: AuditLogReplacementType.Order,
-                description: model.number ? model.data.customer.name : $t(`Deze bestelling heeft nog geen nummer`),
+                description: model.number ? model.data.customer.name : $t(`4597a3f5-6a6a-44a3-85da-5240ab08447a`),
             })],
         ]);
     },

@@ -10,26 +10,26 @@
                     <STErrorsDefault :error-box="errors.errorBox" />
 
                     <template v-if="passwordConfig">
-                        <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="!initialEmail" enterkeyhint="next" class="max" name="username" :validator="errors.validator" autocomplete="username" :disabled="lock !== null" :title="$t(`E-mailadres`)" :placeholder="$t(`Vul jouw e-mailadres hier in`)" />
+                        <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="!initialEmail" enterkeyhint="next" class="max" name="username" :validator="errors.validator" autocomplete="username" :disabled="lock !== null" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" :placeholder="$t(`55d8cd6e-91d1-4cbe-b9b4-f367bbf37b62`)" />
                         <p v-if="lock" class="style-description-small">
                             {{ lock }}
                         </p>
 
-                        <STInputBox class="max" :title="$t(`Wachtwoord`)">
+                        <STInputBox class="max" :title="$t(`f3bcb2fd-6f56-436a-bf8d-8cde0d924d6a`)">
                             <template #right>
                                 <button class="button text" type="button" tabindex="-1" @click.prevent="gotoPasswordForgot">
-                                    <span>{{ $t('Vergeten') }}</span>
+                                    <span>{{ $t('b8d6b8b0-5237-44ed-869d-33692571f4f4') }}</span>
                                     <span class="icon help" />
                                 </button>
                             </template>
-                            <input id="password" v-model="password" :autofocus="!!initialEmail" enterkeyhint="go" class="input" name="current-password" autocomplete="current-password" type="password" :placeholder="$t(`Vul jouw wachtwoord hier in`)" @input="(event) => password = event.target.value" @change="(event) => password = event.target.value">
+                            <input id="password" v-model="password" :autofocus="!!initialEmail" enterkeyhint="go" class="input" name="current-password" autocomplete="current-password" type="password" :placeholder="$t(`e2cec378-4ed6-40c1-bc1b-ca93718bacf1`)" @input="(event) => password = event.target.value" @change="(event) => password = event.target.value">
                         </STInputBox>
                         <VersionFooter v-if="showVersionFooter" />
                         <div v-else class="style-form-buttons ">
                             <LoadingButton :loading="loading" class="block">
                                 <button id="submit" class="button primary full" type="submit">
                                     <span class="lock icon" />
-                                    <span>{{ $t('Inloggen') }}</span>
+                                    <span>{{ $t('1627a32a-56b8-4c74-8715-b885c1795af6') }}</span>
                                 </button>
                             </LoadingButton>
 
@@ -38,43 +38,43 @@
                                     <span class="icon">
                                         <img src="@stamhoofd/assets/images/partners/icons/google.svg"></span>
                                     <span v-if="googleConfig.loginButtonText">{{ googleConfig.loginButtonText }}</span>
-                                    <span v-else>{{ $t('Inloggen met Google') }}</span>
+                                    <span v-else>{{ $t('eb3fdbca-6393-44ec-9e0d-f416c6dded10') }}</span>
                                 </button>
                             </template>
 
                             <template v-if="ssoConfig">
                                 <button class="button secundary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.SSO)">
                                     <span v-if="ssoConfig.loginButtonText">{{ ssoConfig.loginButtonText }}</span>
-                                    <span v-else-if="!passwordConfig">{{ $t('Inloggen') }}</span>
-                                    <span v-else>{{ $t('Inloggen via SSO') }}</span>
+                                    <span v-else-if="!passwordConfig">{{ $t('1627a32a-56b8-4c74-8715-b885c1795af6') }}</span>
+                                    <span v-else>{{ $t('f0f27d05-3281-4d1c-8ff5-0e84ca35114f') }}</span>
                                 </button>
                             </template>
                         </div>
 
                         <hr><p class="style-description-small">
-                            {{ $t('Of maak een nieuw account aan als je nog geen account hebt. Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.') }}
+                            {{ $t('647ac0ed-dcb5-43d2-bd0d-4ac5839a7974') }}
                         </p>
 
                         <button class="button text selected" type="button" tabindex="-1" @click="openSignup">
-                            <span>{{ $t('Account aanmaken') }}</span>
+                            <span>{{ $t('657d0ca3-739f-48bc-b4c0-b4c326b59834') }}</span>
                             <span class="icon arrow-right-small" />
                         </button>
                     </template>
                     <template v-else>
                         <p class="style-description-block">
-                            {{ $t('Log in via de knop hieronder.') }}
+                            {{ $t('f35f414f-7358-4f4f-8d3a-0ddc04270f47') }}
                         </p>
 
                         <div class="style-form-buttons">
                             <button v-if="ssoConfig" class="button primary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.SSO)">
                                 <span v-if="ssoConfig.loginButtonText">{{ ssoConfig.loginButtonText }}</span>
-                                <span v-else>{{ $t('Inloggen') }}</span>
+                                <span v-else>{{ $t('1627a32a-56b8-4c74-8715-b885c1795af6') }}</span>
                             </button>
                             <button v-if="googleConfig" class="button secundary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.Google)">
                                 <span class="icon">
                                     <img src="@stamhoofd/assets/images/partners/icons/google.svg"></span>
                                 <span v-if="googleConfig.loginButtonText">{{ googleConfig.loginButtonText }}</span>
-                                <span v-else>{{ $t('Inloggen met Google') }}</span>
+                                <span v-else>{{ $t('eb3fdbca-6393-44ec-9e0d-f416c6dded10') }}</span>
                             </button>
                         </div>
                     </template>

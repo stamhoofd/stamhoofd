@@ -41,7 +41,7 @@ export class GetEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody
             throw new SimpleError({
                 code: 'not_found',
                 human: 'Email not found',
-                message: $t(`Deze e-mail bestaat niet of is verwijderd`),
+                message: $t(`9ddb6616-f62d-4c91-82a9-e5cf398e4c4a`),
                 statusCode: 404,
             });
         }

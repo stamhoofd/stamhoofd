@@ -81,8 +81,8 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
                 await GlobalEventBus.sendEvent('new-webshop', response.data);
                 new Toast(
                     response.data.meta.ticketType === WebshopTicketType.Tickets
-                        ? $t(`Jouw nieuwe ticketverkoop is aangemaakt. Je kan nu tickets of vouchers toevoegen die je wilt verkopen.`)
-                        : $t(`Jouw nieuwe webshop is aangemaakt. Je kan nu de producten toevoegen die je wilt verkopen en andere instellingen wijzigen.`)
+                        ? $t(`2ce11748-a9c0-439c-af8b-8115243568eb`)
+                        : $t(`878cc081-df24-46b7-a56b-fb91feb631ff`)
                     , 'success green').show();
             }
             else {
@@ -96,7 +96,7 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
                     await props.savedHandler(props.webshopManager!.webshop);
                 }
 
-                new Toast($t(`Jouw wijzigingen zijn opgeslagen`), 'success green').show();
+                new Toast($t(`482f0710-b031-4d4d-90b9-41c6e6ea89a2`), 'success green').show();
 
                 // Clear the patch
                 reset();

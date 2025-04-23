@@ -1,29 +1,29 @@
 <template>
     <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`Vrije bijdrage`)" @save="save">
         <h1>
-            {{ $t('Vrije bijdrage') }}
+            {{ $t('16ca0372-9c8f-49f0-938d-aee012e59f8c') }}
         </h1>
 
         <p>
-            {{ $t('Je kan bij het inschrijven de mogelijkheid geven om ook een vrije bijdrage (gift) te doen. Een lid kan dan kiezen uit 0 euro, enkele voorgestelde bedragen of een eigen gekozen bedrag.') }}
+            {{ $t('ac19ae40-6e9d-4979-bd7c-01f0e672bf64') }}
         </p>
 
         <Checkbox v-model="freeContribution">
             <h3 class="style-title-list">
-                {{ $t('Vraag een vrije bijdrage bij het inschrijven') }}
+                {{ $t('89a52cb4-ccba-42f5-bb8c-1b8beba34e35') }}
             </h3>
             <p v-if="enableFinancialSupport" class="style-description-small">
-                {{ $t('We slaan deze stap altijd over bij leden met financiële ondersteuning.') }}
+                {{ $t('d50793b8-3b37-4dba-9f29-c3912d95ece1') }}
             </p>
         </Checkbox>
 
         <div v-if="freeContribution" class="free-contribution-box">
-            <STInputBox class="max" :title="$t(`Beschrijving`)">
-                <textarea v-model="freeContributionDescription" class="input" :placeholder="$t(`Beschrijving bovenaan (bv. verduidelijking waarom je vrije bijdrage vraagt en wat je ermee gaat doen)`)" />
+            <STInputBox class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
+                <textarea v-model="freeContributionDescription" class="input" :placeholder="$t(`90830df1-98ef-4f05-a0d4-8801e209dcdc`)" />
             </STInputBox>
 
             <STInputBox v-for="n in amountCount" :key="n" :title="$t(`Voorgesteld bedrag`) + ' '+n">
-                <PriceInput :model-value="getFreeContributionAmounts(n - 1)" :placeholder="$t(`Optie`) + ' '+n" @update:model-value="setFreeContributionAmounts(n - 1, $event)" />
+                <PriceInput :model-value="getFreeContributionAmounts(n - 1)" :placeholder="$t(`ffee883f-b817-44df-ae42-46c76e77f394`) + ' '+n" @update:model-value="setFreeContributionAmounts(n - 1, $event)" />
 
                 <template #right>
                     <button class="button icon trash gray" type="button" @click="deleteOption(n - 1)" />
@@ -31,16 +31,16 @@
             </STInputBox>
 
             <p v-if="amountCount === 0" class="info-box">
-                {{ $t('Er zijn geen voorgestelde bedragen. Een lid kan enkel zelf een bedrag ingeven.') }}
+                {{ $t('81c2a3fa-a9ec-4276-96c2-cbb93b2d2203') }}
             </p>
 
             <button class="button text" type="button" @click="addOption">
                 <span class="icon add" />
-                <span>{{ $t('Voorgesteld bedrag') }}</span>
+                <span>{{ $t('6caf3dff-0895-476f-8bf5-fdce81f1fb56') }}</span>
             </button>
 
             <p class="style-description-small">
-                {{ $t('Een lid kan naast deze opties altijd 0 euro aanduiden (dat is standaard geselecteerd) of zelf een bedrag ingeven.') }}
+                {{ $t('31bdee85-c1f4-4561-8f45-33e5527fc151') }}
             </p>
         </div>
     </SaveView>

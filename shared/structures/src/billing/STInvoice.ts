@@ -120,7 +120,7 @@ export class STInvoiceItem extends AutoEncoder {
 
         const item = STInvoiceItem.create({
             name: pack.meta.name,
-            description: pack.validUntil ? ($t(`Van`) + ' ' + Formatter.date(now, true) + ' ' + $t(`tot`) + ' ' + Formatter.date(pack.validUntil, true)) : ($t(`Vanaf`) + ' ' + Formatter.date(pack.meta.startDate, true)),
+            description: pack.validUntil ? ($t(`01b5d104-748c-4801-a369-4eab05809fcf`) + ' ' + Formatter.date(now, true) + ' ' + $t(`3e515054-91e7-43ed-a9ce-563b626f337d`) + ' ' + Formatter.date(pack.validUntil, true)) : ($t(`22761311-3065-49fd-82ca-bc60aae3c975`) + ' ' + Formatter.date(pack.meta.startDate, true)),
             package: pack,
             date: now,
             unitPrice: unitPrice,

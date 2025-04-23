@@ -1,12 +1,12 @@
 <template>
     <div class="container">
-        <Title v-bind="$attrs" :title="$t(`Ouders`)" />
+        <Title v-bind="$attrs" :title="$t(`00306f91-9f66-4cc3-9c8e-36c08f9964d7`)" />
 
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="visibleParents.length === 0" class="info-box">
-            {{ $t('Nog geen ouders toegevoegd. Voeg een ouder van {member} toe via de knop hieronder.', {member: member.patchedMember.details.firstName}) }}
+            {{ $t('63ccb420-e7ca-4b0a-a8a7-403a40f670a1', {member: member.patchedMember.details.firstName}) }}
         </p>
 
         <STList v-else :with-animation="true">
@@ -28,18 +28,18 @@
                     {{ parent.address }}
                 </p>
                 <p v-if="parent.nationalRegisterNumber && parent.nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
-                    {{ $t('RRN') }}: {{ parent.nationalRegisterNumber }}
+                    {{ $t('9ce60d74-86a4-420f-92ab-91fb536a79be') }}: {{ parent.nationalRegisterNumber }}
                 </p>
 
                 <template #right>
                     <span v-if="!isParentSelected(parent)" class="button text limit-space">
                         <span class="icon add" />
-                        <span>{{ $t('Toevoegen') }}</span>
+                        <span>{{ $t('36ba68cb-2159-4179-8ded-89e73d47cd87') }}</span>
                     </span>
 
                     <button v-else class="button text limit-space" type="button" @click.stop="editParent(parent)">
                         <span class="icon edit" />
-                        <span>{{ $t('Bewerken') }}</span>
+                        <span>{{ $t('ad3ad207-6470-4f3e-aaf4-1ea5ea8b85ad') }}</span>
                     </button>
                 </template>
             </STListItem>
@@ -48,13 +48,13 @@
         <div class="style-button-bar">
             <button type="button" class="button text" :class="{selected: visibleParents.length <= 1}" @click="addParent()">
                 <span class="icon add" />
-                <span>{{ $t('Ouder toevoegen') }}</span>
+                <span>{{ $t('6d4c2c27-ac05-4843-b329-c8bb806bfcb0') }}</span>
             </button>
         </div>
 
         <p v-if="!willMarkReviewed && reviewDate && isAdmin" class="style-description-small">
-            {{ $t('Laatst nagekeken op') }} {{ formatDate(reviewDate) }}. <button type="button" class="inline-link" :v-tooltip="$t('Het lid zal deze stap terug moeten doorlopen via het ledenportaal')" @click="clear">
-                {{ $t('Wissen') }}
+            {{ $t('78dedb37-a33d-4907-8034-43345eea18a0') }} {{ formatDate(reviewDate) }}. <button type="button" class="inline-link" :v-tooltip="$t('1452c1a3-6203-4ab2-92c4-c0496661cd21')" @click="clear">
+                {{ $t('74366859-3259-4393-865e-9baa8934327a') }}
             </button>.
         </p>
     </div>

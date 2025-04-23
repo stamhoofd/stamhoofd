@@ -5,20 +5,20 @@
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
-            <input v-model="name" enterkeyhint="next" class="input" type="text" :placeholder="$t(`Naam`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
+            <input v-model="name" enterkeyhint="next" class="input" type="text" :placeholder="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
         </STInputBox>
 
         <div class="container">
-            <hr><h2>{{ $t('Externe beheerdersrollen') }}</h2>
-            <p>{{ $t('Je kan een API-key verschillende rollen geven, net zoals een externe beheerder. Hiermee kan je jouw key beter beveiligen en enkel toegang geven waarvoor je het nodig hebt.') }}</p>
+            <hr><h2>{{ $t('697d96d8-17dc-4e98-8571-87153985f3a1') }}</h2>
+            <p>{{ $t('b1cb5299-5325-4505-ba30-a7b0ae327679') }}</p>
 
             <EditUserPermissionsBox :user="patched" @patch:user="addPatch($event)" />
         </div>
 
         <div class="container">
-            <hr><h2>{{ $t('Rate limits') }}</h2>
-            <p>{{ $t('Een API-key heeft rate limits om overbelasting door foutief of inefficiënt gebruik te voorkomen.') }}</p>
+            <hr><h2>{{ $t('40abbf9c-2dd3-471a-a699-f6af656feb5e') }}</h2>
+            <p>{{ $t('664063fe-6e8f-4439-bb86-07d346e803de') }}</p>
 
             <STList>
                 <STListItem v-if="canAlterRateLimits || rateLimits === ApiUserRateLimits.Normal" :selectable="canAlterRateLimits" class="right-stack right-top" element-name="label">
@@ -26,17 +26,17 @@
                         <Radio v-model="rateLimits" :value="ApiUserRateLimits.Normal" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Laag') }}
+                        {{ $t('ab858fd6-4451-4d88-869e-be425a661169') }}
                     </h3>
                     <p v-if="canAlterRateLimits" class="style-description-small">
-                        {{ $t('Ideaal voor de meeste API-keys.') }}
+                        {{ $t('288fd815-8771-4524-9e4d-6e90bd2eec11') }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('Maximaal 5 req/s; 120 requests per 2 minuten; 1.000 requests per uur; 2.000 requests per dag') }}
+                        {{ $t('be918896-7e92-4ac7-9cbe-fba5afdd8120') }}
                     </p>
 
                     <template v-if="canAlterRateLimits" #right>
-                        <span class="style-tag">{{ $t('Aangeraden') }}</span>
+                        <span class="style-tag">{{ $t('706d4485-be6b-418c-bbf1-5fe05e34e076') }}</span>
                     </template>
                 </STListItem>
 
@@ -45,13 +45,13 @@
                         <Radio v-model="rateLimits" :value="ApiUserRateLimits.Medium" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Gemiddeld') }}
+                        {{ $t('36c579f6-0c98-4946-9d6b-eec3f0db56d6') }}
                     </h3>
                     <p v-if="canAlterRateLimits" class="style-description-small">
-                        {{ $t('Voor een API-key die heel regelmatig de API moet aanroepen. Risico op overbelasting als de API niet correct is geimplementeerd en zware requests op korte tijd afvuurt.') }}
+                        {{ $t('cc4f0640-cdfb-473f-9f94-cc6e11b361ae') }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('Maximaal 10 req/s; 240 requests per 2 minuten; 2.000 requests per uur; 14.400 requests per dag') }}
+                        {{ $t('c1bfbd59-c12d-43e2-88f7-aa08798d1ea6') }}
                     </p>
                 </STListItem>
 
@@ -60,13 +60,13 @@
                         <Radio v-model="rateLimits" :value="ApiUserRateLimits.High" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Hoog') }}
+                        {{ $t('98469c78-6bd6-4354-b7d2-07e5b48aec12') }}
                     </h3>
                     <p v-if="canAlterRateLimits" class="style-description-small">
-                        {{ $t('Voor een API-key die heel intensief gebruik moet maken van de API. Risico op overbelasting als de API niet correct is geimplementeerd en zware requests op korte tijd afvuurt.') }}
+                        {{ $t('a379312a-007d-46a2-9533-33c15c524504') }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('Maximaal 25 req/s; 480 requests per 2 minuten; 4.000 requests per uur; 28.800 requests per dag') }}
+                        {{ $t('f1597fb7-dd45-4d0c-8efc-627b464e6d1b') }}
                     </p>
                 </STListItem>
             </STList>
@@ -101,9 +101,9 @@ const { patch, patched, addPatch, hasChanges } = usePatch(props.user);
 
 const title = computed(() => {
     if (props.isNew) {
-        return $t(`Nieuwe API-key`);
+        return $t(`e5c619de-2d3d-470f-857b-185912b9784e`);
     }
-    return $t(`API-key bewerken`);
+    return $t(`ce422f34-27a2-4dab-b307-d3aaecb9f5b7`);
 });
 
 const name = computed({
@@ -132,7 +132,7 @@ async function save() {
     if ((name.value?.length ?? 0) < 2) {
         errorGroup.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`Vul een naam in`),
+            message: $t(`769aee89-b291-4c53-90ec-16539bca5a33`),
             field: 'name',
         }));
     }

@@ -4,7 +4,7 @@
 
         <main class="center">
             <h1>
-                {{ $t('Instellingen') }}
+                {{ $t('bab38c80-8ab6-4cb7-80c3-1f607057e45d') }}
             </h1>
 
             <BillingWarningBox />
@@ -13,7 +13,7 @@
                 {{ stripeWarning.text }}
 
                 <a :href="$domains.getDocs('documenten-stripe-afgekeurd')" target="_blank" class="button text">
-                    {{ $t('Meer info') }}
+                    {{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}
                 </a>
             </p>
 
@@ -23,10 +23,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/flag.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Algemeen') }}
+                        {{ $t('35757756-d817-419d-82dd-1ba14128af30') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Naam, adres, website en facturatiegegevens') }}
+                        {{ $t('f042b512-f374-4088-9175-955f62575744') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -38,10 +38,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/palette.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Personaliseren') }}
+                        {{ $t('f45871aa-7723-42c3-9781-f4f9b8d7250a') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Kies je eigen logo en kleur') }}
+                        {{ $t('d07dd246-d0b6-4941-a015-a7d305fd8e1c') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -53,10 +53,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/admin.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Toegangsrechten en functies') }}
+                        {{ $t('30ea5656-b3df-4b67-9f8c-2d71924f7eee') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Beheer wie toegang heeft tot welk onderdeel van het beheerdersportaal') }}
+                        {{ $t('c1b71652-5398-4398-8185-0d80e09c9827') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -68,10 +68,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/privacy-policy.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Privacyvoorwaarden') }}
+                        {{ $t('9f4f2cef-7466-42e3-bca3-d3bfd9f29aa4') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Stel je privacyvoorwaarden in') }}
+                        {{ $t('518e8449-5f7e-4493-b724-4a4d32efc40b') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -98,10 +98,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/house.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Lokalen') }}
+                        {{ $t('eecb4cc5-f807-4325-8083-1fe893756ce4') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Beheer jouw (verzekerde) lokalen') }}
+                        {{ $t('52f90401-117a-42e7-b500-f13db35f23a4') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -110,7 +110,7 @@
             </STList>
 
             <template v-if="membersPackage">
-                <hr><h2>{{ $t('Ledenadministratie') }}</h2>
+                <hr><h2>{{ $t('64d8c751-a6c4-427e-b3db-cef827058780') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem v-if="!isPlatform" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.RegistrationPage)">
@@ -118,10 +118,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/laptop.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Link naar ledenportaal') }}
+                            {{ $t('7e571340-71b3-4d22-8c01-c895ee0997a4') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Via deze weg kunnen leden zelf online inschrijven') }}
+                            {{ $t('ab663eb3-5e1b-4876-8e85-c0ffadd5ab3b') }}
                         </p>
 
                         <template #right>
@@ -149,10 +149,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/group.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Inschrijvingsgroepen beheren') }}
+                            {{ $t('30ceddd4-0f32-4d92-b42e-f2d8ffeebb2a') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Deel je leden op in groepen en categorieën') }}
+                            {{ $t('cfa83be3-964c-46ca-95e8-0ee74e2e8389') }}
                         </p>
 
                         <template #right>
@@ -165,10 +165,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/health-data.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Persoonsgegevens van leden') }}
+                            {{ $t('15e411ef-7a28-41e0-ad90-8c6ffae730f1') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Kies welke informatie je verzamelt van jouw leden') }}
+                            {{ $t('9cd854d2-c290-4169-aedc-35cabb608198') }}
                         </p>
 
                         <template #right>
@@ -181,10 +181,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/piggy-bank.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Vrije bijdrage') }}
+                            {{ $t('16ca0372-9c8f-49f0-938d-aee012e59f8c') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Maak het mogelijk dat leden een (optionele) vrije bijdrage doen bij het inschrijven') }}
+                            {{ $t('45193033-dfd3-4dff-a7a6-cf4bd0883b5e') }}
                         </p>
 
                         <template #right>
@@ -194,7 +194,7 @@
                 </STList>
             </template>
 
-            <hr><h2>{{ $t('E-mails') }}</h2>
+            <hr><h2>{{ $t('cce92c4c-1cdf-4a22-9f1a-89f888046cde') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailSettings)">
@@ -202,10 +202,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/email.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('E-mailadressen') }}
+                        {{ $t('7766ee8a-cd92-4d6f-a3fa-f79504fbcdda') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Verstuur e-mails vanaf je zelf gekozen e-mailadres') }}
+                        {{ $t('5c0e8dda-122a-4ec9-a3ca-f8dcb2593fc7') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -217,10 +217,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('E-mailsjablonen') }}
+                        {{ $t('f0b50a39-d4fd-4f97-802d-a599b00030fd') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Wijzig de inhoud van automatische en opgeslagen e-mails.') }}
+                        {{ $t('ba4eeb34-6c93-4537-92ac-ea4f30c28fbb') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -232,10 +232,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/notifications.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Notificaties voor openstaande bedragen') }}
+                        {{ $t('4539b2ba-71f8-4839-aee8-60da1189b520') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Stuur automatisch e-mails naar leden als hun openstaand bedrag stijgt of als betaalherinnering.') }}
+                        {{ $t('4abf9650-55e0-45ad-8412-7570ac42117f') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -244,17 +244,17 @@
             </STList>
 
             <template v-if="feature('sso')">
-                <hr><h2>{{ $t('Geavanceerd') }}</h2>
+                <hr><h2>{{ $t('6a11d3a7-6348-4aca-893e-0f026e5eb8b0') }}</h2>
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.SingleSignOn)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/lock.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Single-Sign-On (SSO)') }}
+                            {{ $t('662467b7-da51-4fe2-bff4-784c8f028e58') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Configureer een externe authenticatie server') }}
+                            {{ $t('1a4edf37-9d52-4a9d-b535-5e098236a61e') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -271,10 +271,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/stock.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Pakketten aankopen') }}
+                            {{ $t('dd8f3b31-064c-4391-9352-6ec9c15bd9a8') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Wijzig je pakketten of activeer nieuwe functies') }}
+                            {{ $t('d772b39b-b319-45ea-8b4b-2448b75ac54d') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -289,7 +289,7 @@
                             {{ $t("0208e14e-b26e-4411-9e8e-461b63b1c0c1") }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Geef 25 euro en krijg zelf ook een tegoed') }}
+                            {{ $t('141a681a-da48-45e8-a37f-058eb042d841') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -301,10 +301,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/experiment.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Experimenten') }}
+                            {{ $t('5a5c1ed2-516e-43a1-9e64-25a7f6190ed3') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Probeer als eerste nieuwe functies uit die in ontwikkeling zijn.') }}
+                            {{ $t('0e276c36-671b-442a-89a0-ad87f5a947f3') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />

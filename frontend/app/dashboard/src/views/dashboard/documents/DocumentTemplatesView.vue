@@ -5,19 +5,19 @@
 
             <main class="center">
                 <h1 class="style-navigation-title">
-                    {{ $t('Documenten') }}
+                    {{ $t('a01ee6b1-f27f-4ad2-a87c-28bce4dedfbd') }}
                 </h1>
 
                 <p v-if="disableActivities" class="error-box">
-                    {{ $t('Deze functie is niet beschikbaar omdat jouw vereniging nog het oude gratis ledenadministratie pakket gebruikt. Via instellingen kunnen hoofdbeheerders overschakelen op de betaalde versie met meer functionaliteiten.') }}
+                    {{ $t('bb17dafc-4305-4213-90c9-2bb2701d777f') }}
                 </p>
 
                 <p class="style-description">
-                    {{ $t('Maak documenten aan en deel ze met jouw leden. Daarbij is het mogelijk om gegevens van leden automatisch in te vullen in de documenten, bijvoorbeeld voor een fiscaal attest of een deelnamebewijs voor de mutualiteit.') }}
+                    {{ $t('72810aaa-d33f-414f-bab1-6c33aca18823') }}
                 </p>
 
                 <p v-if="!enabled" class="info-box">
-                    {{ $t('Deze functie komt binnenkort beschikbaar!') }}
+                    {{ $t('5284a37b-479f-4a7c-bd4e-5b7a15a22291') }}
                 </p>
 
                 <STList>
@@ -26,11 +26,11 @@
                             {{ template.settings.name }}
                         </h2>
                         <p class="style-description-small">
-                            {{ $t('Aangemaakt op') }} {{ formatDate(template.createdAt) }}
+                            {{ $t('b6391640-1e01-47f9-913d-360fb0903b75') }} {{ formatDate(template.createdAt) }}
                         </p>
 
                         <template #right>
-                            <span v-if="template.status === 'Draft'" class="style-tag">{{ $t('Klad') }}</span>
+                            <span v-if="template.status === 'Draft'" class="style-tag">{{ $t('a4b33491-0ace-4b39-aba6-79371659fd51') }}</span>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -39,7 +39,7 @@
                 <p v-if="enabled" class="style-button-bar">
                     <button type="button" class="button text" @click="addDocument">
                         <span class="icon add" />
-                        <span class="text">{{ $t('Nieuw document') }}</span>
+                        <span class="text">{{ $t('6e1522d7-e084-4ec1-a4dc-47b93a88f4c8') }}</span>
                     </button>
                 </p>
             </main>

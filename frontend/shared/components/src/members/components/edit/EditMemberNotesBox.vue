@@ -1,11 +1,11 @@
 <template>
     <div class="container">
-        <Title v-bind="$attrs" :title="$t(`Notities`)" />
+        <Title v-bind="$attrs" :title="$t(`7f3af27c-f057-4ce3-8385-36dfb99745e8`)" />
 
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
         <STInputBox title="" error-fields="notes" :error-box="errors.errorBox" class="max">
-            <textarea v-model="notes" class="input" type="text" autocomplete="off" enterkeyhint="next" :maxlength="maxLength" :placeholder="$t(`Bijkomende informatie over dit lid (onzichtbaar voor het lid).`)" />
+            <textarea v-model="notes" class="input" type="text" autocomplete="off" enterkeyhint="next" :maxlength="maxLength" :placeholder="$t(`4b023560-3014-4a4f-8034-9aaaf9819b36`)" />
         </STInputBox>
     </div>
 </template>

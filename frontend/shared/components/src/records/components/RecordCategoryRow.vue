@@ -11,14 +11,14 @@
             {{ filterDescription }}
         </p>
         <p v-if="!category.childCategories.length && !category.records.length" class="style-description-small">
-            {{ $t('Leeg') }}
+            {{ $t('3e8d9718-569f-4243-b9ba-ae8f3df6d598') }}
         </p>
         <p v-else class="style-description-small">
             <template v-if="category.records.length">
                 {{ category.records.length }} {{ category.records.length === 1 ? "vraag" : "vragen" }}
             </template>
             <template v-if="category.childCategories.length && category.records.length">
-                {{ $t('en') }}
+                {{ $t('6a156458-b396-4d0f-b562-adb3e38fc51b') }}
             </template>
             <template v-if="category.childCategories.length">
                 {{ category.childCategories.length }} {{ category.childCategories.length === 1 ? "categorie" : "categorieën" }}
@@ -26,7 +26,7 @@
         </p>
 
         <template #right>
-            <span v-if="category.containsSensitiveData" class="icon privacy gray" :v-tooltip="$t('Vereist toestemming gegevensverzameling')" />
+            <span v-if="category.containsSensitiveData" class="icon privacy gray" :v-tooltip="$t('007c7ed0-9cac-4697-8ad7-d18684608013')" />
 
             <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />

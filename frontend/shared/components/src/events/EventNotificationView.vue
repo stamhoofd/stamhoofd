@@ -23,7 +23,7 @@
                         <span>{{ notification.events.map(e => e.name).join(', ') }}</span>
                     </p>
                     <p v-if="notification.events.length === 0" class="style-definition-text style-em">
-                        {{ $t('Geen') }}
+                        {{ $t('45ff02db-f404-4d91-853f-738d55c40cb6') }}
                     </p>
 
                     <template v-if="isReviewer && notification.events.length === 1" #right>
@@ -42,7 +42,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('Wanneer') }}
+                        {{ $t('0ca73738-0649-4dbd-b5d7-b54f03140372') }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ capitalizeFirstLetter(formatDateRange(notification.startDate, notification.endDate, undefined, false)) }}</span>
@@ -51,7 +51,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('Status') }}
+                        {{ $t('e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5') }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ capitalizeFirstLetter(EventNotificationStatusHelper.getName(notification.status)) }}</span>
@@ -84,14 +84,14 @@
                     <PatchListText :items="diffList" />
 
                     <template #right>
-                        <button class="button icon eye gray" type="button" :v-tooltip="$t('Bekijk origineel')" @click="showOriginalAnswers" />
+                        <button class="button icon eye gray" type="button" :v-tooltip="$t('4f634d27-7fa3-4e91-9ae1-dbfdafd2baa4')" @click="showOriginalAnswers" />
                     </template>
                 </STListItem>
             </STList>
 
             <template v-if="notification.status === EventNotificationStatus.Draft">
-                <hr><h2>{{ $t('Gegevens') }}</h2>
-                <p>{{ $t('Vul de gegevens hieronder aan voor je de kampmelding indient.') }}</p>
+                <hr><h2>{{ $t('f4d00d5c-77c9-41dd-9689-a447c7977449') }}</h2>
+                <p>{{ $t('025be814-a557-46be-be79-a1cc5406a5ed') }}</p>
 
                 <STList>
                     <STListItem v-for="category of recordCategories" :key="category.id" :selectable="isEnabled(category)" :disabled="!isEnabled(category)" @click="editRecordCategory(category)">
@@ -106,13 +106,13 @@
                             {{ category.name }}
                         </h3>
                         <p v-if="getRecordCategoryProgress(category) === 0" class="style-description">
-                            {{ $t('Nog niet ingevuld') }}
+                            {{ $t('212cf5a4-424b-477e-9007-9a9d789f8c08') }}
                         </p>
                         <p v-else-if="getRecordCategoryProgress(category) === 1" class="style-description">
-                            {{ $t('Volledig ingevuld') }}
+                            {{ $t('7418aed7-61ec-4553-ba8c-301573d32a72') }}
                         </p>
                         <p v-else class="style-description">
-                            {{ $t('Onvolledig') }}
+                            {{ $t('21b3891d-7c0e-49ca-ae35-d77d54e9f0c3') }}
                         </p>
 
                         <template #right>
@@ -131,7 +131,7 @@
             </template>
 
             <div v-if="notification.status === EventNotificationStatus.Pending && isComplete && isReviewer" class="container">
-                <hr><h2>{{ $t('Beslissing') }}</h2>
+                <hr><h2>{{ $t('00b790ad-2238-4a6a-b7cb-36a60fac1e9f') }}</h2>
 
                 <STList>
                     <STListItem :selectable="true" element-name="button" @click="doAccept">
@@ -143,10 +143,10 @@
                             </IconContainer>
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('Goedkeuren') }}
+                            {{ $t('b0657304-772f-4334-be01-da82a190167a') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('Keur deze melding goed.') }}
+                            {{ $t('4a3e388c-32f3-4f76-be22-9eb435ebb9f9') }}
                         </p>
 
                         <template #right>
@@ -163,10 +163,10 @@
                             </IconContainer>
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('Voorlopig goedgekeurd') }}
+                            {{ $t('1b19fc16-6146-42c9-b42e-471f1f18a452') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('Als alles wel in orde is, maar er nog iets klein moet worden aangevuld op een later tijdstip.') }}
+                            {{ $t('a7ed4fc3-5f80-4621-afcb-89002b686cef') }}
                         </p>
 
                         <template #right>
@@ -184,10 +184,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Afkeuren') }}
+                            {{ $t('7c422572-6970-460c-8055-af2935f9a76b') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('Hierna zijn er terug wijzigingen mogelijk. Laat eventueel een opmerking achter.') }}
+                            {{ $t('435950cd-0c43-4f39-9547-c31189725873') }}
                         </p>
 
                         <template #right>
@@ -205,8 +205,8 @@
                         <span v-if="notification.status === EventNotificationStatus.Rejected" class="icon retry" />
                         <span v-else class="icon success" />
 
-                        <span v-if="notification.status === EventNotificationStatus.Rejected">{{ $t('Opnieuw indienen') }}</span>
-                        <span v-else>{{ $t('Indienen') }}</span>
+                        <span v-if="notification.status === EventNotificationStatus.Rejected">{{ $t('b72d05c4-9e64-4254-9580-7123bf7479c3') }}</span>
+                        <span v-else>{{ $t('0b8d1425-4240-4fa8-8150-9a7824ef1c7d') }}</span>
                     </button>
                 </LoadingButton>
             </template>

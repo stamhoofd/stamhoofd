@@ -57,13 +57,13 @@ export class CartStockHelper {
         let more = '';
         if (inCart > 0) {
             if (inCart === 1) {
-                more = $t(', waarvan er al ${inCart} in jouw winkelmandje zit', { inCart: inCart.toString() });
+                more = $t('dca6ed7e-348a-46e0-b3d4-1f0b21945312', { inCart: inCart.toString() });
             }
             else {
-                more = $t(', waarvan er al ${inCart} in jouw winkelmandje zitten', { inCart: inCart.toString() });
+                more = $t('339ecfa6-d5c3-4126-bdbb-66c1a9b1fd7d', { inCart: inCart.toString() });
             }
         }
-        const text: string | null = `Er ${remainingStock === 1 ? $t(`is`) : $t(`zijn`)} nog maar ${product.getRemainingStockText(remainingStock)} beschikbaar${more}`;
+        const text: string | null = `Er ${remainingStock === 1 ? $t(`af839b8a-1367-4655-ad1c-ee658843e9f1`) : $t(`31bacb3a-2920-4bf3-9e68-d7887ef17fe4`)} nog maar ${product.getRemainingStockText(remainingStock)} beschikbaar${more}`;
         return {
             stock: remainingStock,
             remaining: admin ? null : remaining,
@@ -104,14 +104,14 @@ export class CartStockHelper {
 
         let more = '';
         if (inCart > 0) {
-            more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart === 1 ? $t(`zit`) : $t(`zitten`)}`;
+            more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart === 1 ? $t(`5842a365-ee3e-452c-85d8-2967e4e172ef`) : $t(`75168b46-1dcc-4154-b7c7-70fac5e3578b`)}`;
         }
-        const text = `Er ${remainingStock === 1 ? $t(`is`) : $t(`zijn`)} nog maar ${product.getRemainingStockText(remainingStock)} van ${productPrice.name} beschikbaar${more}`;
+        const text = `Er ${remainingStock === 1 ? $t(`af839b8a-1367-4655-ad1c-ee658843e9f1`) : $t(`31bacb3a-2920-4bf3-9e68-d7887ef17fe4`)} nog maar ${product.getRemainingStockText(remainingStock)} van ${productPrice.name} beschikbaar${more}`;
         return {
             stock: remainingStock,
             remaining: admin ? null : remaining,
             text: remainingStock === 0 ? `${Formatter.capitalizeFirstLetter(productPrice.name)} is uitverkocht` : (remaining < 25 || (amount && remaining <= amount) ? text : null),
-            shortText: remainingStock === 0 ? $t(`Uitverkocht`) : (remaining === 0 ? $t(`Maximum bereikt`) : (remaining < 25 ? `Nog ${product.getRemainingStockText(remaining)}` : null)),
+            shortText: remainingStock === 0 ? $t(`44ba544c-3db6-4f35-b7d1-b63fdcadd9ab`) : (remaining === 0 ? $t(`b1c82354-0aa6-4bef-bef6-84261180919a`) : (remaining < 25 ? `Nog ${product.getRemainingStockText(remaining)}` : null)),
         };
     }
 
@@ -152,15 +152,15 @@ export class CartStockHelper {
 
         let more = '';
         if (inCart > 0) {
-            more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart === 1 ? $t(`zit`) : $t(`zitten`)}`;
+            more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart === 1 ? $t(`5842a365-ee3e-452c-85d8-2967e4e172ef`) : $t(`75168b46-1dcc-4154-b7c7-70fac5e3578b`)}`;
         }
-        const text = `Er ${remainingStock === 1 ? $t(`is`) : $t(`zijn`)} nog maar ${product.getRemainingStockText(remainingStock)} van ${option.name} beschikbaar${more}`;
+        const text = `Er ${remainingStock === 1 ? $t(`af839b8a-1367-4655-ad1c-ee658843e9f1`) : $t(`31bacb3a-2920-4bf3-9e68-d7887ef17fe4`)} nog maar ${product.getRemainingStockText(remainingStock)} van ${option.name} beschikbaar${more}`;
 
         return {
             stock: remainingStock,
             remaining: admin ? null : remaining,
             text: remainingStock === 0 ? `${Formatter.capitalizeFirstLetter(option.name)} is uitverkocht` : (remaining < 25 || (amount && remaining <= amount) ? text : null),
-            shortText: remainingStock === 0 ? $t(`Uitverkocht`) : (remaining === 0 ? $t(`Maximum bereikt`) : (remaining < 25 ? `Nog ${product.getRemainingStockText(remaining)}` : null)),
+            shortText: remainingStock === 0 ? $t(`44ba544c-3db6-4f35-b7d1-b63fdcadd9ab`) : (remaining === 0 ? $t(`b1c82354-0aa6-4bef-bef6-84261180919a`) : (remaining < 25 ? `Nog ${product.getRemainingStockText(remaining)}` : null)),
         };
     }
 
@@ -191,14 +191,14 @@ export class CartStockHelper {
 
         let more = '';
         if (inCart > 0) {
-            more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart === 1 ? $t(`zit`) : $t(`zitten`)}`;
+            more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart === 1 ? $t(`5842a365-ee3e-452c-85d8-2967e4e172ef`) : $t(`75168b46-1dcc-4154-b7c7-70fac5e3578b`)}`;
         }
-        const text = `Er ${remainingStock === 1 ? $t(`is`) : $t(`zijn`)} nog maar ${Formatter.pluralText(remainingStock, $t(`plaats`), $t(`plaatsen`))} beschikbaar${more}`;
+        const text = `Er ${remainingStock === 1 ? $t(`af839b8a-1367-4655-ad1c-ee658843e9f1`) : $t(`31bacb3a-2920-4bf3-9e68-d7887ef17fe4`)} nog maar ${Formatter.pluralText(remainingStock, $t(`886ea5ba-4715-43a2-88b6-4715df3cfa2c`), $t(`a76b6d3c-05a1-4c71-9f88-077261a4e595`))} beschikbaar${more}`;
 
         return {
             stock: remainingStock,
             remaining,
-            text: remainingStock === 0 ? $t(`Er zijn geen plaatsen meer beschikbaar`) : (remaining < 25 || (amount && remaining <= amount) ? text : null),
+            text: remainingStock === 0 ? $t(`460b1ea5-15c9-4b4f-8de3-76b5f319aa0f`) : (remaining < 25 || (amount && remaining <= amount) ? text : null),
         };
     }
 
@@ -223,7 +223,7 @@ export class CartStockHelper {
 
         let more = '';
         if (inCart > 0) {
-            more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart === 1 ? $t(`zit`) : $t(`zitten`)}`;
+            more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart === 1 ? $t(`5842a365-ee3e-452c-85d8-2967e4e172ef`) : $t(`75168b46-1dcc-4154-b7c7-70fac5e3578b`)}`;
         }
 
         const remaining = product.maxPerOrder - inCart;
@@ -233,7 +233,7 @@ export class CartStockHelper {
         return {
             stock: product.maxPerOrder,
             remaining: product.maxPerOrder - inCart,
-            text: !show ? null : ($t(`Je kan maximaal`) + ' ' + product.getRemainingStockText(product.maxPerOrder) + ' ' + $t(`bestellen`) + more),
+            text: !show ? null : ($t(`045e381b-d772-4fb8-b06b-b21247110ad3`) + ' ' + product.getRemainingStockText(product.maxPerOrder) + ' ' + $t(`c9ded123-9810-4bc8-815e-77e9ca9ae717`) + more),
         };
     }
 
@@ -259,8 +259,8 @@ export class CartStockHelper {
             return {
                 stock: 1,
                 remaining: 0,
-                text: $t(`Je kan maximaal 1 van dit product bestellen`),
-                shortText: $t(`Maximum bereikt`),
+                text: $t(`5a6717be-0f1e-47b3-b9a8-76d6eb0057be`),
+                shortText: $t(`b1c82354-0aa6-4bef-bef6-84261180919a`),
             };
         }
 

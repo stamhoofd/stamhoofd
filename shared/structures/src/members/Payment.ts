@@ -86,7 +86,7 @@ export class Payment extends AutoEncoder {
     get title() {
         if (this.method !== PaymentMethod.Unknown) {
             if (this.type !== PaymentType.Payment) {
-                return $t(`Via`) + ' ' + PaymentMethodHelper.getName(this.method);
+                return $t(`e13af8ee-f442-4a98-b3e6-6f3d84fba30c`) + ' ' + PaymentMethodHelper.getName(this.method);
             }
             return PaymentMethodHelper.getNameCapitalized(this.method);
         }
@@ -140,26 +140,26 @@ export class Payment extends AutoEncoder {
          */
         const data = [
             {
-                title: $t(`Betaalmethode`),
+                title: $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`),
                 value: this.method ? Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(this.method)) : '',
             },
             {
-                title: $t(`Te betalen`),
+                title: $t(`18aed6d0-0880-4d06-9260-fe342e6e8064`),
                 value: this.status !== PaymentStatus.Succeeded ? Formatter.price(this?.price ?? 0) : Formatter.price(0),
             },
             ...(
                 this.method === PaymentMethod.Transfer
                     ? [
                             {
-                                title: $t(`Mededeling`),
+                                title: $t(`136b7ba4-7611-4ee4-a46d-60758869210f`),
                                 value: this.transferDescription ?? '',
                             },
                             {
-                                title: $t(`Rekeningnummer`),
+                                title: $t(`1fbed7d4-9e6e-4c87-b7fe-a9059aef2492`),
                                 value: this.transferSettings?.iban ?? '',
                             },
                             {
-                                title: $t(`Begunstigde`),
+                                title: $t(`31c28f13-d3b8-42ee-8979-c8224633237e`),
                                 value: this.transferSettings?.creditor ?? '',
                             },
                         ]

@@ -2,7 +2,7 @@
     <LoadingViewTransition>
         <ModernTableView v-if="!loading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :estimated-rows="estimatedRows" :Route="Route">
             <template #empty>
-                {{ $t('Geen leden ingeschreven') }}
+                {{ $t('22f14cbd-ccaf-41a7-a7ca-15272d6203b9') }}
             </template>
         </ModernTableView>
     </LoadingViewTransition>

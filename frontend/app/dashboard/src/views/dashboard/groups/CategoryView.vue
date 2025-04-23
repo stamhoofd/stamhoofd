@@ -19,10 +19,10 @@
                         </template>
 
                         <h2 class="style-title-list bolder">
-                            {{ $t('Alle leden') }}
+                            {{ $t('379d43fb-034f-4280-bb99-ea658eaec729') }}
                         </h2>
                         <p class="style-description-small">
-                            {{ $t('Bekijk alle leden samen') }}
+                            {{ $t('e1f33ca8-8103-4fe9-8d84-58d960e2519c') }}
                         </p>
                         <template #right>
                             <span v-if="getMemberCount() !== null" class="style-description-small">{{ getMemberCount() }}</span>
@@ -54,7 +54,7 @@
                         </template>
 
                         <h2 class="style-title-list bolder">
-                            {{ $t('Alle leden in deze categorie') }}
+                            {{ $t('33119a7d-4e82-4123-8742-dc7ec6da4a30') }}
                         </h2>
                         <template #right>
                             <span v-if="getMemberCount() !== null" class="style-description-small">{{ getMemberCount() }}</span>
@@ -79,22 +79,22 @@
                 <p v-if="canCreate" class="style-button-bar">
                     <button class="button text" type="button" @click="createGroup">
                         <span class="icon add" />
-                        <span>{{ $t('Inschrijvingsgroep') }}</span>
+                        <span>{{ $t('f52db2d7-c0f5-4f9c-b567-62f657787339') }}</span>
                     </button>
                 </p>
             </template>
 
             <p v-if="categories.length === 0 && groups.length === 0 && canCreate" class="info-box">
-                {{ $t('Deze inschrijvingscategorie is leeg, maak zelf inschrijvingsgroepen aan waarin leden kunnen inschrijven.') }}
+                {{ $t('1c22a841-4402-4489-bf5d-a76b919eb4cb') }}
             </p>
             <p v-else-if="categories.length === 0 && groups.length === 0" class="info-box">
-                {{ $t('Deze inschrijvingscategorie is leeg. Vraag een hoofdbeheerder om groepen aan te maken.') }}
+                {{ $t('d766699f-a294-43f4-a07e-c4eebb33fb6f') }}
             </p>
 
             <p v-if="categories.length === 0 && groups.length === 0 && canCreate">
                 <button class="button text" type="button" @click="createGroup">
                     <span class="icon add" />
-                    <span>{{ $t('Nieuwe groep') }}</span>
+                    <span>{{ $t('f30e6b0a-9808-4f17-8d0b-11d9d86d12ff') }}</span>
                 </button>
             </p>
         </main>

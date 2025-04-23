@@ -50,10 +50,10 @@ export function minimumPermissionLevel(...levels: PermissionLevel[]): Permission
 
 export function getPermissionLevelName(level: PermissionLevel): string {
     switch (level) {
-        case PermissionLevel.None: return $t(`Geen basistoegang`);
-        case PermissionLevel.Read: return $t(`Lezen`);
-        case PermissionLevel.Write: return $t(`Bewerken`);
-        case PermissionLevel.Full: return $t(`Volledige toegang`);
+        case PermissionLevel.None: return $t(`e7aebbf1-8a3a-4288-932f-1678c7bb16ca`);
+        case PermissionLevel.Read: return $t(`7afc105f-d34d-4b93-9b33-a6cc08c818ee`);
+        case PermissionLevel.Write: return $t(`ad3ad207-6470-4f3e-aaf4-1ea5ea8b85ad`);
+        case PermissionLevel.Full: return $t(`c2296305-99a9-497a-aed3-7bb3d2293ce8`);
         default: {
             const l: never = level; // will throw compile error if new levels are added without editing this method
             throw new Error('Unknown permission level ' + l);

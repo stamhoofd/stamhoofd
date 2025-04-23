@@ -167,11 +167,11 @@ export class CheckoutMethodTypeHelper {
     static getName(type: CheckoutMethodType): string {
         switch (type) {
             case CheckoutMethodType.OnSite:
-                return $t(`Ter plaatse consumeren`);
+                return $t(`25e67f34-649f-4743-9cdd-d2a81d252daf`);
             case CheckoutMethodType.Takeout:
-                return $t(`Afhalen`);
+                return $t(`edd72e8b-76de-45df-93a0-ecc72efb849a`);
             case CheckoutMethodType.Delivery:
-                return $t(`Leveren`);
+                return $t(`abba46da-6bb8-40cb-88f0-186c2409a0a5`);
         }
     }
 }
@@ -612,7 +612,7 @@ export class WebshopPrivateMetaData extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_configuration',
                 message: 'Missing configuration for webshop domain',
-                human: $t(`Momenteel kan je geen eigen webshop domeinnaam instellen. Probeer het later opnieuw.`),
+                human: $t(`323d9fd1-cd53-41d9-85e6-8d95c60e6240`),
                 statusCode: 500,
             });
         }

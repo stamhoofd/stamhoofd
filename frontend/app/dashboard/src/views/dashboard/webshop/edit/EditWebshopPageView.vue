@@ -2,15 +2,15 @@
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" class="webshop-view-page" @save="save">
         <h1>{{ viewTitle }}</h1>
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox error-fields="meta.title" :error-box="errors.errorBox" :title="$t(`Titel`)">
-            <input v-model="title" class="input" type="text" autocomplete="off" :placeholder="$t(`bv. Bestel je wafels`)">
+        <STInputBox error-fields="meta.title" :error-box="errors.errorBox" :title="$t(`cbe7db4a-b65b-452b-a5d2-d369182fd28f`)">
+            <input v-model="title" class="input" type="text" autocomplete="off" :placeholder="$t(`4915968a-8d8d-4632-8ad8-27965c3e3dba`)">
         </STInputBox>
 
-        <STInputBox error-fields="meta.description" :error-box="errors.errorBox" class="max" :title="$t(`Beschrijving`)">
-            <WYSIWYGTextInput v-model="description" :color="color || defaultColor" :placeholder="$t(`Beschrijving die op jouw webshop staat`)" />
+        <STInputBox error-fields="meta.description" :error-box="errors.errorBox" class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
+            <WYSIWYGTextInput v-model="description" :color="color || defaultColor" :placeholder="$t(`8cc2eb71-2a22-4a82-9a60-33c91dc9a829`)" />
         </STInputBox>
 
-        <hr><h2>{{ $t('Layout') }}</h2>
+        <hr><h2>{{ $t('cdd1fd85-1c4e-416b-b166-48a4ee6ee51f') }}</h2>
 
         <STList>
             <STListItem :selectable="true" element-name="label" class="left-center">
@@ -18,10 +18,10 @@
                     <Radio v-model="layout" :value="WebshopLayout.Split" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Naast elkaar') }}
+                    {{ $t('672ceeaf-53d2-4281-8e0d-05eaea6a614a') }}
                 </h3>
                 <p class="style-description">
-                    {{ $t('Indien er voldoende plaats is. Meerdere artikels worden in lijstweergave getoond.') }}
+                    {{ $t('18444ea0-bbae-4acb-bf53-71df2badf2fb') }}
                 </p>
             </STListItem>
             <STListItem :selectable="true" element-name="label" class="left-center">
@@ -29,26 +29,26 @@
                     <Radio v-model="layout" :value="WebshopLayout.Default" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Onder elkaar') }}
+                    {{ $t('4179cc8f-b7a1-4b19-ab06-3187eb699023') }}
                 </h3>
                 <p class="style-description">
-                    {{ $t('Meerdere artikels worden in vakjes getoond, indien er voldoende plaats is.') }}
+                    {{ $t('e38aa6c0-8d5c-4eea-8a7e-491ce22c4b98') }}
                 </p>
             </STListItem>
         </STList>
 
         <hr><h2 class="style-with-button">
-            <div>{{ $t('Omslagfoto') }}</div>
+            <div>{{ $t('b8a111c0-5f3d-480b-833a-6d7f05bf134d') }}</div>
             <div>
                 <button v-if="coverPhoto" type="button" class="button text only-icon-smartphone" @click="coverPhoto = null">
                     <span class="icon trash" />
-                    <span>{{ $t('Verwijderen') }}</span>
+                    <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
                 </button>
-                <UploadButton v-model="coverPhoto" :text="coverPhoto ? $t(`Vervangen`) : $t(`Uploaden`)" :resolutions="hs" />
+                <UploadButton v-model="coverPhoto" :text="coverPhoto ? $t(`b7c71a71-9523-4748-a6cd-80b9314b05b2`) : $t(`5be27263-6804-4f1c-92b0-f20cdacc141b`)" :resolutions="hs" />
             </div>
         </h2>
 
-        <p>{{ $t('We raden aan om een foto van minstens 1600 pixels breed up te loaden. De foto zal volledig zichtbaar zijn, knip dus indien nodig bij voor het uploaden.') }}</p>
+        <p>{{ $t('fa7399a8-7628-49fd-b5b5-2dfa757494f6') }}</p>
 
         <figure v-if="coverPhotoSrc" class="webshop-banner">
             <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight">
@@ -57,54 +57,54 @@
         <EditPolicyBox v-for="policy in policies" :key="policy.id" :policy="policy" :validator="errors.validator" :error-box="errors.errorBox" @patch="patchPolicy(policy, $event)" @delete="deletePolicy(policy)" />
 
         <hr><h2 class="style-with-button">
-            <div>{{ $t('Externe links') }}</div>
+            <div>{{ $t('0ee815f9-8937-43f6-9332-83d5b80415c4') }}</div>
             <div>
                 <button type="button" class="button icon add" @click="addPolicy" />
             </div>
         </h2>
-        <p>{{ $t('Soms wil je ook jouw algemene voorwaarden, retourbeleid, contactformulier en privacyvoorwaarden op jouw webshop vermelden. Als je online betaalmethodes wilt gebruiken, kan dit noodzakelijk zijn. Deze links worden dan onderaan jouw webshop toegevoegd.') }}</p>
+        <p>{{ $t('602bda22-49ba-4460-b478-0f432c369102') }}</p>
 
         <p v-if="policies.length === 0" class="info-box">
-            {{ $t('Je hebt momenteel geen externe links toegevoegd.') }}
+            {{ $t('b639cbb2-6fd1-464e-aa2a-6e01c5d4d125') }}
         </p>
         <p v-if="policies.length > 0 && (organization?.meta.privacyPolicyFile || organization?.meta.privacyPolicyUrl)" class="warning-box">
-            {{ $t('De privacyvoorwaarden die je bij de algemene instellingen hebt ingesteld, worden niet weergegeven in deze webshop. Voeg deze ook toe als externe link als je dezelfde privacy voorwaarden op deze webshop wilt vermelden.') }}
+            {{ $t('63ec0782-6f98-480c-a150-b6e0870d49f4') }}
         </p>
 
-        <hr><h2>{{ $t('Kleuren') }}</h2>
+        <hr><h2>{{ $t('f1cf2763-71a1-4376-82c8-48509e573f8c') }}</h2>
         <p>
-            {{ $t('Je kan de hoofdkleur voor al je webshops instellen via de algemene instellingen → Personaliseren. Dan hoef je het niet voor elke webshop apart in te stellen. Het kleur hier invullen heeft enkel nut als je het bewust anders wilt instellen.') }}
+            {{ $t('2f311e82-a71b-4ef6-9902-715fb1a8486a') }}
         </p>
 
-        <ColorInput v-model="color" :validator="errors.validator" :required="false" :disallowed="['#FFFFFF']" :title="$t(`Hoofdkleur (optioneel)`)" :placeholder="$t(`Standaardkleur`)" />
+        <ColorInput v-model="color" :validator="errors.validator" :required="false" :disallowed="['#FFFFFF']" :title="$t(`d111d211-9cc2-48be-9c8f-9483dded7fef`)" :placeholder="$t(`d53646df-1caa-49a7-8181-22319561de36`)" />
         <p class="style-description-small">
-            {{ $t('Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om de kleur van je vereniging te behouden (bij algemene instellingen > personalisatie).') }}
+            {{ $t('c244a546-ac11-4aee-be3e-99b0b6079703') }}
         </p>
 
-        <STInputBox error-fields="meta.darkMode" :error-box="errors.errorBox" class="max" :title="$t(`Donkere mode`)">
+        <STInputBox error-fields="meta.darkMode" :error-box="errors.errorBox" class="max" :title="$t(`c199c994-944e-4bd6-91dd-b43b8883165d`)">
             <RadioGroup>
                 <Radio v-model="darkMode" :value="'Off'">
-                    {{ $t('Uit') }}
+                    {{ $t('a858109d-d5b8-447c-9288-ef496e118c9a') }}
                 </Radio>
                 <Radio v-model="darkMode" :value="'On'">
-                    {{ $t('Aan') }}
+                    {{ $t('17a71942-a3d7-4d19-97bb-307cabffc1d6') }}
                 </Radio>
                 <Radio v-model="darkMode" :value="'Auto'">
-                    {{ $t('Automatisch') }}
+                    {{ $t('674bcea5-c383-4cdb-a6ae-bf9330a97f45') }}
                 </Radio>
             </RadioGroup>
         </STInputBox>
         <p v-if="darkMode !== 'Off'" class="style-description-small">
-            {{ $t('Test zeker het contrast van jouw gekozen kleur en logo als je voor een donkere modus kiest.') }}
+            {{ $t('ca3f89e1-c922-496a-992e-82919c959b80') }}
         </p>
 
-        <hr><h2>{{ $t('Logo') }}</h2>
+        <hr><h2>{{ $t('d101ec4a-219f-4f23-afa0-e8dc4862c354') }}</h2>
         <p>
-            {{ $t('Je kan een logo voor al je webshops instellen via de algemene instellingen > personalisatie. Dan hoef je het niet voor elke webshop apart in te stellen.') }}
+            {{ $t('89e0fd6e-3069-41d8-8e2b-74caf363b956') }}
         </p>
 
         <Checkbox v-model="useLogo">
-            {{ $t('Logo van vereniging gebruiken') }}
+            {{ $t('d8662e1d-2f43-4342-91de-ef9a44cf3e86') }}
         </Checkbox>
 
         <LogoEditor v-if="!useLogo" :meta-data="webshop.meta" :validator="errors.validator" :dark-mode="darkMode" @patch="addMetaPatch" />
@@ -114,7 +114,7 @@
 
             <p class="style-button-bar">
                 <button type="button" class="button text" @click="previewTicket">
-                    <span class="icon eye" /><span>{{ $t('Ticketvoorbeeld') }}</span>
+                    <span class="icon eye" /><span>{{ $t('d23266af-9e15-4e53-8863-4e3fa7c53fd0') }}</span>
                 </button>
             </p>
         </template>

@@ -10,7 +10,7 @@
                 {{ checkboxLabel }}
             </Checkbox>
             <p class="style-description-small">
-                {{ $t('Dit lid heeft recht op het kansentarief van de UiTPAS.') }}
+                {{ $t('dd49cb08-cb38-44c1-9c4f-c339b2d9254e') }}
             </p>
         </template>
         <Checkbox v-else v-model="requiresFinancialSupport" :indeterminate="!dataPermissionsChangeDate">
@@ -18,8 +18,8 @@
         </Checkbox>
 
         <p v-if="!willMarkReviewed && dataPermissionsChangeDate" class="style-description-small">
-            {{ $t('Laatst nagekeken op') }} {{ formatDate(dataPermissionsChangeDate) }}. <button type="button" class="inline-link" :v-tooltip="$t('Het lid zal deze stap terug moeten doorlopen via het ledenportaal')" @click="clear">
-                {{ $t('Wissen') }}
+            {{ $t('78dedb37-a33d-4907-8034-43345eea18a0') }} {{ formatDate(dataPermissionsChangeDate) }}. <button type="button" class="inline-link" :v-tooltip="$t('1452c1a3-6203-4ab2-92c4-c0496661cd21')" @click="clear">
+                {{ $t('74366859-3259-4393-865e-9baa8934327a') }}
             </button>.
         </p>
 
@@ -39,7 +39,7 @@
                 {{ checkboxLabel }}
             </Checkbox>
             <p class="style-description-small">
-                {{ $t('Je hebt recht op het kansentarief van de UiTPAS.') }}
+                {{ $t('bc81421d-f016-4cdd-9757-c5efc6607295') }}
             </p>
         </template>
         <Checkbox v-else v-model="requiresFinancialSupport" :disabled="hasKansenTarief">

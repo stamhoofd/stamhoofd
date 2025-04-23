@@ -1,13 +1,13 @@
 <template>
     <form class="st-view" @submit.prevent="goNext">
-        <STNavigationBar :title="$t(`Functies uitproberen`)" />
+        <STNavigationBar :title="$t(`69ea4d40-e84c-4c40-b344-0d1c82e4af42`)" />
 
         <main>
             <h1>
-                {{ $t('Kies de functies die je wilt uitproberen') }}
+                {{ $t('deb8b290-d12c-4fa5-827c-fc24decabbba') }}
             </h1>
             <p>
-                {{ $t('Test de functies eerst rustig uit voor je beslist om een pakket te kopen. Je hoeft geen betaalgegevens in te geven.') }}
+                {{ $t('167706de-e695-4695-95d6-662dd10c2a46') }}
             </p>
 
             <ModuleSettingsBox />
@@ -15,11 +15,11 @@
 
         <STToolbar>
             <template #left>
-                {{ $t('Je kan later deze functies wijzigingen via het instellingen menu.') }}
+                {{ $t('d11410bc-d04e-4145-a59e-75c0db0fc04f') }}
             </template>
             <template #right>
                 <button class="button primary" type="submit">
-                    {{ $t('Aan de slag') }}
+                    {{ $t('e859a41b-e10b-4eac-a594-83decf3927c2') }}
                 </button>
             </template>
         </STToolbar>

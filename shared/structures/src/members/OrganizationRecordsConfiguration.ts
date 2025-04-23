@@ -134,15 +134,15 @@ export class DataPermissionsSettings extends AutoEncoder {
     }
 
     static get defaultTitle() {
-        return $t(`Toestemming verzamelen gevoelige gegevens`);
+        return $t(`75398f88-8d64-47e9-8d8f-627af69052db`);
     }
 
     static get defaultCheckboxLabel() {
-        return $t(`Ik geef toestemming om gevoelige gegevens te verzamelen en te verwerken. Hoe we met deze gegevens omgaan staat vermeld in ons privacybeleid.`);
+        return $t(`b3c24a8b-6dbd-43c5-927e-34d362b30bbe`);
     }
 
     static get defaultWarningText() {
-        return $t(`Geen toestemming om gevoelige gegevens te verzamelen`);
+        return $t(`197cf20f-2759-45a0-a7ea-016ab11a6f10`);
     }
 
     static get defaultCheckboxWarning() {

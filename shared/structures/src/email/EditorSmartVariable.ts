@@ -78,69 +78,69 @@ export class EditorSmartVariable extends AutoEncoder {
         const variables = [
             EditorSmartVariable.create({
                 id: 'greeting',
-                name: $t(`Begroeting`),
+                name: $t(`281d013c-485d-4592-88bf-6518774795c8`),
             }),
             EditorSmartVariable.create({
                 id: 'firstName',
-                name: $t(`Voornaam`),
-                deleteMessage: $t(`De voornaam van één of meerdere ontvangers ontbreekt in het systeem. De magische tekstvervanging voor de voornaam is daarom weggehaald.`),
+                name: $t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`),
+                deleteMessage: $t(`90f2e835-e3a0-4ea9-bf5d-36d97ccab5f4`),
             }),
             EditorSmartVariable.create({
                 id: 'lastName',
-                name: $t(`Achternaam`),
-                deleteMessage: $t(`De achternaam van één of meerdere ontvangers ontbreekt in het systeem. De magische tekstvervanging voor de achteraam is daarom weggehaald.`),
+                name: $t(`171bd1df-ed4b-417f-8c5e-0546d948469a`),
+                deleteMessage: $t(`7e7a5858-0252-45f7-b740-346d81bed6a9`),
             }),
             EditorSmartVariable.create({
                 id: 'email',
-                name: $t(`E-mailadres ontvanger`),
+                name: $t(`4e95caa9-bc2d-4772-80b2-624c42216c90`),
             }),
             EditorSmartVariable.create({
                 id: 'fromAddress',
-                name: $t(`E-mailadres verstuurder`),
+                name: $t(`80812624-3d10-48b1-b897-90609b35b403`),
             }),
             EditorSmartVariable.create({
                 id: 'fromName',
-                name: $t(`Naam verstuurder`),
+                name: $t(`ed36b1bc-ab02-471d-9754-9d9be0fa791f`),
             }),
             EditorSmartVariable.create({
                 id: 'firstNameMember',
-                name: $t(`Voornaam van lid`),
-                deleteMessage: $t(`Je kan de voornaam van een lid enkel gebruiken als je één e-mail per lid verstuurt.`),
+                name: $t(`9c0921f0-1c1e-4318-9621-7137c7a3bc98`),
+                deleteMessage: $t(`eb7d2233-b02c-44b6-983c-d7fdb6ef1fa1`),
             }),
             EditorSmartVariable.create({
                 id: 'lastNameMember',
-                name: $t(`Achternaam van lid`),
-                deleteMessage: $t(`Je kan de achternaam van een lid enkel gebruiken als je één e-mail per lid verstuurt.`),
+                name: $t(`3fe55cf3-7c12-4b03-adce-14f99749a7af`),
+                deleteMessage: $t(`1534ebf6-e8d3-44e8-ab86-7ebcaac62156`),
             }),
             EditorSmartVariable.create({
                 id: 'inviterName',
-                name: $t(`Naam van uitnodiger`),
+                name: $t(`be6cb896-09ec-4066-a4bd-c16eafd0fa67`),
             }),
             EditorSmartVariable.create({
                 id: 'platformOrOrganizationName',
-                name: $t(`Naam van de vereniging of van het platform`),
+                name: $t(`b7298a1c-aba3-4839-a7e0-b0e390d07476`),
             }),
             EditorSmartVariable.create({
                 id: 'outstandingBalance',
-                name: $t(`Openstaand bedrag`),
-                deleteMessage: $t(`Je kan het openstaand bedrag van een lid enkel gebruiken als je één e-mail per lid verstuurt.`),
+                name: $t(`40d7ac9f-f62d-4a9d-8b2f-5fcfb938c12f`),
+                deleteMessage: $t(`8376c638-2c84-4710-9d85-84f1b0fa8ae9`),
             }),
             EditorSmartVariable.create({
                 id: 'registerUrl',
-                name: $t(`Inschrijvingsportaal link`),
+                name: $t(`4ee07a18-6061-484a-94ea-6d2f950f0f34`),
             }),
             EditorSmartVariable.create({
                 id: 'resetUrl',
-                name: $t(`Voluit link om wachtwoord te herstellen`),
+                name: $t(`7c1bf6b8-6133-4e88-9603-43ae0f91b018`),
             }),
             EditorSmartVariable.create({
                 id: 'confirmEmailCode',
-                name: $t(`Code om e-mail te bevestigen`),
+                name: $t(`0c009c51-7145-431c-b41d-60ed8d0e832f`),
             }),
             EditorSmartVariable.create({
                 id: 'loginDetails',
-                name: $t(`Inloggegevens`),
-                hint: $t(`Deze tekst wijzigt afhankelijk van de situatie: als de ontvanger nog geen account heeft, vertelt het op welk e-mailadres de ontvanger kan registreren. In het andere geval op welk e-mailadres de ontvanger kan inloggen.`),
+                name: $t(`6e4859e1-c98c-47df-a340-52e3b28ca53b`),
+                hint: $t(`dacb0698-1ea9-4ee8-b8ce-a2cb4e3ff01c`),
             }),
 
             EditorSmartVariable.create({
@@ -151,113 +151,113 @@ export class EditorSmartVariable extends AutoEncoder {
 
             EditorSmartVariable.create({
                 id: 'groupName',
-                name: $t(`Groepnaam`),
+                name: $t(`bc898c83-c02e-4ea2-a19f-80d2037c47b8`),
             }),
             EditorSmartVariable.create({
                 id: 'mailDomain',
-                name: $t(`E-maildomeinnaam`),
+                name: $t(`6c1f211b-5409-4e55-8ee9-f80badb919c2`),
             }),
         ];
 
         // if (this.orders.length > 0) {
         variables.push(EditorSmartVariable.create({
             id: 'nr',
-            name: $t(`Bestelnummer`),
+            name: $t(`4d496edf-0203-4df3-a6e9-3e58d226d6c5`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderPrice',
-            name: $t(`Bestelbedrag`),
+            name: $t(`f9dce2e6-4292-46f0-87cb-810375e88678`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderPrice',
-            name: $t(`Bestelbedrag`),
+            name: $t(`f9dce2e6-4292-46f0-87cb-810375e88678`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderStatus',
-            name: $t(`Bestelstatus`),
+            name: $t(`1e3b3563-93bf-4d5b-90e9-bbcbbbe1168f`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderTime',
-            name: $t(`Tijdstip`),
+            name: $t(`7853cca1-c41a-4687-9502-190849405f76`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderDate',
-            name: $t(`Afhaal/leverdatum`),
+            name: $t(`3c712881-ef26-474f-a431-dd1c74011260`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderMethod',
-            name: $t(`Afhaalmethode (afhalen, leveren, ter plaatse)`),
+            name: $t(`1dee5fbc-ed10-4290-be15-06839cb4672c`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderLocation',
-            name: $t(`Locatie of leveradres`),
+            name: $t(`de85a91b-0446-4fc5-9a3f-422d86ccde0e`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'paymentMethod',
-            name: $t(`Betaalmethode`),
+            name: $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'priceToPay',
-            name: $t(`Te betalen bedrag`),
+            name: $t(`495e591a-15f2-43f3-ba4f-f02598624f52`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'pricePaid',
-            name: $t(`Betaald bedrag`),
+            name: $t(`25c803f0-6b45-42aa-9b88-573e3706b8bb`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'transferDescription',
-            name: $t(`Mededeling (overschrijving)`),
+            name: $t(`a11d5bd4-71cc-4790-a15a-7e9ca0fc18e2`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'transferBankAccount',
-            name: $t(`Rekeningnummer (overschrijving)`),
+            name: $t(`f86209c8-b630-4906-867e-ef1e5a36b40a`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'transferBankCreditor',
-            name: $t(`Begunstigde (overschrijving)`),
+            name: $t(`ace46014-f3b5-4d9f-8ac1-4f5721bfdab2`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderTable',
-            name: $t(`Tabel met bestelde artikels`),
+            name: $t(`496c04a5-77a2-4683-a2b9-20d3bc78f40a`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'overviewTable',
-            name: $t(`Overzichtstabel`),
+            name: $t(`b510871b-dac3-4188-bfe1-f51ad7577432`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'balanceTable',
-            name: $t(`Tabel met openstaande bedragen`),
+            name: $t(`21b27a40-29f9-4cd7-ab26-76778466a6f1`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderDetailsTable',
-            name: $t(`Tabel met bestelgegevens`),
+            name: $t(`cb11c3ed-fb73-4461-bdbc-d7c044dbd47c`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'paymentTable',
-            name: $t(`Tabel met betaalinstructies`),
+            name: $t(`73bf7acd-90f4-4346-97e9-3d9415ca5952`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'overviewContext',
-            name: $t(`Betaalcontext`),
+            name: $t(`a62f0a8f-384b-403a-9bc3-c719ca3839cf`),
         }));
 
         variables.push(EditorSmartVariable.create({
@@ -272,27 +272,27 @@ export class EditorSmartVariable extends AutoEncoder {
 
         variables.push(EditorSmartVariable.create({
             id: 'objectName',
-            name: $t(`Naam schuldenaar`),
+            name: $t(`93cf7cea-7bb7-4ee5-83bb-7206bde4e7ae`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'webshopName',
-            name: $t(`Naam webshop`),
+            name: $t(`db8bcb81-74c5-4f08-a28a-b80aaf2e5ef5`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'validUntil',
-            name: $t(`Geldig tot`),
+            name: $t(`52ab641f-5864-4fac-8c52-0df00ad7e0a9`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'validUntilDate',
-            name: $t(`Geldig tot (datum)`),
+            name: $t(`47309919-e146-4405-b4f0-ad2c7c923d75`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'packageName',
-            name: $t(`Pakketnaam`),
+            name: $t(`1826aa80-c057-4739-911e-334e037348db`),
         }));
 
         variables.push(EditorSmartVariable.create({

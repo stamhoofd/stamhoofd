@@ -15,7 +15,7 @@
     <template v-else-if="!isNative">
         <a class="button text only-icon-smartphone" :href="'https://'+$domains.marketing+''" rel="noopener">
             <span class="icon external" />
-            <span>{{ $t('Terug naar website') }}</span>
+            <span>{{ $t('6de2861f-64bc-44fe-af80-5742c91d03d6') }}</span>
         </a>
 
         <a v-if="!isPlatform" class="button primary" href="/aansluiten" @click.prevent="$navigate('join')">

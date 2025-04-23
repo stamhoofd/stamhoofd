@@ -28,7 +28,7 @@
                 {{ name }}
                 <span v-if="ticket.getIndexText()" class="ticket-index">{{ ticket.getIndexText() }}</span>
             </h1>
-            <p v-if="isSingle && order" class="description" v-text="$t('Bestelling #')+order.number" />
+            <p v-if="isSingle && order" class="description" v-text="$t('1a2a842e-4f98-4818-911b-c9634aca4214')+order.number" />
             <p v-if="isSingle && order" class="description" v-text="order.data.customer.name" />
             <p v-if="cartItem.descriptionWithoutDate" class="description" v-text="cartItem.descriptionWithoutDate" />
             <p v-if="changedSeatString" class="warning-box">
@@ -38,7 +38,7 @@
             <STList>
                 <STListItem v-if="cartItem.product.location">
                     <h3 class="style-definition-label">
-                        {{ $t('Locatie') }}
+                        {{ $t('7eec15d0-4d60-423f-b860-4f3824271578') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ cartItem.product.location.name }}
@@ -59,14 +59,14 @@
                         </div>
                     </div>
                     <button class="button text" type="button" @click="showSeats">
-                        <span>{{ $t('Toon op zaalplan') }}</span>
+                        <span>{{ $t('cf0f413b-04c9-458a-b33d-12a72f6f24a6') }}</span>
                         <span class="icon arrow-right-small" />
                     </button>
                 </STListItem>
 
                 <STListItem v-if="cartItem.product.dateRange">
                     <h3 class="style-definition-label">
-                        {{ $t('Wanneer?') }}
+                        {{ $t('13081716-3941-44b8-87b4-398ab2288419') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDateRange(cartItem.product.dateRange) }}
@@ -75,7 +75,7 @@
 
                 <STListItem v-if="price">
                     <h3 class="style-definition-label">
-                        {{ $t('Prijs') }}
+                        {{ $t('52bff8d2-52af-4d3f-b092-96bcfa4c0d03') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(price) }}
@@ -88,7 +88,7 @@
             <template #right>
                 <button class="button primary" type="button" @click="download">
                     <span class="icon download" />
-                    <span>{{ $t('Opslaan') }}</span>
+                    <span>{{ $t('a103aa7c-4693-4bd2-b903-d14b70bfd602') }}</span>
                 </button>
             </template>
         </STToolbar>

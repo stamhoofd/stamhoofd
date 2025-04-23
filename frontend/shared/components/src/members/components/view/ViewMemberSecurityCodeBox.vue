@@ -1,12 +1,12 @@
 <template>
     <div v-if="securityCode" class="hover-box container">
         <hr><h2 class="style-with-button">
-            <div>{{ $t('Beveiligingscode') }}</div>
+            <div>{{ $t('ba5f8036-1788-408a-8c44-1db80a53c087') }}</div>
             <div v-if="shouldShowResetSecurityCode">
                 <button type="button" class="button icon retry hover-show" @click="renewSecurityCode" />
             </div>
         </h2>
-        <p>{{ $t('Gebruik deze code om een account toegang te geven tot dit lid als hun e-mailadres nog niet in het systeem zit. Deze staat ook altijd onderaan alle e-mails naar leden/ouders.') }}</p>
+        <p>{{ $t('5b035b31-579b-4d02-bce7-23e500e4fe9d') }}</p>
 
         <p class="style-description">
             <code v-copyable class="style-inline-code style-copyable">{{ Formatter.spaceString(securityCode, 4, '\u2011') }}</code>

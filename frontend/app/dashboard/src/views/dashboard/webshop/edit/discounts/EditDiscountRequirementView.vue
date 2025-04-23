@@ -1,28 +1,28 @@
 <template>
     <SaveView :title="isNew ? $t(`Kortingvoorwaarde toevoegen`) : $t(`Kortingvoorwaarde bewerken`)" :disabled="!hasChanges && !isNew" class="product-edit-view" @save="save">
         <h1 v-if="isNew">
-            {{ $t('Kortingvoorwaarde toevoegen') }}
+            {{ $t('771a87bb-4032-4cd4-967c-a145134f0b0a') }}
         </h1>
         <h1 v-else>
-            {{ $t('Kortingvoorwaarde bewerken') }}
+            {{ $t('8e2090b0-e2e4-4553-b41a-2cd1b4e44f61') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <ProductSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="errors.validator" @patch="patchProductSelector" />
 
-        <STInputBox error-fields="amount" :error-box="errors.errorBox" class="max" :title="$t(`Aantal`)">
+        <STInputBox error-fields="amount" :error-box="errors.errorBox" class="max" :title="$t(`697df3e7-fbbf-421d-81c2-9c904dce4842`)">
             <NumberInput v-model="amount" :min="1" :stepper="true" />
         </STInputBox>
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('Verwijder deze voorwaarde') }}
+                {{ $t('4fc6f5f9-be3e-4e52-84d1-7f68f6a02468') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('Verwijderen') }}</span>
+                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
             </button>
         </div>
     </SaveView>

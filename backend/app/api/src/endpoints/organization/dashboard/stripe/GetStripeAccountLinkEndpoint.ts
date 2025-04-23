@@ -57,7 +57,7 @@ export class GetStripeAccountLinkEndpoint extends Endpoint<Params, Query, Body, 
         // Search account in database
         const model = await StripeAccount.getByID(request.body.accountId);
         if (!model || model.organizationId !== organization.id || model.status !== 'active') {
-            throw Context.auth.notFoundOrNoAccess($t(`Account niet gevonden`));
+            throw Context.auth.notFoundOrNoAccess($t(`e5f6d64c-b3fe-4c8a-a711-ebdb14098c98`));
         }
 
         // Get account

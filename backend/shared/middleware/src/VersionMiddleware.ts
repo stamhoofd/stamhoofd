@@ -50,7 +50,7 @@ export class VersionMiddleware implements RequestMiddleware, ResponseMiddleware 
                     code: 'client_update_required',
                     statusCode: 400,
                     message: 'Er is een noodzakelijke update beschikbaar. Herlaad de pagina en wis indien nodig de cache van jouw browser.',
-                    human: $t(`Er is een noodzakelijke update beschikbaar. Herlaad de pagina en wis indien nodig de cache van jouw browser.`),
+                    human: $t(`adb0e7c8-aed7-43f5-bfcc-a350f03aaabe`),
                 });
             }
             else {
@@ -58,7 +58,7 @@ export class VersionMiddleware implements RequestMiddleware, ResponseMiddleware 
                     code: 'client_update_required',
                     statusCode: 400,
                     message: 'Er is een noodzakelijke update beschikbaar. Update de app en probeer opnieuw!',
-                    human: $t(`Er is een noodzakelijke update beschikbaar. Update de app en probeer opnieuw!`),
+                    human: $t(`81f98449-1a82-4cd3-bde3-16bb58f75fb1`),
                 });
             }
         }

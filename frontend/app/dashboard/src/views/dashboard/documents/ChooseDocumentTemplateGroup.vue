@@ -1,22 +1,22 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t(`Inschrijvingsgroep`)" />
+        <STNavigationBar :title="$t(`f52db2d7-c0f5-4f9c-b567-62f657787339`)" />
 
         <main>
-            <h1>{{ $t('Kies voor welke inschrijvingen je dit document wilt aanmaken') }}</h1>
+            <h1>{{ $t('7f721fa4-ed71-42d7-a92d-6a11abc3cb0f') }}</h1>
 
             <SegmentedControl v-model="selectedTab" :items="tabs.map(t => t.id)" :labels="tabs.map(t => t.label)" />
 
             <div v-if="selectedTab === Tab.Activities" class="input-with-buttons">
                 <div>
                     <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`Zoeken`)">
+                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`01e2b860-7045-4a0c-84ca-2303346d14b2`)">
                     </form>
                 </div>
                 <div>
                     <button type="button" class="button text" @click="editFilter">
                         <span class="icon filter" />
-                        <span class="hide-small">{{ $t('Filter') }}</span>
+                        <span class="hide-small">{{ $t('de5706ec-7edc-4e62-b3f7-d6e414720480') }}</span>
                         <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary" />
                     </button>
                 </div>
@@ -53,7 +53,7 @@
                     </STList>
                 </div>
 
-                <hr><h2>{{ $t('Archief') }}</h2>
+                <hr><h2>{{ $t('c51b35d1-228b-4ce3-8b27-312b5620b662') }}</h2>
                 <Spinner v-if="loadingGroups" />
                 <STList v-else-if="archivedGroups.length">
                     <STListItem v-for="group in archivedGroups" :key="group.id" :selectable="true" @click="selectGroup(group)">
@@ -74,7 +74,7 @@
                     </STListItem>
                 </STList>
                 <p v-else class="info-box">
-                    {{ $t('Het archief is leeg.') }}
+                    {{ $t('e523c2e2-3b75-477f-957f-2392b8df82f8') }}
                 </p>
             </template>
 
@@ -82,7 +82,7 @@
                 <STList>
                     <EventRow v-for="event of fetcher.objects" :key="event.id" :event="event" @click="selectGroup(event.group!)" />
                 </STList>
-                <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`Geen activiteiten gevonden`)" />
+                <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`2a4caf43-3e88-45b6-b337-4c7036130769`)" />
             </template>
         </main>
     </div>

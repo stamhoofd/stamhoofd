@@ -44,7 +44,7 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
             throw new SimpleError({
                 code: 'invalid_fields',
                 message: 'Invalid token or id',
-                human: $t(`Deze link is vervallen. Probeer het opnieuw in een recentere e-mail`),
+                human: $t(`ceacb5a8-7777-4366-abcb-9dd90ffb832e`),
             });
         }
 

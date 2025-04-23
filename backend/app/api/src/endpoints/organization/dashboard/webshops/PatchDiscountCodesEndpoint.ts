@@ -66,7 +66,7 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
                         throw new SimpleError({
                             code: 'used_code',
                             message: 'Discount code already in use',
-                            human: $t(`Er bestaat al een kortingscode met de code`) + ' ' + struct.code + $t(`, een code moet uniek zijn.`),
+                            human: $t(`d8cf1267-28dd-4d70-9f5f-1ed800729f6d`) + ' ' + struct.code + $t(`9145b0bf-8539-4ddc-8867-859f8716f026`),
                         });
                     }
                     throw e;
@@ -98,7 +98,7 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
                         throw new SimpleError({
                             code: 'used_code',
                             message: 'Discount code already in use',
-                            human: $t(`Er bestaat al een kortingscode met de code`) + ' ' + model.code + $t(`, een code moet uniek zijn.`),
+                            human: $t(`d8cf1267-28dd-4d70-9f5f-1ed800729f6d`) + ' ' + model.code + $t(`9145b0bf-8539-4ddc-8867-859f8716f026`),
                         });
                     }
                     throw e;

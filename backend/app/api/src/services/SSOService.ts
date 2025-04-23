@@ -204,7 +204,7 @@ export class SSOService {
             throw new SimpleError({
                 code: 'invalid_user',
                 message: 'User not allowed to use this login method',
-                human: $t(`Je kan deze inlogmethode niet gebruiken`),
+                human: $t(`6180b5ee-b9c1-401d-89c1-c18d8ab77d74`),
                 statusCode: 400,
             });
         }
@@ -463,7 +463,7 @@ export class SSOService {
             return response;
         }
         catch (e) {
-            const message = (isSimpleError(e) || isSimpleErrors(e) ? e.getHuman() : $t(`Er ging iets mis.`));
+            const message = (isSimpleError(e) || isSimpleErrors(e) ? e.getHuman() : $t(`bcfb1217-01fa-4116-b0bc-54c8c6dae284`));
             console.error('Error in openID callback', e);
             return SSOServiceWithSession.getErrorRedirectResponse(session, message);
         }
@@ -574,7 +574,7 @@ export class SSOServiceWithSession {
                     throw new SimpleError({
                         code: 'invalid_user',
                         message: 'User not found: please log in with the same email address as the user you are trying to link',
-                        human: $t(`Je moet inloggen met hetzelfde e-mailadres als het account dat je probeert te koppelen`),
+                        human: $t(`3321ecb9-7600-498f-8ab9-b1625197804a`),
                         statusCode: 404,
                     });
                 }
@@ -628,7 +628,7 @@ export class SSOServiceWithSession {
                     throw new SimpleError({
                         code: 'error',
                         message: 'Could not generate token',
-                        human: $t(`Er ging iets mis bij het aanmelden`),
+                        human: $t(`f40ddd3d-a986-4ec1-9db8-32ec1376c4e8`),
                         statusCode: 500,
                     });
                 }
@@ -648,7 +648,7 @@ export class SSOServiceWithSession {
             return response;
         }
         catch (e) {
-            const message = (isSimpleError(e) || isSimpleErrors(e) ? e.getHuman() : $t(`Er ging iets mis.`));
+            const message = (isSimpleError(e) || isSimpleErrors(e) ? e.getHuman() : $t(`bcfb1217-01fa-4116-b0bc-54c8c6dae284`));
             console.error('Error in openID callback', e);
             return SSOServiceWithSession.getErrorRedirectResponse(session, message);
         }

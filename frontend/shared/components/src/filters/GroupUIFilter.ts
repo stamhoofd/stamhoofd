@@ -102,18 +102,18 @@ export class GroupUIFilter extends UIFilter {
         if (this.builder.wrapper) {
             const prefix: typeof flattened = [];
             prefix.push({
-                text: $t(`Heeft`) + ' ',
+                text: $t(`5773a11d-46bf-4348-89ef-ba20d0cb9868`) + ' ',
                 style: 'gray',
                 choices: [
                     {
                         id: 'false',
-                        text: $t(`Heeft`),
+                        text: $t(`5773a11d-46bf-4348-89ef-ba20d0cb9868`),
                         action: () => this.isInverted = false,
                         isSelected: () => this.isInverted === false,
                     },
                     {
                         id: 'true',
-                        text: $t(`Heeft geen`),
+                        text: $t(`65eb7250-4278-42c7-b147-87f6cde61674`),
                         action: () => this.isInverted = true,
                         isSelected: () => this.isInverted === true,
                     },
@@ -126,7 +126,7 @@ export class GroupUIFilter extends UIFilter {
             });
 
             prefix.push({
-                text: ' ' + $t(`waar`) + ' ',
+                text: ' ' + $t(`07c53e83-c928-425b-9c4a-c7c22f2a4152`) + ' ',
                 style: 'gray',
             });
 
@@ -139,7 +139,7 @@ export class GroupUIFilter extends UIFilter {
 
 export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
     builders: UIFilterBuilder[] = [];
-    name = $t(`complexe filtergroep`);
+    name = $t(`4b2f8d1c-ff27-470d-b452-809042fef818`);
     description = '';
     wrapFilter?: UIFilterWrapper | null;
     wrapper?: WrapperFilter;

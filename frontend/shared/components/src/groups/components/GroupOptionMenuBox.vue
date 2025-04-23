@@ -14,12 +14,12 @@
         </template>
 
         <template v-if="level === 1">
-            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
-                <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`Naam van dit menu`)">
+            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
+                <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`722de8c9-feea-4169-8c9d-3d945fc8c9f5`)">
             </STInputBox>
 
-            <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`Beschrijving`)">
-                <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`Optioneel. Meer info bij keuzes.`)" />
+            <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
+                <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`3a12fa06-088d-413d-a36d-b5a2afdfc504`)" />
             </STInputBox>
 
             <STList>
@@ -28,20 +28,20 @@
                         <Checkbox v-model="multipleChoice" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Meerkeuze') }}
+                        {{ $t('d95331fe-56b0-4423-b485-5f600b6ab49c') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t("Bij meerkeuze is het mogelijk om verschillende opties aan te duiden. In het andere geval moet er exact één keuze gemaakt worden (wil je het optioneel maken, voeg dan een optie 'Geen' toe).") }}
+                        {{ $t("f726843e-f724-4ea4-b783-bddbf0667148") }}
                     </p>
                 </STListItem>
             </STList>
 
             <hr><h2 class="style-with-button">
-                <div>{{ $t('Keuzes') }}</div>
+                <div>{{ $t('6c90965a-8334-43e6-8494-031e2932bc45') }}</div>
                 <div>
                     <button class="button text only-icon-smartphone" type="button" @click="addOption">
                         <span class="icon add" />
-                        <span>{{ $t('Keuze') }}</span>
+                        <span>{{ $t('6c80efa8-5658-4728-ba95-d0536fdd25bd') }}</span>
                     </button>
                 </div>
             </h2>
@@ -68,11 +68,11 @@
                     </p>
 
                     <p v-if="option.stock !== null" class="style-description-small">
-                        {{ $t('Nog {stock} beschikbaar', {stock: pluralText(option.getRemainingStock(group), 'stuk', 'stuks')}) }}
+                        {{ $t('dceceb1c-6d55-4a93-bf8f-85ba041786f4', {stock: pluralText(option.getRemainingStock(group), 'stuk', 'stuks')}) }}
                     </p>
 
                     <p v-if="option.maximum !== null && option.allowAmount" class="style-description-small">
-                        {{ $t('Maximaal {max} per inschrijving', {max: pluralText(option.maximum, 'stuk', 'stuks')}) }}
+                        {{ $t('b86dbc2f-9ec8-468c-9571-ca384f118c79', {max: pluralText(option.maximum, 'stuk', 'stuks')}) }}
                     </p>
 
                     <template #right>

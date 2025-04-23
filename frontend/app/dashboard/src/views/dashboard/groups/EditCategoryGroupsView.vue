@@ -9,39 +9,39 @@
         </h1>
 
         <p v-if="isRoot && enableActivities">
-            {{ $t('Voeg hier alle groepen toe waarin je jouw leden wilt onderverdelen in') }} {{ period.period.name }}{{ $t('. Je kan ook categorieën toevoegen: een categorie is puur voor de structuur, zo kan je bijvoorbeeld een categorie maken voor al je leeftijdsgroepen en één voor al je vrijwilligers.') }}
+            {{ $t('5ee6f9ee-1cae-4980-a7ee-c99804e36c10') }} {{ period.period.name }}{{ $t('b2fce682-83e3-4791-9ff2-cefd2652f2ee') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="!isRoot">
-            <STInputBox v-if="canDeleteOrRename" error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
-                <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`Naam van deze categorie`)">
+            <STInputBox v-if="canDeleteOrRename" error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
+                <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`bf6e5f68-2419-4001-b0bf-69b7c4685c26`)">
             </STInputBox>
             <Checkbox v-if="isPlatformAdmin" v-model="locked">
-                {{ $t('Vergrendel deze categorie (enkel zichtbaar voor platformbeheerders)') }}
+                {{ $t('3db755cd-7c47-4fbd-9797-d6ff859d9b7a') }}
                 <p class="style-description-small">
-                    {{ $t('Een vergrendelde categorie kan niet verwijderd of hernoemd worden. Enkel platformbeheerders kunnen een categorie vergrendelen of ontgrendelen (enkel jij ziet deze checkbox).') }}
+                    {{ $t('4d12a29e-53e8-4cd2-99b1-47cab4e22b44') }}
                 </p>
             </Checkbox>
         </template>
 
         <template v-if="enableActivities">
             <Checkbox v-if="categories.length === 0" v-model="limitRegistrations">
-                {{ $t('Een lid kan maar in één groep inschrijven') }}
+                {{ $t('177d07c8-0ee9-4b85-8363-5b8d0140134e') }}
             </Checkbox>
 
             <Checkbox v-if="!isRoot" v-model="isHidden">
-                {{ $t('Toon deze categorie enkel voor beheerders of leden met een functie') }}
+                {{ $t('b406b04f-42cc-4df4-97f5-2f265d21d4ca') }}
             </Checkbox>
 
             <p v-if="!isRoot && !isHidden && !isPublic" class="warning-box">
-                {{ $t('Een bovenliggende categorie is enkel zichtbaar voor beheerders, dus deze categorie is bijgevolg ook enkel zichtbaar voor beheerders.') }}
+                {{ $t('476c1b4f-4b37-420b-9b86-6793a2c0043c') }}
             </p>
         </template>
 
         <template v-if="categories.length > 0">
-            <hr><h2>{{ $t('Categorieën') }}</h2>
+            <hr><h2>{{ $t('cb83317b-713b-400c-a753-dc944ddf0351') }}</h2>
             <STList v-model="draggableCategories" :draggable="true">
                 <template #item="{item: category}">
                     <GroupCategoryRow :category="category" :period="patchedPeriod" :organization="organization" @patch:period="addPatch" />
@@ -50,9 +50,9 @@
         </template>
 
         <template v-if="groups.length > 0 || categories.length === 0">
-            <hr><h2>{{ $t('Groepen') }}</h2>
+            <hr><h2>{{ $t('edfc89fe-a16e-4789-bda9-1529f8a97f7c') }}</h2>
             <p v-if="categories.length > 0" class="error-box">
-                {{ $t('Je kan groepen niet combineren met categorieën op hetzelfde niveau. Verplaats deze groepen naar een categorie of verwijder ze.') }}
+                {{ $t('dbf164b2-e1d2-4c80-8011-a5d5ce3b2221') }}
             </p>
 
             <STList v-model="draggableGroups" :draggable="true">
@@ -65,33 +65,33 @@
         <p v-if="categories.length === 0">
             <button class="button text" type="button" @click="createGroup">
                 <span class="icon add" />
-                <span>{{ $t('Nieuwe groep') }}</span>
+                <span>{{ $t('f30e6b0a-9808-4f17-8d0b-11d9d86d12ff') }}</span>
             </button>
         </p>
         <p v-if="enableActivities">
             <button class="button text" type="button" @click="createCategory">
                 <span class="icon add" />
-                <span v-if="groups.length === 0">{{ $t('Nieuwe categorie') }}</span>
-                <span v-else>{{ $t('Opdelen in categorieën') }}</span>
+                <span v-if="groups.length === 0">{{ $t('97ddbaef-0a49-4b53-893d-4c77dad6f52b') }}</span>
+                <span v-else>{{ $t('14dcbad9-e83b-4ff9-8f39-2a059d4caaf5') }}</span>
             </button>
         </p>
 
         <div v-if="isRoot && auth.hasFullAccess()" class="container">
-            <hr><h2>{{ $t('Prullenmand inschrijvingsgroepen') }}</h2>
-            <p>{{ $t('Per ongeluk een inschrijvingsgroep verwijderd? Hier haal je de inschrijvingsgroep en daarbij horende leden terug.') }}</p>
+            <hr><h2>{{ $t('2a592a81-8fee-4011-8b41-83c4bcf17690') }}</h2>
+            <p>{{ $t('70b46ba6-abe4-42a1-a0ab-a1b5bfd68210') }}</p>
             <button type="button" class="button text" @click="openGroupTrash">
-                <span class="icon trash" /><span>{{ $t('Open prullenmand') }}</span>
+                <span class="icon trash" /><span>{{ $t('620629c5-5e45-4c6a-ae94-a841ef7387fe') }}</span>
             </button>
         </div>
 
         <div v-if="canDeleteOrRename && !isNew && !isRoot && enableActivities" class="container">
             <hr><h2>
-                {{ $t('Verwijder deze categorie') }}
+                {{ $t('e3ea7df6-8ebd-4bf9-a25e-6be3bfc29e57') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('Verwijderen') }}</span>
+                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
             </button>
         </div>
     </SaveView>

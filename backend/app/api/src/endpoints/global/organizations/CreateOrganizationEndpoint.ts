@@ -31,7 +31,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Not allowed',
-                human: $t(`Je kan geen vereniging aanmaken`),
+                human: $t(`a010c110-bf4e-4c12-a324-6b84c992e728`),
             });
         }
 
@@ -40,7 +40,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Should not be empty',
-                    human: $t(`Je bent de naam van je organisatie vergeten in te vullen`),
+                    human: $t(`3f37782a-c07f-457d-994f-f1cc075cff44`),
                     field: 'organization.name',
                 });
             }
@@ -48,7 +48,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Field is too short',
-                human: $t(`Kijk de naam van je organisatie na, deze is te kort. Vul eventueel aan met de gemeente.`),
+                human: $t(`0e82abec-5467-45d8-ba89-9b9fd10c085d`),
                 field: 'organization.name',
             });
         }
@@ -59,7 +59,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Field is too long',
-                human: $t(`De naam van de vereniging is te lang. Probeer de naam wat te verkorten en probeer opnieuw.`),
+                human: $t(`c4d225ea-8e41-4829-bf0c-bc04755492de`),
                 field: 'organization.name',
             });
         }
@@ -69,7 +69,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             throw new SimpleError({
                 code: 'name_taken',
                 message: 'An organization with the same name already exists',
-                human: $t(`Er bestaat al een vereniging met dezelfde naam. Voeg bijvoorbeeld de naam van je gemeente toe.`),
+                human: $t(`19e5262f-9dc1-40d9-b905-bda8462b6046`),
                 field: 'name',
             });
         }

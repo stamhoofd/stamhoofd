@@ -7,12 +7,12 @@
         </STNavigationBar>
 
         <main>
-            <h1>{{ $t('Leden') }}</h1>
+            <h1>{{ $t('97dc1e85-339a-4153-9413-cca69959d731') }}</h1>
 
             <template v-if="auth.hasFullAccess()">
                 <button v-if="canUpgradePeriod" type="button" class="menu-button button cta" @click="upgradePeriod">
                     <span class="icon flag" />
-                    <span>{{ $t('Schakel over naar') }} {{ newestPeriod.name }}</span>
+                    <span>{{ $t('b91fa8bc-9922-49c5-b773-5190b5103c25') }} {{ newestPeriod.name }}</span>
                 </button>
                 <button v-else-if="canSetDefaultPeriod" type="button" class="menu-button button cta" @click="setDefaultPeriod">
                     <span class="icon flag" />
@@ -23,13 +23,13 @@
             </template>
 
             <p v-if="tree.categories.length === 0" class="info-box">
-                {{ $t('Oeps, er zijn nog geen inschrijvingsgroepen gemaakt. Ga naar de instellingen en configureer jouw inschrijvingsgroepen.') }}
+                {{ $t('0289e748-906d-453a-b54f-dce6a0355da0') }}
             </p>
 
             <div v-if="tree.categories.length > 1" class="container">
                 <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.All) }" @click="$navigate(Routes.All)">
                     <span class="icon ul" />
-                    <span>{{ $t('Alle leden') }}</span>
+                    <span>{{ $t('379d43fb-034f-4280-bb99-ea658eaec729') }}</span>
                 </button>
             </div>
             <hr v-if="tree.categories.length > 1"><div v-for="(category, index) in tree.categories" :key="category.id" class="container">
@@ -37,7 +37,7 @@
                     <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Category, {properties: {category, period}}) }" @click="$navigate('category', {properties: {category, period}})">
                         <span :class="'icon ' + getCategoryIcon(category)" />
                         <span>{{ category.settings.name }}</span>
-                        <span v-if="isCategoryDeactivated(category)" class="icon error red right-icon" :v-tooltip="$t('Deze categorie is onzichtbaar voor leden omdat activiteiten niet geactiveerd is')" />
+                        <span v-if="isCategoryDeactivated(category)" class="icon error red right-icon" :v-tooltip="$t('24b0cf4b-a0be-4d8c-bd75-c04648cdf570')" />
                         <span v-else-if="category.groups.length || category.categories.length" class="button icon arrow-down-small right-icon rot" :class="{rot180: collapsed.isCollapsed(category.id)}" @click.stop="collapsed.toggle(category.id)" />
                     </button>
 

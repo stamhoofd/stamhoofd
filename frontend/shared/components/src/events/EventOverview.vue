@@ -26,10 +26,10 @@
                                 </template>
 
                                 <h2 class="style-title-list">
-                                    {{ $t('Ingeschreven leden') }}
+                                    {{ $t('ba230e6d-38eb-4bf4-9735-4249c96a95e9') }}
                                 </h2>
                                 <p class="style-description">
-                                    {{ $t('Bekijk, beheer, exporteer of e-mail ingeschreven leden.') }}
+                                    {{ $t('8063280c-a4d1-4acf-a54d-dff02e973909') }}
                                 </p>
                                 <template #right>
                                     <span v-if="event.group.getMemberCount() !== null" class="style-description-small">{{ formatInteger(event.group.getMemberCount()!) }}</span>
@@ -46,7 +46,7 @@
                                     {{ event.group.waitingList.settings.name }}
                                 </h2>
                                 <p class="style-description">
-                                    {{ $t('Bekijk leden op de wachtlijst') }}
+                                    {{ $t('8e8cd172-b1c4-4b9e-ad06-e99f5e40a645') }}
                                 </p>
                                 <template #right>
                                     <span v-if="event.group.waitingList.getMemberCount() !== null" class="style-description-small">{{ formatInteger(event.group.waitingList.getMemberCount()!) }}</span>
@@ -58,7 +58,7 @@
 
                     <div v-if="canWriteEvent" class="container">
                         <hr><h2>
-                            {{ $t('Instellingen') }}
+                            {{ $t('bab38c80-8ab6-4cb7-80c3-1f607057e45d') }}
                         </h2>
 
                         <STList class="illustration-list">
@@ -67,10 +67,10 @@
                                     <img src="@stamhoofd/assets/images/illustrations/flag.svg">
                                 </template>
                                 <h2 class="style-title-list">
-                                    {{ $t('Algemeen') }}
+                                    {{ $t('35757756-d817-419d-82dd-1ba14128af30') }}
                                 </h2>
                                 <p class="style-description">
-                                    {{ $t('Wijzig de naam, beschrijving, datum en beschikbaarheid.') }}
+                                    {{ $t('b95cfa13-c42d-4d2f-892b-d2fc4c4c9bd1') }}
                                 </p>
                                 <template #right>
                                     <span class="icon arrow-right-small gray" />
@@ -82,10 +82,10 @@
                                     <img src="@stamhoofd/assets/images/illustrations/list.svg">
                                 </template>
                                 <h2 class="style-title-list">
-                                    {{ $t('Inschrijvingsinstellingen') }}
+                                    {{ $t('269b5fdf-7cfc-46ed-84c9-40836ff5da9c') }}
                                 </h2>
                                 <p class="style-description">
-                                    {{ $t('Wijzig hoe leden kunnen inschrijven, de tarieven en de verzamelde gegevens.') }}
+                                    {{ $t('af4c5417-03ad-4997-b8e2-5ff3b47ac045') }}
                                 </p>
                                 <template #right>
                                     <span class="icon arrow-right-small gray" />
@@ -97,10 +97,10 @@
                                     <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
                                 </template>
                                 <h2 class="style-title-list">
-                                    {{ $t('E-mailsjablonen') }}
+                                    {{ $t('f0b50a39-d4fd-4f97-802d-a599b00030fd') }}
                                 </h2>
                                 <p class="style-description">
-                                    {{ $t('Wijzig de inhoud van automatische e-mails naar leden die zijn of worden ingeschreven voor deze activiteit.') }}
+                                    {{ $t('7c32440d-6a06-4a53-8522-b84c0227fbfe') }}
                                 </p>
                                 <template #right>
                                     <span class="icon arrow-right-small gray" />
@@ -112,7 +112,7 @@
                             </template>
                         </STList>
                     </div>
-                    <hr><h2>{{ $t('Link kopiëren') }}</h2>
+                    <hr><h2>{{ $t('cd9912f4-89a4-44ea-b8a0-40371a53b90a') }}</h2>
                     <p>{{ $t("40b31f32-5a02-488d-beb3-d987ea5c9315") }}</p>
 
                     <div class="input-with-buttons">
@@ -122,13 +122,13 @@
                         <div>
                             <button v-copyable="link" type="button" class="button text">
                                 <span class="icon copy" />
-                                <span class="hide-small">{{ $t('Kopiëren') }}</span>
+                                <span class="hide-small">{{ $t('b8e302b4-e30d-4892-9407-e72207d4c516') }}</span>
                             </button>
                         </div>
                     </div>
 
                     <template v-if="event.group && auth.canRegisterMembersInGroup(event.group)">
-                        <hr><h2>{{ $t('Handmatig leden inschrijven') }}</h2>
+                        <hr><h2>{{ $t('f4186487-551f-4268-b811-c2b31ace72d1') }}</h2>
 
                         <p v-if="organization && event.organizationId === organization.id">
                             {{ $t('3f4666f9-59b5-4a24-b1a7-9f820275c042') }}
@@ -143,7 +143,7 @@
                         <p class="style-button-bar">
                             <button class="button primary" type="button" @click="addMembers">
                                 <span class="icon add" />
-                                <span>{{ $t('Leden inschrijven') }}</span>
+                                <span>{{ $t('433a5c63-b0b9-4f04-962f-d84880701fd2') }}</span>
                             </button>
                         </p>
                     </template>

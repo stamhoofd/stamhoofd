@@ -349,13 +349,13 @@ export class LoadedPermissions {
     getDescription() {
         const stack: string[] = [];
         if (this.level === PermissionLevel.Read) {
-            stack.push($t(`alles lezen`));
+            stack.push($t(`d05c78a9-7bb6-4d16-9cf4-caa0f6401452`));
         }
         if (this.level === PermissionLevel.Write) {
-            stack.push($t(`alles bewerken`));
+            stack.push($t(`82d8ac16-2b4e-430f-8322-2c4610f93cad`));
         }
         if (this.level === PermissionLevel.Full) {
-            stack.push($t(`volledige toegang`));
+            stack.push($t(`d5c41a61-1870-4dff-9422-726f8e2a1227`));
         }
 
         for (const right of this.accessRights) {
@@ -365,9 +365,9 @@ export class LoadedPermissions {
         stack.push(...ResourcePermissions.getMapDescription(this.resources));
 
         if (stack.length === 0) {
-            return $t(`geen rechten`);
+            return $t(`6802d7c7-44d0-43d3-ab91-956ab5edc1f6`);
         }
 
-        return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' ' + $t(`en`) + ' '));
+        return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' '));
     }
 }

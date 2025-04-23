@@ -185,7 +185,7 @@ export class CheckoutStepsManager {
                             // Force a save if nothing changed (to fix timeSlot + updated data)
                             await this.goNext(id, navigate);
                         },
-                        saveText: $t(`Doorgaan`),
+                        saveText: $t(`c72a9ab2-98a0-4176-ba9b-86fe009fa755`),
                     });
                 },
                 validate: (checkout, webshop) => {
@@ -293,7 +293,7 @@ export class CheckoutStepsManager {
         if (!nextStep) {
             throw new SimpleError({
                 code: 'missing_config',
-                message: $t(`Er ging iets mis bij het ophalen van de volgende stap`),
+                message: $t(`177002eb-e9c8-4553-adff-0b3a034d5292`),
             });
         }
 

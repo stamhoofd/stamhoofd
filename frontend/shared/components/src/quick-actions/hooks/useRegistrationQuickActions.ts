@@ -45,7 +45,7 @@ export function useRegistrationQuickActions(): QuickActions {
     }
 
     async function checkAllMemberData(member: PlatformMember) {
-        await editMember(member, { title: $t(`Gegevens nakijken`) });
+        await editMember(member, { title: $t(`d14e4e63-c77d-44d9-b8d0-adf05e299303`) });
     }
 
     const activeMembers = computed(() => memberManager.family.members.filter(m => m.filterRegistrations({ currentPeriod: true, types: [GroupType.Membership] }).length > 0));
@@ -123,8 +123,8 @@ export function useRegistrationQuickActions(): QuickActions {
             if (!checkout.value.cart.isEmpty) {
                 arr.push({
                     illustration: cartSvg,
-                    title: $t(`Mandje afrekenen`),
-                    description: checkout.value.cart.price > 0 ? $t(`Betaal en bevestig je inschrijvingen.`) : $t(`Bevestig je inschrijvingen.`),
+                    title: $t(`ecdcc78a-f91f-42e5-92f9-636225616c4c`),
+                    description: checkout.value.cart.price > 0 ? $t(`ddff3e4b-56df-4279-8e91-b61011dfdb01`) : $t(`d73a6677-2a0d-456a-9c1a-85dccfc2c452`),
                     action: openCart,
                 });
             }
@@ -137,8 +137,8 @@ export function useRegistrationQuickActions(): QuickActions {
 
                 arr.push({
                     illustration: outstandingAmountSvg,
-                    title: $t(`Betaal jouw openstaand bedrag aan`) + ' ' + organizationStatus.organization.name,
-                    description: $t(`Je hebt een openstaand bedrag van`) + ' ' + Formatter.price(open) + ' ' + $t(`bij`) + ' ' + organizationStatus.organization.name + '',
+                    title: $t(`868011d2-7d0b-4739-955a-236d9cb6a39a`) + ' ' + organizationStatus.organization.name,
+                    description: $t(`6d5ed993-d9a6-4573-b838-adf3beaf17a5`) + ' ' + Formatter.price(open) + ' ' + $t(`4d72ebf2-dd5a-49cf-b5a0-dac956b6f2de`) + ' ' + organizationStatus.organization.name + '',
                     rightText: Formatter.price(open),
                     rightTextClass: 'style-price',
                     action: async () => {

@@ -3,7 +3,7 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
-        <p>{{ $t('Je kan groepen onderverdelen in een hiërachie via tags, verbonden, gewesten en/of gouwen. Elke groep kan meerdere tags krijgen volgens de regels die je instelt bij elke tag.') }}</p>
+        <p>{{ $t('a8a815a2-ab66-4734-9eb5-c0d139b22029') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -44,7 +44,7 @@ const originalTags = computed(() => platform.value.config.tags);
 const { patched: tags, patch, addArrayPatch, hasChanges } = usePatchArray(originalTags);
 const saving = ref(false);
 
-const title = $t(`Hiërachie`);
+const title = $t(`99fe8ee0-edaa-4f80-a0e9-d2b2d1a4845a`);
 
 const draggableTags = useDraggableArray(() => TagHelper.getRootTags(tags.value), addArrayPatch);
 
@@ -95,7 +95,7 @@ async function save() {
                 tags: patch.value,
             }),
         }));
-        new Toast($t(`De wijzigingen zijn opgeslagen`), 'success green').show();
+        new Toast($t(`17017abf-c2e0-4479-86af-300ad37347aa`), 'success green').show();
         await pop({ force: true });
     }
     catch (e) {

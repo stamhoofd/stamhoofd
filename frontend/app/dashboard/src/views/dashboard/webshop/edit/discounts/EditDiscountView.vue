@@ -1,32 +1,32 @@
 <template>
     <SaveView :title="isNew ? $t(`Korting toevoegen`) : $t(`Korting bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            {{ $t('Korting toevoegen') }}
+            {{ $t('46681ff6-bc40-4da6-9c3f-f8f335d72633') }}
         </h1>
         <h1 v-else>
-            {{ $t('Korting bewerken') }}
+            {{ $t('2e07e502-3239-4d75-bf62-ed65a619dfa7') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`Vast bedrag`)">
-                <PriceInput v-model="fixedDiscount" :min="0" :required="true" :placeholder="$t(`Vaste kost`)" />
+            <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`6811d233-19c2-4e32-9900-6f138d818588`)">
+                <PriceInput v-model="fixedDiscount" :min="0" :required="true" :placeholder="$t(`f67ccf42-d4a8-4fe6-b7dc-91f43726646e`)" />
             </STInputBox>
 
-            <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`Percentage`)">
-                <PermyriadInput v-model="percentageDiscount" :required="true" :placeholder="$t(`Percentage`)" />
+            <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`dd61d33b-367e-4e40-8ac6-84c286b931bc`)">
+                <PermyriadInput v-model="percentageDiscount" :required="true" :placeholder="$t(`dd61d33b-367e-4e40-8ac6-84c286b931bc`)" />
             </STInputBox>
         </div>
 
         <p class="style-description-small">
-            {{ $t('Deze kortingen worden op de volledige bestelling toegepast.') }}
+            {{ $t('f4350366-03b5-4d0f-8bd5-a03672e347f5') }}
         </p>
 
         <hr><h2>
-            {{ $t('Korting op specifieke artikels') }}
+            {{ $t('d4ee2fbb-f8a8-4497-ba1e-98aee9a4d979') }}
         </h2>
-        <p>{{ $t('Je kan een procentuele korting geven op bepaalde artikels, je kan één artikel gratis maken, je kan een korting per stuk geven op de eerste x aantal stuks (of alle stuks) van een artikel...') }}</p>
+        <p>{{ $t('9c89b752-8949-4fba-86f2-2da04c7a9485') }}</p>
 
         <STList v-if="patchedDiscount.productDiscounts.length">
             <STListItem v-for="productDiscount of patchedDiscount.productDiscounts" :key="productDiscount.id" class="right-description right-stack" :selectable="true" @click="editProductDiscount(productDiscount)">
@@ -49,14 +49,14 @@
         <p>
             <button class="button text" type="button" @click="addProductDiscount">
                 <span class="icon add" />
-                <span>{{ $t('Artikel toevoegen') }}</span>
+                <span>{{ $t('dfdcd5e4-c2a2-4667-b77b-435eef982693') }}</span>
             </button>
         </p>
 
         <hr><h2>
-            {{ $t('Artikelvoorwaarden') }}
+            {{ $t('17dd48e6-a63e-4c3c-9636-c9abd8ce429c') }}
         </h2>
-        <p>{{ $t('De korting wordt enkel toegepast als deze artikels met een bepaalde hoeveelheid aanwezig zijn in het winkelmandje. Hiermee kan je speciale kortingen bereiken waarbij je bijvoorbeeld korting geeft op een bepaald artikel als je eerst een ander artikel bestelt (bv. één drankkaart gratis als je 10 tickets bestelt).') }}</p>
+        <p>{{ $t('205c5904-64f1-4c90-9960-86bdccbafc7a') }}</p>
 
         <STList v-if="patchedDiscount.requirements.length">
             <STListItem v-for="requirement of patchedDiscount.requirements" :key="requirement.id" class="right-description right-stack" :selectable="true" @click="editRequirement(requirement)">
@@ -76,7 +76,7 @@
         <p>
             <button class="button text" type="button" @click="addRequirement">
                 <span class="icon add" />
-                <span>{{ $t('Artikelvoorwaarde toevoegen') }}</span>
+                <span>{{ $t('a00e405f-c19b-4ce6-aafc-eb55b0406d0d') }}</span>
             </button>
         </p>
 
@@ -87,22 +87,22 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Meerdere keren toepassen') }}
+                    {{ $t('9fced9b2-f88d-45e4-a789-b9488e6894c3') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Als de vereiste artikels meerdere keren aanwezig zijn, dan wordt de korting meerdere keren toegepast. Bijvoorbeeld als je korting op één artikel geeft op voorwaarde dat je eerst een ander artikel erbij bestelt.') }}
+                    {{ $t('dbcdd41b-c566-4356-9409-3668f1e7559a') }}
                 </p>
             </STListItem>
         </STList>
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('Verwijder deze korting') }}
+                {{ $t('f86309f9-1830-4aff-858c-a8b9d52053b4') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('Verwijderen') }}</span>
+                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
             </button>
         </div>
     </SaveView>

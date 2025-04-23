@@ -1,10 +1,10 @@
 <template>
     <div id="parent-view" class="st-view">
-        <STNavigationBar :title="$t(`Kies inschrijvingsgroepen`)" />
+        <STNavigationBar :title="$t(`508832fa-ae9f-4357-81d6-279c68e23ae0`)" />
 
         <main>
             <h1>
-                {{ $t('Kies één of meerdere inschrijvingsgroepen') }}
+                {{ $t('31aee3be-f11e-48f8-ba66-9b59f68a7ac8') }}
             </h1>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -26,7 +26,7 @@
             <template v-if="allowArchived">
                 <Spinner v-if="loadingGroups" />
                 <template v-else-if="archivedGroups.length">
-                    <hr><h2>{{ $t('Archief') }}</h2>
+                    <hr><h2>{{ $t('c51b35d1-228b-4ce3-8b27-312b5620b662') }}</h2>
 
                     <STList>
                         <STListItem v-for="group in archivedGroups" :key="group.id" :selectable="true" element-name="label" class="right-stack left-center">
@@ -42,7 +42,7 @@
             </template>
 
             <p v-if="categoryTree.categories.length === 0 && archivedGroups.length === 0 && !loadingGroups" class="info-box">
-                {{ $t('Geen inschrijvingsgroepen beschikbaar om te selecteren.') }}
+                {{ $t('8587ccc4-1b08-4bc1-b3e5-88989aa580cc') }}
             </p>
         </main>
 
@@ -50,7 +50,7 @@
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" @click="save">
-                        {{ $t('Opslaan') }}
+                        {{ $t('a103aa7c-4693-4bd2-b903-d14b70bfd602') }}
                     </button>
                 </LoadingButton>
             </template>

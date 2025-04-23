@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t(`Nieuw werkjaar`)" />
+        <STNavigationBar :title="$t(`b66376fb-238e-42dd-aec6-f48b9ee2e215`)" />
 
         <main>
             <h1>{{ period.name }}</h1>
@@ -8,10 +8,10 @@
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <ul class="style-list">
-                <li>{{ $t('De structuur van jouw leeftijdsgroepen blijft behouden, maar je moet zelf nog de prijs en datums goed zetten. Vergeet dit niet.') }}</li>
+                <li>{{ $t('11ad3320-726c-434b-938a-923f20c9c59c') }}</li>
                 <li>{{ $t('c5d21881-b70a-489e-bce9-5bb3d24b6f76') }}</li>
-                <li>{{ $t('Je kan nog steeds aan de gegevens van vorig jaar') }}</li>
-                <li>{{ $t('Alle leiding en leden verliezen hun functies en moet je opnieuw instellen') }}</li>
+                <li>{{ $t('0ab03598-06c3-433b-a8c6-39daa3aa16f1') }}</li>
+                <li>{{ $t('62536e62-9d62-429f-97d4-2605e738fc92') }}</li>
             </ul>
         </main>
 
@@ -19,7 +19,7 @@
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" @click="start">
-                        {{ $t('Starten') }}
+                        {{ $t('8e829200-f906-49c1-a17e-dbfb193ed9f9') }}
                     </button>
                 </LoadingButton>
             </template>

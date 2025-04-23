@@ -11,18 +11,18 @@
             <p v-if="members.length === 0" class="style-button-bar">
                 <button v-if="isAcceptingNewMembers" class="button primary" type="button" @click="registerMembers">
                     <span class="icon edit" />
-                    <span>{{ $t('Schrijf een lid in') }}</span>
+                    <span>{{ $t('d55c9b50-2f86-4e7a-b6a5-2f03c0fad4fa') }}</span>
                 </button>
 
                 <a :href="$domains.getDocs('mijn-account')" target="_blank" class="button text selected">
                     <span class="icon book" />
-                    <span>{{ $t('Hulp nodig?') }}</span>
+                    <span>{{ $t('b6994143-5a0c-424d-97b3-8b3cf96a3443') }}</span>
                 </a>
             </p>
             <p v-else class="style-button-bar">
                 <a :href="$domains.getDocs('mijn-account')" target="_blank" class="button text selected">
                     <span class="icon book" />
-                    <span>{{ $t('Hulp nodig?') }}</span>
+                    <span>{{ $t('b6994143-5a0c-424d-97b3-8b3cf96a3443') }}</span>
                 </a>
             </p>
 
@@ -30,7 +30,7 @@
 
             <div v-if="members.length > 0" class="container">
                 <hr><h2>
-                    {{ $t('Leden') }}
+                    {{ $t('97dc1e85-339a-4153-9413-cca69959d731') }}
                 </h2>
 
                 <STList class="illustration-list">
@@ -47,14 +47,14 @@
                         </p>
 
                         <p v-if="getRegistrationsForMember(member).length" class="style-description-small">
-                            {{ $t('Ingeschreven voor {groups}.', {groups: Formatter.joinLast(getRegistrationsForMember(member).map(r => r.group.settings.name), ', ', ' ' + $t('en') + ' ')}) }}
+                            {{ $t('f87072d0-0c87-4b31-9068-1471a5f5b3ca', {groups: Formatter.joinLast(getRegistrationsForMember(member).map(r => r.group.settings.name), ', ', ' ' + $t('6a156458-b396-4d0f-b562-adb3e38fc51b') + ' ')}) }}
                         </p>
                         <p v-else class="style-description-small">
-                            {{ $t('{member} is momenteel niet ingeschreven.', {member: member.patchedMember.firstName}) }}
+                            {{ $t('eb39138f-46b9-4005-b70f-dc1e0f3938f9', {member: member.patchedMember.firstName}) }}
                         </p>
 
                         <template #right>
-                            <span v-if="user && member.id === user.memberId" v-color="member" class="style-tag">{{ $t('Dit ben jij') }}</span>
+                            <span v-if="user && member.id === user.memberId" v-color="member" class="style-tag">{{ $t('c0736ebd-de06-4d78-a009-7fc4ba5096a8') }}</span>
                             <span class="icon gray arrow-right-small" />
                         </template>
                     </STListItem>
@@ -63,14 +63,14 @@
                 <footer class="style-button-bar">
                     <button class="button text" type="button" @click="addNewMember">
                         <span class="icon add" />
-                        <span>{{ $t('Nieuw gezinslid') }}</span>
+                        <span>{{ $t('22025c96-3f15-41c6-ab2c-0c5fcb3c5aa2') }}</span>
                     </button>
                 </footer>
             </div>
 
             <div v-if="members.length > 0" class="container">
                 <hr><h2>
-                    {{ $t('Acties') }}
+                    {{ $t('dc052084-eea5-407e-8775-237bf550895a') }}
                 </h2>
 
                 <STList class="illustration-list">
@@ -80,10 +80,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Lid inschrijven') }}
+                            {{ $t('21a07c40-5565-4ad3-bf7a-ca3237c6bcb0') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('Schrijf iemand in.') }}
+                            {{ $t('98edeedc-0a99-4fc0-904e-06dcba42f7e1') }}
                         </p>
 
                         <template #right>
@@ -97,10 +97,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Gegevens nakijken') }}
+                            {{ $t('d14e4e63-c77d-44d9-b8d0-adf05e299303') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('Pas gegevens aan en bekijk al jouw inschrijvingen.') }}
+                            {{ $t('60823584-6df5-4c99-9eca-c5e64d83a730') }}
                         </p>
 
                         <template #right>
@@ -114,10 +114,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Betalingen en openstaande rekening') }}
+                            {{ $t('6b83343a-5d29-4f59-8b44-db03eb0b3b13') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('Bekijk een overzicht van jouw recente betalingen en jouw openstaand bedrag.') }}
+                            {{ $t('e1ba3253-f0a0-41b0-95a0-3fc0abb44264') }}
                         </p>
 
                         <template #right>
@@ -129,7 +129,7 @@
 
             <div v-if="documents.length > 0" class="container">
                 <hr><h2>
-                    {{ $t('Documenten') }}
+                    {{ $t('a01ee6b1-f27f-4ad2-a87c-28bce4dedfbd') }}
                 </h2>
                 <STList>
                     <STListItem v-for="document of documents" :key="document.id" class="left-center hover-box member-registration-block" :selectable="true" @click="onDownloadDocument(document)">
@@ -142,7 +142,7 @@
                         <p class="style-description-small">
                             {{ document.data.description }}
                         </p>
-                        <span v-if="document.status === 'MissingData'" class="style-tag error">{{ $t('Onvolledig') }}</span>
+                        <span v-if="document.status === 'MissingData'" class="style-tag error">{{ $t('21b3891d-7c0e-49ca-ae35-d77d54e9f0c3') }}</span>
 
                         <template #right>
                             <LoadingButton :loading="isDocumentDownloading(document)">
@@ -205,7 +205,7 @@ defineRoutes([
                     member,
                 };
             }
-            Toast.error($t(`Lid niet gevonden`)).show();
+            Toast.error($t(`9cfa48c7-980c-4cd5-85ed-2656db040b4c`)).show();
             throw new Error('member not found');
         },
 
@@ -271,7 +271,7 @@ async function onDownloadDocument(document: Document) {
     }
     if (document.status === DocumentStatus.MissingData) {
         const member = members.value.find(m => m.id === document.memberId);
-        new Toast($t(`Dit document kan niet gedownload worden omdat er nog gegevens ontbreken of ongeldig zijn. Kijk alle gegevens van {name} na en contacteer ons indien het probleem nog niet is verholpen.`, { name: member?.member.firstName ?? $t(`dit lid`) }), 'error red').setHide(20000).show();
+        new Toast($t(`78a4c6c3-c0d0-457c-adfb-44122307161a`, { name: member?.member.firstName ?? $t(`dit lid`) }), 'error red').setHide(20000).show();
         return;
     }
     downloadingDocuments.value.push(document);

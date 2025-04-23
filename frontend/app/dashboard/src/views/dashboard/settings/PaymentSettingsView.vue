@@ -1,30 +1,30 @@
 <template>
-    <SaveView :loading="saving" :disabled="!hasChanges" :loading-view="loadingStripeAccounts" :title="$t(`Betaalmethodes`)" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChanges" :loading-view="loadingStripeAccounts" :title="$t(`12b644c9-c1a7-4930-afb2-79f62648d243`)" @save="save">
         <h1>
-            {{ $t('Betaalaccounts') }}
+            {{ $t('e8600ed0-ac82-4c0f-8719-bd91173d653f') }}
         </h1>
 
-        <p>{{ $t('Koppel betaalaccounts via') }} <a class="inline-link" :href="$domains.getDocs('stripe')" target="_blank">{{ $t('Stripe') }}</a> {{ $t('of') }} <a class="inline-link" :href="$domains.getDocs('payconiq')" target="_blank">{{ $t('Payconiq') }}</a>  {{ $t('om online betalingen te accepteren.') }} <a class="inline-link" :href="$domains.getDocs('tag/betaalmethodes')" target="_blank">{{ $t('Meer info') }}</a>.</p>
+        <p>{{ $t('a31eaafb-e2d1-4e41-8fa1-1c58a9bd585f') }} <a class="inline-link" :href="$domains.getDocs('stripe')" target="_blank">{{ $t('079c3c5d-b816-4adf-9287-6f5352a2cd81') }}</a> {{ $t('411cf334-eebb-4f27-beb6-d81bd544c3f5') }} <a class="inline-link" :href="$domains.getDocs('payconiq')" target="_blank">{{ $t('8f39177b-f214-4f23-82ab-329c66ae731a') }}</a>  {{ $t('e06250b5-6d74-4690-8837-a4455aa9e44d') }} <a class="inline-link" :href="$domains.getDocs('tag/betaalmethodes')" target="_blank">{{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}</a>.</p>
 
         <STErrorsDefault :error-box="errorBox" />
 
         <template v-if="isBuckarooActive">
             <hr><h2>
-                {{ $t('Online betalingen via Buckaroo') }}
+                {{ $t('c9431f00-2628-4dae-9ed9-97729821c025') }}
             </h2>
 
             <p v-if="isBuckarooActive" class="success-box">
-                {{ $t('Online betalingen zijn geactiveerd voor de volgende betaalmethodes:') }} {{ buckarooPaymentMethodsString }}
+                {{ $t('faa806d2-f6d7-426f-81c9-f4172dda5c0d') }} {{ buckarooPaymentMethodsString }}
             </p>
         </template>
 
         <p v-if="hasDuplicateNames" class="warning-box">
-            {{ $t('Sommige van jouw Stripe accounts gebruiken dezelfde weergavenaam. Je past deze best aan zodat je later verwarring vermijdt.') }}
+            {{ $t('a351a6c6-9694-417f-aa91-985470aa0956') }}
         </p>
 
         <div v-for="account in stripeAccounts" :key="account.id" class="container">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('Stripe account') }} <span class="title-suffix">{{ account.accountId }}</span></div>
+                <div>{{ $t('2be4de1c-159a-4767-b461-3ba0f67877d7') }} <span class="title-suffix">{{ account.accountId }}</span></div>
                 <div>
                     <button type="button" class="button icon edit gray" @click="editStripeAccount(account)" />
                 </div>
@@ -33,14 +33,14 @@
             <p v-if="account.warning" :class="account.warning.type + '-box'">
                 {{ account.warning.text }}
                 <a :href="$domains.getDocs('documenten-stripe-afgekeurd')" target="_blank" class="button text">
-                    {{ $t('Meer info') }}
+                    {{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}
                 </a>
             </p>
 
             <STList class="info">
                 <STListItem v-if="account.meta.settings.dashboard.display_name">
                     <h3 class="style-definition-label">
-                        {{ $t('Weergavenaam') }}
+                        {{ $t('679776ce-4997-43cf-837a-0c7f5a70dcf1') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ account.meta.settings.dashboard.display_name }}
@@ -49,7 +49,7 @@
 
                 <STListItem v-if="account.meta.business_profile.name">
                     <h3 class="style-definition-label">
-                        {{ $t('Handelsnaam') }}
+                        {{ $t('88b65545-d735-450d-9441-ede25969f5f9') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ account.meta.business_profile.name }}
@@ -58,7 +58,7 @@
 
                 <STListItem v-if="account.meta.bank_account_last4">
                     <h3 class="style-definition-label">
-                        {{ $t('IBAN') }}
+                        {{ $t('6e40269e-10f8-4c19-804f-dac6ba75959b') }}
                     </h3>
                     <p class="style-definition-text">
                         xxxx {{ account.meta.bank_account_last4 }} ({{ account.meta.bank_account_bank_name }})
@@ -67,26 +67,26 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('Status') }}
+                        {{ $t('e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5') }}
                     </h3>
                     <p v-if="account.meta.charges_enabled && account.meta.payouts_enabled && !account.warning" class="style-definition-text">
-                        <span>{{ $t('Volledig') }}</span>
+                        <span>{{ $t('6f442433-dc3a-4500-918a-65e5776307fc') }}</span>
                         <span class="icon success primary" />
                     </p>
                     <p v-else-if="account.meta.charges_enabled && account.meta.payouts_enabled && account.warning" class="style-definition-text">
-                        <span>{{ $t('Geactiveerd') }}</span>
+                        <span>{{ $t('9631f5ce-dbb9-4463-b565-618446657ea2') }}</span>
                         <span class="icon clock gray" />
                     </p>
                     <p v-else-if="account.meta.charges_enabled && !account.meta.payouts_enabled" class="style-definition-text">
-                        <span>{{ $t('Uitbetalingen gepauzeerd') }}</span>
+                        <span>{{ $t('993b4fec-d7a4-4b8f-807a-f0343843e369') }}</span>
                         <span class="icon clock gray" />
                     </p>
                     <p v-else-if="!account.meta.charges_enabled && !account.meta.payouts_enabled && !account.meta.details_submitted" class="style-definition-text">
-                        <span>{{ $t('Onvolledig') }}</span>
+                        <span>{{ $t('21b3891d-7c0e-49ca-ae35-d77d54e9f0c3') }}</span>
                         <span class="icon red canceled" />
                     </p>
                     <p v-else-if="!account.meta.charges_enabled && !account.meta.payouts_enabled" class="style-definition-text">
-                        <span>{{ $t('Betalingen geblokkeerd') }}</span>
+                        <span>{{ $t('7d59ec07-4b73-441c-a679-426796f426e4') }}</span>
                         <span class="icon red canceled" />
                     </p>
                 </STListItem>
@@ -94,18 +94,18 @@
 
             <div class="style-button-bar">
                 <button v-if="!account.meta.charges_enabled || !account.meta.payouts_enabled || account.warning" type="button" class="button primary" :disabled="creatingStripeAccount" @click="openStripeAccountLink(account.id)">
-                    <span>{{ $t('Vervolledig gegevens') }}</span>
+                    <span>{{ $t('85cf8f92-6092-4546-a43e-f86319e80aa1') }}</span>
                     <span class="icon arrow-right" />
                 </button>
 
                 <button v-else type="button" class="button text" :disabled="creatingStripeAccount" @click="loginStripeAccount(account.id)">
                     <span class="icon external" />
-                    <span>{{ $t('Stripe Dashboard') }}</span>
+                    <span>{{ $t('89d0154d-edcb-4a56-b4d7-1c95c13c4fb1') }}</span>
                 </button>
 
                 <button v-if="account.canDelete || isStamhoofd" class="button text red" type="button" @click="deleteStripeAccount(account.id)">
                     <span class="icon trash" />
-                    <span>{{ $t('Verwijder') }}</span>
+                    <span>{{ $t('1bb244c4-6ffb-4969-91e6-ea70f16ac5a4') }}</span>
                 </button>
             </div>
         </div>
@@ -115,12 +115,12 @@
                 <LoadingButton v-if="stripeAccounts.length === 0 || creatingStripeAccount || canCreateMultipleStripeAccounts" :loading="creatingStripeAccount">
                     <button type="button" class="button secundary" :disabled="creatingStripeAccount" @click="createStripeAccount">
                         <span class="icon add" />
-                        <span>{{ $t('Extra Stripe account') }}*</span>
+                        <span>{{ $t('21610c8e-44fb-4afb-9456-c57b938d4c8e') }}*</span>
                     </button>
                 </LoadingButton>
                 <a class="button text" :href="$domains.getDocs('stripe')" target="_blank">
                     <span class="icon book" />
-                    <span>{{ $t('Stripe Documentatie') }}</span>
+                    <span>{{ $t('58d5950b-f52f-436a-bc82-222c80ce7356') }}</span>
                 </a>
             </div>
 
@@ -130,43 +130,43 @@
         </template>
         <template v-if="stripeAccounts.length === 0 || creatingStripeAccount">
             <hr><h2>
-                {{ $t('Online betalingen via Stripe') }}
+                {{ $t('b3485987-0e69-4eeb-ba2d-89fd27fc5d74') }}
             </h2>
             <p class="info-box">
-                {{ $t('Lees eerst onze gids voor je begint! Neem je tijd om alles netjes en volledig in te vullen. Maak je fouten, dan riskeer je dat de aansluiting veel langer duurt.') }}
+                {{ $t('b3540f2c-6f8c-412b-9c97-89b38606700c') }}
             </p>
 
             <div class="style-button-bar">
                 <a class="button primary" :href="$domains.getDocs('stripe')" target="_blank">
-                    <span>{{ $t('Lees de gids') }}</span>
+                    <span>{{ $t('5e78695a-76f4-4ad0-9f2d-7f0ac9a0220e') }}</span>
                     <span class="icon arrow-right" />
                 </a>
 
                 <LoadingButton :loading="creatingStripeAccount">
                     <button type="button" class="button secundary" :disabled="creatingStripeAccount" @click="createStripeAccount">
-                        <span>{{ $t('Aansluiten bij Stripe') }}</span>
+                        <span>{{ $t('e6461543-af38-49d0-a97b-448826be1148') }}</span>
                     </button>
                 </LoadingButton>
             </div>
         </template>
 
         <template v-if="payconiqApiKey || forcePayconiq">
-            <hr><h2>{{ $t('Online betalingen via Payconiq') }}</h2>
+            <hr><h2>{{ $t('df421a41-36de-4225-b22b-2401a4009f90') }}</h2>
             <p class="st-list-description">
-                {{ $t('Vul hieronder jouw API-key in om betalingen rechtstreeks via Payconiq te verwerken.') }} <a href="https://www.stamhoofd.be/docs/payconiq/" target="_blank" class="inline-link">{{ $t('Meer info') }}</a>
+                {{ $t('455200de-131e-4508-b5e7-3f94a05fb52b') }} <a href="https://www.stamhoofd.be/docs/payconiq/" target="_blank" class="inline-link">{{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}</a>
             </p>
 
-            <STInputBox error-fields="payconiqApiKey" :error-box="errorBox" class="max" :title="$t(`API-key`)">
-                <input v-model="payconiqApiKey" class="input" type="text" :placeholder="$t(`API-key van Payconiq`)">
+            <STInputBox error-fields="payconiqApiKey" :error-box="errorBox" class="max" :title="$t(`da7c1f63-529d-47c6-8d2d-87e5cb98a411`)">
+                <input v-model="payconiqApiKey" class="input" type="text" :placeholder="$t(`70cb0ddd-7379-4359-a6cb-a581382a38ce`)">
             </STInputBox>
             <p v-if="payconiqAccount && payconiqAccount.name" class="style-description-small">
-                {{ $t('Op naam van') }} {{ payconiqAccount.name }}, {{ payconiqAccount.iban }}
+                {{ $t('f957f196-7656-4e0a-9b33-7b18ced4f493') }} {{ payconiqAccount.name }}, {{ payconiqAccount.iban }}
             </p>
         </template>
 
         <template v-if="!enableBuckaroo && (organization.privateMeta.mollieOnboarding || forceMollie)">
             <hr><h2>
-                {{ $t('Online betalingen via Mollie') }}
+                {{ $t('8392834f-9cfb-4af0-8a8d-55c727cbfd66') }}
             </h2>
 
             <template v-if="!organization.privateMeta.mollieOnboarding">
@@ -174,13 +174,13 @@
                     {{ $t('fa1b8694-6a8c-46ea-ab5e-7ed792083bf0') }}
                 </p>
                 <p v-if="isBelgium" class="info-box">
-                    {{ $t('Voor Mollie heb je een VZW nodig. Een feitelijke vereniging is niet voldoende (wordt niet geaccepteerd)') }}
+                    {{ $t('ab21ae18-0181-44ea-b41d-ff61c9358858') }}
                 </p>
 
                 <p class="st-list-description">
                     <button class="button text" type="button" @click="linkMollie">
                         <span class="icon link" />
-                        <span>{{ $t('Mollie koppelen') }}</span>
+                        <span>{{ $t('b0d861f2-1bad-4feb-aec7-116a9a954260') }}</span>
                     </button>
                 </p>
             </template>
@@ -189,24 +189,24 @@
                     {{ $t('ee891dc5-b8e5-4991-951c-28973dd5df05') }}
                 </p>
                 <p v-else class="warning-box">
-                    {{ $t('Je kan nog geen betalingen verwerken omdat je eerst meer gegevens moet aanvullen.') }}
+                    {{ $t('060bd617-bccb-48c3-b140-06440eaf6186') }}
                 </p>
                 <p v-if="!organization.privateMeta.mollieOnboarding.canReceiveSettlements" class="warning-box">
-                    {{ $t('Als je uitbetalingen wil ontvangen moet je eerst jouw gegevens verder aanvullen') }}
+                    {{ $t('2951c3d6-8a53-4678-b041-dff464dd44e9') }}
                 </p>
 
                 <p v-if="organization.privateMeta.mollieOnboarding.status === 'NeedsData'" class="st-list-description">
-                    {{ $t('Mollie is gekoppeld, maar je moet nog enkele gegevens aanvullen.') }}
+                    {{ $t('f4bd8e62-6828-4ae7-b2b8-4d3dbdf01d57') }}
                 </p>
                 <p v-if="organization.privateMeta.mollieOnboarding.status === 'InReview'" class="st-list-description">
-                    {{ $t('Jouw gegevens worden nagekeken door onze betaalpartner (Mollie).') }}
+                    {{ $t('0e46dfc8-f362-4d1d-a3d1-1e28ba5f41c9') }}
                 </p>
 
                 <p class="st-list-description">
                     <LoadingButton :loading="loadingMollie">
                         <button class="button text" type="button" @click="mollieDashboard">
                             <span class="icon external" />
-                            <span>{{ $t('Ga naar het Mollie dashboard') }}</span>
+                            <span>{{ $t('6ab27b71-4ea3-4359-b2b6-43e27e8ab528') }}</span>
                         </button>
                     </LoadingButton>
                 </p>
@@ -217,7 +217,7 @@
                     </button>
                 </p>
 
-                <STInputBox v-if="mollieProfiles.length > 1" error-fields="mollieProfile" :error-box="errorBox" class="max" :title="$t(`Standaardprofiel`)">
+                <STInputBox v-if="mollieProfiles.length > 1" error-fields="mollieProfile" :error-box="errorBox" class="max" :title="$t(`fff3c776-62e8-4957-a79d-0eec462b3f5d`)">
                     <STList>
                         <STListItem v-for="profile in mollieProfiles" :key="profile.id" element-name="label" :selectable="true">
                             <template #left>
@@ -231,13 +231,13 @@
                             </p>
 
                             <template v-if="profile.status === 'verified'" #right>
-                                <span class="icon success green" :v-tooltip="$t('Geverifieerd')" />
+                                <span class="icon success green" :v-tooltip="$t('3686816f-e3c4-4d60-8e87-1f323dba4547')" />
                             </template>
                             <template v-else-if="profile.status === 'unverified'" #right>
-                                <span class="icon clock gray" :v-tooltip="$t('Wacht op verificatie')" />
+                                <span class="icon clock gray" :v-tooltip="$t('4e8d5d7e-7fa6-4053-b526-fbac0dc727b3')" />
                             </template>
                             <template v-else #right>
-                                <span class="icon canceled red" :v-tooltip="$t('Geblokkeerd')" />
+                                <span class="icon canceled red" :v-tooltip="$t('1abd3897-083d-4625-98f6-7143c54bafbf')" />
                             </template>
                         </STListItem>
                     </STList>
@@ -247,32 +247,32 @@
 
         <template v-if="isStamhoofd">
             <hr><h2>
-                {{ $t('Platforminstellingen (enkel voor platformbeheerders)') }}
+                {{ $t('a0044037-18fd-465d-8907-9f7064342279') }}
             </h2>
 
             <Checkbox v-model="useTestPayments">
-                {{ $t('Activeer test-modus voor betalingen') }}
+                {{ $t('02fe4c35-562f-429c-9250-dbd25ca01357') }}
             </Checkbox>
 
             <Checkbox v-model="enableBuckaroo">
-                {{ $t('Gebruik Buckaroo voor online betalingen') }}
+                {{ $t('e0fe5113-8278-43c3-9cec-7485c057c8b3') }}
             </Checkbox>
 
             <div v-if="enableBuckaroo" class="split-inputs">
                 <div>
-                    <STInputBox error-fields="buckarooSettings.key" :error-box="errorBox" class="max" :title="$t(`Key`)">
-                        <input v-model="buckarooKey" class="input" type="text" :placeholder="$t(`Key`)">
+                    <STInputBox error-fields="buckarooSettings.key" :error-box="errorBox" class="max" :title="$t(`d54cbd0f-91c6-484a-b071-5161d4060dd7`)">
+                        <input v-model="buckarooKey" class="input" type="text" :placeholder="$t(`d54cbd0f-91c6-484a-b071-5161d4060dd7`)">
                     </STInputBox>
                     <p class="style-description-small">
-                        {{ $t('Buckaroo Plaza > Mijn Buckaroo > Websites > Algemeen > Key') }}
+                        {{ $t('789610a2-6871-4ffb-816f-592ce7711d25') }}
                     </p>
                 </div>
                 <div>
-                    <STInputBox error-fields="buckarooSettings.secret" :error-box="errorBox" class="max" :title="$t(`Secret`)">
-                        <input v-model="buckarooSecret" class="input" type="text" :placeholder="$t(`Secret`)">
+                    <STInputBox error-fields="buckarooSettings.secret" :error-box="errorBox" class="max" :title="$t(`1c6a928f-1e53-421e-939f-a54959b45769`)">
+                        <input v-model="buckarooSecret" class="input" type="text" :placeholder="$t(`1c6a928f-1e53-421e-939f-a54959b45769`)">
                     </STInputBox>
                     <p class="style-description-small">
-                        {{ $t('Buckaroo Plaza > Configuratie > Beveiliging > Secret Key') }}
+                        {{ $t('b688abde-1da5-4c76-93d6-1970219d1ee3') }}
                     </p>
                 </div>
             </div>

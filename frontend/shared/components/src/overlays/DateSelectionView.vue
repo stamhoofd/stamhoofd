@@ -24,13 +24,13 @@
             </header>
             <div class="days">
                 <div class="days">
-                    <div>{{ $t('Ma') }}</div>
-                    <div>{{ $t('Di') }}</div>
-                    <div>{{ $t('Wo') }}</div>
-                    <div>{{ $t('Do') }}</div>
-                    <div>{{ $t('Vr') }}</div>
-                    <div>{{ $t('Za') }}</div>
-                    <div>{{ $t('Zo') }}</div>
+                    <div>{{ $t('fe26fc19-8954-4fc4-827b-00b18feeea11') }}</div>
+                    <div>{{ $t('277eb883-dec2-4ed3-8744-47b439dad275') }}</div>
+                    <div>{{ $t('b29269de-a372-4125-8f70-07367bc726f3') }}</div>
+                    <div>{{ $t('0a958436-5748-48af-9df9-1cef2fd0799f') }}</div>
+                    <div>{{ $t('31cc1d57-79f8-4395-b247-e9852c973ba9') }}</div>
+                    <div>{{ $t('915b1b4a-3115-4cee-b180-506213cd0ae0') }}</div>
+                    <div>{{ $t('e30a51d3-4b1a-48f2-9a7b-6a0c53a7ea8a') }}</div>
                 </div>
                 <div v-for="(week, index) in weeks" :key="index" class="row">
                     <button v-for="day in week" :key="day.number" type="button" :class="{selected: day.selected, 'other-month': day.otherMonth}" :disabled="isDisabled(day)" @click="onSelect(day)">
@@ -40,10 +40,10 @@
             </div>
             <footer>
                 <button v-if="allowClear" type="button" class="button text" @click="clear">
-                    {{ $t('Leegmaken') }}
+                    {{ $t('032d7766-c134-4b11-80a9-251aeeddd40f') }}
                 </button>
                 <button v-if="!isDisabled({value: new Date()})" type="button" class="button text" @click="setToday">
-                    {{ $t('Vandaag') }}
+                    {{ $t('2cae4f4c-7687-4cbc-9511-8ed0dd7f77ee') }}
                 </button>
             </footer>
         </aside>

@@ -1,5 +1,5 @@
 <template>
-    <SaveView class="st-view register-item-view" main-class="flex" :loading="saving" :save-text="isInCart ? $t('Aanpassen') : $t('Toevoegen')" :save-icon="isInCart ? 'edit' : 'basket'" :title="item.group.settings.name" v-on="isInCart ? {delete: deleteMe} : {}" @save="addToCart">
+    <SaveView class="st-view register-item-view" main-class="flex" :loading="saving" :save-text="isInCart ? $t('112de4a4-afa3-4ad7-bbb6-003d435a6426') : $t('36ba68cb-2159-4179-8ded-89e73d47cd87')" :save-icon="isInCart ? 'edit' : 'basket'" :title="item.group.settings.name" v-on="isInCart ? {delete: deleteMe} : {}" @save="addToCart">
         <p class="style-title-prefix">
             {{ item.organization.name }}
         </p>
@@ -13,10 +13,10 @@
         </h1>
         <p v-for="registration in item.replaceRegistrations" :key="registration.id" class="style-description">
             <template v-if="registration.group.id !== item.group.id">
-                {{ $t('Verplaatsen vanaf {group}', {group: registration.group.settings.name}) }}
+                {{ $t('ece5e681-db76-4ce3-8e5e-c9dbcc4d8f0e', {group: registration.group.settings.name}) }}
             </template>
             <template v-else>
-                {{ $t('Bestaande inschrijving aanpassen') }}
+                {{ $t('5f1406dd-4801-49f5-9906-37e89b393baf') }}
             </template>
         </p>
 
@@ -33,12 +33,12 @@
         </p>
 
         <p v-if="item.totalPrice && contextOrganization && checkout.asOrganizationId && !checkout.isAdminFromSameOrganization" class="warning-box">
-            {{ $t('Je betaalt deze inschrijving in naam van {organization}. Je moet zelf de kosten aan je leden doorrekenen indien gewenst.', {organization: contextOrganization.name}) }}
+            {{ $t('4e758459-990f-488d-b457-d2e0f7edd9cc', {organization: contextOrganization.name}) }}
         </p>
 
         <template v-if="item.replaceRegistrations.length === 0">
             <p v-if="item.group.settings.description" class="style-description-block" v-text="item.group.settings.description" />
-            <p v-else class="style-description-block" :v-text="$t('Schrijf {member} hier in. Voeg de inschrijving toe aan je winkelmandje en reken daarna alle inschrijvingen in één keer af.', {member: item.member.patchedMember.firstName})" />
+            <p v-else class="style-description-block" :v-text="$t('ea2ad051-2874-42e2-8275-aa6e8d05d66a', {member: item.member.patchedMember.firstName})" />
         </template>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -47,22 +47,22 @@
                 <DateSelection v-model="customStartDate" :required="false" :placeholder="formatDate(item.defaultStartDate, true)" :min="item.group.settings.startDate" :max="item.group.settings.endDate" />
             </STInputBox>
             <p v-if="item.group.settings.trialDays > 0" class="style-description-small">
-                {{ $t('Als beheerder kan je zelf een andere startdatum kiezen voor deze inschrijving. Bijvoorbeeld om een proefperiode later te laten beginnen, of een late inschrijving vroeger te laten starten.') }}
+                {{ $t('914a5499-b6db-4495-91dd-be4e412c9d64') }}
             </p>
             <p v-else class="style-description-small">
-                {{ $t('Als beheerder kan je zelf een andere startdatum kiezen voor deze inschrijving. Bijvoorbeeld om een late inschrijving vroeger te laten starten.') }}
+                {{ $t('4ad9864f-c191-4f00-8321-d3ba67e5adab') }}
             </p>
         </div>
 
         <div v-if="item.canHaveTrial || trial" class="container">
             <hr><h2>
-                <span>{{ $t('Proefperiode') }}</span>
+                <span>{{ $t('4d4c0732-2875-4de8-afae-d8b2687ff279') }}</span>
                 <span class="style-tag">{{ Formatter.days(item.group.settings.trialDays) }}</span>
             </h2>
-            <p>{{ $t('{member} komt in aanmerking voor een proefperiode van {days}. Je moet dan pas betalen tegen het einde van de proefperiode (via het ledenportaal). Als je de inschrijving stopzet voor afloop van de proefperiode, hoef je niets te betalen. Als je geen proefperiode wilt, kan je ook onmiddelijk inschrijven als volwaardig lid.', {member: item.member.patchedMember.details.firstName, days: Formatter.days(item.group.settings.trialDays)}) }}</p>
+            <p>{{ $t('1b2f2b52-0852-40c3-b1d3-758577b28424', {member: item.member.patchedMember.details.firstName, days: Formatter.days(item.group.settings.trialDays)}) }}</p>
 
             <STList>
-                <CheckboxListItem v-model="trial" :description="$t('Als je dit aanvinkt zal je nog niet meteen moeten betalen voor de inschrijving, maar pas bij afloop van de proefperiode.')" :label="$t(`Ik wil gebruik maken van de proefperiode`)" />
+                <CheckboxListItem v-model="trial" :description="$t('c88d1d2c-f336-424f-858a-4c8aa75a068d')" :label="$t(`f40cdbc2-a5b2-4020-bd34-12c181905764`)" />
             </STList>
         </div>
 
@@ -77,7 +77,7 @@
                     </h4>
 
                     <p v-if="price.getRemainingStock(item) === 0" class="style-description-small">
-                        {{ $t('Uitverkocht') }}
+                        {{ $t('44ba544c-3db6-4f35-b7d1-b63fdcadd9ab') }}
                     </p>
 
                     <template #right>
@@ -103,15 +103,15 @@
                         {{ option.name || 'Naamloos' }}
                     </h4>
                     <p v-if="option.allowAmount && option.price.forMember(item.member)" class="style-description-small">
-                        {{ $t('{price} per stuk', {price: formatPrice(option.price.forMember(item.member))}) }}
+                        {{ $t('2f7604ae-889e-4574-af76-1559ab0e8120', {price: formatPrice(option.price.forMember(item.member))}) }}
                     </p>
 
                     <p v-if="option.getRemainingStock(item) && (option.maximum === null || option.getRemainingStock(item)! < option.maximum) && option.allowAmount" class="style-description-small">
-                        {{ $t('Nog {stock} beschikbaar', {stock: Formatter.pluralText(option.getRemainingStock(item)!, $t('stuk'), $t('stuks'))}) }}
+                        {{ $t('dceceb1c-6d55-4a93-bf8f-85ba041786f4', {stock: Formatter.pluralText(option.getRemainingStock(item)!, $t('86e03c52-25db-45f7-a129-5f165b289324'), $t('7d5de81e-9ae9-4ec6-86e1-844ca6a75fb1'))}) }}
                     </p>
 
                     <p v-else-if="option.getRemainingStock(item) === 0" class="style-description-small">
-                        {{ $t('Uitverkocht') }}
+                        {{ $t('44ba544c-3db6-4f35-b7d1-b63fdcadd9ab') }}
                     </p>
 
                     <template #right>

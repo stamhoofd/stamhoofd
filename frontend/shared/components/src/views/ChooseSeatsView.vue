@@ -26,7 +26,7 @@
         <STToolbar>
             <template #right>
                 <button class="button primary" type="submit" :disabled="selectedAmount !== amount">
-                    <span>{{ $t('Bevestigen') }}</span>
+                    <span>{{ $t('7de2e636-dcec-44b1-a681-daeb9cd85316') }}</span>
                     <span class="icon arrow-right" />
                 </button>
             </template>

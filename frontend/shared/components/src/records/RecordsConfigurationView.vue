@@ -44,7 +44,7 @@
             {{ $t('07d18e1b-2935-4945-9595-50e16a929b19') }}
         </p>
         <p class="style-description-block">
-            {{ $t('Lees') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('hier') }}</a> {{ $t('meer informatie na over hoe je een vragenlijst kan instellen.') }}
+            {{ $t('8485e7ea-6d66-4f2c-b92a-bd44cb2f4eb4') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('0487c3b0-3f93-4344-a34a-9a9198f37023') }}</a> {{ $t('69551005-512c-4240-8e20-fd546cefafaa') }}
         </p>
 
         <p class="info-box">

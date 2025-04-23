@@ -1,44 +1,44 @@
 <template>
     <SaveView :title="locationTitleName" :disabled="!hasChanges" @save="save">
         <h1 v-if="isNew">
-            {{ locationTitleName }} {{ $t('toevoegen') }}
+            {{ locationTitleName }} {{ $t('06da1310-e17c-475e-bcd3-bb47844c24c1') }}
         </h1>
         <h1 v-else>
-            {{ locationTitleName }} {{ $t('bewerken') }}
+            {{ locationTitleName }} {{ $t('ee3bc635-c294-4134-9155-7a74f47dec4f') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
             <div>
-                <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Locatienaam`)">
-                    <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`bv. kantine`)">
+                <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`3c6084da-ce6f-4d03-b213-42def4eabbb7`)">
+                    <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`3bb5eb55-784a-41ea-8bc1-b487c6421b51`)">
                 </STInputBox>
 
-                <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`Beschrijving`)">
-                    <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`Hier kan je eventeel afhaalinstructies kwijt (optioneel)`)" />
+                <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
+                    <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`bb9c4b26-8f77-4334-a6bd-6649c2fe7a1c`)" />
                 </STInputBox>
             </div>
             <div>
-                <AddressInput v-model="address" :validator="errors.validator" :required="true" :title="$t(`Adres`)" />
+                <AddressInput v-model="address" :validator="errors.validator" :required="true" :title="$t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`)" />
             </div>
         </div>
 
-        <EditTimeSlotsSection v-if="isTakeout" :webshop="webshop" :time-slots="patchedTakeoutMethod.timeSlots" :title="$t(`Datum en tijd + keuze uit afhaalintervallen`)" @patch="patchTimeSlots">
-            <p>{{ $t('Je kan tijdsintervallen toevoegen waartussen men de bestelling kan afhalen. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (bv. als je het elke week kan afhalen na activiteiten). Als je afhalen organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).') }}</p>
+        <EditTimeSlotsSection v-if="isTakeout" :webshop="webshop" :time-slots="patchedTakeoutMethod.timeSlots" :title="$t(`a30e2714-0bef-4714-8d4b-2c4aa296df1b`)" @patch="patchTimeSlots">
+            <p>{{ $t('74d4c806-8c5b-4f12-8629-48d372b5518c') }}</p>
         </EditTimeSlotsSection>
-        <EditTimeSlotsSection v-else :webshop="webshop" :time-slots="patchedTakeoutMethod.timeSlots" :title="$t(`Datum en tijd + keuze uit shiften`)" @patch="patchTimeSlots">
-            <p>{{ $t('Je kan tijdsintervallen toevoegen waartussen men de bestelling ter plaatse kan consumeren. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (afgeraden). Als je jouw evenement organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).') }}</p>
+        <EditTimeSlotsSection v-else :webshop="webshop" :time-slots="patchedTakeoutMethod.timeSlots" :title="$t(`ce84698c-f538-462b-8d43-99feff25680f`)" @patch="patchTimeSlots">
+            <p>{{ $t('46944c50-6c15-4547-90d4-bba60421b471') }}</p>
         </EditTimeSlotsSection>
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('Verwijderen') }}
+                {{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('Verwijderen') }}</span>
+                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
             </button>
         </div>
     </SaveView>

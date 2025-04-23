@@ -309,7 +309,7 @@ class EmailStatic {
                     new SimpleError({
                         code: 'all_filtered',
                         message: 'Invalid email address',
-                        human: $t(`Ongeldig e-mailadres`),
+                        human: $t(`cbbff442-758c-4f76-b8c2-26bb176fefcc`),
                     }),
                 );
             }
@@ -331,7 +331,7 @@ class EmailStatic {
                     new SimpleError({
                         code: 'all_filtered',
                         message: 'All recipients are filtered due to hard bounce or spam',
-                        human: $t(`Alle ontvangers zijn gefilterd wegens een hard bounce of spam`),
+                        human: $t(`e3c3f519-562e-4ef4-b670-599ce4cb74ac`),
                     }),
                 );
             }
@@ -356,7 +356,7 @@ class EmailStatic {
                     new SimpleError({
                         code: 'all_filtered',
                         message: 'All recipients are filtered due to environment',
-                        human: $t(`Alle ontvangers zijn gefilterd omwille van de demo-omgeving die het versturen van bepaalde e-mails limiteert`),
+                        human: $t(`462d5e22-af11-40de-9e16-eda1b93ac0c7`),
                     }),
                 );
             }
@@ -487,8 +487,8 @@ class EmailStatic {
                 if (STAMHOOFD.environment === 'production') {
                     if (data.from.email !== this.getWebmasterFromEmail().email) {
                         this.sendWebmaster({
-                            subject: $t(`E-mail kon niet worden verzonden`),
-                            text: $t(`Een e-mail vanaf {email} kon niet worden verstuurd aan {to}`, { email: data.from.email, to: mail.to }) + ': \n\n' + e + '\n\n' + (mail.text ?? ''),
+                            subject: $t(`2206e5e4-2fc4-4ffd-aefb-60ba0d20aa23`),
+                            text: $t(`d1b217e5-c82e-42fb-93e5-dd6f2d137692`, { email: data.from.email, to: mail.to }) + ': \n\n' + e + '\n\n' + (mail.text ?? ''),
                             type: (data.type === 'transactional') ? 'broadcast' : 'transactional',
                         });
                     }

@@ -19,7 +19,7 @@
             <div v-if="hasRight || hasRight" class="right">
                 <slot name="right" />
                 <button v-if="canDismiss && !disableDismiss && $isIOS" class="button navigation" type="button" @click="dismiss()">
-                    {{ $t('Sluiten') }}
+                    {{ $t('bef7a2f9-129a-4e1c-b8d2-9003ff0a1f8b') }}
                 </button>
                 <button v-else-if="canDismiss && !disableDismiss && !$isAndroid" class="button navigation icon close" type="button" @click="dismiss()" />
             </div>

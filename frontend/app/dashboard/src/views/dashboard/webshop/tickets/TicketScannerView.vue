@@ -1,6 +1,6 @@
 <template>
     <div ref="rootRef" class="st-view scanner-view">
-        <STNavigationBar :show-title="true" :title="$t(`Scan een ticket`)">
+        <STNavigationBar :show-title="true" :title="$t(`8578c5a9-1246-4c57-b1d4-65919a69a2bc`)">
             <template #left>
                 <button class="icon button close" type="button" @click="() => dismiss()" />
             </template>
@@ -22,19 +22,19 @@
 
                 <div class="status-bar">
                     <p v-if="isLoading">
-                        <Spinner class="inline" /> {{ $t('Bijwerken...') }}
+                        <Spinner class="inline" /> {{ $t('547d2798-f0b0-4cdf-95cd-58f3bc6ab4e9') }}
                     </p>
                     <p v-else-if="hadNetworkError">
-                        {{ $t('Geen internetverbinding. Scannen van tickets blijft gedeeltelijk werken. Internet is aan te raden.') }}<br><span class="style-description-small">{{ $t('Laatst bijgewerkt:') }} {{ lastUpdatedText }}</span><br><button class="button text" type="button" @click="updateTickets">
-                            {{ $t('Opnieuw proberen') }}
+                        {{ $t('711b7638-be3d-4723-821e-cedef94c8782') }}<br><span class="style-description-small">{{ $t('5c9f4609-ebf3-44eb-bf7a-06399a87fc90') }} {{ lastUpdatedText }}</span><br><button class="button text" type="button" @click="updateTickets">
+                            {{ $t('bccb094f-12eb-40d0-9a24-843832b0cdb7') }}
                         </button>
                     </p>
                     <p v-else>
                         <template v-if="disableWebVideo">
-                            {{ $t('Plaats de QR-code in het midden van het scherm.') }}
+                            {{ $t('8f609412-7a05-461c-9819-54263bad0f43') }}
                         </template><template v-else>
-                            {{ $t('Plaats de QR-code in het kader om te scannen.') }}
-                        </template><br><span class="style-description-small">{{ $t('Laatst bijgewerkt:') }} {{ lastUpdatedText }}</span>
+                            {{ $t('40fe6e19-794f-439d-929e-d0c6c9f2f7be') }}
+                        </template><br><span class="style-description-small">{{ $t('5c9f4609-ebf3-44eb-bf7a-06399a87fc90') }} {{ lastUpdatedText }}</span>
                     </p>
                 </div>
             </div>

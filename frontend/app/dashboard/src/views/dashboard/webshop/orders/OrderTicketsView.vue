@@ -3,10 +3,10 @@
         <STNavigationBar :title="$t(`Tickets`)" />
         <main>
             <h1 v-if="tickets.length > 1">
-                {{ $t('Tickets') }}
+                {{ $t('b40d200c-4265-4d58-a7f4-7c2498b062b9') }}
             </h1>
             <h1 v-else>
-                {{ $t('Ticket') }}
+                {{ $t('de971042-551d-43d2-ab47-e76132156887') }}
             </h1>
 
             <STList>
@@ -18,7 +18,7 @@
             <template #right>
                 <button class="button primary" type="button" @click="downloadAllTickets">
                     <span class="icon download" />
-                    <span>{{ $t('Download') }}</span>
+                    <span>{{ $t('d3e021e4-a9eb-4f7e-a538-8d2dbc27341c') }}</span>
                 </button>
             </template>
         </STToolbar>

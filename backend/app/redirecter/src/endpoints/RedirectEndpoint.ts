@@ -34,7 +34,7 @@ export class RedirectEndpoint extends Endpoint<Params, Query, Body, ResponseBody
 
         if (country === Country.Belgium) {
             const url = 'https://www.stamhoofd.be' + path;
-            const response = new Response($t(`Doorverwijzen naar`) + ' ' + url);
+            const response = new Response($t(`3fb0eda2-63e8-422c-a19f-b36c36bea5eb`) + ' ' + url);
             response.status = 302;
             response.headers['Location'] = url;
 
@@ -44,7 +44,7 @@ export class RedirectEndpoint extends Endpoint<Params, Query, Body, ResponseBody
         }
 
         const url = 'https://www.stamhoofd.nl' + path;
-        const response = new Response($t(`Doorverwijzen naar`) + ' ' + url);
+        const response = new Response($t(`3fb0eda2-63e8-422c-a19f-b36c36bea5eb`) + ' ' + url);
         response.status = 302;
         response.headers['Location'] = url;
 

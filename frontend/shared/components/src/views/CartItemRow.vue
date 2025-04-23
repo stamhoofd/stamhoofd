@@ -31,7 +31,7 @@
             {{ cartItem.cartError.getHuman() }}
 
             <span v-if="editable" class="button text">
-                <span>{{ $t('Corrigeren') }}</span>
+                <span>{{ $t('43735610-03c1-494b-b76b-74a13a560880') }}</span>
                 <span class="icon arrow-right-small" />
             </span>
         </p>

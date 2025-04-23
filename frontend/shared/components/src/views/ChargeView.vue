@@ -32,13 +32,13 @@
 
         <div class="split-inputs">
             <div v-if="showCreatedAt">
-                <STInputBox error-fields="createdAt" :error-box="errors.errorBox" :title="$t(`Verschuldigd sinds`)">
+                <STInputBox error-fields="createdAt" :error-box="errors.errorBox" :title="$t(`ab0535e6-bbaa-4961-a34f-aca39ef0d785`)">
                     <DateSelection v-model="createdAt" />
                 </STInputBox>
             </div>
             <div v-if="canShowDueAt">
                 <STInputBox :title="$t('1402e826-1f61-498a-81b4-595dce3248d0') + (dueAtDescription ? '*' : '')" error-fields="dueAt" :error-box="errors.errorBox">
-                    <DateSelection v-model="dueAt" :required="false" :time="{hours: 0, minutes: 0, seconds: 0}" :placeholder="$t(`Onmiddelijk`)" />
+                    <DateSelection v-model="dueAt" :required="false" :time="{hours: 0, minutes: 0, seconds: 0}" :placeholder="$t(`ef2b5d01-756d-46d0-8e1d-a200f43a3921`)" />
                 </STInputBox>
             </div>
         </div>

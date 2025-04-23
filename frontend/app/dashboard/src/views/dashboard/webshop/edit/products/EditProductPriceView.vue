@@ -1,10 +1,10 @@
 <template>
     <SaveView :title="isNew ? $t(`Prijskeuze toevoegen`) : $t(`Prijskeuze bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            {{ $t('Prijskeuze toevoegen') }}
+            {{ $t('5da36b5d-903c-415e-a5bc-10c8a05038ae') }}
         </h1>
         <h1 v-else>
-            {{ $t('Prijskeuze bewerken') }}
+            {{ $t('4f42fede-70b7-46cd-9749-fbefdb744567') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -13,12 +13,12 @@
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('Verwijder deze prijskeuze') }}
+                {{ $t('bf57e599-cac3-4b3c-a115-470efa0f3dea') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('Verwijderen') }}</span>
+                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
             </button>
         </div>
     </SaveView>

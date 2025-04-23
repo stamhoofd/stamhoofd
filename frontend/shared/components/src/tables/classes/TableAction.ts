@@ -161,7 +161,7 @@ export class InMemoryTableAction<T extends { id: string }> extends TableAction<T
     }
 
     async handle(data: TableActionSelection<T>) {
-        const toast: Toast = new Toast($t(`Ophalen...`), 'spinner').setHide(null);
+        const toast: Toast = new Toast($t(`7b5938ef-8209-43e9-bea2-4299be757698`), 'spinner').setHide(null);
         const timer = setTimeout(() => {
             toast.show();
         }, 1000);
@@ -175,7 +175,7 @@ export class InMemoryTableAction<T extends { id: string }> extends TableAction<T
                     }))
                 : [];
             toast.setProgress(1);
-            toast.message = $t(`Actie uitvoeren...`);
+            toast.message = $t(`13262228-81da-4b13-acb0-8a2bff210389`);
             await this.handler(items);
         }
         finally {

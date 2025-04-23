@@ -9,11 +9,11 @@
         </h3>
 
         <STListItemGrid>
-            <STListItemGridRow :value="prices" :label="$t(`Tarief`)" />
-            <STListItemGridRow :value="ageRestriction" :label="$t(`Leeftijd`)" />
-            <STListItemGridRow :value="genderRestriction" :label="$t(`Geslacht`)" />
-            <STListItemGridRow v-if="$defaultAgeGroups.length" :value="defaultAgeGroupName" :label="$t(`Aansluiting`)" />
-            <STListItemGridRow :value="status" :label="$t(`Status`)" />
+            <STListItemGridRow :value="prices" :label="$t(`ae21b9bf-7441-4f38-b789-58f34612b7af`)" />
+            <STListItemGridRow :value="ageRestriction" :label="$t(`e96d9ea7-f8cc-42c6-b23d-f46e1a56e043`)" />
+            <STListItemGridRow :value="genderRestriction" :label="$t(`3048ad16-fd3b-480e-b458-10365339926b`)" />
+            <STListItemGridRow v-if="$defaultAgeGroups.length" :value="defaultAgeGroupName" :label="$t(`c0277e8e-a2e0-4ec3-9339-c2e1be2e6e2d`)" />
+            <STListItemGridRow :value="status" :label="$t(`e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5`)" />
         </STListItemGrid>
 
         <template #right>

@@ -21,13 +21,13 @@
         </p>
 
         <p v-if="!payment.paidAt || formatDate(payment.createdAt) !== formatDate(payment.paidAt)" class="style-description-small">
-            {{ $t('Aangemaakt op {date}', {date: formatDate(payment.createdAt)}) }}
+            {{ $t('98148d1f-1c02-49e7-b05d-22276dd1b40c', {date: formatDate(payment.createdAt)}) }}
         </p>
         <p v-if="payment.paidAt" class="style-description-small">
-            {{ $t('Betaald op {date}', {date: formatDate(payment.paidAt)}) }}
+            {{ $t('41334783-830b-4853-9d29-d05fb51a3f35', {date: formatDate(payment.paidAt)}) }}
         </p>
         <p v-if="payment.price && price !== null && price !== payment.price" class="style-description-small">
-            {{ $t('Betaling van {price}', {price: formatPrice(payment.price)}) }}
+            {{ $t('f846548d-56a1-456d-8c7e-96ea791deac3', {price: formatPrice(payment.price)}) }}
         </p>
 
         <template #right>

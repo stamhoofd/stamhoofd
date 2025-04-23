@@ -11,7 +11,7 @@
                 <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('c0a0c0f7-1282-40be-85fc-320d136d34ab')" autocomplete="off" enterkeyhint="next">
             </STInputBox>
 
-            <STInputBox v-if="platform.config.eventTypes.length" error-fields="type" :error-box="errors.errorBox" :title="$t(`Type`)">
+            <STInputBox v-if="platform.config.eventTypes.length" error-fields="type" :error-box="errors.errorBox" :title="$t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)">
                 <Dropdown v-model="typeId">
                     <option v-for="t of platform.config.eventTypes" :key="t.id" :value="t.id">
                         {{ t.name }}
@@ -50,21 +50,21 @@
         </Checkbox>
 
         <div class="split-inputs">
-            <STInputBox :title="multipleDays ? $t(`Startdatum`) : $t(`Datum`)" error-fields="startDate" :error-box="errors.errorBox">
+            <STInputBox :title="multipleDays ? $t(`33a674c2-6981-442b-9bd4-01f71da7a159`) : $t(`40aabd99-0331-4267-9b6a-a87c06b3f7fe`)" error-fields="startDate" :error-box="errors.errorBox">
                 <DateSelection v-model="startDate" />
             </STInputBox>
             <TimeInput v-if="multipleDays" v-model="startDate" :title="$t('5dd84548-b16f-415b-8dbd-d96aeecedc3e')" :validator="errors.validator" />
         </div>
 
         <div class="split-inputs">
-            <STInputBox v-if="multipleDays || (type && type.minimumDays !== null && type.minimumDays > 1)" error-fields="endDate" :error-box="errors.errorBox" :title="$t(`Einddatum`)">
+            <STInputBox v-if="multipleDays || (type && type.minimumDays !== null && type.minimumDays > 1)" error-fields="endDate" :error-box="errors.errorBox" :title="$t(`f852932e-380e-4b9a-916b-2bc008d8c08a`)">
                 <DateSelection v-model="endDate" />
             </STInputBox>
             <TimeInput v-else v-model="startDate" :title="$t('5dd84548-b16f-415b-8dbd-d96aeecedc3e')" :validator="errors.validator" />
-            <TimeInput v-model="endDate" :validator="errors.validator" :title="$t(`Tot`)" />
+            <TimeInput v-model="endDate" :validator="errors.validator" :title="$t(`91310731-bddd-4ad3-b5fb-182237699f20`)" />
         </div>
 
-        <hr><h2>{{ $t('Beschikbaarheid') }}</h2>
+        <hr><h2>{{ $t('bf2af52c-de5d-4089-b46d-9be48594cdb4') }}</h2>
 
         <STList>
             <STListItem v-if="canSetNationalActivity || isNationalActivity" :selectable="true" element-name="label">
@@ -111,12 +111,12 @@
 
         <JumpToContainer :visible="isNationalActivity && organizationTagIds !== null">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('Regio') }}</div>
+                <div>{{ $t('2faa00db-5af7-4556-ac49-5b15abf2182f') }}</div>
                 <div>
                     <button v-if="!hasTagRestrictions" type="button" class="button icon trash" @click="deleteTagRestriction" />
                 </div>
             </h2>
-            <p>{{ $t('Kies voor welke groepen deze activiteit zichtbaar is.') }}</p>
+            <p>{{ $t('7335fc4d-f993-415c-976b-f32af724907e') }}</p>
 
             <TagIdsInput v-model="organizationTagIds" :is-tag-enabled-predicate="isTagEnabledPredicate" :validator="errors.validator" />
         </JumpToContainer>
@@ -159,10 +159,10 @@
             </h2>
 
             <STInputBox :title="$t('3db5bf3f-3eb5-4cfc-ba9b-429fab43c540')" error-fields="location.name" :error-box="errors.errorBox">
-                <input ref="firstInput" v-model="locationName" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`bv. Gemeentelijke feestzaal`)">
+                <input ref="firstInput" v-model="locationName" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`e32f1f4e-e834-47a1-a7cb-a807170b6871`)">
             </STInputBox>
 
-            <AddressInput v-model="locationAddress" :nullable="true" :required="isLocationRequired" :validator="errors.validator" :title="$t(`Adres (optioneel)`)" />
+            <AddressInput v-model="locationAddress" :nullable="true" :required="isLocationRequired" :validator="errors.validator" :title="$t(`5e85d1ac-98a4-4cfb-a0ce-f06e427d73b3`)" />
         </JumpToContainer>
 
         <JumpToContainer :visible="!!coverPhoto">
@@ -173,7 +173,7 @@
                         <span class="icon trash" />
                         <span>{{ $t('ffef2405-f472-416b-b8fa-372fdf694797') }}</span>
                     </button>
-                    <UploadButton v-model="coverPhoto" :text="coverPhoto ? $t(`Vervangen`) : $t(`Uploaden`)" :resolutions="resolutions" />
+                    <UploadButton v-model="coverPhoto" :text="coverPhoto ? $t(`b7c71a71-9523-4748-a6cd-80b9314b05b2`) : $t(`5be27263-6804-4f1c-92b0-f20cdacc141b`)" :resolutions="resolutions" />
                 </div>
             </h2>
 

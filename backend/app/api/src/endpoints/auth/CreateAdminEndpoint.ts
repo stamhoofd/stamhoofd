@@ -59,7 +59,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: 'internal_error',
                 message: 'Something went wrong while creating the admin',
-                human: $t(`Er ging iets mis bij het aanmaken van dit account`),
+                human: $t(`f298a54a-ee0f-462c-a80a-8d8c967dfda3`),
                 statusCode: 500,
             });
         }
@@ -123,7 +123,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
                         }),
                         Replacement.create({
                             token: 'inviterName',
-                            value: user.firstName ?? $t(`Iemand`),
+                            value: user.firstName ?? $t(`afc47996-7028-43ad-b7d0-8b5bb2979883`),
                         }),
                         Replacement.create({
                             token: 'validUntil',

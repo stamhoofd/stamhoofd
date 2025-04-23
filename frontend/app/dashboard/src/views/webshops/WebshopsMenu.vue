@@ -1,11 +1,11 @@
 <template>
     <div class="st-menu st-view">
-        <STNavigationBar :title="$t(`Verkoop`)" />
+        <STNavigationBar :title="$t(`2a7f1944-1da2-4a55-bb1d-981aeed5d29e`)" />
         <main>
-            <h1>{{ $t('Webshops') }}</h1>
+            <h1>{{ $t('e85a86ee-7751-4791-984b-f67dc1106f6b') }}</h1>
 
             <p v-if="visibleWebshops.length === 0" class="info-box">
-                {{ $t('Je hebt nog geen webshops gemaakt') }}
+                {{ $t('2aaf6529-b504-45f9-848e-8fe2b52738ec') }}
             </p>
 
             <STList v-if="visibleWebshops.length > 0">
@@ -37,7 +37,7 @@
                             <span class="icon archive" />
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Archief') }}
+                            {{ $t('c51b35d1-228b-4ce3-8b27-312b5620b662') }}
                         </h2>
                     </STListItem>
 
@@ -46,7 +46,7 @@
                             <span class="icon add" />
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Webshop') }}
+                            {{ $t('e38c0b49-b038-4c9c-9653-fe1e4a078226') }}
                         </h2>
                     </STListItem>
                 </STList>

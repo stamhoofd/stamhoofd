@@ -5,7 +5,7 @@
 
             <main class="center">
                 <h1>
-                    {{ $t('Boekhouding') }}
+                    {{ $t('5d5cb596-1b5b-4ec3-98dd-2c0f012d9093') }}
                 </h1>
 
                 <STList class="illustration-list">
@@ -14,7 +14,7 @@
                             <img src="@stamhoofd/assets/images/illustrations/calculator.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Betalingen exporteren') }}
+                            {{ $t('bcc00835-8af6-4b3a-ad77-691c724af03d') }}
                         </h2>
                         <p class="style-description">
                             {{ $t("64633f7b-2d6e-4ad2-abb1-e9dd77d9a81f") }}
@@ -29,10 +29,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/check-transfer.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Overschrijvingen controleren') }}
+                            {{ $t('bf002215-26cc-4f43-9bf7-3cca60d50a10') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Markeer overschrijvingen als betaald.') }}
+                            {{ $t('d40fa481-cb6d-44ab-bacb-ad8e6fe00cdc') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -44,10 +44,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Alle betalingen') }}
+                            {{ $t('9365e40e-8b00-4b24-8e15-6312aa624fbb') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Controleer alle betalingen die in het systeem aanwezig zijn, inclusief eventueel mislukte betaalpogingen.') }}
+                            {{ $t('8a2e0bd7-27ea-455b-945a-445d91f0ebea') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -59,10 +59,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Te ontvangen bedragen') }}
+                            {{ $t('3df2215e-5c13-493d-afc6-4a866150960c') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Lijst van alle leden die nog een openstaand bedrag hebben tegenover {organization}', {organization: organization!.name}) }}
+                            {{ $t('d74d7aec-8fd5-489a-b93d-89d56ca8ae34', {organization: organization!.name}) }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -71,8 +71,8 @@
                 </STList>
 
                 <div v-for="item of outstandingBalance.organizations" :key="item.organization.id" class="container">
-                    <hr><h2>{{ $t('Betalingen aan {organization}', {organization: item.organization.name}) }}</h2>
-                    <p>{{ $t('Hier vind je een overzicht van wat je moet betalen aan {organization}, bv. voor de aansluitingkosten van leden.', {organization: item.organization.name}) }}</p>
+                    <hr><h2>{{ $t('027d88ac-a3a4-4193-bc1b-8e671bbc6637', {organization: item.organization.name}) }}</h2>
+                    <p>{{ $t('4aa391d7-2367-43fe-a4ce-c4d18b9e46d9', {organization: item.organization.name}) }}</p>
 
                     <STList class="illustration-list">
                         <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.PayableBalance, {params: {uri: item.organization.uri}})">
@@ -80,14 +80,14 @@
                                 <img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg">
                             </template>
                             <h2 class="style-title-list">
-                                {{ $t('Openstaand bedrag') }}
+                                {{ $t('40d7ac9f-f62d-4a9d-8b2f-5fcfb938c12f') }}
                             </h2>
                             <p class="style-description">
-                                {{ $t('Breng de betaling van dit bedrag in orde.') }}
+                                {{ $t('ef30fb68-251e-410b-8e95-df01fa30359e') }}
                             </p>
 
                             <p v-if="BalanceItem.getOutstandingBalance(item.balanceItems).pricePending > 0" class="style-description">
-                                {{ $t('Betaling van {price} gestart, maar nog in verwerking.', {price: formatPrice(BalanceItem.getOutstandingBalance(item.balanceItems).pricePending)}) }}
+                                {{ $t('1602ef29-3f5c-4ec6-a57a-d80361d89013', {price: formatPrice(BalanceItem.getOutstandingBalance(item.balanceItems).pricePending)}) }}
                             </p>
 
                             <template #right>
@@ -103,10 +103,10 @@
                                 <img src="@stamhoofd/assets/images/illustrations/transfer.svg">
                             </template>
                             <h2 class="style-title-list">
-                                {{ $t('Betaalbewijzen') }}
+                                {{ $t('774d7eaf-dee1-4549-8531-7c6ac622e123') }}
                             </h2>
                             <p class="style-description">
-                                {{ $t('Bekijk een overzicht van jouw betalingen aan {organization}.', {organization: item.organization.name}) }}
+                                {{ $t('7731a1c3-1ed2-4b46-8c21-b5cd67c8c521', {organization: item.organization.name}) }}
                             </p>
                             <template #right>
                                 <span class="icon arrow-right-small gray" />

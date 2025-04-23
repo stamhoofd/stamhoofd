@@ -1,13 +1,13 @@
 <template>
     <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`Vragenlijsten en gegevens`)" @save="save">
         <h1>
-            {{ $t('Vragenlijsten en gegevens') }}
+            {{ $t('da5f0578-ebf9-40e1-8caf-baa3a7970b28') }}
         </h1>
-        <p>{{ $t('Je kan zelf kiezen welke extra informatie je van bestellers wilt verzamelen.') }}</p>
+        <p>{{ $t('422c4fca-4c1d-44f4-8e08-b8044c869b7f') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <hr><h2>{{ $t('Ingebouwde gegevens') }}</h2>
+        <hr><h2>{{ $t('98d06da4-164b-4b8f-a373-3873fa99e1ab') }}</h2>
 
         <p>{{ $t('fd68e1a7-6059-47fc-b7ad-fdfe4924a67d') }}</p>
 
@@ -22,10 +22,10 @@
             </STListItem>
         </STList>
 
-        <hr><h2>{{ $t('Vragenlijsten tijdens afrekenen') }}</h2>
+        <hr><h2>{{ $t('ec8efff4-e2cf-4755-b8fb-a47f686be173') }}</h2>
 
         <p>
-            {{ $t('Voeg zelf vragenlijsten toe die ingevuld kunnen worden bij het plaatsen van een bestelling (na de ingebouwde gegevens).') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('Meer info') }}</a>
+            {{ $t('86161523-8879-4092-a332-567bf55e0f52') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}</a>
         </p>
 
         <STList v-model="categories" :draggable="true">
@@ -37,7 +37,7 @@
         <p>
             <button class="button text" type="button" @click="addCategory">
                 <span class="icon add" />
-                <span>{{ $t('Nieuwe vragenlijst') }}</span>
+                <span>{{ $t('9a390ab2-bb28-49dc-9837-b389f5877c53') }}</span>
             </button>
         </p>
     </SaveView>

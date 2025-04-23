@@ -5,11 +5,11 @@
         </h1>
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
-            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`Naam van deze keuze`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
+            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`1539d481-12bf-4814-9fe3-3770eaecdda8`)">
         </STInputBox>
 
-        <ReduceablePriceInput v-model="price" :group="group" :error-box="errors.errorBox" :validator="errors.validator" :title="$t(`Meer of minkost`)" />
+        <ReduceablePriceInput v-model="price" :group="group" :error-box="errors.errorBox" :validator="errors.validator" :title="$t(`295faf23-65af-4820-80de-fa6abfe751e3`)" />
 
         <STList>
             <STListItem :selectable="true" element-name="label">
@@ -18,10 +18,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Verborgen') }}
+                    {{ $t('6276d07c-bd0d-4117-b46c-e3f7b0dbb1e5') }}
                 </h3>
                 <p v-if="hidden" class="style-description-small">
-                    {{ $t('Deze keuze wordt onzichtbaar in het ledenportaal en is enkel manueel toe te voegen door een beheerder.') }}
+                    {{ $t('9562217e-b18e-480e-ad7f-7fd6596dddd6') }}
                 </p>
             </STListItem>
 
@@ -31,10 +31,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Meerdere stuks') }}
+                    {{ $t('2cf796b8-5968-4e10-82f6-cffa4e3d8948') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Een lid kan zelf een aantal stuks kiezen met een invulveld en plus- en minknop bij deze keuze.') }}
+                    {{ $t('f2460d7a-606e-4b03-bf79-d020f4f6c658') }}
                 </p>
             </STListItem>
 
@@ -44,11 +44,11 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Beperk hoeveel stuks maximaal kunnen worden gekozen per inschrijving') }}
+                    {{ $t('bf8d7839-2261-404e-bf74-66d3156a839e') }}
                 </h3>
 
                 <div v-if="useMaximum" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox error-fields="maximum" :error-box="errors.errorBox" :title="$t(`Maximum aantal`)">
+                    <STInputBox error-fields="maximum" :error-box="errors.errorBox" :title="$t(`701fc423-4bf4-4de7-917b-eed7923b2164`)">
                         <NumberInput v-model="maximum" suffix="stuks" suffix-singular="stuk" :required="false" :placeholder="$t('c5562430-7c78-454c-8d61-7b4a98fbaf02')" :min="2" />
                     </STInputBox>
                 </div>
@@ -60,7 +60,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Beperk het totale beschikbare aantal stuks (waarvan nu {stock} ingenomen of gereserveerd)', {stock: usedStock.toString()}) }}
+                    {{ $t('193b7c4b-a401-43bb-8a1a-5be6368c16bd', {stock: usedStock.toString()}) }}
                 </h3>
 
                 <div v-if="useStock" class="split-inputs option" @click.stop.prevent>

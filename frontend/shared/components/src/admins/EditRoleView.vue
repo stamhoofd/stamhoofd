@@ -6,12 +6,12 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox v-if="!isForResponsibility" error-fields="name" :error-box="errors.errorBox" :title="$t(`Titel`)">
-            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`Naam van deze rol`)">
+        <STInputBox v-if="!isForResponsibility" error-fields="name" :error-box="errors.errorBox" :title="$t(`cbe7db4a-b65b-452b-a5d2-d369182fd28f`)">
+            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`8edda6d9-057a-4740-89f3-a226b8fd4950`)">
         </STInputBox>
 
-        <hr><h2>{{ $t('Basistoegang') }}</h2>
-        <p>{{ $t('Geef deze beheerders snel lees of bewerk toegang tot alle onderdelen van jouw vereniging.') }}</p>
+        <hr><h2>{{ $t('27778acf-5730-4c2d-8337-0a84ba47f3f1') }}</h2>
+        <p>{{ $t('bf7f8c10-b6b5-4edb-90d8-a550d061dea6') }}</p>
 
         <STList>
             <STListItem :selectable="true" element-name="label">
@@ -19,10 +19,10 @@
                     <Radio v-model="basePermission" value="None" :disabled="lockedMinimumLevel !== PermissionLevel.None" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Geen') }}
+                    {{ $t('45ff02db-f404-4d91-853f-738d55c40cb6') }}
                 </h3>
                 <p v-if="basePermission === 'None'" class="style-description-small">
-                    {{ $t('Deze beheerders kunnen geen onderdelen zien of bewerken tenzij expliciet hieronder toegang werd gegeven.') }}
+                    {{ $t('1d66f70e-1a42-4479-9e27-683e3f536ccd') }}
                 </p>
             </STListItem>
 
@@ -31,10 +31,10 @@
                     <Radio v-model="basePermission" :value="PermissionLevel.Full" :disabled="lockedMinimumLevel !== PermissionLevel.None" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Volledige toegang') }}
+                    {{ $t('c2296305-99a9-497a-aed3-7bb3d2293ce8') }}
                 </h3>
                 <p v-if="basePermission === PermissionLevel.Full" class="style-description-small">
-                    {{ $t('Deze beheerders hebben toegang tot alles') }}
+                    {{ $t('4610ce3e-5b1e-40d6-8d62-888dc54d2bb9') }}
                 </p>
             </STListItem>
         </STList>
@@ -42,10 +42,10 @@
         <template v-if="basePermission !== PermissionLevel.Full">
             <template v-if="app === 'admin' && (scope === null || scope === 'admin')">
                 <hr><h2>
-                    {{ $t('Toegang tot verenigingen') }}
+                    {{ $t('d431d7b4-8cdd-4307-bb73-2c570fc1a0fa') }}
                 </h2>
 
-                <p>{{ $t('Je kan een beheerder volledige toegang geven tot alle verenigingen (en dus ook de leden van die vereniging), of per tag de toegang regelen.') }}</p>
+                <p>{{ $t('31982300-fbbf-4f5a-b7ce-26738bd2b23d') }}</p>
 
                 <STList>
                     <ResourcePermissionRow :role="patched" :resource="{id: '', name: 'Alle verenigingen', type: PermissionsResourceType.OrganizationTags }" :inherited-roles="inheritedRoles" :configurable-access-rights="[AccessRight.EventWrite, AccessRight.OrganizationFinanceDirector, AccessRight.OrganizationEventNotificationReviewer]" type="resource" @patch:role="addPatch" />
@@ -58,9 +58,9 @@
 
             <template v-if="enableActivities && categories.length">
                 <hr><h2>
-                    {{ $t('Inschrijvingscategorieën') }}
+                    {{ $t('376152ba-a238-451e-a2ce-5a9d4ff69e67') }}
                 </h2>
-                <p>{{ $t('Geef deze beheerders meteen toegang tot alle inschrijvingsgroepen uit een categorie, of geef ze zelf de mogelijkheid om inschrijvingsgroepen (bv. activiteiten of leeftijdsgroepen) aan te maken in één of meerdere categorieën. Enkel hoofdbeheerders kunnen categorieën toevoegen en bewerken.') }}</p>
+                <p>{{ $t('8ff93aca-241e-478f-8e71-f9abd17d2fa5') }}</p>
 
                 <STList>
                     <ResourcePermissionRow v-for="category in categories" :key="category.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: category.id, name: category.settings.name, type: PermissionsResourceType.GroupCategories }" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="addPatch" />
@@ -71,7 +71,7 @@
 
             <div v-if="enableMemberModule && groups.length" class="container">
                 <hr><h2>
-                    {{ $t('Individuele inschrijvingsgroepen') }}
+                    {{ $t('1c68dc61-88b4-4adc-9059-67768a473867') }}
                 </h2>
 
                 <STList>
@@ -83,8 +83,8 @@
             </div>
 
             <div v-if="enableWebshopModule" class="container">
-                <hr><h2>{{ $t('Webshops') }}</h2>
-                <p>{{ $t('Voeg webshops toe om deze beheerders toegang te geven tot een specifieke webshop') }}</p>
+                <hr><h2>{{ $t('e85a86ee-7751-4791-984b-f67dc1106f6b') }}</h2>
+                <p>{{ $t('0b8c6bb0-a953-45b6-8a2c-088d5468f743') }}</p>
 
                 <STList>
                     <AccessRightPermissionRow :access-right="AccessRight.OrganizationCreateWebshops" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
@@ -96,9 +96,9 @@
 
             <div v-if="app !== 'admin' || scope === 'organization'" class="container">
                 <hr><h2>
-                    {{ $t('Toegang tot gegevens van leden') }}
+                    {{ $t('3fcb229b-451c-4c81-8934-5ee65059907c') }}
                 </h2>
-                <p>{{ $t('Standaard heeft elke beheerder die een lid kan bekijken of bewerken, toegang tot de algemene informatie van dat lid (naam, geboortedatum, gender, adres, ouders, noodcontactpersonen). Je kan bepaalde beheerders ook toegang geven tot meer gegevens hieronder.') }}</p>
+                <p>{{ $t('3ac48a57-5af2-449a-91d0-8a98ffe2284f') }}</p>
 
                 <STList>
                     <AccessRightPermissionRow :access-right="AccessRight.MemberReadFinancialData" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
@@ -114,7 +114,7 @@
             </div>
 
             <template v-if="app !== 'admin' || scope === 'organization'">
-                <hr><h2>{{ $t('Boekhouding') }}</h2>
+                <hr><h2>{{ $t('5d5cb596-1b5b-4ec3-98dd-2c0f012d9093') }}</h2>
 
                 <STList>
                     <AccessRightPermissionRow :access-right="AccessRight.OrganizationFinanceDirector" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
@@ -126,25 +126,25 @@
 
         <div v-if="!isNew && deleteHandler" class="container">
             <hr><h2 v-if="responsibility">
-                {{ $t('Verwijder gekoppelde rechten') }}
+                {{ $t('ab8181ca-a193-4cb3-a476-501b4d9196d3') }}
             </h2>
             <h2 v-else>
-                {{ $t('Verwijder deze rol') }}
+                {{ $t('b36cd1f7-9923-433b-93d8-605ac65a4718') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="doDelete">
                 <span class="icon trash" />
-                <span>{{ $t('Verwijderen') }}</span>
+                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
             </button>
         </div>
 
         <template v-if="!isNew && !responsibility">
-            <hr><h2>{{ $t('Beheerders met deze rol') }}</h2>
+            <hr><h2>{{ $t('f30d6db4-12bf-4048-a31c-3e0d8ee3e935') }}</h2>
 
             <Spinner v-if="loading" />
             <template v-else>
                 <p v-if="filteredAdmins.length === 0" class="info-box">
-                    {{ $t('Er zijn geen beheerders met deze rol.') }}
+                    {{ $t('8edaef10-547b-4f3a-9a23-94380305b061') }}
                 </p>
                 <STList v-else>
                     <STListItem v-for="admin in filteredAdmins" :key="admin.id">

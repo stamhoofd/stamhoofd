@@ -6,11 +6,11 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox v-if="isNew" error-fields="type" :error-box="errors.errorBox" :title="$t(`Type document`)">
+        <STInputBox v-if="isNew" error-fields="type" :error-box="errors.errorBox" :title="$t(`50807c89-d15f-4a2e-b8c7-95932d5aa5c8`)">
             <LoadingButton :loading="loadingHtml || loadingXml">
                 <Dropdown v-model="editingType">
                     <option :value="null" disabled>
-                        {{ $t('Maak een keuze') }}
+                        {{ $t('569d1c4a-9389-47dd-9acb-930419271276') }}
                     </option>
                     <option v-for="_type in availableTypes" :key="_type.value ?? _type.definition.name" :value="_type.value">
                         {{ _type.definition.name }}
@@ -20,8 +20,8 @@
         </STInputBox>
 
         <template v-if="editingType || !isNew">
-            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
-                <input v-model="name" class="input" type="text" :placeholder="$t(`Naam document`)">
+            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
+                <input v-model="name" class="input" type="text" :placeholder="$t(`2fe38a3a-0041-4724-869e-4a5b55634380`)">
             </STInputBox>
 
             <div v-for="category of fieldCategories.filter(c => c.filterRecords(patchedDocument).filter(record => isDocumentFieldEditable(record)).length > 0)" :key="category.id" class="container">
@@ -32,18 +32,18 @@
             </div>
 
             <div v-for="category of documentFieldCategories" :key="category.id" class="container">
-                <hr><h2>{{ $t('Koppelen:') }} {{ category.name }}</h2>
+                <hr><h2>{{ $t('0f3c0101-6c9a-43e2-8b9f-6f65585ce05e') }} {{ category.name }}</h2>
                 <p v-if="category.description" class="style-description pre-wrap" v-text="category.description" />
 
                 <p class="info-box">
                     {{ $t('39d0d9ca-2f37-40b6-84a4-51fb29b4cce6') }}
                 </p>
 
-                <MultiSelectInput v-for="field of category.getAllRecords().filter(r => isDocumentFieldEditable(r))" :key="field.id" class="max" :title="field.name" :error-fields="field.id" :error-box="errors.errorBox" :model-value="getLinkedFields(field)" :choices="getLinkedFieldsChoices(field)" :placeholder="$t(`Niet gekoppeld`)" @update:model-value="setLinkedFields(field, $event)" />
+                <MultiSelectInput v-for="field of category.getAllRecords().filter(r => isDocumentFieldEditable(r))" :key="field.id" class="max" :title="field.name" :error-fields="field.id" :error-box="errors.errorBox" :model-value="getLinkedFields(field)" :choices="getLinkedFieldsChoices(field)" :placeholder="$t(`358e6e0b-9736-4cc8-9f96-99583880d15c`)" @update:model-value="setLinkedFields(field, $event)" />
             </div>
 
-            <hr><h2>{{ $t('Inschrijvingen') }}</h2>
-            <p>{{ $t('Kies voor welke inschrijvingen je dit document wilt aanmaken. Er wordt altijd één document aangemaakt per inschrijving.') }}</p>
+            <hr><h2>{{ $t('95ac7564-3fdd-4427-be59-51fd02606b76') }}</h2>
+            <p>{{ $t('1fd616a7-b465-480a-9777-dc036e7b2a08') }}</p>
 
             <STList v-if="patchedDocument.privateSettings.groups.length">
                 <STListItem v-for="group of patchedDocument.privateSettings.groups" :key="group.group.id" :selectable="true" @click="updateGroupAnswers(group)">
@@ -60,48 +60,48 @@
             <p>
                 <button type="button" class="button text" @click="addGroup">
                     <span class="icon add" />
-                    <span>{{ $t('Inschrijvingen toevoegen') }}</span>
+                    <span>{{ $t('d40bb85c-53b9-4b93-be82-9fa7e2f6a11c') }}</span>
                 </button>
             </p>
 
             <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMaxAge">
-                <hr><h2>{{ $t('Leeftijdsbeperking') }}</h2>
-                <STInputBox error-fields="maxAge" :error-box="errors.errorBox" :title="$t(`Maximum leeftijd`)">
-                    <NumberInput v-model="maxAge" :required="false" suffix="jaar" :placeholder="$t(`Geen`)" />
+                <hr><h2>{{ $t('260a3c1e-5e4f-464e-b380-ea6f4022bc91') }}</h2>
+                <STInputBox error-fields="maxAge" :error-box="errors.errorBox" :title="$t(`8c4df8c5-1ed9-402b-aedd-f4bcd940ca34`)">
+                    <NumberInput v-model="maxAge" :required="false" suffix="jaar" :placeholder="$t(`45ff02db-f404-4d91-853f-738d55c40cb6`)" />
                 </STInputBox>
             </template>
 
             <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMinPrice">
-                <hr><h2>{{ $t('Bedrag') }}</h2>
+                <hr><h2>{{ $t('a023893e-ab2c-4215-9981-76ec16336911') }}</h2>
                 <Checkbox v-model="nonZeroPriceOnly">
-                    {{ $t('Enkel aanmaken indien inschrijvingsbedrag groter is dan 0 euro') }}
+                    {{ $t('30c6addd-ebd7-470e-8f9b-e115d5e86820') }}
                 </Checkbox>
             </template>
 
             <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMinPricePaid">
-                <hr><h2>{{ $t('Betaald') }}</h2>
+                <hr><h2>{{ $t('1c1933f1-fee4-4e7d-9c89-57593fd5bed3') }}</h2>
                 <Checkbox v-model="paidOnly">
-                    {{ $t('Enkel aanmaken indien inschrijving betaald is') }}
+                    {{ $t('a7ea9da5-e3d3-4253-b7f5-b90fbdeb83dc') }}
                 </Checkbox>
             </template>
 
             <template v-if="auth.hasPlatformFullAccess()">
-                <hr><h2>{{ $t('Geavanceerd') }}</h2>
+                <hr><h2>{{ $t('6a11d3a7-6348-4aca-893e-0f026e5eb8b0') }}</h2>
 
                 <STList>
-                    <CheckboxListItem v-model="useCustomHtml" :label="$t(`Eigen HTML gebruiken voor document`)" :description="$t(`Personaliseer het document door het wat aan te passen indien je zelf ervaring hebt met HTML. Test het resultaat wel goed uit.`)">
+                    <CheckboxListItem v-model="useCustomHtml" :label="$t(`e5f05c4e-be30-4a28-85a3-939038fb12a7`)" :description="$t(`db4e01e7-911a-4b58-b242-068f887851f7`)">
                         <div v-if="useCustomHtml" class="style-button-bar">
                             <button class="button text" type="button" @click="downloadHtml">
                                 <span class="icon download" />
                                 <span>
-                                    {{ $t('Download huidige HTML') }}
+                                    {{ $t('51190e58-cb85-4d12-b276-937d5514ccfd') }}
                                 </span>
                             </button>
 
                             <label class="button text">
                                 <span class="icon sync" />
                                 <span>
-                                    {{ $t('Vervangen') }}
+                                    {{ $t('b7c71a71-9523-4748-a6cd-80b9314b05b2') }}
                                 </span>
 
                                 <input type="file" multiple="true" style="display: none;" accept=".html, text/html" @change="(event) => changedFile(event as any)"></label>

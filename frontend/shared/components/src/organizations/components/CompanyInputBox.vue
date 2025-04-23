@@ -1,31 +1,31 @@
 <template>
     <STList>
-        <CheckboxListItem v-model="doesNotHaveCompanyNumber" :description="$t('Een feitelijke vereniging is niet geregistreerd en heeft geen ondernemingsnummer')" :label="$t(`Feitelijke vereniging`)" />
-        <CheckboxListItem v-if="hasCompanyNumber" v-model="hasVATNumber" :description="$t('Een VZW is bijna nooit BTW-plichtig')" :label="$t(`BTW-plichtig`)" />
+        <CheckboxListItem v-model="doesNotHaveCompanyNumber" :description="$t('becc82f0-4195-4a17-b3f5-03f305582e4a')" :label="$t(`594307a3-05b8-47cf-81e2-59fb6254deba`)" />
+        <CheckboxListItem v-if="hasCompanyNumber" v-model="hasVATNumber" :description="$t('f9c27b43-9514-4e18-94b4-d1abd79ce689')" :label="$t(`9e78c772-0f29-4fb0-8ce6-fe98f9886c01`)" />
     </STList>
 
-    <hr><h2>{{ $t('Gegevens') }}</h2>
+    <hr><h2>{{ $t('f4d00d5c-77c9-41dd-9689-a447c7977449') }}</h2>
 
     <div class="split-inputs">
         <div>
-            <STInputBox :title="hasCompanyNumber ? $t(`Bedrijfsnaam en rechtsvorm`) : $t(`Naam vereniging`)" error-fields="companyName" :error-box="errors.errorBox">
-                <input id="business-name" v-model="companyName" class="input" type="text" :placeholder="country === Country.Belgium ? $t(`bv. Ruimtereis VZW`) : $t(`bv. Ruimtereis vereniging`)" autocomplete="organization">
+            <STInputBox :title="hasCompanyNumber ? $t(`9ce72f71-93c0-4c9a-8662-2d673800f82c`) : $t(`8ad6c316-22e5-4fbf-b326-25ce5bf640e1`)" error-fields="companyName" :error-box="errors.errorBox">
+                <input id="business-name" v-model="companyName" class="input" type="text" :placeholder="country === Country.Belgium ? $t(`0fd5eadc-ddf0-4962-b7f2-a2dd6dd10c4c`) : $t(`49952c7d-05e9-46a2-b5ec-7411ed71be32`)" autocomplete="organization">
             </STInputBox>
             <p v-if="hasCompanyNumber && country === Country.Belgium" class="style-description-small">
-                {{ $t('Vul ook de rechtsvorm in, bv. VZW.') }}
+                {{ $t('da259569-5bd1-43bd-a632-fe0b3333443d') }}
             </p>
         </div>
         <div>
-            <CompanyNumberInput v-if="hasCompanyNumber && (!hasVATNumber || country !== Country.Belgium)" v-model="companyNumber" :country="country" :validator="validator" :required="true" :placeholder="$t(`Ondernemingsnummer`)" />
-            <VATNumberInput v-if="hasVATNumber" v-model="VATNumber" :country="country" :validator="validator" :required="true" :title="$t(`BTW-nummer`)" :placeholder="$t(`BTW-nummer`)" />
+            <CompanyNumberInput v-if="hasCompanyNumber && (!hasVATNumber || country !== Country.Belgium)" v-model="companyNumber" :country="country" :validator="validator" :required="true" :placeholder="$t(`fb64a034-071e-45d6-8d78-6b5f291ee5f9`)" />
+            <VATNumberInput v-if="hasVATNumber" v-model="VATNumber" :country="country" :validator="validator" :required="true" :title="$t(`4d2a6054-26bf-49ed-b91f-59a8819e6436`)" :placeholder="$t(`4d2a6054-26bf-49ed-b91f-59a8819e6436`)" />
         </div>
     </div>
 
     <div class="split-inputs">
         <div>
-            <AddressInput v-model="companyAddress" :required="true" :title="doesNotHaveCompanyNumber ? $t(`Adres`) : $t(`Maatschappelijke zetel`)" :validator="validator" />
+            <AddressInput v-model="companyAddress" :required="true" :title="doesNotHaveCompanyNumber ? $t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`) : $t(`e49699b5-d1bb-4547-8002-08ed2883997c`)" :validator="validator" />
         </div>
-        <EmailInput v-model="administrationEmail" :validator="validator" :required="false" :title="$t(`E-mailadres boekhouding (optioneel)`)" :placeholder="$t(`Optioneel`)" />
+        <EmailInput v-model="administrationEmail" :validator="validator" :required="false" :title="$t(`e2a0d0fd-b353-4ac1-8872-a4617fe79e2f`)" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" />
     </div>
 </template>
 
@@ -57,7 +57,7 @@ useValidation(props.validator, async () => {
             new SimpleError({
                 code: 'missing_field',
                 field: 'companyName',
-                message: $t('Gelieve een geldige naam in te vullen'),
+                message: $t('d16f385c-7a66-446c-8caa-7a7de5cc4073'),
             }),
         );
         return false;

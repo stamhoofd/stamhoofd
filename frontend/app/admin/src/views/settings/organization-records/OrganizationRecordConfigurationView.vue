@@ -9,7 +9,7 @@
         </p>
 
         <p class="style-description-block">
-            {{ $t('Lees') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('hier') }}</a> {{ $t('meer informatie na over hoe je een vragenlijst kan instellen.') }}
+            {{ $t('8485e7ea-6d66-4f2c-b92a-bd44cb2f4eb4') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('0487c3b0-3f93-4344-a34a-9a9198f37023') }}</a> {{ $t('69551005-512c-4240-8e20-fd546cefafaa') }}
         </p>
 
         <EditRecordCategoriesBox :categories="patched.recordCategories" :settings="editorSettings" @patch:categories="addCategoriesPatch" />
@@ -53,12 +53,12 @@ const editorSettings = computed(() => {
             return getOrganizationUIFilterBuildersForTags(platform.value)[0];
         },
         exampleValue: Organization.create({
-            name: $t(`Voorbeeld`),
+            name: $t(`38e2c1aa-13f6-4339-8cfd-68c2603beb51`),
             address: Address.create({
-                street: $t(`Voorbeeldstraat`),
+                street: $t(`4fe1ed50-7a5c-410a-8aa0-1625b5beb844`),
                 number: '1',
                 postalCode: '1234AB',
-                city: $t(`Voorbeeldstad`),
+                city: $t(`ab2559af-f877-4ee0-bc40-ba563314cded`),
                 country: Country.Belgium,
             }),
             privateMeta: OrganizationPrivateMetaData.create({}),

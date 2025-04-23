@@ -5,10 +5,10 @@
                 <button v-if="canLeaveSelectionMode && isMobile && showSelection && !isIOS" type="button" class="button icon navigation close" @click="setShowSelection(false)"/>
                 <button v-else-if="canLeaveSelectionMode && showSelection && isIOS" type="button" class="button navigation" @click="isAllSelected = !isAllSelected">
                     <template v-if="isAllSelected">
-                        {{ $t('Deselecteer alles') }}
+                        {{ $t('e1efdf4c-de0b-4c12-ba87-dec739b2186f') }}
                     </template>
                     <template v-else>
-                        {{ $t('Selecteer alles') }}
+                        {{ $t('62d13348-4438-44e4-9ea0-c4fb42c0123b') }}
                     </template>
                 </button>
                 <BackButton v-else-if="canPop" @click="pop">
@@ -22,11 +22,11 @@
 
                 <template v-if="showSelection && isIOS && canLeaveSelectionMode">
                     <button v-if="canLeaveSelectionMode" key="iOSDone" type="button" class="button navigation highlight" @click="setShowSelection(false)">
-                        {{ $t('Gereed') }}
+                        {{ $t('7e492b8b-771a-48cd-b10a-2d12fb0cb525') }}
                     </button>
                 </template>
                 <button v-else-if="!showSelection && isIOS && false" key="iOSSelect" type="button" class="button navigation" @click="setShowSelection(true)">
-                    {{ $t('Selecteer') }}
+                    {{ $t('bbc1d7b9-1b97-426f-b8a6-df946bd50d4d') }}
                 </button>
                 <button v-else key="actions" v-long-press="(e) => showActions(true, e)" type="button" class="button icon more navigation" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)"/>
             </template>
@@ -45,12 +45,12 @@
                 <div class="input-with-buttons">
                     <div>
                         <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                            <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`Zoeken`)"></form>
+                            <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`01e2b860-7045-4a0c-84ca-2303346d14b2`)"></form>
                     </div>
                     <div v-if="canFilter">
                         <button type="button" class="button text" @click="editFilter">
                             <span class="icon filter"/>
-                            <span class="hide-small">{{ $t('Filter') }}</span>
+                            <span class="hide-small">{{ $t('de5706ec-7edc-4e62-b3f7-d6e414720480') }}</span>
                             <span v-if="!isEmptyFilter(tableObjectFetcher.baseFilter)" class="icon dot primary"/>
                         </button>
                     </div>
@@ -75,7 +75,7 @@
                                         }"/>
                                 </button>
                                 <span v-if="index < columns.length - 1" class="drag-handle-container"><span class="drag-handle" @mousedown="(event) => handleDragStart(event, column)" @touchstart="(event) => handleDragStart(event, column)"/></span>
-                                <button v-else-if="canCollapse" type="button" class="button light-gray icon collapse-left" @click="collapse" :v-tooltip="$t(`'Pas kolommen op het scherm'`)"/>
+                                <button v-else-if="canCollapse" type="button" class="button light-gray icon collapse-left" @click="collapse" :v-tooltip="$t(`d0aea573-019a-4008-aefc-c785de44dfdc`)"/>
                             </div>
                         </div>
                     </div>
@@ -105,7 +105,7 @@
                 {{ errorMessage }}
 
                 <button class="button text" type="button" @click="refresh">
-                    {{ $t('Opnieuw') }}
+                    {{ $t('7889a8f8-a31e-4291-b8e7-6169e68ed6b4') }}
                 </button>
             </p>
 
@@ -113,10 +113,10 @@
                 <slot name="empty"/>
             </p>
             <p v-else-if="totalFilteredCount === 0" class="info-box with-button">
-                {{ $t('Geen resultaten gevonden') }}
+                {{ $t('8c55753a-4ab8-419d-af51-0fb8d64e900e') }}
 
                 <button class="button text" type="button" @click="resetFilter">
-                    {{ $t('Reset') }}
+                    {{ $t('4efa0c2b-f5af-48fc-9fb3-37ccbdf1ca24') }}
                 </button>
             </p>
         </main>

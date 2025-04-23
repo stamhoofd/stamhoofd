@@ -31,7 +31,7 @@ export class WebshopFieldAnswer extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'This field is required',
-                human: $t(`Je moet dit veld verplicht invullen`),
+                human: $t(`f861299e-e4e1-46ec-a506-89303fdc26fb`),
                 field: 'answer',
             });
         }

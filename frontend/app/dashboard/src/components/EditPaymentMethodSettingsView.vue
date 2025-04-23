@@ -6,13 +6,13 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="paymentMethod === PaymentMethod.Transfer">
-            <STInputBox error-fields="transferSettings.creditor" :error-box="errors.errorBox" :title="$t(`Begunstigde`)">
+            <STInputBox error-fields="transferSettings.creditor" :error-box="errors.errorBox" :title="$t(`31c28f13-d3b8-42ee-8979-c8224633237e`)">
                 <input v-model="creditor" class="input" type="text" :placeholder="organization.name" autocomplete="off">
             </STInputBox>
 
-            <IBANInput v-model="iban" :validator="errors.validator" :required="true" :title="$t(`Bankrekeningnummer`)" />
+            <IBANInput v-model="iban" :validator="errors.validator" :required="true" :title="$t(`b541ddfb-cce5-4194-b6a5-3de523b27fa8`)" />
 
-            <STInputBox error-fields="transferSettings.type" :error-box="errors.errorBox" class="max" :title="$t(`Soort mededeling`)">
+            <STInputBox error-fields="transferSettings.type" :error-box="errors.errorBox" class="max" :title="$t(`aac4ace7-828f-4148-88f1-d49b50610cdd`)">
                 <STList>
                     <STListItem v-for="_type in transferTypes" :key="_type.value" :selectable="true" element-name="label">
                         <template #left>
@@ -27,32 +27,32 @@
             </STInputBox>
 
             <p v-if="transferType !== 'Structured'" class="warning-box">
-                <span>{{ $t('De mededeling kan niet gewijzigd worden door') }} <span v-if="type === 'webshop'">{{ $t('bestellers') }}</span><span v-else>{{ $t('leden') }}</span> {{ $t('die betalen met een app. Voorzie dus zelf geen eigen vervangingen zoals') }} <em class="style-em">{{ $t('bestelling + naam') }}</em> {{ $t("waarbij je ervan uitgaat dat de betaler manueel de mededeling kan invullen en wijzigen. Gebruik in plaats daarvan de 'Vaste mededeling' met de beschikbare automatische vervangingen.") }}</span>
+                <span>{{ $t('669bef94-f6a1-4a84-8f2c-5de06ea05db3') }} <span v-if="type === 'webshop'">{{ $t('6c2068f6-73c6-4e88-b104-15f95832838f') }}</span><span v-else>{{ $t('39c566d6-520d-4048-bb1a-53eeea3ccea7') }}</span> {{ $t('72e5e374-ecd9-40e5-ae80-d14553faab50') }} <em class="style-em">{{ $t('789da13b-5f65-4ab7-8318-ed015e0303cf') }}</em> {{ $t("cc322a9c-e781-4a4e-9e45-fb1355d3c536") }}</span>
             </p>
 
-            <STInputBox v-if="transferType !== 'Structured'" :title="transferType === 'Fixed' ? $t(`Mededeling`) : $t(`Voorvoegsel`)" error-fields="transferSettings.prefix" :error-box="errors.errorBox">
-                <input v-model="prefix" class="input" type="text" :placeholder="transferType === 'Fixed' ? $t(`Mededeling`) : (type === 'registration' ? $t(`Optioneel. Bv. Inschrijving`) : $t(`Optioneel. Bv. Bestelling`))" autocomplete="off">
+            <STInputBox v-if="transferType !== 'Structured'" :title="transferType === 'Fixed' ? $t(`136b7ba4-7611-4ee4-a46d-60758869210f`) : $t(`da96b2e0-1caa-4cf8-8276-94d907c64057`)" error-fields="transferSettings.prefix" :error-box="errors.errorBox">
+                <input v-model="prefix" class="input" type="text" :placeholder="transferType === 'Fixed' ? $t(`136b7ba4-7611-4ee4-a46d-60758869210f`) : (type === 'registration' ? $t(`ff789452-b123-437a-a77b-34f3e0dd3e5c`) : $t(`082234bc-835d-4c27-9fb4-5ab2221719a9`))" autocomplete="off">
             </STInputBox>
 
             <p v-if="transferExample && transferExample !== prefix" class="style-description-small">
-                {{ $t('Voorbeeld:') }} <span class="style-em">{{ transferExample }}</span>
+                {{ $t('ac28d270-81d6-4393-ae2c-6b0da9828cb2') }} <span class="style-em">{{ transferExample }}</span>
             </p>
 
             <p v-if="transferType === 'Fixed' && type === 'webshop'" class="style-description-small">
-                {{ $t('Gebruik automatische tekstvervangingen in de mededeling via') }} <code v-copyable class="style-inline-code style-copyable" :v-text="$t('{{naam}}')" />, <code v-copyable class="style-inline-code style-copyable" :v-text="$t('{{email}}')" /> {{ $t('of') }} <code v-copyable class="style-inline-code style-copyable" :v-text="$t('{{nr}}')" />
+                {{ $t('152f1003-ba4e-4ae0-acef-475bef27e4a5') }} <code v-copyable class="style-inline-code style-copyable" :v-text="$t('9e2430e8-5733-414c-9831-f7c455836691')" />, <code v-copyable class="style-inline-code style-copyable" :v-text="$t('a9947119-083e-4f5f-a088-7ec605ad8e3f')" /> {{ $t('411cf334-eebb-4f27-beb6-d81bd544c3f5') }} <code v-copyable class="style-inline-code style-copyable" :v-text="$t('61b6890f-3b3e-4d69-96fe-687e1366e738')" />
             </p>
             <p v-else-if="transferType === 'Fixed' && type === 'registration'" class="style-description-small">
-                {{ $t('Gebruik automatische tekstvervangingen in de mededeling via') }} <code v-copyable class="style-inline-code style-copyable" :v-text="$t('{{naam}}')" />
+                {{ $t('152f1003-ba4e-4ae0-acef-475bef27e4a5') }} <code v-copyable class="style-inline-code style-copyable" :v-text="$t('9e2430e8-5733-414c-9831-f7c455836691')" />
             </p>
 
-            <hr><h2>{{ $t('Instructies') }}</h2>
-            <p>{{ $t('Op de betaalpagina worden automatisch instructies getoond om de overschrijving correct uit te voeren. Je kan eventueel andere instructies opgeven, bv. als je het toelaat om de overschrijving later uit te voeren.') }}</p>
+            <hr><h2>{{ $t('717310b7-527a-4870-99c4-b6b3a42fe3fa') }}</h2>
+            <p>{{ $t('b7adfe7d-d1c9-482c-bba2-ecaffd9aa0b3') }}</p>
 
             <STInputBox title="" error-fields="infoDescription" :error-box="errors.errorBox" class="max">
-                <textarea v-model="infoDescription" class="input" type="text" autocomplete="off" :placeholder="$t(`Optioneel. Indien niet ingevuld worden automatisch geschikte instructies getoond.`)" />
+                <textarea v-model="infoDescription" class="input" type="text" autocomplete="off" :placeholder="$t(`0e392740-3dd9-4454-b33f-320465f1a52c`)" />
             </STInputBox>
 
-            <hr><h2>{{ $t('Geavanceerd') }}</h2>
+            <hr><h2>{{ $t('6a11d3a7-6348-4aca-893e-0f026e5eb8b0') }}</h2>
         </template>
 
         <STList>
@@ -62,7 +62,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Uitschakelen voor particulieren') }}
+                    {{ $t('404635de-cba2-4a9d-91dc-3309755c070f') }}
                 </h3>
             </STListItem>
 
@@ -72,11 +72,11 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Maak pas beschikbaar vanaf een minimum bedrag') }}
+                    {{ $t('6576e1fc-a49f-487f-ad2d-fc4bfb7b2550') }}
                 </h3>
 
                 <div v-if="useMinimumAmount" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox error-fields="minimumAmount" :error-box="errors.errorBox" :title="$t(`Minimum bedrag`)">
+                    <STInputBox error-fields="minimumAmount" :error-box="errors.errorBox" :title="$t(`ecfdb06e-e649-47d7-8047-4e340e6f6988`)">
                         <PriceInput v-model="minimumAmount" :min="2" :validator="errors.validator" />
                     </STInputBox>
                 </div>
@@ -88,12 +88,12 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Waarschuwing tonen bij selectie van deze betaalmethode') }}
+                    {{ $t('7410de9e-6805-41e5-b166-9e590056c41b') }}
                 </h3>
 
                 <div v-if="useWarning" class="split-inputs option" @click.stop.prevent>
                     <STInputBox title="" error-fields="warningText" :error-box="errors.errorBox" class="max">
-                        <textarea v-model="warningText" class="input" type="text" autocomplete="off" :placeholder="$t(`Waarschuwingstekst`)" />
+                        <textarea v-model="warningText" class="input" type="text" autocomplete="off" :placeholder="$t(`73dbf494-16a3-4e9a-8cbe-5170334209c0`)" />
                     </STInputBox>
                 </div>
             </STListItem>
@@ -104,7 +104,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Waarschuwing enkel tonen vanaf een minimum bedrag') }}
+                    {{ $t('62f644a2-98ba-4a8d-b7fd-22b2d0bb4d45') }}
                 </h3>
 
                 <div v-if="useWarningAmount" class="split-inputs option" @click.stop.prevent>
@@ -226,19 +226,19 @@ const transferTypes = computed(() => {
         {
             value: TransferDescriptionType.Structured,
             name: $t('f22ff741-6a05-4b15-aa6a-16e3a197ac99'),
-            description: $t(`Willekeurig aangemaakt.`),
+            description: $t(`140fd2a3-d019-45a9-9d2b-754111da04f6`),
         },
         {
             value: TransferDescriptionType.Reference,
-            name: props.type === 'registration' ? $t(`Naam van lid/leden`) : $t(`Bestelnummer`),
-            description: $t(`Eventueel voorafgegaan door een zelf gekozen woord (zie onder)`),
+            name: props.type === 'registration' ? $t(`1add2f6b-1c51-49f9-9fe3-a9a1ad62ad07`) : $t(`4d496edf-0203-4df3-a6e9-3e58d226d6c5`),
+            description: $t(`6d5b370e-491e-4565-acc9-444fe7e230fe`),
         },
         {
             value: TransferDescriptionType.Fixed,
-            name: $t(`Vaste mededeling`),
+            name: $t(`610a54d0-5ae5-4e4c-bac3-205fd56b65c8`),
             description: props.type === 'registration'
-                ? $t(`Altijd dezelfde mededeling voor alle inschrijvingen. Een betaling kan voor meerdere inschrijvingen tegelijk zijn.`)
-                : $t(`Altijd dezelfde mededeling voor alle bestellingen.`),
+                ? $t(`35112ce1-48f4-4078-918a-0dc66f25cff0`)
+                : $t(`1d8e0c76-eca0-4973-98bc-ebf7f940f05e`),
 
         },
     ];

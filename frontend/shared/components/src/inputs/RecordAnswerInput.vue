@@ -60,7 +60,7 @@
         </STInputBox>
 
         <p v-else class="error-box">
-            {{ $t('Niet ondersteund. Herlaad de app indien nodig en probeer opnieuw.') }}
+            {{ $t('670ff020-405b-4e81-88e0-c2afa77a4660') }}
         </p>
 
         <div v-if="answer.settings.type === RecordType.Checkbox && selected && answer.settings.askComments" class="textarea-container">

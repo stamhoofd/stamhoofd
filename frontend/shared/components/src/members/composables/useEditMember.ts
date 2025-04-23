@@ -11,7 +11,7 @@ export function useEditMember() {
         components: [
             new ComponentWithProperties(MemberStepView, {
                 member: member,
-                title: member.member.firstName + ' ' + $t(`bewerken`),
+                title: member.member.firstName + ' ' + $t(`ee3bc635-c294-4134-9155-7a74f47dec4f`),
                 component: markRaw(EditMemberAllBox),
                 saveHandler: async ({dismiss}: NavigationActions) => {
                     await dismiss({force: true});

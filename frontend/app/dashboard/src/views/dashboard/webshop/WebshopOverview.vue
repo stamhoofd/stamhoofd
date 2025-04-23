@@ -19,10 +19,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/cart.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Bestellingen') }}
+                        {{ $t('fc1cc5ad-1590-422d-96a5-4523f10fcab1') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Bekijk en exporteer bestellingen, e-mail en SMS klanten.') }}
+                        {{ $t('30a87df1-5f18-4639-8f00-6b333f84d87f') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -34,10 +34,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/seating-plan.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Zaaloverzicht') }}
+                        {{ $t('6a49e896-3491-4f6e-a947-d180fce6c6e8') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Bekijk welke plaatsen door welke personen zijn ingenomen.') }}
+                        {{ $t('558631c2-ee72-4b1e-a8d8-b58a3f863f3f') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -49,10 +49,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/scanner.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Scan tickets') }}
+                        {{ $t('a4919b04-c7de-4c7b-96ac-e18acc476ad7') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Gebruik je camera om snel tickets te scannen.') }}
+                        {{ $t('b0b16292-fad7-4cc2-82ee-46155a484192') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -64,10 +64,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/diagram.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Statistieken') }}
+                        {{ $t('121c350e-012c-4bf7-a2bc-2c07b7c433c8') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Bekijk jouw omzet en andere statistieken.') }}
+                        {{ $t('9351f351-ef7a-4d6b-bfb4-ed0366ab8938') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -79,10 +79,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/earth.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Bekijk jouw webshop') }}
+                        {{ $t('c176d890-8c08-4db1-9ce7-592c1e21818e') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Jouw webshop is bereikbaar via') }} {{ webshopUrl }}
+                        {{ $t('1add9f17-2138-461d-8198-2b7bfde90407') }} {{ webshopUrl }}
                     </p>
                     <template #right>
                         <span class="icon external gray" />
@@ -91,7 +91,7 @@
             </STList>
 
             <template v-if="hasFullPermissions">
-                <hr><h2>{{ $t('Instellingen') }}</h2>
+                <hr><h2>{{ $t('bab38c80-8ab6-4cb7-80c3-1f607057e45d') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editGeneral(true)">
@@ -99,10 +99,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/flag.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Algemeen') }}
+                            {{ $t('35757756-d817-419d-82dd-1ba14128af30') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Naam, type en beschikbaarheid.') }}
+                            {{ $t('7a8c848b-8ffe-488f-9635-43a2c2b10a9f') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -114,10 +114,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/edit-package.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Productaanbod') }}
+                            {{ $t('14875409-7141-445f-b172-05762077d1dc') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Bewerk welke artikels je verkoopt in jouw webshop.') }}
+                            {{ $t('bc25fc1d-ee53-4200-a41e-2ec52bd9292b') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -129,10 +129,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/tickets.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Aanbod tickets en vouchers') }}
+                            {{ $t('778d329e-b646-4cb4-87ac-f6ab1661c359') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Bewerk en voeg nieuwe tickets en vouchers toe aan je webshop.') }}
+                            {{ $t('636f72d4-77f9-423d-b0f8-82a4fb594e11') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -144,10 +144,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/bike.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Afhalen, leveren, ter plaatse eten') }}
+                            {{ $t('0474147e-6756-45a7-a687-04812bcef086') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Wijzig tijdstippen, locaties en afhaalmethodes.') }}
+                            {{ $t('03142327-65eb-4694-986f-ee6ff25c2998') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -159,10 +159,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Betaalmethodes') }}
+                            {{ $t('12b644c9-c1a7-4930-afb2-79f62648d243') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Kies welke betaalmethodes je wilt activeren, en stel eventueel administratiekosten in.') }}
+                            {{ $t('95aafd31-ffd2-44c1-b90c-58a5281af1f0') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -174,10 +174,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/discount.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Kortingen') }}
+                            {{ $t('2173a56e-ee80-4e8d-9551-20f061fff7b9') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Voeg kortingen toe aan je webshop.') }}
+                            {{ $t('4881e4b6-2160-4f29-8e09-1fde96d8240a') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -189,14 +189,14 @@
                             <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Vrije invoervelden') }}
+                            {{ $t('e98f3227-23ff-4db5-9326-10bc43548738') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Verzamel extra informatie van bestellers bij het afrekenen.') }}
+                            {{ $t('baad0752-43d1-4bea-9e39-3a9f4b518723') }}
                         </p>
 
                         <template #right>
-                            <span class="icon error " :v-tooltip="$t('Deze functie is verouderd. Als je alle vrije invoervelden wist, kan je gebruik maken van uitgebreidere vragenlijsten.')" />
+                            <span class="icon error " :v-tooltip="$t('75c82427-9666-4de0-8a79-2a8851b44a88')" />
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -206,10 +206,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Vragenlijsten en gegevens') }}
+                            {{ $t('da5f0578-ebf9-40e1-8caf-baa3a7970b28') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Verzamel extra informatie van bestellers bij het afrekenen.') }}
+                            {{ $t('baad0752-43d1-4bea-9e39-3a9f4b518723') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -221,10 +221,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/lock.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Toegangsbeheer') }}
+                            {{ $t('70c5edd2-3550-447e-8a36-b43d7833fe1c') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Bepaal wie bestellingen en instellingen van deze webshop kan bekijken of wijzigen.') }}
+                            {{ $t('c653d048-3431-417a-b333-dc0af28113a3') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -236,10 +236,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/notifications.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Meldingen') }}
+                            {{ $t('d5bbcc81-57e1-4941-a70b-7b63e39c8916') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Blijf zelf op de hoogte van nieuwe bestellingen.') }}
+                            {{ $t('74c25692-65bf-4e25-ae9c-0e8363c0e738') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -247,7 +247,7 @@
                     </STListItem>
                 </STList>
 
-                <hr><h2>{{ $t('Personaliseren') }}</h2>
+                <hr><h2>{{ $t('f45871aa-7723-42c3-9781-f4f9b8d7250a') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editPage(true)">
@@ -255,10 +255,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/palette.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Tekst, uiterlijk, en externe links') }}
+                            {{ $t('a67ca3cc-ed24-43a4-91d6-ef9c8324b30e') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Wijzig de teksten en uitzicht van jouw webshop.') }}
+                            {{ $t('6d8e8e50-5e72-4e00-b074-c046f4069dd6') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -270,10 +270,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/compass.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Link') }}
+                            {{ $t('d703d8bc-b08f-4b4d-9c26-f255edd70f56') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Wijzig de link van jouw webshop.') }}
+                            {{ $t('c3c001fa-1c57-4aed-aa19-4bfa48736bac') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -285,10 +285,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/email.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('E-mailsjablonen') }}
+                            {{ $t('f0b50a39-d4fd-4f97-802d-a599b00030fd') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Wijzig de inhoud van automatische e-mails naar bestellers.') }}
+                            {{ $t('d2387560-b2ae-4e44-931b-d3fb20c63563') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -296,20 +296,20 @@
                     </STListItem>
                 </STList>
 
-                <hr><h2>{{ $t('Acties') }}</h2>
+                <hr><h2>{{ $t('dc052084-eea5-407e-8775-237bf550895a') }}</h2>
 
                 <STList>
                     <STListItem v-if="isOpen" :selectable="true" @click="closeWebshop()">
                         <h2 class="style-title-list">
-                            {{ $t('Webshop sluiten') }}
+                            {{ $t('8514f479-c987-46c1-aa4b-8abc14164538') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Sluit de webshop, zodat geen nieuwe bestellingen meer mogelijk zijn.') }}
+                            {{ $t('445bf25f-4661-4155-a255-4f15cbf13f34') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary danger hide-smartphone">
                                 <span class="icon power" />
-                                <span>{{ $t('Sluiten') }}</span>
+                                <span>{{ $t('bef7a2f9-129a-4e1c-b8d2-9003ff0a1f8b') }}</span>
                             </button>
                             <button type="button" class="button icon power only-smartphone" />
                         </template>
@@ -317,15 +317,15 @@
 
                     <STListItem v-if="!isOpen && !isArchive" :selectable="true" @click="openWebshop()">
                         <h2 class="style-title-list">
-                            {{ $t('Webshop terug openen') }}
+                            {{ $t('333b4c3f-a575-43e8-acad-754453b253e1') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Open de webshop opnieuw.') }}
+                            {{ $t('07956e16-efc0-4ce6-b5ba-57342ef567b9') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary green hide-smartphone">
                                 <span class="icon power" />
-                                <span>{{ $t('Openen') }}</span>
+                                <span>{{ $t('9e85b407-6e12-4003-9847-5b7d277b87ff') }}</span>
                             </button>
                             <button type="button" class="button icon power only-smartphone" />
                         </template>
@@ -333,15 +333,15 @@
 
                     <STListItem v-if="!isOpen && !isArchive" :selectable="true" @click="archiveWebshop()">
                         <h2 class="style-title-list">
-                            {{ $t('Webshop archiveren') }}
+                            {{ $t('1a3767f2-5b48-4d33-959f-08b114d1559b') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Verplaats de webshop naar het archief, maar behoud alle gegevens. De webshop is dan niet meer zo prominent zichtbaar in het menu.') }}
+                            {{ $t('944f3bbb-b537-48ba-b27f-227e152c658c') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary hide-smartphone">
                                 <span class="icon archive" />
-                                <span>{{ $t('Archiveren') }}</span>
+                                <span>{{ $t('fbeb1597-d56c-4f8b-8220-d2005a6f4310') }}</span>
                             </button>
                             <button type="button" class="button icon archive only-smartphone" />
                         </template>
@@ -349,15 +349,15 @@
 
                     <STListItem v-if="isArchive" :selectable="true" @click="closeWebshop()">
                         <h2 class="style-title-list">
-                            {{ $t('Webshop uit archief halen') }}
+                            {{ $t('5c7e1652-c21d-4746-84a3-3d09c7e0c8d9') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Verplaats de webshop terug naar het hoofdmenu.') }}
+                            {{ $t('2cb036c9-52fd-4044-b1e2-91d4b22d580e') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary hide-smartphone">
                                 <span class="icon undo" />
-                                <span>{{ $t('Terugzetten') }}</span>
+                                <span>{{ $t('574829bb-6ffc-489b-bc83-f3439dc62ffa') }}</span>
                             </button>
                             <button type="button" class="button icon undo only-smartphone" />
                         </template>
@@ -365,15 +365,15 @@
 
                     <STListItem :selectable="true" @click="duplicateWebshop()">
                         <h2 class="style-title-list">
-                            {{ $t('Webshop dupliceren') }}
+                            {{ $t('cfc3fc8b-6b17-4289-b87f-c85e38002795') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Maak een nieuwe webshop met dezelfde instellingen, maar met een andere naam en link.') }}
+                            {{ $t('1e3f3637-e390-44f2-9bb3-8e75ec2aa634') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary hide-smartphone">
                                 <span class="icon copy" />
-                                <span>{{ $t('Dupliceren') }}</span>
+                                <span>{{ $t('1c8e7100-b4ac-4c22-8e22-a19d3c039f74') }}</span>
                             </button>
                             <button type="button" class="button icon copy only-smartphone" />
                         </template>
@@ -381,15 +381,15 @@
 
                     <STListItem v-if="isArchive" :selectable="true" @click="deleteWebshop()">
                         <h2 class="style-title-list">
-                            {{ $t('Webshop definitief verwijderen') }}
+                            {{ $t('ebd0428a-b614-4eaa-a939-69a1e1392054') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Verwijder deze webshop en alle daarbij horende informatie en bestellingen. Dit is meestal niet nodig.') }}
+                            {{ $t('769c03b9-36d0-461d-afe9-10afa2402417') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary danger hide-smartphone">
                                 <span class="icon trash" />
-                                <span>{{ $t('Verwijderen') }}</span>
+                                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
                             </button>
                             <button type="button" class="button icon trash only-smartphone" />
                         </template>

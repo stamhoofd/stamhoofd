@@ -64,7 +64,7 @@ export class MultipleChoiceUIFilter extends UIFilter {
                 choices: [
                     {
                         id: 'is',
-                        text: isSubjectPlural ? $t(`zijn`) : $t(`is`),
+                        text: isSubjectPlural ? $t(`31bacb3a-2920-4bf3-9e68-d7887ef17fe4`) : $t(`af839b8a-1367-4655-ad1c-ee658843e9f1`),
                         action: () => {
                             this.isInverted = false;
                         },
@@ -72,7 +72,7 @@ export class MultipleChoiceUIFilter extends UIFilter {
                     },
                     {
                         id: 'is not',
-                        text: isSubjectPlural ? $t(`zijn niet`) : $t(`is niet`),
+                        text: isSubjectPlural ? $t(`b78e0854-14c4-4474-bbb4-7ba80056ff49`) : $t(`86e4c6c5-2d76-46f2-ac9f-72ec4e074026`),
                         action: () => {
                             this.isInverted = true;
                         },

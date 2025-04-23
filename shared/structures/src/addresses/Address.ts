@@ -85,7 +85,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty postalcode',
-                human: $t(`Vul de postcode in`),
+                human: $t(`50da2518-06f4-47fc-bff7-9d32b941b390`),
             });
         }
 
@@ -93,7 +93,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty city',
-                human: $t(`Vul de gemeente in`),
+                human: $t(`f4e3da0a-175d-4054-9a66-b5661a5a10cc`),
             });
         }
 
@@ -106,7 +106,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid country',
-                human: $t(`Selecteer een land`),
+                human: $t(`6e880cc3-2426-4762-b47e-d6e8d09bab4e`),
                 field: 'country',
             });
         }
@@ -116,7 +116,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid city',
-                human: $t(`De gemeente mag geen cijfers bevatten.`),
+                human: $t(`c67c604b-31ed-4f5a-93b4-a792e76609f5`),
                 field: 'city',
             });
         }
@@ -127,7 +127,7 @@ export class Address extends AutoEncoder {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Invalid postalCode',
-                    human: $t(`Ongeldige postcode. Een postcode moet uit 4 cijfers bestaan.`),
+                    human: $t(`5d001500-b83d-41dd-9fe3-d4fc12f59983`),
                     field: 'postalCode',
                 });
             }
@@ -142,7 +142,7 @@ export class Address extends AutoEncoder {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Invalid postalCode',
-                    human: $t(`Ongeldige postcode. Een postcode moet beginnen met 4 cijfers en eindigen op 2 letters, bv. 9000 AB`),
+                    human: $t(`ce7f1bc7-64b5-4fc7-ad10-4e01c3bf4962`),
                     field: 'postalCode',
                 });
             }
@@ -167,7 +167,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty address line 1',
-                human: $t(`Vul de straat en huisnummer in`),
+                human: $t(`a77eb9b0-cdda-46af-8970-2d9a6577e4cb`),
             });
         }
 
@@ -175,7 +175,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty address line 1',
-                human: $t(`De straat bevat een komma. Verwijder die uit het adres en kijk na of het wel correct werd ingevuld.`),
+                human: $t(`576d500a-f6d3-435a-8280-14926f1333f7`),
             });
         }
 
@@ -184,7 +184,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty address line 1',
-                human: $t(`Het adres is te lang. Controleer of het correct werd ingevuld.`),
+                human: $t(`14b43fee-f3bc-45cd-a0db-098805ffda04`),
             });
         }
 
@@ -194,7 +194,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Missing number in address line 1',
-                human: $t(`Het huisnummer ontbreekt in het opgegeven adres`),
+                human: $t(`d6326bee-02b2-4983-a7f4-c33a38435cff`),
             });
         }
         const number = match[2];
@@ -211,7 +211,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty street',
-                human: $t(`De straat is verplicht`),
+                human: $t(`4953622b-9b0c-49c3-92b9-f5e2532c4c74`),
             });
         }
 
@@ -219,7 +219,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty number',
-                human: $t(`Het huisnummer is verplicht`),
+                human: $t(`248a13b9-7b54-43ab-ac26-974dda1992f1`),
             });
         }
 
@@ -227,7 +227,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty postal code',
-                human: $t(`De postcode is verplicht`),
+                human: $t(`b01c196c-a07b-45a7-af35-caef9fd237ac`),
             });
         }
 
@@ -235,7 +235,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty city',
-                human: $t(`De gemeente is verplicht`),
+                human: $t(`7ab64023-08e1-46b1-be6e-4dd8591ff562`),
             });
         }
 
@@ -243,7 +243,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty country',
-                human: $t(`Het land is verplicht`),
+                human: $t(`5dac2dd1-1008-4d47-aecc-dba26819d2ae`),
             });
         }
     }
