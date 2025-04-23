@@ -132,10 +132,10 @@ export class I18nController {
 
     get validLocales() {
         // todo: make platform specific
-        return {
+        return (STAMHOOFD.locales ?? {
             [Country.Belgium]: [Language.Dutch, Language.English],
             [Country.Netherlands]: [Language.Dutch, Language.English],
-        } as Record<string, undefined | (Language[])>;
+        }) as Partial<Record<Country, Language[]>>;
     }
 
     get availableLanguages(): Language[] {

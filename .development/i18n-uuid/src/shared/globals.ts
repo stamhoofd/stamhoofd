@@ -59,6 +59,9 @@ function getGlobals(): Globals {
             en: {
                 default: "GB",
             },
+            fr: {
+                default: "BE",
+            },
             nl: {
                 default: "BE",
             },

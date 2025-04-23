@@ -85,6 +85,11 @@ declare global {
         readonly domains: StamhoofdDomains
 
         /**
+         * List of the supported locales for this platform
+         */
+        readonly locales?: Partial<Record<Country, Language[]>>
+
+        /**
          * organization = users are specific to one organization
          * platform = users are shared between organizations
          */
