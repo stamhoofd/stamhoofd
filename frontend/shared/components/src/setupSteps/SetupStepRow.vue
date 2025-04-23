@@ -36,7 +36,7 @@ const props = defineProps<{
 }>();
 
 const setupStepTranslations = useSetupStepTranslations();
-const $t = useTranslate();
+
 const { getDescription: getReviewDescription } = useSetupStepReviewDescription();
 
 const isSelectable = computed(() => props.listType === 'todo');

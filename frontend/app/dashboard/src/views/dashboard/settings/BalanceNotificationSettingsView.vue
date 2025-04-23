@@ -92,7 +92,7 @@ const organizationManager = useOrganizationManager();
 const { patch, patched, addPatch, hasChanges } = usePatch(organizationManager.value.organization);
 const saving = ref(false);
 const errors = useErrors();
-const $t = useTranslate();
+
 const owner = useRequestOwner();
 const pop = usePop();
 const platform = usePlatform();

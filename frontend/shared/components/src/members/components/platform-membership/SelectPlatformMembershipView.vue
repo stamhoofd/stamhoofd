@@ -89,7 +89,7 @@ const props = defineProps<{
     period: RegistrationPeriod;
 }>();
 
-const $t = useTranslate();
+
 const title = $t('cb85826e-06fc-473c-95c2-ba338fdbab50');
 const loading = ref(false);
 const saveText = $t(`Toevoegen`);

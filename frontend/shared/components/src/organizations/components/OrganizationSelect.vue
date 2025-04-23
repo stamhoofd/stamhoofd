@@ -9,14 +9,12 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { NavigationActions, SearchOrganizationView } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Organization } from '@stamhoofd/structures';
 
 const model = defineModel<Organization | null>({
     required: true });
 
 const present = usePresent();
-const $t = useTranslate();
 
 async function selectOrganization() {
     await present({

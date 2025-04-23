@@ -100,7 +100,7 @@ const errors = useErrors();
 const organization = useOrganization();
 const pop = usePop();
 const present = usePresent();
-const $t = useTranslate();
+
 
 const importingSeatingPlan = ref(false);
 

@@ -50,7 +50,7 @@ const props = withDefaults(
 
 const errors = useErrors();
 const pop = usePop();
-const $t = useTranslate();
+
 const context = useContext();
 const owner = useRequestOwner();
 const organization = useOrganization();

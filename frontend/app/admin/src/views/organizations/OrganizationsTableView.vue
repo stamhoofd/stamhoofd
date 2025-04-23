@@ -32,7 +32,7 @@ import { useChargeOrganizationsPopup } from './composables/useChargeOrganization
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 
 type ObjectType = Organization;
-const $t = useTranslate();
+
 const owner = useRequestOwner();
 
 const props = withDefaults(

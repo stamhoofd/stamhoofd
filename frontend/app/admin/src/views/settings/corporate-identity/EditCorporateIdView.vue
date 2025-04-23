@@ -84,7 +84,7 @@ const platformManager = usePlatformManager();
 const platform = usePlatform();
 const errors = useErrors();
 const pop = usePop();
-const $t = useTranslate();
+
 
 const { patched, patch, hasChanges, addPatch } = usePatch(platform);
 const saving = ref(false);

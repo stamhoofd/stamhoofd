@@ -20,7 +20,7 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
     getProps: () => UseEditWebshopProps;
 } = { getProps: () => ({}) }) {
     const errors = useErrors();
-    const $t = useTranslate();
+    
     const context = useContext();
     const organizationManager = useOrganizationManager();
     const dismiss = useDismiss();

@@ -56,7 +56,7 @@ const errors = useErrors();
 const editorView = ref(null) as Ref<EditorView | null>;
 const editor = computed(() => editorView.value?.editor);
 const pop = usePop();
-const $t = useTranslate();
+
 const organization = useOrganization();
 const platform = usePlatform();
 

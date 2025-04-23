@@ -32,7 +32,7 @@ const props = defineProps<{
 }>();
 const auth = useAuth();
 const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), false);
-const $t = useTranslate();
+
 
 // Possible the member didn't fill in the answers yet
 const autoCompletedAnswers = computed(() => {

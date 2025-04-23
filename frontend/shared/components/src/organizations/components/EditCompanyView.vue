@@ -35,7 +35,7 @@ const errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
 
-const $t = useTranslate();
+
 const pop = usePop();
 
 const title = computed(() => {

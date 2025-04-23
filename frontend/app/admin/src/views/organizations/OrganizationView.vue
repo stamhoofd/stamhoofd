@@ -205,7 +205,7 @@ const props = defineProps<{
 }>();
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
-const $t = useTranslate();
+
 const context = useContext();
 const owner = useRequestOwner();
 const pop = usePop();

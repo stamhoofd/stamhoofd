@@ -31,7 +31,7 @@ import { computed, Ref, ref } from 'vue';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 
 type ObjectType = EventNotification;
-const $t = useTranslate();
+
 
 const props = withDefaults(
     defineProps<{

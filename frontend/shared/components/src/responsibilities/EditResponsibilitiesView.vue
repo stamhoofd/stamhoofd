@@ -63,7 +63,7 @@ import EditResponsibilityView from './EditResponsibilityView.vue';
 
 const pop = usePop();
 const present = usePresent();
-const $t = useTranslate();
+
 const organization = useOrganization();
 const { reloadPromise, reload } = useReloadAdmins();
 

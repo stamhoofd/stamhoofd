@@ -128,7 +128,7 @@ const { up, canMoveUp, canMoveDown, down } = usePatchMoveUpDownSingle(props.opti
     }));
 });
 
-const $t = useTranslate();
+
 
 const patchOptionsArray = (options: PatchableArrayAutoEncoder<GroupOption>) => {
     addPatch({

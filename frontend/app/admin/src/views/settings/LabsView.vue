@@ -83,7 +83,7 @@ const platformManager = usePlatformManager();
 const platform = usePlatform();
 const errors = useErrors();
 const pop = usePop();
-const $t = useTranslate();
+
 const present = usePresent();
 
 const { patched, patch, hasChanges, addPatch } = usePatch(platform);

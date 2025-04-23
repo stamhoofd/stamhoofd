@@ -34,7 +34,7 @@ const props = defineProps<{
 const auth = useAuth();
 const isRenewingSecurityCode = ref(false);
 const platformFamilyManager = usePlatformFamilyManager();
-const $t = useTranslate();
+
 
 const shouldShowResetSecurityCode = computed(() => {
     return auth.canAccessPlatformMember(props.member, PermissionLevel.Full);

@@ -63,7 +63,7 @@ const selectedOrganization = ref((props.member.organizations[0] ?? null) as any)
 const auth = useUninheritedPermissions({ patchedOrganization: selectedOrganization });
 const present = usePresent();
 const app = useAppContext();
-const $t = useTranslate();
+
 const searchOrganizationTitle = computed(() => $t('2669729c-718d-49a1-9e4f-b3a65a6479a8', { firstName: props.member.patchedMember.firstName }));
 const navigate = useNavigationActions();
 const organization = useOrganization();

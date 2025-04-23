@@ -91,7 +91,7 @@ const props = withDefaults(defineProps<ChargeViewOptions>(), {
 });
 
 const errors = useErrors();
-const $t = useTranslate();
+
 const pop = usePop();
 const owner = useRequestOwner();
 const context = useContext();

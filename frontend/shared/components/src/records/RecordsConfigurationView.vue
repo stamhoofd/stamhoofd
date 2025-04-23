@@ -83,7 +83,7 @@ const errors = useErrors();
 const saving = ref(false);
 const pop = usePop();
 const { patch, patched, addPatch, hasChanges } = usePatch(props.recordsConfiguration);
-const $t = useTranslate();
+
 
 const organization = useOrganization();
 const app = useAppContext();

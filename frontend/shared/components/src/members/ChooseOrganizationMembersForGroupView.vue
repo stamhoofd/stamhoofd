@@ -107,7 +107,7 @@ const cartLength = computed(() => props.checkout.cart.count);
 const $addMember = useAddMember();
 const checkoutDefaultItem = useCheckoutDefaultItem();
 const chooseGroupForMember = useChooseGroupForMember();
-const $t = useTranslate();
+
 const isOnlyDeleting = computed(() => props.checkout.cart.items.length === 0 && props.checkout.cart.balanceItems.length === 0 && props.checkout.cart.deleteRegistrations.length > 0);
 const hasPaidRegistrationDelete = computed(() => props.checkout.cart.deleteRegistrations.some(r => r.balances.some(b => b.amountOpen > 0 || b.amountPaid > 0 || b.amountPending > 0)));
 const hadPaidByOrganization = computed(() => props.checkout.cart.deleteRegistrations.some(r => r.payingOrganizationId && r.balances.some(b => b.amountOpen > 0 || b.amountPaid > 0 || b.amountPending > 0)));

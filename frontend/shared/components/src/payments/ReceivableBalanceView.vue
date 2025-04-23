@@ -111,7 +111,7 @@ const props = withDefaults(
         member: null,
     });
 
-const $t = useTranslate();
+
 const { goBack, goForward, hasNext, hasPrevious } = useBackForward('item', props);
 const title = computed(() => {
     return $t('28c2bc66-231f-44f3-9249-c1981b871a1f');

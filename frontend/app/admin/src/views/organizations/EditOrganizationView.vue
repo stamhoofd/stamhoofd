@@ -83,7 +83,7 @@ const props = defineProps<{
 }>();
 
 const { patched, hasChanges, addPatch, patch } = usePatch(props.organization);
-const $t = useTranslate();
+
 const platformManager = usePlatformManager();
 
 const saving = ref(false);

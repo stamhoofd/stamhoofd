@@ -57,7 +57,6 @@ const { enabled, financialSupportSettings } = useFinancialSupportSettings({
 });
 const platform = usePlatform();
 const organization = useOrganization();
-const $t = useTranslate();
 
 const $showReducedPrice = computed(() => enabled || reducedPrice.value !== null);
 

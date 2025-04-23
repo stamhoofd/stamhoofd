@@ -270,7 +270,7 @@ const { hasChanges, patched, addPatch, patch } = usePatch(props.event);
 const title = computed(() => props.isNew ? $t(`008c80e4-a46f-4e1c-8f45-d383008b2e10`) : $t(`e4bff2f3-d273-4755-b617-f792a01f8325`));
 const saving = ref(false);
 const deleting = ref(false);
-const $t = useTranslate();
+
 const context = useContext();
 const pop = usePop();
 const organization = useOrganization();

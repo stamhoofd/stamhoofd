@@ -75,7 +75,7 @@ const props = withDefaults(
     },
 );
 
-const $t = useTranslate();
+
 
 const title = computed(() => props.isNew ? $t('5e40dfe9-b4ed-497c-a37d-e162191ba96a') : $t('09186fb9-2c94-4425-95e7-66cc2fd398ff'));
 const errors = useErrors();

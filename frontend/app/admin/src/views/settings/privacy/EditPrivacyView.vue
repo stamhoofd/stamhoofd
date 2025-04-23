@@ -38,7 +38,7 @@ const platform = usePlatform();
 const errors = useErrors();
 const pop = usePop();
 const present = usePresent();
-const $t = useTranslate();
+
 
 const { patched, addPatch, hasChanges, patch } = usePatch(platform.value);
 const draggablePolicies = useDraggableArray(() => patched.value.config.privacy.policies, (arr) => {

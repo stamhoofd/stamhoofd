@@ -111,7 +111,7 @@ const props = defineProps<{
 const errors = useErrors({ validator: props.validator });
 const platform = usePlatform();
 const organization = useOrganization();
-const $t = useTranslate();
+
 
 const items = computed(() => {
     if (organization.value) {

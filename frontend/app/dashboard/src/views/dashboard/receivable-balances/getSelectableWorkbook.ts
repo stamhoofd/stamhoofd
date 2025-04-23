@@ -9,7 +9,7 @@ import { Formatter } from '@stamhoofd/utility';
  * -> a hook is better suited for this
  */
 export function useSelectableWorkbook() {
-    const $t = useTranslate();
+    
     const $feature = useFeatureFlag();
 
     return {

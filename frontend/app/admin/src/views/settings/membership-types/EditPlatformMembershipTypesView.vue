@@ -37,7 +37,7 @@ const platform = usePlatform();
 const errors = useErrors();
 const pop = usePop();
 const present = usePresent();
-const $t = useTranslate();
+
 
 const originalTypes = computed(() => platform.value.config.membershipTypes);
 const { patched: types, patch, addArrayPatch, hasChanges } = usePatchArray(originalTypes);

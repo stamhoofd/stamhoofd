@@ -38,7 +38,7 @@ const platform = usePlatform();
 const errors = useErrors();
 const pop = usePop();
 const present = usePresent();
-const $t = useTranslate();
+
 
 const originalGroups = computed(() => platform.value.config.defaultAgeGroups);
 const { patched: groups, patch, addArrayPatch, hasChanges } = usePatchArray(originalGroups);

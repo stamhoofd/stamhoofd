@@ -58,7 +58,7 @@ const query = ref('');
 const results = ref([]) as Ref<Organization[]>;
 const owner = useRequestOwner();
 const defaultCountry = I18nController.shared.countryCode;
-const $t = useTranslate();
+
 
 let lastQuery = '';
 let counter = 0;

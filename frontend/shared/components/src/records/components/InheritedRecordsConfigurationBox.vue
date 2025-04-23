@@ -90,7 +90,7 @@ const props = withDefaults(
 
 const emit = defineEmits(['patch:recordsConfiguration']);
 const { patched, addPatch } = useEmitPatch<OrganizationRecordsConfiguration>(props, emit, 'recordsConfiguration');
-const $t = useTranslate();
+
 const baseOrg = useOrganization();
 const organization = computed(() => props.overrideOrganization ?? baseOrg.value);
 const present = usePresent();

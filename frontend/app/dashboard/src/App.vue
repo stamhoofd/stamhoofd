@@ -19,7 +19,7 @@ import { getScopedAutoRoot, getScopedAutoRootFromUrl, getScopedDashboardRootFrom
 
 const modalStack = ref(null) as Ref<InstanceType<typeof ModalStackComponent> | null>;
 HistoryManager.activate();
-const $t = useTranslate();
+
 
 const root = new ComponentWithProperties(PromiseView, {
     promise: async () => {

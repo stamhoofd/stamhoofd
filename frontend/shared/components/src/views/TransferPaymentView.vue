@@ -231,7 +231,7 @@ const QRCodeUrl = ref<string | null>(null);
 const canDismiss = useCanDismiss();
 const dismiss = useDismiss();
 const pop = usePop();
-const $t = useTranslate();
+
 const navigate = useNavigationActions();
 
 onMounted(() => {

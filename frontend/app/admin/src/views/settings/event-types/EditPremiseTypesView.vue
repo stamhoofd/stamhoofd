@@ -19,7 +19,7 @@ import PremiseTypesList from './PremiseTypesList.vue';
 
 const errors = useErrors();
 const pop = usePop();
-const $t = useTranslate();
+
 const platform = usePlatform();
 const platformManager = usePlatformManager();
 

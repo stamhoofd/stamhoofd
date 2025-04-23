@@ -8,7 +8,7 @@ export function useSetupStepTranslations(): {
     getTodoTitle: (type: SetupStepType) => string;
     getTodoDescription: (type: SetupStepType) => string;
 } {
-    const $t = useTranslate();
+    
 
     const reviewTitleMap: Record<SetupStepType, string> = {
         [SetupStepType.Responsibilities]: $t('1d0d59b8-d7bf-4f04-846f-5025d7de7b4e'),

@@ -44,7 +44,7 @@ import { computed, ref } from 'vue';
 const errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
-const $t = useTranslate();
+
 
 const props = defineProps<{
     period: RegistrationPeriod;

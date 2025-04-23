@@ -136,7 +136,7 @@ const organization = useOrganization();
 const errors = useErrors();
 const saving = ref(false);
 const pop = usePop();
-const $t = useTranslate();
+
 
 const availableMethods = [
     PaymentMethod.Transfer,

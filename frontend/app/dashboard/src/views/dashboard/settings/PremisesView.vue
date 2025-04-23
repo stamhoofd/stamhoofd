@@ -73,7 +73,7 @@ const hasSomeChanges = computed(() => {
 });
 
 const draggablePremises = useDraggableArray(() => premises.value, addArrayPatch);
-const $t = useTranslate();
+
 const present = usePresent();
 const country = useCountry();
 const premiseLimitationWarnings = ref<PremiseLimitationWarning[]>([]);

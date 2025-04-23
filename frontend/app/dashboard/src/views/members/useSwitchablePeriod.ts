@@ -13,7 +13,7 @@ export function useSwitchablePeriod(options?: { onSwitch?: () => void | Promise<
     const owner = useRequestOwner();
     const platform = usePlatform();
     const present = usePresent();
-    const $t = useTranslate();
+    
 
     async function switchPeriod(event: MouseEvent) {
         const button = event.currentTarget as HTMLElement;

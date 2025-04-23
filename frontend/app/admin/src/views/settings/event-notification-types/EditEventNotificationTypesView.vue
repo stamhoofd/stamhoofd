@@ -38,7 +38,7 @@ import EventNotificationTypeRow from './components/EventNotificationTypeRow.vue'
 const errors = useErrors();
 const pop = usePop();
 const present = usePresent();
-const $t = useTranslate();
+
 const platform = usePlatform();
 const platformManager = usePlatformManager();
 
