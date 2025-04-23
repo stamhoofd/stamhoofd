@@ -13,7 +13,7 @@ async function fileExists(file) {
     return false;
 }
 
-const translatorType = 'MistralSmall';
+const translatorType = 'GoogleGemini';
 const namespaces = ['stamhoofd', 'digit', 'keeo', 'jamboree'];
 
 for (const namespace of namespaces) {
