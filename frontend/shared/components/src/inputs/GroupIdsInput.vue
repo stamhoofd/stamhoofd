@@ -59,7 +59,7 @@ const props = withDefaults(
     }>(), {
         nullable: false,
         defaultPeriodId: null,
-        title: 'Groepen',
+        title: $t(`Groepen`),
     },
 );
 

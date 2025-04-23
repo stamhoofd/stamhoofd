@@ -67,7 +67,7 @@ function addressToLines(address: Address): string[] {
 async function deletePhone(phone: string) {
     deleteFromMemberDetails({
         valueToDelete: phone,
-        confirmMessage: `Weet je zeker dat je het gsm nummer '${phone}' wilt verwijderen?`,
+        confirmMessage: $t(`Weet je zeker dat je het gsm nummer '{phone}' wilt verwijderen?`, { phone }),
         key: 'unverifiedPhones',
     });
 }
@@ -75,7 +75,7 @@ async function deletePhone(phone: string) {
 async function deleteEmail(email: string) {
     deleteFromMemberDetails({
         valueToDelete: email,
-        confirmMessage: `Weet je zeker dat je het e-mailadres '${email}' wilt verwijderen?`,
+        confirmMessage: $t(`Weet je zeker dat je het e-mailadres '{email}' wilt verwijderen?`, { email }),
         key: 'unverifiedEmails',
     });
 }
@@ -83,13 +83,13 @@ async function deleteEmail(email: string) {
 async function deleteAddress(address: Address) {
     deleteFromMemberDetails({
         valueToDelete: address,
-        confirmMessage: `Weet je zeker dat je het adres '${address}' wilt verwijderen?`,
+        confirmMessage: $t(`Weet je zeker dat je het adres '{address}' wilt verwijderen?`, { address: address.toString() }),
         key: 'unverifiedAddresses',
     });
 }
 
 async function deleteFromMemberDetails<T extends string | number | (AutoEncoder & { id: string })>({ valueToDelete, key, confirmMessage, confirmButtonText }: { valueToDelete: T; confirmMessage: string; confirmButtonText?: string; key: keyof MemberDetails }) {
-    const isConfirm = await CenteredMessage.confirm(confirmMessage, confirmButtonText ?? 'Verwijderen');
+    const isConfirm = await CenteredMessage.confirm(confirmMessage, confirmButtonText ?? $t(`Verwijderen`));
     if (isConfirm) {
         const member = props.member;
         const membersPatch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;

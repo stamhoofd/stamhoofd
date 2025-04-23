@@ -112,8 +112,8 @@ const settings = new RecordEditorSettings({
     exampleValue: new PlatformMember({
         member: MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({
-                firstName: 'Voorbeeld',
-                lastName: 'Lid',
+                firstName: $t(`Voorbeeld`),
+                lastName: $t(`Lid`),
                 dataPermissions: BooleanStatus.create({ value: true }),
                 birthDay: new Date('2020-01-01'),
             }),
@@ -127,32 +127,32 @@ const settings = new RecordEditorSettings({
 family.members.push(settings.exampleValue);
 
 const properties = [
-    buildPropertyRefs('gender', 'Gender'),
-    buildPropertyRefs('birthDay', 'Geboortedatum'),
-    buildPropertyRefs('nationalRegisterNumber', 'Rijksregisternummer'),
-    buildPropertyRefs('parents', 'Oudergegevens', {
-        description: 'Naam, adres, e-mailadres en telefoonnummer van één of meerdere (plus)ouders',
+    buildPropertyRefs('gender', $t(`Gender`)),
+    buildPropertyRefs('birthDay', $t(`Geboortedatum`)),
+    buildPropertyRefs('nationalRegisterNumber', $t(`Rijksregisternummer`)),
+    buildPropertyRefs('parents', $t(`Oudergegevens`), {
+        description: $t(`Naam, adres, e-mailadres en telefoonnummer van één of meerdere (plus)ouders`),
     }),
-    buildPropertyRefs('phone', $t('90d84282-3274-4d85-81cd-b2ae95429c34') + ' (van lid zelf)', {
-        description: 'Het GSM-nummer van de ouders wordt al verzameld via de oudergegevens. Activeer dit enkel voor leden die ook echt een eigen GSM-nummer kunnen hebben, en maak het enkel verplicht als je zeker weet dat iedereen een GSM-nummer heeft.',
-        warning: 'Maak dit niet verplicht voor alle leden, anders moeten minderjarige leden ook verplicht een eigen GSM-nummer invullen, wat ze vaak niet hebben. Denk goed na over wat je instelt.',
+    buildPropertyRefs('phone', $t('90d84282-3274-4d85-81cd-b2ae95429c34') + ' ' + $t(`(van lid zelf)`), {
+        description: $t(`Het GSM-nummer van de ouders wordt al verzameld via de oudergegevens. Activeer dit enkel voor leden die ook echt een eigen GSM-nummer kunnen hebben, en maak het enkel verplicht als je zeker weet dat iedereen een GSM-nummer heeft.`),
+        warning: $t(`Maak dit niet verplicht voor alle leden, anders moeten minderjarige leden ook verplicht een eigen GSM-nummer invullen, wat ze vaak niet hebben. Denk goed na over wat je instelt.`),
         preventAlways: true,
     }),
-    buildPropertyRefs('emailAddress', 'E-mailadres (van lid zelf)', {
-        description: 'Het e-mailadres van de ouders wordt al verzameld via de oudergegevens. Activeer dit enkel voor leden die ook echt een eigen e-mailadres kunnen hebben, en maak het enkel verplicht als je zeker weet dat iedereen een e-mailadres heeft.',
-        warning: 'Maak dit niet verplicht voor alle leden, anders moeten erg jonge leden ook verplicht een eigen e-mailadres invullen, wat ze vaak niet hebben. Denk goed na over wat je instelt.',
+    buildPropertyRefs('emailAddress', $t(`E-mailadres (van lid zelf)`), {
+        description: $t(`Het e-mailadres van de ouders wordt al verzameld via de oudergegevens. Activeer dit enkel voor leden die ook echt een eigen e-mailadres kunnen hebben, en maak het enkel verplicht als je zeker weet dat iedereen een e-mailadres heeft.`),
+        warning: $t(`Maak dit niet verplicht voor alle leden, anders moeten erg jonge leden ook verplicht een eigen e-mailadres invullen, wat ze vaak niet hebben. Denk goed na over wat je instelt.`),
         preventAlways: true,
     }),
-    buildPropertyRefs('address', 'Adres (van lid zelf)', {
-        description: 'Het adres van elke ouder wordt al verzameld via de oudergegevens. We raden af om dit te activeren voor minderjarige leden. Bij ouders kan er namelijk per ouder een apart adres ingesteld worden, wat beter geschikt is. Enkel voor volwassen leden is dit beter aangewezen.',
-        warning: 'We raden heel sterk af om dit in te schakelen voor minderjarige leden. Gebruik een leeftijdsfilter om dit enkel in te schakelen voor volwassen leden.',
+    buildPropertyRefs('address', $t(`Adres (van lid zelf)`), {
+        description: $t(`Het adres van elke ouder wordt al verzameld via de oudergegevens. We raden af om dit te activeren voor minderjarige leden. Bij ouders kan er namelijk per ouder een apart adres ingesteld worden, wat beter geschikt is. Enkel voor volwassen leden is dit beter aangewezen.`),
+        warning: $t(`We raden heel sterk af om dit in te schakelen voor minderjarige leden. Gebruik een leeftijdsfilter om dit enkel in te schakelen voor volwassen leden.`),
         preventAlways: true,
     }),
-    buildPropertyRefs('emergencyContacts', 'Extra noodcontactpersonen', {
-        description: 'Naam, relatie en telefoonnummer van één of meerdere noodcontactpersonen (als uitbreiding op ouders, niet de ouders zelf)',
+    buildPropertyRefs('emergencyContacts', $t(`Extra noodcontactpersonen`), {
+        description: $t(`Naam, relatie en telefoonnummer van één of meerdere noodcontactpersonen (als uitbreiding op ouders, niet de ouders zelf)`),
     }),
-    buildPropertyRefs('uitpasNumber', 'UiTPAS-nummer', {
-        warning: 'Maak dit niet verplicht voor alle leden anders moet iedereen verplicht een UiTPAS-nummer invullen, wat niet iedereen heeft.',
+    buildPropertyRefs('uitpasNumber', $t(`UiTPAS-nummer`), {
+        warning: $t(`Maak dit niet verplicht voor alle leden anders moet iedereen verplicht een UiTPAS-nummer invullen, wat niet iedereen heeft.`),
         preventAlways: true,
     }),
 ];
@@ -185,7 +185,7 @@ const financialSupport = {
         set: (value: boolean) => {
             if (value) {
                 if (!dataPermissions.enabled.value) {
-                    Toast.error('De financiële status van een lid is gevoelige informatie en vereist toestemming voor gegevensverzameling').show();
+                    Toast.error($t(`De financiële status van een lid is gevoelige informatie en vereist toestemming voor gegevensverzameling`)).show();
                     return;
                 }
                 addPatch({
@@ -297,7 +297,7 @@ function buildRefForInheritedCategory(categoryId: string) {
 
             if (enable) {
                 if (requiresDataPermissions.value && !dataPermissions.enabled.value) {
-                    Toast.error('Deze vragenlijst bevat gegevens waar je toestemming voor moet vragen. Schakel de toestemming voor gegevevensverzameling in om deze vragenlijst te activeren.').show();
+                    Toast.error($t(`Deze vragenlijst bevat gegevens waar je toestemming voor moet vragen. Schakel de toestemming voor gegevevensverzameling in om deze vragenlijst te activeren.`)).show();
                     return;
                 }
 
@@ -320,7 +320,7 @@ function buildRefForInheritedCategory(categoryId: string) {
     const configuration = computed(() => enabled.value ? (patched.value.inheritedRecordCategories.get(categoryId) ?? category.value?.filter ?? PropertyFilter.createDefault()) : null);
 
     return ref({
-        title: category.value?.name ?? 'Naamloos',
+        title: category.value?.name ?? $t(`Naamloos`),
         enabled,
         locked,
         configuration,

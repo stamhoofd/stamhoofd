@@ -178,7 +178,7 @@ const hasFilters = computed(() => {
     return filterBuilder.value instanceof GroupUIFilterBuilder && filterBuilder.value.builders.length > 1;
 });
 
-const title = computed(() => props.isNew ? 'Nieuwe vragenlijst' : patchedCategory.value.name);
+const title = computed(() => props.isNew ? $t(`Nieuwe vragenlijst`) : patchedCategory.value.name);
 const records = computed(() => patchedCategory.value.records);
 const categories = computed(() => patchedCategory.value.childCategories);
 
@@ -217,7 +217,7 @@ const defaultEnabled = computed({
     get: () => patchedCategory.value.defaultEnabled,
     set: (v: boolean) => {
         if (v && patchedCategory.value.containsSensitiveData && !props.settings.inheritedRecordsConfiguration?.dataPermission) {
-            Toast.error('Deze vragenlijst bevat gegevens waar je toestemming voor moet vragen. Schakel de toestemming voor gegevevensverzameling in om deze vragenlijst te activeren.').show();
+            Toast.error($t(`Deze vragenlijst bevat gegevens waar je toestemming voor moet vragen. Schakel de toestemming voor gegevevensverzameling in om deze vragenlijst te activeren.`)).show();
             return;
         }
 
@@ -432,18 +432,18 @@ async function showCategoryMenu(event: MouseEvent, category: RecordCategory) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: 'Wijzig instellingen',
+                name: $t(`Wijzig instellingen`),
                 icon: 'settings',
                 action: () => editCategory(category),
             }),
             new ContextMenuItem({
-                name: 'Categorie dupliceren',
+                name: $t(`Categorie dupliceren`),
                 icon: 'copy',
                 action: () => addCategory(category.duplicate()),
             }),
         ], [
             new ContextMenuItem({
-                name: 'Verplaats naar boven',
+                name: $t(`Verplaats naar boven`),
                 icon: 'arrow-up',
                 disabled: !moveRecordCategories.canMoveUp(category.id),
                 action: () => {
@@ -451,7 +451,7 @@ async function showCategoryMenu(event: MouseEvent, category: RecordCategory) {
                 },
             }),
             new ContextMenuItem({
-                name: 'Verplaats naar beneden',
+                name: $t(`Verplaats naar beneden`),
                 icon: 'arrow-down',
                 disabled: !moveRecordCategories.canMoveDown(category.id),
                 action: () => {
@@ -464,14 +464,14 @@ async function showCategoryMenu(event: MouseEvent, category: RecordCategory) {
         ],
         [
             new ContextMenuItem({
-                name: 'Verplaats naar vragenlijst',
+                name: $t(`Verplaats naar vragenlijst`),
                 childMenu: new ContextMenu([
                     [
                         new ContextMenuItem({
-                            name: 'Hoofdvragenlijst',
+                            name: $t(`Hoofdvragenlijst`),
                             action: async () => {
                                 // Transform into a root category
-                                if (!await CenteredMessage.confirm('Ben je zeker dat je dit wilt verplaatsen?', 'Ja, verplaatsen', 'Deze subcategorie zal worden omgezet in een vragenlijst als je de huidige vragenlijst opslaat.')) {
+                                if (!await CenteredMessage.confirm($t(`Ben je zeker dat je dit wilt verplaatsen?`), $t(`Ja, verplaatsen`), $t(`Deze subcategorie zal worden omgezet in een vragenlijst als je de huidige vragenlijst opslaat.`))) {
                                     return;
                                 }
 
@@ -497,7 +497,7 @@ async function showCategoryMenu(event: MouseEvent, category: RecordCategory) {
                             disabled: c.id === props.categoryId,
                             action: async () => {
                                 // Transform into a root category
-                                if (!await CenteredMessage.confirm('Ben je zeker dat je dit wilt verplaatsen?', 'Ja, verplaatsen', 'Deze subcategorie zal worden verplaatst naar deze vragenlijst als je de huidige vragenlijst opslaat.')) {
+                                if (!await CenteredMessage.confirm($t(`Ben je zeker dat je dit wilt verplaatsen?`), $t(`Ja, verplaatsen`), $t(`Deze subcategorie zal worden verplaatst naar deze vragenlijst als je de huidige vragenlijst opslaat.`))) {
                                     return;
                                 }
 
@@ -553,7 +553,7 @@ async function deleteMe() {
         return;
     }
 
-    if (!await CenteredMessage.confirm('Weet je zeker dat je deze vragenlijst wilt verwijderen?', 'Verwijderen')) {
+    if (!await CenteredMessage.confirm($t(`Weet je zeker dat je deze vragenlijst wilt verwijderen?`), $t(`Verwijderen`))) {
         return;
     }
     // Note we create a patch, but don't use it internally because that would throw errors. The view itszelf is not aware of the delete
@@ -583,7 +583,7 @@ async function showExample() {
                     defaultEnabled: true,
                 }),
                 value: reactiveValue,
-                saveText: 'Opslaan',
+                saveText: $t(`Opslaan`),
                 saveHandler: async (_patch: PatchAnswers, navigationActions: NavigationActions) => {
                     await navigationActions.pop({ force: true });
                 },
@@ -598,7 +598,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
 };
 
 defineExpose({

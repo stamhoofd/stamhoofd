@@ -174,9 +174,9 @@ const inputPlaceholder = computed(() => {
             if (props.record.type === RecordType.Integer) {
                 return answer.value.settings.inputPlaceholder;
             }
-            return 'Optioneel. ' + answer.value.settings.inputPlaceholder;
+            return $t(`Optioneel.`) + ' ' + answer.value.settings.inputPlaceholder;
         }
-        return 'Optioneel';
+        return $t(`Optioneel`);
     }
     return answer.value.settings.inputPlaceholder || answer.value.settings.name;
 });

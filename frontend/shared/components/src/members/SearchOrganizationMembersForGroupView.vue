@@ -211,7 +211,7 @@ function deselectAllResults() {
 
 function selectAllResults() {
     if (fetcher.hasMoreObjects || !props.checkout.singleOrganization) {
-        Toast.error('Niet alle resultaten zijn geladen. Gebruik dit niet voor te veel leden tegelijk.').show();
+        Toast.error($t(`Niet alle resultaten zijn geladen. Gebruik dit niet voor te veel leden tegelijk.`)).show();
         return;
     }
 

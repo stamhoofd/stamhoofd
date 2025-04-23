@@ -33,7 +33,7 @@ const step = (add: number) => {
     const v = constrain(model.value + add)
 
     if (v === model.value && add !== 0) {
-        Toast.warning(add > 0 ? "Maximum bereikt" : "Minimum bereikt").show()
+        Toast.warning(add > 0 ? $t(`Maximum bereikt`) : $t(`Minimum bereikt`)).show()
         return
     }
     model.value = v

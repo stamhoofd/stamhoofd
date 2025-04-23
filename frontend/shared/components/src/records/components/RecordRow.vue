@@ -34,10 +34,10 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { RecordCategory, RecordSettings, RecordType } from '@stamhoofd/structures';
 import { computed } from 'vue';
+import { propertyFilterToString } from '../../filters/UIFilter';
 import { usePatchMoveUpDownSingle } from '../../hooks';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
 import { RecordEditorSettings } from '../RecordEditorSettings';
-import { propertyFilterToString } from '../../filters/UIFilter';
 
 const props = withDefaults(
     defineProps<{
@@ -63,89 +63,89 @@ const filterBuilder = computed(() => props.settings.filterBuilder(props.rootCate
 const description = computed(() => {
     if (props.record.type === RecordType.Checkbox) {
         if (props.record.askComments) {
-            return 'Aankruisvakje met tekstvak indien aangevinkt';
+            return $t(`Aankruisvakje met tekstvak indien aangevinkt`);
         }
         if (props.record.required) {
-            return 'Verplicht aankruisvakje';
+            return $t(`Verplicht aankruisvakje`);
         }
-        return 'Aankruisvakje';
+        return $t(`Aankruisvakje`);
     }
     if (props.record.type === RecordType.ChooseOne) {
         if (!props.record.required) {
-            return 'Kies optioneel één uit ' + props.record.choices.length + ' opties';
+            return $t(`Kies optioneel één uit {count} opties`, { count: props.record.choices.length.toString() });
         }
-        return 'Kies één uit ' + props.record.choices.length + ' opties';
+        return $t(`Kies één uit {count} opties`, { count: props.record.choices.length.toString() });
     }
     if (props.record.type === RecordType.MultipleChoice) {
         if (props.record.required) {
-            return 'Kies minstens één uit ' + props.record.choices.length + ' opties';
+            return $t(`Kies minstens één uit {count} opties`, { count: props.record.choices.length.toString() });
         }
-        return 'Kies optioneel meerdere keuzes uit ' + props.record.choices.length + ' opties';
+        return $t(`Kies optioneel meerdere keuzes uit {count} opties`, { count: props.record.choices.length.toString() });
     }
     if (props.record.type === RecordType.Email) {
         if (!props.record.required) {
-            return 'Optioneel e-mailadres';
+            return $t(`Optioneel e-mailadres`);
         }
-        return 'E-mailadres';
+        return $t(`E-mailadres`);
     }
     if (props.record.type === RecordType.Address) {
         if (!props.record.required) {
-            return 'Optioneel adres';
+            return $t(`Optioneel adres`);
         }
-        return 'Adres';
+        return $t(`Adres`);
     }
     if (props.record.type === RecordType.Phone) {
         if (!props.record.required) {
-            return 'Optioneel telefoonnummer';
+            return $t(`Optioneel telefoonnummer`);
         }
-        return 'Telefoonnummer';
+        return $t(`Telefoonnummer`);
     }
     if (props.record.type === RecordType.Date) {
         if (!props.record.required) {
-            return 'Optionele datum';
+            return $t(`Optionele datum`);
         }
-        return 'Datum';
+        return $t(`Datum`);
     }
 
     if (props.record.type === RecordType.Textarea) {
         if (!props.record.required) {
-            return 'Optioneel (groot) tekstveld';
+            return $t(`Optioneel (groot) tekstveld`);
         }
-        return 'Groot tekstveld';
+        return $t(`Groot tekstveld`);
     }
 
     if (props.record.type === RecordType.Integer) {
         if (!props.record.required) {
-            return 'Optioneel getal';
+            return $t(`Optioneel getal`);
         }
-        return 'Getal';
+        return $t(`Getal`);
     }
 
     if (props.record.type === RecordType.Price) {
         if (!props.record.required) {
-            return 'Optionele prijs';
+            return $t(`Optionele prijs`);
         }
-        return 'Prijs';
+        return $t(`Prijs`);
     }
 
     if (props.record.type === RecordType.Image) {
         if (!props.record.required) {
-            return 'Optionele afbeelding';
+            return $t(`Optionele afbeelding`);
         }
-        return 'Afbeelding';
+        return $t(`Afbeelding`);
     }
 
     if (props.record.type === RecordType.File) {
         if (!props.record.required) {
-            return 'Optioneel bestand';
+            return $t(`Optioneel bestand`);
         }
-        return 'Bestand';
+        return $t(`Bestand`);
     }
 
     if (!props.record.required) {
-        return 'Optioneel tekstveld';
+        return $t(`Optioneel tekstveld`);
     }
-    return 'Tekstveld';
+    return $t(`Tekstveld`);
 });
 
 function editRecord() {
@@ -239,7 +239,7 @@ function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: 'Verplaats omhoog',
+                name: $t(`Verplaats omhoog`),
                 icon: 'arrow-up',
                 action: () => {
                     up();
@@ -247,7 +247,7 @@ function showContextMenu(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: 'Verplaats omlaag',
+                name: $t(`Verplaats omlaag`),
                 icon: 'arrow-down',
                 action: () => {
                     down();
@@ -255,7 +255,7 @@ function showContextMenu(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: 'Verplaats naar',
+                name: $t(`Verplaats naar`),
                 childMenu: new ContextMenu([
                     props.rootCategories.map((category) => {
                         return new ContextMenuItem({
@@ -267,7 +267,7 @@ function showContextMenu(event: MouseEvent) {
                                 ? new ContextMenu([
                                     [
                                         new ContextMenuItem({
-                                            name: 'Algemene vraag',
+                                            name: $t(`Algemene vraag`),
                                             action: () => {
                                                 moveTo(category);
                                             },

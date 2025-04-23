@@ -66,10 +66,10 @@ const props = withDefaults(
 
 const platform = usePlatform();
 
-const title = 'Selecteer tags';
+const title = $t(`Selecteer tags`);
 const $saveText = computed(() => {
-    if (!props.tagIds.length) return 'Voeg toe';
-    return 'Wijzig selectie';
+    if (!props.tagIds.length) return $t(`Voeg toe`);
+    return $t(`Wijzig selectie`);
 });
 
 const $hasChanges = computed(() => {
@@ -131,13 +131,13 @@ async function save() {
     const deletedTags = initialSelection.filter(tag => !allTags.includes(tag));
 
     if (deletedTags.length) {
-        let confirmText = 'Ben je zeker dat je alle tags wilt verwijderen?';
+        let confirmText = $t(`Ben je zeker dat je alle tags wilt verwijderen?`);
 
         if (allTags.length) {
             const deleteCount = deletedTags.length;
             const selectionCount = allTags.length;
             const deletedTagsString = deletedTags.map(t => t.name).join(', ');
-            const selectionText = selectionCount === 1 ? 'Er is 1 tag geselecteerd.' : `Er zijn ${selectionCount} tags geselecteerd.`;
+            const selectionText = selectionCount === 1 ? $t(`Er is 1 tag geselecteerd.`) : `Er zijn ${selectionCount} tags geselecteerd.`;
 
             if (deletedTagsString.length > 100) {
                 confirmText = `${selectionText} Ben je zeker dat je ${deleteCount} tags wilt verwijderen?`;
@@ -147,7 +147,7 @@ async function save() {
             }
         }
 
-        const isConfirm = await CenteredMessage.confirm(confirmText, 'Ja');
+        const isConfirm = await CenteredMessage.confirm(confirmText, $t(`Ja`));
         if (!isConfirm) return false;
     }
 

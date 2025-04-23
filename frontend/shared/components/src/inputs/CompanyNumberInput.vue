@@ -30,9 +30,9 @@ export default class CompanyNumberInput extends VueComponent {
             return this.title;
         }
         if (this.country === Country.Netherlands) {
-            return 'KVK-nummer';
+            return $t(`KVK-nummer`);
         }
-        return 'Ondernemingsnummer';
+        return $t(`Ondernemingsnummer`);
     }
 
     @Prop({ default: null })
@@ -47,10 +47,10 @@ export default class CompanyNumberInput extends VueComponent {
     @Prop({ default: true })
     required!: boolean;
 
-    @Prop({ default: 'Vul jouw ondernemingsnummer hier in' })
+    @Prop({ default: $t(`Vul jouw ondernemingsnummer hier in`) })
     placeholder!: string;
 
-    @Prop({ default: 'vat number' })
+    @Prop({ default: $t(`vat number`) })
     autocomplete!: string;
 
     errorBox: ErrorBox | null = null;
@@ -91,7 +91,7 @@ export default class CompanyNumberInput extends VueComponent {
         if (this.companyNumberRaw.length === 0) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: 'Verplicht in te vullen',
+                message: $t(`Verplicht in te vullen`),
                 field: 'companyNumber',
             }));
             return false;

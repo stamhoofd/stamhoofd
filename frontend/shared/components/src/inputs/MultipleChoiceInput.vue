@@ -33,7 +33,7 @@ const props = withDefaults(
         items: { name: string; value: T; description?: string }[];
     }>(), {
         nullable: false as any,
-        nullableLabel: 'Alles',
+        nullableLabel: $t(`Alles`),
     },
 );
 

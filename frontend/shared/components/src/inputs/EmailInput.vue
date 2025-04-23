@@ -117,7 +117,7 @@ export default class EmailInput extends VueComponent {
             if (!silent) {
                 this.errorBox = new ErrorBox(new SimpleError({
                     "code": "invalid_field",
-                    "message": this.emailRaw.length === 0 ? 'Vul een e-mailadres in' :  "Ongeldig e-mailadres " + this.emailRaw,
+                    "message": this.emailRaw.length === 0 ? $t(`Vul een e-mailadres in`) :  $t(`Ongeldig e-mailadres`) + ' ' + this.emailRaw,
                     "field": "email"
                 }))
             }

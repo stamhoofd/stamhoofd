@@ -97,14 +97,14 @@ useValidation(errors.validator, () => {
     if (parents.value.length === 0 && isPropertyRequired('parents')) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: 'Voeg minstens één ouder toe',
+            message: $t(`Voeg minstens één ouder toe`),
             field: 'parents',
         }));
     }
     else if (parents.value.length > 0 && !parents.value.some(p => !!p.nationalRegisterNumber) && isPropertyRequired('parents.nationalRegisterNumber')) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: 'Voeg bij minstens één ouder een rijksregisternummer toe.',
+            message: $t(`Voeg bij minstens één ouder een rijksregisternummer toe.`),
             field: 'parents',
         }));
     }

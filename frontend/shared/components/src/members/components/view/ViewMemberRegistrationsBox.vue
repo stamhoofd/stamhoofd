@@ -141,7 +141,7 @@ async function editRegistration(registration: Registration, event: MouseEvent) {
     const actions = builder.getActions({ selectedOrganizationRegistrationPeriod });
 
     if (actions.filter(a => a.enabled).length === 0) {
-        Toast.warning('Er zijn geen acties beschikbaar voor deze inschrijving').show();
+        Toast.warning($t(`Er zijn geen acties beschikbaar voor deze inschrijving`)).show();
         return;
     }
 

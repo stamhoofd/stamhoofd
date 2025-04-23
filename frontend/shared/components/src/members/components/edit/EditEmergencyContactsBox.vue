@@ -83,7 +83,7 @@ useValidation(errors.validator, () => {
     if (isPropertyRequired('emergencyContacts') && emergencyContacts.value.length === 0) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: 'Voeg minstens één noodcontactpersoon toe',
+            message: $t(`Voeg minstens één noodcontactpersoon toe`),
             field: 'emergencyContacts',
         }));
     }

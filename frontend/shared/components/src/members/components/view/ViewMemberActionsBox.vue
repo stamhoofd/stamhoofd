@@ -62,7 +62,7 @@ const platformFamilyManager = usePlatformFamilyManager();
 const chooseGroupForMember = useChooseGroupForMember();
 
 async function editMember() {
-    await $editMember(props.member, { title: 'Gegevens bewerken' });
+    await $editMember(props.member, { title: $t(`Gegevens bewerken`) });
 }
 async function addRegistration() {
     await chooseGroupForMember({ member: props.member, displayOptions: { action: 'show' } });
@@ -77,10 +77,10 @@ async function deleteMember() {
             new ComponentWithProperties(DeleteView, {
                 title: `${name} definitief verwijderen?`,
                 description: `Ben je 100% zeker dat je ${name} wilt verwijderen? Vul dan de volledige naam van het lid in ter bevestiging. Je kan dit niet ongedaan maken.`,
-                confirmationTitle: 'Bevestig de naam van het lid',
-                confirmationPlaceholder: 'Volledige naam',
+                confirmationTitle: $t(`Bevestig de naam van het lid`),
+                confirmationPlaceholder: $t(`Volledige naam`),
                 confirmationCode: name,
-                checkboxText: 'Ja, ik ben 100% zeker',
+                checkboxText: $t(`Ja, ik ben 100% zeker`),
                 onDelete: async () => {
                     const patch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
                     patch.addDelete(member.id);
@@ -88,7 +88,7 @@ async function deleteMember() {
                     await platformFamilyManager.isolatedPatch([member], patch);
                     GlobalEventBus.sendEvent('members-deleted', [member]).catch(console.error);
 
-                    Toast.success(name + ' is verwijderd').show();
+                    Toast.success(name + ' ' + $t(`is verwijderd`)).show();
 
                     await dismiss({ force: true });
                     return true;

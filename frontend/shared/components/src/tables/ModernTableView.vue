@@ -269,7 +269,7 @@ if (props.Route) {
             if (objects.results.length === 1) {
                 return getPropertiesForRoute(objects.results[0]);
             }
-            Toast.error('Niet gevonden').show();
+            Toast.error($t(`Niet gevonden`)).show();
             throw new Error('Not found');
         },
 
@@ -520,7 +520,7 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
     if (!showSelection.value) {
         // Add select action
         actions.push(new AsyncTableAction({
-            name: 'Selecteer',
+            name: $t(`Selecteer`),
             groupIndex: -1,
             priority: 10,
             needsSelection: false,
@@ -533,7 +533,7 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
     // Add select all action
     if (!isAllSelected.value) {
         actions.push(new AsyncTableAction({
-            name: 'Selecteer alles',
+            name: $t(`Selecteer alles`),
             groupIndex: -1,
             priority: 9,
             needsSelection: false,
@@ -545,7 +545,7 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
     }
     else {
         actions.push(new AsyncTableAction({
-            name: 'Deselecteer alles',
+            name: $t(`Deselecteer alles`),
             groupIndex: -1,
             priority: 9,
             needsSelection: false,
@@ -557,14 +557,14 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
 
     // Add action to change visible columns
     actions.push(new MenuTableAction({
-        name: wrapColumns.value ? 'Wijzig zichtbare gegevens' : 'Wijzig kolommen',
+        name: wrapColumns.value ? $t(`Wijzig zichtbare gegevens`) : $t(`Wijzig kolommen`),
         groupIndex: -1,
         priority: 8,
         childMenu: getColumnContextMenu(),
     }));
 
     actions.push(new MenuTableAction({
-        name: 'Sorteren',
+        name: $t(`Sorteren`),
         groupIndex: -1,
         priority: 7,
         childMenu: getSortingContextMenu(),
@@ -777,7 +777,7 @@ async function onRightClickRow(row: VisibleRow<Value>, event: MouseEvent | Touch
         selection = buildSelectionObject();
 
         filteredActions.push(new AsyncTableAction({
-            name: 'Deselecteer',
+            name: $t(`Deselecteer`),
             groupIndex: 1,
             priority: 10,
             handler: () => {
@@ -794,7 +794,7 @@ async function onRightClickRow(row: VisibleRow<Value>, event: MouseEvent | Touch
         // Only focus this row
         // Add select action
         filteredActions.push(new AsyncTableAction({
-            name: 'Selecteer',
+            name: $t(`Selecteer`),
             groupIndex: !showSelection.value ? -1 : 1,
             priority: 10,
             handler: () => {

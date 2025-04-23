@@ -60,7 +60,7 @@ export default class UploadFileButton extends Mixins(NavigationMixin) {
         if (file.size > 20 * 1024 * 1024) {
             const error = new SimpleError({
                 code: 'file_too_large',
-                message: 'De bestandsgrootte is te groot. Het bestand mag maximaal 20MB groot zijn.'
+                message: $t(`De bestandsgrootte is te groot. Het bestand mag maximaal 20MB groot zijn.`)
             })
             Toast.fromError(error).setHide(null).show()
             return;

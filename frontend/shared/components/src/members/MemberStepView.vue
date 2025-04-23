@@ -76,7 +76,7 @@ const props = withDefaults(
         saveHandler?: ((navigate: NavigationActions) => Promise<void> | void) | null;
     }>(), {
         doSave: true,
-        saveText: 'Opslaan',
+        saveText: $t(`Opslaan`),
         saveHandler: null,
         markReviewed: () => [],
     },
@@ -139,7 +139,7 @@ async function save() {
             if (code.value.length !== 16) {
                 errors.errorBox = new ErrorBox(new SimpleError({
                     code: 'invalid_field',
-                    message: 'Vul de beveiligingscode in',
+                    message: $t(`Vul de beveiligingscode in`),
                     field: 'code',
                 }));
                 loading.value = false;
@@ -207,7 +207,7 @@ async function modifyAddress(from: Address, to: Address) {
         return;
     }
 
-    if (!await CenteredMessage.confirm('Wil je dit adres overal wijzigen?', 'Overal wijzigen', from.shortString() + ' is ook het adres van ' + Formatter.joinLast(occurrences, ', ', ' en ') + '. Als je wilt kan je het adres ook voor hen wijzigen naar ' + to.shortString() + '.', 'Enkel hier', false)) {
+    if (!await CenteredMessage.confirm($t(`Wil je dit adres overal wijzigen?`), $t(`Overal wijzigen`), from.shortString() + ' ' + $t(`is ook het adres van`) + ' ' + Formatter.joinLast(occurrences, ', ', ' ' + $t(`en`) + ' ') + $t(`. Als je wilt kan je het adres ook voor hen wijzigen naar`) + ' ' + to.shortString() + '.', $t(`Enkel hier`), false)) {
         return;
     }
 
@@ -222,7 +222,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value && !loading.value) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
 }
 
 defineExpose({

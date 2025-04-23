@@ -58,8 +58,8 @@ const resp = computed(() => {
 });
 
 const name = computed(() => {
-    const suffix = group.value ? ` van ${group.value.settings.name}` : (props.responsibility.groupId ? ' van onbekende groep' : '');
-    return (resp.value?.name ?? 'Verwijderde functie') + suffix;
+    const suffix = group.value ? ` van ${group.value.settings.name}` : (props.responsibility.groupId ? ' ' + $t(`van onbekende groep`) : '');
+    return (resp.value?.name ?? $t(`Verwijderde functie`)) + suffix;
 });
 
 const hasRegistration = computed(() => {

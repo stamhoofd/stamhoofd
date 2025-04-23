@@ -23,7 +23,7 @@ const props = withDefaults(
         saveText?: string;
         forceMarkReviewed?: boolean | null;
     }>(), {
-        saveText: 'Opslaan',
+        saveText: $t(`Opslaan`),
         forceMarkReviewed: null,
     },
 );
@@ -72,7 +72,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value && !loading.value) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
 }
 
 defineExpose({

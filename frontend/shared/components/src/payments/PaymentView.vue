@@ -416,7 +416,7 @@ async function mark(status: PaymentStatus) {
         });
         props.payment.deepSet(response.data[0]);
         GlobalEventBus.sendEvent('paymentPatch', props.payment).catch(console.error);
-        new Toast('Betaalstatus gewijzigd', 'success').setHide(1000).show();
+        new Toast($t(`Betaalstatus gewijzigd`), 'success').setHide(1000).show();
     }
     catch (e) {
         Toast.fromError(e).show();

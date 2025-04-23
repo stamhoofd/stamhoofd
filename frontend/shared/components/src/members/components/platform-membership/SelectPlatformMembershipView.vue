@@ -92,7 +92,7 @@ const props = defineProps<{
 const $t = useTranslate();
 const title = $t('cb85826e-06fc-473c-95c2-ba338fdbab50');
 const loading = ref(false);
-const saveText = 'Toevoegen';
+const saveText = $t(`Toevoegen`);
 const organization = useOrganization();
 const platform = usePlatform();
 const now = new Date();
@@ -161,7 +161,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: 'De startdatum kan ten vroegste morgen zijn',
+                    message: $t(`De startdatum kan ten vroegste morgen zijn`),
                 }));
             }
 
@@ -169,7 +169,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'endDate',
-                    message: 'De einddatum moet na de startdatum liggen',
+                    message: $t(`De einddatum moet na de startdatum liggen`),
                 }));
             }
 
@@ -177,7 +177,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: 'De startdatum kan niet voor ' + Formatter.date(periodConfig.startDate) + ' liggen',
+                    message: $t(`De startdatum kan niet voor`) + ' ' + Formatter.date(periodConfig.startDate) + ' ' + $t(`liggen`),
                 }));
             }
 
@@ -185,7 +185,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: 'De startdatum kan niet na ' + Formatter.date(periodConfig.endDate) + ' liggen',
+                    message: $t(`De startdatum kan niet na`) + ' ' + Formatter.date(periodConfig.endDate) + ' ' + $t(`liggen`),
                 }));
             }
 
@@ -193,7 +193,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'endDate',
-                    message: 'De einddatum kan niet na ' + Formatter.date(periodConfig.endDate) + ' liggen',
+                    message: $t(`De einddatum kan niet na`) + ' ' + Formatter.date(periodConfig.endDate) + ' ' + $t(`liggen`),
                 }));
             }
         }
@@ -203,7 +203,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: 'De startdatum kan niet voor ' + Formatter.date(periodConfig.startDate) + ' liggen',
+                    message: $t(`De startdatum kan niet voor`) + ' ' + Formatter.date(periodConfig.startDate) + ' ' + $t(`liggen`),
                 }));
             }
 
@@ -211,7 +211,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: 'De startdatum kan niet na ' + Formatter.date(periodConfig.endDate) + ' liggen',
+                    message: $t(`De startdatum kan niet na`) + ' ' + Formatter.date(periodConfig.endDate) + ' ' + $t(`liggen`),
                 }));
             }
         }
@@ -240,7 +240,7 @@ async function save() {
 
         await platformFamilyManager.isolatedPatch([props.member], patch, false);
 
-        Toast.success('Aansluiting toegevoegd').show();
+        Toast.success($t(`Aansluiting toegevoegd`)).show();
         await pop({ force: true });
     }
     catch (e) {
@@ -278,13 +278,13 @@ function getTypePriceNormalPrice(type: PlatformMembershipType) {
 function getPriceForDate(type: PlatformMembershipType, date: Date) {
     const periodConfig = type.periods.get(props.period.id);
     if (!periodConfig) {
-        return 'Niet beschikbaar';
+        return $t(`Niet beschikbaar`);
     }
 
     const priceConfig = periodConfig.getPriceConfigForDate(date);
 
     if (type.behaviour === PlatformMembershipTypeBehaviour.Days) {
-        return Formatter.price(priceConfig.pricePerDay) + ' per dag';
+        return Formatter.price(priceConfig.pricePerDay) + ' ' + $t(`per dag`);
     }
 
     const tagIds = selectedOrganization.value?.meta.tags ?? [];

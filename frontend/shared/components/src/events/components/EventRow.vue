@@ -64,7 +64,7 @@ const levelPrefix = computed(() => {
             prefixes.push(...tagNames);
         }
         else {
-            prefixes.push('Nationaal');
+            prefixes.push($t(`Nationaal`));
         }
     }
     else {
@@ -79,7 +79,7 @@ const levelPrefix = computed(() => {
         }
     }
 
-    return Formatter.joinLast(prefixes, ', ', ' en ');
+    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`en`) + ' ');
 });
 
 const prefix = computed(() => {
@@ -99,7 +99,7 @@ const prefix = computed(() => {
             prefixes.push(group.name);
         }
     }
-    return Formatter.joinLast(prefixes, ', ', ' en ');
+    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`en`) + ' ');
 });
 
 </script>

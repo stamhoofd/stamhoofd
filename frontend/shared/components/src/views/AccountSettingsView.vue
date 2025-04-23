@@ -299,7 +299,7 @@ async function save() {
             await present(new ComponentWithProperties(ConfirmEmailView, { token: result.verificationToken, email: patched.value.email }).setDisplayStyle('sheet'));
         }
         else {
-            const toast = new Toast('De wijzigingen zijn opgeslagen', 'success green');
+            const toast = new Toast($t(`De wijzigingen zijn opgeslagen`), 'success green');
             toast.show();
         }
 
@@ -324,16 +324,16 @@ async function deleteRequest() {
     await present({
         components: [
             new ComponentWithProperties(DeleteView, {
-                title: 'Verwijder jouw account?',
+                title: $t(`Verwijder jouw account?`),
                 description: `Ben je 100% zeker dat je jouw account wilt verwijderen? Vul dan je huidige e-mailadres in ter bevestiging. Al jouw gegevens gaan verloren. Je kan dit niet ongedaan maken.`,
-                confirmationTitle: 'Bevestig je e-mailadres',
-                confirmationPlaceholder: 'Huidige e-mailadres',
+                confirmationTitle: $t(`Bevestig je e-mailadres`),
+                confirmationPlaceholder: $t(`Huidige e-mailadres`),
                 confirmationCode,
-                checkboxText: 'Ja, ik ben 100% zeker',
+                checkboxText: $t(`Ja, ik ben 100% zeker`),
                 onDelete: async () => {
                     await $context.value.deleteAccount();
 
-                    Toast.success('Je account is verwijderd. Het kan even duren voor jouw aanvraag volledig is verwerkt.').show();
+                    Toast.success($t(`Je account is verwijderd. Het kan even duren voor jouw aanvraag volledig is verwerkt.`)).show();
                     await pop({ force: true });
                     return true;
                 },
@@ -355,7 +355,7 @@ async function disconnectProvider(provider: LoginProviderType) {
     }
     disconnecting = true;
 
-    if (await CenteredMessage.confirm('Ben je zeker dat je deze inlogmethode wilt deactiveren?', 'Ja, deactiveren')) {
+    if (await CenteredMessage.confirm($t(`Ben je zeker dat je deze inlogmethode wilt deactiveren?`), $t(`Ja, deactiveren`))) {
         const metaPatch = UserMeta.patch({});
         metaPatch.loginProviderIds.set(provider, null);
 
@@ -368,7 +368,7 @@ async function disconnectProvider(provider: LoginProviderType) {
 
         try {
             await LoginHelper.patchUser($context.value, patch);
-            Toast.success('De inlogmethode is ontkoppeld').show();
+            Toast.success($t(`De inlogmethode is ontkoppeld`)).show();
         }
         catch (e) {
             errors.errorBox = new ErrorBox(e);
@@ -378,7 +378,7 @@ async function disconnectProvider(provider: LoginProviderType) {
 }
 
 async function deletePassword() {
-    if (await CenteredMessage.confirm('Ben je zeker dat je jouw wachtwoord wilt verwijderen?', 'Ja, verwijderen')) {
+    if (await CenteredMessage.confirm($t(`Ben je zeker dat je jouw wachtwoord wilt verwijderen?`), $t(`Ja, verwijderen`))) {
         const patch = NewUser.patch({
             id: $user.value!.id,
             hasPassword: false,
@@ -388,7 +388,7 @@ async function deletePassword() {
 
         try {
             await LoginHelper.patchUser($context.value, patch);
-            Toast.success('Je wachtwoord is verwijderd').show();
+            Toast.success($t(`Je wachtwoord is verwijderd`)).show();
         }
         catch (e) {
             errors.errorBox = new ErrorBox(e);
@@ -404,7 +404,7 @@ async function connectProvider(provider: LoginProviderType) {
     }
     connecting.value = true;
 
-    if (await CenteredMessage.confirm('Ben je zeker dat je deze inlogmethode wilt koppelen?', 'Ja, koppelen')) {
+    if (await CenteredMessage.confirm($t(`Ben je zeker dat je deze inlogmethode wilt koppelen?`), $t(`Ja, koppelen`))) {
         // This will redirect, so the loading will stay forever
         await $context.value.startSSO({
             providerType: provider,
@@ -414,7 +414,7 @@ async function connectProvider(provider: LoginProviderType) {
 }
 
 async function logout() {
-    if (await CenteredMessage.confirm('Ben je zeker dat je wilt uitloggen?', 'Uitloggen')) {
+    if (await CenteredMessage.confirm($t(`Ben je zeker dat je wilt uitloggen?`), $t(`Uitloggen`))) {
         // Prevent auto sign in via sso
         try {
             sessionStorage.setItem('triedLogin', 'true');

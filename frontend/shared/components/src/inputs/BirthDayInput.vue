@@ -123,7 +123,7 @@ function validate() {
 
     errors.errorBox = new ErrorBox(new SimpleError({
         code: 'empty_field',
-        message: 'Vul de geboortedatum in',
+        message: $t(`Vul de geboortedatum in`),
         field: 'birthDay',
     }));
 
