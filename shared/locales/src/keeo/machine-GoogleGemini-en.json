@@ -13546,5 +13546,2221 @@
   "662e1c09-b491-41a4-8e87-220fabc87eb1": {
     "original": "Je kan geen inschrijvingen wijzigen van {group} omdat scoutsjaar {period} is afgesloten.",
     "translation": "You cannot change registrations for {group} because scout year {period} is closed."
+  },
+  "8505e377-cc4d-4551-98d3-60a70d8b2c7b": {
+    "original": "Naam van het lokaal (optioneel)",
+    "translation": "Name of the premises (optional)"
+  },
+  "03ffd28c-99d4-4bae-8494-5def382d826e": {
+    "original": "Voeg alle lokalen toe en kijk of de gegevens nog up-to-date zijn.",
+    "translation": "Add all premises and check if the data is still up-to-date."
+  },
+  "19cc6e71-9cd7-41d8-84d0-2c8828bd92c4": {
+    "original": "Bevestig dat alle lokalen nagekeken zijn",
+    "translation": "Confirm that all premises have been checked"
+  },
+  "0d7093d6-d3c0-412e-af8a-d44a5d2394d9": {
+    "original": "Bevestig dat alle lokalen nagekeken zijn",
+    "translation": "Confirm that all premises have been checked"
+  },
+  "05afcd20-5dda-4e01-88a7-e58d46487d30": {
+    "original": "Voeg minstens één lokaal toe.",
+    "translation": "Add at least one premises."
+  },
+  "5c37d309-63da-44af-8eec-fb593b8bad31": {
+    "original": "Voeg alle te verzekeren lokalen toe",
+    "translation": "Add all premises to be insured"
+  },
+  "5d0062df-e595-4e28-b1e3-d399102dfadf": {
+    "original": "Soorten lokalen",
+    "translation": "Types of premises"
+  },
+  "146d0874-2f4d-4374-8808-61a4bd953354": {
+    "original": "lid",
+    "translation": "member"
+  },
+  "fbb0dee5-c500-4bb4-81d6-945666ae4784": {
+    "original": "account",
+    "translation": "account"
+  },
+  "41b46e42-08eb-4146-b71c-d77c90f46219": {
+    "original": "Aangerekend",
+    "translation": "Charged"
+  },
+  "87d9975e-d0ac-41d4-8472-dedcfaa571cb": {
+    "original": "Proefperiode",
+    "translation": "Trial period"
+  },
+  "b4f47589-f6b4-4f9e-a83b-ad4cbb3de416": {
+    "original": "Prijs",
+    "translation": "Price"
+  },
+  "9e6fd655-abb5-43b2-ac0e-c62409058700": {
+    "original": "Prijs zonder korting",
+    "translation": "Price without discount"
+  },
+  "c5235739-b78a-4add-ab2f-515aef40073d": {
+    "original": "Aangerekend",
+    "translation": "Charged"
+  },
+  "539dc5d4-c221-412b-bc33-fe28f85625c4": {
+    "original": "Nog niet aangerekend",
+    "translation": "Not yet charged"
+  },
+  "b467444b-879a-4bce-b604-f7e890008c4f": {
+    "original": "Inschrijvingen",
+    "translation": "Registrations"
+  },
+  "f1582fe7-3168-4579-bcc5-9db17568dac0": {
+    "original": "Aangerekend aan {organization}",
+    "translation": "Charged to {organization}"
+  },
+  "b0a70381-66b1-4bff-a613-8332a35bec7a": {
+    "original": "Zal na proefperiode aangerekend worden aan {organization}",
+    "translation": "Will be charged to {organization} after the trial period"
+  },
+  "a2f6d632-9e20-4366-9393-b52431525596": {
+    "original": "Zal binnenkort aangerekend worden aan {organization}",
+    "translation": "Will soon be charged to {organization}"
+  },
+  "e3e4ba16-7923-42bc-ae23-cd729ce06869": {
+    "original": "Je kan maar één lid hebben met de functie {responsibility} in deze leeftijdsgroep",
+    "translation": "You can only have one member with the function {responsibility} in this age group"
+  },
+  "10c13841-9f58-4651-a9b3-a34c8ce1a505": {
+    "original": "Je kan maximum {count} leden hebben met de functie {responsibility} in deze leeftijdsgroep",
+    "translation": "You can have a maximum of {count} members with the function {responsibility} in this age group"
+  },
+  "d81fc0f4-14e5-499c-9749-dd8941cdeb45": {
+    "original": "De standaard leeftijdsgroep is niet beschikbaar voor deze organisatie",
+    "translation": "The default age group is not available for this organisation"
+  },
+  "79672bcc-aa78-4d1d-ab82-f7c3c01ab4ff": {
+    "original": "De standaard leeftijdsgroep is ongeldig",
+    "translation": "The default age group is invalid"
+  },
+  "0c609cc0-e0da-43b0-9390-3e70e1407475": {
+    "original": "Geen ticket",
+    "translation": "No ticket"
+  },
+  "c22c23f8-54d9-4116-8ad0-8766aeb46bea": {
+    "original": "gescand",
+    "translation": "scanned"
+  },
+  "c1ebdccb-6610-4947-a14d-0731c9cb2dc6": {
+    "original": "Het te betalen bedrag van deze bestelling is gewijzigd nadat de bestelling geplaatst werd.",
+    "translation": "The amount payable for this order has been changed after the order was placed."
+  },
+  "6cc7c2e8-bb92-4495-9915-c0fe83631379": {
+    "original": "Er werd nog geen betaling aangemaakt voor alle producten in deze bestelling. Registreer een betaling/terugbetaling",
+    "translation": "No payment has yet been created for all products in this order. Register a payment/refund"
+  },
+  "515e4985-a826-42fc-9dd0-fc168da16f46": {
+    "original": "Betaling / terugbetaling registreren",
+    "translation": "Register payment / refund"
+  },
+  "edd72e8b-76de-45df-93a0-ecc72efb849a": {
+    "original": "Afhalen",
+    "translation": "Collection"
+  },
+  "acde7540-a0b2-4eaf-88af-2d92851f73de": {
+    "original": "Levering",
+    "translation": "Delivery"
+  },
+  "25e67f34-649f-4743-9cdd-d2a81d252daf": {
+    "original": "Ter plaatse consumeren",
+    "translation": "Consume on the spot"
+  },
+  "8baa8f22-c18c-4de7-85b1-99a85509019b": {
+    "original": "Onbekende methode",
+    "translation": "Unknown method"
+  },
+  "5562135d-197d-4251-ada8-ffe747622e7b": {
+    "original": "Leveringsmethode",
+    "translation": "Delivery method"
+  },
+  "856550aa-05af-45fc-8477-51ed1f719432": {
+    "original": "Wanneer afhalen?",
+    "translation": "When to collect?"
+  },
+  "13081716-3941-44b8-87b4-398ab2288419": {
+    "original": "Wanneer?",
+    "translation": "When?"
+  },
+  "cf7b982a-add0-4dc7-bbf9-f0c2477fa1e0": {
+    "original": "Wanneer leveren?",
+    "translation": "When to deliver?"
+  },
+  "f4d00d5c-77c9-41dd-9689-a447c7977449": {
+    "original": "Gegevens",
+    "translation": "Details"
+  },
+  "7f3af27c-f057-4ce3-8385-36dfb99745e8": {
+    "original": "Notities",
+    "translation": "Notes"
+  },
+  "038031a7-0942-493a-9eb5-0cea9bb487b0": {
+    "original": "Afhaalopmerkingen",
+    "translation": "Collection notes"
+  },
+  "22af7a31-3e7c-43ee-aa6f-d6638719caed": {
+    "original": "Leveringsopmerkingen",
+    "translation": "Delivery notes"
+  },
+  "d942f8fe-5c83-4b7f-badf-b6be91762be7": {
+    "original": "Verwijderd ticket",
+    "translation": "Deleted ticket"
+  },
+  "d6972a60-97a1-4065-83f2-95638c866efd": {
+    "original": "Dubbele boekingen gedetecteerd voor plaatsen",
+    "translation": "Double bookings detected for locations"
+  },
+  "33adbc14-dd1a-43a7-a015-98a3322b58c5": {
+    "original": "Info",
+    "translation": "Info"
+  },
+  "16d29c4e-f292-4a77-a995-c4fa9ae76200": {
+    "original": "Geannuleerde bestellingen of verwijderde bestellingen worden niet meegeteld in de statistieken.",
+    "translation": "Cancelled or deleted orders are not included in the statistics."
+  },
+  "c2ee9504-b07a-4d79-bd25-c14a1bba4d59": {
+    "original": "Vouchers",
+    "translation": "Vouchers"
+  },
+  "213bb888-16d4-4cdc-b917-6e6ec8b6fc84": {
+    "original": "Tickets scannen",
+    "translation": "Scan tickets"
+  },
+  "fd3f86b0-c773-4c11-8c24-72fc990975c3": {
+    "original": "Dit appartaat ondersteunt de scanner niet. Probeer in een moderne browser, op een smartphone en zorg ervoor dat je niet in privé modus surft (dat voorkomt de noodzakelijk opslag van tickets als het internet wegvalt).",
+    "translation": "This device does not support the scanner. Please try in a modern browser, on a smartphone and make sure you are not browsing in private mode (this prevents the necessary storage of tickets if the internet goes down)."
+  },
+  "7021a7ac-e143-4a28-b810-f6f4fc88c3df": {
+    "original": "Download de checklist voor het scannen van tickets",
+    "translation": "Download the ticket scanning checklist"
+  },
+  "8e829200-f906-49c1-a17e-dbfb193ed9f9": {
+    "original": "Starten",
+    "translation": "Start"
+  },
+  "6b2de32e-471e-4e77-97d0-a800856ee5ba": {
+    "original": "Vink hieronder de tickets aan die je wilt scannen en klik op \"starten\". Zo scan je niet per ongeluk een ongeldig ticket als je verschillende scanpunten hebt op je evenement (bv. drankkaarten en inkomtickets apart).",
+    "translation": "Tick the tickets you want to scan below and click on \"start\". This way you won't accidentally scan an invalid ticket if you have different scan points at your event (e.g. drink tickets and entrance tickets separately)."
+  },
+  "a2d46fc7-a82b-49ba-a2c8-98fe91a1c4d9": {
+    "original": "Klik op \"starten\" om te beginnen.",
+    "translation": "Click on \"start\" to begin."
+  },
+  "547d2798-f0b0-4cdf-95cd-58f3bc6ab4e9": {
+    "original": "Bijwerken...",
+    "translation": "Updating..."
+  },
+  "711b7638-be3d-4723-821e-cedef94c8782": {
+    "original": "Geen internetverbinding. Scannen van tickets blijft gedeeltelijk werken. Internet is aan te raden.",
+    "translation": "No internet connection. Ticket scanning will continue to work partially. Internet is recommended."
+  },
+  "5c9f4609-ebf3-44eb-bf7a-06399a87fc90": {
+    "original": "Laatst bijgewerkt:",
+    "translation": "Last updated:"
+  },
+  "bccb094f-12eb-40d0-9a24-843832b0cdb7": {
+    "original": "Opnieuw proberen",
+    "translation": "Try again"
+  },
+  "8f609412-7a05-461c-9819-54263bad0f43": {
+    "original": "Plaats de QR-code in het midden van het scherm.",
+    "translation": "Place the QR code in the middle of the screen."
+  },
+  "40fe6e19-794f-439d-929e-d0c6c9f2f7be": {
+    "original": "Plaats de QR-code in het kader om te scannen.",
+    "translation": "Place the QR code in the frame to scan."
+  },
+  "8578c5a9-1246-4c57-b1d4-65919a69a2bc": {
+    "original": "Scan een ticket",
+    "translation": "Scan a ticket"
+  },
+  "4ac91a6b-7e0d-4ebc-9698-2543ef654b63": {
+    "original": "Ticket al gescand",
+    "translation": "Ticket already scanned"
+  },
+  "21c8577c-7124-41e3-8bda-3692b917fdba": {
+    "original": "Let op dat je hetzelfde ticket niet meerdere keren scant en zo hergebruik van een ticket mogelijk maakt.",
+    "translation": "Please note that you should not scan the same ticket multiple times, as this could enable the reuse of a ticket."
+  },
+  "dcb6acd6-9b5a-4a2e-af6e-441a8264dee0": {
+    "original": "Gescand door",
+    "translation": "Scanned by"
+  },
+  "90a3142d-c6a4-4e52-a4d7-db2e78fabacc": {
+    "original": "Ticket toch bekijken",
+    "translation": "View ticket anyway"
+  },
+  "1b311bbf-8cc3-4b91-a019-f80a062d8d4d": {
+    "original": "Terug",
+    "translation": "Back"
+  },
+  "cb6d8561-3187-4b56-bb71-fe6ddaba642f": {
+    "original": "Deze bestelling werd nog niet (volledig) betaald.",
+    "translation": "This order has not yet been (fully) paid."
+  },
+  "c66e68e3-1a62-4218-97a8-bbb7b4f46fc1": {
+    "original": "Er werd te veel betaald voor de bestelling (waarschijnlijk gewijzigd na betaling). Er is een terugbetaling nodig.",
+    "translation": "Too much was paid for the order (probably changed after payment). A refund is required."
+  },
+  "10529c9f-43f8-40f1-b2bf-b59d57caa766": {
+    "original": "Deze bestelling werd al als voltooid gemarkeerd",
+    "translation": "This order has already been marked as complete"
+  },
+  "9a6904ac-2c29-443a-9e73-7c7588c626be": {
+    "original": "Deze bestelling werd geannuleerd",
+    "translation": "This order has been cancelled"
+  },
+  "73cfeb52-162d-4e87-9ed5-1076bb992484": {
+    "original": "Informatie",
+    "translation": "Information"
+  },
+  "412bb2c5-0f77-4168-ad8d-2e27ba35020b": {
+    "original": "Opgelet: deze bestelling werd nog niet betaald.",
+    "translation": "Please note: this order has not yet been paid."
+  },
+  "26f63e2b-14a5-4120-96e8-409c93ec4677": {
+    "original": "Bestelling",
+    "translation": "Order"
+  },
+  "8c153fdb-d103-4f8d-8ad1-89cae3e9869d": {
+    "original": "Leeg ticket?",
+    "translation": "Empty ticket?"
+  },
+  "881bf207-5632-4254-90e2-3e1f691740ea": {
+    "original": "Er ging iets mis bij het lezen van de inhoud van dit ticket.",
+    "translation": "Something went wrong when reading the content of this ticket."
+  },
+  "44cd24c3-8214-434c-a123-923d6c606a69": {
+    "original": "Markering ongedaan maken",
+    "translation": "Undo marking"
+  },
+  "b158e8e9-4f84-4f76-9c4c-ea2ffd1d882f": {
+    "original": "Markeer als gescand",
+    "translation": "Mark as scanned"
+  },
+  "a1761504-f92f-4ef8-b2e1-fd66dfb1107b": {
+    "original": "Geldig ticket",
+    "translation": "Valid ticket"
+  },
+  "a7e6596c-9614-426a-a9ef-dc6e32ec2864": {
+    "original": "Deze pagina is voor beheerders",
+    "translation": "This page is for administrators"
+  },
+  "3abb6fe0-18cc-492b-9221-0a7825ecc9a2": {
+    "original": "Oeps, deze website is enkel voor beheerders van",
+    "translation": "Oops, this website is only for administrators of"
+  },
+  "cf581821-fd16-416c-bdd2-be5315810373": {
+    "original": ". Ga naar het ledenportaal als je je wilt inschrijven als lid.",
+    "translation": ". Go to the member portal if you want to register as a member."
+  },
+  "2dfdd151-6245-4f46-ba42-695a09b74607": {
+    "original": "Ingelogd als",
+    "translation": "Logged in as"
+  },
+  "5eb72046-9ec6-4072-89ff-5c123636afbe": {
+    "original": "Beheer jouw groep",
+    "translation": "Manage your group"
+  },
+  "b91fa8bc-9922-49c5-b773-5190b5103c25": {
+    "original": "Schakel over naar",
+    "translation": "Switch to"
+  },
+  "0289e748-906d-453a-b54f-dce6a0355da0": {
+    "original": "Oeps, er zijn nog geen inschrijvingsgroepen gemaakt. Ga naar de instellingen en configureer jouw inschrijvingsgroepen.",
+    "translation": "Oops, no registration groups have been created yet. Go to the settings and configure your registration groups."
+  },
+  "24b0cf4b-a0be-4d8c-bd75-c04648cdf570": {
+    "original": "Deze categorie is onzichtbaar voor leden omdat activiteiten niet geactiveerd is",
+    "translation": "This category is invisible to members because activities are not activated"
+  },
+  "11ad3320-726c-434b-938a-923f20c9c59c": {
+    "original": "De structuur van jouw leeftijdsgroepen blijft behouden, maar je moet zelf nog de prijs en datums goed zetten. Vergeet dit niet.",
+    "translation": "The structure of your age groups will be retained, but you still have to set the price and dates correctly yourself. Don't forget this."
+  },
+  "0ab03598-06c3-433b-a8c6-39daa3aa16f1": {
+    "original": "Je kan nog steeds aan de gegevens van vorig jaar",
+    "translation": "You can still access last year's data"
+  },
+  "62536e62-9d62-429f-97d4-2605e738fc92": {
+    "original": "Alle leiding en leden verliezen hun functies en moet je opnieuw instellen",
+    "translation": "All leaders and members lose their functions and you have to set them up again"
+  },
+  "9128d20d-f23a-4d1e-a631-c61a25ade53c": {
+    "original": "Niet beschikbaar",
+    "translation": "Not available"
+  },
+  "b34e7f10-2e03-42f5-b865-2d88571d2a6e": {
+    "original": "Deze periode is niet beschikbaar voor jouw organisatie.",
+    "translation": "This period is not available for your organisation."
+  },
+  "253b64ce-1507-4655-a75d-ae046e983329": {
+    "original": "Je bekijkt nu",
+    "translation": "You are now viewing"
+  },
+  "8b1933de-fb99-4a61-91c0-a80e5d09cef5": {
+    "original": "Maak jouw account",
+    "translation": "Create your account"
+  },
+  "0b78041e-b438-46c5-a7f3-62915022c294": {
+    "original": "Je kan later nog andere beheerders toevoegen, dus kies een persoonlijk e-mailadres en wachtwoord dat niet gedeeld wordt.",
+    "translation": "You can add other administrators later, so choose a personal email address and password that is not shared."
+  },
+  "657d0ca3-739f-48bc-b4c0-b4c326b59834": {
+    "original": "Account aanmaken",
+    "translation": "Create account"
+  },
+  "26cb7015-6d17-4c3b-8b94-f44f38576854": {
+    "original": "Persoonlijk e-mailadres",
+    "translation": "Personal email address"
+  },
+  "55d8cd6e-91d1-4cbe-b9b4-f367bbf37b62": {
+    "original": "Vul jouw e-mailadres hier in",
+    "translation": "Enter your email address here"
+  },
+  "d220bb47-196f-4ffb-9f0a-367234ced464": {
+    "original": "Kies een persoonlijk wachtwoord",
+    "translation": "Choose a personal password"
+  },
+  "adf7def3-6328-4261-a390-6cd006737aaf": {
+    "original": "Kies een wachtwoord",
+    "translation": "Choose a password"
+  },
+  "ed8aef93-717e-406c-a779-2465dcd07baa": {
+    "original": "Herhaal wachtwoord",
+    "translation": "Repeat password"
+  },
+  "79537e4c-5363-4f06-9d82-9b1b007add73": {
+    "original": "Herhaal nieuw wachtwoord",
+    "translation": "Repeat new password"
+  },
+  "6bce22dc-e4ac-47f5-aa66-873d02ba9f5f": {
+    "original": "Je kan alle functies gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen.",
+    "translation": "You can try out all the features for free without having to enter your payment details."
+  },
+  "4248538e-48b6-4596-a3f6-0fedb910cb8f": {
+    "original": "Log dan hier in",
+    "translation": "Then log in here"
+  },
+  "09909d45-d69c-4d17-9eff-44dc551032b8": {
+    "original": "Je ontvangt {value} tegoed van {organization} als je nu registreert",
+    "translation": "You will receive {value} credit from {organization} if you register now"
+  },
+  "0502b517-9f29-4b4a-ba02-f11a430edeb5": {
+    "original": "Geen adres? Vul dan een adres in dat in de buurt ligt",
+    "translation": "No address? Then enter an address that is nearby"
+  },
+  "3f538b2d-e68f-4b87-917d-169305dfa42e": {
+    "original": "Hiermee stellen we automatisch al enkele instellingen goed in.",
+    "translation": "This automatically sets up some settings for you."
+  },
+  "d57a2f00-6cf5-4f37-b532-31fe5fae4946": {
+    "original": "Via sociale media",
+    "translation": "Via social media"
+  },
+  "90816551-3afb-44d2-b698-bef4a73d36b3": {
+    "original": "Via opzoekwerk (bv. Google)",
+    "translation": "Via research (e.g. Google)"
+  },
+  "8f7475aa-c110-49b2-8017-1a6dd0fe72f9": {
+    "original": "Andere",
+    "translation": "Other"
+  },
+  "a5f71b13-f443-488a-81a4-62cf2498d9af": {
+    "original": "Koepelorganisatie",
+    "translation": "Umbrella organisation"
+  },
+  "deb8b290-d12c-4fa5-827c-fc24decabbba": {
+    "original": "Kies de functies die je wilt uitproberen",
+    "translation": "Choose the functions you want to try out"
+  },
+  "167706de-e695-4695-95d6-662dd10c2a46": {
+    "original": "Test de functies eerst rustig uit voor je beslist om een pakket te kopen. Je hoeft geen betaalgegevens in te geven.",
+    "translation": "Test the functions first before you decide to buy a package. You do not need to enter any payment details."
+  },
+  "d11410bc-d04e-4145-a59e-75c0db0fc04f": {
+    "original": "Je kan later deze functies wijzigingen via het instellingen menu.",
+    "translation": "You can change these functions later via the settings menu."
+  },
+  "e859a41b-e10b-4eac-a594-83decf3927c2": {
+    "original": "Aan de slag",
+    "translation": "Get started"
+  },
+  "69ea4d40-e84c-4c40-b344-0d1c82e4af42": {
+    "original": "Functies uitproberen",
+    "translation": "Try out functions"
+  },
+  "ae21b9bf-7441-4f38-b789-58f34612b7af": {
+    "original": "Tarief",
+    "translation": "Tariff"
+  },
+  "e96d9ea7-f8cc-42c6-b23d-f46e1a56e043": {
+    "original": "Leeftijd",
+    "translation": "Age"
+  },
+  "3048ad16-fd3b-480e-b458-10365339926b": {
+    "original": "Geslacht",
+    "translation": "Gender"
+  },
+  "c0277e8e-a2e0-4ec3-9339-c2e1be2e6e2d": {
+    "original": "Aansluiting",
+    "translation": "Affiliation"
+  },
+  "3d43c0ab-d755-43ef-af26-f29cfe3743d5": {
+    "original": "Er zijn geen ingebouwde functies.",
+    "translation": "There are no built-in functions."
+  },
+  "31e85868-a04b-42be-bf89-0b691378852c": {
+    "original": "Verplichte functies",
+    "translation": "Mandatory functions"
+  },
+  "f4caaf58-4248-4f91-9e76-c8cec82f528d": {
+    "original": "Optionele functies",
+    "translation": "Optional functions"
+  },
+  "72f84037-1626-49e6-ab24-c657a51266a5": {
+    "original": "Toon stappen",
+    "translation": "Show steps"
+  },
+  "2aaf6529-b504-45f9-848e-8fe2b52738ec": {
+    "original": "Je hebt nog geen webshops gemaakt",
+    "translation": "You haven't created any webshops yet"
+  },
+  "e38c0b49-b038-4c9c-9653-fe1e4a078226": {
+    "original": "Webshop",
+    "translation": "Webshop"
+  },
+  "2a7f1944-1da2-4a55-bb1d-981aeed5d29e": {
+    "original": "Verkoop",
+    "translation": "Sales"
+  },
+  "56958164-b35f-4b78-b286-c3c7ac9c539d": {
+    "original": "Geen toegang tot bestanden. Wijzig de toestemmingen van de app om bestanden te kunnen opslaan.",
+    "translation": "No access to files. Change the app's permissions to save files."
+  },
+  "fa6e6adf-da40-4f05-89c3-721cbb1d33f9": {
+    "original": "Controleren op updates...",
+    "translation": "Checking for updates..."
+  },
+  "63af45b3-7fc7-4c32-b299-2fab446d4f13": {
+    "original": "Nieuwe functionaliteiten in elkaar timmeren...",
+    "translation": "Putting together new functionalities..."
+  },
+  "e83c36c6-d9fb-47fa-8351-e9b34a0a484d": {
+    "original": "Nieuwe functionaliteiten klaarzetten...",
+    "translation": "Preparing new functionalities..."
+  },
+  "b4cb2ff2-bb82-417d-bf01-6af09e996357": {
+    "original": "Herlaad om de nieuwste update toe te passen",
+    "translation": "Reload to apply the latest update"
+  },
+  "44a86a23-a189-421b-b53a-8f922c17ab78": {
+    "original": "download",
+    "translation": "download"
+  },
+  "1529d78d-800f-415a-8e56-b756a8bc6449": {
+    "original": "Herladen",
+    "translation": "Reload"
+  },
+  "fd9b8517-78de-4e10-9995-d248b672ff7b": {
+    "original": "Er is een fout opgetreden bij het controleren op updates. Probeer het later opnieuw.",
+    "translation": "An error occurred while checking for updates. Please try again later."
+  },
+  "a5a6a243-1ce0-460d-ac8f-7957c39e5e13": {
+    "original": "Er is een fout opgetreden bij het downloaden van de update. Probeer het later opnieuw.",
+    "translation": "An error occurred while downloading the update. Please try again later."
+  },
+  "71a6c292-6ea9-41f7-bff7-740ab42842a9": {
+    "original": "Er is een fout opgetreden bij het installeren van de update. Probeer het later opnieuw.",
+    "translation": "An error occurred while installing the update. Please try again later."
+  },
+  "88db9833-34e4-488a-9f74-b6e230c69dc1": {
+    "original": "Mandje",
+    "translation": "Basket"
+  },
+  "18650de1-4791-4334-ac74-2ab6848f9a28": {
+    "original": "Voeg alle inschrijvingen toe aan het mandje en reken in één keer af.",
+    "translation": "Add all registrations to the basket and check out at once."
+  },
+  "00bd2458-2429-41bf-803b-c74a58736265": {
+    "original": "Voeg alle inschrijvingen toe aan het mandje en bevestig ze.",
+    "translation": "Add all registrations to the basket and confirm them."
+  },
+  "c6b88f05-a46b-40cc-895a-8652cd9857f3": {
+    "original": "Afrekenen",
+    "translation": "Checkout"
+  },
+  "7de2e636-dcec-44b1-a681-daeb9cd85316": {
+    "original": "Bevestigen",
+    "translation": "Confirm"
+  },
+  "8def4c64-356c-496f-ad1e-0ecb5b7892a4": {
+    "original": "Jouw mandje is leeg. Schrijf een lid in via het tabblad 'Start'.",
+    "translation": "Your basket is empty. Register a member via the 'Start' tab."
+  },
+  "9c2198f2-9234-42e8-8783-3684d37a513e": {
+    "original": "Kijk even na of de link klopt of probeer later opnieuw.",
+    "translation": "Please check if the link is correct or try again later."
+  },
+  "6a5df3c9-cb80-4f5d-9b5d-94e180bac851": {
+    "original": "Ledenadministratie via",
+    "translation": "Membership administration via"
+  },
+  "97ea7ffc-c5a0-4bb8-a2c5-ec1ae003a371": {
+    "original": "Reken eerst jouw huidige winkelmandje af. Je kan de huidige inhoud van jouw winkelmandje niet samen afrekenen met de inschrijving voor deze activiteit.",
+    "translation": "First check out your current shopping basket. You cannot check out the current contents of your shopping basket together with the registration for this activity."
+  },
+  "eb52f3e4-1daa-41d6-8716-18785bdc8a8d": {
+    "original": "Inschrijven",
+    "translation": "Register"
+  },
+  "33c4f792-005f-4fb1-ad98-397dd92038aa": {
+    "original": "Nationaal",
+    "translation": "National"
+  },
+  "78228ca9-42e4-4612-a2cd-0d298f10f2a4": {
+    "original": "Activiteit niet gevonden",
+    "translation": "Activity not found"
+  },
+  "d14e4e63-c77d-44d9-b8d0-adf05e299303": {
+    "original": "Gegevens nakijken",
+    "translation": "Check details"
+  },
+  "a88bd350-756b-4fcd-ba06-585fabd0e197": {
+    "original": "Er zijn nog geen leden gekoppeld met jouw account.",
+    "translation": "No members are yet linked to your account."
+  },
+  "00306f91-9f66-4cc3-9c8e-36c08f9964d7": {
+    "original": "Ouders",
+    "translation": "Parents"
+  },
+  "b3304780-9d9a-47c2-97f5-13b6fbb03307": {
+    "original": "Ouders hebben automatisch toegang tot de gegevens van hun (minderjarige) kinderen. Vul dus de juiste e-mailadresen in voor elke ouder, zo ontvangt iedereen ook belangrijke communicatie.",
+    "translation": "Parents automatically have access to the data of their (minor) children. So fill in the correct email addresses for each parent, so that everyone also receives important communication."
+  },
+  "d86b0f9d-ad2d-4bb6-9ea0-b41a7925094f": {
+    "original": "Adressen",
+    "translation": "Addresses"
+  },
+  "b54b9706-4c0c-46a6-9027-37052eb76b28": {
+    "original": "Man",
+    "translation": "Male"
+  },
+  "177eba5b-b06f-49dd-8d48-578934c635bb": {
+    "original": "Jongen",
+    "translation": "Boy"
+  },
+  "06466432-eca6-41d0-a3d6-f262f8d6d2ac": {
+    "original": "Vrouw",
+    "translation": "Female"
+  },
+  "dba51db1-ce45-4e09-9a2f-fcea4a7fa46e": {
+    "original": "Meisje",
+    "translation": "Girl"
+  },
+  "28f20fae-6270-4210-b49d-68b9890dbfaf": {
+    "original": "Gegevens bewerken",
+    "translation": "Edit details"
+  },
+  "c0736ebd-de06-4d78-a009-7fc4ba5096a8": {
+    "original": "Dit ben jij",
+    "translation": "This is you"
+  },
+  "9a04effd-d9c3-43ae-b905-019e92dd5101": {
+    "original": "Nieuw lid toevoegen",
+    "translation": "Add new member"
+  },
+  "3cda0fb7-c901-439d-af68-6478d70157be": {
+    "original": "Wie wil je inschrijven?",
+    "translation": "Who do you want to register?"
+  },
+  "d55c9b50-2f86-4e7a-b6a5-2f03c0fad4fa": {
+    "original": "Schrijf een lid in",
+    "translation": "Register a member"
+  },
+  "b6994143-5a0c-424d-97b3-8b3cf96a3443": {
+    "original": "Hulp nodig?",
+    "translation": "Need help?"
+  },
+  "f87072d0-0c87-4b31-9068-1471a5f5b3ca": {
+    "original": "Ingeschreven voor {groups}.",
+    "translation": "Registered for {groups}."
+  },
+  "eb39138f-46b9-4005-b70f-dc1e0f3938f9": {
+    "original": "{member} is momenteel niet ingeschreven.",
+    "translation": "{member} is currently not registered."
+  },
+  "22025c96-3f15-41c6-ab2c-0c5fcb3c5aa2": {
+    "original": "Nieuw gezinslid",
+    "translation": "New family member"
+  },
+  "21a07c40-5565-4ad3-bf7a-ca3237c6bcb0": {
+    "original": "Lid inschrijven",
+    "translation": "Register member"
+  },
+  "98edeedc-0a99-4fc0-904e-06dcba42f7e1": {
+    "original": "Schrijf iemand in.",
+    "translation": "Register someone."
+  },
+  "60823584-6df5-4c99-9eca-c5e64d83a730": {
+    "original": "Pas gegevens aan en bekijk al jouw inschrijvingen.",
+    "translation": "Adjust details and view all your registrations."
+  },
+  "6b83343a-5d29-4f59-8b44-db03eb0b3b13": {
+    "original": "Betalingen en openstaande rekening",
+    "translation": "Payments and outstanding balance"
+  },
+  "e1ba3253-f0a0-41b0-95a0-3fc0abb44264": {
+    "original": "Bekijk een overzicht van jouw recente betalingen en jouw openstaand bedrag.",
+    "translation": "View an overview of your recent payments and your outstanding amount."
+  },
+  "78a4c6c3-c0d0-457c-adfb-44122307161a": {
+    "original": "Dit document kan niet gedownload worden omdat er nog gegevens ontbreken of ongeldig zijn. Kijk alle gegevens van {name} na en contacteer ons indien het probleem nog niet is verholpen.",
+    "translation": "This document cannot be downloaded because some data is missing or invalid. Check all the details of {name} and contact us if the problem is not yet resolved."
+  },
+  "4f7b348e-413a-48c3-9fc8-314831d7518d": {
+    "original": "Kortingscode toegepast",
+    "translation": "Discount code applied"
+  },
+  "8bae7158-e8bd-4e76-80de-acd9a1b323ad": {
+    "original": "Ongeldige kortingscode",
+    "translation": "Invalid discount code"
+  },
+  "6de2861f-64bc-44fe-af80-5742c91d03d6": {
+    "original": "Terug naar website",
+    "translation": "Back to website"
+  },
+  "ee9ae612-2453-4e3c-8ff2-b8c89a63a154": {
+    "original": "Onze webshops",
+    "translation": "Our webshops"
+  },
+  "d1048e80-095f-4fda-9ff2-eed515fef882": {
+    "original": "We organiseren momenteel helaas geen verkoop. Kom later nog eens terug.",
+    "translation": "Unfortunately, we are not currently organising any sales. Please come back later."
+  },
+  "5069be1b-b060-436f-97bc-3a927f906a1a": {
+    "original": "Om deze pagina te bekijken moet je eerst inloggen via onderstaande knop.",
+    "translation": "To view this page, you must first log in via the button below."
+  },
+  "239f3ae0-a3c7-4c39-98d8-f2de79539f21": {
+    "original": "Bestellen kan vanaf",
+    "translation": "Ordering is possible from"
+  },
+  "44cbcf37-42a8-46f1-81fb-d0d3184b76de": {
+    "original": "Bestellingen zijn gesloten",
+    "translation": "Orders are closed"
+  },
+  "21f590bf-891a-4b07-a7f5-b7ca1cf28c24": {
+    "original": "Bestellen kan tot",
+    "translation": "Ordering is possible until"
+  },
+  "d03225ed-db4a-4cd2-8df4-8932b6820b17": {
+    "original": "Momenteel is er niets beschikbaar.",
+    "translation": "Nothing is currently available."
+  },
+  "c72a9ab2-98a0-4176-ba9b-86fe009fa755": {
+    "original": "Doorgaan",
+    "translation": "Continue"
+  },
+  "31d85181-8246-4f2e-9982-7be4aae474d1": {
+    "original": "Kies je leveringsadres",
+    "translation": "Choose your delivery address"
+  },
+  "57d44f0d-097d-4b76-809d-16dafc995f00": {
+    "original": "De leveringskost bedraagt",
+    "translation": "The delivery cost is"
+  },
+  "a6862509-523b-4b07-bbd7-6bfba863874e": {
+    "original": "Jouw winkelmandje is leeg. Ga terug en klik op een product om iets toe te voegen.",
+    "translation": "Your shopping basket is empty. Go back and click on a product to add something."
+  },
+  "95136eb9-934d-4188-b3a9-9a8d4de48dce": {
+    "original": "Meer toevoegen",
+    "translation": "Add more"
+  },
+  "ab745da8-a058-448a-b81d-2544dd93e4da": {
+    "original": "Iets toevoegen",
+    "translation": "Add something"
+  },
+  "a209d3fe-7b1c-43c2-b519-45fb66581201": {
+    "original": "Bestellen",
+    "translation": "Order"
+  },
+  "cd539f63-31c0-46f3-a0b5-a3826796a9d0": {
+    "original": "Kies je afhaalmethode",
+    "translation": "Choose your collection method"
+  },
+  "177002eb-e9c8-4553-adff-0b3a034d5292": {
+    "original": "Er ging iets mis bij het ophalen van de volgende stap",
+    "translation": "Something went wrong retrieving the next step"
+  },
+  "38bea62e-0765-4fbf-a6f3-4e21cc4cc2ef": {
+    "original": "Jouw gegevens",
+    "translation": "Your details"
+  },
+  "d72f4e7e-91b8-4edf-82a7-35c97c4498af": {
+    "original": "Voor dringende info",
+    "translation": "For urgent info"
+  },
+  "bd14d3cd-17de-4569-b12b-8bca0ff8fc57": {
+    "original": "Bestelling bevestigen",
+    "translation": "Confirm order"
+  },
+  "e67d0122-6f15-46c6-af94-92a79268710a": {
+    "original": "Totaal",
+    "translation": "Total"
+  },
+  "4fafca03-d46b-426b-ac73-75cc7fe29ebe": {
+    "original": "Dit is een demo webshop. Bestellingen zijn fictief.",
+    "translation": "This is a demo webshop. Orders are fictitious."
+  },
+  "bf4bfebe-db5e-4e78-862d-f21ef23cc45a": {
+    "original": "Jouw bestelling zal worden geplaatst als je verder gaat.",
+    "translation": "Your order will be placed if you continue."
+  },
+  "1c789f22-cc29-4951-849b-90abcbec9a3d": {
+    "original": "Afhaallocatie:",
+    "translation": "Collection location:"
+  },
+  "af4a5122-ce11-4553-b589-490d6d4960cc": {
+    "original": "Locatie:",
+    "translation": "Location:"
+  },
+  "8b54b2c4-e7bb-4efe-8e7e-a02a2fa6667e": {
+    "original": "Deze webshop bestaat niet",
+    "translation": "This webshop does not exist"
+  },
+  "9c3179f1-549a-4f72-975b-96b1baf0f239": {
+    "original": "Webshop via",
+    "translation": "Webshop via"
+  },
+  "12d2a8ca-d23d-4238-ba3d-86cd31a48067": {
+    "original": "Doorverwijzen...",
+    "translation": "Redirecting..."
+  },
+  "a0b2d272-5bcf-4ecb-9bb1-f2ba239b6c03": {
+    "original": "Bezig met doorverwijzen",
+    "translation": "Redirecting"
+  },
+  "e5749f83-1a33-4185-a07a-b2beea3b69ca": {
+    "original": "Verkoop ook tickets via",
+    "translation": "Also sell tickets via"
+  },
+  "b76dc7cb-2b83-4f21-a601-e8f301052a67": {
+    "original": "Bouw je betaalbare webshop via",
+    "translation": "Build your affordable webshop via"
+  },
+  "575c2a59-2f76-467b-a03d-4b243464a85f": {
+    "original": "Jouw bestelling is geplaatst",
+    "translation": "Your order has been placed"
+  },
+  "f8d1f500-51d4-4ade-8291-51606cfb10c0": {
+    "original": "Jouw bestelling",
+    "translation": "Your order"
+  },
+  "08a0920c-e5c1-443c-80e6-5e8441248903": {
+    "original": "Bedankt voor jouw bestelling, je ontvangt via e-mail ook een bevestiging.",
+    "translation": "Thank you for your order, you will also receive a confirmation via email."
+  },
+  "f20a769b-717c-411f-9b15-f0f1c767b51e": {
+    "original": "Deze bestelling is mislukt. Probeer je bestelling opnieuw te plaatsen als je dat nog niet had gedaan.",
+    "translation": "This order failed. Please try placing your order again if you haven't already."
+  },
+  "7889a8f8-a31e-4291-b8e7-6169e68ed6b4": {
+    "original": "Opnieuw",
+    "translation": "Again"
+  },
+  "3554f028-5050-44fd-80eb-da5608021a86": {
+    "original": "Deze bestelling is mislukt",
+    "translation": "This order failed"
+  },
+  "7f88d4cc-ddbb-45fc-aa7e-1c6b31e26f7c": {
+    "original": "Deze bestelling werd verwijderd",
+    "translation": "This order has been deleted"
+  },
+  "0c690de0-77ee-4115-bd52-c4eb70b6387c": {
+    "original": "Jouw ticket",
+    "translation": "Your ticket"
+  },
+  "610ae813-c8e8-44f2-a0fa-dc83d38f1cee": {
+    "original": "Jouw tickets",
+    "translation": "Your tickets"
+  },
+  "5933154a-b9da-45e5-bd25-d5a9304d9007": {
+    "original": "Klik op een ticket om die individueel te downloaden of de QR-code te vergroten. Toon je ticket bij voorkeur op je smartphone.",
+    "translation": "Click on a ticket to download it individually or enlarge the QR code. Preferably display your ticket on your smartphone."
+  },
+  "3674c705-d837-4c2c-b29e-5eca62703e00": {
+    "original": "Tik op een ticket om die individueel te downloaden of de QR-code te tonen.",
+    "translation": "Tap on a ticket to download it individually or display the QR code."
+  },
+  "d00c85cf-5f7c-4cec-9ad7-0fe74ad116ee": {
+    "original": "Open of download je ticket hieronder. Toon je ticket bij voorkeur op je smartphone.",
+    "translation": "Open or download your ticket below. Preferably display your ticket on your smartphone."
+  },
+  "4d1056b0-250a-435b-b78f-a1e9f03e190e": {
+    "original": "Ticket tonen",
+    "translation": "Show ticket"
+  },
+  "4385bcc8-1643-4352-b766-a658e4c33f80": {
+    "original": "Overzicht",
+    "translation": "Overview"
+  },
+  "87c0a82e-68ff-4e53-8124-08bc2d532d47": {
+    "original": "Je ontvangt",
+    "translation": "You will receive"
+  },
+  "c6968b48-2dcc-47ea-b1b2-647ad01e62e6": {
+    "original": "jouw ticket",
+    "translation": "your ticket"
+  },
+  "b96dd30e-df8d-4cef-8a8c-f73eb842f6d3": {
+    "original": "jouw tickets",
+    "translation": "your tickets"
+  },
+  "8bd25077-dabe-4ccc-ae37-8aa0236636e4": {
+    "original": "via e-mail zodra we jouw overschrijving hebben ontvangen. Je kan ze dan ook op deze pagina terugvinden. Zorg er zeker voor dat je meteen betaalt zodat het bedrag op tijd op onze rekening staat. Klik onderaan op de knop om de instructies nog eens te tonen.",
+    "translation": "via email as soon as we have received your transfer. You can also find them on this page. Make sure you pay immediately so that the amount is in our account on time. Click on the button below to show the instructions again."
+  },
+  "005e0815-0491-4097-8a08-3da585dcd24e": {
+    "original": "Je vindt",
+    "translation": "You will find"
+  },
+  "b1bb4138-62b1-4b25-a495-1a892bcfa8d6": {
+    "original": "onderaan deze pagina.",
+    "translation": "at the bottom of this page."
+  },
+  "2a4bf4a3-151a-494a-85d8-2d8006fcaef9": {
+    "original": "Ticket bekijken",
+    "translation": "View ticket"
+  },
+  "232adc12-6c82-4a13-a085-ce1b702acfa6": {
+    "original": "Tickets bekijken",
+    "translation": "View tickets"
+  },
+  "49097ad0-f257-4132-9b47-d61866e70cd1": {
+    "original": "Opgelet: deze bestelling moet worden betaald via overschrijving, daardoor weten we niet automatisch of deze al betaald werd of niet. Zorg er zeker voor dat je deze meteen betaalt zodat het bedrag op tijd op onze rekening komt. Klik onderaan op de knop om de instructies nog eens te tonen.",
+    "translation": "Please note: this order must be paid by bank transfer, so we do not automatically know whether it has already been paid or not. Make sure you pay this immediately so that the amount is in our account on time. Click on the button below to show the instructions again."
+  },
+  "4a2f9baa-da83-4cf9-a39c-59e7f37c1823": {
+    "original": "Opgelet: je zal deze bestelling nog moeten betalen",
+    "translation": "Please note: you will still have to pay for this order"
+  },
+  "12b2ce84-6297-49a2-a9c4-d5619b764313": {
+    "original": "Opmerkingen",
+    "translation": "Comments"
+  },
+  "bf43c364-65c2-4cbe-98ff-f9e6b4c7d659": {
+    "original": "Delen",
+    "translation": "Share"
+  },
+  "ee3f6752-b47c-46c4-9746-f9832f5df4ea": {
+    "original": "Betaalinstructies",
+    "translation": "Payment instructions"
+  },
+  "104d3831-38fb-4e1e-89f2-cbd5d538faa3": {
+    "original": "Functies beheren",
+    "translation": "Manage functions"
+  },
+  "dcfeea1e-7841-4dbd-a187-84aed37f0790": {
+    "original": "Voeg functies toe en stel de toegangsrechten voor elke functie in.",
+    "translation": "Add functions and set access rights for each function."
+  },
+  "8f75871d-17d9-49b1-aaf2-c7054e058372": {
+    "original": "Interne beheerders (leden met functies)",
+    "translation": "Internal administrators (members with functions)"
+  },
+  "ee16437e-ecc8-42c5-91ef-e2546c71ba12": {
+    "original": "Om een beheerder toe te voegen, schrijf je een (nieuw) lid in en ken je dat lid de juiste functies toe.",
+    "translation": "To add an administrator, register a (new) member and assign that member the correct functions."
+  },
+  "4d9168af-27ed-438e-acd9-756474dd6f5e": {
+    "original": "Deze groep heeft nog geen interne beheerders.",
+    "translation": "This group has no internal administrators yet."
+  },
+  "06e0f25f-f601-4359-a95d-b72fd79ecbdd": {
+    "original": "Hoofdbeheerder",
+    "translation": "Main administrator"
+  },
+  "3bb4e938-ca4e-4318-a86d-002ba6035fd0": {
+    "original": "Heeft geen rol",
+    "translation": "Has no role"
+  },
+  "50f1bd97-6ff4-44cb-a44d-45672218b7f8": {
+    "original": "Ik",
+    "translation": "Me"
+  },
+  "0e7858e2-873b-4d49-9b5b-d9b15ea5f97f": {
+    "original": "Uitnodiging nog niet geaccepteerd",
+    "translation": "Invitation not yet accepted"
+  },
+  "f5404d3b-f49b-489d-9cb8-05ba668ca0cc": {
+    "original": "Externe beheerders",
+    "translation": "External administrators"
+  },
+  "8ed2c90d-f77a-4d9d-aca5-64a76ed50e32": {
+    "original": "Deze beheerders hebben enkel een account en zijn niet aangesloten als lid (of hun account kon niet gekoppeld worden aan een lid omdat ze een onbekend e-mailadres gebruiken).",
+    "translation": "These administrators only have an account and are not affiliated as a member (or their account could not be linked to a member because they are using an unknown email address)."
+  },
+  "ffc7f682-f284-4188-a6fe-fe859bb3f18d": {
+    "original": "Deze groep heeft nog geen externe beheerders. Nodig iemand uit om beheerder te worden.",
+    "translation": "This group has no external administrators yet. Invite someone to become an administrator."
+  },
+  "fa7b2b7e-57a0-435c-b4e5-0ce5d4d82407": {
+    "original": "Account toevoegen",
+    "translation": "Add account"
+  },
+  "da046234-ae13-4c33-9556-b58a8c0eb9af": {
+    "original": "Account bewerken",
+    "translation": "Edit account"
+  },
+  "35a636fb-a11c-4cbd-b648-3332cde7b587": {
+    "original": "Externe beheerder toevoegen",
+    "translation": "Add external administrator"
+  },
+  "9be57c4c-f9e2-40c2-932b-99b0a330365c": {
+    "original": "Externe beheerder bewerken",
+    "translation": "Edit external administrator"
+  },
+  "992282bb-d879-4cde-90bc-afb558a3026f": {
+    "original": "Interne beheerder bewerken",
+    "translation": "Edit internal administrator"
+  },
+  "32e29a00-7799-49ec-9755-30a1e429fea4": {
+    "original": "Deze beheerder heeft nog geen account aangemaakt",
+    "translation": "This administrator has not yet created an account"
+  },
+  "fdca4ebb-8515-4e97-9474-2658d5c47436": {
+    "original": "Uitnodiging opnieuw versturen",
+    "translation": "Resend invitation"
+  },
+  "933f7954-e0bb-4e04-bd4a-9c4ea07fee74": {
+    "original": "Deze beheerder is niet gekoppeld aan een ingeschreven lid, en is daarom extern. Zorg dat het e-mailadres overeen komt met het e-mailadres van een lid zelf.",
+    "translation": "This administrator is not linked to a registered member, and is therefore external. Ensure that the email address matches the email address of a member itself."
+  },
+  "a6008859-e90b-4219-b64d-9ebc6e88f25c": {
+    "original": "Je kan externe beheerders verschillende rollen toekennen (alternatief voor functies die je aan leden kan koppelen). Een externe beheerder zonder rollen heeft geen enkele toegang.",
+    "translation": "You can assign different roles to external administrators (an alternative to functions that you can link to members). An external administrator without roles has no access whatsoever."
+  },
+  "12cf18a0-ce20-4cec-8622-a55ed1ab65d7": {
+    "original": "Individuele toegang",
+    "translation": "Individual access"
+  },
+  "053d536d-3096-4450-8879-bb0fad04d96b": {
+    "original": "Beheerders kunnen automatisch toegang krijgen tot een onderdeel als ze het zelf hebben aangemaakt maar anders niet automatisch toegang zouden hebben (bv. aanmaken van nieuwe webshops). Sowieso is het aan te raden om dit om te zetten in beheerdersrollen, aangezien die eenvoudiger te beheren zijn.",
+    "translation": "Administrators can automatically gain access to a component if they have created it themselves, but otherwise would not automatically have access (e.g. creating new webshops). In any case, it is advisable to convert this into administrator roles, as these are easier to manage."
+  },
+  "14637b25-c719-40bc-a4c3-6108341c7c40": {
+    "original": "Dit account is geen beheerder.",
+    "translation": "This account is not an administrator."
+  },
+  "45b52b33-dfa4-4afa-81d2-d598626b2701": {
+    "original": "Je kan een beheerder verwijderen. Het account blijft dan behouden maar de beheerder verliest alle toegangsrechten.",
+    "translation": "You can remove an administrator. The account will then be retained, but the administrator will lose all access rights."
+  },
+  "de44cdb8-fb65-4e7b-b57a-ae0571db1ab4": {
+    "original": "Nieuwe beheerder",
+    "translation": "New administrator"
+  },
+  "cf6faf7d-57e2-455c-89e2-837b09c612f8": {
+    "original": "Je kan toegang geven aan externe beheerders (beheerders die geen lid zijn) via externe beheerdersrollen.",
+    "translation": "You can grant access to external administrators (administrators who are not members) via external administrator roles."
+  },
+  "4aebc029-a507-466a-b766-d28adb967966": {
+    "original": "Je hebt nog geen beheerdersrollen aangemaakt. Hoofdbeheerders kunnen beheerdersrollen wijzigen via Instellingen → Beheerders. Daarna kan je de toegang hier verdelen.",
+    "translation": "You have not yet created any administrator roles. Main administrators can change administrator roles via Settings → Administrators. You can then distribute access here."
+  },
+  "27778acf-5730-4c2d-8337-0a84ba47f3f1": {
+    "original": "Basistoegang",
+    "translation": "Basic access"
+  },
+  "1d66f70e-1a42-4479-9e27-683e3f536ccd": {
+    "original": "Deze beheerders kunnen geen onderdelen zien of bewerken tenzij expliciet hieronder toegang werd gegeven.",
+    "translation": "These administrators cannot see or edit components unless access has been explicitly granted below."
+  },
+  "c2296305-99a9-497a-aed3-7bb3d2293ce8": {
+    "original": "Volledige toegang",
+    "translation": "Full access"
+  },
+  "4610ce3e-5b1e-40d6-8d62-888dc54d2bb9": {
+    "original": "Deze beheerders hebben toegang tot alles",
+    "translation": "These administrators have access to everything"
+  },
+  "376152ba-a238-451e-a2ce-5a9d4ff69e67": {
+    "original": "Inschrijvingscategorieën",
+    "translation": "Registration categories"
+  },
+  "8ff93aca-241e-478f-8e71-f9abd17d2fa5": {
+    "original": "Geef deze beheerders meteen toegang tot alle inschrijvingsgroepen uit een categorie, of geef ze zelf de mogelijkheid om inschrijvingsgroepen (bv. activiteiten of leeftijdsgroepen) aan te maken in één of meerdere categorieën. Enkel hoofdbeheerders kunnen categorieën toevoegen en bewerken.",
+    "translation": "Give these administrators immediate access to all registration groups from a category, or give them the option to create registration groups (e.g. activities or age groups) in one or more categories. Only main administrators can add and edit categories."
+  },
+  "1c68dc61-88b4-4adc-9059-67768a473867": {
+    "original": "Individuele inschrijvingsgroepen",
+    "translation": "Individual registration groups"
+  },
+  "0b8c6bb0-a953-45b6-8a2c-088d5468f743": {
+    "original": "Voeg webshops toe om deze beheerders toegang te geven tot een specifieke webshop",
+    "translation": "Add webshops to give these administrators access to a specific webshop"
+  },
+  "3fcb229b-451c-4c81-8934-5ee65059907c": {
+    "original": "Toegang tot gegevens van leden",
+    "translation": "Access to member data"
+  },
+  "3ac48a57-5af2-449a-91d0-8a98ffe2284f": {
+    "original": "Standaard heeft elke beheerder die een lid kan bekijken of bewerken, toegang tot de algemene informatie van dat lid (naam, geboortedatum, gender, adres, ouders, noodcontactpersonen). Je kan bepaalde beheerders ook toegang geven tot meer gegevens hieronder.",
+    "translation": "By default, every administrator who can view or edit a member has access to that member's general information (name, date of birth, gender, address, parents, emergency contacts). You can also give certain administrators access to more data below."
+  },
+  "ab8181ca-a193-4cb3-a476-501b4d9196d3": {
+    "original": "Verwijder gekoppelde rechten",
+    "translation": "Remove linked rights"
+  },
+  "b36cd1f7-9923-433b-93d8-605ac65a4718": {
+    "original": "Verwijder deze rol",
+    "translation": "Remove this role"
+  },
+  "f30d6db4-12bf-4048-a31c-3e0d8ee3e935": {
+    "original": "Beheerders met deze rol",
+    "translation": "Administrators with this role"
+  },
+  "8edaef10-547b-4f3a-9a23-94380305b061": {
+    "original": "Er zijn geen beheerders met deze rol.",
+    "translation": "There are no administrators with this role."
+  },
+  "8edda6d9-057a-4740-89f3-a226b8fd4950": {
+    "original": "Naam van deze rol",
+    "translation": "Name of this role"
+  },
+  "49da8533-b5b6-4ca1-9cd5-1ff8dc6486eb": {
+    "original": "Het concept van leden, beheerders en accounts kan verwarrend zijn. Het verschil zit hem in het feit dat leden beheerd kunnen worden door meerdere accounts (= een e-mailadres met wachtwoord waarmee je kan inloggen). Rechten en rollen worden aan accounts toegekend, terwijl je functies kan toekennen aan leden (= iemand die is ingeschreven voor een leeftijdsgroep).",
+    "translation": "The concept of members, administrators and accounts can be confusing. The difference lies in the fact that members can be managed by multiple accounts (= an email address with a password with which you can log in). Rights and roles are assigned to accounts, while you can assign functions to members (= someone who is registered for an age group)."
+  },
+  "2f5d5e2d-cc3b-4cf6-8f4e-97b72a106163": {
+    "original": "Ongebruikt",
+    "translation": "Unused"
+  },
+  "83ce9418-2abf-4d9b-a6b4-312df7ac4837": {
+    "original": "Rollen",
+    "translation": "Roles"
+  },
+  "10bb866a-a7d2-4684-9159-ae288742e069": {
+    "original": "Kan alles bekijken en bewerken",
+    "translation": "Can view and edit everything"
+  },
+  "74237967-b1be-405e-95bb-15ef1905742c": {
+    "original": "Je hebt nog geen rollen aangemaakt. Maak een rol aan om beheerders op te delen.",
+    "translation": "You have not yet created any roles. Create a role to divide administrators."
+  },
+  "b567999b-ea60-41e8-b3a8-abf4247ab0f5": {
+    "original": "Rollen bewerken",
+    "translation": "Edit roles"
+  },
+  "703dec5e-fc37-4ab5-aaa8-4b7d0ed5589a": {
+    "original": "Jij zit in deze groep",
+    "translation": "You are in this group"
+  },
+  "13f40024-23b0-4ce0-b472-8cbb86e30668": {
+    "original": "In het logboek worden alle gebeurtenissen geregistreerd. Enkel hoofdbeheerders hebben toegang tot het logboek.",
+    "translation": "All events are recorded in the logbook. Only main administrators have access to the logbook."
+  },
+  "e0581b7e-aaa2-4e8e-85fc-6a1b9ed4900a": {
+    "original": "Snel selecteren:",
+    "translation": "Quick select:"
+  },
+  "2aa1f986-93d6-410c-9746-70c02fb4f5ea": {
+    "original": "Begin",
+    "translation": "Start"
+  },
+  "92be5ac5-79f3-4f2c-9525-7c11f173931a": {
+    "original": "Nu",
+    "translation": "Now"
+  },
+  "f1972be3-b3c8-42ff-916b-a6ad51dd9f2e": {
+    "original": "Geen logs gevonden",
+    "translation": "No logs found"
+  },
+  "ffefe12f-b125-412a-8dab-0468eeb0f048": {
+    "original": "Inhoud",
+    "translation": "Content"
+  },
+  "5cb65126-68af-4cdc-8ecf-836471dbd536": {
+    "original": "Vul de code uit de e-mail in",
+    "translation": "Enter the code from the email"
+  },
+  "0169b51e-08fb-43b0-a161-01d65335a297": {
+    "original": "Verifieer jouw e-mailadres",
+    "translation": "Verify your email address"
+  },
+  "58c24560-069c-4c85-a879-fe00c534bf14": {
+    "original": "Er werd een e-mail verstuurd naar '{email}'. Vul de code uit de e-mail in of klik op de link in de e-mail en wacht enkele seconden. E-mail niet ontvangen? Kijk in jouw spambox!",
+    "translation": "An email has been sent to '{email}'. Enter the code from the email or click on the link in the email and wait a few seconds. Didn't receive an email? Check your spam box!"
+  },
+  "722ac9a8-7ccb-4e3b-aa51-77132c19b2bb": {
+    "original": "Kies een nieuw wachtwoord",
+    "translation": "Choose a new password"
+  },
+  "66176374-df16-49fb-a487-5269b97e7286": {
+    "original": "Wachtwoord vergeten",
+    "translation": "Forgotten password"
+  },
+  "25514619-8e51-492b-aaad-48083b028148": {
+    "original": "Vul jouw e-mailadres in, en we sturen jou een e-mail waarmee je een nieuw wachtwoord kan kiezen.",
+    "translation": "Enter your email address, and we will send you an email with which you can choose a new password."
+  },
+  "03602f85-5e57-4365-b491-f6fdb66ce3bd": {
+    "original": "Opnieuw instellen",
+    "translation": "Reset"
+  },
+  "c5b0dabc-db2d-4a17-b805-1f1db9a5aa0f": {
+    "original": "Login methode configuratie ({method})",
+    "translation": "Login method configuration ({method})"
+  },
+  "7109c9f9-d44a-4d0e-a56a-7193f9218bd7": {
+    "original": "Bepaal de voorwaarden en benamign van deze login methode.",
+    "translation": "Determine the conditions and naming of this login method."
+  },
+  "49b896d1-9e3c-4a5b-bb35-88cdf9febbf3": {
+    "original": "Alle emaildomeinnamen zijn toegestaan",
+    "translation": "All email domain names are allowed"
+  },
+  "64542640-1f4f-4f9f-a277-86ccbd69d2a9": {
+    "original": "Enkel e-mailadressen met deze domeinnamen kunnen deze login methode gebruiken.",
+    "translation": "Only email addresses with these domain names can use this login method."
+  },
+  "2954282d-0883-48ed-b677-98f8b865b2ca": {
+    "original": "Geen uitgesloten domeinnamen",
+    "translation": "No excluded domain names"
+  },
+  "d346b6d1-87e5-452d-a3c2-b1f0e41acedb": {
+    "original": "E-mailadressen met deze domeinnamen kunnen deze login methode niet gebruiken.",
+    "translation": "Email addresses with these domain names cannot use this login method."
+  },
+  "4f208599-c312-48ba-905b-320cacf05708": {
+    "original": "Login methode configuratie",
+    "translation": "Login method configuration"
+  },
+  "e4b3d2af-dee8-4f55-88e9-a229513d347c": {
+    "original": "Volledige naam",
+    "translation": "Full name"
+  },
+  "8bc9dc7d-7dba-4712-9e4d-c3a64c43cb26": {
+    "original": "Korte naam",
+    "translation": "Short name"
+  },
+  "6fa093d9-7a49-4007-8b73-446d04d3fd12": {
+    "original": "Login knop text",
+    "translation": "Login button text"
+  },
+  "0999529a-9b4f-417a-95da-120f5daabf24": {
+    "original": "Toegestane domeinnamen",
+    "translation": "Allowed domain names"
+  },
+  "56bf5802-724f-451b-8ed4-533cd46fbbe2": {
+    "original": "Uitgesloten domeinnamen",
+    "translation": "Excluded domain names"
+  },
+  "b8d6b8b0-5237-44ed-869d-33692571f4f4": {
+    "original": "Vergeten",
+    "translation": "Forgotten"
+  },
+  "eb3fdbca-6393-44ec-9e0d-f416c6dded10": {
+    "original": "Inloggen met Google",
+    "translation": "Log in with Google"
+  },
+  "f0f27d05-3281-4d1c-8ff5-0e84ca35114f": {
+    "original": "Inloggen via SSO",
+    "translation": "Log in via SSO"
+  },
+  "647ac0ed-dcb5-43d2-bd0d-4ac5839a7974": {
+    "original": "Of maak een nieuw account aan als je nog geen account hebt. Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.",
+    "translation": "Or create a new account if you don't already have one. Preferably use an email address to which we already send you emails."
+  },
+  "f35f414f-7358-4f4f-8d3a-0ddc04270f47": {
+    "original": "Log in via de knop hieronder.",
+    "translation": "Log in via the button below."
+  },
+  "e2cec378-4ed6-40c1-bc1b-ca93718bacf1": {
+    "original": "Vul jouw wachtwoord hier in",
+    "translation": "Enter your password here"
+  },
+  "5a1f85df-8454-4cb9-bd16-bdde165a27de": {
+    "original": "Deze pagina is voor administrators",
+    "translation": "This page is for administrators"
+  },
+  "d25a949b-5fd1-4da9-82d0-7d82fd4bb482": {
+    "original": "Oeps, deze website is enkel voor beheerders van {organization}. Ga naar het ledenportaal als je je wilt inschrijven als lid.",
+    "translation": "Oops, this website is only for administrators of {organization}. Go to the member portal if you want to register as a member."
+  },
+  "a15aada7-18bf-4c94-9165-c0f6ed539164": {
+    "original": "Oeps, deze website is enkel voor administrators. Ga naar het ledenportaal als je je wilt inschrijven als lid.",
+    "translation": "Oops, this website is only for administrators. Go to the member portal if you want to register as a member."
+  },
+  "979af771-f3ab-4105-9478-d8ee14db66f1": {
+    "original": "Single-Sign-On (",
+    "translation": "Single-Sign-On ("
+  },
+  "850e99a6-c2c9-4ba9-9159-d3ac3a74de63": {
+    "original": "deze",
+    "translation": "this"
+  },
+  "33fe6b98-1a87-4d0c-831d-5fcb441ee018": {
+    "original": "handleiding volgen.",
+    "translation": "follow this manual."
+  },
+  "c6e6c4b8-b3ad-4163-aa08-bbf22cc337aa": {
+    "original": "De redirect URI behoud je best op de voorgestelde waarde.",
+    "translation": "It is best to keep the redirect URI at the suggested value."
+  },
+  "0b6247ef-b8bb-4ed7-b403-b0a58ddebaf5": {
+    "original": "Issuer",
+    "translation": "Issuer"
+  },
+  "472e545f-4d75-4885-aeec-be67a6def534": {
+    "original": "bv. https://login.microsoftonline.com/contoso.onmicrosoft.com/v2.0",
+    "translation": "e.g. https://login.microsoftonline.com/contoso.onmicrosoft.com/v2.0"
+  },
+  "9db3d461-f36c-4b2e-9e51-0b1e9a1517c2": {
+    "original": "Client ID",
+    "translation": "Client ID"
+  },
+  "2065700b-bddc-4616-a67b-5c331ab31df7": {
+    "original": "bv. 12345678-1234-1234-1234-123456789012",
+    "translation": "e.g. 12345678-1234-1234-1234-123456789012"
+  },
+  "70af9014-24ec-484c-b11b-4e2510bb09c1": {
+    "original": "Client Secret",
+    "translation": "Client Secret"
+  },
+  "3b81d4a5-0af5-4807-8ea9-264d2f99ee05": {
+    "original": "Redirect URI",
+    "translation": "Redirect URI"
+  },
+  "24183997-792a-47c5-b43d-53ba713f80f1": {
+    "original": "Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.",
+    "translation": "Preferably use an email address to which we already send emails."
+  },
+  "0682bb7b-d3ac-4803-8a07-d4ffc229cad0": {
+    "original": "Geen internetverbinding. Herlaad de applicatie.",
+    "translation": "No internet connection. Please reload the application."
+  },
+  "5a851364-bef5-474a-b1f0-83f4e48edefb": {
+    "original": "Geen internetverbinding. Kijk jouw verbinding na en herlaad de website.",
+    "translation": "No internet connection. Check your connection and reload the website."
+  },
+  "f6de6c56-6326-42b2-b586-2bf607e058a7": {
+    "original": "Developers",
+    "translation": "Developers"
+  },
+  "e909e3d1-516f-4284-8923-0390c95ae290": {
+    "original": "Kanaal",
+    "translation": "Channel"
+  },
+  "0d256e87-ab44-4051-9efc-4749c8edb0c0": {
+    "original": "Custom",
+    "translation": "Custom"
+  },
+  "761c7de2-e697-4c39-9970-82d05fc886ca": {
+    "original": "Vul een URL in",
+    "translation": "Enter a URL"
+  },
+  "c5d8db0b-e901-436d-b292-5dbd6b1df48e": {
+    "original": "Ingelogd als {user}",
+    "translation": "Logged in as {user}"
+  },
+  "e068b5a6-18f2-4801-a518-5903b22b3c04": {
+    "original": "Andere zoeken",
+    "translation": "Search others"
+  },
+  "bac747ea-0977-40c5-9b42-382055a0ee84": {
+    "original": "Kiezen",
+    "translation": "Choose"
+  },
+  "a82ddfb6-f92f-480f-9578-d0cc01a7338e": {
+    "original": "Jouw gegevens en inschrijvingen",
+    "translation": "Your details and registrations"
+  },
+  "7b374a35-4472-4e2f-aa48-74f42e5e8a41": {
+    "original": "Portaal voor beroepskrachten",
+    "translation": "Portal for professionals"
+  },
+  "3a18ce8e-5ec6-48b1-a442-906db662c58f": {
+    "original": "administratie",
+    "translation": "administration"
+  },
+  "15a87f5b-ae73-4c45-bc46-5575e95af13e": {
+    "original": "auto",
+    "translation": "car"
+  },
+  "e8433d58-9e0f-4f18-b2b6-49b2a602db91": {
+    "original": "Gekopieerd naar klembord",
+    "translation": "Copied to clipboard"
+  },
+  "10b83895-551f-4892-9b58-b7b62db58726": {
+    "original": "Link:",
+    "translation": "Link:"
+  },
+  "025d14dd-57d4-4ec4-aa85-ddf9ddf98b6f": {
+    "original": "Link verwijderen",
+    "translation": "Remove link"
+  },
+  "24c13e07-66e8-421d-9dde-c69758395be8": {
+    "original": "Toon/verberg tekst opties",
+    "translation": "Show/hide text options"
+  },
+  "52395130-fb1f-4508-951a-067dd6324575": {
+    "original": "Magische tekstvervanging",
+    "translation": "Magic text replacement"
+  },
+  "6ec5c3ba-7b6d-4ceb-9950-e152bed49b0a": {
+    "original": "Horizontale lijn",
+    "translation": "Horizontal line"
+  },
+  "f501785a-7e57-4184-8cf0-a3413ad2f2a4": {
+    "original": "Link toevoegen",
+    "translation": "Add link"
+  },
+  "91b1faf7-de10-46f3-9338-5930134da354": {
+    "original": "Afbeelding toevoegen",
+    "translation": "Add image"
+  },
+  "130a074e-ce12-4bf1-9898-c49a3c00006e": {
+    "original": "Slimme tekstvervanging",
+    "translation": "Smart text replacement"
+  },
+  "5d8131bf-38a0-4c8c-b266-e30caa7aa270": {
+    "original": "Beperk het gebruik van afbeeldingen in e-mails. Afbeeldingen worden bestraft door spamfilters, en e-mails komen daardoor vaker bij spam terecht.",
+    "translation": "Limit the use of images in emails. Images are punished by spam filters, and emails are therefore more likely to end up in spam."
+  },
+  "780fa99d-7109-4f57-934b-1f4c5643a794": {
+    "original": "https://",
+    "translation": "https://"
+  },
+  "f7057816-fb9f-42f9-b864-bec9756d07f7": {
+    "original": "Vet gedrukte tekst",
+    "translation": "Bold text"
+  },
+  "85ebbd8d-0585-4621-bed9-0d3cacb138a8": {
+    "original": "Schuine tekst",
+    "translation": "Italic text"
+  },
+  "c69c6268-44cb-41a3-9a22-01c0828cb87a": {
+    "original": "Onderlijn tekst",
+    "translation": "Underline text"
+  },
+  "5d0d84fe-2ddb-4962-b104-337abbeeaa1f": {
+    "original": "Koptekst",
+    "translation": "Headline"
+  },
+  "0730d5b9-2581-4ef9-b177-c92337ccba2f": {
+    "original": "Subkop",
+    "translation": "Subheading"
+  },
+  "58fa9950-5b41-421b-9f7f-24ea3fc021b5": {
+    "original": "Informatieve tekst",
+    "translation": "Informative text"
+  },
+  "277573b6-5edd-46bc-bd1b-c40f6935dd38": {
+    "original": "Opsomming met bolletjes",
+    "translation": "Bulleted list"
+  },
+  "97907074-6f4a-4968-a44c-22f67241a87d": {
+    "original": "Opsomming met nummers",
+    "translation": "Numbered list"
+  },
+  "8af02386-a68c-46c0-bb86-91b2177f1ba6": {
+    "original": "Nieuw sjabloon",
+    "translation": "New template"
+  },
+  "6b77538c-6e3a-461c-9f97-f3aa71c8838d": {
+    "original": "Wijzig sjabloon",
+    "translation": "Edit template"
+  },
+  "709a5ff3-8d79-447b-906d-2c3cdabb41cf": {
+    "original": "Onderwerp",
+    "translation": "Subject"
+  },
+  "6a972ca2-8a5f-4e9d-bb26-b59e1f7165a2": {
+    "original": "E-mail template",
+    "translation": "Email template"
+  },
+  "13b42902-e159-4e6a-8562-e87c9c691c8b": {
+    "original": "Typ hier het onderwerp van je e-mail",
+    "translation": "Type the subject of your email here"
+  },
+  "c5602934-95a8-437d-b576-eda8d9e6565e": {
+    "original": "E-mailadres toevoegen",
+    "translation": "Add email address"
+  },
+  "ed3e84f0-7ab3-467b-948f-0423ccbf2056": {
+    "original": "E-mailadres bewerken",
+    "translation": "Edit email address"
+  },
+  "85f5de69-bc8a-4f8d-be68-e6b05f6affce": {
+    "original": "Voor algemene e-mails of voor antwoorden op automatische e-mails als domeinnaam niet ingesteld is (bv. als antwoord op bestelbevestiging).",
+    "translation": "For general emails or for replies to automatic emails if a domain name is not set (e.g. in reply to an order confirmation)."
+  },
+  "c0b96584-ebf2-452b-89e2-0bea5e63eb74": {
+    "original": "Inschrijvingsgroepen",
+    "translation": "Registration groups"
+  },
+  "a481dcc6-d66e-4098-adc4-66ae9b1ed35f": {
+    "original": "Selecteer de groepen die standaard met dit e-mailadres moeten versturen.",
+    "translation": "Select the groups that should send with this email address by default."
+  },
+  "6fbddfd5-c9af-492a-819f-a22370084cb6": {
+    "original": "Selecteer de webshops waarvoor we dit e-mailadres moeten gebruiken (bv. bestelbevestiging).",
+    "translation": "Select the webshops for which we must use this email address (e.g. order confirmation)."
+  },
+  "a059bcec-d0a2-42c4-a7fc-0fade27c9b0e": {
+    "original": "Naam / aanspreking (optioneel)",
+    "translation": "Name / salutation (optional)"
+  },
+  "23302106-6c68-4b4a-8d48-6a7c0debdeb8": {
+    "original": "Optioneel. bv. Webshopverantwoordelijke",
+    "translation": "Optional. e.g. Webshop manager"
+  },
+  "70c99ed2-97be-4252-b7c4-6cd46d5c9513": {
+    "original": "E-mailadres waarmee je wilt versturen",
+    "translation": "Email address you want to send with"
+  },
+  "ecc5560e-bd85-4f2a-bbb2-d0a26f8ead45": {
+    "original": "Wijzig de e-mailadressen waarmee je e-mails kan versturen. Alle informatie over e-mailadressen en e-mails vind je op",
+    "translation": "Change the email addresses you can send emails with.  All information about email addresses and emails can be found on"
+  },
+  "b67ee618-6873-4dfe-84b6-faa51f37d661": {
+    "original": "Standaard",
+    "translation": "Default"
+  },
+  "82395203-b523-4188-b304-0b07aea519cf": {
+    "original": "Je hebt nog geen e-mailadressen toegevoegd.",
+    "translation": "You have not yet added any email addresses."
+  },
+  "d1e7abf8-20ac-49e5-8e0c-cc7fab78fc6b": {
+    "original": "Versturen",
+    "translation": "Send"
+  },
+  "59367bfa-a918-4475-8d90-d9e3d6c71ad8": {
+    "original": "Nieuwe e-mail",
+    "translation": "New email"
+  },
+  "d76495d1-251b-4cf1-9ca1-7e7ac33a046f": {
+    "original": "Bijlage toevoegen",
+    "translation": "Add attachment"
+  },
+  "20bacd85-5b82-4396-bbd5-b6d88e7d90e4": {
+    "original": "Sjablonen",
+    "translation": "Templates"
+  },
+  "ae013398-3667-40ff-ad66-c0cd0050f35c": {
+    "original": "Stel eerst jouw e-mailadressen in",
+    "translation": "First set up your email addresses"
+  },
+  "9ee80b2b-1edd-4ae0-9d18-374b3c1f864a": {
+    "original": "Wijzigen",
+    "translation": "Change"
+  },
+  "2faa00db-5af7-4556-ac49-5b15abf2182f": {
+    "original": "Regio",
+    "translation": "Region"
+  },
+  "7335fc4d-f993-415c-976b-f32af724907e": {
+    "original": "Kies voor welke groepen deze activiteit zichtbaar is.",
+    "translation": "Choose which groups this activity is visible for."
+  },
+  "0ca73738-0649-4dbd-b5d7-b54f03140372": {
+    "original": "Wanneer",
+    "translation": "When"
+  },
+  "4f634d27-7fa3-4e91-9ae1-dbfdafd2baa4": {
+    "original": "Bekijk origineel",
+    "translation": "View original"
+  },
+  "025be814-a557-46be-be79-a1cc5406a5ed": {
+    "original": "Vul de gegevens hieronder aan voor je de kampmelding indient.",
+    "translation": "Fill in the details below before submitting the camp notification."
+  },
+  "212cf5a4-424b-477e-9007-9a9d789f8c08": {
+    "original": "Nog niet ingevuld",
+    "translation": "Not yet filled in"
+  },
+  "7418aed7-61ec-4553-ba8c-301573d32a72": {
+    "original": "Volledig ingevuld",
+    "translation": "Completely filled in"
+  },
+  "00b790ad-2238-4a6a-b7cb-36a60fac1e9f": {
+    "original": "Beslissing",
+    "translation": "Decision"
+  },
+  "b0657304-772f-4334-be01-da82a190167a": {
+    "original": "Goedkeuren",
+    "translation": "Approve"
+  },
+  "4a3e388c-32f3-4f76-be22-9eb435ebb9f9": {
+    "original": "Keur deze melding goed.",
+    "translation": "Approve this notification."
+  },
+  "1b19fc16-6146-42c9-b42e-471f1f18a452": {
+    "original": "Voorlopig goedgekeurd",
+    "translation": "Provisionally approved"
+  },
+  "a7ed4fc3-5f80-4621-afcb-89002b686cef": {
+    "original": "Als alles wel in orde is, maar er nog iets klein moet worden aangevuld op een later tijdstip.",
+    "translation": "If everything is alright, but something small still needs to be completed at a later date."
+  },
+  "7c422572-6970-460c-8055-af2935f9a76b": {
+    "original": "Afkeuren",
+    "translation": "Reject"
+  },
+  "435950cd-0c43-4f39-9547-c31189725873": {
+    "original": "Hierna zijn er terug wijzigingen mogelijk. Laat eventueel een opmerking achter.",
+    "translation": "After this, changes are possible again. Leave a comment if necessary."
+  },
+  "b72d05c4-9e64-4254-9580-7123bf7479c3": {
+    "original": "Opnieuw indienen",
+    "translation": "Resubmit"
+  },
+  "0b8d1425-4240-4fa8-8150-9a7824ef1c7d": {
+    "original": "Indienen",
+    "translation": "Submit"
+  },
+  "8e8cd172-b1c4-4b9e-ad06-e99f5e40a645": {
+    "original": "Bekijk leden op de wachtlijst",
+    "translation": "View members on the waiting list"
+  },
+  "b95cfa13-c42d-4d2f-892b-d2fc4c4c9bd1": {
+    "original": "Wijzig de naam, beschrijving, datum en beschikbaarheid.",
+    "translation": "Change the name, description, date and availability."
+  },
+  "269b5fdf-7cfc-46ed-84c9-40836ff5da9c": {
+    "original": "Inschrijvingsinstellingen",
+    "translation": "Registration settings"
+  },
+  "af4c5417-03ad-4997-b8e2-5ff3b47ac045": {
+    "original": "Wijzig hoe leden kunnen inschrijven, de tarieven en de verzamelde gegevens.",
+    "translation": "Change how members can register, the rates and the data collected."
+  },
+  "7c32440d-6a06-4a53-8522-b84c0227fbfe": {
+    "original": "Wijzig de inhoud van automatische e-mails naar leden die zijn of worden ingeschreven voor deze activiteit.",
+    "translation": "Change the content of automatic emails to members who are or will be registered for this activity."
+  },
+  "cd9912f4-89a4-44ea-b8a0-40371a53b90a": {
+    "original": "Link kopiëren",
+    "translation": "Copy link"
+  },
+  "f4186487-551f-4268-b811-c2b31ace72d1": {
+    "original": "Handmatig leden inschrijven",
+    "translation": "Manually register members"
+  },
+  "433a5c63-b0b9-4f04-962f-d84880701fd2": {
+    "original": "Leden inschrijven",
+    "translation": "Register members"
+  },
+  "66812919-eadf-4906-96a5-35677c4b6ccb": {
+    "original": "Toon wekelijkse suggesties voor",
+    "translation": "Show weekly suggestions for"
+  },
+  "7aa189c8-5a21-4c4f-99c9-98e26119ee9b": {
+    "original": "Inschrijven mogelijk van",
+    "translation": "Registration possible from"
+  },
+  "3132b88b-2b83-4b1b-8ce6-3fe856779d14": {
+    "original": "Inschrijven mogelijk vanaf",
+    "translation": "Registration possible from"
+  },
+  "2d68fac2-1437-4c4e-9fa1-6e0ff4e81274": {
+    "original": "De inschrijvingen zijn gesloten",
+    "translation": "Registrations are closed"
+  },
+  "dd3e1e64-a4fe-4737-bd7a-270c648628fd": {
+    "original": "Inschrijven kan tot",
+    "translation": "Registration possible until"
+  },
+  "54b3473d-ba8c-49f3-b4f3-638c10dffa22": {
+    "original": "Inschrijvingen zijn geopend",
+    "translation": "Registrations are open"
+  },
+  "60898eb6-b3e7-44ef-820c-3bd57b4c6bca": {
+    "original": "Voor",
+    "translation": "For"
+  },
+  "4837760e-e747-427f-a976-0acbc786365f": {
+    "original": "Inschrijvingen starten op",
+    "translation": "Registrations start on"
+  },
+  "8222f272-8e50-4d5d-9e30-ddd534c30081": {
+    "original": "Inschrijvingen gesloten",
+    "translation": "Registrations closed"
+  },
+  "5e56d87a-0c2b-412c-8a84-92091856e538": {
+    "original": "Inschrijvingen open",
+    "translation": "Registrations open"
+  },
+  "90ff0271-716d-4e8f-aebd-037986391293": {
+    "original": "Beginnen",
+    "translation": "Start"
+  },
+  "650e0758-203c-474f-8b51-da33f39de29c": {
+    "original": "Opslaan als klad",
+    "translation": "Save as draft"
+  },
+  "3f34c1d2-0305-432f-b789-7d334a7c093b": {
+    "original": "Al bezig met opslaan... Even geduld.",
+    "translation": "Already saving... Please wait."
+  },
+  "224a3058-b5ca-4f18-bbab-2fd5b16eb6b9": {
+    "original": "is groter dan",
+    "translation": "is greater than"
+  },
+  "b6271592-9d1a-4b59-9511-47917f7c6e5b": {
+    "original": "is kleiner dan",
+    "translation": "is less than"
+  },
+  "c2dd273a-c50e-4947-88f2-1779acb34495": {
+    "original": "is gelijk aan",
+    "translation": "is equal to"
+  },
+  "261a6232-3200-434b-b389-53fa0f19e15d": {
+    "original": "is niet gelijk aan",
+    "translation": "is not equal to"
+  },
+  "f664f209-fa11-4816-a8e9-4ff7f7277158": {
+    "original": "Gelijk aan...",
+    "translation": "Equal to..."
+  },
+  "ce3751a0-69ba-48eb-94a3-b4c498875413": {
+    "original": "Niet gelijk aan...",
+    "translation": "Not equal to..."
+  },
+  "5890f004-738f-4d26-b282-de0c39fb1701": {
+    "original": "Groter dan...",
+    "translation": "Greater than..."
+  },
+  "f38482ad-88c8-42cf-be01-8f910cb5cf6b": {
+    "original": "Kleiner dan...",
+    "translation": "Less than..."
+  },
+  "149628c3-a9ff-4262-af00-0b59804fd7d6": {
+    "original": "Vul datum in",
+    "translation": "Enter date"
+  },
+  "5773a11d-46bf-4348-89ef-ba20d0cb9868": {
+    "original": "Heeft",
+    "translation": "Has"
+  },
+  "65eb7250-4278-42c7-b147-87f6cde61674": {
+    "original": "Heeft geen",
+    "translation": "Has no"
+  },
+  "07c53e83-c928-425b-9c4a-c7c22f2a4152": {
+    "original": "waar",
+    "translation": "where"
+  },
+  "4b2f8d1c-ff27-470d-b452-809042fef818": {
+    "original": "complexe filtergroep",
+    "translation": "complex filter group"
+  },
+  "31bacb3a-2920-4bf3-9e68-d7887ef17fe4": {
+    "original": "zijn",
+    "translation": "are"
+  },
+  "af839b8a-1367-4655-ad1c-ee658843e9f1": {
+    "original": "is",
+    "translation": "is"
+  },
+  "b78e0854-14c4-4474-bbb4-7ba80056ff49": {
+    "original": "zijn niet",
+    "translation": "are not"
+  },
+  "86e4c6c5-2d76-46f2-ac9f-72ec4e074026": {
+    "original": "is niet",
+    "translation": "is not"
+  },
+  "f820fe9e-aee2-4e08-9fe7-8b531280f371": {
+    "original": "Vul getal in",
+    "translation": "Enter number"
+  },
+  "5eda5dc0-3987-4244-8d6c-a65fa9bbe4ea": {
+    "original": "Vul een getal in",
+    "translation": "Enter a number"
+  },
+  "8a4842b5-6304-4b02-a8c5-4b837edcd77d": {
+    "original": "Altijd",
+    "translation": "Always"
+  },
+  "a606fec7-273d-4642-b871-002d3f702a21": {
+    "original": "Als...",
+    "translation": "If..."
+  },
+  "bb7446b4-b23b-4455-861f-d7c70514b3eb": {
+    "original": "Stap kan niet worden overgeslagen",
+    "translation": "Step cannot be skipped"
+  },
+  "c319b21a-5f49-4557-8735-5240dc722c26": {
+    "original": "Stap kan altijd worden overgeslagen",
+    "translation": "Step can always be skipped"
+  },
+  "63b03f2b-6f8c-465f-9a4f-328fd67131e3": {
+    "original": "Als een vragenlijst niet verplicht is, zal men de stap kunnen overslaan zolang nog niets werd ingevuld. Meestal is het niet nodig om dit te gebruiken. Als de vragenlijst altijd verplicht is om in te vullen, kan je ook nog steeds optionele vragen in die lijst hebben. Meestal is het gewoon duidelijker om optionele vragen te gebruiken. Maar soms wil je bijvoorbeeld 'alles invullen' of 'niets invullen', dan kan je dit best gebruiken.",
+    "translation": "If a questionnaire is not mandatory, the step can be skipped as long as nothing has been filled in yet. Usually it is not necessary to use this. If the questionnaire is always mandatory to fill in, you can still have optional questions in that list. Usually it is just clearer to use optional questions. But sometimes you want to, for example, 'fill in everything' or 'fill in nothing', then you'd better use this."
+  },
+  "f193133e-143e-48fa-8d13-afcc01031343": {
+    "original": "Wanneer ingeschakeld?",
+    "translation": "When enabled?"
+  },
+  "879e4842-92f2-4e15-8a47-0f8e9d79770f": {
+    "original": "Wanneer verplicht invullen?",
+    "translation": "When mandatory to fill in?"
+  },
+  "bc53d7e6-3dbc-45ec-beeb-5f132fcbedb9": {
+    "original": "Annuleren",
+    "translation": "Cancel"
+  },
+  "2d9129aa-8486-4b20-9ded-fc3550922b2d": {
+    "original": "bevat",
+    "translation": "contains"
+  },
+  "0b2f9da7-c732-4588-a0c0-8de5581ed955": {
+    "original": "bevat niet",
+    "translation": "does not contain"
+  },
+  "1e6018e6-57e1-4692-a369-ba06998c4b33": {
+    "original": "is leeg",
+    "translation": "is empty"
+  },
+  "e7391885-08d1-4360-99b1-31c65b6eeca7": {
+    "original": "is niet leeg",
+    "translation": "is not empty"
+  },
+  "f9ed62e7-b956-41d0-b256-66cbe5b44ee9": {
+    "original": "Is gelijk aan...",
+    "translation": "Is equal to..."
+  },
+  "2760ef35-629a-4770-9203-70cdebd91efc": {
+    "original": "Is niet gelijk aan...",
+    "translation": "Is not equal to..."
+  },
+  "7f2a8893-7982-4ea5-8f5d-e9de0cffc6d9": {
+    "original": "Bevat...",
+    "translation": "Contains..."
+  },
+  "88614c1b-47ee-4596-9679-e960238fe217": {
+    "original": "Bevat niet...",
+    "translation": "Does not contain..."
+  },
+  "f6c53ee9-9b15-4f33-a617-ac3a3d2ac8d0": {
+    "original": "Is leeg",
+    "translation": "Is empty"
+  },
+  "b05a9993-9743-4cb3-99f1-6deb5a44b7f5": {
+    "original": "Is niet leeg",
+    "translation": "Is not empty"
+  },
+  "23c81649-6973-458f-b275-d1581b541e02": {
+    "original": "Vul tekst in",
+    "translation": "Enter text"
+  },
+  "bc166ef0-20df-40b7-abac-b56bb51376bd": {
+    "original": "Inverteren van de filter is mislukt",
+    "translation": "Inverting the filter failed"
+  },
+  "f2d06f56-bc53-46ea-932f-bd6ba9d6ac86": {
+    "original": "Onleesbare filter",
+    "translation": "Unreadable filter"
+  },
+  "41064b7e-368b-4f93-a5a1-3f5f4a80e5b5": {
+    "original": "Verplicht in te vullen als:",
+    "translation": "Mandatory to fill in if:"
+  },
+  "cc8f2893-37b9-43b5-a631-7d39bdfd486c": {
+    "original": "(anders optioneel)",
+    "translation": "(otherwise optional)"
+  },
+  "a173945b-fd40-4500-b1e0-bf6d3016c7c4": {
+    "original": "Wordt enkel gevraagd als:",
+    "translation": "Only asked if:"
+  },
+  "49b1c5d0-0511-42f0-a9fe-791572ba96f9": {
+    "original": "(optioneel)",
+    "translation": "(optional)"
+  },
+  "f9ea9a60-9957-49ba-8d25-76b3e1d539a2": {
+    "original": "(enkel verplicht invullen als:",
+    "translation": "(only mandatory to fill in if:"
+  },
+  "8d9b6fea-7005-408f-ae89-53a3eff3fb62": {
+    "original": "Toepassen",
+    "translation": "Apply"
+  },
+  "ae457502-49f4-4513-923b-86f353197b0e": {
+    "original": "Niet ondersteunde filter",
+    "translation": "Unsupported filter"
+  },
+  "ebf4d767-4f8f-4f6c-9130-e3b4e8819add": {
+    "original": "En",
+    "translation": "And"
+  },
+  "5df94168-bd59-43b9-986d-57a9c6f7a9b5": {
+    "original": "Of",
+    "translation": "Or"
+  },
+  "f773f4fc-c4e9-4792-a0a4-c9e969f0b245": {
+    "original": "Geen filters",
+    "translation": "No filters"
+  },
+  "f3b87bd8-e36c-4fb8-917f-87b18ece750e": {
+    "original": "Geboortedatum",
+    "translation": "Date of birth"
+  },
+  "fd3fea4f-73c7-4c8d-90cd-80ea90e53b98": {
+    "original": "Gender",
+    "translation": "Gender"
+  },
+  "be88b0da-348e-4394-b36c-1136af8aef7d": {
+    "original": "Met actieve proefperiode",
+    "translation": "With active trial period"
+  },
+  "2c94e906-587b-4ff0-b829-c176fb7120f7": {
+    "original": "Zonder proefperiode",
+    "translation": "Without trial period"
+  },
+  "0b6274d7-7a42-4ab3-bc65-5a76c23d07ff": {
+    "original": "Er staat een ander tabblad open van Keeo die werkt in een oudere versie. Sluit die eerst af.",
+    "translation": "Another Keeo tab is open that is working in an older version. Close this first."
+  },
+  "937b407c-7681-45c1-8c29-f415cf03faaf": {
+    "original": "Hoe ken je Keeo?",
+    "translation": "How do you know Keeo?"
+  },
+  "fcd3549b-1d81-4fe7-9e8f-fcd17501c014": {
+    "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Keeo. Voor Microsoft kan je",
+    "translation": "Ensure users can log in via your own account system, separate from Keeo. For Microsoft you can"
+  },
+  "ac3b2a14-e029-404c-9fe1-2aab4279a3ac": {
+    "original": "Beheer hier alle personen die toegang hebben tot Keeo, en wijzig hun toegangsrechten.",
+    "translation": "Manage all people who have access to Keeo here, and change their access rights."
+  },
+  "81c91169-db1e-4819-8716-5382ffbaa43b": {
+    "original": "Het eenheidsnummer is een unieke code voor deze eenheid. Deze wordt in de URL-balk van de browser gebruikt.",
+    "translation": "The unit number is a unique code for this unit. This is used in the browser's URL bar."
+  },
+  "9021f6b0-d1ae-422b-9651-48c7f5383b0b": {
+    "original": "Soms wil je personen die geen lid zijn toegang geven tot Keeo. Dat kan door externe beheerdersrollen aan te maken, en die rollen vervolgens toe te kennen aan externe beheerders.",
+    "translation": "Sometimes you want to give people who are not members access to Keeo. This can be done by creating external administrator roles and then assigning those roles to external administrators."
+  },
+  "253a60ce-cba7-4679-863c-494609d03e8f": {
+    "original": "Je kan {paymentMethod} niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Keeo instellingen > Betaalaccounts.",
+    "translation": "You cannot activate {paymentMethod}, you must first connect to a payment provider via the Keeo settings > Payment accounts."
+  },
+  "b4307772-62dd-48a4-bae3-9d46df314727": {
+    "original": "Welkom op Keeo. Zoek hieronder jouw eenheid om je in te schrijven of om jouw gegevens te beheren.",
+    "translation": "Welcome to Keeo. Find your unit below to register or to manage your data."
+  },
+  "7c2fee1a-0838-4346-848d-a3d984e70fdc": {
+    "original": "Het bedrag wordt achteraf door FOS Open Scouting aan je groep gefactureerd.",
+    "translation": "The amount will be invoiced to your group afterwards by FOS Open Scouting."
+  },
+  "fa1b8694-6a8c-46ea-ab5e-7ed792083bf0": {
+    "original": "Je kan online betalingen gebruiken in Keeo door te koppelen met Mollie via de onderstaande knop. Hiermee kan je betalingen via Bancontact, iDEAL en kredietkaart activeren. Je betaalt hier wel hogere transactiekosten dan via onze huidige partner.",
+    "translation": "You can use online payments in Keeo by linking with Mollie via the button below. This allows you to activate payments via Bancontact, iDEAL and credit card. You will pay higher transaction costs here than with our current partner."
+  },
+  "3e94193d-873b-4770-ba03-5f7528debf2c": {
+    "original": "Leden kunnen zelfstandig inschrijven via het ledenportaal. Dit is een link die je op jouw website kan plaatsen of kan versturen via e-mail. Daarnaast kan je leden ook uitnodigen om in te schrijven, dat doe je door ze eerst toe te voegen in Keeo en daarna een e-mail te sturen waarbij je de 'magische knop' onderaan toevoegt.",
+    "translation": "Members can register independently via the member portal. This is a link that you can place on your website or send via email. You can also invite members to register, you do this by first adding them in Keeo and then sending an email with the 'magic button' at the bottom."
+  },
+  "94547449-549d-4572-b217-c1a089b12997": {
+    "original": "Jouw domeinnaam is nog niet actief voor het versturen van e-mails vanaf die domeinnaam, maar je kan in tussentijd wel al e-mails versturen via Keeo. Keeo zorgt dat antwoorden op die e-mails wel bij jullie terecht komen.",
+    "translation": "Your domain name is not yet active for sending emails from that domain name, but you can already send emails via Keeo in the meantime. Keeo ensures that replies to those emails do reach you."
+  },
+  "5dbc2f08-f2d0-43bc-973d-b789077ca3ad": {
+    "original": "Welkom op het beheerdersportaal van Keeo. Hier kan je jouw eenheid beheren, leden bekijken, en instellingen aanpassen.",
+    "translation": "Welcome to the Keeo administrator portal. Here you can manage your unit, view members, and adjust settings."
+  },
+  "7a44f6f1-bb2f-4e46-93c2-afcae9db3f80": {
+    "original": "Opgelet: als je de link naar jouw webshop aanpast, werken mogelijks sommige links in al verzonden e-mails niet meer. De enige uitzondering hierop is als je van een standaard Keeo link overschakelt op een eigen domeinnaam (dan blijven oude links werken). Doe dit dus enkel in het begin van een verkoop.",
+    "translation": "Note: if you change the link to your webshop, some links in already sent emails may no longer work. The only exception is if you switch from a standard Keeo link to your own domain name (then old links will continue to work). Only do this at the beginning of a sale."
+  },
+  "768afe13-5f57-4a82-a6ac-77c8999b8aeb": {
+    "original": "Keeo toont op enkele plaatsen het logo van Keeo op jullie webshop. Op die manier kunnen we Keeo bekender maken bij andere eenheiden, waardoor we Keeo ook betaalbaar kunnen houden. Je kan dit verminderen als je dit toch liever niet wilt.",
+    "translation": "Keeo displays the Keeo logo in some places on your webshop. In this way, we can make Keeo better known to other units, so that we can also keep Keeo affordable. You can reduce this if you prefer not to."
+  },
+  "f8f3a5be-624a-4d39-b401-78ad833b64dd": {
+    "original": "Verminder de zichtbaarheid van Keeo",
+    "translation": "Reduce the visibility of Keeo"
+  },
+  "fd68e1a7-6059-47fc-b7ad-fdfe4924a67d": {
+    "original": "Bepaalde gegevens zijn ingebouwd in Keeo zodat we die ook op een speciale manier kunnen verwerken. Je kan deze hier aan of uit zetten.",
+    "translation": "Certain data is built into Keeo so that we can also process it in a special way. You can switch this on or off here."
+  },
+  "5c7d8f29-9d83-4f33-9d6b-0f947e384f75": {
+    "original": "Importeer een zaalplan dat jij of een andere eenheid eerder uit Keeo hebt geëxporteerd. Importeren vanaf andere systemen is niet mogelijk.",
+    "translation": "Import a seating plan that you or another unit previously exported from Keeo. Importing from other systems is not possible."
+  },
+  "977fa720-e451-4dd8-a317-881cf7a409b1": {
+    "original": "Er is iets misgelopen bij het importeren van het zaalplan. Kijk na of het bestand dat je hebt gekozen wel uit Keeo afkomstig is.",
+    "translation": "Something went wrong when importing the seating plan. Check if the file you have chosen is indeed from Keeo."
+  },
+  "39d0d9ca-2f37-40b6-84a4-51fb29b4cce6": {
+    "original": "Deze invoervelden zijn nodig op elk document, maar je moet hier instellen welke gegevens je uit Keeo daarin wilt invullen. Koppel je met meerdere gegevens uit Keeo, dan gaan we de eerste beschikbare op het document invullen. Bv. als er bij het lid zelf geen adres werd ingevuld, neem dan het adres van de eerste ouder.",
+    "translation": "These input fields are required on each document, but you must set here which data from Keeo you want to fill in. If you link with multiple data from Keeo, we will fill in the first available one on the document. E.g. if no address was filled in by the member, then take the address of the first parent."
+  },
+  "fa988b87-6665-43e4-a177-77031826e9a8": {
+    "original": "Keeo kan de inhoud van documenten automatisch wijzigen als de daarbij horende gegevens wijzigen, en nieuwe documenten aanmaken als er nieuwe inschrijvingen bij komen (ook na publicatie). Dat is ideaal om bijvoorbeeld ontbrekende of foute gegevens door leden nog te laten invullen via het ledenportaal. Op het moment dat je documenten officiëel hebt ingedient (indien van toepassing), zet je dit best uit. Als dit uit staat zullen onvolledige documenten niet langer zichtbaar zijn voor leden.",
+    "translation": "Keeo can automatically change the content of documents when the corresponding data changes, and create new documents when new registrations are added (also after publication). This is ideal, for example, to allow members to fill in missing or incorrect data via the member portal. When you have officially submitted your documents (if applicable), it is best to switch this off. If this is off, incomplete documents will no longer be visible to members."
+  },
+  "df8e9385-314f-4403-b0d5-e5893f68d442": {
+    "original": "Upload hier het logo zonder extra tekst of witruimtes. Laat leeg als je die niet hebt, en upload dan een banner. Zo kan Keeo de plaatsing optimaliseren. We plaatsen het logo bij voorkeur op de afgedrukte versie van een ticket als zowel een logo als banner aanwezig is.",
+    "translation": "Upload the logo here without extra text or white spaces. Leave blank if you don't have one, and then upload a banner. This allows Keeo to optimise the placement. We prefer to place the logo on the printed version of a ticket if both a logo and banner are present."
+  },
+  "b375f5be-879c-4696-8ccf-0e7066e3f5f4": {
+    "original": "De ideale afmeting voor een banner van een sponsor is 1104x450px. De banner wordt maximaal 150px hoog getoond, maar een veelvoud is noodzakelijk voor een niet-pixelachtige weergave op smartphones. Upload bij voorkeur voor alle sponsors een afbeelding met dezelfde afmetingen. Vermijd het uploaden van het logo als banner, laat dan de banner weg. Als zowel een logo als banner werd geupload zal Keeo de banner verkiezen op mobiele tickets, en het logo op de afgedrukte tickets.",
+    "translation": "The ideal size for a sponsor's banner is 1104x450px. The banner is shown at a maximum height of 150px, but a multiple is necessary for a non-pixelated display on smartphones. Preferably upload an image with the same dimensions for all sponsors. Avoid uploading the logo as a banner, then leave the banner out. If both a logo and banner have been uploaded, Keeo will choose the banner on mobile tickets, and the logo on the printed tickets."
+  },
+  "f3236c83-b7ba-453f-981a-3e06925c9b7a": {
+    "original": "Geef iedereen toegang tot Keeo door ze de juiste functies te geven.",
+    "translation": "Give everyone access to Keeo by giving them the right functions."
+  },
+  "70894bb8-da5a-4f1a-929d-08f4479c4de3": {
+    "original": "Bevestig dat de betaalmethodes correct zijn ingesteld. Deze betaalmethodes worden gebruikt als leden inschrijven via Keeo.",
+    "translation": "Confirm that the payment methods are correctly set up. These payment methods are used when members register via Keeo."
+  },
+  "1af084bf-42d6-4a59-a7da-d1e87c6dba8e": {
+    "original": "Dit lid is niet langer aangesloten bij FOS Open Scouting, en de verzekering loopt binnenkort af",
+    "translation": "This member is no longer affiliated with FOS Open Scouting, and the insurance will expire soon"
+  },
+  "60871aaf-1b90-4a7c-a755-a4aeb0585a8e": {
+    "original": "Dit lid is niet aangesloten bij FOS Open Scouting, en is daardoor ook niet verzekerd",
+    "translation": "This member is not affiliated with FOS Open Scouting, and is therefore not insured"
+  },
+  "405a811e-ebb1-4948-84cd-8fb5860104e6": {
+    "original": "Keeo",
+    "translation": "Keeo"
+  },
+  "f24d4ba4-4b42-4fa1-b99f-4b90dd1a3208": {
+    "original": "Kies hieronder wat er precies terugbetaald (negatief bedrag invullen) werd. Let op dat Keeo momenteel geen automatische terugbetalingen doet voor online betalingen. Je moet dus zelf het bedrag manueel terugbetalen of storten.",
+    "translation": "Choose below what exactly was refunded (enter a negative amount). Note that Keeo currently does not do automatic refunds for online payments. So you have to refund or deposit the amount manually yourself."
+  },
+  "369440db-a9e0-4530-a06b-3ea05cc6a2b0": {
+    "original": "Welkom op het ledenplatform van FOS Open Scouting, hier kan je jouw gegevens beheren en je inschrijven bij een eenheid of voor een activiteit.",
+    "translation": "Welcome to the FOS Open Scouting member platform, here you can manage your data and register with a unit or for an activity."
+  },
+  "d2749916-b99a-47af-9bc4-300648fe77a7": {
+    "original": "Je moet elke betaling zelf controleren en markeren als betaald in Keeo",
+    "translation": "You must check each payment yourself and mark it as paid in Keeo"
+  },
+  "4d995169-f792-40f5-addf-60d8aed00362": {
+    "original": "Maak API-keys aan om toegang te krijgen tot de Keeo-API.",
+    "translation": "Create API keys to access the Keeo API."
+  },
+  "64633f7b-2d6e-4ad2-abb1-e9dd77d9a81f": {
+    "original": "Alle betalingen, transactiekosten en uitbetalingen die via Keeo verliepen.",
+    "translation": "All payments, transaction costs and payouts that went through Keeo."
+  },
+  "719f31f6-cae0-41b0-97e6-ab8f5ff01d19": {
+    "original": "De velden {unlinkedAnswersText} werden manueel aangepast en zijn niet meer automatisch gelinkt met de waarden in Keeo",
+    "translation": "The fields {unlinkedAnswersText} have been manually adjusted and are no longer automatically linked with the values in Keeo"
+  },
+  "eb55e12d-0c0a-491e-bdbc-6e705b9d82a7": {
+    "original": "Account loskoppelen van Keeo",
+    "translation": "Disconnect account from Keeo"
+  },
+  "2ca73761-bc6c-4ffb-9550-a988376f26ef": {
+    "original": "Lees hier meer over Keeo.",
+    "translation": "Read more about Keeo here."
+  },
+  "9f1a0032-32dd-48fd-9d04-0b20bd86aefb": {
+    "original": "Terug naar Keeo",
+    "translation": "Back to Keeo"
+  },
+  "f511ce18-7a60-4fe8-8695-16216ffb7bdc": {
+    "original": "De betaling loopt niet via Keeo",
+    "translation": "The payment does not run through Keeo"
+  },
+  "f0ff8a76-a986-440c-b966-a5579e0844f4": {
+    "original": "Je kan geen documenten aanmaken in de gratis versie van Keeo",
+    "translation": "You cannot create documents in the free version of Keeo"
+  },
+  "de1d5cdf-6aa6-4912-828a-82cb53f8abf6": {
+    "original": "Dit is geen geldig zaalplan uit Keeo",
+    "translation": "This is not a valid Keeo seating plan"
+  },
+  "8cba151c-54df-4786-8d37-bf2af2005753": {
+    "original": "Ticketverkoop via Keeo",
+    "translation": "Ticket sales via Keeo"
+  },
+  "34fdb013-005c-46c4-b52e-e58f7697b586": {
+    "original": "Leden kunnen enkel zelf inschrijven via Keeo",
+    "translation": "Members can only register themselves via Keeo"
+  },
+  "cd6e3548-aea1-4f74-9c66-b1fa43de6438": {
+    "original": "Ticketverkoop via Keeo",
+    "translation": "Ticket sales via Keeo"
+  },
+  "68914509-aa54-40c7-9f53-7b8a02149198": {
+    "original": "Keeo",
+    "translation": "Keeo"
+  },
+  "d54c9b23-2d3c-49cd-b1fc-7e821d36fd41": {
+    "original": "Inloggen op Keeo",
+    "translation": "Log in to Keeo"
+  },
+  "75815048-939a-4ac1-a81c-f23fc3ec5006": {
+    "original": "Jouw eenheid betaalt {price} aan FOS Open Scouting.",
+    "translation": "Your unit pays {price} to FOS Open Scouting."
+  },
+  "9305016a-babf-4606-af6c-e8ef9f2ba91e": {
+    "original": "Weet je zeker dat je {total} wilt aanrekenen aan {count} eenheid/eenheden?",
+    "translation": "Are you sure you want to charge {total} to {count} unit(s)?"
+  },
+  "a654551b-6dcd-48a9-a5c5-4609fdcba5f3": {
+    "original": "Keeo is in orde",
+    "translation": "Keeo is in order"
+  },
+  "8e77d1c1-87dc-4fdb-ad6e-13145bc96f78": {
+    "original": "Breng Keeo in orde",
+    "translation": "Bring Keeo in order"
+  },
+  "ab0c7981-0d5f-4c36-bd3f-07ddc2a63759": {
+    "original": "Jouw eenheid bevindt zich in een ander scoutsjaar dan FOS Open Scouting.",
+    "translation": "Your unit is in a different work year than FOS Open Scouting."
+  },
+  "528545c4-028b-4711-9b16-f6fa990c3130": {
+    "original": "Aansluiting/verzekering Keeo*",
+    "translation": "Connection/insurance Keeo*"
+  },
+  "e99c7d31-f9fe-4e0f-8947-bdc30784de5b": {
+    "original": "* Voor de aansluiting bij Keeo moet je nog een correcte standaard inschrijvingsgroep selecteren zodat de benaming die jouw eenheid gebruikt gekoppeld kan worden aan de benaming van Keeo.",
+    "translation": "* For connection to Keeo you must select a correct standard registration group so that the name used by your unit can be linked to the Keeo name."
+  },
+  "61f434a9-49e6-4a92-b613-965dfd807dca": {
+    "original": "Aansluiting FOS Open Scouting",
+    "translation": "FOS Open Scouting connection"
+  },
+  "f5229cc1-c908-4409-855a-1dba40371815": {
+    "original": "Jouw leiding kan in Keeo jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf leiding, vraag het dan aan jouw medeleiding of FOS Open Scouting.",
+    "translation": "Your leadership can look up your security code in Keeo and pass it on to you. If you are a leader yourself, ask your co-leader or FOS Open Scouting."
+  },
+  "525747e4-48df-4f20-979e-3c18142e64a5": {
+    "original": "Het bedrag zal achteraf door FOS Open Scouting aan {name} worden gefactureerd",
+    "translation": "The amount will be invoiced to {name} afterwards by FOS Open Scouting"
+  },
+  "237be7e0-4534-4008-b7bc-3e6db776a72a": {
+    "original": "Leden die je inschrijft in een leeftijdsgroep die je koppelt aan een standaard leeftijdsgroep van FOS Open Scouting worden automatisch aangesloten. Voor andere leden kan je hier een aansluiting manueel aanvragen.",
+    "translation": "Members who you register in an age group that you link to a standard age group of FOS Open Scouting are automatically connected. For other members, you can request a connection manually here."
+  },
+  "d68a6d63-d782-49e2-84a5-4f77dbfa2977": {
+    "original": "Nieuwe leden hebben automatisch recht op een proefperiode van {days} voor de aansluiting bij FOS Open Scouting.",
+    "translation": "New members are automatically entitled to a {days} trial period for connection to FOS Open Scouting."
+  },
+  "29343dad-93c5-4e72-a6d5-3960cfbfcf42": {
+    "original": "Dit lid heeft een proefaansluiting bij FOS Open Scouting",
+    "translation": "This member has a trial connection with FOS Open Scouting"
+  },
+  "65cbb5ad-4a6b-4800-a7db-59627fb576ef": {
+    "original": "Dit lid is niet aangesloten in {werkjaar} bij FOS Open Scouting, en is daardoor ook niet verzekerd.",
+    "translation": "This member is not affiliated with FOS Open Scouting in {werkjaar}, and is therefore not insured."
+  },
+  "11ffdf3a-dd66-49ec-b092-c7f3063e19f3": {
+    "original": "Keeo verwijdert automatisch het reeds aangerekende bedrag van het openstaande bedrag van alle leden die je uitschrijft. Als je wilt kan je wel een annuleringskost in rekening brengen, bv. als je het bedrag niet zal terugbetalen stel je dit in op 100%. Als je geen annuleringskost in rekening brengt, zal het openstaande bedrag van een lid dat al betaald had negatief worden en kan je dit terugbetalen via het tabblad ‘Rekening’ van een lid.",
+    "translation": "Keeo automatically removes the already charged amount from the outstanding amount of all members you unsubscribe. If you wish, you can charge a cancellation fee, e.g. if you will not refund the amount, set this to 100%. If you do not charge a cancellation fee, the outstanding amount of a member who has already paid will become negative and you can refund this via the 'Account' tab of a member."
+  },
+  "cd60d49f-9fc8-4fb7-b574-1231874c1d43": {
+    "original": "Overloop alle stappen en bevestig dat je alles hebt nagekeken bij elke stap. Zorg dat alles ten laatste tegen 1 september is nagekeken. De deadline om je leden in te schrijven en op orde te zetten is 15 november.",
+    "translation": "Go through all the steps and confirm that you have checked everything at each step. Make sure everything is checked by 1 September at the latest. The deadline for registering and setting up your members is 15 November."
+  },
+  "ced29068-facb-4692-9fd7-d9ac74e35359": {
+    "original": "Kijk na of alle instellingen van de groepen correct zijn. Als alles goed staat ingesteld kan je ervoor zorgen dat alle leden via Keeo kunnen inschrijven én betalen. Let dus goed op welke tarieven je instelt, en welke leeftijdsrestricties je gebruikt. Als je klaar bent kan je een leeftijdsgroep openen zodat leden via Keeo kunnen inschrijven.",
+    "translation": "Check if all group settings are correct. If everything is set up correctly, you can ensure that all members can register and pay via Keeo. So pay close attention to the rates you set, and which age restrictions you use. When you are ready, you can open an age group so that members can register via Keeo."
+  },
+  "880e4cac-5a7e-4d6d-80ad-c5472a005df6": {
+    "original": "De eerstvolgende aansluiting van dit lid start op {date}. Vandaag is dit lid niet aangesloten bij FOS Open Scouting en daardoor niet verzekerd.",
+    "translation": "The next connection of this member starts on {date}. Today this member is not affiliated with FOS Open Scouting and therefore not insured."
+  },
+  "cd5ee584-5b0c-4acb-af75-7b21ad37cead": {
+    "original": "Het antwoord is niet gekend (werd nog nooit ingevuld in Keeo). Er worden geen lagere tarieven automatisch toegepast.",
+    "translation": "The answer is not known (was never filled in in Keeo). No lower rates are automatically applied."
+  },
+  "5e60cf0f-5489-4e90-8dab-97c56c2e989c": {
+    "original": "Je probeert een doorverwijzingslink met korting van een andere eenheid te gebruiken, maar je hebt al een eenheid geregistreerd. Een doorverwijzingslink is enkel geldig voor de eerste eenheid die je op Keeo aansluit.",
+    "translation": "You are trying to use a referral link with a discount from another unit, but you already have a unit registered. A referral link is only valid for the first unit you connect to Keeo."
+  },
+  "0208e14e-b26e-4411-9e8e-461b63b1c0c1": {
+    "original": "Vertel Keeo door aan andere eenheiden",
+    "translation": "Tell Keeo to other units"
+  },
+  "d80e2291-5bb9-4799-9594-bcda54480efa": {
+    "original": "Gebruikt jouw eenheid Keeo al?",
+    "translation": "Does your unit already use Keeo?"
+  },
+  "92f76d54-282e-448e-ae15-21411b7bc085": {
+    "original": "Sluit jouw eenheid aan bij Keeo",
+    "translation": "Connect your unit to Keeo"
+  },
+  "aeace79f-c772-4944-8d1d-f92eb519267f": {
+    "original": "FOS De Goudvis",
+    "translation": "FOS De Goudvis"
+  },
+  "6f77926b-801a-477d-8254-78166ca8e6be": {
+    "original": "FOS De Goudvis op Keeo",
+    "translation": "FOS De Goudvis on Keeo"
+  },
+  "e60df757-6546-41c2-b3d3-599df08f34b6": {
+    "original": "FOS De Goudvis",
+    "translation": "FOS De Goudvis"
+  },
+  "16ba3d97-5943-451d-92b5-0bf21555f7ae": {
+    "original": "FOS De Goudvis",
+    "translation": "FOS De Goudvis"
+  },
+  "209f9f13-4897-4310-95eb-f436987b8ba7": {
+    "original": "Kijk hieronder na of alle functies toegekend zijn. Om een functie toe te kennen zorg je er eerst voor dat de persoon is ingeschreven in Keeo, daarna kan je functies toekennen door het lid open te klikken in het tabblad ‘Leden’. Daar kan je met de rechtermuisknop op een lid klikken en \"Functies bewerken\" kiezen.",
+    "translation": "Check below if all functions have been assigned. To assign a function, first ensure that the person is registered in Keeo, then you can assign functions by clicking open the member in the 'Members' tab. There you can right-click on a member and choose \"Edit functions\"."
+  },
+  "3f4666f9-59b5-4a24-b1a7-9f820275c042": {
+    "original": "Hier kan je als beheerder leden inschrijven voor een activiteit. Het meest praktische is dat elk lid zichtzelf inschrijft via Keeo, maar dat is misschien niet altijd mogelijk.",
+    "translation": "Here you can register members for an activity as an administrator. The most practical way is for each member to register themselves via Keeo, but this may not always be possible."
+  },
+  "3ab07939-121b-47f9-956f-a573c57ec008": {
+    "original": "Je kan zelf ook leden inschrijven voor deze activiteit. Jouw groep betaalt dan meteen de kostprijs aan de organisator, waarna Keeo automatisch één of meerdere openstaande bedragen aanmaakt van de ingeschreven leden aan jouw groep (te betalen via het ledenportaal of manueel betaling te registreren).",
+    "translation": "You can also register members for this activity yourself. Your group then immediately pays the price to the organiser, after which Keeo automatically creates one or more outstanding amounts of the registered members to your group (payable via the member portal or manually register payment)."
+  },
+  "52b7cfdf-2f2c-4d88-8689-96a91f885654": {
+    "original": "Aanrekening via FOS Open Scouting",
+    "translation": "Invoicing via FOS Open Scouting"
+  },
+  "227a2170-37b7-46b0-ac1e-516f603379b5": {
+    "original": "Sommige aansluitingen verlopen via FOS Open Scouting (lid betaalt rechtstreeks aan de koepel) en worden dus ook niet echt aangerekend aan een individuele eenheid. Je kan deze via deze filter uitsluiten.",
+    "translation": "Some connections run through FOS Open Scouting (member pays directly to the umbrella organisation) and are therefore not really charged to an individual unit. You can exclude these using this filter."
+  },
+  "48148df3-81a8-439e-a368-64355aa7da6e": {
+    "original": "Lid betaald rechtstreeks aan FOS Open Scouting",
+    "translation": "Member pays directly to FOS Open Scouting"
+  },
+  "4a39e12b-efa2-46fe-aa30-83bc576548a3": {
+    "original": "Aangesloten via FOS Open Scouting (niet aangerekend aan een eenheid)",
+    "translation": "Connected via FOS Open Scouting (not charged to a unit)"
+  },
+  "f6e06abd-3e58-4f99-bc8d-6cf6a44273b3": {
+    "original": "Jouw eenheid betaalt {price} aan FOS Open Scouting, maar voor latere aansluitingen bedraagt het nu {priceReduced}.",
+    "translation": "Your unit pays {price} to FOS Open Scouting, but for later connections it is now {priceReduced}."
+  },
+  "a9605085-cd44-454d-9386-3dd30206f3bf": {
+    "original": "Opgelet, deze beheerders zijn ook niet aangesloten bij FOS Open Scouting, en zijn dus ook niet verzekerd. Gebruik met mate, bv. om externen toegang te geven voor evenementen.",
+    "translation": "Note, these administrators are also not affiliated with FOS Open Scouting, and are therefore not insured. Use sparingly, e.g. to give external parties access to events."
+  },
+  "1dfaeb07-5f01-42c7-a9a4-0096047da86e": {
+    "original": "Vragenlijst van FOS Open Scouting",
+    "translation": "FOS Open Scouting questionnaire"
+  },
+  "91e43562-956f-41ac-b5b6-a8bcb63edd66": {
+    "original": "Deze domeinnaam is al in gebruik door een andere eenheid. Neem contact op met Keeo als je denkt dat je toch toegang zou moeten krijgen.",
+    "translation": "This domain name is already in use by another unit. Contact Keeo if you think you should still have access."
+  },
+  "4f7e64c6-4607-446d-9a84-8ebcb7206241": {
+    "original": "Kijk na of je nog een ander tabblad open hebt staan met Keeo en sluit deze. Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer de pagina te herladen of in een andere browser te werken.",
+    "translation": "Check if you have another tab open with Keeo and close it. Your browser does not support certain functions, which means we cannot keep orders offline if your internet goes down. Try reloading the page or working in a different browser."
   }
 }
