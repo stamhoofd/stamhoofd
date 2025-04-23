@@ -206,7 +206,7 @@ const levelPrefix = computed(() => {
             prefixes.push(...tagNames);
         }
         else {
-            prefixes.push('Nationaal');
+            prefixes.push($t(`Nationaal`));
         }
     }
     else {
@@ -219,7 +219,7 @@ const levelPrefix = computed(() => {
         }
     }
 
-    const base = Formatter.joinLast(prefixes, ', ', ' en ');
+    const base = Formatter.joinLast(prefixes, ', ', ' ' + $t(`en`) + ' ');
 
     if (groupOrganization.value && props.event.organizationId === null) {
         return `${base} (via ${groupOrganization.value.name})`;
@@ -362,7 +362,7 @@ async function addMembers() {
     }
 
     if (!organization.value) {
-        Toast.warning('Ga naar het beheerdersportaal van een groep om leden uit die groep toe te voegen. Dit kan niet via het administratieportaal.').show();
+        Toast.warning($t(`Ga naar het beheerdersportaal van een groep om leden uit die groep toe te voegen. Dit kan niet via het administratieportaal.`)).show();
         return;
     }
 

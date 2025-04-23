@@ -69,24 +69,24 @@ function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: 'Wijzig instellingen',
+                name: $t(`Wijzig instellingen`),
                 icon: 'settings',
                 action: () => editCategory(),
             }),
             new ContextMenuItem({
-                name: 'Categorie dupliceren',
+                name: $t(`Categorie dupliceren`),
                 icon: 'copy',
                 action: () => addCategory(props.category.duplicate()),
             }),
             new ContextMenuItem({
-                name: 'Categorie verwijderen',
+                name: $t(`Categorie verwijderen`),
                 icon: 'trash',
                 action: () => deleteCategory(),
             }),
         ],
         [
             new ContextMenuItem({
-                name: 'Verplaats omhoog',
+                name: $t(`Verplaats omhoog`),
                 icon: 'arrow-up',
                 action: () => {
                     up();
@@ -94,7 +94,7 @@ function showContextMenu(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: 'Verplaats omlaag',
+                name: $t(`Verplaats omlaag`),
                 icon: 'arrow-down',
                 action: () => {
                     down();
@@ -104,12 +104,12 @@ function showContextMenu(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: 'Verplaats naar vragenlijst',
+                name: $t(`Verplaats naar vragenlijst`),
                 disabled: props.category.childCategories.length !== 0,
                 childMenu: new ContextMenu([
                     [
                         new ContextMenuItem({
-                            name: 'Hoofdvragenlijst',
+                            name: $t(`Hoofdvragenlijst`),
                             disabled: true,
                         }),
                     ],
@@ -119,7 +119,7 @@ function showContextMenu(event: MouseEvent) {
                             disabled: c.id === props.category.id,
                             action: async () => {
                                 // Transform into a root category
-                                if (!await CenteredMessage.confirm('Ben je zeker dat je deze vragenlijst wilt verplaatsen?', 'Ja, verplaatsen', 'Deze vragenlijst zal worden verplaatst naar de gekozen vragenlijst (' + c.name + ').')) {
+                                if (!await CenteredMessage.confirm($t(`Ben je zeker dat je deze vragenlijst wilt verplaatsen?`), $t(`Ja, verplaatsen`), $t(`Deze vragenlijst zal worden verplaatst naar de gekozen vragenlijst (`) + c.name + ').')) {
                                     return;
                                 }
 
@@ -145,7 +145,7 @@ function showContextMenu(event: MouseEvent) {
 }
 
 async function deleteCategory() {
-    if (!await CenteredMessage.confirm('Weet je zeker dat je deze vragenlijst wilt verwijderen?', 'Verwijderen', 'Nadat je hebt opgeslagen kan je dit niet meer ongedaan maken')) {
+    if (!await CenteredMessage.confirm($t(`Weet je zeker dat je deze vragenlijst wilt verwijderen?`), $t(`Verwijderen`), $t(`Nadat je hebt opgeslagen kan je dit niet meer ongedaan maken`))) {
         return;
     }
 

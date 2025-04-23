@@ -187,7 +187,7 @@ export default class WYSIWYGTextInput extends VueComponent {
             return;
         }
         if (!this.editor.isActive('link') && this.editor.state.selection.empty) {
-            new Toast('Selecteer eerst tekst die je klikbaar wilt maken', 'info').show();
+            new Toast($t(`Selecteer eerst tekst die je klikbaar wilt maken`), 'info').show();
             return;
         }
         this.editLink = this.editor.getAttributes('link')?.href ?? '';
@@ -203,7 +203,7 @@ export default class WYSIWYGTextInput extends VueComponent {
         const menu = new ContextMenu([
             [
                 new ContextMenuItem({
-                    name: 'Titel',
+                    name: $t(`Titel`),
                     icon: 'h1',
                     selected: this.editor.isActive('heading', { level: this.headingStartLevel }),
                     action: () => {
@@ -212,7 +212,7 @@ export default class WYSIWYGTextInput extends VueComponent {
                     },
                 }),
                 new ContextMenuItem({
-                    name: 'Koptekst',
+                    name: $t(`Koptekst`),
                     icon: 'h2',
                     selected: this.editor.isActive('heading', { level: this.headingStartLevel + 1 }),
                     action: () => {
@@ -221,7 +221,7 @@ export default class WYSIWYGTextInput extends VueComponent {
                     },
                 }),
                 new ContextMenuItem({
-                    name: 'Waarschuwing',
+                    name: $t(`Waarschuwing`),
                     icon: 'warning',
                     selected: this.editor.isActive('warningBox', { type: 'warning' }),
                     action: () => {
@@ -230,7 +230,7 @@ export default class WYSIWYGTextInput extends VueComponent {
                     },
                 }),
                 new ContextMenuItem({
-                    name: 'Info',
+                    name: $t(`Info`),
                     icon: 'info',
                     selected: this.editor.isActive('warningBox', { type: 'info' }),
                     action: () => {
@@ -241,7 +241,7 @@ export default class WYSIWYGTextInput extends VueComponent {
             ],
             [
                 new ContextMenuItem({
-                    name: 'Opsomming met bolletjes',
+                    name: $t(`Opsomming met bolletjes`),
                     icon: 'ul',
                     selected: this.editor.isActive('bulletList'),
                     action: () => {
@@ -250,7 +250,7 @@ export default class WYSIWYGTextInput extends VueComponent {
                     },
                 }),
                 new ContextMenuItem({
-                    name: 'Opsomming met nummers',
+                    name: $t(`Opsomming met nummers`),
                     icon: 'ol',
                     selected: this.editor.isActive('orderedList'),
                     action: () => {
@@ -303,7 +303,7 @@ export default class WYSIWYGTextInput extends VueComponent {
         }
 
         if (!this.isValidHttpUrl(cleanedUrl)) {
-            new Toast('Ongeldige URL', 'error red').show();
+            new Toast($t(`Ongeldige URL`), 'error red').show();
             return;
         }
 

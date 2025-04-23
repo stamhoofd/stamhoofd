@@ -31,25 +31,25 @@ const priceBreakdown = computed(() => {
 
     const all = [
         {
-            name: 'Reeds betaald',
+            name: $t(`Reeds betaald`),
             price: balance.pricePaid + laterBalance.pricePaid,
         },
         {
-            name: 'In verwerking',
+            name: $t(`In verwerking`),
             price: balance.pricePending + laterBalance.pricePending,
         },
     ].filter(a => a.price !== 0);
 
     if (all.length > 0) {
         all.unshift({
-            name: 'Totaalprijs',
+            name: $t(`Totaalprijs`),
             price: balance.price + laterBalance.price,
         });
     }
 
     if (laterBalance.priceOpen > 0) {
         all.push({
-            name: 'Later te betalen',
+            name: $t(`Later te betalen`),
             price: laterBalance.priceOpen,
         });
     }
@@ -57,7 +57,7 @@ const priceBreakdown = computed(() => {
     return [
         ...all,
         {
-            name: balance.priceOpen < 0 ? (isPayable ? 'Terug te krijgen' : 'Terug te betalen') : (laterBalance.priceOpen !== 0 ? 'Nu te betalen' : 'Te betalen'),
+            name: balance.priceOpen < 0 ? (isPayable ? $t(`Terug te krijgen`) : $t(`Terug te betalen`)) : (laterBalance.priceOpen !== 0 ? $t(`Nu te betalen`) : $t(`Te betalen`)),
             price: Math.abs(balance.priceOpen),
         },
     ];

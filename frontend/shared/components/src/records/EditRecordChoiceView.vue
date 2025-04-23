@@ -147,9 +147,9 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
 
     get title(): string {
         if (this.isNew) {
-            return 'Nieuwe optie';
+            return $t(`Nieuwe optie`);
         }
-        return 'Optie bewerken';
+        return $t(`Optie bewerken`);
     }
 
     get name() {
@@ -273,7 +273,7 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
     }
 
     async deleteMe() {
-        if (!await CenteredMessage.confirm('Ben je zeker dat je deze optie wilt verwijderen?', 'Verwijderen')) {
+        if (!await CenteredMessage.confirm($t(`Ben je zeker dat je deze optie wilt verwijderen?`), $t(`Verwijderen`))) {
             return;
         }
 
@@ -302,7 +302,7 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
         if (!this.hasChanges) {
             return true;
         }
-        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+        return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
     }
 }
 </script>

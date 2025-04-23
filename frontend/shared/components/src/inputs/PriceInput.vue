@@ -51,7 +51,7 @@ export default class PriceInput extends VueComponent {
     @Prop({ default: null })
         modelValue!: number | null
 
-    currency = "euro";
+    currency = $t(`euro`);
 
     @Prop({ default: "" })
         placeholder!: string

@@ -37,10 +37,10 @@ export default class VATNumberInput extends VueComponent {
     @Prop({ default: true })
         required!: boolean
 
-    @Prop({ default: "Vul jouw BTW-nummer hier in" })
+    @Prop({ default: $t(`Vul jouw BTW-nummer hier in`) })
         placeholder!: string
 
-    @Prop({ default: "vat number" })
+    @Prop({ default: $t(`vat number`) })
         autocomplete!: string
 
     errorBox: ErrorBox | null = null
@@ -81,7 +81,7 @@ export default class VATNumberInput extends VueComponent {
         if (this.required && this.VATNumberRaw.length === 0) {
             this.errorBox = new ErrorBox(new SimpleError({
                 "code": "invalid_field",
-                "message": "Vul een BTW-nummer in",
+                "message": $t(`Vul een BTW-nummer in`),
                 "field": "VATNumber"
             }))
             return false
@@ -98,7 +98,7 @@ export default class VATNumberInput extends VueComponent {
         if (!result.isValid) {
             this.errorBox = new ErrorBox(new SimpleError({
                 "code": "invalid_field",
-                "message": "Ongeldig BTW-nummer: "+ this.VATNumberRaw,
+                "message": $t(`Ongeldig BTW-nummer:`) + ' '+ this.VATNumberRaw,
                 "field": "VATNumber"
             }))
             return false

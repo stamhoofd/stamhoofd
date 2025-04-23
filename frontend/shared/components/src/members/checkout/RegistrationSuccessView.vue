@@ -82,38 +82,38 @@ if (props.payment && names.length === 0 && waitingListNames.length === 0) {
 }
 
 const title = computed(() => {
-    let t = 'Hoera! ';
+    let t = $t(`Hoera!`) + ' ';
 
     if (names.length > 0) {
         if (names.length > 3) {
-            t += Formatter.joinLast([...names.slice(0, 2), (names.length - 2) + ' andere leden'], ', ', ' en ') + ' zijn ingeschreven';
+            t += Formatter.joinLast([...names.slice(0, 2), (names.length - 2) + ' ' + $t(`andere leden`)], ', ', ' ' + $t(`en`) + ' ') + ' ' + $t(`zijn ingeschreven`);
         }
         else if (names.length > 1) {
-            t += Formatter.joinLast(names, ', ', ' en ') + ' zijn ingeschreven';
+            t += Formatter.joinLast(names, ', ', ' ' + $t(`en`) + ' ') + ' ' + $t(`zijn ingeschreven`);
         }
         else {
-            t += names.join('') + ' is ingeschreven';
+            t += names.join('') + ' ' + $t(`is ingeschreven`);
         }
     }
 
     if (waitingListNames.length > 0) {
         if (names.length > 0) {
-            t += ' en ';
+            t += ' ' + $t(`en`) + ' ';
         }
 
         if (waitingListNames.length > 3) {
-            t += Formatter.joinLast([...waitingListNames.slice(0, 2), (waitingListNames.length - 2) + ' andere leden'], ', ', ' en ') + ' zijn ingeschreven op de wachtlijst';
+            t += Formatter.joinLast([...waitingListNames.slice(0, 2), (waitingListNames.length - 2) + ' ' + $t(`andere leden`)], ', ', ' ' + $t(`en`) + ' ') + ' ' + $t(`zijn ingeschreven op de wachtlijst`);
         }
         else if (waitingListNames.length > 1) {
-            t += Formatter.joinLast(waitingListNames, ', ', ' en ') + ' zijn ingeschreven op de wachtlijst';
+            t += Formatter.joinLast(waitingListNames, ', ', ' ' + $t(`en`) + ' ') + ' ' + $t(`zijn ingeschreven op de wachtlijst`);
         }
         else {
-            t += waitingListNames.join('') + ' is ingeschreven op de wachtlijst';
+            t += waitingListNames.join('') + ' ' + $t(`is ingeschreven op de wachtlijst`);
         }
     }
 
     if (names.length === 0 && waitingListNames.length === 0) {
-        t += 'Gelukt!';
+        t += $t(`Gelukt!`);
     }
 
     return t;

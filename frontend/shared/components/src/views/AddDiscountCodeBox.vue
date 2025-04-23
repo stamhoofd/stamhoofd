@@ -66,7 +66,7 @@ export default class AddDiscountCodeBox extends VueComponent {
                 this.errorBox = new ErrorBox(new SimpleError({
                     code: 'invalid_code',
                     field: 'code',
-                    message: 'Deze kortingscode is ongeldig',
+                    message: $t(`Deze kortingscode is ongeldig`),
                 }));
             }
         }

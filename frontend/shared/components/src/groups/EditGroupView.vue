@@ -623,7 +623,7 @@ const availableWaitingLists = computed(() => {
         const usedByGroups = externalOrganization?.value?.period?.groups.filter(g => g.waitingList?.id === list.id);
         return {
             list,
-            description: usedByGroups?.length ? 'Deze wachtlijst wordt gebruikt door ' + Formatter.joinLast(usedByGroups.map(g => g.settings.name), ', ', ' en ') : 'Niet gebruikt',
+            description: usedByGroups?.length ? $t(`Deze wachtlijst wordt gebruikt door`) + ' ' + Formatter.joinLast(usedByGroups.map(g => g.settings.name), ', ', ' ' + $t(`en`) + ' ') : $t(`Niet gebruikt`),
         };
     });
 });
@@ -1112,7 +1112,7 @@ async function addWaitingList() {
         periodId: patched.value.periodId,
         type: GroupType.WaitingList,
         settings: GroupSettings.create({
-            name: 'Wachtlijst van ' + patched.value.settings.name,
+            name: $t(`Wachtlijst van`) + ' ' + patched.value.settings.name,
         }),
     });
 
@@ -1170,15 +1170,15 @@ async function editWaitingList(waitingList: Group) {
 const genderTypes = [
     {
         value: GroupGenderType.Mixed,
-        name: 'Gemengd',
+        name: $t(`Gemengd`),
     },
     {
         value: GroupGenderType.OnlyFemale,
-        name: 'Enkel meisjes',
+        name: $t(`Enkel meisjes`),
     },
     {
         value: GroupGenderType.OnlyMale,
-        name: 'Enkel jongens',
+        name: $t(`Enkel jongens`),
     },
 ];
 
@@ -1219,7 +1219,7 @@ function getAgeGroupSelectionText(ageGroup: DefaultAgeGroup) {
     }
 
     if (!ageGroup.defaultMembershipTypeId) {
-        text = text + ' (niet automatisch)';
+        text = text + ' ' + $t(`(niet automatisch)`);
     }
 
     return text;
@@ -1236,8 +1236,8 @@ const recordEditorSettings = computed(() => {
     const exampleMember = new PlatformMember({
         member: MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({
-                firstName: 'Voorbeeld',
-                lastName: 'Lid',
+                firstName: $t(`Voorbeeld`),
+                lastName: $t(`Lid`),
                 dataPermissions: BooleanStatus.create({ value: true }),
                 birthDay: new Date('2020-01-01'),
             }),

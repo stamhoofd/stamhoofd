@@ -70,7 +70,7 @@ const isLoggedIn = computed(() => context.value.isComplete() ?? false);
 const company = computed(() => props.organization.meta.companies[0] as Company | undefined);
 
 async function logout() {
-    if (!(await CenteredMessage.confirm('Wil je uitloggen?', 'Ja, uitloggen', 'Hiermee zal je worden afgemeld.'))) {
+    if (!(await CenteredMessage.confirm($t(`Wil je uitloggen?`), $t(`Ja, uitloggen`), $t(`Hiermee zal je worden afgemeld.`)))) {
         return;
     }
     await context.value.logout();

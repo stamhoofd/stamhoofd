@@ -173,14 +173,14 @@ const groupedResponsibilites = computed(() => {
 
     if (groupedPlatformResponsibilities.length > 0) {
         groups.push({
-            title: selectedOrganization.value === null ? '' : 'Standaardfuncties',
+            title: selectedOrganization.value === null ? '' : $t(`Standaardfuncties`),
             responsibilities: groupedPlatformResponsibilities,
         });
     }
 
     if (groupedOrganizationResponsibilities.length > 0) {
         groups.push({
-            title: 'Groepseigenfuncties',
+            title: $t(`Groepseigenfuncties`),
             responsibilities: groupedOrganizationResponsibilities,
         });
     }
@@ -205,11 +205,11 @@ const deletedMemberResponsibilityRecords = computed(() => {
 });
 
 const labels = computed(() => {
-    return items.value.map(o => o === null ? 'Nationaal niveau' : o.name);
+    return items.value.map(o => o === null ? $t(`Nationaal niveau`) : o.name);
 });
 
 const title = computed(() => {
-    return 'Functies van ' + props.member.patchedMember.firstName;
+    return $t(`Functies van`) + ' ' + props.member.patchedMember.firstName;
 });
 
 useValidation(errors.validator, () => {
@@ -233,9 +233,9 @@ function getResponsibilityEnabledDescription(responsibility: MemberResponsibilit
 
     if (rr) {
         if (!rr.endDate) {
-            return 'Van ' + Formatter.date(rr.startDate, true) + ' tot nu';
+            return $t(`Van`) + ' ' + Formatter.date(rr.startDate, true) + ' ' + $t(`tot nu`);
         }
-        return 'Van ' + Formatter.date(rr.startDate, true) + ' tot ' + Formatter.date(rr.endDate, true);
+        return $t(`Van`) + ' ' + Formatter.date(rr.startDate, true) + ' ' + $t(`tot`) + ' ' + Formatter.date(rr.endDate, true);
     }
 
     return null;
@@ -244,9 +244,9 @@ function getResponsibilityEnabledDescription(responsibility: MemberResponsibilit
 function getResponsibilityRecordEnabledDescription(record: MemberResponsibilityRecord | undefined) {
     if (record) {
         if (!record.endDate) {
-            return 'Van ' + Formatter.date(record.startDate, true) + ' tot nu';
+            return $t(`Van`) + ' ' + Formatter.date(record.startDate, true) + ' ' + $t(`tot nu`);
         }
-        return 'Van ' + Formatter.date(record.startDate, true) + ' tot ' + Formatter.date(record.endDate, true);
+        return $t(`Van`) + ' ' + Formatter.date(record.startDate, true) + ' ' + $t(`tot`) + ' ' + Formatter.date(record.endDate, true);
     }
 
     return null;

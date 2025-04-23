@@ -273,69 +273,69 @@ const showExternalPermissionLevel = computed(() => editorType.value === RecordEd
 
 const availableTypes = [
     {
-        name: 'Tekst',
+        name: $t(`Tekst`),
         values: [
             {
                 value: RecordType.Text,
-                name: 'Tekstveld (één lijn)',
+                name: $t(`Tekstveld (één lijn)`),
             },
             {
                 value: RecordType.Textarea,
-                name: 'Tekstveld (meerdere lijnen)',
+                name: $t(`Tekstveld (meerdere lijnen)`),
             },
             {
                 value: RecordType.Address,
-                name: 'Adres',
+                name: $t(`Adres`),
             },
             {
                 value: RecordType.Email,
-                name: 'E-mailadres',
+                name: $t(`E-mailadres`),
             },
             {
                 value: RecordType.Phone,
-                name: 'Telefoonnummer',
+                name: $t(`Telefoonnummer`),
             },
             {
                 value: RecordType.Date,
-                name: 'Datum',
+                name: $t(`Datum`),
             },
             {
                 value: RecordType.Integer,
-                name: 'Getal',
+                name: $t(`Getal`),
             },
             {
                 value: RecordType.Price,
-                name: 'Prijs',
+                name: $t(`Prijs`),
             },
         ],
     },
     {
-        name: 'Aankruisen',
+        name: $t(`Aankruisen`),
         values: [
             {
                 value: RecordType.Checkbox,
-                name: 'Aankruisvakje',
+                name: $t(`Aankruisvakje`),
             },
             {
                 value: RecordType.ChooseOne,
-                name: 'Keuzemenu (kies één)',
+                name: $t(`Keuzemenu (kies één)`),
             },
             {
                 value: RecordType.MultipleChoice,
-                name: 'Keuzemenu (kies meerdere)',
+                name: $t(`Keuzemenu (kies meerdere)`),
             },
         ],
     },
     {
-        name: 'Geavanceerd',
+        name: $t(`Geavanceerd`),
         values: [
             {
                 value: RecordType.Image,
-                name: 'Afbeelding of foto',
+                name: $t(`Afbeelding of foto`),
             },
             {
                 value: RecordType.File,
-                name: 'Bestand',
+                name: $t(`Bestand`),
             },
         ],
     },
@@ -343,7 +343,7 @@ const availableTypes = [
 
 const availableFileTypes = [
     {
-        name: 'Alles',
+        name: $t(`Alles`),
         value: null,
     },
     {
@@ -370,49 +370,49 @@ const canAddWarning = computed(() => {
 
 const warningNonInvertedText = computed(() => {
     if (patchedRecord.value.type === RecordType.Checkbox) {
-        return 'Waarschuwing als aangevinkt';
+        return $t(`Waarschuwing als aangevinkt`);
     }
-    return 'Waarschuwing als ingevuld';
+    return $t(`Waarschuwing als ingevuld`);
 });
 
 const warningInvertedText = computed(() => {
     if (patchedRecord.value.type === RecordType.Checkbox) {
-        return 'Waarschuwing als niet aangevinkt';
+        return $t(`Waarschuwing als niet aangevinkt`);
     }
-    return 'Waarschuwing als niet ingevuld';
+    return $t(`Waarschuwing als niet ingevuld`);
 });
 
 const title = computed(() => {
     if (props.isNew) {
-        return 'Nieuwe vraag';
+        return $t(`Nieuwe vraag`);
     }
-    return 'Vraag bewerken';
+    return $t(`Vraag bewerken`);
 });
 
 const labelTitle = computed(() => {
     if (type.value === RecordType.Checkbox) {
-        return 'Tekst naast aankruisvakje';
+        return $t(`Tekst naast aankruisvakje`);
     }
     if (type.value === RecordType.MultipleChoice) {
-        return 'Titel boven keuzemenu';
+        return $t(`Titel boven keuzemenu`);
     }
     if (type.value === RecordType.ChooseOne) {
-        return 'Titel boven keuzemenu';
+        return $t(`Titel boven keuzemenu`);
     }
-    return 'Titel boven tekstvak';
+    return $t(`Titel boven tekstvak`);
 });
 
 const descriptionTitle = computed(() => {
     if (type.value === RecordType.Checkbox) {
-        return 'Beschrijving naast aankruisvakje';
+        return $t(`Beschrijving naast aankruisvakje`);
     }
     if (type.value === RecordType.MultipleChoice) {
-        return 'Beschrijving onder keuzemenu';
+        return $t(`Beschrijving onder keuzemenu`);
     }
     if (type.value === RecordType.ChooseOne) {
-        return 'Beschrijving onder keuzemenu';
+        return $t(`Beschrijving onder keuzemenu`);
     }
-    return 'Beschrijving onder tekstvak';
+    return $t(`Beschrijving onder tekstvak`);
 });
 
 const name = computed({
@@ -503,15 +503,15 @@ const shouldAskCommentsDescription = computed(() => {
 
 const requiredText = computed(() => {
     if (type.value === RecordType.Checkbox) {
-        return 'Verplicht aankruisen';
+        return $t(`Verplicht aankruisen`);
     }
     if (type.value === RecordType.MultipleChoice) {
-        return 'Verplicht om minstens één keuze te selecteren';
+        return $t(`Verplicht om minstens één keuze te selecteren`);
     }
     if (type.value === RecordType.ChooseOne) {
-        return 'Verplicht om een keuze te selecteren';
+        return $t(`Verplicht om een keuze te selecteren`);
     }
-    return 'Verplicht in te vullen';
+    return $t(`Verplicht in te vullen`);
 });
 
 const type = computed({
@@ -534,8 +534,8 @@ const type = computed({
                 else {
                     patchRecord.value = patchRecord.value.patch({
                         choices: [
-                            RecordChoice.create({ name: 'Keuze 1' }),
-                            RecordChoice.create({ name: 'Keuze 2' }),
+                            RecordChoice.create({ name: $t(`Keuze 1`) }),
+                            RecordChoice.create({ name: $t(`Keuze 2`) }),
                         ] as any,
                     });
                 }
@@ -684,7 +684,7 @@ async function save() {
     if (name.value.length < 2) {
         errors.errorBox = new ErrorBox(new SimpleError({
             code: 'invalid_field',
-            message: 'Vul een naam in',
+            message: $t(`Vul een naam in`),
             field: 'name',
         }));
         return;
@@ -712,7 +712,7 @@ async function save() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm('Ben je zeker dat je dit kenmerk wilt verwijderen?', 'Verwijderen', 'Alle hieraan verbonden informatie gaat dan ook mogelijks verloren.')) {
+    if (!await CenteredMessage.confirm($t(`Ben je zeker dat je dit kenmerk wilt verwijderen?`), $t(`Verwijderen`), $t(`Alle hieraan verbonden informatie gaat dan ook mogelijks verloren.`))) {
         return;
     }
 
@@ -733,7 +733,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
 };
 
 function openPreview() {

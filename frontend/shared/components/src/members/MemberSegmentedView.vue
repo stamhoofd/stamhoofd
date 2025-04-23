@@ -58,20 +58,20 @@ const organization = useOrganization();
 
 const tabs = computed(() => {
     const base: { name: string; component: unknown }[] = [{
-        name: 'Gegevens',
+        name: $t(`Gegevens`),
         component: markRaw(MemberDetailsTab),
     }];
 
     if (STAMHOOFD.userMode === 'platform') {
         base.push({
-            name: 'Aansluiting',
+            name: $t(`Aansluiting`),
             component: markRaw(MemberPlatformMembershipTab),
         });
     }
 
     if (organization.value && auth.hasAccessRight(AccessRight.MemberReadFinancialData)) {
         base.push({
-            name: 'Rekening',
+            name: $t(`Rekening`),
             component: markRaw(MemberPaymentsTab),
         });
     }

@@ -90,7 +90,7 @@ export default class TimeMinutesInput extends VueComponent {
         if (!regex.test(this.timeRaw)) {
             this.errorBox = new ErrorBox(new SimpleError({
                 "code": "invalid_field",
-                "message": "Ongeldig tijdstip. Voer in zoals bv. '12:30'",
+                "message": $t(`Ongeldig tijdstip. Voer in zoals bv. '12:30'`),
                 "field": "time"
             }))
             if (this.modelValue !== null) {

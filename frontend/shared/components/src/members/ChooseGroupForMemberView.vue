@@ -119,7 +119,7 @@ const alreadyRegisteredMessage = computed(() => {
 
     if (groups.length > 0) {
         const firstName = props.member.patchedMember.firstName;
-        const groupsString = Formatter.joinLast(groups.map(g => g.settings.name), ', ', ' en ');
+        const groupsString = Formatter.joinLast(groups.map(g => g.settings.name), ', ', ' ' + $t(`en`) + ' ');
         return `${firstName} is reeds ingeschreven bij ${groupsString}.`;
     }
 
@@ -149,10 +149,13 @@ const noGroupsMessage = computed(() => {
     const organizationName = selectedOrganization.value?.name;
 
     if (groups.length > 0) {
-        return `Er zijn geen andere groepen bij ${organizationName} waarvoor ${firstName} kan inschrijven. Dit kan het geval zijn als: de inschrijvingen gesloten zijn of als dit lid in geen enkele andere groep 'past' (bv. leeftijd).`;
+        return $t(`Er zijn geen andere groepen bij {organization} waarvoor {member} kan inschrijven. Dit kan het geval zijn als: de inschrijvingen gesloten zijn of als dit lid in geen enkele andere groep 'past' (bv. leeftijd).`, { organization: organizationName ?? '', member: firstName });
     }
 
-    return `${firstName} kan je op dit moment niet inschrijven bij ${organizationName}. Dit kan het geval zijn als: de inschrijvingen gesloten zijn of als dit lid in geen enkele groep 'past' (bv. leeftijd).`;
+    return $t(`{member} kan je op dit moment niet inschrijven bij {organization}. Dit kan het geval zijn als: de inschrijvingen gesloten zijn of als dit lid in geen enkele groep 'past' (bv. leeftijd).`, {
+        member: firstName,
+        organization: organizationName ?? '',
+    });
 });
 
 function addOrganization(organization: Organization) {

@@ -121,10 +121,10 @@ const { patched, addPatch, hasChanges, patch } = usePatch(props.parent);
 const errors = useErrors();
 const pop = usePop();
 const loading = ref(false);
-const saveText = ref('Opslaan');
+const saveText = ref($t(`Opslaan`));
 const app = useAppContext();
 const parentTypes = ParentTypeHelper.getPublicTypes();
-const title = computed(() => !props.isNew ? `${patched.value.firstName || 'Ouder'} bewerken` : 'Ouder toevoegen');
+const title = computed(() => !props.isNew ? `${patched.value.firstName || $t(`Ouder`)} bewerken` : $t(`Ouder toevoegen`));
 const navigate = useNavigationActions();
 
 const relatedMembers = computed(() => {
@@ -239,14 +239,14 @@ async function save() {
         if (firstName.value.length < 2) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: 'Vul de voornaam in',
+                message: $t(`Vul de voornaam in`),
                 field: 'firstName',
             }));
         }
         if (lastName.value.length < 2) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: 'Vul de achternaam in',
+                message: $t(`Vul de achternaam in`),
                 field: 'lastName',
             }));
         }
@@ -259,7 +259,7 @@ async function save() {
                     if (member.patchedMember.details.nationalRegisterNumber === nationalRegisterNumber.value) {
                         se.addError(new SimpleError({
                             code: 'invalid_field',
-                            message: 'Dit rijksregisternummer is al in gebruik door ' + member.patchedMember.firstName + '. Vul a.u.b. het juiste rijksregisternummer in, dit kan invloed hebben op uw belastingaangifte.',
+                            message: $t(`Dit rijksregisternummer is al in gebruik door`) + ' ' + member.patchedMember.firstName + $t(`. Vul a.u.b. het juiste rijksregisternummer in, dit kan invloed hebben op uw belastingaangifte.`),
                             field: 'nationalRegisterNumber',
                         }));
                     }
@@ -301,7 +301,7 @@ async function save() {
         if (props.member && props.isNew) {
             const minorMembers = family.members.filter(m => m.id !== props.member!.id && m.isPropertyEnabled('parents'));
 
-            if (minorMembers.length > 0 && !await CenteredMessage.confirm('Wil je deze ouder bij alle gezinsleden toevoegen?', 'Overal toevoegen', 'Je kan deze ouder ook automatisch toevoegen bij ' + Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' en ') + '.', 'Enkel hier', false)) {
+            if (minorMembers.length > 0 && !await CenteredMessage.confirm($t(`Wil je deze ouder bij alle gezinsleden toevoegen?`), $t(`Overal toevoegen`), $t(`Je kan deze ouder ook automatisch toevoegen bij`) + ' ' + Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t(`en`) + ' ') + '.', $t(`Enkel hier`), false)) {
                 props.member.addParent(patched.value);
             }
             else {
@@ -341,7 +341,7 @@ async function modifyAddress(from: Address, to: Address) {
         return;
     }
 
-    if (!await CenteredMessage.confirm('Wil je dit adres overal wijzigen?', 'Overal wijzigen', from.shortString() + ' is ook het adres van ' + Formatter.joinLast(occurrences, ', ', ' en ') + '. Als je wilt kan je het adres ook voor hen wijzigen naar ' + to.shortString() + '.', 'Enkel hier', false)) {
+    if (!await CenteredMessage.confirm($t(`Wil je dit adres overal wijzigen?`), $t(`Overal wijzigen`), from.shortString() + ' ' + $t(`is ook het adres van`) + ' ' + Formatter.joinLast(occurrences, ', ', ' ' + $t(`en`) + ' ') + $t(`. Als je wilt kan je het adres ook voor hen wijzigen naar`) + ' ' + to.shortString() + '.', $t(`Enkel hier`), false)) {
         return;
     }
 
@@ -352,7 +352,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value && !loading.value) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
 }
 
 defineExpose({

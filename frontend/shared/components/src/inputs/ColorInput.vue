@@ -119,7 +119,7 @@ export default class ColorInput extends VueComponent {
             if (!silent) {
                 this.errorBox = new ErrorBox(new SimpleError({
                     "code": "invalid_field",
-                    "message": "Ongeldige kleurcode",
+                    "message": $t(`Ongeldige kleurcode`),
                     "field": "color"
                 }))
             }
@@ -136,7 +136,7 @@ export default class ColorInput extends VueComponent {
             if (!silent) {
                 this.errorBox = new ErrorBox(new SimpleError({
                     "code": "invalid_field",
-                    "message": "Deze kleur is niet toegelaten. Kies een andere kleur.",
+                    "message": $t(`Deze kleur is niet toegelaten. Kies een andere kleur.`),
                     "field": "color"
                 }))
             }

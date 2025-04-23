@@ -36,7 +36,7 @@ export default class IBANInput extends VueComponent {
     @Prop({ default: null })
         placeholder!: string | null
 
-    @Prop({ default: "email" })
+    @Prop({ default: $t(`email`) })
         autocomplete!: string
 
     errorBox: ErrorBox | null = null
@@ -83,7 +83,7 @@ export default class IBANInput extends VueComponent {
                     this.ibanRaw = "BE42631299159354"
                     this.errorBox = new ErrorBox(new SimpleError({
                         "code": "invalid_field",
-                        "message": "Vul een rekeningnummer in - automatisch willekeurig rekeningnummer ingevuld",
+                        "message": $t(`Vul een rekeningnummer in - automatisch willekeurig rekeningnummer ingevuld`),
                         "field": "iban"
                     }))
                     return false
@@ -91,13 +91,13 @@ export default class IBANInput extends VueComponent {
                 }
                 this.errorBox = new ErrorBox(new SimpleError({
                     "code": "invalid_field",
-                    "message": "Vul een rekeningnummer in",
+                    "message": $t(`Vul een rekeningnummer in`),
                     "field": "iban"
                 }))
             } else {
                 this.errorBox = new ErrorBox(new SimpleError({
                     "code": "invalid_field",
-                    "message": "Ongeldig rekeningnummer: "+this.ibanRaw,
+                    "message": $t(`Ongeldig rekeningnummer:`) + ' '+this.ibanRaw,
                     "field": "iban"
                 }))
             }

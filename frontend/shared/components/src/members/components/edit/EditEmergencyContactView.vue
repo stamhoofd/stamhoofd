@@ -65,8 +65,8 @@ const details = computed(() => props.member.patchedMember.details);
 const errors = useErrors();
 const pop = usePop();
 const loading = ref(false);
-const saveText = ref('Opslaan');
-const title = computed(() => !props.isNew ? `${patched.value.name || 'Noodcontactpersoon'} bewerken` : 'Noodcontactpersoon toevoegen');
+const saveText = ref($t(`Opslaan`));
+const title = computed(() => !props.isNew ? `${patched.value.name || $t(`Noodcontactpersoon`)} bewerken` : $t(`Noodcontactpersoon toevoegen`));
 
 const name = computed({
     get: () => patched.value.name,
@@ -93,7 +93,7 @@ async function save() {
         if (name.value.length < 2) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: 'Vul de naam in',
+                message: $t(`Vul de naam in`),
                 field: 'name',
             }));
         }
@@ -101,7 +101,7 @@ async function save() {
         if (contactTitle.value.length < 2) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: 'Vul een relatie in',
+                message: $t(`Vul een relatie in`),
                 field: 'title',
             }));
         }
@@ -124,7 +124,7 @@ async function save() {
         if (props.isNew) {
             const minorMembers = props.member.family.members.filter(m => m.id !== props.member.id);
 
-            if (minorMembers.length > 0 && !await CenteredMessage.confirm('Wil je deze noodcontactpersoon bij alle gezinsleden toevoegen?', 'Overal toevoegen', 'Je kan deze noodcontactpersoon ook automatisch toevoegen bij ' + Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' en ') + '.', 'Enkel hier', false)) {
+            if (minorMembers.length > 0 && !await CenteredMessage.confirm($t(`Wil je deze noodcontactpersoon bij alle gezinsleden toevoegen?`), $t(`Overal toevoegen`), $t(`Je kan deze noodcontactpersoon ook automatisch toevoegen bij`) + ' ' + Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t(`en`) + ' ') + '.', $t(`Enkel hier`), false)) {
                 props.member.addEmergencyContact(patched.value);
             }
             else {
@@ -150,7 +150,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value && !loading.value) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
 }
 
 defineExpose({

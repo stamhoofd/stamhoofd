@@ -95,7 +95,7 @@ const selectedUIFilter = ref(createDefaultUIFilter()) as Ref<null | UIFilter>;
 const yearLabels = computed(() => {
     return years.value.map((y) => {
         if (y === null) {
-            return 'Toekomstige';
+            return $t(`Toekomstige`);
         }
         return y.toString();
     });
@@ -132,7 +132,7 @@ defineRoutes([
                     event: events.results[0],
                 };
             }
-            Toast.error('Activiteit niet gevonden').show();
+            Toast.error($t(`Activiteit niet gevonden`)).show();
             throw new Error('Event not found');
         },
 
@@ -207,7 +207,7 @@ const eventSuggestions = computed(() => {
             suggestions.push(
                 Event.create({
                     id: '',
-                    name: 'Suggestie',
+                    name: $t(`Suggestie`),
                     startDate: pointer.toJSDate(),
                     endDate: pointer.toJSDate(),
                 }),
@@ -248,10 +248,10 @@ function blurFocus() {
 async function addEvent(template?: Event) {
     if (platform.value.config.eventTypes.length === 0) {
         if (auth.hasFullPlatformAccess()) {
-            Toast.error('Configureer eerst minstens één soort activiteit. Ga naar \'Instellingen\' → \'Soorten activiteiten\' in het Administratieportaal.').show();
+            Toast.error($t('Configureer eerst minstens één soort activiteit. Ga naar \'Instellingen\' → \'Soorten activiteiten\' in het Administratieportaal.')).show();
         }
         else {
-            Toast.error('Activiteiten werden nog niet correct geconfigureerd. Vraag een hoofdbeheerder om dit in orde te brengen.').show();
+            Toast.error($t(`Activiteiten werden nog niet correct geconfigureerd. Vraag een hoofdbeheerder om dit in orde te brengen.`)).show();
         }
         return;
     }

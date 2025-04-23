@@ -51,12 +51,12 @@ const uitpasNumber = computed({
 });
 
 const reviewDate = computed(() => {
-    return props.member.patchedMember.details.reviewTimes.getLastReview('uitpasNumber');
+    return props.member.patchedMember.details.reviewTimes.getLastReview($t(`uitpasNumber`));
 });
 
 function clear() {
     const times = props.member.patchedMember.details.reviewTimes.clone();
-    times.removeReview('uitpasNumber');
+    times.removeReview($t(`uitpasNumber`));
     props.member.addDetailsPatch({
         reviewTimes: times,
     });

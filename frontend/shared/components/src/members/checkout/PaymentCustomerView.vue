@@ -114,14 +114,14 @@ async function goNext() {
             if (companies.value.length === 0) {
                 throw new SimpleError({
                     code: 'missing_field',
-                    message: 'Stel je facturatiegegevens in voor je verder gaat',
+                    message: $t(`Stel je facturatiegegevens in voor je verder gaat`),
                     field: 'company',
                 });
             }
 
             throw new SimpleError({
                 code: 'missing_field',
-                message: 'Kies de juiste facturatiegegevens voor je verder gaat',
+                message: $t(`Kies de juiste facturatiegegevens voor je verder gaat`),
                 field: 'company',
             });
         }
@@ -129,7 +129,7 @@ async function goNext() {
         if (customer.company.name.length < 2 || !customer.company.address) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Deze facturatiegegevens zijn niet volledig. Bewerk ze en kijk ze na voor je verder gaat.',
+                message: $t(`Deze facturatiegegevens zijn niet volledig. Bewerk ze en kijk ze na voor je verder gaat.`),
                 field: 'company',
             });
         }

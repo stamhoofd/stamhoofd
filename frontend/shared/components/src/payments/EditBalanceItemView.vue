@@ -148,9 +148,9 @@ loadFamilyFromUser().catch(console.error);
 
 const title = computed(() => {
     if (patchedBalanceItem.value.price < 0) {
-        return props.isNew ? 'Terug te betalen bedrag toevoegen' : 'Terug te betalen bedrag bewerken';
+        return props.isNew ? $t(`Terug te betalen bedrag toevoegen`) : $t(`Terug te betalen bedrag bewerken`);
     }
-    return props.isNew ? 'Verschuldigd bedrag toevoegen' : 'Verschuldigd bedrag bewerken';
+    return props.isNew ? $t(`Verschuldigd bedrag toevoegen`) : $t(`Verschuldigd bedrag bewerken`);
 });
 
 const sortedPayments = computed(() => {
@@ -238,7 +238,7 @@ async function doDelete() {
     if (loading.value) {
         return;
     }
-    if (!(await CenteredMessage.confirm('Deze aanrekening verwijderen?', 'Verwijderen', 'Je kan dit niet ongedaan maken.'))) {
+    if (!(await CenteredMessage.confirm($t(`Deze aanrekening verwijderen?`), $t(`Verwijderen`), $t(`Je kan dit niet ongedaan maken.`)))) {
         return;
     }
     if (loading.value) {

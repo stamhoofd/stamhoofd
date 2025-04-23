@@ -204,7 +204,7 @@ async function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: 'Instellingen',
+                name: $t(`Instellingen`),
                 icon: 'settings',
                 action: async () => {
                     await editOptionMenu();
@@ -213,7 +213,7 @@ async function showContextMenu(event: MouseEvent) {
             }),
 
             new ContextMenuItem({
-                name: 'Verwijderen',
+                name: $t(`Verwijderen`),
                 icon: 'trash',
                 action: async () => {
                     if (!await CenteredMessage.confirm($t('f58412a9-9db9-4aa3-ad68-fa089d4f345b'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('9f8c1ed0-371b-4c22-940c-57d624734c18'))) {
@@ -226,7 +226,7 @@ async function showContextMenu(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: 'Omhoog verplaatsen',
+                name: $t(`Omhoog verplaatsen`),
                 icon: 'arrow-up',
                 disabled: !canMoveUp.value,
                 action: async () => {
@@ -235,7 +235,7 @@ async function showContextMenu(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: 'Omlaag verplaatsen',
+                name: $t(`Omlaag verplaatsen`),
                 icon: 'arrow-down',
                 disabled: !canMoveDown.value,
                 action: async () => {

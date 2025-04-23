@@ -120,8 +120,8 @@ const checkboxWarning = computed({
 
 const checkboxWarningPlaceholder = computed(() => {
     const base = props.inheritedDataPermission?.checkboxWarning || DataPermissionsSettings.defaultCheckboxWarning;
-    if (!base) return '(Optioneel)';
-    return base + ' (optioneel)';
+    if (!base) return $t(`(Optioneel)`);
+    return base + ' ' + $t(`(optioneel)`);
 });
 
 async function save() {
@@ -143,7 +143,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
 };
 
 defineExpose({

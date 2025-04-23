@@ -150,7 +150,7 @@ const props = withDefaults(
 const errors = useErrors();
 const detailedItem = ref(null) as Ref<null | DetailedReceivableBalance>;
 const context = useContext();
-const selectedTab = ref(props.hideSegmentedControl ? 'Individueel' : 'Gegroepeerd') as Ref<'Gegroepeerd' | 'Individueel'>;
+const selectedTab = ref(props.hideSegmentedControl ? $t(`Individueel`) : $t(`Gegroepeerd`)) as Ref<'Gegroepeerd' | 'Individueel'>;
 const owner = useRequestOwner();
 const hasWrite = true;
 const present = usePresent();
@@ -181,7 +181,7 @@ async function reload() {
             detailedItem.value = response.data;
 
             if (detailedItem.value.filteredBalanceItems.length <= 4) {
-                selectedTab.value = 'Individueel';
+                selectedTab.value = $t(`Individueel`);
             }
         }
         else {

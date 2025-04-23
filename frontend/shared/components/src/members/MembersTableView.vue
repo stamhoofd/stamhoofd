@@ -55,7 +55,7 @@ const title = computed(() => {
         return props.group.settings.name;
     }
 
-    return 'Leden';
+    return $t(`Leden`);
 });
 
 const estimatedRows = computed(() => {
@@ -208,7 +208,7 @@ const allColumns: Column<ObjectType, any>[] = [
         name: '#',
         getValue: member => member.member.details.memberNumber ?? '',
         getStyle: val => val ? '' : 'gray',
-        format: val => val ? val : 'Geen',
+        format: val => val ? val : $t(`Geen`),
         minimumWidth: 100,
         recommendedWidth: 150,
         grow: true,
@@ -218,7 +218,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'name',
-        name: 'Naam',
+        name: $t(`Naam`),
         getValue: member => member.member.name,
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -226,7 +226,7 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
     new Column<ObjectType, Date | null>({
         id: 'birthDay',
-        name: 'Geboortedatum',
+        name: $t(`Geboortedatum`),
         getValue: member => member.member.details.birthDay,
         format: date => date ? Formatter.dateNumber(date, true) : '',
         minimumWidth: 50,
@@ -235,15 +235,15 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
     new Column<ObjectType, number | null>({
         id: 'age',
-        name: 'Leeftijd',
+        name: $t(`Leeftijd`),
         getValue: member => member.member.details.age,
-        format: (age, width) => age ? (width <= 60 ? Formatter.integer(age) : (Formatter.integer(age) + ' jaar')) : 'onbekend',
+        format: (age, width) => age ? (width <= 60 ? Formatter.integer(age) : (Formatter.integer(age) + ' ' + $t(`jaar`))) : $t(`onbekend`),
         minimumWidth: 50,
         recommendedWidth: 120,
     }),
     new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
         id: 'membership',
-        name: 'Aansluiting',
+        name: $t(`Aansluiting`),
         getValue: (member) => {
             return {
                 status: member.membershipStatus,
@@ -253,15 +253,15 @@ const allColumns: Column<ObjectType, any>[] = [
         format: ({ status }) => {
             switch (status) {
                 case MembershipStatus.Trial:
-                    return 'Proefperiode';
+                    return $t(`Proefperiode`);
                 case MembershipStatus.Active:
-                    return 'Actief';
+                    return $t(`Actief`);
                 case MembershipStatus.Expiring:
-                    return 'Verlopen';
+                    return $t(`Verlopen`);
                 case MembershipStatus.Temporary:
-                    return 'Tijdelijk';
+                    return $t(`Tijdelijk`);
                 case MembershipStatus.Inactive:
-                    return 'Niet verzekerd';
+                    return $t(`Niet verzekerd`);
             }
         },
         getStyle: ({ status, hasFutureMembership }) => {
@@ -319,12 +319,12 @@ const allColumns: Column<ObjectType, any>[] = [
         })
         : null,
     new Column<ObjectType, string[]>({
-        name: 'Functies',
+        name: $t(`Functies`),
         allowSorting: false,
         getValue: member => member.getResponsibilities({ organization: organization.value ?? undefined }).map(l => l.getName(member, false)),
         format: (list) => {
             if (list.length === 0) {
-                return 'Geen';
+                return $t(`Geen`);
             }
             return list.join(', ');
         },
@@ -334,12 +334,12 @@ const allColumns: Column<ObjectType, any>[] = [
         enabled: false,
     }),
     new Column<ObjectType, string[]>({
-        name: 'Account',
+        name: $t(`Account`),
         allowSorting: false,
         getValue: member => member.patchedMember.users.filter(u => u.hasAccount).map(u => u.email),
         format: (accounts) => {
             if (accounts.length === 0) {
-                return 'Geen account';
+                return $t(`Geen account`);
             }
             return accounts.join(', ');
         },
@@ -358,7 +358,7 @@ if (props.group) {
                 allowSorting: false,
                 name: $t('a5ecc2e0-c1f2-4cfb-b4b2-8a17782787bc'),
                 getValue: member => member.filterRegistrations({ groups: [props.group!] }).map(r => r.groupPrice),
-                format: prices => Formatter.joinLast(prices.map(o => o.name).sort(), ', ', ' en ') || $t('e41660ea-180a-45ef-987c-e780319c4331'),
+                format: prices => Formatter.joinLast(prices.map(o => o.name).sort(), ', ', ' ' + $t(`en`) + ' ') || $t('e41660ea-180a-45ef-987c-e780319c4331'),
                 getStyle: prices => prices.length === 0 ? 'gray' : '',
                 minimumWidth: 100,
                 recommendedWidth: 300,
@@ -381,7 +381,7 @@ if (props.group) {
                 }),
                 format: (values) => {
                     if (values.length === 0) {
-                        return 'Geen';
+                        return $t(`Geen`);
                     }
                     return values.map(v => v.option.allowAmount || v.amount > 1 ? (v.amount + 'x ' + v.option.name) : v.option.name).join(', ');
                 },
@@ -410,7 +410,7 @@ if (props.group) {
                     },
                     format: (answer) => {
                         if (answer === null) {
-                            return 'Ontbreekt';
+                            return $t(`Ontbreekt`);
                         }
                         return answer.stringValue;
                     },
@@ -442,38 +442,38 @@ if (groups.length) {
 
                 // Check missing information
                 if (!member.patchedMember.details.phone && member.isPropertyRequired('phone', scope)) {
-                    base.push('telefoonnummer');
+                    base.push($t(`telefoonnummer`));
                 }
 
                 if (!member.patchedMember.details.email && member.isPropertyRequired('emailAddress', scope)) {
-                    base.push('e-mailadres');
+                    base.push($t(`e-mailadres`));
                 }
 
                 if (!member.patchedMember.details.address && member.isPropertyRequired('address', scope)) {
-                    base.push('adres');
+                    base.push($t(`adres`));
                 }
 
                 if (!member.patchedMember.details.birthDay && member.isPropertyRequired('birthDay', scope)) {
-                    base.push('geboortedatum');
+                    base.push($t(`geboortedatum`));
                 }
 
                 if (!member.patchedMember.details.nationalRegisterNumber && member.isPropertyRequired('nationalRegisterNumber', scope)) {
-                    base.push('rijksregisternummer');
+                    base.push($t(`rijksregisternummer`));
                 }
                 else {
                     if (member.isPropertyRequired('parents', scope) && member.isPropertyRequired('nationalRegisterNumber', scope) && !member.patchedMember.details.parents.find(p => p.nationalRegisterNumber)) {
-                        base.push('rijksregisternummer ouders');
+                        base.push($t(`rijksregisternummer ouders`));
                     }
                 }
 
                 if (member.isPropertyRequired('parents', scope)) {
                     if (member.patchedMember.details.parents.length === 0) {
-                        base.push('ouders');
+                        base.push($t(`ouders`));
                     }
                 }
 
                 if (member.patchedMember.details.emergencyContacts.length === 0 && member.isPropertyRequired('emergencyContacts', scope)) {
-                    base.push('noodcontactpersonen');
+                    base.push($t(`noodcontactpersonen`));
                 }
 
                 const enabledCategories = member.getEnabledRecordCategories(scope);
@@ -481,7 +481,7 @@ if (groups.length) {
                 const incomplete = enabledCategories.filter(c => !c.isComplete(member));
                 return [...base, ...incomplete.map(c => c.name)];
             },
-            format: prices => Formatter.capitalizeFirstLetter(Formatter.joinLast(prices, ', ', ' en ') || $t('e41660ea-180a-45ef-987c-e780319c4331')),
+            format: prices => Formatter.capitalizeFirstLetter(Formatter.joinLast(prices, ', ', ' ' + $t(`en`) + ' ') || $t('e41660ea-180a-45ef-987c-e780319c4331')),
             getStyle: prices => prices.length === 0 ? 'gray' : '',
             minimumWidth: 100,
             recommendedWidth: 300,
@@ -497,7 +497,7 @@ if (app === 'admin' || (props.group && props.group.settings.requireOrganizationI
             allowSorting: false,
             name: $t('2f325358-6e2f-418c-9fea-31a14abbc17a'),
             getValue: member => member.filterOrganizations({ periodId: filterPeriodId, types: [GroupType.Membership] }),
-            format: organizations => Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' en ') || $t('1a16a32a-7ee4-455d-af3d-6073821efa8f'),
+            format: organizations => Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' ' + $t(`en`) + ' ') || $t('1a16a32a-7ee4-455d-af3d-6073821efa8f'),
             getStyle: organizations => organizations.length === 0 ? 'gray' : '',
             minimumWidth: 100,
             recommendedWidth: 300,
@@ -511,7 +511,7 @@ if (app === 'admin' || (props.group && props.group.settings.requireOrganizationI
             allowSorting: false,
             name: $t('9d283cbb-7ba2-4a16-88ec-ff0c19f39674'),
             getValue: member => member.filterOrganizations({ periodId: filterPeriodId, types: [GroupType.Membership] }),
-            format: organizations => Formatter.joinLast(organizations.map(o => o.uri).sort(), ', ', ' en ') || $t('e41660ea-180a-45ef-987c-e780319c4331'),
+            format: organizations => Formatter.joinLast(organizations.map(o => o.uri).sort(), ', ', ' ' + $t(`en`) + ' ') || $t('e41660ea-180a-45ef-987c-e780319c4331'),
             getStyle: organizations => organizations.length === 0 ? 'gray' : '',
             minimumWidth: 100,
             recommendedWidth: 300,
@@ -531,11 +531,11 @@ if (props.group && props.group.type === GroupType.EventRegistration && props.gro
                 const registrations = member.filterRegistrations({ groups, periodId: filterPeriodId });
                 if (registrations.find(r => r.payingOrganizationId)) {
                     const organization = member.organizations.find(o => o.id === registrations[0].payingOrganizationId);
-                    return organization ? organization.name : 'Onbekend';
+                    return organization ? organization.name : $t(`Onbekend`);
                 }
                 return null;
             },
-            format: organizations => organizations || 'Nee',
+            format: organizations => organizations || $t(`Nee`),
             getStyle: organizations => organizations === null ? 'gray' : '',
             minimumWidth: 100,
             recommendedWidth: 300,
@@ -547,7 +547,7 @@ if (props.group && props.group.type === GroupType.EventRegistration && props.gro
 if (groups.find(g => g.settings.trialDays)) {
     allColumns.push(
         new Column<ObjectType, Date | null>({
-            name: 'Proefperiode',
+            name: $t(`Proefperiode`),
             allowSorting: false,
             getValue: (v) => {
                 const registrations = v.filterRegistrations({ groups, periodId: props.periodId ?? props.group?.periodId ?? '' });
@@ -566,9 +566,9 @@ if (groups.find(g => g.settings.trialDays)) {
             },
             format: (v, width) => {
                 if (!v) {
-                    return 'Geen';
+                    return $t(`Geen`);
                 }
-                return 'Tot ' + (width < 200 ? Formatter.dateNumber(v) : Formatter.date(v));
+                return $t(`Tot`) + ' ' + (width < 200 ? Formatter.dateNumber(v) : Formatter.date(v));
             },
             getStyle: v => v === null ? 'gray' : 'secundary',
             minimumWidth: 80,
@@ -579,7 +579,7 @@ if (groups.find(g => g.settings.trialDays)) {
 
 allColumns.push(
     new Column<ObjectType, Date | null>({
-        name: 'Startdatum',
+        name: $t(`Startdatum`),
         allowSorting: false,
         getValue: (v) => {
             const registrations = v.filterRegistrations({ groups, periodId: filterPeriodId });
@@ -595,7 +595,7 @@ allColumns.push(
             }
             return new Date(Math.min(...filtered));
         },
-        format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : 'Onbekend',
+        format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`Onbekend`),
         getStyle: v => v === null ? 'gray' : '',
         minimumWidth: 80,
         recommendedWidth: 200,
@@ -605,7 +605,7 @@ allColumns.push(
 
 allColumns.push(
     new Column<ObjectType, Date | null>({
-        name: waitingList.value ? 'Sinds' : 'Inschrijvingsdatum',
+        name: waitingList.value ? $t(`Sinds`) : $t(`Inschrijvingsdatum`),
         allowSorting: false,
         getValue: (v) => {
             const registrations = v.filterRegistrations({ groups, periodId: filterPeriodId });
@@ -621,7 +621,7 @@ allColumns.push(
             }
             return new Date(Math.min(...filtered));
         },
-        format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : 'Onbekend',
+        format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`Onbekend`),
         getStyle: v => v === null ? 'gray' : '',
         minimumWidth: 80,
         recommendedWidth: 200,
@@ -631,7 +631,7 @@ allColumns.push(
 if (!waitingList.value && financialRead.value) {
     allColumns.push(
         new Column<ObjectType, number>({
-            name: 'Prijs',
+            name: $t(`Prijs`),
             allowSorting: false,
             getValue: v => v.filterRegistrations({ groups: groups }).flatMap(r => r.balances).reduce((sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending), 0),
             format: (outstandingBalance) => {
@@ -639,7 +639,7 @@ if (!waitingList.value && financialRead.value) {
                     return Formatter.price(outstandingBalance);
                 }
                 if (outstandingBalance <= 0) {
-                    return 'Gratis';
+                    return $t(`Gratis`);
                 }
                 return Formatter.price(outstandingBalance);
             },
@@ -652,7 +652,7 @@ if (!waitingList.value && financialRead.value) {
 
     allColumns.push(
         new Column<ObjectType, number>({
-            name: 'Te betalen',
+            name: $t(`Te betalen`),
             allowSorting: false,
             getValue: v => v.filterRegistrations({ groups: groups }).flatMap(r => r.balances).reduce((sum, r) => sum + (r.amountOpen), 0),
             format: (outstandingBalance) => {
@@ -660,7 +660,7 @@ if (!waitingList.value && financialRead.value) {
                     return Formatter.price(outstandingBalance);
                 }
                 if (outstandingBalance <= 0) {
-                    return 'Betaald';
+                    return $t(`Betaald`);
                 }
                 return Formatter.price(outstandingBalance);
             },
@@ -677,7 +677,7 @@ if (props.category) {
         new Column<ObjectType, Group[]>({
             id: 'category',
             allowSorting: false,
-            name: waitingList.value ? 'Wachtlijst' : (props.category.settings.name || $t('b467444b-879a-4bce-b604-f7e890008c4f')),
+            name: waitingList.value ? $t(`Wachtlijst`) : (props.category.settings.name || $t('b467444b-879a-4bce-b604-f7e890008c4f')),
             getValue: (member) => {
                 if (!props.category) {
                     return [];
@@ -689,7 +689,7 @@ if (props.category) {
             },
             format: (groups) => {
                 if (groups.length === 0) {
-                    return 'Geen';
+                    return $t(`Geen`);
                 }
                 return groups.map(g => g.settings.name).join(', ');
             },
@@ -716,7 +716,7 @@ if (!props.group && !props.category) {
             },
             format: (groups) => {
                 if (groups.length === 0) {
-                    return 'Geen';
+                    return $t(`Geen`);
                 }
                 return groups.map(g => g.settings.name).join(', ');
             },
@@ -752,7 +752,7 @@ const excludeEdit = props.group && props.group.type === GroupType.EventRegistrat
 
 const actions: TableAction<ObjectType>[] = [
     new InMemoryTableAction({
-        name: 'Leden inschrijven',
+        name: $t(`Leden inschrijven`),
         icon: 'add',
         priority: 0,
         groupIndex: 1,
@@ -770,7 +770,7 @@ const actions: TableAction<ObjectType>[] = [
 
 if (app !== 'admin' && auth.canManagePayments()) {
     actions.push(new AsyncTableAction({
-        name: 'Bedrag aanrekenen',
+        name: $t(`Bedrag aanrekenen`),
         icon: 'calculator',
         priority: 13,
         groupIndex: 4,
