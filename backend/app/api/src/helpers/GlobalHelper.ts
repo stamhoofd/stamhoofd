@@ -1,7 +1,6 @@
 import { I18n } from '@stamhoofd/backend-i18n';
 import { FileSignService } from '../services/FileSignService';
 import { Context, ContextInstance } from './Context';
-import { Address, Country, Language } from '@stamhoofd/structures';
 import { MemberRecordStore } from '../services/MemberRecordStore';
 
 export class GlobalHelper {
@@ -13,8 +12,11 @@ export class GlobalHelper {
     }
 
     private static loadGlobalTranslateFunction() {
-        (global as any).$t = (key: string, replace?: Record<string, string>) => Context.i18n.$t(key, replace);
-        (global as any).$getLanguage = () => ContextInstance.optional?.i18n.language ?? Language.Dutch;
-        (global as any).$getCountry = () => ContextInstance.optional?.i18n.country ?? STAMHOOFD.fixedCountry ?? Country.Belgium;
+        function getI18n() {
+            return ContextInstance.optional?.i18n ?? new I18n(I18n.defaultLanguage, STAMHOOFD.fixedCountry ?? I18n.defaultCountry);
+        }
+        (global as any).$t = (key: string, replace?: Record<string, string>) => getI18n().$t(key, replace);
+        (global as any).$getLanguage = () => getI18n().language;
+        (global as any).$getCountry = () => getI18n().country;
     }
 }
