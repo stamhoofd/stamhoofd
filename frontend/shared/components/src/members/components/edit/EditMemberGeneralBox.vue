@@ -140,9 +140,9 @@ const isAdmin = app === 'dashboard' || app === 'admin';
 
 const title = computed(() => {
     if (props.member.isNew) {
-        return 'Nieuw lid';
+        return $t('Nieuw lid');
     }
-    return 'Algemeen';
+    return $t('Algemeen');
 });
 
 useValidation(errors.validator, () => {
