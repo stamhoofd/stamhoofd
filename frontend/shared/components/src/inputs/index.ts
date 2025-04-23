@@ -44,3 +44,5 @@ export { default as GroupIdsInput } from './GroupIdsInput.vue';
 export { default as ArrayInput } from './ArrayInput.vue';
 export { default as EventTypeIdsInput } from './EventTypeIdsInput.vue';
 export { default as MultipleChoiceInput } from './MultipleChoiceInput.vue';
+export { default as TTextarea } from './TTextarea.vue';
+export { default as EditorLanguageButton } from './EditorLanguageButton.vue';

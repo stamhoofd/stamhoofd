@@ -41,9 +41,7 @@
                 </div>
             </template>
 
-            <STInputBox error-fields="settings.description" :error-box="errors.errorBox" class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
-                <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`706063e0-e92f-4fdd-8b88-8dea252a55cc`)" />
-            </STInputBox>
+            <TTextarea v-model="description" :placeholder="$t(`706063e0-e92f-4fdd-8b88-8dea252a55cc`)" error-fields="settings.description" :error-box="errors.errorBox" class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)" />
             <p v-if="patched.type === GroupType.EventRegistration" class="style-description-small">
                 {{ $t('a20a78e9-60c4-425b-a416-5874d0ec4b11') }}
             </p>
@@ -500,6 +498,7 @@ import GroupOptionMenuView from './components/GroupOptionMenuView.vue';
 import GroupPriceBox from './components/GroupPriceBox.vue';
 import GroupPriceView from './components/GroupPriceView.vue';
 import { useExternalOrganization, useFinancialSupportSettings, useRegistrationPeriod } from './hooks';
+import TTextarea from '../inputs/TTextarea.vue';
 
 const props = withDefaults(
     defineProps<{

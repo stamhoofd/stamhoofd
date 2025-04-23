@@ -12,6 +12,7 @@ import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsC
 import { PlatformMember } from './members/PlatformMember.js';
 import { RegisterItem } from './members/checkout/RegisterItem.js';
 import { RecordCategory } from './members/records/RecordCategory.js';
+import { TranslatedString, TranslatedStringDecoder } from './TranslatedString.js';
 
 export class ReduceablePrice extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
@@ -297,8 +298,8 @@ export class GroupSettings extends AutoEncoder {
     @field({ decoder: StringDecoder })
     name = '';
 
-    @field({ decoder: StringDecoder })
-    description = '';
+    @field({ decoder: TranslatedStringDecoder })
+    description = new TranslatedString();
 
     @field({ decoder: StringDecoder, version: 350, nullable: true })
     eventId: string | null = null;

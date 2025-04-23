@@ -227,6 +227,37 @@
         cursor: help;
     }
 
+    &.icons {
+        @extend .style-button-small;
+        color: $color-gray-4;
+        
+        // Multiple icons stacked after each other
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        // note: if you need overflow ellipsis, please use a <span> inside of the button.
+        // we need to overflow for the breakout region
+        overflow: visible; 
+        white-space: nowrap;
+        transition: opacity 0.2s ease-out, color 0.2s;
+        position: relative;
+
+        &:after {
+            // Increase touch area by 15pixels
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -10px;
+            right: -10px;
+            bottom: -5px;
+        }
+
+        &:active {
+            opacity: 0.15;
+            transition: opacity 0s, color 0.2s;
+        }
+    }
+
     &.text, &.navigation {
         @extend .style-button-small;
         color: $color-gray-4;
