@@ -57,7 +57,7 @@ const props = defineProps<{
     saveHandler: (p: AutoEncoderPatchType<PlatformPolicy>) => Promise<void>;
     deleteHandler: (() => Promise<void>) | null;
 }>();
-const title = computed(() => props.isNew ? 'Nieuwe voorwaarden' : 'Voorwaarden bewerken');
+const title = computed(() => props.isNew ? $t(`Nieuwe voorwaarden`) : $t(`Voorwaarden bewerken`));
 const pop = usePop();
 const $t = useTranslate();
 
@@ -72,7 +72,7 @@ const save = async () => {
         if (name.value.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Gelieve een naam in te vullen',
+                message: $t(`Gelieve een naam in te vullen`),
                 field: 'name',
             });
         }
@@ -95,7 +95,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm('Ben je zeker dat je deze voorwaarden wilt verwijderen?', 'Verwijderen')) {
+    if (!await CenteredMessage.confirm($t(`Ben je zeker dat je deze voorwaarden wilt verwijderen?`), $t(`Verwijderen`))) {
         return;
     }
 

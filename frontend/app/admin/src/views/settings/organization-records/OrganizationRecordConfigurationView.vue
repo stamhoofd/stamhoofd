@@ -53,12 +53,12 @@ const editorSettings = computed(() => {
             return getOrganizationUIFilterBuildersForTags(platform.value)[0];
         },
         exampleValue: Organization.create({
-            name: 'Voorbeeld',
+            name: $t(`Voorbeeld`),
             address: Address.create({
-                street: 'Voorbeeldstraat',
+                street: $t(`Voorbeeldstraat`),
                 number: '1',
                 postalCode: '1234AB',
-                city: 'Voorbeeldstad',
+                city: $t(`Voorbeeldstad`),
                 country: Country.Belgium,
             }),
             privateMeta: OrganizationPrivateMetaData.create({}),

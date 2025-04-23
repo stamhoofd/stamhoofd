@@ -121,7 +121,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'name',
-        name: 'Naam',
+        name: $t(`Naam`),
         getValue: organization => organization.name,
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -130,9 +130,9 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, boolean>({
         id: 'status',
-        name: 'Status',
+        name: $t(`Status`),
         getValue: organization => organization.active,
-        format: active => active ? 'Actief' : 'Inactief',
+        format: active => active ? $t(`Actief`) : $t(`Inactief`),
         getStyle: active => active ? 'success' : 'error',
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -143,33 +143,33 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'city',
-        name: 'Gemeente',
+        name: $t(`Gemeente`),
         getValue: organization => organization.address.city,
         minimumWidth: 100,
         recommendedWidth: 200,
     }),
     new Column<ObjectType, string[]>({
         id: 'tags',
-        name: 'Tags',
+        name: $t(`Tags`),
         allowSorting: false,
-        getValue: organization => organization.meta.tags.map(t => platform.value.config.tags.find(tt => tt.id === t)?.name ?? 'Onbekend'),
-        format: tags => tags.length === 0 ? 'Geen' : tags.join(', '),
+        getValue: organization => organization.meta.tags.map(t => platform.value.config.tags.find(tt => tt.id === t)?.name ?? $t(`Onbekend`)),
+        format: tags => tags.length === 0 ? $t(`Geen`) : tags.join(', '),
         getStyle: tags => tags.length === 0 ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 300,
     }),
     new Column<ObjectType, { completed: number; total: number }>({
         id: 'setupSteps',
-        name: 'Vlagmoment',
+        name: $t(`Vlagmoment`),
         allowSorting: false,
         getValue: organization => organization.period.setupSteps.getProgress(),
         format: (progress) => {
             const { completed, total } = progress;
             if (total === 0) {
-                return 'Geen';
+                return $t(`Geen`);
             }
             if (completed >= total) {
-                return 'Voltooid';
+                return $t(`Voltooid`);
             }
             return `${progress.completed}/${progress.total}`;
         },
@@ -315,7 +315,7 @@ if (auth.hasPlatformFullAccess()) {
     );
 
     actions.push(new AsyncTableAction({
-        name: 'E-mailen',
+        name: $t(`E-mailen`),
         icon: 'email',
         priority: 12,
         groupIndex: 3,
@@ -325,7 +325,7 @@ if (auth.hasPlatformFullAccess()) {
     }));
 
     actions.push(new AsyncTableAction({
-        name: 'Bedrag aanrekenen',
+        name: $t(`Bedrag aanrekenen`),
         icon: 'calculator',
         priority: 13,
         groupIndex: 4,
@@ -336,7 +336,7 @@ if (auth.hasPlatformFullAccess()) {
 
     actions.push(
         new AsyncTableAction({
-            name: 'Exporteren naar Excel',
+            name: $t(`Exporteren naar Excel`),
             icon: 'download',
             priority: 11,
             groupIndex: 3,

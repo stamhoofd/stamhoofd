@@ -166,7 +166,7 @@ function tagIdsToTags(tagIds: string[]): OrganizationTag[] {
 }
 
 function getTagById(id: string): OrganizationTag {
-    return tags.value.find(t => t.id === id) ?? OrganizationTag.create({ id, name: 'Onbekende tag' });
+    return tags.value.find(t => t.id === id) ?? OrganizationTag.create({ id, name: $t(`Onbekende tag`) });
 }
 
 async function navigateToTag(tag: OrganizationTag) {

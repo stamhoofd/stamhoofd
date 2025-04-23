@@ -107,7 +107,7 @@ const save = async () => {
         if (patched.value.expireDate && (patched.value.expireDate.getTime() > patched.value.endDate.getTime() || patched.value.expireDate.getTime() < patched.value.startDate.getTime())) {
             throw new SimpleError({
                 code: 'invalid_date_range',
-                message: 'De vervaldatum moet tussen de start- en einddatum liggen',
+                message: $t(`De vervaldatum moet tussen de start- en einddatum liggen`),
                 field: 'expireDate',
             });
         }

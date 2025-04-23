@@ -226,19 +226,19 @@ const transferTypes = computed(() => {
         {
             value: TransferDescriptionType.Structured,
             name: $t('f22ff741-6a05-4b15-aa6a-16e3a197ac99'),
-            description: 'Willekeurig aangemaakt.',
+            description: $t(`Willekeurig aangemaakt.`),
         },
         {
             value: TransferDescriptionType.Reference,
-            name: props.type === 'registration' ? 'Naam van lid/leden' : 'Bestelnummer',
-            description: 'Eventueel voorafgegaan door een zelf gekozen woord (zie onder)',
+            name: props.type === 'registration' ? $t(`Naam van lid/leden`) : $t(`Bestelnummer`),
+            description: $t(`Eventueel voorafgegaan door een zelf gekozen woord (zie onder)`),
         },
         {
             value: TransferDescriptionType.Fixed,
-            name: 'Vaste mededeling',
+            name: $t(`Vaste mededeling`),
             description: props.type === 'registration'
-                ? 'Altijd dezelfde mededeling voor alle inschrijvingen. Een betaling kan voor meerdere inschrijvingen tegelijk zijn.'
-                : 'Altijd dezelfde mededeling voor alle bestellingen.',
+                ? $t(`Altijd dezelfde mededeling voor alle inschrijvingen. Een betaling kan voor meerdere inschrijvingen tegelijk zijn.`)
+                : $t(`Altijd dezelfde mededeling voor alle bestellingen.`),
 
         },
     ];

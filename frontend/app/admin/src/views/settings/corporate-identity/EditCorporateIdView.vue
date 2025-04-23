@@ -89,7 +89,7 @@ const $t = useTranslate();
 const { patched, patch, hasChanges, addPatch } = usePatch(platform);
 const saving = ref(false);
 
-const title = 'Huisstijl';
+const title = $t(`Huisstijl`);
 
 const $name = computed({
     get: () => patched.value.config.name,
@@ -133,7 +133,7 @@ const coverBottomLeftOverlayWidth = computed({
 
         if (coverBottomLeftOverlayImage.value) {
             coverBottomLeftOverlayImage.value = null;
-            Toast.error('Upload een nieuwe overlay: je kan de breedte enkel aanpassen VOOR het uploaden - anders kunnen we de resolutie niet correct afstemmen op alle apparaten. Wil je jouw aanpassing ongedaan maken? Klik dan op het kruisje en sla niet op.').setHide(15 * 1000).show();
+            Toast.error($t(`Upload een nieuwe overlay: je kan de breedte enkel aanpassen VOOR het uploaden - anders kunnen we de resolutie niet correct afstemmen op alle apparaten. Wil je jouw aanpassing ongedaan maken? Klik dan op het kruisje en sla niet op.`)).setHide(15 * 1000).show();
         }
     },
 });
@@ -152,7 +152,7 @@ async function save() {
         }
 
         await platformManager.value.patch(patch.value);
-        new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
+        new Toast($t(`De wijzigingen zijn opgeslagen`), 'success green').show();
         await pop({ force: true });
     }
     catch (e) {

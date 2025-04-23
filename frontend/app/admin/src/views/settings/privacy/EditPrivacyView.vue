@@ -52,7 +52,7 @@ const draggablePolicies = useDraggableArray(() => patched.value.config.privacy.p
 });
 const saving = ref(false);
 
-const title = 'Voorwaarden';
+const title = $t(`Voorwaarden`);
 
 async function addPolicy() {
     const privacyPatch = PrivacySettings.patch({});
@@ -123,7 +123,7 @@ async function save() {
             return;
         }
         await platformManager.value.patch(patch.value);
-        new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
+        new Toast($t(`De wijzigingen zijn opgeslagen`), 'success green').show();
         await pop({ force: true });
     }
     catch (e) {

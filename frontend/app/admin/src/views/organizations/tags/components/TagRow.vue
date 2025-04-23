@@ -61,14 +61,14 @@ function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: 'Verplaatsen naar',
+                name: $t(`Verplaatsen naar`),
                 childMenu: new ContextMenu([
                     ...(
                         parentTags.length > 0
                             ? [
                                     [
                                         new ContextMenuItem({
-                                            name: 'Hoofdtags',
+                                            name: $t(`Hoofdtags`),
                                             action: () => {
                                                 // Remove self from all these parent tags
                                                 const patch: PatchableArrayAutoEncoder<OrganizationTag> = new PatchableArray();

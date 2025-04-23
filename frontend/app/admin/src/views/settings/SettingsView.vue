@@ -406,6 +406,7 @@ import OrganizationRecordConfigurationView from './organization-records/Organiza
 import EditPrivacyView from './privacy/EditPrivacyView.vue';
 import EditRegistrationPeriodsView from './registration-periods/EditRegistrationPeriodsView.vue';
 
+// todo translations
 enum Routes {
     Admins = 'beheerders',
     Records = 'persoonsgegevens',
@@ -448,7 +449,7 @@ defineRoutes([
                             recordsConfiguration: patch,
                         }),
                     }));
-                    Toast.success('De aanpassingen zijn opgeslagen').show();
+                    Toast.success($t(`De aanpassingen zijn opgeslagen`)).show();
                 },
             };
         },
@@ -467,7 +468,7 @@ defineRoutes([
                             financialSupport: isNew ? FinancialSupportSettings.create({}).patch(patch) : patch,
                         }),
                     }));
-                    Toast.success('De aanpassingen zijn opgeslagen').show();
+                    Toast.success($t(`De aanpassingen zijn opgeslagen`)).show();
                 },
             };
         },
@@ -487,7 +488,7 @@ defineRoutes([
                             dataPermission: isNew ? DataPermissionsSettings.create({}).patch(patch) : patch,
                         }),
                     }));
-                    Toast.success('De aanpassingen zijn opgeslagen').show();
+                    Toast.success($t(`De aanpassingen zijn opgeslagen`)).show();
                 },
             };
         },
@@ -567,7 +568,7 @@ defineRoutes([
                         }),
                     }));
 
-                    Toast.success('De aanpassingen zijn opgeslagen').show();
+                    Toast.success($t(`De aanpassingen zijn opgeslagen`)).show();
                 },
             };
         },

@@ -218,7 +218,7 @@ const title = computed(() => {
 });
 
 const tagStringList = computed(() => {
-    return props.organization.meta.tags.map(id => platform.value.config.tags.find(t => t.id === id)?.name ?? 'onbekend').join(', ');
+    return props.organization.meta.tags.map(id => platform.value.config.tags.find(t => t.id === id)?.name ?? $t(`onbekend`)).join(', ');
 });
 
 const setupSteps = computed(() => props.organization.period.setupSteps);

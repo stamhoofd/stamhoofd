@@ -72,7 +72,7 @@ const props = defineProps<{
 }>();
 
 const $t = useTranslate();
-const title = computed(() => props.isNew ? 'Nieuwe tag' : Formatter.capitalizeFirstLetter($t('cd52133a-d8bf-4dde-a924-962f3f0e3fe9', { tagType: getOrganizationTagTypeName(props.tag.type) })));
+const title = computed(() => props.isNew ? $t(`Nieuwe tag`) : Formatter.capitalizeFirstLetter($t('cd52133a-d8bf-4dde-a924-962f3f0e3fe9', { tagType: getOrganizationTagTypeName(props.tag.type) })));
 const pop = usePop();
 
 const patch = ref(new PatchableArray()) as Ref<PatchableArrayAutoEncoder<OrganizationTag>>;
@@ -81,7 +81,7 @@ if (props.isNew) {
 }
 
 const allPatchedTags = computed(() => patch.value.applyTo(props.allTags) as OrganizationTag[]);
-const patched = computed(() => getPatchedTag(props.tag.id) ?? OrganizationTag.create({ name: 'Onbekende tag' }));
+const patched = computed(() => getPatchedTag(props.tag.id) ?? OrganizationTag.create({ name: $t(`Onbekende tag`) }));
 
 const hasChanges = computed(() => patch.value.changes.length > 0);
 
@@ -112,7 +112,7 @@ const save = async () => {
         if (name.value.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Gelieve een naam in te vullen',
+                message: $t(`Gelieve een naam in te vullen`),
                 field: 'name',
             });
         }
@@ -132,7 +132,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm('Ben je zeker dat je deze tag wilt verwijderen?', 'Verwijderen')) {
+    if (!await CenteredMessage.confirm($t(`Ben je zeker dat je deze tag wilt verwijderen?`), $t(`Verwijderen`))) {
         return;
     }
 
@@ -219,7 +219,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder op te slaan?`), $t(`Niet opslaan`));
 };
 
 defineExpose({

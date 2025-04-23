@@ -130,7 +130,7 @@ async function showContextMenu(event: MouseEvent, period: RegistrationPeriod) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: 'Instellen als huidige',
+                name: $t(`Instellen als huidige`),
                 disabled: patchedPlatform.value.period.id === period.id,
                 action: () => {
                     setCurrent(period);
@@ -172,7 +172,7 @@ async function save() {
             await platformManager.value.patch(platformPatch.value, false);
         }
 
-        new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
+        new Toast($t(`De wijzigingen zijn opgeslagen`), 'success green').show();
 
         if (changedPeriod) {
             new Toast($t('671147bd-cf0e-42fc-b456-18ce7d75b867'), 'info').setHide(20 * 1000).show();
