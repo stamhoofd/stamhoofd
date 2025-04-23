@@ -1,20 +1,20 @@
 <template>
     <template v-if="paymentStatus === null">
         <p v-if="item.dueAt" class="style-title-prefix-list" :class="{error: item.isOverDue}">
-            <span>Te betalen tegen {{ formatDate(item.dueAt) }}</span>
+            <span>{{ $t('Te betalen tegen {date}', {date: formatDate(item.dueAt)}) }}</span>
             <span v-if="item.isOverDue" class="icon error small" />
         </p>
         <p v-if="item.status === BalanceItemStatus.Canceled && (price === null || price < 0)" class="style-title-prefix-list error">
-            <span>Geannuleerd</span>
+            <span>{{ $t('Geannuleerd') }}</span>
             <span class="icon disabled small" />
         </p>
         <p v-else-if="item.priceOpen < 0 && item.pricePaid > item.price && item.pricePaid > 0" class="style-title-prefix-list">
-            <span>Te veel betaald</span>
+            <span>{{ $t('Te veel betaald') }}</span>
             <span class="icon undo small" />
         </p>
         <p v-else-if="item.priceOpen < 0" class="style-title-prefix-list">
-            <span v-if="isPayable">Terug te krijgen</span>
-            <span v-else>Terug te betalen</span>
+            <span v-if="isPayable">{{ $t('Terug te krijgen') }}</span>
+            <span v-else>{{ $t('Terug te betalen') }}</span>
             <span class="icon undo small" />
         </p>
     </template>
@@ -36,11 +36,11 @@
 
     <template v-if="price === null && paymentStatus === null">
         <p v-if="item.pricePaid !== 0 && item.pricePaid !== (item.amount * item.unitPrice)" class="style-description-small">
-            {{ formatPrice(item.pricePaid ) }} betaald
+            {{ $t('{price} betaald', {price: formatPrice(item.pricePaid )}) }}
         </p>
 
         <p v-if="item.pricePending !== 0" class="style-description-small">
-            {{ formatPrice(item.pricePending) }} in verwerking
+            {{ $t('{price} in verwerking', {price: formatPrice(item.pricePending)}) }}
         </p>
     </template>
 

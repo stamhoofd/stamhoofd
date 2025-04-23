@@ -31,7 +31,7 @@ export class GetOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBody
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Order not found',
-                human: 'Deze bestelling bestaat niet (meer)',
+                human: $t(`Deze bestelling bestaat niet (meer)`),
             });
         }
 

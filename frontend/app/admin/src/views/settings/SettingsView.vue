@@ -1,10 +1,10 @@
 <template>
     <div id="settings-view" class="st-view background">
-        <STNavigationBar title="Instellingen" />
+        <STNavigationBar :title="$t(`Instellingen`)" />
 
         <main class="center">
             <h1>
-                Instellingen
+                {{ $t('Instellingen') }}
             </h1>
 
             <STList class="illustration-list">
@@ -144,8 +144,7 @@
                 </STListItem>
             </STList>
 
-            <hr>
-            <h2>Gegevensverzameling</h2>
+            <hr><h2>{{ $t('Gegevensverzameling') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Records)">
@@ -209,8 +208,7 @@
                 </STListItem>
             </STList>
 
-            <hr>
-            <h2>E-mails</h2>
+            <hr><h2>{{ $t('E-mails') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailSettings)">
@@ -218,10 +216,10 @@
                         <img src="~@stamhoofd/assets/images/illustrations/email.svg">
                     </template>
                     <h2 class="style-title-list">
-                        E-mailadressen
+                        {{ $t('E-mailadressen') }}
                     </h2>
                     <p class="style-description">
-                        Wijzig de e-mailadressen waaruit e-mails verzonden kunnen worden.
+                        {{ $t('Wijzig de e-mailadressen waaruit e-mails verzonden kunnen worden.') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -233,10 +231,10 @@
                         <img src="~@stamhoofd/assets/images/illustrations/email-template.svg">
                     </template>
                     <h2 class="style-title-list">
-                        E-mailsjablonen
+                        {{ $t('E-mailsjablonen') }}
                     </h2>
                     <p class="style-description">
-                        Wijzig de inhoud van automatische en opgeslagen e-mails.
+                        {{ $t('Wijzig de inhoud van automatische en opgeslagen e-mails.') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -244,8 +242,7 @@
                 </STListItem>
             </STList>
 
-            <hr>
-            <h2>Ongebruikte functionaliteiten</h2>
+            <hr><h2>{{ $t('Ongebruikte functionaliteiten') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem v-if="platform.config.defaultAgeGroups.length === 0" :selectable="true" class="left-center" @click="$navigate(Routes.DefaultAgeGroups)">
@@ -339,8 +336,7 @@
                 </STListItem>
             </STList>
 
-            <hr>
-            <h2>Geavanceerd</h2>
+            <hr><h2>{{ $t('Geavanceerd') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Labs)">
@@ -348,10 +344,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/experiment.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Experimenten
+                        {{ $t('Experimenten') }}
                     </h2>
                     <p class="style-description">
-                        Probeer als eerste nieuwe functies uit die in ontwikkeling zijn.
+                        {{ $t('Probeer als eerste nieuwe functies uit die in ontwikkeling zijn.') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -363,10 +359,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/lock.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Single-Sign-On (SSO)
+                        {{ $t('Single-Sign-On (SSO)') }}
                     </h2>
                     <p class="style-description">
-                        Configureer een externe authenticatie server
+                        {{ $t('Configureer een externe authenticatie server') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -378,10 +374,10 @@
                         <img src="@stamhoofd/assets/images/partners/google/google-50.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Sign in with Google
+                        {{ $t('Sign in with Google') }}
                     </h2>
                     <p class="style-description">
-                        Configureer login via Google
+                        {{ $t('Configureer login via Google') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -410,6 +406,7 @@ import OrganizationRecordConfigurationView from './organization-records/Organiza
 import EditPrivacyView from './privacy/EditPrivacyView.vue';
 import EditRegistrationPeriodsView from './registration-periods/EditRegistrationPeriodsView.vue';
 
+// todo translations
 enum Routes {
     Admins = 'beheerders',
     Records = 'persoonsgegevens',
@@ -452,7 +449,7 @@ defineRoutes([
                             recordsConfiguration: patch,
                         }),
                     }));
-                    Toast.success('De aanpassingen zijn opgeslagen').show();
+                    Toast.success($t(`De aanpassingen zijn opgeslagen`)).show();
                 },
             };
         },
@@ -471,7 +468,7 @@ defineRoutes([
                             financialSupport: isNew ? FinancialSupportSettings.create({}).patch(patch) : patch,
                         }),
                     }));
-                    Toast.success('De aanpassingen zijn opgeslagen').show();
+                    Toast.success($t(`De aanpassingen zijn opgeslagen`)).show();
                 },
             };
         },
@@ -491,7 +488,7 @@ defineRoutes([
                             dataPermission: isNew ? DataPermissionsSettings.create({}).patch(patch) : patch,
                         }),
                     }));
-                    Toast.success('De aanpassingen zijn opgeslagen').show();
+                    Toast.success($t(`De aanpassingen zijn opgeslagen`)).show();
                 },
             };
         },
@@ -571,7 +568,7 @@ defineRoutes([
                         }),
                     }));
 
-                    Toast.success('De aanpassingen zijn opgeslagen').show();
+                    Toast.success($t(`De aanpassingen zijn opgeslagen`)).show();
                 },
             };
         },

@@ -32,7 +32,7 @@ const helper = {
         const rect = el.getBoundingClientRect();
 
         const displayedComponent = new ComponentWithProperties(Tooltip, {
-            text: 'Gekopieerd naar klembord',
+            text: $t(`Gekopieerd naar klembord`),
             icon: '',
             x: rect.left,
             y: rect.top + el.offsetHeight + 5,

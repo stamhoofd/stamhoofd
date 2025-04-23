@@ -9,47 +9,39 @@
         </h1>
 
         <p v-if="isRoot && enableActivities">
-            Voeg hier alle groepen toe waarin je jouw leden wilt onderverdelen in {{ period.period.name }}. Je kan ook categorieën toevoegen: een categorie is puur voor de structuur, zo kan je bijvoorbeeld een categorie maken voor al je leeftijdsgroepen en één voor al je vrijwilligers.
+            {{ $t('Voeg hier alle groepen toe waarin je jouw leden wilt onderverdelen in') }} {{ period.period.name }}{{ $t('. Je kan ook categorieën toevoegen: een categorie is puur voor de structuur, zo kan je bijvoorbeeld een categorie maken voor al je leeftijdsgroepen en één voor al je vrijwilligers.') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="!isRoot">
-            <STInputBox v-if="canDeleteOrRename" title="Naam" error-fields="name" :error-box="errors.errorBox">
-                <input
-                    ref="firstInput"
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    placeholder="Naam van deze categorie"
-                    autocomplete="off"
-                >
+            <STInputBox v-if="canDeleteOrRename" error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
+                <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`Naam van deze categorie`)">
             </STInputBox>
             <Checkbox v-if="isPlatformAdmin" v-model="locked">
-                Vergrendel deze categorie (enkel zichtbaar voor platformbeheerders)
+                {{ $t('Vergrendel deze categorie (enkel zichtbaar voor platformbeheerders)') }}
                 <p class="style-description-small">
-                    Een vergrendelde categorie kan niet verwijderd of hernoemd worden. Enkel platformbeheerders kunnen een categorie vergrendelen of ontgrendelen (enkel jij ziet deze checkbox).
+                    {{ $t('Een vergrendelde categorie kan niet verwijderd of hernoemd worden. Enkel platformbeheerders kunnen een categorie vergrendelen of ontgrendelen (enkel jij ziet deze checkbox).') }}
                 </p>
             </Checkbox>
         </template>
 
         <template v-if="enableActivities">
             <Checkbox v-if="categories.length === 0" v-model="limitRegistrations">
-                Een lid kan maar in één groep inschrijven
+                {{ $t('Een lid kan maar in één groep inschrijven') }}
             </Checkbox>
 
             <Checkbox v-if="!isRoot" v-model="isHidden">
-                Toon deze categorie enkel voor beheerders of leden met een functie
+                {{ $t('Toon deze categorie enkel voor beheerders of leden met een functie') }}
             </Checkbox>
 
             <p v-if="!isRoot && !isHidden && !isPublic" class="warning-box">
-                Een bovenliggende categorie is enkel zichtbaar voor beheerders, dus deze categorie is bijgevolg ook enkel zichtbaar voor beheerders.
+                {{ $t('Een bovenliggende categorie is enkel zichtbaar voor beheerders, dus deze categorie is bijgevolg ook enkel zichtbaar voor beheerders.') }}
             </p>
         </template>
 
         <template v-if="categories.length > 0">
-            <hr>
-            <h2>Categorieën</h2>
+            <hr><h2>{{ $t('Categorieën') }}</h2>
             <STList v-model="draggableCategories" :draggable="true">
                 <template #item="{item: category}">
                     <GroupCategoryRow :category="category" :period="patchedPeriod" :organization="organization" @patch:period="addPatch" />
@@ -58,10 +50,9 @@
         </template>
 
         <template v-if="groups.length > 0 || categories.length === 0">
-            <hr>
-            <h2>Groepen</h2>
+            <hr><h2>{{ $t('Groepen') }}</h2>
             <p v-if="categories.length > 0" class="error-box">
-                Je kan groepen niet combineren met categorieën op hetzelfde niveau. Verplaats deze groepen naar een categorie of verwijder ze.
+                {{ $t('Je kan groepen niet combineren met categorieën op hetzelfde niveau. Verplaats deze groepen naar een categorie of verwijder ze.') }}
             </p>
 
             <STList v-model="draggableGroups" :draggable="true">
@@ -74,35 +65,33 @@
         <p v-if="categories.length === 0">
             <button class="button text" type="button" @click="createGroup">
                 <span class="icon add" />
-                <span>Nieuwe groep</span>
+                <span>{{ $t('Nieuwe groep') }}</span>
             </button>
         </p>
         <p v-if="enableActivities">
             <button class="button text" type="button" @click="createCategory">
                 <span class="icon add" />
-                <span v-if="groups.length === 0">Nieuwe categorie</span>
-                <span v-else>Opdelen in categorieën</span>
+                <span v-if="groups.length === 0">{{ $t('Nieuwe categorie') }}</span>
+                <span v-else>{{ $t('Opdelen in categorieën') }}</span>
             </button>
         </p>
 
         <div v-if="isRoot && auth.hasFullAccess()" class="container">
-            <hr>
-            <h2>Prullenmand inschrijvingsgroepen</h2>
-            <p>Per ongeluk een inschrijvingsgroep verwijderd? Hier haal je de inschrijvingsgroep en daarbij horende leden terug.</p>
+            <hr><h2>{{ $t('Prullenmand inschrijvingsgroepen') }}</h2>
+            <p>{{ $t('Per ongeluk een inschrijvingsgroep verwijderd? Hier haal je de inschrijvingsgroep en daarbij horende leden terug.') }}</p>
             <button type="button" class="button text" @click="openGroupTrash">
-                <span class="icon trash" /><span>Open prullenmand</span>
+                <span class="icon trash" /><span>{{ $t('Open prullenmand') }}</span>
             </button>
         </div>
 
         <div v-if="canDeleteOrRename && !isNew && !isRoot && enableActivities" class="container">
-            <hr>
-            <h2>
-                Verwijder deze categorie
+            <hr><h2>
+                {{ $t('Verwijder deze categorie') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span>{{ $t('Verwijderen') }}</span>
             </button>
         </div>
     </SaveView>
@@ -339,7 +328,7 @@ async function createCategory() {
 async function openGroupTrash() {
     await present({
         components: [
-            new ComponentWithProperties(GroupTrashView, { period: props.period}).setDisplayStyle('popup'),
+            new ComponentWithProperties(GroupTrashView, { period: props.period }).setDisplayStyle('popup'),
         ],
         modalDisplayStyle: 'popup',
     });

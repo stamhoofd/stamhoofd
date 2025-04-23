@@ -39,20 +39,20 @@ export const CountryDecoder = new EnumDecoder(Country);
 export class CountryHelper {
     static getName(country: Country): string {
         switch (country) {
-            case Country.Belgium: return 'België';
-            case Country.Netherlands: return 'Nederland';
-            case Country.Luxembourg: return 'Luxemburg';
-            case Country.France: return 'Frankrijk';
-            case Country.Germany: return 'Duitsland';
-            case Country.Sweden: return 'Zweden';
-            case Country.UnitedKingdom: return 'Verenigd Koninkrijk';
-            case Country.Switzerland: return 'Zwitserland';
-            case Country.Afghanistan: return 'Afghanistan';
-            case Country.CzechRepublic: return 'Tsjechië';
-            case Country.UnitedStates: return 'Verenigde Staten';
-            case Country.Austria: return 'Oostenrijk';
-            case Country.Portugal: return 'Portugal';
-            case Country.Other: return 'Ander land';
+            case Country.Belgium: return $t(`België`);
+            case Country.Netherlands: return $t(`Nederland`);
+            case Country.Luxembourg: return $t(`Luxemburg`);
+            case Country.France: return $t(`Frankrijk`);
+            case Country.Germany: return $t(`Duitsland`);
+            case Country.Sweden: return $t(`Zweden`);
+            case Country.UnitedKingdom: return $t(`Verenigd Koninkrijk`);
+            case Country.Switzerland: return $t(`Zwitserland`);
+            case Country.Afghanistan: return $t(`Afghanistan`);
+            case Country.CzechRepublic: return $t(`Tsjechië`);
+            case Country.UnitedStates: return $t(`Verenigde Staten`);
+            case Country.Austria: return $t(`Oostenrijk`);
+            case Country.Portugal: return $t(`Portugal`);
+            case Country.Other: return $t(`Ander land`);
         }
     }
 

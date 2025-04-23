@@ -1,14 +1,14 @@
 <template>
     <div class="st-view payconiq-button-view">
-        <STNavigationBar title="Payconiq by Bancontact" />
+        <STNavigationBar :title="$t(`Payconiq by Bancontact`)" />
 
         <main>
-            <h1>Betaal met Payconiq by Bancontact</h1>
+            <h1>{{ $t('Betaal met Payconiq by Bancontact') }}</h1>
             <p class="style-description">
-                Je hebt één van volgende apps nodig om te kunnen betalen: Payconiq by Bancontact, KBC Mobile, ING Banking, Belfius, BNP Paribas Fortis, Fintro, Hello Bank!, Argenta of Crelan.
+                {{ $t('Je hebt één van volgende apps nodig om te kunnen betalen: Payconiq by Bancontact, KBC Mobile, ING Banking, Belfius, BNP Paribas Fortis, Fintro, Hello Bank!, Argenta of Crelan.') }}
             </p>
             <p class="style-description">
-                Klik op de volgende pagina op 'Kies een andere app' als je met een andere app dan Payconiq by Bancontact wilt betalen.
+                {{ $t("Klik op de volgende pagina op 'Kies een andere app' als je met een andere app dan Payconiq by Bancontact wilt betalen.") }}
             </p>
         </main>
 
@@ -16,11 +16,11 @@
             <template #right>
                 <button class="button secundary" type="button" @click="helpMe">
                     <span class="icon help" />
-                    <span>Het lukt niet</span>
+                    <span>{{ $t('Het lukt niet') }}</span>
                 </button>
                 <LoadingButton :loading="payment && payment.status === 'Pending'">
                     <a :href="paymentUrl" class="button primary open-app">
-                        <span class="icon external" /><span>Open de app</span>
+                        <span class="icon external" /><span>{{ $t('Open de app') }}</span>
                     </a>
                 </LoadingButton>
             </template>
@@ -29,8 +29,8 @@
 </template>
 
 <script lang="ts">
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { CenteredMessage, EmailInput, LoadingButton, STErrorsDefault, STNavigationBar, STToolbar } from '@stamhoofd/components';
-import { Component, Prop, Mixins } from '@simonbackx/vue-app-navigation/classes';
 
 import PayconiqBannerView from './PayconiqBannerView.vue';
 

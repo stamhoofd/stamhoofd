@@ -37,6 +37,19 @@ export function getDiffChunks(filePath: string, options: GetGitChangesOptions = 
         .map(getStartAndEndIndexFromDifChunkHeader);
 }
 
+export function getChangedLines(filePath: string, options: GetGitChangesOptions = {}): Set<number> {
+    const diffChunks = getDiffChunks(filePath, options);
+    const changedLines = new Set<number>();
+
+    for(const diffChunk of diffChunks) {
+        for(let i = diffChunk.startIndex; i <= diffChunk.endIndex; i++) {
+            changedLines.add(i);
+        }
+    }
+
+    return changedLines;
+}
+
 function isDiffChunkHeader(line: string): boolean {
     return line.startsWith('@@');
 }
@@ -84,3 +97,30 @@ export function getChangedFiles(extension: string = '', options: GetGitChangedFi
     const diffOutput = execSync(command).toString();
     return new Set(diffOutput.toString().split('\n').map(file => root + '/' + file).filter(file => file.endsWith(extensionWithDot)));
 }
+
+export const startChangeMarker = '[[start-change]]';
+export const endChangeMarker = '[[end-change]]';
+
+function splitLines(text: string): string[] {
+    return text.split(/(\r|\n)/).filter(item => !/(\r|\n)/.test(item));
+}
+
+export function addChangeMarkers(filePath: string, text: string, commitsToCompare?: [string, string]): string {
+    const lines = splitLines(text);
+    const changes = getDiffChunks(filePath, {compare: commitsToCompare});
+
+    for(const {startIndex, endIndex} of changes) {
+        lines[startIndex] = startChangeMarker + lines[startIndex];
+        lines[endIndex] = lines[endIndex] + endChangeMarker;
+    }
+
+    return lines.join(`
+`);
+}
+
+export function removeChangeMarkers(text: string): string {
+    text = text.replaceAll(startChangeMarker, '');
+    text = text.replaceAll(endChangeMarker, '');
+    return text;
+}
+

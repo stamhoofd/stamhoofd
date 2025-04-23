@@ -9,7 +9,7 @@
         </p>
 
         <p class="style-description-block">
-            Lees <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
+            {{ $t('Lees') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('hier') }}</a> {{ $t('meer informatie na over hoe je een vragenlijst kan instellen.') }}
         </p>
 
         <EditRecordCategoriesBox :categories="patched.recordCategories" :settings="editorSettings" @patch:categories="addCategoriesPatch" />
@@ -21,7 +21,7 @@ import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/sim
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, EditRecordCategoriesBox, ErrorBox, getOrganizationUIFilterBuildersForTags, RecordEditorSettings, RecordEditorType, SaveView, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Address, Country, Organization, OrganizationLevelRecordsConfiguration, OrganizationPrivateMetaData, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
+import { Address, Country, Organization, OrganizationLevelRecordsConfiguration, OrganizationPrivateMetaData, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const props = defineProps<{
@@ -53,12 +53,12 @@ const editorSettings = computed(() => {
             return getOrganizationUIFilterBuildersForTags(platform.value)[0];
         },
         exampleValue: Organization.create({
-            name: 'Voorbeeld',
+            name: $t(`Voorbeeld`),
             address: Address.create({
-                street: 'Voorbeeldstraat',
+                street: $t(`Voorbeeldstraat`),
                 number: '1',
                 postalCode: '1234AB',
-                city: 'Voorbeeldstad',
+                city: $t(`Voorbeeldstad`),
                 country: Country.Belgium,
             }),
             privateMeta: OrganizationPrivateMetaData.create({}),

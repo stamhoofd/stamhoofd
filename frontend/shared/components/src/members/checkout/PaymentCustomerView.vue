@@ -1,12 +1,12 @@
 <template>
-    <SaveView title="Jouw gegevens" :loading="loading" save-icon-right="arrow-right" save-text="Doorgaan" data-submit-last-field :disabled="companies.length === 0" @save="goNext">
-        <h1>Facturatiegegevens</h1>
-        <p>Deze gegevens komen op jouw betaalbewijs. Zorg dat ze in orde zijn, je kan ze later niet meer wijzigen.</p>
+    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('Doorgaan')" data-submit-last-field :disabled="companies.length === 0" :title="$t(`Jouw gegevens`)" @save="goNext">
+        <h1>{{ $t('Facturatiegegevens') }}</h1>
+        <p>{{ $t('Deze gegevens komen op jouw betaalbewijs. Zorg dat ze in orde zijn, je kan ze later niet meer wijzigen.') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="companies.length === 0" class="info-box">
-            Je hebt nog geen facturatiegegevens toegevoegd aan jouw vereniging. Stel deze eerst in voor je verder gaat.
+            {{ $t('Je hebt nog geen facturatiegegevens toegevoegd aan jouw vereniging. Stel deze eerst in voor je verder gaat.') }}
         </p>
 
         <STList v-else>
@@ -19,13 +19,13 @@
                 </h3>
 
                 <p v-if="company.VATNumber" class="style-description-small">
-                    {{ company.VATNumber }} (BTW-plichtig)
+                    {{ company.VATNumber }} {{ $t('(BTW-plichtig)') }}
                 </p>
                 <p v-else-if="company.companyNumber" class="style-description-small">
-                    {{ company.companyNumber }} (niet BTW-plichtig)
+                    {{ company.companyNumber }} {{ $t('(niet BTW-plichtig)') }}
                 </p>
                 <p v-else class="style-description-small">
-                    Feitelijke vereniging
+                    {{ $t('Feitelijke vereniging') }}
                 </p>
 
                 <p v-if="company.address" class="style-description-small">
@@ -40,11 +40,11 @@
 
         <p v-if="auth.hasFullAccess()" class="style-button-bar">
             <button v-if="companies.length === 0" type="button" class="button primary" @click="editInvoiceSettings">
-                <span>Instellen</span>
+                <span>{{ $t('Instellen') }}</span>
             </button>
             <button v-else type="button" class="button text" @click="editInvoiceSettings">
                 <span class="icon edit" />
-                <span>Bewerk</span>
+                <span>{{ $t('Bewerk') }}</span>
             </button>
         </p>
         <p v-else class="warning-box">

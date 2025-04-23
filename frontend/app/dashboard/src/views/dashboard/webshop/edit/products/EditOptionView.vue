@@ -1,26 +1,19 @@
 <template>
-    <SaveView :title="isNew ? 'Keuze toevoegen' : name+' bewerken'" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`Keuze toevoegen`) : name+' ' + $t(`bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            Keuze toevoegen
+            {{ $t('Keuze toevoegen') }}
         </h1>
         <h1 v-else>
-            {{ name }} bewerken
+            {{ name }} {{ $t('bewerken') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
-            <input
-                ref="firstInput"
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="Naam van deze keuze"
-                autocomplete="off"
-            >
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`Naam van deze keuze`)">
         </STInputBox>
 
-        <STInputBox title="Meer of minkost" error-fields="price" :error-box="errors.errorBox">
-            <PriceInput v-model="price" placeholder="+ 0 euro" :min="null" />
+        <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`Meer of minkost`)">
+            <PriceInput v-model="price" :min="null" :placeholder="$t(`+ 0 euro`)" />
         </STInputBox>
 
         <STList>
@@ -30,11 +23,11 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Beperk het beschikbare aantal stuks (waarvan nu {{ usedStock }} verkocht of gereserveerd)
+                    {{ $t('Beperk het beschikbare aantal stuks (waarvan nu {stock} verkocht of gereserveerd)', {stock: usedStock.toString()}) }}
                 </h3>
 
                 <p v-if="useStock" class="style-description-small">
-                    Geannuleerde en verwijderde bestellingen worden niet meegerekend.
+                    {{ $t('Geannuleerde en verwijderde bestellingen worden niet meegerekend.') }}
                 </p>
 
                 <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
@@ -46,14 +39,13 @@
         </STList>
 
         <div v-if="!isNew && !isSingle" class="container">
-            <hr>
-            <h2>
-                Verwijder deze keuze
+            <hr><h2>
+                {{ $t('Verwijder deze keuze') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span>{{ $t('Verwijderen') }}</span>
             </button>
         </div>
     </SaveView>

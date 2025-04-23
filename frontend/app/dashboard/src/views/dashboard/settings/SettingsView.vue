@@ -1,10 +1,10 @@
 <template>
     <div id="settings-view" class="st-view background">
-        <STNavigationBar title="Instellingen" />
+        <STNavigationBar :title="$t(`Instellingen`)" />
 
         <main class="center">
             <h1>
-                Instellingen
+                {{ $t('Instellingen') }}
             </h1>
 
             <BillingWarningBox />
@@ -13,7 +13,7 @@
                 {{ stripeWarning.text }}
 
                 <a :href="$domains.getDocs('documenten-stripe-afgekeurd')" target="_blank" class="button text">
-                    Meer info
+                    {{ $t('Meer info') }}
                 </a>
             </p>
 
@@ -23,10 +23,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/flag.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Algemeen
+                        {{ $t('Algemeen') }}
                     </h2>
                     <p class="style-description">
-                        Naam, adres, website en facturatiegegevens
+                        {{ $t('Naam, adres, website en facturatiegegevens') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -38,10 +38,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/palette.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Personaliseren
+                        {{ $t('Personaliseren') }}
                     </h2>
                     <p class="style-description">
-                        Kies je eigen logo en kleur
+                        {{ $t('Kies je eigen logo en kleur') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -53,10 +53,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/admin.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Toegangsrechten en functies
+                        {{ $t('Toegangsrechten en functies') }}
                     </h2>
                     <p class="style-description">
-                        Beheer wie toegang heeft tot welk onderdeel van het beheerdersportaal
+                        {{ $t('Beheer wie toegang heeft tot welk onderdeel van het beheerdersportaal') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -68,10 +68,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/privacy-policy.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Privacyvoorwaarden
+                        {{ $t('Privacyvoorwaarden') }}
                     </h2>
                     <p class="style-description">
-                        Stel je privacyvoorwaarden in
+                        {{ $t('Stel je privacyvoorwaarden in') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -98,10 +98,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/house.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Lokalen
+                        {{ $t('Lokalen') }}
                     </h2>
                     <p class="style-description">
-                        Beheer jouw (verzekerde) lokalen
+                        {{ $t('Beheer jouw (verzekerde) lokalen') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -110,8 +110,7 @@
             </STList>
 
             <template v-if="membersPackage">
-                <hr>
-                <h2>Ledenadministratie</h2>
+                <hr><h2>{{ $t('Ledenadministratie') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem v-if="!isPlatform" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.RegistrationPage)">
@@ -119,10 +118,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/laptop.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Link naar ledenportaal
+                            {{ $t('Link naar ledenportaal') }}
                         </h2>
                         <p class="style-description">
-                            Via deze weg kunnen leden zelf online inschrijven
+                            {{ $t('Via deze weg kunnen leden zelf online inschrijven') }}
                         </p>
 
                         <template #right>
@@ -150,10 +149,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/group.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Inschrijvingsgroepen beheren
+                            {{ $t('Inschrijvingsgroepen beheren') }}
                         </h2>
                         <p class="style-description">
-                            Deel je leden op in groepen en categorieën
+                            {{ $t('Deel je leden op in groepen en categorieën') }}
                         </p>
 
                         <template #right>
@@ -166,10 +165,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/health-data.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Persoonsgegevens van leden
+                            {{ $t('Persoonsgegevens van leden') }}
                         </h2>
                         <p class="style-description">
-                            Kies welke informatie je verzamelt van jouw leden
+                            {{ $t('Kies welke informatie je verzamelt van jouw leden') }}
                         </p>
 
                         <template #right>
@@ -182,10 +181,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/piggy-bank.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Vrije bijdrage
+                            {{ $t('Vrije bijdrage') }}
                         </h2>
                         <p class="style-description">
-                            Maak het mogelijk dat leden een (optionele) vrije bijdrage doen bij het inschrijven
+                            {{ $t('Maak het mogelijk dat leden een (optionele) vrije bijdrage doen bij het inschrijven') }}
                         </p>
 
                         <template #right>
@@ -195,9 +194,7 @@
                 </STList>
             </template>
 
-            <hr>
-
-            <h2>E-mails</h2>
+            <hr><h2>{{ $t('E-mails') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailSettings)">
@@ -205,10 +202,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/email.svg">
                     </template>
                     <h2 class="style-title-list">
-                        E-mailadressen
+                        {{ $t('E-mailadressen') }}
                     </h2>
                     <p class="style-description">
-                        Verstuur e-mails vanaf je zelf gekozen e-mailadres
+                        {{ $t('Verstuur e-mails vanaf je zelf gekozen e-mailadres') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -220,10 +217,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
                     </template>
                     <h2 class="style-title-list">
-                        E-mailsjablonen
+                        {{ $t('E-mailsjablonen') }}
                     </h2>
                     <p class="style-description">
-                        Wijzig de inhoud van automatische en opgeslagen e-mails.
+                        {{ $t('Wijzig de inhoud van automatische en opgeslagen e-mails.') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -235,10 +232,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/notifications.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Notificaties voor openstaande bedragen
+                        {{ $t('Notificaties voor openstaande bedragen') }}
                     </h2>
                     <p class="style-description">
-                        Stuur automatisch e-mails naar leden als hun openstaand bedrag stijgt of als betaalherinnering.
+                        {{ $t('Stuur automatisch e-mails naar leden als hun openstaand bedrag stijgt of als betaalherinnering.') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -247,18 +244,17 @@
             </STList>
 
             <template v-if="feature('sso')">
-                <hr>
-                <h2>Geavanceerd</h2>
+                <hr><h2>{{ $t('Geavanceerd') }}</h2>
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.SingleSignOn)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/lock.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Single-Sign-On (SSO)
+                            {{ $t('Single-Sign-On (SSO)') }}
                         </h2>
                         <p class="style-description">
-                            Configureer een externe authenticatie server
+                            {{ $t('Configureer een externe authenticatie server') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -268,18 +264,17 @@
             </template>
 
             <template v-if="!salesDisabled">
-                <hr>
-                <h2>{{ $t('405a811e-ebb1-4948-84cd-8fb5860104e6') }}</h2>
+                <hr><h2>{{ $t('405a811e-ebb1-4948-84cd-8fb5860104e6') }}</h2>
                 <STList class="illustration-list">
                     <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.Packages)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/stock.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Pakketten aankopen
+                            {{ $t('Pakketten aankopen') }}
                         </h2>
                         <p class="style-description">
-                            Wijzig je pakketten of activeer nieuwe functies
+                            {{ $t('Wijzig je pakketten of activeer nieuwe functies') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -294,7 +289,7 @@
                             {{ $t("0208e14e-b26e-4411-9e8e-461b63b1c0c1") }}
                         </h2>
                         <p class="style-description">
-                            Geef 25 euro en krijg zelf ook een tegoed
+                            {{ $t('Geef 25 euro en krijg zelf ook een tegoed') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -306,10 +301,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/experiment.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Experimenten
+                            {{ $t('Experimenten') }}
                         </h2>
                         <p class="style-description">
-                            Probeer als eerste nieuwe functies uit die in ontwikkeling zijn.
+                            {{ $t('Probeer als eerste nieuwe functies uit die in ontwikkeling zijn.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />

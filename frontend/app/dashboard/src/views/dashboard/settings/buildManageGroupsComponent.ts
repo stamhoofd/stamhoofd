@@ -49,7 +49,7 @@ export function buildManageGroupsComponent($organizationManager: OrganizationMan
             const defaultCategories = OrganizationTypeHelper.getDefaultGroupCategoriesWithoutActivities(organization.meta.type, organization.meta.umbrellaOrganization ?? undefined);
             const category = defaultCategories[0] ?? GroupCategory.create({
                 settings: GroupCategorySettings.create({
-                    name: 'Leeftijdsgroepen',
+                    name: $t(`Leeftijdsgroepen`),
 
                 }),
             });

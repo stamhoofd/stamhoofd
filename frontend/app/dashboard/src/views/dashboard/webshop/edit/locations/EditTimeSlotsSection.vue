@@ -1,24 +1,23 @@
 <template>
     <div class="container">
-        <hr>
-        <h2 class="style-with-button">
+        <hr><h2 class="style-with-button">
             <div>
                 {{ title }}
             </div>
             <div>
                 <button class="button text" type="button" @click="addTimeSlot">
                     <span class="icon add" />
-                    <span>Keuze</span>
+                    <span>{{ $t('Keuze') }}</span>
                 </button>
             </div>
         </h2>
         <slot />
 
         <p v-if="timeSlots.timeSlots.length === 0" class="info-box">
-            Je hebt geen intervallen toegevoegd, dus er moet geen keuze gemaakt worden.
+            {{ $t('Je hebt geen intervallen toegevoegd, dus er moet geen keuze gemaakt worden.') }}
         </p>
         <p v-if="timeSlots.timeSlots.length === 1" class="info-box">
-            Er is maar één keuze, dus we communiceren dit interval i.v.p. een keuze te geven.
+            {{ $t('Er is maar één keuze, dus we communiceren dit interval i.v.p. een keuze te geven.') }}
         </p>
 
         <STList>

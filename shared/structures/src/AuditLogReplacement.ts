@@ -166,19 +166,19 @@ export class AuditLogReplacement extends AutoEncoder {
         }
 
         if (this.type === AuditLogReplacementType.Html) {
-            return this.description || 'Bekijk inhoud';
+            return this.description || $t(`Bekijk inhoud`);
         }
 
         if (this.type === AuditLogReplacementType.LongText) {
-            return this.description || 'Bekijk inhoud';
+            return this.description || $t(`Bekijk inhoud`);
         }
 
         if (this.type === AuditLogReplacementType.Image) {
-            return 'Afbeelding';
+            return $t(`Afbeelding`);
         }
 
         if (this.type === AuditLogReplacementType.File) {
-            return 'Bestand';
+            return $t(`Bestand`);
         }
         return this.value;
     }

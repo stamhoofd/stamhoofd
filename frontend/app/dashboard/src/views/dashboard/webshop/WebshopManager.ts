@@ -49,11 +49,11 @@ export class WebshopManager {
     }
 
     get hasWrite() {
-        return this.context.auth.canAccessWebshop(this.preview, PermissionLevel.Write)
+        return this.context.auth.canAccessWebshop(this.preview, PermissionLevel.Write);
     }
 
     get hasRead() {
-        return this.context.auth.canAccessWebshop(this.preview, PermissionLevel.Read)
+        return this.context.auth.canAccessWebshop(this.preview, PermissionLevel.Read);
     }
 
     /**
@@ -251,7 +251,7 @@ export class WebshopManager {
 
             DBOpenRequest.onblocked = function (e) {
                 console.log('DB open blocked', e);
-                new Toast('Er staat een ander tabblad open van Stamhoofd die werkt in een oudere versie. Sluit die eerst af.', 'error red').setHide(15 * 1000).show();
+                new Toast($t(`Er staat een ander tabblad open van Stamhoofd die werkt in een oudere versie. Sluit die eerst af.`), 'error red').setHide(15 * 1000).show();
             };
 
             DBOpenRequest.onerror = (event) => {
@@ -269,7 +269,7 @@ export class WebshopManager {
                 resolved = true;
                 reject(new SimpleError({
                     code: 'not_supported',
-                    message: 'Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer de pagina te herladen of in een andere browser te werken.',
+                    message: $t('Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer de pagina te herladen of in een andere browser te werken.'),
                 }));
             };
 
@@ -343,7 +343,7 @@ export class WebshopManager {
                     // Abort
                     reject(new SimpleError({
                         code: 'not_supported',
-                        message: 'Kijk na of je nog een ander tabblad open hebt staan met Stamhoofd en sluit deze. Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer de pagina te herladen of in een andere browser te werken.',
+                        message: $t('Kijk na of je nog een ander tabblad open hebt staan met Stamhoofd en sluit deze. Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer de pagina te herladen of in een andere browser te werken.'),
                     }));
                 }
             }, 2000);

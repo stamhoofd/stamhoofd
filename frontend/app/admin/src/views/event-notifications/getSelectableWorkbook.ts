@@ -14,7 +14,7 @@ export function getSelectableWorkbook(platform: Platform) {
                 columns: [
                     new SelectableColumn({
                         id: 'id',
-                        name: 'ID',
+                        name: $t(`ID`),
                         description: $t('5239cde1-c980-43eb-b6f1-83f6bcd0652d'),
                     }),
 
@@ -55,13 +55,13 @@ export function getSelectableWorkbook(platform: Platform) {
 
                     new SelectableColumn({
                         id: 'submittedAt',
-                        category: 'Indiening',
+                        category: $t(`Indiening`),
                         name: $t('65110237-a12e-4cbd-8514-75a942626d7a'),
                     }),
 
                     new SelectableColumn({
                         id: 'submittedBy',
-                        category: 'Indiening',
+                        category: $t(`Indiening`),
                         name: $t('27301eda-b7f6-44c3-baed-25e8f416d777'),
                     }),
 

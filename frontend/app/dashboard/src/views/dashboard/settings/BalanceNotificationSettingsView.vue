@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" title="Notificaties" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`Notificaties`)" @save="save">
         <h1>
             {{ $t('ac0594f0-af79-465b-84d5-568da90af8b6') }}
         </h1>
@@ -15,7 +15,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Inschakelen
+                    {{ $t('Inschakelen') }}
                 </h3>
 
                 <p class="style-description-small">
@@ -26,9 +26,8 @@
 
         <template v-if="enabled">
             <div v-if="(patched.privateMeta?.emails ?? []).length" class="container">
-                <hr>
-                <h2>E-mailadres</h2>
-                <p>Kies een e-mailadres vanwaar je de e-mails wilt versturen. Je kan extra e-mailadressen toevoegen via de instellingen van e-mailadressen.</p>
+                <hr><h2>{{ $t('E-mailadres') }}</h2>
+                <p>{{ $t('Kies een e-mailadres vanwaar je de e-mails wilt versturen. Je kan extra e-mailadressen toevoegen via de instellingen van e-mailadressen.') }}</p>
 
                 <STList>
                     <STListItem :selectable="true" element-name="label">
@@ -37,7 +36,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            Standaard e-mailadres
+                            {{ $t('Standaard e-mailadres') }}
                         </h3>
                     </STListItem>
                     <STListItem v-for="email in patched.privateMeta?.emails ?? []" :key="email.id" :selectable="true" element-name="label">
@@ -57,34 +56,20 @@
             </div>
 
             <div class="container">
-                <hr>
-                <h2>Geavanceerd</h2>
+                <hr><h2>{{ $t('Geavanceerd') }}</h2>
                 <p>{{ $t('18cbfdea-798d-4efc-aad8-f6897c9efb2c') }}</p>
 
-                <STInputBox title="Minimum dagen tussen herinneringmails" error-fields="price" :error-box="errors.errorBox">
-                    <NumberInput
-                        v-model="minimumDaysBetween" placeholder=""
-                        suffix="dagen"
-                        suffix-singular="dag"
-                        :min="1"
-                        :stepper="true"
-                    />
+                <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`Minimum dagen tussen herinneringmails`)">
+                    <NumberInput v-model="minimumDaysBetween" placeholder="" suffix="dagen" suffix-singular="dag" :min="1" :stepper="true" />
                 </STInputBox>
 
-                <STInputBox title="Maximum e-mails" error-fields="price" :error-box="errors.errorBox">
-                    <NumberInput
-                        v-model="maximumReminderEmails" placeholder=""
-                        suffix="e-mails"
-                        suffix-singular="e-mail"
-                        :min="1"
-                        :stepper="true"
-                    />
+                <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`Maximum e-mails`)">
+                    <NumberInput v-model="maximumReminderEmails" placeholder="" suffix="e-mails" suffix-singular="e-mail" :min="1" :stepper="true" />
                 </STInputBox>
             </div>
 
             <div v-if="$feature('organization-receivable-balances')" class="container">
-                <hr>
-                <h2>{{ $t('6b39d554-a4a7-489c-84b5-3f430457dd50') }}</h2>
+                <hr><h2>{{ $t('6b39d554-a4a7-489c-84b5-3f430457dd50') }}</h2>
                 <p>{{ $t('0998a455-9ffc-4222-8432-ef7681908ad7') }}</p>
 
                 <MultipleChoiceInput v-model="selectedResponsibilityIds" :items="responsibilities.map(r => ({value: r.id, name: r.name}))" :nullable="false" />

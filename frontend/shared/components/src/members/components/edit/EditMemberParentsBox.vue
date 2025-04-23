@@ -1,12 +1,12 @@
 <template>
     <div class="container">
-        <Title v-bind="$attrs" title="Ouders" />
+        <Title v-bind="$attrs" :title="$t(`Ouders`)" />
 
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="visibleParents.length === 0" class="info-box">
-            Nog geen ouders toegevoegd. Voeg een ouder van {{ member.patchedMember.details.firstName }} toe via de knop hieronder.
+            {{ $t('Nog geen ouders toegevoegd. Voeg een ouder van {member} toe via de knop hieronder.', {member: member.patchedMember.details.firstName}) }}
         </p>
 
         <STList v-else :with-animation="true">
@@ -28,18 +28,18 @@
                     {{ parent.address }}
                 </p>
                 <p v-if="parent.nationalRegisterNumber && parent.nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
-                    RRN: {{ parent.nationalRegisterNumber }}
+                    {{ $t('RRN') }}: {{ parent.nationalRegisterNumber }}
                 </p>
 
                 <template #right>
                     <span v-if="!isParentSelected(parent)" class="button text limit-space">
                         <span class="icon add" />
-                        <span>Toevoegen</span>
+                        <span>{{ $t('Toevoegen') }}</span>
                     </span>
 
                     <button v-else class="button text limit-space" type="button" @click.stop="editParent(parent)">
                         <span class="icon edit" />
-                        <span>Bewerken</span>
+                        <span>{{ $t('Bewerken') }}</span>
                     </button>
                 </template>
             </STListItem>
@@ -48,13 +48,13 @@
         <div class="style-button-bar">
             <button type="button" class="button text" :class="{selected: visibleParents.length <= 1}" @click="addParent()">
                 <span class="icon add" />
-                <span>Ouder toevoegen</span>
+                <span>{{ $t('Ouder toevoegen') }}</span>
             </button>
         </div>
 
         <p v-if="!willMarkReviewed && reviewDate && isAdmin" class="style-description-small">
-            Laatst nagekeken op {{ formatDate(reviewDate) }}. <button v-tooltip="'Het lid zal deze stap terug moeten doorlopen via het ledenportaal'" type="button" class="inline-link" @click="clear">
-                Wissen
+            {{ $t('Laatst nagekeken op') }} {{ formatDate(reviewDate) }}. <button type="button" class="inline-link" :v-tooltip="$t('Het lid zal deze stap terug moeten doorlopen via het ledenportaal')" @click="clear">
+                {{ $t('Wissen') }}
             </button>.
         </p>
     </div>

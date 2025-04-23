@@ -1,13 +1,13 @@
 <template>
-    <SaveView :title="title" :loading="loading" save-text="Bestelling bevestigen" :prefer-large-button="true" @save="goNext">
+    <SaveView :title="title" :loading="loading" :save-text="$t('Bestelling bevestigen')" :prefer-large-button="true" @save="goNext">
         <template v-if="checkout.totalPrice > 0" #left>
-            <span>Totaal: {{ formatPrice(checkout.totalPrice) }}</span>
+            <span>{{ $t('Totaal') }}: {{ formatPrice(checkout.totalPrice) }}</span>
         </template>
 
         <h1>{{ title }}</h1>
 
         <p v-if="isTrial" class="warning-box">
-            Dit is een demo webshop. Bestellingen zijn fictief.
+            {{ $t('Dit is een demo webshop. Bestellingen zijn fictief.') }}
         </p>
 
         <template v-if="checkout.totalPrice > 0">
@@ -15,7 +15,7 @@
             <PaymentSelectionList v-model="selectedPaymentMethod" :payment-configuration="paymentConfiguration" :amount="checkout.totalPrice" :organization="organization" :context="paymentContext" />
         </template>
         <template v-else>
-            <p>Jouw bestelling zal worden geplaatst als je verder gaat.</p>
+            <p>{{ $t('Jouw bestelling zal worden geplaatst als je verder gaat.') }}</p>
             <STErrorsDefault :error-box="errors.errorBox" />
         </template>
     </SaveView>
@@ -91,7 +91,7 @@ async function goToOrder(id: string, args: NavigationActions) {
     }
     else {
         // Desktop: push
-        await args.dismiss({ force: true })
+        await args.dismiss({ force: true });
         await args.present({
             components: [
                 new ComponentWithProperties(OrderView, { orderId: id, success: true }, {

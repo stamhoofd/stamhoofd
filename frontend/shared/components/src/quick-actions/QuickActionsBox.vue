@@ -1,9 +1,8 @@
 <template>
-    <LoadingBoxTransition :error-box="errorBox" v-if="actions.length || loading">
-        <div v-if="actions.length" class="container" key="view">
-            <hr>
-            <h2>
-                Snelle acties
+    <LoadingBoxTransition v-if="actions.length || loading" :error-box="errorBox">
+        <div v-if="actions.length" key="view" class="container">
+            <hr><h2>
+                {{ $t('Snelle acties') }}
             </h2>
 
             <STList>
@@ -20,7 +19,7 @@
                     </p>
 
                     <template #right>
-                        <span :class="action.rightTextClass ?? ''" v-if="action.rightText">
+                        <span v-if="action.rightText" :class="action.rightTextClass ?? ''">
                             {{ action.rightText }}
                         </span>
                         <span class="icon arrow-right-small gray" />
@@ -37,7 +36,7 @@ import { LoadingBoxTransition } from '../containers';
 import { QuickActions } from './classes/QuickActions';
 
 const props = defineProps<{
-    quickActions: QuickActions
+    quickActions: QuickActions;
 }>();
 
 const actions = computed(() => unref(props.quickActions.actions));

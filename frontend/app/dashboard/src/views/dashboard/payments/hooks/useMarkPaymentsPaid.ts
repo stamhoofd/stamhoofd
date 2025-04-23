@@ -20,7 +20,7 @@ async function markPaymentsPaid(context: SessionContext, payments: PaymentGenera
         }
 
         if (![PaymentMethod.Unknown, PaymentMethod.Transfer, PaymentMethod.PointOfSale].includes(payment.method)) {
-            new Toast('Je kan de betaalstatus van online betalingen niet wijzigen', 'error red').setHide(4000).show();
+            new Toast($t(`Je kan de betaalstatus van online betalingen niet wijzigen`), 'error red').setHide(4000).show();
             return;
         }
 
@@ -43,7 +43,7 @@ async function markPaymentsPaid(context: SessionContext, payments: PaymentGenera
     }
 
     if (data.changes.length > 0) {
-        if (!await CenteredMessage.confirm('Ben je zeker?', paid ? 'Markeer als betaald' : 'Markeer als niet betaald', paid && hasOrder ? 'De besteller(s) van bestellingen ontvangen in sommige gevallen een automatische e-mail.' : undefined)) {
+        if (!await CenteredMessage.confirm($t(`Ben je zeker?`), paid ? $t(`Markeer als betaald`) : $t(`Markeer als niet betaald`), paid && hasOrder ? $t(`De besteller(s) van bestellingen ontvangen in sommige gevallen een automatische e-mail.`) : undefined)) {
             return;
         }
 
@@ -58,7 +58,7 @@ async function markPaymentsPaid(context: SessionContext, payments: PaymentGenera
 
             deepSetArray(payments, response.data);
 
-            new Toast('Betaalstatus gewijzigd', 'success').setHide(3000).show();
+            new Toast($t(`Betaalstatus gewijzigd`), 'success').setHide(3000).show();
 
             for (const payment of response.data) {
                 GlobalEventBus.sendEvent('paymentPatch', payment).catch(console.error);
@@ -69,6 +69,6 @@ async function markPaymentsPaid(context: SessionContext, payments: PaymentGenera
         }
     }
     else {
-        new Toast(paid ? 'Al gemarkeerd als betaald' : ('Deze ' + (payments.length == 1 ? 'betaling werd' : 'betalingen werden') + ' nog niet betaald'), 'error red').setHide(2000).show();
+        new Toast(paid ? $t(`Al gemarkeerd als betaald`) : payments.length === 1 ? $t(`Deze betaling werd nog niet betaald`) : $t(`Deze betalingen werden nog niet betaald`), 'error red').setHide(2000).show();
     }
 }

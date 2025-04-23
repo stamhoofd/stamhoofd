@@ -22,12 +22,12 @@ const model = defineModel<ReduceablePrice>({ required: true });
 
 const platform = usePlatform();
 const tag = platform.value.config.tags.find(t => t.id === props.tagId);
-const priceTitle = computed(() => format(props.showPricePerDay ? 'Vaste prijs' : 'Prijs'));
+const priceTitle = computed(() => format(props.showPricePerDay ? $t(`Vaste prijs`) : $t(`Prijs`)));
 
 function format(base: string) {
     if (!props.tagId) {
         return base;
     }
-    return `${base} voor ${tag?.name ?? 'Onbekend'}`;
+    return `${base} voor ${tag?.name ?? $t(`Onbekend`)}`;
 }
 </script>

@@ -5,6 +5,7 @@ import { BalanceItemWithPayments, BalanceItemWithPrivatePayments } from '../Bala
 import { EmailRecipient } from '../email/Email.js';
 import { Recipient, Replacement } from '../endpoints/EmailRequest.js';
 import { Payment, PrivatePayment } from '../members/Payment.js';
+import { RecordCheckboxAnswer } from '../members/records/RecordAnswer.js';
 import { Organization } from '../Organization.js';
 import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodHelper, PaymentMethodV150 } from '../PaymentMethod.js';
 import { PaymentStatus } from '../PaymentStatus.js';
@@ -13,7 +14,6 @@ import { Customer } from './Customer.js';
 import { TicketPrivate } from './Ticket.js';
 import { WebshopPreview } from './Webshop.js';
 import { CheckoutMethodType, WebshopTakeoutMethod } from './WebshopMetaData.js';
-import { RecordCheckboxAnswer } from '../members/records/RecordAnswer.js';
 
 export enum OrderStatusV103 {
     Created = 'Created',
@@ -42,12 +42,12 @@ export enum OrderStatus {
 export class OrderStatusHelper {
     static getName(status: OrderStatus): string {
         switch (status) {
-            case OrderStatus.Created: return 'Nieuw';
-            case OrderStatus.Prepared: return 'Verwerkt';
-            case OrderStatus.Collect: return 'Ligt klaar';
-            case OrderStatus.Completed: return 'Voltooid';
-            case OrderStatus.Canceled: return 'Geannuleerd';
-            case OrderStatus.Deleted: return 'Verwijderd';
+            case OrderStatus.Created: return $t(`Nieuw`);
+            case OrderStatus.Prepared: return $t(`Verwerkt`);
+            case OrderStatus.Collect: return $t(`Ligt klaar`);
+            case OrderStatus.Completed: return $t(`Voltooid`);
+            case OrderStatus.Canceled: return $t(`Geannuleerd`);
+            case OrderStatus.Deleted: return $t(`Verwijderd`);
         }
     }
 
@@ -113,7 +113,7 @@ export class OrderData extends Checkout {
             return this.checkoutMethod.name;
         }
 
-        return this.address?.shortString() ?? 'Onbekend';
+        return this.address?.shortString() ?? $t(`Onbekend`);
     }
 
     /**
@@ -263,20 +263,20 @@ export class Order extends AutoEncoder {
 
         const data = [
             {
-                title: 'Bestelnummer',
+                title: $t('Bestelnummer'),
                 value: '' + (this.number ?? '?'),
             },
             {
                 title: ((order) => {
                     if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
-                        return 'Afhaallocatie';
+                        return $t(`Afhaallocatie`);
                     }
 
                     if (order.data.checkoutMethod?.type === CheckoutMethodType.OnSite) {
-                        return 'Locatie';
+                        return $t(`Locatie`);
                     }
 
-                    return 'Leveringsadres';
+                    return $t(`Leveringsadres`);
                 })(this),
                 value: ((order) => {
                     if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
@@ -294,7 +294,7 @@ export class Order extends AutoEncoder {
                 (this.data.checkoutMethod?.type === CheckoutMethodType.Takeout || this.data.checkoutMethod?.type === CheckoutMethodType.OnSite) && ((this.data.checkoutMethod as any)?.address)
                     ? [
                             {
-                                title: 'Adres',
+                                title: $t(`Adres`),
                                 value: ((order) => {
                                     return (order.data.checkoutMethod as WebshopTakeoutMethod)?.address?.shortString() ?? '';
                                 })(this),
@@ -303,21 +303,21 @@ export class Order extends AutoEncoder {
                     : []
             ),
             {
-                title: 'Datum',
+                title: $t(`Datum`),
                 value: Formatter.capitalizeFirstLetter(this.data.timeSlot?.dateString() ?? ''),
             },
             {
-                title: 'Tijdstip',
+                title: $t(`Tijdstip`),
                 value: this.data.timeSlot?.timeRangeString() ?? '',
             },
             {
-                title: 'Naam',
+                title: $t(`Naam`),
                 value: this.data.customer.name,
             },
             ...(this.data.customer.phone
                 ? [
                         {
-                            title: 'GSM-nummer',
+                            title: $t(`GSM-nummer`),
                             value: this.data.customer.phone,
                         },
                     ]
@@ -334,7 +334,7 @@ export class Order extends AutoEncoder {
                 (this.data.paymentMethod !== PaymentMethod.Unknown)
                     ? [
                             {
-                                title: 'Betaalmethode',
+                                title: $t(`Betaalmethode`),
                                 value: Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(this.data.paymentMethod)),
                             },
                         ]

@@ -1,8 +1,8 @@
 <template>
     <div class="st-view">
         <main class="center">
-            <h1>Deze pagina is voor beheerders</h1>
-            <p>Oeps, deze website is enkel voor beheerders van {{ organization.name }}. Ga naar het ledenportaal als je je wilt inschrijven als lid.</p>
+            <h1>{{ $t('Deze pagina is voor beheerders') }}</h1>
+            <p>{{ $t('Oeps, deze website is enkel voor beheerders van') }} {{ organization.name }}{{ $t('. Ga naar het ledenportaal als je je wilt inschrijven als lid.') }}</p>
         </main>
     </div>
 </template>

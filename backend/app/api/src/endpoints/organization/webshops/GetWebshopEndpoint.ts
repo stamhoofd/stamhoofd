@@ -40,7 +40,7 @@ export class GetWebshopEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Webshop not found',
-                human: 'Deze webshop bestaat niet (meer)',
+                human: $t(`Deze webshop bestaat niet (meer)`),
             });
         }
 

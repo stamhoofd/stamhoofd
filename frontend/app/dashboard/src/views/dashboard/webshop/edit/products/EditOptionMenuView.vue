@@ -1,38 +1,30 @@
 <template>
-    <SaveView :title="isNew ? 'Keuzemenu toevoegen' : 'Keuzemenu bewerken'" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`Keuzemenu toevoegen`) : $t(`Keuzemenu bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            Keuzemenu toevoegen
+            {{ $t('Keuzemenu toevoegen') }}
         </h1>
         <h1 v-else>
-            Keuzemenu bewerken
+            {{ $t('Keuzemenu bewerken') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
-            <input
-                ref="firstInput"
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="bv. Kies je extra's"
-                autocomplete="off"
-            >
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`bv. Kies je extra's`)">
         </STInputBox>
 
         <Checkbox v-model="multipleChoice">
-            Meerkeuze
+            {{ $t('Meerkeuze') }}
         </Checkbox>
         <p class="style-description">
-            Bij meerkeuze kunnen bestellers geen, één of meerdere keuzes aanduiden. In het andere geval moet er exact één keuze gemaakt worden (of je voegt nog een extra optie 'geen' toe).
+            {{ $t("Bij meerkeuze kunnen bestellers geen, één of meerdere keuzes aanduiden. In het andere geval moet er exact één keuze gemaakt worden (of je voegt nog een extra optie 'geen' toe).") }}
         </p>
 
-        <hr>
-        <h2 class="style-with-button">
-            <div>Keuzes</div>
+        <hr><h2 class="style-with-button">
+            <div>{{ $t('Keuzes') }}</div>
             <div>
                 <button class="button text only-icon-smartphone" type="button" @click="addOption">
                     <span class="icon add" />
-                    <span>Keuze</span>
+                    <span>{{ $t('Keuze') }}</span>
                 </button>
             </div>
         </h2>
@@ -40,14 +32,13 @@
         <OptionMenuOptions :option-menu="patchedOptionMenu" @patch="addOptionMenuPatch" />
 
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Verwijder dit keuzemenu
+            <hr><h2>
+                {{ $t('Verwijder dit keuzemenu') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span>{{ $t('Verwijderen') }}</span>
             </button>
         </div>
     </SaveView>

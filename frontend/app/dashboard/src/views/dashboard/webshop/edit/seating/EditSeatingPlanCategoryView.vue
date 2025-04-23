@@ -1,26 +1,19 @@
 <template>
-    <SaveView :title="isNew ? 'Categorie toevoegen' : 'Categorie bewerken'" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`Categorie toevoegen`) : $t(`Categorie bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            Zetelcategorie toevoegen
+            {{ $t('Zetelcategorie toevoegen') }}
         </h1>
         <h1 v-else>
-            Categorie bewerken
+            {{ $t('Categorie bewerken') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
-            <input
-                ref="firstInput"
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="Naam van deze keuze"
-                autocomplete="off"
-            >
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`Naam van deze keuze`)">
         </STInputBox>
 
-        <STInputBox title="Meer of minkost" error-fields="price" :error-box="errors.errorBox">
-            <PriceInput v-model="price" placeholder="+ 0 euro" :min="null" />
+        <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`Meer of minkost`)">
+            <PriceInput v-model="price" :min="null" :placeholder="$t(`+ 0 euro`)" />
         </STInputBox>
 
         <STList>
@@ -30,23 +23,22 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Enkel voor beheerders
+                    {{ $t('Enkel voor beheerders') }}
                 </h3>
                 <p class="style-description-small">
-                    Enkel een beheerder kan deze plaatsen selecteren bij het toevoegen van een bestelling.
+                    {{ $t('Enkel een beheerder kan deze plaatsen selecteren bij het toevoegen van een bestelling.') }}
                 </p>
             </STListItem>
         </STList>
 
         <div v-if="!isNew && !isSingle" class="container">
-            <hr>
-            <h2>
-                Verwijder deze categorie
+            <hr><h2>
+                {{ $t('Verwijder deze categorie') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span>{{ $t('Verwijderen') }}</span>
             </button>
         </div>
     </SaveView>

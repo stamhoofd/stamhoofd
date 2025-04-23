@@ -64,12 +64,12 @@ export class PaymentGeneral extends Payment {
             return id ? [id] : [];
         });
 
-        return Formatter.joinLast(Formatter.uniqueArray(ids), ', ', ' en ');
+        return Formatter.joinLast(Formatter.uniqueArray(ids), ', ', ' ' + $t(`en`) + ' ');
     }
 
     getDetailsHTMLTable(): string {
         let str = '';
-        str += `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><tr><th>Beschrijving</th><th>Prijs</th></tr></thead><tbody>`;
+        str += `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><tr><th>${$t('Beschrijving')}</th><th>${$t('Prijs')}</th></tr></thead><tbody>`;
 
         for (const balanceItemPayment of this.balanceItemPayments) {
             str += `<tr><td><h4>${Formatter.escapeHtml(balanceItemPayment.balanceItem.description)}</h4></td><td>${Formatter.escapeHtml(Formatter.price(balanceItemPayment.price))}</td></tr>`;
@@ -98,6 +98,6 @@ export class PaymentGeneral extends Payment {
             }
         }
 
-        return Formatter.capitalizeFirstLetter(Formatter.joinLast(arr, ', ', ' en '));
+        return Formatter.capitalizeFirstLetter(Formatter.joinLast(arr, ', ', ' ' + $t(`en`) + ' '));
     }
 }

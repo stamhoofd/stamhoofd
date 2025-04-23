@@ -1,18 +1,7 @@
 <template>
-    <ModernTableView
-        ref="modernTableView"
-        :table-object-fetcher="tableObjectFetcher"
-        :filter-builders="filterBuilders"
-        :default-sort-column="allColumns.find(c => c.id === 'createdAt')"
-        :default-filter="defaultFilter"
-        :title="title"
-        :column-configuration-id="configurationId"
-        :actions="actions"
-        :all-columns="allColumns"
-        :Route="Route"
-    >
+    <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :default-sort-column="allColumns.find(c => c.id === 'createdAt')" :default-filter="defaultFilter" :title="title" :column-configuration-id="configurationId" :actions="actions" :all-columns="allColumns" :Route="Route">
         <template #empty>
-            Geen betalingen gevonden
+            {{ $t('Geen betalingen gevonden') }}
         </template>
     </ModernTableView>
 </template>

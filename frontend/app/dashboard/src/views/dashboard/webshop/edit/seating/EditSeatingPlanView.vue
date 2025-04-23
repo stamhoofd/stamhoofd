@@ -6,19 +6,11 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="$isMobile" class="warning-box">
-            We raden aan om een zaalplan op te bouwen via een computer of tablet met toetsenbord.
+            {{ $t('We raden aan om een zaalplan op te bouwen via een computer of tablet met toetsenbord.') }}
         </p>
 
-        <STInputBox title="Naam zaal" error-fields="name" :error-box="errors.errorBox">
-            <input
-                ref="firstInput"
-                v-model="name"
-                class="input"
-                type="text"
-                :placeholder="'bv. Sportpaleis'"
-                autocomplete="off"
-                enterkeyhint="next"
-            >
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam zaal`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t(`bv. Sportpaleis`)" autocomplete="off" enterkeyhint="next">
         </STInputBox>
 
         <STList>
@@ -28,17 +20,16 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Verplicht optimale zaalbezetting
+                    {{ $t('Verplicht optimale zaalbezetting') }}
                 </h3>
                 <p class="style-description-small">
-                    Zorg dat het niet mogelijk is om maar één plaats tussen te laten.
+                    {{ $t('Zorg dat het niet mogelijk is om maar één plaats tussen te laten.') }}
                 </p>
             </STListItem>
         </STList>
 
-        <hr>
-        <h2>Zetelcategorieën</h2>
-        <p>Maak een zetelcategorie aan om een meerprijs in rekening te brengen voor sommige zetels of bepaalde zetels te reserveren. Selecteer daarna een rij of een zetel en klik op rechtermuisknop om de categorie van die rij of zetel te wijzigen.</p>
+        <hr><h2>{{ $t('Zetelcategorieën') }}</h2>
+        <p>{{ $t('Maak een zetelcategorie aan om een meerprijs in rekening te brengen voor sommige zetels of bepaalde zetels te reserveren. Selecteer daarna een rij of een zetel en klik op rechtermuisknop om de categorie van die rij of zetel te wijzigen.') }}</p>
         <STList>
             <STListItem v-for="category in patchedSeatingPlan.categories" :key="category.id" :selectable="true" element-name="button" @click="editCategory(category)">
                 <template #left>
@@ -53,54 +44,35 @@
                     <span class="icon add gray" />
                 </template>
                 <h3 class="style-title-list">
-                    Nieuwe categorie
+                    {{ $t('Nieuwe categorie') }}
                 </h3>
             </STListItem>
         </STList>
 
         <div v-for="section of patchedSeatingPlan.sections" :key="section.id" class="container">
-            <hr>
-
-            <h2 v-if="patchedSeatingPlan.sections.length > 1" class="style-with-button">
+            <hr><h2 v-if="patchedSeatingPlan.sections.length > 1" class="style-with-button">
                 <div>{{ section.name||'Zone' }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="deleteSection(section)" />
                 </div>
             </h2>
 
-            <STInputBox v-if="patchedSeatingPlan.sections.length > 1" title="Naam" :error-box="errors.errorBox" :error-fields="'sections['+section.id+'].name'">
-                <input
-                    :value="section.name"
-                    class="input"
-                    type="text"
-                    :placeholder="'bv. Middenplein'"
-                    autocomplete="off"
-                    enterkeyhint="next"
-                    @input="setSectionName(section, ($event as any).target.value)"
-                >
+            <STInputBox v-if="patchedSeatingPlan.sections.length > 1" :error-box="errors.errorBox" :error-fields="'sections['+section.id+'].name'" :title="$t(`Naam`)">
+                <input :value="section.name" class="input" type="text" :placeholder="$t(`bv. Middenplein`)" autocomplete="off" enterkeyhint="next" @input="setSectionName(section, ($event as any).target.value)">
             </STInputBox>
 
-            <EditSeatingPlanSectionBox
-                :seating-plan="patchedSeatingPlan"
-                :seating-plan-section="section"
-                :validator="errors.validator"
-                @patch="addPatch($event)"
-            />
+            <EditSeatingPlanSectionBox :seating-plan="patchedSeatingPlan" :seating-plan-section="section" :validator="errors.validator" @patch="addPatch($event)" />
         </div>
 
-        <hr>
-
-        <p>
+        <hr><p>
             <button class="button text" type="button" @click="addSection">
                 <span class="icon add" />
-                <span>Zone toevoegen</span>
+                <span>{{ $t('Zone toevoegen') }}</span>
             </button>
         </p>
 
         <template v-if="!isNew">
-            <hr>
-
-            <h2>Acties</h2>
+            <hr><h2>{{ $t('Acties') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="downloadSettings">
@@ -109,10 +81,10 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        Exporteer zaalplan
+                        {{ $t('Exporteer zaalplan') }}
                     </h2>
                     <p class="style-description">
-                        Sla een kopie van jouw zaalplan op zodat je het kan delen met andere verenigingen.
+                        {{ $t('Sla een kopie van jouw zaalplan op zodat je het kan delen met andere verenigingen.') }}
                     </p>
 
                     <template #right>
@@ -134,10 +106,10 @@ import { CenteredMessage, Checkbox, ErrorBox, LoadingButton, SaveView, STErrorsD
 import { PrivateWebshop, SeatingPlan, SeatingPlanCategory, SeatingPlanRow, SeatingPlanSection, Version, WebshopMetaData } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
+import { AppManager } from '@stamhoofd/networking';
 import { computed, ref } from 'vue';
 import EditSeatingPlanCategoryView from './EditSeatingPlanCategoryView.vue';
 import EditSeatingPlanSectionBox from './EditSeatingPlanSectionBox.vue';
-import { AppManager } from '@stamhoofd/networking';
 
 const props = defineProps<{
     isNew: boolean;

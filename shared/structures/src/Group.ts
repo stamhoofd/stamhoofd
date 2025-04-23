@@ -26,11 +26,11 @@ export enum GroupStatus {
 export function getGroupStatusName(status: GroupStatus) {
     switch (status) {
         case GroupStatus.Open:
-            return 'Geopend';
+            return $t(`Geopend`);
         case GroupStatus.Closed:
-            return 'Gesloten';
+            return $t(`Gesloten`);
         case GroupStatus.Archived:
-            return 'Gearhiveerd';
+            return $t(`Gearhiveerd`);
     }
 }
 

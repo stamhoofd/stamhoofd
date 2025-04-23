@@ -34,7 +34,7 @@ export class CheckWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Webshop not found',
-                human: 'Deze webshop bestaat niet (meer)',
+                human: $t(`Deze webshop bestaat niet (meer)`),
             });
         }
 

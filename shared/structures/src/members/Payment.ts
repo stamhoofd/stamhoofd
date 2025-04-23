@@ -86,7 +86,7 @@ export class Payment extends AutoEncoder {
     get title() {
         if (this.method !== PaymentMethod.Unknown) {
             if (this.type !== PaymentType.Payment) {
-                return 'Via ' + PaymentMethodHelper.getName(this.method);
+                return $t(`Via`) + ' ' + PaymentMethodHelper.getName(this.method);
             }
             return PaymentMethodHelper.getNameCapitalized(this.method);
         }
@@ -140,26 +140,26 @@ export class Payment extends AutoEncoder {
          */
         const data = [
             {
-                title: 'Betaalmethode',
+                title: $t(`Betaalmethode`),
                 value: this.method ? Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(this.method)) : '',
             },
             {
-                title: 'Te betalen',
+                title: $t(`Te betalen`),
                 value: this.status !== PaymentStatus.Succeeded ? Formatter.price(this?.price ?? 0) : Formatter.price(0),
             },
             ...(
                 this.method === PaymentMethod.Transfer
                     ? [
                             {
-                                title: 'Mededeling',
+                                title: $t(`Mededeling`),
                                 value: this.transferDescription ?? '',
                             },
                             {
-                                title: 'Rekeningnummer',
+                                title: $t(`Rekeningnummer`),
                                 value: this.transferSettings?.iban ?? '',
                             },
                             {
-                                title: 'Begunstigde',
+                                title: $t(`Begunstigde`),
                                 value: this.transferSettings?.creditor ?? '',
                             },
                         ]

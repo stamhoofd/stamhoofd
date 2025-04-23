@@ -374,22 +374,22 @@ export class Product extends AutoEncoder {
     getRemainingStockText(stock: number): string {
         if (stock === 1) {
             if (this.type === ProductType.Ticket) {
-                return 'één ticket';
+                return $t(`één ticket`);
             }
             if (this.type === ProductType.Person) {
-                return 'één persoon';
+                return $t(`één persoon`);
             }
-            return 'één stuk';
+            return $t(`één stuk`);
         }
 
         if (this.type === ProductType.Ticket) {
-            return stock + ' tickets';
+            return stock + ' ' + $t(`tickets`);
         }
 
         if (this.type === ProductType.Person) {
-            return stock + ' personen';
+            return stock + ' ' + $t(`personen`);
         }
-        return stock + ' stuks';
+        return stock + ' ' + $t(`stuks`);
     }
 
     get stockText(): string | null {
@@ -398,34 +398,34 @@ export class Product extends AutoEncoder {
         }
 
         if (this.remainingStockWithOptions === 0) {
-            return 'Uitverkocht';
+            return $t(`Uitverkocht`);
         }
 
-        return 'Nog ' + this.getRemainingStockText(this.remainingStockWithOptions);
+        return $t(`Nog`) + ' ' + this.getRemainingStockText(this.remainingStockWithOptions);
     }
 
     get isEnabledTextLong() {
         if (this.hidden) {
-            return 'Verborgen';
+            return $t(`Verborgen`);
         }
 
         if (!this.enabled) {
-            return 'Onbeschikbaar';
+            return $t(`Onbeschikbaar`);
         }
 
         if (this.enableInFuture && this.enableAfter) {
             if (this.disableAfter) {
-                return 'Beschikbaar vanaf ' + Formatter.dateTime(this.enableAfter) + ' tot ' + Formatter.dateTime(this.disableAfter);
+                return $t(`Beschikbaar vanaf`) + ' ' + Formatter.dateTime(this.enableAfter) + ' ' + $t(`tot`) + ' ' + Formatter.dateTime(this.disableAfter);
             }
-            return 'Beschikbaar vanaf ' + Formatter.dateTime(this.enableAfter);
+            return $t(`Beschikbaar vanaf`) + ' ' + Formatter.dateTime(this.enableAfter);
         }
 
         if (!this.isEnabled) {
-            return 'Onbeschikbaar';
+            return $t(`Onbeschikbaar`);
         }
 
         if (this.disableAfter) {
-            return 'Beschikbaar tot ' + Formatter.dateTime(this.disableAfter);
+            return $t(`Beschikbaar tot`) + ' ' + Formatter.dateTime(this.disableAfter);
         }
     }
 
@@ -437,7 +437,7 @@ export class Product extends AutoEncoder {
         if (this.disableAfter) {
             const diff = this.disableAfter.getTime() - new Date().getTime();
             if (diff < 24 * 60 * 60 * 1000) {
-                return 'Beschikbaar tot ' + Formatter.time(this.disableAfter);
+                return $t(`Beschikbaar tot`) + ' ' + Formatter.time(this.disableAfter);
             }
         }
         return null;

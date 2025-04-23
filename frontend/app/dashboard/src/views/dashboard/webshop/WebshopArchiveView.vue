@@ -1,12 +1,12 @@
 <template>
     <div class="st-view background">
-        <STNavigationBar title="Webshop archief" />
+        <STNavigationBar :title="$t(`Webshop archief`)" />
 
         <main>
             <h1>
-                Webshop archief
+                {{ $t('Webshop archief') }}
             </h1>
-            <p>Deze webshops werden gearchiveerd en zijn niet langer actief.</p>
+            <p>{{ $t('Deze webshops werden gearchiveerd en zijn niet langer actief.') }}</p>
 
             <STList>
                 <STListItem v-for="webshop in webshops" :key="webshop.id" :selectable="true" @click="openWebshop(webshop)">

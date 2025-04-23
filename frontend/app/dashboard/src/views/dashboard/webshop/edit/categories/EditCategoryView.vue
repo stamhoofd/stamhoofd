@@ -1,41 +1,26 @@
 <template>
-    <SaveView :title="isNew ? 'Categorie toevoegen' : name+' bewerken'" :disabled="!hasChanges" @save="save">
+    <SaveView :title="isNew ? $t(`Categorie toevoegen`) : name+' ' + $t(`bewerken`)" :disabled="!hasChanges" @save="save">
         <h1 v-if="isNew">
-            Categorie toevoegen
+            {{ $t('Categorie toevoegen') }}
         </h1>
         <h1 v-else>
-            {{ name || 'Categorie' }} bewerken
+            {{ name || 'Categorie' }} {{ $t('bewerken') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
-            <input
-                ref="firstInput"
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="Naam van deze categorie"
-                autocomplete="off"
-                enterkeyhint="next"
-            >
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`Naam van deze categorie`)">
         </STInputBox>
 
-        <STInputBox title="Beschrijving (optioneel)" error-fields="description" :error-box="errors.errorBox" class="max">
-            <textarea
-                v-model="description"
-                class="input"
-                type="text"
-                placeholder="Optioneel wat extra uitleg onder de titel van de categorie"
-                autocomplete="off"
-            />
+        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`Beschrijving (optioneel)`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`Optioneel wat extra uitleg onder de titel van de categorie`)" />
         </STInputBox>
 
-        <hr>
-        <h2 v-if="isTickets">
-            Tickets
+        <hr><h2 v-if="isTickets">
+            {{ $t('Tickets') }}
         </h2>
         <h2 v-else>
-            Artikels
+            {{ $t('Artikels') }}
         </h2>
         <STList v-model="draggableProducts" :draggable="true">
             <template #item="{item: product}">
@@ -46,20 +31,19 @@
         <p>
             <button class="button text" type="button" @click="addProduct">
                 <span class="icon add" />
-                <span v-if="isTickets">Ticket toevoegen</span>
-                <span v-else>Artikel toevoegen</span>
+                <span v-if="isTickets">{{ $t('Ticket toevoegen') }}</span>
+                <span v-else>{{ $t('Artikel toevoegen') }}</span>
             </button>
         </p>
 
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Verwijder deze categorie
+            <hr><h2>
+                {{ $t('Verwijder deze categorie') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span>{{ $t('Verwijderen') }}</span>
             </button>
         </div>
     </SaveView>

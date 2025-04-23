@@ -1,33 +1,32 @@
 <template>
-    <SaveView :title="isNew ? 'Korting toevoegen' : 'Korting bewerken'" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`Korting toevoegen`) : $t(`Korting bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            Korting toevoegen
+            {{ $t('Korting toevoegen') }}
         </h1>
         <h1 v-else>
-            Korting bewerken
+            {{ $t('Korting bewerken') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox title="Vast bedrag" error-fields="administrationFee.fixed" :error-box="errors.errorBox">
-                <PriceInput v-model="fixedDiscount" :min="0" placeholder="Vaste kost" :required="true" />
+            <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`Vast bedrag`)">
+                <PriceInput v-model="fixedDiscount" :min="0" :required="true" :placeholder="$t(`Vaste kost`)" />
             </STInputBox>
 
-            <STInputBox title="Percentage" error-fields="administrationFee.fixed" :error-box="errors.errorBox">
-                <PermyriadInput v-model="percentageDiscount" placeholder="Percentage" :required="true" />
+            <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`Percentage`)">
+                <PermyriadInput v-model="percentageDiscount" :required="true" :placeholder="$t(`Percentage`)" />
             </STInputBox>
         </div>
 
         <p class="style-description-small">
-            Deze kortingen worden op de volledige bestelling toegepast.
+            {{ $t('Deze kortingen worden op de volledige bestelling toegepast.') }}
         </p>
 
-        <hr>
-        <h2>
-            Korting op specifieke artikels
+        <hr><h2>
+            {{ $t('Korting op specifieke artikels') }}
         </h2>
-        <p>Je kan een procentuele korting geven op bepaalde artikels, je kan één artikel gratis maken, je kan een korting per stuk geven op de eerste x aantal stuks (of alle stuks) van een artikel...</p>
+        <p>{{ $t('Je kan een procentuele korting geven op bepaalde artikels, je kan één artikel gratis maken, je kan een korting per stuk geven op de eerste x aantal stuks (of alle stuks) van een artikel...') }}</p>
 
         <STList v-if="patchedDiscount.productDiscounts.length">
             <STListItem v-for="productDiscount of patchedDiscount.productDiscounts" :key="productDiscount.id" class="right-description right-stack" :selectable="true" @click="editProductDiscount(productDiscount)">
@@ -50,15 +49,14 @@
         <p>
             <button class="button text" type="button" @click="addProductDiscount">
                 <span class="icon add" />
-                <span>Artikel toevoegen</span>
+                <span>{{ $t('Artikel toevoegen') }}</span>
             </button>
         </p>
 
-        <hr>
-        <h2>
-            Artikelvoorwaarden
+        <hr><h2>
+            {{ $t('Artikelvoorwaarden') }}
         </h2>
-        <p>De korting wordt enkel toegepast als deze artikels met een bepaalde hoeveelheid aanwezig zijn in het winkelmandje. Hiermee kan je speciale kortingen bereiken waarbij je bijvoorbeeld korting geeft op een bepaald artikel als je eerst een ander artikel bestelt (bv. één drankkaart gratis als je 10 tickets bestelt).</p>
+        <p>{{ $t('De korting wordt enkel toegepast als deze artikels met een bepaalde hoeveelheid aanwezig zijn in het winkelmandje. Hiermee kan je speciale kortingen bereiken waarbij je bijvoorbeeld korting geeft op een bepaald artikel als je eerst een ander artikel bestelt (bv. één drankkaart gratis als je 10 tickets bestelt).') }}</p>
 
         <STList v-if="patchedDiscount.requirements.length">
             <STListItem v-for="requirement of patchedDiscount.requirements" :key="requirement.id" class="right-description right-stack" :selectable="true" @click="editRequirement(requirement)">
@@ -78,7 +76,7 @@
         <p>
             <button class="button text" type="button" @click="addRequirement">
                 <span class="icon add" />
-                <span>Artikelvoorwaarde toevoegen</span>
+                <span>{{ $t('Artikelvoorwaarde toevoegen') }}</span>
             </button>
         </p>
 
@@ -89,23 +87,22 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Meerdere keren toepassen
+                    {{ $t('Meerdere keren toepassen') }}
                 </h3>
                 <p class="style-description-small">
-                    Als de vereiste artikels meerdere keren aanwezig zijn, dan wordt de korting meerdere keren toegepast. Bijvoorbeeld als je korting op één artikel geeft op voorwaarde dat je eerst een ander artikel erbij bestelt.
+                    {{ $t('Als de vereiste artikels meerdere keren aanwezig zijn, dan wordt de korting meerdere keren toegepast. Bijvoorbeeld als je korting op één artikel geeft op voorwaarde dat je eerst een ander artikel erbij bestelt.') }}
                 </p>
             </STListItem>
         </STList>
 
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Verwijder deze korting
+            <hr><h2>
+                {{ $t('Verwijder deze korting') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span>{{ $t('Verwijderen') }}</span>
             </button>
         </div>
     </SaveView>

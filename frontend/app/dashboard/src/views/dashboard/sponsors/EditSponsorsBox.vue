@@ -1,13 +1,13 @@
 <template>
     <div class="container">
         <h2 class="style-with-button">
-            <div>Sponsors</div>
+            <div>{{ $t('Sponsors') }}</div>
             <div>
                 <button type="button" class="button icon add" @click="addSponsor" />
             </div>
         </h2>
 
-        <p>Het is mogelijk om het logo van sponsors op je tickets te plaatsen.</p>
+        <p>{{ $t('Het is mogelijk om het logo van sponsors op je tickets te plaatsen.') }}</p>
 
         <STList v-model="draggableSponsors" :draggable="true">
             <template #item="{item: sponsor}">
@@ -16,7 +16,7 @@
                         {{ sponsor.name || 'Naamloos' }}
                     </h3>
                     <p v-if="sponsor.onTickets" class="style-description-small">
-                        Op tickets
+                        {{ $t('Op tickets') }}
                     </p>
 
                     <template #right>

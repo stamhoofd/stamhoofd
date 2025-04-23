@@ -9,7 +9,7 @@
         </h3>
 
         <p class="style-description-small">
-            Uitschrijven voor {{ registration.group.settings.name }}
+            {{ $t('Uitschrijven voor') }} {{ registration.group.settings.name }}
         </p>
 
         <template #right>
@@ -24,8 +24,8 @@
 
 <script setup lang="ts">
 import { RegisterCheckout, RegistrationWithMember } from '@stamhoofd/structures';
-import GroupIconWithWaitingList from './GroupIconWithWaitingList.vue';
 import { computed } from 'vue';
+import GroupIconWithWaitingList from './GroupIconWithWaitingList.vue';
 
 const props = withDefaults(
     defineProps<{

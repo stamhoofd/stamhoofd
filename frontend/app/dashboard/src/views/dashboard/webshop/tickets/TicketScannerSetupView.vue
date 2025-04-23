@@ -1,35 +1,34 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Tickets scannen" />
+        <STNavigationBar :title="$t(`Tickets scannen`)" />
 
         <main>
             <h1>
-                Tickets scannen
+                {{ $t('Tickets scannen') }}
             </h1>
 
             <Spinner v-if="(isLoading && shouldFilter) || isChecking" />
             <p v-else-if="shouldFilter && !isLoading && (ticketProducts.length > 1 || disabledProducts.length)">
-                Vink hieronder de tickets aan die je wilt scannen en klik op "starten". Zo scan je niet per ongeluk een ongeldig ticket als je verschillende scanpunten hebt op je evenement (bv. drankkaarten en inkomtickets apart).
+                {{ $t(`Vink hieronder de tickets aan die je wilt scannen en klik op "starten". Zo scan je niet per ongeluk een ongeldig ticket als je verschillende scanpunten hebt op je evenement (bv. drankkaarten en inkomtickets apart).`) }}
             </p>
             <p v-else>
-                Klik op "starten" om te beginnen.
+                {{ $t(`Klik op "starten" om te beginnen.`) }}
             </p>
 
             <p v-if="noDatabaseSupport" class="error-box">
-                Dit appartaat ondersteunt de scanner niet. Probeer in een moderne browser, op een smartphone en zorg ervoor dat je niet in privé modus surft (dat voorkomt de noodzakelijk opslag van tickets als het internet wegvalt).
+                {{ $t('Dit appartaat ondersteunt de scanner niet. Probeer in een moderne browser, op een smartphone en zorg ervoor dat je niet in privé modus surft (dat voorkomt de noodzakelijk opslag van tickets als het internet wegvalt).') }}
             </p>
 
             <a v-if="STAMHOOFD.platformName === 'stamhoofd'" class="info-box icon download selectable" href="https://files.stamhoofd.be/website/docs/tickets-checklist.pdf" download="tickets-checklist.pdf" target="_blank">
-                Download de checklist voor het scannen van tickets
+                {{ $t('Download de checklist voor het scannen van tickets') }}
             </a>
             <a v-else class="info-box icon download selectable" href="https://files.stamhoofd.be/website/docs/tickets-checklist-whitelabel.pdf" download="tickets-checklist.pdf" target="_blank">
-                Download de checklist voor het scannen van tickets
+                {{ $t('Download de checklist voor het scannen van tickets') }}
             </a>
 
             <template v-if="shouldFilter && !isLoading && (ticketProducts.length > 1 || disabledProducts.length)">
                 <div v-for="category of categories" :key="category.id" class="container">
-                    <hr v-if="categories.length > 1">
-                    <h2 v-if="categories.length > 1">
+                    <hr v-if="categories.length > 1"><h2 v-if="categories.length > 1">
                         {{ category.name }}
                     </h2>
                     <STList>
@@ -53,7 +52,7 @@
             <template #right>
                 <button class="button primary" type="button" @click="start">
                     <span class="icon play" />
-                    <span>Starten</span>
+                    <span>{{ $t('Starten') }}</span>
                 </button>
             </template>
         </STToolbar>

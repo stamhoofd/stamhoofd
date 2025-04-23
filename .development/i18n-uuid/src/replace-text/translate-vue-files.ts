@@ -2,8 +2,10 @@ import chalk from "chalk";
 import fs from "fs";
 import { getFilesToSearch } from "../shared/get-files-to-search";
 import { eslintFormatter } from "./eslint-formatter";
+import { fileCache } from "./FileCache";
 import { getChangedFiles } from "./git-helper";
 import { getVueTemplateMatchCount, TranslateVueFileOptions, translateVueTemplate } from "./translate-vue-template";
+import { getTotalMatchCount, translateTypescript, TypescriptTranslatorOptions } from "./typescript-translator";
 
 interface TranslateVueFilesOptions {
     replaceChangesOnly?: boolean;
@@ -19,11 +21,12 @@ const attributeWhiteList = new Set([
     'placeholder',
     'label',
     'title',
-    'text'
+    'text',
+    'empty-message'
 ]);
 
 export async function translateVueFiles(options: TranslateVueFilesOptions = {}) {
-    const files = getFilesToSearch(['vue']);
+    const files = getFilesToSearch(['vue']).filter(filePath => !fileCache.hasFile(filePath));
     let filesToLoop: string[];
 
     if(options.replaceChangesOnly) {
@@ -73,12 +76,18 @@ export async function translateVueFileHelper(filePath: string, options: Translat
     current: number,
     total: number
 }, commitsToCompare?: [string, string]) {
+    let isDoubt = false;
+
     const fileOptions: TranslateVueFileOptions = {
         attributeWhiteList: options.attributeWhiteList ?? attributeWhiteList,
         doPrompt: options.doPrompt === undefined ? true : options.doPrompt,
         onBeforePrompt: () => {
             // console.clear();
             console.log(chalk.blue(filePath));
+        },
+        onPromptDoubt: () => {
+            isDoubt = true;
+            fileCache.doubtFile(filePath);
         },
         replaceChangesOnly: options.replaceChangesOnly ? {filePath, commitsToCompare} : undefined,
         fileProgress,
@@ -92,9 +101,22 @@ export async function translateVueFileHelper(filePath: string, options: Translat
         return;
     }
 
-    const translation = await translateVueTemplate(templateContent, fileOptions);
+    const templateTranslation = await translateVueTemplate(templateContent, fileOptions);
+    let newFileContent = replaceTemplate(fileContent, templateTranslation);
 
-    if(translation !== templateContent) {
+    const scriptContent = getScriptContent(fileContent);
+    let scriptTranslation = scriptContent;
+
+    if(scriptContent !== null) {
+        scriptTranslation = await translateTypescript(scriptContent, fileOptions);
+        newFileContent = replaceScript(fileContent, scriptTranslation, scriptContent);
+    }
+
+    if(!isDoubt) {
+        fileCache.addFile(filePath);
+    }
+
+    if(templateTranslation !== templateContent || scriptContent !== scriptTranslation) {
         const infoText = options.dryRun ? 'Completed with changes (dry-run)' : 'Write file';
 
         console.log(chalk.magenta(`
@@ -102,8 +124,6 @@ ${infoText}: `) + chalk.gray(filePath) + `
 `)
 
         if(!options.dryRun) {
-            const newFileContent = replaceTemplate(fileContent, translation);
-            
             fs.writeFileSync(filePath, newFileContent);
 
             if(options.doFix) {
@@ -135,9 +155,14 @@ async function getVueFileMatchCount(filePath: string, options: TranslateVueFileH
 
     const fileContent = fs.readFileSync(filePath, "utf8");
     const templateContent = getVueTemplate(fileContent);
+    const typescriptContent = getScriptContent(fileContent);
 
     if(templateContent === null) {
         return 0;
+    }
+
+    if(typescriptContent !== null) {
+        return await getVueTemplateMatchCount(templateContent, fileOptions) + await getScriptMatchCount(typescriptContent, fileOptions);
     }
 
     return await getVueTemplateMatchCount(templateContent, fileOptions);
@@ -155,7 +180,27 @@ function getVueTemplate(vueFileContent: string): string | null {
     return match[0] ?? null;
 }
 
+function getScriptContent(vueFileContent: string): string | null {
+    const regex = /<script.*>((?:.|\n)+)<\/script>/;
+
+    const match = vueFileContent.match(regex);
+
+    if(match === null) {
+        return null;
+    }
+
+    return match[1] ?? null;
+}
+
+async function getScriptMatchCount(scriptContent: string, options: TypescriptTranslatorOptions): Promise<number> {
+    return await getTotalMatchCount(scriptContent, options);
+}
+
 function replaceTemplate(vueFileContent: string, templateContent: string) {
     const templateRegex = /<template>((?:.|\n)+)<\/template>/;
     return vueFileContent.replace(templateRegex, templateContent);
+}
+
+function replaceScript(vueFileContent: string, scriptTranslation: string, scriptContent: string) {
+    return vueFileContent.replace(scriptContent, scriptTranslation);
 }

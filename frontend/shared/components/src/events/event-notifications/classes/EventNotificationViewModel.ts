@@ -88,7 +88,7 @@ export class EventNotificationViewModel {
                 if (this.isSaving) {
                     throw new SimpleError({
                         code: 'saving',
-                        message: 'Al bezig met opslaan... Even geduld.',
+                        message: $t('Al bezig met opslaan... Even geduld.'),
                     });
                 }
                 this.isSaving = true;
@@ -139,7 +139,7 @@ export class EventNotificationViewModel {
                 if (this.isSaving) {
                     throw new SimpleError({
                         code: 'saving',
-                        message: 'Al bezig met opslaan... Even geduld.',
+                        message: $t('Al bezig met opslaan... Even geduld.'),
                     });
                 }
                 this.isSaving = true;

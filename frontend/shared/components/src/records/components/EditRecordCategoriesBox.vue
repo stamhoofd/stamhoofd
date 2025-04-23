@@ -9,7 +9,7 @@
         <p>
             <button class="button text" type="button" @click="addCategory()">
                 <span class="icon add" />
-                <span>Nieuwe vragenlijst</span>
+                <span>{{ $t('Nieuwe vragenlijst') }}</span>
             </button>
         </p>
     </div>

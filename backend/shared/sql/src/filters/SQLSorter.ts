@@ -1,11 +1,11 @@
 import { PlainObject } from '@simonbackx/simple-encoding';
 import { SortDefinition, SortList } from '@stamhoofd/structures';
 
-import { SQLOrderBy, SQLOrderByDirection } from '../SQLOrderBy';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { SQLSelect } from '../SQLSelect';
-import { SQLJoin } from '../SQLJoin';
 import { SQLExpression } from '../SQLExpression';
+import { SQLJoin } from '../SQLJoin';
+import { SQLOrderBy, SQLOrderByDirection } from '../SQLOrderBy';
+import { SQLSelect } from '../SQLSelect';
 
 export type SQLSortDefinition<T, B extends PlainObject | Date = PlainObject | Date> = SortDefinition<T, B> & {
     toSQL(direction: SQLOrderByDirection): SQLOrderBy;
@@ -44,7 +44,7 @@ export function applySQLSorter(selectQuery: SQLSelect<any>, sortBy: SortList, de
                         throw new SimpleError({
                             code: 'sorter_join_overlap',
                             message: 'This combination of sorters is not possible',
-                            human: 'Deze combinatie van sorteringen is niet mogelijk',
+                            human: $t('Deze combinatie van sorteringen is niet mogelijk'),
                         });
                     }
                 }

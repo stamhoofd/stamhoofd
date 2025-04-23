@@ -36,48 +36,48 @@ export function downgradePaymentMethodArrayV150(newerValue: PaymentMethod[]): Pa
 export class PaymentMethodHelper {
     static getName(method: PaymentMethod, context: null | 'takeout' | 'delivery' | 'Takeout' | 'Delivery' | 'OnSite' = null): string {
         switch (method) {
-            case PaymentMethod.Unknown: return 'onbekende betaalmethode';
+            case PaymentMethod.Unknown: return $t(`onbekende betaalmethode`);
             case PaymentMethod.PointOfSale: {
                 switch (context) {
-                    case 'takeout': return 'bij afhalen';
-                    case 'delivery': return 'bij levering';
-                    case 'Takeout': return 'bij afhalen';
-                    case 'Delivery': return 'bij levering';
-                    case 'OnSite': return 'ter plaatse';
-                    default: return 'ter plaatse';
+                    case 'takeout': return $t(`bij afhalen`);
+                    case 'delivery': return $t(`bij levering`);
+                    case 'Takeout': return $t(`bij afhalen`);
+                    case 'Delivery': return $t(`bij levering`);
+                    case 'OnSite': return $t(`ter plaatse`);
+                    default: return $t(`ter plaatse`);
                 }
             }
-            case PaymentMethod.Transfer: return 'overschrijving';
-            case PaymentMethod.DirectDebit: return 'domiciliëring';
-            case PaymentMethod.Bancontact: return 'Bancontact';
-            case PaymentMethod.iDEAL: return 'iDEAL';
-            case PaymentMethod.CreditCard: return 'kredietkaart';
-            case PaymentMethod.Payconiq: return 'Payconiq by Bancontact';
+            case PaymentMethod.Transfer: return $t(`overschrijving`);
+            case PaymentMethod.DirectDebit: return $t(`domiciliëring`);
+            case PaymentMethod.Bancontact: return $t(`Bancontact`);
+            case PaymentMethod.iDEAL: return $t(`iDEAL`);
+            case PaymentMethod.CreditCard: return $t(`kredietkaart`);
+            case PaymentMethod.Payconiq: return $t(`Payconiq by Bancontact`);
         }
     }
 
     static getPaymentName(method: PaymentMethod, type: PaymentType): string {
         if (type === PaymentType.Payment) {
             switch (method) {
-                case PaymentMethod.Unknown: return 'onbekende betaling';
+                case PaymentMethod.Unknown: return $t(`onbekende betaling`);
                 case PaymentMethod.PointOfSale: {
-                    return 'betaling ter plaatse';
+                    return $t(`betaling ter plaatse`);
                 }
-                case PaymentMethod.Transfer: return 'overschrijving';
-                case PaymentMethod.DirectDebit: return 'domiciliëring';
-                case PaymentMethod.Bancontact: return 'Bancontact betaling';
-                case PaymentMethod.iDEAL: return 'iDEAL betaling';
-                case PaymentMethod.CreditCard: return 'kredietkaart betaling';
-                case PaymentMethod.Payconiq: return 'Payconiq betaling';
+                case PaymentMethod.Transfer: return $t(`overschrijving`);
+                case PaymentMethod.DirectDebit: return $t(`domiciliëring`);
+                case PaymentMethod.Bancontact: return $t(`Bancontact betaling`);
+                case PaymentMethod.iDEAL: return $t(`iDEAL betaling`);
+                case PaymentMethod.CreditCard: return $t(`kredietkaart betaling`);
+                case PaymentMethod.Payconiq: return $t(`Payconiq betaling`);
             }
         }
 
         if (type === PaymentType.Refund) {
-            return 'terugbetaling via ' + PaymentMethodHelper.getName(method);
+            return $t(`terugbetaling via`) + ' ' + PaymentMethodHelper.getName(method);
         }
 
         if (type === PaymentType.Chargeback) {
-            return 'terugvordering van ' + PaymentMethodHelper.getName(method);
+            return $t(`terugvordering van`) + ' ' + PaymentMethodHelper.getName(method);
         }
 
         return PaymentTypeHelper.getName(type);
@@ -85,16 +85,16 @@ export class PaymentMethodHelper {
 
     static getPluralName(method: PaymentMethod): string {
         switch (method) {
-            case PaymentMethod.Unknown: return 'onbekende betaalmethodes';
+            case PaymentMethod.Unknown: return $t(`onbekende betaalmethodes`);
             case PaymentMethod.PointOfSale: {
-                return 'betalingen ter plaatse';
+                return $t(`betalingen ter plaatse`);
             }
-            case PaymentMethod.Transfer: return 'overschrijvingen';
-            case PaymentMethod.DirectDebit: return 'domiciliëringen';
-            case PaymentMethod.Bancontact: return 'Bancontact';
-            case PaymentMethod.iDEAL: return 'iDEAL';
-            case PaymentMethod.CreditCard: return 'kredietkaart';
-            case PaymentMethod.Payconiq: return 'Payconiq';
+            case PaymentMethod.Transfer: return $t(`overschrijvingen`);
+            case PaymentMethod.DirectDebit: return $t(`domiciliëringen`);
+            case PaymentMethod.Bancontact: return $t(`Bancontact`);
+            case PaymentMethod.iDEAL: return $t(`iDEAL`);
+            case PaymentMethod.CreditCard: return $t(`kredietkaart`);
+            case PaymentMethod.Payconiq: return $t(`Payconiq`);
         }
     }
 

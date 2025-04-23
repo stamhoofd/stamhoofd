@@ -2,8 +2,8 @@
     <div class="st-view">
         <STNavigationBar :title="title">
             <template #right>
-                <button v-if="hasPrevious || hasNext" v-tooltip="'Ga naar vorige'" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" v-tooltip="'Ga naar volgende'" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goForward" />
+                <button v-if="hasPrevious || hasNext" v-tooltip="$t('Ga naar vorige')" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
+                <button v-if="hasNext || hasPrevious" v-tooltip="$t('Ga naar volgende')" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goForward" />
             </template>
         </STNavigationBar>
 
@@ -48,10 +48,10 @@
                         {{ formatPrice(item.amountOpen + Math.max(0, item.amountPending)) }}
                     </p>
                     <p v-if="item.amountPending > 0" class="style-description-small">
-                        waarvan {{ formatPrice(item.amountPending) }} in verwerking
+                        {{ $t('waarvan {amount} in verwerking', {amount: formatPrice(item.amountPending)}) }}
                     </p>
                     <p v-if="item.amountPending < 0" class="style-description-small">
-                        een terugbetaling van {{ formatPrice(-item.amountPending) }} is nog in verwerking
+                        {{ $t('een terugbetaling van {amount} is nog in verwerking', {amount: formatPrice(-item.amountPending)}) }}
                     </p>
                 </STListItem>
 
@@ -63,10 +63,9 @@
                         {{ formatPrice(-item.amountOpen + Math.max(0, -item.amountPending)) }}
                     </p>
                     <p v-if="item.amountPending > 0" class="style-description-small">
-                        een betaling in verwerking van {{ formatPrice(item.amountPending) }} dient geannuleerd te worden
-                    </p>
-                    <p v-if="item.amountPending < 0" class="style-description-small">
-                        waarvan een terugbetaling van {{ formatPrice(-item.amountPending) }} nog in verwerking
+                        {{ $t('een betaling in verwerking van {amount} dient geannuleerd te worden', {amount: formatPrice(item.amountPending)}) }}
+                    </p><p v-if="item.amountPending < 0" class="style-description-small">
+                        {{ $t('waarvan een terugbetaling van {amount} nog in verwerking', {amount: formatPrice(-item.amountPending)}) }}
                     </p>
                 </STListItem>
 
@@ -75,22 +74,21 @@
                         {{ $t('a8bf2d7d-3208-4c18-bac3-2cc97b629ad1') }}
                     </h3>
                     <p class="style-definition-text">
-                        {{ item.lastReminderEmail && item.reminderEmailCount > 0 ? formatDateTime(item.lastReminderEmail, true) : 'Nog niet verstuurd' }}
+                        {{ item.lastReminderEmail && item.reminderEmailCount > 0 ? formatDateTime(item.lastReminderEmail, true) : $t('Nog niet verstuurd') }}
                     </p>
                     <p v-if="item.lastReminderEmail && item.reminderEmailCount > 1" class="style-description-small">
-                        Al {{ item.reminderEmailCount }} automatische e-mails verstuurd
+                        {{ $t('Al {count} automatische e-mails verstuurd', {count: item.reminderEmailCount.toString()}) }}
                     </p>
                     <p v-if="item.lastReminderEmail && item.reminderEmailCount && item.lastReminderAmountOpen !== item.amountOpen" class="style-description-small">
-                        Bedrag was toen {{ formatPrice(item.lastReminderAmountOpen) }}
+                        {{ $t('Bedrag was toen {amount}', {amount: formatPrice(item.lastReminderAmountOpen)}) }}
                     </p>
                     <p v-if="!item.lastReminderEmail || item.reminderEmailCount === 0" class="style-description-small">
-                        Als automatische e-mails zijn ingeschakeld wordt de eerste e-mail morgenvroeg verzonden.
+                        {{ $t('Als automatische e-mails zijn ingeschakeld wordt de eerste e-mail morgenvroeg verzonden.') }}
                     </p>
                 </STListItem>
             </STList>
 
-            <hr>
-            <ReceivableBalanceBox :item="item" :member="member" :hide-segmented-control="false" />
+            <hr><ReceivableBalanceBox :item="item" :member="member" :hide-segmented-control="false" />
         </main>
     </div>
 </template>

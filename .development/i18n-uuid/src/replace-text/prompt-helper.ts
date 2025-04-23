@@ -1,6 +1,13 @@
 import readline from 'readline/promises';
 
-export async function promptBoolean(message: string) {
+
+export enum ReplaceTextPromptResult {
+    Yes,
+    No,
+    Doubt
+}
+
+export async function promptReplaceText(message: string): Promise<ReplaceTextPromptResult> {
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,
@@ -25,19 +32,22 @@ export async function promptBoolean(message: string) {
     rl.close();
     rl.removeAllListeners();
     
-    return answerToBoolean(answer);
+    return answerToResult(answer);
 }
 
-function answerToBoolean(answer: string): boolean {
+function answerToResult(answer: string): ReplaceTextPromptResult {
     if(!answer) {
-        return true;
+        return ReplaceTextPromptResult.Yes;
     }
     
     switch(answer.trim().toLowerCase()) {
         case 'y':
         case 'yes': {
-            return true;
+            return ReplaceTextPromptResult.Yes;
         }
-        default: return false;
+        case 'd': {
+            return ReplaceTextPromptResult.Doubt;
+        }
+        default: return ReplaceTextPromptResult.No;
     }
 }

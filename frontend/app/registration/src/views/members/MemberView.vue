@@ -2,15 +2,15 @@
     <div class="st-view">
         <STNavigationBar :title="member.member.details.name">
             <template #right>
-                <button v-tooltip="$t('f2eb0c04-0dca-4c8e-b920-7044a65aee6a')" class="button icon navigation edit" type="button" @click="doEdit" />
+                <button :v-tooltip="$t('f2eb0c04-0dca-4c8e-b920-7044a65aee6a')" class="button icon navigation edit" type="button" @click="doEdit" />
             </template>
         </STNavigationBar>
 
         <main>
             <h1 class="style-navigation-title with-icons">
                 <span class="icon-spacer">{{ member.member.details.name }}</span>
-                <span v-if="member.member.details.gender === Gender.Male" v-tooltip="member.member.details.defaultAge >= 18 ? 'Man' : 'Jongen'" class="icon male blue icon-spacer" />
-                <span v-if="member.member.details.gender === Gender.Female" v-tooltip="member.member.details.defaultAge >= 18 ? 'Vrouw' : 'Meisje'" class="icon female pink icon-spacer" />
+                <span v-if="member.member.details.gender === Gender.Male" :v-tooltip="member.member.details.defaultAge >= 18 ? $t('Man') : $t('Jongen')" class="icon male blue icon-spacer" />
+                <span v-if="member.member.details.gender === Gender.Female" :v-tooltip="member.member.details.defaultAge >= 18 ? $t('Vrouw') : $t('Meisje')" class="icon female pink icon-spacer" />
             </h1>
 
             <div class="member-view-details split">

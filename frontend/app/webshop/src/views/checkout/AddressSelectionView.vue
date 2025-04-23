@@ -1,26 +1,26 @@
 <template>
-    <SaveView title="Kies je leveringsadres" :loading="loading" save-icon-right="arrow-right" save-text="Doorgaan" data-submit-last-field @save="goNext">
-        <h1>Kies je leveringsadres</h1>
+    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('Doorgaan')" data-submit-last-field :title="$t(`Kies je leveringsadres`)" @save="goNext">
+        <h1>{{ $t('Kies je leveringsadres') }}</h1>
         <div v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice !== checkout.deliveryPrice" class="info-box">
-            Bestel minimum {{ formatPrice(deliveryMethod.price.minimumPrice) }} om van een verlaagde leveringskost van {{ formatPrice(deliveryMethod.price.discountPrice) }} te genieten.
+            {{ $t('Bestel minimum {min} om van een verlaagde leveringskost van {price} te genieten.', {min: formatPrice(deliveryMethod.price.minimumPrice), price: formatPrice(deliveryMethod.price.discountPrice)}) }}
         </div>
 
         <p v-if="checkout.deliveryPrice === 0" class="success-box">
-            Levering is gratis
+            {{ $t('Levering is gratis') }}
             <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.price !== 0">
-                vanaf een bestelbedrag van {{ formatPrice(deliveryMethod.price.minimumPrice) }}.
+                {{ $t('vanaf een bestelbedrag van {min}.', {min: formatPrice(deliveryMethod.price.minimumPrice)}) }}
             </template>
         </p>
         <p v-else class="info-box">
-            De leveringskost bedraagt {{ formatPrice(checkout.deliveryPrice) }}
+            {{ $t('De leveringskost bedraagt') }} {{ formatPrice(checkout.deliveryPrice) }}
             <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice === checkout.deliveryPrice">
-                vanaf een bestelbedrag van {{ formatPrice(deliveryMethod.price.minimumPrice) }}.
+                {{ $t('vanaf een bestelbedrag van {min}.', {min: formatPrice(deliveryMethod.price.minimumPrice)}) }}
             </template>
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <AddressInput v-model="address" :required="true" title="Vul het leveringsadres in" :validator="errors.validator" :validate-server="unscopedServer" />
+        <AddressInput v-model="address" :required="true" :validator="errors.validator" :validate-server="unscopedServer" :title="$t(`Vul het leveringsadres in`)" />
     </SaveView>
 </template>
 

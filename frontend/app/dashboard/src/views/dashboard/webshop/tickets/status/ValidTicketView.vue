@@ -1,40 +1,35 @@
 <template>
     <div ref="root" class="st-view valid-ticket-view">
-        <STNavigationBar title="Geldig ticket" />
+        <STNavigationBar :title="$t(`Geldig ticket`)" />
 
         <main v-if="!publicTicket.isSingle">
             <h1>
                 <span class="icon green success" />
-                <span>Bestelling #{{ order.number }}</span>
+                <span>{{ $t('Bestelling #') }}{{ order.number }}</span>
             </h1>
 
             <p v-if="order.pricePaid < order.totalToPay" class="warning-box">
-                Deze bestelling werd nog niet (volledig) betaald.
+                {{ $t('Deze bestelling werd nog niet (volledig) betaald.') }}
             </p>
             <p v-if="order.pricePaid > order.totalToPay" class="warning-box">
-                Er werd te veel betaald voor de bestelling (waarschijnlijk gewijzigd na betaling). Er is een terugbetaling nodig.
+                {{ $t('Er werd te veel betaald voor de bestelling (waarschijnlijk gewijzigd na betaling). Er is een terugbetaling nodig.') }}
             </p>
 
             <p v-if="order.status === 'Completed'" class="warning-box">
-                Deze bestelling werd al als voltooid gemarkeerd
+                {{ $t('Deze bestelling werd al als voltooid gemarkeerd') }}
             </p>
             <p v-if="order.status === 'Canceled'" class="error-box">
-                Deze bestelling werd geannuleerd
+                {{ $t('Deze bestelling werd geannuleerd') }}
             </p>
 
             <button v-if="order.pricePaid !== order.totalToPay && hasPaymentsWrite && isMissingPayments" class="button text" type="button" @click="createPayment">
                 <span class="icon add" />
-                <span>Betaling / terugbetaling registreren</span>
+                <span>{{ $t('Betaling / terugbetaling registreren') }}</span>
             </button>
 
             <div v-if="hasWarnings" class="hover-box container">
-                <hr>
-                <ul class="member-records">
-                    <li
-                        v-for="warning in sortedWarnings"
-                        :key="warning.id"
-                        :class="{ [warning.type]: true }"
-                    >
+                <hr><ul class="member-records">
+                    <li v-for="warning in sortedWarnings" :key="warning.id" :class="{ [warning.type]: true }">
                         <span :class="'icon '+warning.icon" />
                         <span class="text">{{ warning.text }}</span>
                     </li>
@@ -46,13 +41,12 @@
                 <CartItemRow v-for="cartItem of order.data.cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="order.data.cart" :webshop="webshop" :editable="false" :admin="true" />
             </STList>
 
-            <hr>
-            <h2>Informatie</h2>
+            <hr><h2>{{ $t('Informatie') }}</h2>
 
             <STList>
                 <STListItem v-if="order.totalToPay || !webshop?.isAllFree">
                     <h3 class="style-definition-label">
-                        Totaal te betalen
+                        {{ $t('Totaal te betalen') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(order.totalToPay) }}
@@ -61,7 +55,7 @@
 
                 <STListItem v-if="(order.totalToPay || !webshop?.isAllFree) && (order.pricePaid > 0 && order.pricePaid !== order.totalToPay)">
                     <h3 class="style-definition-label">
-                        Betaald bedrag
+                        {{ $t('Betaald bedrag') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(order.pricePaid) }}
@@ -70,7 +64,7 @@
 
                 <STListItem v-if="order.validAt !== null">
                     <h3 class="style-definition-label">
-                        Geplaatst op
+                        {{ $t('Geplaatst op') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ capitalizeFirstLetter(formatDateTime(order.validAt)) }}
@@ -79,7 +73,7 @@
 
                 <STListItem v-long-press="(e: Event) => (hasWrite ? markAs(e) : null)" class="right-description right-stack" :selectable="hasWrite" @click="hasWrite ? markAs($event) : null">
                     <h3 :class="'style-definition-label '+statusColor">
-                        Status
+                        {{ $t('Status') }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ statusName }}</span>
@@ -90,13 +84,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem
-                    v-for="(payment, index) in order.payments"
-                    :key="payment.id"
-                    v-long-press="(e: MouseEvent) => (hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite"
-                    class="right-description" @click="openPayment(payment)"
-                    @contextmenu.prevent="hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus($event) : null"
-                >
+                <STListItem v-for="(payment, index) in order.payments" :key="payment.id" v-long-press="(e: MouseEvent) => (hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite" class="right-description" @click="openPayment(payment)" @contextmenu.prevent="hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus($event) : null">
                     <h3 class="style-definition-label">
                         {{ payment.price >= 0 ? 'Betaling' : 'Terugbetaling' }} {{ order.payments.length > 1 ? index + 1 : '' }}
                     </h3>
@@ -114,31 +102,30 @@
             </STList>
 
             <template v-if="order.data.checkoutMethod">
-                <hr>
-                <h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
-                    Afhalen
+                <hr><h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
+                    {{ $t('Afhalen') }}
                 </h2>
                 <h2 v-else-if="order.data.checkoutMethod.type === 'Delivery'">
-                    Levering
+                    {{ $t('Levering') }}
                 </h2>
                 <h2 v-else-if="order.data.checkoutMethod.type === 'OnSite'">
-                    Ter plaatse consumeren
+                    {{ $t('Ter plaatse consumeren') }}
                 </h2>
                 <h2 v-else>
-                    Onbekende methode
+                    {{ $t('Onbekende methode') }}
                 </h2>
 
                 <STList class="info">
                     <STListItem v-if="order.data.checkoutMethod.name" class="right-description">
                         <h3 class="style-definition-label">
                             <template v-if="order.data.checkoutMethod.type === 'Takeout'">
-                                Afhaallocatie
+                                {{ $t('Afhaallocatie') }}
                             </template>
                             <template v-else-if="order.data.checkoutMethod.type === 'OnSite'">
-                                Locatie
+                                {{ $t('Locatie') }}
                             </template>
                             <template v-else>
-                                Leveringsmethode
+                                {{ $t('Leveringsmethode') }}
                             </template>
                         </h3>
 
@@ -148,7 +135,7 @@
                     </STListItem>
                     <STListItem v-if="(order.data.checkoutMethod as any).address" class="right-description">
                         <h3 class="style-definition-label">
-                            Adres
+                            {{ $t('Adres') }}
                         </h3>
 
                         <p class="style-definition-text">
@@ -157,7 +144,7 @@
                     </STListItem>
                     <STListItem v-if="order.data.address" class="right-description">
                         <h3 class="style-definition-label">
-                            Leveringsadres
+                            {{ $t('Leveringsadres') }}
                         </h3>
 
                         <p class="style-definition-text">
@@ -167,23 +154,23 @@
                     <STListItem v-if="order.data.timeSlot" class="right-description">
                         <h3 class="style-definition-label">
                             <template v-if="order.data.checkoutMethod.type === 'Takeout'">
-                                Wanneer afhalen?
+                                {{ $t('Wanneer afhalen?') }}
                             </template>
                             <template v-else-if="order.data.checkoutMethod.type === 'OnSite'">
-                                Wanneer?
+                                {{ $t('Wanneer?') }}
                             </template>
                             <template v-else>
-                                Wanneer leveren?
+                                {{ $t('Wanneer leveren?') }}
                             </template>
                         </h3>
 
                         <p class="style-definition-text">
-                            {{ capitalizeFirstLetter(formatDate(order.data.timeSlot.date)) }}<br>{{ formatMinutes(order.data.timeSlot.startTime) }} - {{ formatMinutes(order.data.timeSlot.endTime) }}
+                            {{ capitalizeFirstLetter(formatDate(order.data.timeSlot.date)) }}<br>
                         </p>
                     </STListItem>
                     <STListItem v-if="order.data.deliveryPrice > 0" class="right-description">
                         <h3 class="style-definition-label">
-                            Leveringskost
+                            {{ $t('Leveringskost') }}
                         </h3>
 
                         <p class="style-definition-text">
@@ -192,7 +179,7 @@
                     </STListItem>
                     <STListItem v-if="order.data.administrationFee > 0" class="right-description">
                         <h3 class="style-definition-label">
-                            Administratiekosten
+                            {{ $t('Administratiekosten') }}
                         </h3>
 
                         <p class="style-definition-text">
@@ -202,13 +189,12 @@
                 </STList>
             </template>
 
-            <hr>
-            <h2>Gegevens</h2>
+            <hr><h2>{{ $t('Gegevens') }}</h2>
 
             <STList class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        Naam
+                        {{ $t('Naam') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ order.data.customer.name }}
@@ -217,7 +203,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        E-mailadres
+                        {{ $t('E-mailadres') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ order.data.customer.email }}
@@ -247,21 +233,19 @@
             <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="order.data" />
 
             <div v-if="order.data.comments" class="container">
-                <hr>
-                <h2>
-                    Notities
+                <hr><h2>
+                    {{ $t('Notities') }}
                 </h2>
 
                 <p class="pre-wrap" v-text="order.data.comments" />
             </div>
 
             <div v-if="order.data.checkoutMethod && order.data.checkoutMethod.description" class="container">
-                <hr>
-                <h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
-                    Afhaalopmerkingen
+                <hr><h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
+                    {{ $t('Afhaalopmerkingen') }}
                 </h2>
                 <h2 v-else>
-                    Leveringsopmerkingen
+                    {{ $t('Leveringsopmerkingen') }}
                 </h2>
 
                 <p class="pre-wrap" v-text="order.data.checkoutMethod.description" />
@@ -278,11 +262,11 @@
             </p>
 
             <p v-if="order.status === 'Canceled'" class="error-box">
-                Deze bestelling werd geannuleerd
+                {{ $t('Deze bestelling werd geannuleerd') }}
             </p>
 
             <p v-if="order.payment && order.payment.status !== 'Succeeded'" class="warning-box">
-                Opgelet: deze bestelling werd nog niet betaald.
+                {{ $t('Opgelet: deze bestelling werd nog niet betaald.') }}
             </p>
 
             <p v-if="changedSeatString" class="warning-box">
@@ -290,13 +274,8 @@
             </p>
 
             <div v-if="hasWarnings" class="hover-box container">
-                <hr>
-                <ul class="member-records">
-                    <li
-                        v-for="warning in sortedWarnings"
-                        :key="warning.id"
-                        :class="{ [warning.type]: true }"
-                    >
+                <hr><ul class="member-records">
+                    <li v-for="warning in sortedWarnings" :key="warning.id" :class="{ [warning.type]: true }">
                         <span :class="'icon '+warning.icon" />
                         <span class="text">{{ warning.text }}</span>
                     </li>
@@ -307,7 +286,7 @@
             <STList class="info">
                 <STListItem v-if="item.product.dateRange">
                     <h3 class="style-definition-label">
-                        Wanneer?
+                        {{ $t('Wanneer?') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDateRange(item.product.dateRange) }}
@@ -353,7 +332,7 @@
 
                 <STListItem :selectable="true" @click="openOrder">
                     <h3 class="style-definition-label">
-                        Bestelling
+                        {{ $t('Bestelling') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ order.number }}
@@ -368,19 +347,19 @@
 
         <main v-else>
             <h1>
-                Leeg ticket?
+                {{ $t('Leeg ticket?') }}
             </h1>
-            <p>Er ging iets mis bij het lezen van de inhoud van dit ticket.</p>
+            <p>{{ $t('Er ging iets mis bij het lezen van de inhoud van dit ticket.') }}</p>
         </main>
 
         <STToolbar>
             <template #right>
                 <button v-if="ticket.scannedAt" class="button secundary" type="button" @click="cancelScan">
-                    Markering ongedaan maken
+                    {{ $t('Markering ongedaan maken') }}
                 </button>
                 <button class="button primary" type="button" @click="markScanned">
                     <span class="icon qr-code" />
-                    <span>Markeer als gescand</span>
+                    <span>{{ $t('Markeer als gescand') }}</span>
                 </button>
             </template>
         </STToolbar>

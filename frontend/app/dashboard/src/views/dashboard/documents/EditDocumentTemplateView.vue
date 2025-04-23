@@ -6,11 +6,11 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox v-if="isNew" title="Type document" error-fields="type" :error-box="errors.errorBox">
+        <STInputBox v-if="isNew" error-fields="type" :error-box="errors.errorBox" :title="$t(`Type document`)">
             <LoadingButton :loading="loadingHtml || loadingXml">
                 <Dropdown v-model="editingType">
                     <option :value="null" disabled>
-                        Maak een keuze
+                        {{ $t('Maak een keuze') }}
                     </option>
                     <option v-for="_type in availableTypes" :key="_type.value ?? _type.definition.name" :value="_type.value">
                         {{ _type.definition.name }}
@@ -20,48 +20,30 @@
         </STInputBox>
 
         <template v-if="editingType || !isNew">
-            <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
-                <input
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    placeholder="Naam document"
-                >
+            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
+                <input v-model="name" class="input" type="text" :placeholder="$t(`Naam document`)">
             </STInputBox>
 
-            <!-- Depending on the selected definition, we'll display all the required fields here -->
             <div v-for="category of fieldCategories.filter(c => c.filterRecords(patchedDocument).filter(record => isDocumentFieldEditable(record)).length > 0)" :key="category.id" class="container">
-                <hr>
-                <h2>{{ category.name }}</h2>
+                <hr><h2>{{ category.name }}</h2>
                 <p v-if="category.description" class="style-description pre-wrap" v-text="category.description" />
 
-                <RecordAnswerInput
-                    v-for="record of category.filterRecords(patchedDocument).filter(record => isDocumentFieldEditable(record))"
-                    :key="record.id"
-                    :record="record"
-                    :answers="recordAnswers"
-                    :validator="errors.validator"
-                    :mark-reviewed="true"
-                    @patch="patchAnswers"
-                />
+                <RecordAnswerInput v-for="record of category.filterRecords(patchedDocument).filter(record => isDocumentFieldEditable(record))" :key="record.id" :record="record" :answers="recordAnswers" :validator="errors.validator" :mark-reviewed="true" @patch="patchAnswers" />
             </div>
 
-            <!-- Display all the required linking -->
             <div v-for="category of documentFieldCategories" :key="category.id" class="container">
-                <hr>
-                <h2>Koppelen: {{ category.name }}</h2>
+                <hr><h2>{{ $t('Koppelen:') }} {{ category.name }}</h2>
                 <p v-if="category.description" class="style-description pre-wrap" v-text="category.description" />
 
                 <p class="info-box">
                     {{ $t('39d0d9ca-2f37-40b6-84a4-51fb29b4cce6') }}
                 </p>
 
-                <MultiSelectInput v-for="field of category.getAllRecords().filter(r => isDocumentFieldEditable(r))" :key="field.id" class="max" :title="field.name" :error-fields="field.id" :error-box="errors.errorBox" :model-value="getLinkedFields(field)" :choices="getLinkedFieldsChoices(field)" placeholder="Niet gekoppeld" @update:model-value="setLinkedFields(field, $event)" />
+                <MultiSelectInput v-for="field of category.getAllRecords().filter(r => isDocumentFieldEditable(r))" :key="field.id" class="max" :title="field.name" :error-fields="field.id" :error-box="errors.errorBox" :model-value="getLinkedFields(field)" :choices="getLinkedFieldsChoices(field)" :placeholder="$t(`Niet gekoppeld`)" @update:model-value="setLinkedFields(field, $event)" />
             </div>
 
-            <hr>
-            <h2>Inschrijvingen</h2>
-            <p>Kies voor welke inschrijvingen je dit document wilt aanmaken. Er wordt altijd één document aangemaakt per inschrijving.</p>
+            <hr><h2>{{ $t('Inschrijvingen') }}</h2>
+            <p>{{ $t('Kies voor welke inschrijvingen je dit document wilt aanmaken. Er wordt altijd één document aangemaakt per inschrijving.') }}</p>
 
             <STList v-if="patchedDocument.privateSettings.groups.length">
                 <STListItem v-for="group of patchedDocument.privateSettings.groups" :key="group.group.id" :selectable="true" @click="updateGroupAnswers(group)">
@@ -78,56 +60,51 @@
             <p>
                 <button type="button" class="button text" @click="addGroup">
                     <span class="icon add" />
-                    <span>Inschrijvingen toevoegen</span>
+                    <span>{{ $t('Inschrijvingen toevoegen') }}</span>
                 </button>
             </p>
 
             <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMaxAge">
-                <hr>
-                <h2>Leeftijdsbeperking</h2>
-                <STInputBox title="Maximum leeftijd" error-fields="maxAge" :error-box="errors.errorBox">
-                    <NumberInput v-model="maxAge" placeholder="Geen" :required="false" suffix="jaar" />
+                <hr><h2>{{ $t('Leeftijdsbeperking') }}</h2>
+                <STInputBox error-fields="maxAge" :error-box="errors.errorBox" :title="$t(`Maximum leeftijd`)">
+                    <NumberInput v-model="maxAge" :required="false" suffix="jaar" :placeholder="$t(`Geen`)" />
                 </STInputBox>
             </template>
 
             <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMinPrice">
-                <hr>
-                <h2>Bedrag</h2>
+                <hr><h2>{{ $t('Bedrag') }}</h2>
                 <Checkbox v-model="nonZeroPriceOnly">
-                    Enkel aanmaken indien inschrijvingsbedrag groter is dan 0 euro
+                    {{ $t('Enkel aanmaken indien inschrijvingsbedrag groter is dan 0 euro') }}
                 </Checkbox>
             </template>
 
             <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMinPricePaid">
-                <hr>
-                <h2>Betaald</h2>
+                <hr><h2>{{ $t('Betaald') }}</h2>
                 <Checkbox v-model="paidOnly">
-                    Enkel aanmaken indien inschrijving betaald is
+                    {{ $t('Enkel aanmaken indien inschrijving betaald is') }}
                 </Checkbox>
             </template>
 
             <template v-if="auth.hasPlatformFullAccess()">
-                <hr>
-                <h2>Geavanceerd</h2>
+                <hr><h2>{{ $t('Geavanceerd') }}</h2>
 
                 <STList>
-                    <CheckboxListItem v-model="useCustomHtml" label="Eigen HTML gebruiken voor document" description="Personaliseer het document door het wat aan te passen indien je zelf ervaring hebt met HTML. Test het resultaat wel goed uit.">
+                    <CheckboxListItem v-model="useCustomHtml" :label="$t(`Eigen HTML gebruiken voor document`)" :description="$t(`Personaliseer het document door het wat aan te passen indien je zelf ervaring hebt met HTML. Test het resultaat wel goed uit.`)">
                         <div v-if="useCustomHtml" class="style-button-bar">
                             <button class="button text" type="button" @click="downloadHtml">
                                 <span class="icon download" />
                                 <span>
-                                    Download huidige HTML
+                                    {{ $t('Download huidige HTML') }}
                                 </span>
                             </button>
 
                             <label class="button text">
                                 <span class="icon sync" />
                                 <span>
-                                    Vervangen
+                                    {{ $t('Vervangen') }}
                                 </span>
 
-                                <input type="file" multiple="true" style="display: none;" accept=".html, text/html" @change="(event) => changedFile(event as any)">
-                            </label>
+                                <input type="file" multiple="true" style="display: none;" accept=".html, text/html" @change="(event) => changedFile(event as any)"></label>
                         </div>
                     </CheckboxListItem>
                 </STList>

@@ -2,22 +2,21 @@
     <div class="st-view invalid-page-view">
         <main>
             <h1>
-                Doorverwijzen...
+                {{ $t('Doorverwijzen...') }}
             </h1>
 
-            <p>Bezig met doorverwijzen</p>
+            <p>{{ $t('Bezig met doorverwijzen') }}</p>
         </main>
 
         <div class="legal-footer">
-            <hr class="style-hr">
-            <div>
+            <hr class="style-hr"><div>
                 <aside>
                     <a :href="'https://'+$domains.marketing" class="inline-link secundary" target="_blank">
                         {{ $t('9f1a0032-32dd-48fd-9d04-0b20bd86aefb') }}
                     </a>
                 </aside>
                 <div>
-                    <a :href="'https://'+$domains.marketing+'/webshops'">Webshop via <Logo /></a>
+                    <a :href="'https://'+$domains.marketing+'/webshops'">{{ $t('Webshop via') }} <Logo /></a>
                 </div>
             </div>
         </div>

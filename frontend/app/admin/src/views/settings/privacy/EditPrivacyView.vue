@@ -3,7 +3,7 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
-        <p>Voeg voorwaarden toe die bij het registereren staan vermeldt of geaccepteerd moeten worden.</p>
+        <p>{{ $t('Voeg voorwaarden toe die bij het registereren staan vermeldt of geaccepteerd moeten worden.') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -16,7 +16,7 @@
         <p>
             <button class="button text" type="button" @click="addPolicy">
                 <span class="icon add" />
-                <span>Voorwaarden</span>
+                <span>{{ $t('Voorwaarden') }}</span>
             </button>
         </p>
     </SaveView>
@@ -52,7 +52,7 @@ const draggablePolicies = useDraggableArray(() => patched.value.config.privacy.p
 });
 const saving = ref(false);
 
-const title = 'Voorwaarden';
+const title = $t(`Voorwaarden`);
 
 async function addPolicy() {
     const privacyPatch = PrivacySettings.patch({});
@@ -123,7 +123,7 @@ async function save() {
             return;
         }
         await platformManager.value.patch(patch.value);
-        new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
+        new Toast($t(`De wijzigingen zijn opgeslagen`), 'success green').show();
         await pop({ force: true });
     }
     catch (e) {

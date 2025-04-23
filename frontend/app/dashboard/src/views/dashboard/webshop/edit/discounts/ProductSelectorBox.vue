@@ -1,6 +1,6 @@
 <template>
     <div class="product-selector-box">
-        <STInputBox title="Artikel" error-fields="productId" :error-box="errors.errorBox" class="max">
+        <STInputBox error-fields="productId" :error-box="errors.errorBox" class="max" :title="$t(`Artikel`)">
             <div class="style-input-box" @click="changeProduct">
                 <STList v-if="product">
                     <STListItem :selectable="true">
@@ -20,12 +20,12 @@
                     </STListItem>
                 </STList>
                 <div v-else>
-                    Onbekend artikel
+                    {{ $t('Onbekend artikel') }}
                 </div>
             </div>
         </STInputBox>
 
-        <STInputBox v-if="product && product.prices.length > 1" title="Prijskeuzes" error-fields="productPriceIds" :error-box="errors.errorBox" class="max">
+        <STInputBox v-if="product && product.prices.length > 1" error-fields="productPriceIds" :error-box="errors.errorBox" class="max" :title="$t(`Prijskeuzes`)">
             <STList>
                 <STListItem v-for="price of product.prices" :key="price.id" :selectable="true" element-name="label">
                     <template #left>
@@ -39,7 +39,7 @@
             </STList>
         </STInputBox>
 
-        <STInputBox v-for="optionMenu of product.optionMenus" :key="optionMenu.id" :title="optionMenu.name || 'Naamloos'" :error-fields="'optionMenu.'+optionMenu.id" :error-box="errors.errorBox" class="max">
+        <STInputBox v-for="optionMenu of product.optionMenus" :key="optionMenu.id" :title="optionMenu.name || $t(`Naamloos`)" :error-fields="'optionMenu.'+optionMenu.id" :error-box="errors.errorBox" class="max">
             <STList>
                 <STListItem v-for="option of optionMenu.options" :key="option.id" :selectable="true" element-name="label">
                     <template #left>

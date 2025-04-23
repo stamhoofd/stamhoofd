@@ -19,8 +19,9 @@
 </template>
 
 <script lang="ts" setup>
+import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, Column, ComponentExposed, EmailView, EventNotificationView, ModernTableView, TableAction, TableActionSelection, useAuth, useEventNotificationsObjectFetcher, useEventNotificationBackendFilterBuilders, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
+import { AsyncTableAction, Column, ComponentExposed, EmailView, EventNotificationView, ModernTableView, TableAction, TableActionSelection, useEventNotificationBackendFilterBuilders, useEventNotificationsObjectFetcher, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
 import { EventNotificationViewModel } from '@stamhoofd/components/src/events/event-notifications/classes/EventNotificationViewModel';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
@@ -28,7 +29,6 @@ import { EventNotification, EventNotificationStatus, EventNotificationStatusHelp
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
-import { SimpleError } from '@simonbackx/simple-errors';
 
 type ObjectType = EventNotification;
 const $t = useTranslate();
@@ -188,7 +188,7 @@ async function openMail(selection: TableActionSelection<EventNotification>) {
         throw new SimpleError({
             code: 'not_implemented',
             message: 'Not implemented',
-            human: 'Deze functie is nog niet beschikbaar',
+            human: $t(`Deze functie is nog niet beschikbaar`),
         });
     }
 
@@ -222,7 +222,7 @@ async function exportToExcel(selection: TableActionSelection<ObjectType>) {
 }
 
 actions.push(new AsyncTableAction({
-    name: 'E-mailen',
+    name: $t(`E-mailen`),
     icon: 'email',
     priority: 12,
     groupIndex: 3,
@@ -233,7 +233,7 @@ actions.push(new AsyncTableAction({
 
 actions.push(
     new AsyncTableAction({
-        name: 'Exporteren naar Excel',
+        name: $t(`Exporteren naar Excel`),
         icon: 'download',
         priority: 11,
         groupIndex: 3,

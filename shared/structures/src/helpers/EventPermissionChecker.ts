@@ -37,7 +37,7 @@ export class EventPermissionChecker {
             throw new SimpleError({
                 code: 'permission_denied',
                 message:
-                    'Je hebt geen toegangsrechten om een activiteit te beheren.',
+                    $t(`Je hebt geen toegangsrechten om een activiteit te beheren.`),
                 statusCode: 403,
             });
         }
@@ -52,7 +52,7 @@ export class EventPermissionChecker {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Organization not found',
-                    human: 'De activiteit werd niet gevonden',
+                    human: $t(`De activiteit werd niet gevonden`),
                 });
             }
 
@@ -90,7 +90,7 @@ export class EventPermissionChecker {
             throw new SimpleError({
                 code: 'permission_denied',
                 message:
-                    'Je hebt geen toegangsrechten om een activiteit te beheren.',
+                    $t(`Je hebt geen toegangsrechten om een activiteit te beheren.`),
                 statusCode: 403,
             });
         }
@@ -144,7 +144,7 @@ export class EventPermissionChecker {
             throw new SimpleError({
                 code: 'permission_denied',
                 message:
-                    'Je kan geen activiteit beheren voor deze organisatie.',
+                    $t(`Je kan geen activiteit beheren voor deze organisatie.`),
                 statusCode: 403,
             });
         }
@@ -158,7 +158,7 @@ export class EventPermissionChecker {
             throw new SimpleError({
                 code: 'permission_denied',
                 message:
-                    'Je hebt geen toegangsrechten om een activiteit te beheren voor deze organisatie.',
+                    $t(`Je hebt geen toegangsrechten om een activiteit te beheren voor deze organisatie.`),
                 statusCode: 403,
             });
         }
@@ -174,7 +174,7 @@ export class EventPermissionChecker {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message:
-                            'Je hebt geen toegangsrechten om een activiteit te beheren voor deze organisatie.',
+                            $t(`Je hebt geen toegangsrechten om een activiteit te beheren voor deze organisatie.`),
                     statusCode: 403,
                 });
             }
@@ -191,7 +191,7 @@ export class EventPermissionChecker {
                     throw new SimpleError({
                         code: 'permission_denied',
                         message:
-                            'Je hebt geen toegangsrechten om een activiteit te beheren voor deze groep(en).',
+                            $t(`Je hebt geen toegangsrechten om een activiteit te beheren voor deze groep(en).`),
                         statusCode: 403,
                     });
                 }
@@ -210,7 +210,7 @@ export class EventPermissionChecker {
             throw new SimpleError({
                 code: 'permission_denied',
                 message:
-                    'Je hebt geen toegangsrechten om een nationale activiteit te beheren.',
+                    $t(`Je hebt geen toegangsrechten om een nationale activiteit te beheren.`),
                 statusCode: 403,
             });
         }
@@ -228,7 +228,7 @@ export class EventPermissionChecker {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message:
-                        'Je hebt geen toegangsrechten om een nationale activiteit te beheren voor alle groepen.',
+                        $t(`Je hebt geen toegangsrechten om een nationale activiteit te beheren voor alle groepen.`),
                     statusCode: 403,
                 });
             }
@@ -245,7 +245,7 @@ export class EventPermissionChecker {
                     throw new SimpleError({
                         code: 'permission_denied',
                         message:
-                            "Je hebt geen toegangsrechten om een regionale activiteit te beheren voor deze regio('s).",
+                            $t(`Je hebt geen toegangsrechten om een regionale activiteit te beheren voor deze regio('s).`),
                         statusCode: 403,
                     });
                 }

@@ -22,51 +22,51 @@ export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>, $feat
         sheets: [
             new SelectableSheet({
                 id: 'receivableBalances',
-                name: 'Te ontvangen bedragen',
-                description: 'Dit werkblad bevat één rij per te ontvangen bedrag, maar een te ontvangen bedrag zelf kan wel voor meerdere items zijn. Voor meer detailinformatie heb je het tabblad Betaallijnen nodig.',
+                name: $t(`Te ontvangen bedragen`),
+                description: $t(`Dit werkblad bevat één rij per te ontvangen bedrag, maar een te ontvangen bedrag zelf kan wel voor meerdere items zijn. Voor meer detailinformatie heb je het tabblad Betaallijnen nodig.`),
                 columns: [
                     ...getGeneralColumns($t, $feature),
                     new SelectableColumn({
                         id: 'amountOpen',
-                        name: 'Openstaand bedrag',
+                        name: $t(`Openstaand bedrag`),
                     }),
                     new SelectableColumn({
                         id: 'amountPending',
-                        name: 'In verwerking',
+                        name: $t(`In verwerking`),
                     }),
                 ],
             }),
             new SelectableSheet({
                 id: 'balanceItems',
-                name: 'Lijnen',
-                description: 'Een openstaand bedrag kan soms voor meerdere items tegelijk zijn. Dat is vaak nuttige informatie omdat je die items soms anders moet verwerken in je boekhouding. Als je dit werkblad exporteert, krijgt elk item een aparte lijn met bijhorende informatie.',
+                name: $t(`Lijnen`),
+                description: $t(`Een openstaand bedrag kan soms voor meerdere items tegelijk zijn. Dat is vaak nuttige informatie omdat je die items soms anders moet verwerken in je boekhouding. Als je dit werkblad exporteert, krijgt elk item een aparte lijn met bijhorende informatie.`),
                 columns: [
                     new SelectableColumn({
                         id: 'id',
-                        name: 'ID',
-                        description: 'Unieke identificatie van de lijn',
+                        name: $t(`ID`),
+                        description: $t(`Unieke identificatie van de lijn`),
                     }),
 
-                    ...getGeneralColumns($t, $feature, { category: 'Schuldenaar (herhaling)' }).map((c) => {
+                    ...getGeneralColumns($t, $feature, { category: $t(`Schuldenaar (herhaling)`) }).map((c) => {
                         c.id = `receivableBalance.${c.id}`;
                         return c;
                     }),
 
                     new SelectableColumn({
                         id: 'type',
-                        name: 'Type',
-                        description: Formatter.joinLast(Object.values(BalanceItemType).map(type => getBalanceItemTypeName(type)), ', ', ' en '),
+                        name: $t(`Type`),
+                        description: Formatter.joinLast(Object.values(BalanceItemType).map(type => getBalanceItemTypeName(type)), ', ', ' ' + $t(`en`) + ' '),
                     }),
 
                     new SelectableColumn({
                         id: 'category',
-                        name: 'Categorie',
-                        description: 'Extra kolom om lijnen makkelijker te groeperen. Dit bevat de naam van de activiteit/groep, de naam van de webshop of de beschrijving bij andere aanrekeningen.',
+                        name: $t(`Categorie`),
+                        description: $t(`Extra kolom om lijnen makkelijker te groeperen. Dit bevat de naam van de activiteit/groep, de naam van de webshop of de beschrijving bij andere aanrekeningen.`),
                     }),
 
                     new SelectableColumn({
                         id: 'description',
-                        name: 'Beschrijving',
+                        name: $t(`Beschrijving`),
                     }),
 
                     ...Object.values(BalanceItemRelationType).map(relationType => new SelectableColumn({
@@ -77,47 +77,47 @@ export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>, $feat
 
                     new SelectableColumn({
                         id: 'amount',
-                        name: 'Aantal',
+                        name: $t(`Aantal`),
                     }),
 
                     new SelectableColumn({
                         id: 'unitPrice',
-                        name: 'Eenheidsprijs',
+                        name: $t(`Eenheidsprijs`),
                     }),
 
                     new SelectableColumn({
                         id: 'price',
-                        name: 'Prijs',
+                        name: $t(`Prijs`),
                     }),
 
                     new SelectableColumn({
                         id: 'pricePaid',
-                        name: 'Betaald bedrag',
+                        name: $t(`Betaald bedrag`),
                     }),
 
                     new SelectableColumn({
                         id: 'pricePending',
-                        name: 'In verwerking',
+                        name: $t(`In verwerking`),
                     }),
 
                     new SelectableColumn({
                         id: 'priceOpen',
-                        name: 'Openstaand bedrag',
+                        name: $t(`Openstaand bedrag`),
                     }),
 
                     new SelectableColumn({
                         id: 'createdAt',
-                        name: 'Aangemaakt op',
+                        name: $t(`Aangemaakt op`),
                     }),
 
                     new SelectableColumn({
                         id: 'dueAt',
-                        name: 'Verschuldigd vanaf',
+                        name: $t(`Verschuldigd vanaf`),
                     }),
 
                     new SelectableColumn({
                         id: 'status',
-                        name: 'Status',
+                        name: $t(`Status`),
                     }),
                 ],
             }),
@@ -130,12 +130,12 @@ function getGeneralColumns($t: ReturnType<typeof useTranslate>, $feature: Return
         return [
             new SelectableColumn({
                 id: 'id',
-                name: 'ID schuldenaar',
-                description: 'Unieke identificatie van de schuldenaar',
+                name: $t(`ID schuldenaar`),
+                description: $t(`Unieke identificatie van de schuldenaar`),
             }),
             new SelectableColumn({
                 id: 'name',
-                name: 'Schuldenaar',
+                name: $t(`Schuldenaar`),
                 ...options,
             }),
             ...($feature('organization-receivable-balances')
@@ -149,7 +149,7 @@ function getGeneralColumns($t: ReturnType<typeof useTranslate>, $feature: Return
                 : []),
             new SelectableColumn({
                 id: 'objectType',
-                name: 'Type schuldenaar',
+                name: $t(`Type schuldenaar`),
                 ...options,
             }),
         ];

@@ -3,22 +3,13 @@
         <h1>{{ viewTitle }}</h1>
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox title="Naam (kort)" error-fields="meta.name" :error-box="errors.errorBox">
-            <input
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="bv. Wafelverkoop"
-                autocomplete="off"
-            >
-
-            <p v-if="name.length > 30" class="style-description-small">
-                Lange naam? Je kan de zichtbare titel op de webshop apart wijzigen bij de instellingen 'Personaliseren'. Hier houd je het beter kort.
+        <STInputBox error-fields="meta.name" :error-box="errors.errorBox" :title="$t(`Naam (kort)`)">
+            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`bv. Wafelverkoop`)"><p v-if="name.length > 30" class="style-description-small">
+                {{ $t("Lange naam? Je kan de zichtbare titel op de webshop apart wijzigen bij de instellingen 'Personaliseren'. Hier houd je het beter kort.") }}
             </p>
         </STInputBox>
 
-        <hr>
-        <h2>Type</h2>
+        <hr><h2>{{ $t('Type') }}</h2>
 
         <STList>
             <STListItem :selectable="true" element-name="label" class="left-center">
@@ -26,10 +17,10 @@
                     <Radio v-model="ticketType" :value="WebshopTicketType.None" />
                 </template>
                 <h3 class="style-title-list">
-                    Geen tickets
+                    {{ $t('Geen tickets') }}
                 </h3>
                 <p class="style-description">
-                    Webshop zonder scanners. Er worden geen tickets aangemaakt.
+                    {{ $t('Webshop zonder scanners. Er worden geen tickets aangemaakt.') }}
                 </p>
             </STListItem>
             <STListItem :selectable="true" element-name="label" class="left-center">
@@ -37,10 +28,10 @@
                     <Radio v-model="ticketType" :value="WebshopTicketType.SingleTicket" />
                 </template>
                 <h3 class="style-title-list">
-                    Ticketverkoop voor groepen
+                    {{ $t('Ticketverkoop voor groepen') }}
                 </h3>
                 <p class="style-description">
-                    Eén ticket per bestelling. Ideaal voor een eetfestijn
+                    {{ $t('Eén ticket per bestelling. Ideaal voor een eetfestijn') }}
                 </p>
             </STListItem>
             <STListItem :selectable="true" element-name="label" class="left-center">
@@ -48,23 +39,22 @@
                     <Radio v-model="ticketType" :value="WebshopTicketType.Tickets" />
                 </template>
                 <h3 class="style-title-list">
-                    Ticketverkoop voor personen
+                    {{ $t('Ticketverkoop voor personen') }}
                 </h3>
                 <p class="style-description">
-                    Eén ticket per artikel. Ideaal voor een fuif
+                    {{ $t('Eén ticket per artikel. Ideaal voor een fuif') }}
                 </p>
             </STListItem>
         </STList>
 
         <p v-if="ticketType === WebshopTicketType.SingleTicket" class="info-box">
-            Per bestelling wordt er maar één ticket met QR-code aangemaakt. Dus als er 5 spaghetti's en één beenham besteld worden, dan krijgt de besteller één scanbaar ticket.
+            {{ $t("Per bestelling wordt er maar één ticket met QR-code aangemaakt. Dus als er 5 spaghetti's en één beenham besteld worden, dan krijgt de besteller één scanbaar ticket.") }}
         </p>
         <p v-if="ticketType === WebshopTicketType.Tickets" class="info-box">
-            Op de webshop staan tickets en vouchers te koop die elk hun eigen QR-code krijgen en apart gescand moeten worden. Ideaal voor een fuif of evenement waar toegang betalend is per persoon. Minder ideaal voor grote groepen omdat je dan elk ticket afzonderlijk moet scannen (dus best niet voor een eetfestijn gebruiken).
+            {{ $t('Op de webshop staan tickets en vouchers te koop die elk hun eigen QR-code krijgen en apart gescand moeten worden. Ideaal voor een fuif of evenement waar toegang betalend is per persoon. Minder ideaal voor grote groepen omdat je dan elk ticket afzonderlijk moet scannen (dus best niet voor een eetfestijn gebruiken).') }}
         </p>
 
-        <hr>
-        <h2>Beschikbaarheid</h2>
+        <hr><h2>{{ $t('Beschikbaarheid') }}</h2>
 
         <Checkbox v-model="hasStatusClosed">
             {{ $t('4ae26268-586e-41f7-875d-90137f9ed836') }}
@@ -72,28 +62,27 @@
 
         <template v-if="!hasStatusClosed">
             <Checkbox v-model="useAvailableUntil">
-                Sluit webshop na een bepaalde datum
+                {{ $t('Sluit webshop na een bepaalde datum') }}
             </Checkbox>
             <div v-if="useAvailableUntil" class="split-inputs">
-                <STInputBox title="Stop bestellingen op" error-fields="settings.availableUntil" :error-box="errors.errorBox">
+                <STInputBox error-fields="settings.availableUntil" :error-box="errors.errorBox" :title="$t(`Stop bestellingen op`)">
                     <DateSelection v-model="availableUntil" />
                 </STInputBox>
-                <TimeInput v-model="availableUntil" title="Om" :validator="errors.validator" />
+                <TimeInput v-model="availableUntil" :validator="errors.validator" :title="$t(`Om`)" />
             </div>
             <Checkbox v-model="useOpenAt">
-                Open webshop pas na een bepaalde datum
+                {{ $t('Open webshop pas na een bepaalde datum') }}
             </Checkbox>
             <div v-if="useOpenAt" class="split-inputs">
-                <STInputBox title="Open op" error-fields="settings.openAt" :error-box="errors.errorBox">
+                <STInputBox error-fields="settings.openAt" :error-box="errors.errorBox" :title="$t(`Open op`)">
                     <DateSelection v-model="openAt" />
                 </STInputBox>
-                <TimeInput v-model="openAt" title="Om" :validator="errors.validator" />
+                <TimeInput v-model="openAt" :validator="errors.validator" :title="$t(`Om`)" />
             </div>
         </template>
 
         <div class="container">
-            <hr>
-            <h2>Nummering</h2>
+            <hr><h2>{{ $t('Nummering') }}</h2>
 
             <STList>
                 <STListItem :selectable="true" element-name="label" class="left-center">
@@ -101,10 +90,10 @@
                         <Radio v-model="numberingType" :value="WebshopNumberingType.Continuous" />
                     </template>
                     <h3 class="style-title-list">
-                        Gebruik opeenvolgende bestelnummers
+                        {{ $t('Gebruik opeenvolgende bestelnummers') }}
                     </h3>
                     <p class="style-description">
-                        1, 2, 3, ...
+                        {{ $t('1, 2, 3, ...') }}
                     </p>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label" class="left-center">
@@ -112,44 +101,33 @@
                         <Radio v-model="numberingType" :value="WebshopNumberingType.Random" />
                     </template>
                     <h3 class="style-title-list">
-                        Gebruik willekeurige bestelnummers
+                        {{ $t('Gebruik willekeurige bestelnummers') }}
                     </h3>
                     <p class="style-description">
-                        964824335, 116455337, 228149715, ...
+                        {{ $t('964824335, 116455337, 228149715, ...') }}
                     </p>
                 </STListItem>
             </STList>
 
-            <STInputBox v-if="numberingType === WebshopNumberingType.Continuous" title="Eerste bestelnummer" error-fields="settings.openAt" :error-box="errors.errorBox">
+            <STInputBox v-if="numberingType === WebshopNumberingType.Continuous" error-fields="settings.openAt" :error-box="errors.errorBox" :title="$t(`Eerste bestelnummer`)">
                 <NumberInput v-model="startNumber" :min="1" />
             </STInputBox>
             <p v-if="!isNew && numberingType === WebshopNumberingType.Continuous" class="style-description-small">
-                Je kan dit enkel wijzigen als je alle bestellingen verwijdert.
+                {{ $t('Je kan dit enkel wijzigen als je alle bestellingen verwijdert.') }}
             </p>
         </div>
 
         <template v-if="isNew">
-            <hr>
-            <h2>Betaalmethodes</h2>
-            <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-webshops-instellen')" target="_blank">deze pagina</a>.</p>
+            <hr><h2>{{ $t('Betaalmethodes') }}</h2>
+            <p>{{ $t('Zoek je informatie over alle betaalmethodes, neem dan een kijkje op') }} <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-webshops-instellen')" target="_blank">{{ $t('deze pagina') }}</a>.</p>
 
-            <EditPaymentMethodsBox
-                type="webshop"
-                :organization="organization"
-                :config="config"
-                :private-config="privateConfig"
-                :validator="errors.validator"
-                :show-administration-fee="false"
-                @patch:config="patchConfig($event)"
-                @patch:private-config="patchPrivateConfig($event)"
-            />
+            <EditPaymentMethodsBox type="webshop" :organization="organization" :config="config" :private-config="privateConfig" :validator="errors.validator" :show-administration-fee="false" @patch:config="patchConfig($event)" @patch:private-config="patchPrivateConfig($event)" />
         </template>
 
         <div v-if="getFeatureFlag('webshop-auth')" class="container">
-            <hr>
-            <h2>Inloggen</h2>
+            <hr><h2>{{ $t('Inloggen') }}</h2>
             <p>
-                Verplicht gebruikers om in te loggen om de webshop te kunnen bekijken.
+                {{ $t('Verplicht gebruikers om in te loggen om de webshop te kunnen bekijken.') }}
             </p>
 
             <STList>
@@ -158,10 +136,10 @@
                         <Radio v-model="authType" :value="WebshopAuthType.Disabled" />
                     </template>
                     <h3 class="style-title-list">
-                        Uitgeschakeld
+                        {{ $t('Uitgeschakeld') }}
                     </h3>
                     <p class="style-description">
-                        Gebruikers kunnen en moeten niet inloggen om een bestelling te plaatsen.
+                        {{ $t('Gebruikers kunnen en moeten niet inloggen om een bestelling te plaatsen.') }}
                     </p>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label" class="left-center">
@@ -169,10 +147,10 @@
                         <Radio v-model="authType" :value="WebshopAuthType.Required" />
                     </template>
                     <h3 class="style-title-list">
-                        Verplicht
+                        {{ $t('Verplicht') }}
                     </h3>
                     <p class="style-description">
-                        Gebruikers moeten inloggen om de webshop te zien en een bestelling te plaatsen.
+                        {{ $t('Gebruikers moeten inloggen om de webshop te zien en een bestelling te plaatsen.') }}
                     </p>
                 </STListItem>
             </STList>

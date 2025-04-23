@@ -1,18 +1,17 @@
 <template>
     <div v-if="hasResponsibilities && (sortedResponsibilities.length || auth.hasFullAccess())" class="hover-box container">
-        <hr>
-        <h2 class="style-with-button">
-            <div>Functies</div>
+        <hr><h2 class="style-with-button">
+            <div>{{ $t('Functies') }}</div>
             <div class="hover-show">
                 <button v-if="auth.hasFullAccess()" type="button" class="button icon edit gray" @click.prevent="editResponsibilities" />
             </div>
         </h2>
 
         <button v-if="sortedResponsibilities.length === 0" class="info-box selectable with-button" type="button" @click="editResponsibilities">
-            {{ props.member.patchedMember.details.firstName }} heeft geen functies
+            {{ $t('{member} heeft geen functies', {member: props.member.patchedMember.details.firstName}) }}
 
             <span class="button text">
-                Bewerken
+                {{ $t('Bewerken') }}
             </span>
         </button>
 

@@ -1,66 +1,45 @@
 <template>
-    <SaveView :title="isNew ? 'Vraag toevoegen' : 'Vraag bewerken'" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`Vraag toevoegen`) : $t(`Vraag bewerken`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            Vraag toevoegen
+            {{ $t('Vraag toevoegen') }}
         </h1>
         <h1 v-else>
-            Vraag bewerken
+            {{ $t('Vraag bewerken') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
-            <input
-                ref="firstInput"
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="Naam van deze keuze"
-                autocomplete="off"
-                enterkeyhint="next"
-            >
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`Naam van deze keuze`)">
         </STInputBox>
 
-        <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox">
-            <textarea
-                v-model="description"
-                class="input"
-                type="text"
-                placeholder="Optioneel"
-                autocomplete="off"
-            />
+        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t(`Beschrijving`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`Optioneel`)" />
         </STInputBox>
         <p class="style-description-small">
-            Deze tekst is zichtbaar in het klein onder het tekstvak (zoals deze tekst).
+            {{ $t('Deze tekst is zichtbaar in het klein onder het tekstvak (zoals deze tekst).') }}
         </p>
 
         <Checkbox v-model="required">
-            Verplicht invullen
+            {{ $t('Verplicht invullen') }}
         </Checkbox>
 
         <template v-if="required">
-            <STInputBox title="Placeholder*" error-fields="placeholder" :error-box="errors.errorBox">
-                <input
-                    v-model="placeholder"
-                    class="input"
-                    type="text"
-                    placeholder="Tekst in lege velden"
-                    autocomplete="off"
-                >
+            <STInputBox error-fields="placeholder" :error-box="errors.errorBox" :title="$t(`Placeholder`)+'*'">
+                <input v-model="placeholder" class="input" type="text" autocomplete="off" :placeholder="$t(`Tekst in lege velden`)">
             </STInputBox>
             <p class="style-description-small">
-                * Dit is de tekst die zichtbaar is in het veld als het leeg is. Bv. 'Vul hier jouw naam in'. Hou het kort.
+                * {{ $t("Dit is de tekst die zichtbaar is in het veld als het leeg is. Bv. 'Vul hier jouw naam in'. Hou het kort.") }}
             </p>
         </template>
 
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Verwijder deze vraag
+            <hr><h2>
+                {{ $t('Verwijder deze vraag') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span>{{ $t('Verwijderen') }}</span>
             </button>
         </div>
     </SaveView>

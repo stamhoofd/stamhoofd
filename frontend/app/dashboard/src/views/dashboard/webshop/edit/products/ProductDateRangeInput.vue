@@ -1,16 +1,16 @@
 <template>
     <div>
         <div class="split-inputs">
-            <STInputBox title="Startdatum" error-fields="startDate" :error-box="errors.errorBox">
+            <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`Startdatum`)">
                 <DateSelection v-model="startDate" />
             </STInputBox>
-            <TimeInput v-model="startDate" title="Vanaf welk tijdstip" :validator="errors.validator" />
+            <TimeInput v-model="startDate" :validator="errors.validator" :title="$t(`Vanaf welk tijdstip`)" />
         </div>
         <div class="split-inputs">
-            <STInputBox title="Einddatum" error-fields="endDate" :error-box="errors.errorBox">
+            <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t(`Einddatum`)">
                 <DateSelection v-model="endDate" />
             </STInputBox>
-            <TimeInput v-model="endDate" title="Tot welk tijdstip" :validator="errors.validator" />
+            <TimeInput v-model="endDate" :validator="errors.validator" :title="$t(`Tot welk tijdstip`)" />
         </div>
     </div>
 </template>

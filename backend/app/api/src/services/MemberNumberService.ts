@@ -36,7 +36,7 @@ export class MemberNumberService {
                     throw new SimpleError({
                         code: 'assign_member_number',
                         message: error.message,
-                        human: 'Er is iets misgegaan bij het aanmaken van het lidnummer.',
+                        human: $t(`Er is iets misgegaan bij het aanmaken van het lidnummer.`),
                     });
                 }
             }
@@ -61,7 +61,7 @@ export class MemberNumberService {
             throw new SimpleError({
                 code: 'assign_member_number',
                 message: 'Missing birthDay',
-                human: 'Er kon geen lidnummer aangemaakt worden omdat er geen geboortedatum is ingesteld.',
+                human: $t(`Er kon geen lidnummer aangemaakt worden omdat er geen geboortedatum is ingesteld.`),
             });
         }
 
@@ -123,7 +123,7 @@ export class MemberNumberService {
                     throw new SimpleError({
                         code: 'assign_member_number',
                         message: `Duplicate member numbers (last try: ${memberNumber}, tries: ${tries})`,
-                        human: 'Er kon geen uniek lidnummer aangemaakt worden. Mogelijks zijn er teveel leden met dezelfde geboortedatum. Neem contact op met de vereniging.',
+                        human: $t(`Er kon geen uniek lidnummer aangemaakt worden. Mogelijks zijn er teveel leden met dezelfde geboortedatum. Neem contact op met de vereniging.`),
                     });
                 }
             }

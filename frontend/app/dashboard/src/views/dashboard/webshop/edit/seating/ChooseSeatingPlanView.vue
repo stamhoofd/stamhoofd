@@ -1,10 +1,10 @@
 <template>
-    <SaveView title="Zaalplan" :disabled="!hasChanges" @save="save">
+    <SaveView :disabled="!hasChanges" :title="$t(`Zaalplan`)" @save="save">
         <h1>
-            Kies een zaalplan
+            {{ $t('Kies een zaalplan') }}
         </h1>
         <p>
-            Je kan een zaalplan aanmaken of een bestaand zaalplan kiezen. Je kan in de loop van een evenement wijzigingen maken aan een zaalplan of zelfs een ander zaalplan kiezen op voorwaarde dat dezelfde rij en zetelnummers gebruikt worden.
+            {{ $t('Je kan een zaalplan aanmaken of een bestaand zaalplan kiezen. Je kan in de loop van een evenement wijzigingen maken aan een zaalplan of zelfs een ander zaalplan kiezen op voorwaarde dat dezelfde rij en zetelnummers gebruikt worden.') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -16,10 +16,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Geen zetelselectie
+                    {{ $t('Geen zetelselectie') }}
                 </h3>
                 <p class="style-description-small">
-                    Er worden geen plaatsen aan tickets gekoppeld.
+                    {{ $t('Er worden geen plaatsen aan tickets gekoppeld.') }}
                 </p>
             </STListItem>
 
@@ -32,11 +32,11 @@
                     {{ plan.name }}
                 </h3>
                 <p v-if="plan.seatCount > 1" class="style-description-small">
-                    {{ plan.seatCount }} plaatsen
+                    {{ plan.seatCount }} {{ $t('plaatsen') }}
                 </p>
 
                 <p v-if="isFromOtherWebshop(plan)" class="style-description-small">
-                    Dit zaalplan is van een andere webshop ({{ getWebshopFor(plan)?.meta?.name ?? 'Onbekend' }}). Door het te kiezen wordt een kopie toegevoegd aan deze webshop. Aanpassingen worden niet overgenomen in bestaande webshops.
+                    {{ $t('Dit zaalplan is van een andere webshop ({name}). Door het te kiezen wordt een kopie toegevoegd aan deze webshop. Aanpassingen worden niet overgenomen in bestaande webshops.', {name: getWebshopFor(plan)?.meta?.name ?? 'Onbekend'}) }}
                 </p>
 
                 <template #right>
@@ -49,24 +49,20 @@
         <p>
             <button class="button text" type="button" @click="addSeatingPlan">
                 <span class="icon add" />
-                <span>Zaalplan aanmaken</span>
+                <span>{{ $t('Zaalplan aanmaken') }}</span>
             </button>
         </p>
 
-        <hr>
-
-        <h2>Acties</h2>
+        <hr><h2>{{ $t('Acties') }}</h2>
 
         <STList class="illustration-list">
             <STListItem :selectable="true" class="left-center" element-name="label">
-                <input type="file" multiple style="display: none;" accept=".plan" @change="importSeatingPlan">
-
-                <template #left>
+                <input type="file" multiple style="display: none;" accept=".plan" @change="importSeatingPlan"><template #left>
                     <img src="@stamhoofd/assets/images/illustrations/box-upload.svg">
                 </template>
 
                 <h2 class="style-title-list">
-                    Importeer zaalplan
+                    {{ $t('Importeer zaalplan') }}
                 </h2>
                 <p class="style-description">
                     {{ $t('5c7d8f29-9d83-4f33-9d6b-0f947e384f75') }}
@@ -117,7 +113,7 @@ function isFromOtherWebshop(seatingPlan: SeatingPlan) {
 }
 
 function getWebshopFor(seatingPlan: SeatingPlan) {
-    return organization.value?.webshops.find(w => w.meta.seatingPlans.find(p => p.id == seatingPlan.id))
+    return organization.value?.webshops.find(w => w.meta.seatingPlans.find(p => p.id == seatingPlan.id));
 }
 
 async function save() {
@@ -164,30 +160,29 @@ async function deleteSeatingPlan(id: string) {
             continue;
         }
         if (product.seatingPlanId === id) {
-            new Toast("Dit zaalplan wordt nog gebruikt door een ander ticket in deze webshop. Verwijder het eerst daar.", "error red").show()
-            return
+            new Toast('Dit zaalplan wordt nog gebruikt door een ander ticket in deze webshop. Verwijder het eerst daar.', 'error red').show();
+            return;
         }
     }
 
-    if (!await CenteredMessage.confirm("Ben je zeker dat je dit zaalplan wilt verwijderen?", "Ja, verwijderen", 'Je kan dit niet ongedaan maken.')) {
-        return
+    if (!await CenteredMessage.confirm('Ben je zeker dat je dit zaalplan wilt verwijderen?', 'Ja, verwijderen', 'Je kan dit niet ongedaan maken.')) {
+        return;
     }
 
-    await sleep(1000)
+    await sleep(1000);
 
-    if (!await CenteredMessage.confirm("Ben je helemaal zeker?", "Ja, verwijderen", 'Je kan dit niet ongedaan maken.')) {
-        return
+    if (!await CenteredMessage.confirm('Ben je helemaal zeker?', 'Ja, verwijderen', 'Je kan dit niet ongedaan maken.')) {
+        return;
     }
 
     if (selectedPlan.value == id) {
-        selectedPlan.value = null
+        selectedPlan.value = null;
     }
-    const webshopMetaPatch = WebshopMetaData.patch({})
-    webshopMetaPatch.seatingPlans.addDelete(id)
-    const webshopPatch = PrivateWebshop.patch({meta: webshopMetaPatch})
-    addWebshopPatch(webshopPatch)
+    const webshopMetaPatch = WebshopMetaData.patch({});
+    webshopMetaPatch.seatingPlans.addDelete(id);
+    const webshopPatch = PrivateWebshop.patch({ meta: webshopMetaPatch });
+    addWebshopPatch(webshopPatch);
 }
-
 
 const selectedPlan = computed({
     get: () => patchedProduct.value.seatingPlanId,

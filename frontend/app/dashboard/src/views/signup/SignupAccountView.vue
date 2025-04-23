@@ -1,30 +1,30 @@
 <template>
     <form id="signup-account-view" class="st-view" @submit.prevent="goNext">
-        <STNavigationBar title="Maak jouw account" />
+        <STNavigationBar :title="$t(`Maak jouw account`)" />
 
         <main>
             <h1>
-                Maak jouw account
+                {{ $t('Maak jouw account') }}
             </h1>
             <p>
-                Je kan later nog andere beheerders toevoegen, dus kies een persoonlijk e-mailadres en wachtwoord dat niet gedeeld wordt.
+                {{ $t('Je kan later nog andere beheerders toevoegen, dus kies een persoonlijk e-mailadres en wachtwoord dat niet gedeeld wordt.') }}
             </p>
 
             <STErrorsDefault :error-box="errorBox" />
 
             <div class="split-inputs">
                 <div>
-                    <EmailInput v-model="email" title="Persoonlijk e-mailadres" name="username" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
+                    <EmailInput v-model="email" name="username" :validator="validator" autocomplete="username" :title="$t(`Persoonlijk e-mailadres`)" :placeholder="$t(`Vul jouw e-mailadres hier in`)" />
                 </div>
 
                 <div>
-                    <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errorBox">
+                    <STInputBox error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`Jouw naam`)">
                         <div class="input-group">
                             <div>
-                                <input v-model="firstName" name="given-name" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
+                                <input v-model="firstName" name="given-name" class="input" type="text" autocomplete="given-name" :placeholder="$t(`Voornaam`)">
                             </div>
                             <div>
-                                <input v-model="lastName" name="family-name" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
+                                <input v-model="lastName" name="family-name" class="input" type="text" autocomplete="family-name" :placeholder="$t(`Achternaam`)">
                             </div>
                         </div>
                     </STInputBox>
@@ -33,11 +33,11 @@
 
             <div class="split-inputs">
                 <div>
-                    <STInputBox title="Kies een persoonlijk wachtwoord" error-fields="password" :error-box="errorBox">
-                        <input v-model="password" name="new-password" class="input" placeholder="Kies een wachtwoord" autocomplete="new-password" type="password">
+                    <STInputBox error-fields="password" :error-box="errorBox" :title="$t(`Kies een persoonlijk wachtwoord`)">
+                        <input v-model="password" name="new-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`Kies een wachtwoord`)">
                     </STInputBox>
-                    <STInputBox title="Herhaal wachtwoord" error-fields="passwordRepeat" :error-box="errorBox">
-                        <input v-model="passwordRepeat" name="confirm-password" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
+                    <STInputBox error-fields="passwordRepeat" :error-box="errorBox" :title="$t(`Herhaal wachtwoord`)">
+                        <input v-model="passwordRepeat" name="confirm-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`Herhaal nieuw wachtwoord`)">
                     </STInputBox>
                 </div>
 
@@ -48,15 +48,15 @@
 
             <div class="checkbox-box">
                 <Checkbox v-model="acceptPrivacy" class="long-text">
-                    Ik heb kennis genomen van <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/privacy'" target="_blank">het privacybeleid</a>.
+                    {{ $t('Ik heb kennis genomen van') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/privacy'" target="_blank">{{ $t('het privacybeleid') }}</a>.
                 </Checkbox>
 
                 <Checkbox v-model="acceptTerms" class="long-text">
-                    Ik heb <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/algemene-voorwaarden'" target="_blank">de algemene voorwaarden</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
+                    {{ $t('Ik heb') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/algemene-voorwaarden'" target="_blank">{{ $t('de algemene voorwaarden') }}</a> {{ $t('gelezen en ga hiermee akkoord in naam van mijn vereniging.') }}
                 </Checkbox>
 
                 <Checkbox v-model="acceptDataAgreement" class="long-text">
-                    Ik heb <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/verwerkersovereenkomst'" target="_blank">de verwerkersovereenkomst</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
+                    {{ $t('Ik heb') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/verwerkersovereenkomst'" target="_blank">{{ $t('de verwerkersovereenkomst') }}</a> {{ $t('gelezen en ga hiermee akkoord in naam van mijn vereniging.') }}
                 </Checkbox>
             </div>
         </main>
@@ -65,7 +65,7 @@
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" @click.prevent="goNext">
-                        Account aanmaken
+                        {{ $t('Account aanmaken') }}
                     </button>
                 </LoadingButton>
             </template>

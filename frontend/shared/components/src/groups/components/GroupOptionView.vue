@@ -5,17 +5,11 @@
         </h1>
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
-            <input
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="Naam van deze keuze"
-                autocomplete="off"
-            >
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
+            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`Naam van deze keuze`)">
         </STInputBox>
 
-        <ReduceablePriceInput v-model="price" :group="group" title="Meer of minkost" :error-box="errors.errorBox" :validator="errors.validator" />
+        <ReduceablePriceInput v-model="price" :group="group" :error-box="errors.errorBox" :validator="errors.validator" :title="$t(`Meer of minkost`)" />
 
         <STList>
             <STListItem :selectable="true" element-name="label">
@@ -24,23 +18,23 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Verborgen
+                    {{ $t('Verborgen') }}
                 </h3>
                 <p v-if="hidden" class="style-description-small">
-                    Deze keuze wordt onzichtbaar in het ledenportaal en is enkel manueel toe te voegen door een beheerder.
+                    {{ $t('Deze keuze wordt onzichtbaar in het ledenportaal en is enkel manueel toe te voegen door een beheerder.') }}
                 </p>
             </STListItem>
-            
+
             <STListItem :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="allowAmount" />
                 </template>
 
                 <h3 class="style-title-list">
-                    Meerdere stuks
+                    {{ $t('Meerdere stuks') }}
                 </h3>
                 <p class="style-description-small">
-                    Een lid kan zelf een aantal stuks kiezen met een invulveld en plus- en minknop bij deze keuze.
+                    {{ $t('Een lid kan zelf een aantal stuks kiezen met een invulveld en plus- en minknop bij deze keuze.') }}
                 </p>
             </STListItem>
 
@@ -50,11 +44,11 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Beperk hoeveel stuks maximaal kunnen worden gekozen per inschrijving
+                    {{ $t('Beperk hoeveel stuks maximaal kunnen worden gekozen per inschrijving') }}
                 </h3>
 
                 <div v-if="useMaximum" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox title="Maximum aantal" error-fields="maximum" :error-box="errors.errorBox">
+                    <STInputBox error-fields="maximum" :error-box="errors.errorBox" :title="$t(`Maximum aantal`)">
                         <NumberInput v-model="maximum" suffix="stuks" suffix-singular="stuk" :required="false" :placeholder="$t('c5562430-7c78-454c-8d61-7b4a98fbaf02')" :min="2" />
                     </STInputBox>
                 </div>
@@ -66,7 +60,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Beperk het totale beschikbare aantal stuks (waarvan nu {{ usedStock }} ingenomen of gereserveerd)
+                    {{ $t('Beperk het totale beschikbare aantal stuks (waarvan nu {stock} ingenomen of gereserveerd)', {stock: usedStock.toString()}) }}
                 </h3>
 
                 <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
@@ -99,16 +93,16 @@ const props = withDefaults(
         group: Group;
         isNew: boolean;
         saveHandler: (price: AutoEncoderPatchType<GroupOption>) => Promise<void>;
-        deleteHandler?: (() => Promise<void>)|null,
-        showToasts?: boolean
+        deleteHandler?: (() => Promise<void>) | null;
+        showToasts?: boolean;
     }>(),
     {
         deleteHandler: null,
-        showToasts: true
-    }
+        showToasts: true,
+    },
 );
 
-const {patched, hasChanges, addPatch, patch} = usePatch(props.option);
+const { patched, hasChanges, addPatch, patch } = usePatch(props.option);
 const errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
@@ -121,45 +115,44 @@ const title = computed(() => {
 
 const name = computed({
     get: () => patched.value.name,
-    set: (name) => addPatch({name})
-})
+    set: name => addPatch({ name }),
+});
 const price = computed({
     get: () => patched.value.price,
-    set: (price) => addPatch({price})
-})
+    set: price => addPatch({ price }),
+});
 
 const hidden = computed({
     get: () => patched.value.hidden,
-    set: (hidden) => addPatch({hidden})
-})
+    set: hidden => addPatch({ hidden }),
+});
 
 const stock = computed({
     get: () => patched.value.stock,
-    set: (stock) => addPatch({stock})
-})
-
+    set: stock => addPatch({ stock }),
+});
 
 const usedStock = computed(() => patched.value.getUsedStock(props.group) || 0);
 
 const useStock = computed({
     get: () => patched.value.stock !== null,
-    set: (useStock) => addPatch({stock: useStock ? (patched.value.getUsedStock(props.group) || 10) : null})
-})
+    set: useStock => addPatch({ stock: useStock ? (patched.value.getUsedStock(props.group) || 10) : null }),
+});
 
 const maximum = computed({
     get: () => patched.value.maximum,
-    set: (maximum) => addPatch({maximum})
-})
+    set: maximum => addPatch({ maximum }),
+});
 
 const useMaximum = computed({
     get: () => patched.value.maximum !== null,
-    set: (useMaximum) => addPatch({maximum: useMaximum ? 10 : null})
-})
+    set: useMaximum => addPatch({ maximum: useMaximum ? 10 : null }),
+});
 
 const allowAmount = computed({
     get: () => patched.value.allowAmount,
-    set: (allowAmount) => addPatch({allowAmount})
-})
+    set: allowAmount => addPatch({ allowAmount }),
+});
 
 async function save() {
     if (deleting.value || saving.value) {
@@ -169,10 +162,12 @@ async function save() {
     saving.value = true;
     try {
         await props.saveHandler(patch.value);
-        await pop({force: true})
-    } catch (e) {
+        await pop({ force: true });
+    }
+    catch (e) {
         Toast.fromError(e).show();
-    } finally {
+    }
+    finally {
         saving.value = false;
     }
 }
@@ -191,25 +186,25 @@ async function deleteMe() {
         if (props.showToasts) {
             await Toast.success($t('eb66ea67-3c37-40f2-8572-9589d71ffab6')).show();
         }
-        await pop({force: true})
-    } catch (e) {
+        await pop({ force: true });
+    }
+    catch (e) {
         Toast.fromError(e).show();
-    } finally {
+    }
+    finally {
         deleting.value = false;
     }
 }
-
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
-}
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
 
 defineExpose({
-    shouldNavigateAway
-})
-
+    shouldNavigateAway,
+});
 
 </script>

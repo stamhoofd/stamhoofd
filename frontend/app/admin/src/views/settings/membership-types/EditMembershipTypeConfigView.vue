@@ -1,8 +1,5 @@
 <template>
-    <SaveView
-        :title="title" :loading="saving" :disabled="!hasChanges && !isNew" @save="save"
-        v-on="!isNew && deleteHandler ? {delete: doDelete} : {}"
-    >
+    <SaveView :title="title" :loading="saving" :disabled="!hasChanges && !isNew" @save="save" v-on="!isNew && deleteHandler ? {delete: doDelete} : {}">
         <h1>
             {{ title }}
         </h1>
@@ -19,54 +16,27 @@
             </STInputBox>
         </div>
         <p v-if="type.behaviour === PlatformMembershipTypeBehaviour.Days" class="style-description-small">
-            Het is enkel mogelijk om de aansluiting binnen de start- en einddata aan te vragen.
+            {{ $t('Het is enkel mogelijk om de aansluiting binnen de start- en einddata aan te vragen.') }}
         </p>
 
-        <STInputBox
-            v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period"
-            :title="$t('b0215bc3-b94d-47de-99d2-4dcb9f59b299')" error-fields="expireDate"
-            :error-box="errors.errorBox"
-        >
-            <DateSelection
-                v-model="expireDate" :required="false"
-                :placeholder="$t('f19516b2-0c37-4dce-86f4-46690ec3dfc9')"
-                :time="{hours: 23, minutes: 59, seconds: 59}"
-            />
+        <STInputBox v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period" :title="$t('b0215bc3-b94d-47de-99d2-4dcb9f59b299')" error-fields="expireDate" :error-box="errors.errorBox">
+            <DateSelection v-model="expireDate" :required="false" :placeholder="$t('f19516b2-0c37-4dce-86f4-46690ec3dfc9')" :time="{hours: 23, minutes: 59, seconds: 59}" />
         </STInputBox>
         <p v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period" class="style-description-small">
             {{ $t('e866488b-bc8d-481f-900b-9cf1779f44b8') }}
         </p>
 
-        <PlatformMembershipTypePriceConfigEditBox
-            :config="patched"
-            v-for="(priceConfig, index) of prices"
-            :key="priceConfig.id"
-            :has-multiple-prices="prices.length > 1"
-            :show-start-date="index > 0"
-            :show-price-per-day="$showPricePerDay"
-            :error-box="errors.errorBox"
-            :validator="errors.validator"
-            :price-config="priceConfig"
-            @patch:price-config="patchPrice(priceConfig, $event)"
-            @delete="deletePrice(priceConfig)"
-        />
+        <PlatformMembershipTypePriceConfigEditBox v-for="(priceConfig, index) of prices" :key="priceConfig.id" :config="patched" :has-multiple-prices="prices.length > 1" :show-start-date="index > 0" :show-price-per-day="$showPricePerDay" :error-box="errors.errorBox" :validator="errors.validator" :price-config="priceConfig" @patch:price-config="patchPrice(priceConfig, $event)" @delete="deletePrice(priceConfig)" />
 
-        <hr>
-        <p>
+        <hr><p>
             <button class="button text" type="button" @click="addPrice">
                 <span class="icon add" />
                 <span>{{ $t('285539ab-4119-4dcd-b0fe-87952f71d90d') }}</span>
             </button>
         </p>
 
-        <hr>
-
-        <STInputBox title="Gratis per lokale groep" error-fields="price" :error-box="errors.errorBox">
-            <NumberInput
-                v-model="amountFree" placeholder="Geen"
-                :suffix="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dagen' : 'leden'"
-                :suffix-singular="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dag' : 'lid'"
-            />
+        <hr><STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`Gratis per lokale groep`)">
+            <NumberInput v-model="amountFree" :suffix="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dagen' : 'leden'" :suffix-singular="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dag' : 'lid'" :placeholder="$t(`Geen`)" />
         </STInputBox>
 
         <template v-if="$feature('member-trials')">
@@ -74,7 +44,7 @@
                 <NumberInput v-model="trialDays" suffix="dagen" suffix-singular="dag" :min="0" />
             </STInputBox>
             <p class="style-description-small">
-                * Enkel voor nieuwe leden
+                * {{ $t('Enkel voor nieuwe leden') }}
             </p>
         </template>
     </SaveView>
@@ -137,7 +107,7 @@ const save = async () => {
         if (patched.value.expireDate && (patched.value.expireDate.getTime() > patched.value.endDate.getTime() || patched.value.expireDate.getTime() < patched.value.startDate.getTime())) {
             throw new SimpleError({
                 code: 'invalid_date_range',
-                message: 'De vervaldatum moet tussen de start- en einddatum liggen',
+                message: $t(`De vervaldatum moet tussen de start- en einddatum liggen`),
                 field: 'expireDate',
             });
         }

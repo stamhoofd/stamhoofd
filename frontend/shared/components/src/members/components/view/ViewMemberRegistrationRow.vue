@@ -21,28 +21,28 @@
         <p v-if="registration.description" class="style-description-small pre-wrap" v-text="registration.description" />
 
         <p v-if="registration.startDate" class="style-description-small">
-            Gestart op {{ formatDate(registration.startDate) }}
+            {{ $t('Gestart op') }} {{ formatDate(registration.startDate) }}
         </p>
 
         <p v-if="registration.registeredAt && !(registration.startDate && formatDate(registration.registeredAt) === formatDate(registration.startDate))" class="style-description-small">
-            Ingeschreven op {{ formatDate(registration.registeredAt) }}
+            {{ $t('Ingeschreven op') }} {{ formatDate(registration.registeredAt) }}
         </p>
         <p v-if="registration.deactivatedAt" class="style-description-small">
-            Uitgeschreven op {{ formatDate(registration.deactivatedAt) }}
+            {{ $t('Uitgeschreven op') }} {{ formatDate(registration.deactivatedAt) }}
         </p>
         <p v-if="registration.isTrial && registration.trialUntil" class="style-description-small">
-            Proefperiode tot {{ formatDate(registration.trialUntil) }}
+            {{ $t('Proefperiode tot') }} {{ formatDate(registration.trialUntil) }}
         </p>
         <p v-else-if="registration.startDate && registration.trialUntil" class="style-description-small">
-            Had een proefperiode van {{ Formatter.dateNumber(registration.startDate) }} tot {{ Formatter.dateNumber(registration.trialUntil) }}
+            {{ $t('Had een proefperiode van') }} {{ Formatter.dateNumber(registration.startDate) }} tot {{ Formatter.dateNumber(registration.trialUntil) }}
         </p>
 
         <p v-if="!registration.registeredAt && registration.canRegister" class="style-description-small">
-            Uitgenodigd om in te schrijven
+            {{ $t('Uitgenodigd om in te schrijven') }}
         </p>
 
         <p v-if="registration.payingOrganizationId" class="style-description-small">
-            Via groepsinschrijving
+            {{ $t('Via groepsinschrijving') }}
         </p>
 
         <template v-if="isEditable" #right>

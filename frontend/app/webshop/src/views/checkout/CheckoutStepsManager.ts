@@ -185,7 +185,7 @@ export class CheckoutStepsManager {
                             // Force a save if nothing changed (to fix timeSlot + updated data)
                             await this.goNext(id, navigate);
                         },
-                        saveText: 'Doorgaan',
+                        saveText: $t(`Doorgaan`),
                     });
                 },
                 validate: (checkout, webshop) => {
@@ -293,7 +293,7 @@ export class CheckoutStepsManager {
         if (!nextStep) {
             throw new SimpleError({
                 code: 'missing_config',
-                message: 'Er ging iets mis bij het ophalen van de volgende stap',
+                message: $t(`Er ging iets mis bij het ophalen van de volgende stap`),
             });
         }
 

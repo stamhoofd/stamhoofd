@@ -12,7 +12,7 @@
                 </button>
                 <a v-else-if="organization.website" class="button text limit-space" :href="organization.website" target="_blank" rel="nofollow noreferrer noopener">
                     <span class="icon external" />
-                    <span>Terug naar website</span>
+                    <span>{{ $t('Terug naar website') }}</span>
                 </a>
                 <button v-if="cartEnabled" class="primary button" type="button" @click="openCart(true)">
                     <span class="icon basket" />
@@ -28,21 +28,22 @@
                         <img :src="bannerImageSrc" :width="bannerImageWidth" :height="bannerImageHeight">
                     </figure>
                     <h1>{{ webshop.meta.title || webshop.meta.name }}</h1>
+
                     <!-- eslint-disable-next-line vue/no-v-html -> cleaned in backend -->
                     <div v-if="webshop.meta.description.html" class="description style-wysiwyg" v-html="webshop.meta.description.html" />
                     <p v-else-if="webshop.meta.description.text" class="description" v-text="webshop.meta.description.text" />
 
                     <p v-if="showOpenAt" class="info-box">
-                        Bestellen kan vanaf {{ webshop.meta.openAt ? formatDateTime(webshop.meta.openAt) : '?' }}
+                        {{ $t('Bestellen kan vanaf') }} {{ webshop.meta.openAt ? formatDateTime(webshop.meta.openAt) : '?' }}
                     </p>
                     <p v-else-if="closed" class="info-box">
-                        Bestellingen zijn gesloten
+                        {{ $t('Bestellingen zijn gesloten') }}
                     </p>
                     <p v-else-if="almostClosed" class="info-box">
-                        Bestellen kan tot {{ webshop.meta.availableUntil ? formatTime(webshop.meta.availableUntil) : '?' }}
+                        {{ $t('Bestellen kan tot') }} {{ webshop.meta.availableUntil ? formatTime(webshop.meta.availableUntil) : '?' }}
                     </p>
                     <p v-if="categories.length === 0 && products.length === 0" class="info-box">
-                        Momenteel is er niets beschikbaar.
+                        {{ $t('Momenteel is er niets beschikbaar.') }}
                     </p>
                 </header>
 

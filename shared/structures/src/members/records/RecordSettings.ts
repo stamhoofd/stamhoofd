@@ -64,46 +64,46 @@ export function getRecordTypeName(type: RecordType) {
     const all = [
         {
             value: RecordType.Text,
-            name: 'Tekstveld (één lijn)',
+            name: $t(`Tekstveld (één lijn)`),
         },
         {
             value: RecordType.Textarea,
-            name: 'Tekstveld (meerdere lijnen)',
+            name: $t(`Tekstveld (meerdere lijnen)`),
         },
         {
             value: RecordType.Address,
-            name: 'Adres',
+            name: $t(`Adres`),
         },
         {
             value: RecordType.Email,
-            name: 'E-mailadres',
+            name: $t(`E-mailadres`),
         },
         {
             value: RecordType.Phone,
-            name: 'Telefoonnummer',
+            name: $t(`Telefoonnummer`),
         },
         {
             value: RecordType.Date,
-            name: 'Datum',
+            name: $t(`Datum`),
         },
         {
             value: RecordType.Checkbox,
-            name: 'Aankruisvakje',
+            name: $t(`Aankruisvakje`),
         },
         {
             value: RecordType.ChooseOne,
-            name: 'Keuzemenu (kies één)',
+            name: $t(`Keuzemenu (kies één)`),
         },
         {
             value: RecordType.MultipleChoice,
-            name: 'Keuzemenu (kies meerdere)',
+            name: $t(`Keuzemenu (kies meerdere)`),
         },
         {
             value: RecordType.File,
-            name: 'Bestand',
+            name: $t(`Bestand`),
         },
     ];
-    return all.find(t => t.value === type)?.name ?? 'Onbekend';
+    return all.find(t => t.value === type)?.name ?? $t(`Onbekend`);
 }
 
 export enum RecordWarningType {
@@ -267,7 +267,7 @@ export class RecordSettings extends BaseRecordSettings {
     getDiffValue() {
         const type = getRecordTypeName(this.type);
         if (this.required) {
-            return 'Verplicht ' + type;
+            return $t(`Verplicht`) + ' ' + type;
         }
         return type;
     }
@@ -283,7 +283,7 @@ export class RecordSettings extends BaseRecordSettings {
         if (this.required && !answer) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Dit veld is verplicht',
+                message: $t(`Dit veld is verplicht`),
                 field: this.id,
             });
         }

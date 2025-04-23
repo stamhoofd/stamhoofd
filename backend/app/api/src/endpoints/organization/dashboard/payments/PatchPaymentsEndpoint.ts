@@ -52,7 +52,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'You need to add at least one balance item payment',
-                    human: 'Een betaling moet ten minste één item bestaan',
+                    human: $t(`Een betaling moet ten minste één item bestaan`),
                     field: 'balanceItemPayments',
                 });
             }
@@ -61,7 +61,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Invalid payment method',
-                    human: 'Je kan zelf geen online betalingen aanmaken',
+                    human: $t(`Je kan zelf geen online betalingen aanmaken`),
                     field: 'method',
                 });
             }
@@ -78,7 +78,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Transfer settings are required',
-                        human: 'Je moet de overschrijvingsdetails invullen',
+                        human: $t(`Je moet de overschrijvingsdetails invullen`),
                         field: 'transferSettings',
                     });
                 }
@@ -89,7 +89,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Transfer description is required',
-                        human: 'Je moet een mededeling invullen voor de overschrijving',
+                        human: $t(`Je moet een mededeling invullen voor de overschrijving`),
                         field: 'transferDescription',
                     });
                 }
@@ -103,7 +103,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             for (const item of put.balanceItemPayments) {
                 const balanceItem = await BalanceItem.getByID(item.balanceItem.id);
                 if (!balanceItem || balanceItem.organizationId !== organization.id) {
-                    throw Context.auth.notFoundOrNoAccess('Eén van de afrekeningen die je wilde markeren als betaald bestaat niet (meer).');
+                    throw Context.auth.notFoundOrNoAccess($t(`Eén van de afrekeningen die je wilde markeren als betaald bestaat niet (meer).`));
                 }
                 balanceItems.push(balanceItem);
 
@@ -121,7 +121,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
 
             // Check permissions
             if (!(await Context.auth.canAccessBalanceItems(balanceItems, PermissionLevel.Write))) {
-                throw Context.auth.error('Je hebt geen toegangsrechten tot één van de gekozen afrekeningen voor de betaling die je wilt aanmaken');
+                throw Context.auth.error($t(`Je hebt geen toegangsrechten tot één van de gekozen afrekeningen voor de betaling die je wilt aanmaken`));
             }
 
             // Check total price
@@ -134,7 +134,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'The price should be greater than zero',
-                            human: 'Het totaalbedrag moet groter zijn dan 0 euro',
+                            human: $t(`Het totaalbedrag moet groter zijn dan 0 euro`),
                             field: 'price',
                         });
                     }
@@ -147,7 +147,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'The price should be smaller than zero',
-                            human: 'Het totaalbedrag moet kleiner zijn dan 0 euro',
+                            human: $t(`Het totaalbedrag moet kleiner zijn dan 0 euro`),
                             field: 'price',
                         });
                     }
@@ -160,7 +160,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Total price should be zero',
-                            human: 'Het totaalbedrag moet 0 euro zijn',
+                            human: $t(`Het totaalbedrag moet 0 euro zijn`),
                             field: 'price',
                         });
                     }
@@ -169,7 +169,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                         throw new SimpleError({
                             code: 'missing_items',
                             message: 'At least two items are required for a reallocation',
-                            human: 'Er moeten minstens twee items in een verrekening zitten',
+                            human: $t(`Er moeten minstens twee items in een verrekening zitten`),
                         });
                     }
                     break;
@@ -216,7 +216,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                     throw new SimpleError({
                         code: 'not_found',
                         message: 'Payment not found',
-                        human: 'Deze betaling werd niet gevonden.',
+                        human: $t(`Deze betaling werd niet gevonden.`),
                     });
                 }
 
@@ -225,7 +225,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid payment method',
-                            human: 'Je kan online betalingen niet wijzigen',
+                            human: $t(`Je kan online betalingen niet wijzigen`),
                         });
                     }
                 }
@@ -244,7 +244,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid payment method',
-                            human: 'De betaalmethode die je wilt gebruiken is niet toegestaan',
+                            human: $t(`De betaalmethode die je wilt gebruiken is niet toegestaan`),
                             field: 'method',
                         });
                     }

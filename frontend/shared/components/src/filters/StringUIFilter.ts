@@ -160,12 +160,12 @@ export class StringUIFilter extends UIFilter {
 
     private createCominationWord(mode: StringFilterMode) {
         switch (mode) {
-            case StringFilterMode.Contains: return 'bevat';
-            case StringFilterMode.NotContains: return 'bevat niet';
-            case StringFilterMode.Equals: return 'is gelijk aan';
-            case StringFilterMode.NotEquals: return 'is niet gelijk aan';
-            case StringFilterMode.Empty: return 'is leeg';
-            case StringFilterMode.NotEmpty: return 'is niet leeg';
+            case StringFilterMode.Contains: return $t(`bevat`);
+            case StringFilterMode.NotContains: return $t(`bevat niet`);
+            case StringFilterMode.Equals: return $t(`is gelijk aan`);
+            case StringFilterMode.NotEquals: return $t(`is niet gelijk aan`);
+            case StringFilterMode.Empty: return $t(`is leeg`);
+            case StringFilterMode.NotEmpty: return $t(`is niet leeg`);
         }
     }
 }

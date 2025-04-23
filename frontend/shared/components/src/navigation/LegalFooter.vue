@@ -1,14 +1,13 @@
 <template>
     <div class="legal-footer" :class="{customPlatform: STAMHOOFD.platformName !== 'stamhoofd'}">
-        <hr class="style-hr">
-        <div>
+        <hr class="style-hr"><div>
             <aside>
                 {{ company?.name || organization.name }}{{ company?.VATNumber || company?.companyNumber ? (", "+(company?.VATNumber || company?.companyNumber)) : "" }}
                 <template v-if="organization.website">
                     -
                 </template>
                 <a v-if="organization.website" :href="organization.website" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
-                    Website
+                    {{ $t('Website') }}
                 </a>
 
                 <template v-for="policy in policies" :key="policy.id">
@@ -23,7 +22,7 @@
                 </template>
 
                 <a v-if="privacyUrl" :href="privacyUrl" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
-                    Privacyvoorwaarden
+                    {{ $t('Privacyvoorwaarden') }}
                 </a>
 
                 <template v-if="isLoggedIn">
@@ -31,18 +30,16 @@
                 </template>
 
                 <button v-if="isLoggedIn" class="inline-link secundary" type="button" @click="logout">
-                    Uitloggen
+                    {{ $t('Uitloggen') }}
                 </button>
 
                 <br>
-                {{ company?.address || organization.address }}
             </aside>
-            <div class="style-wysiwyg gray no-underline-links" v-html="platform.config.shopFooterText.html" v-if="STAMHOOFD.platformName !== 'stamhoofd'">
-            </div>
+            <div v-if="STAMHOOFD.platformName !== 'stamhoofd'" class="style-wysiwyg gray no-underline-links" v-html="platform.config.shopFooterText.html" />
             <div v-else>
-                <a v-if="hasTickets" :href="'https://'+$domains.marketing+'?utm_medium=webshop'">Verkoop ook tickets via <Logo /></a>
-                <a v-else-if="isWebshop" :href="'https://'+$domains.marketing+'?utm_medium=webshop'">Bouw je webshop via <Logo /></a>
-                <a v-else :href="'https://'+$domains.marketing+'/ledenadministratie?utm_medium=ledenportaal'">Ledenadministratie via <Logo /></a>
+                <a v-if="hasTickets" :href="'https://'+$domains.marketing+'?utm_medium=webshop'">{{ $t('Verkoop ook tickets via') }} <Logo /></a>
+                <a v-else-if="isWebshop" :href="'https://'+$domains.marketing+'?utm_medium=webshop'">{{ $t('Bouw je webshop via') }} <Logo /></a>
+                <a v-else :href="'https://'+$domains.marketing+'/ledenadministratie?utm_medium=ledenportaal'">{{ $t('Ledenadministratie via') }} <Logo /></a>
             </div>
         </div>
     </div>
@@ -67,10 +64,10 @@ const props = withDefaults(
 );
 
 const context = useContext();
-const platform = usePlatform()
+const platform = usePlatform();
 
 const isLoggedIn = computed(() => context.value.isComplete() ?? false);
-const company = computed(() => props.organization.meta.companies[0] as Company|undefined);
+const company = computed(() => props.organization.meta.companies[0] as Company | undefined);
 
 async function logout() {
     if (!(await CenteredMessage.confirm('Wil je uitloggen?', 'Ja, uitloggen', 'Hiermee zal je worden afgemeld.'))) {

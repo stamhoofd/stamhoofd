@@ -35,7 +35,7 @@ export class GetMemberBalanceEndpoint extends Endpoint<Params, Query, Body, Resp
         const member = (await Member.getWithRegistrations(request.params.id));
 
         if (!member || !await Context.auth.hasFinancialMemberAccess(member)) {
-            throw Context.auth.notFoundOrNoAccess('Geen lid gevonden, of je hebt geen toegang tot dit lid');
+            throw Context.auth.notFoundOrNoAccess($t(`Geen lid gevonden, of je hebt geen toegang tot dit lid`));
         }
 
         // Get all balance items for this member or users

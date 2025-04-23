@@ -1,9 +1,8 @@
 <template>
     <div v-if="notes">
         <div class="hover-box container">
-            <hr>
-            <h2 class="style-with-button">
-                <div>Notities</div>
+            <hr><h2 class="style-with-button">
+                <div>{{ $t('Notities') }}</div>
                 <div class="hover-show">
                     <button v-if="hasWrite" type="button" class="button icon edit gray" @click.prevent="editThisMember" />
                 </div>
@@ -11,7 +10,7 @@
             <p class="style-description-small notes">
                 {{ notes }}
             </p>
-        </div>  
+        </div>
     </div>
 </template>
 
@@ -22,11 +21,11 @@ import { useAuth } from '../../../hooks';
 import { useEditMember } from '../../composables/useEditMember';
 
 defineOptions({
-    inheritAttrs: false
-})
+    inheritAttrs: false,
+});
 
 const props = defineProps<{
-    member: PlatformMember
+    member: PlatformMember;
 }>();
 
 const editMember = useEditMember();
@@ -40,7 +39,6 @@ async function editThisMember() {
     await editMember(props.member);
 }
 </script>
-
 
 <style lang="scss" scoped>
 .notes {

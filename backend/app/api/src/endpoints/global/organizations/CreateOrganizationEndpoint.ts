@@ -31,7 +31,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Not allowed',
-                human: 'Je kan geen vereniging aanmaken',
+                human: $t(`Je kan geen vereniging aanmaken`),
             });
         }
 
@@ -40,7 +40,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Should not be empty',
-                    human: 'Je bent de naam van je organisatie vergeten in te vullen',
+                    human: $t(`Je bent de naam van je organisatie vergeten in te vullen`),
                     field: 'organization.name',
                 });
             }
@@ -48,7 +48,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Field is too short',
-                human: 'Kijk de naam van je organisatie na, deze is te kort. Vul eventueel aan met de gemeente.',
+                human: $t(`Kijk de naam van je organisatie na, deze is te kort. Vul eventueel aan met de gemeente.`),
                 field: 'organization.name',
             });
         }
@@ -59,7 +59,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Field is too long',
-                human: 'De naam van de vereniging is te lang. Probeer de naam wat te verkorten en probeer opnieuw.',
+                human: $t(`De naam van de vereniging is te lang. Probeer de naam wat te verkorten en probeer opnieuw.`),
                 field: 'organization.name',
             });
         }
@@ -69,7 +69,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             throw new SimpleError({
                 code: 'name_taken',
                 message: 'An organization with the same name already exists',
-                human: 'Er bestaat al een vereniging met dezelfde naam. Voeg bijvoorbeeld de naam van je gemeente toe.',
+                human: $t(`Er bestaat al een vereniging met dezelfde naam. Voeg bijvoorbeeld de naam van je gemeente toe.`),
                 field: 'name',
             });
         }

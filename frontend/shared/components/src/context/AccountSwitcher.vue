@@ -15,7 +15,7 @@
     <template v-else-if="!isNative">
         <a class="button text only-icon-smartphone" :href="'https://'+$domains.marketing+''" rel="noopener">
             <span class="icon external" />
-            <span>Terug naar website</span>
+            <span>{{ $t('Terug naar website') }}</span>
         </a>
 
         <a v-if="!isPlatform" class="button primary" href="/aansluiten" @click.prevent="$navigate('join')">
@@ -34,20 +34,20 @@ import { useUser } from '../hooks';
 
 const $user = useUser();
 const $navigate = useNavigate();
-const isNative = AppManager.shared.isNative
-const isPlatform = STAMHOOFD.userMode === 'platform'
+const isNative = AppManager.shared.isNative;
+const isPlatform = STAMHOOFD.userMode === 'platform';
 
 // todo: this isn't working yet on start
 defineRoutes([
     {
         url: 'account',
         component: async () => (await import('../views/AccountSettingsView.vue')).default as any,
-        present: "popup"
-    }
-])
+        present: 'popup',
+    },
+]);
 
 const letters = computed(() => {
-    return $user.value ? Formatter.firstLetters($user.value.name, 3) : ''
+    return $user.value ? Formatter.firstLetters($user.value.name, 3) : '';
 });
 
 const showContextMenu = async () => {

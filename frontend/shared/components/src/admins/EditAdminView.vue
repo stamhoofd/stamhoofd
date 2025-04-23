@@ -1,95 +1,84 @@
 <template>
-    <SaveView :loading="saving" :title="isNew ? 'Nieuwe beheerder' : user.name" :disabled="!isNew && !hasChanges" @save="save">
+    <SaveView :loading="saving" :title="isNew ? $t(`Nieuwe beheerder`) : user.name" :disabled="!isNew && !hasChanges" @save="save">
         <template v-if="!getPermissions(user)">
             <h1 v-if="isNew">
-                Account toevoegen
+                {{ $t('Account toevoegen') }}
             </h1>
             <h1 v-else>
-                Account bewerken
+                {{ $t('Account bewerken') }}
             </h1>
         </template>
         <template v-else>
             <h1 v-if="isNew">
-                Externe beheerder toevoegen
+                {{ $t('Externe beheerder toevoegen') }}
             </h1>
             <h1 v-else-if="!user.memberId">
-                Externe beheerder bewerken
+                {{ $t('Externe beheerder bewerken') }}
             </h1>
             <h1 v-else>
-                Interne beheerder bewerken
+                {{ $t('Interne beheerder bewerken') }}
             </h1>
         </template>
 
         <LoadingButton v-if="getPermissions(user) && !isNew && !user.hasAccount" :loading="sendingInvite">
             <button class="warning-box with-button" type="button" :class="{selectable: !didSendInvite}" @click="resendInvite">
-                Deze beheerder heeft nog geen account aangemaakt
+                {{ $t('Deze beheerder heeft nog geen account aangemaakt') }}
 
                 <span class="button text" :class="{disabled: didSendInvite}">
-                    Uitnodiging opnieuw versturen
+                    {{ $t('Uitnodiging opnieuw versturen') }}
                 </span>
             </button>
         </LoadingButton>
 
         <p v-if="getPermissions(user) && !user.memberId" class="info-box">
-            Deze beheerder is niet gekoppeld aan een ingeschreven lid, en is daarom extern. Zorg dat het e-mailadres overeen komt met het e-mailadres van een lid zelf.
+            {{ $t('Deze beheerder is niet gekoppeld aan een ingeschreven lid, en is daarom extern. Zorg dat het e-mailadres overeen komt met het e-mailadres van een lid zelf.') }}
         </p>
 
         <STErrorsDefault :error-box="$errors.errorBox" />
-        <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="$errors.errorBox">
+        <STInputBox error-fields="firstName,lastName" :error-box="$errors.errorBox" :title="$t(`Naam`)">
             <div class="input-group">
                 <div>
-                    <input v-model="firstName" enterkeyhint="next" class="input" type="text" placeholder="Voornaam" autocomplete="given-name" :disabled="!canEditDetails">
+                    <input v-model="firstName" enterkeyhint="next" class="input" type="text" autocomplete="given-name" :disabled="!canEditDetails" :placeholder="$t(`Voornaam`)">
                 </div>
                 <div>
-                    <input v-model="lastName" enterkeyhint="next" class="input" type="text" placeholder="Achternaam" autocomplete="family-name" :disabled="!canEditDetails">
+                    <input v-model="lastName" enterkeyhint="next" class="input" type="text" autocomplete="family-name" :disabled="!canEditDetails" :placeholder="$t(`Achternaam`)">
                 </div>
             </div>
         </STInputBox>
 
-        <EmailInput v-model="email" title="E-mailadres" :validator="$errors.validator" placeholder="E-mailadres" :required="true" :disabled="!canEditDetails" />
+        <EmailInput v-model="email" :validator="$errors.validator" :required="true" :disabled="!canEditDetails" :title="$t(`E-mailadres`)" :placeholder="$t(`E-mailadres`)" />
 
         <template v-if="getUnloadedPermissions(user)">
             <div v-if="!user.memberId || getUnloadedPermissions(user)" class="container">
-                <hr>
-                <h2>Externe beheerdersrollen</h2>
-                <p>Je kan externe beheerders verschillende rollen toekennen (alternatief voor functies die je aan leden kan koppelen). Een externe beheerder zonder rollen heeft geen enkele toegang.</p>
+                <hr><h2>{{ $t('Externe beheerdersrollen') }}</h2>
+                <p>{{ $t('Je kan externe beheerders verschillende rollen toekennen (alternatief voor functies die je aan leden kan koppelen). Een externe beheerder zonder rollen heeft geen enkele toegang.') }}</p>
 
                 <EditUserPermissionsBox :user="patched" @patch:user="(event) => addPatch(event)" />
             </div>
 
             <div v-if="resources.length" class="container">
-                <hr>
-                <h2>Individuele toegang</h2>
-                <p>Beheerders kunnen automatisch toegang krijgen tot een onderdeel als ze het zelf hebben aangemaakt maar anders niet automatisch toegang zouden hebben (bv. aanmaken van nieuwe webshops). Sowieso is het aan te raden om dit om te zetten in beheerdersrollen, aangezien die eenvoudiger te beheren zijn.</p>
+                <hr><h2>{{ $t('Individuele toegang') }}</h2>
+                <p>{{ $t('Beheerders kunnen automatisch toegang krijgen tot een onderdeel als ze het zelf hebben aangemaakt maar anders niet automatisch toegang zouden hebben (bv. aanmaken van nieuwe webshops). Sowieso is het aan te raden om dit om te zetten in beheerdersrollen, aangezien die eenvoudiger te beheren zijn.') }}</p>
 
                 <STList>
-                    <ResourcePermissionRow
-                        v-for="resource in resources"
-                        :key="resource.id"
-                        :role="permissions.unloadedPermissions!"
-                        :resource="resource"
-                        :configurable-access-rights="[]"
-                        type="resource"
-                        @patch:role="addPermissionPatch"
-                    />
+                    <ResourcePermissionRow v-for="resource in resources" :key="resource.id" :role="permissions.unloadedPermissions!" :resource="resource" :configurable-access-rights="[]" type="resource" @patch:role="addPermissionPatch" />
                 </STList>
             </div>
         </template>
         <p v-else class="style-description-small">
-            Dit account is geen beheerder.
+            {{ $t('Dit account is geen beheerder.') }}
         </p>
         <code v-if="STAMHOOFD.environment === 'development'" class="style-code">{{ JSON.stringify(getUnloadedPermissions(user)?.encode({version: 1000}), undefined, '    ') }}</code>
 
         <template v-if="!isNew && getUnloadedPermissions(user)">
-            <hr v-if="!isNew">
-            <h2>
-                Verwijderen
+            <hr v-if="!isNew"><h2>
+                {{ $t('Verwijderen') }}
             </h2>
-            <p>Je kan een beheerder verwijderen. Het account blijft dan behouden maar de beheerder verliest alle toegangsrechten.</p>
+            <p>{{ $t('Je kan een beheerder verwijderen. Het account blijft dan behouden maar de beheerder verliest alle toegangsrechten.') }}</p>
 
             <button class="button secundary danger" type="button" @click="doDelete()">
                 <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span>{{ $t('Verwijderen') }}</span>
             </button>
         </template>
     </SaveView>

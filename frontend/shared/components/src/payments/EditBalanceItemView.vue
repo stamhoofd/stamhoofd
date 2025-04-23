@@ -6,45 +6,37 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="!hasPayments(patchedBalanceItem)" class="warning-box">
-            Een afrekening (= de schuld) wijzigen die al gebruikt werd in een aangemaakte betaling (= hoe de schuld betaald werd) zal enkel het openstaande bedrag wijzigen. Een betaling is niet meer aanpasbaar na het aanmaken ervan. Indien je het bedrag van een betaling wilt wijzigen moet je ofwel een extra betaling aanmaken voor het verschil of de betaling annuleren en opnieuw aanmaken.
+            {{ $t('Een afrekening (= de schuld) wijzigen die al gebruikt werd in een aangemaakte betaling (= hoe de schuld betaald werd) zal enkel het openstaande bedrag wijzigen. Een betaling is niet meer aanpasbaar na het aanmaken ervan. Indien je het bedrag van een betaling wilt wijzigen moet je ofwel een extra betaling aanmaken voor het verschil of de betaling annuleren en opnieuw aanmaken.') }}
         </p>
 
         <div class="split-inputs">
             <div>
-                <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox">
-                    <input
-                        ref="firstInput"
-                        v-model="description"
-                        class="input"
-                        type="text"
-                        placeholder="Bv. Aankoop T-shirt"
-                        autocomplete="off"
-                        :disabled="!!balanceItem.relations.size"
-                    >
+                <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t(`Beschrijving`)">
+                    <input ref="firstInput" v-model="description" class="input" type="text" autocomplete="off" :disabled="!!balanceItem.relations.size" :placeholder="$t(`Bv. Aankoop T-shirt`)">
                 </STInputBox>
                 <p v-if="balanceItem.relations.size" class="style-description-small">
-                    Dit is een verschuldigd bedrag dat automatisch werd aangemaakt door {{ platform.config.name }}
+                    {{ $t('Dit is een verschuldigd bedrag dat automatisch werd aangemaakt door {platform}', {platform: platform.config.name}) }}
                 </p>
             </div>
             <div>
-                <STInputBox title="Verschuldigd sinds" error-fields="createdAt" :error-box="errors.errorBox">
+                <STInputBox error-fields="createdAt" :error-box="errors.errorBox" :title="$t(`Verschuldigd sinds`)">
                     <DateSelection v-model="createdAt" />
                 </STInputBox>
             </div>
         </div>
 
         <div class="split-inputs">
-            <STInputBox title="Eenheidsprijs" error-fields="unitPrice" :error-box="errors.errorBox">
-                <PriceInput v-model="unitPrice" placeholder="Gratis" :min="null" />
+            <STInputBox error-fields="unitPrice" :error-box="errors.errorBox" :title="$t(`Eenheidsprijs`)">
+                <PriceInput v-model="unitPrice" :min="null" :placeholder="$t(`Gratis`)" />
             </STInputBox>
 
-            <STInputBox title="Aantal" error-fields="amount" :error-box="errors.errorBox">
-                <NumberInput v-model="amount" placeholder="1" :min="Math.min(1, balanceItem.amount)" :stepper="true" />
+            <STInputBox error-fields="amount" :error-box="errors.errorBox" :title="$t(`Aantal`)">
+                <NumberInput v-model="amount" :min="Math.min(1, balanceItem.amount)" :stepper="true" :placeholder="$t(`1`)" />
             </STInputBox>
         </div>
         <template v-if="$feature('member-trials') && (patchedBalanceItem.price >= 0 || dueAt !== null)">
-            <STInputBox title="Te betalen tegen*" error-fields="dueAt" :error-box="errors.errorBox">
-                <DateSelection v-model="dueAt" :required="false" placeholder="Onmiddelijk" :time="{hours: 0, minutes: 0, seconds: 0}" />
+            <STInputBox error-fields="dueAt" :error-box="errors.errorBox" :title="$t(`Te betalen tegen*`)">
+                <DateSelection v-model="dueAt" :required="false" :time="{hours: 0, minutes: 0, seconds: 0}" :placeholder="$t(`Onmiddelijk`)" />
             </STInputBox>
             <p class="style-description-small">
                 {{ $t('15b6f0c8-6287-4b4d-bf34-4da2f4a0e575') }}
@@ -53,12 +45,11 @@
         <PriceBreakdownBox :price-breakdown="patchedBalanceItem.priceBreakown" />
 
         <template v-if="family && family.members.length >= (originalMemberId ? 2 : 1)">
-            <hr>
-            <h2>Lid</h2>
-            <p>Selecteer welk lid het bedrag verschuldigd is.</p>
+            <hr><h2>{{ $t('Lid') }}</h2>
+            <p>{{ $t('Selecteer welk lid het bedrag verschuldigd is.') }}</p>
 
             <p v-if="!memberId" class="warning-box">
-                Je koppelt een verschuldigd bedrag best aan een lid en niet aan een account. Dan kan iedereen binnen het gezin het openstaande bedrag betalen.
+                {{ $t('Je koppelt een verschuldigd bedrag best aan een lid en niet aan een account. Dan kan iedereen binnen het gezin het openstaande bedrag betalen.') }}
             </p>
 
             <STList>
@@ -70,8 +61,8 @@
                     <h3 class="style-title-list">
                         {{ m.patchedMember.name }}
                     </h3>
-                    <p class="style-description-small" v-if="!memberId">
-                        Lid
+                    <p v-if="!memberId" class="style-description-small">
+                        {{ $t('Lid') }}
                     </p>
                 </STListItem>
 
@@ -84,19 +75,18 @@
                         {{ user.name }} ({{ user.email }})
                     </h3>
                     <p class="style-description-small">
-                        Account
+                        {{ $t('Account') }}
                     </p>
                 </STListItem>
             </STList>
         </template>
 
         <template v-if="!isNew && hasPayments(patchedBalanceItem)">
-            <hr>
-            <h2>Betalingen</h2>
-            <p>Een openstaand bedrag kan door een lid betaald worden via het ledenportaal. Daar kan men via één van de ingestelde betaalmethodes afrekenen. Meerdere openstaande bedragen (ook over meerdere leden heen als een account meerdere leden beheert) kunnen in één keer betaald worden, vandaar dat het bedrag van een betaling vaak hoger is dan het bedrag van een individuele afrekening.</p>
+            <hr><h2>{{ $t('Betalingen') }}</h2>
+            <p>{{ $t('Een openstaand bedrag kan door een lid betaald worden via het ledenportaal. Daar kan men via één van de ingestelde betaalmethodes afrekenen. Meerdere openstaande bedragen (ook over meerdere leden heen als een account meerdere leden beheert) kunnen in één keer betaald worden, vandaar dat het bedrag van een betaling vaak hoger is dan het bedrag van een individuele afrekening.') }}</p>
 
             <p v-if="patchedBalanceItem.payments.length === 0" class="info-box">
-                Er werd nog geen betaling aangemaakt voor deze afrekening
+                {{ $t('Er werd nog geen betaling aangemaakt voor deze afrekening') }}
             </p>
 
             <STList v-else>
@@ -104,18 +94,17 @@
             </STList>
 
             <template v-if="outstanding.pending === 0 && outstanding.paid === 0">
-                <hr>
-                <h2>Acties</h2>
+                <hr><h2>{{ $t('Acties') }}</h2>
 
                 <STList>
                     <STListItem :selectable="true" @click="doDelete">
                         <h2 class="style-title-list">
-                            Verwijder deze aanrekening
+                            {{ $t('Verwijder deze aanrekening') }}
                         </h2>
                         <template #right>
                             <button type="button" class="button secundary danger hide-smartphone">
                                 <span class="icon trash" />
-                                <span>Verwijderen</span>
+                                <span>{{ $t('Verwijderen') }}</span>
                             </button>
                             <button type="button" class="button icon trash only-smartphone" />
                         </template>

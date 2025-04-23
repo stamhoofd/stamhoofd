@@ -1,13 +1,13 @@
 <template>
     <div class="property-filter-value-input">
-        <STInputBox v-if="!isAlwaysEnabled() || hasFilters" title="Wanneer ingeschakeld?" class="max">
+        <STInputBox v-if="!isAlwaysEnabled() || hasFilters" class="max" :title="$t(`Wanneer ingeschakeld?`)">
             <STList>
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
                         <Radio :model-value="isAlwaysEnabled()" :value="true" @update:model-value="setAlwaysEnabled()" />
                     </template>
                     <h3 class="style-title-list">
-                        Altijd
+                        {{ $t('Altijd') }}
                     </h3>
                 </STListItem>
 
@@ -16,7 +16,7 @@
                         <Radio :model-value="isAlwaysEnabled()" :value="false" @update:model-value="setEnabledWhen(true)" />
                     </template>
                     <h3 class="style-title-list">
-                        Als...
+                        {{ $t('Als...') }}
                     </h3>
                     <p class="style-description-small">
                         {{ enabledText }}
@@ -24,21 +24,21 @@
                     <template #right>
                         <button v-if="!isAlwaysEnabled()" class="button text" type="button" @click="setEnabledWhen(false)">
                             <span class="icon edit" />
-                            <span class="hide-small">Wijzig</span>
+                            <span class="hide-small">{{ $t('Wijzig') }}</span>
                         </button>
                     </template>
                 </STListItem>
             </STList>
         </STInputBox>
 
-        <STInputBox v-if="allowOptional" title="Wanneer verplicht invullen?*" class="max">
+        <STInputBox v-if="allowOptional" class="max" :title="$t(`Wanneer verplicht invullen?`) + '*'">
             <STList>
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
                         <Radio :model-value="isAlwaysRequired()" :value="true" @update:model-value="setAlwaysRequired()" />
                     </template>
                     <h3 class="style-title-list">
-                        Stap kan niet worden overgeslagen
+                        {{ $t('Stap kan niet worden overgeslagen') }}
                     </h3>
                 </STListItem>
 
@@ -47,7 +47,7 @@
                         <Radio :model-value="isNeverRequired()" :value="true" @update:model-value="setNeverRequired()" />
                     </template>
                     <h3 class="style-title-list">
-                        Stap kan altijd worden overgeslagen
+                        {{ $t('Stap kan altijd worden overgeslagen') }}
                     </h3>
                 </STListItem>
 
@@ -56,7 +56,7 @@
                         <Radio :model-value="!isAlwaysRequired() && !isNeverRequired()" :value="true" @update:model-value="setRequiredWhen(true)" />
                     </template>
                     <h3 class="style-title-list">
-                        Als...
+                        {{ $t('Als...') }}
                     </h3>
                     <p class="style-description-small">
                         {{ requiredText }}
@@ -64,14 +64,14 @@
                     <template #right>
                         <button v-if="!isAlwaysRequired() && !isNeverRequired()" class="button text" type="button" @click="setRequiredWhen(false)">
                             <span class="icon edit" />
-                            <span class="hide-small">Wijzig</span>
+                            <span class="hide-small">{{ $t('Wijzig') }}</span>
                         </button>
                     </template>
                 </STListItem>
             </STList>
         </STInputBox>
         <p v-if="allowOptional" class="style-description-small">
-            * Als een vragenlijst niet verplicht is, zal men de stap kunnen overslaan zolang nog niets werd ingevuld. Meestal is het niet nodig om dit te gebruiken. Als de vragenlijst altijd verplicht is om in te vullen, kan je ook nog steeds optionele vragen in die lijst hebben. Meestal is het gewoon duidelijker om optionele vragen te gebruiken. Maar soms wil je bijvoorbeeld 'alles invullen' of 'niets invullen', dan kan je dit best gebruiken.
+            * {{ $t("Als een vragenlijst niet verplicht is, zal men de stap kunnen overslaan zolang nog niets werd ingevuld. Meestal is het niet nodig om dit te gebruiken. Als de vragenlijst altijd verplicht is om in te vullen, kan je ook nog steeds optionele vragen in die lijst hebben. Meestal is het gewoon duidelijker om optionele vragen te gebruiken. Maar soms wil je bijvoorbeeld 'alles invullen' of 'niets invullen', dan kan je dit best gebruiken.") }}
         </p>
 
         <div v-if="isDevelopment">

@@ -1,3 +1,4 @@
+import { translateTypescriptFiles } from "./translate-typescript-files";
 import { translateVueFiles } from "./translate-vue-files";
 
 export interface ReplaceTextOptions {
@@ -34,6 +35,7 @@ export class ReplaceText {
 
     async start() {
         await translateVueFiles(this.options);
+        await translateTypescriptFiles(this.options);
     }
 
     private getCommitsToCompare(commits: string[] | undefined): [string, string] | undefined {

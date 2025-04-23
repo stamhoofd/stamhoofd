@@ -26,10 +26,10 @@
                                 </template>
 
                                 <h2 class="style-title-list">
-                                    Ingeschreven leden
+                                    {{ $t('Ingeschreven leden') }}
                                 </h2>
                                 <p class="style-description">
-                                    Bekijk, beheer, exporteer of e-mail ingeschreven leden.
+                                    {{ $t('Bekijk, beheer, exporteer of e-mail ingeschreven leden.') }}
                                 </p>
                                 <template #right>
                                     <span v-if="event.group.getMemberCount() !== null" class="style-description-small">{{ formatInteger(event.group.getMemberCount()!) }}</span>
@@ -46,7 +46,7 @@
                                     {{ event.group.waitingList.settings.name }}
                                 </h2>
                                 <p class="style-description">
-                                    Bekijk leden op de wachtlijst
+                                    {{ $t('Bekijk leden op de wachtlijst') }}
                                 </p>
                                 <template #right>
                                     <span v-if="event.group.waitingList.getMemberCount() !== null" class="style-description-small">{{ formatInteger(event.group.waitingList.getMemberCount()!) }}</span>
@@ -57,9 +57,8 @@
                     </EventInfoTable>
 
                     <div v-if="canWriteEvent" class="container">
-                        <hr>
-                        <h2>
-                            Instellingen
+                        <hr><h2>
+                            {{ $t('Instellingen') }}
                         </h2>
 
                         <STList class="illustration-list">
@@ -68,10 +67,10 @@
                                     <img src="@stamhoofd/assets/images/illustrations/flag.svg">
                                 </template>
                                 <h2 class="style-title-list">
-                                    Algemeen
+                                    {{ $t('Algemeen') }}
                                 </h2>
                                 <p class="style-description">
-                                    Wijzig de naam, beschrijving, datum en beschikbaarheid.
+                                    {{ $t('Wijzig de naam, beschrijving, datum en beschikbaarheid.') }}
                                 </p>
                                 <template #right>
                                     <span class="icon arrow-right-small gray" />
@@ -83,10 +82,10 @@
                                     <img src="@stamhoofd/assets/images/illustrations/list.svg">
                                 </template>
                                 <h2 class="style-title-list">
-                                    Inschrijvingsinstellingen
+                                    {{ $t('Inschrijvingsinstellingen') }}
                                 </h2>
                                 <p class="style-description">
-                                    Wijzig hoe leden kunnen inschrijven, de tarieven en de verzamelde gegevens.
+                                    {{ $t('Wijzig hoe leden kunnen inschrijven, de tarieven en de verzamelde gegevens.') }}
                                 </p>
                                 <template #right>
                                     <span class="icon arrow-right-small gray" />
@@ -98,10 +97,10 @@
                                     <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
                                 </template>
                                 <h2 class="style-title-list">
-                                    E-mailsjablonen
+                                    {{ $t('E-mailsjablonen') }}
                                 </h2>
                                 <p class="style-description">
-                                    Wijzig de inhoud van automatische e-mails naar leden die zijn of worden ingeschreven voor deze activiteit.
+                                    {{ $t('Wijzig de inhoud van automatische e-mails naar leden die zijn of worden ingeschreven voor deze activiteit.') }}
                                 </p>
                                 <template #right>
                                     <span class="icon arrow-right-small gray" />
@@ -113,8 +112,7 @@
                             </template>
                         </STList>
                     </div>
-                    <hr>
-                    <h2>Link kopiëren</h2>
+                    <hr><h2>{{ $t('Link kopiëren') }}</h2>
                     <p>{{ $t("40b31f32-5a02-488d-beb3-d987ea5c9315") }}</p>
 
                     <div class="input-with-buttons">
@@ -124,14 +122,13 @@
                         <div>
                             <button v-copyable="link" type="button" class="button text">
                                 <span class="icon copy" />
-                                <span class="hide-small">Kopiëren</span>
+                                <span class="hide-small">{{ $t('Kopiëren') }}</span>
                             </button>
                         </div>
                     </div>
 
                     <template v-if="event.group && auth.canRegisterMembersInGroup(event.group)">
-                        <hr>
-                        <h2>Handmatig leden inschrijven</h2>
+                        <hr><h2>{{ $t('Handmatig leden inschrijven') }}</h2>
 
                         <p v-if="organization && event.organizationId === organization.id">
                             {{ $t('3f4666f9-59b5-4a24-b1a7-9f820275c042') }}
@@ -146,7 +143,7 @@
                         <p class="style-button-bar">
                             <button class="button primary" type="button" @click="addMembers">
                                 <span class="icon add" />
-                                <span>Leden inschrijven</span>
+                                <span>{{ $t('Leden inschrijven') }}</span>
                             </button>
                         </p>
                     </template>

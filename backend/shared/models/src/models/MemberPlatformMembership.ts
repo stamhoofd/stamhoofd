@@ -166,7 +166,7 @@ export class MemberPlatformMembership extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_membership_type',
                 message: 'Unknown membership type',
-                human: 'Deze aansluiting is niet (meer) beschikbaar',
+                human: $t(`Deze aansluiting is niet (meer) beschikbaar`),
             });
         }
 
@@ -176,7 +176,7 @@ export class MemberPlatformMembership extends QueryableModel {
             throw new SimpleError({
                 code: 'period_unavailable',
                 message: 'Membership not available for this period',
-                human: 'Deze aansluiting is nog niet beschikbaar voor dit werkjaar',
+                human: $t(`Deze aansluiting is nog niet beschikbaar voor dit werkjaar`),
             });
         }
 
@@ -267,7 +267,7 @@ export class MemberPlatformMembership extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_membership_type',
                 message: 'Unknown membership type',
-                human: 'Deze aansluiting is niet (meer) beschikbaar',
+                human: $t(`Deze aansluiting is niet (meer) beschikbaar`),
             });
         }
 
@@ -277,7 +277,7 @@ export class MemberPlatformMembership extends QueryableModel {
             throw new SimpleError({
                 code: 'period_unavailable',
                 message: 'Membership not available for this period',
-                human: 'Deze aansluiting is nog niet beschikbaar voor dit werkjaar',
+                human: $t(`Deze aansluiting is nog niet beschikbaar voor dit werkjaar`),
             });
         }
 
@@ -287,7 +287,7 @@ export class MemberPlatformMembership extends QueryableModel {
                 // todo
                 code: 'not_found',
                 message: 'Organization not found',
-                human: 'De organisatie is niet gevonden',
+                human: $t(`De organisatie is niet gevonden`),
             });
         }
 

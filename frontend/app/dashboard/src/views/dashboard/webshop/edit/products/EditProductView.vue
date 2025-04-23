@@ -1,85 +1,63 @@
 <template>
-    <SaveView :title="isNew ? typeName+' toevoegen' : name+' bewerken'" :disabled="!hasChanges" class="product-edit-view" @save="save">
+    <SaveView :title="isNew ? typeName+' ' + $t(`toevoegen`) : name+' ' + $t(`bewerken`)" :disabled="!hasChanges" class="product-edit-view" @save="save">
         <h1 v-if="isNew">
-            {{ typeName }} toevoegen
+            {{ typeName }} {{ $t('toevoegen') }}
         </h1>
         <h1 v-else>
-            {{ name || typeName }} bewerken
+            {{ name || typeName }} {{ $t('bewerken') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
-                <input
-                    ref="firstInput"
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    :placeholder="'Naam '+typeName"
-                    autocomplete="off"
-                    enterkeyhint="next"
-                >
+            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
+                <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t(`Naam`) + ' '+typeName" autocomplete="off" enterkeyhint="next">
             </STInputBox>
-            <STInputBox v-if="isTicket" title="Type" error-fields="type" :error-box="errors.errorBox">
-                <Dropdown
-                    v-model="type"
-                >
+            <STInputBox v-if="isTicket" error-fields="type" :error-box="errors.errorBox" :title="$t(`Type`)">
+                <Dropdown v-model="type">
                     <option value="Ticket">
-                        Ticket
+                        {{ $t('Ticket') }}
                     </option>
                     <option value="Voucher">
-                        Voucher
+                        {{ $t('Voucher') }}
                     </option>
                 </Dropdown>
             </STInputBox>
 
-            <STInputBox v-else title="Type" error-fields="type" :error-box="errors.errorBox">
-                <Dropdown
-                    v-model="type"
-                >
+            <STInputBox v-else error-fields="type" :error-box="errors.errorBox" :title="$t(`Type`)">
+                <Dropdown v-model="type">
                     <option value="Product">
-                        Stuks
+                        {{ $t('Stuks') }}
                     </option>
                     <option value="Person">
-                        Personen
+                        {{ $t('Personen') }}
                     </option>
                 </Dropdown>
             </STInputBox>
         </div>
 
-        <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox" class="max">
-            <textarea
-                v-model="description"
-                class="input"
-                type="text"
-                placeholder="Beschrijving van dit artikel"
-                autocomplete="off"
-                enterkeyhint="next"
-            />
+        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`Beschrijving`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`Beschrijving van dit artikel`)" />
         </STInputBox>
 
         <template v-if="isTicket">
-            <hr>
-            <h2>Locatie</h2>
+            <hr><h2>{{ $t('Locatie') }}</h2>
             <ProductSelectLocationInput v-model="location" :locations="allLocations" :validator="errors.validator" @modify="modifyLocation" />
 
-            <hr>
-            <h2>Datum en tijd</h2>
+            <hr><h2>{{ $t('Datum en tijd') }}</h2>
             <ProductSelectDateRangeInput v-model="dateRange" :date-ranges="allDateRanges" :validator="errors.validator" @modify="modifyDateRange" />
         </template>
 
-        <hr>
-        <h2 class="style-with-button">
-            <div>Prijzen</div>
+        <hr><h2 class="style-with-button">
+            <div>{{ $t('Prijzen') }}</div>
             <div>
                 <button class="button text only-icon-smartphone" type="button" @click="addProductPrice">
                     <span class="icon add" />
-                    <span>Prijs</span>
+                    <span>{{ $t('Prijs') }}</span>
                 </button>
             </div>
         </h2>
-        <p>Je kan een artikel meerdere prijzen geven en aan elke prijs een naam geven. Bv. small, medium en large. Naast meerdere prijzen kan je ook meerdere keuzemenu's toevoegen (zie onder).</p>
+        <p>{{ $t("Je kan een artikel meerdere prijzen geven en aan elke prijs een naam geven. Bv. small, medium en large. Naast meerdere prijzen kan je ook meerdere keuzemenu's toevoegen (zie onder).") }}</p>
 
         <ProductPriceBox v-if="patchedProduct.prices.length === 1" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errors.errorBox" @patch="addProductPatch($event)" />
 
@@ -92,28 +70,25 @@
         <OptionMenuSection v-for="optionMenu in patchedProduct.optionMenus" :key="optionMenu.id" :option-menu="optionMenu" :product="patchedProduct" @patch="addProductPatch" />
 
         <template v-if="fields.length">
-            <hr>
-            <h2 class="style-with-button">
-                <div>Tekstvelden / open vragen</div>
+            <hr><h2 class="style-with-button">
+                <div>{{ $t('Tekstvelden / open vragen') }}</div>
                 <div>
                     <button class="button icon add" type="button" @click="addField" />
                 </div>
             </h2>
 
-            <p>Open vragen zijn vragen (bv. 'naam op de trui') waarbij bestellers zelf tekst kunnen intypen. Let op: voeg hier geen vragen toe die op bestelniveau moeten komen (want dan moet de gebruiker die meerdere keren beantwoorden), dat kan je doen in de instellingen van de webshop zelf.</p>
+            <p>{{ $t("Open vragen zijn vragen (bv. 'naam op de trui') waarbij bestellers zelf tekst kunnen intypen. Let op: voeg hier geen vragen toe die op bestelniveau moeten komen (want dan moet de gebruiker die meerdere keren beantwoorden), dat kan je doen in de instellingen van de webshop zelf.") }}</p>
 
             <WebshopFieldsBox :fields="fields" @patch="addFieldsPatch" />
         </template>
 
-        <hr>
-
-        <STList>
+        <hr><STList>
             <STListItem v-if="seatingPlan" :selectable="true" element-name="button" @click="chooseSeatingPlan">
                 <template #left>
                     <span class="icon seat gray" />
                 </template>
                 <h3 class="style-title-list">
-                    Zaalplan
+                    {{ $t('Zaalplan') }}
                 </h3>
 
                 <p class="style-description-small">
@@ -132,10 +107,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Keuzemenu
+                    {{ $t('Keuzemenu') }}
                 </h3>
                 <p class="style-description-small">
-                    Laat bestellers een keuze maken uit een lijst met opties, al dan niet met een meerprijs. Bv. "Kies je extra's" met daarin bijvoorbeeld "Kaas op je spaghetti"
+                    {{ $t(`Laat bestellers een keuze maken uit een lijst met opties, al dan niet met een meerprijs. Bv. "Kies je extra's" met daarin bijvoorbeeld "Kaas op je spaghetti"`) }}
                 </p>
             </STListItem>
 
@@ -145,10 +120,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Tekstveld (open vraag)
+                    {{ $t('Tekstveld (open vraag)') }}
                 </h3>
                 <p class="style-description-small">
-                    Stel een open vraag (bv. 'naam op de trui') waarbij men zelf tekst kan intypen. Let op: voeg hier geen vragen toe die op bestelniveau moeten komen (want dan moet de gebruiker die meerdere keren beantwoorden), dat kan je doen in de instellingen van de webshop zelf.
+                    {{ $t("Stel een open vraag (bv. 'naam op de trui') waarbij men zelf tekst kan intypen. Let op: voeg hier geen vragen toe die op bestelniveau moeten komen (want dan moet de gebruiker die meerdere keren beantwoorden), dat kan je doen in de instellingen van de webshop zelf.") }}
                 </p>
             </STListItem>
 
@@ -157,10 +132,10 @@
                     <span class="icon seat gray" />
                 </template>
                 <h3 class="style-title-list">
-                    Zetelselectie instellen
+                    {{ $t('Zetelselectie instellen') }}
                 </h3>
                 <p class="style-description-small">
-                    Laat bestellers hun zetel kiezen bij het bestellen. Ideaal voor bijvoorbeeld een dansvoorstelling met vaste plaatsen.
+                    {{ $t('Laat bestellers hun zetel kiezen bij het bestellen. Ideaal voor bijvoorbeeld een dansvoorstelling met vaste plaatsen.') }}
                 </p>
             </STListItem>
 
@@ -171,25 +146,24 @@
 
                 <UploadButton v-model="image" :resolutions="resolutions" element-name="div">
                     <h3 class="style-title-list">
-                        Foto toevoegen
+                        {{ $t('Foto toevoegen') }}
                     </h3>
                     <p class="style-description-small">
-                        Voeg een foto toe aan dit artikel. Knip bij voorkeur zelf je foto's wat bij zodat ze mooi weergegeven worden voor je ze uploadt.
+                        {{ $t("Voeg een foto toe aan dit artikel. Knip bij voorkeur zelf je foto's wat bij zodat ze mooi weergegeven worden voor je ze uploadt.") }}
                     </p>
                 </UploadButton>
             </STListItem>
         </STList>
 
         <template v-if="image">
-            <hr>
-            <h2 class="style-with-button">
-                <div>Foto</div>
+            <hr><h2 class="style-with-button">
+                <div>{{ $t('Foto') }}</div>
                 <div>
                     <button v-if="image" type="button" class="button text only-icon-smartphone" @click="image = null">
                         <span class="icon trash" />
-                        <span>Verwijderen</span>
+                        <span>{{ $t('Verwijderen') }}</span>
                     </button>
-                    <UploadButton v-model="image" :text="image ? 'Vervangen' : 'Uploaden'" :resolutions="resolutions" />
+                    <UploadButton v-model="image" :text="image ? $t(`Vervangen`) : $t(`Uploaden`)" :resolutions="resolutions" />
                 </div>
             </h2>
 
@@ -198,10 +172,9 @@
             </div>
         </template>
 
-        <hr>
-        <h2>
-            Beschikbaarheid
-            <span v-if="remainingStock !== null" class="title-suffix">nog {{ remainingStock }} beschikbaar</span>
+        <hr><h2>
+            {{ $t('Beschikbaarheid') }}
+            <span v-if="remainingStock !== null" class="title-suffix">{{ $t('nog') }} {{ remainingStock }} {{ $t('beschikbaar') }}</span>
         </h2>
 
         <STList>
@@ -211,10 +184,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Verbergen op webshop
+                    {{ $t('Verbergen op webshop') }}
                 </h3>
                 <p v-if="hidden" class="style-description-small">
-                    Dit artikel wordt onzichtbaar op de webshop en is enkel te bestellen door manueel een bestelling in te geven als beheerder.
+                    {{ $t('Dit artikel wordt onzichtbaar op de webshop en is enkel te bestellen door manueel een bestelling in te geven als beheerder.') }}
                 </p>
             </STListItem>
 
@@ -225,10 +198,10 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        Onbeschikbaar
+                        {{ $t('Onbeschikbaar') }}
                     </h3>
                     <p v-if="disabled" class="style-description-small">
-                        Zichtbaar op de webshop, maar niet mogelijk om te bestellen.
+                        {{ $t('Zichtbaar op de webshop, maar niet mogelijk om te bestellen.') }}
                     </p>
                 </STListItem>
 
@@ -239,10 +212,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            Beschikbaar vanaf datum
+                            {{ $t('Beschikbaar vanaf datum') }}
                         </h3>
                         <p v-if="useEnableAfter" class="style-description-small">
-                            Zichtbaar op de webshop, maar pas te bestellen vanaf een bepaalde datum.
+                            {{ $t('Zichtbaar op de webshop, maar pas te bestellen vanaf een bepaalde datum.') }}
                         </p>
 
                         <div v-if="useEnableAfter" class="split-inputs option">
@@ -259,10 +232,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            Onbeschikbaar na datum
+                            {{ $t('Onbeschikbaar na datum') }}
                         </h3>
                         <p v-if="useDisableAfter" class="style-description-small">
-                            Zichtbaar op de webshop, maar niet meer te bestellen na een bepaalde datum.
+                            {{ $t('Zichtbaar op de webshop, maar niet meer te bestellen na een bepaalde datum.') }}
                         </p>
 
                         <div v-if="useDisableAfter" class="split-inputs option">
@@ -279,11 +252,11 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            Beperk het beschikbare aantal stuks (waarvan nu {{ usedStock }} verkocht of gereserveerd)
+                            {{ $t('Beperk het beschikbare aantal stuks (waarvan nu') }} {{ usedStock }} {{ $t('verkocht of gereserveerd)') }}
                         </h3>
 
                         <p v-if="useStock" class="style-description-small">
-                            Geannuleerde en verwijderde bestellingen worden niet meegerekend.
+                            {{ $t('Geannuleerde en verwijderde bestellingen worden niet meegerekend.') }}
                         </p>
 
                         <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
@@ -299,7 +272,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            Wijzig aantal verkochte stuks manueel (nu {{ usedStock }} verkocht)
+                            {{ $t('Wijzig aantal verkochte stuks manueel (nu') }} {{ usedStock }} {{ $t('verkocht)') }}
                         </h3>
 
                         <div v-if="resetStock" class="split-inputs option" @click.stop.prevent>
@@ -309,7 +282,7 @@
                         </div>
 
                         <p class="style-description">
-                            Geannuleerde en verwijderde bestellingen worden niet meegerekend.
+                            {{ $t('Geannuleerde en verwijderde bestellingen worden niet meegerekend.') }}
                         </p>
                     </STListItem>
 
@@ -319,11 +292,11 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            Beperk het maximaal aantal stuks per bestelling
+                            {{ $t('Beperk het maximaal aantal stuks per bestelling') }}
                         </h3>
 
                         <p v-if="useMaxPerOrder" class="style-description-small">
-                            Het aantal stuks wordt geteld over alle mogelijke keuzes heen en wordt niet gecommuniceerd tenzij men over de limiet gaat.
+                            {{ $t('Het aantal stuks wordt geteld over alle mogelijke keuzes heen en wordt niet gecommuniceerd tenzij men over de limiet gaat.') }}
                         </p>
 
                         <div v-if="useMaxPerOrder" class="split-inputs option" @click.stop.prevent>
@@ -341,23 +314,22 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Keuze voor aantal stuks verbergen
+                    {{ $t('Keuze voor aantal stuks verbergen') }}
                 </h3>
                 <p class="style-description-small">
-                    Als je dit aanzet kan er maar één stuk besteld worden per unieke combinatie van keuzes en open vragen.
+                    {{ $t('Als je dit aanzet kan er maar één stuk besteld worden per unieke combinatie van keuzes en open vragen.') }}
                 </p>
             </STListItem>
         </STList>
 
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Verwijder dit artikel
+            <hr><h2>
+                {{ $t('Verwijder dit artikel') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span>{{ $t('Verwijderen') }}</span>
             </button>
         </div>
     </SaveView>

@@ -15,7 +15,7 @@ export class MemberGeneralStep implements EditMemberStep {
     }
 
     getName(manager: MemberStepManager) {
-        return 'Algemene gegevens';
+        return $t(`Algemene gegevens`);
     }
 
     isEnabled(manager: MemberStepManager) {
@@ -62,10 +62,10 @@ export class MemberGeneralStep implements EditMemberStep {
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {
         return new ComponentWithProperties(MemberStepView, {
-            title: 'Algemene gegevens',
+            title: $t(`Algemene gegevens`),
             member: manager.member,
             component: markRaw(EditMemberGeneralBox),
-            saveText: 'Doorgaan',
+            saveText: $t(`Doorgaan`),
             markReviewed: ['details'],
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);

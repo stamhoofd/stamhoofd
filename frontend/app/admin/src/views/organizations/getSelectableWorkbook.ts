@@ -6,122 +6,122 @@ export function getSelectableWorkbook(_platform: Platform) {
         sheets: [
             new SelectableSheet({
                 id: 'organizations',
-                name: 'Groepen',
+                name: $t(`Groepen`),
                 columns: [
                     new SelectableColumn({
                         id: 'id',
-                        name: 'ID',
-                        description: 'Unieke identificatie van de groep',
+                        name: $t(`ID`),
+                        description: $t(`Unieke identificatie van de groep`),
                         enabled: false,
                     }),
 
                     // todo: only if platform?
                     new SelectableColumn({
                         id: 'uri',
-                        name: 'Groepsnummer',
-                        description: 'Nummer van de groep',
+                        name: $t(`Groepsnummer`),
+                        description: $t(`Nummer van de groep`),
                     }),
 
                     new SelectableColumn({
                         id: 'name',
-                        name: 'Naam',
+                        name: $t(`Naam`),
                     }),
 
                     new SelectableColumn({
                         id: 'tags',
-                        name: 'Hiërarchie',
+                        name: $t(`Hiërarchie`),
                     }),
 
                     new SelectableColumn({
                         id: 'address',
-                        name: 'Adres',
+                        name: $t(`Adres`),
                     }),
                 ],
             }),
 
             new SelectableSheet({
                 id: 'responsibilities',
-                name: 'Functies',
+                name: $t(`Functies`),
                 columns: [
                     new SelectableColumn({
                         id: 'organization.id',
-                        name: 'ID',
-                        description: 'Unieke identificatie van de groep',
+                        name: $t(`ID`),
+                        description: $t(`Unieke identificatie van de groep`),
                         enabled: false,
                     }),
 
                     new SelectableColumn({
                         id: 'organization.uri',
-                        name: 'Groepsnummer',
-                        description: 'Nummer van de groep',
+                        name: $t(`Groepsnummer`),
+                        description: $t(`Nummer van de groep`),
                     }),
 
                     new SelectableColumn({
                         id: 'organization.name',
-                        name: 'Groepsnaam',
+                        name: $t(`Groepsnaam`),
                     }),
 
                     new SelectableColumn({
                         id: 'responsibility.name',
-                        name: 'Functie',
+                        name: $t(`Functie`),
                     }),
 
                     new SelectableColumn({
                         id: 'responsibility.member.firstName',
-                        name: 'Voornaam',
+                        name: $t(`Voornaam`),
                     }),
 
                     new SelectableColumn({
                         id: 'responsibility.member.lastName',
-                        name: 'Achternaam',
+                        name: $t(`Achternaam`),
                     }),
 
                     new SelectableColumn({
                         id: 'responsibility.member.email',
-                        name: 'E-mail',
+                        name: $t(`E-mail`),
                     }),
 
                     new SelectableColumn({
                         id: 'responsibility.member.address',
-                        name: 'Adres',
+                        name: $t(`Adres`),
                     }),
                 ],
             }),
             new SelectableSheet({
                 id: 'premises',
-                name: 'Lokalen',
+                name: $t(`Lokalen`),
                 columns: [
                     new SelectableColumn({
                         id: 'organization.id',
-                        name: 'ID',
-                        description: 'Unieke identificatie van de groep',
+                        name: $t(`ID`),
+                        description: $t(`Unieke identificatie van de groep`),
                         enabled: false,
                     }),
 
                     new SelectableColumn({
                         id: 'organization.uri',
-                        name: 'Groepsnummer',
-                        description: 'Nummer van de groep',
+                        name: $t(`Groepsnummer`),
+                        description: $t(`Nummer van de groep`),
                     }),
 
                     new SelectableColumn({
                         id: 'organization.name',
-                        name: 'Groepsnaam',
+                        name: $t(`Groepsnaam`),
                     }),
 
                     new SelectableColumn({
                         id: 'premise.name',
-                        name: 'Naam gebouw',
+                        name: $t(`Naam gebouw`),
                     }),
 
                     new SelectableColumn({
                         id: 'premise.type',
-                        name: 'Types',
+                        name: $t(`Types`),
                     }),
 
                     new SelectableColumn({
                         id: 'premise.address',
-                        name: 'Adres',
+                        name: $t(`Adres`),
                     }),
                 ],
             }),

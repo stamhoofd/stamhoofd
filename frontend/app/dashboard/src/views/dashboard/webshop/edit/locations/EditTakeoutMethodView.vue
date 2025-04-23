@@ -1,58 +1,44 @@
 <template>
     <SaveView :title="locationTitleName" :disabled="!hasChanges" @save="save">
         <h1 v-if="isNew">
-            {{ locationTitleName }} toevoegen
+            {{ locationTitleName }} {{ $t('toevoegen') }}
         </h1>
         <h1 v-else>
-            {{ locationTitleName }} bewerken
+            {{ locationTitleName }} {{ $t('bewerken') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
             <div>
-                <STInputBox title="Locatienaam" error-fields="name" :error-box="errors.errorBox">
-                    <input
-                        ref="firstInput"
-                        v-model="name"
-                        class="input"
-                        type="text"
-                        placeholder="bv. kantine"
-                        autocomplete="off"
-                    >
+                <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Locatienaam`)">
+                    <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`bv. kantine`)">
                 </STInputBox>
 
-                <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox" class="max">
-                    <textarea
-                        v-model="description"
-                        class="input"
-                        type="text"
-                        placeholder="Hier kan je eventeel afhaalinstructies kwijt (optioneel)"
-                        autocomplete="off"
-                    />
+                <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`Beschrijving`)">
+                    <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`Hier kan je eventeel afhaalinstructies kwijt (optioneel)`)" />
                 </STInputBox>
             </div>
             <div>
-                <AddressInput v-model="address" title="Adres" :validator="errors.validator" :required="true" />
+                <AddressInput v-model="address" :validator="errors.validator" :required="true" :title="$t(`Adres`)" />
             </div>
         </div>
 
-        <EditTimeSlotsSection v-if="isTakeout" :webshop="webshop" :time-slots="patchedTakeoutMethod.timeSlots" title="Datum en tijd + keuze uit afhaalintervallen" @patch="patchTimeSlots">
-            <p>Je kan tijdsintervallen toevoegen waartussen men de bestelling kan afhalen. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (bv. als je het elke week kan afhalen na activiteiten). Als je afhalen organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).</p>
+        <EditTimeSlotsSection v-if="isTakeout" :webshop="webshop" :time-slots="patchedTakeoutMethod.timeSlots" :title="$t(`Datum en tijd + keuze uit afhaalintervallen`)" @patch="patchTimeSlots">
+            <p>{{ $t('Je kan tijdsintervallen toevoegen waartussen men de bestelling kan afhalen. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (bv. als je het elke week kan afhalen na activiteiten). Als je afhalen organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).') }}</p>
         </EditTimeSlotsSection>
-        <EditTimeSlotsSection v-else :webshop="webshop" :time-slots="patchedTakeoutMethod.timeSlots" title="Datum en tijd + keuze uit shiften" @patch="patchTimeSlots">
-            <p>Je kan tijdsintervallen toevoegen waartussen men de bestelling ter plaatse kan consumeren. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (afgeraden). Als je jouw evenement organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).</p>
+        <EditTimeSlotsSection v-else :webshop="webshop" :time-slots="patchedTakeoutMethod.timeSlots" :title="$t(`Datum en tijd + keuze uit shiften`)" @patch="patchTimeSlots">
+            <p>{{ $t('Je kan tijdsintervallen toevoegen waartussen men de bestelling ter plaatse kan consumeren. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (afgeraden). Als je jouw evenement organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).') }}</p>
         </EditTimeSlotsSection>
 
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Verwijderen
+            <hr><h2>
+                {{ $t('Verwijderen') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span>{{ $t('Verwijderen') }}</span>
             </button>
         </div>
     </SaveView>

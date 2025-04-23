@@ -1,23 +1,23 @@
 <template>
     <LoadingViewTransition>
         <div v-if="!loading" id="documents-view" class="st-view background">
-            <STNavigationBar title="Documenten" />
+            <STNavigationBar :title="$t(`Documenten`)" />
 
             <main class="center">
                 <h1 class="style-navigation-title">
-                    Documenten
+                    {{ $t('Documenten') }}
                 </h1>
 
                 <p v-if="disableActivities" class="error-box">
-                    Deze functie is niet beschikbaar omdat jouw vereniging nog het oude gratis ledenadministratie pakket gebruikt. Via instellingen kunnen hoofdbeheerders overschakelen op de betaalde versie met meer functionaliteiten.
+                    {{ $t('Deze functie is niet beschikbaar omdat jouw vereniging nog het oude gratis ledenadministratie pakket gebruikt. Via instellingen kunnen hoofdbeheerders overschakelen op de betaalde versie met meer functionaliteiten.') }}
                 </p>
 
                 <p class="style-description">
-                    Maak documenten aan en deel ze met jouw leden. Daarbij is het mogelijk om gegevens van leden automatisch in te vullen in de documenten, bijvoorbeeld voor een fiscaal attest of een deelnamebewijs voor de mutualiteit.
+                    {{ $t('Maak documenten aan en deel ze met jouw leden. Daarbij is het mogelijk om gegevens van leden automatisch in te vullen in de documenten, bijvoorbeeld voor een fiscaal attest of een deelnamebewijs voor de mutualiteit.') }}
                 </p>
 
                 <p v-if="!enabled" class="info-box">
-                    Deze functie komt binnenkort beschikbaar!
+                    {{ $t('Deze functie komt binnenkort beschikbaar!') }}
                 </p>
 
                 <STList>
@@ -26,11 +26,11 @@
                             {{ template.settings.name }}
                         </h2>
                         <p class="style-description-small">
-                            Aangemaakt op {{ formatDate(template.createdAt) }}
+                            {{ $t('Aangemaakt op') }} {{ formatDate(template.createdAt) }}
                         </p>
 
                         <template #right>
-                            <span v-if="template.status === 'Draft'" class="style-tag">Klad</span>
+                            <span v-if="template.status === 'Draft'" class="style-tag">{{ $t('Klad') }}</span>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -39,7 +39,7 @@
                 <p v-if="enabled" class="style-button-bar">
                     <button type="button" class="button text" @click="addDocument">
                         <span class="icon add" />
-                        <span class="text">Nieuw document</span>
+                        <span class="text">{{ $t('Nieuw document') }}</span>
                     </button>
                 </p>
             </main>
@@ -49,7 +49,7 @@
 
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, defineRoutes, useNavigate, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import { LoadingViewTransition, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useRequiredOrganization } from '@stamhoofd/components';
 import { DocumentTemplatePrivate } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

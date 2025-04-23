@@ -6,19 +6,12 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox v-if="!isForResponsibility" title="Titel" error-fields="name" :error-box="errors.errorBox">
-            <input
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="Naam van deze rol"
-                autocomplete="off"
-            >
+        <STInputBox v-if="!isForResponsibility" error-fields="name" :error-box="errors.errorBox" :title="$t(`Titel`)">
+            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`Naam van deze rol`)">
         </STInputBox>
 
-        <hr>
-        <h2>Basistoegang</h2>
-        <p>Geef deze beheerders snel lees of bewerk toegang tot alle onderdelen van jouw vereniging.</p>
+        <hr><h2>{{ $t('Basistoegang') }}</h2>
+        <p>{{ $t('Geef deze beheerders snel lees of bewerk toegang tot alle onderdelen van jouw vereniging.') }}</p>
 
         <STList>
             <STListItem :selectable="true" element-name="label">
@@ -26,10 +19,10 @@
                     <Radio v-model="basePermission" value="None" :disabled="lockedMinimumLevel !== PermissionLevel.None" />
                 </template>
                 <h3 class="style-title-list">
-                    Geen
+                    {{ $t('Geen') }}
                 </h3>
                 <p v-if="basePermission === 'None'" class="style-description-small">
-                    Deze beheerders kunnen geen onderdelen zien of bewerken tenzij expliciet hieronder toegang werd gegeven.
+                    {{ $t('Deze beheerders kunnen geen onderdelen zien of bewerken tenzij expliciet hieronder toegang werd gegeven.') }}
                 </p>
             </STListItem>
 
@@ -38,267 +31,120 @@
                     <Radio v-model="basePermission" :value="PermissionLevel.Full" :disabled="lockedMinimumLevel !== PermissionLevel.None" />
                 </template>
                 <h3 class="style-title-list">
-                    Volledige toegang
+                    {{ $t('Volledige toegang') }}
                 </h3>
                 <p v-if="basePermission === PermissionLevel.Full" class="style-description-small">
-                    Deze beheerders hebben toegang tot alles
+                    {{ $t('Deze beheerders hebben toegang tot alles') }}
                 </p>
             </STListItem>
         </STList>
 
         <template v-if="basePermission !== PermissionLevel.Full">
             <template v-if="app === 'admin' && (scope === null || scope === 'admin')">
-                <hr>
-                <h2>
-                    Toegang tot verenigingen
+                <hr><h2>
+                    {{ $t('Toegang tot verenigingen') }}
                 </h2>
 
-                <p>Je kan een beheerder volledige toegang geven tot alle verenigingen (en dus ook de leden van die vereniging), of per tag de toegang regelen.</p>
+                <p>{{ $t('Je kan een beheerder volledige toegang geven tot alle verenigingen (en dus ook de leden van die vereniging), of per tag de toegang regelen.') }}</p>
 
                 <STList>
-                    <ResourcePermissionRow
-                        :role="patched"
-                        :resource="{id: '', name: 'Alle verenigingen', type: PermissionsResourceType.OrganizationTags }"
-                        :inherited-roles="inheritedRoles"
-                        :configurable-access-rights="[AccessRight.EventWrite, AccessRight.OrganizationFinanceDirector, AccessRight.OrganizationEventNotificationReviewer]"
-                        type="resource"
-                        @patch:role="addPatch"
-                    />
+                    <ResourcePermissionRow :role="patched" :resource="{id: '', name: 'Alle verenigingen', type: PermissionsResourceType.OrganizationTags }" :inherited-roles="inheritedRoles" :configurable-access-rights="[AccessRight.EventWrite, AccessRight.OrganizationFinanceDirector, AccessRight.OrganizationEventNotificationReviewer]" type="resource" @patch:role="addPatch" />
 
-                    <ResourcePermissionRow
-                        v-for="tag in tags"
-                        :key="tag.id"
-                        :role="patched"
-                        :inherited-roles="inheritedRoles"
-                        :resource="{id: tag.id, name: tag.name, type: PermissionsResourceType.OrganizationTags }"
-                        :configurable-access-rights="[AccessRight.EventWrite, AccessRight.OrganizationFinanceDirector, AccessRight.OrganizationEventNotificationReviewer]"
-                        type="resource"
-                        @patch:role="addPatch"
-                    />
+                    <ResourcePermissionRow v-for="tag in tags" :key="tag.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: tag.id, name: tag.name, type: PermissionsResourceType.OrganizationTags }" :configurable-access-rights="[AccessRight.EventWrite, AccessRight.OrganizationFinanceDirector, AccessRight.OrganizationEventNotificationReviewer]" type="resource" @patch:role="addPatch" />
 
-                    <ResourcePermissionRow
-                        v-for="resource in getUnlistedResources(PermissionsResourceType.OrganizationTags, patched, tags)"
-                        :key="resource.id"
-                        :role="patched"
-                        :inherited-roles="inheritedRoles"
-                        :resource="resource"
-                        :configurable-access-rights="[AccessRight.EventWrite, AccessRight.OrganizationFinanceDirector, AccessRight.OrganizationEventNotificationReviewer]"
-                        type="resource"
-                        :unlisted="true"
-                        @patch:role="addPatch"
-                    />
+                    <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.OrganizationTags, patched, tags)" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.EventWrite, AccessRight.OrganizationFinanceDirector, AccessRight.OrganizationEventNotificationReviewer]" type="resource" :unlisted="true" @patch:role="addPatch" />
                 </STList>
             </template>
 
             <template v-if="enableActivities && categories.length">
-                <hr>
-                <h2>
-                    Inschrijvingscategorieën
+                <hr><h2>
+                    {{ $t('Inschrijvingscategorieën') }}
                 </h2>
-                <p>Geef deze beheerders meteen toegang tot alle inschrijvingsgroepen uit een categorie, of geef ze zelf de mogelijkheid om inschrijvingsgroepen (bv. activiteiten of leeftijdsgroepen) aan te maken in één of meerdere categorieën. Enkel hoofdbeheerders kunnen categorieën toevoegen en bewerken.</p>
+                <p>{{ $t('Geef deze beheerders meteen toegang tot alle inschrijvingsgroepen uit een categorie, of geef ze zelf de mogelijkheid om inschrijvingsgroepen (bv. activiteiten of leeftijdsgroepen) aan te maken in één of meerdere categorieën. Enkel hoofdbeheerders kunnen categorieën toevoegen en bewerken.') }}</p>
 
                 <STList>
-                    <ResourcePermissionRow
-                        v-for="category in categories"
-                        :key="category.id"
-                        :role="patched"
-                        :inherited-roles="inheritedRoles"
-                        :resource="{id: category.id, name: category.settings.name, type: PermissionsResourceType.GroupCategories }"
-                        :configurable-access-rights="[AccessRight.OrganizationCreateGroups]"
-                        type="resource"
-                        @patch:role="addPatch"
-                    />
+                    <ResourcePermissionRow v-for="category in categories" :key="category.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: category.id, name: category.settings.name, type: PermissionsResourceType.GroupCategories }" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="addPatch" />
 
-                    <ResourcePermissionRow
-                        v-for="resource in getUnlistedResources(PermissionsResourceType.GroupCategories, patched, categories)"
-                        :key="resource.id"
-                        :role="patched"
-                        :inherited-roles="inheritedRoles"
-                        :resource="resource"
-                        :configurable-access-rights="[AccessRight.OrganizationCreateGroups]"
-                        type="resource"
-                        :unlisted="true"
-                        @patch:role="addPatch"
-                    />
+                    <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.GroupCategories, patched, categories)" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" :unlisted="true" @patch:role="addPatch" />
                 </STList>
             </template>
 
             <div v-if="enableMemberModule && groups.length" class="container">
-                <hr>
-                <h2>
-                    Individuele inschrijvingsgroepen
+                <hr><h2>
+                    {{ $t('Individuele inschrijvingsgroepen') }}
                 </h2>
 
                 <STList>
-                    <ResourcePermissionRow
-                        :role="patched"
-                        :inherited-roles="inheritedRoles"
-                        :resource="{id: '', name: 'Alle groepen', type: PermissionsResourceType.Groups }"
-                        :configurable-access-rights="[AccessRight.EventWrite]"
-                        type="resource"
-                        @patch:role="addPatch"
-                    />
-                    <ResourcePermissionRow
-                        v-for="group in groups"
-                        :key="group.id"
-                        :role="patched"
-                        :inherited-roles="inheritedRoles"
-                        :resource="{id: group.id, name: group.settings.name + ' ('+(group.settings.period?.nameShort ?? '?')+')', type: PermissionsResourceType.Groups }"
-                        :configurable-access-rights="[AccessRight.EventWrite]"
-                        type="resource"
-                        @patch:role="addPatch"
-                    />
+                    <ResourcePermissionRow :role="patched" :inherited-roles="inheritedRoles" :resource="{id: '', name: 'Alle groepen', type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow v-for="group in groups" :key="group.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: group.id, name: group.settings.name + ' ('+(group.settings.period?.nameShort ?? '?')+')', type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
 
-                    <ResourcePermissionRow
-                        v-for="resource in getUnlistedResources(PermissionsResourceType.Groups, patched, groups)"
-                        :key="resource.id"
-                        :role="patched"
-                        :inherited-roles="inheritedRoles"
-                        :resource="resource"
-                        :configurable-access-rights="[AccessRight.EventWrite]"
-                        type="resource"
-                        :unlisted="true"
-                        @patch:role="addPatch"
-                    />
+                    <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.Groups, patched, groups)" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" :unlisted="true" @patch:role="addPatch" />
                 </STList>
             </div>
 
             <div v-if="enableWebshopModule" class="container">
-                <hr>
-                <h2>Webshops</h2>
-                <p>Voeg webshops toe om deze beheerders toegang te geven tot een specifieke webshop</p>
+                <hr><h2>{{ $t('Webshops') }}</h2>
+                <p>{{ $t('Voeg webshops toe om deze beheerders toegang te geven tot een specifieke webshop') }}</p>
 
                 <STList>
-                    <AccessRightPermissionRow
-                        :access-right="AccessRight.OrganizationCreateWebshops"
-                        :inherited-roles="inheritedRoles"
-                        :role="patched"
-                        @patch:role="addPatch"
-                    />
-                    <ResourcePermissionRow
-                        v-for="webshop in webshops"
-                        :key="webshop.id"
-                        :role="patched"
-                        :inherited-roles="inheritedRoles"
-                        :resource="{id: webshop.id, name: webshop.meta.name, type: PermissionsResourceType.Webshops }"
-                        :configurable-access-rights="webshop.hasTickets ? [AccessRight.WebshopScanTickets] : []"
-                        type="resource"
-                        @patch:role="addPatch"
-                    />
+                    <AccessRightPermissionRow :access-right="AccessRight.OrganizationCreateWebshops" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
+                    <ResourcePermissionRow v-for="webshop in webshops" :key="webshop.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: webshop.id, name: webshop.meta.name, type: PermissionsResourceType.Webshops }" :configurable-access-rights="webshop.hasTickets ? [AccessRight.WebshopScanTickets] : []" type="resource" @patch:role="addPatch" />
 
-                    <ResourcePermissionRow
-                        v-for="resource in getUnlistedResources(PermissionsResourceType.Webshops, patched, webshops)"
-                        :key="resource.id"
-                        :role="patched"
-                        :inherited-roles="inheritedRoles"
-                        :resource="resource"
-                        :configurable-access-rights="[AccessRight.WebshopScanTickets]"
-                        type="resource"
-                        :unlisted="true"
-                        @patch:role="addPatch"
-                    />
+                    <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.Webshops, patched, webshops)" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.WebshopScanTickets]" type="resource" :unlisted="true" @patch:role="addPatch" />
                 </STList>
             </div>
 
             <div v-if="app !== 'admin' || scope === 'organization'" class="container">
-                <hr>
-                <h2>
-                    Toegang tot gegevens van leden
+                <hr><h2>
+                    {{ $t('Toegang tot gegevens van leden') }}
                 </h2>
-                <p>Standaard heeft elke beheerder die een lid kan bekijken of bewerken, toegang tot de algemene informatie van dat lid (naam, geboortedatum, gender, adres, ouders, noodcontactpersonen). Je kan bepaalde beheerders ook toegang geven tot meer gegevens hieronder.</p>
+                <p>{{ $t('Standaard heeft elke beheerder die een lid kan bekijken of bewerken, toegang tot de algemene informatie van dat lid (naam, geboortedatum, gender, adres, ouders, noodcontactpersonen). Je kan bepaalde beheerders ook toegang geven tot meer gegevens hieronder.') }}</p>
 
                 <STList>
-                    <AccessRightPermissionRow
-                        :access-right="AccessRight.MemberReadFinancialData"
-                        :inherited-roles="inheritedRoles"
-                        :role="patched"
-                        @patch:role="addPatch"
-                    />
+                    <AccessRightPermissionRow :access-right="AccessRight.MemberReadFinancialData" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
 
-                    <AccessRightPermissionRow
-                        :access-right="AccessRight.MemberWriteFinancialData"
-                        :inherited-roles="inheritedRoles"
-                        :role="patched"
-                        @patch:role="addPatch"
-                    />
+                    <AccessRightPermissionRow :access-right="AccessRight.MemberWriteFinancialData" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
 
-                    <AccessRightPermissionRow
-                        :access-right="AccessRight.MemberManageNRN"
-                        :inherited-roles="inheritedRoles"
-                        :role="patched"
-                        @patch:role="addPatch"
-                    />
+                    <AccessRightPermissionRow :access-right="AccessRight.MemberManageNRN" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
 
-                    <ResourcePermissionRow
-                        v-for="{recordCategory, organization} in recordCategories"
-                        :key="recordCategory.id"
-                        :role="patched"
-                        :inherited-roles="inheritedRoles"
-                        :resource="{id: recordCategory.id, name: recordCategory.name, type: PermissionsResourceType.RecordCategories, description: !organization ? $t('1dfaeb07-5f01-42c7-a9a4-0096047da86e') : $t('4dea71e9-0965-4c9a-81ac-6ee7046a0d8e') }"
-                        :configurable-access-rights="[]"
-                        type="resource"
-                        @patch:role="addPatch"
-                    />
+                    <ResourcePermissionRow v-for="{recordCategory, organization} in recordCategories" :key="recordCategory.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: recordCategory.id, name: recordCategory.name, type: PermissionsResourceType.RecordCategories, description: !organization ? $t('1dfaeb07-5f01-42c7-a9a4-0096047da86e') : $t('4dea71e9-0965-4c9a-81ac-6ee7046a0d8e') }" :configurable-access-rights="[]" type="resource" @patch:role="addPatch" />
 
-                    <ResourcePermissionRow
-                        v-for="resource in getUnlistedResources(PermissionsResourceType.RecordCategories, patched, recordCategories.map(r => r.recordCategory))"
-                        :key="resource.id"
-                        :role="patched"
-                        :inherited-roles="inheritedRoles"
-                        :resource="resource"
-                        :configurable-access-rights="[]"
-                        type="resource"
-                        :unlisted="true"
-                        @patch:role="addPatch"
-                    />
+                    <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.RecordCategories, patched, recordCategories.map(r => r.recordCategory))" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[]" type="resource" :unlisted="true" @patch:role="addPatch" />
                 </STList>
             </div>
 
             <template v-if="app !== 'admin' || scope === 'organization'">
-                <hr>
-                <h2>Boekhouding</h2>
+                <hr><h2>{{ $t('Boekhouding') }}</h2>
 
                 <STList>
-                    <AccessRightPermissionRow
-                        :access-right="AccessRight.OrganizationFinanceDirector"
-                        :inherited-roles="inheritedRoles"
-                        :role="patched"
-                        @patch:role="addPatch"
-                    />
+                    <AccessRightPermissionRow :access-right="AccessRight.OrganizationFinanceDirector" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
 
-                    <AccessRightPermissionRow
-                        :access-right="AccessRight.OrganizationManagePayments"
-                        :inherited-roles="inheritedRoles"
-                        :role="patched"
-                        @patch:role="addPatch"
-                    />
+                    <AccessRightPermissionRow :access-right="AccessRight.OrganizationManagePayments" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
                 </STList>
             </template>
         </template>
 
         <div v-if="!isNew && deleteHandler" class="container">
-            <hr>
-            <h2 v-if="responsibility">
-                Verwijder gekoppelde rechten
+            <hr><h2 v-if="responsibility">
+                {{ $t('Verwijder gekoppelde rechten') }}
             </h2>
             <h2 v-else>
-                Verwijder deze rol
+                {{ $t('Verwijder deze rol') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="doDelete">
                 <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span>{{ $t('Verwijderen') }}</span>
             </button>
         </div>
 
         <template v-if="!isNew && !responsibility">
-            <hr>
-            <h2>Beheerders met deze rol</h2>
+            <hr><h2>{{ $t('Beheerders met deze rol') }}</h2>
 
             <Spinner v-if="loading" />
             <template v-else>
                 <p v-if="filteredAdmins.length === 0" class="info-box">
-                    Er zijn geen beheerders met deze rol.
+                    {{ $t('Er zijn geen beheerders met deze rol.') }}
                 </p>
                 <STList v-else>
                     <STListItem v-for="admin in filteredAdmins" :key="admin.id">

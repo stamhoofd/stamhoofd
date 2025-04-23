@@ -1,12 +1,11 @@
 <template>
     <div v-if="familyMembers.length > 0" class="hover-box container">
-        <hr>
-        <h2>
+        <hr><h2>
             <template v-if="member.patchedMember.details.defaultAge <= 30 && Math.abs(maxFamilyAge - member.patchedMember.details.defaultAge) <= 14">
-                Broers &amp; zussen
+                {{ $t('Broers &amp; zussen') }}
             </template>
             <template v-else>
-                Familie
+                {{ $t('Familie') }}
             </template>
         </h2>
 
@@ -36,22 +35,22 @@ import { computed } from 'vue';
 import { MemberSegmentedView } from '../..';
 
 defineOptions({
-    inheritAttrs: false
-})
+    inheritAttrs: false,
+});
 
 const props = defineProps<{
-    member: PlatformMember
-}>()
+    member: PlatformMember;
+}>();
 const present = usePresent();
 
-const familyMembers = computed(() => props.member.family.members.filter(m => m.id !== props.member.id))
+const familyMembers = computed(() => props.member.family.members.filter(m => m.id !== props.member.id));
 const maxFamilyAge = computed(() => {
-    const ages = familyMembers.value.map(m => m.patchedMember.details.age ?? 99)
+    const ages = familyMembers.value.map(m => m.patchedMember.details.age ?? 99);
     if (ages.length === 0) {
-        return 99
+        return 99;
     }
-    return Math.max(...ages)
-})
+    return Math.max(...ages);
+});
 
 async function gotoMember(member: PlatformMember) {
     await present({
@@ -60,9 +59,9 @@ async function gotoMember(member: PlatformMember) {
                 root: new ComponentWithProperties(MemberSegmentedView, {
                     member,
                 }),
-            })
+            }),
         ],
-        modalDisplayStyle: "popup"
+        modalDisplayStyle: 'popup',
     });
 }
 </script>

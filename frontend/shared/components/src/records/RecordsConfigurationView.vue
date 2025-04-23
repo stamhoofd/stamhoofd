@@ -6,8 +6,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <hr>
-        <h2 v-if="app === 'admin'">
+        <hr><h2 v-if="app === 'admin'">
             {{ $t('0581e6ae-5695-4132-89d3-7f1c542d44f4') }}
         </h2>
         <h2 v-else>
@@ -31,8 +30,7 @@
 
         <InheritedRecordsConfigurationBox :inherited-records-configuration="props.inheritedRecordsConfiguration" :records-configuration="patched" @patch:records-configuration="addPatch" />
 
-        <hr>
-        <h2 v-if="app === 'admin'">
+        <hr><h2 v-if="app === 'admin'">
             {{ $t('4e842082-57fa-49ed-a806-6861cc913d12') }}
         </h2>
         <h2 v-else>
@@ -46,7 +44,7 @@
             {{ $t('07d18e1b-2935-4945-9595-50e16a929b19') }}
         </p>
         <p class="style-description-block">
-            Lees <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
+            {{ $t('Lees') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('hier') }}</a> {{ $t('meer informatie na over hoe je een vragenlijst kan instellen.') }}
         </p>
 
         <p class="info-box">
@@ -121,7 +119,7 @@ const settings = computed(() => {
             }),
             isNew: true,
             family,
-        })
+        }),
     });
     family.members.push(ss.exampleValue);
     return ss;

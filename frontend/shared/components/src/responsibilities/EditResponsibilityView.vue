@@ -7,74 +7,56 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <STInputBox :title="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') ">
-            <input
-                v-model="name"
-                class="input"
-                type="text"
-                :placeholder="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') "
-            >
+            <input v-model="name" class="input" type="text" :placeholder="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') ">
         </STInputBox>
 
         <STInputBox :title="$t('1c338881-0940-429b-a47e-7c9d3055f533')" error-fields="settings.description" :error-box="errors.errorBox" class="max">
-            <textarea
-                v-model="description"
-                class="input"
-                type="text"
-                :placeholder="$t('3db64326-c892-4fdb-8293-3d713453383a')"
-                autocomplete="off"
-            />
+            <textarea v-model="description" class="input" type="text" :placeholder="$t('3db64326-c892-4fdb-8293-3d713453383a')" autocomplete="off" />
         </STInputBox>
 
         <Checkbox v-if="app === 'admin'" v-model="notOrganizationBased">
-            Nationale functie
+            {{ $t('Nationale functie') }}
         </Checkbox>
 
         <template v-if="organizationBased && app === 'admin'">
-            <hr>
-            <h2>Vereisten</h2>
+            <hr><h2>{{ $t('Vereisten') }}</h2>
 
             <div class="split-inputs">
-                <STInputBox title="Minimum aantal (optioneel)" error-fields="settings.minAge" :error-box="errors.errorBox">
-                    <NumberInput v-model="minimumMembers" placeholder="Geen" :required="false" />
+                <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`Minimum aantal (optioneel)`)">
+                    <NumberInput v-model="minimumMembers" :required="false" :placeholder="$t(`Geen`)" />
                 </STInputBox>
 
-                <STInputBox title="Maximum aantal (optioneel)" error-fields="settings.maxAge" :error-box="errors.errorBox">
-                    <NumberInput v-model="maximumMembers" placeholder="Onbeperkt" :required="false" />
+                <STInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`Maximum aantal (optioneel)`)">
+                    <NumberInput v-model="maximumMembers" :required="false" :placeholder="$t(`Onbeperkt`)" />
                 </STInputBox>
             </div>
         </template>
 
         <JumpToContainer :visible="organizationTagIds !== null">
-            <hr>
-
-            <h2 class="style-with-button">
-                <div>Groepen</div>
+            <hr><h2 class="style-with-button">
+                <div>{{ $t('Groepen') }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="organizationTagIds = null" />
                 </div>
             </h2>
-            <p>Kies voor welke lokale groepen deze functie beschikbaar is.</p>
+            <p>{{ $t('Kies voor welke lokale groepen deze functie beschikbaar is.') }}</p>
 
-            <TagIdsInput v-model="organizationTagIds" :validator="errors.validator"/>
+            <TagIdsInput v-model="organizationTagIds" :validator="errors.validator" />
         </JumpToContainer>
 
         <JumpToContainer :visible="defaultAgeGroupIds !== null">
-            <hr>
-
-            <h2 class="style-with-button">
-                <div>Leeftijdsgroepen</div>
+            <hr><h2 class="style-with-button">
+                <div>{{ $t('Leeftijdsgroepen') }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="defaultAgeGroupIds = null" />
                 </div>
             </h2>
 
-            <p>Deze functie moet gekoppeld worden aan een specifieke inschrijvingsgroep van een lokale groep. Hier kan je die lokale leeftijdsgroepen beperken tot een aantal standaard leeftijdsgroepen.</p>
+            <p>{{ $t('Deze functie moet gekoppeld worden aan een specifieke inschrijvingsgroep van een lokale groep. Hier kan je die lokale leeftijdsgroepen beperken tot een aantal standaard leeftijdsgroepen.') }}</p>
 
             <DefaultAgeGroupIdsInput v-model="defaultAgeGroupIds" :validator="errors.validator" :should-select-at-least-one="true" />
 
-            <hr>
-
-            <h2>Automatische rechten voor gekoppelde leeftijdsgroep</h2>
+            <hr><h2>{{ $t('Automatische rechten voor gekoppelde leeftijdsgroep') }}</h2>
 
             <p>{{ $t('022aad3d-6250-4000-9336-4ae7e8e75c23') }}</p>
 
@@ -84,7 +66,7 @@
                         <Radio v-model="groupPermissionLevel" :value="PermissionLevel.None" />
                     </template>
                     <h3 class="style-title-list">
-                        Geen
+                        {{ $t('Geen') }}
                     </h3>
                 </STListItem>
 
@@ -93,7 +75,7 @@
                         <Radio v-model="groupPermissionLevel" :value="PermissionLevel.Read" />
                     </template>
                     <h3 class="style-title-list">
-                        Lezen
+                        {{ $t('Lezen') }}
                     </h3>
                 </STListItem>
 
@@ -102,7 +84,7 @@
                         <Radio v-model="groupPermissionLevel" :value="PermissionLevel.Write" />
                     </template>
                     <h3 class="style-title-list">
-                        Lezen en bewerken
+                        {{ $t('Lezen en bewerken') }}
                     </h3>
                 </STListItem>
 
@@ -111,16 +93,14 @@
                         <Radio v-model="groupPermissionLevel" :value="PermissionLevel.Full" />
                     </template>
                     <h3 class="style-title-list">
-                        Volledige toegang
+                        {{ $t('Volledige toegang') }}
                     </h3>
                 </STListItem>
             </STList>
         </JumpToContainer>
 
         <template v-if="organizationTagIds === null || defaultAgeGroupIds === null">
-            <hr>
-
-            <STList>
+            <hr><STList>
                 <template v-if="app === 'admin'">
                     <STListItem v-if="organizationTagIds === null && organizationBased" :selectable="true" element-name="button" @click="organizationTagIds = []">
                         <template #left>
@@ -128,7 +108,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            Beperk tot bepaalde lokale groepen (tags)
+                            {{ $t('Beperk tot bepaalde lokale groepen (tags)') }}
                         </h3>
                     </STListItem>
 
@@ -138,11 +118,11 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            Koppel de functie aan leeftijdsgroepen
+                            {{ $t('Koppel de functie aan leeftijdsgroepen') }}
                         </h3>
 
                         <p class="style-description-small">
-                            De functie moet dan worden toegekend aan een specifieke inschrijvingsgroep
+                            {{ $t('De functie moet dan worden toegekend aan een specifieke inschrijvingsgroep') }}
                         </p>
                     </STListItem>
                 </template>
@@ -153,25 +133,24 @@
                     </template>
 
                     <h3 v-if="!permissions" class="style-title-list">
-                        Automatisch rechten toekennen
+                        {{ $t('Automatisch rechten toekennen') }}
                     </h3>
                     <h3 v-else class="style-title-list">
-                        Gekoppelde rechten aanpassen
+                        {{ $t('Gekoppelde rechten aanpassen') }}
                     </h3>
 
                     <p v-if="organizationBased" class="style-description-small">
-                        Stel in welke rechten deze leden automatisch krijgen tot het beheerderportaal
+                        {{ $t('Stel in welke rechten deze leden automatisch krijgen tot het beheerderportaal') }}
                     </p>
                     <p v-else class="style-description-small">
-                        Stel in welke rechten deze leden automatisch krijgen tot het administratieportaal
+                        {{ $t('Stel in welke rechten deze leden automatisch krijgen tot het administratieportaal') }}
                     </p>
                 </STListItem>
             </STList>
         </template>
 
         <div v-if="!isNew && deleteHandler" class="container">
-            <hr>
-            <h2>
+            <hr><h2>
                 {{ $t('1e83f389-222b-48c7-ab9f-c77f82ea05af') }}
             </h2>
 

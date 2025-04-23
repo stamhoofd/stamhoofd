@@ -3,7 +3,7 @@
         <STGradientBackground v-if="!platform.config.horizontalLogo" />
 
         <div class="st-view">
-            <STNavigationBar :large="!isNative" class="transparent" title="Beheer jouw groep" />
+            <STNavigationBar :large="!isNative" class="transparent" :title="$t(`Beheer jouw groep`)" />
 
             <main class="flex center small organization-selection-view">
                 <h1>
@@ -33,7 +33,7 @@
                                 {{ getAppDescription(option.app, option.organization) }}
                             </p>
                             <p v-if="option.userDescription" class="style-description-small style-em">
-                                Ingelogd als {{ option.userDescription }}
+                                {{ $t('Ingelogd als') }} {{ option.userDescription }}
                             </p>
 
                             <span v-if="option.userDescription" class="icon gray sync floating" />
@@ -44,18 +44,18 @@
                 </template>
 
                 <p v-if="!loadingResults && visibleOptions.length === 0 && query" class="info-box">
-                    Geen verenigingen gevonden. Probeer te zoeken op postcode of naam. Is jouw vereniging nog niet aangesloten? Maak dan eerst een vereniging aan.
+                    {{ $t('Geen verenigingen gevonden. Probeer te zoeken op postcode of naam. Is jouw vereniging nog niet aangesloten? Maak dan eerst een vereniging aan.') }}
                 </p>
 
                 <footer v-if="!isPlatform">
                     <a v-if="!isNative" href="/aansluiten" class="button text full selected" @click.prevent="$navigate('join')">
                         <span class="icon add" />
-                        <span>Mijn vereniging aansluiten</span>
+                        <span>{{ $t('Mijn vereniging aansluiten') }}</span>
                     </a>
 
                     <button class="button text full" type="button" @click="help">
                         <span class="icon help" />
-                        <span>Mijn vereniging staat er niet tussen</span>
+                        <span>{{ $t('Mijn vereniging staat er niet tussen') }}</span>
                     </button>
                 </footer>
 
@@ -69,7 +69,7 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { ContextLogo, LoadingViewTransition, Option, PlatformFooter, Spinner, STGradientBackground, Toast, useAppData, useContextOptions, usePlatform, VersionFooter } from '@stamhoofd/components';
+import { ContextLogo, Option, PlatformFooter, Spinner, STGradientBackground, Toast, useAppData, useContextOptions, usePlatform, VersionFooter } from '@stamhoofd/components';
 import { AppManager, NetworkManager, useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';

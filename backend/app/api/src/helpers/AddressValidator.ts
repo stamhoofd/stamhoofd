@@ -20,7 +20,7 @@ export class AddressValidatorStatic {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Invalid postal code format (NL)',
-                    human: "Ongeldig postcode formaat, voer in zoals '8011 PK'",
+                    human: $t(`Ongeldig postcode formaat, voer in zoals '8011 PK'`),
                     field: 'postalCode',
                 });
             }
@@ -30,7 +30,7 @@ export class AddressValidatorStatic {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Invalid postal code format (NL)',
-                    human: "Ongeldig postcode formaat, voer in zoals '8011 PK'",
+                    human: $t(`Ongeldig postcode formaat, voer in zoals '8011 PK'`),
                     field: 'postalCode',
                 });
             }
@@ -52,7 +52,7 @@ export class AddressValidatorStatic {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Postal code is required',
-                    human: 'Voer een postcode in',
+                    human: $t(`Voer een postcode in`),
                     field: 'postalCode',
                 });
             }
@@ -75,7 +75,7 @@ export class AddressValidatorStatic {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid postal code or city',
-                human: 'Deze postcode en/of gemeente bestaat niet, kijk je even na op een typfout?',
+                human: $t(`Deze postcode en/of gemeente bestaat niet, kijk je even na op een typfout?`),
                 field: 'postalCode',
             });
         }
@@ -129,7 +129,7 @@ export class AddressValidatorStatic {
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid street',
-                            human: 'Deze straat bestaat niet, kijk je deze even na op fouten? Formuleer de naam zonder afkortingen.',
+                            human: $t(`Deze straat bestaat niet, kijk je deze even na op fouten? Formuleer de naam zonder afkortingen.`),
                             field: 'street',
                         });
                     }
@@ -137,7 +137,7 @@ export class AddressValidatorStatic {
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid street, do you mean ' + bestStreet.name + '?',
-                        human: "Deze straat bestaat niet, bedoel je '" + bestStreet.name + "'?",
+                        human: $t("Deze straat bestaat niet, bedoel je '{street}'?", { street: bestStreet.name }),
                         field: 'street',
                     });
                 }

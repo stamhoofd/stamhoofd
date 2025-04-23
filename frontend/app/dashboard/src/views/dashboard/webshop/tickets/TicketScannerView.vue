@@ -1,6 +1,6 @@
 <template>
     <div ref="rootRef" class="st-view scanner-view">
-        <STNavigationBar title="Scan een ticket" :show-title="true">
+        <STNavigationBar :show-title="true" :title="$t(`Scan een ticket`)">
             <template #left>
                 <button class="icon button close" type="button" @click="() => dismiss()" />
             </template>
@@ -22,22 +22,19 @@
 
                 <div class="status-bar">
                     <p v-if="isLoading">
-                        <Spinner class="inline" /> Bijwerken...
+                        <Spinner class="inline" /> {{ $t('Bijwerken...') }}
                     </p>
                     <p v-else-if="hadNetworkError">
-                        Geen internetverbinding. Scannen van tickets blijft gedeeltelijk werken. Internet is aan te raden.<br>
-                        <span class="style-description-small">Laatst bijgewerkt: {{ lastUpdatedText }}</span><br>
-                        <button class="button text" type="button" @click="updateTickets">
-                            Opnieuw proberen
+                        {{ $t('Geen internetverbinding. Scannen van tickets blijft gedeeltelijk werken. Internet is aan te raden.') }}<br><span class="style-description-small">{{ $t('Laatst bijgewerkt:') }} {{ lastUpdatedText }}</span><br><button class="button text" type="button" @click="updateTickets">
+                            {{ $t('Opnieuw proberen') }}
                         </button>
                     </p>
                     <p v-else>
                         <template v-if="disableWebVideo">
-                            Plaats de QR-code in het midden van het scherm.
+                            {{ $t('Plaats de QR-code in het midden van het scherm.') }}
                         </template><template v-else>
-                            Plaats de QR-code in het kader om te scannen.
-                        </template><br>
-                        <span class="style-description-small">Laatst bijgewerkt: {{ lastUpdatedText }}</span>
+                            {{ $t('Plaats de QR-code in het kader om te scannen.') }}
+                        </template><br><span class="style-description-small">{{ $t('Laatst bijgewerkt:') }} {{ lastUpdatedText }}</span>
                     </p>
                 </div>
             </div>

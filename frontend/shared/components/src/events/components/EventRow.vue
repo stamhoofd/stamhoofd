@@ -14,7 +14,7 @@
         </p>
 
         <p v-if="prefix" class="style-description-small">
-            Voor {{ prefix }}
+            {{ $t('Voor') }} {{ prefix }}
         </p>
 
         <p v-if="event.meta.location?.name || event.meta.location?.address?.city" class="style-description-small">
@@ -22,9 +22,9 @@
         </p>
 
         <p v-if="event.group" class="style-description-small">
-            <span v-if="event.group.notYetOpen">Inschrijvingen starten op {{ Formatter.date(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date()) }}</span>
-            <span v-else-if="event.group.closed">Inschrijvingen gesloten</span>
-            <span v-else>Inschrijvingen open</span>
+            <span v-if="event.group.notYetOpen">{{ $t('Inschrijvingen starten op') }} {{ Formatter.date(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date()) }}</span>
+            <span v-else-if="event.group.closed">{{ $t('Inschrijvingen gesloten') }}</span>
+            <span v-else>{{ $t('Inschrijvingen open') }}</span>
         </p>
 
         <p v-if="event.group && app !== 'registration'" class="style-description-small">
@@ -32,7 +32,7 @@
         </p>
 
         <template #right>
-            <span v-if="!event.meta.visible" v-tooltip="'Verborgen'" class="icon gray eye-off" />
+            <span v-if="!event.meta.visible" class="icon gray eye-off" :v-tooltip="$t('Verborgen')" />
             <span v-if="event.id" class="icon arrow-right-small gray" />
             <span v-else class="icon add gray" />
         </template>
@@ -43,61 +43,63 @@
 import { Event } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
+import { useAppContext } from '../../context';
 import { useOrganization, usePlatform } from '../../hooks';
 import EventImageBox from './EventImageBox.vue';
-import { useAppContext } from '../../context';
 
 const props = defineProps<{
-    event: Event
+    event: Event;
 }>();
 
-const platform = usePlatform()
-const organization = useOrganization()
-const app = useAppContext()
+const platform = usePlatform();
+const organization = useOrganization();
+const app = useAppContext();
 
 const levelPrefix = computed(() => {
-    const prefixes: string[] = []
+    const prefixes: string[] = [];
 
     if (props.event.organizationId === null) {
         if (props.event.meta.organizationTagIds !== null) {
-            const tagNames = platform.value?.config.tags.filter(t => props.event.meta.organizationTagIds?.includes(t.id)).map(t => t.name)
-            prefixes.push(...tagNames)
-        } else {
-            prefixes.push('Nationaal')
+            const tagNames = platform.value?.config.tags.filter(t => props.event.meta.organizationTagIds?.includes(t.id)).map(t => t.name);
+            prefixes.push(...tagNames);
         }
-    } else {
+        else {
+            prefixes.push('Nationaal');
+        }
+    }
+    else {
         if (props.event.organizationId === organization.value?.id) {
             // skip
-        } else {
+        }
+        else {
             // Name of the organization
             if (props.event.meta.organizationCache?.name) {
-                prefixes.push(props.event.meta.organizationCache?.name)
+                prefixes.push(props.event.meta.organizationCache?.name);
             }
         }
     }
 
-    return Formatter.joinLast(prefixes, ', ', ' en ')
+    return Formatter.joinLast(prefixes, ', ', ' en ');
 });
 
-
 const prefix = computed(() => {
-    const prefixes: string[] = []
+    const prefixes: string[] = [];
 
     if (props.event.meta.defaultAgeGroupIds !== null) {
         for (const ageGroupId of props.event.meta.defaultAgeGroupIds) {
-            const ageGroup = platform.value?.config.defaultAgeGroups.find(g => g.id === ageGroupId)
+            const ageGroup = platform.value?.config.defaultAgeGroups.find(g => g.id === ageGroupId);
             if (ageGroup) {
-                prefixes.push(ageGroup.name)
+                prefixes.push(ageGroup.name);
             }
         }
     }
 
     if (props.event.meta.groups !== null) {
         for (const group of props.event.meta.groups) {
-            prefixes.push(group.name)
+            prefixes.push(group.name);
         }
     }
-    return Formatter.joinLast(prefixes, ', ', ' en ')
+    return Formatter.joinLast(prefixes, ', ', ' en ');
 });
 
 </script>

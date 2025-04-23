@@ -4,7 +4,7 @@
             {{ formatDate(deadline.startDate, true) }} - {{ formatDate(deadline.endDate) }}
         </h2>
         <p class="style-description-small">
-            Indienen kan tot {{ Formatter.endDate(deadline.deadline, false, true) }}
+            {{ $t('Indienen kan tot') }} {{ Formatter.endDate(deadline.deadline, false, true) }}
         </p>
 
         <template #right>

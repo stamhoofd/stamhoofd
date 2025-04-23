@@ -120,93 +120,93 @@ export class StripeMetaData extends AutoEncoder {
 function requirementsToString(list: string[]) {
     let missing = list.map((key) => {
         if (key.match(/person_.+?\.verification.document/)) {
-            return 'identiteitsbewijs van een persoon';
+            return $t(`identiteitsbewijs van een persoon`);
         }
 
         if (key.match(/(representative|person|individual|director)\.address/)) {
-            return 'adres van een vertegenwoordiger';
+            return $t(`adres van een vertegenwoordiger`);
         }
 
         if (key.match(/(representative|person|individual|director)\.phone/)) {
-            return 'telefoon van een vertegenwoordiger';
+            return $t(`telefoon van een vertegenwoordiger`);
         }
 
         if (key.match(/(representative|person|individual|director)\.email/)) {
-            return 'email van een vertegenwoordiger';
+            return $t(`email van een vertegenwoordiger`);
         }
 
         if (key.match(/(representative|person|individual|director)\.dob/)) {
-            return 'geboortedatum van een vertegenwoordiger';
+            return $t(`geboortedatum van een vertegenwoordiger`);
         }
 
         if (key.match(/(representative|person|individual|director)\.(first|last)_name/)) {
-            return 'naam van een vertegenwoordiger';
+            return $t(`naam van een vertegenwoordiger`);
         }
 
         if (key.match(/(representative|person|individual|director)?\.relationship.title/)) {
-            return 'functie van een vertegenwoordiger';
+            return $t(`functie van een vertegenwoordiger`);
         }
 
         if (key.match(/person_.+?\.address/)) {
-            return 'adres van een persoon';
+            return $t(`adres van een persoon`);
         }
 
         if (key.match(/person_.+?\.phone/)) {
-            return 'telefoon van een persoon';
+            return $t(`telefoon van een persoon`);
         }
 
         if (key.match(/person_.+?\.email/)) {
-            return 'email van een persoon';
+            return $t(`email van een persoon`);
         }
 
         if (key.match(/person_.+?\.dob/)) {
-            return 'geboortedatum van een persoon';
+            return $t(`geboortedatum van een persoon`);
         }
 
         if (key.match(/person_.+?\.(first|last)_name/)) {
-            return 'naam van een persoon';
+            return $t(`naam van een persoon`);
         }
 
         if (key.match(/person_.+?\.relationship.title/)) {
-            return 'functie van een persoon';
+            return $t(`functie van een persoon`);
         }
 
         if (key.match(/(representative|person|individual|director)_/)) {
-            return 'gegevens van een persoon';
+            return $t(`gegevens van een persoon`);
         }
 
         if (key.match(/company_.+?\.address/)) {
-            return 'adres van je vereniging';
+            return $t(`adres van je vereniging`);
         }
 
         if (key === 'company.phone') {
-            return 'telefoonnummer van je vereniging';
+            return $t(`telefoonnummer van je vereniging`);
         }
 
         if (key === 'company.name') {
-            return 'naam van je vereniging';
+            return $t(`naam van je vereniging`);
         }
 
         if (key === 'company.verification.document') {
-            return 'verificatiedocument van je vereniging';
+            return $t(`verificatiedocument van je vereniging`);
         }
 
         if (key === 'individual.verification.document') {
-            return 'verificatiedocument van natuurlijk persoon';
+            return $t(`verificatiedocument van natuurlijk persoon`);
         }
 
         if (key === 'business_profile.product_description') {
-            return 'beschrijving van je vereniging';
+            return $t(`beschrijving van je vereniging`);
         }
 
         if (key === 'business_profile.url') {
-            return 'website van je vereniging';
+            return $t(`website van je vereniging`);
         }
 
-        return 'andere';
+        return $t(`andere`);
     });
     missing = Formatter.uniqueArray(missing);
-    return Formatter.joinLast(missing, ', ', ' en ');
+    return Formatter.joinLast(missing, ', ', ' ' + $t(`en`) + ' ');
 }
 
 export class StripeAccountPatch extends AutoEncoder {
@@ -240,24 +240,24 @@ export class StripeAccount extends AutoEncoder {
             const missing = this.missingData;
 
             return {
-                text: 'Je moet gegevens aanvullen om te voorkomen dat uitbetalingen en betalingen worden stopgezet. Dit moet gebeuren voor ' + Formatter.date(new Date(this.meta.requirements.current_deadline * 1000)) + '. Ga naar je Stripe dashboard om dit in orde te brengen. Volgende zaken zouden ontbreken: ' + missing + '.',
+                text: $t(`Je moet gegevens aanvullen om te voorkomen dat uitbetalingen en betalingen worden stopgezet. Dit moet gebeuren voor {date}. Ga naar je Stripe dashboard om dit in orde te brengen. Volgende zaken zouden ontbreken:`, { date: Formatter.date(new Date(this.meta.requirements.current_deadline * 1000)) }) + ' ' + missing + '.',
                 type: 'error',
             };
         }
 
         if (this.meta.charges_enabled && this.meta.paymentMethods.length < 3) {
             const missing = [PaymentMethod.CreditCard, PaymentMethod.Bancontact, PaymentMethod.iDEAL].filter(m => !this.meta.paymentMethods.includes(m));
-            const text = Formatter.joinLast(missing.map(m => PaymentMethodHelper.getName(m)), ', ', ' en ');
+            const text = Formatter.joinLast(missing.map(m => PaymentMethodHelper.getName(m)), ', ', ' ' + $t(`en`) + ' ');
             const missingText = this.missingData;
 
             if (missing.length === 1) {
                 return {
-                    text: 'De betaalmethode ' + text + ' werd nog niet door Stripe geactiveerd. Kijk na of alle informatie in je Stripe dashboard volledig ingevuld werd. ' + (missingText ? (' Volgende zaken zouden ontbreken: ' + missingText + '.') : ''),
+                    text: $t(`De betaalmethode {method} werd nog niet door Stripe geactiveerd. Kijk na of alle informatie in je Stripe dashboard volledig ingevuld werd.`, { method: text }) + ' ' + (missingText ? (' ' + $t(`Volgende zaken zouden ontbreken:`) + ' ' + missingText + '.') : ''),
                     type: 'error',
                 };
             }
             return {
-                text: 'De betaalmethodes ' + text + ' werden nog niet door Stripe geactiveerd. Kijk na of alle informatie in je Stripe dashboard volledig ingevuld werd. ' + (missingText ? (' Volgende zaken zouden ontbreken: ' + missingText + '.') : ''),
+                text: $t(`De betaalmethodes {methods} werden nog niet door Stripe geactiveerd. Kijk na of alle informatie in je Stripe dashboard volledig ingevuld werd.`, { methods: text }) + ' ' + (missingText ? (' ' + $t(`Volgende zaken zouden ontbreken:`) + ' ' + missingText + '.') : ''),
                 type: 'error',
             };
         }
@@ -266,7 +266,7 @@ export class StripeAccount extends AutoEncoder {
             const missing = this.missingData;
             const d = new Date(this.meta.future_requirements.current_deadline * 1000);
             return {
-                text: 'Je moet gegevens aanvullen om te voorkomen dat uitbetalingen en betalingen worden stopgezet. Dit moet gebeuren voor ' + Formatter.date(d) + '. Ga naar je Stripe dashboard om dit in orde te brengen. Volgende zaken zouden ontbreken: ' + missing + '.',
+                text: $t(`Je moet gegevens aanvullen om te voorkomen dat uitbetalingen en betalingen worden stopgezet. Dit moet gebeuren voor {date}. Ga naar je Stripe dashboard om dit in orde te brengen. Volgende zaken zouden ontbreken:`, { date: Formatter.date(d) }) + ' ' + missing + '.',
                 // Error if needed within one month
                 type: d < new Date(Date.now() + 24 * 60 * 60 * 1000 * 30) ? 'error' : 'warning',
             };
@@ -276,7 +276,7 @@ export class StripeAccount extends AutoEncoder {
             // Try to convert to readable text
             const missing = this.missingData;
             return {
-                text: 'Niet alle gegevens van jouw vereniging werden in het Stripe dashboard ingevuld. Kijk na of alles werd ingevuld. Volgende zaken zouden ontbreken: ' + missing + '.',
+                text: $t(`Niet alle gegevens van jouw vereniging werden in het Stripe dashboard ingevuld. Kijk na of alles werd ingevuld. Volgende zaken zouden ontbreken:`) + ' ' + missing + '.',
                 type: 'warning',
             };
         }

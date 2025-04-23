@@ -102,18 +102,18 @@ export class GroupUIFilter extends UIFilter {
         if (this.builder.wrapper) {
             const prefix: typeof flattened = [];
             prefix.push({
-                text: 'Heeft ',
+                text: $t(`Heeft`) + ' ',
                 style: 'gray',
                 choices: [
                     {
                         id: 'false',
-                        text: 'Heeft',
+                        text: $t(`Heeft`),
                         action: () => this.isInverted = false,
                         isSelected: () => this.isInverted === false,
                     },
                     {
                         id: 'true',
-                        text: 'Heeft geen',
+                        text: $t(`Heeft geen`),
                         action: () => this.isInverted = true,
                         isSelected: () => this.isInverted === true,
                     },
@@ -126,7 +126,7 @@ export class GroupUIFilter extends UIFilter {
             });
 
             prefix.push({
-                text: ' waar ',
+                text: ' ' + $t(`waar`) + ' ',
                 style: 'gray',
             });
 
@@ -139,7 +139,7 @@ export class GroupUIFilter extends UIFilter {
 
 export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
     builders: UIFilterBuilder[] = [];
-    name = 'complexe filtergroep';
+    name = $t(`complexe filtergroep`);
     description = '';
     wrapFilter?: UIFilterWrapper | null;
     wrapper?: WrapperFilter;

@@ -243,7 +243,7 @@ export class RegisterCheckout {
             throw new SimpleError({
                 code: 'forbidden',
                 message: 'Permission denied: you are not allowed to delete registrations',
-                human: 'Oeps, je hebt geen rechten om inschrijvingen te verwijderen.',
+                human: $t(`Oeps, je hebt geen rechten om inschrijvingen te verwijderen.`),
             });
         }
 
@@ -271,26 +271,26 @@ export class RegisterCheckout {
     get priceBreakown(): PriceBreakdown {
         const all = [
             {
-                name: 'Administratiekost',
+                name: $t(`Administratiekost`),
                 price: this.administrationFee,
             },
             {
-                name: 'Vrije bijdrage',
+                name: $t(`Vrije bijdrage`),
                 price: this.freeContribution,
             },
             {
-                name: 'Terugbetaling',
+                name: $t(`Terugbetaling`),
                 price: -this.cart.refund,
             },
             {
-                name: 'Later te betalen',
+                name: $t(`Later te betalen`),
                 price: this.cart.priceDueLater,
             },
         ].filter(a => a.price !== 0);
 
         if (all.length > 0) {
             all.unshift({
-                name: 'Subtotaal',
+                name: $t(`Subtotaal`),
                 price: this.cart.price,
             });
         }
@@ -298,7 +298,7 @@ export class RegisterCheckout {
         return [
             ...all,
             {
-                name: this.cart.priceDueLater ? 'Nu te betalen' : 'Totaal',
+                name: this.cart.priceDueLater ? $t(`Nu te betalen`) : $t(`Totaal`),
                 price: this.totalPrice,
             },
         ];

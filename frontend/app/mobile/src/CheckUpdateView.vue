@@ -8,13 +8,13 @@
                     {{ status.options.customText }}
                 </h1>
                 <h1 v-else-if="status.status === 'checking'">
-                    Controleren op updates...
+                    {{ $t('Controleren op updates...') }}
                 </h1>
                 <h1 v-else-if="status.status === 'downloading'">
-                    Nieuwe functionaliteiten in elkaar timmeren...
+                    {{ $t('Nieuwe functionaliteiten in elkaar timmeren...') }}
                 </h1>
                 <h1 v-else-if="status.status === 'installing'">
-                    Nieuwe functionaliteiten klaarzetten...
+                    {{ $t('Nieuwe functionaliteiten klaarzetten...') }}
                 </h1>
 
                 <div class="comment-box">
@@ -34,67 +34,67 @@
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { LoadingViewTransition, Spinner, STNavigationBar } from '@stamhoofd/components';
 
-import { UpdateStatus } from "./UpdateStatus";
+import { UpdateStatus } from './UpdateStatus';
 
 @Component({
     components: {
         Spinner,
         STNavigationBar,
-        LoadingViewTransition
-    }
+        LoadingViewTransition,
+    },
 })
 export default class CheckUpdateView extends Mixins(NavigationMixin) {
-    @Prop({required: true})
-        status: UpdateStatus
+    @Prop({ required: true })
+    status: UpdateStatus;
 
     spinnerLeft = true;
-    interval: NodeJS.Timeout|null = null;
-    textInterval: NodeJS.Timeout|null = null;
+    interval: NodeJS.Timeout | null = null;
+    textInterval: NodeJS.Timeout | null = null;
 
-    texts = ['Wist je dat je ons naast onze documentatiepagina\'s ook altijd via e-mail kan bereiken via een link onderaan de documentatie?', 'Is er iets dat niet goed werkt? Dan horen we dat altijd graag!', 'We werken voortdurend aan nieuwe functionaliteiten.']
+    texts = ['Wist je dat je ons naast onze documentatiepagina\'s ook altijd via e-mail kan bereiken via een link onderaan de documentatie?', 'Is er iets dat niet goed werkt? Dan horen we dat altijd graag!', 'We werken voortdurend aan nieuwe functionaliteiten.'];
     visibleText = 0;
 
     get nextTextIndex() {
-        return (this.visibleText + 1) % this.texts.length
+        return (this.visibleText + 1) % this.texts.length;
     }
 
     get title() {
-        return 'Update'
+        return 'Update';
     }
 
     get showLoading() {
-        return this.status.status === 'checking' && this.status.options.visibleCheck !== 'text'
+        return this.status.status === 'checking' && this.status.options.visibleCheck !== 'text';
     }
 
     mounted() {
-        console.log('Mounted CheckUpdateView')
+        console.log('Mounted CheckUpdateView');
         if (!this.status.shouldBeVisible) {
-            console.log('Update should not be visible: dismiss on mount')
-            this.dismiss({force: true, animated: false})
+            console.log('Update should not be visible: dismiss on mount');
+            this.dismiss({ force: true, animated: false });
         }
         this.status.setDoHide(() => {
-            this.dismiss({force: true, animated: false})
-        })
+            this.dismiss({ force: true, animated: false });
+        });
 
         this.interval = setInterval(() => {
             this.spinnerLeft = !this.spinnerLeft;
-        }, 800)
+        }, 800);
 
         this.textInterval = setInterval(() => {
-            this.visibleText = (this.visibleText + 1) % this.texts.length
-        }, 3500)
+            this.visibleText = (this.visibleText + 1) % this.texts.length;
+        }, 3500);
     }
 
     beforeUnmount() {
         if (this.interval) {
-            clearInterval(this.interval)
+            clearInterval(this.interval);
         }
         if (this.textInterval) {
-            clearInterval(this.textInterval)
+            clearInterval(this.textInterval);
         }
     }
 
@@ -110,13 +110,13 @@ export default class CheckUpdateView extends Mixins(NavigationMixin) {
 
     get width() {
         if (this.status.progress !== null) {
-            return this.status.progress * 100 + '%'
+            return this.status.progress * 100 + '%';
         }
-        return '30%'
+        return '30%';
     }
 
     get transform() {
-        return 'translateX('+this.statusX+')'
+        return 'translateX(' + this.statusX + ')';
     }
 }
 </script>

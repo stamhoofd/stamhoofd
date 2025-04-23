@@ -15,7 +15,7 @@ export class MemberParentsStep implements EditMemberStep {
     }
 
     getName(manager: MemberStepManager) {
-        return 'Ouders';
+        return $t(`Ouders`);
     }
 
     isEnabled(manager: MemberStepManager) {
@@ -52,10 +52,10 @@ export class MemberParentsStep implements EditMemberStep {
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {
         return new ComponentWithProperties(MemberStepView, {
-            title: 'Ouders',
+            title: $t(`Ouders`),
             member: manager.member,
             component: markRaw(EditMemberParentsBox),
-            saveText: 'Doorgaan',
+            saveText: $t(`Doorgaan`),
             markReviewed: ['parents'],
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);
