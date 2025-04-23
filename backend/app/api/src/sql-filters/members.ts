@@ -59,7 +59,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: 'No permissions for financial support filter (organization scope).',
-                    human: 'Je hebt geen toegangsrechten om deze filter te gebruiken.',
+                    human: $t(`Je hebt geen toegangsrechten om deze filter te gebruiken.`),
                     statusCode: 400,
                 });
             }

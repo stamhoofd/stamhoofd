@@ -8,15 +8,7 @@
         <div class="split-inputs">
             <div>
                 <STInputBox :title="$t('6793e0dc-66f0-4a70-b8ac-fb41e2063871')" error-fields="name" :error-box="errors.errorBox">
-                    <input
-                        id="organization-name"
-                        ref="firstInput"
-                        v-model="name"
-                        class="input"
-                        type="text"
-                        :placeholder="$t('bc8578de-ee3c-4aac-bd19-3fd4040168a4')"
-                        autocomplete="organization"
-                    >
+                    <input id="organization-name" ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('bc8578de-ee3c-4aac-bd19-3fd4040168a4')" autocomplete="organization">
                 </STInputBox>
 
                 <AddressInput v-model="address" :title="$t('74303d1c-2700-4340-816e-03cb9c3fb188')" :validator="errors.validator" />
@@ -32,31 +24,24 @@
         </div>
 
         <STInputBox :title="$t('2cc5355d-3c19-4a6e-a2c7-1d93e423a8d2')" error-fields="name" :error-box="errors.errorBox">
-            <OrganizationUriInput
-                v-model="uri"
-                :validator="errors.validator"
-                :allow-value="props.organization.uri"
-            />
+            <OrganizationUriInput v-model="uri" :validator="errors.validator" :allow-value="props.organization.uri" />
         </STInputBox>
         <p class="style-description-small">
             {{ $t('81c91169-db1e-4819-8716-5382ffbaa43b') }}
         </p>
 
         <div v-for="category of recordCategories" :key="category.id" class="container">
-            <hr>
-            <FillRecordCategoryBox :category="category" :value="patched" :validator="errors.validator" :level="2" :all-optional="true" :force-mark-reviewed="false" @patch="patchAnswers" />
+            <hr><FillRecordCategoryBox :category="category" :value="patched" :validator="errors.validator" :level="2" :all-optional="true" :force-mark-reviewed="false" @patch="patchAnswers" />
         </div>
 
-        <hr>
-        <h2>{{ $t('0be39baa-0b8e-47a5-bd53-0feeb14a0f93') }}</h2>
+        <hr><h2>{{ $t('0be39baa-0b8e-47a5-bd53-0feeb14a0f93') }}</h2>
         <STList>
             <SelectOrganizationTagRow v-for="tag in rootTags" :key="tag.id" :organization="patched" :tag="tag" @patch:organization="addPatch" />
         </STList>
 
         <div v-for="tag in allTagsWithChildren" :key="tag.id" class="container">
             <JumpToContainer :visible="isSelected(tag)">
-                <hr>
-                <h2>{{ $t('0be39baa-0b8e-47a5-bd53-0feeb14a0f93') }} → {{ tag.name }}</h2>
+                <hr><h2>{{ $t('0be39baa-0b8e-47a5-bd53-0feeb14a0f93') }} → {{ tag.name }}</h2>
                 <STList>
                     <SelectOrganizationTagRow v-for="childTag in tagIdsToTags(tag.childTags)" :key="childTag.id" :organization="patched" :tag="childTag" @patch:organization="addPatch" />
                 </STList>
@@ -64,11 +49,10 @@
         </div>
 
         <template v-if="auth.hasFullPlatformAccess()">
-            <hr>
-            <h2>{{ $t('97475ade-4e97-4989-b2f4-fecd534db3c4') }}</h2>
+            <hr><h2>{{ $t('97475ade-4e97-4989-b2f4-fecd534db3c4') }}</h2>
 
             <STList>
-                <CheckboxListItem v-model="active" :label="$t('97475ade-4e97-4989-b2f4-fecd534db3c4')" description="Leden kunnen geen inactieve groepen vinden of erbij inloggen." />
+                <CheckboxListItem v-model="active" :label="$t('97475ade-4e97-4989-b2f4-fecd534db3c4')" :description="$t(`Leden kunnen geen inactieve groepen vinden of erbij inloggen.`)" />
             </STList>
         </template>
     </SaveView>

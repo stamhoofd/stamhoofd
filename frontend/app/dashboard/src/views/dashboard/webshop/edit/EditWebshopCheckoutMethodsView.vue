@@ -1,7 +1,7 @@
 <template>
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
-        <p>Stel hier in waar en wanneer de bestelde producten kunnen worden afgehaald, geleverd of ter plaatse geconsumeerd. Dit is optioneel, maar we raden het wel sterk aan, want zo is de juiste informatie zichtbaar in de bestelbevestiging.</p>
+        <p>{{ $t('Stel hier in waar en wanneer de bestelde producten kunnen worden afgehaald, geleverd of ter plaatse geconsumeerd. Dit is optioneel, maar we raden het wel sterk aan, want zo is de juiste informatie zichtbaar in de bestelbevestiging.') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -20,21 +20,21 @@
         <p>
             <button class="button text" type="button" @click="addOnSiteMethod">
                 <span class="icon add" />
-                <span>Ter plaatse consumeren toevoegen</span>
+                <span>{{ $t('Ter plaatse consumeren toevoegen') }}</span>
             </button>
         </p>
 
         <p>
             <button class="button text" type="button" @click="addTakeoutMethod">
                 <span class="icon add" />
-                <span>Afhaallocatie toevoegen</span>
+                <span>{{ $t('Afhaallocatie toevoegen') }}</span>
             </button>
         </p>
 
         <p>
             <button class="button text" type="button" @click="addDeliveryMethod">
                 <span class="icon add" />
-                <span>Leveringsoptie toevoegen</span>
+                <span>{{ $t('Leveringsoptie toevoegen') }}</span>
             </button>
         </p>
     </SaveView>

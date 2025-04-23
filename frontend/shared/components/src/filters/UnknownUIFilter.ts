@@ -30,7 +30,7 @@ export class UnknownUIFilter extends UIFilter {
     get styledDescription() {
         return [
             {
-                text: 'Niet ondersteunde filter',
+                text: $t(`Niet ondersteunde filter`),
                 style: ''
             }
         ]
@@ -39,7 +39,7 @@ export class UnknownUIFilter extends UIFilter {
 
 export class UnknownFilterBuilder implements UIFilterBuilder<UnknownUIFilter> {
     get name() {
-        return 'Niet ondersteunde filter';
+        return $t(`Niet ondersteunde filter`);
     }
 
     fromFilter(filter: StamhoofdFilter): UIFilter | null {

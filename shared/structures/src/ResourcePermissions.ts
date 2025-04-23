@@ -96,19 +96,19 @@ export class ResourcePermissions extends AutoEncoder {
         const resourceDescription = (resource: ResourceLike) => {
             const accessRights = resource.accessRights.map(a => AccessRightHelper.getDescription(a));
             if (resource.level === PermissionLevel.None) {
-                return Formatter.joinLast(accessRights, ', ', ' en ');
+                return Formatter.joinLast(accessRights, ', ', ' ' + $t(`en`) + ' ');
             }
 
-            let prefix = 'lezen';
+            let prefix = $t(`lezen`);
 
             if (resource.level === PermissionLevel.Write) {
-                prefix = 'bewerken';
+                prefix = $t(`bewerken`);
             }
             else if (resource.level === PermissionLevel.Full) {
-                prefix = 'volledige toegang';
+                prefix = $t(`volledige toegang`);
             }
 
-            return prefix + (accessRights.length > 0 ? ' met ' + Formatter.joinLast(accessRights, ', ', ' en ') : '');
+            return prefix + (accessRights.length > 0 ? ' ' + $t(`met`) + ' ' + Formatter.joinLast(accessRights, ', ', ' ' + $t(`en`) + ' ') : '');
         };
 
         for (const [type, resources] of map) {
@@ -118,21 +118,21 @@ export class ResourcePermissions extends AutoEncoder {
             if (all && !all.isEmpty) {
                 const accessRights = all.accessRights.map(a => AccessRightHelper.getDescription(a));
                 if (all.level === PermissionLevel.None) {
-                    stack.push('alle ' + getPermissionResourceTypeName(type, true) + ': ' + Formatter.joinLast(accessRights, ', ', ' en '));
+                    stack.push($t(`alle`) + ' ' + getPermissionResourceTypeName(type, true) + ': ' + Formatter.joinLast(accessRights, ', ', ' ' + $t(`en`) + ' '));
                 }
 
-                let prefix = 'alle ';
-                let suffix = ' lezen';
+                let prefix = $t(`alle`) + ' ';
+                let suffix = ' ' + $t(`lezen`);
 
                 if (all.level === PermissionLevel.Write) {
-                    suffix = ' bewerken';
+                    suffix = ' ' + $t(`bewerken`);
                 }
                 else if (all.level === PermissionLevel.Full) {
-                    prefix = 'volledige toegang tot alle ';
+                    prefix = $t(`volledige toegang tot alle`) + ' ';
                     suffix = '';
                 }
 
-                stack.push(prefix + getPermissionResourceTypeName(type, true) + suffix + (accessRights.length > 0 ? ' met ' + Formatter.joinLast(accessRights, ', ', ' en ') : ''));
+                stack.push(prefix + getPermissionResourceTypeName(type, true) + suffix + (accessRights.length > 0 ? ' ' + $t(`met`) + ' ' + Formatter.joinLast(accessRights, ', ', ' ' + $t(`en`) + ' ') : ''));
                 allDescription = resourceDescription(all);
             }
 

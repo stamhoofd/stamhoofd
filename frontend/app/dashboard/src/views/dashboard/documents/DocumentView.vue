@@ -1,31 +1,27 @@
 <template>
     <div class="st-view document-view">
-        <STNavigationBar :title="'Document'">
+        <STNavigationBar :title="$t(`Document`)">
             <template #right>
-                <button v-if="hasPrevious || hasNext" v-tooltip="'Ga naar vorig document'" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" v-tooltip="'Ga naar volgende document'" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goForward" />
+                <button v-if="hasPrevious || hasNext" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('Ga naar vorig document')" @click="goBack" />
+                <button v-if="hasNext || hasPrevious" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('Ga naar volgende document')" @click="goForward" />
                 <button v-long-press="(e: MouseEvent) => showContextMenu(e)" class="button icon navigation more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
             </template>
         </STNavigationBar>
         <main>
             <h1>
-                Document
+                {{ $t('Document') }}
             </h1>
 
             <p v-if="unlinkedAnswers.length" class="info-box">
                 {{ $t('719f31f6-cae0-41b0-97e6-ab8f5ff01d19', { unlinkedAnswersText }) }}
                 <button class="button text" type="button" @click="resetDocument">
-                    Reset
+                    {{ $t('Reset') }}
                 </button>
             </p>
 
             <div v-if="hasWarnings" class="hover-box container">
                 <ul class="member-records">
-                    <li
-                        v-for="warning in sortedWarnings"
-                        :key="warning.id"
-                        :class="{ [warning.type]: true }"
-                    >
+                    <li v-for="warning in sortedWarnings" :key="warning.id" :class="{ [warning.type]: true }">
                         <span :class="'icon '+warning.icon" />
                         <span class="text">{{ warning.text }}</span>
                     </li>
@@ -36,7 +32,7 @@
             <STList class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        Naam
+                        {{ $t('Naam') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ document.data.name }}
@@ -45,7 +41,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        Beschrijving
+                        {{ $t('Beschrijving') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ document.data.description }}
@@ -54,7 +50,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        Volgnummer
+                        {{ $t('Volgnummer') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ document.id }} ({{ document.number || 'Zonder nummer' }})
@@ -63,7 +59,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        Aangemaakt op
+                        {{ $t('Aangemaakt op') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ capitalizeFirstLetter(formatDateTime(document.createdAt)) }}
@@ -72,7 +68,7 @@
 
                 <STListItem>
                     <h3 :class="'style-definition-label '+statusColor">
-                        Status
+                        {{ $t('Status') }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ statusName }}</span>

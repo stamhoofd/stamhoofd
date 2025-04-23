@@ -53,7 +53,7 @@ export class MemberDataPermissionStep implements EditMemberStep {
             title: config?.title ?? DataPermissionsSettings.defaultTitle,
             member: manager.member,
             component: markRaw(EditMemberDataPermissionsBox),
-            saveText: "Doorgaan",
+            saveText: $t(`Doorgaan`),
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate)
             }

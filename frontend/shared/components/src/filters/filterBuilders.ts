@@ -16,7 +16,7 @@ import { UIFilter, UIFilterBuilder, UIFilterBuilders } from './UIFilter';
 
 export const paymentsUIFilterBuilders: UIFilterBuilders = [
     new MultipleChoiceFilterBuilder({
-        name: 'Betaalmethode',
+        name: $t(`Betaalmethode`),
         options: Object.values(PaymentMethod).map((method) => {
             return new MultipleChoiceUIFilterOption(PaymentMethodHelper.getNameCapitalized(method), method);
         }),
@@ -28,7 +28,7 @@ export const paymentsUIFilterBuilders: UIFilterBuilders = [
     }),
 
     new MultipleChoiceFilterBuilder({
-        name: 'Status',
+        name: $t(`Status`),
         options: Object.values(PaymentStatus).map((method) => {
             return new MultipleChoiceUIFilterOption(PaymentStatusHelper.getNameCapitalized(method), method);
         }),
@@ -50,19 +50,19 @@ paymentsUIFilterBuilders.unshift(
 // This one should match memberWithRegistrationsBlobInMemoryFilterCompilers
 export const memberWithRegistrationsBlobUIFilterBuilders: UIFilterBuilders = [
     new NumberFilterBuilder({
-        name: 'Leeftijd',
+        name: $t(`Leeftijd`),
         key: 'age',
     }),
     new DateFilterBuilder({
-        name: 'Geboortedatum',
+        name: $t(`Geboortedatum`),
         key: 'birthDay',
     }),
     new MultipleChoiceFilterBuilder({
-        name: 'Gender',
+        name: $t(`Gender`),
         options: [
-            new MultipleChoiceUIFilterOption('Vrouw', Gender.Female),
-            new MultipleChoiceUIFilterOption('Man', Gender.Male),
-            new MultipleChoiceUIFilterOption('Andere', Gender.Other),
+            new MultipleChoiceUIFilterOption($t(`Vrouw`), Gender.Female),
+            new MultipleChoiceUIFilterOption($t(`Man`), Gender.Male),
+            new MultipleChoiceUIFilterOption($t(`Andere`), Gender.Other),
         ],
         wrapper: {
             gender: {
@@ -85,23 +85,23 @@ export function useMemberWithRegistrationsBlobFilterBuilders() {
 
         if (recordConfiguration.birthDay) {
             all.push(new DateFilterBuilder({
-                name: 'Geboortedatum',
+                name: $t(`Geboortedatum`),
                 key: 'birthDay',
             }));
 
             all.push(new NumberFilterBuilder({
-                name: 'Leeftijd',
+                name: $t(`Leeftijd`),
                 key: 'age',
             }));
         }
 
         if (recordConfiguration.gender) {
             all.push(new MultipleChoiceFilterBuilder({
-                name: 'Gender',
+                name: $t(`Gender`),
                 options: [
-                    new MultipleChoiceUIFilterOption('Vrouw', Gender.Female),
-                    new MultipleChoiceUIFilterOption('Man', Gender.Male),
-                    new MultipleChoiceUIFilterOption('Andere', Gender.Other),
+                    new MultipleChoiceUIFilterOption($t(`Vrouw`), Gender.Female),
+                    new MultipleChoiceUIFilterOption($t(`Man`), Gender.Male),
+                    new MultipleChoiceUIFilterOption($t(`Andere`), Gender.Other),
                 ],
                 wrapper: {
                     gender: {
@@ -134,25 +134,25 @@ export function useRegisterItemFilterBuilders() {
     return (group: Group) => {
         const all: UIFilterBuilders = [
             new NumberFilterBuilder({
-                name: 'Leeftijd',
+                name: $t(`Leeftijd`),
                 key: 'age',
                 wrapper: {
                     member: FilterWrapperMarker,
                 },
             }),
             new DateFilterBuilder({
-                name: 'Geboortedatum',
+                name: $t(`Geboortedatum`),
                 key: 'birthDay',
                 wrapper: {
                     member: FilterWrapperMarker,
                 },
             }),
             new MultipleChoiceFilterBuilder({
-                name: 'Gender',
+                name: $t(`Gender`),
                 options: [
-                    new MultipleChoiceUIFilterOption('Vrouw', Gender.Female),
-                    new MultipleChoiceUIFilterOption('Man', Gender.Male),
-                    new MultipleChoiceUIFilterOption('Andere', Gender.Other),
+                    new MultipleChoiceUIFilterOption($t(`Vrouw`), Gender.Female),
+                    new MultipleChoiceUIFilterOption($t(`Man`), Gender.Male),
+                    new MultipleChoiceUIFilterOption($t(`Andere`), Gender.Other),
                 ],
                 wrapper: {
                     member: {
@@ -167,7 +167,7 @@ export function useRegisterItemFilterBuilders() {
         // Add price filter
         all.push(
             new MultipleChoiceFilterBuilder({
-                name: 'Tarief',
+                name: $t(`Tarief`),
                 options: [
                     ...group.settings.prices.map((price) => {
                         return new MultipleChoiceUIFilterOption(price.name, price.id);
@@ -465,8 +465,8 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
                 new MultipleChoiceFilterBuilder({
                     name: $t('87d9975e-d0ac-41d4-8472-dedcfaa571cb'),
                     options: [
-                        new MultipleChoiceUIFilterOption('Met actieve proefperiode', true),
-                        new MultipleChoiceUIFilterOption('Zonder proefperiode', false),
+                        new MultipleChoiceUIFilterOption($t(`Met actieve proefperiode`), true),
+                        new MultipleChoiceUIFilterOption($t(`Zonder proefperiode`), false),
                     ],
                     wrapFilter: (f: StamhoofdFilter) => {
                         const choices = Array.isArray(f) ? f : [f];
@@ -1103,9 +1103,9 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                     new MultipleChoiceFilterBuilder({
                         name: financialSupportSettings.financialSupportSettings.value.title,
                         options: [
-                            new MultipleChoiceUIFilterOption('Ingeschakeld', true),
-                            new MultipleChoiceUIFilterOption('Uitgeschakeld', false),
-                            new MultipleChoiceUIFilterOption('Onbepaald', null),
+                            new MultipleChoiceUIFilterOption($t(`Ingeschakeld`), true),
+                            new MultipleChoiceUIFilterOption($t(`Uitgeschakeld`), false),
+                            new MultipleChoiceUIFilterOption($t(`Onbepaald`), null),
                         ],
                         wrapper: {
                             'details.requiresFinancialSupport': {
@@ -1118,8 +1118,8 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
 
             all.push(
                 new GroupUIFilterBuilder({
-                    name: 'huidige inschrijving',
-                    description: 'Filter op leden die een actieve inschrijving heeft die aan deze voorwaarden voldoet.',
+                    name: $t(`huidige inschrijving`),
+                    description: $t(`Filter op leden die een actieve inschrijving heeft die aan deze voorwaarden voldoet.`),
                     builders: registrationFilters.value.filter(f => f.name !== 'Werkjaar'),
                     wrapper: {
                         registrations: {
@@ -1229,8 +1229,8 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
 
                 all.push(
                     new GroupUIFilterBuilder({
-                        name: 'historische functie',
-                        description: 'Filter op leden die een functie hadden die aan deze voorwaarden voldoet.',
+                        name: $t(`historische functie`),
+                        description: $t(`Filter op leden die een functie hadden die aan deze voorwaarden voldoet.`),
                         builders: responsibilitiesFilters,
                         wrapper: {
                             responsibilities: {
@@ -1272,12 +1272,12 @@ checkoutUIFilterBuilders.unshift(
 
 export const cachedOutstandingBalanceUIFilterBuilders: UIFilterBuilders = [
     new NumberFilterBuilder({
-        name: 'Openstaand bedrag',
+        name: $t(`Openstaand bedrag`),
         type: NumberFilterFormat.Currency,
         key: 'amountOpen',
     }),
     new NumberFilterBuilder({
-        name: 'Bedrag in verwerking',
+        name: $t(`Bedrag in verwerking`),
         type: NumberFilterFormat.Currency,
         key: 'amountPending',
     }),
@@ -1308,19 +1308,19 @@ cachedOutstandingBalanceUIFilterBuilders.unshift(
 
 const organizationMemberUIFilterBuilders: UIFilterBuilders = [
     new StringFilterBuilder({
-        name: 'Naam',
+        name: $t(`Naam`),
         key: 'name',
     }),
     new StringFilterBuilder({
-        name: 'Voornaam',
+        name: $t(`Voornaam`),
         key: 'firstName',
     }),
     new StringFilterBuilder({
-        name: 'Achternaam',
+        name: $t(`Achternaam`),
         key: 'lastName',
     }),
     new StringFilterBuilder({
-        name: 'E-mailadres',
+        name: $t(`E-mailadres`),
         key: 'email',
     }),
 ];
@@ -1342,17 +1342,17 @@ export function useGetOrganizationUIFilterBuilders() {
     const getOrganizationUIFilterBuilders = (user: User | null) => {
         const all = [
             new StringFilterBuilder({
-                name: 'Naam',
+                name: $t(`Naam`),
                 key: 'name',
             }),
 
             new StringFilterBuilder({
-                name: 'Gemeente',
+                name: $t(`Gemeente`),
                 key: 'city',
             }),
 
             new StringFilterBuilder({
-                name: 'Postcode',
+                name: $t(`Postcode`),
                 key: 'postalCode',
             }),
 
@@ -1362,7 +1362,7 @@ export function useGetOrganizationUIFilterBuilders() {
             }),
 
             new GroupUIFilterBuilder({
-                name: 'Leden',
+                name: $t(`Leden`),
                 description: $t('6bf80a05-84b0-47ba-ad41-66e2a106669b'),
                 builders: organizationMemberUIFilterBuilders,
                 wrapper: {
@@ -1372,10 +1372,10 @@ export function useGetOrganizationUIFilterBuilders() {
                 },
             }),
             new MultipleChoiceFilterBuilder({
-                name: 'Actief',
+                name: $t(`Actief`),
                 options: [
-                    new MultipleChoiceUIFilterOption('Actief', 1),
-                    new MultipleChoiceUIFilterOption('Inactief', 0),
+                    new MultipleChoiceUIFilterOption($t(`Actief`), 1),
+                    new MultipleChoiceUIFilterOption($t(`Inactief`), 0),
                 ],
                 wrapper: {
                     active: {
@@ -1404,7 +1404,7 @@ export function useGetOrganizationUIFilterBuilders() {
 
             all.push(
                 new MultipleChoiceFilterBuilder({
-                    name: 'Voltooide vlagmomenten',
+                    name: $t(`Voltooide vlagmomenten`),
                     multipleChoiceConfiguration: {
                         isSubjectPlural: true,
                         mode: MultipleChoiceUIFilterMode.And,
@@ -1542,9 +1542,9 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
     const all: UIFilterBuilder<UIFilter>[] = [];
 
     const organizationFilter = new MultipleChoiceFilterBuilder({
-        name: 'Lokale groep',
+        name: $t(`Lokale groep`),
         options: [
-            new MultipleChoiceUIFilterOption('Nationale activiteiten', null),
+            new MultipleChoiceUIFilterOption($t(`Nationale activiteiten`), null),
             ...organizations.map(org => new MultipleChoiceUIFilterOption(org.name, org.id)),
         ],
         wrapper: {
@@ -1556,9 +1556,9 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
     all.push(organizationFilter);
 
     const tagsFilter = new MultipleChoiceFilterBuilder({
-        name: 'Regio',
+        name: $t(`Regio`),
         options: [
-            new MultipleChoiceUIFilterOption('Alles', null),
+            new MultipleChoiceUIFilterOption($t(`Alles`), null),
             ...platform.config.tags.map(tag => new MultipleChoiceUIFilterOption(tag.name, tag.id)),
         ],
         wrapper: {
@@ -1573,9 +1573,9 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
     const allTags = organizations.flatMap(organization => organization.meta.tags);
 
     const defaultAgeGroupFilter = new MultipleChoiceFilterBuilder({
-        name: 'Standaard leeftijdsgroep',
+        name: $t(`Standaard leeftijdsgroep`),
         options: [
-            new MultipleChoiceUIFilterOption('Iedereen', null),
+            new MultipleChoiceUIFilterOption($t(`Iedereen`), null),
             ...platform.config.defaultAgeGroups.filter(defaultAgeGroup => defaultAgeGroup.isEnabledForTags(allTags)).map(g => new MultipleChoiceUIFilterOption(g.name, g.id)),
         ],
         wrapper: {
@@ -1587,10 +1587,10 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
     all.push(defaultAgeGroupFilter);
 
     const groupFilter = new MultipleChoiceFilterBuilder({
-        name: 'Inschrijvingsgroep',
+        name: $t(`Inschrijvingsgroep`),
         allowCreation: organizations.length > 0,
         options: [
-            new MultipleChoiceUIFilterOption('Iedereen', null),
+            new MultipleChoiceUIFilterOption($t(`Iedereen`), null),
             ...organizations
                 .flatMap(organization => organization.period.getCategoryTree({ permissions }).getAllGroups().map((g) => {
                     return new MultipleChoiceUIFilterOption((organizations.length > 1 ? (organization.name + ' - ') : '') + g.settings.name, g.id);
@@ -1606,7 +1606,7 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
 
     if (app !== 'registration') {
         const typeFilter = new MultipleChoiceFilterBuilder({
-            name: 'Type',
+            name: $t(`Type`),
             options: [
                 ...platform.config.eventTypes.map(type => new MultipleChoiceUIFilterOption(type.name, type.id)),
             ],
@@ -1634,7 +1634,7 @@ export function useAuditLogUIFilterBuilders() {
     const all: UIFilterBuilder<UIFilter>[] = [];
 
     const typeFilter = new MultipleChoiceFilterBuilder({
-        name: 'Type',
+        name: $t(`Type`),
         options: [
             ...Object.values(AuditLogType).map(type => new MultipleChoiceUIFilterOption(getAuditLogTypeName(type), type)),
         ],
@@ -1663,7 +1663,7 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
             key: 'number',
         }),
         new MultipleChoiceFilterBuilder({
-            name: 'Status',
+            name: $t(`Status`),
             options: Object.values(OrderStatus)
                 .filter(s => s !== OrderStatus.Deleted)
                 .map((status) => {
@@ -1676,24 +1676,24 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
             },
         }),
         new StringFilterBuilder({
-            name: 'Naam',
+            name: $t(`Naam`),
             key: 'name',
         }),
         new StringFilterBuilder({
-            name: 'E-mailadres',
+            name: $t(`E-mailadres`),
             key: 'email',
         }),
     ];
 
     if (preview.meta.phoneEnabled) {
         builders.push(new StringFilterBuilder({
-            name: 'Telefoonnummer',
+            name: $t(`Telefoonnummer`),
             key: 'phone',
         }));
     }
 
     builders.push(new MultipleChoiceFilterBuilder({
-        name: 'Betaalmethode',
+        name: $t(`Betaalmethode`),
         options: Object.values(PaymentMethod).map((paymentMethod) => {
             return new MultipleChoiceUIFilterOption(PaymentMethodHelper.getNameCapitalized(paymentMethod), paymentMethod);
         }),
@@ -1708,7 +1708,7 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
 
     if (distinctCheckoutMethods.length > 1) {
         builders.push(new MultipleChoiceFilterBuilder({
-            name: 'Methode',
+            name: $t(`Methode`),
             options: distinctCheckoutMethods.map((checkoutMethod) => {
                 return new MultipleChoiceUIFilterOption(Formatter.capitalizeFirstLetter(CheckoutMethodTypeHelper.getName(checkoutMethod)), checkoutMethod);
             }),
@@ -1722,16 +1722,16 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
 
     builders.push(
         new DateFilterBuilder({
-            name: 'Besteldatum',
+            name: $t(`Besteldatum`),
             key: 'validAt',
         }),
         new NumberFilterBuilder({
-            name: 'Bedrag',
+            name: $t(`Bedrag`),
             key: 'totalPrice',
             type: NumberFilterFormat.Currency,
         }),
         new NumberFilterBuilder({
-            name: 'Aantal',
+            name: $t(`Aantal`),
             key: 'amount',
         }),
     );
@@ -1747,7 +1747,7 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
     if (dateCount > 1) {
         builders.push(
             new DateFilterBuilder({
-                name: (hasDelivery && nonDeliveryCount > 0) ? 'Afhaal/leverdatum' : (hasDelivery ? 'Leverdatum' : 'Afhaaldatum'),
+                name: (hasDelivery && nonDeliveryCount > 0) ? $t(`Afhaal/leverdatum`) : (hasDelivery ? $t(`Leverdatum`) : $t(`Afhaaldatum`)),
                 key: 'timeSlotDate',
             }));
     }
@@ -1757,14 +1757,14 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
         // todo: maybe group
         builders.push(
             new NumberFilterBuilder({
-                name: 'Tijdstip einde',
+                name: $t(`Tijdstip einde`),
                 key: 'timeSlotEndTime',
                 type: NumberFilterFormat.TimeMinutes,
             }));
 
         builders.push(
             new NumberFilterBuilder({
-                name: 'Tijdstip start',
+                name: $t(`Tijdstip start`),
                 key: 'timeSlotStartTime',
                 type: NumberFilterFormat.TimeMinutes,
             }));
@@ -1778,19 +1778,19 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
 export function getDocumentsUIFilterBuilders() {
     const builders: UIFilterBuilders = [
         new StringFilterBuilder({
-            name: 'Volgnummer',
+            name: $t(`Volgnummer`),
             key: 'id',
         }),
         new NumberFilterBuilder({
-            name: 'Nummer',
+            name: $t(`Nummer`),
             key: 'number',
         }),
         new StringFilterBuilder({
-            name: 'Beschrijving',
+            name: $t(`Beschrijving`),
             key: 'description',
         }),
         new MultipleChoiceFilterBuilder({
-            name: 'status',
+            name: $t(`status`),
             options: Object.values(DocumentStatus).map((status) => {
                 return new MultipleChoiceUIFilterOption(
                     Formatter.capitalizeFirstLetter(DocumentStatusHelper.getName(status)),

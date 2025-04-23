@@ -1,17 +1,16 @@
 <template>
     <div id="parent-view" class="st-view">
-        <STNavigationBar title="Kies inschrijvingsgroepen" />
+        <STNavigationBar :title="$t(`Kies inschrijvingsgroepen`)" />
 
         <main>
             <h1>
-                Kies één of meerdere inschrijvingsgroepen
+                {{ $t('Kies één of meerdere inschrijvingsgroepen') }}
             </h1>
 
             <STErrorsDefault :error-box="errorBox" />
 
             <div v-for="category in categoryTree.categories" :key="category.id" class="container">
-                <hr>
-                <h2>{{ category.settings.name }}</h2>
+                <hr><h2>{{ category.settings.name }}</h2>
                 <STList>
                     <STListItem v-for="group in category.groups" :key="group.id" :selectable="true" element-name="label" class="right-stack left-center">
                         <template #left>
@@ -27,8 +26,7 @@
             <template v-if="allowArchived">
                 <Spinner v-if="loadingGroups" />
                 <template v-else-if="archivedGroups.length">
-                    <hr>
-                    <h2>Archief</h2>
+                    <hr><h2>{{ $t('Archief') }}</h2>
 
                     <STList>
                         <STListItem v-for="group in archivedGroups" :key="group.id" :selectable="true" element-name="label" class="right-stack left-center">
@@ -44,7 +42,7 @@
             </template>
 
             <p v-if="categoryTree.categories.length === 0 && archivedGroups.length === 0 && !loadingGroups" class="info-box">
-                Geen inschrijvingsgroepen beschikbaar om te selecteren.
+                {{ $t('Geen inschrijvingsgroepen beschikbaar om te selecteren.') }}
             </p>
         </main>
 
@@ -52,7 +50,7 @@
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" @click="save">
-                        Opslaan
+                        {{ $t('Opslaan') }}
                     </button>
                 </LoadingButton>
             </template>
@@ -63,9 +61,9 @@
 <script lang="ts">
 import { Request } from '@simonbackx/simple-networking';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { CenteredMessage, Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from '@stamhoofd/components';
 import { Group } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 @Component({
     components: {

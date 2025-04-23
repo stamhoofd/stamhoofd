@@ -22,10 +22,10 @@
                 <div v-if="index < filters.length - 1" class="group-ui-filter-mode" @click.stop>
                     <Dropdown :model-value="filter.mode" @update:model-value="setFilterMode($event, index)">
                         <option :value="GroupUIFilterMode.And">
-                            En
+                            {{ $t('En') }}
                         </option>
                         <option :value="GroupUIFilterMode.Or">
-                            Of
+                            {{ $t('Of') }}
                         </option>
                     </Dropdown>
                 </div>
@@ -39,28 +39,27 @@
         </template>
     </STList>
     <p v-else>
-        Geen filters
+        {{ $t('Geen filters') }}
     </p>
 </template>
 
-
 <script lang="ts" setup>
-import { ComponentWithProperties, useShow } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
 
-import { computed } from "vue";
-import Dropdown from "../../inputs/Dropdown.vue";
-import { ContextMenu, ContextMenuItem } from "../../overlays/ContextMenu";
-import { GroupUIFilter, GroupUIFilterMode } from "../GroupUIFilter";
-import { StyledDescriptionChoice, UIFilter } from "../UIFilter";
-import UIFilterEditor from "../UIFilterEditor.vue";
+import { computed } from 'vue';
+import Dropdown from '../../inputs/Dropdown.vue';
+import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
+import { GroupUIFilter, GroupUIFilterMode } from '../GroupUIFilter';
+import { StyledDescriptionChoice, UIFilter } from '../UIFilter';
+import UIFilterEditor from '../UIFilterEditor.vue';
 
 const props = defineProps<{
-    filter: GroupUIFilter
+    filter: GroupUIFilter;
 }>();
 const show = useShow();
 
 const emit = defineEmits<{
-    replace: [patch: UIFilter|null]
+    replace: [patch: UIFilter | null];
 }>();
 const filters = computed(() => props.filter.filters);
 
@@ -70,8 +69,8 @@ const draggableFilters = computed({
         const clone = props.filter.clone();
         clone.filters = value;
         emit('replace', clone.flatten());
-    }
-})
+    },
+});
 
 function getSelectedChoiceText(choices: StyledDescriptionChoice[]) {
     return choices.find(c => c.isSelected())?.text;
@@ -79,17 +78,17 @@ function getSelectedChoiceText(choices: StyledDescriptionChoice[]) {
 
 async function showChoices(event: MouseEvent, choices: StyledDescriptionChoice[]) {
     const menu = new ContextMenu([
-        choices.map(choice => {
+        choices.map((choice) => {
             return new ContextMenuItem({
                 name: choice.text,
-                action: choice.action
-            })
-        })
-    ])
+                action: choice.action,
+            });
+        }),
+    ]);
 
     await menu.show({
-        button: event.currentTarget as HTMLElement
-    })
+        button: event.currentTarget as HTMLElement,
+    });
 }
 
 async function editFilter(index: number, filter: UIFilter) {
@@ -100,17 +99,17 @@ async function editFilter(index: number, filter: UIFilter) {
                 saveHandler: (f: UIFilter) => {
                     const ff = f.flatten();
                     if (!ff) {
-                        filters.value.splice(index, 1)
+                        filters.value.splice(index, 1);
                         return;
                     }
-                    filters.value.splice(index, 1, ff)
+                    filters.value.splice(index, 1, ff);
                 },
                 deleteHandler: () => {
                     deleteFilter(index, filter);
-                }
-            })
-        ]
-    })
+                },
+            }),
+        ],
+    });
 }
 
 function deleteFilter(index: number, filter: UIFilter) {
@@ -119,7 +118,7 @@ function deleteFilter(index: number, filter: UIFilter) {
     emit('replace', clone.flatten());
 }
 
-function setFilter(index: number, oldFilter: UIFilter, newFilter: UIFilter|null) {
+function setFilter(index: number, oldFilter: UIFilter, newFilter: UIFilter | null) {
     if (!newFilter) {
         deleteFilter(index, oldFilter);
         return;
@@ -143,7 +142,7 @@ function setFilterMode(mode: GroupUIFilterMode, index: number) {
         const cloned = props.filter.clone();
         cloned.mode = mode;
         emit('replace', cloned.flatten());
-        return
+        return;
     }
 
     const item1 = filters.value[index];
@@ -153,7 +152,7 @@ function setFilterMode(mode: GroupUIFilterMode, index: number) {
         return;
     }
 
-    const newChildGroup = props.filter.clone()
+    const newChildGroup = props.filter.clone();
     newChildGroup.filters = [item1, item2];
     newChildGroup.mode = mode;
 
@@ -179,7 +178,7 @@ function setFilterMode(mode: GroupUIFilterMode, index: number) {
     transition: opacity 0.2s;
 
     .sortable-drag & {
-        
+
         opacity: 0;
     }
 

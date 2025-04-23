@@ -1,60 +1,33 @@
 <template>
-    <SaveView :loading-view="!ssoConfiguration" :loading="saving" title="Single-Sign-On" :disabled="!hasChanges" :error-box="errors.errorBox" @save="save">
+    <SaveView :loading-view="!ssoConfiguration" :loading="saving" :disabled="!hasChanges" :error-box="errors.errorBox" :title="$t(`Single-Sign-On`)" @save="save">
         <h1>
-            Single-Sign-On ({{ provider }})
+            {{ $t('Single-Sign-On (') }}{{ provider }})
         </h1>
         <p>
-            Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Stamhoofd. Voor Microsoft kan je <a href="https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app" target="_blank" class="inline-link">deze</a> handleiding volgen.
+            {{ $t('Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Stamhoofd. Voor Microsoft kan je') }} <a href="https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app" target="_blank" class="inline-link">{{ $t('deze') }}</a> {{ $t('handleiding volgen.') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox title="Issuer" error-fields="issuer" :error-box="errors.errorBox" class="max">
-            <input
-                ref="firstInput"
-                v-model="issuer"
-                class="input"
-                type="text"
-                placeholder="bv. https://login.microsoftonline.com/contoso.onmicrosoft.com/v2.0"
-                autocomplete="off"
-            >
+        <STInputBox error-fields="issuer" :error-box="errors.errorBox" class="max" :title="$t(`Issuer`)">
+            <input ref="firstInput" v-model="issuer" class="input" type="text" autocomplete="off" :placeholder="$t(`bv. https://login.microsoftonline.com/contoso.onmicrosoft.com/v2.0`)">
         </STInputBox>
 
-        <STInputBox title="Client ID" error-fields="clientId" :error-box="errors.errorBox" class="max">
-            <input
-                v-model="clientId"
-                class="input"
-                type="text"
-                placeholder="bv. 12345678-1234-1234-1234-123456789012"
-                autocomplete="off"
-            >
+        <STInputBox error-fields="clientId" :error-box="errors.errorBox" class="max" :title="$t(`Client ID`)">
+            <input v-model="clientId" class="input" type="text" autocomplete="off" :placeholder="$t(`bv. 12345678-1234-1234-1234-123456789012`)">
         </STInputBox>
 
-        <STInputBox title="Client Secret" error-fields="clientSecret" :error-box="errors.errorBox" class="max">
-            <input
-                v-model="clientSecret"
-                class="input"
-                type="text"
-                placeholder="bv. 12345678-1234-1234-1234-123456789012"
-                autocomplete="off"
-            >
+        <STInputBox error-fields="clientSecret" :error-box="errors.errorBox" class="max" :title="$t(`Client Secret`)">
+            <input v-model="clientSecret" class="input" type="text" autocomplete="off" :placeholder="$t(`bv. 12345678-1234-1234-1234-123456789012`)">
         </STInputBox>
 
-        <STInputBox title="Redirect URI" :error-box="errors.errorBox" class="max">
-            <input
-                v-model="redirectUri"
-                :placeholder="defaultRedirectUri"
-                class="input"
-                type="text"
-                autocomplete="off"
-            >
-
-            <template #right>
+        <STInputBox :error-box="errors.errorBox" class="max" :title="$t(`Redirect URI`)">
+            <input v-model="redirectUri" :placeholder="defaultRedirectUri" class="input" type="text" autocomplete="off"><template #right>
                 <button v-copyable="redirectUri || defaultRedirectUri" class="button icon copy small" type="button" />
             </template>
         </STInputBox>
         <p class="style-description-small">
-            De redirect URI behoud je best op de voorgestelde waarde.
+            {{ $t('De redirect URI behoud je best op de voorgestelde waarde.') }}
         </p>
     </SaveView>
 </template>
@@ -62,9 +35,9 @@
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, Toast, useContext, useErrors, useOrganization, usePatch, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, Toast, useContext, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking';
 import { LoginProviderType, OpenIDClientConfiguration } from '@stamhoofd/structures';
 import { computed, onMounted, Ref, ref } from 'vue';
 

@@ -25,7 +25,7 @@ export class BalanceItemCartItem extends AutoEncoder {
             if (!found) {
                 throw new SimpleError({
                     code: 'not_found',
-                    message: 'Eén van de openstaande bedragen is niet meer beschikbaar.',
+                    message: $t(`Eén van de openstaande bedragen is niet meer beschikbaar.`),
                 });
             }
             this.item = found;
@@ -36,7 +36,7 @@ export class BalanceItemCartItem extends AutoEncoder {
         if (maxPrice === 0) {
             throw new SimpleError({
                 code: 'not_found',
-                message: 'Eén van de openstaande bedragen is ondertussen al betaald.',
+                message: $t(`Eén van de openstaande bedragen is ondertussen al betaald.`),
             });
         }
 

@@ -1,12 +1,11 @@
 <template>
     <div class="hover-box container">
-        <hr>
-        <h2 class="style-with-button">
+        <hr><h2 class="style-with-button">
             <div>{{ emergencyContact.title || emergencyContact.name }}</div>
         </h2>
 
         <dl class="details-grid hover">
-            <dt>Naam</dt>
+            <dt>{{ $t('Naam') }}</dt>
             <dd v-copyable>
                 {{ emergencyContact.name }}
             </dd>
@@ -21,15 +20,14 @@
 
 <script setup lang="ts">
 import { EmergencyContact, PlatformMember } from '@stamhoofd/structures';
-import { useCountry } from '../../../hooks';
 
 defineOptions({
-    inheritAttrs: false
-})
+    inheritAttrs: false,
+});
 
 defineProps<{
-    emergencyContact: EmergencyContact,
-    member: PlatformMember
-}>()
+    emergencyContact: EmergencyContact;
+    member: PlatformMember;
+}>();
 
 </script>

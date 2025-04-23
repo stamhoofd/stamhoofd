@@ -1,14 +1,13 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Gegevens nakijken" />
+        <STNavigationBar :title="$t(`Gegevens nakijken`)" />
 
         <main>
-            <h1>Gegevens nakijken</h1>
+            <h1>{{ $t('Gegevens nakijken') }}</h1>
 
             <template v-if="members.length > 0">
-                <hr>
-                <h2>
-                    <div>Leden</div>
+                <hr><h2>
+                    <div>{{ $t('Leden') }}</div>
                 </h2>
 
                 <STList class="illustration-list">
@@ -38,13 +37,12 @@
                 </STList>
             </template>
             <p v-else class="info-box">
-                Er zijn nog geen leden gekoppeld met jouw account.
+                {{ $t('Er zijn nog geen leden gekoppeld met jouw account.') }}
             </p>
 
             <template v-if="parents.length">
-                <hr>
-                <h2>Ouders</h2>
-                <p>Ouders hebben automatisch toegang tot de gegevens van hun (minderjarige) kinderen. Vul dus de juiste e-mailadresen in voor elke ouder, zo ontvangt iedereen ook belangrijke communicatie.</p>
+                <hr><h2>{{ $t('Ouders') }}</h2>
+                <p>{{ $t('Ouders hebben automatisch toegang tot de gegevens van hun (minderjarige) kinderen. Vul dus de juiste e-mailadresen in voor elke ouder, zo ontvangt iedereen ook belangrijke communicatie.') }}</p>
 
                 <STList class="illustration-list">
                     <STListItem v-for="parent in parents" :key="parent.id" class="right-stack" :selectable="true" @click.stop="editParent(parent)">
@@ -73,8 +71,7 @@
             </template>
 
             <template v-if="addresses.length">
-                <hr>
-                <h2>Adressen</h2>
+                <hr><h2>{{ $t('Adressen') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem v-for="address in addresses" :key="address.toString()" class="right-stack" :selectable="false">
@@ -98,12 +95,12 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { EditParentView, MemberIcon, NavigationActions, useEditMember, usePlatformFamilyManager } from '@stamhoofd/components';
+import { useMemberManager } from '@stamhoofd/networking';
 import { Address, Parent, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { useMemberManager } from '@stamhoofd/networking';
 
 const memberManager = useMemberManager();
-const present = usePresent()
+const present = usePresent();
 const platformFamilyManager = usePlatformFamilyManager();
 
 const members = computed(() => memberManager.family.members);
@@ -112,7 +109,7 @@ const addresses = computed(() => memberManager.family.addresses);
 const editMember = useEditMember();
 
 async function checkAllMemberData(member: PlatformMember) {
-    await editMember(member, {title: 'Gegevens nakijken'})
+    await editMember(member, { title: 'Gegevens nakijken' });
 }
 
 function editAddress(_address: Address) {
@@ -130,12 +127,12 @@ async function editParent(parent: Parent) {
                 saveHandler: async (navigate: NavigationActions) => {
                     await platformFamilyManager.save(clone.members);
                     memberManager.family.copyFromClone(clone);
-                    await navigate.pop({force: true});
-                }
-            })
+                    await navigate.pop({ force: true });
+                },
+            }),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 </script>

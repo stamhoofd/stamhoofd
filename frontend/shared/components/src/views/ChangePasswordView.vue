@@ -1,22 +1,20 @@
 <template>
-    <SaveView class="auto" data-submit-last-field title="Wachtwoord wijzigen" save-icon="lock" @save="submit">
+    <SaveView class="auto" data-submit-last-field save-icon="lock" :title="$t(`Wachtwoord wijzigen`)" @save="submit">
         <h1 v-if="$context.user?.hasPassword">
-            Wachtwoord wijzigen
+            {{ $t('Wachtwoord wijzigen') }}
         </h1>
         <h1 v-else>
-            Wachtwoord instellen
+            {{ $t('Wachtwoord instellen') }}
         </h1>
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <input id="username" style="display: none;" type="text" name="username" autocomplete="username" :value="email">
-
-        <STInputBox title="Kies een wachtwoord">
-            <input id="new-password" v-model="password" class="input" enterkeyhint="next" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
+        <input id="username" style="display: none;" type="text" name="username" autocomplete="username" :value="email"><STInputBox :title="$t(`Kies een wachtwoord`)">
+            <input id="new-password" v-model="password" class="input" enterkeyhint="next" autocomplete="new-password" type="password" :placeholder="$t(`Kies een nieuw wachtwoord`)">
         </STInputBox>
 
-        <STInputBox title="Herhaal wachtwoord">
-            <input id="confirm-password" v-model="passwordRepeat" enterkeyhint="go" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
+        <STInputBox :title="$t(`Herhaal wachtwoord`)">
+            <input id="confirm-password" v-model="passwordRepeat" enterkeyhint="go" class="input" autocomplete="new-password" type="password" :placeholder="$t(`Herhaal nieuw wachtwoord`)">
         </STInputBox>
 
         <PasswordStrength v-model="password" />

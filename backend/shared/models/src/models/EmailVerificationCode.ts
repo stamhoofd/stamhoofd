@@ -217,7 +217,7 @@ export class EmailVerificationCode extends QueryableModel {
             throw new SimpleError({
                 code: 'too_many_attempts',
                 message: 'Too many attempts',
-                human: 'Je hebt de code te veel foutief ingegeven. Verstuur eerst een nieuwe code voor je opnieuw probeert.',
+                human: $t(`Je hebt de code te veel foutief ingegeven. Verstuur eerst een nieuwe code voor je opnieuw probeert.`),
                 statusCode: 429,
             });
         }
@@ -238,7 +238,7 @@ export class EmailVerificationCode extends QueryableModel {
             throw new SimpleError({
                 code: 'too_many_attempts',
                 message: 'Too many attempts',
-                human: 'Je hebt de code te veel foutief ingegeven. Verstuur eerst een nieuwe code voor je opnieuw probeert.',
+                human: $t(`Je hebt de code te veel foutief ingegeven. Verstuur eerst een nieuwe code voor je opnieuw probeert.`),
                 statusCode: 429,
             });
         }

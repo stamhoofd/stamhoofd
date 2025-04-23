@@ -1,14 +1,14 @@
 <template>
-    <SaveView :loading-view="loading" :error-box="errors.errorBox" class="st-view background" title="Rollen" :loading="saving" :disabled="!hasChanges" @save="save">
+    <SaveView :loading-view="loading" :error-box="errors.errorBox" class="st-view background" :loading="saving" :disabled="!hasChanges" :title="$t(`Rollen`)" @save="save">
         <template #buttons>
             <button class="button icon add navigation" aria-label="Nieuwe beheerder" type="button" @click="addRole" />
         </template>
 
-        <h1>Externe beheerdersrollen</h1>
+        <h1>{{ $t('Externe beheerdersrollen') }}</h1>
         <p>{{ $t('9021f6b0-d1ae-422b-9651-48c7f5383b0b') }}</p>
 
         <p class="info-box">
-            Het concept van leden, beheerders en accounts kan verwarrend zijn. Het verschil zit hem in het feit dat leden beheerd kunnen worden door meerdere accounts (= een e-mailadres met wachtwoord waarmee je kan inloggen). Rechten en rollen worden aan accounts toegekend, terwijl je functies kan toekennen aan leden (= iemand die is ingeschreven voor een leeftijdsgroep).
+            {{ $t('Het concept van leden, beheerders en accounts kan verwarrend zijn. Het verschil zit hem in het feit dat leden beheerd kunnen worden door meerdere accounts (= een e-mailadres met wachtwoord waarmee je kan inloggen). Rechten en rollen worden aan accounts toegekend, terwijl je functies kan toekennen aan leden (= iemand die is ingeschreven voor een leeftijdsgroep).') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -23,10 +23,10 @@
                 </template>
 
                 <h2 class="style-title-list">
-                    Hoofdbeheerder
+                    {{ $t('Hoofdbeheerder') }}
                 </h2>
                 <p class="style-description-small">
-                    Volledige toegang
+                    {{ $t('Volledige toegang') }}
                 </p>
 
                 <template #right>
@@ -55,7 +55,7 @@
                                 {{ getAdminsForRole(role) }}
                             </span>
                             <span v-else class="style-tag warn">
-                                Ongebruikt
+                                {{ $t('Ongebruikt') }}
                             </span>
                             <span class="button icon drag gray" @click.stop @contextmenu.stop />
                             <span class="icon arrow-right-small gray" />

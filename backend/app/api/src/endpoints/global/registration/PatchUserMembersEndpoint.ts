@@ -90,7 +90,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                     throw new SimpleError({
                         code: 'not_allowed',
                         message: 'Cannot override details',
-                        human: 'Er ging iets mis bij het aanpassen van de gegevens van dit lid. Probeer het later opnieuw en neem contact op als het probleem zich blijft voordoen.',
+                        human: $t(`Er ging iets mis bij het aanpassen van de gegevens van dit lid. Probeer het later opnieuw en neem contact op als het probleem zich blijft voordoen.`),
                         field: 'details',
                     });
                 }
@@ -106,7 +106,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 throw new SimpleError({
                     code: 'invalid_data',
                     message: 'No details provided',
-                    human: 'Opgelet! Je gebruikt een oudere versie van de inschrijvingspagina die niet langer wordt ondersteund. Herlaad de website grondig en wis je browser cache.',
+                    human: $t(`Opgelet! Je gebruikt een oudere versie van de inschrijvingspagina die niet langer wordt ondersteund. Herlaad de website grondig en wis je browser cache.`),
                     field: 'details',
                 });
             }
@@ -170,7 +170,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
         if (details.firstName.length < 2) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Voornaam is te kort',
+                message: $t(`Voornaam is te kort`),
                 field: 'firstName',
             });
         }
@@ -178,7 +178,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
         if (details.lastName.length < 2) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Achternaam is te kort',
+                message: $t(`Achternaam is te kort`),
                 field: 'lastName',
             });
         }

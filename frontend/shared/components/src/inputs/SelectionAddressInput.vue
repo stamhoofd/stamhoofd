@@ -1,14 +1,12 @@
 <template>
     <div>
-        <STInputBox v-if="addresses.length > 0" :title="title || 'Kies een adres'" :error-box="errorBox" error-fields="selectedAddress">
+        <STInputBox v-if="addresses.length > 0" :title="title || $t(`Kies een adres`)" :error-box="errorBox" error-fields="selectedAddress">
             <STList>
                 <STListItem v-for="_address in addresses" :key="_address.toString()" element-name="label" :selectable="true" class="left-center address-selection">
                     <template #left>
                         <Radio v-model="selectedAddress" :value="_address" @update:model-value="changeSelected" />
                     </template>
-                    {{ _address.street }} {{ _address.number }}<br>
-                    {{ _address.postalCode }} {{ _address.city }}
-                    <template #right>
+                    {{ _address.street }} {{ _address.number }}<br><template #right>
                         <button class="button icon gray edit" type="button" @click.stop="doEditAddress(_address)" />
                     </template>
                 </STListItem>
@@ -16,11 +14,11 @@
                     <template #left>
                         <Radio v-model="selectedAddress" :value="null" @update:model-value="changeSelected" />
                     </template>
-                    Een ander adres ingeven
+                    {{ $t('Een ander adres ingeven') }}
                 </STListItem>
             </STList>
         </STInputBox>
-        <AddressInput v-if="editingAddress || selectedAddress === null" v-model="editAddress" :title="selectedAddress === null ? (addresses.length > 0 ? 'Nieuw adres' : 'Adres') : 'Adres bewerken'" :validator="internalValidator" :required="false" />
+        <AddressInput v-if="editingAddress || selectedAddress === null" v-model="editAddress" :title="selectedAddress === null ? (addresses.length > 0 ? $t(`Nieuw adres`) : $t(`Adres`)) : $t(`Adres bewerken`)" :validator="internalValidator" :required="false" />
         <STErrorsDefault :error-box="errorBox" />
     </div>
 </template>

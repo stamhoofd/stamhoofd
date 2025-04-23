@@ -1,11 +1,11 @@
 <template>
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
-        <p>Voeg e-mailadressen toe waarop je automatisch een e-mail wilt ontvangen als er nieuwe bestellingen binnen komen. Gebruik deze functie alleen als je geen grote aantallen bestellingen per dag verwacht.</p>
+        <p>{{ $t('Voeg e-mailadressen toe waarop je automatisch een e-mail wilt ontvangen als er nieuwe bestellingen binnen komen. Gebruik deze functie alleen als je geen grote aantallen bestellingen per dag verwacht.') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <EmailInput v-for="n in emailCount" :key="n" :title="'E-mailadres '+n" :model-value="getEmail(n - 1)" placeholder="E-mailadres" :validator="errors.validator" @update:model-value="setEmail(n - 1, $event)">
+        <EmailInput v-for="n in emailCount" :key="n" :title="$t(`E-mailadres`) + ' '+n" :model-value="getEmail(n - 1)" :validator="errors.validator" :placeholder="$t(`E-mailadres`)" @update:model-value="setEmail(n - 1, $event)">
             <template #right>
                 <span v-if="isBlocked(n-1)" v-tooltip="getInvalidEmailDescription(n-1)" class="icon warning yellow" />
                 <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" />
@@ -13,7 +13,7 @@
         </EmailInput>
 
         <p v-if="emailCount === 0" class="info-box">
-            Er zijn nog geen e-mailadressen ingesteld die een e-mail ontvangen bij nieuwe bestellingen.
+            {{ $t('Er zijn nog geen e-mailadressen ingesteld die een e-mail ontvangen bij nieuwe bestellingen.') }}
         </p>
 
         <button v-for="suggestion in suggestions" :key="suggestion" class="button text" type="button" @click="addEmail(suggestion)">
@@ -23,7 +23,7 @@
 
         <button class="button text" type="button" @click="addEmail('')">
             <span class="icon add" />
-            <span>Ander e-mailadres</span>
+            <span>{{ $t('Ander e-mailadres') }}</span>
         </button>
     </SaveView>
 </template>

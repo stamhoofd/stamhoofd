@@ -1,20 +1,20 @@
 <template>
     <div class="container">
-        <STInputBox error-fields="price" title="Leveringskost" :error-box="errorBox">
-            <PriceInput v-model="price" placeholder="Gratis" />
+        <STInputBox error-fields="price" :error-box="errorBox" :title="$t(`Leveringskost`)">
+            <PriceInput v-model="price" :placeholder="$t(`Gratis`)" />
         </STInputBox>
 
         <Checkbox v-model="useMinimumPrice">
-            Andere leveringskost vanaf bestelbedrag
+            {{ $t('Andere leveringskost vanaf bestelbedrag') }}
         </Checkbox>
 
         <div v-if="useMinimumPrice" class="split-inputs">
-            <STInputBox error-fields="minimumPrice" title="Vanaf bestelbedrag" :error-box="errorBox">
-                <PriceInput v-model="minimumPrice" placeholder="€ 0" />
+            <STInputBox error-fields="minimumPrice" :error-box="errorBox" :title="$t(`Vanaf bestelbedrag`)">
+                <PriceInput v-model="minimumPrice" :placeholder="$t(`€ 0`)" />
             </STInputBox>
 
-            <STInputBox error-fields="discountPrice" title="Verminderde leveringskost" :error-box="errorBox">
-                <PriceInput v-model="discountPrice" placeholder="Gratis" />
+            <STInputBox error-fields="discountPrice" :error-box="errorBox" :title="$t(`Verminderde leveringskost`)">
+                <PriceInput v-model="discountPrice" :placeholder="$t(`Gratis`)" />
             </STInputBox>
         </div>
     </div>

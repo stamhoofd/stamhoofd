@@ -1,27 +1,25 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Betalingen" />
+        <STNavigationBar :title="$t(`Betalingen`)" />
 
         <main>
-            <h1>Betalingen</h1>
+            <h1>{{ $t('Betalingen') }}</h1>
 
             <PayableBalanceTable v-for="item in collection.organizations" :key="item.organization.id" :item="item" :show-name="!singleOrganization" />
 
             <template v-if="pendingPayments.length > 0">
-                <hr>
-                <h2>In verwerking</h2>
-                <p>Bij betalingen via overschrijving of domiciliëring kan het even duren voor we een betaling ontvangen en bevestigen. Je kan hier de status opvolgen.</p>
+                <hr><h2>{{ $t('In verwerking') }}</h2>
+                <p>{{ $t('Bij betalingen via overschrijving of domiciliëring kan het even duren voor we een betaling ontvangen en bevestigen. Je kan hier de status opvolgen.') }}</p>
 
                 <STList>
                     <PaymentRow v-for="payment of pendingPayments" :key="payment.id" :payments="pendingPayments" :payment="payment" />
                 </STList>
             </template>
 
-            <hr>
-            <h2>Betalingen</h2>
+            <hr><h2>{{ $t('Betalingen') }}</h2>
 
             <p v-if="succeededPayments.length === 0" class="info-box">
-                Je hebt nog geen betalingen gedaan
+                {{ $t('Je hebt nog geen betalingen gedaan') }}
             </p>
 
             <STList v-else>
@@ -32,15 +30,15 @@
 </template>
 
 <script setup lang="ts">
+import { useRequestOwner } from '@stamhoofd/networking';
 import { DetailedPayableBalanceCollection } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { GlobalEventBus } from '../EventBus';
+import { useVisibilityChange } from '../composables';
 import { Toast } from '../overlays/Toast';
 import PayableBalanceTable from './PayableBalanceTable.vue';
 import PaymentRow from './components/PaymentRow.vue';
-import { useRequestOwner } from '@stamhoofd/networking';
-import { useVisibilityChange } from '../composables';
 
 const props = withDefaults(
     defineProps<{

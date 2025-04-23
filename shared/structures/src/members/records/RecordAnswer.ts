@@ -49,7 +49,7 @@ export class RecordAnswer extends AutoEncoder {
     }
 
     get stringValue() {
-        return 'Onbekend';
+        return $t(`Onbekend`);
     }
 
     get objectValue(): string | number | boolean | null | Date | object {
@@ -208,7 +208,7 @@ export class RecordTextAnswer extends RecordAnswer {
         if (this.settings.required && (this.value === null || this.value.length === 0)) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Dit veld is verplicht',
+                message: $t(`Dit veld is verplicht`),
                 field: 'input',
             });
         }
@@ -217,7 +217,7 @@ export class RecordTextAnswer extends RecordAnswer {
             if (!DataValidator.verifyBelgianNationalNumber(this.value)) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: "'" + (this.value) + "' is geen geldig rijksregisternummer. Je kan dit nummer vinden op de achterkant van de identiteitskaart, in de vorm van JJ.MM.DD-XXX.XX. Kijk na op typefouten.",
+                    message: "'" + (this.value) + $t(`' is geen geldig rijksregisternummer. Je kan dit nummer vinden op de achterkant van de identiteitskaart, in de vorm van JJ.MM.DD-XXX.XX. Kijk na op typefouten.`),
                     field: 'input',
                 });
             }
@@ -251,7 +251,7 @@ export class RecordCheckboxAnswer extends RecordAnswer {
     }
 
     get stringValue() {
-        return this.selected ? 'Aangevinkt' : 'Niet aangevinkt';
+        return this.selected ? $t(`Aangevinkt`) : $t(`Niet aangevinkt`);
     }
 
     get objectValue() {
@@ -260,7 +260,7 @@ export class RecordCheckboxAnswer extends RecordAnswer {
 
     get excelValues() {
         return [{
-            value: this.selected ? (this.comments ? this.comments : 'Ja') : 'Nee',
+            value: this.selected ? (this.comments ? this.comments : $t(`Ja`)) : $t(`Nee`),
             format: null,
         }];
     }
@@ -269,7 +269,7 @@ export class RecordCheckboxAnswer extends RecordAnswer {
         if (this.settings.required && !this.selected) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Dit is verplicht',
+                message: $t(`Dit is verplicht`),
                 field: 'input',
             });
         }
@@ -321,7 +321,7 @@ export class RecordMultipleChoiceAnswer extends RecordAnswer {
         if (this.settings.required && this.selectedChoices.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Duid minstens één keuze aan',
+                message: $t(`Duid minstens één keuze aan`),
                 field: 'input',
             });
         }
@@ -372,7 +372,7 @@ export class RecordChooseOneAnswer extends RecordAnswer {
         if (this.settings.required && this.selectedChoice === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Duid een keuze aan',
+                message: $t(`Duid een keuze aan`),
                 field: 'input',
             });
         }
@@ -399,7 +399,7 @@ export class RecordAddressAnswer extends RecordAnswer {
         if (this.settings.required && this.address === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Verplicht in te vullen',
+                message: $t(`Verplicht in te vullen`),
                 field: 'input',
             });
         }
@@ -451,7 +451,7 @@ export class RecordDateAnswer extends RecordAnswer {
         if (this.settings.required && this.dateValue === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Verplicht in te vullen',
+                message: $t(`Verplicht in te vullen`),
                 field: 'input',
             });
         }
@@ -489,7 +489,7 @@ export class RecordIntegerAnswer extends RecordAnswer {
         if (this.settings.required && (this.value === null)) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Dit veld is verplicht',
+                message: $t(`Dit veld is verplicht`),
                 field: 'input',
             });
         }
@@ -522,7 +522,7 @@ export class RecordImageAnswer extends RecordAnswer {
         if (this.settings.required && this.image === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Verplicht in te vullen',
+                message: $t(`Verplicht in te vullen`),
                 field: 'input',
             });
         }
@@ -553,7 +553,7 @@ export class RecordFileAnswer extends RecordAnswer {
         if (this.settings.required && this.file === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Verplicht in te vullen',
+                message: $t(`Verplicht in te vullen`),
                 field: 'input',
             });
         }

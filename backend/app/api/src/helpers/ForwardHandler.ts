@@ -67,7 +67,7 @@ export class ForwardHandler {
         let defaultEmail: EmailInterfaceRecipient[] = [Email.getWebmasterToEmail()];
         let organizationEmails: EmailInterfaceRecipient[] = [];
         const platform = await Platform.getShared();
-        const extraDescription = 'Dit bericht werd verstuurd naar ' + email + ', en werd automatisch doorgestuurd naar alle beheerders. Stel in ' + platform.config.name + ' de e-mailadressen in om ervoor te zorgen dat antwoorden naar een specifiek e-mailadres worden verstuurd.';
+        const extraDescription = $t(`Dit bericht werd verstuurd naar`) + ' ' + email + $t(`, en werd automatisch doorgestuurd naar alle beheerders. Stel in`) + ' ' + platform.config.name + ' ' + $t(`de e-mailadressen in om ervoor te zorgen dat antwoorden naar een specifiek e-mailadres worden verstuurd.`);
 
         function doBounce() {
             if (!from) {

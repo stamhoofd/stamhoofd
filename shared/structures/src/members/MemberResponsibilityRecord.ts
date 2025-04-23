@@ -42,7 +42,7 @@ export class MemberResponsibilityRecord extends MemberResponsibilityRecordBase {
     getName(member: PlatformMember, includeOrganization = true) {
         let allResponsibilities = member.family.platform.config.responsibilities;
 
-        let suffix = (this.group ? ' van ' + this.group.settings.name : '');
+        let suffix = (this.group ? ' ' + $t(`van`) + ' ' + this.group.settings.name : '');
 
         if (this.organizationId) {
             const organization = member.family.getOrganization(this.organizationId);
@@ -51,11 +51,11 @@ export class MemberResponsibilityRecord extends MemberResponsibilityRecordBase {
             }
 
             if (organization && includeOrganization) {
-                suffix += ' bij ' + organization.name;
+                suffix += ' ' + $t(`bij`) + ' ' + organization.name;
             }
         }
 
         const responsibility = allResponsibilities.find(r => r.id == this.responsibilityId);
-        return (responsibility ? responsibility.name : 'Verwijderde functie') + suffix;
+        return (responsibility ? responsibility.name : $t(`Verwijderde functie`)) + suffix;
     }
 }

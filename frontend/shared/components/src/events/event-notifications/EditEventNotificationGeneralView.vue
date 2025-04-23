@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="viewModel.type.title" :prefer-large-button="true" :loading="saving" :save-text="viewModel.isNew ? 'Beginnen' : 'Opslaan'" save-icon-right="arrow-right" @save="save">
+    <SaveView :title="viewModel.type.title" :prefer-large-button="true" :loading="saving" :save-text="viewModel.isNew ? $t('Beginnen') : $t('Opslaan')" save-icon-right="arrow-right" @save="save">
         <h1>
             {{ viewModel.type.title }}
         </h1>
@@ -17,7 +17,7 @@
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, NavigationActions, useErrors, useNavigationActions } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import { EventNotificationViewModel } from './classes/EventNotificationViewModel';
 
 const props = withDefaults(

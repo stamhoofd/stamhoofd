@@ -1,8 +1,8 @@
 <template>
     <div class="st-view show-seats-view shade">
-        <STNavigationBar title="Jouw plaatsen" :disableDismiss="!allowDismiss" />
+        <STNavigationBar :disable-dismiss="!allowDismiss" :title="$t(`Jouw plaatsen`)" />
         <main>
-            <h1>Jouw plaatsen</h1>
+            <h1>{{ $t('Jouw plaatsen') }}</h1>
 
             <STList>
                 <STListItem v-if="seatDescription.length">
@@ -19,27 +19,16 @@
                 </STListItem>
             </STList>
 
-            <hr>
-
-            <SeatSelectionBox 
-                v-if="seatingPlan && seatingPlanSection"
-                :allow-changes="false"
-                :seating-plan="seatingPlan"
-                :seating-plan-section="seatingPlanSection"
-                :seats="seats"
-                :reserved-seats="reservedSeats"
-                :highlight-seats="highlightSeats"
-            />
+            <hr><SeatSelectionBox v-if="seatingPlan && seatingPlanSection" :allow-changes="false" :seating-plan="seatingPlan" :seating-plan-section="seatingPlanSection" :seats="seats" :reserved-seats="reservedSeats" :highlight-seats="highlightSeats" />
         </main>
     </div>
 </template>
 
-
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
 import { Order, TicketPublic, Webshop } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 import SeatSelectionBox from './SeatSelectionBox.vue';
 
@@ -50,77 +39,77 @@ import SeatSelectionBox from './SeatSelectionBox.vue';
         STErrorsDefault,
         SeatSelectionBox,
         STListItem,
-        STList
-    }
+        STList,
+    },
 })
-export default class ShowSeatsView extends Mixins(NavigationMixin){
+export default class ShowSeatsView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-        ticket: TicketPublic
+    ticket: TicketPublic;
 
     @Prop({ required: false, default: null })
-        order: Order | null
+    order: Order | null;
 
     @Prop({ required: true })
-        webshop: Webshop
+    webshop: Webshop;
 
     @Prop({ default: true })
-        allowDismiss: boolean
+    allowDismiss: boolean;
 
     get seatingPlanSection() {
-        const plan = this.seatingPlan
+        const plan = this.seatingPlan;
         if (!plan) {
-            return null
+            return null;
         }
-        const seat = this.ticket.seat
+        const seat = this.ticket.seat;
         if (!seat) {
-            return plan.sections[0]
+            return plan.sections[0];
         }
-        return plan.sections.find(s => s.id === seat.section) ?? null
+        return plan.sections.find(s => s.id === seat.section) ?? null;
     }
 
     get seatingPlan() {
-        const id = this.ticket.getSeatingPlanId()
-        return this.webshop.meta.seatingPlans.find(p => p.id === id)
+        const id = this.ticket.getSeatingPlanId();
+        return this.webshop.meta.seatingPlans.find(p => p.id === id);
     }
 
     get seats() {
-        const seat = this.ticket.seat
+        const seat = this.ticket.seat;
         if (!seat) {
-            return []
+            return [];
         }
-        return [seat]
+        return [seat];
     }
 
     get seatDescription() {
-        const seat = this.ticket.seat
-        const product =  this.ticket.items[0]?.product
+        const seat = this.ticket.seat;
+        const product = this.ticket.items[0]?.product;
         if (!seat || !product) {
-            return []
+            return [];
         }
-        return seat.getName(this.webshop, product)
+        return seat.getName(this.webshop, product);
     }
 
     get reservedSeats() {
-        const product = this.ticket.items[0]?.product
+        const product = this.ticket.items[0]?.product;
         if (product) {
-            const updatedProduct = this.webshop.products.find(p => p.id === product.id)
+            const updatedProduct = this.webshop.products.find(p => p.id === product.id);
             if (updatedProduct) {
-                return updatedProduct.reservedSeats
+                return updatedProduct.reservedSeats;
             }
         }
-        return []
+        return [];
     }
 
     get highlightSeats() {
         // Other seats from this order (if any)
         if (!this.order) {
-            return []
+            return [];
         }
-        const product = this.ticket.items[0]?.product
+        const product = this.ticket.items[0]?.product;
         if (!product) {
-            return []
+            return [];
         }
-        return this.order.data.cart.items.filter(i => i.product.seatingPlanId === this.seatingPlan?.id && i.product.id === product.id).flatMap(i => i.seats)
+        return this.order.data.cart.items.filter(i => i.product.seatingPlanId === this.seatingPlan?.id && i.product.id === product.id).flatMap(i => i.seats);
     }
 }
 </script>

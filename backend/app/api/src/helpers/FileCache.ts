@@ -61,7 +61,7 @@ export class FileCache {
             throw new SimpleError({
                 code: 'invalid_file',
                 message: 'Invalid file',
-                human: 'Ongeldig bestand',
+                human: $t(`Ongeldig bestand`),
                 statusCode: 400,
             });
         }
@@ -73,7 +73,7 @@ export class FileCache {
             throw new SimpleError({
                 code: 'invalid_file',
                 message: 'Invalid file',
-                human: 'Ongeldig bestand',
+                human: $t(`Ongeldig bestand`),
                 statusCode: 400,
             });
         }
@@ -86,7 +86,7 @@ export class FileCache {
                 throw new SimpleError({
                     code: 'invalid_file',
                     message: 'Invalid file',
-                    human: 'Onbekend karakters in bestandsnaam',
+                    human: $t(`Onbekend karakters in bestandsnaam`),
                     statusCode: 400,
                 });
             }
@@ -99,7 +99,7 @@ export class FileCache {
             throw new SimpleError({
                 code: 'invalid_file',
                 message: 'Invalid file',
-                human: 'Ongelidge datum',
+                human: $t(`Ongelidge datum`),
                 statusCode: 400,
             });
         }
@@ -111,7 +111,7 @@ export class FileCache {
             throw new SimpleError({
                 code: 'invalid_file',
                 message: 'Invalid file',
-                human: 'Ongeldige datum',
+                human: $t(`Ongeldige datum`),
                 statusCode: 400,
             });
         }
@@ -126,7 +126,7 @@ export class FileCache {
             throw new SimpleError({
                 code: 'file_expired',
                 message: 'File expired',
-                human: 'Het bestand is verlopen',
+                human: $t(`Het bestand is verlopen`),
                 statusCode: 404,
             });
         }
@@ -142,7 +142,7 @@ export class FileCache {
                 throw new SimpleError({
                     code: 'file_expired',
                     message: 'File expired',
-                    human: 'Het bestand bestaat niet',
+                    human: $t(`Het bestand bestaat niet`),
                     statusCode: 404,
                 });
             }

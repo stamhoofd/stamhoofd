@@ -226,7 +226,7 @@ export class ContextInstance {
             throw new SimpleError({
                 code: 'invalid_access_token',
                 message: 'The access token is invalid',
-                human: 'Je bent automatisch uitgelogd, log opnieuw in om verder te gaan',
+                human: $t(`Je bent automatisch uitgelogd, log opnieuw in om verder te gaan`),
                 statusCode: 401,
             });
         }
@@ -235,7 +235,7 @@ export class ContextInstance {
             throw new SimpleError({
                 code: 'expired_access_token',
                 message: 'The access token is expired',
-                human: 'Je bent automatisch uitgelogd, log opnieuw in om verder te gaan',
+                human: $t(`Je bent automatisch uitgelogd, log opnieuw in om verder te gaan`),
                 statusCode: 401,
             });
         }
@@ -244,7 +244,7 @@ export class ContextInstance {
             throw new SimpleError({
                 code: 'not_activated',
                 message: 'This user is not yet activated',
-                human: 'Maak een account aan op dit e-mailadres om een wachtwoord in te stellen voor je inlogt.',
+                human: $t(`Maak een account aan op dit e-mailadres om een wachtwoord in te stellen voor je inlogt.`),
                 statusCode: 401,
             });
         }

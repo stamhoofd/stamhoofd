@@ -4,19 +4,15 @@
 
         <main>
             <h1>
-                Statistieken
+                {{ $t('Statistieken') }}
             </h1>
 
-            <hr>
-
-            <div class="graph-grid">
+            <hr><div class="graph-grid">
                 <GraphView :configurations="graphConfigurations" />
             </div>
 
-            <hr>
-
-            <div class="stats-grid">
-                <STInputBox title="Bestellingen">
+            <hr><div class="stats-grid">
+                <STInputBox :title="$t(`Bestellingen`)">
                     <p class="style-statistic">
                         <span>
                             {{ loading ? '-' : totalOrders }}
@@ -28,7 +24,7 @@
                 </STInputBox>
 
                 <template v-if="hasTickets">
-                    <STInputBox title="Tickets">
+                    <STInputBox :title="$t(`Tickets`)">
                         <p class="style-statistic">
                             {{ loading ? '-' : totalTickets }}
                         </p>
@@ -39,7 +35,7 @@
                 </template>
 
                 <template v-if="hasVouchers">
-                    <STInputBox title="Vouchers">
+                    <STInputBox :title="$t(`Vouchers`)">
                         <p class="style-statistic">
                             {{ loading ? '-' : totalVouchers }}
                         </p>
@@ -51,8 +47,7 @@
             </div>
 
             <div v-for="category of totalByCategory" :key="category.name" class="container">
-                <hr>
-                <h2>{{ totalByCategory.length > 1 ? category.name : 'Per productcombinatie' }}</h2>
+                <hr><h2>{{ totalByCategory.length > 1 ? category.name : 'Per productcombinatie' }}</h2>
 
                 <STList>
                     <STListItem v-for="(info, index) in category.products" :key="index" class="right-small">
@@ -71,9 +66,8 @@
                 </STList>
             </div>
 
-            <hr>
-            <h2>Info</h2>
-            <p>Geannuleerde bestellingen of verwijderde bestellingen worden niet meegeteld in de statistieken.</p>
+            <hr><h2>{{ $t('Info') }}</h2>
+            <p>{{ $t('Geannuleerde bestellingen of verwijderde bestellingen worden niet meegeteld in de statistieken.') }}</p>
         </main>
     </div>
 </template>

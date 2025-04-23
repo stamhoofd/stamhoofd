@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" title="Algemeen" :disabled="!hasSomeChanges" @save="save">
+    <SaveView :loading="saving" :disabled="!hasSomeChanges" :title="$t(`Algemeen`)" @save="save">
         <h1>
             {{ title }}
         </h1>
@@ -13,15 +13,7 @@
         <div v-else class="split-inputs">
             <div>
                 <STInputBox :title="$t('840ac72d-d4b3-40ea-afb4-b0109e88c640')" error-fields="name" :error-box="errors.errorBox">
-                    <input
-                        id="organization-name"
-                        ref="firstInput"
-                        v-model="name"
-                        class="input"
-                        type="text"
-                        :placeholder="$t('cb51b737-c4cf-4ea7-aeb5-b5736a43c333')"
-                        autocomplete="organization"
-                    >
+                    <input id="organization-name" ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('cb51b737-c4cf-4ea7-aeb5-b5736a43c333')" autocomplete="organization">
                 </STInputBox>
 
                 <AddressInput v-model="address" :title="$t('68c40b9e-30d7-4ce5-8069-f7ca93221906')" :validator="errors.validator" :link-country-to-locale="true" />
@@ -29,13 +21,7 @@
 
             <div>
                 <STInputBox :title="$t('Groepsnummer')" :error-box="errors.errorBox">
-                    <input
-                        id="organization-uri"
-                        :value="uri"
-                        class="input"
-                        type="text"
-                        disabled
-                    >
+                    <input id="organization-uri" :value="uri" class="input" type="text" disabled>
                 </STInputBox>
 
                 <UrlInput v-model="website" :title="$t('0e17f20e-e0a6-4fa0-8ec4-378e4325bea5')" :placeholder="$t('5d75775a-a4b5-426a-aea9-b1e75ee5f055')" :validator="errors.validator" :required="false" />
@@ -46,13 +32,11 @@
             </div>
         </div>
 
-        <hr>
-
-        <h2>Facturatiegegevens</h2>
-        <p>Voeg één of meerdere juridische entiteiten toe. Als je zowel een feitelijke vereniging als een VZW hebt, voeg ze dan beide toe. De eerste in de lijst wordt standaard gebruikt als je betalingen uitvoert.</p>
+        <hr><h2>{{ $t('Facturatiegegevens') }}</h2>
+        <p>{{ $t('Voeg één of meerdere juridische entiteiten toe. Als je zowel een feitelijke vereniging als een VZW hebt, voeg ze dan beide toe. De eerste in de lijst wordt standaard gebruikt als je betalingen uitvoert.') }}</p>
 
         <p v-if="draggableCompanies.length === 0" class="info-box">
-            Geen facturatiegegevens toegevoegd
+            {{ $t('Geen facturatiegegevens toegevoegd') }}
         </p>
 
         <STList v-else v-model="draggableCompanies" :draggable="true">
@@ -66,20 +50,20 @@
                     </h3>
 
                     <p v-if="company.VATNumber" class="style-description-small">
-                        {{ company.VATNumber }} (BTW-plichtig)
+                        {{ company.VATNumber }} {{ $t('(BTW-plichtig)') }}
                     </p>
                     <p v-else-if="company.companyNumber" class="style-description-small">
                         {{ company.companyNumber }}
                     </p>
                     <p v-else class="style-description-small">
-                        Feitelijke vereniging
+                        {{ $t('Feitelijke vereniging') }}
                     </p>
 
                     <p v-if="company.address" class="style-description-small">
                         {{ company.address.shortString() }}
                     </p>
                     <p v-else class="style-description-small">
-                        <span class="style-tag error">Adres ontbreekt</span>
+                        <span class="style-tag error">{{ $t('Adres ontbreekt') }}</span>
                     </p>
 
                     <p v-if="company.administrationEmail" class="style-description-small">
@@ -88,7 +72,7 @@
 
                     <template #right>
                         <span v-if="index === 0" class="style-tag">
-                            Standaard
+                            {{ $t('Standaard') }}
                         </span>
                         <span class="button icon drag gray" @click.stop @contextmenu.stop />
                         <span class="icon arrow-right-small gray" />
@@ -100,14 +84,13 @@
         <p class="style-button-bar">
             <button class="button text" type="button" @click="addCompany">
                 <span class="icon add" />
-                <span>Toevoegen</span>
+                <span>{{ $t('Toevoegen') }}</span>
             </button>
         </p>
 
         <div v-if="!isReview">
             <div v-for="category of recordCategories" :key="category.id" class="container">
-                <hr>
-                <FillRecordCategoryBox :category="category" :value="patched" :validator="errors.validator" :level="2" :all-optional="false" :force-mark-reviewed="true" @patch="patchAnswers" />
+                <hr><FillRecordCategoryBox :category="category" :value="patched" :validator="errors.validator" :level="2" :all-optional="false" :force-mark-reviewed="true" @patch="patchAnswers" />
             </div>
         </div>
     </SaveView>

@@ -70,12 +70,12 @@ export function useGlobalRoutes() {
                             }
                             else {
                                 await navigationActions.dismiss({ force: true });
-                                new CenteredMessage('Betaling voltooid', 'De betaling werd voltooid.').addCloseButton().show();
+                                new CenteredMessage($t(`Betaling voltooid`), $t(`De betaling werd voltooid.`)).addCloseButton().show();
                             }
                         }
                         else {
                             await navigationActions.dismiss({ force: true });
-                            new CenteredMessage('Betaling mislukt', 'De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.').addCloseButton().show();
+                            new CenteredMessage($t(`Betaling mislukt`), $t(`De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.`)).addCloseButton().show();
                         }
                     },
                 }));

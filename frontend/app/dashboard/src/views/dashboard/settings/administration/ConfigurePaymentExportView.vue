@@ -1,31 +1,30 @@
 <template>
-    <SaveView :loading="saving" title="Exporteren" :disabled="!canContinue" save-text="Exporteren" @save="save">
+    <SaveView :loading="saving" :disabled="!canContinue" :save-text="$t('Exporteren')" :title="$t(`Exporteren`)" @save="save">
         <h1>
-            Cijfers exporteren
+            {{ $t('Cijfers exporteren') }}
         </h1>
 
         <STErrorsDefault :error-box="errorBox" />
 
         <div class="split-inputs">
-            <STInputBox title="Vanaf" error-fields="startDate" :error-box="errorBox">
+            <STInputBox error-fields="startDate" :error-box="errorBox" :title="$t(`Vanaf`)">
                 <DateSelection v-model="startDate" />
             </STInputBox>
 
-            <STInputBox title="Tot en met" error-fields="endDate" :error-box="errorBox">
+            <STInputBox error-fields="endDate" :error-box="errorBox" :title="$t(`Tot en met`)">
                 <DateSelection v-model="endDate" />
             </STInputBox>
         </div>
 
         <p class="style-description-small">
-            Snel selecteren: <span v-for="(suggestion, index) in dateRangeSuggestions" :key="suggestion.name">
+            {{ $t('Snel selecteren') }}: <span v-for="(suggestion, index) in dateRangeSuggestions" :key="suggestion.name">
                 <button type="button" class="inline-link" :class="isSuggestionSelected(suggestion) ? {secundary: false} : {secundary: true}" @click="selectSuggestion(suggestion)">
                     {{ suggestion.name }}
                 </button><template v-if="index < dateRangeSuggestions.length - 1">, </template>
             </span>
         </p>
 
-        <hr>
-        <h2>Betaalmethodes</h2>
+        <hr><h2>{{ $t('Betaalmethodes') }}</h2>
 
         <STList>
             <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label">
@@ -39,8 +38,7 @@
         </STList>
 
         <template v-if="allPaymentProviders.length">
-            <hr>
-            <h2>Betaalaccounts</h2>
+            <hr><h2>{{ $t('Betaalaccounts') }}</h2>
 
             <STList>
                 <STListItem v-for="provider in allPaymentProviders" :key="provider" :selectable="true" element-name="label" class="left-center">
@@ -55,18 +53,17 @@
         </template>
 
         <template v-if="getProvider('Stripe') || useUTCTimezone">
-            <hr>
-            <h2>Tijdzone</h2>
+            <hr><h2>{{ $t('Tijdzone') }}</h2>
             <STList>
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
                         <Checkbox v-model="useUTCTimezone" />
                     </template>
                     <h3 class="style-title-list">
-                        Gebruik UTC-tijdzone
+                        {{ $t('Gebruik UTC-tijdzone') }}
                     </h3>
                     <p class="style-description-small">
-                        Voor de maandelijkse facturen van Stripe gebruiken we de UTC-tijdzone.
+                        {{ $t('Voor de maandelijkse facturen van Stripe gebruiken we de UTC-tijdzone.') }}
                     </p>
                 </STListItem>
             </STList>

@@ -176,7 +176,7 @@ export class SetupStepUpdater {
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Organization not found',
-                human: 'De organisatie werd niet gevonden',
+                human: $t(`De organisatie werd niet gevonden`),
             });
         }
 

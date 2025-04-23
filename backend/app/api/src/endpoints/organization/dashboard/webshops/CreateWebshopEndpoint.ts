@@ -38,7 +38,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
 
         // Fast throw first (more in depth checking for patches later)
         if (!await Context.auth.canCreateWebshops(organization.id)) {
-            throw Context.auth.error('Je kan geen webshops maken, vraag aan de hoofdbeheerders om jou toegang te geven.');
+            throw Context.auth.error($t(`Je kan geen webshops maken, vraag aan de hoofdbeheerders om jou toegang te geven.`));
         }
 
         const errors = new SimpleErrors();
@@ -141,7 +141,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
                 throw new SimpleError({
                     code: 'failed_to_generate_unique_uri',
                     message: 'Failed to generate unique uri',
-                    human: 'Er is een fout opgetreden bij het maken van de webshop, kies een andere naam voor jouw webshop',
+                    human: $t(`Er is een fout opgetreden bij het maken van de webshop, kies een andere naam voor jouw webshop`),
                     statusCode: 500,
                 });
             }
@@ -168,7 +168,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
             throw new SimpleError({
                 code: 'missing_permissions',
                 message: 'You cannot create a webshop without having full permissions on the created webshop',
-                human: 'Als je een webshop aanmaakt moet je ervoor zorgen dat jezelf ook volledige toegang hebt.',
+                human: $t(`Als je een webshop aanmaakt moet je ervoor zorgen dat jezelf ook volledige toegang hebt.`),
             });
         }
 
@@ -211,7 +211,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
                 throw new SimpleError({
                     code: 'failed_to_generate_unique_domainUri',
                     message: 'Failed to generate unique domainUri',
-                    human: 'Er is een fout opgetreden bij het maken van de webshop, kies een andere naam voor jouw webshop',
+                    human: $t(`Er is een fout opgetreden bij het maken van de webshop, kies een andere naam voor jouw webshop`),
                     statusCode: 500,
                 });
             }

@@ -112,7 +112,7 @@ async function save() {
                 eventNotificationTypes: patch.value,
             }),
         }));
-        new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
+        new Toast($t(`De wijzigingen zijn opgeslagen`), 'success green').show();
         await pop({ force: true });
     }
     catch (e) {

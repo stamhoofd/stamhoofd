@@ -14,25 +14,12 @@
         </template>
 
         <template v-if="level === 1">
-            <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
-                <input
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    placeholder="Naam van dit menu"
-                    autocomplete="off"
-                >
+            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
+                <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`Naam van dit menu`)">
             </STInputBox>
 
-            <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox" class="max">
-                <textarea
-                    v-model="description"
-                    class="input"
-                    type="text"
-                    placeholder="Optioneel. Meer info bij keuzes."
-                    autocomplete="off"
-                    enterkeyhint="next"
-                />
+            <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`Beschrijving`)">
+                <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`Optioneel. Meer info bij keuzes.`)" />
             </STInputBox>
 
             <STList>
@@ -41,22 +28,20 @@
                         <Checkbox v-model="multipleChoice" />
                     </template>
                     <h3 class="style-title-list">
-                        Meerkeuze
+                        {{ $t('Meerkeuze') }}
                     </h3>
                     <p class="style-description-small">
-                        Bij meerkeuze is het mogelijk om verschillende opties aan te duiden. In het andere geval moet er exact één keuze gemaakt worden (wil je het optioneel maken, voeg dan een optie 'Geen' toe).
+                        {{ $t("Bij meerkeuze is het mogelijk om verschillende opties aan te duiden. In het andere geval moet er exact één keuze gemaakt worden (wil je het optioneel maken, voeg dan een optie 'Geen' toe).") }}
                     </p>
                 </STListItem>
             </STList>
 
-            
-            <hr>
-            <h2 class="style-with-button">
-                <div>Keuzes</div>
+            <hr><h2 class="style-with-button">
+                <div>{{ $t('Keuzes') }}</div>
                 <div>
                     <button class="button text only-icon-smartphone" type="button" @click="addOption">
                         <span class="icon add" />
-                        <span>Keuze</span>
+                        <span>{{ $t('Keuze') }}</span>
                     </button>
                 </div>
             </h2>
@@ -83,11 +68,11 @@
                     </p>
 
                     <p v-if="option.stock !== null" class="style-description-small">
-                        Nog {{ pluralText(option.getRemainingStock(group), 'stuk', 'stuks') }} beschikbaar
+                        {{ $t('Nog {stock} beschikbaar', {stock: pluralText(option.getRemainingStock(group), 'stuk', 'stuks')}) }}
                     </p>
 
                     <p v-if="option.maximum !== null && option.allowAmount" class="style-description-small">
-                        Maximaal {{ pluralText(option.maximum, 'stuk', 'stuks') }} per inschrijving
+                        {{ $t('Maximaal {max} per inschrijving', {max: pluralText(option.maximum, 'stuk', 'stuks')}) }}
                     </p>
 
                     <template #right>
@@ -119,61 +104,61 @@ import GroupOptionView from './GroupOptionView.vue';
 
 const props = withDefaults(
     defineProps<{
-        optionMenu: GroupOptionMenu,
-        group: Group,
-        errors: ReturnType<typeof useErrors>,
-        level: 1|2
+        optionMenu: GroupOptionMenu;
+        group: Group;
+        errors: ReturnType<typeof useErrors>;
+        level: 1 | 2;
     }>(),
     {
-        level: 2
-    }
+        level: 2,
+    },
 );
 
-const emit = defineEmits(['patch:optionMenu', 'delete', 'patch:group'])
-const {patched, addPatch} = useEmitPatch<GroupOptionMenu>(props, emit, 'optionMenu');
+const emit = defineEmits(['patch:optionMenu', 'delete', 'patch:group']);
+const { patched, addPatch } = useEmitPatch<GroupOptionMenu>(props, emit, 'optionMenu');
 const present = usePresent();
-const {priceName: reducedPriceName} = useFinancialSupportSettings({
-    group: computed(() => props.group)
-})
-const {up, canMoveUp, canMoveDown, down} = usePatchMoveUpDownSingle(props.optionMenu.id, computed(() => props.group.settings.optionMenus), (patch) => {
+const { priceName: reducedPriceName } = useFinancialSupportSettings({
+    group: computed(() => props.group),
+});
+const { up, canMoveUp, canMoveDown, down } = usePatchMoveUpDownSingle(props.optionMenu.id, computed(() => props.group.settings.optionMenus), (patch) => {
     emit('patch:group', Group.patch({
         settings: GroupSettings.patch({
-            optionMenus: patch
-        })
-    }))
-})
+            optionMenus: patch,
+        }),
+    }));
+});
 
 const $t = useTranslate();
 
 const patchOptionsArray = (options: PatchableArrayAutoEncoder<GroupOption>) => {
     addPatch({
-        options
-    })
-}
-const {addPatch: addOptionPatch, addPut: addOptionPut, addDelete: addOptionDelete} = usePatchableArray(patchOptionsArray)
-const draggableOptions = useDraggableArray(() => patched.value.options, patchOptionsArray)
+        options,
+    });
+};
+const { addPatch: addOptionPatch, addPut: addOptionPut, addDelete: addOptionDelete } = usePatchableArray(patchOptionsArray);
+const draggableOptions = useDraggableArray(() => patched.value.options, patchOptionsArray);
 
 const name = computed({
     get: () => patched.value.name,
-    set: (name) => addPatch({name})
-})
+    set: name => addPatch({ name }),
+});
 
 const description = computed({
     get: () => patched.value.description,
-    set: (description) => addPatch({description})
-})
+    set: description => addPatch({ description }),
+});
 
 const multipleChoice = computed({
     get: () => patched.value.multipleChoice,
-    set: (multipleChoice) => addPatch({multipleChoice})
-})
+    set: multipleChoice => addPatch({ multipleChoice }),
+});
 
 function addOption() {
     const price = GroupOption.create({
         name: $t('9b0aebaf-d119-49df-955b-eb57654529e5'),
-        price: patched.value.options[0]?.price?.clone()
-    })
-    addOptionPut(price)
+        price: patched.value.options[0]?.price?.clone(),
+    });
+    addOptionPut(price);
 }
 
 async function editOption(option: GroupOption) {
@@ -185,15 +170,15 @@ async function editOption(option: GroupOption) {
                 group: props.group,
                 isNew: false,
                 saveHandler: async (patch: AutoEncoderPatchType<GroupOption>) => {
-                    addOptionPatch(patch)
+                    addOptionPatch(patch);
                 },
                 deleteHandler: () => {
-                    addOptionDelete(option.id)
-                }
-            })
+                    addOptionDelete(option.id);
+                },
+            }),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function editOptionMenu() {
@@ -204,62 +189,62 @@ async function editOptionMenu() {
                 group: props.group,
                 isNew: false,
                 saveHandler: async (patch: AutoEncoderPatchType<GroupOptionMenu>) => {
-                    addPatch(patch)
+                    addPatch(patch);
                 },
                 deleteHandler: () => {
-                    emit('delete')
-                }
-            })
+                    emit('delete');
+                },
+            }),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
-async function  showContextMenu(event: MouseEvent) {
+async function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: "Instellingen",
-                icon: "settings",
+                name: 'Instellingen',
+                icon: 'settings',
                 action: async () => {
-                    await editOptionMenu()
+                    await editOptionMenu();
                     return true;
-                }
+                },
             }),
 
             new ContextMenuItem({
-                name: "Verwijderen",
-                icon: "trash",
+                name: 'Verwijderen',
+                icon: 'trash',
                 action: async () => {
                     if (!await CenteredMessage.confirm($t('f58412a9-9db9-4aa3-ad68-fa089d4f345b'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('9f8c1ed0-371b-4c22-940c-57d624734c18'))) {
                         return;
                     }
-                    emit('delete')
+                    emit('delete');
                     return true;
-                }
+                },
             }),
         ],
         [
             new ContextMenuItem({
-                name: "Omhoog verplaatsen",
-                icon: "arrow-up",
+                name: 'Omhoog verplaatsen',
+                icon: 'arrow-up',
                 disabled: !canMoveUp.value,
                 action: async () => {
-                    up()
+                    up();
                     return true;
-                }
+                },
             }),
             new ContextMenuItem({
-                name: "Omlaag verplaatsen",
-                icon: "arrow-down",
+                name: 'Omlaag verplaatsen',
+                icon: 'arrow-down',
                 disabled: !canMoveDown.value,
                 action: async () => {
-                    down()
+                    down();
                     return true;
-                }
+                },
             }),
-        ]
-    ])
-    menu.show({ clickEvent: event }).catch(console.error)
+        ],
+    ]);
+    menu.show({ clickEvent: event }).catch(console.error);
 }
 </script>

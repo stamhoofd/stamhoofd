@@ -1,7 +1,7 @@
 <template>
     <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-stack" @contextmenu.prevent="showContextMenu">
         <template #left>
-            <span v-if="mergedRole.isEmpty" v-tooltip="'Heeft geen automatische rechten'" class="icon layered">
+            <span v-if="mergedRole.isEmpty" class="icon layered" :v-tooltip="$t('Heeft geen automatische rechten')">
                 <span class="icon user-blocked-layer-1" />
                 <span class="icon user-blocked-layer-2 red" />
             </span>
@@ -17,7 +17,7 @@
         </h2>
 
         <p v-if="responsibility.organizationTagIds !== null" class="style-description">
-            Enkel voor {{ organizationTagIdsDescription }}
+            {{ $t('Enkel voor {organization}', {organization: organizationTagIdsDescription}) }}
         </p>
 
         <p v-if="defaultAgeGroupIdsDescription" class="style-description">
@@ -29,14 +29,14 @@
         </p>
 
         <p v-if="responsibility.minimumMembers" class="style-description">
-            Minimum {{ responsibility.minimumMembers }} vereist
+            {{ $t('Minimum {min} vereist', {min: responsibility.minimumMembers.toString()}) }}
         </p>
 
         <p v-if="responsibility.maximumMembers" class="style-description">
-            Maximum {{ responsibility.maximumMembers }}
+            {{ $t('Maximum {max}', {max: responsibility.maximumMembers.toString()}) }}
         </p>
         <p class="style-description-small">
-            Rechten: {{ capitalizeFirstLetter(roleDescription) }}
+            {{ $t('Rechten') }}: {{ capitalizeFirstLetter(roleDescription) }}
         </p>
 
         <template #right>

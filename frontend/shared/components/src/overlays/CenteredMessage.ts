@@ -57,7 +57,7 @@ export class CenteredMessage {
         }
 
         if (simpleErrors.hasCode("network_error") || simpleErrors.hasCode("network_timeout")) {
-            return new CenteredMessage("Geen internetverbinding", "Kijk jouw verbinding na en probeer opnieuw", "error")
+            return new CenteredMessage($t(`Geen internetverbinding`), $t(`Kijk jouw verbinding na en probeer opnieuw`), "error")
         }
 
         return new CenteredMessage(simpleErrors.getHuman(), "", "error")
@@ -77,7 +77,7 @@ export class CenteredMessage {
         }
     }
 
-    addCloseButton(text = "Sluiten", action?: (() => Promise<any>) | undefined) {
+    addCloseButton(text = $t(`Sluiten`), action?: (() => Promise<any>) | undefined) {
         this.buttons.push(new CenteredMessageButton(text, { type: "secundary", action }))
         return this
     }
@@ -108,7 +108,7 @@ export class CenteredMessage {
                     return Promise.resolve()
                 },
                 type: destructive ? "destructive" : "primary"
-            })).addButton(new CenteredMessageButton(cancelText ?? "Annuleren", {
+            })).addButton(new CenteredMessageButton(cancelText ?? $t(`Annuleren`), {
                 action: () => {
                     resolve(false)
                     return Promise.resolve()

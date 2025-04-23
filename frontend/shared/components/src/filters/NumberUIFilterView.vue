@@ -5,10 +5,10 @@
                 <Radio v-model="filter.mode" :name="filter.id" :value="UINumberFilterMode.Equals" @change="onChange" />
             </template>
             <p class="style-title-list">
-                Gelijk aan...
+                {{ $t('Gelijk aan...') }}
             </p>
 
-            <component :is="inputComponent" v-if="filter.mode === UINumberFilterMode.Equals" ref="input" v-model="filter.value" :min="null" :max="null" :required="true" :floating-point="floatingPoint" :stepper="!floatingPoint" placeholder="Vul getal in" class="option" />
+            <component :is="inputComponent" v-if="filter.mode === UINumberFilterMode.Equals" ref="input" v-model="filter.value" :min="null" :max="null" :required="true" :floating-point="floatingPoint" :stepper="!floatingPoint" class="option" :placeholder="$t(`Vul getal in`)" />
         </STListItem>
 
         <STListItem :selectable="true" element-name="label">
@@ -16,10 +16,10 @@
                 <Radio v-model="filter.mode" :name="filter.id" :value="UINumberFilterMode.NotEquals" @change="onChange" />
             </template>
             <p class="style-title-list">
-                Niet gelijk aan...
+                {{ $t('Niet gelijk aan...') }}
             </p>
 
-            <component :is="inputComponent" v-if="filter.mode === UINumberFilterMode.NotEquals" ref="input" v-model="filter.value" :min="null" :max="null" :required="true" :floating-point="floatingPoint" :stepper="!floatingPoint" placeholder="Vul getal in" class="option" />
+            <component :is="inputComponent" v-if="filter.mode === UINumberFilterMode.NotEquals" ref="input" v-model="filter.value" :min="null" :max="null" :required="true" :floating-point="floatingPoint" :stepper="!floatingPoint" class="option" :placeholder="$t(`Vul getal in`)" />
         </STListItem>
 
         <STListItem :selectable="true" element-name="label">
@@ -27,10 +27,10 @@
                 <Radio v-model="filter.mode" :name="filter.id" :value="UINumberFilterMode.GreaterThan" @change="onChange" />
             </template>
             <p class="style-title-list">
-                Groter dan...
+                {{ $t('Groter dan...') }}
             </p>
 
-            <component :is="inputComponent" v-if="filter.mode === UINumberFilterMode.GreaterThan" ref="input" v-model="filter.value" :min="null" :max="null" :floating-point="floatingPoint" :stepper="!floatingPoint" placeholder="Vul een getal in" class="option" />
+            <component :is="inputComponent" v-if="filter.mode === UINumberFilterMode.GreaterThan" ref="input" v-model="filter.value" :min="null" :max="null" :floating-point="floatingPoint" :stepper="!floatingPoint" class="option" :placeholder="$t(`Vul een getal in`)" />
         </STListItem>
 
         <STListItem :selectable="true" element-name="label">
@@ -38,10 +38,10 @@
                 <Radio v-model="filter.mode" :name="filter.id" :value="UINumberFilterMode.LessThan" @change="onChange" />
             </template>
             <p class="style-title-list">
-                Kleiner dan...
+                {{ $t('Kleiner dan...') }}
             </p>
 
-            <component :is="inputComponent" v-if="filter.mode === UINumberFilterMode.LessThan" ref="input" v-model="filter.value" :min="null" :max="null" :floating-point="floatingPoint" :stepper="!floatingPoint" placeholder="Vul een getal in" class="option" />
+            <component :is="inputComponent" v-if="filter.mode === UINumberFilterMode.LessThan" ref="input" v-model="filter.value" :min="null" :max="null" :floating-point="floatingPoint" :stepper="!floatingPoint" class="option" :placeholder="$t(`Vul een getal in`)" />
         </STListItem>
     </STList>
 </template>

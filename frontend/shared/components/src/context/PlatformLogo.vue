@@ -3,7 +3,7 @@
         <ImageComponent v-if="logo" :image="logo" :image-dark="logoDark" />
         <template v-else>
             <Logo class="responsive" />
-            <span v-if="!isPlatform" class="logo-text horizontal hide-medium">Beheerders</span>
+            <span v-if="!isPlatform" class="logo-text horizontal hide-medium">{{ $t('Beheerders') }}</span>
         </template>
     </a>
 </template>

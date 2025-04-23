@@ -1,29 +1,29 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Betaling" />
+        <STNavigationBar :title="$t(`Betaling`)" />
 
         <main v-if="payment && payment.status === 'Pending' && payment.method === 'DirectDebit'">
-            <h1>Betaling in verwerking</h1>
-            <p>Jouw betaling is aangevraagd via jouw bank. Het kan tot 5 werkdagen duren voor we een bevestiging van de betaling ontvangen. In tussentijd blijft de betaling de status 'in verwerking' behouden.</p>
+            <h1>{{ $t('Betaling in verwerking') }}</h1>
+            <p>{{ $t("Jouw betaling is aangevraagd via jouw bank. Het kan tot 5 werkdagen duren voor we een bevestiging van de betaling ontvangen. In tussentijd blijft de betaling de status 'in verwerking' behouden.") }}</p>
         </main>
 
         <main v-else-if="!payment || payment.status !== 'Failed'">
-            <h1>Wachten op betaalbevestiging...</h1>
-            <p>We wachten op de betaalbevestiging van de bank. Verlaat deze pagina niet. Dit duurt hooguit 5 minuten.</p>
+            <h1>{{ $t('Wachten op betaalbevestiging...') }}</h1>
+            <p>{{ $t('We wachten op de betaalbevestiging van de bank. Verlaat deze pagina niet. Dit duurt hooguit 5 minuten.') }}</p>
 
             <Spinner />
         </main>
 
         <main v-else>
-            <h1>Betaling mislukt</h1>
-            <p>De betaling werd geannuleerd of door de bank geweigerd.</p>
+            <h1>{{ $t('Betaling mislukt') }}</h1>
+            <p>{{ $t('De betaling werd geannuleerd of door de bank geweigerd.') }}</p>
         </main>
 
         <STToolbar v-if="payment && (payment.status === 'Failed' || payment.method === 'Payconiq')">
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" @click="retry">
-                        <span>Opnieuw proberen</span>
+                        <span>{{ $t('Opnieuw proberen') }}</span>
                     </button>
                 </LoadingButton>
             </template>

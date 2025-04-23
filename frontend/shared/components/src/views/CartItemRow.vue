@@ -31,22 +31,23 @@
             {{ cartItem.cartError.getHuman() }}
 
             <span v-if="editable" class="button text">
-                <span>Corrigeren</span>
+                <span>{{ $t('Corrigeren') }}</span>
                 <span class="icon arrow-right-small" />
             </span>
         </p>
 
-        <figure v-if="cartItem.product.images[0]" slot="right">
-            <ImageComponent :image="cartItem.product.images[0]" :auto-height="true" />
-        </figure>
+        <template #right>
+            <figure v-if="cartItem.product.images[0]">
+                <ImageComponent :image="cartItem.product.images[0]" :auto-height="true" />
+            </figure>
+        </template>
     </STListItem>
 </template>
 
-
 <script lang="ts">
+import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 import { Cart, CartItem, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 
 import StepperInput from '../inputs/StepperInput.vue';
 import STList from '../layout/STList.vue';
@@ -58,45 +59,45 @@ import ImageComponent from './ImageComponent.vue';
         STList,
         STListItem,
         StepperInput,
-        ImageComponent
+        ImageComponent,
     },
     filters: {
         price: Formatter.price.bind(Formatter),
     },
-    emits: ['edit', 'amount', 'delete']
+    emits: ['edit', 'amount', 'delete'],
 })
 export default class CartItemRow extends VueComponent {
-    @Prop({required: true })
-        cart!: Cart
+    @Prop({ required: true })
+    cart!: Cart;
 
-    @Prop({required: true })
-        webshop!: Webshop
+    @Prop({ required: true })
+    webshop!: Webshop;
 
-    @Prop({default: false })
-        admin!: boolean
+    @Prop({ default: false })
+    admin!: boolean;
 
-    @Prop({required: true })
-        cartItem!: CartItem
+    @Prop({ required: true })
+    cartItem!: CartItem;
 
-    @Prop({required: false, default: false })
-        editable!: boolean
+    @Prop({ required: false, default: false })
+    editable!: boolean;
 
     editItem() {
         if (!this.editable) {
             return;
         }
-        this.$emit('edit')
+        this.$emit('edit');
     }
 
     get amount() {
-        return this.cartItem.amount
+        return this.cartItem.amount;
     }
 
     set amount(amount: number) {
         if (!this.editable) {
             return;
         }
-        this.$emit('amount', amount)
+        this.$emit('amount', amount);
     }
 
     deleteItem() {
@@ -107,12 +108,12 @@ export default class CartItemRow extends VueComponent {
     }
 
     get labels() {
-        return this.cartItem.discounts.filter(d => !!d.cartLabel)
+        return this.cartItem.discounts.filter(d => !!d.cartLabel);
     }
 
     get maximumRemaining() {
         const remaining = this.cartItem.getMaximumRemaining(this.cartItem, this.cart, this.webshop, this.admin);
-        return remaining
+        return remaining;
     }
 }
 </script>

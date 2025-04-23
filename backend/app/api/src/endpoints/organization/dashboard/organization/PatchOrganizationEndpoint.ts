@@ -50,7 +50,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             throw new SimpleError({
                 code: 'permission_denied',
                 message: 'You do not have permissions to edit an inactive organization',
-                human: 'Je hebt geen toegangsrechten om een inactieve groep te bewerken',
+                human: $t(`Je hebt geen toegangsrechten om een inactieve groep te bewerken`),
                 statusCode: 403,
             });
         }
@@ -85,7 +85,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Field is too long',
-                        human: 'De URI van de vereniging is te lang',
+                        human: $t(`De URI van de vereniging is te lang`),
                         field: 'uri',
                     });
                 }
@@ -94,7 +94,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Field is too short',
-                        human: 'De URI van de vereniging is te kort',
+                        human: $t(`De URI van de vereniging is te kort`),
                         field: 'uri',
                     });
                 }
@@ -104,7 +104,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'name_taken',
                         message: 'An organization with the same URI already exists',
-                        human: 'Er bestaat al een vereniging met dezelfde URI. Voeg bijvoorbeeld de naam van je gemeente toe.',
+                        human: $t(`Er bestaat al een vereniging met dezelfde URI. Voeg bijvoorbeeld de naam van je gemeente toe.`),
                         field: 'uri',
                     });
                 }
@@ -301,7 +301,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
             if (request.body.active !== undefined) {
                 if (!Context.auth.hasPlatformFullAccess()) {
-                    throw Context.auth.error('Enkel een platform hoofdbeheerder kan een groep (in)actief maken');
+                    throw Context.auth.error($t(`Enkel een platform hoofdbeheerder kan een groep (in)actief maken`));
                 }
                 organization.active = request.body.active;
             }
@@ -317,7 +317,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'name_taken',
                         message: 'An organization with the same name already exists',
-                        human: 'Er bestaat al een vereniging met dezelfde URI. Pas deze aan zodat deze uniek is, en controleer of deze vereniging niet al bestaat.',
+                        human: $t(`Er bestaat al een vereniging met dezelfde URI. Pas deze aan zodat deze uniek is, en controleer of deze vereniging niet al bestaat.`),
                         field: 'name',
                     });
                 }
@@ -384,7 +384,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
             if (!model || !await Context.auth.canAccessWebshop(model, PermissionLevel.Full)) {
                 errors.addError(
-                    Context.auth.error('Je hebt geen toegangsrechten om deze webshop te wijzigen'),
+                    Context.auth.error($t(`Je hebt geen toegangsrechten om deze webshop te wijzigen`)),
                 );
                 continue;
             }
@@ -440,7 +440,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Too many companies',
-                        human: 'Je kan maximaal 5 bedrijven toevoegen',
+                        human: $t(`Je kan maximaal 5 bedrijven toevoegen`),
                         field: 'companies',
                     });
                 }
@@ -453,7 +453,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Too many companies',
-                    human: 'Je kan maximaal 5 bedrijven toevoegen',
+                    human: $t(`Je kan maximaal 5 bedrijven toevoegen`),
                     field: 'companies',
                 });
             }

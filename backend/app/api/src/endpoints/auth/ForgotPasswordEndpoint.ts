@@ -37,7 +37,7 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
                 throw new SimpleError({
                     code: 'not_supported',
                     message: 'This platform does not support password login',
-                    human: 'Dit platform ondersteunt geen wachtwoord login',
+                    human: $t(`Dit platform ondersteunt geen wachtwoord login`),
                     statusCode: 400,
                 });
             }
@@ -46,7 +46,7 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
                 throw new SimpleError({
                     code: 'not_supported',
                     message: 'Login method not supported',
-                    human: 'Je kan op dit account geen wachtwoord gebruiken om in te loggen.',
+                    human: $t(`Je kan op dit account geen wachtwoord gebruiken om in te loggen.`),
                     statusCode: 400,
                 });
             }

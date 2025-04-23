@@ -1,20 +1,20 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="DNS-instellingen" />
+        <STNavigationBar :title="$t(`DNS-instellingen`)" />
 
         <main>
             <h1>
-                Pas de volgende instellingen aan
+                {{ $t('Pas de volgende instellingen aan') }}
             </h1>
 
             <p class="st-list-description">
-                Stel de volgende DNS-instellingen in voor jouw domeinnaam. Dit kan je meestal doen in het klantenpaneel van jouw registrar (bv. Combell, Versio, Transip, One.com, GoDaddy...) waar je je domeinnaam hebt gekocht.
+                {{ $t('Stel de volgende DNS-instellingen in voor jouw domeinnaam. Dit kan je meestal doen in het klantenpaneel van jouw registrar (bv. Combell, Versio, Transip, One.com, GoDaddy...) waar je je domeinnaam hebt gekocht.') }}
             </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <p v-if="isComplete" class="success-box">
-                Alles is correct ingesteld.
+                {{ $t('Alles is correct ingesteld.') }}
             </p>
 
             <div v-for="record in records" :key="record.id">
@@ -22,21 +22,21 @@
             </div>
 
             <p v-if="!isComplete" class="warning-box">
-                Kijk alles goed na voor je aanpassingen maakt, verwijder zeker geen bestaande DNS-records. Als je DNS-records verwijdert, kan jouw huidige website onbereikbaar worden.
+                {{ $t('Kijk alles goed na voor je aanpassingen maakt, verwijder zeker geen bestaande DNS-records. Als je DNS-records verwijdert, kan jouw huidige website onbereikbaar worden.') }}
             </p>
             <p v-if="!isComplete" class="warning-box">
-                Het kan tot 24 uur duren tot de aanpassingen zijn doorgevoerd, in de meeste gevallen zou het binnen 1 uur al in orde moeten zijn. Je mag dit scherm sluiten als je de aanpassingen hebt gemaakt, we blijven op de achtergrond proberen en sturen jou een mailtje als alles in orde is.
+                {{ $t('Het kan tot 24 uur duren tot de aanpassingen zijn doorgevoerd, in de meeste gevallen zou het binnen 1 uur al in orde moeten zijn. Je mag dit scherm sluiten als je de aanpassingen hebt gemaakt, we blijven op de achtergrond proberen en sturen jou een mailtje als alles in orde is.') }}
             </p>
         </main>
 
         <STToolbar>
             <template #right>
                 <button class="button secundary" type="button" @click="skip">
-                    Overslaan
+                    {{ $t('Overslaan') }}
                 </button>
                 <LoadingButton :loading="saving">
                     <button class="button primary" type="button" @click="validate">
-                        Ik heb het ingesteld
+                        {{ $t('Ik heb het ingesteld') }}
                     </button>
                 </LoadingButton>
             </template>

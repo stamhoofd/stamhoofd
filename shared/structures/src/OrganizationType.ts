@@ -41,111 +41,111 @@ export class OrganizationTypeHelper {
         return [
             {
                 value: OrganizationType.Youth,
-                name: 'Jeugdbeweging',
+                name: $t(`Jeugdbeweging`),
             },
             {
                 value: OrganizationType.Football,
-                name: 'Voetbal',
+                name: $t(`Voetbal`),
             },
             {
                 value: OrganizationType.Tennis,
-                name: 'Tennis',
+                name: $t(`Tennis`),
             },
             {
                 value: OrganizationType.Golf,
-                name: 'Golf',
+                name: $t(`Golf`),
             },
             {
                 value: OrganizationType.Athletics,
-                name: 'Atletiek',
+                name: $t(`Atletiek`),
             },
             {
                 value: OrganizationType.Badminton,
-                name: 'Badminton',
+                name: $t(`Badminton`),
             },
             {
                 value: OrganizationType.Hockey,
-                name: 'Hockey',
+                name: $t(`Hockey`),
             },
             {
                 value: OrganizationType.Cycling,
-                name: 'Wielrennen',
+                name: $t(`Wielrennen`),
             },
             {
                 value: OrganizationType.Swimming,
-                name: 'Zwemmen',
+                name: $t(`Zwemmen`),
             },
             {
                 value: OrganizationType.Dance,
-                name: 'Dans',
+                name: $t(`Dans`),
             },
             {
                 value: OrganizationType.Volleyball,
-                name: 'Volleybal',
+                name: $t(`Volleybal`),
             },
             {
                 value: OrganizationType.Basketball,
-                name: 'Basketbal',
+                name: $t(`Basketbal`),
             },
             {
                 value: OrganizationType.Judo,
-                name: 'Vechtkunst',
+                name: $t(`Vechtkunst`),
             },
             {
                 value: OrganizationType.Sport,
-                name: 'Andere sport',
+                name: $t(`Andere sport`),
             },
             {
                 value: OrganizationType.Student,
-                name: 'Studentenvereniging',
+                name: $t(`Studentenvereniging`),
             },
             {
                 value: OrganizationType.HorseRiding,
-                name: 'Paardensport',
+                name: $t(`Paardensport`),
             },
             {
                 value: OrganizationType.Neighborhood,
-                name: 'Buurtvereniging',
+                name: $t(`Buurtvereniging`),
             },
             {
                 value: OrganizationType.Nature,
-                name: 'Natuurvereniging',
+                name: $t(`Natuurvereniging`),
             },
             {
                 value: OrganizationType.Music,
-                name: 'Muziekvereniging',
+                name: $t(`Muziekvereniging`),
             },
             {
                 value: OrganizationType.Professional,
-                name: 'Beroepsvereniging',
+                name: $t(`Beroepsvereniging`),
             },
             {
                 value: OrganizationType.Art,
-                name: 'Kunstvereniging',
+                name: $t(`Kunstvereniging`),
             },
             {
                 value: OrganizationType.Culture,
-                name: 'Cultuur',
+                name: $t(`Cultuur`),
             },
             {
                 value: OrganizationType.LGBTQ,
-                name: 'LGBTQ+',
+                name: $t(`LGBTQ+`),
             },
             {
                 value: OrganizationType.Politics,
-                name: 'Politiek',
+                name: $t(`Politiek`),
             },
             {
                 value: OrganizationType.Union,
-                name: 'Vakbond',
+                name: $t(`Vakbond`),
             },
             {
                 value: OrganizationType.School,
-                name: 'School',
+                name: $t(`School`),
             },
             {
                 value: OrganizationType.Other,
-                name: 'Andere',
+                name: $t(`Andere`),
             },
         ];
     }
@@ -154,7 +154,7 @@ export class OrganizationTypeHelper {
         switch (type) {
             case OrganizationType.Youth:
             case OrganizationType.Student:
-                return 'Jeugd';
+                return $t(`Jeugd`);
 
             case OrganizationType.Sport:
             case OrganizationType.Football:
@@ -170,12 +170,12 @@ export class OrganizationTypeHelper {
             case OrganizationType.Basketball:
             case OrganizationType.Judo:
             case OrganizationType.HorseRiding:
-                return 'Sport';
+                return $t(`Sport`);
 
             case OrganizationType.Culture:
             case OrganizationType.Art:
             case OrganizationType.Music:
-                return 'Cultuur';
+                return $t(`Cultuur`);
 
             case OrganizationType.Other:
             case OrganizationType.LGBTQ:
@@ -185,7 +185,7 @@ export class OrganizationTypeHelper {
             case OrganizationType.Professional:
             case OrganizationType.Neighborhood:
             case OrganizationType.School:
-                return 'Overige';
+                return $t(`Overige`);
         }
     }
 
@@ -200,7 +200,7 @@ export class OrganizationTypeHelper {
                 return [
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: 'Takken',
+                            name: $t(`Takken`),
                             maximumRegistrations: 1,
                         }),
                     }),
@@ -211,7 +211,7 @@ export class OrganizationTypeHelper {
                 return [
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: 'Afdelingen',
+                            name: $t(`Afdelingen`),
                             maximumRegistrations: 1,
                         }),
                     }),
@@ -221,7 +221,7 @@ export class OrganizationTypeHelper {
             return [
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: 'Leeftijdsgroepen',
+                        name: $t(`Leeftijdsgroepen`),
                         maximumRegistrations: 1,
                     }),
                 }),
@@ -232,7 +232,7 @@ export class OrganizationTypeHelper {
             return [
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: 'Danslessen',
+                        name: $t(`Danslessen`),
                         maximumRegistrations: 1,
                     }),
                 }),
@@ -243,7 +243,7 @@ export class OrganizationTypeHelper {
             return [
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: 'Leeftijdsgroepen',
+                        name: $t(`Leeftijdsgroepen`),
                         maximumRegistrations: 1,
                     }),
                 }),
@@ -255,7 +255,7 @@ export class OrganizationTypeHelper {
             // Always need one minimum
             GroupCategory.create({
                 settings: GroupCategorySettings.create({
-                    name: 'Leeftijdsgroepen',
+                    name: $t(`Leeftijdsgroepen`),
                     maximumRegistrations: 1,
                 }),
             }),
@@ -273,12 +273,12 @@ export class OrganizationTypeHelper {
                 const activities = [
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: 'Weekends',
+                            name: $t(`Weekends`),
                         }),
                     }),
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: 'Kampen',
+                            name: $t(`Kampen`),
                         }),
                     }),
                 ];
@@ -286,13 +286,13 @@ export class OrganizationTypeHelper {
                 return [
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: 'Takken',
+                            name: $t(`Takken`),
                             maximumRegistrations: 1,
                         }),
                     }),
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: 'Activiteiten',
+                            name: $t(`Activiteiten`),
                         }),
                         categoryIds: activities.map(c => c.id),
                     }),
@@ -304,12 +304,12 @@ export class OrganizationTypeHelper {
                 const activities = [
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: 'Weekends',
+                            name: $t(`Weekends`),
                         }),
                     }),
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: 'Kampen',
+                            name: $t(`Kampen`),
                         }),
                     }),
                 ];
@@ -317,13 +317,13 @@ export class OrganizationTypeHelper {
                 return [
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: 'Afdelingen',
+                            name: $t(`Afdelingen`),
                             maximumRegistrations: 1,
                         }),
                     }),
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: 'Activiteiten',
+                            name: $t(`Activiteiten`),
                         }),
                         categoryIds: activities.map(c => c.id),
                     }),
@@ -335,12 +335,12 @@ export class OrganizationTypeHelper {
             const activities = [
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: 'Weekends',
+                        name: $t(`Weekends`),
                     }),
                 }),
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: 'Kampen',
+                        name: $t(`Kampen`),
                     }),
                 }),
             ];
@@ -348,13 +348,13 @@ export class OrganizationTypeHelper {
             return [
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: 'Leeftijdsgroepen',
+                        name: $t(`Leeftijdsgroepen`),
                         maximumRegistrations: 1,
                     }),
                 }),
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: 'Activiteiten',
+                        name: $t(`Activiteiten`),
                     }),
                     categoryIds: activities.map(c => c.id),
                 }),
@@ -366,12 +366,12 @@ export class OrganizationTypeHelper {
             return [
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: 'Danslessen',
+                        name: $t(`Danslessen`),
                     }),
                 }),
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: 'Activiteiten',
+                        name: $t(`Activiteiten`),
                     }),
                 }),
             ];
@@ -381,13 +381,13 @@ export class OrganizationTypeHelper {
             return [
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: 'Leeftijdsgroepen',
+                        name: $t(`Leeftijdsgroepen`),
                         maximumRegistrations: 1,
                     }),
                 }),
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: 'Activiteiten',
+                        name: $t(`Activiteiten`),
                     }),
                 }),
             ];

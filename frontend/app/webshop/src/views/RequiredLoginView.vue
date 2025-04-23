@@ -9,7 +9,7 @@
                 <template #right>
                     <a v-if="organization.website" class="button text limit-space" :href="organization.website" target="_blank" rel="nofollow noreferrer noopener">
                         <span class="icon external" />
-                        <span>Terug naar website</span>
+                        <span>{{ $t('Terug naar website') }}</span>
                     </a>
                 </template>
             </STNavigationBar>
@@ -17,14 +17,14 @@
             <main>
                 <div class="box">
                     <main>
-                        <h1>Inloggen</h1>
+                        <h1>{{ $t('Inloggen') }}</h1>
                         <p>
-                            Om deze pagina te bekijken moet je eerst inloggen via onderstaande knop.
+                            {{ $t('Om deze pagina te bekijken moet je eerst inloggen via onderstaande knop.') }}
                         </p>
 
                         <p>
                             <button type="button" class="button primary" @click="login">
-                                Inloggen
+                                {{ $t('Inloggen') }}
                             </button>
                         </p>
                     </main>

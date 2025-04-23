@@ -26,7 +26,7 @@ export class DocumentActionBuilder {
     getActions(): TableAction<DocumentStruct>[] {
         return [
             new InMemoryTableAction({
-                name: 'Downloaden',
+                name: $t(`Downloaden`),
                 icon: 'download',
                 priority: 5,
                 groupIndex: 2,
@@ -38,7 +38,7 @@ export class DocumentActionBuilder {
             }),
 
             new InMemoryTableAction({
-                name: 'Wijzig',
+                name: $t(`Wijzig`),
                 icon: 'edit',
                 priority: 0,
                 groupIndex: 1,
@@ -50,7 +50,7 @@ export class DocumentActionBuilder {
             }),
 
             new InMemoryTableAction({
-                name: 'Dupliceren',
+                name: $t(`Dupliceren`),
                 icon: 'copy',
                 priority: 1,
                 groupIndex: 2,
@@ -63,7 +63,7 @@ export class DocumentActionBuilder {
             }),
 
             new InMemoryTableAction({
-                name: 'Verwijderen',
+                name: $t(`Verwijderen`),
                 icon: 'trash',
                 priority: 1,
                 groupIndex: 3,
@@ -75,7 +75,7 @@ export class DocumentActionBuilder {
             }),
 
             new InMemoryTableAction({
-                name: 'Terugzetten',
+                name: $t(`Terugzetten`),
                 icon: 'undo',
                 priority: 1,
                 groupIndex: 3,
@@ -92,13 +92,13 @@ export class DocumentActionBuilder {
         const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "EditDocumentView" */ './EditDocumentView.vue'), {
             document,
             template: this.template,
-            isNew: false
+            isNew: false,
         });
         this.navigationActions.present(displayedComponent.setDisplayStyle('popup')).catch(console.error);
     }
 
     async deleteDocuments(documents: DocumentStruct[]) {
-        if (!(await CenteredMessage.confirm(documents.length > 1 ? `${documents.length} documenten verwijderen?` : 'Dit document verwijderen?', 'Verwijderen'))) {
+        if (!(await CenteredMessage.confirm(documents.length > 1 ? $t('{count} documenten verwijderen?', { count: documents.length.toString() }) : $t(`Dit document verwijderen?`), $t(`Verwijderen`)))) {
             return;
         }
         try {
@@ -123,7 +123,7 @@ export class DocumentActionBuilder {
                     originalDocument.deepSet(d);
                 }
             }
-            new Toast(documents.length === 1 ? 'Document verwijderd' : `${documents.length} documenten verwijderd`, 'success').show();
+            new Toast(documents.length === 1 ? $t(`Document verwijderd`) : $t('{count} documenten verwijderd', { count: documents.length.toString() }), 'success').show();
         }
         catch (e) {
             Toast.fromError(e).show();
@@ -131,7 +131,7 @@ export class DocumentActionBuilder {
     }
 
     async undoDocuments(documents: DocumentStruct[]) {
-        if (!(await CenteredMessage.confirm(documents.length > 1 ? `${documents.length} documenten uit prullenmand terug halen?` : 'Dit document uit prullenmand terug halen?', 'Terugzetten'))) {
+        if (!(await CenteredMessage.confirm(documents.length > 1 ? $t('{count} documenten uit prullenmand terug halen?', { count: documents.length.toString() }) : $t(`Dit document uit prullenmand terug halen?`), $t(`Terugzetten`)))) {
             return;
         }
         try {
@@ -156,7 +156,7 @@ export class DocumentActionBuilder {
                     originalDocument.deepSet(d);
                 }
             }
-            new Toast(documents.length === 1 ? 'Document teruggezet' : `${documents.length} documenten teruggezet`, 'success').show();
+            new Toast(documents.length === 1 ? $t(`Document teruggezet`) : $t('{count} documenten teruggezet', { count: documents.length.toString() }), 'success').show();
         }
         catch (e) {
             Toast.fromError(e).show();
@@ -164,7 +164,7 @@ export class DocumentActionBuilder {
     }
 
     async duplicateDocument(document: DocumentStruct) {
-        if (!(await CenteredMessage.confirm('Dit document dupliceren?', 'Dupliceren', 'Gebruik dit als je hetzelfde attest in verschillende versies wilt beschikbaar maken aan hetzelfde lid.'))) {
+        if (!(await CenteredMessage.confirm($t(`Dit document dupliceren?`), $t(`Dupliceren`), $t(`Gebruik dit als je hetzelfde attest in verschillende versies wilt beschikbaar maken aan hetzelfde lid.`)))) {
             return;
         }
         try {
@@ -190,10 +190,10 @@ export class DocumentActionBuilder {
                 this.addDocument?.(duplicatedDocument);
                 this.editDocument(duplicatedDocument).catch(console.error);
 
-                new Toast(`Nieuw document aangemaakt. Pas de naam en gegevens aan.`, 'success').show();
+                new Toast($t('Nieuw document aangemaakt. Pas de naam en gegevens aan.'), 'success').show();
             }
             else {
-                new Toast(`Er ging iets mis bij het dupliceren van het document`, 'error red').show();
+                new Toast($t('Er ging iets mis bij het dupliceren van het document'), 'error red').show();
             }
         }
         catch (e) {
@@ -205,7 +205,7 @@ export class DocumentActionBuilder {
         // Filter invalid documents
         const invalidDocuments = documents.filter(d => d.status === DocumentStatus.MissingData);
         if (invalidDocuments.length > 0) {
-            new Toast(`${invalidDocuments.length} ${invalidDocuments.length === 1 ? 'onvolledig document kan niet gedownload worden' : 'onvolledige documenten kunnen niet gedownload worden'}`, invalidDocuments.length === documents.length ? 'error red' : 'warning yellow').show();
+            new Toast(`${invalidDocuments.length} ${invalidDocuments.length === 1 ? $t(`onvolledig document kan niet gedownload worden`) : $t(`onvolledige documenten kunnen niet gedownload worden`)}`, invalidDocuments.length === documents.length ? 'error red' : 'warning yellow').show();
         }
         const validDocuments = documents.filter(d => d.status !== DocumentStatus.MissingData);
         if (validDocuments.length) {
@@ -214,7 +214,7 @@ export class DocumentActionBuilder {
     }
 
     async resetDocuments(documents: DocumentStruct[]) {
-        if (!(await CenteredMessage.confirm(documents.length == 1 ? 'Dit document resetten?' : 'Weet je zeker dat je de documenten wilt resetten?', 'Resetten'))) {
+        if (!(await CenteredMessage.confirm(documents.length == 1 ? $t(`Dit document resetten?`) : $t(`Weet je zeker dat je de documenten wilt resetten?`), $t(`Resetten`)))) {
             return;
         }
         try {

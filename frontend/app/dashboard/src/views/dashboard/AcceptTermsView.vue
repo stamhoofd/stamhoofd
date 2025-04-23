@@ -1,24 +1,24 @@
 <template>
-    <SaveView title="Aangepaste overeenkomsten" :loading="loading" @save="save">
+    <SaveView :loading="loading" :title="$t(`Aangepaste overeenkomsten`)" @save="save">
         <h1>
-            Bekijk de aangepaste overeenkomsten
+            {{ $t('Bekijk de aangepaste overeenkomsten') }}
         </h1>
 
         <p>
-            We hebben een wijziging aangebracht in onze algemene voorwaarden, privacyvoorwaarden en verwerkingsovereenkomst. Bekijk deze eerst en accepteer de nieuwe overeenkomsten voor je verder gaat.
+            {{ $t('We hebben een wijziging aangebracht in onze algemene voorwaarden, privacyvoorwaarden en verwerkingsovereenkomst. Bekijk deze eerst en accepteer de nieuwe overeenkomsten voor je verder gaat.') }}
         </p>
         <STErrorsDefault :error-box="errorBox" />
 
         <Checkbox v-model="acceptPrivacy" class="long-text">
-            Ik heb kennis genomen van <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/privacy'" target="_blank">het privacybeleid</a>.
+            {{ $t('Ik heb kennis genomen van') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/privacy'" target="_blank">{{ $t('het privacybeleid') }}</a>.
         </Checkbox>
 
         <Checkbox v-model="acceptTerms" class="long-text">
-            Ik heb <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/algemene-voorwaarden'" target="_blank">de algemene voorwaarden</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
+            {{ $t('Ik heb') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/algemene-voorwaarden'" target="_blank">{{ $t('de algemene voorwaarden') }}</a> {{ $t('gelezen en ga hiermee akkoord in naam van mijn vereniging.') }}
         </Checkbox>
 
         <Checkbox v-model="acceptDataAgreement" class="long-text">
-            Ik heb <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/verwerkersovereenkomst'" target="_blank">de verwerkersovereenkomst</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
+            {{ $t('Ik heb') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/verwerkersovereenkomst'" target="_blank">{{ $t('de verwerkersovereenkomst') }}</a> {{ $t('gelezen en ga hiermee akkoord in naam van mijn vereniging.') }}
         </Checkbox>
     </SaveView>
 </template>

@@ -1,6 +1,6 @@
 <template>
     <form class="st-view login-view" data-submit-last-field @submit.prevent="submit">
-        <STNavigationBar :large="true" title="Inloggen" class="transparent" />
+        <STNavigationBar :large="true" class="transparent" :title="$t(`Inloggen`)" />
 
         <main class="center small flex">
             <div class="st-view-vertical-center">
@@ -10,74 +10,71 @@
                     <STErrorsDefault :error-box="errors.errorBox" />
 
                     <template v-if="passwordConfig">
-                        <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="!initialEmail" enterkeyhint="next" class="max" name="username" title="E-mailadres" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
+                        <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="!initialEmail" enterkeyhint="next" class="max" name="username" :validator="errors.validator" autocomplete="username" :disabled="lock !== null" :title="$t(`E-mailadres`)" :placeholder="$t(`Vul jouw e-mailadres hier in`)" />
                         <p v-if="lock" class="style-description-small">
                             {{ lock }}
                         </p>
 
-                        <STInputBox title="Wachtwoord" class="max">
+                        <STInputBox class="max" :title="$t(`Wachtwoord`)">
                             <template #right>
                                 <button class="button text" type="button" tabindex="-1" @click.prevent="gotoPasswordForgot">
-                                    <span>Vergeten</span>
+                                    <span>{{ $t('Vergeten') }}</span>
                                     <span class="icon help" />
                                 </button>
                             </template>
-                            <input id="password" v-model="password" :autofocus="!!initialEmail" enterkeyhint="go" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="(event) => password = event.target.value" @change="(event) => password = event.target.value">
+                            <input id="password" v-model="password" :autofocus="!!initialEmail" enterkeyhint="go" class="input" name="current-password" autocomplete="current-password" type="password" :placeholder="$t(`Vul jouw wachtwoord hier in`)" @input="(event) => password = event.target.value" @change="(event) => password = event.target.value">
                         </STInputBox>
                         <VersionFooter v-if="showVersionFooter" />
                         <div v-else class="style-form-buttons ">
                             <LoadingButton :loading="loading" class="block">
                                 <button id="submit" class="button primary full" type="submit">
                                     <span class="lock icon" />
-                                    <span>Inloggen</span>
+                                    <span>{{ $t('Inloggen') }}</span>
                                 </button>
                             </LoadingButton>
 
                             <template v-if="googleConfig">
                                 <button class="button secundary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.Google)">
                                     <span class="icon">
-                                        <img src="@stamhoofd/assets/images/partners/icons/google.svg">
-                                    </span>
+                                        <img src="@stamhoofd/assets/images/partners/icons/google.svg"></span>
                                     <span v-if="googleConfig.loginButtonText">{{ googleConfig.loginButtonText }}</span>
-                                    <span v-else>Inloggen met Google</span>
+                                    <span v-else>{{ $t('Inloggen met Google') }}</span>
                                 </button>
                             </template>
 
                             <template v-if="ssoConfig">
                                 <button class="button secundary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.SSO)">
                                     <span v-if="ssoConfig.loginButtonText">{{ ssoConfig.loginButtonText }}</span>
-                                    <span v-else-if="!passwordConfig">Inloggen</span>
-                                    <span v-else>Inloggen via SSO</span>
+                                    <span v-else-if="!passwordConfig">{{ $t('Inloggen') }}</span>
+                                    <span v-else>{{ $t('Inloggen via SSO') }}</span>
                                 </button>
                             </template>
                         </div>
 
-                        <hr>
-                        <p class="style-description-small">
-                            Of maak een nieuw account aan als je nog geen account hebt. Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.
+                        <hr><p class="style-description-small">
+                            {{ $t('Of maak een nieuw account aan als je nog geen account hebt. Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.') }}
                         </p>
 
                         <button class="button text selected" type="button" tabindex="-1" @click="openSignup">
-                            <span>Account aanmaken</span>
+                            <span>{{ $t('Account aanmaken') }}</span>
                             <span class="icon arrow-right-small" />
                         </button>
                     </template>
                     <template v-else>
                         <p class="style-description-block">
-                            Log in via de knop hieronder.
+                            {{ $t('Log in via de knop hieronder.') }}
                         </p>
 
                         <div class="style-form-buttons">
                             <button v-if="ssoConfig" class="button primary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.SSO)">
                                 <span v-if="ssoConfig.loginButtonText">{{ ssoConfig.loginButtonText }}</span>
-                                <span v-else>Inloggen</span>
+                                <span v-else>{{ $t('Inloggen') }}</span>
                             </button>
                             <button v-if="googleConfig" class="button secundary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.Google)">
                                 <span class="icon">
-                                    <img src="@stamhoofd/assets/images/partners/icons/google.svg">
-                                </span>
+                                    <img src="@stamhoofd/assets/images/partners/icons/google.svg"></span>
                                 <span v-if="googleConfig.loginButtonText">{{ googleConfig.loginButtonText }}</span>
-                                <span v-else>Inloggen met Google</span>
+                                <span v-else>{{ $t('Inloggen met Google') }}</span>
                             </button>
                         </div>
                     </template>

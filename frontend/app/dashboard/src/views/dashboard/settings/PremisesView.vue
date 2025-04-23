@@ -20,7 +20,7 @@
 
         <template v-if="!draggablePremises.length">
             <p class="info-box">
-                Er zijn nog geen lokalen toegevoegd
+                {{ $t('Er zijn nog geen lokalen toegevoegd') }}
             </p>
         </template>
 

@@ -19,7 +19,7 @@ export class RegistrationPeriodBase extends AutoEncoder {
     previousPeriodId: string | null = null;
 
     get name() {
-        return 'Werkjaar ' + Formatter.year(this.startDate) + ' - ' + Formatter.year(this.endDate);
+        return $t(`Werkjaar`) + ' ' + Formatter.year(this.startDate) + ' - ' + Formatter.year(this.endDate);
     }
 
     get nameShort() {

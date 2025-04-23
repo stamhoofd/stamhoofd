@@ -6,32 +6,32 @@
             <h1>
                 {{ $t("a48e6035-5e61-4fc7-9ac4-89016e7174fe") }}
             </h1>
-            <p>Met een account kan je één of meerdere leden beheren.</p>
+            <p>{{ $t('Met een account kan je één of meerdere leden beheren.') }}</p>
 
             <p v-if="isUserModeOrganization && patched.organizationId === null" class="error-box icon privacy">
-                Dit is een platform account
+                {{ $t('Dit is een platform account') }}
             </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <form @submit.prevent="save">
-                <STInputBox v-if="firstName || lastName || usesPassword" title="Mijn naam" error-fields="firstName,lastName" :error-box="errors.errorBox">
+                <STInputBox v-if="firstName || lastName || usesPassword" error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`Mijn naam`)">
                     <div class="input-group">
                         <div>
-                            <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name" :disabled="!usesPassword">
+                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :disabled="!usesPassword" :placeholder="$t(`Voornaam`)">
                         </div>
                         <div>
-                            <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name" :disabled="!usesPassword">
+                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :disabled="!usesPassword" :placeholder="$t(`Achternaam`)">
                         </div>
                     </div>
                 </STInputBox>
 
-                <EmailInput v-model="email" title="E-mailadres" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="email" :disabled="!usesPassword" />
+                <EmailInput v-model="email" :validator="errors.validator" autocomplete="email" :disabled="!usesPassword" :title="$t(`E-mailadres`)" :placeholder="$t(`Vul jouw e-mailadres hier in`)" />
 
                 <div v-if="usesPassword" class="style-button-bar">
                     <LoadingButton :loading="saving">
                         <button id="submit" class="button primary" type="submit" :disabled="!hasChanges">
-                            <span>Opslaan</span>
+                            <span>{{ $t('Opslaan') }}</span>
                         </button>
                     </LoadingButton>
                 </div>
@@ -63,10 +63,10 @@
                     </template>
 
                     <h3 v-if="usesPassword" class="style-title-list">
-                        Wachtwoord wijzigen
+                        {{ $t('Wachtwoord wijzigen') }}
                     </h3>
                     <h3 v-else class="style-title-list">
-                        Wachtwoord instellen
+                        {{ $t('Wachtwoord instellen') }}
                     </h3>
                 </STListItem>
 
@@ -76,10 +76,10 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        Google account koppelen
+                        {{ $t('Google account koppelen') }}
                     </h3>
                     <p class="style-description-small">
-                        Je kan dan inloggen via je Google account als alternatieve loginmethode
+                        {{ $t('Je kan dan inloggen via je Google account als alternatieve loginmethode') }}
                     </p>
                 </STListItem>
 
@@ -89,7 +89,7 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ ssoConfig.fullName || 'Single-Sign-On (SSO)' }} activeren
+                        {{ $t('{sso} activeren', {sso: ssoConfig?.fullName || $t('Single-Sign-On (SSO)') }) }}
                     </h3>
                 </STListItem>
 
@@ -99,7 +99,7 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        Uitloggen
+                        {{ $t('Uitloggen') }}
                     </h3>
                 </STListItem>
 
@@ -111,7 +111,7 @@
                     </template>
 
                     <h3 class="style-title-list red">
-                        Account verwijderen
+                        {{ $t('Account verwijderen') }}
                     </h3>
                 </STListItem>
             </STList>
@@ -125,9 +125,8 @@
             </template>
 
             <div v-if="googleConfig && googleEnabled && usesGoogle && (passwordEnabled || ssoEnabled)" class="container">
-                <hr>
-                <h2>{{ googleConfig.fullName || 'Inloggen met Google' }}</h2>
-                <p>Je gebruikt Google om in te loggen op jouw account. Je kan inloggen met Google deactiveren voor jouw account.</p>
+                <hr><h2>{{ googleConfig.fullName || 'Inloggen met Google' }}</h2>
+                <p>{{ $t('Je gebruikt Google om in te loggen op jouw account. Je kan inloggen met Google deactiveren voor jouw account.') }}</p>
 
                 <STList>
                     <STListItem :selectable="true" @click.prevent="disconnectProvider(LoginProviderType.Google)">
@@ -143,16 +142,15 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            Google deactiveren
+                            {{ $t('Google deactiveren') }}
                         </h3>
                     </STListItem>
                 </STList>
             </div>
 
             <div v-if="ssoConfig && ssoEnabled && usesSSO && (passwordEnabled || googleEnabled)" class="container">
-                <hr>
-                <h2>{{ ssoConfig.fullName || 'Single-Sign-On (SSO)' }}</h2>
-                <p>Je gebruikt {{ ssoConfig.shortName || 'SSO' }} om in te loggen op jouw account. Als je wilt kan je die inlogmethode deactiveren voor jouw account.</p>
+                <hr><h2>{{ ssoConfig.fullName || 'Single-Sign-On (SSO)' }}</h2>
+                <p>{{ $t('Je gebruikt {sso} om in te loggen op jouw account. Als je wilt kan je die inlogmethode deactiveren voor jouw account.', {sso: ssoConfig.shortName || 'SSO'}) }}</p>
 
                 <STList>
                     <STListItem :selectable="true" @click.prevent="disconnectProvider(LoginProviderType.SSO)">
@@ -168,16 +166,15 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ ssoConfig.shortName || 'SSO' }} deactiveren
+                            {{ $t('{sso} deactiveren', {sso: ssoConfig.shortName || 'SSO'}) }}
                         </h3>
                     </STListItem>
                 </STList>
             </div>
 
             <div v-if="passwordEnabled && usesPassword && (usesGoogle || usesSSO)" class="container">
-                <hr>
-                <h2>Inloggen met wachtwoord</h2>
-                <p>Je kan momenteel ook inloggen met een wachtwoord op je account. Als je wilt kan je jouw wachtwoord verwijderen zodat je enkel via je andere ingestelde loginmethode kan inloggen.</p>
+                <hr><h2>{{ $t('Inloggen met wachtwoord') }}</h2>
+                <p>{{ $t('Je kan momenteel ook inloggen met een wachtwoord op je account. Als je wilt kan je jouw wachtwoord verwijderen zodat je enkel via je andere ingestelde loginmethode kan inloggen.') }}</p>
 
                 <STList>
                     <STListItem :selectable="true" @click.prevent="deletePassword">
@@ -193,7 +190,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            Wachtwoord verwijderen
+                            {{ $t('Wachtwoord verwijderen') }}
                         </h3>
                     </STListItem>
                 </STList>
@@ -208,10 +205,9 @@ import { ComponentWithProperties, useDismiss, usePop, usePresent } from '@simonb
 import { CenteredMessage, ChangePasswordView, ConfirmEmailView, ContextMenu, ContextMenuItem, EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, Toast, useContext, useErrors, useLoginMethod, useLoginMethodEnabled, usePatch, usePlatform, useUser, useValidation } from '@stamhoofd/components';
 import { I18nController, useTranslate } from '@stamhoofd/frontend-i18n';
 import { LoginHelper } from '@stamhoofd/networking';
-import { LoginMethod, LoginProviderType, NewUser, UserMeta } from '@stamhoofd/structures';
-import { computed, getCurrentInstance, onMounted, ref } from 'vue';
+import { LanguageHelper, LoginMethod, LoginProviderType, NewUser, UserMeta } from '@stamhoofd/structures';
+import { computed, onMounted, ref } from 'vue';
 import DeleteView from './DeleteView.vue';
-import { LanguageHelper } from '@stamhoofd/structures';
 
 const $context = useContext();
 const $platform = usePlatform();

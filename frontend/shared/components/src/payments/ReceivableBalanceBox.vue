@@ -8,7 +8,7 @@
                 <BalancePriceBreakdown :item="detailedItem" />
             </template>
             <p v-else class="info-box">
-                Geen openstaand bedrag
+                {{ $t('Geen openstaand bedrag') }}
             </p>
 
             <STList v-if="hasWrite">
@@ -21,10 +21,10 @@
                         </IconContainer>
                     </template>
                     <h3 class="style-title-list">
-                        Item toevoegen
+                        {{ $t('Item toevoegen') }}
                     </h3>
                     <p class="style-description-small">
-                        Voeg een item toe aan het openstaand bedrag of geef een tegoed
+                        {{ $t('Voeg een item toe aan het openstaand bedrag of geef een tegoed') }}
                     </p>
 
                     <template #right>
@@ -42,10 +42,10 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        Betaling registreren
+                        {{ $t('Betaling registreren') }}
                     </h3>
                     <p class="style-description-small">
-                        Via een betaling kan je één of meerdere items markeren als betaald
+                        {{ $t('Via een betaling kan je één of meerdere items markeren als betaald') }}
                     </p>
 
                     <template #right>
@@ -63,10 +63,10 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        Terugbetaling registreren
+                        {{ $t('Terugbetaling registreren') }}
                     </h3>
                     <p class="style-description-small">
-                        Via een betaling kan je één of meerdere items markeren als betaald
+                        {{ $t('Via een betaling kan je één of meerdere items markeren als betaald') }}
                     </p>
 
                     <template #right>
@@ -76,42 +76,38 @@
             </STList>
 
             <template v-if="item.objectType === ReceivableBalanceType.member || item.objectType === ReceivableBalanceType.user">
-                <hr>
-                <h2>Hoe kan men dit betalen?</h2>
-                <p>Leden kunnen hun openstaand bedrag betalen door naar het ledenportaal te gaan. Bovenaan zullen ze bij 'snelle acties' een knop zien waarmee ze hun openstaand bedrag kunnen betalen (je kan een e-mail sturen met een inlogknop om naar het ledenportaal te gaan).</p>
+                <hr><h2>{{ $t('Hoe kan men dit betalen?') }}</h2>
+                <p>{{ $t("Leden kunnen hun openstaand bedrag betalen door naar het ledenportaal te gaan. Bovenaan zullen ze bij 'snelle acties' een knop zien waarmee ze hun openstaand bedrag kunnen betalen (je kan een e-mail sturen met een inlogknop om naar het ledenportaal te gaan).") }}</p>
                 <p v-if="detailedItem.amountPending !== 0" class="style-description-block">
-                    Opgelet, het deel dat in verwerking is kan niet betaald worden via het ledenportaal. Je kan wel de betalingen die in verwerking zijn annuleren zodat ze via een andere betaalmethode betaald kunnen worden via het ledenportaal. Bijvoorbeeld een overschrijving die al lang niet betaald werd kan je annuleren om vervolgens een nieuw betaalverzoek te versturen van het openstaande bedrag.
+                    {{ $t('Opgelet, het deel dat in verwerking is kan niet betaald worden via het ledenportaal. Je kan wel de betalingen die in verwerking zijn annuleren zodat ze via een andere betaalmethode betaald kunnen worden via het ledenportaal. Bijvoorbeeld een overschrijving die al lang niet betaald werd kan je annuleren om vervolgens een nieuw betaalverzoek te versturen van het openstaande bedrag.') }}
                 </p>
                 <p v-if="detailedItem.amountOpen !== 0" class="style-description-block">
-                    Je kan zelf ook manueel een betaling toevoegen (bv. als er ter plaatse werd betaald, of via een overschrijving die niet in het systeem is opgenomen) via de knop 'Betaling/terugbetaling registreren' hierboven.
+                    {{ $t("Je kan zelf ook manueel een betaling toevoegen (bv. als er ter plaatse werd betaald, of via een overschrijving die niet in het systeem is opgenomen) via de knop 'Betaling/terugbetaling registreren' hierboven.") }}
                 </p>
             </template>
 
             <template v-if="pendingPayments.length > 0">
-                <hr>
-                <h2>In verwerking</h2>
-                <p>Bij betalingen via overschrijving of domiciliëring kan het even duren voor een betaling wordt bevestigd.</p>
+                <hr><h2>{{ $t('In verwerking') }}</h2>
+                <p>{{ $t('Bij betalingen via overschrijving of domiciliëring kan het even duren voor een betaling wordt bevestigd.') }}</p>
 
                 <STList>
                     <PaymentRow v-for="payment of pendingPayments" :key="payment.id" :payments="pendingPayments" :payment="payment" />
                 </STList>
             </template>
 
-            <hr>
-            <h2>Betalingen</h2>
+            <hr><h2>{{ $t('Betalingen') }}</h2>
 
             <p v-if="succeededPayments.length === 0" class="info-box">
-                Je hebt nog geen betalingen ontvangen
+                {{ $t('Je hebt nog geen betalingen ontvangen') }}
             </p>
 
             <STList v-else>
                 <PaymentRow v-for="payment of succeededPayments" :key="payment.id" :payment="payment" :payments="succeededPayments" />
             </STList>
 
-            <hr>
-            <h2>Contactpersonen</h2>
+            <hr><h2>{{ $t('Contactpersonen') }}</h2>
 
-            <p>Deze personen ontvangen een e-mail bij elke communicatie rond dit openstaand bedrag.</p>
+            <p>{{ $t('Deze personen ontvangen een e-mail bij elke communicatie rond dit openstaand bedrag.') }}</p>
 
             <STList v-if="detailedItem.object.contacts.length" class="info">
                 <STListItem v-for="(contact, index) of detailedItem.object.contacts" :key="index">
@@ -124,7 +120,7 @@
                 </STListItem>
             </STList>
             <p v-else class="info-box">
-                Geen contactpersonen gevonden
+                {{ $t('Geen contactpersonen gevonden') }}
             </p>
         </div>
     </LoadingBoxTransition>

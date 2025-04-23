@@ -212,65 +212,65 @@ export class EmailTemplate extends AutoEncoder {
 
     static getTypeTitle(type: EmailTemplateType): string {
         switch (type) {
-            case EmailTemplateType.SavedMembersEmail: return 'Opgeslagen e-mail naar leden';
-            case EmailTemplateType.SavedReceivableBalancesEmail: return 'Opgeslagen e-mail naar openstaande bedragen';
+            case EmailTemplateType.SavedMembersEmail: return $t(`Opgeslagen e-mail naar leden`);
+            case EmailTemplateType.SavedReceivableBalancesEmail: return $t(`Opgeslagen e-mail naar openstaande bedragen`);
 
-            case EmailTemplateType.DefaultMembersEmail: return 'Standaard e-mail naar leden';
-            case EmailTemplateType.DefaultReceivableBalancesEmail: return 'Standaard e-mail naar openstaande bedragen';
-            case EmailTemplateType.DefaultOrdersEmail: return 'Standaard e-mail naar bestellingen';
+            case EmailTemplateType.DefaultMembersEmail: return $t(`Standaard e-mail naar leden`);
+            case EmailTemplateType.DefaultReceivableBalancesEmail: return $t(`Standaard e-mail naar openstaande bedragen`);
+            case EmailTemplateType.DefaultOrdersEmail: return $t(`Standaard e-mail naar bestellingen`);
 
-            case EmailTemplateType.MembersExpirationReminder: return 'Herinnering verlopen pakket ledenadministratie';
-            case EmailTemplateType.WebshopsExpirationReminder: return 'Herinnering verlopen pakket webshops';
-            case EmailTemplateType.SingleWebshopExpirationReminder: return 'Herinnering verlopen pakket enkele webshop';
-            case EmailTemplateType.TrialWebshopsExpirationReminder: return 'Herinnering verlopen proefperiode pakket webshops';
-            case EmailTemplateType.TrialMembersExpirationReminder: return 'Herinnering verlopen proefperiode pakket ledenadministratie';
-            case EmailTemplateType.OrderNotification: return 'Bestelling notificatie voor beheerders';
+            case EmailTemplateType.MembersExpirationReminder: return $t(`Herinnering verlopen pakket ledenadministratie`);
+            case EmailTemplateType.WebshopsExpirationReminder: return $t(`Herinnering verlopen pakket webshops`);
+            case EmailTemplateType.SingleWebshopExpirationReminder: return $t(`Herinnering verlopen pakket enkele webshop`);
+            case EmailTemplateType.TrialWebshopsExpirationReminder: return $t(`Herinnering verlopen proefperiode pakket webshops`);
+            case EmailTemplateType.TrialMembersExpirationReminder: return $t(`Herinnering verlopen proefperiode pakket ledenadministratie`);
+            case EmailTemplateType.OrderNotification: return $t(`Bestelling notificatie voor beheerders`);
 
-            case EmailTemplateType.RegistrationConfirmation: return 'Bevestiging van inschrijving';
-            case EmailTemplateType.RegistrationTransferDetails: return 'Betaalinstructies met overschrijving';
+            case EmailTemplateType.RegistrationConfirmation: return $t(`Bevestiging van inschrijving`);
+            case EmailTemplateType.RegistrationTransferDetails: return $t(`Betaalinstructies met overschrijving`);
 
-            case EmailTemplateType.OrderConfirmationOnline: return 'Bestelling bevestiging: online betaling';
-            case EmailTemplateType.OrderConfirmationTransfer: return 'Bestelling bevestiging: overschrijving';
-            case EmailTemplateType.OrderConfirmationPOS: return 'Bestelling bevestiging: betaling aan de kassa';
-            case EmailTemplateType.OrderReceivedTransfer: return 'Bevestiging ontvangen overschrijving';
-            case EmailTemplateType.OrderOnlinePaymentFailed: return 'Online betaling mislukt';
-            case EmailTemplateType.TicketsConfirmation: return 'E-mail met tickets: online betaling';
-            case EmailTemplateType.TicketsConfirmationTransfer: return 'Bevestiging voor bestelling met overschrijving (nog geen tickets)';
-            case EmailTemplateType.TicketsConfirmationPOS: return 'E-mail met tickets: betaling aan de kassa';
-            case EmailTemplateType.TicketsReceivedTransfer: return 'E-mail met tickets: na ontvangen overschrijving';
+            case EmailTemplateType.OrderConfirmationOnline: return $t(`Bestelling bevestiging: online betaling`);
+            case EmailTemplateType.OrderConfirmationTransfer: return $t(`Bestelling bevestiging: overschrijving`);
+            case EmailTemplateType.OrderConfirmationPOS: return $t(`Bestelling bevestiging: betaling aan de kassa`);
+            case EmailTemplateType.OrderReceivedTransfer: return $t(`Bevestiging ontvangen overschrijving`);
+            case EmailTemplateType.OrderOnlinePaymentFailed: return $t(`Online betaling mislukt`);
+            case EmailTemplateType.TicketsConfirmation: return $t(`E-mail met tickets: online betaling`);
+            case EmailTemplateType.TicketsConfirmationTransfer: return $t(`Bevestiging voor bestelling met overschrijving (nog geen tickets)`);
+            case EmailTemplateType.TicketsConfirmationPOS: return $t(`E-mail met tickets: betaling aan de kassa`);
+            case EmailTemplateType.TicketsReceivedTransfer: return $t(`E-mail met tickets: na ontvangen overschrijving`);
 
-            case EmailTemplateType.OrganizationUnstableDNS: return 'Instabiele DNS';
-            case EmailTemplateType.OrganizationInvalidDNS: return 'Ongeldige DNS';
-            case EmailTemplateType.OrganizationValidDNS: return 'Geldige DNS';
-            case EmailTemplateType.OrganizationStableDNS: return 'Stabiele DNS';
-            case EmailTemplateType.OrganizationDNSSetupComplete: return 'DNS setup compleet';
+            case EmailTemplateType.OrganizationUnstableDNS: return $t(`Instabiele DNS`);
+            case EmailTemplateType.OrganizationInvalidDNS: return $t(`Ongeldige DNS`);
+            case EmailTemplateType.OrganizationValidDNS: return $t(`Geldige DNS`);
+            case EmailTemplateType.OrganizationStableDNS: return $t(`Stabiele DNS`);
+            case EmailTemplateType.OrganizationDNSSetupComplete: return $t(`DNS setup compleet`);
 
-            case EmailTemplateType.OrganizationDripWelcome: return 'Welkom';
-            case EmailTemplateType.OrganizationDripWebshopTrialCheckin: return 'Webshop proefperiode checkin';
-            case EmailTemplateType.OrganizationDripMembersTrialCheckin: return 'Ledenadministratie proefperiode checkin';
-            case EmailTemplateType.OrganizationDripWebshopTrialExpired: return 'Webshop proefperiode verlopen';
-            case EmailTemplateType.OrganizationDripMembersTrialExpired: return 'Ledenadministratie proefperiode verlopen';
-            case EmailTemplateType.OrganizationDripTrialExpiredReminder: return 'Proefperiode verlopen reminder';
-            case EmailTemplateType.OrganizationDripWebshopNotRenewed: return 'Webshop niet verlengd';
-            case EmailTemplateType.OrganizationDripMembersNotRenewed: return 'Ledenadministratie niet verlengd';
+            case EmailTemplateType.OrganizationDripWelcome: return $t(`Welkom`);
+            case EmailTemplateType.OrganizationDripWebshopTrialCheckin: return $t(`Webshop proefperiode checkin`);
+            case EmailTemplateType.OrganizationDripMembersTrialCheckin: return $t(`Ledenadministratie proefperiode checkin`);
+            case EmailTemplateType.OrganizationDripWebshopTrialExpired: return $t(`Webshop proefperiode verlopen`);
+            case EmailTemplateType.OrganizationDripMembersTrialExpired: return $t(`Ledenadministratie proefperiode verlopen`);
+            case EmailTemplateType.OrganizationDripTrialExpiredReminder: return $t(`Proefperiode verlopen reminder`);
+            case EmailTemplateType.OrganizationDripWebshopNotRenewed: return $t(`Webshop niet verlengd`);
+            case EmailTemplateType.OrganizationDripMembersNotRenewed: return $t(`Ledenadministratie niet verlengd`);
 
-            case EmailTemplateType.ExcelExportSucceeded: return 'Excel export geslaagd';
-            case EmailTemplateType.ExcelExportFailed: return 'Excel export mislukt';
+            case EmailTemplateType.ExcelExportSucceeded: return $t(`Excel export geslaagd`);
+            case EmailTemplateType.ExcelExportFailed: return $t(`Excel export mislukt`);
 
-            case EmailTemplateType.SignupAlreadyHasAccount: return 'Registratie: account bestaat al';
-            case EmailTemplateType.ForgotPasswordButNoAccount: return 'Wachtwoord vergeten: geen account';
-            case EmailTemplateType.ForgotPassword: return 'Wachtwoord vergeten';
-            case EmailTemplateType.DeleteAccountConfirmation: return 'Bevestiging account verwijderen';
-            case EmailTemplateType.VerifyEmail: return 'Verifieer e-mailadres';
-            case EmailTemplateType.VerifyEmailWithoutCode: return 'Verifieer e-mailadres zonder code';
-            case EmailTemplateType.AdminInvitation: return 'Uitnodiging beheerder: bestaande gebruiker';
-            case EmailTemplateType.AdminInvitationNewUser: return 'Uitnodiging beheerder: nieuwe gebruiker';
+            case EmailTemplateType.SignupAlreadyHasAccount: return $t(`Registratie: account bestaat al`);
+            case EmailTemplateType.ForgotPasswordButNoAccount: return $t(`Wachtwoord vergeten: geen account`);
+            case EmailTemplateType.ForgotPassword: return $t(`Wachtwoord vergeten`);
+            case EmailTemplateType.DeleteAccountConfirmation: return $t(`Bevestiging account verwijderen`);
+            case EmailTemplateType.VerifyEmail: return $t(`Verifieer e-mailadres`);
+            case EmailTemplateType.VerifyEmailWithoutCode: return $t(`Verifieer e-mailadres zonder code`);
+            case EmailTemplateType.AdminInvitation: return $t(`Uitnodiging beheerder: bestaande gebruiker`);
+            case EmailTemplateType.AdminInvitationNewUser: return $t(`Uitnodiging beheerder: nieuwe gebruiker`);
 
-            case EmailTemplateType.UserBalanceIncreaseNotification: return 'Saldo verhoogd';
-            case EmailTemplateType.UserBalanceReminder: return 'Saldo herinnering';
+            case EmailTemplateType.UserBalanceIncreaseNotification: return $t(`Saldo verhoogd`);
+            case EmailTemplateType.UserBalanceReminder: return $t(`Saldo herinnering`);
 
-            case EmailTemplateType.OrganizationBalanceIncreaseNotification: return 'Saldo verhoogd';
-            case EmailTemplateType.OrganizationBalanceReminder: return 'Saldo herinnering';
+            case EmailTemplateType.OrganizationBalanceIncreaseNotification: return $t(`Saldo verhoogd`);
+            case EmailTemplateType.OrganizationBalanceReminder: return $t(`Saldo herinnering`);
 
             case EmailTemplateType.EventNotificationSubmittedCopy: return $t('9a9a7777-44ca-494b-9d15-c0192bc41a7f');
             case EmailTemplateType.EventNotificationSubmittedReviewer: return $t('ff2beaea-cb8f-4de8-ba1c-039b7ba20bc0');
@@ -284,44 +284,44 @@ export class EmailTemplate extends AutoEncoder {
         switch (type) {
             case EmailTemplateType.SavedMembersEmail:
             case EmailTemplateType.SavedReceivableBalancesEmail:
-                return 'Opgeslagen e-mail';
+                return $t(`Opgeslagen e-mail`);
 
             case EmailTemplateType.DefaultMembersEmail:
             case EmailTemplateType.DefaultReceivableBalancesEmail:
             case EmailTemplateType.DefaultOrdersEmail:
-                return 'Placeholder';
+                return $t(`Placeholder`);
 
             case EmailTemplateType.MembersExpirationReminder:
             case EmailTemplateType.WebshopsExpirationReminder:
             case EmailTemplateType.SingleWebshopExpirationReminder:
             case EmailTemplateType.TrialWebshopsExpirationReminder:
             case EmailTemplateType.TrialMembersExpirationReminder:
-                return 'Billing';
+                return $t(`Billing`);
 
             case EmailTemplateType.RegistrationConfirmation:
             case EmailTemplateType.RegistrationTransferDetails:
-                return 'Inschrijvingen';
+                return $t(`Inschrijvingen`);
 
             case EmailTemplateType.OrderNotification:
-                return 'Webshop';
+                return $t(`Webshop`);
             case EmailTemplateType.OrderConfirmationOnline:
             case EmailTemplateType.OrderConfirmationTransfer:
             case EmailTemplateType.OrderConfirmationPOS:
             case EmailTemplateType.OrderReceivedTransfer:
             case EmailTemplateType.OrderOnlinePaymentFailed:
-                return 'Webshop zonder tickets';
+                return $t(`Webshop zonder tickets`);
             case EmailTemplateType.TicketsConfirmation:
             case EmailTemplateType.TicketsConfirmationTransfer:
             case EmailTemplateType.TicketsConfirmationPOS:
             case EmailTemplateType.TicketsReceivedTransfer:
-                return 'Webshop met tickets';
+                return $t(`Webshop met tickets`);
 
             case EmailTemplateType.OrganizationUnstableDNS:
             case EmailTemplateType.OrganizationInvalidDNS:
             case EmailTemplateType.OrganizationValidDNS:
             case EmailTemplateType.OrganizationStableDNS:
             case EmailTemplateType.OrganizationDNSSetupComplete:
-                return 'DNS';
+                return $t(`DNS`);
 
             case EmailTemplateType.OrganizationDripWelcome:
             case EmailTemplateType.OrganizationDripWebshopTrialCheckin:
@@ -331,11 +331,11 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.OrganizationDripTrialExpiredReminder:
             case EmailTemplateType.OrganizationDripWebshopNotRenewed:
             case EmailTemplateType.OrganizationDripMembersNotRenewed:
-                return 'Drip';
+                return $t(`Drip`);
 
             case EmailTemplateType.ExcelExportSucceeded:
             case EmailTemplateType.ExcelExportFailed:
-                return 'Excel export';
+                return $t(`Excel export`);
 
             case EmailTemplateType.SignupAlreadyHasAccount:
             case EmailTemplateType.ForgotPasswordButNoAccount:
@@ -343,19 +343,19 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.DeleteAccountConfirmation:
             case EmailTemplateType.VerifyEmail:
             case EmailTemplateType.VerifyEmailWithoutCode:
-                return 'Accounts en wachtwoorden';
+                return $t(`Accounts en wachtwoorden`);
 
             case EmailTemplateType.AdminInvitation:
             case EmailTemplateType.AdminInvitationNewUser:
-                return 'Uitnodiging beheerder';
+                return $t(`Uitnodiging beheerder`);
 
             case EmailTemplateType.UserBalanceIncreaseNotification:
             case EmailTemplateType.UserBalanceReminder:
-                return 'Openstaand bedrag leden';
+                return $t(`Openstaand bedrag leden`);
 
             case EmailTemplateType.OrganizationBalanceIncreaseNotification:
             case EmailTemplateType.OrganizationBalanceReminder:
-                return 'Openstaand bedrag groepen';
+                return $t(`Openstaand bedrag groepen`);
 
             case EmailTemplateType.EventNotificationSubmittedCopy:
             case EmailTemplateType.EventNotificationSubmittedReviewer:
@@ -365,7 +365,6 @@ export class EmailTemplate extends AutoEncoder {
                 return $t('a4658017-52e9-4732-8570-2c60e5d6a5cd');
         }
 
-        return 'Andere';
     }
 
     static allowPlatformLevel(type: EmailTemplateType): boolean {
@@ -411,26 +410,26 @@ export class EmailTemplate extends AutoEncoder {
 
     static getPlatformTypeDescription(type: EmailTemplateType): string | null {
         switch (type) {
-            case EmailTemplateType.OrganizationUnstableDNS: return 'Na periodiek controleren blijken de DNS-instellingen van de domeinnaam van een vereniging instabiel te zijn.';
-            case EmailTemplateType.OrganizationInvalidDNS: return 'Bij een routinecontrole blijken de DNS-instellingen van de domeinnaam van een vereniging ongeldig te zijn.';
-            case EmailTemplateType.OrganizationValidDNS: return 'Na een controle blijken de DNS-instellingen van de domeinnaam van een vereniging geldig te zijn.';
-            case EmailTemplateType.OrganizationStableDNS: return 'Na periodiek controleren blijken de DNS-instellingen van de domeinnaam van een vereniging terug stabiel te zijn.';
-            case EmailTemplateType.OrganizationDNSSetupComplete: return 'De DNS-instellingen van de domeinnaam van een vereniging zijn correct ingesteld.';
+            case EmailTemplateType.OrganizationUnstableDNS: return $t(`Na periodiek controleren blijken de DNS-instellingen van de domeinnaam van een vereniging instabiel te zijn.`);
+            case EmailTemplateType.OrganizationInvalidDNS: return $t(`Bij een routinecontrole blijken de DNS-instellingen van de domeinnaam van een vereniging ongeldig te zijn.`);
+            case EmailTemplateType.OrganizationValidDNS: return $t(`Na een controle blijken de DNS-instellingen van de domeinnaam van een vereniging geldig te zijn.`);
+            case EmailTemplateType.OrganizationStableDNS: return $t(`Na periodiek controleren blijken de DNS-instellingen van de domeinnaam van een vereniging terug stabiel te zijn.`);
+            case EmailTemplateType.OrganizationDNSSetupComplete: return $t(`De DNS-instellingen van de domeinnaam van een vereniging zijn correct ingesteld.`);
 
-            case EmailTemplateType.OrderOnlinePaymentFailed: return 'Wanneer een online betaling bij een webshop mislukt na een lange tijd wachten - zou zelden mogen voorkomen';
+            case EmailTemplateType.OrderOnlinePaymentFailed: return $t(`Wanneer een online betaling bij een webshop mislukt na een lange tijd wachten - zou zelden mogen voorkomen`);
 
-            case EmailTemplateType.ExcelExportSucceeded: return 'Bij lange Excel exports ontvang je een e-mail om jouw bestand te downloaden';
-            case EmailTemplateType.ExcelExportFailed: return 'Als een lange Excel export toch mislukt, ontvang je een e-mail dat het mis ging';
+            case EmailTemplateType.ExcelExportSucceeded: return $t(`Bij lange Excel exports ontvang je een e-mail om jouw bestand te downloaden`);
+            case EmailTemplateType.ExcelExportFailed: return $t(`Als een lange Excel export toch mislukt, ontvang je een e-mail dat het mis ging`);
 
-            case EmailTemplateType.ForgotPasswordButNoAccount: return 'Als iemand een wachtwoord probeert te resetten, maar er geen account is met dat e-mailadres';
-            case EmailTemplateType.ForgotPassword: return 'De e-mail met een link om je wachtwoord opnieuw in te stellen als je die bent vergeten';
-            case EmailTemplateType.DeleteAccountConfirmation: return 'De e-mail als bevestiging als iemand aanvraagt om hun account te verwijderen.';
-            case EmailTemplateType.VerifyEmail: return 'De e-mail die wordt verzonden om het e-mailadres te bevestigen als iemand een account aanmaakt.';
-            case EmailTemplateType.VerifyEmailWithoutCode: return 'De e-mail die wordt verzonden naar de gebruiker om het e-mailadres te bevestigen als een beheerder dit wijzigt. Deze e-mail bevat geen bevestigingscode.';
-            case EmailTemplateType.AdminInvitation: return 'De e-mail die een bestaande gebruiker ontvangt als hij toegevoegd wordt als beheerder.';
-            case EmailTemplateType.AdminInvitationNewUser: return 'De e-mail die iemand zonder account ontvangt als hij toegevoegd wordt als beheerder.';
+            case EmailTemplateType.ForgotPasswordButNoAccount: return $t(`Als iemand een wachtwoord probeert te resetten, maar er geen account is met dat e-mailadres`);
+            case EmailTemplateType.ForgotPassword: return $t(`De e-mail met een link om je wachtwoord opnieuw in te stellen als je die bent vergeten`);
+            case EmailTemplateType.DeleteAccountConfirmation: return $t(`De e-mail als bevestiging als iemand aanvraagt om hun account te verwijderen.`);
+            case EmailTemplateType.VerifyEmail: return $t(`De e-mail die wordt verzonden om het e-mailadres te bevestigen als iemand een account aanmaakt.`);
+            case EmailTemplateType.VerifyEmailWithoutCode: return $t(`De e-mail die wordt verzonden naar de gebruiker om het e-mailadres te bevestigen als een beheerder dit wijzigt. Deze e-mail bevat geen bevestigingscode.`);
+            case EmailTemplateType.AdminInvitation: return $t(`De e-mail die een bestaande gebruiker ontvangt als hij toegevoegd wordt als beheerder.`);
+            case EmailTemplateType.AdminInvitationNewUser: return $t(`De e-mail die iemand zonder account ontvangt als hij toegevoegd wordt als beheerder.`);
 
-            case EmailTemplateType.SignupAlreadyHasAccount: return 'Als iemand probeert een account aan te maken, maar er al een account bestaat met dat e-mailadres';
+            case EmailTemplateType.SignupAlreadyHasAccount: return $t(`Als iemand probeert een account aan te maken, maar er al een account bestaat met dat e-mailadres`);
 
             case EmailTemplateType.EventNotificationSubmittedCopy: return $t('fdf6dd9d-25f9-41bc-869b-beb2906aa77f');
             case EmailTemplateType.EventNotificationSubmittedReviewer: return $t('bd2321f7-caea-423e-a5e9-823023e74ec9');
@@ -444,28 +443,28 @@ export class EmailTemplate extends AutoEncoder {
 
     static getTypeDescription(type: EmailTemplateType): string {
         switch (type) {
-            case EmailTemplateType.DefaultMembersEmail: return 'Als iemand een nieuwe e-mail opstelt, gericht aan leden, zal deze template standaard al klaar staan. Deze kan dan nog aangepast worden.';
-            case EmailTemplateType.DefaultReceivableBalancesEmail: return 'Als iemand een nieuwe e-mail opstelt, gericht aan leden met openstaande bedragen, zal deze template standaard al klaar staan. Deze kan dan nog aangepast worden.';
-            case EmailTemplateType.DefaultOrdersEmail: return 'Als iemand een nieuwe e-mail opstelt, gericht aan bestellingen, zal deze template standaard al klaar staan. Deze kan dan nog aangepast worden.';
+            case EmailTemplateType.DefaultMembersEmail: return $t(`Als iemand een nieuwe e-mail opstelt, gericht aan leden, zal deze template standaard al klaar staan. Deze kan dan nog aangepast worden.`);
+            case EmailTemplateType.DefaultReceivableBalancesEmail: return $t(`Als iemand een nieuwe e-mail opstelt, gericht aan leden met openstaande bedragen, zal deze template standaard al klaar staan. Deze kan dan nog aangepast worden.`);
+            case EmailTemplateType.DefaultOrdersEmail: return $t(`Als iemand een nieuwe e-mail opstelt, gericht aan bestellingen, zal deze template standaard al klaar staan. Deze kan dan nog aangepast worden.`);
 
-            case EmailTemplateType.OrderNotification: return 'E-mail die webshop eigenaren ontvangen wanneer er een bestelling is geplaatst (indien ze die functie hebben ingeschakeld)';
-            case EmailTemplateType.RegistrationConfirmation: return 'Leden en ouders (die toegang hebben of moeten krijgen) ontvangen deze e-mail nadat ze worden ingeschreven of zelf inschrijven.';
+            case EmailTemplateType.OrderNotification: return $t(`E-mail die webshop eigenaren ontvangen wanneer er een bestelling is geplaatst (indien ze die functie hebben ingeschakeld)`);
+            case EmailTemplateType.RegistrationConfirmation: return $t(`Leden en ouders (die toegang hebben of moeten krijgen) ontvangen deze e-mail nadat ze worden ingeschreven of zelf inschrijven.`);
 
-            case EmailTemplateType.OrderConfirmationOnline: return 'Wanneer een besteller online betaald (of totaalbedrag is 0 euro)';
-            case EmailTemplateType.OrderConfirmationTransfer: return 'Wanneer een besteller kiest voor overschrijving - bevat nog eens de betaalinstructies als de betaling nog niet zou zijn gebeurd';
-            case EmailTemplateType.OrderConfirmationPOS: return 'Wanneer een besteller kiest voor betaling ter plaatse/bij levering';
-            case EmailTemplateType.OrderReceivedTransfer: return 'De e-mail die een besteller nog ontvangt als je de betaling hebt gemarkeerd als ontvangen (enkel bij betaalmethode overschrijving)';
+            case EmailTemplateType.OrderConfirmationOnline: return $t(`Wanneer een besteller online betaald (of totaalbedrag is 0 euro)`);
+            case EmailTemplateType.OrderConfirmationTransfer: return $t(`Wanneer een besteller kiest voor overschrijving - bevat nog eens de betaalinstructies als de betaling nog niet zou zijn gebeurd`);
+            case EmailTemplateType.OrderConfirmationPOS: return $t(`Wanneer een besteller kiest voor betaling ter plaatse/bij levering`);
+            case EmailTemplateType.OrderReceivedTransfer: return $t(`De e-mail die een besteller nog ontvangt als je de betaling hebt gemarkeerd als ontvangen (enkel bij betaalmethode overschrijving)`);
 
-            case EmailTemplateType.TicketsConfirmation: return 'Wanneer een besteller online betaald (of totaalbedrag is 0 euro)';
-            case EmailTemplateType.TicketsConfirmationTransfer: return 'Wanneer een besteller kiest voor overschrijving - bevat nog eens de betaalinstructies als de betaling nog niet zou zijn gebeurd';
-            case EmailTemplateType.TicketsConfirmationPOS: return 'Wanneer een besteller kiest voor betaling ter plaatse/bij levering';
-            case EmailTemplateType.TicketsReceivedTransfer: return 'De e-mail die een besteller nog ontvangt als je de betaling hebt gemarkeerd als ontvangen (enkel bij betaalmethode overschrijving)';
+            case EmailTemplateType.TicketsConfirmation: return $t(`Wanneer een besteller online betaald (of totaalbedrag is 0 euro)`);
+            case EmailTemplateType.TicketsConfirmationTransfer: return $t(`Wanneer een besteller kiest voor overschrijving - bevat nog eens de betaalinstructies als de betaling nog niet zou zijn gebeurd`);
+            case EmailTemplateType.TicketsConfirmationPOS: return $t(`Wanneer een besteller kiest voor betaling ter plaatse/bij levering`);
+            case EmailTemplateType.TicketsReceivedTransfer: return $t(`De e-mail die een besteller nog ontvangt als je de betaling hebt gemarkeerd als ontvangen (enkel bij betaalmethode overschrijving)`);
 
-            case EmailTemplateType.UserBalanceIncreaseNotification: return 'Automatische e-mail die \'s ochtends wordt verzonden als het saldo van een gebruiker omhoog is gegaan. Bijvoorbeeld als iemand een openstaand bedrag heeft toegevoegd bij een lid.';
-            case EmailTemplateType.UserBalanceReminder: return 'Automatische e-mail die \'s ochtends wordt verzonden als een gebruiker nog steeds een openstaand bedrag heeft.';
+            case EmailTemplateType.UserBalanceIncreaseNotification: return $t('Automatische e-mail die \'s ochtends wordt verzonden als het saldo van een gebruiker omhoog is gegaan. Bijvoorbeeld als iemand een openstaand bedrag heeft toegevoegd bij een lid.');
+            case EmailTemplateType.UserBalanceReminder: return $t('Automatische e-mail die \'s ochtends wordt verzonden als een gebruiker nog steeds een openstaand bedrag heeft.');
 
-            case EmailTemplateType.OrganizationBalanceIncreaseNotification: return 'Automatische e-mail die \'s ochtends wordt verzonden als het saldo van een groep omhoog is gegaan.';
-            case EmailTemplateType.OrganizationBalanceReminder: return 'Automatische e-mail die \'s ochtends wordt verzonden als een groep nog steeds een openstaand bedrag heeft.';
+            case EmailTemplateType.OrganizationBalanceIncreaseNotification: return $t('Automatische e-mail die \'s ochtends wordt verzonden als het saldo van een groep omhoog is gegaan.');
+            case EmailTemplateType.OrganizationBalanceReminder: return $t('Automatische e-mail die \'s ochtends wordt verzonden als een groep nog steeds een openstaand bedrag heeft.');
         }
 
         return '';

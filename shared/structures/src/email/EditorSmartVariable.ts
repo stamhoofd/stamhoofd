@@ -78,69 +78,69 @@ export class EditorSmartVariable extends AutoEncoder {
         const variables = [
             EditorSmartVariable.create({
                 id: 'greeting',
-                name: 'Begroeting',
+                name: $t(`Begroeting`),
             }),
             EditorSmartVariable.create({
                 id: 'firstName',
-                name: 'Voornaam',
-                deleteMessage: 'De voornaam van één of meerdere ontvangers ontbreekt in het systeem. De magische tekstvervanging voor de voornaam is daarom weggehaald.',
+                name: $t(`Voornaam`),
+                deleteMessage: $t(`De voornaam van één of meerdere ontvangers ontbreekt in het systeem. De magische tekstvervanging voor de voornaam is daarom weggehaald.`),
             }),
             EditorSmartVariable.create({
                 id: 'lastName',
-                name: 'Achternaam',
-                deleteMessage: 'De achternaam van één of meerdere ontvangers ontbreekt in het systeem. De magische tekstvervanging voor de achteraam is daarom weggehaald.',
+                name: $t(`Achternaam`),
+                deleteMessage: $t(`De achternaam van één of meerdere ontvangers ontbreekt in het systeem. De magische tekstvervanging voor de achteraam is daarom weggehaald.`),
             }),
             EditorSmartVariable.create({
                 id: 'email',
-                name: 'E-mailadres ontvanger',
+                name: $t(`E-mailadres ontvanger`),
             }),
             EditorSmartVariable.create({
                 id: 'fromAddress',
-                name: 'E-mailadres verstuurder',
+                name: $t(`E-mailadres verstuurder`),
             }),
             EditorSmartVariable.create({
                 id: 'fromName',
-                name: 'Naam verstuurder',
+                name: $t(`Naam verstuurder`),
             }),
             EditorSmartVariable.create({
                 id: 'firstNameMember',
-                name: 'Voornaam van lid',
-                deleteMessage: 'Je kan de voornaam van een lid enkel gebruiken als je één e-mail per lid verstuurt.',
+                name: $t(`Voornaam van lid`),
+                deleteMessage: $t(`Je kan de voornaam van een lid enkel gebruiken als je één e-mail per lid verstuurt.`),
             }),
             EditorSmartVariable.create({
                 id: 'lastNameMember',
-                name: 'Achternaam van lid',
-                deleteMessage: 'Je kan de achternaam van een lid enkel gebruiken als je één e-mail per lid verstuurt.',
+                name: $t(`Achternaam van lid`),
+                deleteMessage: $t(`Je kan de achternaam van een lid enkel gebruiken als je één e-mail per lid verstuurt.`),
             }),
             EditorSmartVariable.create({
                 id: 'inviterName',
-                name: 'Naam van uitnodiger',
+                name: $t(`Naam van uitnodiger`),
             }),
             EditorSmartVariable.create({
                 id: 'platformOrOrganizationName',
-                name: 'Naam van de vereniging of van het platform',
+                name: $t(`Naam van de vereniging of van het platform`),
             }),
             EditorSmartVariable.create({
                 id: 'outstandingBalance',
-                name: 'Openstaand bedrag',
-                deleteMessage: 'Je kan het openstaand bedrag van een lid enkel gebruiken als je één e-mail per lid verstuurt.',
+                name: $t(`Openstaand bedrag`),
+                deleteMessage: $t(`Je kan het openstaand bedrag van een lid enkel gebruiken als je één e-mail per lid verstuurt.`),
             }),
             EditorSmartVariable.create({
                 id: 'registerUrl',
-                name: 'Inschrijvingsportaal link',
+                name: $t(`Inschrijvingsportaal link`),
             }),
             EditorSmartVariable.create({
                 id: 'resetUrl',
-                name: 'Voluit link om wachtwoord te herstellen',
+                name: $t(`Voluit link om wachtwoord te herstellen`),
             }),
             EditorSmartVariable.create({
                 id: 'confirmEmailCode',
-                name: 'Code om e-mail te bevestigen',
+                name: $t(`Code om e-mail te bevestigen`),
             }),
             EditorSmartVariable.create({
                 id: 'loginDetails',
-                name: 'Inloggegevens',
-                hint: 'Deze tekst wijzigt afhankelijk van de situatie: als de ontvanger nog geen account heeft, vertelt het op welk e-mailadres de ontvanger kan registreren. In het andere geval op welk e-mailadres de ontvanger kan inloggen.',
+                name: $t(`Inloggegevens`),
+                hint: $t(`Deze tekst wijzigt afhankelijk van de situatie: als de ontvanger nog geen account heeft, vertelt het op welk e-mailadres de ontvanger kan registreren. In het andere geval op welk e-mailadres de ontvanger kan inloggen.`),
             }),
 
             EditorSmartVariable.create({
@@ -151,113 +151,113 @@ export class EditorSmartVariable extends AutoEncoder {
 
             EditorSmartVariable.create({
                 id: 'groupName',
-                name: 'Groepnaam',
+                name: $t(`Groepnaam`),
             }),
             EditorSmartVariable.create({
                 id: 'mailDomain',
-                name: 'E-maildomeinnaam',
+                name: $t(`E-maildomeinnaam`),
             }),
         ];
 
         // if (this.orders.length > 0) {
         variables.push(EditorSmartVariable.create({
             id: 'nr',
-            name: 'Bestelnummer',
+            name: $t(`Bestelnummer`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderPrice',
-            name: 'Bestelbedrag',
+            name: $t(`Bestelbedrag`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderPrice',
-            name: 'Bestelbedrag',
+            name: $t(`Bestelbedrag`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderStatus',
-            name: 'Bestelstatus',
+            name: $t(`Bestelstatus`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderTime',
-            name: 'Tijdstip',
+            name: $t(`Tijdstip`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderDate',
-            name: 'Afhaal/leverdatum',
+            name: $t(`Afhaal/leverdatum`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderMethod',
-            name: 'Afhaalmethode (afhalen, leveren, ter plaatse)',
+            name: $t(`Afhaalmethode (afhalen, leveren, ter plaatse)`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderLocation',
-            name: 'Locatie of leveradres',
+            name: $t(`Locatie of leveradres`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'paymentMethod',
-            name: 'Betaalmethode',
+            name: $t(`Betaalmethode`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'priceToPay',
-            name: 'Te betalen bedrag',
+            name: $t(`Te betalen bedrag`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'pricePaid',
-            name: 'Betaald bedrag',
+            name: $t(`Betaald bedrag`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'transferDescription',
-            name: 'Mededeling (overschrijving)',
+            name: $t(`Mededeling (overschrijving)`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'transferBankAccount',
-            name: 'Rekeningnummer (overschrijving)',
+            name: $t(`Rekeningnummer (overschrijving)`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'transferBankCreditor',
-            name: 'Begunstigde (overschrijving)',
+            name: $t(`Begunstigde (overschrijving)`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderTable',
-            name: 'Tabel met bestelde artikels',
+            name: $t(`Tabel met bestelde artikels`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'overviewTable',
-            name: 'Overzichtstabel',
+            name: $t(`Overzichtstabel`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'balanceTable',
-            name: 'Tabel met openstaande bedragen',
+            name: $t(`Tabel met openstaande bedragen`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderDetailsTable',
-            name: 'Tabel met bestelgegevens',
+            name: $t(`Tabel met bestelgegevens`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'paymentTable',
-            name: 'Tabel met betaalinstructies',
+            name: $t(`Tabel met betaalinstructies`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'overviewContext',
-            name: 'Betaalcontext',
+            name: $t(`Betaalcontext`),
         }));
 
         variables.push(EditorSmartVariable.create({
@@ -272,27 +272,27 @@ export class EditorSmartVariable extends AutoEncoder {
 
         variables.push(EditorSmartVariable.create({
             id: 'objectName',
-            name: 'Naam schuldenaar',
+            name: $t(`Naam schuldenaar`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'webshopName',
-            name: 'Naam webshop',
+            name: $t(`Naam webshop`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'validUntil',
-            name: 'Geldig tot',
+            name: $t(`Geldig tot`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'validUntilDate',
-            name: 'Geldig tot (datum)',
+            name: $t(`Geldig tot (datum)`),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'packageName',
-            name: 'Pakketnaam',
+            name: $t(`Pakketnaam`),
         }));
 
         variables.push(EditorSmartVariable.create({

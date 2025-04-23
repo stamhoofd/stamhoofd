@@ -35,26 +35,26 @@ export enum OrganizationTagType {
 export function getOrganizationTagTypeName(type: OrganizationTagType): string {
     switch (type) {
         case OrganizationTagType.Tag:
-            return 'tag';
+            return $t(`tag`);
         case OrganizationTagType.Verbond:
-            return 'verbond';
+            return $t(`verbond`);
         case OrganizationTagType.Gewest:
-            return 'gewest';
+            return $t(`gewest`);
         case OrganizationTagType.Gouw:
-            return 'gouw';
+            return $t(`gouw`);
     }
 }
 
 export function getOrganizationTagTypePluralName(type: OrganizationTagType): string {
     switch (type) {
         case OrganizationTagType.Tag:
-            return 'tags';
+            return $t(`tags`);
         case OrganizationTagType.Verbond:
-            return 'verbonden';
+            return $t(`verbonden`);
         case OrganizationTagType.Gewest:
-            return 'gewesten';
+            return $t(`gewesten`);
         case OrganizationTagType.Gouw:
-            return 'gouwen';
+            return $t(`gouwen`);
     }
 }
 
@@ -170,9 +170,9 @@ export class PlatformMembershipTypeConfigPrice extends AutoEncoder {
 
     get name() {
         if (this.startDate) {
-            return 'prijzen vanaf ' + Formatter.date(this.startDate);
+            return $t(`prijzen vanaf`) + ' ' + Formatter.date(this.startDate);
         }
-        return 'standaardprijzen';
+        return $t(`standaardprijzen`);
     }
 }
 

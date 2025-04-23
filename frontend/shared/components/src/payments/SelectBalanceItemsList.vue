@@ -12,7 +12,7 @@
                     <p v-if="isPayable && getItemPrice(item) < 0" class="style-price-base">
                         {{ formatPrice(getItemPrice(item)) }}
                     </p>
-                    <PriceInput v-else :model-value="getItemPrice(item)" placeholder="0 euro" :min="item.priceOpen < 0 ? item.priceOpen : 0" :max="item.priceOpen >= 0 ? item.priceOpen : 0" @update:model-value="setItemPrice(item, $event)" />
+                    <PriceInput v-else :model-value="getItemPrice(item)" :min="item.priceOpen < 0 ? item.priceOpen : 0" :max="item.priceOpen >= 0 ? item.priceOpen : 0" :placeholder="$t(`0 euro`)" @update:model-value="setItemPrice(item, $event)" />
                 </div>
                 <template v-else>
                     <p class="style-discount-old-price disabled">

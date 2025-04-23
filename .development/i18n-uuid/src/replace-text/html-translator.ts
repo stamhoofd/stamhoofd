@@ -1,8 +1,8 @@
 import chalk from "chalk";
 import { X2jOptions, XMLBuilder, XmlBuilderOptions, XMLParser } from "fast-xml-parser";
-import { addChangeMarkers, endChangeMarker, removeChangeMarkers, startChangeMarker } from "./git-html-helper";
-import { promptBoolean } from "./prompt-helper";
-import { getWhiteSpaceBeforeAndAfter, isNumberOrSpecialCharacter } from "./regex-helper";
+import { addChangeMarkers, endChangeMarker, removeChangeMarkers, startChangeMarker } from "./git-helper";
+import { promptReplaceText, ReplaceTextPromptResult } from "./prompt-helper";
+import { getWhiteSpaceBeforeAndAfter, isNumberOrSpecialCharacter, splitInParts } from "./regex-helper";
 import { wrapWithTranslationFunction } from "./translation-helper";
 
 export interface HtmlTranslatorOptions {
@@ -11,6 +11,7 @@ export interface HtmlTranslatorOptions {
     skipKeys?: Set<string>,
     attributeWhiteList?: Set<string>,
     onBeforePrompt?: () => void,
+    onPromptDoubt?: () => void;
     replaceChangesOnly?: {
         filePath: string,
         commitsToCompare?: [string, string]
@@ -38,10 +39,9 @@ export class HtmlTranslator {
     private _currentMatchCount = 0;
     private totalMatchCount = 0;
     private static readonly PLACEHOLDER = '[[html-translator-placeholder]]';
-    private static readonly START_CHANGE_MARKER = startChangeMarker;
-    private static readonly END_CHANGE_MARKER = endChangeMarker;
     private readonly shouldCheckChanges: boolean;
     private readonly fileProgressText: string;
+    private _isDoubt = false;
 
     get currentMatchCount() {
         return this._currentMatchCount;
@@ -104,7 +104,7 @@ export class HtmlTranslator {
             await this.processRecord(parent, source);
         }
 
-        if(!this.isChanged) {
+        if(this._isDoubt || !this.isChanged) {
             return originalHtml;
         }
 
@@ -185,7 +185,7 @@ export class HtmlTranslator {
         const text: string | null = this.setIsChangedAndRemoveMarkers(record[key]);
 
         if(text !== null) {
-            const parts = this.splitInParts(text, betweenBracketsRegex).map(item => {
+            const parts = splitInParts(text, betweenBracketsRegex).map(item => {
                 return {
                     value: item.value,
                     shouldTranslate: !item.isMatch
@@ -193,7 +193,7 @@ export class HtmlTranslator {
             });
         
             // update text on record
-            record[key] = await this.translateTextParts(parent, record, key, parts, this.translateText)
+            record[key] = await this.translateTextParts(parent, record, key, text, parts, this.translateText)
         }
     }
 
@@ -219,7 +219,18 @@ export class HtmlTranslator {
         }
     
         this.logContext(parent, record, key, part, translatedPart, processedParts, unprocessedPart, transformContext);
-        return await promptBoolean(chalk.yellow(`> Accept (press [y] or [enter])?`));
+        const result = await promptReplaceText(chalk.yellow(`> Accept (press [y] or [enter])?`));
+
+        if(result === ReplaceTextPromptResult.Yes) {
+            return true;
+        }
+
+        if(result === ReplaceTextPromptResult.Doubt && this.options.onPromptDoubt) {
+            this._isDoubt = true;
+            this.options.onPromptDoubt();
+        }
+
+        return false;
     }
 
     private replaceObjectWithPlaceholder(contextObject: any, copyObject: any, childObject: Record<string, string>, key: string): boolean {
@@ -361,7 +372,7 @@ REPLACEMENT:`))
     }
 
     private checkIsStartChange(value: string): boolean {
-        if(this.shouldCheckChanges && value.includes(HtmlTranslator.START_CHANGE_MARKER)) {
+        if(this.shouldCheckChanges && value.includes(startChangeMarker)) {
             this.areCurrentLinesChanged = true;
             return true;
         }
@@ -370,7 +381,7 @@ REPLACEMENT:`))
     }
 
     private checkIsEndChange(value: string): boolean {
-        if(this.shouldCheckChanges && value.includes(HtmlTranslator.END_CHANGE_MARKER)) {
+        if(this.shouldCheckChanges && value.includes(endChangeMarker)) {
             this.areCurrentLinesChanged = false;
             return true;
         }
@@ -379,8 +390,8 @@ REPLACEMENT:`))
     }
 
     private setIsChangedAndRemoveMarkers(value: string): string | null {
-        const startIndex = value.indexOf(HtmlTranslator.START_CHANGE_MARKER);
-        const endIndex = value.indexOf(HtmlTranslator.END_CHANGE_MARKER);
+        const startIndex = value.indexOf(startChangeMarker);
+        const endIndex = value.indexOf(endChangeMarker);
         const originalIsChanged = this.areCurrentLinesChanged;
 
         if(startIndex === -1) {
@@ -400,7 +411,7 @@ REPLACEMENT:`))
             }
 
             if(originalIsChanged) {
-                return value.replace(HtmlTranslator.END_CHANGE_MARKER, '')
+                return value.replace(endChangeMarker, '')
             }
 
             return null;
@@ -408,14 +419,14 @@ REPLACEMENT:`))
 
         if(endIndex === -1) {
             this.areCurrentLinesChanged = true;
-            return value.replace(HtmlTranslator.START_CHANGE_MARKER, '');
+            return value.replace(startChangeMarker, '');
         }
 
         this.areCurrentLinesChanged = startIndex > endIndex;
-        return value.replace(HtmlTranslator.START_CHANGE_MARKER, '').replace(HtmlTranslator.END_CHANGE_MARKER, '')
+        return value.replace(startChangeMarker, '').replace(endChangeMarker, '')
     }
 
-    private async translateTextParts(parent: Record<string, any>, record: Record<string, string>, key: string, textParts: {value: string, shouldTranslate: boolean}[], translate: (text: string) => string, transformContext?: (context: HtmlTranslatorContext) => HtmlTranslatorContext) {
+    private async translateTextParts(parent: Record<string, any>, record: Record<string, string>, key: string, original: string, textParts: {value: string, shouldTranslate: boolean}[], translate: (text: string) => string, transformContext?: (context: HtmlTranslatorContext) => HtmlTranslatorContext) {
 
         const processedParts: string[] = [];
     
@@ -439,6 +450,9 @@ REPLACEMENT:`))
             }
     
             const canTranslate = isTranslated && (!this.options.doPrompt || await this.prompt(parent, record, key, value, translatedPart, processedParts.join(''), getUnprocessedpart(i), transformContext));
+            if(this._isDoubt) {
+                return original;
+            }
 
             if(canTranslate) {
                 this.isChanged = true;
@@ -450,48 +464,13 @@ REPLACEMENT:`))
         return processedParts.join('');
     }
 
-    private splitInParts(text: string, regex: RegExp): {isMatch: boolean, value: string}[] {
-        const matches = [...text.matchAll(regex)];
-        const startsWithMatch = matches[0]?.index === 0;
-        const matchedText = matches.map(match => match[0]);
-        const otherText = text.split(regex);
-
-        if(startsWithMatch) {
-            const removed = otherText.shift();
-            if(removed !== '') {
-                throw new Error('Removed part is not empty')
-            }
-        }
-    
-        const results: {isMatch: boolean, value: string}[] = [];
-    
-        for(let i = 0; i < otherText.length; i++) {
-            const part = otherText[i];
-    
-            const matchedPart = matchedText[i];
-            if(startsWithMatch && matchedPart !== undefined) {
-                results.push({value: matchedPart, isMatch: true});
-            }
-    
-            if(part !== undefined && part !== null && part.length > 0) {
-                results.push({value: part, isMatch: false});
-            }
-    
-            if(!startsWithMatch && matchedPart !== undefined) {
-                results.push({value: matchedPart, isMatch: true});
-            }
-        }
-    
-        return results;
-    }
-
     private async replaceTextInNonReactiveAttributeValue(parent: Record<string, any>, record: Record<string, string>, key: string, value: string, attributeName: string): Promise<string> {
         const allParts: {value: string, shouldTranslate: boolean}[] = [{
             value,
             shouldTranslate: value !== undefined && value.trim().length > 0
         }];
     
-        return await this.translateTextParts(parent, record, key, allParts, (value: string) => {
+        return await this.translateTextParts(parent, record, key, value, allParts, (value: string) => {
             return wrapWithTranslationFunction(value, ['"']);
         }, context => {
 
@@ -507,7 +486,7 @@ REPLACEMENT:`))
     }
 
     private async replaceTextInTypescript(parent: Record<string, any>, record: Record<string, string>, key: string, value: string): Promise<string> {
-        const parts = this.splitInParts(value, /"(?:[^"]*?)"|'(?:[^']*?)'/ig);
+        const parts = splitInParts(value, /"(?:[^"]*?)"|'(?:[^']*?)'/ig);
         const allParts: {value: string, shouldTranslate: boolean}[] = [];
     
         for(let i = 0; i < parts.length; i++) {
@@ -569,7 +548,7 @@ REPLACEMENT:`))
             });
         }
     
-        return await this.translateTextParts(parent, record, key, allParts, (value: string) => {
+        return await this.translateTextParts(parent, record, key, value, allParts, (value: string) => {
             const unquoted = value.slice(1, value.length - 1);
             const trimmed = unquoted.trim();
             const quoteType = "'";

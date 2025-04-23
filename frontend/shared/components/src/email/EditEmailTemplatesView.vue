@@ -18,9 +18,9 @@
                                 <span class="icon email" />
                             </figure>
                             <aside>
-                                <span v-if="!emailTemplate.id && !emailTemplate.html" v-tooltip="$t('5069c440-c7db-4abc-9f1e-148d47d3650f')" class="icon disabled error small stroke" />
-                                <span v-else-if="!emailTemplate.id" v-tooltip="$t('d79ef7e9-5399-4aae-804b-cb34fac5583d')" class="icon lightning small stroke" />
-                                <span v-else v-tooltip="$t('926212f4-c606-46e7-a43e-2f1ca3bfbf33')" class="icon lightning primary small stroke " />
+                                <span v-if="!emailTemplate.id && !emailTemplate.html" :v-tooltip="$t('5069c440-c7db-4abc-9f1e-148d47d3650f')" class="icon disabled error small stroke" />
+                                <span v-else-if="!emailTemplate.id" :v-tooltip="$t('d79ef7e9-5399-4aae-804b-cb34fac5583d')" class="icon lightning small stroke" />
+                                <span v-else :v-tooltip="$t('926212f4-c606-46e7-a43e-2f1ca3bfbf33')" class="icon lightning primary small stroke " />
                             </aside>
                         </figure>
                     </template>

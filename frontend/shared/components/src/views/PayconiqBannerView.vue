@@ -1,7 +1,7 @@
 <template>
     <div class="payconiq-banner-view">
         <button class="payconiq-close button icon close white" type="button" @click="close" />
-        <h1>Scan en betaal met Payconiq by Bancontact</h1>
+        <h1>{{ $t('Scan en betaal met Payconiq by Bancontact') }}</h1>
 
         <div class="payconiq-logo" />
 
@@ -15,7 +15,7 @@
             </p>
         </LoadingButton>
 
-        <p>Of scan met een ondersteunende bank app</p>
+        <p>{{ $t('Of scan met een ondersteunende bank app') }}</p>
     </div>
 </template>
 
@@ -23,14 +23,14 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { Server } from '@simonbackx/simple-networking';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { Payment, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import STNavigationBar from '../navigation/STNavigationBar.vue';
+import STErrorsDefault from '../errors/STErrorsDefault.vue';
 import EmailInput from '../inputs/EmailInput.vue';
 import LoadingButton from '../navigation/LoadingButton.vue';
-import STErrorsDefault from '../errors/STErrorsDefault.vue';
 import STFloatingFooter from '../navigation/STFloatingFooter.vue';
+import STNavigationBar from '../navigation/STNavigationBar.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 
 @Component({

@@ -1,7 +1,6 @@
 <template>
     <article class="container">
-        <hr>
-        <h2 class="style-with-button">
+        <hr><h2 class="style-with-button">
             <button v-long-press="(e) => switchCycle(e)" type="button" class="button" @click.prevent="switchCycle" @contextmenu.prevent="switchCycle">
                 {{ visibleRegistrationsTitle }}
                 <span class="icon arrow-down-small" />
@@ -12,15 +11,15 @@
         </h2>
 
         <button v-if="!member.family.checkout.cart.isEmpty && app === 'registration'" class="info-box selectable icon" type="button" @click="openCart">
-            <span>Er staan inschrijvingen klaar in je mandje. Reken ze af om ze definitief te maken.</span>
+            <span>{{ $t('Er staan inschrijvingen klaar in je mandje. Reken ze af om ze definitief te maken.') }}</span>
             <span class="button icon arrow-right-small" />
         </button>
         <template v-else>
             <p v-if="visibleRegistrations.length === 0 && period.id === defaultPeriod.id" class="info-box">
-                {{ member.patchedMember.firstName }} is niet ingeschreven
+                {{ $t('{member} is niet ingeschreven', {member: member.patchedMember.firstName}) }}
             </p>
             <p v-else-if="visibleRegistrations.length === 0" class="info-box">
-                {{ member.patchedMember.firstName }} was niet ingeschreven
+                {{ $t('{member} was niet ingeschreven', {member: member.patchedMember.firstName}) }}
             </p>
         </template>
 
@@ -33,7 +32,7 @@
 
         <footer v-if="hasDeleted && !showDeleted" class="style-button-bar">
             <button class="button text" type="button" @click="showDeleted = true;">
-                Toon beëindigde inschrijvingen
+                {{ $t('Toon beëindigde inschrijvingen') }}
             </button>
         </footer>
     </article>

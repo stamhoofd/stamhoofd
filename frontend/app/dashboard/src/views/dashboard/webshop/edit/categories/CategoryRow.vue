@@ -5,13 +5,13 @@
         </h2>
 
         <p v-if="!category.productIds.length" class="style-description">
-            Leeg
+            {{ $t('Leeg') }}
         </p>
         <p v-else-if="category.productIds.length === 1" class="style-description">
-            Eén artikel
+            {{ $t('Eén artikel') }}
         </p>
         <p v-else class="style-description">
-            {{ category.productIds.length }} artikels
+            {{ category.productIds.length }} {{ $t('artikels') }}
         </p>
 
         <template #right>

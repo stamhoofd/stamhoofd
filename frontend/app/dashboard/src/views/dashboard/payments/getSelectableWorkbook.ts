@@ -17,24 +17,24 @@ export function getSelectableWorkbook() {
         sheets: [
             new SelectableSheet({
                 id: 'payments',
-                name: 'Betalingen',
-                description: 'Dit werkblad bevat één rij per betaling, maar een betaling zelf kan wel voor meerdere items zijn. Voor meer detailinformatie heb je het tabblad Betaallijnen nodig.',
+                name: $t(`Betalingen`),
+                description: $t(`Dit werkblad bevat één rij per betaling, maar een betaling zelf kan wel voor meerdere items zijn. Voor meer detailinformatie heb je het tabblad Betaallijnen nodig.`),
                 columns: [
                     new SelectableColumn({
                         id: 'id',
-                        name: 'ID',
-                        description: 'Unieke identificatie van de betaling',
+                        name: $t(`ID`),
+                        description: $t(`Unieke identificatie van de betaling`),
                     }),
 
                     new SelectableColumn({
                         id: 'price',
-                        name: 'Prijs',
+                        name: $t(`Prijs`),
                     }),
 
                     new SelectableColumn({
                         id: 'description',
-                        name: 'Detail',
-                        description: 'De inschrijvingen of producten die zijn afgerekend',
+                        name: $t(`Detail`),
+                        description: $t(`De inschrijvingen of producten die zijn afgerekend`),
                     }),
 
                     ...getGeneralColumns(),
@@ -51,46 +51,46 @@ export function getSelectableWorkbook() {
             }),
             new SelectableSheet({
                 id: 'balanceItemPayments',
-                name: 'Betaallijnen',
-                description: 'Een betaling kan soms voor meerdere items tegelijk zijn. Dat is vaak nuttige informatie omdat je die items soms anders moet verwerken in je boekhouding. Als je dit werkblad exporteert, krijgt elk item een aparte lijn met bijhorende informatie.',
+                name: $t(`Betaallijnen`),
+                description: $t(`Een betaling kan soms voor meerdere items tegelijk zijn. Dat is vaak nuttige informatie omdat je die items soms anders moet verwerken in je boekhouding. Als je dit werkblad exporteert, krijgt elk item een aparte lijn met bijhorende informatie.`),
                 columns: [
                     new SelectableColumn({
                         id: 'id',
-                        name: 'ID',
-                        description: 'Unieke identificatie van de betaallijn',
+                        name: $t(`ID`),
+                        description: $t(`Unieke identificatie van de betaallijn`),
                     }),
 
                     new SelectableColumn({
                         id: 'paymentId',
-                        name: 'Betaling ID',
-                        description: 'Unieke identificatie van de betaling',
+                        name: $t(`Betaling ID`),
+                        description: $t(`Unieke identificatie van de betaling`),
                     }),
 
                     new SelectableColumn({
                         id: 'balanceItem.type',
-                        name: 'Type',
-                        description: Formatter.joinLast(Object.values(BalanceItemType).map(type => getBalanceItemTypeName(type)), ', ', ' en '),
+                        name: $t(`Type`),
+                        description: Formatter.joinLast(Object.values(BalanceItemType).map(type => getBalanceItemTypeName(type)), ', ', ' ' + $t(`en`) + ' '),
                     }),
 
                     new SelectableColumn({
                         id: 'balanceItem.category',
-                        name: 'Categorie',
-                        description: 'Extra kolom om betalingen makkelijker te groeperen. Dit bevat de naam van de activiteit/groep, de naam van de webshop of de beschrijving bij andere aanrekeningen.',
+                        name: $t(`Categorie`),
+                        description: $t(`Extra kolom om betalingen makkelijker te groeperen. Dit bevat de naam van de activiteit/groep, de naam van de webshop of de beschrijving bij andere aanrekeningen.`),
                     }),
 
                     new SelectableColumn({
                         id: 'balanceItem.description',
-                        name: 'Beschrijving',
+                        name: $t(`Beschrijving`),
                     }),
 
                     new SelectableColumn({
                         id: 'balanceItem.createdAt',
-                        name: 'Aangerekend op',
+                        name: $t(`Aangerekend op`),
                     }),
 
                     new SelectableColumn({
                         id: 'balanceItem.dueAt',
-                        name: 'Verschuldigd vanaf',
+                        name: $t(`Verschuldigd vanaf`),
                     }),
 
                     ...Object.values(BalanceItemRelationType).map(relationType => new SelectableColumn({
@@ -101,20 +101,20 @@ export function getSelectableWorkbook() {
 
                     new SelectableColumn({
                         id: 'amount',
-                        name: 'Aantal',
+                        name: $t(`Aantal`),
                     }),
 
                     new SelectableColumn({
                         id: 'unitPrice',
-                        name: 'Eenheidsprijs',
+                        name: $t(`Eenheidsprijs`),
                     }),
 
                     new SelectableColumn({
                         id: 'price',
-                        name: 'Prijs',
+                        name: $t(`Prijs`),
                     }),
 
-                    ...getGeneralColumns({ category: 'Betaling (herhaling)' }),
+                    ...getGeneralColumns({ category: $t(`Betaling (herhaling)`) }),
 
                     // Facturatiegegevens
                     ...getInvoiceColumns(),
@@ -130,31 +130,31 @@ function getGeneralColumns(options?: { category?: string | null }) {
         return [
             new SelectableColumn({
                 id: 'status',
-                name: 'Betaalstatus',
+                name: $t(`Betaalstatus`),
                 ...options,
             }),
 
             new SelectableColumn({
                 id: 'method',
-                name: 'Betaalmethode',
+                name: $t(`Betaalmethode`),
                 ...options,
             }),
 
             new SelectableColumn({
                 id: 'provider',
-                name: 'Betaalprovider',
+                name: $t(`Betaalprovider`),
                 ...options,
             }),
 
             new SelectableColumn({
                 id: 'createdAt',
-                name: 'Aangemaakt op',
+                name: $t(`Aangemaakt op`),
                 ...options,
             }),
 
             new SelectableColumn({
                 id: 'paidAt',
-                name: 'Betaald op',
+                name: $t(`Betaald op`),
                 ...options,
             }),
         ];
@@ -165,21 +165,21 @@ function getSettlementColumns() {
     return [
         new SelectableColumn({
             id: 'settlement.reference',
-            name: 'Uitbetalingsmededeling',
-            description: 'De mededeling die de betaalprovider heeft gebruikt bij de uitbetaling',
-            category: 'Uitbetaling',
+            name: $t(`Uitbetalingsmededeling`),
+            description: $t(`De mededeling die de betaalprovider heeft gebruikt bij de uitbetaling`),
+            category: $t(`Uitbetaling`),
         }),
         new SelectableColumn({
             id: 'settlement.settledAt',
-            name: 'Uitbetalingsdatum',
-            description: 'Datum waarop de betaling werd uitbetaald door de betaalprovider',
-            category: 'Uitbetaling',
+            name: $t(`Uitbetalingsdatum`),
+            description: $t(`Datum waarop de betaling werd uitbetaald door de betaalprovider`),
+            category: $t(`Uitbetaling`),
         }),
         new SelectableColumn({
             id: 'settlement.amount',
-            name: 'Uitbetalingsbedrag',
-            description: 'Totale bedrag dat werd uitbetaald door de betaalprovider in de uitbetaling (bevat dus ook andere betalingen)',
-            category: 'Uitbetaling',
+            name: $t(`Uitbetalingsbedrag`),
+            description: $t(`Totale bedrag dat werd uitbetaald door de betaalprovider in de uitbetaling (bevat dus ook andere betalingen)`),
+            category: $t(`Uitbetaling`),
         }),
     ];
 }
@@ -188,28 +188,28 @@ function getStripeColumns() {
     return [
         new SelectableColumn({
             id: 'transferFee',
-            name: 'Transactiekosten',
-            description: 'Transactiekosten die in mindering worden gebracht door de betaalprovider',
-            category: 'Stripe',
+            name: $t(`Transactiekosten`),
+            description: $t(`Transactiekosten die in mindering worden gebracht door de betaalprovider`),
+            category: $t(`Stripe`),
         }),
         new SelectableColumn({
             id: 'stripeAccountId',
-            name: 'Account ID',
-            description: 'Stripe Account ID waarop de betaling is ontvangen',
-            category: 'Stripe',
+            name: $t(`Account ID`),
+            description: $t(`Stripe Account ID waarop de betaling is ontvangen`),
+            category: $t(`Stripe`),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'iban',
-            name: 'Kaartnummer',
-            description: 'De laatste 4 cijfers van de IBAN-rekeningnummer of creditcard van de betaler',
-            category: 'Stripe',
+            name: $t(`Kaartnummer`),
+            description: $t(`De laatste 4 cijfers van de IBAN-rekeningnummer of creditcard van de betaler`),
+            category: $t(`Stripe`),
         }),
         new SelectableColumn({
             id: 'ibanName',
-            name: 'Kaarthouder',
-            description: 'Naam van de betaler volgens de bank',
-            category: 'Stripe',
+            name: $t(`Kaarthouder`),
+            description: $t(`Naam van de betaler volgens de bank`),
+            category: $t(`Stripe`),
         }),
     ];
 }
@@ -218,21 +218,21 @@ function getTransferColumns() {
     return [
         new SelectableColumn({
             id: 'transferDescription',
-            name: 'Mededeling',
-            description: 'Mededeling van de betaling',
-            category: 'Overschrijvingen',
+            name: $t(`Mededeling`),
+            description: $t(`Mededeling van de betaling`),
+            category: $t(`Overschrijvingen`),
         }),
         new SelectableColumn({
             id: 'transferSettings.creditor',
-            name: 'Begunstigde',
-            description: 'De eigenaar van de rekening waarnaar de betaler heeft overgeschreven',
-            category: 'Overschrijvingen',
+            name: $t(`Begunstigde`),
+            description: $t(`De eigenaar van de rekening waarnaar de betaler heeft overgeschreven`),
+            category: $t(`Overschrijvingen`),
         }),
         new SelectableColumn({
             id: 'transferSettings.iban',
-            name: 'Rekeningnummer begunstigde',
-            description: 'Rekeningnummer waarnaar de betaler heeft overgeschreven',
-            category: 'Overschrijvingen',
+            name: $t(`Rekeningnummer begunstigde`),
+            description: $t(`Rekeningnummer waarnaar de betaler heeft overgeschreven`),
+            category: $t(`Overschrijvingen`),
         }),
     ];
 }
@@ -241,21 +241,21 @@ function getPayingOrganizationColumns() {
     return [
         new SelectableColumn({
             id: 'payingOrganization.id',
-            name: 'ID betalende groep',
-            category: 'Betalende groep',
+            name: $t(`ID betalende groep`),
+            category: $t(`Betalende groep`),
             enabled: false,
         }),
 
         new SelectableColumn({
             id: 'payingOrganization.uri',
-            name: 'Groepsnummer betalende groep',
-            category: 'Betalende groep',
+            name: $t(`Groepsnummer betalende groep`),
+            category: $t(`Betalende groep`),
         }),
 
         new SelectableColumn({
             id: 'payingOrganization.name',
-            name: 'Naam betalende groep',
-            category: 'Betalende groep',
+            name: $t(`Naam betalende groep`),
+            category: $t(`Betalende groep`),
         }),
     ];
 }
@@ -264,45 +264,45 @@ function getInvoiceColumns() {
     return [
         new SelectableColumn({
             id: 'customer.name',
-            name: 'Naam',
-            description: 'Naam van de betaler',
-            category: 'Facturatiegegevens',
+            name: $t(`Naam`),
+            description: $t(`Naam van de betaler`),
+            category: $t(`Facturatiegegevens`),
         }),
         new SelectableColumn({
             id: 'customer.email',
-            name: 'E-mailadres',
-            description: 'E-mailadres van de betaler',
-            category: 'Facturatiegegevens',
+            name: $t(`E-mailadres`),
+            description: $t(`E-mailadres van de betaler`),
+            category: $t(`Facturatiegegevens`),
         }),
 
         new SelectableColumn({
             id: 'customer.company.name',
-            name: 'Bedrijfsnaam',
-            category: 'Facturatiegegevens',
+            name: $t(`Bedrijfsnaam`),
+            category: $t(`Facturatiegegevens`),
         }),
 
         new SelectableColumn({
             id: 'customer.company.VATNumber',
-            name: 'BTW-nummer',
-            category: 'Facturatiegegevens',
+            name: $t(`BTW-nummer`),
+            category: $t(`Facturatiegegevens`),
         }),
 
         new SelectableColumn({
             id: 'customer.company.companyNumber',
-            name: 'Ondernemingsnummer',
-            category: 'Facturatiegegevens',
+            name: $t(`Ondernemingsnummer`),
+            category: $t(`Facturatiegegevens`),
         }),
 
         new SelectableColumn({
             id: 'customer.company.address',
-            name: 'Bedrijfsadres',
-            category: 'Facturatiegegevens',
+            name: $t(`Bedrijfsadres`),
+            category: $t(`Facturatiegegevens`),
         }),
 
         new SelectableColumn({
             id: 'customer.company.administrationEmail',
-            name: 'E-mailadres administratie',
-            category: 'Facturatiegegevens',
+            name: $t(`E-mailadres administratie`),
+            category: $t(`Facturatiegegevens`),
         }),
     ];
 }

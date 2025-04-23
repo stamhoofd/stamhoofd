@@ -71,7 +71,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'error',
                         message: 'Could not generate token',
-                        human: 'Er ging iets mis bij het aanmelden',
+                        human: $t(`Er ging iets mis bij het aanmelden`),
                         statusCode: 500,
                     });
                 }
@@ -91,7 +91,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                         throw new SimpleError({
                             code: 'not_supported',
                             message: 'This platform does not support password login',
-                            human: 'Dit platform ondersteunt geen wachtwoord login',
+                            human: $t(`Dit platform ondersteunt geen wachtwoord login`),
                             statusCode: 400,
                         });
                     }
@@ -100,7 +100,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                         throw new SimpleError({
                             code: 'not_supported',
                             message: 'Login method not supported',
-                            human: 'Je kan op dit account niet inloggen met een wachtwoord. Gebruik een andere methode om in te loggen.',
+                            human: $t(`Je kan op dit account niet inloggen met een wachtwoord. Gebruik een andere methode om in te loggen.`),
                             statusCode: 400,
                         });
                     }
@@ -111,7 +111,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 const errBody = {
                     code: 'invalid_username_or_password',
                     message: 'Invalid username or password',
-                    human: 'Foutief wachtwoord of onbekend emailadres',
+                    human: $t(`Foutief wachtwoord of onbekend emailadres`),
                     statusCode: 400,
                 };
 
@@ -130,7 +130,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'verify_email',
                         message: 'Your email address needs verification',
-                        human: 'Jouw e-mailadres is nog niet geverifieerd. Verifieer jouw e-mailadres via de link in de e-mail.',
+                        human: $t(`Jouw e-mailadres is nog niet geverifieerd. Verifieer jouw e-mailadres via de link in de e-mail.`),
                         meta: SignupResponse.create({
                             token: code.token,
                         }).encode({ version: request.request.getVersion() }),
@@ -144,7 +144,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'error',
                         message: 'Could not generate token',
-                        human: 'Er ging iets mis bij het aanmelden',
+                        human: $t(`Er ging iets mis bij het aanmelden`),
                         statusCode: 500,
                     });
                 }
@@ -159,7 +159,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'invalid_token',
                         message: 'Invalid token',
-                        human: 'Deze link is ongeldig of is al vervallen. Je zal nogmaals een e-mail moeten versturen om je wachtwoord te herstellen.',
+                        human: $t(`Deze link is ongeldig of is al vervallen. Je zal nogmaals een e-mail moeten versturen om je wachtwoord te herstellen.`),
                         statusCode: 400,
                     });
                 }
@@ -170,7 +170,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'invalid_token',
                         message: 'Invalid token',
-                        human: 'Deze link is ongeldig of is al vervallen. Je zal nogmaals een e-mail moeten versturen om je wachtwoord te herstellen.',
+                        human: $t(`Deze link is ongeldig of is al vervallen. Je zal nogmaals een e-mail moeten versturen om je wachtwoord te herstellen.`),
                         statusCode: 400,
                     });
                 }
@@ -180,7 +180,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'invalid_token',
                         message: 'Invalid token',
-                        human: 'Deze link is ongeldig of is al vervallen. Je zal nogmaals een e-mail moeten versturen om je wachtwoord te herstellen.',
+                        human: $t(`Deze link is ongeldig of is al vervallen. Je zal nogmaals een e-mail moeten versturen om je wachtwoord te herstellen.`),
                         statusCode: 400,
                     });
                 }
@@ -194,7 +194,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'error',
                         message: 'Could not generate token',
-                        human: 'Er ging iets mis bij het inloggen',
+                        human: $t(`Er ging iets mis bij het inloggen`),
                         statusCode: 500,
                     });
                 }

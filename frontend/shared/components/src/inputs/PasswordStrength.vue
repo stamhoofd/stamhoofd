@@ -1,28 +1,28 @@
 <template>
-    <STInputBox title="Wachtwoord sterkte">
+    <STInputBox :title="$t(`Wachtwoord sterkte`)">
         <div class="password-strength">
             <div :style="{ width: strength+'%' }" :class="type" />
         </div>
         <p v-if="!modelValue" class="style-description-small">
-            Gebruik bij voorkeur de wachtwoord-beheerder van jouw browser
+            {{ $t('Gebruik bij voorkeur de wachtwoord-beheerder van jouw browser') }}
         </p>
         <p v-else-if="warning.length > 0" class="style-description-small">
             {{ warning }}
         </p>
         <p v-else-if="duration <= 60*60" class="style-description-small">
-            Kan in enkele minuten worden geraden door een computer
+            {{ $t('Kan in enkele minuten worden geraden door een computer') }}
         </p>
         <p v-else-if="duration <= 60*60*24" class="style-description-small">
-            Kan in enkele uren worden geraden door een computer
+            {{ $t('Kan in enkele uren worden geraden door een computer') }}
         </p>
         <p v-else-if="duration <= 60*60*24*30" class="style-description-small">
-            Kan in enkele dagen worden geraden door een computer
+            {{ $t('Kan in enkele dagen worden geraden door een computer') }}
         </p>
         <p v-else-if="duration <= 60*60*24*30*12" class="style-description-small">
-            Kan binnen het jaar worden geraden door een computer
+            {{ $t('Kan binnen het jaar worden geraden door een computer') }}
         </p>
         <p v-else class="style-description-small">
-            Jouw wachtwoord ziet er goed uit
+            {{ $t('Jouw wachtwoord ziet er goed uit') }}
         </p>
 
         <template #right>
@@ -32,109 +32,108 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 
-import STInputBox from "./STInputBox.vue";
+import STInputBox from './STInputBox.vue';
 
 @Component({
     components: {
-        STInputBox
-    }
+        STInputBox,
+    },
 })
 export default class PasswordStrength extends VueComponent {
     @Prop({ default: null })
-        modelValue!: string | null
+    modelValue!: string | null;
 
-    strength = 0
-    duration = 0
-    warning = ""
+    strength = 0;
+    duration = 0;
+    warning = '';
 
-    calculateCounter = 0
-    loading = false
+    calculateCounter = 0;
+    loading = false;
 
     @Watch('modelValue')
     onValueChanged(val: string | null) {
         if (val === null || val.length === 0) {
-            this.calculateCounter++
+            this.calculateCounter++;
             this.strength = 0;
             this.duration = 0;
-            this.loading = false
-            return
+            this.loading = false;
+            return;
         }
-        this.calculateStrength(val).catch(e => {
-            console.error(e)
-        })
+        this.calculateStrength(val).catch((e) => {
+            console.error(e);
+        });
     }
 
     async calculateStrength(password: string) {
-        this.calculateCounter++
-        const saved = this.calculateCounter
-        this.loading = true
+        this.calculateCounter++;
+        const saved = this.calculateCounter;
+        this.loading = true;
 
         try {
-            const calculator = await import(/* webpackChunkName: "PasswordStrengthCalculator" */ "./PasswordStrengthCalculator")
+            const calculator = await import(/* webpackChunkName: "PasswordStrengthCalculator" */ './PasswordStrengthCalculator');
             if (saved !== this.calculateCounter) {
                 // skip
-                return
+                return;
             }
-            const result = calculator.checkPassword(password)
+            const result = calculator.checkPassword(password);
             if (saved !== this.calculateCounter) {
                 // skip
-                return
+                return;
             }
-            this.warning = result.feedback.warning ?? ""
-            this.strength = result.score*25
-            this.duration = result.crackTimesSeconds.offlineSlowHashing1e4PerSecond
-
-        } catch (e) {
+            this.warning = result.feedback.warning ?? '';
+            this.strength = result.score * 25;
+            this.duration = result.crackTimesSeconds.offlineSlowHashing1e4PerSecond;
+        }
+        catch (e) {
             // ignore
         }
 
         if (saved === this.calculateCounter) {
-            this.loading = false
+            this.loading = false;
         }
     }
 
     get type() {
-        const strength = this.strength
+        const strength = this.strength;
         if (strength === 0) {
-            return "none"
+            return 'none';
         }
 
         if (strength < 50) {
-            return "error"
+            return 'error';
         }
 
         if (strength < 100) {
-            return "warning"
+            return 'warning';
         }
 
-        return "success"
+        return 'success';
     }
 
     get description() {
-        const strength = this.strength
+        const strength = this.strength;
         if (strength < 50) {
-            return "Heel zwak"
+            return 'Heel zwak';
         }
 
         if (strength < 75) {
-            return "Zwak"
+            return 'Zwak';
         }
 
         if (strength < 100) {
-            return "Matig"
+            return 'Matig';
         }
 
-        return "Sterk"
+        return 'Sterk';
     }
 
     get detailDescription() {
         if (this.warning.length > 0) {
-            return this.warning
+            return this.warning;
         }
     }
-
 }
 </script>
 
@@ -195,6 +194,6 @@ export default class PasswordStrength extends VueComponent {
 
     &.success {
         color: $color-success;
-    }   
+    }
 }
 </style>

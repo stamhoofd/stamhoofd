@@ -53,7 +53,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
         if (!payment) {
             throw new SimpleError({
                 code: '',
-                message: 'Deze link is ongeldig',
+                message: $t('Deze link is ongeldig'),
             });
         }
 

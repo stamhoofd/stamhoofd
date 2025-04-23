@@ -76,8 +76,8 @@ export function useReview(type: SetupStepType): UseReview {
     const save = async () => {
         if(!$hasChanges.value) return true;
 
-        const isConfirm = $checkboxValue.value ? await CenteredMessage.confirm("Ben je zeker dat je alles goed hebt nagekeken?", "Markeer als nagekeken") : 
-            await CenteredMessage.confirm("Ben je zeker dat je deze stap wil markeren als niet nagekeken?", "Ja");
+        const isConfirm = $checkboxValue.value ? await CenteredMessage.confirm($t(`Ben je zeker dat je alles goed hebt nagekeken?`), $t(`Markeer als nagekeken`)) : 
+            await CenteredMessage.confirm($t(`Ben je zeker dat je deze stap wil markeren als niet nagekeken?`), $t(`Ja`));
 
         if(!isConfirm) return false;
 

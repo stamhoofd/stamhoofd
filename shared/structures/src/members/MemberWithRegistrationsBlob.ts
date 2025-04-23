@@ -5,14 +5,14 @@ import { Organization } from '../Organization.js';
 import { User } from '../User.js';
 import { EmailRecipient } from '../email/Email.js';
 import { Replacement } from '../endpoints/EmailRequest.js';
-import { memberWithRegistrationsBlobInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions.js';
 import { compileToInMemoryFilter } from '../filters/InMemoryFilter.js';
 import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
+import { memberWithRegistrationsBlobInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions.js';
 import { Member } from './Member.js';
 import { MemberPlatformMembership } from './MemberPlatformMembership.js';
+import { MemberResponsibilityRecord } from './MemberResponsibilityRecord.js';
 import { Registration } from './Registration.js';
 import { Filterable } from './records/RecordCategory.js';
-import { MemberResponsibilityRecord } from './MemberResponsibilityRecord.js';
 
 export class MemberWithRegistrationsBlob extends Member implements Filterable {
     @field({ decoder: new ArrayDecoder(Registration) })
@@ -73,7 +73,7 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
             return Replacement.create({
                 token: 'loginDetails',
                 value: '',
-                html: this.hasAccount(email) ? `<p class="description"><em>Je kan op het ledenportaal inloggen met <strong>${formattedEmail}</strong>.${suffix}</em></p>` : `<p class="description"><em>Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres <strong>${formattedEmail}</strong>, dan krijg je automatisch toegang tot alle bestaande gegevens.${suffix}</em></p>`,
+                html: this.hasAccount(email) ? `<p class="description"><em>${$t('Je kan op het ledenportaal inloggen met')} <strong>${formattedEmail}</strong>.${suffix}</em></p>` : `<p class="description"><em>${$t('Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres')} <strong>${formattedEmail}</strong>${$t(', dan krijg je automatisch toegang tot alle bestaande gegevens.')}${suffix}</em></p>`,
             });
         };
 

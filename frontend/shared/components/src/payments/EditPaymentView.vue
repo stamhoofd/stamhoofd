@@ -8,7 +8,7 @@
 
         <div class="split-inputs">
             <div>
-                <STInputBox title="Type" error-fields="type" :error-box="errors.errorBox">
+                <STInputBox error-fields="type" :error-box="errors.errorBox" :title="$t(`Type`)">
                     <Dropdown v-model="type">
                         <option v-for="m in availableTypes" :key="m" :value="m">
                             {{ capitalizeFirstLetter(PaymentTypeHelper.getName(m)) }}
@@ -16,7 +16,7 @@
                     </Dropdown>
                 </STInputBox>
 
-                <STInputBox :title="type === PaymentType.Payment ? 'Betaalmethode' : 'Terugbetaalmethode'" error-fields="method" :error-box="errors.errorBox">
+                <STInputBox :title="type === PaymentType.Payment ? $t(`Betaalmethode`) : $t(`Terugbetaalmethode`)" error-fields="method" :error-box="errors.errorBox">
                     <Dropdown v-model="method">
                         <option v-for="m in availableMethods" :key="m" :value="m">
                             {{ PaymentMethodHelper.getNameCapitalized(m) }}
@@ -24,7 +24,7 @@
                     </Dropdown>
                 </STInputBox>
 
-                <STInputBox v-if="!isNew" title="Status" error-fields="status" :error-box="errors.errorBox">
+                <STInputBox v-if="!isNew" error-fields="status" :error-box="errors.errorBox" :title="$t(`Status`)">
                     <Dropdown v-model="status">
                         <option v-for="m in availableStatuses" :key="m" :value="m">
                             {{ PaymentStatusHelper.getNameCapitalized(m) }}
@@ -33,52 +33,37 @@
                 </STInputBox>
             </div>
             <div>
-                <STInputBox v-if="status === 'Succeeded'" :title="type === PaymentType.Payment ? 'Ontvangen op' : 'Terugbetaald op'" error-fields="paidAt" :error-box="errors.errorBox">
+                <STInputBox v-if="status === 'Succeeded'" :title="type === PaymentType.Payment ? $t(`Ontvangen op`) : $t(`Terugbetaald op`)" error-fields="paidAt" :error-box="errors.errorBox">
                     <DateSelection v-model="paidAt" />
                 </STInputBox>
             </div>
         </div>
 
         <template v-if="method === PaymentMethod.Transfer">
-            <hr>
-            <h2 v-if="type === PaymentType.Payment">
-                Overschrijvingsdetails
+            <hr><h2 v-if="type === PaymentType.Payment">
+                {{ $t('Overschrijvingsdetails') }}
             </h2>
             <h2 v-else>
-                Overgeschreven via
+                {{ $t('Overgeschreven via') }}
             </h2>
 
-            <STInputBox :title="type === PaymentType.Payment ? 'Begunstigde' : 'Naam rekening'" error-fields="transferSettings.creditor" :error-box="errors.errorBox">
-                <input
-                    v-model="creditor"
-                    class="input"
-                    type="text"
-                    placeholder="Naam bankrekeningnummer"
-                    autocomplete="off"
-                >
+            <STInputBox :title="type === PaymentType.Payment ? $t(`Begunstigde`) : $t(`Naam rekening`)" error-fields="transferSettings.creditor" :error-box="errors.errorBox">
+                <input v-model="creditor" class="input" type="text" autocomplete="off" :placeholder="$t(`Naam bankrekeningnummer`)">
             </STInputBox>
 
-            <IBANInput v-model="iban" title="Bankrekeningnummer" placeholder="Op deze rekening schrijft men over" :validator="errors.validator" :required="false" />
+            <IBANInput v-model="iban" :validator="errors.validator" :required="false" :title="$t(`Bankrekeningnummer`)" :placeholder="$t(`Op deze rekening schrijft men over`)" />
 
-            <STInputBox title="Mededeling" error-fields="transferDescription" :error-box="errors.errorBox">
-                <input
-                    ref="firstInput"
-                    v-model="transferDescription"
-                    class="input"
-                    type="text"
-                    placeholder="Bv. Aankoop x"
-                    autocomplete="off"
-                >
+            <STInputBox error-fields="transferDescription" :error-box="errors.errorBox" :title="$t(`Mededeling`)">
+                <input ref="firstInput" v-model="transferDescription" class="input" type="text" autocomplete="off" :placeholder="$t(`Bv. Aankoop x`)">
             </STInputBox>
         </template>
 
-        <hr>
-        <h2>Wat en hoeveel?</h2>
+        <hr><h2>{{ $t('Wat en hoeveel?') }}</h2>
         <p v-if="patchedPayment.type === PaymentType.Payment">
-            Kies hieronder wat er precies betaald werd - en pas eventueel aan hoeveel. Dit is nodig om de boekhouding correct te houden en elke betaling te koppelen aan specifieke items.
+            {{ $t('Kies hieronder wat er precies betaald werd - en pas eventueel aan hoeveel. Dit is nodig om de boekhouding correct te houden en elke betaling te koppelen aan specifieke items.') }}
         </p>
         <p v-else-if="patchedPayment.type === PaymentType.Reallocation">
-            Bouw hieronder een balans op zodat het totaalbedrag 0 euro bedraagt.
+            {{ $t('Bouw hieronder een balans op zodat het totaalbedrag 0 euro bedraagt.') }}
         </p>
         <p v-else>
             {{ $t('f24d4ba4-4b42-4fa1-b99f-4b90dd1a3208') }}
@@ -96,11 +81,11 @@
                     </IconContainer>
                 </template>
                 <h3 class="style-title-list">
-                    Item toevoegen
+                    {{ $t('Item toevoegen') }}
                 </h3>
 
                 <p class="style-description-small">
-                    Voeg een item toe aan het openstaand bedrag of geef een tegoed
+                    {{ $t('Voeg een item toe aan het openstaand bedrag of geef een tegoed') }}
                 </p>
 
                 <template #right>

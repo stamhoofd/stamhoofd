@@ -6,41 +6,21 @@
             </template>
 
             <p v-if="!$organizationBasedResponsibilities.length" class="info-box">
-                Er zijn geen ingebouwde functies.
+                {{ $t('Er zijn geen ingebouwde functies.') }}
             </p>
 
             <div v-if="$rowCategories" class="container">
                 <div v-if="$rowCategories.requiredRows.length" class="container">
-                    <hr>
-                    <h2>Verplichte functies</h2>
+                    <hr><h2>{{ $t('Verplichte functies') }}</h2>
                     <STList class="info">
-                        <ResponsibilityReview
-                            v-for="row in $rowCategories.requiredRows"
-                            :key="row.responsibility.id"
-                            :responsibility="row.responsibility"
-                            :group="row.group"
-                            :members="row.members"
-                            :count="row.count"
-                            :progress="row.progress"
-                            :total="row.total"
-                        />
+                        <ResponsibilityReview v-for="row in $rowCategories.requiredRows" :key="row.responsibility.id" :responsibility="row.responsibility" :group="row.group" :members="row.members" :count="row.count" :progress="row.progress" :total="row.total" />
                     </STList>
                 </div>
 
                 <div v-if="$rowCategories.optionalRows.length" class="container">
-                    <hr>
-                    <h2>Optionele functies</h2>
+                    <hr><h2>{{ $t('Optionele functies') }}</h2>
                     <STList class="info">
-                        <ResponsibilityReview
-                            v-for="row in $rowCategories.optionalRows"
-                            :key="row.responsibility.id"
-                            :responsibility="row.responsibility"
-                            :group="row.group"
-                            :members="row.members"
-                            :count="row.count"
-                            :progress="row.progress"
-                            :total="row.total"
-                        />
+                        <ResponsibilityReview v-for="row in $rowCategories.optionalRows" :key="row.responsibility.id" :responsibility="row.responsibility" :group="row.group" :members="row.members" :count="row.count" :progress="row.progress" :total="row.total" />
                     </STList>
                 </div>
             </div>
@@ -50,7 +30,7 @@
 
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
-import { useAuth, useContext, useOrganization, usePlatform, useVisibilityChange, LoadingViewTransition } from '@stamhoofd/components';
+import { LoadingViewTransition, useAuth, useContext, useOrganization, usePlatform, useVisibilityChange } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Group, LimitedFilteredRequest, MemberResponsibility, MembersBlob, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, SetupStepType, SortItemDirection } from '@stamhoofd/structures';
 import { computed, onMounted, Ref, ref } from 'vue';

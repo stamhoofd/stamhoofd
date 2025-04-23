@@ -33,7 +33,7 @@ export class GetOrderByPaymentEndpoint extends Endpoint<Params, Query, Body, Res
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Order not found',
-                human: 'Deze bestelling bestaat niet (meer)',
+                human: $t(`Deze bestelling bestaat niet (meer)`),
             });
         }
         const [order] = await Order.where({ paymentId: payment.id }, { limit: 1 });
@@ -41,7 +41,7 @@ export class GetOrderByPaymentEndpoint extends Endpoint<Params, Query, Body, Res
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Order not found',
-                human: 'Deze bestelling bestaat niet (meer)',
+                human: $t(`Deze bestelling bestaat niet (meer)`),
             });
         }
 

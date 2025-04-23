@@ -490,15 +490,15 @@ export class MemberDetails extends AutoEncoder {
             if (age) {
                 if (group.settings.minAge && age < group.settings.minAge) {
                     return {
-                        message: 'Te jong',
-                        description: this.firstName + ' is te jong. Inschrijvingen is beperkt tot leden ' + (group.settings.getAgeGenderDescription({ includeAge: true }) ?? ''),
+                        message: $t(`Te jong`),
+                        description: this.firstName + ' ' + $t(`is te jong. Inschrijvingen is beperkt tot leden`) + ' ' + (group.settings.getAgeGenderDescription({ includeAge: true }) ?? ''),
                     };
                 }
 
                 if (group.settings.maxAge && age > group.settings.maxAge) {
                     return {
-                        message: 'Te oud',
-                        description: this.firstName + ' is te jong. Inschrijvingen is beperkt tot leden ' + (group.settings.getAgeGenderDescription({ includeAge: true }) ?? ''),
+                        message: $t(`Te oud`),
+                        description: this.firstName + ' ' + $t(`is te jong. Inschrijvingen is beperkt tot leden`) + ' ' + (group.settings.getAgeGenderDescription({ includeAge: true }) ?? ''),
                     };
                 }
             }
@@ -506,15 +506,15 @@ export class MemberDetails extends AutoEncoder {
 
         if (this.gender == Gender.Male && group.settings.genderType == GroupGenderType.OnlyFemale) {
             return {
-                message: 'Enkel ' + group.settings.getAgeGenderDescription({ includeGender: true }),
-                description: 'Inschrijvingen is beperkt tot ' + group.settings.getAgeGenderDescription({ includeGender: true }),
+                message: $t(`Enkel`) + ' ' + group.settings.getAgeGenderDescription({ includeGender: true }),
+                description: $t(`Inschrijvingen is beperkt tot`) + ' ' + group.settings.getAgeGenderDescription({ includeGender: true }),
             };
         }
 
         if (this.gender == Gender.Female && group.settings.genderType == GroupGenderType.OnlyMale) {
             return {
-                message: 'Enkel ' + group.settings.getAgeGenderDescription({ includeGender: true }),
-                description: 'Inschrijvingen is beperkt tot ' + group.settings.getAgeGenderDescription({ includeGender: true }),
+                message: $t(`Enkel`) + ' ' + group.settings.getAgeGenderDescription({ includeGender: true }),
+                description: $t(`Inschrijvingen is beperkt tot`) + ' ' + group.settings.getAgeGenderDescription({ includeGender: true }),
             };
         }
 

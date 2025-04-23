@@ -525,17 +525,17 @@ export class ReservedSeat extends AutoEncoder {
 
         const section = seatingPlan.sections.find(s => s.id === this.section);
         const categoryName = seatingPlan.getCategoryName(this);
-        const suffix = categoryName ? [{ title: 'Categorie', value: categoryName }] : [];
+        const suffix = categoryName ? [{ title: $t(`Categorie`), value: categoryName }] : [];
 
         if (seatingPlan.sections.length === 1 || !section || section.name.length === 0) {
             // Don't mention the section
             return [
                 {
-                    title: 'Rij',
+                    title: $t(`Rij`),
                     value: this.row,
                 },
                 {
-                    title: 'Zetel',
+                    title: $t(`Zetel`),
                     value: this.seat,
                 },
                 ...suffix,
@@ -544,15 +544,15 @@ export class ReservedSeat extends AutoEncoder {
 
         return [
             {
-                title: 'Zone',
+                title: $t(`Zone`),
                 value: section.name,
             },
             {
-                title: 'Rij',
+                title: $t(`Rij`),
                 value: this.row,
             },
             {
-                title: 'Zetel',
+                title: $t(`Zetel`),
                 value: this.seat,
             },
             ...suffix,

@@ -1,28 +1,21 @@
 <template>
-    <SaveView :title="isNew ? 'Sponsor toevoegen' : 'Sponsor bewerken'" :disabled="!hasChanges && !isNew" class="edit-sponsor-view" @save="save">
+    <SaveView :title="isNew ? $t(`Sponsor toevoegen`) : $t(`Sponsor bewerken`)" :disabled="!hasChanges && !isNew" class="edit-sponsor-view" @save="save">
         <h1 v-if="isNew">
-            Sponsor toevoegen
+            {{ $t('Sponsor toevoegen') }}
         </h1>
         <h1 v-else>
-            Sponsor bewerken
+            {{ $t('Sponsor bewerken') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
-            <input
-                ref="firstInput"
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="Naam van deze sponsor"
-                autocomplete="off"
-            >
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`Naam van deze sponsor`)">
         </STInputBox>
 
         <UrlInput v-model="url" :title="$t('0e17f20e-e0a6-4fa0-8ec4-378e4325bea5')" :validator="errors.validator" :required="false" />
 
         <p class="style-description-small">
-            Op plaatsen waar technisch mogelijk, kan men op het logo klikken om de website te bezoeken.
+            {{ $t('Op plaatsen waar technisch mogelijk, kan men op het logo klikken om de website te bezoeken.') }}
         </p>
 
         <STList>
@@ -32,29 +25,27 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Toon op tickets
+                    {{ $t('Toon op tickets') }}
                 </h3>
             </STListItem>
         </STList>
 
-        <hr>
-        <h2 class="style-with-button">
-            <div>Logo</div>
+        <hr><h2 class="style-with-button">
+            <div>{{ $t('Logo') }}</div>
             <div>
                 <button v-if="logo" type="button" class="button icon trash" @click="logo = null" />
-                <UploadButton v-model="logo" :text="logo ? 'Vervangen' : 'Uploaden'" :resolutions="logoResolutions" />
+                <UploadButton v-model="logo" :text="logo ? $t(`Vervangen`) : $t(`Uploaden`)" :resolutions="logoResolutions" />
             </div>
         </h2>
         <p>{{ $t('df8e9385-314f-4403-b0d5-e5893f68d442') }}</p>
 
         <ImageComponent v-if="logo" :image="logo" :max-height="150" :auto-height="true" />
 
-        <hr>
-        <h2 class="style-with-button">
-            <div>Banner</div>
+        <hr><h2 class="style-with-button">
+            <div>{{ $t('Banner') }}</div>
             <div>
                 <button v-if="banner" type="button" class="button icon trash" @click="logo = null" />
-                <UploadButton v-model="banner" :text="banner ? 'Vervangen' : 'Uploaden'" :resolutions="resolutions" />
+                <UploadButton v-model="banner" :text="banner ? $t(`Vervangen`) : $t(`Uploaden`)" :resolutions="resolutions" />
             </div>
         </h2>
         <p>{{ $t('b375f5be-879c-4696-8ccf-0e7066e3f5f4') }}</p>
@@ -62,14 +53,13 @@
         <ImageComponent v-if="banner" :image="banner" :max-height="150" :auto-height="true" />
 
         <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Verwijder deze sponsor
+            <hr><h2>
+                {{ $t('Verwijder deze sponsor') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>Verwijderen</span>
+                <span>{{ $t('Verwijderen') }}</span>
             </button>
         </div>
     </SaveView>

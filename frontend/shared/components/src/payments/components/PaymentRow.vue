@@ -21,13 +21,13 @@
         </p>
 
         <p v-if="!payment.paidAt || formatDate(payment.createdAt) !== formatDate(payment.paidAt)" class="style-description-small">
-            Aangemaakt op {{ formatDate(payment.createdAt) }}
+            {{ $t('Aangemaakt op {date}', {date: formatDate(payment.createdAt)}) }}
         </p>
         <p v-if="payment.paidAt" class="style-description-small">
-            Betaald op {{ formatDate(payment.paidAt) }}
+            {{ $t('Betaald op {date}', {date: formatDate(payment.paidAt)}) }}
         </p>
         <p v-if="payment.price && price !== null && price !== payment.price" class="style-description-small">
-            Betaling van {{ formatPrice(payment.price) }}
+            {{ $t('Betaling van {price}', {price: formatPrice(payment.price)}) }}
         </p>
 
         <template #right>
@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentType, PaymentTypeHelper } from '@stamhoofd/structures';
+import { Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper } from '@stamhoofd/structures';
 import AsyncPaymentView from '../AsyncPaymentView.vue';
 import PaymentMethodIcon from './PaymentMethodIcon.vue';
 

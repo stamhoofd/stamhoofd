@@ -1,13 +1,7 @@
 <template>
     <div>
-        <STInputBox v-if="!isSingle" title="Naam" error-fields="name" :error-box="errors.errorBox">
-            <input
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="Naam van dit tarief"
-                autocomplete="off"
-            >
+        <STInputBox v-if="!isSingle" error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
+            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`Naam van dit tarief`)">
         </STInputBox>
 
         <ReduceablePriceInput v-model="groupPrice" :group="group" :error-box="errors.errorBox" :validator="errors.validator" :default-membership-type-id="defaultMembershipTypeId" />
@@ -19,10 +13,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Verborgen
+                    {{ $t('Verborgen') }}
                 </h3>
                 <p v-if="hidden" class="style-description-small">
-                    Deze keuze wordt onzichtbaar in het ledenportaal en is enkel manueel toe te voegen door een beheerder.
+                    {{ $t('Deze keuze wordt onzichtbaar in het ledenportaal en is enkel manueel toe te voegen door een beheerder.') }}
                 </p>
             </STListItem>
 
@@ -32,7 +26,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Beperk het beschikbare aantal stuks (waarvan nu {{ usedStock }} ingenomen of gereserveerd)
+                    {{ $t('Beperk het beschikbare aantal stuks (waarvan nu {stock} ingenomen of gereserveerd)', {stock: usedStock.toString()}) }}
                 </h3>
 
                 <div v-if="useStock" class="split-inputs option" @click.stop.prevent>

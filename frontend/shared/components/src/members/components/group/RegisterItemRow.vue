@@ -32,10 +32,10 @@
         <template v-if="item.totalPrice !== 0">
             <footer v-if="item.checkout.isAdminFromSameOrganization">
                 <p v-if="item.totalPrice >= 0" class="style-price">
-                    Openstaand bedrag stijgt met {{ formatPrice(item.totalPrice) }}
+                    {{ $t('Openstaand bedrag stijgt met {price}', {price: formatPrice(item.totalPrice)}) }}
                 </p>
                 <p v-else class="style-price">
-                    Openstaand bedrag daalt met {{ formatPrice(-item.totalPrice) }}
+                    {{ $t('Openstaand bedrag daalt met {price}', {price: formatPrice(-item.totalPrice)}) }}
                 </p>
             </footer>
             <footer v-else>
@@ -48,7 +48,7 @@
         <template v-if="item.calculatedPriceDueLater > 0">
             <footer>
                 <p class="style-price">
-                    {{ formatPrice(item.calculatedPriceDueLater) }} later te betalen
+                    {{ formatPrice(item.calculatedPriceDueLater) }} {{ $t('later te betalen') }}
                 </p>
             </footer>
         </template>
@@ -57,7 +57,7 @@
             {{ item.cartError.getHuman() }}
 
             <span v-if="canEdit" class="button text">
-                <span>Corrigeren</span>
+                <span>{{ $t('Corrigeren') }}</span>
                 <span class="icon arrow-right-small" />
             </span>
         </p>

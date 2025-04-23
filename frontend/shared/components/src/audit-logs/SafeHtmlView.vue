@@ -2,7 +2,7 @@
     <div class="st-view">
         <STNavigationBar :title="title" />
         <main ref="main">
-            <h1>Inhoud</h1>
+            <h1>{{ $t('Inhoud') }}</h1>
             <iframe ref="iframeRef" sandbox="" />
         </main>
     </div>

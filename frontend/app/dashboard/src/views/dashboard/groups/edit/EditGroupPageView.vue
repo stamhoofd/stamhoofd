@@ -4,43 +4,39 @@
             {{ title }}
         </h1>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox"/>
 
-        <hr>
-        <h2 class="style-with-button">
-            <div>Omslagfoto</div>
+        <hr><h2 class="style-with-button">
+            <div>{{ $t('Omslagfoto') }}</div>
             <div>
                 <button v-if="coverPhoto" class="button text only-icon-smartphone" type="button" @click="coverPhoto = null">
-                    <span class="icon trash" />
-                    <span>Verwijderen</span>
+                    <span class="icon trash"/>
+                    <span>{{ $t('Verwijderen') }}</span>
                 </button>
-                <UploadButton v-model="coverPhoto" :text="coverPhoto ? 'Vervangen' : 'Uploaden'" :resolutions="hs" />
+                <UploadButton v-model="coverPhoto" :text="coverPhoto ? $t(`Vervangen`) : $t(`Uploaden`)" :resolutions="hs"/>
             </div>
         </h2>
 
-        <p>Deze foto wordt getoond met een grootte van 1800 x 750 pixels, bovenaan de informatiepagina van deze groep.</p>
+        <p>{{ $t('Deze foto wordt getoond met een grootte van 1800 x 750 pixels, bovenaan de informatiepagina van deze groep.') }}</p>
 
         <figure v-if="coverPhotoSrc" class="cover-photo">
-            <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight">
-        </figure>
+            <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight"></figure>
 
-        <hr>
-        <h2 class="style-with-button">
-            <div>Vierkante foto of icoontje</div>
+        <hr><h2 class="style-with-button">
+            <div>{{ $t('Vierkante foto of icoontje') }}</div>
             <div>
                 <button v-if="squarePhoto" class="button text only-icon-smartphone" type="button" @click="squarePhoto = null">
-                    <span class="icon trash" />
-                    <span>Verwijderen</span>
+                    <span class="icon trash"/>
+                    <span>{{ $t('Verwijderen') }}</span>
                 </button>
-                <UploadButton v-model="squarePhoto" :text="squarePhoto ? 'Vervangen' : 'Uploaden'" :resolutions="hsSquare" />
+                <UploadButton v-model="squarePhoto" :text="squarePhoto ? $t(`Vervangen`) : $t(`Uploaden`)" :resolutions="hsSquare"/>
             </div>
         </h2>
 
-        <p>Deze foto wordt getoond in het overzicht bij de keuze tussen alle groepen. Upload bij voorkeur een foto groter dan 200 x 200 pixels. Als je deze niet uploadt gebruiken we gewoon de omslagfoto (als die er is). Je hoeft dus niet dezelfde foto nog eens te uploaden.</p>
+        <p>{{ $t('Deze foto wordt getoond in het overzicht bij de keuze tussen alle groepen. Upload bij voorkeur een foto groter dan 200 x 200 pixels. Als je deze niet uploadt gebruiken we gewoon de omslagfoto (als die er is). Je hoeft dus niet dezelfde foto nog eens te uploaden.') }}</p>
 
         <figure v-if="squarePhotoSrc" class="square-photo">
-            <img :src="squarePhotoSrc">
-        </figure>
+            <img :src="squarePhotoSrc"></figure>
     </SaveView>
 </template>
 

@@ -381,7 +381,7 @@ export class SessionContext implements RequestMiddleware {
                 search.delete('error');
 
                 // Message not authorized
-                new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show();
+                new Toast($t(`Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.`), 'error red').setHide(20000).show();
             }
         }
 
@@ -414,7 +414,7 @@ export class SessionContext implements RequestMiddleware {
         }
         catch (e) {
             console.error('Could not save state in local storage');
-            new Toast('Jouw browser ondersteunt geen lokale opslag, wat noodzakelijk is om in te kunnen loggen. Kijk na of je de browser niet in incognito/prive mode gebruikt. Schakel het indien mogelijk uit, of probeer in een andere browser.', 'error red').setHide(20000).show();
+            new Toast($t(`Jouw browser ondersteunt geen lokale opslag, wat noodzakelijk is om in te kunnen loggen. Kijk na of je de browser niet in incognito/prive mode gebruikt. Schakel het indien mogelijk uit, of probeer in een andere browser.`), 'error red').setHide(20000).show();
             return;
         }
 
@@ -679,7 +679,7 @@ export class SessionContext implements RequestMiddleware {
             this.setLoadingError(new SimpleError({
                 code: 'failed',
                 message: 'Something went wrong',
-                human: 'Er ging iets mis. Je hebt geen toegang tot deze vereniging.',
+                human: $t(`Er ging iets mis. Je hebt geen toegang tot deze vereniging.`),
             }));
             throw new Error('Missing privateMeta in authenticated organization response');
         }
@@ -880,7 +880,7 @@ export class SessionContext implements RequestMiddleware {
                         throw new SimpleError({
                             code: '',
                             message: '',
-                            human: 'Je bent niet langer ingelogd. Log opnieuw in om verder te gaan.',
+                            human: $t(`Je bent niet langer ingelogd. Log opnieuw in om verder te gaan.`),
                         });
                     }
                 }

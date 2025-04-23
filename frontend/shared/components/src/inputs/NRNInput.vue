@@ -1,8 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="nationalRegisterNumber" :error-box="errors.errorBox" :class="class">
-        <input v-if="value === NationalRegisterNumberOptOut" :disabled="true" :value="'Geen Belgische nationaliteit'" class="input">
-        <input v-else v-model="nrrRaw" v-format-input="DataValidator.getBelgianNationalNumberInputFormatter()" :placeholder="placeholder || (!required ? 'Optioneel' : 'JJ.MM.DD-XXX.XX')" class="input" type="text" :class="{placeholder: isSuggestion}" :disabled="disabled" v-bind="$attrs" @change="validate(false)" @input="(event: any) => {nrrRaw = event.currentTarget.value; onTyping();}">
-        <template #right>
+        <input v-if="value === NationalRegisterNumberOptOut" :disabled="true" :value="$t('Geen Belgische nationaliteit')" class="input"><input v-else v-model="nrrRaw" v-format-input="DataValidator.getBelgianNationalNumberInputFormatter()" :placeholder="placeholder || (!required ? $t(`Optioneel`) : $t(`JJ.MM.DD-XXX.XX`))" class="input" type="text" :class="{placeholder: isSuggestion}" :disabled="disabled" v-bind="$attrs" @change="validate(false)" @input="(event: any) => {nrrRaw = event.currentTarget.value; onTyping();}"><template #right>
             <slot name="right" />
         </template>
     </STInputBox>

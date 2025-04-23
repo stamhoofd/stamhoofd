@@ -5,10 +5,10 @@
                 <template #left>
                     <Checkbox v-model="fullAccess" :disabled="lockedFullAccess" />
                 </template>
-                Hoofdbeheerder
+                {{ $t('Hoofdbeheerder') }}
 
                 <template #right>
-                    Kan alles bekijken en bewerken
+                    {{ $t('Kan alles bekijken en bewerken') }}
                 </template>
             </STListItem>
 
@@ -21,13 +21,13 @@
         </STList>
 
         <p v-if="roles.length === 0" class="info-box">
-            Je hebt nog geen rollen aangemaakt. Maak een rol aan om beheerders op te delen.
+            {{ $t('Je hebt nog geen rollen aangemaakt. Maak een rol aan om beheerders op te delen.') }}
         </p>
 
         <p class="style-button-bar">
             <button class="button text" type="button" @click="editRoles">
                 <span class="icon edit" />
-                <span>Rollen bewerken</span>
+                <span>{{ $t('Rollen bewerken') }}</span>
             </button>
         </p>
     </div>

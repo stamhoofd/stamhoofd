@@ -27,15 +27,15 @@
             </p>
 
             <p v-else-if="cartItem.product.isSoldOut" class="warning-box">
-                Dit artikel is uitverkocht
+                {{ $t('Dit artikel is uitverkocht') }}
             </p>
 
             <p v-else-if="areSeatsSoldOut" class="warning-box">
-                Alle plaatsen zijn volzet
+                {{ $t('Alle plaatsen zijn volzet') }}
             </p>
 
             <p v-else-if="!canOrder" class="warning-box">
-                Je hebt het maximaal aantal stuks bereikt dat je nog kan bestellen van dit artikel
+                {{ $t('Je hebt het maximaal aantal stuks bereikt dat je nog kan bestellen van dit artikel') }}
             </p>
 
             <p v-else-if="cartItem.product.closesSoonText" class="info-box">
@@ -43,7 +43,7 @@
             </p>
 
             <p v-if="remainingReduced > 0" class="info-box">
-                Bestel je {{ cartItem.productPrice.discountAmount }} of meer stuks, dan betaal je maar {{ formatPrice(discountPrice) }} per stuk!
+                {{ $t('Bestel je {amount} of meer stuks, dan betaal je maar {price} per stuk!', {amount: cartItem.productPrice.discountAmount.toString(), price: formatPrice(discountPrice) }) }}
             </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
@@ -51,7 +51,7 @@
             <STList v-if="(cartItem.product.type === 'Ticket' || cartItem.product.type === 'Voucher') && cartItem.product.location" class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        Locatie
+                        {{ $t('Locatie') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ cartItem.product.location.name }}
@@ -63,7 +63,7 @@
 
                 <STListItem v-if="cartItem.product.dateRange">
                     <h3 class="style-definition-label">
-                        Wanneer?
+                        {{ $t('Wanneer?') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDateRange(cartItem.product.dateRange) }}
@@ -72,8 +72,7 @@
             </STList>
 
             <div v-if="cartItem.product.filteredPrices({admin}).length > 1" class="container">
-                <hr>
-                <STList>
+                <hr><STList>
                     <STListItem v-for="price in cartItem.product.filteredPrices({admin})" :key="price.id" class="no-border right-price" :selectable="canSelectPrice(price)" :disabled="!canSelectPrice(price)" element-name="label">
                         <template #left>
                             <Radio v-model="cartItem.productPrice" :value="price" :name="cartItem.product.id+'price'" :disabled="!canSelectPrice(price)" />
@@ -102,8 +101,7 @@
             <FieldBox v-for="field in cartItem.product.customFields" :key="field.id" :field="field" :answers="cartItem.fieldAnswers" :error-box="errors.errorBox" />
 
             <template v-if="canOrder && canSelectAmount">
-                <hr>
-                <h2>Aantal</h2>
+                <hr><h2>{{ $t('Aantal') }}</h2>
 
                 <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" />
 
@@ -118,17 +116,17 @@
         <STToolbar v-if="canOrder">
             <template #right>
                 <button v-if="willNeedSeats" class="button primary" type="submit">
-                    <span>Kies plaatsen</span>
+                    <span>{{ $t('Kies plaatsen') }}</span>
                     <span class="icon arrow-right" />
                 </button>
                 <button v-else-if="oldItem && cartEnabled" class="button primary" type="submit">
                     <span class="icon basket" />
-                    <span>Opslaan</span>
+                    <span>{{ $t('Opslaan') }}</span>
                 </button>
                 <button v-else class="button primary" type="submit">
                     <span v-if="cartEnabled" class="icon basket" />
-                    <span v-if="cartEnabled">Toevoegen</span>
-                    <span v-else>Doorgaan</span>
+                    <span v-if="cartEnabled">{{ $t('Toevoegen') }}</span>
+                    <span v-else>{{ $t('Doorgaan') }}</span>
                     <span v-if="!cartEnabled" class="icon arrow-right" />
                 </button>
             </template>

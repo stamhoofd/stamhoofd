@@ -1,23 +1,23 @@
 <template>
     <div>
         <STErrorsDefault :error-box="errors.errorBox" />
-        <PrefixInput v-model="uri" placeholder="Vul een URI in" :prefix="prefix" @blur="onBlur" />
+        <PrefixInput v-model="uri" :prefix="prefix" :placeholder="$t(`Vul een URI in`)" @blur="onBlur" />
         <template v-if="errors.errorBox === null && (checkingAvailability || (isAvailable !== null)) ">
             <p v-if="checkingAvailability" class="loading-box">
                 <Spinner />
-                Nakijken of deze nog beschikbaar is...
+                {{ $t('Nakijken of deze nog beschikbaar is...') }}
             </p>
 
             <p v-else-if="uri.length === 0" class="error-box">
-                Dit mag niet leeg zijn
+                {{ $t('Dit mag niet leeg zijn') }}
             </p>
 
             <p v-else-if="!isAvailable" class="error-box">
-                Deze URI is al in gebruik. Kies een andere.
+                {{ $t('Deze URI is al in gebruik. Kies een andere.') }}
             </p>
 
             <p v-else class="success-box">
-                Deze URI is nog beschikbaar!
+                {{ $t('Deze URI is nog beschikbaar!') }}
             </p>
         </template>
     </div>

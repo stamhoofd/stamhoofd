@@ -39,7 +39,7 @@ export class CheckEmailBouncesEndpoint extends Endpoint<Params, Query, Body, Res
             throw new SimpleError({
                 code: 'too_many_recipients',
                 message: 'Too many recipients',
-                human: 'Je kan maar maximaal 10.000 adressen tergelijk controleren.',
+                human: $t(`Je kan maar maximaal 10.000 adressen tergelijk controleren.`),
                 field: 'recipients',
             });
         }

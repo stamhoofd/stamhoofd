@@ -26,13 +26,10 @@
             <slot />
 
             <STList>
-                <!-- Place for e.g. To, From, Subject ... -->
                 <slot name="list" />
             </STList>
 
-            <hr class="mail-hr">
-
-            <div class="editor-container">
+            <hr class="mail-hr"><div class="editor-container">
                 <editor-content v-color="primaryColor" :editor="editor" class="editor-content" />
                 <footer>
                     <slot name="footer" />
@@ -56,15 +53,15 @@
                 <STList>
                     <STListItem class="no-padding right-stack">
                         <div class="list-input-box">
-                            <span>Link:</span>
+                            <span>{{ $t('Link:') }}</span>
 
-                            <input ref="linkInput" v-model="editLink" class="list-input" type="url" placeholder="https://" enterkeyhint="go">
+                            <input ref="linkInput" v-model="editLink" class="list-input" type="url" enterkeyhint="go" :placeholder="$t(`https://`)">
                         </div>
                         <template #right>
                             <button class="button text" type="submit" @mousedown.prevent>
                                 {{ editLink.length === 0 ? "Sluiten" : "Opslaan" }}
                             </button>
-                            <button v-if="editor.isActive('link')" v-tooltip="'Link verwijderen'" class="button icon trash gray" type="button" @mousedown.prevent @click.stop.prevent="clearLink()" />
+                            <button v-if="editor.isActive('link')" class="button icon trash gray" type="button" :v-tooltip="$t('Link verwijderen')" @mousedown.prevent @click.stop.prevent="clearLink()" />
                         </template>
                     </STListItem>
                 </STList>
@@ -73,13 +70,12 @@
         <STToolbar v-if="!$isMobile && !$isIOS && !$isAndroid">
             <template #right>
                 <div class="editor-button-bar">
-                    <button v-tooltip="'Toon/verberg tekst opties'" class="button icon text-style" :class="{ 'is-active': showTextStyles }" type="button" @mousedown.prevent @click.prevent="showTextStyles = !showTextStyles" />
-                    <hr>
-                    <button v-if="smartVariables.length > 0" v-tooltip="'Magische tekstvervanging'" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
-                    <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
-                    <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click.prevent="openLinkEditor()" @mousedown.prevent />
+                    <button class="button icon text-style" :class="{ 'is-active': showTextStyles }" type="button" :v-tooltip="$t('Toon/verberg tekst opties')" @mousedown.prevent @click.prevent="showTextStyles = !showTextStyles" />
+                    <hr><button v-if="smartVariables.length > 0" class="button icon wand" type="button" :v-tooltip="$t('Magische tekstvervanging')" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
+                    <button class="button icon hr" type="button" :v-tooltip="$t('Horizontale lijn')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
+                    <button class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" :v-tooltip="$t('Link toevoegen')" @click.prevent="openLinkEditor()" @mousedown.prevent />
                     <UploadButton :resolutions="imageResolutions" @update:model-value="insertImage" @mousedown.native.prevent>
-                        <div v-tooltip="'Afbeelding toevoegen'" class="button icon image" type="button" />
+                        <div class="button icon image" type="button" :v-tooltip="$t('Afbeelding toevoegen')" />
                     </UploadButton>
                     <slot name="buttons" />
                 </div>
@@ -93,12 +89,12 @@
             </template>
         </STToolbar>
         <STButtonToolbar v-else-if="!showLinkEditor" class="sticky" @mousedown.prevent>
-            <button v-tooltip="'Toon/verberg tekst opties'" class="button icon text-style" type="button" @click.prevent="openTextStyles($event)" @mousedown.prevent />
-            <button v-if="smartVariables.length > 0" v-tooltip="'Slimme tekstvervanging'" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
-            <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
-            <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click="openLinkEditor()" @mousedown.prevent />
+            <button class="button icon text-style" type="button" :v-tooltip="$t('Toon/verberg tekst opties')" @click.prevent="openTextStyles($event)" @mousedown.prevent />
+            <button v-if="smartVariables.length > 0" class="button icon wand" type="button" :v-tooltip="$t('Slimme tekstvervanging')" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
+            <button class="button icon hr" type="button" :v-tooltip="$t('Horizontale lijn')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
+            <button class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" :v-tooltip="$t('Link toevoegen')" @click="openLinkEditor()" @mousedown.prevent />
             <UploadButton :resolutions="imageResolutions" @update:model-value="insertImage" @mousedown.prevent>
-                <div v-tooltip="'Afbeelding toevoegen'" class="button icon image" type="button" />
+                <div class="button icon image" type="button" :v-tooltip="$t('Afbeelding toevoegen')" />
             </UploadButton>
             <slot name="buttons" />
         </STButtonToolbar>
@@ -115,7 +111,8 @@ import Underline from '@tiptap/extension-underline';
 import StarterKit from '@tiptap/starter-kit';
 import { Editor, EditorContent } from '@tiptap/vue-3';
 
-import { useCanDismiss, useCanPop, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
+import { useCanPop, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
+import { DataValidator } from '@stamhoofd/utility';
 import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue';
 import UploadButton from '../inputs/UploadButton.vue';
 import STList from '../layout/STList.vue';
@@ -131,7 +128,6 @@ import { DescriptiveText } from './EditorDescriptiveText';
 import { SmartButtonInlineNode, SmartButtonNode } from './EditorSmartButton';
 import { SmartVariableNode, SmartVariableNodeBlock } from './EditorSmartVariable';
 import TextStyleButtonsView from './TextStyleButtonsView.vue';
-import { DataValidator } from '@stamhoofd/utility';
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
@@ -345,7 +341,7 @@ function insertImage(image: Image | null) {
         return;
     }
     editor.value.chain().focus().setImage({ src: resolution.file.getPublicPath(), alt: image.source.name ?? undefined, width: resolution.width, height: resolution.height }).run();
-    new Toast('Beperk het gebruik van afbeeldingen in e-mails. Afbeeldingen worden bestraft door spamfilters, en e-mails komen daardoor vaker bij spam terecht.', 'info').show();
+    new Toast($t('Beperk het gebruik van afbeeldingen in e-mails. Afbeeldingen worden bestraft door spamfilters, en e-mails komen daardoor vaker bij spam terecht.'), 'info').show();
 }
 //
 async function openTextStyles(event: MouseEvent) {

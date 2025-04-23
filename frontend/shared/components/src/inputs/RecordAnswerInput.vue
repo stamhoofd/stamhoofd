@@ -60,10 +60,9 @@
         </STInputBox>
 
         <p v-else class="error-box">
-            Niet ondersteund. Herlaad de app indien nodig en probeer opnieuw.
+            {{ $t('Niet ondersteund. Herlaad de app indien nodig en probeer opnieuw.') }}
         </p>
 
-        <!-- Comments if checkbox is selected -->
         <div v-if="answer.settings.type === RecordType.Checkbox && selected && answer.settings.askComments" class="textarea-container">
             <textarea v-model="comments" class="input small" :placeholder="inputPlaceholder" />
             <p v-if="answer.settings.commentsDescription" class="info-box">
@@ -71,10 +70,8 @@
             </p>
         </div>
 
-        <!-- Unhandled errors -->
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <!-- Footer description -->
         <p v-if="answer.settings.type !== RecordType.Checkbox && answer.settings.description" class="style-description-small">
             {{ answer.settings.description }}
         </p>

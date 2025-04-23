@@ -2,6 +2,7 @@ import { Command } from "commander";
 import { autoTranslate } from "./src/auto-translate/auto-translate";
 import { createAutoTranslateComparison } from "./src/auto-translate/create-auto-translate-comparison";
 import { replaceKeys } from "./src/replace-keys/replace-keys";
+import { fileCache } from "./src/replace-text/FileCache";
 import { replaceText } from "./src/replace-text/replace-text";
 
 const program = new Command();
@@ -64,6 +65,14 @@ const replaceTextCommand = program
 replaceTextOptions.forEach(([flags, description]) =>
     replaceTextCommand.option(flags, description),
 );
+
+program
+    .command("clear-cache")
+    .action(async (args) => {
+        console.log('start clear cache...');
+        fileCache.clear();
+        console.log('cleared cache');
+    });
 
 program.command("replace-keys").action(() => replaceKeys());
 

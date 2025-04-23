@@ -39,7 +39,7 @@ export class OrderActionBuilder {
     getTicketStatusActions(): TableAction<PrivateOrderWithTickets>[] {
         return [
             new InMemoryTableAction({
-                name: 'Gescand',
+                name: $t(`Gescand`),
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (orders: PrivateOrderWithTickets[]) => {
@@ -61,7 +61,7 @@ export class OrderActionBuilder {
                 },
             }),
             new InMemoryTableAction({
-                name: 'Niet gescand',
+                name: $t(`Niet gescand`),
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (orders: PrivateOrderWithTickets[]) => {
@@ -88,7 +88,7 @@ export class OrderActionBuilder {
     getPaymentActions(): TableAction<PrivateOrder>[] {
         return [
             new InMemoryTableAction({
-                name: 'Betaald',
+                name: $t(`Betaald`),
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (orders: PrivateOrder[]) => {
@@ -96,7 +96,7 @@ export class OrderActionBuilder {
                 },
             }),
             new InMemoryTableAction({
-                name: 'Niet betaald',
+                name: $t(`Niet betaald`),
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (orders: PrivateOrder[]) => {
@@ -109,7 +109,7 @@ export class OrderActionBuilder {
     getActions(options?: { includeAdd: boolean }): TableAction<PrivateOrderWithTickets>[] {
         return [
             new InMemoryTableAction({
-                name: 'Bestelling toevoegen',
+                name: $t(`Bestelling toevoegen`),
                 icon: 'add',
                 priority: 1,
                 groupIndex: 2,
@@ -121,7 +121,7 @@ export class OrderActionBuilder {
             }),
 
             new InMemoryTableAction({
-                name: 'Wijzig...',
+                name: $t(`Wijzig...`),
                 enabled: this.webshopManager.hasWrite,
                 icon: 'edit',
                 priority: 1,
@@ -134,7 +134,7 @@ export class OrderActionBuilder {
             }),
 
             new MenuTableAction({
-                name: 'Wijzig status',
+                name: $t(`Wijzig status`),
                 enabled: this.webshopManager.hasWrite,
                 icon: 'flag',
                 priority: 1,
@@ -145,7 +145,7 @@ export class OrderActionBuilder {
             }),
 
             new MenuTableAction({
-                name: 'Wijzig ticketstatus',
+                name: $t(`Wijzig ticketstatus`),
                 enabled: this.webshopManager.hasWrite && this.webshopManager.preview.hasTickets,
                 icon: 'flag',
                 priority: 1,
@@ -156,7 +156,7 @@ export class OrderActionBuilder {
             }),
 
             new MenuTableAction({
-                name: 'Wijzig betaalstatus',
+                name: $t(`Wijzig betaalstatus`),
                 enabled: this.webshopManager.hasWrite,
                 icon: 'flag',
                 priority: 0,
@@ -167,7 +167,7 @@ export class OrderActionBuilder {
             }),
 
             new InMemoryTableAction({
-                name: 'Kopieer link naar bestelling',
+                name: $t(`Kopieer link naar bestelling`),
                 icon: 'copy',
                 priority: 0,
                 groupIndex: 2,
@@ -178,12 +178,12 @@ export class OrderActionBuilder {
                     const order = orders[0];
                     // copy the link to clipboard
                     await navigator.clipboard.writeText('https://' + this.webshopManager.preview.getUrl(this.organizationManager.organization) + '/order/' + order!.id);
-                    new Toast('Link gekopieerd naar klembord', 'success').show();
+                    new Toast($t(`Link gekopieerd naar klembord`), 'success').show();
                 },
             }),
 
             new AsyncTableAction({
-                name: 'E-mailen',
+                name: $t(`E-mailen`),
                 enabled: this.webshopManager.hasRead,
                 icon: 'email',
                 priority: 10,
@@ -195,7 +195,7 @@ export class OrderActionBuilder {
 
             ...(this.webshopManager.preview.meta.phoneEnabled
                 ? [new InMemoryTableAction({
-                        name: "SMS'en",
+                        name: $t(`SMS'en`),
                         enabled: this.webshopManager.hasRead,
                         icon: 'feedback-line',
                         priority: 9,
@@ -208,7 +208,7 @@ export class OrderActionBuilder {
                 : []),
 
             new InMemoryTableAction({
-                name: 'Exporteer naar Excel',
+                name: $t(`Exporteer naar Excel`),
                 enabled: this.webshopManager.hasRead,
                 icon: 'download',
                 priority: 8,
@@ -219,7 +219,7 @@ export class OrderActionBuilder {
             }),
 
             new InMemoryTableAction({
-                name: 'Verwijderen',
+                name: $t(`Verwijderen`),
                 icon: 'trash',
                 enabled: this.webshopManager.hasWrite,
                 priority: 0,
@@ -263,13 +263,13 @@ export class OrderActionBuilder {
 
         const options: RecipientChooseOneOption[] = [];
 
-        let name = 'Alle bestellingen';
+        let name = $t(`Alle bestellingen`);
 
         if (selection.markedRows.size > 0) {
-            name = 'Geselecteerde bestellingen';
+            name = $t(`Geselecteerde bestellingen`);
         }
         else if (!OrderRequiredFilterHelper.isDefault(this.webshopManager.preview.id, selection.filter.filter)) {
-            name = 'Gefilterde bestellingen';
+            name = $t(`Gefilterde bestellingen`);
         }
 
         options.push({
@@ -305,7 +305,7 @@ export class OrderActionBuilder {
         const hasCanceledOrders = !!orders.find(o => o.status === OrderStatus.Canceled);
         const hasNotCanceled = !!orders.find(o => o.status !== OrderStatus.Canceled);
         if (hasCanceledOrders && hasNotCanceled) {
-            const excludeCanceled = await CenteredMessage.confirm('Je exporteert ook geannuleerde bestellingen', 'Zonder exporteren', 'Momenteel heb je ook bestellingen geselecteerd die geannuleerd zijn. Als je die mee exporteert komen die bestellingen ook in de totalen van de Excel, dat wil je meestal niet.', 'Mee exporteren', true);
+            const excludeCanceled = await CenteredMessage.confirm($t(`Je exporteert ook geannuleerde bestellingen`), $t(`Zonder exporteren`), $t(`Momenteel heb je ook bestellingen geselecteerd die geannuleerd zijn. Als je die mee exporteert komen die bestellingen ook in de totalen van de Excel, dat wil je meestal niet.`), $t(`Mee exporteren`), true);
             if (excludeCanceled) {
                 orders = orders.filter(o => o.status !== OrderStatus.Canceled);
             }
@@ -334,7 +334,7 @@ export class OrderActionBuilder {
             }
 
             if (status === OrderStatus.Deleted) {
-                new Toast(orders.length == 1 ? 'Bestelling verwijderd' : 'Bestellingen verwijderd', 'success').setHide(1500).show();
+                new Toast(orders.length == 1 ? $t(`Bestelling verwijderd`) : $t(`Bestellingen verwijderd`), 'success').setHide(1500).show();
 
                 // Do a slow reload of the webshop stocks
                 if (!wasCanceledOrDeleted) {
@@ -342,10 +342,10 @@ export class OrderActionBuilder {
                 }
             }
             else {
-                new Toast('Status gewijzigd', 'success').setHide(1500).show();
+                new Toast($t(`Status gewijzigd`), 'success').setHide(1500).show();
 
                 if (status == OrderStatus.Canceled) {
-                    new Toast('Je moet zelf communiceren dat de bestelling werd geannuleerd', 'warning yellow').setHide(10 * 1000).show();
+                    new Toast($t(`Je moet zelf communiceren dat de bestelling werd geannuleerd`), 'warning yellow').setHide(10 * 1000).show();
 
                     // Do a slow reload of the webshop stocks
                     if (!wasCanceledOrDeleted) {
@@ -397,7 +397,7 @@ export class OrderActionBuilder {
         }
 
         if (data.changes.length) {
-            if (willSendEmail && !await CenteredMessage.confirm('Ben je zeker?', paid ? 'Markeer als betaald' : 'Markeer als niet betaald', paid ? 'De besteller ontvangt een automatische e-mail.' : undefined)) {
+            if (willSendEmail && !await CenteredMessage.confirm($t(`Ben je zeker?`), paid ? $t(`Markeer als betaald`) : $t(`Markeer als niet betaald`), paid ? $t(`De besteller ontvangt een automatische e-mail.`) : undefined)) {
                 return;
             }
             const session = this.organizationManager.$context;
@@ -425,19 +425,19 @@ export class OrderActionBuilder {
                 for (const payment of response.data) {
                     GlobalEventBus.sendEvent('paymentPatch', payment).catch(console.error);
                 }
-                new Toast('Betaalstatus gewijzigd', 'success').setHide(1000).show();
+                new Toast($t(`Betaalstatus gewijzigd`), 'success').setHide(1000).show();
             }
             catch (e) {
                 Toast.fromError(e).show();
             }
         }
         else {
-            new Toast(paid ? 'Al gemarkeerd als betaald' : ('Deze ' + (orders.length == 1 ? 'bestelling werd' : 'bestellingen werden') + ' nog niet betaald'), 'error red').setHide(2000).show();
+            new Toast(paid ? $t(`Al gemarkeerd als betaald`) : orders.length === 1 ? $t(`Deze bestelling werd nog niet betaald`) : $t(`Deze bestellingen werden nog niet betaald`), 'error red').setHide(2000).show();
         }
     }
 
     async deleteOrders(orders: PrivateOrder[]) {
-        if (!await CenteredMessage.confirm(orders.length == 1 ? 'Bestelling ' + orders[0].number + ' (' + orders[0].data.customer.name + ') verwijderen?' : 'Bestellingen verwijderen?', 'Verwijderen', 'Je kan dit niet ongedaan maken.')) {
+        if (!await CenteredMessage.confirm(orders.length === 1 ? $t(`Bestelling {number} ({customer}) verwijderen?`, { number: orders[0].number?.toString() ?? '', customer: orders[0].data.customer.name }) : $t(`Bestellingen verwijderen?`), $t(`Verwijderen`), $t(`Je kan dit niet ongedaan maken.`))) {
             return;
         }
 

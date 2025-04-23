@@ -14,11 +14,11 @@
                 {{ $t('7dd9a44e-8a47-4b74-9d57-d20b1efb706f') }}
             </p>
             <p v-if="!isPublic" class="info-box">
-                Deze groep staat in een categorie die enkel zichtbaar is voor beheerders of leden met een functie
+                {{ $t('Deze groep staat in een categorie die enkel zichtbaar is voor beheerders of leden met een functie') }}
             </p>
             <p v-if="!isArchive && !isOpen" class="info-box">
-                Inschrijvingen zijn momenteel gesloten via het ledenportaal. <template v-if="hasFullPermissions">
-                    Stel een datum in waarop ze moeten openen, of open de inschrijvingen manueel via de knoppen onderaan.
+                {{ $t('Inschrijvingen zijn momenteel gesloten via het ledenportaal.') }} <template v-if="hasFullPermissions">
+                    {{ $t('Stel een datum in waarop ze moeten openen, of open de inschrijvingen manueel via de knoppen onderaan.') }}
                 </template>
             </p>
 
@@ -30,10 +30,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/group.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Ingeschreven leden
+                        {{ $t('Ingeschreven leden') }}
                     </h2>
                     <p class="style-description">
-                        Bekijk, beheer, exporteer of e-mail ingeschreven leden.
+                        {{ $t('Bekijk, beheer, exporteer of e-mail ingeschreven leden.') }}
                     </p>
                     <template #right>
                         <span v-if="group.getMemberCount() !== null" class="style-description-small">{{ formatInteger(group.getMemberCount()!) }}</span>
@@ -46,10 +46,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/clock.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Wachtlijst
+                        {{ $t('Wachtlijst') }}
                     </h2>
                     <p class="style-description">
-                        Bekijk leden op de wachtlijst.
+                        {{ $t('Bekijk leden op de wachtlijst.') }}
                     </p>
                     <template #right>
                         <span v-if="group.waitingList.getMemberCount() !== null" class="style-description-small">{{ formatInteger(group.waitingList.getMemberCount()!) }}</span>
@@ -65,7 +65,7 @@
                         {{ responsibility.name }} van {{ group.settings.name }}
                     </h2>
                     <p class="style-description">
-                        Bekijk, beheer, exporteer of e-mail leden met deze functie.
+                        {{ $t('Bekijk, beheer, exporteer of e-mail leden met deze functie.') }}
                     </p>
 
                     <template #right>
@@ -76,8 +76,7 @@
             </STList>
 
             <template v-if="hasFullPermissions">
-                <hr>
-                <h2>Instellingen</h2>
+                <hr><h2>{{ $t('Instellingen') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editGeneral(true)">
@@ -85,10 +84,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/flag.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Algemeen
+                            {{ $t('Algemeen') }}
                         </h2>
                         <p class="style-description">
-                            Naam, tarieven, keuzeopties, gegevens, limieten en beschikbaarheid
+                            {{ $t('Naam, tarieven, keuzeopties, gegevens, limieten en beschikbaarheid') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -100,10 +99,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/lock.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Toegangsbeheer
+                            {{ $t('Toegangsbeheer') }}
                         </h2>
                         <p class="style-description">
-                            Bepaal wie leden en instellingen van deze groep kan bekijken of wijzigen
+                            {{ $t('Bepaal wie leden en instellingen van deze groep kan bekijken of wijzigen') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -115,10 +114,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/palette.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Foto's en icoontje
+                            {{ $t("Foto's en icoontje") }}
                         </h2>
                         <p class="style-description">
-                            Stel een foto en icoontje van deze groep in.
+                            {{ $t('Stel een foto en icoontje van deze groep in.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -130,10 +129,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
                         </template>
                         <h2 class="style-title-list">
-                            E-mailsjablonen
+                            {{ $t('E-mailsjablonen') }}
                         </h2>
                         <p class="style-description">
-                            Wijzig de inhoud van automatische e-mails voor deze groep.
+                            {{ $t('Wijzig de inhoud van automatische e-mails voor deze groep.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -141,21 +140,20 @@
                     </STListItem>
                 </STList>
 
-                <hr>
-                <h2>Acties</h2>
+                <hr><h2>{{ $t('Acties') }}</h2>
 
                 <STList>
                     <STListItem v-if="!isArchive && !isOpen" :selectable="true" @click="openGroup()">
                         <h2 class="style-title-list">
-                            Inschrijvingen openen
+                            {{ $t('Inschrijvingen openen') }}
                         </h2>
                         <p class="style-description">
-                            Open inschrijvingen van leden via het ledenportaal.
+                            {{ $t('Open inschrijvingen van leden via het ledenportaal.') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary green hide-smartphone">
                                 <span class="icon power" />
-                                <span>Open</span>
+                                <span>{{ $t('Open') }}</span>
                             </button>
                             <button type="button" class="button icon power only-smartphone" />
                         </template>
@@ -163,15 +161,15 @@
 
                     <STListItem v-if="!isArchive && isOpen" :selectable="true" @click="closeGroup()">
                         <h2 class="style-title-list">
-                            Inschrijvingen sluiten
+                            {{ $t('Inschrijvingen sluiten') }}
                         </h2>
                         <p class="style-description">
-                            Stop inschrijvingen van leden via het ledenportaal. Na het sluiten van de inschrijvingen kan je de groep ook eventueel archiveren.
+                            {{ $t('Stop inschrijvingen van leden via het ledenportaal. Na het sluiten van de inschrijvingen kan je de groep ook eventueel archiveren.') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary danger hide-smartphone">
                                 <span class="icon power" />
-                                <span>Sluiten</span>
+                                <span>{{ $t('Sluiten') }}</span>
                             </button>
                             <button type="button" class="button icon power only-smartphone" />
                         </template>
@@ -179,15 +177,15 @@
 
                     <STListItem :selectable="true" @click="deleteGroup()">
                         <h2 class="style-title-list">
-                            Groep definitief verwijderen
+                            {{ $t('Groep definitief verwijderen') }}
                         </h2>
                         <p class="style-description">
-                            Verwijder deze groep en alle daarbij horende informatie. Dit is meestal niet nodig.
+                            {{ $t('Verwijder deze groep en alle daarbij horende informatie. Dit is meestal niet nodig.') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary danger hide-smartphone">
                                 <span class="icon trash" />
-                                <span>Verwijderen</span>
+                                <span>{{ $t('Verwijderen') }}</span>
                             </button>
                             <button type="button" class="button icon trash only-smartphone" />
                         </template>

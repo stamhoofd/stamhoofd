@@ -8,7 +8,7 @@
             </h1>
 
             <p>
-                Deze inschrijvingsgroepen werden verwijderd. Je kan ze terugzetten door ze aan te klikken.
+                {{ $t('Deze inschrijvingsgroepen werden verwijderd. Je kan ze terugzetten door ze aan te klikken.') }}
             </p>
 
             <Spinner v-if="loadingGroups" />
@@ -22,7 +22,7 @@
                         {{ group.settings.name }}
                     </h2>
                     <p v-if="group.deletedAt" class="style-description-small">
-                        Verwijderd op {{ formatDate(group.deletedAt) }}
+                        {{ $t('Verwijderd op') }} {{ formatDate(group.deletedAt) }}
                     </p>
 
                     <template #right>
@@ -31,7 +31,7 @@
                 </STListItem>
             </STList>
             <p v-else class="info-box">
-                De prullenmand is leeg.
+                {{ $t('De prullenmand is leeg.') }}
             </p>
         </main>
     </div>

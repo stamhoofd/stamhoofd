@@ -45,7 +45,7 @@ export function useRegistrationQuickActions(): QuickActions {
     }
 
     async function checkAllMemberData(member: PlatformMember) {
-        await editMember(member, { title: 'Gegevens nakijken' });
+        await editMember(member, { title: $t(`Gegevens nakijken`) });
     }
 
     const activeMembers = computed(() => memberManager.family.members.filter(m => m.filterRegistrations({ currentPeriod: true, types: [GroupType.Membership] }).length > 0));
@@ -123,8 +123,8 @@ export function useRegistrationQuickActions(): QuickActions {
             if (!checkout.value.cart.isEmpty) {
                 arr.push({
                     illustration: cartSvg,
-                    title: 'Mandje afrekenen',
-                    description: checkout.value.cart.price > 0 ? 'Betaal en bevestig je inschrijvingen.' : 'Bevestig je inschrijvingen.',
+                    title: $t(`Mandje afrekenen`),
+                    description: checkout.value.cart.price > 0 ? $t(`Betaal en bevestig je inschrijvingen.`) : $t(`Bevestig je inschrijvingen.`),
                     action: openCart,
                 });
             }
@@ -137,8 +137,8 @@ export function useRegistrationQuickActions(): QuickActions {
 
                 arr.push({
                     illustration: outstandingAmountSvg,
-                    title: 'Betaal jouw openstaand bedrag aan ' + organizationStatus.organization.name,
-                    description: 'Je hebt een openstaand bedrag van ' + Formatter.price(open) + ' bij ' + organizationStatus.organization.name + '',
+                    title: $t(`Betaal jouw openstaand bedrag aan`) + ' ' + organizationStatus.organization.name,
+                    description: $t(`Je hebt een openstaand bedrag van`) + ' ' + Formatter.price(open) + ' ' + $t(`bij`) + ' ' + organizationStatus.organization.name + '',
                     rightText: Formatter.price(open),
                     rightTextClass: 'style-price',
                     action: async () => {

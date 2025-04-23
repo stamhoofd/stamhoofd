@@ -7,11 +7,11 @@
             </h1>
 
             <p v-if="cart.items.length === 0" class="info-box">
-                Jouw winkelmandje is leeg. Ga terug en klik op een product om iets toe te voegen.
+                {{ $t('Jouw winkelmandje is leeg. Ga terug en klik op een product om iets toe te voegen.') }}
             </p>
 
             <p v-for="code of checkout.discountCodes" :key="code.id" class="discount-box icon label">
-                <span>Kortingscode <span class="style-discount-code">{{ code.code }}</span></span>
+                <span>{{ $t('Kortingscode') }} <span class="style-discount-code">{{ code.code }}</span></span>
 
                 <button class="button icon trash" type="button" @click="deleteCode(code)" />
             </p>
@@ -30,13 +30,13 @@
             <template #right>
                 <button type="button" class="button secundary" @click="() => pop()">
                     <span class="icon add" />
-                    <span v-if="cart.items.length > 0">Meer toevoegen</span>
-                    <span v-else>Iets toevoegen</span>
+                    <span v-if="cart.items.length > 0">{{ $t('Meer toevoegen') }}</span>
+                    <span v-else>{{ $t('Iets toevoegen') }}</span>
                 </button>
                 <LoadingButton v-if="cart.items.length > 0" :loading="loading">
                     <button class="button primary" type="button" @click="goToCheckout">
                         <span class="icon flag" />
-                        <span>Bestellen</span>
+                        <span>{{ $t('Bestellen') }}</span>
                     </button>
                 </LoadingButton>
             </template>

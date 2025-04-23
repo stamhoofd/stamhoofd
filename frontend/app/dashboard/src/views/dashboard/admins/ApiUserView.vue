@@ -5,22 +5,20 @@
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
-            <input v-model="name" enterkeyhint="next" class="input" type="text" placeholder="Naam">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)">
+            <input v-model="name" enterkeyhint="next" class="input" type="text" :placeholder="$t(`Naam`)">
         </STInputBox>
 
         <div class="container">
-            <hr>
-            <h2>Externe beheerdersrollen</h2>
-            <p>Je kan een API-key verschillende rollen geven, net zoals een externe beheerder. Hiermee kan je jouw key beter beveiligen en enkel toegang geven waarvoor je het nodig hebt.</p>
+            <hr><h2>{{ $t('Externe beheerdersrollen') }}</h2>
+            <p>{{ $t('Je kan een API-key verschillende rollen geven, net zoals een externe beheerder. Hiermee kan je jouw key beter beveiligen en enkel toegang geven waarvoor je het nodig hebt.') }}</p>
 
             <EditUserPermissionsBox :user="patched" @patch:user="addPatch($event)" />
         </div>
 
         <div class="container">
-            <hr>
-            <h2>Rate limits</h2>
-            <p>Een API-key heeft rate limits om overbelasting door foutief of inefficiënt gebruik te voorkomen.</p>
+            <hr><h2>{{ $t('Rate limits') }}</h2>
+            <p>{{ $t('Een API-key heeft rate limits om overbelasting door foutief of inefficiënt gebruik te voorkomen.') }}</p>
 
             <STList>
                 <STListItem v-if="canAlterRateLimits || rateLimits === ApiUserRateLimits.Normal" :selectable="canAlterRateLimits" class="right-stack right-top" element-name="label">
@@ -28,17 +26,17 @@
                         <Radio v-model="rateLimits" :value="ApiUserRateLimits.Normal" />
                     </template>
                     <h3 class="style-title-list">
-                        Laag
+                        {{ $t('Laag') }}
                     </h3>
                     <p v-if="canAlterRateLimits" class="style-description-small">
-                        Ideaal voor de meeste API-keys.
+                        {{ $t('Ideaal voor de meeste API-keys.') }}
                     </p>
                     <p class="style-description-small">
-                        Maximaal 5 req/s; 120 requests per 2 minuten; 1.000 requests per uur; 2.000 requests per dag
+                        {{ $t('Maximaal 5 req/s; 120 requests per 2 minuten; 1.000 requests per uur; 2.000 requests per dag') }}
                     </p>
 
                     <template v-if="canAlterRateLimits" #right>
-                        <span class="style-tag">Aangeraden</span>
+                        <span class="style-tag">{{ $t('Aangeraden') }}</span>
                     </template>
                 </STListItem>
 
@@ -47,13 +45,13 @@
                         <Radio v-model="rateLimits" :value="ApiUserRateLimits.Medium" />
                     </template>
                     <h3 class="style-title-list">
-                        Gemiddeld
+                        {{ $t('Gemiddeld') }}
                     </h3>
                     <p v-if="canAlterRateLimits" class="style-description-small">
-                        Voor een API-key die heel regelmatig de API moet aanroepen. Risico op overbelasting als de API niet correct is geimplementeerd en zware requests op korte tijd afvuurt.
+                        {{ $t('Voor een API-key die heel regelmatig de API moet aanroepen. Risico op overbelasting als de API niet correct is geimplementeerd en zware requests op korte tijd afvuurt.') }}
                     </p>
                     <p class="style-description-small">
-                        Maximaal 10 req/s; 240 requests per 2 minuten; 2.000 requests per uur; 14.400 requests per dag
+                        {{ $t('Maximaal 10 req/s; 240 requests per 2 minuten; 2.000 requests per uur; 14.400 requests per dag') }}
                     </p>
                 </STListItem>
 
@@ -62,13 +60,13 @@
                         <Radio v-model="rateLimits" :value="ApiUserRateLimits.High" />
                     </template>
                     <h3 class="style-title-list">
-                        Hoog
+                        {{ $t('Hoog') }}
                     </h3>
                     <p v-if="canAlterRateLimits" class="style-description-small">
-                        Voor een API-key die heel intensief gebruik moet maken van de API. Risico op overbelasting als de API niet correct is geimplementeerd en zware requests op korte tijd afvuurt.
+                        {{ $t('Voor een API-key die heel intensief gebruik moet maken van de API. Risico op overbelasting als de API niet correct is geimplementeerd en zware requests op korte tijd afvuurt.') }}
                     </p>
                     <p class="style-description-small">
-                        Maximaal 25 req/s; 480 requests per 2 minuten; 4.000 requests per uur; 28.800 requests per dag
+                        {{ $t('Maximaal 25 req/s; 480 requests per 2 minuten; 4.000 requests per uur; 28.800 requests per dag') }}
                     </p>
                 </STListItem>
             </STList>

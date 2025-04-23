@@ -1,17 +1,7 @@
 <template>
-    <ModernTableView
-        ref="modernTableView"
-        :table-object-fetcher="tableObjectFetcher"
-        :filter-builders="filterBuilders"
-        :title="title"
-        :column-configuration-id="configurationId"
-        :actions="actions"
-        :all-columns="allColumns"
-        :prefix-column="allColumns[0]"
-        :Route="Route"
-    >
+    <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :actions="actions" :all-columns="allColumns" :prefix-column="allColumns[0]" :Route="Route">
         <p class="style-description">
-            De openstaande bedragen kunnen soms herhaald worden als er meerdere ouders of e-mailadressen zijn ingesteld bij een lid.
+            {{ $t('De openstaande bedragen kunnen soms herhaald worden als er meerdere ouders of e-mailadressen zijn ingesteld bij een lid.') }}
         </p>
 
         <template #empty>

@@ -84,10 +84,10 @@ export class DateUIFilter extends UIFilter {
 
     get combinationWord(): string {
         switch (this.mode) {
-            case UIDateFilterMode.GreaterThan: return 'is groter dan';
-            case UIDateFilterMode.LessThan: return 'is kleiner dan';
-            case UIDateFilterMode.Equals: return 'is gelijk aan';
-            case UIDateFilterMode.NotEquals: return 'is niet gelijk aan';
+            case UIDateFilterMode.GreaterThan: return $t(`is groter dan`);
+            case UIDateFilterMode.LessThan: return $t(`is kleiner dan`);
+            case UIDateFilterMode.Equals: return $t(`is gelijk aan`);
+            case UIDateFilterMode.NotEquals: return $t(`is niet gelijk aan`);
         }
     }
 

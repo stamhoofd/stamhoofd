@@ -8,40 +8,27 @@
 
         <div class="split-inputs">
             <STInputBox :title="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') " error-fields="title" :error-box="errors.errorBox">
-                <input
-                    v-model="title"
-                    class="input"
-                    type="text"
-                    :placeholder="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') "
-                >
+                <input v-model="title" class="input" type="text" :placeholder="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') ">
             </STInputBox>
         </div>
 
         <STInputBox :title="$t('688fc9a3-68af-4aa3-ae6c-7d35a5f954ad')" error-fields="description" :error-box="errors.errorBox" class="max">
-            <textarea
-                v-model="description"
-                class="input"
-                type="text"
-                :placeholder="$t('68bd7b1d-9492-40ca-89f5-917143932218')"
-                autocomplete="off"
-            />
+            <textarea v-model="description" class="input" type="text" :placeholder="$t('68bd7b1d-9492-40ca-89f5-917143932218')" autocomplete="off" />
         </STInputBox>
 
         <STInputBox :title="$t('51850490-5d94-4e0b-a415-9b84e07d86f2')" error-fields="eventTypeIds" :error-box="errors.errorBox" class="max">
             <EventTypeIdsInput v-model="eventTypeIds" />
         </STInputBox>
 
-        <hr>
-        <h2>{{ $t('1a559b46-1863-4782-8cb5-ee6517a2e91d') }}</h2>
+        <hr><h2>{{ $t('1a559b46-1863-4782-8cb5-ee6517a2e91d') }}</h2>
         <p>
-            Lees <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
+            {{ $t('Lees') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('hier') }}</a> {{ $t('meer informatie na over hoe je een vragenlijst kan instellen.') }}
         </p>
 
         <EditRecordCategoriesBox :categories="patched.recordCategories" :settings="editorSettings" @patch:categories="addPatch({recordCategories: $event})" />
 
-        <hr>
-        <h2>Deadlines</h2>
-        <p>Via deadlines kan je instellen wanneer de leiding een kampmelding moet invullen.</p>
+        <hr><h2>{{ $t('Deadlines') }}</h2>
+        <p>{{ $t('Via deadlines kan je instellen wanneer de leiding een kampmelding moet invullen.') }}</p>
 
         <STList v-if="patched.deadlines.length">
             <EventNotificationDeadlineRow v-for="deadline in patched.deadlines" :key="deadline.id" :deadline="deadline" @click="editDeadline(deadline)" />
@@ -55,16 +42,14 @@
         </p>
 
         <div class="container">
-            <hr>
-            <h2>{{ $t('35c08279-a7ce-4536-a201-985bb882a6cf') }}</h2>
+            <hr><h2>{{ $t('35c08279-a7ce-4536-a201-985bb882a6cf') }}</h2>
             <p>{{ $t('8b9ef669-554d-4ee2-b3bd-2ea12f85fa26') }}</p>
 
             <MultipleChoiceInput v-model="contactResponsibilityIds" :items="responsibilities.map(r => ({value: r.id, name: r.name}))" :nullable="false" />
         </div>
 
         <div class="container">
-            <hr>
-            <h2>{{ $t('95e5b391-4399-40ae-8e58-aed3b822e65a') }}</h2>
+            <hr><h2>{{ $t('95e5b391-4399-40ae-8e58-aed3b822e65a') }}</h2>
             <p>{{ $t('f4b0aed8-5223-471c-81e3-1b580d359f66') }}</p>
         </div>
     </SaveView>
@@ -75,7 +60,7 @@ import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from 
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, EditRecordCategoriesBox, ErrorBox, EventTypeIdsInput, MultipleChoiceInput, RecordEditorSettings, RecordEditorType, SaveView, useCountry, useErrors, useEventNotificationInMemoryFilterBuilders, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Address, BaseOrganization, EventNotification, EventNotificationDeadline, EventNotificationType, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
+import { Address, BaseOrganization, EventNotification, EventNotificationDeadline, EventNotificationType, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import EventNotificationDeadlineRow from './components/EventNotificationDeadlineRow.vue';
 import EditEventNotificationDeadlineView from './EditEventNotificationDeadlineView.vue';
@@ -188,7 +173,7 @@ const editorSettings = computed(() => {
                     country: country.value,
                 }),
             }),
-        })
+        }),
     });
 });
 

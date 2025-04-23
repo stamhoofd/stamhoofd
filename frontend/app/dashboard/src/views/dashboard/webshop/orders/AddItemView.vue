@@ -1,9 +1,9 @@
 <template>
     <div class="st-view add-item-view">
-        <STNavigationBar title="Producten" />
+        <STNavigationBar :title="$t(`Producten`)" />
         <main>
             <h1>
-                Producten
+                {{ $t('Producten') }}
             </h1>
 
             <CategoryBox v-for="(category, index) in webshop.categories" :key="category.id" :category="category" :webshop="webshop" :checkout="checkout" :save-handler="saveHandler" :is-last="index === webshop.categories.length - 1" :admin="true" />

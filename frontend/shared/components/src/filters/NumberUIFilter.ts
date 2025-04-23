@@ -60,10 +60,10 @@ export class NumberUIFilter extends UIFilter {
 
     get combinationWord(): string {
         switch (this.mode) {
-            case UINumberFilterMode.GreaterThan: return 'is groter dan';
-            case UINumberFilterMode.LessThan: return 'is kleiner dan';
-            case UINumberFilterMode.Equals: return 'is gelijk aan';
-            case UINumberFilterMode.NotEquals: return 'is niet gelijk aan';
+            case UINumberFilterMode.GreaterThan: return $t(`is groter dan`);
+            case UINumberFilterMode.LessThan: return $t(`is kleiner dan`);
+            case UINumberFilterMode.Equals: return $t(`is gelijk aan`);
+            case UINumberFilterMode.NotEquals: return $t(`is niet gelijk aan`);
         }
     }
 

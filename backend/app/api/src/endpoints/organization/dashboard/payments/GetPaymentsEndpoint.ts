@@ -171,7 +171,7 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'timeout',
                     message: 'Query took too long',
-                    human: 'Deze opzoeking is te complex en duurt te lang. Probeer een eenvoudigere zoekopdracht of probeer terug op een rustiger tijdstip.',
+                    human: $t(`Deze opzoeking is te complex en duurt te lang. Probeer een eenvoudigere zoekopdracht of probeer terug op een rustiger tijdstip.`),
                 });
             }
             throw error;

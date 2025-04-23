@@ -10,21 +10,21 @@
                 {{ options.description }}
             </p>
 
-            <p class="warning-box" v-if="options?.warning">
+            <p v-if="options?.warning" class="warning-box">
                 {{ options.warning }}
             </p>
-            <!-- Todo: hier selector: nieuwe filter maken of bestaande filter bewerken, of opslaan als niewue filter -->
 
+            <!-- Todo: hier selector: nieuwe filter maken of bestaande filter bewerken, of opslaan als niewue filter -->
             <PropertyFilterInput v-model="editingConfiguration" :builder="builder" />
         </main>
 
         <STToolbar>
             <template #right>
                 <button class="button secundary" type="button" @click="cancel">
-                    Annuleren
+                    {{ $t('Annuleren') }}
                 </button>
                 <button class="button primary" type="button" @click="save">
-                    Opslaan
+                    {{ $t('Opslaan') }}
                 </button>
             </template>
         </STToolbar>
@@ -32,59 +32,59 @@
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { PropertyFilter, Version } from "@stamhoofd/structures";
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { PropertyFilter, Version } from '@stamhoofd/structures';
 
-import STNavigationBar from "../navigation/STNavigationBar.vue";
-import STToolbar from "../navigation/STToolbar.vue";
-import { CenteredMessage } from "../overlays/CenteredMessage";
-import { UIFilterBuilder } from "./UIFilter";
-import PropertyFilterInput from "./PropertyFilterInput.vue";
+import STNavigationBar from '../navigation/STNavigationBar.vue';
+import STToolbar from '../navigation/STToolbar.vue';
+import { CenteredMessage } from '../overlays/CenteredMessage';
+import PropertyFilterInput from './PropertyFilterInput.vue';
+import { UIFilterBuilder } from './UIFilter';
 
 @Component({
     components: {
         STNavigationBar,
         PropertyFilterInput,
-        STToolbar
+        STToolbar,
     },
 })
 export default class PropertyFilterView extends Mixins(NavigationMixin) {
-    @Prop({ default: "" })
-        title!: string
+    @Prop({ default: '' })
+    title!: string;
 
     @Prop({ default: () => ({}) })
-        options?: {warning?: string, description?: string}
+    options?: { warning?: string; description?: string };
 
     @Prop({ required: true })
-        builder!: UIFilterBuilder
+    builder!: UIFilterBuilder;
 
     @Prop({ required: true })
-        configuration!: PropertyFilter
+    configuration!: PropertyFilter;
 
     @Prop({ required: true })
-        setConfiguration!: (configuration: PropertyFilter) => void
+    setConfiguration!: (configuration: PropertyFilter) => void;
 
-    editingConfiguration: PropertyFilter = this.configuration
+    editingConfiguration: PropertyFilter = this.configuration;
 
     cancel() {
-        this.dismiss({ force: true })
+        this.dismiss({ force: true });
     }
 
     save() {
-        this.setConfiguration(this.editingConfiguration)
-        this.dismiss({ force: true })
+        this.setConfiguration(this.editingConfiguration);
+        this.dismiss({ force: true });
     }
 
     isChanged() {
-        return JSON.stringify(this.editingConfiguration.encode({ version: Version })) !== JSON.stringify(this.configuration.encode({ version: Version }))
+        return JSON.stringify(this.editingConfiguration.encode({ version: Version })) !== JSON.stringify(this.configuration.encode({ version: Version }));
     }
 
     async shouldNavigateAway() {
         if (!this.isChanged()) {
-            return true
+            return true;
         }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
 }
 </script>

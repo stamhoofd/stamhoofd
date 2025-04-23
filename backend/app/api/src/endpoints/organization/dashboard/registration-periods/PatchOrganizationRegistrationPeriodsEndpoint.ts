@@ -74,7 +74,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Period not found',
-                    human: 'Je kan geen wijzigingen meer aanbrengen in ' + period.getStructure().name + ' omdat deze is afgesloten',
+                    human: $t(`Je kan geen wijzigingen meer aanbrengen in`) + ' ' + period.getStructure().name + ' ' + $t(`omdat deze is afgesloten`),
                     statusCode: 404,
                 });
             }
@@ -120,7 +120,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                             }
 
                             if (!await Context.auth.canCreateGroupInCategory(organization.id, category)) {
-                                throw Context.auth.error('Je hebt geen toegangsrechten om groepen toe te voegen in deze categorie');
+                                throw Context.auth.error($t(`Je hebt geen toegangsrechten om groepen toe te voegen in deze categorie`));
                             }
 
                             // Only process puts
@@ -144,7 +144,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                             code: 'invalid_field',
                             field: 'categories',
                             message: 'Cannot have groups and categories combined',
-                            human: 'Een categorie kan niet zowel groepen als subcategorieën bevatten. Mogelijks zijn meerdere mensen tegelijk aanpassingen aan het maken aan de categorieën. Herlaadt de pagina en probeer opnieuw.',
+                            human: $t(`Een categorie kan niet zowel groepen als subcategorieën bevatten. Mogelijks zijn meerdere mensen tegelijk aanpassingen aan het maken aan de categorieën. Herlaadt de pagina en probeer opnieuw.`),
                         });
                     }
                 }
@@ -165,7 +165,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                         const isDeleted = refCountAfter < refCountBefore;
 
                         if (isDeleted) {
-                            throw Context.auth.error('Je hebt geen toegangsrechten om deze vergrendelde categorie te verwijderen.');
+                            throw Context.auth.error($t(`Je hebt geen toegangsrechten om deze vergrendelde categorie te verwijderen.`));
                         }
                     }
 
@@ -173,11 +173,11 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
                     if (!categoryAfter) {
                         if (locked) {
-                            throw Context.auth.error('Je hebt geen toegangsrechten om deze vergrendelde categorie te verwijderen.');
+                            throw Context.auth.error($t(`Je hebt geen toegangsrechten om deze vergrendelde categorie te verwijderen.`));
                         }
                     }
                     else if (locked !== categoryAfter.settings.locked) {
-                        throw Context.auth.error('Je hebt geen toegangsrechten om deze categorie te vergrendelen of ontgrendelen.');
+                        throw Context.auth.error($t(`Je hebt geen toegangsrechten om deze categorie te vergrendelen of ontgrendelen.`));
                     }
 
                     if (!locked || !categoryAfter) {
@@ -188,7 +188,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     const settingsAfter = categoryAfter.settings;
 
                     if (settingsBefore.name !== settingsAfter.name) {
-                        throw Context.auth.error('Je hebt geen toegangsrechten de naam van deze vergrendelde categorie te wijzigen.');
+                        throw Context.auth.error($t(`Je hebt geen toegangsrechten de naam van deze vergrendelde categorie te wijzigen.`));
                     }
                 }
             }
@@ -256,7 +256,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             throw new SimpleError({
                 code: 'invalid_default_age_group',
                 message: 'Invalid default age group',
-                human: 'De standaard leeftijdsgroep is niet beschikbaar voor deze organisatie',
+                human: $t(`De standaard leeftijdsgroep is niet beschikbaar voor deze organisatie`),
                 statusCode: 400,
             });
         }
@@ -264,7 +264,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         throw new SimpleError({
             code: 'invalid_default_age_group',
             message: 'Invalid default age group',
-            human: 'De standaard leeftijdsgroep is ongeldig',
+            human: $t(`De standaard leeftijdsgroep is ongeldig`),
             statusCode: 400,
         });
     }
@@ -313,7 +313,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
     static async deleteGroup(id: string) {
         const model = await Group.getByID(id);
         if (!model || !await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
-            throw Context.auth.error('Je hebt geen toegangsrechten om deze groep te verwijderen');
+            throw Context.auth.error($t(`Je hebt geen toegangsrechten om deze groep te verwijderen`));
         }
 
         model.deletedAt = new Date();
@@ -324,7 +324,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         const model = await Group.getByID(struct.id);
 
         if (!model || !await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
-            throw Context.auth.error('Je hebt geen toegangsrechten om deze groep te wijzigen');
+            throw Context.auth.error($t(`Je hebt geen toegangsrechten om deze groep te wijzigen`));
         }
 
         if (struct.settings) {
@@ -343,7 +343,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 throw new SimpleError({
                     code: 'missing_permissions',
                     message: 'You cannot restrict your own permissions',
-                    human: 'Je kan je eigen volledige toegang tot deze inschrijvingsgroep niet verwijderen. Vraag aan een hoofdbeheerder om jouw toegang te verwijderen.',
+                    human: $t(`Je kan je eigen volledige toegang tot deze inschrijvingsgroep niet verwijderen. Vraag aan een hoofdbeheerder om jouw toegang te verwijderen.`),
                 });
             }
         }
@@ -423,7 +423,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                             code: 'invalid_field',
                             field: 'waitingList',
                             message: 'Waiting list group is already used in another period',
-                            human: 'Een wachtlijst kan momenteel niet gedeeld worden tussen verschillende werkjaren',
+                            human: $t(`Een wachtlijst kan momenteel niet gedeeld worden tussen verschillende werkjaren`),
                         });
                     }
 
@@ -461,7 +461,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     // Ok
                 }
                 else {
-                    throw Context.auth.error('Je hebt geen toegangsrechten om groepen toe te voegen');
+                    throw Context.auth.error($t(`Je hebt geen toegangsrechten om groepen toe te voegen`));
                 }
             }
         }
@@ -513,7 +513,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 throw new SimpleError({
                     code: 'missing_permissions',
                     message: 'You cannot restrict your own permissions',
-                    human: 'Je kan geen inschrijvingsgroep maken zonder dat je zelf volledige toegang hebt tot de nieuwe groep',
+                    human: $t(`Je kan geen inschrijvingsgroep maken zonder dat je zelf volledige toegang hebt tot de nieuwe groep`),
                 });
             }
         }

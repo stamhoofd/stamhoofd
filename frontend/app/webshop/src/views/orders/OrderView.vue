@@ -9,74 +9,73 @@
 
             <main>
                 <p v-if="!webshop.meta.reduceBranding && STAMHOOFD.platformName === 'stamhoofd'" class="stamhoofd-header">
-                    <a :href="'https://'+$domains.marketing+'?utm_medium=webshop'" target="_blank" class="button text"><span v-if="hasTickets">Verkoop ook tickets via </span><span v-else>Bouw je betaalbare webshop via</span>  <Logo /></a>
+                    <a :href="'https://'+$domains.marketing+'?utm_medium=webshop'" target="_blank" class="button text"><span v-if="hasTickets">{{ $t('Verkoop ook tickets via') }} </span><span v-else>{{ $t('Bouw je betaalbare webshop via') }}</span>  <Logo /></a>
                 </p>
                 <div class="box">
                     <main>
                         <h1 v-if="success">
-                            Jouw bestelling is geplaatst
+                            {{ $t('Jouw bestelling is geplaatst') }}
                         </h1>
                         <h1 v-else>
-                            Jouw bestelling
+                            {{ $t('Jouw bestelling') }}
                         </h1>
 
                         <p v-if="success">
-                            Bedankt voor jouw bestelling, je ontvangt via e-mail ook een bevestiging.
+                            {{ $t('Bedankt voor jouw bestelling, je ontvangt via e-mail ook een bevestiging.') }}
                         </p>
 
                         <p v-if="isFailed && !closed" class="error-box selectable with-button" @click="() => pop()">
-                            Deze bestelling is mislukt. Probeer je bestelling opnieuw te plaatsen als je dat nog niet had gedaan.
+                            {{ $t('Deze bestelling is mislukt. Probeer je bestelling opnieuw te plaatsen als je dat nog niet had gedaan.') }}
 
                             <button class="button text" type="button">
-                                Opnieuw
+                                {{ $t('Opnieuw') }}
                             </button>
                         </p>
                         <p v-else-if="isFailed" class="error-box selectable with-button" @click="() => pop()">
-                            Deze bestelling is mislukt
+                            {{ $t('Deze bestelling is mislukt') }}
 
                             <button class="button text" type="button">
-                                Terug
+                                {{ $t('Terug') }}
                             </button>
                         </p>
                         <p v-else-if="isDeleted" class="error-box">
-                            Deze bestelling werd verwijderd
+                            {{ $t('Deze bestelling werd verwijderd') }}
                         </p>
                         <p v-else-if="isCanceled" class="error-box">
-                            Deze bestelling werd geannuleerd
+                            {{ $t('Deze bestelling werd geannuleerd') }}
                         </p>
 
                         <section v-if="!isCanceled && hasTickets && (isPaid || !isTransfer)" id="tickets" class="container">
-                            <hr>
-                            <h2 class="style-with-button">
+                            <hr><h2 class="style-with-button">
                                 <div v-if="singleTicket">
-                                    Jouw ticket
+                                    {{ $t('Jouw ticket') }}
                                 </div>
                                 <div v-else>
-                                    Jouw tickets
+                                    {{ $t('Jouw tickets') }}
                                 </div>
                                 <div class="hover-show">
                                     <button v-if="!loadingTickets" class="button text limit-space" type="button" @click="downloadAllTickets">
                                         <span class="icon download" />
-                                        <span>Opslaan</span>
+                                        <span>{{ $t('Opslaan') }}</span>
                                     </button>
                                 </div>
                             </h2>
                             <p v-if="!singleTicket" class="hide-smartphone style-description">
-                                Klik op een ticket om die individueel te downloaden of de QR-code te vergroten. Toon je ticket bij voorkeur op je smartphone.
+                                {{ $t('Klik op een ticket om die individueel te downloaden of de QR-code te vergroten. Toon je ticket bij voorkeur op je smartphone.') }}
                             </p>
                             <p v-if="!singleTicket" class="only-smartphone style-description">
-                                Tik op een ticket om die individueel te downloaden of de QR-code te tonen.
+                                {{ $t('Tik op een ticket om die individueel te downloaden of de QR-code te tonen.') }}
                             </p>
 
                             <p v-if="singleTicket" class="style-description">
-                                Open of download je ticket hieronder. Toon je ticket bij voorkeur op je smartphone.
+                                {{ $t('Open of download je ticket hieronder. Toon je ticket bij voorkeur op je smartphone.') }}
                             </p>
 
                             <Spinner v-if="loadingTickets" />
                             <template v-else>
                                 <button v-if="publicTickets.length === 1" class="button primary" type="button" @click="openTicket(publicTickets[0])">
                                     <span class="icon qr-code" />
-                                    <span>Ticket tonen</span>
+                                    <span>{{ $t('Ticket tonen') }}</span>
                                 </button>
 
                                 <STList v-else>
@@ -84,54 +83,51 @@
                                 </STList>
                             </template>
 
-                            <hr>
-                            <h2>Overzicht</h2>
+                            <hr><h2>{{ $t('Overzicht') }}</h2>
                         </section>
 
                         <template v-else-if="hasTickets">
-                            <hr>
-                            <h2 v-if="singleTicket">
-                                Jouw ticket
+                            <hr><h2 v-if="singleTicket">
+                                {{ $t('Jouw ticket') }}
                             </h2>
                             <h2 v-else>
-                                Jouw tickets
+                                {{ $t('Jouw tickets') }}
                             </h2>
 
                             <p v-if="!isPaid && isTransfer" class="warning-box">
-                                Je ontvangt <template v-if="singleTicket">
-                                    jouw ticket
+                                {{ $t('Je ontvangt') }} <template v-if="singleTicket">
+                                    {{ $t('jouw ticket') }}
                                 </template><template v-else>
-                                    jouw tickets
-                                </template> via e-mail zodra we jouw overschrijving hebben ontvangen. Je kan ze dan ook op deze pagina terugvinden. Zorg er zeker voor dat je meteen betaalt zodat het bedrag op tijd op onze rekening staat. Klik onderaan op de knop om de instructies nog eens te tonen.
+                                    {{ $t('jouw tickets') }}
+                                </template> {{ $t('via e-mail zodra we jouw overschrijving hebben ontvangen. Je kan ze dan ook op deze pagina terugvinden. Zorg er zeker voor dat je meteen betaalt zodat het bedrag op tijd op onze rekening staat. Klik onderaan op de knop om de instructies nog eens te tonen.') }}
                             </p>
                             <p v-else>
-                                Je vindt <template v-if="singleTicket">
-                                    jouw ticket
+                                {{ $t('Je vindt') }} <template v-if="singleTicket">
+                                    {{ $t('jouw ticket') }}
                                 </template><template v-else>
-                                    jouw tickets
-                                </template> onderaan deze pagina.
+                                    {{ $t('jouw tickets') }}
+                                </template> {{ $t('onderaan deze pagina.') }}
                             </p>
 
                             <a v-if="isPaid" href="#tickets" class="button primary">
                                 <span class="icon arrow-down" />
-                                <span v-if="singleTicket">Ticket bekijken</span>
-                                <span v-else>Tickets bekijken</span>
+                                <span v-if="singleTicket">{{ $t('Ticket bekijken') }}</span>
+                                <span v-else>{{ $t('Tickets bekijken') }}</span>
                             </a>
 
-                            <hr>
-                            <h2>Overzicht</h2>
+                            <hr><h2>{{ $t('Overzicht') }}</h2>
                         </template>
                         <p v-else-if="!isCanceled && !isPaid && isTransfer" class="warning-box">
-                            Opgelet: deze bestelling moet worden betaald via overschrijving, daardoor weten we niet automatisch of deze al betaald werd of niet. Zorg er zeker voor dat je deze meteen betaalt zodat het bedrag op tijd op onze rekening komt. Klik onderaan op de knop om de instructies nog eens te tonen.
+                            {{ $t('Opgelet: deze bestelling moet worden betaald via overschrijving, daardoor weten we niet automatisch of deze al betaald werd of niet. Zorg er zeker voor dat je deze meteen betaalt zodat het bedrag op tijd op onze rekening komt. Klik onderaan op de knop om de instructies nog eens te tonen.') }}
                         </p>
                         <p v-else-if="!isCanceled && !isPaid && !isTransfer" class="warning-box">
-                            Opgelet: je zal deze bestelling nog moeten betalen {{ getLowerCaseName(order.data.paymentMethod) }}
+                            {{ $t('Opgelet: je zal deze bestelling nog moeten betalen') }} {{ getLowerCaseName(order.data.paymentMethod) }}
                         </p>
 
                         <STList class="info">
                             <STListItem v-if="order.number && !isDeleted" class="right-description">
                                 <h3 class="style-definition-label">
-                                    Bestelnummer
+                                    {{ $t('Bestelnummer') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -140,7 +136,7 @@
                             </STListItem>
                             <STListItem v-if="order.data.customer.name" class="right-description">
                                 <h3 class="style-definition-label">
-                                    Naam
+                                    {{ $t('Naam') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -149,7 +145,7 @@
                             </STListItem>
                             <STListItem v-if="order.data.customer.email" class="right-description">
                                 <h3 class="style-definition-label">
-                                    E-mailadres
+                                    {{ $t('E-mailadres') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -184,7 +180,7 @@
                             </STListItem>
                             <STListItem v-if="order.validAt" class="right-description">
                                 <h3 class="style-definition-label">
-                                    Geplaatst op
+                                    {{ $t('Geplaatst op') }}
                                 </h3>
                                 <p class="style-definition-text">
                                     {{ capitalizeFirstLetter(formatDateTime(order.validAt)) }}
@@ -193,7 +189,7 @@
 
                             <STListItem class="right-description">
                                 <h3 class="style-definition-label">
-                                    Status
+                                    {{ $t('Status') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -206,13 +202,13 @@
                                 <STListItem v-if="order.data.checkoutMethod.name" class="right-description">
                                     <h3 class="style-definition-label">
                                         <template v-if="order.data.checkoutMethod.type === 'Takeout'">
-                                            Afhaallocatie
+                                            {{ $t('Afhaallocatie') }}
                                         </template>
                                         <template v-else-if="order.data.checkoutMethod.type === 'OnSite'">
-                                            Locatie
+                                            {{ $t('Locatie') }}
                                         </template>
                                         <template v-else>
-                                            Leveringsmethode
+                                            {{ $t('Leveringsmethode') }}
                                         </template>
                                     </h3>
 
@@ -222,7 +218,7 @@
                                 </STListItem>
                                 <STListItem v-if="(order.data.checkoutMethod as any).address" class="right-description">
                                     <h3 class="style-definition-label">
-                                        Adres
+                                        {{ $t('Adres') }}
                                     </h3>
 
                                     <p class="style-definition-text">
@@ -231,7 +227,7 @@
                                 </STListItem>
                                 <STListItem v-if="order.data.address" class="right-description">
                                     <h3 class="style-definition-label">
-                                        Leveringsadres
+                                        {{ $t('Leveringsadres') }}
                                     </h3>
 
                                     <p class="style-definition-text">
@@ -241,24 +237,24 @@
                                 <STListItem v-if="order.data.timeSlot" class="right-description">
                                     <h3 class="style-definition-label">
                                         <template v-if="order.data.checkoutMethod.type === 'Takeout'">
-                                            Wanneer afhalen?
+                                            {{ $t('Wanneer afhalen?') }}
                                         </template>
                                         <template v-else-if="order.data.checkoutMethod.type === 'OnSite'">
-                                            Wanneer?
+                                            {{ $t('Wanneer?') }}
                                         </template>
                                         <template v-else>
-                                            Wanneer leveren?
+                                            {{ $t('Wanneer leveren?') }}
                                         </template>
                                     </h3>
 
                                     <p class="style-definition-text">
-                                        {{ capitalizeFirstLetter(formatDate(order.data.timeSlot.date)) }}<br>{{ formatMinutes(order.data.timeSlot.startTime) }} - {{ formatMinutes(order.data.timeSlot.endTime) }}
+                                        {{ capitalizeFirstLetter(formatDate(order.data.timeSlot.date)) }}<br>
                                     </p>
                                 </STListItem>
                             </template>
                             <STListItem v-if="order.data.deliveryPrice > 0" class="right-description">
                                 <h3 class="style-definition-label">
-                                    Leveringskost
+                                    {{ $t('Leveringskost') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -267,7 +263,7 @@
                             </STListItem>
                             <STListItem v-if="order.data.administrationFee > 0" class="right-description">
                                 <h3 class="style-definition-label">
-                                    Administratiekosten
+                                    {{ $t('Administratiekosten') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -276,7 +272,7 @@
                             </STListItem>
                             <STListItem v-if="order.data.totalPrice || !webshop.isAllFree" class="right-description">
                                 <h3 class="style-definition-label">
-                                    Totaal
+                                    {{ $t('Totaal') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -285,48 +281,43 @@
                             </STListItem>
                         </STList>
 
-                        <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id"  :category="category" :value="order.data" />
+                        <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="order.data" />
 
                         <div v-if="order.data.checkoutMethod && order.data.checkoutMethod.description" class="container">
-                            <hr>
-                            <h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
-                                Afhaalopmerkingen
+                            <hr><h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
+                                {{ $t('Afhaalopmerkingen') }}
                             </h2>
                             <h2 v-else-if="order.data.checkoutMethod.type === 'OnSite'">
-                                Opmerkingen
+                                {{ $t('Opmerkingen') }}
                             </h2>
                             <h2 v-else>
-                                Leveringsopmerkingen
+                                {{ $t('Leveringsopmerkingen') }}
                             </h2>
 
                             <p class="pre-wrap" v-text="order.data.checkoutMethod.description" />
                         </div>
 
                         <template v-if="!hasTickets || hasSingleTicket || !isPaid">
-                            <hr>
-
-                            <p v-for="code of order.data.discountCodes" :key="code.id" class="discount-box icon label">
-                                <span>Kortingscode <span class="style-discount-code">{{ code.code }}</span></span>
+                            <hr><p v-for="code of order.data.discountCodes" :key="code.id" class="discount-box icon label">
+                                <span>{{ $t('Kortingscode') }} <span class="style-discount-code">{{ code.code }}</span></span>
                             </p>
 
                             <STList>
                                 <CartItemRow v-for="cartItem of order.data.cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="order.data.cart" :webshop="webshop" :editable="false" :admin="false" />
                             </STList>
 
-                            <hr>
-
-                            <PriceBreakdownBox :price-breakdown="order.data.priceBreakown" />
+                            <hr><PriceBreakdownBox :price-breakdown="order.data.priceBreakown" />
                         </template>
                     </main>
                     <STToolbar v-if="!isCanceled && ((canShare && !hasTickets) || (!isPaid && isTransfer))" :sticky="false">
                         <template #right>
                             <button v-if="canShare && !hasTickets" class="button secundary" type="button" @click="share">
                                 <span class="icon share" />
-                                <span>Delen</span>
+                                <span>{{ $t('Delen') }}</span>
                             </button>
                             <button v-if="!isPaid && isTransfer" class="button primary" type="button" @click="openTransferView(getDefaultTransferPayment())">
                                 <span class="icon card" />
-                                <span>Betaalinstructies</span>
+                                <span>{{ $t('Betaalinstructies') }}</span>
                             </button>
                         </template>
                     </STToolbar>

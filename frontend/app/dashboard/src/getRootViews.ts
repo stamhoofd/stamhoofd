@@ -7,12 +7,12 @@ import { AccessRight, Country, Organization, PermissionLevel, Webshop } from '@s
 import { computed, markRaw, reactive, ref } from 'vue';
 
 import { SimpleError } from '@simonbackx/simple-errors';
+import RedirectView from '@stamhoofd/components/src/auth/RedirectView.vue';
 import { CheckoutManager } from '../../webshop/src/classes/CheckoutManager';
 import { WebshopManager } from '../../webshop/src/classes/WebshopManager';
 import { WhatsNewCount } from './classes/WhatsNewCount';
 import { useGlobalRoutes } from './useGlobalRoutes';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
-import RedirectView from '@stamhoofd/components/src/auth/RedirectView.vue';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
     return new ComponentWithProperties(ModalStackComponent, { root: component, initialPresents });
@@ -218,7 +218,7 @@ export async function getScopedAutoRoot(session: SessionContext, options: { init
                         else {
                             throw new SimpleError({
                                 code: 'infinite_redirect',
-                                message: 'Er ging iets mis: te veel doorverwijzingen.',
+                                message: $t('Er ging iets mis: te veel doorverwijzingen.'),
                             });
                         }
                         return new ComponentWithProperties({}, {});

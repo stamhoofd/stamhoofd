@@ -8,14 +8,14 @@
             </h1>
 
             <p v-if="isDraft" class="warning-box">
-                Dit document is nog een kladversie. Nu kan je alles nog wijzigen, maar ze is nog niet zichtbaar voor leden. Publiceer het document via de knop onderaan nadat je alles hebt nagekeken.
+                {{ $t('Dit document is nog een kladversie. Nu kan je alles nog wijzigen, maar ze is nog niet zichtbaar voor leden. Publiceer het document via de knop onderaan nadat je alles hebt nagekeken.') }}
             </p>
             <p v-else class="success-box">
-                Dit document is zichtbaar in het ledenportaal.
+                {{ $t('Dit document is zichtbaar in het ledenportaal.') }}
             </p>
 
             <p v-if="!isDraft && template.updatesEnabled" class="warning-box">
-                We raden aan om automatische wijzigingen uit te schakelen zodra alle documenten volledig zijn (of als leden voldoende kans hebben gehad om ontbrekende gegevens aan te vullen). Anders riskeer je dat documenten nog worden gewijzigd of verwijderd als leden worden uitgeschreven.
+                {{ $t('We raden aan om automatische wijzigingen uit te schakelen zodra alle documenten volledig zijn (of als leden voldoende kans hebben gehad om ontbrekende gegevens aan te vullen). Anders riskeer je dat documenten nog worden gewijzigd of verwijderd als leden worden uitgeschreven.') }}
             </p>
 
             <STList class="illustration-list">
@@ -24,10 +24,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/agreement.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Documenten
+                        {{ $t('Documenten') }}
                     </h2>
                     <p class="style-description">
-                        Bekijk en bewerk de aangemaakte documenten.
+                        {{ $t('Bekijk en bewerk de aangemaakte documenten.') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -39,10 +39,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Instellingen
+                        {{ $t('Instellingen') }}
                     </h2>
                     <p class="style-description">
-                        Wijzig de invulvelden en de instellingen van het document.
+                        {{ $t('Wijzig de invulvelden en de instellingen van het document.') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -54,7 +54,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/code-export.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Exporteren naar XML
+                        {{ $t('Exporteren naar XML') }}
                     </h2>
                     <p class="style-description">
                         {{ xmlExportDescription }}
@@ -65,59 +65,57 @@
                 </STListItem>
             </STList>
 
-            <hr>
-            <h2>Automatische wijzigingen</h2>
+            <hr><h2>{{ $t('Automatische wijzigingen') }}</h2>
             <p>{{ $t('fa988b87-6665-43e4-a177-77031826e9a8') }}</p>
 
             <Checkbox :model-value="template.updatesEnabled" :disabled="settingUpdatesEnabled" @update:model-value="toggleUpdatesEnabled">
-                Documenten automatisch wijzigen
+                {{ $t('Documenten automatisch wijzigen') }}
             </Checkbox>
 
-            <hr>
-            <h2>Acties</h2>
+            <hr><h2>{{ $t('Acties') }}</h2>
 
             <STList>
                 <STListItem v-if="isDraft" :selectable="true" @click="publishTemplate()">
                     <h2 class="style-title-list">
-                        Document publiceren
+                        {{ $t('Document publiceren') }}
                     </h2>
                     <p class="style-description">
-                        Maak alle documenten toegankelijk voor alle leden.
+                        {{ $t('Maak alle documenten toegankelijk voor alle leden.') }}
                     </p>
                     <template #right>
                         <button type="button" class="button secundary green hide-smartphone">
                             <span class="icon success" />
-                            <span>Publiceer</span>
+                            <span>{{ $t('Publiceer') }}</span>
                         </button>                    <button type="button" class="button icon success only-smartphone" />
                     </template>
                 </STListItem>
 
                 <STListItem v-if="!isDraft" :selectable="true" @click="draftTemplate()">
                     <h2 class="style-title-list">
-                        Terug naar klad
+                        {{ $t('Terug naar klad') }}
                     </h2>
                     <p class="style-description">
-                        Maak dit document terug onzichtbaar voor alle leden.
+                        {{ $t('Maak dit document terug onzichtbaar voor alle leden.') }}
                     </p>
                     <template #right>
                         <button type="button" class="button secundary hide-smartphone">
                             <span class="icon edit" />
-                            <span>Naar klad</span>
+                            <span>{{ $t('Naar klad') }}</span>
                         </button>                    <button type="button" class="button icon edit only-smartphone" />
                     </template>
                 </STListItem>
 
                 <STListItem v-if="isDraft" :selectable="true" @click="deleteTemplate()">
                     <h2 class="style-title-list">
-                        Document verwijderen
+                        {{ $t('Document verwijderen') }}
                     </h2>
                     <p class="style-description">
-                        Verwijder alle documenten definitief.
+                        {{ $t('Verwijder alle documenten definitief.') }}
                     </p>
                     <template #right>
                         <button type="button" class="button secundary danger hide-smartphone">
                             <span class="icon trash" />
-                            <span>Verwijder</span>
+                            <span>{{ $t('Verwijder') }}</span>
                         </button>                    <button type="button" class="button icon trash only-smartphone" />
                     </template>
                 </STListItem>
@@ -129,7 +127,7 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, Checkbox, FillRecordCategoryView, NavigationActions, STList, STListItem, STNavigationBar, Toast, useContext } from '@stamhoofd/components';
 import { DocumentSettings, DocumentStatus, DocumentTemplatePrivate, PatchAnswers } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

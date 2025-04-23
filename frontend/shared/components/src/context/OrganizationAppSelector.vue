@@ -1,6 +1,6 @@
 <template>
     <nav class="st-view organization-app-switcher">
-        <STNavigationBar v-if="!popup" title="Kiezen" />
+        <STNavigationBar v-if="!popup" :title="$t(`Kiezen`)" />
 
         <main>
             <h1 v-if="!popup">
@@ -20,7 +20,7 @@
                             {{ getAppDescription(option.app, option.organization) }}
                         </p>
                         <p v-if="option.userDescription" class="style-description-small style-em">
-                            Ingelogd als {{ option.userDescription }}
+                            {{ $t('Ingelogd als {user}', {user: option.userDescription}) }}
                         </p>
 
                         <template v-if="isCurrent(option) || option.userDescription || (option.context.hasPermissions() && option.app === 'auto')" #right>
@@ -46,7 +46,7 @@
                         {{ getAppDescription(option.app, option.organization) }}
                     </p>
                     <p v-if="option.userDescription" class="style-description-small style-em">
-                        Ingelogd als {{ option.userDescription }}
+                        {{ $t('Ingelogd als') }} {{ option.userDescription }}
                     </p>
 
                     <template v-if="isCurrent(option) || option.userDescription || (option.context.hasPermissions() && option.app === 'auto')" #right>
@@ -58,11 +58,9 @@
             </STList>
 
             <template v-if="(STAMHOOFD.userMode !== 'platform' || hasAdmin) && !STAMHOOFD.singleOrganization">
-                <hr v-if="currentOptions.length || otherOptions.length">
-
-                <button class="button text" type="button" @click="searchOrganizations">
+                <hr v-if="currentOptions.length || otherOptions.length"><button class="button text" type="button" @click="searchOrganizations">
                     <span class="icon search" />
-                    <span>Andere zoeken</span>
+                    <span>{{ $t('Andere zoeken') }}</span>
                 </button>
             </template>
         </main>
