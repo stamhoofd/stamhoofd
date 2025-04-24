@@ -17,6 +17,8 @@ export class OutdatedTranslationFinder {
             ),
         );
 
+        // todo: maybe use iterateNonDefaultLocalesWithNamespace
+
         const otherLocales = this.translationManager.locales.filter(
             (locale) => {
                 if (locale === globals.DEFAULT_LOCALE) {
