@@ -167,16 +167,16 @@ async function build(country, language, namespace, skipFallbackLanguages, skipNa
         json = mergeObjects(json, specifics);
     }
 
-    // language
-    if (await fileExists(folder + '/' + language + '.json')) {
-        const specifics = JSON.parse(await fs.readFile(folder + '/' + language + '.json'));
-        json = mergeObjects(json, specifics);
-    }
-
-    // machine translations of locale file
+    // machine translations of locale file (before normal language to simplify changes in the language file because machine translations duplicate everything atm)
     const machineLocaleFile = `${folder}/machine-${translatorType}-${locale}.json`;
     if (await fileExists(machineLocaleFile)) {
         const specifics = await readMachineTranslations(machineLocaleFile);
+        json = mergeObjects(json, specifics);
+    }
+
+    // language
+    if (await fileExists(folder + '/' + language + '.json')) {
+        const specifics = JSON.parse(await fs.readFile(folder + '/' + language + '.json'));
         json = mergeObjects(json, specifics);
     }
 
