@@ -19375,10 +19375,6 @@
     "original": "1 week",
     "translation": "1 week"
   },
-  "b6185496-deab-4569-906f-c636e625bcd1": {
-    "original": "todo",
-    "translation": "to do"
-  },
   "9464cf2b-10a9-4690-8ab6-2e3d2f3e9b9d": {
     "original": "Document",
     "translation": "Document"
@@ -19502,5 +19498,97 @@
   "7c04a4f3-25c5-4663-9833-87a7aecbf0b9": {
     "original": "Demoshop",
     "translation": "Demoshop"
+  },
+  "b6185496-deab-4569-906f-c636e625bcd1": {
+    "original": "andere",
+    "translation": "other"
+  },
+  "269872df-ab70-4eae-b671-ab9246162d4e": {
+    "original": "account",
+    "translation": "account"
+  },
+  "940c3987-3048-441e-9933-3fa51c6d421d": {
+    "original": "naam",
+    "translation": "name"
+  },
+  "340f1829-3bb9-419d-8646-ba3b34eea958": {
+    "original": "email",
+    "translation": "email"
+  },
+  "fb17210e-534f-48f3-b6a2-756428d117ee": {
+    "original": "nr",
+    "translation": "no"
+  },
+  "cf9f3bc1-51d7-438b-832c-8757ee79e0d4": {
+    "original": "Taal",
+    "translation": "Language"
+  },
+  "edcbd633-f0f9-4e7f-97bc-e91a6eb1fff0": {
+    "original": "Onvolledig",
+    "translation": "Incomplete"
+  },
+  "f910a622-522a-4507-89a1-8cae473ea043": {
+    "original": "Ongebruikt",
+    "translation": "Unused"
+  },
+  "d5c7e037-e526-41d5-9151-d9e115b4b8de": {
+    "original": "Dit is leeg maar werd wel ingevuld in een andere taal",
+    "translation": "This is empty but was filled in another language"
+  },
+  "4bc9a5fd-a1d5-47cd-8e25-2ce20b21a656": {
+    "original": "Verwijder vertaling",
+    "translation": "Delete translation"
+  },
+  "aece10d1-efd5-4fe7-98a0-98670abed7de": {
+    "original": "Neem vertaling over",
+    "translation": "Use translation"
+  },
+  "e5f00b6a-9424-46b7-ada2-9474160189c4": {
+    "original": "vereniging",
+    "translation": "association"
+  },
+  "d483a129-031a-4cfd-8cac-16a34134aad0": {
+    "original": "functies",
+    "translation": "roles"
+  },
+  "c1dbdfd0-5111-4b1b-859b-95c8f30ad132": {
+    "original": "facturatiegegevens",
+    "translation": "billing data"
+  },
+  "4e226f0b-e81f-4e27-b352-073fc4744c18": {
+    "original": "leeftijdsgroepen",
+    "translation": "age groups"
+  },
+  "85125d9c-6a30-4211-830a-8aa9a2c75fc0": {
+    "original": "lokalen",
+    "translation": "premises"
+  },
+  "8cf35f34-4cbb-4eb5-93cd-308ab22adf56": {
+    "original": "inschrijvingen",
+    "translation": "registrations"
+  },
+  "b427a2eb-4d55-4f41-b60e-ae3c6819100d": {
+    "original": "inschrijvingsgroep",
+    "translation": "registration group"
+  },
+  "bc90ce0a-2273-4942-9ce9-45fead8f928c": {
+    "original": "betaling",
+    "translation": "payment"
+  },
+  "0fe765e4-3ec6-43aa-8cae-ef6d89939c85": {
+    "original": "verwijderd",
+    "translation": "deleted"
+  },
+  "efc92098-8600-41e8-bbd9-a2d2edbcd19d": {
+    "original": "activiteit",
+    "translation": "activity"
+  },
+  "0467006a-7ded-4e4f-acec-986d013bea6b": {
+    "original": "beschikbaar",
+    "translation": "available"
+  },
+  "06da1310-e17c-475e-bcd3-bb47844c24c1": {
+    "original": "toevoegen",
+    "translation": "add"
   }
 }
