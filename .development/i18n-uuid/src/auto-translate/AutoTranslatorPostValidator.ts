@@ -54,7 +54,7 @@ export class AutoTranslatorPostValidator {
     }
 
     private validateDictionaryValue<K extends keyof TranslationDictionary>({original, translation}: TranslationDictionary[K]): string | null {
-        if(original.length > 9) {
+        if(original.length > 0) {
             if(original === translation) {
                 return 'Not translated';
             }

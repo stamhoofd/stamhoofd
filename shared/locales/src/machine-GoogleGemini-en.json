@@ -91,10 +91,6 @@
     "original": "De URI is een unieke en leesbare code voor deze vereniging, bestaande uit enkel kleine letters en koppeltekens. Deze wordt in de URL-balk van de browser gebruikt op enkele plaatsen, maar is anders niet zichtbaar.",
     "translation": "The URI is a unique and readable code for this association, consisting only of lowercase letters and hyphens. This is used in the browser's URL bar in a few places, but is otherwise not visible."
   },
-  "2cc5355d-3c19-4a6e-a2c7-1d93e423a8d2": {
-    "original": "URI",
-    "translation": "URI"
-  },
   "5f0e24bb-10db-428b-a480-6f73d959cafa": {
     "original": "De link naar de website van deze vereniging.",
     "translation": "The link to the website of this association."
@@ -703,14 +699,6 @@
     "original": "Beschrijving",
     "translation": "Description"
   },
-  "6b3555a2-ace4-4f37-a1fd-18921552f2b5": {
-    "original": "stamhoofd.be",
-    "translation": "stamhoofd.be"
-  },
-  "ccfc0566-2fc4-4c0a-b1da-c3059cad6586": {
-    "original": "www.stamhoofd.be",
-    "translation": "www.stamhoofd.be"
-  },
   "edac937d-5eda-445e-8bba-2c2b353d3f27": {
     "original": "klachten@stamhoofd.be",
     "translation": "complaints@stamhoofd.be"
@@ -718,10 +706,6 @@
   "59b85264-c4c3-4cf6-8923-9b43282b2787": {
     "original": "hallo@stamhoofd.be",
     "translation": "hello@stamhoofd.be"
-  },
-  "5670bc42-cf94-46b6-9ce0-7cdc4ffbb4d9": {
-    "original": "simon@stamhoofd.be",
-    "translation": "simon@stamhoofd.be"
   },
   "7955066a-93c8-4872-8ac7-e7ccdc7f61f9": {
     "original": "Einddatum",
@@ -735,17 +719,9 @@
     "original": "voorbeeld@gmail.com",
     "translation": "example@gmail.com"
   },
-  "bb910a6c-ec64-46d8-bebb-c3b4312bbfb4": {
-    "original": "Jan Janssens",
-    "translation": "Jan Janssens"
-  },
   "274d0a26-49b8-4dfa-a8bf-21368b12dca7": {
     "original": "Lies en Jan Janssens",
     "translation": "Lies and Jan Janssens"
-  },
-  "0c3689c1-01f8-455a-a9b0-8f766c03b2d3": {
-    "original": "+32 470 12 34 56",
-    "translation": "+32 470 12 34 56"
   },
   "b4567b6a-b90e-425f-bd31-be4d2252829a": {
     "original": "Algemeen",
@@ -819,10 +795,6 @@
     "original": "Vereniging",
     "translation": "Association"
   },
-  "405a811e-ebb1-4948-84cd-8fb5860104e6": {
-    "original": "Stamhoofd",
-    "translation": "Stamhoofd"
-  },
   "c43f09fa-5f39-4e1a-bfbf-80a0d2d4bd6c": {
     "original": "Zoek een vereniging",
     "translation": "Find an association"
@@ -850,10 +822,6 @@
   "f22ff741-6a05-4b15-aa6a-16e3a197ac99": {
     "original": "Gestructureerde mededeling",
     "translation": "Structured communication"
-  },
-  "00c90aa3-2d42-45bc-a3e7-56565b7a4e0e": {
-    "original": "Website",
-    "translation": "Website"
   },
   "8012abfe-4a7e-4864-88e5-fcf02f851705": {
     "original": "De link naar de website van jouw vereniging.",
@@ -1163,10 +1131,6 @@
     "original": "Zoeken",
     "translation": "Search"
   },
-  "54685a94-1ae2-46f9-aa4b-03f0b3939fd3": {
-    "original": "shared.untitled",
-    "translation": "shared.untitled"
-  },
   "7a63f22a-1f4d-4dfa-9030-47137ff52bab": {
     "original": "De locatie is verplicht",
     "translation": "The location is mandatory"
@@ -1238,10 +1202,6 @@
   "cd6e3548-aea1-4f74-9c66-b1fa43de6438": {
     "original": "Ticketverkoop via Stamhoofd",
     "translation": "Ticket sales via Stamhoofd"
-  },
-  "68914509-aa54-40c7-9f53-7b8a02149198": {
-    "original": "Stamhoofd",
-    "translation": "Stamhoofd"
   },
   "6355a1b9-7b98-48c4-9aca-91df9a22d66e": {
     "original": "Vlagmomenten",
@@ -1367,10 +1327,6 @@
     "original": "Aangesloten sinds",
     "translation": "Affiliated since"
   },
-  "bf20a769-772d-46b2-9b48-2ea29c96f113": {
-    "original": "Via",
-    "translation": "Via"
-  },
   "f18beb62-a9e8-4881-865c-28ad534b6f24": {
     "original": "Navigatie",
     "translation": "Navigation"
@@ -1431,10 +1387,6 @@
     "original": "Er zijn nog geen bestellingen.",
     "translation": "There are no orders yet."
   },
-  "4a07f8e5-c16e-4706-9387-9d3ded9e2b3c": {
-    "original": "Type",
-    "translation": "Type"
-  },
   "f7300ff2-638b-47c2-97b5-e8774aa0b6f5": {
     "original": "Naam",
     "translation": "Name"
@@ -1470,10 +1422,6 @@
   "146d0874-2f4d-4374-8808-61a4bd953354": {
     "original": "lid",
     "translation": "member"
-  },
-  "fbb0dee5-c500-4bb4-81d6-945666ae4784": {
-    "original": "account",
-    "translation": "account"
   },
   "9cff0038-a8c2-49bd-9353-fab8308a83ad": {
     "original": "Nieuwe standaard leeftijdsgroep",
@@ -1658,10 +1606,6 @@
   "f5c908ad-c996-4dc8-acc0-dae902f13495": {
     "original": "Gemeente",
     "translation": "Municipality"
-  },
-  "28b0f035-cb44-48b7-b60f-093f6adc26fb": {
-    "original": "Postcode",
-    "translation": "Postcode"
   },
   "619d07b4-4512-4ca5-933c-93203421ac54": {
     "original": "Functie",
@@ -1850,10 +1794,6 @@
   "cb1953f4-7e4f-498d-b8d8-54a885753e23": {
     "original": "Proefperiode",
     "translation": "Trial period"
-  },
-  "ceba695c-105b-49c9-aaa4-bf716c4aec6b": {
-    "original": "tags",
-    "translation": "tags"
   },
   "a8bf2d7d-3208-4c18-bac3-2cc97b629ad1": {
     "original": "Laatste automatische herinneringsmail",
@@ -2210,10 +2150,6 @@
   "cc3d3da6-27ce-4f32-a696-4e08d649a7bc": {
     "original": "Proefperiodes",
     "translation": "Trial periods"
-  },
-  "ed995f5d-eeff-44ad-ac35-f518b2892524": {
-    "original": "Detail",
-    "translation": "Detail"
   },
   "78f9f25f-e02d-4310-af9e-87b075aa1232": {
     "original": "Kies een vereniging die verantwoordelijk is voor het verzamelen van de aansluitingskosten",
@@ -2723,10 +2659,6 @@
     "original": "Naam activiteit",
     "translation": "Activity name"
   },
-  "fde0cfa6-c279-4eef-ab75-8f62fd4028a8": {
-    "original": "Status",
-    "translation": "Status"
-  },
   "46e61090-1188-4085-8995-69aef85af678": {
     "original": "Ingediend door {name} op {date}",
     "translation": "Submitted by {name} on {date}"
@@ -2995,10 +2927,6 @@
     "original": "Het antwoord is niet gekend (werd nog nooit ingevuld in het platform). Er worden geen lagere tarieven automatisch toegepast.",
     "translation": "The answer is unknown (never filled in on the platform). No lower tariffs are automatically applied."
   },
-  "c8f1e4d4-669c-4ccb-a9d9-30584f6c2d55": {
-    "original": "Via {organization}",
-    "translation": "Via {organization}"
-  },
   "f1582fe7-3168-4579-bcc5-9db17568dac0": {
     "original": "Aangerekend aan {organization}",
     "translation": "Charged to {organization}"
@@ -3195,10 +3123,6 @@
     "original": "Groepsnummer",
     "translation": "Group number"
   },
-  "6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8": {
-    "original": "Status",
-    "translation": "Status"
-  },
   "387f4352-c78d-4e21-9dfe-a2433e3ba554": {
     "original": "Opmerkingen",
     "translation": "Comments"
@@ -3286,10 +3210,6 @@
   "af42889c-3278-4dab-8e5c-5ada25e40cf8": {
     "original": "Nummer",
     "translation": "Number"
-  },
-  "997da269-7091-470e-9032-abe1a1ea8096": {
-    "original": "Postcode",
-    "translation": "Postcode"
   },
   "b87def14-63e9-4c00-bff9-21283f7890a9": {
     "original": "Gemeente",
@@ -3654,10 +3574,6 @@
   "5f7b1766-eb58-4471-bff7-60f3fc66fe41": {
     "original": "Beste, \\nDe limiet werd bereikt voor het aantal beveiligingscodes per dag. \\nNaam lid:",
     "translation": "Dear,\nThe limit has been reached for the number of security codes per day.\nMember name:"
-  },
-  "7254f2f6-0d15-4e81-85cf-cff6438c9e98": {
-    "original": "(ID:",
-    "translation": "(ID:"
   },
   "ddb1b9de-cc00-4960-ba36-fa70429cbac1": {
     "original": "Oeps! Om spam te voorkomen limiteren we het aantal beveiligingscodes die je kan proberen. Probeer morgen opnieuw.",
@@ -4267,10 +4183,6 @@
     "original": "Administratie",
     "translation": "Administration"
   },
-  "04548161-abc0-4bea-bdd3-fdbacddc22f8": {
-    "original": "Start",
-    "translation": "Start"
-  },
   "97dc1e85-339a-4153-9413-cca69959d731": {
     "original": "Leden",
     "translation": "Members"
@@ -4310,10 +4222,6 @@
   "0302eaa0-ce2a-4ef0-b652-88b26b9c53e9": {
     "original": "Exporteren naar Excel",
     "translation": "Export to Excel"
-  },
-  "8daf57de-69cf-48fe-b09b-772c54473184": {
-    "original": "ID",
-    "translation": "ID"
   },
   "70de758a-58c5-45ce-8cbd-6a984069cd1b": {
     "original": "Indiening",
@@ -4391,10 +4299,6 @@
     "original": "Naam",
     "translation": "Name"
   },
-  "e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5": {
-    "original": "Status",
-    "translation": "Status"
-  },
   "1bb1402a-c26b-4516-bbe1-08aff32ee3e8": {
     "original": "Actief",
     "translation": "Active"
@@ -4406,10 +4310,6 @@
   "54b992a4-20e1-4232-8d2e-93c9353c6af3": {
     "original": "Gemeente",
     "translation": "Municipality"
-  },
-  "b1dd12f9-89d8-446b-8005-6be3a812a2b2": {
-    "original": "Tags",
-    "translation": "Tags"
   },
   "49e90fda-d262-4fe7-a2e2-d6b48abc8e2b": {
     "original": "Onbekend",
@@ -4503,10 +4403,6 @@
     "original": "Naam gebouw",
     "translation": "Building name"
   },
-  "a3765fff-0634-4ffe-a726-005fd8ba5dcd": {
-    "original": "Types",
-    "translation": "Types"
-  },
   "cbe7db4a-b65b-452b-a5d2-d369182fd28f": {
     "original": "Titel",
     "translation": "Title"
@@ -4599,10 +4495,6 @@
     "original": "Notificaties voor openstaande bedragen",
     "translation": "Notifications for outstanding amounts"
   },
-  "e85a86ee-7751-4791-984b-f67dc1106f6b": {
-    "original": "Webshops",
-    "translation": "Webshops"
-  },
   "57dd24f3-ae95-42d7-aaab-48e43483c018": {
     "original": "Login methodes",
     "translation": "Login methods"
@@ -4610,14 +4502,6 @@
   "f3bcb2fd-6f56-436a-bf8d-8cde0d924d6a": {
     "original": "Wachtwoord",
     "translation": "Password"
-  },
-  "af5f50da-3290-44bd-a104-896231e6ea08": {
-    "original": "Google",
-    "translation": "Google"
-  },
-  "662467b7-da51-4fe2-bff4-784c8f028e58": {
-    "original": "Single-Sign-On (SSO)",
-    "translation": "Single-Sign-On (SSO)"
   },
   "05e6464f-8db4-4c12-9bfe-527afc83d412": {
     "original": "Gegevensverzameling",
@@ -4659,10 +4543,6 @@
     "original": "Configureer een externe authenticatie server",
     "translation": "Configure an external authentication server"
   },
-  "592f4d78-1019-4b7f-b5ec-0f62eadf7c2b": {
-    "original": "Sign in with Google",
-    "translation": "Sign in with Google"
-  },
   "8387199f-9705-4f77-8440-3ea0a697af2a": {
     "original": "Configureer login via Google",
     "translation": "Configure login via Google"
@@ -4670,10 +4550,6 @@
   "f2d84e17-1901-4d6b-98e2-228d670aead7": {
     "original": "De aanpassingen zijn opgeslagen",
     "translation": "The changes have been saved"
-  },
-  "d101ec4a-219f-4f23-afa0-e8dc4862c354": {
-    "original": "Logo",
-    "translation": "Logo"
   },
   "06c25477-62cb-45d0-b00d-dbe55af9947c": {
     "original": "Let op: het logo van de app in de AppStores moet via een app-update aangepast worden.",
@@ -4698,14 +4574,6 @@
   "f2ed302c-5e58-4d45-9071-baa30fde75d4": {
     "original": "Deze afbeelding wordt in de linkeronderhoek van de omslagfoto geplaatst. Kies bij voorkeur een mét een achtergrondkleur dat hier goed op werd aangepast.",
     "translation": "This image is placed in the bottom left corner of the cover photo. Preferably choose one with a background colour that has been well adapted here."
-  },
-  "089baffa-1456-48a4-ab5b-8994143c011b": {
-    "original": "Footer",
-    "translation": "Footer"
-  },
-  "99b55ec2-7b90-4456-82bd-4168ab909822": {
-    "original": "Webshop footer",
-    "translation": "Webshop footer"
   },
   "042858d8-e3a2-4b78-acac-020ab4555819": {
     "original": "Naam van het platform",
@@ -4783,10 +4651,6 @@
     "original": "Geen automatische aansluiting",
     "translation": "No automatic affiliation"
   },
-  "e0a54e0c-03b3-43c6-b4ca-962c5b1d6772": {
-    "original": "Minimum",
-    "translation": "Minimum"
-  },
   "9db0c34d-8632-4b5c-8dc5-88cc6772baf8": {
     "original": "Activiteiten die vallen binnen dit bereik moeten voldoen aan de deadline.",
     "translation": "Activities that fall within this range must meet the deadline."
@@ -4802,10 +4666,6 @@
   "40008cbb-d57f-4c0d-82ae-048a33fc8c12": {
     "original": "Einddatum (inclusief)",
     "translation": "End date (inclusive)"
-  },
-  "0a2e758f-37b1-448a-a14f-a0548443faec": {
-    "original": "Deadline",
-    "translation": "Deadline"
   },
   "7853cca1-c41a-4687-9502-190849405f76": {
     "original": "Tijdstip",
@@ -4826,10 +4686,6 @@
   "69551005-512c-4240-8e20-fd546cefafaa": {
     "original": "meer informatie na over hoe je een vragenlijst kan instellen.",
     "translation": "more information on how to set up a questionnaire."
-  },
-  "49dd6919-a853-4004-b817-ae811de527ab": {
-    "original": "Deadlines",
-    "translation": "Deadlines"
   },
   "2562f83d-522d-47a5-b8ad-b918d14c3cb2": {
     "original": "Via deadlines kan je instellen wanneer de leiding een kampmelding moet invullen.",
@@ -4870,10 +4726,6 @@
   "b19e199f-2b0e-444c-a4ee-0cdd0b3c6a35": {
     "original": "Je hebt nog geen instellingen toegevoegd.",
     "translation": "You have not yet added any settings."
-  },
-  "6c9d45e5-c9f6-49c8-9362-177653414c7e": {
-    "original": "Type",
-    "translation": "Type"
   },
   "42ac723d-9e5f-4324-a2b9-f14ceeba10d8": {
     "original": "per dag",
@@ -4934,10 +4786,6 @@
   "a0fa9d2c-106e-4cb4-9e78-d137934fd2b1": {
     "original": "Volledige link",
     "translation": "Full link"
-  },
-  "00204508-e8ce-4b81-b978-4b0a4a0472f5": {
-    "original": "Upload PDF",
-    "translation": "Upload PDF"
   },
   "8b7c18d3-3588-4f07-a269-391283e4c2cc": {
     "original": "Aanvinktekst",
@@ -5063,10 +4911,6 @@
     "original": "Feedback systeem openen...",
     "translation": "Opening feedback system..."
   },
-  "619a9ba5-895c-4334-a126-a1c4b780e87b": {
-    "original": "spinner",
-    "translation": "spinner"
-  },
   "9e0461d2-7439-4588-837c-750de6946287": {
     "original": "Optioneel",
     "translation": "Optional"
@@ -5082,10 +4926,6 @@
   "6a8b6166-a8f9-41b8-81e7-a12180de762e": {
     "original": "Waarde",
     "translation": "Value"
-  },
-  "116f6ca0-c077-4468-b79b-d329f6a8db77": {
-    "original": "TTL",
-    "translation": "TTL"
   },
   "669bef94-f6a1-4a84-8f2c-5de06ea05db3": {
     "original": "De mededeling kan niet gewijzigd worden door",
@@ -5114,14 +4954,6 @@
   "152f1003-ba4e-4ae0-acef-475bef27e4a5": {
     "original": "Gebruik automatische tekstvervangingen in de mededeling via",
     "translation": "Use automatic text replacements in the message via"
-  },
-  "a9947119-083e-4f5f-a088-7ec605ad8e3f": {
-    "original": "{{email}}",
-    "translation": "{{email}}"
-  },
-  "61b6890f-3b3e-4d69-96fe-687e1366e738": {
-    "original": "{{nr}}",
-    "translation": "{{nr}}"
   },
   "717310b7-527a-4870-99c4-b6b3a42fe3fa": {
     "original": "Instructies",
@@ -5239,10 +5071,6 @@
     "original": "Vaste kost",
     "translation": "Fixed cost"
   },
-  "dd61d33b-367e-4e40-8ac6-84c286b931bc": {
-    "original": "Percentage",
-    "translation": "Percentage"
-  },
   "45285899-60e2-42c6-bb51-fdd16fe651e4": {
     "original": "Nog bezig met laden. Even geduld.",
     "translation": "Still loading. Please wait."
@@ -5254,14 +5082,6 @@
   "2384baa0-50ca-4003-8d3a-af0beb18fec2": {
     "original": "Er is een fout opgetreden bij het ophalen van de betaalaccounts",
     "translation": "An error occurred while retrieving the payment accounts"
-  },
-  "70ee9a44-6cd7-49a1-9852-8519c23ec13a": {
-    "original": "Via Buckaroo",
-    "translation": "Via Buckaroo"
-  },
-  "4db6cde7-274f-4202-9351-3e9ce82794c1": {
-    "original": "Via Mollie",
-    "translation": "Via Mollie"
   },
   "84e54416-464f-4ca6-a685-def2a0a9c135": {
     "original": "Vanaf minimum",
@@ -5298,14 +5118,6 @@
   "4df013df-328f-47b6-b90a-fc40813d3c0a": {
     "original": "Je moet minimaal één betaalmethode accepteren",
     "translation": "You must accept at least one payment method"
-  },
-  "f5fc5d6b-49ef-4b3d-80b7-90e1f81220fa": {
-    "original": "Buckaroo",
-    "translation": "Buckaroo"
-  },
-  "b8cf0b1f-04c4-4a85-9a19-027a5326fd11": {
-    "original": "Mollie",
-    "translation": "Mollie"
   },
   "60bbe710-43e0-4a19-996c-ded3f25c1c39": {
     "original": "Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalmethodes). Daar vind je ook meer informatie.",
@@ -5390,10 +5202,6 @@
   "b1cb5299-5325-4505-ba30-a7b0ae327679": {
     "original": "Je kan een API-key verschillende rollen geven, net zoals een externe beheerder. Hiermee kan je jouw key beter beveiligen en enkel toegang geven waarvoor je het nodig hebt.",
     "translation": "You can give an API key different roles, just like an external administrator. This allows you to better secure your key and only grant access where you need it."
-  },
-  "40abbf9c-2dd3-471a-a699-f6af656feb5e": {
-    "original": "Rate limits",
-    "translation": "Rate limits"
   },
   "664063fe-6e8f-4439-bb86-07d346e803de": {
     "original": "Een API-key heeft rate limits om overbelasting door foutief of inefficiënt gebruik te voorkomen.",
@@ -5495,10 +5303,6 @@
     "original": "Klaar",
     "translation": "Ready"
   },
-  "b1d528c7-1e05-48de-aadd-d30c28581bf2": {
-    "original": "Token",
-    "translation": "Token"
-  },
   "da7c1f63-529d-47c6-8d2d-87e5cb98a411": {
     "original": "API-key",
     "translation": "API key"
@@ -5506,10 +5310,6 @@
   "7f721fa4-ed71-42d7-a92d-6a11abc3cb0f": {
     "original": "Kies voor welke inschrijvingen je dit document wilt aanmaken",
     "translation": "Choose for which registrations you want to create this document"
-  },
-  "de5706ec-7edc-4e62-b3f7-d6e414720480": {
-    "original": "Filter",
-    "translation": "Filter"
   },
   "c51b35d1-228b-4ce3-8b27-312b5620b662": {
     "original": "Archief",
@@ -5714,14 +5514,6 @@
   "516c5273-3f27-41e2-9b2b-0ffb94501ca1": {
     "original": "Ga naar volgende document",
     "translation": "Go to next document"
-  },
-  "f4b5c997-f9ed-4ba9-aabd-ac1d5fa37dfb": {
-    "original": "Document",
-    "translation": "Document"
-  },
-  "4efa0c2b-f5af-48fc-9fb3-37ccbdf1ca24": {
-    "original": "Reset",
-    "translation": "Reset"
   },
   "bb5c03d2-d684-40b6-9aa9-6f0877f41441": {
     "original": "Volgnummer",
@@ -5959,10 +5751,6 @@
     "original": "Open inschrijvingen van leden via het ledenportaal.",
     "translation": "Open registrations of members via the member portal."
   },
-  "cd0a1bf5-5cfe-40c6-bbd1-9f40574d559b": {
-    "original": "Open",
-    "translation": "Open"
-  },
   "01f61997-3e70-41fa-85bd-9d0311caddcd": {
     "original": "Inschrijvingen sluiten",
     "translation": "Close registrations"
@@ -6042,10 +5830,6 @@
   "fb8cd9a0-f531-4b1a-9a5c-dfb6b4957e22": {
     "original": "Unieke identificatie van de betaling",
     "translation": "Unique identification of the payment"
-  },
-  "204f8618-c061-449d-aa74-5085e67b1d24": {
-    "original": "Detail",
-    "translation": "Detail"
   },
   "17c0327e-3206-4f14-a246-d215c97299f5": {
     "original": "De inschrijvingen of producten die zijn afgerekend",
@@ -6150,14 +5934,6 @@
   "e6fef5f5-3c6a-4879-b2d6-0dfb479cb047": {
     "original": "Transactiekosten die in mindering worden gebracht door de betaalprovider",
     "translation": "Transaction costs deducted by the payment provider"
-  },
-  "079c3c5d-b816-4adf-9287-6f5352a2cd81": {
-    "original": "Stripe",
-    "translation": "Stripe"
-  },
-  "e8ef97dc-5470-4d36-9c4a-a9c2ec92b7e2": {
-    "original": "Account ID",
-    "translation": "Account ID"
   },
   "cefc0455-9e43-41ef-abe0-dec25b6a9927": {
     "original": "Stripe Account ID waarop de betaling is ontvangen",
@@ -6555,14 +6331,6 @@
     "original": "Activeer test-modus voor betalingen",
     "translation": "Activate test mode for payments"
   },
-  "8cdbbc91-88ab-4d25-8f42-b34369e959f0": {
-    "original": "Single-Sign-On",
-    "translation": "Single-Sign-On"
-  },
-  "5573d401-88aa-4221-9ed7-44380d970177": {
-    "original": "Webshop auth",
-    "translation": "Webshop auth"
-  },
   "47e866d9-5349-4318-b779-161da61c2250": {
     "original": "Openstaande bedragen tussen verenigingen",
     "translation": "Outstanding amounts between associations"
@@ -6578,10 +6346,6 @@
   "a31eaafb-e2d1-4e41-8fa1-1c58a9bd585f": {
     "original": "Koppel betaalaccounts via",
     "translation": "Link payment accounts via"
-  },
-  "8f39177b-f214-4f23-82ab-329c66ae731a": {
-    "original": "Payconiq",
-    "translation": "Payconiq"
   },
   "e06250b5-6d74-4690-8837-a4455aa9e44d": {
     "original": "om online betalingen te accepteren.",
@@ -6599,10 +6363,6 @@
     "original": "Sommige van jouw Stripe accounts gebruiken dezelfde weergavenaam. Je past deze best aan zodat je later verwarring vermijdt.",
     "translation": "Some of your Stripe accounts use the same display name. You should adjust this to avoid confusion later."
   },
-  "2be4de1c-159a-4767-b461-3ba0f67877d7": {
-    "original": "Stripe account",
-    "translation": "Stripe account"
-  },
   "679776ce-4997-43cf-837a-0c7f5a70dcf1": {
     "original": "Weergavenaam",
     "translation": "Display name"
@@ -6610,10 +6370,6 @@
   "88b65545-d735-450d-9441-ede25969f5f9": {
     "original": "Handelsnaam",
     "translation": "Trade name"
-  },
-  "6e40269e-10f8-4c19-804f-dac6ba75959b": {
-    "original": "IBAN",
-    "translation": "IBAN"
   },
   "6f442433-dc3a-4500-918a-65e5776307fc": {
     "original": "Volledig",
@@ -6638,14 +6394,6 @@
   "85cf8f92-6092-4546-a43e-f86319e80aa1": {
     "original": "Vervolledig gegevens",
     "translation": "Complete data"
-  },
-  "89d0154d-edcb-4a56-b4d7-1c95c13c4fb1": {
-    "original": "Stripe Dashboard",
-    "translation": "Stripe Dashboard"
-  },
-  "21610c8e-44fb-4afb-9456-c57b938d4c8e": {
-    "original": "Extra Stripe account",
-    "translation": "Extra Stripe account"
   },
   "58d5950b-f52f-436a-bc82-222c80ce7356": {
     "original": "Stripe Documentatie",
@@ -6747,14 +6495,6 @@
     "original": "Standaardprofiel",
     "translation": "Default profile"
   },
-  "d54cbd0f-91c6-484a-b071-5161d4060dd7": {
-    "original": "Key",
-    "translation": "Key"
-  },
-  "1c6a928f-1e53-421e-939f-a54959b45769": {
-    "original": "Secret",
-    "translation": "Secret"
-  },
   "f45871aa-7723-42c3-9781-f4f9b8d7250a": {
     "original": "Personaliseren",
     "translation": "Personalise"
@@ -6838,10 +6578,6 @@
   "7d21c7fd-6aed-4147-881b-34041284b61c": {
     "original": "Er zijn nog geen lokalen toegevoegd",
     "translation": "No premises have been added yet"
-  },
-  "9ce28983-01ef-44bc-bc02-b76575bda1ce": {
-    "original": "Privacy",
-    "translation": "Privacy"
   },
   "ec02ca17-cd7e-4416-b22f-b63aef41be2a": {
     "original": "Om in orde te zijn met de GDPR-wetgeving moet je jullie privacyvoorwaarden instellen.",
@@ -7095,10 +6831,6 @@
     "original": "Toon op tickets",
     "translation": "Show on tickets"
   },
-  "c56ee3f1-b83d-4118-a703-6f98450508cd": {
-    "original": "Banner",
-    "translation": "Banner"
-  },
   "092a4a76-8fa0-4a51-b629-dfac29ec2e15": {
     "original": "Verwijder deze sponsor",
     "translation": "Remove this sponsor"
@@ -7106,10 +6838,6 @@
   "a67e18e6-6159-40c9-8515-4de601ff586b": {
     "original": "Naam van deze sponsor",
     "translation": "Name of this sponsor"
-  },
-  "46eb81ad-4f6c-4c29-9741-ddcb0003a208": {
-    "original": "Sponsors",
-    "translation": "Sponsors"
   },
   "8a7bbc23-3158-4b70-a803-bf319a3984fc": {
     "original": "Het is mogelijk om het logo van sponsors op je tickets te plaatsen.",
@@ -7154,10 +6882,6 @@
   "558631c2-ee72-4b1e-a8d8-b58a3f863f3f": {
     "original": "Bekijk welke plaatsen door welke personen zijn ingenomen.",
     "translation": "See which seats are occupied by whom."
-  },
-  "a4919b04-c7de-4c7b-96ac-e18acc476ad7": {
-    "original": "Scan tickets",
-    "translation": "Scan tickets"
   },
   "b0b16292-fad7-4cc2-82ee-46155a484192": {
     "original": "Gebruik je camera om snel tickets te scannen.",
@@ -7254,10 +6978,6 @@
   "6d8e8e50-5e72-4e00-b074-c046f4069dd6": {
     "original": "Wijzig de teksten en uitzicht van jouw webshop.",
     "translation": "Change the texts and appearance of your webshop."
-  },
-  "d703d8bc-b08f-4b4d-9c26-f255edd70f56": {
-    "original": "Link",
-    "translation": "Link"
   },
   "c3c001fa-1c57-4aed-aa19-4bfa48736bac": {
     "original": "Wijzig de link van jouw webshop.",
@@ -7443,17 +7163,9 @@
     "original": "Gebruik opeenvolgende bestelnummers",
     "translation": "Use consecutive order numbers"
   },
-  "cd7dec4c-5183-4c18-b447-b4095436bb5c": {
-    "original": "1, 2, 3, ...",
-    "translation": "1, 2, 3, ..."
-  },
   "e9d7b5ad-5938-4e96-a089-582854d0d9a8": {
     "original": "Gebruik willekeurige bestelnummers",
     "translation": "Use random order numbers"
-  },
-  "8982ff9e-7905-4b82-9e9c-cb37a6a9481e": {
-    "original": "964824335, 116455337, 228149715, ...",
-    "translation": "964824335, 116455337, 228149715, ..."
   },
   "290f637c-9313-44c1-8e4f-4e5922e9768a": {
     "original": "Je kan dit enkel wijzigen als je alle bestellingen verwijdert.",
@@ -7619,10 +7331,6 @@
     "original": "Ander e-mailadres",
     "translation": "Other email address"
   },
-  "cdd1fd85-1c4e-416b-b166-48a4ee6ee51f": {
-    "original": "Layout",
-    "translation": "Layout"
-  },
   "672ceeaf-53d2-4281-8e0d-05eaea6a614a": {
     "original": "Naast elkaar",
     "translation": "Next to each other"
@@ -7787,10 +7495,6 @@
     "original": "artikels",
     "translation": "items"
   },
-  "b40d200c-4265-4d58-a7f4-7c2498b062b9": {
-    "original": "Tickets",
-    "translation": "Tickets"
-  },
   "22b99054-a114-4393-8127-5ec9fbc2010f": {
     "original": "Artikels",
     "translation": "Items"
@@ -7846,10 +7550,6 @@
   "ca70e639-c7f8-40d7-9054-9c01711d3f5b": {
     "original": "Verwijder deze code",
     "translation": "Delete this code"
-  },
-  "55a6f957-af81-40b3-8c83-2096f22044c8": {
-    "original": "Code",
-    "translation": "Code"
   },
   "93258b4f-4bbd-40bb-a0d4-7e1112f7aeaf": {
     "original": "Bv. BLACK-FRIDAY",
@@ -7983,10 +7683,6 @@
     "original": "en verder",
     "translation": "and further"
   },
-  "f64ba2c0-b20e-4aa5-94d2-ff2a3173ee51": {
-    "original": "Label",
-    "translation": "Label"
-  },
   "261191bf-7565-4444-9e4c-7fffe5f7b919": {
     "original": "Onbekend artikel",
     "translation": "Unknown item"
@@ -8031,10 +7727,6 @@
     "original": "Naam van deze keuze",
     "translation": "Name of this choice"
   },
-  "0c35caa6-6240-4a92-9d89-78acf2c79fc0": {
-    "original": "Placeholder",
-    "translation": "Placeholder"
-  },
   "caa8166a-c0cc-4579-97b9-b57fd7f0a00d": {
     "original": "Tekst in lege velden",
     "translation": "Text in empty fields"
@@ -8054,10 +7746,6 @@
   "d567a7a8-bcb3-477b-b857-d954cc4dfce2": {
     "original": "Vanaf bestelbedrag",
     "translation": "From order amount"
-  },
-  "4c9238ec-4895-4ada-89c9-a4e2560d2f10": {
-    "original": "€ 0",
-    "translation": "€ 0"
   },
   "e7f6f003-c131-4fc5-8060-2318e344e4f2": {
     "original": "Verminderde leveringskost",
@@ -8227,10 +7915,6 @@
     "original": "Meer of minkost",
     "translation": "More or less cost"
   },
-  "ef6ac7e5-de7e-4e2e-802f-de730294f05d": {
-    "original": "+ 0 euro",
-    "translation": "+ 0 euro"
-  },
   "5da36b5d-903c-415e-a5bc-10c8a05038ae": {
     "original": "Prijskeuze toevoegen",
     "translation": "Add price choice"
@@ -8242,14 +7926,6 @@
   "bf57e599-cac3-4b3c-a115-470efa0f3dea": {
     "original": "Verwijder deze prijskeuze",
     "translation": "Delete this price choice"
-  },
-  "de971042-551d-43d2-ab47-e76132156887": {
-    "original": "Ticket",
-    "translation": "Ticket"
-  },
-  "325f85b1-ff89-4bde-a2df-1328c8ea4a3a": {
-    "original": "Voucher",
-    "translation": "Voucher"
   },
   "e1f32f18-acac-4339-883c-09897ffbd691": {
     "original": "Stuks",
@@ -8531,14 +8207,6 @@
     "original": "Voeg rijen en gangen toe. Binnen een rij kan je verticale gangen maken door een stoel aan te klikken met je rechtermuisknop en een gang links of rechts in te voegen. Je kan ook een stoel selecteren en wijzigen in een gang. Je kan tekst in een gang plaatsen ter informatie, bijvoorbeeld om ingangen en het podium aan te geven. Je kan de breedte van een gang of stoel wijzigen met je rechtermuisknop. Hou",
     "translation": "Add rows and aisles. Within a row you can create vertical aisles by clicking on a chair with your right mouse button and inserting an aisle to the left or right. You can also select a chair and change it to an aisle. You can place text in an aisle for information, for example to indicate entrances and the stage. You can change the width of an aisle or chair with your right mouse button. Keep"
   },
-  "f4155ecb-b961-4b07-8c4a-69e2d2518a52": {
-    "original": "Command(⌘)",
-    "translation": "Command(⌘)"
-  },
-  "cdfd1cea-e2d5-41bf-80f7-bc62303b6c70": {
-    "original": "Ctrl",
-    "translation": "Ctrl"
-  },
   "f1e7568d-b058-4a73-a48c-f2636750d330": {
     "original": "en/of Shift(⇧) ingedrukt om meerdere stoelen te selecteren. Gebruik de Enter(⏎) toetst om snel stoelen toe te voegen. Gebruik Backspace(⌫) om een stoel of rij te verwijderen. Gebruik de pijltjestoetsen om snel te navigeren.",
     "translation": "and/or Shift(⇧) pressed to select multiple chairs. Use the Enter(⏎) key to quickly add chairs. Use Backspace(⌫) to delete a chair or row. Use the arrow keys to navigate quickly."
@@ -8779,10 +8447,6 @@
     "original": "Bestelling {number} ({customer}) verwijderen?",
     "translation": "Delete order {number} ({customer})?"
   },
-  "d3e021e4-a9eb-4f7e-a538-8d2dbc27341c": {
-    "original": "Download",
-    "translation": "Download"
-  },
   "bd66e295-2748-40da-a8e9-0e6e48584033": {
     "original": "Ga naar vorige bestelling",
     "translation": "Go to previous order"
@@ -8879,17 +8543,9 @@
     "original": "Dubbele boekingen gedetecteerd voor plaatsen",
     "translation": "Double bookings detected for seats"
   },
-  "33adbc14-dd1a-43a7-a015-98a3322b58c5": {
-    "original": "Info",
-    "translation": "Info"
-  },
   "16d29c4e-f292-4a77-a995-c4fa9ae76200": {
     "original": "Geannuleerde bestellingen of verwijderde bestellingen worden niet meegeteld in de statistieken.",
     "translation": "Cancelled or deleted orders are not included in the statistics."
-  },
-  "c2ee9504-b07a-4d79-bd25-c14a1bba4d59": {
-    "original": "Vouchers",
-    "translation": "Vouchers"
   },
   "213bb888-16d4-4cdc-b917-6e6ec8b6fc84": {
     "original": "Tickets scannen",
@@ -9235,10 +8891,6 @@
     "original": "Je hebt nog geen webshops gemaakt",
     "translation": "You have not yet created any webshops"
   },
-  "e38c0b49-b038-4c9c-9653-fe1e4a078226": {
-    "original": "Webshop",
-    "translation": "Webshop"
-  },
   "2a7f1944-1da2-4a55-bb1d-981aeed5d29e": {
     "original": "Verkoop",
     "translation": "Sales"
@@ -9262,10 +8914,6 @@
   "b4cb2ff2-bb82-417d-bf01-6af09e996357": {
     "original": "Herlaad om de nieuwste update toe te passen",
     "translation": "Reload to apply the latest update"
-  },
-  "44a86a23-a189-421b-b53a-8f922c17ab78": {
-    "original": "download",
-    "translation": "download"
   },
   "1529d78d-800f-415a-8e56-b756a8bc6449": {
     "original": "Herladen",
@@ -9538,10 +9186,6 @@
   "8b54b2c4-e7bb-4efe-8e7e-a02a2fa6667e": {
     "original": "Deze webshop bestaat niet",
     "translation": "This webshop does not exist"
-  },
-  "9c3179f1-549a-4f72-975b-96b1baf0f239": {
-    "original": "Webshop via",
-    "translation": "Webshop via"
   },
   "12d2a8ca-d23d-4238-ba3d-86cd31a48067": {
     "original": "Doorverwijzen...",
@@ -9887,10 +9531,6 @@
     "original": "Snel selecteren:",
     "translation": "Quick select:"
   },
-  "2aa1f986-93d6-410c-9746-70c02fb4f5ea": {
-    "original": "Begin",
-    "translation": "Begin"
-  },
   "92be5ac5-79f3-4f2c-9525-7c11f173931a": {
     "original": "Nu",
     "translation": "Now"
@@ -10015,10 +9655,6 @@
     "original": "Oeps, deze website is enkel voor administrators. Ga naar het ledenportaal als je je wilt inschrijven als lid.",
     "translation": "Oops, this website is only for administrators. Go to the member portal if you want to register as a member."
   },
-  "979af771-f3ab-4105-9478-d8ee14db66f1": {
-    "original": "Single-Sign-On (",
-    "translation": "Single-Sign-On ("
-  },
   "fcd3549b-1d81-4fe7-9e8f-fcd17501c014": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Stamhoofd. Voor Microsoft kan je",
     "translation": "Ensure that users can log in via your own account system, separate from Stamhoofd. For Microsoft you can"
@@ -10035,29 +9671,13 @@
     "original": "De redirect URI behoud je best op de voorgestelde waarde.",
     "translation": "It is best to keep the redirect URI at the suggested value."
   },
-  "0b6247ef-b8bb-4ed7-b403-b0a58ddebaf5": {
-    "original": "Issuer",
-    "translation": "Issuer"
-  },
   "472e545f-4d75-4885-aeec-be67a6def534": {
     "original": "bv. https://login.microsoftonline.com/contoso.onmicrosoft.com/v2.0",
     "translation": "e.g. https://login.microsoftonline.com/contoso.onmicrosoft.com/v2.0"
   },
-  "9db3d461-f36c-4b2e-9e51-0b1e9a1517c2": {
-    "original": "Client ID",
-    "translation": "Client ID"
-  },
   "2065700b-bddc-4616-a67b-5c331ab31df7": {
     "original": "bv. 12345678-1234-1234-1234-123456789012",
     "translation": "e.g. 12345678-1234-1234-1234-123456789012"
-  },
-  "70af9014-24ec-484c-b11b-4e2510bb09c1": {
-    "original": "Client Secret",
-    "translation": "Client Secret"
-  },
-  "3b81d4a5-0af5-4807-8ea9-264d2f99ee05": {
-    "original": "Redirect URI",
-    "translation": "Redirect URI"
   },
   "24183997-792a-47c5-b43d-53ba713f80f1": {
     "original": "Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.",
@@ -10071,17 +9691,9 @@
     "original": "Geen internetverbinding. Kijk jouw verbinding na en herlaad de website.",
     "translation": "No internet connection. Check your connection and reload the website."
   },
-  "f6de6c56-6326-42b2-b586-2bf607e058a7": {
-    "original": "Developers",
-    "translation": "Developers"
-  },
   "e909e3d1-516f-4284-8923-0390c95ae290": {
     "original": "Kanaal",
     "translation": "Channel"
-  },
-  "0d256e87-ab44-4051-9efc-4749c8edb0c0": {
-    "original": "Custom",
-    "translation": "Custom"
   },
   "761c7de2-e697-4c39-9970-82d05fc886ca": {
     "original": "Vul een URL in",
@@ -10119,10 +9731,6 @@
     "original": "Gekopieerd naar klembord",
     "translation": "Copied to clipboard"
   },
-  "10b83895-551f-4892-9b58-b7b62db58726": {
-    "original": "Link:",
-    "translation": "Link:"
-  },
   "025d14dd-57d4-4ec4-aa85-ddf9ddf98b6f": {
     "original": "Link verwijderen",
     "translation": "Remove link"
@@ -10154,10 +9762,6 @@
   "5d8131bf-38a0-4c8c-b266-e30caa7aa270": {
     "original": "Beperk het gebruik van afbeeldingen in e-mails. Afbeeldingen worden bestraft door spamfilters, en e-mails komen daardoor vaker bij spam terecht.",
     "translation": "Limit the use of images in emails. Images are penalised by spam filters, and emails are therefore more likely to end up in spam."
-  },
-  "780fa99d-7109-4f57-934b-1f4c5643a794": {
-    "original": "https://",
-    "translation": "https://"
   },
   "f7057816-fb9f-42f9-b864-bec9756d07f7": {
     "original": "Vet gedrukte tekst",
@@ -10491,10 +10095,6 @@
     "original": "zijn",
     "translation": "are"
   },
-  "af839b8a-1367-4655-ad1c-ee658843e9f1": {
-    "original": "is",
-    "translation": "is"
-  },
   "b78e0854-14c4-4474-bbb4-7ba80056ff49": {
     "original": "zijn niet",
     "translation": "are not"
@@ -10639,10 +10239,6 @@
     "original": "Geboortedatum",
     "translation": "Date of birth"
   },
-  "fd3fea4f-73c7-4c8d-90cd-80ea90e53b98": {
-    "original": "Gender",
-    "translation": "Gender"
-  },
   "be88b0da-348e-4394-b36c-1136af8aef7d": {
     "original": "Met actieve proefperiode",
     "translation": "With active trial period"
@@ -10678,10 +10274,6 @@
   "5e73bf1c-6413-4fa5-8049-bff5faf4d8ea": {
     "original": "Bedrag in verwerking",
     "translation": "Amount in processing"
-  },
-  "5ed579c6-bfe4-453b-bc13-5e38690849e1": {
-    "original": "Postcode",
-    "translation": "Postcode"
   },
   "95fc75cf-bf23-4895-bb64-dfec3944596c": {
     "original": "Voltooide vlagmomenten",
@@ -10742,10 +10334,6 @@
   "89eafa94-6447-4608-a71e-84752eab10c8": {
     "original": "Nummer",
     "translation": "Number"
-  },
-  "62a07ea0-53ad-4962-88ff-26ea1ab493b0": {
-    "original": "status",
-    "translation": "status"
   },
   "f82d0296-c037-4e8b-9150-08cfe8c8f231": {
     "original": "Maak gebruik van de activiteitenmodule om leden in te schrijven voor activiteiten. Maak daarvoor geen inschrijvingsgroep aan.",
@@ -11159,10 +10747,6 @@
     "original": "Inschrijvingen wijzigen",
     "translation": "Change registrations"
   },
-  "085e5b60-8c26-49b2-bba3-04dd38b3a891": {
-    "original": "0",
-    "translation": "0"
-  },
   "0b44456e-1338-4468-ba71-5aabc171555f": {
     "original": "Ga naar vorige lid",
     "translation": "Go to previous member"
@@ -11499,10 +11083,6 @@
     "original": "Algemene gegevens",
     "translation": "General information"
   },
-  "612b0f89-4a6e-4616-a50f-6e228daa86c3": {
-    "original": "UiTPAS",
-    "translation": "UiTPAS"
-  },
   "973b8b5e-9c84-4e86-aae8-da7ae1a1ad6a": {
     "original": "Heeft geen automatische rechten",
     "translation": "Has no automatic rights"
@@ -11711,10 +11291,6 @@
     "original": "Corrigeren",
     "translation": "Correct"
   },
-  "9b625e82-f571-4fc6-a83b-47cb14ac1739": {
-    "original": "Accounts",
-    "translation": "Accounts"
-  },
   "db162d2e-be1b-4e8a-9915-b1e58ffa0aca": {
     "original": "Dit zijn alle e-mailadressen die toegang hebben tot de gegevens van {member}. Hierop kan je inloggen of een account aanmaken.",
     "translation": "These are all the email addresses that have access to the data of {member}. You can log in or create an account here."
@@ -11862,10 +11438,6 @@
   "9a60989a-61d2-4596-adac-d9ec6befe218": {
     "original": "Aansluiting of verzekering toevoegen in {period}",
     "translation": "Add affiliation or insurance in {period}"
-  },
-  "f6c4cd8c-97e5-40d0-9331-69d15e100726": {
-    "original": "Website",
-    "translation": "Website"
   },
   "ecefb25b-4125-4df3-883b-73ddc301529e": {
     "original": "Uitloggen",
@@ -12039,10 +11611,6 @@
     "original": "Je koppelt een verschuldigd bedrag best aan een lid en niet aan een account. Dan kan iedereen binnen het gezin het openstaande bedrag betalen.",
     "translation": "You should link an amount due to a member and not to an account. Then everyone in the family can pay the outstanding amount."
   },
-  "ac747fb2-d391-499b-8cee-1ed7241e6177": {
-    "original": "Account",
-    "translation": "Account"
-  },
   "a4474840-0a73-4268-8d06-be3361fe5fc7": {
     "original": "Een openstaand bedrag kan door een lid betaald worden via het ledenportaal. Daar kan men via één van de ingestelde betaalmethodes afrekenen. Meerdere openstaande bedragen (ook over meerdere leden heen als een account meerdere leden beheert) kunnen in één keer betaald worden, vandaar dat het bedrag van een betaling vaak hoger is dan het bedrag van een individuele afrekening.",
     "translation": "An outstanding amount can be paid by a member via the member portal. There, one can pay off via one of the set payment methods. Multiple outstanding amounts (also across multiple members if an account manages multiple members) can be paid at once, which is why the amount of a payment is often higher than the amount of an individual invoice."
@@ -12062,10 +11630,6 @@
   "ab0535e6-bbaa-4961-a34f-aca39ef0d785": {
     "original": "Verschuldigd sinds",
     "translation": "Due since"
-  },
-  "bfcceb79-e614-4e9c-9fba-0ec2bd3f8f2a": {
-    "original": "1",
-    "translation": "1"
   },
   "bf30128b-4c99-4a97-b4d2-1a4e62f33f41": {
     "original": "Te betalen tegen*",
@@ -12695,10 +12259,6 @@
     "original": "Verduidelijking voor een lid als hij niet kan inschrijven",
     "translation": "Clarification for a member if he cannot register"
   },
-  "02b0533d-31b1-44ce-a22b-47d7f90adea8": {
-    "original": "This category should be invisible. Check if the record categories are filtered using .filter(c => c.isEnabled(value))",
-    "translation": "This category should be invisible. Check if the record categories are filtered using .filter(c => c.isEnabled(value))"
-  },
   "dd1f78c5-9a9e-4535-8527-3f50619860c7": {
     "original": "Wis alle antwoorden",
     "translation": "Clear all answers"
@@ -12818,10 +12378,6 @@
   "53f798cf-f2d0-4a3b-ad26-c5d67af71343": {
     "original": "Minimum {min} vereist",
     "translation": "Minimum {min} required"
-  },
-  "6dde271d-4108-48ce-a433-4ad80478c4ef": {
-    "original": "Maximum {max}",
-    "translation": "Maximum {max}"
   },
   "7e492b8b-771a-48cd-b10a-2d12fb0cb525": {
     "original": "Gereed",
@@ -13015,10 +12571,6 @@
     "original": "Klik op de volgende pagina op 'Kies een andere app' als je met een andere app dan Payconiq by Bancontact wilt betalen.",
     "translation": "On the next page, click on 'Choose another app' if you want to pay with an app other than Payconiq by Bancontact."
   },
-  "a4dde8e6-d0f7-4ad6-b880-cf5467771770": {
-    "original": "Payconiq by Bancontact",
-    "translation": "Payconiq by Bancontact"
-  },
   "e8247764-d10a-4c54-97e2-acca397b8ac9": {
     "original": "Betaling in verwerking",
     "translation": "Payment in progress"
@@ -13111,37 +12663,17 @@
     "original": "Je moet niet noodzakelijk overschrijven via een app of één van deze apps. Dit is puur voor het gemak, het gaat hier om een gewone overschrijving.",
     "translation": "You don't necessarily have to transfer via an app or one of these apps. This is purely for convenience, this is a normal bank transfer."
   },
-  "a2f52798-c27f-4904-b651-2bec3aeebf21": {
-    "original": "KBC Mobile",
-    "translation": "KBC Mobile"
-  },
   "e340ffec-98ed-4951-a5e0-dd98f2949229": {
     "original": "Gegevens worden automatisch ingevuld",
     "translation": "Data will be filled in automatically"
-  },
-  "9f6b5880-d02b-46a8-9b83-fc1e5320defe": {
-    "original": "ING Banking",
-    "translation": "ING Banking"
   },
   "d8a84fa6-ddc2-4518-8d12-3608ab830a15": {
     "original": "Kopieer zelf manueel de gegevens bovenaan",
     "translation": "Manually copy the data at the top"
   },
-  "0b894cff-2ae3-4954-a71c-7ccd1280668a": {
-    "original": "Belfius Mobile",
-    "translation": "Belfius Mobile"
-  },
-  "21b523b8-b6f1-4b21-ba56-0f9640670339": {
-    "original": "Easy Banking App (BNP Paribas Fortis)",
-    "translation": "Easy Banking App (BNP Paribas Fortis)"
-  },
   "5b576dbc-9ed9-4faf-8bf7-9cf95c2b6dbe": {
     "original": "Argenta-app",
     "translation": "Argenta app"
-  },
-  "131fbe93-acac-497e-a768-bbfccf3425f0": {
-    "original": "Hello Bank! app",
-    "translation": "Hello Bank! app"
   },
   "a69c9d5b-7191-49d8-b21a-f196547dfc0e": {
     "original": "Of open zelf een andere app. Je kan de gegevens makkelijk kopiëren hierboven door erop te klikken.",
@@ -13527,25 +13059,9 @@
     "original": "Voetbal",
     "translation": "Football"
   },
-  "a6621627-ce47-41df-a715-1adda44fa4df": {
-    "original": "Tennis",
-    "translation": "Tennis"
-  },
-  "cc287710-eb24-4b30-827c-20ecccdcb04f": {
-    "original": "Golf",
-    "translation": "Golf"
-  },
   "4b46d657-a991-45bf-b176-6787d37b94d9": {
     "original": "Atletiek",
     "translation": "Athletics"
-  },
-  "73da6e39-663b-42f3-b2b5-5c87abe1975b": {
-    "original": "Badminton",
-    "translation": "Badminton"
-  },
-  "b6ca6bd6-3ba1-445c-aefa-396efead493b": {
-    "original": "Hockey",
-    "translation": "Hockey"
   },
   "1a6e956a-aa3c-4e04-8ac4-46d45180d6c9": {
     "original": "Wielrennen",
@@ -13607,10 +13123,6 @@
     "original": "Cultuur",
     "translation": "Culture"
   },
-  "43f4f751-2752-4ecc-9d78-136853852b43": {
-    "original": "LGBTQ+",
-    "translation": "LGBTQ+"
-  },
   "fc00d7a3-4ff4-4355-aef0-c73af12218f1": {
     "original": "Politiek",
     "translation": "Politics"
@@ -13619,17 +13131,9 @@
     "original": "Vakbond",
     "translation": "Trade union"
   },
-  "3ef919e4-b9a3-4b58-a316-83c9340c9830": {
-    "original": "School",
-    "translation": "School"
-  },
   "f768ec1f-c743-474a-b6c1-e05271c58a3c": {
     "original": "Jeugd",
     "translation": "Youth"
-  },
-  "77a5d5d5-a1c6-476b-8fbf-354a40ca5fcb": {
-    "original": "Sport",
-    "translation": "Sport"
   },
   "735e5a5b-5858-40d7-b195-9113ca6bf98c": {
     "original": "Overige",
@@ -13646,10 +13150,6 @@
   "e34a3ade-b58d-4957-8e49-af0a76c6a0f5": {
     "original": "Danslessen",
     "translation": "Dance classes"
-  },
-  "a248259d-cf0d-4942-a1b4-ec7e2b85246b": {
-    "original": "Weekends",
-    "translation": "Weekends"
   },
   "b3d7072c-9265-4c1f-a283-42ed2baca093": {
     "original": "Kampen",
@@ -13686,14 +13186,6 @@
   "5e93b172-67cf-4c24-a536-87841f9f691d": {
     "original": "domiciliëring",
     "translation": "direct debit"
-  },
-  "b96a2898-7229-4397-99f1-2ffd761982f3": {
-    "original": "Bancontact",
-    "translation": "Bancontact"
-  },
-  "aa5a52fe-dd8e-4d28-9dcc-a730146e7972": {
-    "original": "iDEAL",
-    "translation": "iDEAL"
   },
   "8da866ba-9114-4633-874c-99c2ea891bb8": {
     "original": "kredietkaart",
@@ -13783,14 +13275,6 @@
     "original": "categorie",
     "translation": "category"
   },
-  "e80487d1-d969-41fe-b2e8-59192e639fbb": {
-    "original": "tags",
-    "translation": "tags"
-  },
-  "fe29857c-e4ac-4b25-aa0e-31813f3570c2": {
-    "original": "tag",
-    "translation": "tag"
-  },
   "b609c4cb-238c-4b27-bae5-9ee9f307ffb4": {
     "original": "vragenlijsten",
     "translation": "questionnaires"
@@ -13858,10 +13342,6 @@
   "78812fb1-dbbb-4115-a513-2b4841fc086f": {
     "original": "Zetel",
     "translation": "Seat"
-  },
-  "95708a22-4743-4f04-aa24-fee0220da923": {
-    "original": "Zone",
-    "translation": "Zone"
   },
   "2fd98822-82eb-4f50-9396-5ddf9aa54a33": {
     "original": "e-mailadressen",
@@ -13975,34 +13455,6 @@
     "original": "Niet alle gegevens van jouw vereniging werden in het Stripe dashboard ingevuld. Kijk na of alles werd ingevuld. Volgende zaken zouden ontbreken:",
     "translation": "Not all details of your association have been filled in the Stripe dashboard. Check if everything has been filled in. The following items may be missing:"
   },
-  "13109d4e-6427-4d9b-a0a2-c01de76282c1": {
-    "original": "Chirojeugd Vlaanderen",
-    "translation": "Chirojeugd Vlaanderen"
-  },
-  "bea5dd9d-12e8-4f85-8bea-133467c3a737": {
-    "original": "Scouts & Gidsen Vlaanderen",
-    "translation": "Scouts & Gidsen Vlaanderen"
-  },
-  "b33fd0c6-4a54-469e-b108-d75f4d8c613d": {
-    "original": "KSA",
-    "translation": "KSA"
-  },
-  "552906c2-db14-4bd8-b499-c29f61f57472": {
-    "original": "KLJ",
-    "translation": "KLJ"
-  },
-  "8f4d1891-4198-4133-8bcb-d90437affe83": {
-    "original": "FOS Open Scouting",
-    "translation": "FOS Open Scouting"
-  },
-  "0979101f-70e9-4b59-a75e-43c9ee3b237f": {
-    "original": "Jeugd Rode Kruis",
-    "translation": "Jeugd Rode Kruis"
-  },
-  "5330841f-d2b1-4014-bbea-1b3a8a68faa3": {
-    "original": "JNM",
-    "translation": "JNM"
-  },
   "2ec07f88-b979-41a0-a948-63675a8dbcd6": {
     "original": "Andere / geen",
     "translation": "Other / none"
@@ -14099,10 +13551,6 @@
     "original": "Zwitserland",
     "translation": "Switzerland"
   },
-  "978520d9-7210-414a-82fd-9c04697b1a08": {
-    "original": "Afghanistan",
-    "translation": "Afghanistan"
-  },
   "21c6085b-3ed3-4922-a438-e06364ad70f6": {
     "original": "Tsjechië",
     "translation": "Czech Republic"
@@ -14114,10 +13562,6 @@
   "86f87cca-4ed5-40ac-a03d-33a6ffef7466": {
     "original": "Oostenrijk",
     "translation": "Austria"
-  },
-  "e79825e3-975a-4da9-8425-77beac42a41f": {
-    "original": "Portugal",
-    "translation": "Portugal"
   },
   "4fd81137-ac48-4bec-b6f1-4fc1b55b7b5d": {
     "original": "Ander land",
@@ -14142,10 +13586,6 @@
   "752a87bb-4994-4a86-b03c-f8d91670bafd": {
     "original": "Demo ledenadministratie",
     "translation": "Demo member administration"
-  },
-  "5cccc05b-344c-4abf-addc-2d898b2bda4b": {
-    "original": "Demo webshops",
-    "translation": "Demo webshops"
   },
   "972bf91c-ce61-48af-b2c9-04bc52eb2838": {
     "original": "Ledenadministratie voor één jaar",
@@ -14583,10 +14023,6 @@
     "original": "Opgeslagen e-mail",
     "translation": "Saved email"
   },
-  "b53032c7-e96d-42ff-8d6f-d5b40c5fa700": {
-    "original": "Billing",
-    "translation": "Billing"
-  },
   "ec252aa0-30df-4d49-9a37-a2ce6a0fc6dc": {
     "original": "Webshop zonder tickets",
     "translation": "Webshop without tickets"
@@ -14594,18 +14030,6 @@
   "05ac8c30-f824-4269-aecd-b7226636e2de": {
     "original": "Webshop met tickets",
     "translation": "Webshop with tickets"
-  },
-  "cbefe240-5d20-4b9a-8cbb-29286e3dae4d": {
-    "original": "DNS",
-    "translation": "DNS"
-  },
-  "cb57875f-a2b7-4076-8f32-a9a970f68907": {
-    "original": "Drip",
-    "translation": "Drip"
-  },
-  "b47abc59-c79d-4d69-b961-de80e562e8f2": {
-    "original": "Excel export",
-    "translation": "Excel export"
   },
   "e752d93c-4293-4d36-b958-f74b15322824": {
     "original": "Accounts en wachtwoorden",
@@ -14834,10 +14258,6 @@
   "33557539-2f23-4243-9b81-20065d19e9d8": {
     "original": "Pleegouder",
     "translation": "Foster parent"
-  },
-  "e13af8ee-f442-4a98-b3e6-6f3d84fba30c": {
-    "original": "Via",
-    "translation": "Via"
   },
   "d0c91429-b8c8-4142-b95f-0bc249b9506c": {
     "original": "Eén van de openstaande bedragen is niet meer beschikbaar.",
@@ -15130,10 +14550,6 @@
   "0a6588e4-d367-4b57-b5a0-76a04bf49e63": {
     "original": "Slaapwandelen",
     "translation": "Sleepwalking"
-  },
-  "425f3938-b431-406b-90c2-cdbb896ca21b": {
-    "original": "Diabetes",
-    "translation": "Diabetes"
   },
   "433cf808-ea38-4281-a793-e1b3c122e0aa": {
     "original": "Moet geneesmiddelen nemen",
@@ -15559,10 +14975,6 @@
     "original": "één stuk",
     "translation": "one item"
   },
-  "8096d9e3-1bb3-4015-911d-9e13388e8bfd": {
-    "original": "tickets",
-    "translation": "tickets"
-  },
   "7d5de81e-9ae9-4ec6-86e1-844ca6a75fb1": {
     "original": "stuks",
     "translation": "items"
@@ -15695,10 +15107,6 @@
     "original": "zondag",
     "translation": "Sunday"
   },
-  "9965a103-1ff5-444d-99f4-39fb0adb903b": {
-    "original": "1 week",
-    "translation": "1 week"
-  },
   "df3cfead-38d4-478b-b769-8c410a199a30": {
     "original": "weken",
     "translation": "weeks"
@@ -15751,10 +15159,6 @@
     "original": "om",
     "translation": "at"
   },
-  "b6185496-deab-4569-906f-c636e625bcd1": {
-    "original": "todo",
-    "translation": "todo"
-  },
   "3024d542-4987-4487-ae83-6593036a7e1d": {
     "original": "Aansluitingen aanrekenen",
     "translation": "Charge affiliations"
@@ -15783,10 +15187,6 @@
     "original": "Documenten",
     "translation": "Documents"
   },
-  "9464cf2b-10a9-4690-8ab6-2e3d2f3e9b9d": {
-    "original": "Document",
-    "translation": "Document"
-  },
   "e8340220-a719-4ab8-82ff-627fce627235": {
     "original": "Domeinnaam kiezen",
     "translation": "Choose domain name"
@@ -15798,10 +15198,6 @@
   "4a7e3838-f75a-4610-9caa-0f75849ea142": {
     "original": "Personaliseren",
     "translation": "Personalise"
-  },
-  "36459d6c-1685-463a-829f-bc92f83d1f0f": {
-    "original": "Privacy",
-    "translation": "Privacy"
   },
   "7f2ccfd4-a570-46fe-bc8a-44e4a6144081": {
     "original": "Jullie ledenportaal",
@@ -15922,10 +15318,6 @@
   "19bd9ed4-585f-4cc5-a4ea-643f00481b77": {
     "original": "Producten",
     "translation": "Products"
-  },
-  "32e049b4-acd6-4d77-a5b8-0632111f2445": {
-    "original": "Tickets",
-    "translation": "Tickets"
   },
   "e0f1bd7f-332f-4c99-adab-35a7e7481cf9": {
     "original": "Bestelling #",
@@ -16187,10 +15579,6 @@
     "original": "Je hebt een nieuwe e-mail ontvangen. Kijk jouw inbox en spambox goed na!",
     "translation": "You have received a new email. Check your inbox and spam box carefully!"
   },
-  "6df6c342-d948-41b1-b913-55cfd3c2b558": {
-    "original": "email",
-    "translation": "email"
-  },
   "a66456db-d4d8-4f4e-895e-e66aa873604a": {
     "original": "Jouw e-mailadres is geverifieerd!",
     "translation": "Your email address has been verified!"
@@ -16295,29 +15683,9 @@
     "original": "Je moet akkoord gaan met de voorwaarden voor je een account kan aanmaken.",
     "translation": "You must agree to the terms and conditions before you can create an account."
   },
-  "e1193431-b95a-4a8a-94b2-8659005dcb77": {
-    "original": "TabBarController",
-    "translation": "TabBarController"
-  },
-  "9120db75-8638-4cab-9dca-8bd81390149e": {
-    "original": "Developers",
-    "translation": "Developers"
-  },
   "40c0b334-e007-4fc1-88e5-b38707175d45": {
     "original": "Standaard",
     "translation": "Default"
-  },
-  "8bc22ee1-303e-4b40-94dc-72c5869abdbc": {
-    "original": "Production",
-    "translation": "Production"
-  },
-  "cab2694d-8d0f-44d0-9819-d2d2c4148b22": {
-    "original": "Staging",
-    "translation": "Staging"
-  },
-  "d517ff0c-abad-4a23-91e2-3463279cfa65": {
-    "original": "Development",
-    "translation": "Development"
   },
   "5d614fe0-ec0d-47af-92bc-8c50f09717e2": {
     "original": "Wijzigingen opgeslagen",
@@ -16527,10 +15895,6 @@
     "original": "Totaal",
     "translation": "Total"
   },
-  "4070dda9-b556-49cd-ba17-aad535240835": {
-    "original": "todo",
-    "translation": "todo"
-  },
   "47f56c92-fcfb-4ef4-8d0b-fb0c959fb624": {
     "original": "Oops! Je gebruikt een oude versie van de applicatie om in te schrijven. Herlaad de website en verwijder indien nodig de cache van jouw browser.",
     "translation": "Oops! You are using an old version of the application to register. Reload the website and remove your browser cache if necessary."
@@ -16679,10 +16043,6 @@
     "original": "Meldingen",
     "translation": "Notifications"
   },
-  "29360811-3663-496c-8d8f-c9fdf9467a74": {
-    "original": "ID",
-    "translation": "ID"
-  },
   "394aafa1-811b-4ed4-bfc6-c12ae59ff9b6": {
     "original": "Naam activiteit",
     "translation": "Activity name"
@@ -16694,10 +16054,6 @@
   "27cfaf26-6b88-4ebc-a50a-627a9f0f9e64": {
     "original": "Groepsnummer",
     "translation": "Group number"
-  },
-  "d7003b29-cc92-4ef4-b07b-f283193ef2ae": {
-    "original": "Status",
-    "translation": "Status"
   },
   "c4cc50fc-f2f1-4af4-abaf-fe41d5fe8c0e": {
     "original": "Opmerkingen",
@@ -16835,10 +16191,6 @@
     "original": "Naam",
     "translation": "Name"
   },
-  "5f8c1ac5-a650-4046-80b6-0fe37fa12439": {
-    "original": "Tags",
-    "translation": "Tags"
-  },
   "d0defb77-0a25-4b85-a03e-57569c5edf6c": {
     "original": "Functies",
     "translation": "Roles"
@@ -16870,10 +16222,6 @@
   "9fe916f3-199d-4be2-b9c2-c96eeea31437": {
     "original": "Lokalen",
     "translation": "Premises"
-  },
-  "f97ad8c1-31d2-4b61-9e09-3be86eaeba08": {
-    "original": "Type",
-    "translation": "Type"
   },
   "d4dbb3ee-ab9d-4231-be12-945b7d156900": {
     "original": "Betalingen",
@@ -16935,10 +16283,6 @@
     "original": "Betaald op",
     "translation": "Paid on"
   },
-  "151006be-86c2-48cd-bcd7-7c3bf9b76080": {
-    "original": "Detail",
-    "translation": "Detail"
-  },
   "544a77e9-c915-4f47-afbf-c626396b0308": {
     "original": "Uitbetalingsmededeling",
     "translation": "Payout notification"
@@ -16954,10 +16298,6 @@
   "02754274-677a-4911-9a32-8422a8d9f827": {
     "original": "Transactiekosten",
     "translation": "Transaction costs"
-  },
-  "a7f32979-1ee8-47fe-a409-7b17ce9f9d39": {
-    "original": "Account ID",
-    "translation": "Account ID"
   },
   "f8dd1b1a-3da5-472d-bb46-8763537e53c8": {
     "original": "Kaartnummer",
@@ -17035,10 +16375,6 @@
     "original": "Schuldenaar",
     "translation": "Debtor"
   },
-  "a0dfe596-0670-48bc-a5f3-2c9308c70a17": {
-    "original": "type",
-    "translation": "type"
-  },
   "9f5ee239-d01b-4ee1-961b-2e3224489781": {
     "original": "Je hebt geen toegang tot deze betaling",
     "translation": "You do not have access to this payment"
@@ -17098,10 +16434,6 @@
   "2f10996e-ea97-4345-b997-c93198c7d67f": {
     "original": "Adres",
     "translation": "Address"
-  },
-  "dafc7b04-dfb2-4dbc-8bcf-f7e9c6356442": {
-    "original": "Postcode",
-    "translation": "Postcode"
   },
   "3d538399-3585-4be6-b03d-c12afa7183e8": {
     "original": "Stad",
@@ -17307,10 +16639,6 @@
     "original": "Transactiekosten (incl. BTW)",
     "translation": "Transaction costs (incl. VAT)"
   },
-  "be748ea7-badc-48b6-ae7a-8eca6341dc08": {
-    "original": "Variant",
-    "translation": "Variant"
-  },
   "1718783a-80df-4d97-a5b5-10c785abfba1": {
     "original": "Artikel per lijn",
     "translation": "Item per line"
@@ -17334,10 +16662,6 @@
   "6fef52a1-82a9-456f-a51e-b32eea13b889": {
     "original": "Geen toegang",
     "translation": "No access"
-  },
-  "3e23e0d2-ec8c-44f9-92fa-a1fce10c0185": {
-    "original": "Start",
-    "translation": "Start"
   },
   "6ec2f1fd-3f8f-4814-9442-e628eea062a3": {
     "original": "Activiteiten",
@@ -17370,10 +16694,6 @@
   "031cfca3-ca9a-44cc-95b5-03c81948f765": {
     "original": "Documentatie",
     "translation": "Documentation"
-  },
-  "630ab37a-85c8-4bbd-a281-b87e82a976d5": {
-    "original": "Feedback",
-    "translation": "Feedback"
   },
   "95bb5f36-a709-4724-bf21-9793911af5d6": {
     "original": "Meer",
@@ -17759,10 +17079,6 @@
     "original": "Vul jouw ondernemingsnummer hier in",
     "translation": "Enter your company number here"
   },
-  "a0b5e325-c175-4002-a812-4c83e3ce781a": {
-    "original": "vat number",
-    "translation": "vat number"
-  },
   "0169f40b-45fd-4552-979d-095381626df1": {
     "original": "Verplicht in te vullen",
     "translation": "Must be filled in"
@@ -17782,10 +17098,6 @@
   "97f9599f-cfdd-4705-a94e-8ec6351e99d4": {
     "original": "De bestandsgrootte is te groot. Het bestand mag maximaal 20MB groot zijn.",
     "translation": "The file size is too large. The file may be a maximum of 20MB in size."
-  },
-  "6285b165-8d32-4a00-bb3f-0f95abcda58f": {
-    "original": "email",
-    "translation": "email"
   },
   "1b84633d-5f01-44ec-ae98-dd096dd13fb4": {
     "original": "Vul een rekeningnummer in - automatisch willekeurig rekeningnummer ingevuld",
@@ -17838,10 +17150,6 @@
   "fee65508-7b87-4db2-a56f-457cd3e7d808": {
     "original": "Sterk",
     "translation": "Strong"
-  },
-  "168c5bc7-2a5e-4bb9-99c0-b91905e5a193": {
-    "original": "euro",
-    "translation": "euro"
   },
   "b2933d54-b2ec-4fde-965c-7d62de768a1e": {
     "original": "Optioneel.",
@@ -17914,10 +17222,6 @@
   "4943ece9-450b-4913-a6d8-6834d011a1ee": {
     "original": "Waarschuwing",
     "translation": "Warning"
-  },
-  "0456ef2e-5e86-48fa-835c-fd8ec1921f5e": {
-    "original": "Info",
-    "translation": "Info"
   },
   "edf611b8-a969-4861-956f-522c47a948fb": {
     "original": "Opsomming met bolletjes",
@@ -18006,10 +17310,6 @@
   "1f8620fa-e8a5-4665-99c8-c1907a5b5768": {
     "original": "Niet verzekerd",
     "translation": "Not insured"
-  },
-  "d84503e9-7d0e-4c4b-a3ca-92bfbed6ca49": {
-    "original": "Account",
-    "translation": "Account"
   },
   "e7592781-8be0-4912-8628-e611e88431ba": {
     "original": "Geen account",
@@ -18242,10 +17542,6 @@
   "347113ec-87a8-4dd9-88ea-c151e3f066f0": {
     "original": "tot",
     "translation": "until"
-  },
-  "43d59035-b07a-4f51-8e9b-cd136eb3715c": {
-    "original": "uitpasNumber",
-    "translation": "uitpasNumber"
   },
   "92a1d590-2388-4193-9fac-ad41b6122fe4": {
     "original": "Ouder",
@@ -18751,10 +18047,6 @@
     "original": "voorbeeld.com",
     "translation": "example.com"
   },
-  "8f9575f3-9787-4fa5-9ddf-dd1fa4103996": {
-    "original": "Bancontact",
-    "translation": "Bancontact"
-  },
   "967a1b0b-88cd-4b95-9008-f0610ed64b24": {
     "original": "Inschrijving van Klaas en Piet",
     "translation": "Registration of Claus and Peter"
@@ -18762,10 +18054,6 @@
   "990581a8-e4db-4c33-b36b-4df045f8c294": {
     "original": "Klaas en Piet",
     "translation": "Claus and Peter"
-  },
-  "7c04a4f3-25c5-4663-9833-87a7aecbf0b9": {
-    "original": "Demoshop",
-    "translation": "Demoshop"
   },
   "81dced9c-c5aa-4c49-b030-31363d3847db": {
     "original": "Er zijn nog maar {count} stuks beschikbaar van {name}",
@@ -18863,10 +18151,6 @@
     "original": "De keuzemogelijkheid {name} is uitverkocht",
     "translation": "The option {name} is sold out"
   },
-  "e122d6c9-a452-4c70-9868-f53c2520aedc": {
-    "original": "todo",
-    "translation": "todo"
-  },
   "b9bac60d-1fd8-43e7-9c9d-4b9b5227f9d6": {
     "original": "Vul ontbrekende gegevens aan van {member}",
     "translation": "Fill in missing data for {member}"
@@ -18878,14 +18162,6 @@
   "69385e1a-413f-4583-9061-67072d0742b9": {
     "original": "Voeg e-mailadres toe van {member}",
     "translation": "Add email address of {member}"
-  },
-  "f7999a55-e73a-49c4-ac9f-f5030d96ba43": {
-    "original": "todo",
-    "translation": "todo"
-  },
-  "d7fdebd4-7c3c-4316-b862-7ed777ff36ad": {
-    "original": "todo",
-    "translation": "todo"
   },
   "04ff85c0-eb98-46b8-975b-8fd136ddc49a": {
     "original": "Een {name} moet minimum {days} duren",
@@ -18951,17 +18227,9 @@
     "original": "Het maximum voor de keuzemogelijkheid {name} is overschreden",
     "translation": "The maximum for the option {name} has been exceeded"
   },
-  "96e61729-ea9c-45bf-82da-56e6a92e6b91": {
-    "original": "todo",
-    "translation": "todo"
-  },
   "77f48757-5c36-47a6-8ce2-d676eef1e778": {
     "original": "Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. Heeft {member} geen Belgische nationaliteit,",
     "translation": "The national registration number is used to prepare tax certificates. If {member} does not have Belgian nationality,"
-  },
-  "269872df-ab70-4eae-b671-ab9246162d4e": {
-    "original": "todo",
-    "translation": "todo"
   },
   "4dd7660f-3a18-4791-87b9-0e47115148f0": {
     "original": "Beschrijving onder tekstvak",
@@ -18998,10 +18266,6 @@
   "fa50aa94-4f8a-428a-9b97-8b477176240a": {
     "original": "Alle hieraan verbonden informatie gaat dan ook mogelijks verloren.",
     "translation": "All connected information may also be lost."
-  },
-  "9e080d96-2c2b-47e3-b56c-d58d993974c9": {
-    "original": "Gender",
-    "translation": "Gender"
   },
   "fae120e5-80b0-4b67-a8b7-638b43362429": {
     "original": "Oudergegevens",
@@ -19267,10 +18531,6 @@
     "original": "Deze kortingscode is ongeldig",
     "translation": "This discount code is invalid"
   },
-  "3cb04b43-16ca-4467-8729-ea7dcd206ed0": {
-    "original": "ticket",
-    "translation": "ticket"
-  },
   "28f60cd9-f9bc-46ff-8fd3-8b6a6a109b4b": {
     "original": "persoon",
     "translation": "person"
@@ -19278,10 +18538,6 @@
   "599ce864-4059-48eb-82f8-9191e9507050": {
     "original": "stuk",
     "translation": "item"
-  },
-  "390d335e-98c4-4c60-92fc-f1616096c875": {
-    "original": "tickets",
-    "translation": "tickets"
   },
   "414f837c-b446-41c4-b522-3e6b473d5b5d": {
     "original": "personen",
@@ -19535,8 +18791,720 @@
     "original": "Dit lid is niet aangesloten in {werkjaar} bij KSA Nationaal, en is daardoor ook niet verzekerd.",
     "translation": "This member is not affiliated in {werkjaar} with KSA National, and is therefore not insured."
   },
-  "9e2430e8-5733-414c-9831-f7c455836691": {
-    "original": "{{naam}}",
-    "translation": "{{naam}}"
+  "2cc5355d-3c19-4a6e-a2c7-1d93e423a8d2": {
+    "original": "URI",
+    "translation": "URI"
+  },
+  "6b3555a2-ace4-4f37-a1fd-18921552f2b5": {
+    "original": "stamhoofd.be",
+    "translation": "Stamhoofd.be"
+  },
+  "ccfc0566-2fc4-4c0a-b1da-c3059cad6586": {
+    "original": "www.stamhoofd.be",
+    "translation": "www.Stamhoofd.be"
+  },
+  "5670bc42-cf94-46b6-9ce0-7cdc4ffbb4d9": {
+    "original": "simon@stamhoofd.be",
+    "translation": "simon@Stamhoofd.be"
+  },
+  "bb910a6c-ec64-46d8-bebb-c3b4312bbfb4": {
+    "original": "Jan Janssens",
+    "translation": "John Smith"
+  },
+  "0c3689c1-01f8-455a-a9b0-8f766c03b2d3": {
+    "original": "+32 470 12 34 56",
+    "translation": "+32 470 12 34 56"
+  },
+  "405a811e-ebb1-4948-84cd-8fb5860104e6": {
+    "original": "Stamhoofd",
+    "translation": "Stamhoofd"
+  },
+  "00c90aa3-2d42-45bc-a3e7-56565b7a4e0e": {
+    "original": "Website",
+    "translation": "Website"
+  },
+  "68914509-aa54-40c7-9f53-7b8a02149198": {
+    "original": "Stamhoofd",
+    "translation": "Stamhoofd"
+  },
+  "bf20a769-772d-46b2-9b48-2ea29c96f113": {
+    "original": "Via",
+    "translation": "Via"
+  },
+  "4a07f8e5-c16e-4706-9387-9d3ded9e2b3c": {
+    "original": "Type",
+    "translation": "Type"
+  },
+  "fbb0dee5-c500-4bb4-81d6-945666ae4784": {
+    "original": "account",
+    "translation": "account"
+  },
+  "28b0f035-cb44-48b7-b60f-093f6adc26fb": {
+    "original": "Postcode",
+    "translation": "Postcode"
+  },
+  "ceba695c-105b-49c9-aaa4-bf716c4aec6b": {
+    "original": "tags",
+    "translation": "tags"
+  },
+  "ed995f5d-eeff-44ad-ac35-f518b2892524": {
+    "original": "Detail",
+    "translation": "Detail"
+  },
+  "fde0cfa6-c279-4eef-ab75-8f62fd4028a8": {
+    "original": "Status",
+    "translation": "Status"
+  },
+  "c8f1e4d4-669c-4ccb-a9d9-30584f6c2d55": {
+    "original": "Via {organization}",
+    "translation": "Via {organization}"
+  },
+  "6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8": {
+    "original": "Status",
+    "translation": "Status"
+  },
+  "997da269-7091-470e-9032-abe1a1ea8096": {
+    "original": "Postcode",
+    "translation": "Postcode"
+  },
+  "7254f2f6-0d15-4e81-85cf-cff6438c9e98": {
+    "original": "(ID:",
+    "translation": "(ID:"
+  },
+  "04548161-abc0-4bea-bdd3-fdbacddc22f8": {
+    "original": "Start",
+    "translation": "Start"
+  },
+  "8daf57de-69cf-48fe-b09b-772c54473184": {
+    "original": "ID",
+    "translation": "ID"
+  },
+  "e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5": {
+    "original": "Status",
+    "translation": "Status"
+  },
+  "b1dd12f9-89d8-446b-8005-6be3a812a2b2": {
+    "original": "Tags",
+    "translation": "Tags"
+  },
+  "a3765fff-0634-4ffe-a726-005fd8ba5dcd": {
+    "original": "Types",
+    "translation": "Types"
+  },
+  "e85a86ee-7751-4791-984b-f67dc1106f6b": {
+    "original": "Webshops",
+    "translation": "Online shops"
+  },
+  "af5f50da-3290-44bd-a104-896231e6ea08": {
+    "original": "Google",
+    "translation": "Google"
+  },
+  "662467b7-da51-4fe2-bff4-784c8f028e58": {
+    "original": "Single-Sign-On (SSO)",
+    "translation": "Single Sign-On (SSO)"
+  },
+  "592f4d78-1019-4b7f-b5ec-0f62eadf7c2b": {
+    "original": "Sign in with Google",
+    "translation": "Sign in with Google"
+  },
+  "d101ec4a-219f-4f23-afa0-e8dc4862c354": {
+    "original": "Logo",
+    "translation": "Logo"
+  },
+  "089baffa-1456-48a4-ab5b-8994143c011b": {
+    "original": "Footer",
+    "translation": "Footer"
+  },
+  "99b55ec2-7b90-4456-82bd-4168ab909822": {
+    "original": "Webshop footer",
+    "translation": "Webshop footer"
+  },
+  "e0a54e0c-03b3-43c6-b4ca-962c5b1d6772": {
+    "original": "Minimum",
+    "translation": "Minimum"
+  },
+  "0a2e758f-37b1-448a-a14f-a0548443faec": {
+    "original": "Deadline",
+    "translation": "Deadline"
+  },
+  "49dd6919-a853-4004-b817-ae811de527ab": {
+    "original": "Deadlines",
+    "translation": "Deadlines"
+  },
+  "6c9d45e5-c9f6-49c8-9362-177653414c7e": {
+    "original": "Type",
+    "translation": "Type"
+  },
+  "00204508-e8ce-4b81-b978-4b0a4a0472f5": {
+    "original": "Upload PDF",
+    "translation": "Upload PDF"
+  },
+  "619a9ba5-895c-4334-a126-a1c4b780e87b": {
+    "original": "spinner",
+    "translation": "spinner"
+  },
+  "116f6ca0-c077-4468-b79b-d329f6a8db77": {
+    "original": "TTL",
+    "translation": "TTL"
+  },
+  "dd61d33b-367e-4e40-8ac6-84c286b931bc": {
+    "original": "Percentage",
+    "translation": "Percentage"
+  },
+  "70ee9a44-6cd7-49a1-9852-8519c23ec13a": {
+    "original": "Via Buckaroo",
+    "translation": "Via Buckaroo"
+  },
+  "4db6cde7-274f-4202-9351-3e9ce82794c1": {
+    "original": "Via Mollie",
+    "translation": "Via Mollie"
+  },
+  "f5fc5d6b-49ef-4b3d-80b7-90e1f81220fa": {
+    "original": "Buckaroo",
+    "translation": "Buckaroo"
+  },
+  "b8cf0b1f-04c4-4a85-9a19-027a5326fd11": {
+    "original": "Mollie",
+    "translation": "Mollie"
+  },
+  "40abbf9c-2dd3-471a-a699-f6af656feb5e": {
+    "original": "Rate limits",
+    "translation": "Rate limits"
+  },
+  "b1d528c7-1e05-48de-aadd-d30c28581bf2": {
+    "original": "Token",
+    "translation": "Token"
+  },
+  "de5706ec-7edc-4e62-b3f7-d6e414720480": {
+    "original": "Filter",
+    "translation": "Filter"
+  },
+  "f4b5c997-f9ed-4ba9-aabd-ac1d5fa37dfb": {
+    "original": "Document",
+    "translation": "Document"
+  },
+  "4efa0c2b-f5af-48fc-9fb3-37ccbdf1ca24": {
+    "original": "Reset",
+    "translation": "Reset"
+  },
+  "cd0a1bf5-5cfe-40c6-bbd1-9f40574d559b": {
+    "original": "Open",
+    "translation": "Open"
+  },
+  "204f8618-c061-449d-aa74-5085e67b1d24": {
+    "original": "Detail",
+    "translation": "Detail"
+  },
+  "079c3c5d-b816-4adf-9287-6f5352a2cd81": {
+    "original": "Stripe",
+    "translation": "Stripe"
+  },
+  "e8ef97dc-5470-4d36-9c4a-a9c2ec92b7e2": {
+    "original": "Account ID",
+    "translation": "Account ID"
+  },
+  "8cdbbc91-88ab-4d25-8f42-b34369e959f0": {
+    "original": "Single-Sign-On",
+    "translation": "Single-Sign-On"
+  },
+  "5573d401-88aa-4221-9ed7-44380d970177": {
+    "original": "Webshop auth",
+    "translation": "Webshop auth"
+  },
+  "8f39177b-f214-4f23-82ab-329c66ae731a": {
+    "original": "Payconiq",
+    "translation": "Payconiq"
+  },
+  "2be4de1c-159a-4767-b461-3ba0f67877d7": {
+    "original": "Stripe account",
+    "translation": "Stripe account"
+  },
+  "6e40269e-10f8-4c19-804f-dac6ba75959b": {
+    "original": "IBAN",
+    "translation": "IBAN"
+  },
+  "89d0154d-edcb-4a56-b4d7-1c95c13c4fb1": {
+    "original": "Stripe Dashboard",
+    "translation": "Stripe Dashboard"
+  },
+  "21610c8e-44fb-4afb-9456-c57b938d4c8e": {
+    "original": "Extra Stripe account",
+    "translation": "Extra Stripe account"
+  },
+  "d54cbd0f-91c6-484a-b071-5161d4060dd7": {
+    "original": "Key",
+    "translation": "Key"
+  },
+  "1c6a928f-1e53-421e-939f-a54959b45769": {
+    "original": "Secret",
+    "translation": "Secret"
+  },
+  "9ce28983-01ef-44bc-bc02-b76575bda1ce": {
+    "original": "Privacy",
+    "translation": "Privacy"
+  },
+  "c56ee3f1-b83d-4118-a703-6f98450508cd": {
+    "original": "Banner",
+    "translation": "Banner"
+  },
+  "46eb81ad-4f6c-4c29-9741-ddcb0003a208": {
+    "original": "Sponsors",
+    "translation": "Sponsors"
+  },
+  "a4919b04-c7de-4c7b-96ac-e18acc476ad7": {
+    "original": "Scan tickets",
+    "translation": "Scan tickets"
+  },
+  "d703d8bc-b08f-4b4d-9c26-f255edd70f56": {
+    "original": "Link",
+    "translation": "Link"
+  },
+  "cd7dec4c-5183-4c18-b447-b4095436bb5c": {
+    "original": "1, 2, 3, ...",
+    "translation": "1, 2, 3, ..."
+  },
+  "8982ff9e-7905-4b82-9e9c-cb37a6a9481e": {
+    "original": "964824335, 116455337, 228149715, ...",
+    "translation": "964824335, 116455337, 228149715, ..."
+  },
+  "cdd1fd85-1c4e-416b-b166-48a4ee6ee51f": {
+    "original": "Layout",
+    "translation": "Layout"
+  },
+  "b40d200c-4265-4d58-a7f4-7c2498b062b9": {
+    "original": "Tickets",
+    "translation": "Tickets"
+  },
+  "55a6f957-af81-40b3-8c83-2096f22044c8": {
+    "original": "Code",
+    "translation": "Code"
+  },
+  "f64ba2c0-b20e-4aa5-94d2-ff2a3173ee51": {
+    "original": "Label",
+    "translation": "Label"
+  },
+  "0c35caa6-6240-4a92-9d89-78acf2c79fc0": {
+    "original": "Placeholder",
+    "translation": "Placeholder"
+  },
+  "4c9238ec-4895-4ada-89c9-a4e2560d2f10": {
+    "original": "€ 0",
+    "translation": "£ 0"
+  },
+  "ef6ac7e5-de7e-4e2e-802f-de730294f05d": {
+    "original": "+ 0 euro",
+    "translation": "+ 0 pounds"
+  },
+  "de971042-551d-43d2-ab47-e76132156887": {
+    "original": "Ticket",
+    "translation": "Ticket"
+  },
+  "325f85b1-ff89-4bde-a2df-1328c8ea4a3a": {
+    "original": "Voucher",
+    "translation": "Voucher"
+  },
+  "f4155ecb-b961-4b07-8c4a-69e2d2518a52": {
+    "original": "Command(⌘)",
+    "translation": "Command(⌘)"
+  },
+  "cdfd1cea-e2d5-41bf-80f7-bc62303b6c70": {
+    "original": "Ctrl",
+    "translation": "Ctrl"
+  },
+  "d3e021e4-a9eb-4f7e-a538-8d2dbc27341c": {
+    "original": "Download",
+    "translation": "Download"
+  },
+  "33adbc14-dd1a-43a7-a015-98a3322b58c5": {
+    "original": "Info",
+    "translation": "Info"
+  },
+  "c2ee9504-b07a-4d79-bd25-c14a1bba4d59": {
+    "original": "Vouchers",
+    "translation": "Vouchers"
+  },
+  "e38c0b49-b038-4c9c-9653-fe1e4a078226": {
+    "original": "Webshop",
+    "translation": "Webshop"
+  },
+  "44a86a23-a189-421b-b53a-8f922c17ab78": {
+    "original": "download",
+    "translation": "download"
+  },
+  "9c3179f1-549a-4f72-975b-96b1baf0f239": {
+    "original": "Webshop via",
+    "translation": "Webshop via"
+  },
+  "2aa1f986-93d6-410c-9746-70c02fb4f5ea": {
+    "original": "Begin",
+    "translation": "Start"
+  },
+  "979af771-f3ab-4105-9478-d8ee14db66f1": {
+    "original": "Single-Sign-On (",
+    "translation": "Single-Sign-On ("
+  },
+  "0b6247ef-b8bb-4ed7-b403-b0a58ddebaf5": {
+    "original": "Issuer",
+    "translation": "Issuer"
+  },
+  "9db3d461-f36c-4b2e-9e51-0b1e9a1517c2": {
+    "original": "Client ID",
+    "translation": "Client ID"
+  },
+  "70af9014-24ec-484c-b11b-4e2510bb09c1": {
+    "original": "Client Secret",
+    "translation": "Client Secret"
+  },
+  "3b81d4a5-0af5-4807-8ea9-264d2f99ee05": {
+    "original": "Redirect URI",
+    "translation": "Redirect URI"
+  },
+  "f6de6c56-6326-42b2-b586-2bf607e058a7": {
+    "original": "Developers",
+    "translation": "Developers"
+  },
+  "0d256e87-ab44-4051-9efc-4749c8edb0c0": {
+    "original": "Custom",
+    "translation": "Custom"
+  },
+  "10b83895-551f-4892-9b58-b7b62db58726": {
+    "original": "Link:",
+    "translation": "Link:"
+  },
+  "780fa99d-7109-4f57-934b-1f4c5643a794": {
+    "original": "https://",
+    "translation": "https://"
+  },
+  "af839b8a-1367-4655-ad1c-ee658843e9f1": {
+    "original": "is",
+    "translation": "is"
+  },
+  "fd3fea4f-73c7-4c8d-90cd-80ea90e53b98": {
+    "original": "Gender",
+    "translation": "Gender"
+  },
+  "5ed579c6-bfe4-453b-bc13-5e38690849e1": {
+    "original": "Postcode",
+    "translation": "Postcode"
+  },
+  "62a07ea0-53ad-4962-88ff-26ea1ab493b0": {
+    "original": "status",
+    "translation": "status"
+  },
+  "085e5b60-8c26-49b2-bba3-04dd38b3a891": {
+    "original": "0",
+    "translation": "0"
+  },
+  "612b0f89-4a6e-4616-a50f-6e228daa86c3": {
+    "original": "UiTPAS",
+    "translation": "UiTPAS"
+  },
+  "9b625e82-f571-4fc6-a83b-47cb14ac1739": {
+    "original": "Accounts",
+    "translation": "Accounts"
+  },
+  "f6c4cd8c-97e5-40d0-9331-69d15e100726": {
+    "original": "Website",
+    "translation": "Website"
+  },
+  "ac747fb2-d391-499b-8cee-1ed7241e6177": {
+    "original": "Account",
+    "translation": "Account"
+  },
+  "bfcceb79-e614-4e9c-9fba-0ec2bd3f8f2a": {
+    "original": "1",
+    "translation": "1"
+  },
+  "02b0533d-31b1-44ce-a22b-47d7f90adea8": {
+    "original": "This category should be invisible. Check if the record categories are filtered using .filter(c => c.isEnabled(value))",
+    "translation": "This category should be invisible. Check if the record categories are filtered using .filter(c => c.isEnabled(value))"
+  },
+  "6dde271d-4108-48ce-a433-4ad80478c4ef": {
+    "original": "Maximum {max}",
+    "translation": "Maximum {max}"
+  },
+  "a4dde8e6-d0f7-4ad6-b880-cf5467771770": {
+    "original": "Payconiq by Bancontact",
+    "translation": "Payconiq by Bancontact"
+  },
+  "54685a94-1ae2-46f9-aa4b-03f0b3939fd3": {
+    "original": "shared.untitled",
+    "translation": "shared.untitled"
+  },
+  "a2f52798-c27f-4904-b651-2bec3aeebf21": {
+    "original": "KBC Mobile",
+    "translation": "KBC Mobile"
+  },
+  "9f6b5880-d02b-46a8-9b83-fc1e5320defe": {
+    "original": "ING Banking",
+    "translation": "ING Banking"
+  },
+  "0b894cff-2ae3-4954-a71c-7ccd1280668a": {
+    "original": "Belfius Mobile",
+    "translation": "Belfius Mobile"
+  },
+  "21b523b8-b6f1-4b21-ba56-0f9640670339": {
+    "original": "Easy Banking App (BNP Paribas Fortis)",
+    "translation": "Easy Banking App (BNP Paribas Fortis)"
+  },
+  "131fbe93-acac-497e-a768-bbfccf3425f0": {
+    "original": "Hello Bank! app",
+    "translation": "Hello Bank! app"
+  },
+  "a6621627-ce47-41df-a715-1adda44fa4df": {
+    "original": "Tennis",
+    "translation": "Tennis"
+  },
+  "cc287710-eb24-4b30-827c-20ecccdcb04f": {
+    "original": "Golf",
+    "translation": "Golf"
+  },
+  "73da6e39-663b-42f3-b2b5-5c87abe1975b": {
+    "original": "Badminton",
+    "translation": "Badminton"
+  },
+  "b6ca6bd6-3ba1-445c-aefa-396efead493b": {
+    "original": "Hockey",
+    "translation": "Hockey"
+  },
+  "43f4f751-2752-4ecc-9d78-136853852b43": {
+    "original": "LGBTQ+",
+    "translation": "LGBTQ+"
+  },
+  "3ef919e4-b9a3-4b58-a316-83c9340c9830": {
+    "original": "School",
+    "translation": "School"
+  },
+  "77a5d5d5-a1c6-476b-8fbf-354a40ca5fcb": {
+    "original": "Sport",
+    "translation": "Sport"
+  },
+  "a248259d-cf0d-4942-a1b4-ec7e2b85246b": {
+    "original": "Weekends",
+    "translation": "Weekends"
+  },
+  "b96a2898-7229-4397-99f1-2ffd761982f3": {
+    "original": "Bancontact",
+    "translation": "Bancontact"
+  },
+  "aa5a52fe-dd8e-4d28-9dcc-a730146e7972": {
+    "original": "iDEAL",
+    "translation": "iDEAL"
+  },
+  "e80487d1-d969-41fe-b2e8-59192e639fbb": {
+    "original": "tags",
+    "translation": "tags"
+  },
+  "fe29857c-e4ac-4b25-aa0e-31813f3570c2": {
+    "original": "tag",
+    "translation": "tag"
+  },
+  "95708a22-4743-4f04-aa24-fee0220da923": {
+    "original": "Zone",
+    "translation": "Zone"
+  },
+  "13109d4e-6427-4d9b-a0a2-c01de76282c1": {
+    "original": "Chirojeugd Vlaanderen",
+    "translation": "Chiro Youth Flanders"
+  },
+  "bea5dd9d-12e8-4f85-8bea-133467c3a737": {
+    "original": "Scouts & Gidsen Vlaanderen",
+    "translation": "Scouts & Guides Flanders"
+  },
+  "b33fd0c6-4a54-469e-b108-d75f4d8c613d": {
+    "original": "KSA",
+    "translation": "KSA"
+  },
+  "552906c2-db14-4bd8-b499-c29f61f57472": {
+    "original": "KLJ",
+    "translation": "KLJ"
+  },
+  "8f4d1891-4198-4133-8bcb-d90437affe83": {
+    "original": "FOS Open Scouting",
+    "translation": "FOS Open Scouting"
+  },
+  "0979101f-70e9-4b59-a75e-43c9ee3b237f": {
+    "original": "Jeugd Rode Kruis",
+    "translation": "Youth Red Cross"
+  },
+  "5330841f-d2b1-4014-bbea-1b3a8a68faa3": {
+    "original": "JNM",
+    "translation": "JNM"
+  },
+  "978520d9-7210-414a-82fd-9c04697b1a08": {
+    "original": "Afghanistan",
+    "translation": "Afghanistan"
+  },
+  "e79825e3-975a-4da9-8425-77beac42a41f": {
+    "original": "Portugal",
+    "translation": "Portugal"
+  },
+  "5cccc05b-344c-4abf-addc-2d898b2bda4b": {
+    "original": "Demo webshops",
+    "translation": "Demo online shops"
+  },
+  "b53032c7-e96d-42ff-8d6f-d5b40c5fa700": {
+    "original": "Billing",
+    "translation": "Billing"
+  },
+  "cbefe240-5d20-4b9a-8cbb-29286e3dae4d": {
+    "original": "DNS",
+    "translation": "DNS"
+  },
+  "cb57875f-a2b7-4076-8f32-a9a970f68907": {
+    "original": "Drip",
+    "translation": "Drip"
+  },
+  "b47abc59-c79d-4d69-b961-de80e562e8f2": {
+    "original": "Excel export",
+    "translation": "Excel export"
+  },
+  "e13af8ee-f442-4a98-b3e6-6f3d84fba30c": {
+    "original": "Via",
+    "translation": "Via"
+  },
+  "425f3938-b431-406b-90c2-cdbb896ca21b": {
+    "original": "Diabetes",
+    "translation": "Diabetes"
+  },
+  "8096d9e3-1bb3-4015-911d-9e13388e8bfd": {
+    "original": "tickets",
+    "translation": "tickets"
+  },
+  "9965a103-1ff5-444d-99f4-39fb0adb903b": {
+    "original": "1 week",
+    "translation": "1 week"
+  },
+  "b6185496-deab-4569-906f-c636e625bcd1": {
+    "original": "todo",
+    "translation": "to do"
+  },
+  "9464cf2b-10a9-4690-8ab6-2e3d2f3e9b9d": {
+    "original": "Document",
+    "translation": "Document"
+  },
+  "36459d6c-1685-463a-829f-bc92f83d1f0f": {
+    "original": "Privacy",
+    "translation": "Privacy"
+  },
+  "32e049b4-acd6-4d77-a5b8-0632111f2445": {
+    "original": "Tickets",
+    "translation": "Tickets"
+  },
+  "6df6c342-d948-41b1-b913-55cfd3c2b558": {
+    "original": "email",
+    "translation": "email"
+  },
+  "e1193431-b95a-4a8a-94b2-8659005dcb77": {
+    "original": "TabBarController",
+    "translation": "TabBarController"
+  },
+  "9120db75-8638-4cab-9dca-8bd81390149e": {
+    "original": "Developers",
+    "translation": "Developers"
+  },
+  "8bc22ee1-303e-4b40-94dc-72c5869abdbc": {
+    "original": "Production",
+    "translation": "Production"
+  },
+  "cab2694d-8d0f-44d0-9819-d2d2c4148b22": {
+    "original": "Staging",
+    "translation": "Staging"
+  },
+  "d517ff0c-abad-4a23-91e2-3463279cfa65": {
+    "original": "Development",
+    "translation": "Development"
+  },
+  "4070dda9-b556-49cd-ba17-aad535240835": {
+    "original": "todo",
+    "translation": "todo"
+  },
+  "29360811-3663-496c-8d8f-c9fdf9467a74": {
+    "original": "ID",
+    "translation": "ID"
+  },
+  "d7003b29-cc92-4ef4-b07b-f283193ef2ae": {
+    "original": "Status",
+    "translation": "Status"
+  },
+  "5f8c1ac5-a650-4046-80b6-0fe37fa12439": {
+    "original": "Tags",
+    "translation": "Tags"
+  },
+  "f97ad8c1-31d2-4b61-9e09-3be86eaeba08": {
+    "original": "Type",
+    "translation": "Type"
+  },
+  "151006be-86c2-48cd-bcd7-7c3bf9b76080": {
+    "original": "Detail",
+    "translation": "Detail"
+  },
+  "a7f32979-1ee8-47fe-a409-7b17ce9f9d39": {
+    "original": "Account ID",
+    "translation": "Account ID"
+  },
+  "a0dfe596-0670-48bc-a5f3-2c9308c70a17": {
+    "original": "type",
+    "translation": "type"
+  },
+  "dafc7b04-dfb2-4dbc-8bcf-f7e9c6356442": {
+    "original": "Postcode",
+    "translation": "Postcode"
+  },
+  "be748ea7-badc-48b6-ae7a-8eca6341dc08": {
+    "original": "Variant",
+    "translation": "Variant"
+  },
+  "3e23e0d2-ec8c-44f9-92fa-a1fce10c0185": {
+    "original": "Start",
+    "translation": "Start"
+  },
+  "630ab37a-85c8-4bbd-a281-b87e82a976d5": {
+    "original": "Feedback",
+    "translation": "Feedback"
+  },
+  "a0b5e325-c175-4002-a812-4c83e3ce781a": {
+    "original": "vat number",
+    "translation": "VAT number"
+  },
+  "6285b165-8d32-4a00-bb3f-0f95abcda58f": {
+    "original": "email",
+    "translation": "email"
+  },
+  "168c5bc7-2a5e-4bb9-99c0-b91905e5a193": {
+    "original": "euro",
+    "translation": "euro"
+  },
+  "0456ef2e-5e86-48fa-835c-fd8ec1921f5e": {
+    "original": "Info",
+    "translation": "Info"
+  },
+  "d84503e9-7d0e-4c4b-a3ca-92bfbed6ca49": {
+    "original": "Account",
+    "translation": "Account"
+  },
+  "43d59035-b07a-4f51-8e9b-cd136eb3715c": {
+    "original": "uitpasNumber",
+    "translation": "uitpasNumber"
+  },
+  "9e080d96-2c2b-47e3-b56c-d58d993974c9": {
+    "original": "Gender",
+    "translation": "Gender"
+  },
+  "3cb04b43-16ca-4467-8729-ea7dcd206ed0": {
+    "original": "ticket",
+    "translation": "ticket"
+  },
+  "390d335e-98c4-4c60-92fc-f1616096c875": {
+    "original": "tickets",
+    "translation": "tickets"
+  },
+  "8f9575f3-9787-4fa5-9ddf-dd1fa4103996": {
+    "original": "Bancontact",
+    "translation": "Bancontact"
+  },
+  "7c04a4f3-25c5-4663-9833-87a7aecbf0b9": {
+    "original": "Demoshop",
+    "translation": "Demoshop"
   }
 }

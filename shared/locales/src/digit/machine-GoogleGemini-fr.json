@@ -499,26 +499,6 @@
     "original": "Beschrijving",
     "translation": "Description"
   },
-  "6b3555a2-ace4-4f37-a1fd-18921552f2b5": {
-    "original": "stamhoofd.be",
-    "translation": "stamhoofd.be"
-  },
-  "ccfc0566-2fc4-4c0a-b1da-c3059cad6586": {
-    "original": "www.stamhoofd.be",
-    "translation": "www.stamhoofd.be"
-  },
-  "edac937d-5eda-445e-8bba-2c2b353d3f27": {
-    "original": "klachten@stamhoofd.be",
-    "translation": "klachten@stamhoofd.be"
-  },
-  "59b85264-c4c3-4cf6-8923-9b43282b2787": {
-    "original": "hallo@stamhoofd.be",
-    "translation": "hallo@stamhoofd.be"
-  },
-  "5670bc42-cf94-46b6-9ce0-7cdc4ffbb4d9": {
-    "original": "simon@stamhoofd.be",
-    "translation": "simon@stamhoofd.be"
-  },
   "7955066a-93c8-4872-8ac7-e7ccdc7f61f9": {
     "original": "Einddatum",
     "translation": "Date de fin"
@@ -531,17 +511,9 @@
     "original": "voorbeeld@gmail.com",
     "translation": "exemple@gmail.com"
   },
-  "bb910a6c-ec64-46d8-bebb-c3b4312bbfb4": {
-    "original": "Jan Janssens",
-    "translation": "Jan Janssens"
-  },
   "274d0a26-49b8-4dfa-a8bf-21368b12dca7": {
     "original": "Lies en Jan Janssens",
     "translation": "Lies et Jan Janssens"
-  },
-  "0c3689c1-01f8-455a-a9b0-8f766c03b2d3": {
-    "original": "+32 470 12 34 56",
-    "translation": "+32 470 12 34 56"
   },
   "b4567b6a-b90e-425f-bd31-be4d2252829a": {
     "original": "Algemeen",
@@ -855,10 +827,6 @@
     "original": "Zoeken",
     "translation": "Rechercher"
   },
-  "54685a94-1ae2-46f9-aa4b-03f0b3939fd3": {
-    "original": "shared.untitled",
-    "translation": "shared.untitled"
-  },
   "7a63f22a-1f4d-4dfa-9030-47137ff52bab": {
     "original": "De locatie is verplicht",
     "translation": "L'emplacement est obligatoire"
@@ -1031,10 +999,6 @@
     "original": "Aangesloten sinds",
     "translation": "Affilié depuis"
   },
-  "bf20a769-772d-46b2-9b48-2ea29c96f113": {
-    "original": "Via",
-    "translation": "Via"
-  },
   "f18beb62-a9e8-4881-865c-28ad534b6f24": {
     "original": "Navigatie",
     "translation": "Navigation"
@@ -1094,10 +1058,6 @@
   "8827deb6-8c18-4b98-a495-57696801a73e": {
     "original": "Er zijn nog geen bestellingen.",
     "translation": "Il n'y a pas encore de commandes."
-  },
-  "4a07f8e5-c16e-4706-9387-9d3ded9e2b3c": {
-    "original": "Type",
-    "translation": "Type"
   },
   "f7300ff2-638b-47c2-97b5-e8774aa0b6f5": {
     "original": "Naam",
@@ -1462,10 +1422,6 @@
   "cb1953f4-7e4f-498d-b8d8-54a885753e23": {
     "original": "Proefperiode",
     "translation": "Période d'essai"
-  },
-  "ceba695c-105b-49c9-aaa4-bf716c4aec6b": {
-    "original": "tags",
-    "translation": "tags"
   },
   "a8bf2d7d-3208-4c18-bac3-2cc97b629ad1": {
     "original": "Laatste automatische herinneringsmail",
@@ -2462,10 +2418,6 @@
   "308d1e59-057c-4a51-846f-8557ba5a385e": {
     "original": "Het antwoord is niet gekend. Daardoor blijft het mogelijk om gegevens te verzamelen waarvoor toestemming nodig is tot er een expliciet antwoord werd gegeven.",
     "translation": "La réponse est inconnue. Il reste donc possible de collecter des données pour lesquelles une autorisation est nécessaire jusqu’à ce qu’une réponse explicite soit donnée."
-  },
-  "c8f1e4d4-669c-4ccb-a9d9-30584f6c2d55": {
-    "original": "Via {organization}",
-    "translation": "Via {organization}"
   },
   "f1582fe7-3168-4579-bcc5-9db17568dac0": {
     "original": "Aangerekend aan {organization}",
@@ -3547,597 +3499,9 @@
     "original": "Een e-mail vanaf {email} kon niet worden verstuurd aan {to}",
     "translation": "Un e-mail depuis {email} n'a pas pu être envoyé à {to}"
   },
-  "49dd6919-a853-4004-b817-ae811de527ab": {
-    "original": "Deadlines",
-    "translation": "Deadlines"
-  },
-  "2562f83d-522d-47a5-b8ad-b918d14c3cb2": {
-    "original": "Via deadlines kan je instellen wanneer de leiding een kampmelding moet invullen.",
-    "translation": "Via deadlines kan je instellen wanneer de leiding een kampmelding moet invullen."
-  },
-  "b00dca0d-d590-4d2f-8703-1aeb02c9584e": {
-    "original": "Indienen kan tot",
-    "translation": "Indienen kan tot"
-  },
-  "b82a5b97-5abe-4f63-97fe-a738d9698039": {
-    "original": "Stel optioneel limieten voor het aantal lokalen van deze soort per groep in.",
-    "translation": "Stel optioneel limieten voor het aantal lokalen van deze soort per groep in."
-  },
-  "ec5437dc-5d11-4092-8ab7-e9090af1f71a": {
-    "original": "Het is enkel mogelijk om de aansluiting binnen de start- en einddata aan te vragen.",
-    "translation": "Het is enkel mogelijk om de aansluiting binnen de start- en einddata aan te vragen."
-  },
-  "513b343f-6a4e-402c-90c4-c0d73e4f65a3": {
-    "original": "Enkel voor nieuwe leden",
-    "translation": "Enkel voor nieuwe leden"
-  },
-  "7a010291-3eac-4690-b6d8-2972d3ab8e58": {
-    "original": "Gratis per lokale groep",
-    "translation": "Gratis per lokale groep"
-  },
-  "de1f0a0d-4251-41db-bc28-c332cc20dc8b": {
-    "original": "De vervaldatum moet tussen de start- en einddatum liggen",
-    "translation": "De vervaldatum moet tussen de start- en einddatum liggen"
-  },
-  "c56506a1-14a9-4179-bbab-5eac533ff730": {
-    "original": "Vaste periode",
-    "translation": "Vaste periode"
-  },
-  "a85bd4c0-52f7-4bf0-86c2-234a97c679bc": {
-    "original": "Per dag",
-    "translation": "Per dag"
-  },
-  "b19e199f-2b0e-444c-a4ee-0cdd0b3c6a35": {
-    "original": "Je hebt nog geen instellingen toegevoegd.",
-    "translation": "Je hebt nog geen instellingen toegevoegd."
-  },
-  "6c9d45e5-c9f6-49c8-9362-177653414c7e": {
-    "original": "Type",
-    "translation": "Type"
-  },
-  "42ac723d-9e5f-4324-a2b9-f14ceeba10d8": {
-    "original": "per dag",
-    "translation": "per dag"
-  },
-  "49a1a0a5-72fa-4170-89f5-8dfa78f2eef7": {
-    "original": "Prijs vanaf",
-    "translation": "Prijs vanaf"
-  },
-  "72974c5e-47ab-4c11-815c-e3d7a0f76b51": {
-    "original": "Standaardprijs",
-    "translation": "Standaardprijs"
-  },
-  "35d99159-ef2f-48d5-a34b-a648497a3ac7": {
-    "original": "Prijs per dag",
-    "translation": "Prijs per dag"
-  },
-  "8e5dfe36-70c4-4011-916f-2b6f0e0b7648": {
-    "original": "Vaste prijs",
-    "translation": "Vaste prijs"
-  },
-  "52bff8d2-52af-4d3f-b092-96bcfa4c0d03": {
-    "original": "Prijs",
-    "translation": "Prijs"
-  },
-  "38e2c1aa-13f6-4339-8cfd-68c2603beb51": {
-    "original": "Voorbeeld",
-    "translation": "Voorbeeld"
-  },
-  "4fe1ed50-7a5c-410a-8aa0-1625b5beb844": {
-    "original": "Voorbeeldstraat",
-    "translation": "Voorbeeldstraat"
-  },
-  "ab2559af-f877-4ee0-bc40-ba563314cded": {
-    "original": "Voorbeeldstad",
-    "translation": "Voorbeeldstad"
-  },
-  "c9169aad-6b6f-4701-b079-a9936697984c": {
-    "original": "Tonen bij het registeren",
-    "translation": "Tonen bij het registeren"
-  },
-  "1abf9a19-7075-498f-b7d7-d47fa9cfe2dc": {
-    "original": "Verplicht aanvinkvakje",
-    "translation": "Verplicht aanvinkvakje"
-  },
-  "95480dc5-e4fd-4f88-9fe5-242f504180c0": {
-    "original": "Het aanvinkvakje moet aangevinkt worden bij het registreren als je dit aanzet. In het andere geval is het enkel een vermelding die impliciet aanvaard wordt.",
-    "translation": "Het aanvinkvakje moet aangevinkt worden bij het registreren als je dit aanzet. In het andere geval is het enkel een vermelding die impliciet aanvaard wordt."
-  },
-  "32f88e2b-d43e-49b2-b60b-dd2247700aeb": {
-    "original": "Herhaal jouw link in deze tekst door een deel van de tekst te selecteren en op de link-knop te drukken.",
-    "translation": "Herhaal jouw link in deze tekst door een deel van de tekst te selecteren en op de link-knop te drukken."
-  },
-  "ab3872b4-6ef5-4584-af47-89e6a17e04b3": {
-    "original": "bv. privacyvoorwaarden",
-    "translation": "bv. privacyvoorwaarden"
-  },
-  "a0fa9d2c-106e-4cb4-9e78-d137934fd2b1": {
-    "original": "Volledige link",
-    "translation": "Volledige link"
-  },
-  "00204508-e8ce-4b81-b978-4b0a4a0472f5": {
-    "original": "Upload PDF",
-    "translation": "Upload PDF"
-  },
-  "8b7c18d3-3588-4f07-a269-391283e4c2cc": {
-    "original": "Aanvinktekst",
-    "translation": "Aanvinktekst"
-  },
-  "8eb4e674-0b88-48b5-a4e7-ea9021caf952": {
-    "original": "Tekst die naast het aanvinkvakje staat",
-    "translation": "Tekst die naast het aanvinkvakje staat"
-  },
-  "2e109d45-8777-45fe-9596-4a08785f5923": {
-    "original": "Nieuwe voorwaarden",
-    "translation": "Nieuwe voorwaarden"
-  },
-  "ced74e50-34b9-4d83-a89d-542c4b0c4c45": {
-    "original": "Voorwaarden bewerken",
-    "translation": "Voorwaarden bewerken"
-  },
-  "a1f2fa4d-10a4-4b67-af10-0fafda4b0246": {
-    "original": "Ben je zeker dat je deze voorwaarden wilt verwijderen?",
-    "translation": "Ben je zeker dat je deze voorwaarden wilt verwijderen?"
-  },
   "08aa378f-6e1d-4882-965f-756108c677e1": {
     "original": "Voeg voorwaarden toe die bij het registereren staan vermeldt of geaccepteerd moeten worden.",
     "translation": "Voeg voorwaarden toe die bij het registeren staan vermeldt of geaccepteerd moeten worden."
-  },
-  "23229877-c51f-4e18-8563-88315be182aa": {
-    "original": "Voorwaarden",
-    "translation": "Voorwaarden"
-  },
-  "6a297067-37ee-43f3-bffc-07968cf321c2": {
-    "original": "Vergrendel inschrijvingen",
-    "translation": "Vergrendel inschrijvingen"
-  },
-  "33a674c2-6981-442b-9bd4-01f71da7a159": {
-    "original": "Startdatum",
-    "translation": "Startdatum"
-  },
-  "f852932e-380e-4b9a-916b-2bc008d8c08a": {
-    "original": "Einddatum",
-    "translation": "Einddatum"
-  },
-  "3b3be211-9a70-4345-abd6-760b39cef51d": {
-    "original": "Overschakelen naar",
-    "translation": "Overschakelen naar"
-  },
-  "5119aacc-24c1-43e6-b025-0efa7ea60ea3": {
-    "original": "Instellen als huidige",
-    "translation": "Instellen als huidige"
-  },
-  "1c5ba032-2132-4bda-8aae-7f622f6f3a2a": {
-    "original": "Huidige",
-    "translation": "Huidige"
-  },
-  "6bdca00a-b7ec-413e-b57a-3e192a53564f": {
-    "original": "Administratieportaal",
-    "translation": "Administratieportaal"
-  },
-  "315fdb48-3f61-4795-9a40-c08c61fcd926": {
-    "original": "Welkom op het administratieportaal. Hier kan je alle leden of groepen opzoeken, nationale/regionale activiteiten aanmaken, of de instellingen op koepelniveau wijzigen.",
-    "translation": "Welkom op het administratieportaal. Hier kan je alle leden of groepen opzoeken, nationale/regionale activiteiten aanmaken, of de instellingen op koepelniveau wijzigen."
-  },
-  "607105b3-ba57-4818-9523-72923e3cdc8b": {
-    "original": "Welkom op het administratieportaal. Hier kan je alle leden of groepen opzoeken of nationale/regionale activiteiten aanmaken.",
-    "translation": "Welkom op het administratieportaal. Hier kan je alle leden of groepen opzoeken of nationale/regionale activiteiten aanmaken."
-  },
-  "6e39ca2a-d279-41d3-b68d-eb17dd4f4331": {
-    "original": "E-mailadres valideren...",
-    "translation": "E-mailadres valideren..."
-  },
-  "e35060cc-3e63-4b78-9e79-d160401053f5": {
-    "original": "E-mailadres is gevalideerd",
-    "translation": "E-mailadres is gevalideerd"
-  },
-  "eefdb3b1-ae26-420d-b1a5-d24997ec3305": {
-    "original": "Bezig met uitschrijven...",
-    "translation": "Bezig met uitschrijven..."
-  },
-  "5aa1ac8b-626e-496b-bbd9-e97aebb19937": {
-    "original": "Je bent al uitgeschreven",
-    "translation": "Je bent al uitgeschreven"
-  },
-  "35f6fc8e-b63e-4e88-8324-2660c5280d5d": {
-    "original": "Terug inschrijven op e-mails",
-    "translation": "Terug inschrijven op e-mails"
-  },
-  "fe5a96e6-a7e6-4fe8-9b3f-8ef27bb204bb": {
-    "original": "Je ontvangt momenteel geen e-mails van {name} op {email}. Toch een e-mail ontvangen? Stuur hem door naar {complaintEmail}",
-    "translation": "Je ontvangt momenteel geen e-mails van {name} op {email}. Toch een e-mail ontvangen? Stuur hem door naar {complaintEmail}"
-  },
-  "4a7194b9-bcaf-498b-af75-6065f08f2a8e": {
-    "original": "Wil je dat we jou geen e-mails meer sturen?",
-    "translation": "Wil je dat we jou geen e-mails meer sturen?"
-  },
-  "48b16d15-edcd-423a-abc3-a203a9c5d09e": {
-    "original": "Ja, uitschrijven",
-    "translation": "Ja, uitschrijven"
-  },
-  "f2fef1b6-c586-4d28-b11d-6dad0974af93": {
-    "original": "Hierna ontvang je geen e-mails van {name} op {email}",
-    "translation": "Hierna ontvang je geen e-mails van {name} op {email}"
-  },
-  "26e5dfeb-3e71-4d1a-8580-350d19efbacd": {
-    "original": "Top! Je ontvangt geen e-mails meer.",
-    "translation": "Top! Je ontvangt geen e-mails meer."
-  },
-  "f7cb59de-5024-4a84-bb81-c10961911e35": {
-    "original": "Je ontvangt vanaf nu terug e-mails.",
-    "translation": "Je ontvangt vanaf nu terug e-mails."
-  },
-  "1ff9f2e7-bf47-4206-bc03-ec43cfc33b65": {
-    "original": "Wil je inloggen in het feedback systeem?",
-    "translation": "Wil je inloggen in het feedback systeem?"
-  },
-  "c4135e6a-2dab-4a8d-810d-252bd5552a22": {
-    "original": "Ja, open Feedback",
-    "translation": "Ja, open Feedback"
-  },
-  "ce7d2ca1-bda6-4701-b6a9-3e0cd7ac23c2": {
-    "original": "Feedback systeem openen...",
-    "translation": "Feedback systeem openen..."
-  },
-  "619a9ba5-895c-4334-a126-a1c4b780e87b": {
-    "original": "spinner",
-    "translation": "spinner"
-  },
-  "9e0461d2-7439-4588-837c-750de6946287": {
-    "original": "Optioneel",
-    "translation": "Optioneel"
-  },
-  "9abb03cf-d76c-4f97-afea-76982042b1ad": {
-    "original": "Deze record is optioneel",
-    "translation": "Deze record is optioneel"
-  },
-  "6b0bca07-3cba-45cf-bc94-e3217e59a69f": {
-    "original": "Klik om te kopiëren",
-    "translation": "Klik om te kopiëren"
-  },
-  "6a8b6166-a8f9-41b8-81e7-a12180de762e": {
-    "original": "Waarde",
-    "translation": "Waarde"
-  },
-  "116f6ca0-c077-4468-b79b-d329f6a8db77": {
-    "original": "TTL",
-    "translation": "TTL"
-  },
-  "669bef94-f6a1-4a84-8f2c-5de06ea05db3": {
-    "original": "De mededeling kan niet gewijzigd worden door",
-    "translation": "De mededeling kan niet gewijzigd worden door"
-  },
-  "6c2068f6-73c6-4e88-b104-15f95832838f": {
-    "original": "bestellers",
-    "translation": "bestellers"
-  },
-  "39c566d6-520d-4048-bb1a-53eeea3ccea7": {
-    "original": "leden",
-    "translation": "leden"
-  },
-  "72e5e374-ecd9-40e5-ae80-d14553faab50": {
-    "original": "die betalen met een app. Voorzie dus zelf geen eigen vervangingen zoals",
-    "translation": "die betalen met een app. Voorzie dus zelf geen eigen vervangingen zoals"
-  },
-  "789da13b-5f65-4ab7-8318-ed015e0303cf": {
-    "original": "bestelling + naam",
-    "translation": "bestelling + naam"
-  },
-  "ac28d270-81d6-4393-ae2c-6b0da9828cb2": {
-    "original": "Voorbeeld:",
-    "translation": "Voorbeeld:"
-  },
-  "152f1003-ba4e-4ae0-acef-475bef27e4a5": {
-    "original": "Gebruik automatische tekstvervangingen in de mededeling via",
-    "translation": "Gebruik automatische tekstvervangingen in de mededeling via"
-  },
-  "9e2430e8-5733-414c-9831-f7c455836691": {
-    "original": "{{naam}}",
-    "translation": "{{naam}}"
-  },
-  "a9947119-083e-4f5f-a088-7ec605ad8e3f": {
-    "original": "{{email}}",
-    "translation": "{{email}}"
-  },
-  "61b6890f-3b3e-4d69-96fe-687e1366e738": {
-    "original": "{{nr}}",
-    "translation": "{{nr}}"
-  },
-  "717310b7-527a-4870-99c4-b6b3a42fe3fa": {
-    "original": "Instructies",
-    "translation": "Instructies"
-  },
-  "b7adfe7d-d1c9-482c-bba2-ecaffd9aa0b3": {
-    "original": "Op de betaalpagina worden automatisch instructies getoond om de overschrijving correct uit te voeren. Je kan eventueel andere instructies opgeven, bv. als je het toelaat om de overschrijving later uit te voeren.",
-    "translation": "Op de betaalpagina worden automatisch instructies getoond om de overschrijving correct uit te voeren. Je kan eventueel andere instructies opgeven, bv. als je het toelaat om de overschrijving later uit te voeren."
-  },
-  "404635de-cba2-4a9d-91dc-3309755c070f": {
-    "original": "Uitschakelen voor particulieren",
-    "translation": "Uitschakelen voor particulieren"
-  },
-  "6576e1fc-a49f-487f-ad2d-fc4bfb7b2550": {
-    "original": "Maak pas beschikbaar vanaf een minimum bedrag",
-    "translation": "Maak pas beschikbaar vanaf een minimum bedrag"
-  },
-  "7410de9e-6805-41e5-b166-9e590056c41b": {
-    "original": "Waarschuwing tonen bij selectie van deze betaalmethode",
-    "translation": "Waarschuwing tonen bij selectie van deze betaalmethode"
-  },
-  "62f644a2-98ba-4a8d-b7fd-22b2d0bb4d45": {
-    "original": "Waarschuwing enkel tonen vanaf een minimum bedrag",
-    "translation": "Waarschuwing enkel tonen vanaf een minimum bedrag"
-  },
-  "cc322a9c-e781-4a4e-9e45-fb1355d3c536": {
-    "original": "waarbij je ervan uitgaat dat de betaler manueel de mededeling kan invullen en wijzigen. Gebruik in plaats daarvan de 'Vaste mededeling' met de beschikbare automatische vervangingen.",
-    "translation": "waarbij je ervan uitgaat dat de betaler manueel de mededeling kan invullen en wijzigen. Gebruik in plaats daarvan de 'Vaste mededeling' met de beschikbare automatische vervangingen."
-  },
-  "31c28f13-d3b8-42ee-8979-c8224633237e": {
-    "original": "Begunstigde",
-    "translation": "Begunstigde"
-  },
-  "b541ddfb-cce5-4194-b6a5-3de523b27fa8": {
-    "original": "Bankrekeningnummer",
-    "translation": "Bankrekeningnummer"
-  },
-  "aac4ace7-828f-4148-88f1-d49b50610cdd": {
-    "original": "Soort mededeling",
-    "translation": "Soort mededeling"
-  },
-  "136b7ba4-7611-4ee4-a46d-60758869210f": {
-    "original": "Mededeling",
-    "translation": "Mededeling"
-  },
-  "da96b2e0-1caa-4cf8-8276-94d907c64057": {
-    "original": "Voorvoegsel",
-    "translation": "Voorvoegsel"
-  },
-  "ff789452-b123-437a-a77b-34f3e0dd3e5c": {
-    "original": "Optioneel. Bv. Inschrijving",
-    "translation": "Optioneel. Bv. Inschrijving"
-  },
-  "082234bc-835d-4c27-9fb4-5ab2221719a9": {
-    "original": "Optioneel. Bv. Bestelling",
-    "translation": "Optioneel. Bv. Bestelling"
-  },
-  "0e392740-3dd9-4454-b33f-320465f1a52c": {
-    "original": "Optioneel. Indien niet ingevuld worden automatisch geschikte instructies getoond.",
-    "translation": "Optioneel. Indien niet ingevuld worden automatisch geschikte instructies getoond."
-  },
-  "ecfdb06e-e649-47d7-8047-4e340e6f6988": {
-    "original": "Minimum bedrag",
-    "translation": "Minimum bedrag"
-  },
-  "73dbf494-16a3-4e9a-8cbe-5170334209c0": {
-    "original": "Waarschuwingstekst",
-    "translation": "Waarschuwingstekst"
-  },
-  "140fd2a3-d019-45a9-9d2b-754111da04f6": {
-    "original": "Willekeurig aangemaakt.",
-    "translation": "Willekeurig aangemaakt."
-  },
-  "1add2f6b-1c51-49f9-9fe3-a9a1ad62ad07": {
-    "original": "Naam van lid/leden",
-    "translation": "Naam van lid/leden"
-  },
-  "4d496edf-0203-4df3-a6e9-3e58d226d6c5": {
-    "original": "Bestelnummer",
-    "translation": "Bestelnummer"
-  },
-  "6d5b370e-491e-4565-acc9-444fe7e230fe": {
-    "original": "Eventueel voorafgegaan door een zelf gekozen woord (zie onder)",
-    "translation": "Eventueel voorafgegaan door een zelf gekozen woord (zie onder)"
-  },
-  "610a54d0-5ae5-4e4c-bac3-205fd56b65c8": {
-    "original": "Vaste mededeling",
-    "translation": "Vaste mededeling"
-  },
-  "35112ce1-48f4-4078-918a-0dc66f25cff0": {
-    "original": "Altijd dezelfde mededeling voor alle inschrijvingen. Een betaling kan voor meerdere inschrijvingen tegelijk zijn.",
-    "translation": "Altijd dezelfde mededeling voor alle inschrijvingen. Een betaling kan voor meerdere inschrijvingen tegelijk zijn."
-  },
-  "1d8e0c76-eca0-4973-98bc-ebf7f940f05e": {
-    "original": "Altijd dezelfde mededeling voor alle bestellingen.",
-    "translation": "Altijd dezelfde mededeling voor alle bestellingen."
-  },
-  "a36700a3-64be-49eb-b1fd-60af7475eb4e": {
-    "original": "Meer info",
-    "translation": "Meer info"
-  },
-  "be98be36-f796-4f96-b054-4d2a09be3d79": {
-    "original": "Administratiekosten",
-    "translation": "Administratiekosten"
-  },
-  "29c16366-9962-4b22-a8bb-55c5a8467315": {
-    "original": "Reken geen administratiekosten aan als het totaalbedrag 0 euro is",
-    "translation": "Reken geen administratiekosten aan als het totaalbedrag 0 euro is"
-  },
-  "217f3390-3eef-4f35-bd23-ab3c155f2622": {
-    "original": "Betaalaccount",
-    "translation": "Betaalaccount"
-  },
-  "f67ccf42-d4a8-4fe6-b7dc-91f43726646e": {
-    "original": "Vaste kost",
-    "translation": "Vaste kost"
-  },
-  "dd61d33b-367e-4e40-8ac6-84c286b931bc": {
-    "original": "Percentage",
-    "translation": "Percentage"
-  },
-  "45285899-60e2-42c6-bb51-fdd16fe651e4": {
-    "original": "Nog bezig met laden. Even geduld.",
-    "translation": "Nog bezig met laden. Even geduld."
-  },
-  "740c41c3-7f19-4a5b-bd49-7e7d228e2187": {
-    "original": "Je moet minimaal één betaalmethode selecteren",
-    "translation": "Je moet minimaal één betaalmethode selecteren"
-  },
-  "2384baa0-50ca-4003-8d3a-af0beb18fec2": {
-    "original": "Er is een fout opgetreden bij het ophalen van de betaalaccounts",
-    "translation": "Er is een fout opgetreden bij het ophalen van de betaalaccounts"
-  },
-  "70ee9a44-6cd7-49a1-9852-8519c23ec13a": {
-    "original": "Via Buckaroo",
-    "translation": "Via Buckaroo"
-  },
-  "4db6cde7-274f-4202-9351-3e9ce82794c1": {
-    "original": "Via Mollie",
-    "translation": "Via Mollie"
-  },
-  "84e54416-464f-4ca6-a685-def2a0a9c135": {
-    "original": "Vanaf minimum",
-    "translation": "Vanaf minimum"
-  },
-  "7972bd35-3bb5-4dae-9771-8d4765646f61": {
-    "original": "Met waarschuwing vanaf",
-    "translation": "Met waarschuwing vanaf"
-  },
-  "88edcbb7-c3b2-4531-8796-f0c6782fa76e": {
-    "original": "Met waarschuwing",
-    "translation": "Met waarschuwing"
-  },
-  "8bec9f71-c41d-485f-b0f5-95a40b695884": {
-    "original": "Niet beschikbaar voor particulieren",
-    "translation": "Niet beschikbaar voor particulieren"
-  },
-  "8e243505-26f6-4505-9317-c871fa1df324": {
-    "original": "Nog geen bankrekeningnummer ingesteld",
-    "translation": "Nog geen bankrekeningnummer ingesteld"
-  },
-  "475a6b09-e71d-4160-a87e-d4a3844116c3": {
-    "original": "Rekeningnummer:",
-    "translation": "Rekeningnummer:"
-  },
-  "0cfac4d3-1840-4b12-b9d7-b9f40e49d664": {
-    "original": "Begunstigde:",
-    "translation": "Begunstigde:"
-  },
-  "e54dd641-9788-4514-b866-86f602892fb2": {
-    "original": "Mededeling:",
-    "translation": "Mededeling:"
-  },
-  "4df013df-328f-47b6-b90a-fc40813d3c0a": {
-    "original": "Je moet minimaal één betaalmethode accepteren",
-    "translation": "Je moet minimaal één betaalmethode accepteren"
-  },
-  "f5fc5d6b-49ef-4b3d-80b7-90e1f81220fa": {
-    "original": "Buckaroo",
-    "translation": "Buckaroo"
-  },
-  "b8cf0b1f-04c4-4a85-9a19-027a5326fd11": {
-    "original": "Mollie",
-    "translation": "Mollie"
-  },
-  "60bbe710-43e0-4a19-996c-ded3f25c1c39": {
-    "original": "Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalmethodes). Daar vind je ook meer informatie.",
-    "translation": "Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalmethodes). Daar vind je ook meer informatie."
-  },
-  "a600bbdb-779a-4f6d-bc60-16c15eeaebe9": {
-    "original": "Er ging iets mis: te veel doorverwijzingen.",
-    "translation": "Er ging iets mis: te veel doorverwijzingen."
-  },
-  "c264b163-1fec-45b3-9d69-4807ee8901a2": {
-    "original": "Betaling voltooid",
-    "translation": "Betaling voltooid"
-  },
-  "ebe7609c-0a44-4e91-b2d9-2d90be4269ed": {
-    "original": "De betaling werd voltooid.",
-    "translation": "De betaling werd voltooid."
-  },
-  "5690126d-651e-475d-9503-cfe6825a9735": {
-    "original": "Betaling mislukt",
-    "translation": "Betaling mislukt"
-  },
-  "5e16870b-d00f-424d-b904-d412bd2b7368": {
-    "original": "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.",
-    "translation": "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw."
-  },
-  "770381c5-61af-483c-a21f-f55a63baba3a": {
-    "original": "Bekijk de aangepaste overeenkomsten",
-    "translation": "Bekijk de aangepaste overeenkomsten"
-  },
-  "2615ff5c-0ef3-4c6d-87c7-3caf7671a94a": {
-    "original": "We hebben een wijziging aangebracht in onze algemene voorwaarden, privacyvoorwaarden en verwerkingsovereenkomst. Bekijk deze eerst en accepteer de nieuwe overeenkomsten voor je verder gaat.",
-    "translation": "We hebben een wijziging aangebracht in onze algemene voorwaarden, privacyvoorwaarden en verwerkingsovereenkomst. Bekijk deze eerst en accepteer de nieuwe overeenkomsten voor je verder gaat."
-  },
-  "df2f7ae1-ad07-4ec4-94c0-939dd3f6bc8d": {
-    "original": "Ik heb kennis genomen van",
-    "translation": "Ik heb kennis genomen van"
-  },
-  "005c5e2d-8185-46e7-b1a0-4e4eaaf60d41": {
-    "original": "het privacybeleid",
-    "translation": "het privacybeleid"
-  },
-  "b22d5516-2644-4f4a-bcb5-ad93b82a0d61": {
-    "original": "Ik heb",
-    "translation": "Ik heb"
-  },
-  "1943d3e6-4550-4240-b2f7-5aaa74e55f5d": {
-    "original": "de algemene voorwaarden",
-    "translation": "de algemene voorwaarden"
-  },
-  "2b08e5d7-6acc-4d7f-ad1a-30f349a79fe9": {
-    "original": "de verwerkersovereenkomst",
-    "translation": "de verwerkersovereenkomst"
-  },
-  "4b52f8cb-2b1a-42ff-ab7e-c209e7874649": {
-    "original": "Aangepaste overeenkomsten",
-    "translation": "Aangepaste overeenkomsten"
-  },
-  "ca416d8b-8535-4680-a421-3c49cfff8e55": {
-    "original": "Je moet kennis hebben genomen van het privacybeleid.",
-    "translation": "Je moet kennis hebben genomen van het privacybeleid."
-  },
-  "cebbc813-84c2-4f11-a144-1d1632bfb0f5": {
-    "original": "Je moet akkoord gaan met de algemene voorwaarden.",
-    "translation": "Je moet akkoord gaan met de algemene voorwaarden."
-  },
-  "92e9d94a-20c9-482a-a528-fd3c8a8fdded": {
-    "original": "Je moet akkoord gaan met de verwerkersovereenkomst.",
-    "translation": "Je moet akkoord gaan met de verwerkersovereenkomst."
-  },
-  "697d96d8-17dc-4e98-8571-87153985f3a1": {
-    "original": "Externe beheerdersrollen",
-    "translation": "Externe beheerdersrollen"
-  },
-  "b1cb5299-5325-4505-ba30-a7b0ae327679": {
-    "original": "Je kan een API-key verschillende rollen geven, net zoals een externe beheerder. Hiermee kan je jouw key beter beveiligen en enkel toegang geven waarvoor je het nodig hebt.",
-    "translation": "Je kan een API-key verschillende rollen geven, net zoals een externe beheerder. Hiermee kan je jouw key beter beveiligen en enkel toegang geven waarvoor je het nodig hebt."
-  },
-  "40abbf9c-2dd3-471a-a699-f6af656feb5e": {
-    "original": "Rate limits",
-    "translation": "Rate limits"
-  },
-  "664063fe-6e8f-4439-bb86-07d346e803de": {
-    "original": "Een API-key heeft rate limits om overbelasting door foutief of inefficiënt gebruik te voorkomen.",
-    "translation": "Een API-key heeft rate limits om overbelasting door foutief of inefficiënt gebruik te voorkomen."
-  },
-  "288fd815-8771-4524-9e4d-6e90bd2eec11": {
-    "original": "Ideaal voor de meeste API-keys.",
-    "translation": "Ideaal voor de meeste API-keys."
-  },
-  "be918896-7e92-4ac7-9cbe-fba5afdd8120": {
-    "original": "Maximaal 5 req/s; 120 requests per 2 minuten; 1.000 requests per uur; 2.000 requests per dag",
-    "translation": "Maximaal 5 req/s; 120 requests per 2 minuten; 1.000 requests per uur; 2.000 requests per dag"
-  },
-  "706d4485-be6b-418c-bbf1-5fe05e34e076": {
-    "original": "Aangeraden",
-    "translation": "Aangeraden"
-  },
-  "36c579f6-0c98-4946-9d6b-eec3f0db56d6": {
-    "original": "Gemiddeld",
-    "translation": "Gemiddeld"
-  },
-  "cc4f0640-cdfb-473f-9f94-cc6e11b361ae": {
-    "original": "Voor een API-key die heel regelmatig de API moet aanroepen. Risico op overbelasting als de API niet correct is geimplementeerd en zware requests op korte tijd afvuurt.",
-    "translation": "Voor een API-key die heel regelmatig de API moet aanroepen. Risico op overbelasting als de API niet correct is geimplementeerd en zware requests op korte tijd afvuurt."
-  },
-  "c1bfbd59-c12d-43e2-88f7-aa08798d1ea6": {
-    "original": "Maximaal 10 req/s; 240 requests per 2 minuten; 2.000 requests per uur; 14.400 requests per dag",
-    "translation": "Maximaal 10 req/s; 240 requests per 2 minuten; 2.000 requests per uur; 14.400 requests per dag"
-  },
-  "98469c78-6bd6-4354-b7d2-07e5b48aec12": {
-    "original": "Hoog",
-    "translation": "Hoog"
   },
   "a379312a-007d-46a2-9533-33c15c524504": {
     "original": "Voor een API-key die heel intensief gebruik moet maken van de API. Risico op overbelasting als de API niet correct is geimplementeerd en zware requests op korte tijd afvuurt.",
@@ -4158,10 +3522,6 @@
   "769aee89-b291-4c53-90ec-16539bca5a33": {
     "original": "Vul een naam in",
     "translation": "Veuillez saisir un nom"
-  },
-  "a5b3b5e6-70c0-4818-9548-01f810477cd2": {
-    "original": "API-keys",
-    "translation": "API-keys"
   },
   "af0a4e82-1872-4c61-9b80-fbfb52ef1278": {
     "original": "Maak een nieuwe key aan.",
@@ -4206,10 +3566,6 @@
   "b1d528c7-1e05-48de-aadd-d30c28581bf2": {
     "original": "Token",
     "translation": "Jeton"
-  },
-  "da7c1f63-529d-47c6-8d2d-87e5cb98a411": {
-    "original": "API-key",
-    "translation": "API-key"
   },
   "7f721fa4-ed71-42d7-a92d-6a11abc3cb0f": {
     "original": "Kies voor welke inschrijvingen je dit document wilt aanmaken",
@@ -4414,10 +3770,6 @@
   "516c5273-3f27-41e2-9b2b-0ffb94501ca1": {
     "original": "Ga naar volgende document",
     "translation": "Aller au document suivant"
-  },
-  "f4b5c997-f9ed-4ba9-aabd-ac1d5fa37dfb": {
-    "original": "Document",
-    "translation": "Document"
   },
   "4efa0c2b-f5af-48fc-9fb3-37ccbdf1ca24": {
     "original": "Reset",
@@ -4839,10 +4191,6 @@
     "original": "Transactiekosten die in mindering worden gebracht door de betaalprovider",
     "translation": "Frais de transaction déduits par le fournisseur de paiement"
   },
-  "079c3c5d-b816-4adf-9287-6f5352a2cd81": {
-    "original": "Stripe",
-    "translation": "Stripe"
-  },
   "e8ef97dc-5470-4d36-9c4a-a9c2ec92b7e2": {
     "original": "Account ID",
     "translation": "ID de compte"
@@ -5239,10 +4587,6 @@
     "original": "Activeer test-modus voor betalingen",
     "translation": "Activer le mode test pour les paiements"
   },
-  "8cdbbc91-88ab-4d25-8f42-b34369e959f0": {
-    "original": "Single-Sign-On",
-    "translation": "Single-Sign-On"
-  },
   "5573d401-88aa-4221-9ed7-44380d970177": {
     "original": "Webshop auth",
     "translation": "Authentification boutique en ligne"
@@ -5258,10 +4602,6 @@
   "a31eaafb-e2d1-4e41-8fa1-1c58a9bd585f": {
     "original": "Koppel betaalaccounts via",
     "translation": "Lier des comptes de paiement via"
-  },
-  "8f39177b-f214-4f23-82ab-329c66ae731a": {
-    "original": "Payconiq",
-    "translation": "Payconiq"
   },
   "e06250b5-6d74-4690-8837-a4455aa9e44d": {
     "original": "om online betalingen te accepteren.",
@@ -5290,10 +4630,6 @@
   "88b65545-d735-450d-9441-ede25969f5f9": {
     "original": "Handelsnaam",
     "translation": "Nom commercial"
-  },
-  "6e40269e-10f8-4c19-804f-dac6ba75959b": {
-    "original": "IBAN",
-    "translation": "IBAN"
   },
   "6f442433-dc3a-4500-918a-65e5776307fc": {
     "original": "Volledig",
@@ -5426,10 +4762,6 @@
   "d54cbd0f-91c6-484a-b071-5161d4060dd7": {
     "original": "Key",
     "translation": "Clé"
-  },
-  "1c6a928f-1e53-421e-939f-a54959b45769": {
-    "original": "Secret",
-    "translation": "Secret"
   },
   "f45871aa-7723-42c3-9781-f4f9b8d7250a": {
     "original": "Personaliseren",
@@ -5783,10 +5115,6 @@
     "original": "Naam van deze sponsor",
     "translation": "Nom de ce sponsor"
   },
-  "46eb81ad-4f6c-4c29-9741-ddcb0003a208": {
-    "original": "Sponsors",
-    "translation": "Sponsors"
-  },
   "8a7bbc23-3158-4b70-a803-bf319a3984fc": {
     "original": "Het is mogelijk om het logo van sponsors op je tickets te plaatsen.",
     "translation": "Il est possible de placer le logo des sponsors sur vos tickets."
@@ -6111,17 +5439,9 @@
     "original": "Gebruik opeenvolgende bestelnummers",
     "translation": "Utiliser des numéros de commande consécutifs"
   },
-  "cd7dec4c-5183-4c18-b447-b4095436bb5c": {
-    "original": "1, 2, 3, ...",
-    "translation": "1, 2, 3, ..."
-  },
   "e9d7b5ad-5938-4e96-a089-582854d0d9a8": {
     "original": "Gebruik willekeurige bestelnummers",
     "translation": "Utiliser des numéros de commande aléatoires"
-  },
-  "8982ff9e-7905-4b82-9e9c-cb37a6a9481e": {
-    "original": "964824335, 116455337, 228149715, ...",
-    "translation": "964824335, 116455337, 228149715, ..."
   },
   "290f637c-9313-44c1-8e4f-4e5922e9768a": {
     "original": "Je kan dit enkel wijzigen als je alle bestellingen verwijdert.",
@@ -6355,10 +5675,6 @@
     "original": "artikels",
     "translation": "articles"
   },
-  "b40d200c-4265-4d58-a7f4-7c2498b062b9": {
-    "original": "Tickets",
-    "translation": "Tickets"
-  },
   "22b99054-a114-4393-8127-5ec9fbc2010f": {
     "original": "Artikels",
     "translation": "Articles"
@@ -6414,10 +5730,6 @@
   "ca70e639-c7f8-40d7-9054-9c01711d3f5b": {
     "original": "Verwijder deze code",
     "translation": "Supprimer ce code"
-  },
-  "55a6f957-af81-40b3-8c83-2096f22044c8": {
-    "original": "Code",
-    "translation": "Code"
   },
   "93258b4f-4bbd-40bb-a0d4-7e1112f7aeaf": {
     "original": "Bv. BLACK-FRIDAY",
@@ -6550,10 +5862,6 @@
   "049a16f3-a8dd-485e-9696-afa9fdb511b8": {
     "original": "en verder",
     "translation": "et plus"
-  },
-  "f64ba2c0-b20e-4aa5-94d2-ff2a3173ee51": {
-    "original": "Label",
-    "translation": "Label"
   },
   "261191bf-7565-4444-9e4c-7fffe5f7b919": {
     "original": "Onbekend artikel",
@@ -6795,10 +6103,6 @@
     "original": "Meer of minkost",
     "translation": "Plus ou moins-value"
   },
-  "ef6ac7e5-de7e-4e2e-802f-de730294f05d": {
-    "original": "+ 0 euro",
-    "translation": "+ 0 euro"
-  },
   "5da36b5d-903c-415e-a5bc-10c8a05038ae": {
     "original": "Prijskeuze toevoegen",
     "translation": "Ajouter un choix de prix"
@@ -6810,14 +6114,6 @@
   "bf57e599-cac3-4b3c-a115-470efa0f3dea": {
     "original": "Verwijder deze prijskeuze",
     "translation": "Supprimer ce choix de prix"
-  },
-  "de971042-551d-43d2-ab47-e76132156887": {
-    "original": "Ticket",
-    "translation": "Ticket"
-  },
-  "325f85b1-ff89-4bde-a2df-1328c8ea4a3a": {
-    "original": "Voucher",
-    "translation": "Voucher"
   },
   "e1f32f18-acac-4339-883c-09897ffbd691": {
     "original": "Stuks",
@@ -7094,10 +6390,6 @@
   "f4155ecb-b961-4b07-8c4a-69e2d2518a52": {
     "original": "Command(⌘)",
     "translation": "Commande(⌘)"
-  },
-  "cdfd1cea-e2d5-41bf-80f7-bc62303b6c70": {
-    "original": "Ctrl",
-    "translation": "Ctrl"
   },
   "f1e7568d-b058-4a73-a48c-f2636750d330": {
     "original": "en/of Shift(⇧) ingedrukt om meerdere stoelen te selecteren. Gebruik de Enter(⏎) toetst om snel stoelen toe te voegen. Gebruik Backspace(⌫) om een stoel of rij te verwijderen. Gebruik de pijltjestoetsen om snel te navigeren.",
@@ -7434,10 +6726,6 @@
   "d6972a60-97a1-4065-83f2-95638c866efd": {
     "original": "Dubbele boekingen gedetecteerd voor plaatsen",
     "translation": "Doubles réservations détectées pour les places"
-  },
-  "33adbc14-dd1a-43a7-a015-98a3322b58c5": {
-    "original": "Info",
-    "translation": "Info"
   },
   "16d29c4e-f292-4a77-a995-c4fa9ae76200": {
     "original": "Geannuleerde bestellingen of verwijderde bestellingen worden niet meegeteld in de statistieken.",
@@ -8511,10 +7799,6 @@
     "original": "Deze pagina is voor administrators",
     "translation": "Cette page est pour les administrateurs"
   },
-  "979af771-f3ab-4105-9478-d8ee14db66f1": {
-    "original": "Single-Sign-On (",
-    "translation": "Single-Sign-On ("
-  },
   "850e99a6-c2c9-4ba9-9159-d3ac3a74de63": {
     "original": "deze",
     "translation": "ce"
@@ -8646,10 +7930,6 @@
   "5d8131bf-38a0-4c8c-b266-e30caa7aa270": {
     "original": "Beperk het gebruik van afbeeldingen in e-mails. Afbeeldingen worden bestraft door spamfilters, en e-mails komen daardoor vaker bij spam terecht.",
     "translation": "Limitez l'utilisation d'images dans les e-mails. Les images sont pénalisées par les filtres anti-spam, et les e-mails se retrouvent donc plus souvent dans les spams."
-  },
-  "780fa99d-7109-4f57-934b-1f4c5643a794": {
-    "original": "https://",
-    "translation": "https://"
   },
   "f7057816-fb9f-42f9-b864-bec9756d07f7": {
     "original": "Vet gedrukte tekst",
@@ -9631,10 +8911,6 @@
     "original": "Inschrijvingen wijzigen",
     "translation": "Modifier les inscriptions"
   },
-  "085e5b60-8c26-49b2-bba3-04dd38b3a891": {
-    "original": "0",
-    "translation": "0"
-  },
   "0b44456e-1338-4468-ba71-5aabc171555f": {
     "original": "Ga naar vorige lid",
     "translation": "Aller au membre précédent"
@@ -9959,10 +9235,6 @@
     "original": "Algemene gegevens",
     "translation": "Informations générales"
   },
-  "612b0f89-4a6e-4616-a50f-6e228daa86c3": {
-    "original": "UiTPAS",
-    "translation": "UiTPAS"
-  },
   "973b8b5e-9c84-4e86-aae8-da7ae1a1ad6a": {
     "original": "Heeft geen automatische rechten",
     "translation": "N’a pas de droits automatiques"
@@ -10246,10 +9518,6 @@
   "df3121cb-c5b1-405a-a34e-fd4d92d468ac": {
     "original": "Als automatische e-mails zijn ingeschakeld wordt de eerste e-mail morgenvroeg verzonden.",
     "translation": "Si les e-mails automatiques sont activés, le premier e-mail sera envoyé demain matin."
-  },
-  "240b3e60-bab9-47d6-bcfb-71e138d2cd2c": {
-    "original": "0 euro",
-    "translation": "0 euro"
   },
   "98148d1f-1c02-49e7-b05d-22276dd1b40c": {
     "original": "Aangemaakt op {date}",
@@ -10747,10 +10015,6 @@
     "original": "Verschuldigd sinds",
     "translation": "Dû depuis"
   },
-  "bfcceb79-e614-4e9c-9fba-0ec2bd3f8f2a": {
-    "original": "1",
-    "translation": "1"
-  },
   "bf30128b-4c99-4a97-b4d2-1a4e62f33f41": {
     "original": "Te betalen tegen*",
     "translation": "À payer pour le*"
@@ -11147,25 +10411,9 @@
     "original": "Voetbal",
     "translation": "Football"
   },
-  "a6621627-ce47-41df-a715-1adda44fa4df": {
-    "original": "Tennis",
-    "translation": "Tennis"
-  },
-  "cc287710-eb24-4b30-827c-20ecccdcb04f": {
-    "original": "Golf",
-    "translation": "Golf"
-  },
   "4b46d657-a991-45bf-b176-6787d37b94d9": {
     "original": "Atletiek",
     "translation": "Athlétisme"
-  },
-  "73da6e39-663b-42f3-b2b5-5c87abe1975b": {
-    "original": "Badminton",
-    "translation": "Badminton"
-  },
-  "b6ca6bd6-3ba1-445c-aefa-396efead493b": {
-    "original": "Hockey",
-    "translation": "Hockey"
   },
   "1a6e956a-aa3c-4e04-8ac4-46d45180d6c9": {
     "original": "Wielrennen",
@@ -11203,10 +10451,6 @@
     "original": "Cultuur",
     "translation": "Culture"
   },
-  "43f4f751-2752-4ecc-9d78-136853852b43": {
-    "original": "LGBTQ+",
-    "translation": "LGBTQ+"
-  },
   "fc00d7a3-4ff4-4355-aef0-c73af12218f1": {
     "original": "Politiek",
     "translation": "Politique"
@@ -11222,10 +10466,6 @@
   "f768ec1f-c743-474a-b6c1-e05271c58a3c": {
     "original": "Jeugd",
     "translation": "Jeunesse"
-  },
-  "77a5d5d5-a1c6-476b-8fbf-354a40ca5fcb": {
-    "original": "Sport",
-    "translation": "Sport"
   },
   "735e5a5b-5858-40d7-b195-9113ca6bf98c": {
     "original": "Overige",
@@ -11282,14 +10522,6 @@
   "5e93b172-67cf-4c24-a536-87841f9f691d": {
     "original": "domiciliëring",
     "translation": "domiciliation"
-  },
-  "b96a2898-7229-4397-99f1-2ffd761982f3": {
-    "original": "Bancontact",
-    "translation": "Bancontact"
-  },
-  "aa5a52fe-dd8e-4d28-9dcc-a730146e7972": {
-    "original": "iDEAL",
-    "translation": "iDEAL"
   },
   "8da866ba-9114-4633-874c-99c2ea891bb8": {
     "original": "kredietkaart",
@@ -11455,10 +10687,6 @@
     "original": "Zetel",
     "translation": "Siège"
   },
-  "95708a22-4743-4f04-aa24-fee0220da923": {
-    "original": "Zone",
-    "translation": "Zone"
-  },
   "2fd98822-82eb-4f50-9396-5ddf9aa54a33": {
     "original": "e-mailadressen",
     "translation": "adresses e-mail"
@@ -11542,34 +10770,6 @@
   "08b4f877-40eb-4363-932b-a56a853eaf30": {
     "original": "De betaalmethodes {methods} werden nog niet door Stripe geactiveerd. Kijk na of alle informatie in je Stripe dashboard volledig ingevuld werd.",
     "translation": "Les modes de paiement {methods} n'ont pas encore été activés par Stripe. Vérifiez si toutes les informations de votre tableau de bord Stripe sont complètes."
-  },
-  "13109d4e-6427-4d9b-a0a2-c01de76282c1": {
-    "original": "Chirojeugd Vlaanderen",
-    "translation": "Chirojeugd Vlaanderen"
-  },
-  "bea5dd9d-12e8-4f85-8bea-133467c3a737": {
-    "original": "Scouts & Gidsen Vlaanderen",
-    "translation": "Scouts & Gidsen Vlaanderen"
-  },
-  "b33fd0c6-4a54-469e-b108-d75f4d8c613d": {
-    "original": "KSA",
-    "translation": "KSA"
-  },
-  "552906c2-db14-4bd8-b499-c29f61f57472": {
-    "original": "KLJ",
-    "translation": "KLJ"
-  },
-  "8f4d1891-4198-4133-8bcb-d90437affe83": {
-    "original": "FOS Open Scouting",
-    "translation": "FOS Open Scouting"
-  },
-  "0979101f-70e9-4b59-a75e-43c9ee3b237f": {
-    "original": "Jeugd Rode Kruis",
-    "translation": "Jeugd Rode Kruis"
-  },
-  "5330841f-d2b1-4014-bbea-1b3a8a68faa3": {
-    "original": "JNM",
-    "translation": "JNM"
   },
   "2ec07f88-b979-41a0-a948-63675a8dbcd6": {
     "original": "Andere / geen",
@@ -11667,10 +10867,6 @@
     "original": "Zwitserland",
     "translation": "Suisse"
   },
-  "978520d9-7210-414a-82fd-9c04697b1a08": {
-    "original": "Afghanistan",
-    "translation": "Afghanistan"
-  },
   "21c6085b-3ed3-4922-a438-e06364ad70f6": {
     "original": "Tsjechië",
     "translation": "République tchèque"
@@ -11682,10 +10878,6 @@
   "86f87cca-4ed5-40ac-a03d-33a6ffef7466": {
     "original": "Oostenrijk",
     "translation": "Autriche"
-  },
-  "e79825e3-975a-4da9-8425-77beac42a41f": {
-    "original": "Portugal",
-    "translation": "Portugal"
   },
   "4fd81137-ac48-4bec-b6f1-4fc1b55b7b5d": {
     "original": "Ander land",
@@ -11895,10 +11087,6 @@
     "original": "Klik op de volgende pagina op 'Kies een andere app' als je met een andere app dan Payconiq by Bancontact wilt betalen.",
     "translation": "Sur la page suivante, cliquez sur « Choisir une autre application » si vous souhaitez payer avec une application autre que Payconiq by Bancontact."
   },
-  "a4dde8e6-d0f7-4ad6-b880-cf5467771770": {
-    "original": "Payconiq by Bancontact",
-    "translation": "Payconiq by Bancontact"
-  },
   "e8247764-d10a-4c54-97e2-acca397b8ac9": {
     "original": "Betaling in verwerking",
     "translation": "Paiement en cours de traitement"
@@ -11991,29 +11179,13 @@
     "original": "Je moet niet noodzakelijk overschrijven via een app of één van deze apps. Dit is puur voor het gemak, het gaat hier om een gewone overschrijving.",
     "translation": "Vous n'êtes pas obligé d'effectuer un virement via une application ou l'une de ces applications. Ceci est uniquement pour plus de commodité, il s'agit d'un virement ordinaire."
   },
-  "a2f52798-c27f-4904-b651-2bec3aeebf21": {
-    "original": "KBC Mobile",
-    "translation": "KBC Mobile"
-  },
   "e340ffec-98ed-4951-a5e0-dd98f2949229": {
     "original": "Gegevens worden automatisch ingevuld",
     "translation": "Les données sont automatiquement complétées"
   },
-  "9f6b5880-d02b-46a8-9b83-fc1e5320defe": {
-    "original": "ING Banking",
-    "translation": "ING Banking"
-  },
   "d8a84fa6-ddc2-4518-8d12-3608ab830a15": {
     "original": "Kopieer zelf manueel de gegevens bovenaan",
     "translation": "Copiez manuellement les données ci-dessus"
-  },
-  "0b894cff-2ae3-4954-a71c-7ccd1280668a": {
-    "original": "Belfius Mobile",
-    "translation": "Belfius Mobile"
-  },
-  "21b523b8-b6f1-4b21-ba56-0f9640670339": {
-    "original": "Easy Banking App (BNP Paribas Fortis)",
-    "translation": "Easy Banking App (BNP Paribas Fortis)"
   },
   "5b576dbc-9ed9-4faf-8bf7-9cf95c2b6dbe": {
     "original": "Argenta-app",
@@ -12715,14 +11887,6 @@
     "original": "Webshop met tickets",
     "translation": "Boutique en ligne avec billets"
   },
-  "cbefe240-5d20-4b9a-8cbb-29286e3dae4d": {
-    "original": "DNS",
-    "translation": "DNS"
-  },
-  "cb57875f-a2b7-4076-8f32-a9a970f68907": {
-    "original": "Drip",
-    "translation": "Drip"
-  },
   "b47abc59-c79d-4d69-b961-de80e562e8f2": {
     "original": "Excel export",
     "translation": "Exportation Excel"
@@ -12899,10 +12063,6 @@
     "original": "Mama",
     "translation": "Maman"
   },
-  "2f92cf37-00f5-41fe-bf7a-f309c38eed10": {
-    "original": "Papa",
-    "translation": "Papa"
-  },
   "5e104255-3930-45ab-9a4b-1bd2135259ec": {
     "original": "Plusmama",
     "translation": "Belle-mère"
@@ -12926,10 +12086,6 @@
   "33557539-2f23-4243-9b81-20065d19e9d8": {
     "original": "Pleegouder",
     "translation": "Parent adoptif"
-  },
-  "e13af8ee-f442-4a98-b3e6-6f3d84fba30c": {
-    "original": "Via",
-    "translation": "Via"
   },
   "d0c91429-b8c8-4142-b95f-0bc249b9506c": {
     "original": "Eén van de openstaande bedragen is niet meer beschikbaar.",
@@ -13651,10 +12807,6 @@
     "original": "één stuk",
     "translation": "un article"
   },
-  "8096d9e3-1bb3-4015-911d-9e13388e8bfd": {
-    "original": "tickets",
-    "translation": "tickets"
-  },
   "7d5de81e-9ae9-4ec6-86e1-844ca6a75fb1": {
     "original": "stuks",
     "translation": "articles"
@@ -13702,10 +12854,6 @@
   "e8962830-bc23-4af4-9909-d665a37f805d": {
     "original": "derde",
     "translation": "troisième"
-  },
-  "8abddd1b-0359-42fa-ab4d-707f39d84852": {
-    "original": "{number}e",
-    "translation": "{number}e"
   },
   "77477737-3b6b-4e1b-9fd8-006981cf53eb": {
     "original": "één {singular}",
@@ -13843,10 +12991,6 @@
     "original": "om",
     "translation": "à"
   },
-  "b6185496-deab-4569-906f-c636e625bcd1": {
-    "original": "todo",
-    "translation": "todo"
-  },
   "3024d542-4987-4487-ae83-6593036a7e1d": {
     "original": "Aansluitingen aanrekenen",
     "translation": "Calcul des connexions"
@@ -13874,10 +13018,6 @@
   "2f140e22-4940-453f-8f49-871a69f0776e": {
     "original": "Documenten",
     "translation": "Documents"
-  },
-  "9464cf2b-10a9-4690-8ab6-2e3d2f3e9b9d": {
-    "original": "Document",
-    "translation": "Document"
   },
   "e8340220-a719-4ab8-82ff-627fce627235": {
     "original": "Domeinnaam kiezen",
@@ -14014,10 +13154,6 @@
   "19bd9ed4-585f-4cc5-a4ea-643f00481b77": {
     "original": "Producten",
     "translation": "Produits"
-  },
-  "32e049b4-acd6-4d77-a5b8-0632111f2445": {
-    "original": "Tickets",
-    "translation": "Tickets"
   },
   "e0f1bd7f-332f-4c99-adab-35a7e7481cf9": {
     "original": "Bestelling #",
@@ -14387,10 +13523,6 @@
     "original": "Je moet akkoord gaan met de voorwaarden voor je een account kan aanmaken.",
     "translation": "Vous devez accepter les conditions pour pouvoir créer un compte."
   },
-  "e1193431-b95a-4a8a-94b2-8659005dcb77": {
-    "original": "TabBarController",
-    "translation": "TabBarController"
-  },
   "9120db75-8638-4cab-9dca-8bd81390149e": {
     "original": "Developers",
     "translation": "Développeurs"
@@ -14398,10 +13530,6 @@
   "40c0b334-e007-4fc1-88e5-b38707175d45": {
     "original": "Standaard",
     "translation": "Standard"
-  },
-  "8bc22ee1-303e-4b40-94dc-72c5869abdbc": {
-    "original": "Production",
-    "translation": "Production"
   },
   "cab2694d-8d0f-44d0-9819-d2d2c4148b22": {
     "original": "Staging",
@@ -14619,10 +13747,6 @@
     "original": "Totaal",
     "translation": "Total"
   },
-  "4070dda9-b556-49cd-ba17-aad535240835": {
-    "original": "todo",
-    "translation": "todo"
-  },
   "47f56c92-fcfb-4ef4-8d0b-fb0c959fb624": {
     "original": "Oops! Je gebruikt een oude versie van de applicatie om in te schrijven. Herlaad de website en verwijder indien nodig de cache van jouw browser.",
     "translation": "Oups ! Vous utilisez une ancienne version de l’application pour vous inscrire. Rechargez le site Web et supprimez le cache de votre navigateur si nécessaire."
@@ -14766,10 +13890,6 @@
   "bdb23973-b215-447f-8077-f1e2c0bc3034": {
     "original": "Meldingen",
     "translation": "Notifications"
-  },
-  "29360811-3663-496c-8d8f-c9fdf9467a74": {
-    "original": "ID",
-    "translation": "ID"
   },
   "394aafa1-811b-4ed4-bfc6-c12ae59ff9b6": {
     "original": "Naam activiteit",
@@ -14959,10 +14079,6 @@
     "original": "Lokalen",
     "translation": "Salles"
   },
-  "f97ad8c1-31d2-4b61-9e09-3be86eaeba08": {
-    "original": "Type",
-    "translation": "Type"
-  },
   "d4dbb3ee-ab9d-4231-be12-945b7d156900": {
     "original": "Betalingen",
     "translation": "Paiements"
@@ -15122,10 +14238,6 @@
   "b9c7a57e-6dc1-48a2-bcba-a26c5f59555e": {
     "original": "Schuldenaar",
     "translation": "Débiteur"
-  },
-  "a0dfe596-0670-48bc-a5f3-2c9308c70a17": {
-    "original": "type",
-    "translation": "type"
   },
   "9f5ee239-d01b-4ee1-961b-2e3224489781": {
     "original": "Je hebt geen toegang tot deze betaling",
@@ -15287,10 +14399,6 @@
     "original": "Besteldatum",
     "translation": "Date de commande"
   },
-  "2bc71d9a-c8d0-4f55-bf68-5dbb896d1f5b": {
-    "original": "E-mail",
-    "translation": "E-mail"
-  },
   "eee19242-20ee-4e5c-b2ff-ba122ec6fc06": {
     "original": "GSM-nummer",
     "translation": "Numéro GSM"
@@ -15442,10 +14550,6 @@
   "031cfca3-ca9a-44cc-95b5-03c81948f765": {
     "original": "Documentatie",
     "translation": "Documentation"
-  },
-  "630ab37a-85c8-4bbd-a281-b87e82a976d5": {
-    "original": "Feedback",
-    "translation": "Feedback"
   },
   "95bb5f36-a709-4724-bf21-9793911af5d6": {
     "original": "Meer",
@@ -15895,10 +14999,6 @@
     "original": "Sterk",
     "translation": "Fort"
   },
-  "168c5bc7-2a5e-4bb9-99c0-b91905e5a193": {
-    "original": "euro",
-    "translation": "euro"
-  },
   "b2933d54-b2ec-4fde-965c-7d62de768a1e": {
     "original": "Optioneel.",
     "translation": "Optionnel."
@@ -15970,10 +15070,6 @@
   "4943ece9-450b-4913-a6d8-6834d011a1ee": {
     "original": "Waarschuwing",
     "translation": "Avertissement"
-  },
-  "0456ef2e-5e86-48fa-835c-fd8ec1921f5e": {
-    "original": "Info",
-    "translation": "Info"
   },
   "edf611b8-a969-4861-956f-522c47a948fb": {
     "original": "Opsomming met bolletjes",
@@ -16298,10 +15394,6 @@
   "347113ec-87a8-4dd9-88ea-c151e3f066f0": {
     "original": "tot",
     "translation": "à"
-  },
-  "43d59035-b07a-4f51-8e9b-cd136eb3715c": {
-    "original": "uitpasNumber",
-    "translation": "uitpasNumber"
   },
   "92a1d590-2388-4193-9fac-ad41b6122fe4": {
     "original": "Ouder",
@@ -17299,14 +16391,6 @@
     "original": "Dag Jan,",
     "translation": "Bonjour Jan,"
   },
-  "b115e024-edc7-401b-8e41-2da247822e9e": {
-    "original": "Jan",
-    "translation": "Jan"
-  },
-  "7c619773-33de-451c-9f8e-695e871058bb": {
-    "original": "Jansen",
-    "translation": "Jansen"
-  },
   "46e8393a-144d-477e-9b9e-c79616e4b9a7": {
     "original": "jan.jansen@voorbeeld.com",
     "translation": "jan.jansen@exemple.com"
@@ -17319,29 +16403,9 @@
     "original": "Verstuurder",
     "translation": "Expediteur"
   },
-  "db31945c-b255-4f37-b866-489befc61810": {
-    "original": "Jan Jansens",
-    "translation": "Jan Jansens"
-  },
   "80c2fd05-aba8-4261-bf68-2f2e07ae872b": {
     "original": "https://www.voorbeeld.com/heel-lange-code-waarmee-de-link-beveiligd-wordt",
     "translation": "https://www.exemple.com/code-tres-long-qui-securise-le-lien"
-  },
-  "7afd1f1f-f818-40c9-b872-32d93be3958b": {
-    "original": "Piet Pieters",
-    "translation": "Piet Pieters"
-  },
-  "ce00a7f3-4be9-4da8-833f-e13ff3b3fb14": {
-    "original": "Piet",
-    "translation": "Piet"
-  },
-  "65c9a375-fbca-4a27-9a42-01d49f7f9588": {
-    "original": "Klaas",
-    "translation": "Klaas"
-  },
-  "e028c78a-166d-4531-b03b-99a573f1661b": {
-    "original": "Klaassen",
-    "translation": "Klaassen"
   },
   "c89a6220-9e60-4f0c-9404-d9cb0fc301f7": {
     "original": "https://inschrijven.voorbeeld.com",
@@ -17355,10 +16419,6 @@
     "original": "voorbeeld.com",
     "translation": "exemple.com"
   },
-  "8f9575f3-9787-4fa5-9ddf-dd1fa4103996": {
-    "original": "Bancontact",
-    "translation": "Bancontact"
-  },
   "967a1b0b-88cd-4b95-9008-f0610ed64b24": {
     "original": "Inschrijving van Klaas en Piet",
     "translation": "Inscription de Klaas et Piet"
@@ -17366,10 +16426,6 @@
   "990581a8-e4db-4c33-b36b-4df045f8c294": {
     "original": "Klaas en Piet",
     "translation": "Klaas et Piet"
-  },
-  "7c04a4f3-25c5-4663-9833-87a7aecbf0b9": {
-    "original": "Demoshop",
-    "translation": "Demoshop"
   },
   "81dced9c-c5aa-4c49-b030-31363d3847db": {
     "original": "Er zijn nog maar {count} stuks beschikbaar van {name}",
@@ -17467,10 +16523,6 @@
     "original": "De keuzemogelijkheid {name} is uitverkocht",
     "translation": "L'option {name} est épuisée"
   },
-  "e122d6c9-a452-4c70-9868-f53c2520aedc": {
-    "original": "todo",
-    "translation": "todo"
-  },
   "b9bac60d-1fd8-43e7-9c9d-4b9b5227f9d6": {
     "original": "Vul ontbrekende gegevens aan van {member}",
     "translation": "Veuillez compléter les données manquantes de {member}"
@@ -17482,14 +16534,6 @@
   "69385e1a-413f-4583-9061-67072d0742b9": {
     "original": "Voeg e-mailadres toe van {member}",
     "translation": "Ajouter l'adresse e-mail de {member}"
-  },
-  "f7999a55-e73a-49c4-ac9f-f5030d96ba43": {
-    "original": "todo",
-    "translation": "todo"
-  },
-  "d7fdebd4-7c3c-4316-b862-7ed777ff36ad": {
-    "original": "todo",
-    "translation": "todo"
   },
   "04ff85c0-eb98-46b8-975b-8fd136ddc49a": {
     "original": "Een {name} moet minimum {days} duren",
@@ -17555,17 +16599,9 @@
     "original": "Het maximum voor de keuzemogelijkheid {name} is overschreden",
     "translation": "Le maximum pour l'option {name} est dépassé"
   },
-  "96e61729-ea9c-45bf-82da-56e6a92e6b91": {
-    "original": "todo",
-    "translation": "todo"
-  },
   "77f48757-5c36-47a6-8ce2-d676eef1e778": {
     "original": "Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. Heeft {member} geen Belgische nationaliteit,",
     "translation": "Le numéro national est utilisé pour établir les attestations fiscales. Si {member} n'a pas la nationalité belge,"
-  },
-  "269872df-ab70-4eae-b671-ab9246162d4e": {
-    "original": "todo",
-    "translation": "todo"
   },
   "ab858fd6-4451-4d88-869e-be425a661169": {
     "original": "Laag",
@@ -17783,10 +16819,6 @@
     "original": "Groep",
     "translation": "Groupe"
   },
-  "405a811e-ebb1-4948-84cd-8fb5860104e6": {
-    "original": "Ravot",
-    "translation": "Ravot"
-  },
   "c43f09fa-5f39-4e1a-bfbf-80a0d2d4bd6c": {
     "original": "Zoek een groep",
     "translation": "Rechercher un groupe"
@@ -17894,10 +16926,6 @@
   "cd6e3548-aea1-4f74-9c66-b1fa43de6438": {
     "original": "Ticketverkoop via Ravot",
     "translation": "Vente de billets via Ravot"
-  },
-  "68914509-aa54-40c7-9f53-7b8a02149198": {
-    "original": "Ravot",
-    "translation": "Ravot"
   },
   "d54c9b23-2d3c-49cd-b1fc-7e821d36fd41": {
     "original": "Inloggen bij KSA",
@@ -18231,10 +17259,6 @@
     "original": "E-mail die wordt verzonden naar de indiener (en de ingestelde contactpersonen van de groep) als een kampmelding wordt afgekeurd",
     "translation": "E-mail envoyé au déposant (et aux personnes de contact du groupe configurées) lorsqu'une déclaration de camp est refusée"
   },
-  "aeace79f-c772-4944-8d1d-f92eb519267f": {
-    "original": "KSA Demo",
-    "translation": "KSA Demo"
-  },
   "6f77926b-801a-477d-8254-78166ca8e6be": {
     "original": "KSA Demo op Ravot",
     "translation": "KSA Demo sur Ravot"
@@ -18242,14 +17266,6 @@
   "e07bc7a1-92c0-48fc-91f3-46e12573ee03": {
     "original": "Naam groep",
     "translation": "Nom du groupe"
-  },
-  "e60df757-6546-41c2-b3d3-599df08f34b6": {
-    "original": "KSA Demo",
-    "translation": "KSA Demo"
-  },
-  "16ba3d97-5943-451d-92b5-0bf21555f7ae": {
-    "original": "KSA Demo",
-    "translation": "KSA Demo"
   },
   "209f9f13-4897-4310-95eb-f436987b8ba7": {
     "original": "Kijk hieronder na of alle functies toegekend zijn. Om een functie toe te kennen zorg je er eerst voor dat de persoon is ingeschreven in Ravot, daarna kan je functies toekennen door het lid open te klikken in het tabblad ‘Leden’. Daar kan je met de rechtermuisknop op een lid klikken en \"Functies bewerken\" kiezen.",
@@ -18855,10 +17871,6 @@
     "original": "Minimum {min} vereist",
     "translation": "Minimum {min} requis"
   },
-  "6dde271d-4108-48ce-a433-4ad80478c4ef": {
-    "original": "Maximum {max}",
-    "translation": "Maximum {max}"
-  },
   "7e492b8b-771a-48cd-b10a-2d12fb0cb525": {
     "original": "Gereed",
     "translation": "Prêt"
@@ -19030,10 +18042,6 @@
   "0302eaa0-ce2a-4ef0-b652-88b26b9c53e9": {
     "original": "Exporteren naar Excel",
     "translation": "Exporter vers Excel"
-  },
-  "8daf57de-69cf-48fe-b09b-772c54473184": {
-    "original": "ID",
-    "translation": "ID"
   },
   "70de758a-58c5-45ce-8cbd-6a984069cd1b": {
     "original": "Indiening",
@@ -19207,10 +18215,6 @@
     "original": "Achternaam",
     "translation": "Nom"
   },
-  "ccb47323-6aa7-4f37-a03c-848ed47eb412": {
-    "original": "E-mail",
-    "translation": "E-mail"
-  },
   "eecb4cc5-f807-4325-8083-1fe893756ce4": {
     "original": "Lokalen",
     "translation": "Locaux"
@@ -19218,10 +18222,6 @@
   "179c8dd9-2719-41a9-ad5f-11aab6e4a1c3": {
     "original": "Naam gebouw",
     "translation": "Nom du bâtiment"
-  },
-  "a3765fff-0634-4ffe-a726-005fd8ba5dcd": {
-    "original": "Types",
-    "translation": "Types"
   },
   "cbe7db4a-b65b-452b-a5d2-d369182fd28f": {
     "original": "Titel",
@@ -19327,21 +18327,9 @@
     "original": "Wachtwoord",
     "translation": "Mot de passe"
   },
-  "af5f50da-3290-44bd-a104-896231e6ea08": {
-    "original": "Google",
-    "translation": "Google"
-  },
-  "662467b7-da51-4fe2-bff4-784c8f028e58": {
-    "original": "Single-Sign-On (SSO)",
-    "translation": "Single-Sign-On (SSO)"
-  },
   "05e6464f-8db4-4c12-9bfe-527afc83d412": {
     "original": "Gegevensverzameling",
     "translation": "Collecte de données"
-  },
-  "cce92c4c-1cdf-4a22-9f1a-89f888046cde": {
-    "original": "E-mails",
-    "translation": "E-mails"
   },
   "7766ee8a-cd92-4d6f-a3fa-f79504fbcdda": {
     "original": "E-mailadressen",
@@ -19386,10 +18374,6 @@
   "f2d84e17-1901-4d6b-98e2-228d670aead7": {
     "original": "De aanpassingen zijn opgeslagen",
     "translation": "Les modifications ont été enregistrées"
-  },
-  "d101ec4a-219f-4f23-afa0-e8dc4862c354": {
-    "original": "Logo",
-    "translation": "Logo"
   },
   "06c25477-62cb-45d0-b00d-dbe55af9947c": {
     "original": "Let op: het logo van de app in de AppStores moet via een app-update aangepast worden.",
@@ -19499,10 +18483,6 @@
     "original": "Geen automatische aansluiting",
     "translation": "Pas de connexion automatique"
   },
-  "e0a54e0c-03b3-43c6-b4ca-962c5b1d6772": {
-    "original": "Minimum",
-    "translation": "Minimum"
-  },
   "9db0c34d-8632-4b5c-8dc5-88cc6772baf8": {
     "original": "Activiteiten die vallen binnen dit bereik moeten voldoen aan de deadline.",
     "translation": "Les activités qui entrent dans cette fourchette doivent respecter la date limite."
@@ -19542,5 +18522,745 @@
   "69551005-512c-4240-8e20-fd546cefafaa": {
     "original": "meer informatie na over hoe je een vragenlijst kan instellen.",
     "translation": "plus d'informations sur la façon de configurer un questionnaire."
+  },
+  "6b3555a2-ace4-4f37-a1fd-18921552f2b5": {
+    "original": "stamhoofd.be",
+    "translation": "chef.be"
+  },
+  "ccfc0566-2fc4-4c0a-b1da-c3059cad6586": {
+    "original": "www.stamhoofd.be",
+    "translation": "www.chef.be"
+  },
+  "edac937d-5eda-445e-8bba-2c2b353d3f27": {
+    "original": "klachten@stamhoofd.be",
+    "translation": "plaintes@chef.be"
+  },
+  "59b85264-c4c3-4cf6-8923-9b43282b2787": {
+    "original": "hallo@stamhoofd.be",
+    "translation": "bonjour@chef.be"
+  },
+  "5670bc42-cf94-46b6-9ce0-7cdc4ffbb4d9": {
+    "original": "simon@stamhoofd.be",
+    "translation": "jean@chef.be"
+  },
+  "bb910a6c-ec64-46d8-bebb-c3b4312bbfb4": {
+    "original": "Jan Janssens",
+    "translation": "Jean Janssen"
+  },
+  "0c3689c1-01f8-455a-a9b0-8f766c03b2d3": {
+    "original": "+32 470 12 34 56",
+    "translation": "+32 470 12 34 56"
+  },
+  "bf20a769-772d-46b2-9b48-2ea29c96f113": {
+    "original": "Via",
+    "translation": "Via"
+  },
+  "4a07f8e5-c16e-4706-9387-9d3ded9e2b3c": {
+    "original": "Type",
+    "translation": "Type"
+  },
+  "70ee9a44-6cd7-49a1-9852-8519c23ec13a": {
+    "original": "Via Buckaroo",
+    "translation": "Via Buckaroo"
+  },
+  "4db6cde7-274f-4202-9351-3e9ce82794c1": {
+    "original": "Via Mollie",
+    "translation": "Via Mollie"
+  },
+  "f5fc5d6b-49ef-4b3d-80b7-90e1f81220fa": {
+    "original": "Buckaroo",
+    "translation": "Buckaroo"
+  },
+  "b8cf0b1f-04c4-4a85-9a19-027a5326fd11": {
+    "original": "Mollie",
+    "translation": "Mollie"
+  },
+  "40abbf9c-2dd3-471a-a699-f6af656feb5e": {
+    "original": "Rate limits",
+    "translation": "Limites de débit"
+  },
+  "a5b3b5e6-70c0-4818-9548-01f810477cd2": {
+    "original": "API-keys",
+    "translation": "Clés API"
+  },
+  "da7c1f63-529d-47c6-8d2d-87e5cb98a411": {
+    "original": "API-key",
+    "translation": "Clé API"
+  },
+  "f4b5c997-f9ed-4ba9-aabd-ac1d5fa37dfb": {
+    "original": "Document",
+    "translation": "Document"
+  },
+  "079c3c5d-b816-4adf-9287-6f5352a2cd81": {
+    "original": "Stripe",
+    "translation": "Stripe"
+  },
+  "8cdbbc91-88ab-4d25-8f42-b34369e959f0": {
+    "original": "Single-Sign-On",
+    "translation": "Authentification unique"
+  },
+  "8f39177b-f214-4f23-82ab-329c66ae731a": {
+    "original": "Payconiq",
+    "translation": "Payconiq"
+  },
+  "6e40269e-10f8-4c19-804f-dac6ba75959b": {
+    "original": "IBAN",
+    "translation": "IBAN"
+  },
+  "1c6a928f-1e53-421e-939f-a54959b45769": {
+    "original": "Secret",
+    "translation": "Secret"
+  },
+  "46eb81ad-4f6c-4c29-9741-ddcb0003a208": {
+    "original": "Sponsors",
+    "translation": "Sponsors"
+  },
+  "cd7dec4c-5183-4c18-b447-b4095436bb5c": {
+    "original": "1, 2, 3, ...",
+    "translation": "1, 2, 3, ..."
+  },
+  "8982ff9e-7905-4b82-9e9c-cb37a6a9481e": {
+    "original": "964824335, 116455337, 228149715, ...",
+    "translation": "964824335, 116455337, 228149715, ..."
+  },
+  "b40d200c-4265-4d58-a7f4-7c2498b062b9": {
+    "original": "Tickets",
+    "translation": "Tickets"
+  },
+  "55a6f957-af81-40b3-8c83-2096f22044c8": {
+    "original": "Code",
+    "translation": "Code"
+  },
+  "f64ba2c0-b20e-4aa5-94d2-ff2a3173ee51": {
+    "original": "Label",
+    "translation": "Étiquette"
+  },
+  "ef6ac7e5-de7e-4e2e-802f-de730294f05d": {
+    "original": "+ 0 euro",
+    "translation": "+ 0 euro"
+  },
+  "de971042-551d-43d2-ab47-e76132156887": {
+    "original": "Ticket",
+    "translation": "Ticket"
+  },
+  "325f85b1-ff89-4bde-a2df-1328c8ea4a3a": {
+    "original": "Voucher",
+    "translation": "Bon"
+  },
+  "cdfd1cea-e2d5-41bf-80f7-bc62303b6c70": {
+    "original": "Ctrl",
+    "translation": "Ctrl"
+  },
+  "33adbc14-dd1a-43a7-a015-98a3322b58c5": {
+    "original": "Info",
+    "translation": "Info"
+  },
+  "979af771-f3ab-4105-9478-d8ee14db66f1": {
+    "original": "Single-Sign-On (",
+    "translation": "Single-Sign-On ("
+  },
+  "780fa99d-7109-4f57-934b-1f4c5643a794": {
+    "original": "https://",
+    "translation": "https://"
+  },
+  "085e5b60-8c26-49b2-bba3-04dd38b3a891": {
+    "original": "0",
+    "translation": "0"
+  },
+  "612b0f89-4a6e-4616-a50f-6e228daa86c3": {
+    "original": "UiTPAS",
+    "translation": "UiTPAS"
+  },
+  "bfcceb79-e614-4e9c-9fba-0ec2bd3f8f2a": {
+    "original": "1",
+    "translation": "1"
+  },
+  "240b3e60-bab9-47d6-bcfb-71e138d2cd2c": {
+    "original": "0 euro",
+    "translation": "0 euro"
+  },
+  "6dde271d-4108-48ce-a433-4ad80478c4ef": {
+    "original": "Maximum {max}",
+    "translation": "Maximum {max}"
+  },
+  "a4dde8e6-d0f7-4ad6-b880-cf5467771770": {
+    "original": "Payconiq by Bancontact",
+    "translation": "Payconiq par Bancontact"
+  },
+  "a2f52798-c27f-4904-b651-2bec3aeebf21": {
+    "original": "KBC Mobile",
+    "translation": "KBC Mobile"
+  },
+  "9f6b5880-d02b-46a8-9b83-fc1e5320defe": {
+    "original": "ING Banking",
+    "translation": "ING Banking"
+  },
+  "0b894cff-2ae3-4954-a71c-7ccd1280668a": {
+    "original": "Belfius Mobile",
+    "translation": "Belfius Mobile"
+  },
+  "21b523b8-b6f1-4b21-ba56-0f9640670339": {
+    "original": "Easy Banking App (BNP Paribas Fortis)",
+    "translation": "Easy Banking App (BNP Paribas Fortis)"
+  },
+  "a6621627-ce47-41df-a715-1adda44fa4df": {
+    "original": "Tennis",
+    "translation": "Tennis"
+  },
+  "cc287710-eb24-4b30-827c-20ecccdcb04f": {
+    "original": "Golf",
+    "translation": "Golf"
+  },
+  "73da6e39-663b-42f3-b2b5-5c87abe1975b": {
+    "original": "Badminton",
+    "translation": "Badminton"
+  },
+  "b6ca6bd6-3ba1-445c-aefa-396efead493b": {
+    "original": "Hockey",
+    "translation": "Hockey"
+  },
+  "43f4f751-2752-4ecc-9d78-136853852b43": {
+    "original": "LGBTQ+",
+    "translation": "LGBTQ+"
+  },
+  "77a5d5d5-a1c6-476b-8fbf-354a40ca5fcb": {
+    "original": "Sport",
+    "translation": "Sport"
+  },
+  "b96a2898-7229-4397-99f1-2ffd761982f3": {
+    "original": "Bancontact",
+    "translation": "Bancontact"
+  },
+  "aa5a52fe-dd8e-4d28-9dcc-a730146e7972": {
+    "original": "iDEAL",
+    "translation": "iDEAL"
+  },
+  "95708a22-4743-4f04-aa24-fee0220da923": {
+    "original": "Zone",
+    "translation": "Zone"
+  },
+  "13109d4e-6427-4d9b-a0a2-c01de76282c1": {
+    "original": "Chirojeugd Vlaanderen",
+    "translation": "Guides et Scouts de Flandre"
+  },
+  "bea5dd9d-12e8-4f85-8bea-133467c3a737": {
+    "original": "Scouts & Gidsen Vlaanderen",
+    "translation": "Scouts et Guides de Flandre"
+  },
+  "b33fd0c6-4a54-469e-b108-d75f4d8c613d": {
+    "original": "KSA",
+    "translation": "KSA"
+  },
+  "552906c2-db14-4bd8-b499-c29f61f57472": {
+    "original": "KLJ",
+    "translation": "KLJ"
+  },
+  "8f4d1891-4198-4133-8bcb-d90437affe83": {
+    "original": "FOS Open Scouting",
+    "translation": "FOS Open Scouting"
+  },
+  "0979101f-70e9-4b59-a75e-43c9ee3b237f": {
+    "original": "Jeugd Rode Kruis",
+    "translation": "Jeunesse Croix-Rouge"
+  },
+  "5330841f-d2b1-4014-bbea-1b3a8a68faa3": {
+    "original": "JNM",
+    "translation": "JNM"
+  },
+  "978520d9-7210-414a-82fd-9c04697b1a08": {
+    "original": "Afghanistan",
+    "translation": "Afghanistan"
+  },
+  "e79825e3-975a-4da9-8425-77beac42a41f": {
+    "original": "Portugal",
+    "translation": "Portugal"
+  },
+  "cbefe240-5d20-4b9a-8cbb-29286e3dae4d": {
+    "original": "DNS",
+    "translation": "DNS"
+  },
+  "cb57875f-a2b7-4076-8f32-a9a970f68907": {
+    "original": "Drip",
+    "translation": "Drip"
+  },
+  "2f92cf37-00f5-41fe-bf7a-f309c38eed10": {
+    "original": "Papa",
+    "translation": "Papa"
+  },
+  "e13af8ee-f442-4a98-b3e6-6f3d84fba30c": {
+    "original": "Via",
+    "translation": "Via"
+  },
+  "8096d9e3-1bb3-4015-911d-9e13388e8bfd": {
+    "original": "tickets",
+    "translation": "billets"
+  },
+  "8abddd1b-0359-42fa-ab4d-707f39d84852": {
+    "original": "{number}e",
+    "translation": "{number}e"
+  },
+  "b6185496-deab-4569-906f-c636e625bcd1": {
+    "original": "todo",
+    "translation": "tâche"
+  },
+  "9464cf2b-10a9-4690-8ab6-2e3d2f3e9b9d": {
+    "original": "Document",
+    "translation": "Document"
+  },
+  "32e049b4-acd6-4d77-a5b8-0632111f2445": {
+    "original": "Tickets",
+    "translation": "Billets"
+  },
+  "e1193431-b95a-4a8a-94b2-8659005dcb77": {
+    "original": "TabBarController",
+    "translation": "TabBarController"
+  },
+  "8bc22ee1-303e-4b40-94dc-72c5869abdbc": {
+    "original": "Production",
+    "translation": "Production"
+  },
+  "4070dda9-b556-49cd-ba17-aad535240835": {
+    "original": "todo",
+    "translation": "tâche"
+  },
+  "29360811-3663-496c-8d8f-c9fdf9467a74": {
+    "original": "ID",
+    "translation": "ID"
+  },
+  "f97ad8c1-31d2-4b61-9e09-3be86eaeba08": {
+    "original": "Type",
+    "translation": "Type"
+  },
+  "a0dfe596-0670-48bc-a5f3-2c9308c70a17": {
+    "original": "type",
+    "translation": "type"
+  },
+  "2bc71d9a-c8d0-4f55-bf68-5dbb896d1f5b": {
+    "original": "E-mail",
+    "translation": "Courriel"
+  },
+  "630ab37a-85c8-4bbd-a281-b87e82a976d5": {
+    "original": "Feedback",
+    "translation": "Feedback"
+  },
+  "168c5bc7-2a5e-4bb9-99c0-b91905e5a193": {
+    "original": "euro",
+    "translation": "euro"
+  },
+  "0456ef2e-5e86-48fa-835c-fd8ec1921f5e": {
+    "original": "Info",
+    "translation": "Info"
+  },
+  "43d59035-b07a-4f51-8e9b-cd136eb3715c": {
+    "original": "uitpasNumber",
+    "translation": "Numéro de la uitpas"
+  },
+  "b115e024-edc7-401b-8e41-2da247822e9e": {
+    "original": "Jan",
+    "translation": "Jean"
+  },
+  "7c619773-33de-451c-9f8e-695e871058bb": {
+    "original": "Jansen",
+    "translation": "Jansen"
+  },
+  "db31945c-b255-4f37-b866-489befc61810": {
+    "original": "Jan Jansens",
+    "translation": "Jean Jansen"
+  },
+  "7afd1f1f-f818-40c9-b872-32d93be3958b": {
+    "original": "Piet Pieters",
+    "translation": "Jean Dupont"
+  },
+  "ce00a7f3-4be9-4da8-833f-e13ff3b3fb14": {
+    "original": "Piet",
+    "translation": "Jean"
+  },
+  "65c9a375-fbca-4a27-9a42-01d49f7f9588": {
+    "original": "Klaas",
+    "translation": "Jacques"
+  },
+  "e028c78a-166d-4531-b03b-99a573f1661b": {
+    "original": "Klaassen",
+    "translation": "Jacques"
+  },
+  "8f9575f3-9787-4fa5-9ddf-dd1fa4103996": {
+    "original": "Bancontact",
+    "translation": "Bancontact"
+  },
+  "7c04a4f3-25c5-4663-9833-87a7aecbf0b9": {
+    "original": "Demoshop",
+    "translation": "Démo-boutique"
+  },
+  "e122d6c9-a452-4c70-9868-f53c2520aedc": {
+    "original": "todo",
+    "translation": "à faire"
+  },
+  "f7999a55-e73a-49c4-ac9f-f5030d96ba43": {
+    "original": "todo",
+    "translation": "à faire"
+  },
+  "d7fdebd4-7c3c-4316-b862-7ed777ff36ad": {
+    "original": "todo",
+    "translation": "à faire"
+  },
+  "96e61729-ea9c-45bf-82da-56e6a92e6b91": {
+    "original": "todo",
+    "translation": "à faire"
+  },
+  "269872df-ab70-4eae-b671-ab9246162d4e": {
+    "original": "todo",
+    "translation": "à faire"
+  },
+  "aeace79f-c772-4944-8d1d-f92eb519267f": {
+    "original": "KSA Demo",
+    "translation": "KSA Demo"
+  },
+  "e60df757-6546-41c2-b3d3-599df08f34b6": {
+    "original": "KSA Demo",
+    "translation": "KSA Demo"
+  },
+  "16ba3d97-5943-451d-92b5-0bf21555f7ae": {
+    "original": "KSA Demo",
+    "translation": "KSA Demo"
+  },
+  "2562f83d-522d-47a5-b8ad-b918d14c3cb2": {
+    "original": "Via deadlines kan je instellen wanneer de leiding een kampmelding moet invullen.",
+    "translation": "Via des échéances, vous pouvez définir le moment où l'équipe dirigeante doit remplir une déclaration de camp."
+  },
+  "b00dca0d-d590-4d2f-8703-1aeb02c9584e": {
+    "original": "Indienen kan tot",
+    "translation": "Soumission possible jusqu'au"
+  },
+  "b82a5b97-5abe-4f63-97fe-a738d9698039": {
+    "original": "Stel optioneel limieten voor het aantal lokalen van deze soort per groep in.",
+    "translation": "Définissez des limites facultatives pour le nombre de locaux de ce type par groupe."
+  },
+  "ec5437dc-5d11-4092-8ab7-e9090af1f71a": {
+    "original": "Het is enkel mogelijk om de aansluiting binnen de start- en einddata aan te vragen.",
+    "translation": "Il est uniquement possible de demander le raccordement entre les dates de début et de fin."
+  },
+  "513b343f-6a4e-402c-90c4-c0d73e4f65a3": {
+    "original": "Enkel voor nieuwe leden",
+    "translation": "Uniquement pour les nouveaux membres"
+  },
+  "7a010291-3eac-4690-b6d8-2972d3ab8e58": {
+    "original": "Gratis per lokale groep",
+    "translation": "Gratuit par groupe local"
+  },
+  "de1f0a0d-4251-41db-bc28-c332cc20dc8b": {
+    "original": "De vervaldatum moet tussen de start- en einddatum liggen",
+    "translation": "La date d'expiration doit se situer entre la date de début et la date de fin"
+  },
+  "c56506a1-14a9-4179-bbab-5eac533ff730": {
+    "original": "Vaste periode",
+    "translation": "Période fixe"
+  },
+  "a85bd4c0-52f7-4bf0-86c2-234a97c679bc": {
+    "original": "Per dag",
+    "translation": "Par jour"
+  },
+  "b19e199f-2b0e-444c-a4ee-0cdd0b3c6a35": {
+    "original": "Je hebt nog geen instellingen toegevoegd.",
+    "translation": "Vous n'avez encore ajouté aucun paramètre."
+  },
+  "42ac723d-9e5f-4324-a2b9-f14ceeba10d8": {
+    "original": "per dag",
+    "translation": "par jour"
+  },
+  "49a1a0a5-72fa-4170-89f5-8dfa78f2eef7": {
+    "original": "Prijs vanaf",
+    "translation": "Prix à partir de"
+  },
+  "6bdca00a-b7ec-413e-b57a-3e192a53564f": {
+    "original": "Administratieportaal",
+    "translation": "Portail d'administration"
+  },
+  "315fdb48-3f61-4795-9a40-c08c61fcd926": {
+    "original": "Welkom op het administratieportaal. Hier kan je alle leden of groepen opzoeken, nationale/regionale activiteiten aanmaken, of de instellingen op koepelniveau wijzigen.",
+    "translation": "Bienvenue sur le portail d'administration.  Ici, vous pouvez rechercher tous les membres ou groupes, créer des activités nationales/régionales ou modifier les paramètres au niveau de la fédération."
+  },
+  "607105b3-ba57-4818-9523-72923e3cdc8b": {
+    "original": "Welkom op het administratieportaal. Hier kan je alle leden of groepen opzoeken of nationale/regionale activiteiten aanmaken.",
+    "translation": "Bienvenue sur le portail d'administration. Ici, vous pouvez rechercher tous les membres ou groupes ou créer des activités nationales/régionales."
+  },
+  "6e39ca2a-d279-41d3-b68d-eb17dd4f4331": {
+    "original": "E-mailadres valideren...",
+    "translation": "Valider l'adresse électronique..."
+  },
+  "e35060cc-3e63-4b78-9e79-d160401053f5": {
+    "original": "E-mailadres is gevalideerd",
+    "translation": "Adresse électronique validée"
+  },
+  "eefdb3b1-ae26-420d-b1a5-d24997ec3305": {
+    "original": "Bezig met uitschrijven...",
+    "translation": "Désinscription en cours..."
+  },
+  "5aa1ac8b-626e-496b-bbd9-e97aebb19937": {
+    "original": "Je bent al uitgeschreven",
+    "translation": "Vous êtes déjà désinscrit"
+  },
+  "35f6fc8e-b63e-4e88-8324-2660c5280d5d": {
+    "original": "Terug inschrijven op e-mails",
+    "translation": "Se réinscrire aux e-mails"
+  },
+  "fe5a96e6-a7e6-4fe8-9b3f-8ef27bb204bb": {
+    "original": "Je ontvangt momenteel geen e-mails van {name} op {email}. Toch een e-mail ontvangen? Stuur hem door naar {complaintEmail}",
+    "translation": "Vous ne recevez actuellement aucun e-mail de {name} sur {email}. Vous avez tout de même reçu un e-mail ? Transmettez-le à {complaintEmail}"
+  },
+  "4a7194b9-bcaf-498b-af75-6065f08f2a8e": {
+    "original": "Wil je dat we jou geen e-mails meer sturen?",
+    "translation": "Souhaitez-vous que nous ne vous envoyions plus d’e-mails ?"
+  },
+  "48b16d15-edcd-423a-abc3-a203a9c5d09e": {
+    "original": "Ja, uitschrijven",
+    "translation": "Oui, se désinscrire"
+  },
+  "f2fef1b6-c586-4d28-b11d-6dad0974af93": {
+    "original": "Hierna ontvang je geen e-mails van {name} op {email}",
+    "translation": "Vous ne recevrez plus d’e-mails de {name} sur {email}"
+  },
+  "26e5dfeb-3e71-4d1a-8580-350d19efbacd": {
+    "original": "Top! Je ontvangt geen e-mails meer.",
+    "translation": "Top! Vous ne recevrez plus d'e-mails."
+  },
+  "f7cb59de-5024-4a84-bb81-c10961911e35": {
+    "original": "Je ontvangt vanaf nu terug e-mails.",
+    "translation": "Vous recevrez à nouveau des e-mails à partir de maintenant."
+  },
+  "1ff9f2e7-bf47-4206-bc03-ec43cfc33b65": {
+    "original": "Wil je inloggen in het feedback systeem?",
+    "translation": "Souhaitez-vous vous connecter au système de feedback ?"
+  },
+  "c4135e6a-2dab-4a8d-810d-252bd5552a22": {
+    "original": "Ja, open Feedback",
+    "translation": "Oui, ouvrir Feedback"
+  },
+  "ce7d2ca1-bda6-4701-b6a9-3e0cd7ac23c2": {
+    "original": "Feedback systeem openen...",
+    "translation": "Ouverture du système de feedback…"
+  },
+  "9e0461d2-7439-4588-837c-750de6946287": {
+    "original": "Optioneel",
+    "translation": "Facultatif"
+  },
+  "9abb03cf-d76c-4f97-afea-76982042b1ad": {
+    "original": "Deze record is optioneel",
+    "translation": "Ce enregistrement est facultatif"
+  },
+  "6b0bca07-3cba-45cf-bc94-e3217e59a69f": {
+    "original": "Klik om te kopiëren",
+    "translation": "Cliquez pour copier"
+  },
+  "6a8b6166-a8f9-41b8-81e7-a12180de762e": {
+    "original": "Waarde",
+    "translation": "Valeur"
+  },
+  "669bef94-f6a1-4a84-8f2c-5de06ea05db3": {
+    "original": "De mededeling kan niet gewijzigd worden door",
+    "translation": "Le message ne peut pas être modifié par"
+  },
+  "6c2068f6-73c6-4e88-b104-15f95832838f": {
+    "original": "bestellers",
+    "translation": "les clients"
+  },
+  "39c566d6-520d-4048-bb1a-53eeea3ccea7": {
+    "original": "leden",
+    "translation": "membres"
+  },
+  "72e5e374-ecd9-40e5-ae80-d14553faab50": {
+    "original": "die betalen met een app. Voorzie dus zelf geen eigen vervangingen zoals",
+    "translation": "qui paient avec une application. Ne prévoyez donc pas vous-même de remplacements tels que"
+  },
+  "789da13b-5f65-4ab7-8318-ed015e0303cf": {
+    "original": "bestelling + naam",
+    "translation": "commande + nom"
+  },
+  "ac28d270-81d6-4393-ae2c-6b0da9828cb2": {
+    "original": "Voorbeeld:",
+    "translation": "Exemple :"
+  },
+  "152f1003-ba4e-4ae0-acef-475bef27e4a5": {
+    "original": "Gebruik automatische tekstvervangingen in de mededeling via",
+    "translation": "Utilisez des remplacements de texte automatiques dans le message via"
+  },
+  "717310b7-527a-4870-99c4-b6b3a42fe3fa": {
+    "original": "Instructies",
+    "translation": "Instructions"
+  },
+  "b7adfe7d-d1c9-482c-bba2-ecaffd9aa0b3": {
+    "original": "Op de betaalpagina worden automatisch instructies getoond om de overschrijving correct uit te voeren. Je kan eventueel andere instructies opgeven, bv. als je het toelaat om de overschrijving later uit te voeren.",
+    "translation": "Sur la page de paiement, les instructions pour effectuer correctement le virement sont automatiquement affichées. Vous pouvez éventuellement spécifier d'autres instructions, par ex. si vous autorisez le virement à une date ultérieure."
+  },
+  "404635de-cba2-4a9d-91dc-3309755c070f": {
+    "original": "Uitschakelen voor particulieren",
+    "translation": "Désactiver pour les particuliers"
+  },
+  "6576e1fc-a49f-487f-ad2d-fc4bfb7b2550": {
+    "original": "Maak pas beschikbaar vanaf een minimum bedrag",
+    "translation": "Ne rendre disponible qu'à partir d'un montant minimum"
+  },
+  "7410de9e-6805-41e5-b166-9e590056c41b": {
+    "original": "Waarschuwing tonen bij selectie van deze betaalmethode",
+    "translation": "Afficher un avertissement lors de la sélection de ce mode de paiement"
+  },
+  "62f644a2-98ba-4a8d-b7fd-22b2d0bb4d45": {
+    "original": "Waarschuwing enkel tonen vanaf een minimum bedrag",
+    "translation": "Afficher un avertissement uniquement à partir d'un montant minimum"
+  },
+  "cc322a9c-e781-4a4e-9e45-fb1355d3c536": {
+    "original": "waarbij je ervan uitgaat dat de betaler manueel de mededeling kan invullen en wijzigen. Gebruik in plaats daarvan de 'Vaste mededeling' met de beschikbare automatische vervangingen.",
+    "translation": "où vous partez du principe que le payeur peut saisir et modifier manuellement la communication. Utilisez plutôt la 'Communication fixe' avec les remplacements automatiques disponibles."
+  },
+  "31c28f13-d3b8-42ee-8979-c8224633237e": {
+    "original": "Begunstigde",
+    "translation": "Bénéficiaire"
+  },
+  "b541ddfb-cce5-4194-b6a5-3de523b27fa8": {
+    "original": "Bankrekeningnummer",
+    "translation": "Numéro de compte bancaire"
+  },
+  "aac4ace7-828f-4148-88f1-d49b50610cdd": {
+    "original": "Soort mededeling",
+    "translation": "Type de communication"
+  },
+  "136b7ba4-7611-4ee4-a46d-60758869210f": {
+    "original": "Mededeling",
+    "translation": "Message"
+  },
+  "da96b2e0-1caa-4cf8-8276-94d907c64057": {
+    "original": "Voorvoegsel",
+    "translation": "Préfixe"
+  },
+  "ff789452-b123-437a-a77b-34f3e0dd3e5c": {
+    "original": "Optioneel. Bv. Inschrijving",
+    "translation": "Optionnel. Ex. Inscription"
+  },
+  "082234bc-835d-4c27-9fb4-5ab2221719a9": {
+    "original": "Optioneel. Bv. Bestelling",
+    "translation": "Optionnel. Ex. Commande"
+  },
+  "0e392740-3dd9-4454-b33f-320465f1a52c": {
+    "original": "Optioneel. Indien niet ingevuld worden automatisch geschikte instructies getoond.",
+    "translation": "Optionnel. Si non rempli, des instructions appropriées seront affichées automatiquement."
+  },
+  "ecfdb06e-e649-47d7-8047-4e340e6f6988": {
+    "original": "Minimum bedrag",
+    "translation": "Montant minimum"
+  },
+  "73dbf494-16a3-4e9a-8cbe-5170334209c0": {
+    "original": "Waarschuwingstekst",
+    "translation": "Texte d'avertissement"
+  },
+  "140fd2a3-d019-45a9-9d2b-754111da04f6": {
+    "original": "Willekeurig aangemaakt.",
+    "translation": "Créé aléatoirement."
+  },
+  "1add2f6b-1c51-49f9-9fe3-a9a1ad62ad07": {
+    "original": "Naam van lid/leden",
+    "translation": "Nom du/des membre(s)"
+  },
+  "4d496edf-0203-4df3-a6e9-3e58d226d6c5": {
+    "original": "Bestelnummer",
+    "translation": "Numéro de commande"
+  },
+  "6d5b370e-491e-4565-acc9-444fe7e230fe": {
+    "original": "Eventueel voorafgegaan door een zelf gekozen woord (zie onder)",
+    "translation": "Éventuellement précédé d'un mot de votre choix (voir ci-dessous)"
+  },
+  "610a54d0-5ae5-4e4c-bac3-205fd56b65c8": {
+    "original": "Vaste mededeling",
+    "translation": "Message fixe"
+  },
+  "35112ce1-48f4-4078-918a-0dc66f25cff0": {
+    "original": "Altijd dezelfde mededeling voor alle inschrijvingen. Een betaling kan voor meerdere inschrijvingen tegelijk zijn.",
+    "translation": "Toujours le même message pour toutes les inscriptions. Un paiement peut concerner plusieurs inscriptions à la fois."
+  },
+  "1d8e0c76-eca0-4973-98bc-ebf7f940f05e": {
+    "original": "Altijd dezelfde mededeling voor alle bestellingen.",
+    "translation": "Toujours le même message pour toutes les commandes."
+  },
+  "a36700a3-64be-49eb-b1fd-60af7475eb4e": {
+    "original": "Meer info",
+    "translation": "Plus d'infos"
+  },
+  "be98be36-f796-4f96-b054-4d2a09be3d79": {
+    "original": "Administratiekosten",
+    "translation": "Frais administratifs"
+  },
+  "29c16366-9962-4b22-a8bb-55c5a8467315": {
+    "original": "Reken geen administratiekosten aan als het totaalbedrag 0 euro is",
+    "translation": "Ne comptez pas de frais administratifs si le montant total est de 0 euro"
+  },
+  "217f3390-3eef-4f35-bd23-ab3c155f2622": {
+    "original": "Betaalaccount",
+    "translation": "Compte de paiement"
+  },
+  "f67ccf42-d4a8-4fe6-b7dc-91f43726646e": {
+    "original": "Vaste kost",
+    "translation": "Coût fixe"
+  },
+  "dd61d33b-367e-4e40-8ac6-84c286b931bc": {
+    "original": "Percentage",
+    "translation": "Pourcentage"
+  },
+  "45285899-60e2-42c6-bb51-fdd16fe651e4": {
+    "original": "Nog bezig met laden. Even geduld.",
+    "translation": "Chargement en cours. Merci de patienter."
+  },
+  "740c41c3-7f19-4a5b-bd49-7e7d228e2187": {
+    "original": "Je moet minimaal één betaalmethode selecteren",
+    "translation": "Vous devez sélectionner au moins une méthode de paiement"
+  },
+  "2384baa0-50ca-4003-8d3a-af0beb18fec2": {
+    "original": "Er is een fout opgetreden bij het ophalen van de betaalaccounts",
+    "translation": "Une erreur s'est produite lors de la récupération des comptes de paiement"
+  },
+  "84e54416-464f-4ca6-a685-def2a0a9c135": {
+    "original": "Vanaf minimum",
+    "translation": "À partir de minimum"
+  },
+  "7972bd35-3bb5-4dae-9771-8d4765646f61": {
+    "original": "Met waarschuwing vanaf",
+    "translation": "Avec avertissement à partir de"
+  },
+  "88edcbb7-c3b2-4531-8796-f0c6782fa76e": {
+    "original": "Met waarschuwing",
+    "translation": "Avec avertissement"
+  },
+  "8bec9f71-c41d-485f-b0f5-95a40b695884": {
+    "original": "Niet beschikbaar voor particulieren",
+    "translation": "Non disponible pour les particuliers"
+  },
+  "8e243505-26f6-4505-9317-c871fa1df324": {
+    "original": "Nog geen bankrekeningnummer ingesteld",
+    "translation": "Aucun numéro de compte bancaire encore défini"
+  },
+  "475a6b09-e71d-4160-a87e-d4a3844116c3": {
+    "original": "Rekeningnummer:",
+    "translation": "Numéro de compte :"
+  },
+  "0cfac4d3-1840-4b12-b9d7-b9f40e49d664": {
+    "original": "Begunstigde:",
+    "translation": "Bénéficiaire :"
+  },
+  "e54dd641-9788-4514-b866-86f602892fb2": {
+    "original": "Mededeling:",
+    "translation": "Communication :"
+  },
+  "4df013df-328f-47b6-b90a-fc40813d3c0a": {
+    "original": "Je moet minimaal één betaalmethode accepteren",
+    "translation": "Vous devez accepter au moins une méthode de paiement"
+  },
+  "60bbe710-43e0-4a19-996c-ded3f25c1c39": {
+    "original": "Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalmethodes). Daar vind je ook meer informatie.",
+    "translation": "Vous devez d’abord activer Payconiq via les paramètres de paiement (Paramètres > Méthodes de paiement). Vous y trouverez également plus d’informations."
+  },
+  "a600bbdb-779a-4f6d-bc60-16c15eeaebe9": {
+    "original": "Er ging iets mis: te veel doorverwijzingen.",
+    "translation": "Une erreur s’est produite : trop de redirections."
+  },
+  "c264b163-1fec-45b3-9d69-4807ee8901a2": {
+    "original": "Betaling voltooid",
+    "translation": "Paiement effectué"
   }
 }
