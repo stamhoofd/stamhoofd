@@ -19446,5 +19446,69 @@
   "269872df-ab70-4eae-b671-ab9246162d4e": {
     "original": "todo",
     "translation": "à faire"
+  },
+  "54685a94-1ae2-46f9-aa4b-03f0b3939fd3": {
+    "original": "shared.untitled",
+    "translation": "shared.untitled"
+  },
+  "ceba695c-105b-49c9-aaa4-bf716c4aec6b": {
+    "original": "tags",
+    "translation": "étiquettes"
+  },
+  "c8f1e4d4-669c-4ccb-a9d9-30584f6c2d55": {
+    "original": "Via {organization}",
+    "translation": "Via {organization}"
+  },
+  "8daf57de-69cf-48fe-b09b-772c54473184": {
+    "original": "ID",
+    "translation": "ID"
+  },
+  "ccb47323-6aa7-4f37-a03c-848ed47eb412": {
+    "original": "E-mail",
+    "translation": "E-mail"
+  },
+  "a3765fff-0634-4ffe-a726-005fd8ba5dcd": {
+    "original": "Types",
+    "translation": "Types"
+  },
+  "af5f50da-3290-44bd-a104-896231e6ea08": {
+    "original": "Google",
+    "translation": "Google"
+  },
+  "662467b7-da51-4fe2-bff4-784c8f028e58": {
+    "original": "Single-Sign-On (SSO)",
+    "translation": "Single-Sign-On (SSO)"
+  },
+  "cce92c4c-1cdf-4a22-9f1a-89f888046cde": {
+    "original": "E-mails",
+    "translation": "Courriels"
+  },
+  "d101ec4a-219f-4f23-afa0-e8dc4862c354": {
+    "original": "Logo",
+    "translation": "Logo"
+  },
+  "e0a54e0c-03b3-43c6-b4ca-962c5b1d6772": {
+    "original": "Minimum",
+    "translation": "Minimum"
+  },
+  "49dd6919-a853-4004-b817-ae811de527ab": {
+    "original": "Deadlines",
+    "translation": "Échéances"
+  },
+  "6c9d45e5-c9f6-49c8-9362-177653414c7e": {
+    "original": "Type",
+    "translation": "Type"
+  },
+  "619a9ba5-895c-4334-a126-a1c4b780e87b": {
+    "original": "spinner",
+    "translation": "spinner"
+  },
+  "116f6ca0-c077-4468-b79b-d329f6a8db77": {
+    "original": "TTL",
+    "translation": "TTL"
+  },
+  "1c5ba032-2132-4bda-8aae-7f622f6f3a2a": {
+    "original": "Huidige",
+    "translation": "Actif"
   }
 }
