@@ -1,11 +1,12 @@
 import { ArrayDecoder, AutoEncoder, Decoder, field, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { Organization, Version } from '@stamhoofd/structures';
+import { Country, Language, Organization, Version } from '@stamhoofd/structures';
 
 import { SessionContext } from './SessionContext';
 import { Storage } from './Storage';
 import { isReactive } from 'vue';
+import { I18nController } from '@stamhoofd/frontend-i18n';
 
 class SessionStorage extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(Organization) })
@@ -196,6 +197,7 @@ export class SessionManagerStatic {
         });
 
         await session.saveToStorage();
+        await I18nController.loadDefault(session, Country.Belgium, Language.Dutch, session?.organization?.address?.country);
         return session;
     }
 

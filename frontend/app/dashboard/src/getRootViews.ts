@@ -21,7 +21,6 @@ export function wrapWithModalStack(component: ComponentWithProperties, initialPr
 export async function wrapContext(context: SessionContext, app: AppType | 'auto', buildComponent: ComponentWithProperties | ((data: { platformManager: PlatformManager }) => ComponentWithProperties), options?: { ownDomain?: boolean; initialPresents?: PushOptions[]; webshop?: Webshop }) {
     const platformManager = await PlatformManager.createFromCache(context, app, true);
     const $memberManager = new MemberManager(context, platformManager.$platform);
-    await I18nController.loadDefault(context, Country.Belgium, Language.Dutch, context?.organization?.address?.country);
 
     if (app === 'webshop' && !options?.webshop) {
         throw new Error('Webshop is required for webshop app');
