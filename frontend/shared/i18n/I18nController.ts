@@ -187,7 +187,7 @@ export class I18nController {
 
         if (!i18n.isLocaleLoaded(namespace, locale)) {
             // If the language hasn't been loaded yet
-            const messages = await import(/* webpackChunkName: "lang-[request]" */ `../../../shared/locales/dist/${namespace}/${locale}.json`);
+            const messages = await import(`../../../shared/locales/dist/${namespace}/${locale}.json`);
             i18n.loadLocale(namespace, locale, messages.default);
             console.log('[I18n] Successfully loaded locale', namespace, locale);
         }

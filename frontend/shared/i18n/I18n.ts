@@ -7,12 +7,17 @@ export class I18n {
     locale = 'nl-BE';
     language: string = 'nl';
     country: CountryCode = Country.Belgium;
+    _debug = true;
 
     // Reference to messages in loadedLocales
     messages: Map<string, string>;
 
     install(app: App) {
         app.config.globalProperties.$t = this.$t.bind(this);
+    }
+
+    get debug() {
+        return this._debug && STAMHOOFD.environment === 'development';
     }
 
     loadRecursive(messages: any, prefix: string | null = null): Map<string, string> {
@@ -57,6 +62,8 @@ export class I18n {
         else {
             this.loadedLocales.set(locale, loaded);
         }
+
+        console.log('load locale', locale, namespace, messages);
     }
 
     t(key: string, replace?: Record<string, string>): string {
@@ -64,7 +71,7 @@ export class I18n {
     }
 
     $t(key: string, replace?: Record<string, string | { toString(): string }>): string {
-        return this.replace(this.messages?.get(key) ?? key, replace);
+        return this.replace((this.messages?.get(key) ?? key) + (this.debug ? (' (' + this.locale + ')') : ''), replace);
     }
 
     escapeRegex(string: string) {
