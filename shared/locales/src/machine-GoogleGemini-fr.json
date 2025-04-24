@@ -19439,10 +19439,6 @@
     "original": "Demoshop",
     "translation": "Démo-boutique"
   },
-  "54685a94-1ae2-46f9-aa4b-03f0b3939fd3": {
-    "original": "shared.untitled",
-    "translation": "shared.untitled"
-  },
   "ceba695c-105b-49c9-aaa4-bf716c4aec6b": {
     "original": "tags",
     "translation": "étiquettes"
@@ -19590,5 +19586,9 @@
   "06da1310-e17c-475e-bcd3-bb47844c24c1": {
     "original": "toevoegen",
     "translation": "ajouter"
+  },
+  "54685a94-1ae2-46f9-aa4b-03f0b3939fd3": {
+    "original": "Naamloos",
+    "translation": "Anonyme"
   }
 }
