@@ -1,6 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, UrlHelper } from '@simonbackx/vue-app-navigation';
-import { AuthenticatedView, ColorHelper, manualFeatureFlag, PromiseView, TabBarController, TabBarItem } from '@stamhoofd/components';
+import { appToUri, AuthenticatedView, ColorHelper, manualFeatureFlag, PromiseView, TabBarController, TabBarItem, uriToApp } from '@stamhoofd/components';
 import { getNonAutoLoginRoot, sessionFromOrganization, wrapContext } from '@stamhoofd/dashboard';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, SessionContext, SessionManager } from '@stamhoofd/networking';
@@ -24,7 +24,7 @@ export async function getScopedRegistrationRootFromUrl() {
     if (STAMHOOFD.singleOrganization) {
         session = await sessionFromOrganization({ organizationId: STAMHOOFD.singleOrganization });
     }
-    else if (parts[0] === 'leden' && parts[1] && !ignoreUris.includes(parts[1])) {
+    else if (uriToApp(parts[0]) === 'registration' && parts[1] && !ignoreUris.includes(parts[1])) {
         const uri = parts[1];
 
         // Load organization
@@ -47,7 +47,7 @@ export async function getScopedRegistrationRootFromUrl() {
     }
 
     if (!session || !session.organization) {
-        if (STAMHOOFD.userMode === 'platform' && parts[0] === 'leden') {
+        if (STAMHOOFD.userMode === 'platform' && parts[0] && uriToApp(parts[0]) === 'registration') {
             session = new SessionContext(null);
             await session.loadFromStorage();
             await session.checkSSO();

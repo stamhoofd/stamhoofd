@@ -6,6 +6,7 @@ import { PromiseComponent } from '../../containers/AsyncComponent';
 import { useOrganization, usePlatform, useUser } from '../../hooks';
 import { ReplaceRootEventBus } from '../../overlays/ModalStackEventBus';
 import { AppType, useAppContext } from '../appContext';
+import { Formatter } from '@stamhoofd/utility';
 
 export type Option = {
     id: string;
@@ -18,23 +19,23 @@ export type Option = {
 export function appToUri(app: AppType | 'auto') {
     switch (app) {
         case 'admin':
-            return $t(`3a18ce8e-5ec6-48b1-a442-906db662c58f`);
+            return Formatter.slug($t(`3a18ce8e-5ec6-48b1-a442-906db662c58f`));
         case 'dashboard':
-            return $t(`0a7ea16d-50ba-47a4-9dbd-7456de59fd95`);
+            return Formatter.slug($t(`beheerdersportaal`));
         case 'registration':
-            return $t(`39c566d6-520d-4048-bb1a-53eeea3ccea7`);
+            return Formatter.slug($t(`39c566d6-520d-4048-bb1a-53eeea3ccea7`));
         case 'auto':
-            return $t(`15a87f5b-ae73-4c45-bc46-5575e95af13e`);
+            return 'auto';
     }
 }
 
 export function uriToApp(uri: string) {
     switch (uri) {
-        case 'administratie':
+        case appToUri('admin'):
             return 'admin';
-        case 'beheerders':
+        case appToUri('dashboard'):
             return 'dashboard';
-        case 'leden':
+        case appToUri('registration'):
             return 'registration';
         default:
             return 'auto';
@@ -45,7 +46,7 @@ export function useContextOptions() {
     const $user = useUser();
     const $organization = useOrganization();
     const app = useAppContext();
-    
+
     const platform = usePlatform();
 
     const getRegistrationOption = (): Option => {
