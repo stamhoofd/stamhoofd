@@ -19223,10 +19223,6 @@
     "original": "Payconiq by Bancontact",
     "translation": "Payconiq by Bancontact"
   },
-  "54685a94-1ae2-46f9-aa4b-03f0b3939fd3": {
-    "original": "shared.untitled",
-    "translation": "shared.untitled"
-  },
   "a2f52798-c27f-4904-b651-2bec3aeebf21": {
     "original": "KBC Mobile",
     "translation": "KBC Mobile"
@@ -19598,5 +19594,9 @@
   "e5f00b6a-9424-46b7-ada2-9474160189c4": {
     "original": "eenheid",
     "translation": "unit"
+  },
+  "54685a94-1ae2-46f9-aa4b-03f0b3939fd3": {
+    "original": "Naamloos",
+    "translation": "Unnamed"
   }
 }
