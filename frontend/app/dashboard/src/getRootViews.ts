@@ -3,7 +3,7 @@ import { ComponentWithProperties, ModalStackComponent, NavigationController, Pus
 import { AccountSwitcher, AppType, AsyncComponent, AuditLogsView, AuthenticatedView, ContextNavigationBar, ContextProvider, CoverImageContainer, CustomHooksContainer, LoginView, ManageEventsView, manualFeatureFlag, NoPermissionsView, OrganizationLogo, OrganizationSwitcher, PromiseView, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { I18nController, LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { MemberManager, NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { AccessRight, Country, Organization, PermissionLevel, Webshop } from '@stamhoofd/structures';
+import { AccessRight, Country, Language, Organization, PermissionLevel, Webshop } from '@stamhoofd/structures';
 import { computed, markRaw, reactive, ref } from 'vue';
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -21,7 +21,7 @@ export function wrapWithModalStack(component: ComponentWithProperties, initialPr
 export async function wrapContext(context: SessionContext, app: AppType | 'auto', buildComponent: ComponentWithProperties | ((data: { platformManager: PlatformManager }) => ComponentWithProperties), options?: { ownDomain?: boolean; initialPresents?: PushOptions[]; webshop?: Webshop }) {
     const platformManager = await PlatformManager.createFromCache(context, app, true);
     const $memberManager = new MemberManager(context, platformManager.$platform);
-    await I18nController.loadDefault(context, Country.Belgium, 'nl', context?.organization?.address?.country);
+    await I18nController.loadDefault(context, Country.Belgium, Language.Dutch, context?.organization?.address?.country);
 
     if (app === 'webshop' && !options?.webshop) {
         throw new Error('Webshop is required for webshop app');
