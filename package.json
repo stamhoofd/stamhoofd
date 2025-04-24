@@ -42,7 +42,7 @@
         "ship": "node ./.development/increase-structures-version.js && yarn -s clear:shared && yarn -s build:shared && lerna version --exact --force-publish --yes --no-private && lerna publish from-git --yes --no-private --otp $(op item get NPM --otp || :)",
         "ship:fix": "lerna publish from-git --yes --no-private --otp $(op item get NPM --otp || :)",
         "translate:keys": "cd .development/i18n-uuid && yarn replace-keys",
-        "translate:auto-translate": "cd .development/i18n-uuid && yarn auto-translate",
+        "translate:auto-translate": "cd shared/locales && yarn -s build && cd ../.. && cd .development/i18n-uuid && yarn auto-translate",
         "translate": "cd .development/i18n-uuid && yarn start"
     },
     "dependencies": {
