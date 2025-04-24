@@ -67,21 +67,24 @@ export abstract class Translator implements ITranslator {
         },
     ): string {
         const consistentWordsText = consistentWords && Object.keys(consistentWords).length > 0
-            ? `Make sure certain words are translated consistently, most often we use the following words, so try to keep the following translations in sentences if the context makes sense: ` +
+            ? `\n- Make sure certain words are translated consistently, most often we use the following words, so try to keep the following translations in sentences if the context makes sense: \n` +
               JSON.stringify(consistentWords, undefined, '  ') +
-              "."
+              ".\n"
             : "";
 
         const prompt = `Translate the values of the JSON array from ${originalLocal} to ${targetLocal}.${consistentWordsText}
-
-Do not translate words between curly brackets (even if it is a consistent word). For example {een-voorbeeld} must remain {een-voorbeeld}, {werkjaar} must remain {werkjaar} (only if between curly brackets, so do translate werkjaar). If you don't have enough context to provide a correct translation, set the value to an empty string.
+- Do not translate words between curly brackets (even if it is a consistent word). For example {een-voorbeeld} must remain {een-voorbeeld}, {werkjaar} must remain {werkjaar} (only if between curly brackets, so do translate werkjaar).
+- If you don't have enough context to provide a correct translation, set the value to an empty string.
+- If you encounter a persons name (e.g. Klaas) or something similar try to also translate it to a common name in ${targetLocal}.
 
 Translate this array: 
 
 ${JSON.stringify(batch, undefined, '  ')}
 
-Translate the above values of the JSON array from ${originalLocal} to ${targetLocal}. Remember, Do not translate words between curly brackets (even if it is a consistent word). For example {een-voorbeeld} must remain {een-voorbeeld}, {werkjaar} must remain {werkjaar} (only if between curly brackets, so do translate werkjaar).
-If you don't have enough context to provide a correct translation, set the value to an empty string.
+Translate the above values of the JSON array from ${originalLocal} to ${targetLocal}. 
+- Do not translate words between curly brackets (even if it is a consistent word). For example {een-voorbeeld} must remain {een-voorbeeld}, {werkjaar} must remain {werkjaar} (only if between curly brackets, so do translate werkjaar).
+- If you don't have enough context to provide a correct translation, set the value to an empty string.
+- If you encounter a persons name (e.g. Klaas) or something similar try to also translate it to a common name in ${targetLocal}.${consistentWordsText}
 `;
 
         return prompt;
