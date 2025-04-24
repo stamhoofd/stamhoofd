@@ -3949,7 +3949,7 @@
   "aae5e3da-7bc1-4d0a-bf0b-56b97c017ba2": "{seconds} seconden geleden",
   "5e3c0459-3ee0-4c2f-9657-5e189dbf749d": "zojuist",
   "8ae93138-5aeb-4bd4-8845-d57c1e2d62f2": "om",
-  "b6185496-deab-4569-906f-c636e625bcd1": "todo",
+  "b6185496-deab-4569-906f-c636e625bcd1": "andere",
   "3024d542-4987-4487-ae83-6593036a7e1d": "Aansluitingen aanrekenen",
   "e58db898-16ad-4bb4-840c-2315ca894ff6": "Experimenten",
   "88136719-d85f-499f-8c5f-252519947c03": "Instellingen",
@@ -4904,5 +4904,6 @@
   "4e226f0b-e81f-4e27-b352-073fc4744c18": "leeftijdsgroepen",
   "85125d9c-6a30-4211-830a-8aa9a2c75fc0": "lokalen",
   "8cf35f34-4cbb-4eb5-93cd-308ab22adf56": "inschrijvingen",
-  "b427a2eb-4d55-4f41-b60e-ae3c6819100d": "inschrijvingsgroep"
+  "b427a2eb-4d55-4f41-b60e-ae3c6819100d": "inschrijvingsgroep",
+  "bc90ce0a-2273-4942-9ce9-45fead8f928c": "betaling"
 }
