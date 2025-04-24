@@ -62,8 +62,6 @@ export class I18n {
         else {
             this.loadedLocales.set(locale, loaded);
         }
-
-        console.log('load locale', locale, namespace, messages);
     }
 
     t(key: string, replace?: Record<string, string>): string {
