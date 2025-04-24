@@ -4893,5 +4893,15 @@
   "c006386b-0590-40c9-ae62-c4b7ade939f0": "Het maximum voor de keuzemogelijkheid {name} is overschreden",
   "96e61729-ea9c-45bf-82da-56e6a92e6b91": "todo",
   "77f48757-5c36-47a6-8ce2-d676eef1e778": "Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. Heeft {member} geen Belgische nationaliteit,",
-  "269872df-ab70-4eae-b671-ab9246162d4e": "todo"
+  "269872df-ab70-4eae-b671-ab9246162d4e": "todo",
+  "940c3987-3048-441e-9933-3fa51c6d421d": "naam",
+  "340f1829-3bb9-419d-8646-ba3b34eea958": "email",
+  "fb17210e-534f-48f3-b6a2-756428d117ee": "nr",
+  "cf9f3bc1-51d7-438b-832c-8757ee79e0d4": "Taal",
+  "edcbd633-f0f9-4e7f-97bc-e91a6eb1fff0": "Onvolledig",
+  "f910a622-522a-4507-89a1-8cae473ea043": "Ongebruikt",
+  "d5c7e037-e526-41d5-9151-d9e115b4b8de": "Dit is leeg maar werd wel ingevuld in een andere taal",
+  "4bc9a5fd-a1d5-47cd-8e25-2ce20b21a656": "Verwijder vertaling",
+  "aece10d1-efd5-4fe7-98a0-98670abed7de": "Neem vertaling over",
+  "e5f00b6a-9424-46b7-ada2-9474160189c4": "todo"
 }

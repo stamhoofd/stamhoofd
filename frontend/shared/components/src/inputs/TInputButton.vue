@@ -1,6 +1,6 @@
 <template>
     <template v-if="hasLanguages">
-        <span v-if="isMissing" v-tooltip="$t('Dit is leeg maar werd wel ingevuld in een andere taal')" class="icon small error red" />
+        <span v-if="isMissing" v-tooltip="$t('d5c7e037-e526-41d5-9151-d9e115b4b8de')" class="icon small error red" />
         <button class="button icons" type="button" @click="showMenu">
             <span class="icon language small gray" />
             <span class="icon arrow-down-small" />
@@ -27,7 +27,7 @@ async function showMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t('Verwijder vertaling'),
+                name: $t('4bc9a5fd-a1d5-47cd-8e25-2ce20b21a656'),
                 disabled: !value.value.getIfExists(editorLanguage.value) || Object.keys(value.value.translations).length <= 1,
                 icon: 'trash',
                 action: () => {
@@ -37,7 +37,7 @@ async function showMenu(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t('Neem vertaling over'),
+                name: $t('aece10d1-efd5-4fe7-98a0-98670abed7de'),
                 disabled: !isMissing.value,
                 icon: 'copy',
                 action: () => {
@@ -49,7 +49,7 @@ async function showMenu(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: $t('Taal'),
+                name: $t('cf9f3bc1-51d7-438b-832c-8757ee79e0d4'),
                 description: LanguageHelper.getName(editorLanguage.value),
                 childMenu: new ContextMenu([
                     I18nController.shared.availableLanguages.map(lang => new ContextMenuItem({
