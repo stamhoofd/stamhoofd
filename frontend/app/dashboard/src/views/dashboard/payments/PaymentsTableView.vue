@@ -8,7 +8,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, Column, ComponentExposed, InMemoryTableAction, ModernTableView, paymentsUIFilterBuilders, PaymentView, TableAction, usePaymentsObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
+import { AsyncTableAction, Column, ComponentExposed, getPaymentsUIFilterBuilders, InMemoryTableAction, ModernTableView, PaymentView, TableAction, usePaymentsObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { ExcelExportType, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -34,7 +34,7 @@ const configurationId = computed(() => {
 
 const present = usePresent();
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
-const filterBuilders = paymentsUIFilterBuilders;
+const filterBuilders = getPaymentsUIFilterBuilders();
 const title = computed(() => {
     if (props.methods?.length === 1) {
         return PaymentMethodHelper.getPluralNameCapitalized(props.methods[0]);

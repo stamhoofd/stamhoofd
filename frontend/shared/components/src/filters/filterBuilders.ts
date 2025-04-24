@@ -1,4 +1,3 @@
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, FilterWrapperMarker, getAuditLogTypeName, Group, LoadedPermissions, MemberResponsibility, OrderStatus, OrderStatusHelper, Organization, OrganizationRecordsConfiguration, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, RecordCategory, RecordType, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, unwrapFilter, User, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -14,70 +13,76 @@ import { NumberFilterBuilder, NumberFilterFormat } from './NumberUIFilter';
 import { StringFilterBuilder } from './StringUIFilter';
 import { UIFilter, UIFilterBuilder, UIFilterBuilders } from './UIFilter';
 
-export const paymentsUIFilterBuilders: UIFilterBuilders = [
-    new MultipleChoiceFilterBuilder({
-        name: $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`),
-        options: Object.values(PaymentMethod).map((method) => {
-            return new MultipleChoiceUIFilterOption(PaymentMethodHelper.getNameCapitalized(method), method);
-        }),
-        wrapper: {
-            method: {
-                $in: FilterWrapperMarker,
+export const getPaymentsUIFilterBuilders: () => UIFilterBuilders = () => {
+    const builders: UIFilterBuilders = [
+        new MultipleChoiceFilterBuilder({
+            name: $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`),
+            options: Object.values(PaymentMethod).map((method) => {
+                return new MultipleChoiceUIFilterOption(PaymentMethodHelper.getNameCapitalized(method), method);
+            }),
+            wrapper: {
+                method: {
+                    $in: FilterWrapperMarker,
+                },
             },
-        },
-    }),
-
-    new MultipleChoiceFilterBuilder({
-        name: $t(`e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5`),
-        options: Object.values(PaymentStatus).map((method) => {
-            return new MultipleChoiceUIFilterOption(PaymentStatusHelper.getNameCapitalized(method), method);
         }),
-        wrapper: {
-            status: {
-                $in: FilterWrapperMarker,
-            },
-        },
-    }),
-];
 
-// Recursive: self referencing groups
-paymentsUIFilterBuilders.unshift(
-    new GroupUIFilterBuilder({
-        builders: paymentsUIFilterBuilders,
-    }),
-);
+        new MultipleChoiceFilterBuilder({
+            name: $t(`e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5`),
+            options: Object.values(PaymentStatus).map((method) => {
+                return new MultipleChoiceUIFilterOption(PaymentStatusHelper.getNameCapitalized(method), method);
+            }),
+            wrapper: {
+                status: {
+                    $in: FilterWrapperMarker,
+                },
+            },
+        }),
+    ];
+
+    builders.unshift(
+        new GroupUIFilterBuilder({
+            builders,
+        }),
+    );
+
+    return builders;
+};
 
 // This one should match memberWithRegistrationsBlobInMemoryFilterCompilers
-export const memberWithRegistrationsBlobUIFilterBuilders: UIFilterBuilders = [
-    new NumberFilterBuilder({
-        name: $t(`e96d9ea7-f8cc-42c6-b23d-f46e1a56e043`),
-        key: 'age',
-    }),
-    new DateFilterBuilder({
-        name: $t(`f3b87bd8-e36c-4fb8-917f-87b18ece750e`),
-        key: 'birthDay',
-    }),
-    new MultipleChoiceFilterBuilder({
-        name: $t(`fd3fea4f-73c7-4c8d-90cd-80ea90e53b98`),
-        options: [
-            new MultipleChoiceUIFilterOption($t(`06466432-eca6-41d0-a3d6-f262f8d6d2ac`), Gender.Female),
-            new MultipleChoiceUIFilterOption($t(`b54b9706-4c0c-46a6-9027-37052eb76b28`), Gender.Male),
-            new MultipleChoiceUIFilterOption($t(`8f7475aa-c110-49b2-8017-1a6dd0fe72f9`), Gender.Other),
-        ],
-        wrapper: {
-            gender: {
-                $in: FilterWrapperMarker,
+export const getMemberWithRegistrationsBlobUIFilterBuilders: () => UIFilterBuilders = () => {
+    const builders: UIFilterBuilders = [
+        new NumberFilterBuilder({
+            name: $t(`e96d9ea7-f8cc-42c6-b23d-f46e1a56e043`),
+            key: 'age',
+        }),
+        new DateFilterBuilder({
+            name: $t(`f3b87bd8-e36c-4fb8-917f-87b18ece750e`),
+            key: 'birthDay',
+        }),
+        new MultipleChoiceFilterBuilder({
+            name: $t(`fd3fea4f-73c7-4c8d-90cd-80ea90e53b98`),
+            options: [
+                new MultipleChoiceUIFilterOption($t(`06466432-eca6-41d0-a3d6-f262f8d6d2ac`), Gender.Female),
+                new MultipleChoiceUIFilterOption($t(`b54b9706-4c0c-46a6-9027-37052eb76b28`), Gender.Male),
+                new MultipleChoiceUIFilterOption($t(`8f7475aa-c110-49b2-8017-1a6dd0fe72f9`), Gender.Other),
+            ],
+            wrapper: {
+                gender: {
+                    $in: FilterWrapperMarker,
+                },
             },
-        },
-    }),
-];
+        }),
+    ];
 
-// Recursive: self referencing groups
-memberWithRegistrationsBlobUIFilterBuilders.unshift(
-    new GroupUIFilterBuilder({
-        builders: memberWithRegistrationsBlobUIFilterBuilders,
-    }),
-);
+    builders.unshift(
+        new GroupUIFilterBuilder({
+            builders,
+        }),
+    );
+
+    return builders;
+};
 
 export function useMemberWithRegistrationsBlobFilterBuilders() {
     return (recordConfiguration: OrganizationRecordsConfiguration) => {
@@ -229,7 +234,7 @@ export function useRegisterItemFilterBuilders() {
 export function useAdvancedRegistrationsUIFilterBuilders() {
     const $platform = usePlatform();
     const $user = useUser();
-    
+
     const manager = usePlatformManager();
     const owner = useRequestOwner();
     const loading = ref(true);
@@ -357,7 +362,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
 export function useAdvancedPlatformMembershipUIFilterBuilders() {
     const $platform = usePlatform();
     const $user = useUser();
-    
+
     const manager = usePlatformManager();
     const owner = useRequestOwner();
     const loading = ref(true);
@@ -587,7 +592,7 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
 export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
     const $platform = usePlatform();
     const $user = useUser();
-    
+
     const { loading, filterBuilders: registrationFilters } = useAdvancedRegistrationsUIFilterBuilders();
     const financialSupportSettings = useFinancialSupportSettings();
     const auth = useAuth();
@@ -615,7 +620,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
             const user = $user.value;
 
             const all = [
-                ...memberWithRegistrationsBlobUIFilterBuilders.slice(1),
+                ...getMemberWithRegistrationsBlobUIFilterBuilders().slice(1),
             ];
 
             if (user?.permissions?.platform !== null) {
@@ -1257,30 +1262,32 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
 //
 
 // This one should match memberWithRegistrationsBlobInMemoryFilterCompilers
-export const checkoutUIFilterBuilders: UIFilterBuilders = [
+export const getCheckoutUIFilterBuilders: () => UIFilterBuilders = () => {
     // todo
-];
+    const builders: UIFilterBuilders = [];
 
-// Recursive: self referencing groups
-checkoutUIFilterBuilders.unshift(
-    new GroupUIFilterBuilder({
-        builders: checkoutUIFilterBuilders,
-    }),
-);
+    builders.unshift(
+        new GroupUIFilterBuilder({
+            builders,
+        }));
+
+    return builders;
+};
 
 // Cached outstanding balances
 
-export const cachedOutstandingBalanceUIFilterBuilders: UIFilterBuilders = [
-    new NumberFilterBuilder({
-        name: $t(`40d7ac9f-f62d-4a9d-8b2f-5fcfb938c12f`),
-        type: NumberFilterFormat.Currency,
-        key: 'amountOpen',
-    }),
-    new NumberFilterBuilder({
-        name: $t(`5e73bf1c-6413-4fa5-8049-bff5faf4d8ea`),
-        type: NumberFilterFormat.Currency,
-        key: 'amountPending',
-    }),
+export const getCachedOutstandingBalanceUIFilterBuilders: () => UIFilterBuilders = () => {
+    const builders: UIFilterBuilders = [
+        new NumberFilterBuilder({
+            name: $t(`40d7ac9f-f62d-4a9d-8b2f-5fcfb938c12f`),
+            type: NumberFilterFormat.Currency,
+            key: 'amountOpen',
+        }),
+        new NumberFilterBuilder({
+            name: $t(`5e73bf1c-6413-4fa5-8049-bff5faf4d8ea`),
+            type: NumberFilterFormat.Currency,
+            key: 'amountPending',
+        }),
     /* new MultipleChoiceFilterBuilder({
         name: 'Type',
         options: [
@@ -1294,39 +1301,45 @@ export const cachedOutstandingBalanceUIFilterBuilders: UIFilterBuilders = [
             },
         },
     }), */
-];
+    ];
 
-cachedOutstandingBalanceUIFilterBuilders.unshift(
-    new GroupUIFilterBuilder({
-        builders: cachedOutstandingBalanceUIFilterBuilders,
-    }),
-);
+    builders.unshift(
+        new GroupUIFilterBuilder({
+            builders,
+        }),
+    );
+
+    return builders;
+};
 
 //
 // ORGANIZATIONS
 //
 
-const organizationMemberUIFilterBuilders: UIFilterBuilders = [
-    new StringFilterBuilder({
-        name: $t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`),
-        key: 'name',
-    }),
-    new StringFilterBuilder({
-        name: $t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`),
-        key: 'firstName',
-    }),
-    new StringFilterBuilder({
-        name: $t(`171bd1df-ed4b-417f-8c5e-0546d948469a`),
-        key: 'lastName',
-    }),
-    new StringFilterBuilder({
-        name: $t(`7400cdce-dfb4-40e7-996b-4817385be8d8`),
-        key: 'email',
-    }),
-];
+const getOrganizationMemberUIFilterBuilders: () => UIFilterBuilders = () => {
+    const builders: UIFilterBuilders = [
+        new StringFilterBuilder({
+            name: $t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`),
+            key: 'name',
+        }),
+        new StringFilterBuilder({
+            name: $t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`),
+            key: 'firstName',
+        }),
+        new StringFilterBuilder({
+            name: $t(`171bd1df-ed4b-417f-8c5e-0546d948469a`),
+            key: 'lastName',
+        }),
+        new StringFilterBuilder({
+            name: $t(`7400cdce-dfb4-40e7-996b-4817385be8d8`),
+            key: 'email',
+        }),
+    ];
+
+    return builders;
+};
 
 export function useGetOrganizationUIFilterBuilders() {
-    
     const platform = usePlatform();
 
     const setupStepFilterNameMap: Record<SetupStepType, string> = {
@@ -1364,7 +1377,7 @@ export function useGetOrganizationUIFilterBuilders() {
             new GroupUIFilterBuilder({
                 name: $t(`97dc1e85-339a-4153-9413-cca69959d731`),
                 description: $t('6bf80a05-84b0-47ba-ad41-66e2a106669b'),
-                builders: organizationMemberUIFilterBuilders,
+                builders: getOrganizationMemberUIFilterBuilders(),
                 wrapper: {
                     members: {
                         $elemMatch: FilterWrapperMarker,
@@ -1503,8 +1516,6 @@ export function useGetOrganizationUIFilterBuilders() {
 }
 
 export function getOrganizationUIFilterBuildersForTags(platform: Platform) {
-    
-
     const all: UIFilterBuilder[] = [];
 
     const tagFilter = new MultipleChoiceFilterBuilder({

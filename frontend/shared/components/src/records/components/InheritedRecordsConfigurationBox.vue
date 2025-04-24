@@ -67,8 +67,7 @@
 <script setup lang="ts">
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { NavigationActions, PropertyFilterView, Toast, memberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, useEmitPatch, useFinancialSupportSettings, useOrganization } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { NavigationActions, PropertyFilterView, Toast, getMemberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, useEmitPatch, useFinancialSupportSettings, useOrganization } from '@stamhoofd/components';
 import { BooleanStatus, MemberDetails, MemberPropertyWithFilter, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, PatchAnswers, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref, watchEffect } from 'vue';
 import FillRecordCategoryView from '../FillRecordCategoryView.vue';
@@ -94,6 +93,7 @@ const { patched, addPatch } = useEmitPatch<OrganizationRecordsConfiguration>(pro
 const baseOrg = useOrganization();
 const organization = computed(() => props.overrideOrganization ?? baseOrg.value);
 const present = usePresent();
+const memberWithRegistrationsBlobUIFilterBuilders = getMemberWithRegistrationsBlobUIFilterBuilders();
 const filterBuilder = memberWithRegistrationsBlobUIFilterBuilders[0];
 const { financialSupportSettings } = useFinancialSupportSettings();
 
