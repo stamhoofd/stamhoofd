@@ -19262,5 +19262,273 @@
   "c264b163-1fec-45b3-9d69-4807ee8901a2": {
     "original": "Betaling voltooid",
     "translation": "Paiement effectué"
+  },
+  "54685a94-1ae2-46f9-aa4b-03f0b3939fd3": {
+    "original": "shared.untitled",
+    "translation": "shared.untitled"
+  },
+  "ceba695c-105b-49c9-aaa4-bf716c4aec6b": {
+    "original": "tags",
+    "translation": "étiquettes"
+  },
+  "c8f1e4d4-669c-4ccb-a9d9-30584f6c2d55": {
+    "original": "Via {organization}",
+    "translation": "Via {organization}"
+  },
+  "8daf57de-69cf-48fe-b09b-772c54473184": {
+    "original": "ID",
+    "translation": "ID"
+  },
+  "ccb47323-6aa7-4f37-a03c-848ed47eb412": {
+    "original": "E-mail",
+    "translation": "E-mail"
+  },
+  "a3765fff-0634-4ffe-a726-005fd8ba5dcd": {
+    "original": "Types",
+    "translation": "Types"
+  },
+  "af5f50da-3290-44bd-a104-896231e6ea08": {
+    "original": "Google",
+    "translation": "Google"
+  },
+  "662467b7-da51-4fe2-bff4-784c8f028e58": {
+    "original": "Single-Sign-On (SSO)",
+    "translation": "Single-Sign-On (SSO)"
+  },
+  "cce92c4c-1cdf-4a22-9f1a-89f888046cde": {
+    "original": "E-mails",
+    "translation": "Courriels"
+  },
+  "d101ec4a-219f-4f23-afa0-e8dc4862c354": {
+    "original": "Logo",
+    "translation": "Logo"
+  },
+  "e0a54e0c-03b3-43c6-b4ca-962c5b1d6772": {
+    "original": "Minimum",
+    "translation": "Minimum"
+  },
+  "49dd6919-a853-4004-b817-ae811de527ab": {
+    "original": "Deadlines",
+    "translation": "Échéances"
+  },
+  "6c9d45e5-c9f6-49c8-9362-177653414c7e": {
+    "original": "Type",
+    "translation": "Type"
+  },
+  "619a9ba5-895c-4334-a126-a1c4b780e87b": {
+    "original": "spinner",
+    "translation": "spinner"
+  },
+  "116f6ca0-c077-4468-b79b-d329f6a8db77": {
+    "original": "TTL",
+    "translation": "TTL"
+  },
+  "72974c5e-47ab-4c11-815c-e3d7a0f76b51": {
+    "original": "Standaardprijs",
+    "translation": "Prix standard"
+  },
+  "35d99159-ef2f-48d5-a34b-a648497a3ac7": {
+    "original": "Prijs per dag",
+    "translation": "Prix par jour"
+  },
+  "8e5dfe36-70c4-4011-916f-2b6f0e0b7648": {
+    "original": "Vaste prijs",
+    "translation": "Prix fixe"
+  },
+  "52bff8d2-52af-4d3f-b092-96bcfa4c0d03": {
+    "original": "Prijs",
+    "translation": "Prix"
+  },
+  "38e2c1aa-13f6-4339-8cfd-68c2603beb51": {
+    "original": "Voorbeeld",
+    "translation": "Exemple"
+  },
+  "4fe1ed50-7a5c-410a-8aa0-1625b5beb844": {
+    "original": "Voorbeeldstraat",
+    "translation": "Rue Exemple"
+  },
+  "ab2559af-f877-4ee0-bc40-ba563314cded": {
+    "original": "Voorbeeldstad",
+    "translation": "Ville Exemple"
+  },
+  "c9169aad-6b6f-4701-b079-a9936697984c": {
+    "original": "Tonen bij het registeren",
+    "translation": "Afficher lors de l'enregistrement"
+  },
+  "1abf9a19-7075-498f-b7d7-d47fa9cfe2dc": {
+    "original": "Verplicht aanvinkvakje",
+    "translation": "Case à cocher obligatoire"
+  },
+  "95480dc5-e4fd-4f88-9fe5-242f504180c0": {
+    "original": "Het aanvinkvakje moet aangevinkt worden bij het registreren als je dit aanzet. In het andere geval is het enkel een vermelding die impliciet aanvaard wordt.",
+    "translation": "La case à cocher doit être cochée lors de l'enregistrement si vous activez cette option. Dans le cas contraire, il ne s'agit que d'une mention implicitement acceptée."
+  },
+  "32f88e2b-d43e-49b2-b60b-dd2247700aeb": {
+    "original": "Herhaal jouw link in deze tekst door een deel van de tekst te selecteren en op de link-knop te drukken.",
+    "translation": "Répétez votre lien dans ce texte en sélectionnant une partie du texte et en cliquant sur le bouton lien."
+  },
+  "ab3872b4-6ef5-4584-af47-89e6a17e04b3": {
+    "original": "bv. privacyvoorwaarden",
+    "translation": "p. ex. conditions de confidentialité"
+  },
+  "a0fa9d2c-106e-4cb4-9e78-d137934fd2b1": {
+    "original": "Volledige link",
+    "translation": "Lien complet"
+  },
+  "00204508-e8ce-4b81-b978-4b0a4a0472f5": {
+    "original": "Upload PDF",
+    "translation": "Télécharger PDF"
+  },
+  "8b7c18d3-3588-4f07-a269-391283e4c2cc": {
+    "original": "Aanvinktekst",
+    "translation": "Texte de coche"
+  },
+  "8eb4e674-0b88-48b5-a4e7-ea9021caf952": {
+    "original": "Tekst die naast het aanvinkvakje staat",
+    "translation": "Texte qui se trouve à côté de la case à cocher"
+  },
+  "2e109d45-8777-45fe-9596-4a08785f5923": {
+    "original": "Nieuwe voorwaarden",
+    "translation": "Nouvelles conditions"
+  },
+  "ced74e50-34b9-4d83-a89d-542c4b0c4c45": {
+    "original": "Voorwaarden bewerken",
+    "translation": "Modifier les conditions"
+  },
+  "a1f2fa4d-10a4-4b67-af10-0fafda4b0246": {
+    "original": "Ben je zeker dat je deze voorwaarden wilt verwijderen?",
+    "translation": "Êtes-vous sûr de vouloir supprimer ces conditions ?"
+  },
+  "23229877-c51f-4e18-8563-88315be182aa": {
+    "original": "Voorwaarden",
+    "translation": "Conditions"
+  },
+  "6a297067-37ee-43f3-bffc-07968cf321c2": {
+    "original": "Vergrendel inschrijvingen",
+    "translation": "Vergrendel inschrijvingen"
+  },
+  "33a674c2-6981-442b-9bd4-01f71da7a159": {
+    "original": "Startdatum",
+    "translation": "Date de début"
+  },
+  "f852932e-380e-4b9a-916b-2bc008d8c08a": {
+    "original": "Einddatum",
+    "translation": "Date de fin"
+  },
+  "3b3be211-9a70-4345-abd6-760b39cef51d": {
+    "original": "Overschakelen naar",
+    "translation": "Passer à"
+  },
+  "5119aacc-24c1-43e6-b025-0efa7ea60ea3": {
+    "original": "Instellen als huidige",
+    "translation": "Définir comme actif"
+  },
+  "1c5ba032-2132-4bda-8aae-7f622f6f3a2a": {
+    "original": "Huidige",
+    "translation": "Actif"
+  },
+  "ebe7609c-0a44-4e91-b2d9-2d90be4269ed": {
+    "original": "De betaling werd voltooid.",
+    "translation": "Le paiement a été effectué."
+  },
+  "5690126d-651e-475d-9503-cfe6825a9735": {
+    "original": "Betaling mislukt",
+    "translation": "Paiement échoué"
+  },
+  "5e16870b-d00f-424d-b904-d412bd2b7368": {
+    "original": "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.",
+    "translation": "Le paiement n'a pas été effectué ou la banque a refusé le paiement. Veuillez réessayer."
+  },
+  "770381c5-61af-483c-a21f-f55a63baba3a": {
+    "original": "Bekijk de aangepaste overeenkomsten",
+    "translation": "Consultez les accords modifiés"
+  },
+  "2615ff5c-0ef3-4c6d-87c7-3caf7671a94a": {
+    "original": "We hebben een wijziging aangebracht in onze algemene voorwaarden, privacyvoorwaarden en verwerkingsovereenkomst. Bekijk deze eerst en accepteer de nieuwe overeenkomsten voor je verder gaat.",
+    "translation": "Nous avons apporté une modification à nos conditions générales, conditions de confidentialité et contrat de traitement. Veuillez d'abord les consulter et accepter les nouveaux contrats avant de continuer."
+  },
+  "df2f7ae1-ad07-4ec4-94c0-939dd3f6bc8d": {
+    "original": "Ik heb kennis genomen van",
+    "translation": "J'ai pris connaissance de"
+  },
+  "005c5e2d-8185-46e7-b1a0-4e4eaaf60d41": {
+    "original": "het privacybeleid",
+    "translation": "la politique de confidentialité"
+  },
+  "b22d5516-2644-4f4a-bcb5-ad93b82a0d61": {
+    "original": "Ik heb",
+    "translation": "J'ai"
+  },
+  "1943d3e6-4550-4240-b2f7-5aaa74e55f5d": {
+    "original": "de algemene voorwaarden",
+    "translation": "les conditions générales"
+  },
+  "2b08e5d7-6acc-4d7f-ad1a-30f349a79fe9": {
+    "original": "de verwerkersovereenkomst",
+    "translation": "le contrat de sous-traitance"
+  },
+  "4b52f8cb-2b1a-42ff-ab7e-c209e7874649": {
+    "original": "Aangepaste overeenkomsten",
+    "translation": "Accords adaptés"
+  },
+  "ca416d8b-8535-4680-a421-3c49cfff8e55": {
+    "original": "Je moet kennis hebben genomen van het privacybeleid.",
+    "translation": "Vous devez avoir pris connaissance de la politique de confidentialité."
+  },
+  "cebbc813-84c2-4f11-a144-1d1632bfb0f5": {
+    "original": "Je moet akkoord gaan met de algemene voorwaarden.",
+    "translation": "Vous devez accepter les conditions générales."
+  },
+  "92e9d94a-20c9-482a-a528-fd3c8a8fdded": {
+    "original": "Je moet akkoord gaan met de verwerkersovereenkomst.",
+    "translation": "Vous devez accepter le contrat de traitement."
+  },
+  "697d96d8-17dc-4e98-8571-87153985f3a1": {
+    "original": "Externe beheerdersrollen",
+    "translation": "Rôles d'administrateurs externes"
+  },
+  "b1cb5299-5325-4505-ba30-a7b0ae327679": {
+    "original": "Je kan een API-key verschillende rollen geven, net zoals een externe beheerder. Hiermee kan je jouw key beter beveiligen en enkel toegang geven waarvoor je het nodig hebt.",
+    "translation": "Vous pouvez attribuer différents rôles à une clé API, tout comme à un administrateur externe. Cela vous permet de mieux protéger votre clé et de n’y donner accès que lorsque cela est nécessaire."
+  },
+  "664063fe-6e8f-4439-bb86-07d346e803de": {
+    "original": "Een API-key heeft rate limits om overbelasting door foutief of inefficiënt gebruik te voorkomen.",
+    "translation": "Une API-key a des limites de débit pour éviter la surcharge due à une utilisation erronée ou inefficace."
+  },
+  "288fd815-8771-4524-9e4d-6e90bd2eec11": {
+    "original": "Ideaal voor de meeste API-keys.",
+    "translation": "Idéal pour la plupart des API-keys."
+  },
+  "be918896-7e92-4ac7-9cbe-fba5afdd8120": {
+    "original": "Maximaal 5 req/s; 120 requests per 2 minuten; 1.000 requests per uur; 2.000 requests per dag",
+    "translation": "Maximum 5 req/s ; 120 requêtes par 2 minutes ; 1 000 requêtes par heure ; 2 000 requêtes par jour"
+  },
+  "706d4485-be6b-418c-bbf1-5fe05e34e076": {
+    "original": "Aangeraden",
+    "translation": "Recommandé"
+  },
+  "36c579f6-0c98-4946-9d6b-eec3f0db56d6": {
+    "original": "Gemiddeld",
+    "translation": "Moyenne"
+  },
+  "cc4f0640-cdfb-473f-9f94-cc6e11b361ae": {
+    "original": "Voor een API-key die heel regelmatig de API moet aanroepen. Risico op overbelasting als de API niet correct is geimplementeerd en zware requests op korte tijd afvuurt.",
+    "translation": "Pour une API-key qui doit appeler l'API très régulièrement. Risque de surcharge si l'API n'est pas correctement implémentée et déclenche des requêtes lourdes en peu de temps."
+  },
+  "c1bfbd59-c12d-43e2-88f7-aa08798d1ea6": {
+    "original": "Maximaal 10 req/s; 240 requests per 2 minuten; 2.000 requests per uur; 14.400 requests per dag",
+    "translation": "Maximum 10 req/s ; 240 requêtes par 2 minutes ; 2 000 requêtes par heure ; 14 400 requêtes par jour"
+  },
+  "98469c78-6bd6-4354-b7d2-07e5b48aec12": {
+    "original": "Hoog",
+    "translation": "Haut"
+  },
+  "405a811e-ebb1-4948-84cd-8fb5860104e6": {
+    "original": "Ravot",
+    "translation": "Escarmouche"
+  },
+  "68914509-aa54-40c7-9f53-7b8a02149198": {
+    "original": "Ravot",
+    "translation": "Escarmouche"
   }
 }
