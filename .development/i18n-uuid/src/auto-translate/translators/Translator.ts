@@ -66,17 +66,23 @@ export abstract class Translator implements ITranslator {
             namespace: string;
         },
     ): string {
-        const consistentWordsText = consistentWords
-            ? ` Use this dictionary of translations for consistency: ` +
-              JSON.stringify(consistentWords) +
+        const consistentWordsText = consistentWords && Object.keys(consistentWords).length > 0
+            ? `Make sure certain words are translated consistently, most often we use the following words, so try to keep the following translations in sentences if the context makes sense: ` +
+              JSON.stringify(consistentWords, undefined, '  ') +
               "."
             : "";
 
-        const prompt = `Translate the values of the json array from ${originalLocal} to ${targetLocal}.${consistentWordsText}
+        const prompt = `Translate the values of the JSON array from ${originalLocal} to ${targetLocal}.${consistentWordsText}
 
-Important: do not translate words between curly brackets (even if it is a consistent word). For example {een-voorbeeld} must remain {een-voorbeeld}.
+Do not translate words between curly brackets (even if it is a consistent word). For example {een-voorbeeld} must remain {een-voorbeeld}, {werkjaar} must remain {werkjaar} (only if between curly brackets, so do translate werkjaar). If you don't have enough context to provide a correct translation, set the value to an empty string.
 
-Translate this array: ${JSON.stringify(batch)}`;
+Translate this array: 
+
+${JSON.stringify(batch, undefined, '  ')}
+
+Translate the above values of the JSON array from ${originalLocal} to ${targetLocal}. Remember, Do not translate words between curly brackets (even if it is a consistent word). For example {een-voorbeeld} must remain {een-voorbeeld}, {werkjaar} must remain {werkjaar} (only if between curly brackets, so do translate werkjaar).
+If you don't have enough context to provide a correct translation, set the value to an empty string.
+`;
 
         return prompt;
     }
@@ -315,6 +321,13 @@ ${error}`;
         original: string,
         translation: string,
     ): boolean {
+        if (original.length > 0 && translation.length === 0) {
+            const errorMessage = `The AI returned an empty string for a non-empty original string. Original: ${original}, translation: ${translation} - it is likely that the AI does not have enough context to provide a correct translation. Please check the translation or tranlate it manually.`;
+            console.error(errorMessage);
+            promptLogger.error(errorMessage);
+            return false;
+        }
+
         const regex = /{((?:.|\r|\n)*?)}/g;
         const originalMatches = original.matchAll(regex);
         const translationMatches = translation.matchAll(regex);
