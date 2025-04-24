@@ -131,10 +131,6 @@ const $rootCategory = computed(() => period.value.rootCategory);
 
 const $canEdit = computed(() => organizationManager.value.user.permissions ? $rootCategory.value && $rootCategory.value.canEdit($context.value.auth.permissions) : false);
 
-onActivated(() => {
-    urlHelpers.setTitle('Leden');
-});
-
 const getCategoryIcon = (category: GroupCategoryTree) => {
     if (category.settings.name.toLocaleLowerCase().includes('lessen') || category.settings.name.toLocaleLowerCase().includes('proefles')) {
         return 'education';

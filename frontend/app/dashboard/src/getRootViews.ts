@@ -70,7 +70,7 @@ export async function sessionFromOrganization(data: ({ organization: Organizatio
 
 export async function loadSessionFromUrl() {
     const parts = UrlHelper.shared.getParts();
-    const ignoreUris = ['login', 'aansluiten', 'start', 'activiteiten', 'mandje', 'leden'];
+    const ignoreUris = ['login', 'aansluiten', 'start', 'activiteiten', 'mandje', $t(`39c566d6-520d-4048-bb1a-53eeea3ccea7`)];
 
     let session: SessionContext | null = null;
 
