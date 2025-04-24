@@ -11,18 +11,18 @@ export enum SetupStepType {
 export function getSetupStepName(step: SetupStepType) {
     switch (step) {
         case SetupStepType.Responsibilities:
-            return $t(`96e61729-ea9c-45bf-82da-56e6a92e6b91`);
+            return $t(`d483a129-031a-4cfd-8cac-16a34134aad0`);
         case SetupStepType.Companies:
-            return $t(`d7fdebd4-7c3c-4316-b862-7ed777ff36ad`);
+            return $t(`c1dbdfd0-5111-4b1b-859b-95c8f30ad132`);
         case SetupStepType.Groups:
-            return $t(`f7999a55-e73a-49c4-ac9f-f5030d96ba43`);
+            return $t(`4e226f0b-e81f-4e27-b352-073fc4744c18`);
         case SetupStepType.Premises:
-            return $t(`e122d6c9-a452-4c70-9868-f53c2520aedc`);
+            return $t(`85125d9c-6a30-4211-830a-8aa9a2c75fc0`);
         case SetupStepType.Emails:
             return $t(`2fd98822-82eb-4f50-9396-5ddf9aa54a33`);
         case SetupStepType.Payment:
             return $t(`5df07dee-5d57-452a-b79b-844e1dc2db71`);
         case SetupStepType.Registrations:
-            return $t(`4070dda9-b556-49cd-ba17-aad535240835`);
+            return $t(`8cf35f34-4cbb-4eb5-93cd-308ab22adf56`);
     }
 }
