@@ -43,7 +43,7 @@
         "ship:fix": "lerna publish from-git --yes --no-private --otp $(op item get NPM --otp || :)",
         "translate:keys": "cd .development/i18n-uuid && yarn replace-keys",
         "translate:auto-translate": "cd shared/locales && yarn -s build && cd ../.. && cd .development/i18n-uuid && yarn auto-translate",
-        "translate": "cd .development/i18n-uuid && yarn start"
+        "translate": "cd shared/locales && yarn -s build && cd ../.. && cd .development/i18n-uuid && yarn start"
     },
     "dependencies": {
         "@babel/runtime": "^7.15.4",
