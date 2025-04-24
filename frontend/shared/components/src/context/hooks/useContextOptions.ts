@@ -62,7 +62,7 @@ export function appToUri(app: AppType | 'auto') {
 export function uriToApp(uri: string) {
     // Loop all answers of appToTranslatableUri in all languages and return the first match
     for (const language of languages) {
-        for (const app of ['admin', 'dashboard', 'registration', 'webshop', 'auto'] as const) {
+        for (const app of ['admin', 'dashboard', 'registration', 'auto'] as const) {
             const translated = appToTranslatableUri(app).get(language);
             if (translated && uri === translated) {
                 return app;

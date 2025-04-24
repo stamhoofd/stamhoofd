@@ -10,7 +10,6 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions, useManualPresent } from '@simonbackx/vue-app-navigation';
 import { getScopedAdminRootFromUrl } from '@stamhoofd/admin-frontend';
 import { CenteredMessage, CenteredMessageView, ModalStackEventBus, PromiseView, ReplaceRootEventBus, Toast, ToastBox, uriToApp } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { AppManager, LoginHelper, NetworkManager, SessionContext, UrlHelper } from '@stamhoofd/networking';
 import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';
 import { EmailAddressSettings, Platform } from '@stamhoofd/structures';
@@ -43,8 +42,6 @@ const root = new ComponentWithProperties(PromiseView, {
             else {
                 app = 'auto';
             }
-
-            console.log('booted with app', app, parts);
 
             let component: ComponentWithProperties;
             if (app === 'auto') {
