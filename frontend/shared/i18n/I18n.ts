@@ -7,7 +7,7 @@ export class I18n {
     locale = 'nl-BE';
     language: string = 'nl';
     country: CountryCode = Country.Belgium;
-    _debug = true;
+    _debug = false;
 
     // Reference to messages in loadedLocales
     messages: Map<string, string>;
