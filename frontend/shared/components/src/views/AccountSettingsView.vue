@@ -46,7 +46,7 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        Taal wijzigen
+                        {{ $t('a9f552ad-87f3-4ed4-8fb6-2aea378b9665') }}
                     </h3>
                     <p class="style-description-small">
                         {{ LanguageHelper.getNativeName(I18nController.shared.language) }}
