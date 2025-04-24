@@ -26,7 +26,7 @@ async function showMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t('Taal'),
+                name: $t('cf9f3bc1-51d7-438b-832c-8757ee79e0d4'),
                 description: LanguageHelper.getName(editorLanguage.value),
                 childMenu: new ContextMenu([
                     I18nController.shared.availableLanguages.map(lang => new ContextMenuItem({
@@ -34,9 +34,9 @@ async function showMenu(event: MouseEvent) {
                         selected: lang === editorLanguage.value,
                         description: (editorContext.hasLanguage(lang)
                             ? (
-                                    !editorContext.isComplete(lang) ? $t('Onvolledig') : undefined
+                                    !editorContext.isComplete(lang) ? $t('edcbd633-f0f9-4e7f-97bc-e91a6eb1fff0') : undefined
                                 )
-                            : $t('Ongebruikt')),
+                            : $t('f910a622-522a-4507-89a1-8cae473ea043')),
                         action: () => {
                             editorLanguage.value = lang;
                         },
