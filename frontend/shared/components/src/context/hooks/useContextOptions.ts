@@ -1,5 +1,5 @@
 import { SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { Organization } from '@stamhoofd/structures';
+import { Organization, TranslatedString } from '@stamhoofd/structures';
 
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { PromiseComponent } from '../../containers/AsyncComponent';
@@ -7,6 +7,7 @@ import { useOrganization, usePlatform, useUser } from '../../hooks';
 import { ReplaceRootEventBus } from '../../overlays/ModalStackEventBus';
 import { AppType, useAppContext } from '../appContext';
 import { Formatter } from '@stamhoofd/utility';
+import { languages } from '@stamhoofd/locales';
 
 export type Option = {
     id: string;
@@ -16,30 +17,59 @@ export type Option = {
     userDescription?: string;
 };
 
-export function appToUri(app: AppType | 'auto') {
+/**
+ * urls are hardcoded because they need to work without a current language
+ */
+export function appToTranslatableUri(app: AppType | 'auto'): TranslatedString {
     switch (app) {
         case 'admin':
-            return Formatter.slug($t(`3a18ce8e-5ec6-48b1-a442-906db662c58f`));
+            return new TranslatedString({
+                nl: 'platform',
+                en: 'platform',
+                fr: 'plateforme',
+            });
         case 'dashboard':
-            return Formatter.slug($t(`beheerdersportaal`));
+            return new TranslatedString({
+                nl: 'dashboard',
+                en: 'dashboard',
+                fr: 'dashboard',
+            });
         case 'registration':
-            return Formatter.slug($t(`39c566d6-520d-4048-bb1a-53eeea3ccea7`));
+            return new TranslatedString({
+                nl: 'leden',
+                en: 'members',
+                fr: 'membres',
+            });
+        case 'webshop':
+            return new TranslatedString({
+                nl: 'shop',
+                en: 'shop',
+                fr: 'shop',
+            });
         case 'auto':
-            return 'auto';
+            return new TranslatedString({
+                nl: 'auto',
+                en: 'auto',
+                fr: 'auto',
+            });
     }
 }
 
+export function appToUri(app: AppType | 'auto') {
+    return appToTranslatableUri(app).toString();
+}
+
 export function uriToApp(uri: string) {
-    switch (uri) {
-        case appToUri('admin'):
-            return 'admin';
-        case appToUri('dashboard'):
-            return 'dashboard';
-        case appToUri('registration'):
-            return 'registration';
-        default:
-            return 'auto';
+    // Loop all answers of appToTranslatableUri in all languages and return the first match
+    for (const language of languages) {
+        for (const app of ['admin', 'dashboard', 'registration', 'webshop', 'auto'] as const) {
+            const translated = appToTranslatableUri(app).get(language);
+            if (translated && uri === translated) {
+                return app;
+            }
+        }
     }
+    return 'auto';
 }
 
 export function useContextOptions() {

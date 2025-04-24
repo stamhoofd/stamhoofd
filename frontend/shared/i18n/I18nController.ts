@@ -412,7 +412,7 @@ export class I18nController {
             country = STAMHOOFD.fixedCountry;
         }
 
-        const def = new I18nController($context, language, country, namespace);
+        const def = new I18nController($context, language ?? defaultLanguage ?? Language.Dutch, country, namespace);
         def.defaultCountryCode = defaultCountry ? countryToCode({ country: defaultCountry, defaultCountryCode: def.defaultCountryCode }) : def.defaultCountryCode;
         def.defaultLanguage = defaultLanguage ?? def.defaultLanguage;
         I18nController.shared = def;
