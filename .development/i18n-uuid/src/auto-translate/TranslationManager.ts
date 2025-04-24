@@ -23,6 +23,29 @@ export class TranslationManager {
         this.namespaces = this.getAllNamespacesInProject();
     }
 
+    iterateNonDefaultLocalesWithNamespace(callbackfn: (locale: string, namespace: string) => void, locales?: string[]) {
+        const otherLocales = this.locales.filter(
+            (locale) => {
+                if (locale === globals.DEFAULT_LOCALE || this.getMappedLocale(locale) ===
+                globals.DEFAULT_LOCALE) {
+                    return false;
+                }
+
+                if (locales) {
+                    return locales.includes(locale);
+                }
+
+                return true;
+            },
+        );
+
+        for(const namespace of this.namespaces) {
+            for (const locale of otherLocales) {
+                callbackfn(locale, namespace);
+            }
+        }
+    }
+
     getMappedLocale(locale: string): string {
         const parts = locale.split("-");
         const language = parts[0];

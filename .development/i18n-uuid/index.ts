@@ -1,5 +1,6 @@
 import { Command } from "commander";
 import { autoTranslate } from "./src/auto-translate/auto-translate";
+import { filterInvalidAutoTranslations } from "./src/auto-translate/AutoTranslatorPostValidator";
 import { createAutoTranslateComparison } from "./src/auto-translate/create-auto-translate-comparison";
 import { replaceKeys } from "./src/replace-keys/replace-keys";
 import { fileCache } from "./src/replace-text/FileCache";
@@ -85,6 +86,15 @@ const autoTranslateCommand = program
 autoTranslateOptions.forEach(([flags, description]) =>
     autoTranslateCommand.option(flags, description),
 );
+
+const filterInvalidAutoTranslationsCommand = program
+    .command("filter-invalid-auto-translations")
+    .action(async (args) => {
+        filterInvalidAutoTranslations(args);
+    });
+
+filterInvalidAutoTranslationsCommand.option("--dry-run", "Do not remove the invalid auto translations.");
+
 
 program
     .command("create-comparison")
