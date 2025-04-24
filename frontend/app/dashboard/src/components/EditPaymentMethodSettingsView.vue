@@ -39,10 +39,10 @@
             </p>
 
             <p v-if="transferType === 'Fixed' && type === 'webshop'" class="style-description-small">
-                {{ $t('152f1003-ba4e-4ae0-acef-475bef27e4a5') }} <code v-copyable class="style-inline-code style-copyable" :v-text="$t('9e2430e8-5733-414c-9831-f7c455836691')" />, <code v-copyable class="style-inline-code style-copyable" :v-text="$t('a9947119-083e-4f5f-a088-7ec605ad8e3f')" /> {{ $t('411cf334-eebb-4f27-beb6-d81bd544c3f5') }} <code v-copyable class="style-inline-code style-copyable" :v-text="$t('61b6890f-3b3e-4d69-96fe-687e1366e738')" />
+                {{ $t('152f1003-ba4e-4ae0-acef-475bef27e4a5') }} <code v-copyable class="style-inline-code style-copyable" :v-text="'{{' + $t('naam') + '}}'" />, <code v-copyable class="style-inline-code style-copyable" :v-text="'{{' + $t('email') + '}}'" /> {{ $t('411cf334-eebb-4f27-beb6-d81bd544c3f5') }} <code v-copyable class="style-inline-code style-copyable" :v-text="'{{' + $t('nr') + '}}'" />
             </p>
             <p v-else-if="transferType === 'Fixed' && type === 'registration'" class="style-description-small">
-                {{ $t('152f1003-ba4e-4ae0-acef-475bef27e4a5') }} <code v-copyable class="style-inline-code style-copyable" :v-text="$t('9e2430e8-5733-414c-9831-f7c455836691')" />
+                {{ $t('152f1003-ba4e-4ae0-acef-475bef27e4a5') }} <code v-copyable class="style-inline-code style-copyable" :v-text="'{{' + $t('naam') + '}}'" />
             </p>
 
             <hr><h2>{{ $t('717310b7-527a-4870-99c4-b6b3a42fe3fa') }}</h2>
