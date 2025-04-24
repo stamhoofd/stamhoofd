@@ -12,9 +12,8 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, cachedOutstandingBalanceUIFilterBuilders, Column, ComponentExposed, EmailView, GlobalEventBus, ModernTableView, ReceivableBalanceView, RecipientChooseOneOption, RecipientMultipleChoiceOption, TableAction, TableActionSelection, useFeatureFlag, useOrganization, usePlatform, useReceivableBalancesObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
+import { AsyncTableAction, Column, ComponentExposed, EmailView, getCachedOutstandingBalanceUIFilterBuilders, GlobalEventBus, ModernTableView, ReceivableBalanceView, RecipientChooseOneOption, RecipientMultipleChoiceOption, TableAction, TableActionSelection, useFeatureFlag, useOrganization, usePlatform, useReceivableBalancesObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, mergeFilters, ReceivableBalance, ReceivableBalanceType, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -45,7 +44,7 @@ const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTa
 const configurationId = computed(() => {
     return 'receivable-balances';
 });
-const filterBuilders = cachedOutstandingBalanceUIFilterBuilders;
+const filterBuilders = getCachedOutstandingBalanceUIFilterBuilders();
 
 function getRequiredFilter(): StamhoofdFilter | null {
     if (!props.objectType) {

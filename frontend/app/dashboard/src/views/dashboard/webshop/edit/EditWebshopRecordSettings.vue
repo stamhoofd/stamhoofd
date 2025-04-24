@@ -46,7 +46,7 @@
 <script lang="ts" setup>
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { Checkbox, EditRecordCategoryView, RecordCategoryRow, RecordEditorSettings, RecordEditorType, STErrorsDefault, STList, STListItem, SaveView, checkoutUIFilterBuilders } from '@stamhoofd/components';
+import { Checkbox, EditRecordCategoryView, RecordCategoryRow, RecordEditorSettings, RecordEditorType, STErrorsDefault, STList, STListItem, SaveView, getCheckoutUIFilterBuilders } from '@stamhoofd/components';
 import { Checkout, PrivateWebshop, RecordCategory, WebshopMetaData } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { UseEditWebshopProps, useEditWebshop } from './useEditWebshop';
@@ -85,7 +85,7 @@ const editorSettings = computed(() => {
         type: RecordEditorType.Webshop,
         dataPermission: false,
         filterBuilder: (_categories: RecordCategory[]) => {
-            return checkoutUIFilterBuilders[0];
+            return getCheckoutUIFilterBuilders()[0];
         },
         exampleValue: Checkout.create({}),
     });
