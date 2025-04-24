@@ -230,6 +230,13 @@ Translate the above values of the JSON array from ${originalLocal} to ${targetLo
                             },
                         );
 
+                        if(validatedBatch.length > 10) {
+                            // throw error if all translations in batch are equal to original
+                            if(validatedBatch.every(({uuid, value}) => value === translations[uuid])) {
+                                throw new Error('All translations in batch are equal to original');
+                            }
+                        }
+
                         if (afterBatchTranslated) {
                             afterBatchTranslated(validatedBatch);
                         }
