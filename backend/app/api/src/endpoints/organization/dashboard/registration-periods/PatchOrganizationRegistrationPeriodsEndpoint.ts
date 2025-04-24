@@ -500,7 +500,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 throw new Error('Unexpected missing permissions');
             }
             const resourcePermissions = ResourcePermissions.create({
-                resourceName: model.settings.name,
+                resourceName: model.settings.name.toString(),
                 level: PermissionLevel.Full,
             });
             const patch = resourcePermissions.createInsertPatch(PermissionsResourceType.Groups, model.id, organizationPermissions);
