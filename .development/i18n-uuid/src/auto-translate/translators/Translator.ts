@@ -331,6 +331,13 @@ ${error}`;
             return false;
         }
 
+        if(original.length > 20 && translation === original) {
+            const errorMessage = `Translation and original are equal: ${original}`;
+            console.error(errorMessage);
+            promptLogger.error(errorMessage);
+            return false;
+        }
+
         const regex = /{((?:.|\r|\n)*?)}/g;
         const originalMatches = original.matchAll(regex);
         const translationMatches = translation.matchAll(regex);
