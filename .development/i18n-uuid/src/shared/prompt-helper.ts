@@ -1,13 +1,13 @@
 import readline from 'readline/promises';
 
 
-export enum ReplaceTextPromptResult {
+export enum YesNoOrDoubt {
     Yes,
     No,
     Doubt
 }
 
-export async function promptReplaceText(message: string): Promise<ReplaceTextPromptResult> {
+export async function promptYesNoOrDoubt(message: string): Promise<YesNoOrDoubt> {
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,
@@ -35,19 +35,19 @@ export async function promptReplaceText(message: string): Promise<ReplaceTextPro
     return answerToResult(answer);
 }
 
-function answerToResult(answer: string): ReplaceTextPromptResult {
+function answerToResult(answer: string): YesNoOrDoubt {
     if(!answer) {
-        return ReplaceTextPromptResult.Yes;
+        return YesNoOrDoubt.Yes;
     }
     
     switch(answer.trim().toLowerCase()) {
         case 'y':
         case 'yes': {
-            return ReplaceTextPromptResult.Yes;
+            return YesNoOrDoubt.Yes;
         }
         case 'd': {
-            return ReplaceTextPromptResult.Doubt;
+            return YesNoOrDoubt.Doubt;
         }
-        default: return ReplaceTextPromptResult.No;
+        default: return YesNoOrDoubt.No;
     }
 }
