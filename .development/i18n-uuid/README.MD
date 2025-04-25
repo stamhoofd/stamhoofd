@@ -32,6 +32,12 @@ Finds missing or changed translations and translate with an Ai-model.
 - `--translator <translator-type>`: The translator type (GoogleGemini, MistralLarge, MistralSmall, OpenAi or Claude).
 - `--locales <locales...>`: Specify the locals to translate (by default translations for all locals will be added).
 
+### loop-invalid-auto-translations
+Loop all invalid auto translations. Choose with a prompt if the translation is correct. If the translation is correct it will be added to the translations and removed from the auto translations, if not it will be removed from the machine translations. In case of doubt (key 'd'), the translation will remain in the machine translations.
+
+#### arguments
+- `--dry-run`: Do not remove the invalid auto translations.
+
 ### create-comparison
 Create a comparison of the machine translations for each locale and write the comparison in the output directory.
 
