@@ -12,7 +12,6 @@ export interface AutoTranslatorPostValidatorOptions {
 export class AutoTranslatorPostValidator {
     constructor(private readonly manager: TranslationManager
     ) {
-
     }
 
     filterInvalidTranslations({dryRun = false}: AutoTranslatorPostValidatorOptions = {}) {

@@ -2,6 +2,7 @@ import { Command } from "commander";
 import { autoTranslate } from "./src/auto-translate/auto-translate";
 import { filterInvalidAutoTranslations, loopAndPromptValidateInvalidTranslations } from "./src/auto-translate/AutoTranslatorPostValidator";
 import { createAutoTranslateComparison } from "./src/auto-translate/create-auto-translate-comparison";
+import { fixDoubleTranslations } from "./src/auto-translate/fix-double-translations";
 import { replaceKeys } from "./src/replace-keys/replace-keys";
 import { fileCache } from "./src/replace-text/FileCache";
 import { replaceText } from "./src/replace-text/replace-text";
@@ -103,6 +104,11 @@ const loopInvalidAutoTranslationsCommand = program
 
 loopInvalidAutoTranslationsCommand.option("--dry-run", "Do not remove the invalid auto translations.");
 
+const fixDoubleTranslationsCommand = program
+    .command("fix-double-translations")
+    .action(async (args) => {
+        fixDoubleTranslations();
+    });
 
 program
     .command("create-comparison")
