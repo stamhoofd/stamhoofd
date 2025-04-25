@@ -46,6 +46,29 @@ export class TranslationManager {
         }
     }
 
+    async iterateNonDefaultLocalesWithNamespaceAsync(callbackfn: (locale: string, namespace: string) => Promise<void>, locales?: string[]) {
+        const otherLocales = this.locales.filter(
+            (locale) => {
+                if (locale === globals.DEFAULT_LOCALE || this.getMappedLocale(locale) ===
+                globals.DEFAULT_LOCALE) {
+                    return false;
+                }
+
+                if (locales) {
+                    return locales.includes(locale);
+                }
+
+                return true;
+            },
+        );
+
+        for(const namespace of this.namespaces) {
+            for (const locale of otherLocales) {
+                await callbackfn(locale, namespace);
+            }
+        }
+    }
+
     getMappedLocale(locale: string): string {
         const parts = locale.split("-");
         const language = parts[0];
@@ -76,6 +99,14 @@ export class TranslationManager {
                 this.getSourcePath(locale, namespace),
             ) ?? {}
         );
+    }
+
+    setSourceTranslation({key, value, locale, namespace}: {key: string, value: string, locale: string, namespace: string}) {
+        const path = this.getSourcePath(locale, namespace);
+        const source = this.readCompleteSource(path) ?? {};
+        source[key] = value;
+
+        fs.writeFileSync(path, JSON.stringify(source, null, 2));
     }
 
     readMachineTranslationDictionary(
@@ -114,6 +145,17 @@ export class TranslationManager {
     readDist(locale: string, namespace: string): Translations {
         const path = this.getDistPath(locale, namespace);
         return this.readTranslationsAllowNull(path) ?? {};
+    }
+
+    removeFromMachineTranslationDictionary(args: { translator: TranslatorType; locale: string; namespace: string, key: string }) {
+        const existingDictionary = this.readMachineTranslationDictionary(
+            args.translator,
+            args.locale,
+            args.namespace,
+        );
+
+        delete existingDictionary[args.key];
+        this.setMachineTranslationDictionary(existingDictionary, args);
     }
 
     addMachineTranslationDictionary(
@@ -306,14 +348,22 @@ export class TranslationManager {
         return parsedDictionary;
     }
 
-    private readTranslationsAllowNull(filePath: string): Translations | null {
+    private readCompleteSource(filePath: string): (Translations & any) | null {
         if (!fs.existsSync(filePath)) {
             return null;
         }
 
-        const parsedTranslations = JSON.parse(
+        return JSON.parse(
             fs.readFileSync(filePath, "utf8"),
         );
+    }
+
+    private readTranslationsAllowNull(filePath: string): Translations | null {
+        const parsedTranslations = this.readCompleteSource(filePath);
+        if(parsedTranslations === null) {
+            return null;
+        }
+
         for (const [key, value] of Object.entries(parsedTranslations)) {
             if (typeof value === "object") {
                 delete parsedTranslations[key];

@@ -12,6 +12,7 @@
         "replace-keys": "yarn build && node --enable-source-maps ./dist/index.js replace-keys",
         "auto-translate": "yarn build && node --enable-source-maps ./dist/index.js auto-translate",
         "filter-invalid-auto-translations": "yarn build && node --enable-source-maps ./dist/index.js filter-invalid-auto-translations",
+        "loop-invalid-auto-translations": "yarn build && node --enable-source-maps ./dist/index.js loop-invalid-auto-translations",
         "create-comparison": "yarn build && node --enable-source-maps ./dist/index.js create-comparison",
         "test": "jest --runInBand",
         "test:build": "yarn -s build && yarn -s test",

@@ -1,6 +1,6 @@
 import chalk from "chalk";
+import { promptYesNoOrDoubt, YesNoOrDoubt } from "../shared/prompt-helper";
 import { getChangedLines, removeChangeMarkers } from "./git-helper";
-import { promptReplaceText, ReplaceTextPromptResult } from "./prompt-helper";
 import { getWhiteSpaceBeforeAndAfter, splitInParts } from "./regex-helper";
 import { shouldTranslateTypescriptString } from "./should-translate-typescript-string";
 import { wrapWithTranslationFunction } from "./translation-helper";
@@ -170,13 +170,13 @@ export class TypescriptTranslator {
         }
     
         this.logContext(part, translatedPart, processedParts, unprocessedPart);
-        const result = await promptReplaceText(chalk.yellow(`> Accept (press [y] or [enter])?`));
+        const result = await promptYesNoOrDoubt(chalk.yellow(`> Accept (press [y] or [enter])?`));
 
-        if(result === ReplaceTextPromptResult.Yes) {
+        if(result === YesNoOrDoubt.Yes) {
             return true;
         }
 
-        if(result === ReplaceTextPromptResult.Doubt && this.options.onPromptDoubt) {
+        if(result === YesNoOrDoubt.Doubt && this.options.onPromptDoubt) {
             this._isDoubt = true;
             this.options.onPromptDoubt();
         }
