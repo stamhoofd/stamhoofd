@@ -7,9 +7,9 @@ export function useGlobalRoutes() {
     const modalStackComponent = useModalStackComponent();
     const context = useContext();
 
-    const present = (component: ComponentWithProperties) => {
+    const present = async (component: ComponentWithProperties) => {
         const currentPath = UrlHelper.shared.getPath({ removeLocale: true });
-        modalStackComponent.value.present({
+        await modalStackComponent.value?.present({
             adjustHistory: true,
             animated: false,
             force: true,
@@ -42,7 +42,7 @@ export function useGlobalRoutes() {
             const cancel = queryString.get('cancel') === 'true';
 
             if (paymentId) {
-                present(new ComponentWithProperties(PaymentPendingView, {
+                await present(new ComponentWithProperties(PaymentPendingView, {
                     server: context.value.optionalAuthenticatedServer,
                     paymentId,
                     cancel,
@@ -82,7 +82,7 @@ export function useGlobalRoutes() {
             }
         }
 
-        if (parts.length > 0 && parts[0] == 'reset-password') {
+        if (parts.length > 0 && parts[0] === 'reset-password') {
             // Clear initial url before pushing to history, because else, when closing the popup, we'll get the original url...
 
             const token = queryString.get('token');
@@ -93,7 +93,7 @@ export function useGlobalRoutes() {
                 return;
             }
 
-            present(new ComponentWithProperties(ForgotPasswordResetView, { token }));
+            await present(new ComponentWithProperties(ForgotPasswordResetView, { token }));
         }
     });
 }
