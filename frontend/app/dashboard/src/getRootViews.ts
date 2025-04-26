@@ -386,14 +386,6 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
         );
     }
 
-    // todo: accept terms view
-    // if (this.fullAccess && !this.$organization.meta.didAcceptLatestTerms) {
-    //     // Show new terms view if needed
-    //     LoadComponent(() => import(/* webpackChunkName: "AcceptTermsView" */ "./AcceptTermsView.vue"), {}, { instant: true }).then((component) => {
-    //         this.present(component.setDisplayStyle("popup").setAnimated(false))
-    //     }).catch(console.error)
-    // }
-
     return wrapContext(reactiveSession, 'dashboard',
         ({ platformManager }) => new ComponentWithProperties(AuthenticatedView, {
             root: wrapWithModalStack(
