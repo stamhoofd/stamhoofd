@@ -5,6 +5,7 @@
         "jsx": "preserve",
         "importHelpers": true,
         "moduleResolution": "node",
+        "noFallthroughCasesInSwitch": true,
         "experimentalDecorators": true,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
