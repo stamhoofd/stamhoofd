@@ -28,7 +28,7 @@
                 <button v-else-if="!showSelection && isIOS && false" key="iOSSelect" type="button" class="button navigation" @click="setShowSelection(true)">
                     {{ $t('bbc1d7b9-1b97-426f-b8a6-df946bd50d4d') }}
                 </button>
-                <button v-else key="actions" v-long-press="(e) => showActions(true, e)" type="button" class="button icon more navigation" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)"/>
+                <button v-else key="actions" v-long-press="(e: any) => showActions(true, e)" type="button" class="button icon more navigation" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)"/>
             </template>
         </STNavigationBar>
 
@@ -81,7 +81,7 @@
                     </div>
 
                     <div ref="tableBody" class="table-body" :style="{ height: totalHeight+'px' }">
-                        <div v-for="row of visibleRows" :key="row.id" v-long-press="(e) => onRightClickRow(row, e)" class="table-row" :class="{focused: isRowFocused(row) }" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }" @click="onClickRow(row, $event)" @contextmenu.prevent="(event) => onRightClickRow(row, event)">
+                        <div v-for="row of visibleRows" :key="row.id" v-long-press="(e: any) => onRightClickRow(row, e)" class="table-row" :class="{focused: isRowFocused(row) }" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }" @click="onClickRow(row, $event)" @contextmenu.prevent="(event) => onRightClickRow(row, event)">
                             <label v-if="showSelection" class="selection-column" @click.stop>
                                 <Checkbox v-if="row.value" :key="row.value.id" :model-value="row.cachedSelectionValue" @update:model-value="setSelectionValue(row, $event)"/>
                                 <Checkbox v-else :model-value="isAllSelected"/>
@@ -126,7 +126,7 @@
                 <span :class="'icon '+action.icon"/>
             </button>
 
-            <button v-long-press="(e) => showActions(false, e)" type="button" class="button text small column selected" @click="showActions(false, $event)">
+            <button v-long-press="(e: any) => showActions(false, e)" type="button" class="button text small column selected" @click="showActions(false, $event)">
                 <span class="icon more"/>
             </button>
         </STButtonToolbar>

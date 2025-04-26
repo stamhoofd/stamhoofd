@@ -12,14 +12,23 @@ export class TranslatedStringPatch implements Encodeable, Patchable<TranslatedSt
     /**
      * Setting to null will remove the translation (if it exists).
      */
-    translations: LanguageMapPatch;
+    translations: LanguageMapPatch | string;
 
-    constructor(translations: LanguageMapPatch) {
+    constructor(translations: LanguageMapPatch | string) {
         this.translations = translations;
     }
 
     patch(patch: TranslatedStringPatch): this {
-        const c = new TranslatedStringPatch(Object.assign({}, this.translations)) as this;
+        if (typeof patch.translations === 'string') {
+            return patch as this;
+        }
+
+        if (typeof this.translations === 'string' && Object.keys(patch.translations).length === 0) {
+            // Ignore
+            return this;
+        }
+
+        const c = typeof this.translations === 'string' ? new TranslatedStringPatch({}) as this : new TranslatedStringPatch({ ...this.translations }) as this;
         for (const key in patch.translations) {
             if (Object.prototype.hasOwnProperty.call(patch.translations, key)) {
                 const value = patch.translations[key] as string | null;
@@ -30,22 +39,26 @@ export class TranslatedStringPatch implements Encodeable, Patchable<TranslatedSt
     }
 
     encode(context: EncodeContext) {
+        if (typeof this.translations === 'string') {
+            return this.translations;
+        }
         return { ...this.translations, _isPatch: true };
     }
 }
 
 export class TranslatedString implements Encodeable, Patchable<TranslatedStringPatch>, StringLikeObject {
-    translations: LanguageMap;
+    translations: LanguageMap | string; // set to a string if not known in which language it is
 
     constructor(translations: LanguageMap | string = '') {
-        if (typeof translations === 'string') {
-            this.translations = {
-                [$getLanguage()]: translations,
-            };
-        }
-        else {
-            this.translations = translations;
-        }
+        this.translations = translations;
+    }
+
+    static create(translations: LanguageMap | string = '') {
+        return new TranslatedString(translations);
+    }
+
+    get isDefault(): boolean {
+        return typeof this.translations === 'string';
     }
 
     get length(): number {
@@ -109,6 +122,11 @@ export class TranslatedString implements Encodeable, Patchable<TranslatedStringP
     }
 
     patch(patch: string | LanguageMapPatch | TranslatedStringPatch | TranslatedString): this {
+        if (typeof patch === 'string') {
+            // Set to simple string without translations
+            return TranslatedString.create(patch) as this;
+        }
+
         if (patch instanceof TranslatedString) {
             return patch as this;
         }
@@ -117,7 +135,17 @@ export class TranslatedString implements Encodeable, Patchable<TranslatedStringP
             return this.patch(TranslatedString.patch(patch));
         }
 
-        const c = new TranslatedString({ ...this.translations }) as this;
+        if (typeof patch.translations === 'string') {
+            // Set to simple string without translations
+            return TranslatedString.create(patch.translations) as this;
+        }
+
+        if (typeof this.translations === 'string' && Object.keys(patch.translations).length === 0) {
+            // Ignore
+            return this;
+        }
+
+        const c = typeof this.translations === 'string' ? new TranslatedString({}) as this : new TranslatedString({ ...this.translations }) as this;
         for (const key in patch.translations) {
             if (key in patch.translations) {
                 const value = patch.translations[key] as string | null;
@@ -141,7 +169,18 @@ export class TranslatedString implements Encodeable, Patchable<TranslatedStringP
         return new TranslatedStringPatch(patch);
     }
 
+    get languages(): Language[] {
+        if (typeof this.translations === 'string') {
+            return [];
+        }
+        return Object.keys(this.translations) as Language[];
+    }
+
     getIfExists(language: Language): string | null {
+        if (typeof this.translations === 'string') {
+            return this.translations;
+        }
+
         if (this.translations[language] !== undefined) {
             return this.translations[language] as string;
         }
@@ -149,6 +188,10 @@ export class TranslatedString implements Encodeable, Patchable<TranslatedStringP
     }
 
     get(language: Language): string {
+        if (typeof this.translations === 'string') {
+            return this.translations;
+        }
+
         if (this.translations[language] !== undefined) {
             return this.translations[language] as string;
         }
@@ -160,9 +203,46 @@ export class TranslatedString implements Encodeable, Patchable<TranslatedStringP
         return this.translations[Language.English] ?? this.translations[Language.Dutch] ?? this.translations[keys[0]];
     }
 
+    static field(options: { version?: number }) {
+        return {
+            ...options,
+            decoder: TranslatedStringDecoder,
+            upgrade: TranslatedString.upgrade,
+            downgrade: TranslatedString.downgrade,
+            upgradePatch: (str: PatchType<string>): PatchType<TranslatedString> => {
+                if (!str || typeof str !== 'string') {
+                    return new TranslatedStringPatch({});
+                }
+                return new TranslatedStringPatch({ [Language.Dutch]: str }); // Note: before the version we expect the string to be in Dutch
+            },
+            downgradePatch: (name: TranslatedStringPatch): PatchType<string> => {
+                return name.translations[$getLanguage()] ?? name.translations[Language.English] ?? name.translations[Language.Dutch] ?? undefined;
+            },
+        };
+    }
+
+    static upgrade(data: any): TranslatedString {
+        if (typeof data === 'string') {
+            return new TranslatedString(data);
+        }
+        if (data instanceof TranslatedString) {
+            return data;
+        }
+        console.warn('TranslatedString: Upgrading from unknown type', data);
+        return new TranslatedString();
+    }
+
+    static downgrade(data: TranslatedString): string {
+        return data.toString();
+    }
+
     encode(context: EncodeContext) {
-        if (context.version < TranslationEncodeVersion) {
-            return this.get($getLanguage());
+        const keys = Object.keys(this.translations);
+        if (keys.length === 0) {
+            return '';
+        }
+        if (keys.length === 1) {
+            return this.translations[keys[0]];
         }
         return this.translations;
     }
@@ -170,6 +250,11 @@ export class TranslatedString implements Encodeable, Patchable<TranslatedStringP
 
 export class TranslatedStringPatchDecoderStatic implements Decoder<PatchType<TranslatedString>> {
     decode(data: Data): PatchType<TranslatedString> {
+        if (typeof data.value === 'string') {
+            // Allowed
+            return new TranslatedStringPatch(data.value);
+        }
+
         if (typeof data.value !== 'object') {
             throw new SimpleError({
                 code: 'invalid_field',

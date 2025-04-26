@@ -1,12 +1,12 @@
 <template>
     <article class="container">
         <hr><h2 class="style-with-button">
-            <button v-long-press="(e) => switchCycle(e)" type="button" class="button" @click.prevent="switchCycle" @contextmenu.prevent="switchCycle">
+            <button v-long-press="(e: any) => switchCycle(e)" type="button" class="button" @click.prevent="switchCycle" @contextmenu.prevent="switchCycle">
                 {{ visibleRegistrationsTitle }}
                 <span class="icon arrow-down-small" />
             </button>
             <div>
-                <button v-if="hasWrite" v-long-press="(e) => addRegistration(e)" type="button" class="button icon add gray" @click.prevent="addRegistration" @contextmenu.prevent="addRegistration" />
+                <button v-if="hasWrite" v-long-press="(e: any) => addRegistration(e)" type="button" class="button icon add gray" @click.prevent="addRegistration" @contextmenu.prevent="addRegistration" />
             </div>
         </h2>
 
@@ -24,7 +24,7 @@
         </template>
 
         <STList v-if="hasWrite && app !== 'registration'">
-            <ViewMemberRegistrationRow v-for="registration in visibleRegistrations" :key="registration.id" :member="member" :registration="registration" @edit="(e) => editRegistration(registration, e)" />
+            <ViewMemberRegistrationRow v-for="registration in visibleRegistrations" :key="registration.id" :member="member" :registration="registration" @edit="(e: any) => editRegistration(registration, e)" />
         </STList>
         <STList v-else>
             <ViewMemberRegistrationRow v-for="registration in visibleRegistrations" :key="registration.id" :member="member" :registration="registration" />

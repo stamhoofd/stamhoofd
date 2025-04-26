@@ -19,6 +19,7 @@ import { RecordCategory } from '../records/RecordCategory.js';
 import { RecordSettings } from '../records/RecordSettings.js';
 import { Registration } from '../Registration.js';
 import { RegisterContext } from './RegisterCheckout.js';
+import { TranslatedString } from '../../TranslatedString.js';
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
@@ -159,7 +160,7 @@ export class RegisterItem implements ObjectWithRecords {
             if (!this.groupPrice) {
                 // Probably all sold out
                 // Select the first one anyway
-                this.groupPrice = prices[0] ?? GroupPrice.create({ name: $t(`18c0f453-ffe5-46bf-bcb6-ca4d940f722d`), id: '' });
+                this.groupPrice = prices[0] ?? GroupPrice.create({ name: TranslatedString.create($t('Ongeldig tarief')), id: '' });
             }
         }
         else {
@@ -672,7 +673,7 @@ export class RegisterItem implements ObjectWithRecords {
         }
 
         if (this.getFilteredPrices().length > 1) {
-            descriptions.push(this.groupPrice.name);
+            descriptions.push(this.groupPrice.name.toString());
         }
 
         for (const option of this.options) {

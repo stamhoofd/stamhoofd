@@ -24,14 +24,12 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import { AsyncTableAction, Column, ComponentExposed, EmailView, EventNotificationView, ModernTableView, TableAction, TableActionSelection, useEventNotificationBackendFilterBuilders, useEventNotificationsObjectFetcher, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
 import { EventNotificationViewModel } from '@stamhoofd/components/src/events/event-notifications/classes/EventNotificationViewModel';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { EventNotification, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, ExcelExportType, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 
 type ObjectType = EventNotification;
-
 
 const props = withDefaults(
     defineProps<{

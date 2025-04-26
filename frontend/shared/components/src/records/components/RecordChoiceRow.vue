@@ -1,5 +1,5 @@
 <template>
-    <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-stack" @click="editChoice()" @contextmenu.prevent="showContextMenu">
+    <STListItem v-long-press="(e: any) => showContextMenu(e)" :selectable="true" class="right-stack" @click="editChoice()" @contextmenu.prevent="showContextMenu">
         <h3 class="style-title-list">
             {{ choice.name }}
         </h3>

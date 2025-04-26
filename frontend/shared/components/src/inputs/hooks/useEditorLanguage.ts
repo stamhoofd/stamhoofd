@@ -1,12 +1,7 @@
-import { Language } from '@stamhoofd/structures';
-import { ref, Ref } from 'vue';
-
-let editorLanguageRef: Ref<Language> | null = null;
+import { useEditorContext } from './useEditorContext';
 
 export function useEditorLanguage() {
-    if (!editorLanguageRef) {
-        editorLanguageRef = ref<Language>($getLanguage());
-    }
+    const editorContext = useEditorContext();
 
-    return editorLanguageRef;
+    return editorContext._editorLanguageRef.ref;
 }

@@ -52,6 +52,7 @@ declare module 'vue' {
         readonly LoadingButton: typeof import('@stamhoofd/components').LoadingButton;
         readonly STToolbar: typeof import('@stamhoofd/components').STToolbar;
         readonly TTextarea: typeof import('@stamhoofd/components').TTextarea;
+        readonly TInput: typeof import('@stamhoofd/components').TInput;
         readonly STAMHOOFD: FrontendEnvironment;
         readonly $domains: typeof LocalizedDomains;
 
