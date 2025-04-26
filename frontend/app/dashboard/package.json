@@ -6,8 +6,8 @@
     "main": "./src/exports.ts",
     "scripts": {
         "dev": "NODE_ENV=development ENV_FILE=../../.env.json vite",
-        "build": "NODE_ENV=development ENV_FILE=../../.env.json vite build",
-        "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192\" NODE_ENV=production vite build",
+        "build": "yarn -s check-types && NODE_ENV=development ENV_FILE=../../.env.json vite build",
+        "build:production": "yarn -s check-types && NODE_OPTIONS=\"--max-old-space-size=8192\" NODE_ENV=production vite build",
         "test": "yarn -s check-types && jest",
         "lint": "eslint --cache",
         "check-types": "vue-tsc --noEmit"
