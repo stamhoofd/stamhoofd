@@ -158,7 +158,7 @@ export class OrdersExcelExport {
                     if (index !== undefined) {
                         const values = a.excelValues;
                         for (const [i, v] of values.entries()) {
-                            answers[index + i] = v;
+                            answers[index + i] = v.value?.toString() ?? '';
                         }
                     }
                 }
@@ -217,7 +217,7 @@ export class OrdersExcelExport {
                     }
                 }
 
-                const showDetails = index == 0 || repeat;
+                const showDetails = index === 0 || repeat;
                 wsData.push([
                     showDetails
                         ? {
