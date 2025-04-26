@@ -1,6 +1,6 @@
 import { languages } from '@stamhoofd/locales';
 import { Language, TranslatedString } from '@stamhoofd/structures';
-import { inject, onBeforeUnmount, provide, reactive, Ref, watch } from 'vue';
+import { inject, markRaw, onBeforeUnmount, provide, Raw, reactive, ref, Ref, watch } from 'vue';
 
 export class TranslateableComponent {
     latestValue: TranslatedString | null = null;
@@ -8,6 +8,13 @@ export class TranslateableComponent {
 
 export class EditorContext {
     translateableComponents: Set<TranslateableComponent> = new Set();
+    _editorLanguageRef: Raw<{ ref: Ref<Language | null> }>; // This is some magic to prevent vue from unwrapping the ref to a raw value when used in a reactive object
+
+    constructor() {
+        this._editorLanguageRef = markRaw({
+            ref: ref<Language>($getLanguage()),
+        });
+    }
 
     get enabled() {
         return this.translateableComponents.size > 0;
@@ -57,6 +64,8 @@ export function useEditorContext() {
     if (!editorContext) {
         throw new Error('Editor context not provided');
     }
+
+    console.log('Editor context', editorContext);
 
     return editorContext;
 }

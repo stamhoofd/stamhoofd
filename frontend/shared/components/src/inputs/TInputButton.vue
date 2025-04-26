@@ -1,10 +1,6 @@
 <template>
     <template v-if="hasLanguages">
-        <span v-if="isMissing" v-tooltip="$t('d5c7e037-e526-41d5-9151-d9e115b4b8de')" class="icon small error red" />
-        <button class="button icons" type="button" @click="showMenu">
-            <span class="icon language small gray" />
-            <span class="icon arrow-down-small" />
-        </button>
+        <button class="button icon language small gray" type="button" @click="showMenu" />
     </template>
 </template>
 
@@ -19,49 +15,61 @@ import { useSwitchLanguage } from '../views/hooks/useSwitchLanguage';
 const value = defineModel<TranslatedString>({ required: true });
 const editorLanguage = useEditorLanguage();
 const { hasLanguages } = useSwitchLanguage();
-const isMissing = computed(() => {
-    return !value.value.getIfExists(editorLanguage.value) && value.value.get(editorLanguage.value);
+const isDefault = computed(() => {
+    return typeof value.value.translations === 'string';
 });
+
+const isMissing = computed(() => {
+    return editorLanguage.value && (!value.value.getIfExists(editorLanguage.value) && value.value.get(editorLanguage.value));
+});
+
+async function showAll() {
+    editorLanguage.value = null;
+}
 
 async function showMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t('4bc9a5fd-a1d5-47cd-8e25-2ce20b21a656'),
-                disabled: !value.value.getIfExists(editorLanguage.value) || Object.keys(value.value.translations).length <= 1,
-                icon: 'trash',
+                name: $t('Geen vertaling'),
+                selected: value.value.isDefault,
                 action: () => {
-                    value.value = value.value.patch({
-                        [editorLanguage.value]: null,
-                    });
-                },
-            }),
-            new ContextMenuItem({
-                name: $t('aece10d1-efd5-4fe7-98a0-98670abed7de'),
-                disabled: !isMissing.value,
-                icon: 'copy',
-                action: () => {
-                    value.value = value.value.patch({
-                        [editorLanguage.value]: value.value.get(editorLanguage.value),
-                    });
+                    value.value = value.value.patch(value.value.toString());
                 },
             }),
         ],
-        [
-            new ContextMenuItem({
-                name: $t('cf9f3bc1-51d7-438b-832c-8757ee79e0d4'),
-                description: LanguageHelper.getName(editorLanguage.value),
-                childMenu: new ContextMenu([
-                    I18nController.shared.availableLanguages.map(lang => new ContextMenuItem({
-                        name: LanguageHelper.getName(lang),
-                        selected: lang === editorLanguage.value,
-                        action: () => {
-                            editorLanguage.value = lang;
-                        },
-                    })),
-                ]),
-            }),
-        ],
+        I18nController.shared.availableLanguages.map(lang => new ContextMenuItem({
+            name: LanguageHelper.getName(lang),
+            selected: value.value.languages.includes(lang),
+            action: () => {
+                const included = value.value.languages.includes(lang);
+                if (!included) {
+                    if (value.value.isDefault) {
+                        value.value = new TranslatedString({
+                            [lang]: value.value.toString(),
+                        });
+                    }
+                    else {
+                        value.value = value.value.patch({
+                            [lang]: value.value.getIfExists(lang) ?? '',
+                        });
+                    }
+                }
+                else {
+                    if (value.value.languages.length > 1) {
+                        // Remove the language
+                        value.value = value.value.patch({
+                            [lang]: null,
+                        });
+                    }
+                    else {
+                        // Set as untranslated
+                        value.value = new TranslatedString(value.value.toString());
+                    }
+                }
+                return false; // Do not close
+            },
+        })),
     ]);
     await menu.show({
         button: event.currentTarget as HTMLButtonElement,

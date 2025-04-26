@@ -12,7 +12,7 @@ import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsC
 import { PlatformMember } from './members/PlatformMember.js';
 import { RegisterItem } from './members/checkout/RegisterItem.js';
 import { RecordCategory } from './members/records/RecordCategory.js';
-import { TranslatedString, TranslatedStringDecoder } from './TranslatedString.js';
+import { TranslatedString } from './TranslatedString.js';
 
 export class ReduceablePrice extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
@@ -39,7 +39,8 @@ export class GroupPrice extends AutoEncoder {
     id: string;
 
     @field({ decoder: StringDecoder })
-    name = $t(`e3ef8c27-f909-4725-b97b-2cbbd9f24bb5`);
+    @field(TranslatedString.field({ version: 370 }))
+    name = new TranslatedString($t(`e3ef8c27-f909-4725-b97b-2cbbd9f24bb5`));
 
     @field({ decoder: ReduceablePrice })
     price = ReduceablePrice.create({});
@@ -295,10 +296,12 @@ export class GroupDefaultEventTime extends AutoEncoder {
 }
 
 export class GroupSettings extends AutoEncoder {
-    @field({ decoder: TranslatedStringDecoder })
+    @field({ decoder: StringDecoder })
+    @field(TranslatedString.field({ version: 370 }))
     name = new TranslatedString();
 
-    @field({ decoder: TranslatedStringDecoder })
+    @field({ decoder: StringDecoder })
+    @field(TranslatedString.field({ version: 370 }))
     description = new TranslatedString();
 
     @field({ decoder: StringDecoder, version: 350, nullable: true })

@@ -566,6 +566,12 @@
     }
 }
 
+.style-input-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
 .style-input-box {
     border: $border-width solid $color-border;
     background: $color-background;

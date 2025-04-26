@@ -1,5 +1,5 @@
 <template>
-    <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-stack" @contextmenu.prevent="showContextMenu">
+    <STListItem v-long-press="(e: any) => showContextMenu(e)" :selectable="true" class="right-stack" @contextmenu.prevent="showContextMenu">
         <h2 class="style-title-list">
             {{ group.name }}
         </h2>
@@ -21,8 +21,8 @@
         </p>
 
         <template #right>
-            <span class="button icon drag gray" @click.stop @contextmenu.stop/>
-            <span class="icon arrow-right-small gray"/>
+            <span class="button icon drag gray" @click.stop @contextmenu.stop />
+            <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>
 </template>

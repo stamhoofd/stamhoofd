@@ -118,7 +118,7 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
         const descriptions: string[] = [];
 
         if (this.group.settings.getFilteredPrices().length > 1) {
-            descriptions.push(this.groupPrice.name);
+            descriptions.push(this.groupPrice.name.toString());
         }
 
         for (const option of this.options) {

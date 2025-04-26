@@ -5,7 +5,7 @@
             <h2 class="style-with-button">
                 <span>{{ title }}</span>
                 <div>
-                    <button v-long-press="(e) => switchCycle(e)" type="button" class="button text" @click.prevent="switchCycle" @contextmenu.prevent="switchCycle">
+                    <button v-long-press="(e: any) => switchCycle(e)" type="button" class="button text" @click.prevent="switchCycle" @contextmenu.prevent="switchCycle">
                         {{ period.name }}
                         <span class="icon arrow-down-small" />
                     </button>
