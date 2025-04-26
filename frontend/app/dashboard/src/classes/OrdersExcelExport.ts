@@ -376,7 +376,7 @@ export class OrdersExcelExport {
                 if (index !== undefined) {
                     const values = a.excelValues;
                     for (const [i, v] of values.entries()) {
-                        answers[index + i] = v;
+                        answers[index + i] = v.value?.toString() ?? '';
                     }
                 }
             }
