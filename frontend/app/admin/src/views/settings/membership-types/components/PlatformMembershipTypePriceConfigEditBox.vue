@@ -68,9 +68,9 @@ const props = defineProps<{
     validator: Validator;
 }>();
 
-const emits = defineEmits<{ 
-    delete: [];
-    'patch:priceConfig': [value: AutoEncoderPatchType<PlatformMembershipTypeConfigPrice];
+const emits = defineEmits<{
+    'delete': [];
+    'patch:priceConfig': [value: AutoEncoderPatchType<PlatformMembershipTypeConfigPrice>];
 }>();
 const { patched, addPatch } = useEmitPatch<PlatformMembershipTypeConfigPrice>(props, emits, 'priceConfig');
 
