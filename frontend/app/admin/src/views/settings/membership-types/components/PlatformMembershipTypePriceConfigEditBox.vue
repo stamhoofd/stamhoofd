@@ -68,7 +68,10 @@ const props = defineProps<{
     validator: Validator;
 }>();
 
-const emits = defineEmits<{ (e: 'delete'): void; (e: 'patch:priceConfig'): AutoEncoderPatchType<PlatformMembershipTypeConfigPrice> }>();
+const emits = defineEmits<{ 
+    delete: [];
+    'patch:priceConfig': [value: AutoEncoderPatchType<PlatformMembershipTypeConfigPrice];
+}>();
 const { patched, addPatch } = useEmitPatch<PlatformMembershipTypeConfigPrice>(props, emits, 'priceConfig');
 
 const present = usePresent();
