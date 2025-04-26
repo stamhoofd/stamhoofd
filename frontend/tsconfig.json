@@ -16,9 +16,6 @@
         "isolatedModules": true,
         "noEmit": true,
         "jsx": "preserve",
-        /* Linting */
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true,
         "experimentalDecorators": true,
         "sourceMap": true,
