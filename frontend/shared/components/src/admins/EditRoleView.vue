@@ -298,7 +298,7 @@ const name = computed({
 });
 
 const lockedMinimumLevel = computed(() => {
-    const arr = [];
+    const arr: PermissionLevel[] = [];
 
     for (const role of props.inheritedRoles) {
         arr.push(role.level);

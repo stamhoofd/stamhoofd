@@ -70,7 +70,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
 
     const groupsTab = new TabBarItem({
         icon: 'location',
-        name: computed(() => $t('6e884f27-427f-4f85-914c-d5c2780253b0')),
+        name: $t('6e884f27-427f-4f85-914c-d5c2780253b0'),
         component: organizationsTableView,
     });
 

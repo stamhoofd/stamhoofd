@@ -1,7 +1,7 @@
 <template>
     <!-- This div is not really needed, but causes bugs if we remove it from the DOM. Probably something Vue.js related (e.g. user keeps logged out, even if loggedIn = true and force reload is used) -->
     <div class="promise-view">
-        <LoadingViewTransition :errorBox="errorBox">
+        <LoadingViewTransition :error-box="errorBox">
             <ComponentWithPropertiesInstance v-if="root" :key="root.key" :component="root" />
         </LoadingViewTransition>
     </div>
@@ -38,7 +38,7 @@ export default class PromiseView extends Mixins(NavigationMixin) {
 
     run() {
         this.errorBox = null;
-        this.promise.call(this).then((value) => {
+        this.promise.call(this as any).then((value) => {
             if (!value) {
                 console.error('Promise view did not return a component.');
                 throw new Error('Missing component in promise');

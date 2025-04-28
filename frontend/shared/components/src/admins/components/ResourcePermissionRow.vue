@@ -329,9 +329,7 @@ const choosePermissions = async (event: MouseEvent) => {
                         const isLocked = lockedAccessRights.value.includes(accessRight);
                         const included = !!baseLevel && getPermissionLevelNumber(permissionLevel.value) >= getPermissionLevelNumber(baseLevel);
 
-                        // #region description
-                        let description = undefined;
-
+                        let description: string|undefined = undefined;
                         if (!isLocked) {
                             if (included) {
                                 description = ($t(`c3d22dca-87b6-4975-96ff-72ffe2ce99d0`) + ' ' + getPermissionLevelName(baseLevel));
@@ -340,7 +338,6 @@ const choosePermissions = async (event: MouseEvent) => {
                                 description = ($t(`74dd7a35-db8b-477d-934a-2681d8d35184`) + ' ' + getPermissionLevelName(permissionLevel.value));
                             }
                         }
-                        // #endregion
 
                         return new ContextMenuItem({
                             selected: isLocked || included || accessRightsMap.get(accessRight)!.value,

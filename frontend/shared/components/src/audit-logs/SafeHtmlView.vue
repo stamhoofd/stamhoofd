@@ -16,8 +16,8 @@ const props = defineProps<{
     html: string;
     title: string;
 }>();
-const iframe = useTemplateRef('iframeRef');
-const mainElement = useTemplateRef('main');
+const iframe = useTemplateRef<HTMLIFrameElement>('iframeRef');
+const mainElement = useTemplateRef<HTMLElement>('main');
 
 // Make sure the iframe width and height matches the width and height of main
 function updateSize() {

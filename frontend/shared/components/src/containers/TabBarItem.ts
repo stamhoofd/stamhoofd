@@ -2,14 +2,14 @@ import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { ComponentPublicInstance, markRaw, Ref, unref } from 'vue';
 
 export class TabBarItem {
-    name: string | Ref<string> = '';
+    name: string = '';
     icon = '';
     badge: string | Ref<string> | null = '';
     component?: ComponentWithProperties;
     action?: (this: ComponentPublicInstance) => Promise<void> | void;
     savedScrollPositions: WeakMap<HTMLElement, number> = new WeakMap();
 
-    constructor(options: { name: string | Ref<string>; icon: string; badge?: string | Ref<string> | null; component?: ComponentWithProperties; action?: (this: ComponentPublicInstance) => Promise<void> | void }) {
+    constructor(options: { name: string; icon: string; badge?: string | Ref<string> | null; component?: ComponentWithProperties; action?: (this: ComponentPublicInstance) => Promise<void> | void }) {
         this.name = options.name;
         this.icon = options.icon;
         this.component = options.component;
