@@ -26,7 +26,7 @@
                 </template>
             </STListItem>
 
-            <STListItem v-if="isStamhoofd" :selectable="true" class="left-center" @click="downloadSettings(true)">
+            <STListItem v-if="isStamhoofd" :selectable="true" class="left-center" @click="downloadSettings()">
                 <template #left>
                     <img src="@stamhoofd/assets/images/illustrations/box-download.svg">
                 </template>
@@ -43,7 +43,7 @@
                 </template>
             </STListItem>
 
-            <STListItem v-if="isStamhoofd" :selectable="true" class="left-center" @click="uploadSettings(true)">
+            <STListItem v-if="isStamhoofd" :selectable="true" class="left-center" @click="uploadSettings()">
                 <template #left>
                     <img src="@stamhoofd/assets/images/illustrations/box-upload.svg">
                 </template>
@@ -109,7 +109,7 @@
 
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, Decoder, ObjectData, patchContainsChanges, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
@@ -355,7 +355,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
         catch (e) {
             throw new SimpleError({
                 code: 'invalid_json',
-                message: 'Het bestand is geen geldige export: ' + e.getMessage(),
+                message: 'Het bestand is geen geldige export: ' + (isSimpleError(e) ? e.getHuman() : e),
             });
         }
 

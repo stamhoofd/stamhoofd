@@ -12,7 +12,7 @@
             </p>
             <template v-else>
                 <p v-if="isMailOk" class="success-box">
-                    {{ $t('b7985e12-33ca-4c18-9b56-0d57e39c6dfa') }} <template v-if="!organization.privateMeta.mailDomainActive">
+                    {{ $t('b7985e12-33ca-4c18-9b56-0d57e39c6dfa') }} <template v-if="!organization.privateMeta?.mailDomainActive">
                         {{ $t('52a60393-2b13-474b-a20c-80e61f9b8ff1') }}
                     </template>
                 </p>
@@ -107,13 +107,13 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
     useDkim1024bit = false;
     registerDomain = '';
     mailDomain = '';
-    customRegisterDomain = '';
+    customRegisterDomain = false;
     allowSubdomain = true;
 
     created() {
         this.registerDomain = this.$organization.privateMeta?.pendingRegisterDomain ?? this.$organization.registerDomain ?? '';
         this.mailDomain = this.$organization.privateMeta?.pendingMailDomain ?? this.$organization.privateMeta?.mailDomain ?? '';
-        this.customRegisterDomain = this.registerDomain && this.mailDomain ? (this.registerDomain !== 'inschrijven.' + this.mailDomain) : '';
+        this.customRegisterDomain = this.registerDomain && this.mailDomain ? (this.registerDomain !== 'inschrijven.' + this.mailDomain) : false;
         this.allowSubdomain = !!this.mailDomain.match(/^[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+\.[a-zA-Z]+$/);
     }
 

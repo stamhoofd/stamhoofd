@@ -10,7 +10,7 @@
                 <p>
                     {{ $t('6bce22dc-e4ac-47f5-aa66-873d02ba9f5f') }} <a v-if="validatedRegisterCode" :href="'https://'+ $domains.marketing" target="_blank" class="inline-link">{{ $t("2ca73761-bc6c-4ffb-9550-a988376f26ef") }}</a>
                 </p>
-                <button v-if="!validatedRegisterCode && visitViaUrl" class="info-box with-button selectable" type="button" @click="dismiss">
+                <button v-if="!validatedRegisterCode && visitViaUrl" class="info-box with-button selectable" type="button" @click="dismiss()">
                     {{ $t('d80e2291-5bb9-4799-9594-bcda54480efa') }}
                     <span class="button text" type="button">
                         {{ $t('4248538e-48b6-4596-a3f6-0fedb910cb8f') }}
@@ -181,10 +181,6 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
         this.loadRegisterCode().catch((e) => {
             console.error(e);
         });
-    }
-
-    formatPrice(p: number) {
-        return Formatter.price(p);
     }
 
     async loadRegisterCode() {

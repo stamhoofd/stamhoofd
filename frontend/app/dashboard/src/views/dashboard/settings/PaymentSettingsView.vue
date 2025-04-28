@@ -164,12 +164,12 @@
             </p>
         </template>
 
-        <template v-if="!enableBuckaroo && (organization.privateMeta.mollieOnboarding || forceMollie)">
+        <template v-if="!enableBuckaroo && (organization.privateMeta?.mollieOnboarding || forceMollie)">
             <hr><h2>
                 {{ $t('8392834f-9cfb-4af0-8a8d-55c727cbfd66') }}
             </h2>
 
-            <template v-if="!organization.privateMeta.mollieOnboarding">
+            <template v-if="!organization.privateMeta?.mollieOnboarding">
                 <p class="st-list-description">
                     {{ $t('fa1b8694-6a8c-46ea-ab5e-7ed792083bf0') }}
                 </p>
