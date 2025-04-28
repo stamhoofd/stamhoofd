@@ -79,8 +79,8 @@ export default class Tooltip extends Mixins(NavigationMixin) {
 
     mounted() {
         // Calculate position
-        let width = (this.$el as HTMLElement).offsetWidth;
-        let height = (this.$el as HTMLElement).offsetHeight;
+        let width = this.$el.offsetWidth;
+        let height = this.$el.offsetHeight;
 
         const viewPadding = 15;
 

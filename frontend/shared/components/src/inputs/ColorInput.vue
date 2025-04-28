@@ -11,153 +11,151 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 
-import {ErrorBox} from "../errors/ErrorBox";
-import {Validator} from "../errors/Validator";
-import STInputBox from "./STInputBox.vue";
+import { ErrorBox } from '../errors/ErrorBox';
+import { Validator } from '../errors/Validator';
+import STInputBox from './STInputBox.vue';
 
 @Component({
     components: {
-        STInputBox
+        STInputBox,
     },
-    emits: ['update:modelValue']
+    emits: ['update:modelValue'],
 })
 export default class ColorInput extends VueComponent {
-    @Prop({ default: "" }) 
-        title: string;
-
-    @Prop({ default: null }) 
-        validator: Validator | null
-    
-    @Prop({ default: () => [] }) 
-        disallowed: string[]
-
-    colorRaw = "";
-    hasColor = "";
+    @Prop({ default: '' })
+    title: string;
 
     @Prop({ default: null })
-        modelValue!: string | null
+    validator: Validator | null;
+
+    @Prop({ default: () => [] })
+    disallowed: string[];
+
+    colorRaw = '';
+    hasColor = '';
+
+    @Prop({ default: null })
+    modelValue!: string | null;
 
     @Prop({ default: true })
-        required!: boolean
+    required!: boolean;
 
-    @Prop({ default: "" })
-        placeholder!: string
+    @Prop({ default: '' })
+    placeholder!: string;
 
-    @Prop({ default: "color" })
-        autocomplete!: string
+    @Prop({ default: 'color' })
+    autocomplete!: string;
 
-    errorBox: ErrorBox | null = null
+    errorBox: ErrorBox | null = null;
 
     @Watch('modelValue')
     onValueChanged(val: string | null) {
         if (val === null) {
-            return
+            return;
         }
-        this.colorRaw = val
+        this.colorRaw = val;
     }
 
     get pickerColor() {
         if (!this.hasColor) {
             // Hacky solution to make black colors work from emtpy -> black
-            return "#000001"
+            return '#000001';
         }
-        return this.hasColor || "#000000"
+        return this.hasColor || '#000000';
     }
 
     set pickerColor(val: string) {
-        this.colorRaw = val || "#000000"
-        this.validate(false, true)
+        this.colorRaw = val || '#000000';
+        this.validate(false, true);
     }
 
     mounted() {
         if (this.validator) {
             this.validator.addValidation(this, () => {
-                return this.validate(true, false)
-            })
+                return this.validate(true, false);
+            });
         }
 
-        this.colorRaw = this.modelValue ?? ""
-        this.hasColor = this.colorRaw
+        this.colorRaw = this.modelValue ?? '';
+        this.hasColor = this.colorRaw;
     }
 
     unmounted() {
         if (this.validator) {
-            this.validator.removeValidation(this)
+            this.validator.removeValidation(this);
         }
     }
 
     get myColor() {
-        return this.hasColor ?? "black"
+        return this.hasColor ?? 'black';
     }
 
     validate(final = true, silent = false) {
-        this.colorRaw = this.colorRaw.trim().toUpperCase()
+        this.colorRaw = this.colorRaw.trim().toUpperCase();
 
         if (!this.required && this.colorRaw.length === 0) {
             if (!silent) {
-                this.errorBox = null
+                this.errorBox = null;
             }
-            this.hasColor = ""
+            this.hasColor = '';
 
             if (this.modelValue !== null) {
-                this.$emit('update:modelValue', null)
+                this.$emit('update:modelValue', null);
             }
-            return true
+            return true;
         }
 
-        if (this.colorRaw.length === 6 && !this.colorRaw.startsWith("#")) {
-            this.colorRaw = "#"+this.colorRaw;
+        if (this.colorRaw.length === 6 && !this.colorRaw.startsWith('#')) {
+            this.colorRaw = '#' + this.colorRaw;
         }
 
         const regex = /^#[0-9A-F]{6}$/;
-        
+
         if (!regex.test(this.colorRaw)) {
-            this.hasColor = ""
+            this.hasColor = '';
 
             if (!silent) {
                 this.errorBox = new ErrorBox(new SimpleError({
-                    "code": "invalid_field",
-                    "message": $t(`38b06bba-0683-44ca-9164-c0aff5f9c860`),
-                    "field": "color"
-                }))
+                    code: 'invalid_field',
+                    message: $t(`38b06bba-0683-44ca-9164-c0aff5f9c860`),
+                    field: 'color',
+                }));
             }
             if (this.modelValue !== null) {
-                this.$emit('update:modelValue', null)
+                this.$emit('update:modelValue', null);
             }
-            return false
-
+            return false;
         }
 
         if (this.disallowed.includes(this.colorRaw)) {
-            this.hasColor = ""
+            this.hasColor = '';
 
             if (!silent) {
                 this.errorBox = new ErrorBox(new SimpleError({
-                    "code": "invalid_field",
-                    "message": $t(`b122a8f8-ddc7-4b9c-abf4-3c3f356a5071`),
-                    "field": "color"
-                }))
+                    code: 'invalid_field',
+                    message: $t(`b122a8f8-ddc7-4b9c-abf4-3c3f356a5071`),
+                    field: 'color',
+                }));
             }
 
             if (this.modelValue !== null) {
-                this.$emit('update:modelValue', null)
+                this.$emit('update:modelValue', null);
             }
-            
-            return false
+
+            return false;
         }
 
-        this.hasColor = this.colorRaw
+        this.hasColor = this.colorRaw;
 
         if (this.colorRaw !== this.modelValue) {
-            this.$emit('update:modelValue', this.colorRaw)
+            this.$emit('update:modelValue', this.colorRaw);
         }
         if (!silent) {
-            this.errorBox = null
+            this.errorBox = null;
         }
-        return true
-        
+        return true;
     }
 }
 </script>
@@ -165,7 +163,6 @@ export default class ColorInput extends VueComponent {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
-
 
 .color-input-box {
     position: relative;
@@ -179,7 +176,7 @@ export default class ColorInput extends VueComponent {
         height:  calc(#{$input-height} - 2 * #{$border-width});
         line-height: calc(#{$input-height} - 10px - 2 * #{$border-width});
         box-sizing: border-box;
-        
+
     }
 
     .color-input {
@@ -193,7 +190,6 @@ export default class ColorInput extends VueComponent {
         height: 15px;
         border-radius: 3px;
     }
-
 
     > span.color {
         position: absolute;

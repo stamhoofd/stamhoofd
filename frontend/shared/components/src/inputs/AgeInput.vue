@@ -60,7 +60,7 @@ export default class AgeInput extends VueComponent {
     }
 
     set internalValue(val: number | null) {
-        (this as any).$emit('update:modelValue', val);
+        this.$emit('update:modelValue', val);
     }
 
     get descriptionText() {

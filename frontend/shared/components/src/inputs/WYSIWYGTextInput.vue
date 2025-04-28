@@ -93,7 +93,7 @@ export default class WYSIWYGTextInput extends VueComponent {
 
     showLinkEditor = false;
     editLink = '';
-    editor: Editor | null = null;
+    editor: Editor = null as any;
     showTextStyles = false;
 
     beforeMount() {
@@ -102,7 +102,7 @@ export default class WYSIWYGTextInput extends VueComponent {
 
     mounted() {
         if (this.color) {
-            const el = (this.$el as HTMLElement).querySelector('.editor-content') as HTMLElement;
+            const el = this.$el.querySelector('.editor-content') as HTMLElement;
             if (el) {
                 ColorHelper.setColor(this.color, el);
             }
@@ -112,7 +112,7 @@ export default class WYSIWYGTextInput extends VueComponent {
     @Watch('color')
     onColorChanged() {
         if (this.color) {
-            const el = (this.$el as HTMLElement).querySelector('.editor-content') as HTMLElement;
+            const el = this.$el.querySelector('.editor-content') as HTMLElement;
             if (el) {
                 ColorHelper.setColor(this.color, el);
             }
@@ -121,8 +121,8 @@ export default class WYSIWYGTextInput extends VueComponent {
 
     beforeUnmount() {
         // This fixes a glitch that the editor content is wiped before the transition is finished
-        const content = (this.$el as HTMLElement).innerHTML;
-        (this.$el as HTMLElement).innerHTML = content;
+        const content = this.$el.innerHTML;
+        this.$el.innerHTML = content;
         this.editor?.destroy();
     }
 
@@ -180,17 +180,17 @@ export default class WYSIWYGTextInput extends VueComponent {
 
     openLinkEditor() {
         if (this.showLinkEditor) {
-            this.editor.chain().focus().run();
+            this.editor!.chain().focus().run();
             this.$nextTick(() => {
                 this.showLinkEditor = false;
             });
             return;
         }
-        if (!this.editor.isActive('link') && this.editor.state.selection.empty) {
+        if (!this.editor!.isActive('link') && this.editor!.state.selection.empty) {
             new Toast($t(`930cb01b-7877-45e6-99dc-7cb148f13cc9`), 'info').show();
             return;
         }
-        this.editLink = this.editor.getAttributes('link')?.href ?? '';
+        this.editLink = this.editor!.getAttributes('link')?.href ?? '';
         this.showLinkEditor = true;
         this.$nextTick(() => {
             (this.$refs.linkInput as HTMLInputElement).focus();

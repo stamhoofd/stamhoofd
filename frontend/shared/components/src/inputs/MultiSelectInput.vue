@@ -10,7 +10,7 @@
         </div>
         <div v-else class="multi-select-container">
             <div class="input">
-                <STList v-model="draggableValues" :draggable="true" :item-key="(v: T) => v">
+                <STList v-model="draggableValues" :draggable="true" :item-key="(v) => v">
                     <template #item="{item: value}">
                         <STListItem :selectable="true" @click="openContextMenu($event, value)">
                             <span v-for="(label, index) of getValueLabels(value)" :key="index" :title="label" v-text="label" />
@@ -30,9 +30,9 @@
 
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { Sorter } from '@stamhoofd/utility';
-import { Formatter } from "@stamhoofd/utility"
+import { Formatter } from '@stamhoofd/utility';
 
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
@@ -43,99 +43,98 @@ import STInputBox from './STInputBox.vue';
     components: {
         STList,
         STListItem,
-        STInputBox
+        STInputBox,
     },
-    emits: ['update:modelValue']
+    emits: ['update:modelValue'],
 })
 export default class MultiSelectInput<T> extends Mixins(NavigationMixin) {
     @Prop({})
-        modelValue: T[]
+    modelValue: T[];
 
     @Prop({})
-        choices: {value: T, label: string, categories?: string[]}[]
+    choices: { value: T; label: string; categories?: string[] }[];
 
     @Prop({ default: $t(`bad54c0f-e030-48c4-bd75-42ed4aa9be02`) })
-        placeholder!: string
+    placeholder!: string;
 
     get draggableValues() {
-        return this.modelValue
+        return this.modelValue;
     }
 
     set draggableValues(arr: T[]) {
         if (arr.length !== this.modelValue.length) {
             return;
         }
-        this.$emit('update:modelValue', arr)
+        this.$emit('update:modelValue', arr);
     }
 
     getValueLabels(value: T) {
         const choice = this.choices.find(c => c.value === value);
         if (!choice) {
-            return ["?"]
+            return ['?'];
         }
         return [
             ...(choice.categories ?? []),
-            choice.label
-        ]
+            choice.label,
+        ];
     }
 
-    openContextMenu(event: TouchEvent | MouseEvent, replace?: T) {        
-        const menu = this.generateMenu(this.choices, replace)
+    openContextMenu(event: TouchEvent | MouseEvent, replace?: T) {
+        const menu = this.generateMenu(this.choices, replace);
         menu.show({
-            clickEvent: event
-        }).catch(console.error)
+            clickEvent: event,
+        }).catch(console.error);
     }
 
     addValue(value: T, replace?: T) {
         if (replace) {
-            const index = this.modelValue.findIndex(v => v === replace)
+            const index = this.modelValue.findIndex(v => v === replace);
             if (index !== -1) {
-                const arr = [...this.modelValue]
+                const arr = [...this.modelValue];
                 arr[index] = value;
-                this.$emit('update:modelValue', arr)
+                this.$emit('update:modelValue', arr);
                 return;
             }
         }
-        const arr = [...this.modelValue, value]
-        this.$emit('update:modelValue', arr)
+        const arr = [...this.modelValue, value];
+        this.$emit('update:modelValue', arr);
     }
 
     deleteValue(value: T) {
-        const arr = this.modelValue.filter(v => v !== value)
-        this.$emit('update:modelValue', arr)
+        const arr = this.modelValue.filter(v => v !== value);
+        this.$emit('update:modelValue', arr);
     }
 
-    generateMenu(choices: {value: T, label: string, categories?: string[]}[], replace?: T): ContextMenu {
-        const rootCategories = Formatter.uniqueArray(choices.map(c => c.categories?.[0]).filter(c => !!c)).sort(Sorter.byStringValue)
+    generateMenu(choices: { value: T; label: string; categories?: string[] }[], replace?: T): ContextMenu {
+        const rootCategories = Formatter.uniqueArray(choices.map(c => c.categories?.[0]).filter(c => !!c)).sort(Sorter.byStringValue as any);
 
         return new ContextMenu([
-            choices.filter(c => !c.categories?.[0]).map(choice => {
+            choices.filter(c => !c.categories?.[0]).map((choice) => {
                 return new ContextMenuItem({
                     name: choice.label,
                     action: () => {
                         // Add a new value
-                        this.addValue(choice.value, replace)
+                        this.addValue(choice.value, replace);
                         return true;
-                    }
-                })
+                    },
+                });
             }),
-            rootCategories.map(category => {
-                const subChoices = choices.filter(c => c.categories?.[0] === category).map(c => {
+            rootCategories.map((category) => {
+                const subChoices = choices.filter(c => c.categories?.[0] === category).map((c) => {
                     return {
                         ...c,
-                        categories: c.categories?.slice(1)
-                    }
-                })
+                        categories: c.categories?.slice(1),
+                    };
+                });
                 return new ContextMenuItem({
                     name: category,
-                    childMenu: this.generateMenu(subChoices, replace)
-                })
-            })
-        ])
+                    childMenu: this.generateMenu(subChoices, replace),
+                });
+            }),
+        ]);
     }
 }
 </script>
-
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss">

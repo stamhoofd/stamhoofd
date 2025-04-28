@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="email" :error-box="errorBox" :class="class">
-        <input ref="input" v-model="emailRaw" class="email-input-field input" type="email" :class="{ error: !valid }" :disabled="disabled" v-bind="$attrs" @change="validate(false)" @input="(event) => {emailRaw = event.currentTarget.value; onTyping();}">
+        <input ref="input" v-model="emailRaw" class="email-input-field input" type="email" :class="{ error: !valid }" :disabled="disabled" v-bind="$attrs" @change="validate(false)" @input="(event: any) => {emailRaw = event.currentTarget.value; onTyping();}">
         <template #right>
             <slot name="right" />
         </template>
@@ -9,133 +9,134 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
-import { DataValidator } from "@stamhoofd/utility";
+import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
+import { DataValidator } from '@stamhoofd/utility';
 
-import {ErrorBox} from "../errors/ErrorBox";
-import {Validator} from "../errors/Validator";
-import STInputBox from "./STInputBox.vue";
+import { ErrorBox } from '../errors/ErrorBox';
+import { Validator } from '../errors/Validator';
+import STInputBox from './STInputBox.vue';
 
 @Component({
     components: {
-        STInputBox
+        STInputBox,
     },
     emits: ['update:modelValue'],
 
     // All attributes that we don't recognize should be passed to the input, and not to the root (except style and class)
-    inheritAttrs: false
+    inheritAttrs: false,
 })
 export default class EmailInput extends VueComponent {
-    @Prop({ default: "" }) 
-        title: string;
+    @Prop({ default: '' })
+    title: string;
 
-    @Prop({ default: null }) 
-        validator: Validator | null
+    @Prop({ default: null })
+    validator: Validator | null;
 
-    emailRaw = "";
+    emailRaw = '';
     valid = true;
 
     @Prop({ required: true })
-        modelValue!: string | null
+    modelValue!: string | null;
 
     @Prop({ default: null })
-        class!: string | null
+    class!: string | null;
 
     @Prop({ default: true })
-        required!: boolean
+    required!: boolean;
 
     /**
      * Whether the modelValue can be set to null if it is empty (even when it is required, will still be invalid)
      * Only used if required = false
      */
     @Prop({ default: false })
-        nullable!: boolean
+    nullable!: boolean;
 
     @Prop({ default: false })
-        disabled!: boolean
+    disabled!: boolean;
 
-    errorBox: ErrorBox | null = null
+    errorBox: ErrorBox | null = null;
 
     @Watch('modelValue')
     onValueChanged(val: string | null) {
         if (val === null) {
-            return
+            return;
         }
-        this.emailRaw = val
+        this.emailRaw = val;
     }
 
     onTyping() {
         // Silently send modelValue to parents, but don't show visible errors yet
-        this.validate(false, true)
+        this.validate(false, true);
     }
 
     mounted() {
         if (this.validator) {
             this.validator.addValidation(this, () => {
-                return this.validate(true)
-            })
+                return this.validate(true);
+            });
         }
 
-        this.emailRaw = this.modelValue ?? ""
+        this.emailRaw = this.modelValue ?? '';
     }
 
     unmounted() {
         if (this.validator) {
-            this.validator.removeValidation(this)
+            this.validator.removeValidation(this);
         }
     }
 
     validate(final = true, silent = false) {
-        this.emailRaw = this.emailRaw.trim().toLowerCase()
+        this.emailRaw = this.emailRaw.trim().toLowerCase();
 
         if (!this.required && this.emailRaw.length === 0) {
             if (!silent) {
-                this.errorBox = null
+                this.errorBox = null;
             }
 
             if (this.modelValue !== null) {
-                this.$emit('update:modelValue', null)
+                this.$emit('update:modelValue', null);
             }
-            return true
+            return true;
         }
 
         if (this.required && this.emailRaw.length === 0 && !final) {
             // Ignore empty email if not final
             if (!silent) {
-                this.errorBox = null
+                this.errorBox = null;
             }
 
             if (this.nullable && this.modelValue !== null) {
-                this.$emit('update:modelValue', null)
-            } else if (this.modelValue !== "") {
-                this.$emit('update:modelValue', "")
+                this.$emit('update:modelValue', null);
             }
-            return false
+            else if (this.modelValue !== '') {
+                this.$emit('update:modelValue', '');
+            }
+            return false;
         }
-        
+
         if (!DataValidator.isEmailValid(this.emailRaw)) {
             if (!silent) {
                 this.errorBox = new ErrorBox(new SimpleError({
-                    "code": "invalid_field",
-                    "message": this.emailRaw.length === 0 ? $t(`7178d4db-3143-4fd3-832a-a6ffcad60b84`) :  $t(`e9d08384-b7a9-4c7e-9364-63a90a889657`) + ' ' + this.emailRaw,
-                    "field": "email"
-                }))
+                    code: 'invalid_field',
+                    message: this.emailRaw.length === 0 ? $t(`7178d4db-3143-4fd3-832a-a6ffcad60b84`) : $t(`e9d08384-b7a9-4c7e-9364-63a90a889657`) + ' ' + this.emailRaw,
+                    field: 'email',
+                }));
             }
-            return false
-
-        } else {
+            return false;
+        }
+        else {
             if (this.emailRaw !== this.modelValue) {
-                this.$emit('update:modelValue', this.emailRaw)
+                this.$emit('update:modelValue', this.emailRaw);
             }
             if (!silent) {
-                this.errorBox = null
+                this.errorBox = null;
             }
-            return true
+            return true;
         }
     }
 
     focus() {
-        (this.$refs.input as any)?.focus()
+        (this.$refs.input as any)?.focus();
     }
 }
 </script>

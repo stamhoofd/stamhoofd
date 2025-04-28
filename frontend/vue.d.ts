@@ -20,23 +20,25 @@ declare module '*.vue' {
 
 declare module 'vue' {
     interface ComponentCustomProperties {
-        readonly $OS: 'android' | 'iOS' | 'web' | 'macOS' | 'windows' | 'unknown';
-        readonly $isNative: boolean;
-        readonly $isTouch: boolean;
-        readonly $isAndroid: boolean;
-        readonly $isIOS: boolean;
-        readonly $isMac: boolean;
-        readonly $isMobile: boolean;
-        readonly $t: typeof import('@stamhoofd/frontend-i18n').I18n.prototype.$t;
-        readonly $feature: ReturnType<typeof import('@stamhoofd/components').useFeatureFlag>;
+        $OS: 'android' | 'iOS' | 'web' | 'macOS' | 'windows' | 'unknown';
+        $isNative: boolean;
+        $isTouch: boolean;
+        $isAndroid: boolean;
+        $isIOS: boolean;
+        $isMac: boolean;
+        $isMobile: boolean;
+        $t: typeof import('@stamhoofd/frontend-i18n').I18n.prototype.$t;
+        $feature: ReturnType<typeof import('@stamhoofd/components').useFeatureFlag>;
 
-        readonly $context: SessionContext;
-        readonly $organization: Organization;
-        readonly $platform: Platform;
-        readonly $user: User | null;
-        readonly $organizationManager: OrganizationManager;
-        readonly $memberManager: MemberManager;
-        readonly $app: ReturnType<typeof import('@stamhoofd/components').useAppContext>;
+        $context: SessionContext;
+        $organization: Organization;
+        $platform: Platform;
+        $user: User | null;
+        $organizationManager: OrganizationManager;
+        $memberManager: MemberManager;
+        $app: ReturnType<typeof import('@stamhoofd/components').useAppContext>;
+        STAMHOOFD: FrontendEnvironment;
+        $domains: typeof LocalizedDomains;
 
         // Global components
         readonly STList: typeof import('@stamhoofd/components').STList;
@@ -53,8 +55,6 @@ declare module 'vue' {
         readonly STToolbar: typeof import('@stamhoofd/components').STToolbar;
         readonly TTextarea: typeof import('@stamhoofd/components').TTextarea;
         readonly TInput: typeof import('@stamhoofd/components').TInput;
-        readonly STAMHOOFD: FrontendEnvironment;
-        readonly $domains: typeof LocalizedDomains;
 
         // Formatters
         formatPrice: typeof Formatter.price;
@@ -74,5 +74,21 @@ declare module 'vue' {
         pluralText: typeof Formatter.pluralText;
 
         vFormatInput: typeof FormatInputDirective;
+    }
+}
+
+// Make sure VueComponent from '@simonbackx/vue-app-navigation/classes' has a property named $t
+declare module '@simonbackx/vue-app-navigation/classes' {
+    interface VueComponent {
+        $t: typeof import('@stamhoofd/frontend-i18n').I18n.prototype.$t;
+        $attrs: any;
+        $: any;
+        $emit: any;
+        $slots: any;
+        $refs: any;
+        $nextTick: any;
+        $isMobile: boolean;
+        $el: HTMLElement;
+        $parent: any;
     }
 }

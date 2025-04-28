@@ -177,7 +177,7 @@ export default class AddressInput extends VueComponent {
             }
 
             if (this.modelValue !== null) {
-                (this as any).$emit('update:modelValue', null);
+                this.$emit('update:modelValue', null);
             }
             return true;
         }
@@ -189,7 +189,7 @@ export default class AddressInput extends VueComponent {
                 }
 
                 if (this.nullable && this.modelValue !== null) {
-                    (this as any).$emit('update:modelValue', null);
+                    this.$emit('update:modelValue', null);
                 }
                 return false;
             }
@@ -213,13 +213,13 @@ export default class AddressInput extends VueComponent {
                     if (!this.hasFocus) {
                         this.updateValues(response.data);
                     }
-                    (this as any).$emit('update:modelValue', response.data);
+                    this.$emit('update:modelValue', response.data);
                 }
                 else {
                     if (!this.hasFocus) {
                         this.updateValues(address);
                     }
-                    (this as any).$emit('update:modelValue', address);
+                    this.$emit('update:modelValue', address);
                 }
             }
             else {
@@ -255,7 +255,7 @@ export default class AddressInput extends VueComponent {
             }
 
             if (!this.required && !silent) {
-                (this as any).$emit('update:modelValue', null);
+                this.$emit('update:modelValue', null);
             }
             return false;
         }

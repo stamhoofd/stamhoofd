@@ -53,11 +53,11 @@ export default class CodeInput extends VueComponent {
         if (value === this.getInternalValue()) {
             return;
         }
-        if (!((this as any).$refs && (this as any).$refs.numberInput && Array.isArray((this as any).$refs.numberInput))) {
+        if (!(this.$refs && this.$refs.numberInput && Array.isArray(this.$refs.numberInput))) {
             return;
         }
         for (let index = 0; index < this.codeLength; index++) {
-            const element = (this as any).$refs.numberInput[index] as HTMLInputElement;
+            const element = this.$refs.numberInput[index] as HTMLInputElement;
 
             if (index < value.length) {
                 const letter = value[index];
@@ -76,11 +76,11 @@ export default class CodeInput extends VueComponent {
     }
 
     onInput(index: number) {
-        if (!((this as any).$refs && (this as any).$refs.numberInput && Array.isArray((this as any).$refs.numberInput))) {
+        if (!(this.$refs && this.$refs.numberInput && Array.isArray(this.$refs.numberInput))) {
             return;
         }
 
-        const input = (this as any).$refs.numberInput[index] as HTMLInputElement;
+        const input = this.$refs.numberInput[index] as HTMLInputElement;
         input.value = this.numbersOnly ? (input.value as string).replace(/[^0-9]/g, '') : (input.value as string).toLocaleUpperCase().replace(/[^0-9A-Z]/g, '');
         if (input.value.length >= 1) {
             this.selectNext(index + 1);
@@ -88,15 +88,15 @@ export default class CodeInput extends VueComponent {
     }
 
     clearInput(index: number, select = true) {
-        if (!((this as any).$refs && (this as any).$refs.numberInput && Array.isArray((this as any).$refs.numberInput))) {
+        if (!(this.$refs && this.$refs.numberInput && Array.isArray(this.$refs.numberInput))) {
             return;
         }
 
         // Move everything one to the left
-        const input = (this as any).$refs.numberInput[index] as HTMLInputElement;
+        const input = this.$refs.numberInput[index] as HTMLInputElement;
         if (input.value.length === 0 && index < this.codeLength - 1) {
-            input.value = ((this as any).$refs.numberInput[index + 1] as HTMLInputElement).value;
-            ((this as any).$refs.numberInput[index + 1] as HTMLInputElement).value = '';
+            input.value = (this.$refs.numberInput[index + 1] as HTMLInputElement).value;
+            (this.$refs.numberInput[index + 1] as HTMLInputElement).value = '';
             this.clearInput(index + 1, false);
         }
 
@@ -117,55 +117,55 @@ export default class CodeInput extends VueComponent {
             return;
         }
 
-        if (!((this as any).$refs && (this as any).$refs.numberInput && Array.isArray((this as any).$refs.numberInput))) {
+        if (!(this.$refs && this.$refs.numberInput && Array.isArray(this.$refs.numberInput))) {
             return;
         }
 
         console.log('select next ', index);
         if (index >= this.codeLength) {
-            const prev = (this as any).$refs.numberInput[index - 1] as HTMLInputElement;
+            const prev = this.$refs.numberInput[index - 1] as HTMLInputElement;
             const val = prev.value;
             if (val.length > 1) {
                 prev.value = val.substr(0, 1);
             }
             for (let index = 0; index < this.codeLength; index++) {
-                const element = (this as any).$refs.numberInput[index] as HTMLInputElement;
+                const element = this.$refs.numberInput[index] as HTMLInputElement;
                 element.blur();
             }
             this.updateValue();
 
             if (this.getInternalValue().length === this.codeLength) {
-                (this as any).$emit('complete');
+                this.$emit('complete');
             }
             return;
         }
         if (index >= 1) {
-            const prev = (this as any).$refs.numberInput[index - 1] as HTMLInputElement;
+            const prev = this.$refs.numberInput[index - 1] as HTMLInputElement;
             const val = prev.value;
             if (val.length > 1) {
                 prev.value = val.substr(0, 1);
-                ((this as any).$refs.numberInput[index] as HTMLInputElement).value = val.substr(1);
+                (this.$refs.numberInput[index] as HTMLInputElement).value = val.substr(1);
                 this.selectNext(index + 1);
                 return;
             }
         }
-        ((this as any).$refs.numberInput[index] as HTMLInputElement).focus();
+        (this.$refs.numberInput[index] as HTMLInputElement).focus();
 
-        if (((this as any).$refs.numberInput[index] as HTMLInputElement).value.length > 0) {
+        if ((this.$refs.numberInput[index] as HTMLInputElement).value.length > 0) {
             // iOS fix
-            ((this as any).$refs.numberInput[index] as HTMLInputElement).select();
+            (this.$refs.numberInput[index] as HTMLInputElement).select();
         }
         this.updateValue();
     }
 
     getInternalValue() {
-        if (!((this as any).$refs && (this as any).$refs.numberInput && Array.isArray((this as any).$refs.numberInput))) {
+        if (!(this.$refs && this.$refs.numberInput && Array.isArray(this.$refs.numberInput))) {
             return '';
         }
 
         let val = '';
         for (let index = 0; index < this.codeLength; index++) {
-            const element = (this as any).$refs.numberInput[index] as HTMLInputElement;
+            const element = this.$refs.numberInput[index] as HTMLInputElement;
             const letter = element.value.substr(0, 1).toUpperCase();
             val += letter;
             if (letter.length === 0) {
@@ -176,7 +176,7 @@ export default class CodeInput extends VueComponent {
     }
 
     updateValue() {
-        (this as any).$emit('update:modelValue', this.getInternalValue());
+        this.$emit('update:modelValue', this.getInternalValue());
     }
 }
 </script>

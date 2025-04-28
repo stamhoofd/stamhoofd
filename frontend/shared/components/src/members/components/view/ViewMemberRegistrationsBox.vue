@@ -6,7 +6,7 @@
                 <span class="icon arrow-down-small" />
             </button>
             <div>
-                <button v-if="hasWrite" v-long-press="(e: any) => addRegistration(e)" type="button" class="button icon add gray" @click.prevent="addRegistration" @contextmenu.prevent="addRegistration" />
+                <button v-if="hasWrite" v-long-press="(e: any) => addRegistration()" type="button" class="button icon add gray" @click.prevent="addRegistration" @contextmenu.prevent="addRegistration" />
             </div>
         </h2>
 

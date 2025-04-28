@@ -669,7 +669,7 @@ if (!props.group && !props.category) {
                 if (app === 'admin') {
                     memberGroups = memberGroups.filter(g => g.defaultAgeGroupId !== null);
                 }
-                return memberGroups.sort((a, b) => Sorter.byStringValue(a.settings.name, b.settings.name));
+                return memberGroups.sort((a, b) => Sorter.byStringValue(a.settings.name.toString(), b.settings.name.toString()));
             },
             format: (groups) => {
                 if (groups.length === 0) {
