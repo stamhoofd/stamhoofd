@@ -2,6 +2,7 @@ import chalk from "chalk";
 import { TranslatorType } from "../enums/TranslatorType";
 import { globals } from "../shared/globals";
 import { TranslationDictionary } from "../types/TranslationDictionary";
+import { TextToTranslateRef } from "./TextToTranslateRef";
 import { TranslationManager } from "./TranslationManager";
 
 type Language = string;
@@ -20,42 +21,6 @@ interface SearchResult {
 interface MissingTranslationsOutput {
     allTranslationRefs: Set<TextToTranslateRef>;
     searchResults: SearchResult[];
-}
-
-export class TextToTranslateRef {
-    private _didTry = false;
-    private _translation: string | null = null;
-
-    get isTranslated(): boolean {
-        return this._translation !== null;
-    }
-
-    get didTry(): boolean {
-        return this._didTry;
-    }
-
-    get translation(): string {
-        const translation = this._translation;
-        if (translation === null) {
-            throw new Error("Not translated.");
-        }
-        return translation;
-    }
-
-    constructor(
-        readonly locale: string,
-        readonly namespace: string,
-        readonly id: string,
-        readonly text: string,
-    ) {}
-
-    markDidTry() {
-        this._didTry = true;
-    }
-
-    setTranslation(value: string) {
-        this._translation = value;
-    }
 }
 
 export class MissingTranslationFinder {
