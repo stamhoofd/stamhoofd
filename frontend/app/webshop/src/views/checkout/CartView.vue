@@ -45,8 +45,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController, useDismiss, useNavigationController, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { AddDiscountCodeBox, CartItemRow, CartItemView, ErrorBox, LoadingButton, PriceBreakdownBox, STErrorsDefault, STList, STNavigationBar, STToolbar, useErrors } from '@stamhoofd/components';
+import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AddDiscountCodeBox, CartItemRow, CartItemView, ErrorBox, LoadingButton, PriceBreakdownBox, STErrorsDefault, STList, STNavigationBar, STToolbar, useErrors, useNavigationActions } from '@stamhoofd/components';
 import { CartItem, DiscountCode } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
@@ -61,13 +61,9 @@ const errors = useErrors();
 const present = usePresent();
 const pop = usePop();
 
-const navigationController = useNavigationController();
-const dismiss = useDismiss();
-const show = useShow();
-
 const checkoutManager = useCheckoutManager();
 const webshopManager = useWebshopManager();
-
+const navigationActions = useNavigationActions();
 const cart = computed(() => checkoutManager.cart);
 const checkout = computed(() => checkoutManager.checkout);
 const webshop = computed(() => webshopManager.webshop);
@@ -81,11 +77,7 @@ async function goToCheckout() {
     errors.errorBox = null;
 
     try {
-        await CheckoutStepsManager.for(checkoutManager).goNext(undefined, {
-            navigationController: navigationController.value,
-            dismiss,
-            show,
-        });
+        await CheckoutStepsManager.for(checkoutManager).goNext(undefined, navigationActions);
     }
     catch (e) {
         console.error(e);

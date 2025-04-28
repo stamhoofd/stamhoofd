@@ -13,7 +13,7 @@ import { ComponentWithProperties, HistoryManager, ModalStackComponent, Navigatio
 import { CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, LoadingView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { I18nController, LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { DarkMode, GetWebshopFromDomainResult } from '@stamhoofd/structures';
+import { DarkMode, GetWebshopFromDomainResult, Language } from '@stamhoofd/structures';
 import { GoogleTranslateHelper } from '@stamhoofd/utility';
 
 import { ref, watch } from 'vue';
@@ -88,7 +88,7 @@ const root = new ComponentWithProperties(PromiseView, {
             const session = new SessionContext(response.data.organization);
             await session.loadFromStorage();
 
-            await I18nController.loadDefault(session, response.data.organization.address.country, 'nl', response.data.organization.address.country);
+            await I18nController.loadDefault(session, response.data.organization.address.country, Language.Dutch, response.data.organization.address.country);
 
             await session.checkSSO();
             await SessionManager.prepareSessionForUsage(session);
@@ -114,7 +114,7 @@ const root = new ComponentWithProperties(PromiseView, {
             // Check if we have an organization on this domain
             if (!I18nController.shared) {
                 try {
-                    await I18nController.loadDefault(null, undefined, 'nl');
+                    await I18nController.loadDefault(null, undefined, Language.Dutch);
                 }
                 catch (e) {
                     console.error(e);
@@ -161,7 +161,7 @@ function created() {
 }
 
 created();
-const manualPresent = useManualPresent()
+const manualPresent = useManualPresent();
 
 watch(modalStack, (modalStack) => {
     if (modalStack === null) {
@@ -180,13 +180,13 @@ watch(modalStack, (modalStack) => {
     CenteredMessage.addListener(owner, async (centeredMessage) => {
         await manualPresent(modalStack.present, {
             components: [
-                new ComponentWithProperties(CenteredMessageView, { 
-                    centeredMessage
+                new ComponentWithProperties(CenteredMessageView, {
+                    centeredMessage,
                 }, {
-                    forceCanHaveFocus: true
+                    forceCanHaveFocus: true,
                 }),
             ],
-            modalDisplayStyle: 'overlay'
+            modalDisplayStyle: 'overlay',
         });
     });
 });
