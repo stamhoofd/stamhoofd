@@ -1,4 +1,4 @@
-import { BundleInfo, CapacitorUpdater, DownloadChangeListener } from '@capgo/capacitor-updater';
+import { BundleInfo, CapacitorUpdater } from '@capgo/capacitor-updater';
 import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { Server } from '@simonbackx/simple-networking';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
@@ -62,7 +62,7 @@ export class UpdateStatus {
             await Storage.keyValue.setItem('UPDATE_SERVER', this.options.channel);
         }
         const server = this.options.channel || await Storage.keyValue.getItem('UPDATE_SERVER');
-        const url = new URL(this.options.channel || server || STAMHOOFD.APP_UPDATE_SERVER_URL);
+        const url = new URL(this.options.channel || server || STAMHOOFD.APP_UPDATE_SERVER_URL!);
         const host = url.protocol + '//' + url.host;
         const checkPath = url.pathname;
 
@@ -96,7 +96,7 @@ export class UpdateStatus {
             // toast = new Toast(`Downloaden van de nieuwste update (${STAMHOOFD.VERSION} > ${release.version})...`, 'spinner').setProgress(0).setHide(null).show()
 
             // check
-            const listener: DownloadChangeListener = (v) => {
+            const listener = (v) => {
                 this.progress = v.percent / 100;
             };
 

@@ -92,7 +92,7 @@ export function buildConfig(options: { port: number; clientFiles?: string[] }): 
                 context: resolve(__dirname, './shared/assets/images/icons/'),
                 cssTemplate: resolve(__dirname, './shared/assets/images/icons/iconCss.hbs'),
             }),
-        ],
+        ] as any,
         define: use_env,
         server: process.env.NODE_ENV !== 'production'
             ? {

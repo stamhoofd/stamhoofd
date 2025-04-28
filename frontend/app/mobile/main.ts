@@ -25,11 +25,12 @@ import { WrapperHTTPRequest } from './src/WrapperHTTPRequest';
 const throttle = (func, limit) => {
     let lastFunc;
     let lastRan;
-    return function (height: number) {
+    return function (this: any, height: number) {
         const context = this;
         // eslint-disable-next-line prefer-rest-params
         const args = arguments;
         if (lastRan) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             clearTimeout(lastFunc);
         }
         lastRan = Date.now();
@@ -247,6 +248,10 @@ function blobToBase64(blob: Blob | File): Promise<string> {
     });
 }
 
+function isError(e: any): e is Error {
+    return e && typeof e === 'object' && 'message' in e;
+}
+
 // Download File
 AppManager.shared.downloadFile = async (data: Blob | File | URL, filename: string) => {
     const { publicStorage } = await Filesystem.checkPermissions();
@@ -285,7 +290,7 @@ AppManager.shared.downloadFile = async (data: Blob | File | URL, filename: strin
         }
     }
     catch (e) {
-        if (e.message === 'Share canceled' || e.message === 'Error sharing item') {
+        if (isError(e) && (e.message === 'Share canceled' || e.message === 'Error sharing item')) {
             return;
         }
         throw e;
