@@ -18,11 +18,11 @@
             <div class="split-inputs">
                 <div>
                     <STInputBox :title="$t(`adf7def3-6328-4261-a390-6cd006737aaf`)">
-                        <input id="new-password" v-model="password" name="new-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`722ac9a8-7ccb-4e3b-aa51-77132c19b2bb`)" @input="(event) => password = event.target.value" @change="(event) => password = event.target.value">
+                        <input id="new-password" v-model="password" name="new-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`722ac9a8-7ccb-4e3b-aa51-77132c19b2bb`)" @input="(event: any) => password = event.target.value" @change="(event: any) => password = event.target.value">
                     </STInputBox>
 
                     <STInputBox :title="$t(`ed8aef93-717e-406c-a779-2465dcd07baa`)">
-                        <input id="confirm-password" v-model="passwordRepeat" name="confirm-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`722ac9a8-7ccb-4e3b-aa51-77132c19b2bb`)" @input="(event) => passwordRepeat = event.target.value" @change="(event) => passwordRepeat = event.target.value">
+                        <input id="confirm-password" v-model="passwordRepeat" name="confirm-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`722ac9a8-7ccb-4e3b-aa51-77132c19b2bb`)" @input="(event: any) => passwordRepeat = event.target.value" @change="(event: any) => passwordRepeat = event.target.value">
                     </STInputBox>
                 </div>
                 <div>

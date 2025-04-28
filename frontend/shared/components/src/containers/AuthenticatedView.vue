@@ -15,6 +15,7 @@ import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/cl
 
 import { ErrorBox } from '../errors/ErrorBox';
 import LoadingViewTransition from './LoadingViewTransition.vue';
+import { SessionContext } from '@stamhoofd/networking';
 
 @Component({
     components: {
@@ -45,29 +46,29 @@ export default class AuthenticatedView extends VueComponent {
     created() {
         // We need to check data already before loading any component!
         this.changed();
-        this.$context.addListener(this, this.changed.bind(this));
+        ((this as any).$context as SessionContext).addListener(this, this.changed.bind(this));
         document.addEventListener('visibilitychange', this.onVisibilityChange);
     }
 
     beforeUnmount() {
-        this.$context.removeListener(this);
+        ((this as any).$context as SessionContext).removeListener(this);
         document.removeEventListener('visibilitychange', this.onVisibilityChange);
     }
 
     changed() {
         if (this.noPermissionsRoot) {
-            this.loggedIn = (this.$context.isComplete() ?? false) && !!this.$context.auth.permissions && !this.$context.auth.permissions.isEmpty;
-            this.hasToken = this.$context.hasToken() ?? false;
-            this.showPermissionsRoot = this.$context.isComplete() ?? false;
-            this.userId = this.$context.user?.id ?? null;
-            this.errorBox = this.$context.loadingError ? new ErrorBox(this.$context.loadingError) : null;
+            this.loggedIn = (((this as any).$context as SessionContext).isComplete() ?? false) && !!((this as any).$context as SessionContext).auth.permissions && !((this as any).$context as SessionContext).auth.permissions.isEmpty;
+            this.hasToken = ((this as any).$context as SessionContext).hasToken() ?? false;
+            this.showPermissionsRoot = ((this as any).$context as SessionContext).isComplete() ?? false;
+            this.userId = ((this as any).$context as SessionContext).user?.id ?? null;
+            this.errorBox = ((this as any).$context as SessionContext).loadingError ? new ErrorBox(((this as any).$context as SessionContext).loadingError) : null;
         }
         else {
-            this.loggedIn = this.$context.isComplete() ?? false;
-            this.hasToken = this.$context.hasToken() ?? false;
+            this.loggedIn = ((this as any).$context as SessionContext).isComplete() ?? false;
+            this.hasToken = ((this as any).$context as SessionContext).hasToken() ?? false;
             this.showPermissionsRoot = false;
-            this.userId = this.$context.user?.id ?? null;
-            this.errorBox = this.$context.loadingError ? new ErrorBox(this.$context.loadingError) : null;
+            this.userId = ((this as any).$context as SessionContext).user?.id ?? null;
+            this.errorBox = ((this as any).$context as SessionContext).loadingError ? new ErrorBox(((this as any).$context as SessionContext).loadingError) : null;
         }
     }
 
@@ -76,7 +77,7 @@ export default class AuthenticatedView extends VueComponent {
             // TODO
             console.info('Window became visible again');
 
-            if (!this.$context || !this.$context.isComplete()) {
+            if (!((this as any).$context as SessionContext) || !((this as any).$context as SessionContext).isComplete()) {
                 return;
             }
 
@@ -85,7 +86,7 @@ export default class AuthenticatedView extends VueComponent {
                 console.info('Updating organization');
                 this.lastOrganizationFetch = new Date();
 
-                this.$context.updateData(true, false, false).catch(console.error);
+                ((this as any).$context as SessionContext).updateData(true, false, false).catch(console.error);
             }
         }
     }

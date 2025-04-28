@@ -22,7 +22,7 @@
                                     <span class="icon help" />
                                 </button>
                             </template>
-                            <input id="password" v-model="password" :autofocus="!!initialEmail" enterkeyhint="go" class="input" name="current-password" autocomplete="current-password" type="password" :placeholder="$t(`e2cec378-4ed6-40c1-bc1b-ca93718bacf1`)" @input="(event) => password = event.target.value" @change="(event) => password = event.target.value">
+                            <input id="password" v-model="password" :autofocus="!!initialEmail" enterkeyhint="go" class="input" name="current-password" autocomplete="current-password" type="password" :placeholder="$t(`e2cec378-4ed6-40c1-bc1b-ca93718bacf1`)" @input="(event: any) => password = event.target.value" @change="(event: any) => password = event.target.value">
                         </STInputBox>
                         <VersionFooter v-if="showVersionFooter" />
                         <div v-else class="style-form-buttons ">

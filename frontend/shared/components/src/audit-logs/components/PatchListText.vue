@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacementType, isUuid } from '@stamhoofd/structures';
+import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacementType } from '@stamhoofd/structures';
 import { Context, Renderable, renderAny, RenderTextComponent } from './RenderTextComponent';
 import { h } from 'vue';
 

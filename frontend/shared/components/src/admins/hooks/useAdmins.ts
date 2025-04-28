@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { GlobalEventBus, useOrganization, usePlatform } from '@stamhoofd/components';
 import { ContextPermissions, usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { ApiUser, GroupType, PermissionLevel, Permissions, PlatformFamily, PlatformMember, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
+import { ApiUser, GroupType, LoadedPermissions, PermissionLevel, Permissions, PlatformFamily, PlatformMember, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, onActivated, shallowRef } from 'vue';
 import { useReloadAdmins } from './useReloadAdmins';
@@ -56,7 +56,10 @@ export function useAdmins() {
     });
 
     const permissionContextCache = shallowRef(new WeakMap<User, ContextPermissions>());
-    const apiContextCache = shallowRef(new WeakMap<ApiUser, ContextPermissions>());
+    const apiContextCache = shallowRef(new WeakMap<ApiUser, {
+        permissions: LoadedPermissions | null;
+        unloadedPermissions: Permissions | null;
+    }>());
 
     const getPermissionContext = (user: User | ApiUser) => {
         if (user instanceof ApiUser) {

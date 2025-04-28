@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoutes, useDismiss, useNavigate, usePopup, useShow } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, PushOptions, useDismiss, useNavigate, usePopup, useShow } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentPublicInstance, computed, getCurrentInstance, ref, unref } from 'vue';
 
@@ -53,7 +53,7 @@ defineRoutes(flatTabs.value.map(tab => {
                 tab.component.setCheckRoutes()
             }
             await show({
-                ...(options as any),
+                ...(options as any as PushOptions),
                 components: [tab.component]
             })
         }
