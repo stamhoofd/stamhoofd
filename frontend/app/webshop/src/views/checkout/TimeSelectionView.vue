@@ -36,20 +36,17 @@
 </template>
 
 <script lang="ts" setup>
-import { ErrorBox, Radio, SaveView, STErrorsDefault, STList, STListItem, useErrors } from '@stamhoofd/components';
+import { ErrorBox, Radio, SaveView, STErrorsDefault, STList, STListItem, useErrors, useNavigationActions } from '@stamhoofd/components';
 import { CheckoutMethodType, WebshopTimeSlot } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 
-import { useDismiss, useNavigationController, useShow } from '@simonbackx/vue-app-navigation';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
 import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
 
 const loading = ref(false);
 const errors = useErrors();
 const checkoutManager = useCheckoutManager();
-const dismiss = useDismiss();
-const show = useShow();
-const navigationController = useNavigationController();
+const navigationActions = useNavigationActions();
 
 const title = computed(() => {
     if (checkoutMethod.value.type === CheckoutMethodType.Takeout) {
@@ -89,11 +86,7 @@ async function goNext() {
     errors.errorBox = null;
 
     try {
-        await CheckoutStepsManager.for(checkoutManager).goNext(CheckoutStepType.Time, {
-            dismiss,
-            show,
-            navigationController: navigationController.value,
-        });
+        await CheckoutStepsManager.for(checkoutManager).goNext(CheckoutStepType.Time, navigationActions);
     }
     catch (e) {
         console.error(e);
