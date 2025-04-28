@@ -215,7 +215,7 @@ export class XlsxTransformerColumnHelper {
                             name,
                             width: width ?? 20,
                             defaultCategory,
-                            category: recordCategory.name,
+                            category: recordCategory.name.toString(),
                             getValue: (object: T) => {
                                 const answers = getRecordAnswers(object);
                                 const b = (answers.get(recordSettingId)?.excelValues[index] ?? {

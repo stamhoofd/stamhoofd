@@ -7,6 +7,7 @@ import { PropertyFilter } from '../../filters/PropertyFilter.js';
 import { getPermissionLevelNumber, PermissionLevel } from '../../PermissionLevel.js';
 import { ObjectWithRecords } from '../ObjectWithRecords.js';
 import { type RecordAnswer } from './RecordAnswer.js';
+import { TranslatedString } from '../../TranslatedString.js';
 
 export type RecordFilterOptions = { level?: PermissionLevel; additionalFilter?: (record: RecordSettings) => boolean };
 
@@ -117,7 +118,8 @@ export class RecordWarning extends AutoEncoder {
     id: string;
 
     @field({ decoder: StringDecoder })
-    text = '';
+    @field(TranslatedString.field({ version: 370 }))
+    text = TranslatedString.create();
 
     @field({ decoder: new EnumDecoder(RecordWarningType) })
     type = RecordWarningType.Info;
@@ -163,10 +165,12 @@ export class RecordChoice extends AutoEncoder {
     id: string;
 
     @field({ decoder: StringDecoder })
-    name = '';
+    @field(TranslatedString.field({ version: 370 }))
+    name = TranslatedString.create();
 
     @field({ decoder: StringDecoder, version: 118 })
-    description = '';
+    @field(TranslatedString.field({ version: 370 }))
+    description = TranslatedString.create();
 
     /**
      * Show a warning if selected (or not selected if inverted)
@@ -183,7 +187,8 @@ export class BaseRecordSettings extends AutoEncoder {
      * Short name (used mainly for displaying the information)
      */
     @field({ decoder: StringDecoder })
-    name = '';
+    @field(TranslatedString.field({ version: 370 }))
+    name = TranslatedString.create();
 }
 
 export class RecordSettings extends BaseRecordSettings {
@@ -223,22 +228,26 @@ export class RecordSettings extends BaseRecordSettings {
      * If empty: name is used
      */
     @field({ decoder: StringDecoder })
-    label = '';
+    @field(TranslatedString.field({ version: 370 }))
+    label = TranslatedString.create();
 
     /**
      * Text underneath the label in case of a checkbox.
      * For other types: below the input
      */
     @field({ decoder: StringDecoder })
-    description = '';
+    @field(TranslatedString.field({ version: 370 }))
+    description = TranslatedString.create();
 
     /// In case of textboxes or comments for checked checkboxes
     @field({ decoder: StringDecoder })
-    inputPlaceholder = '';
+    @field(TranslatedString.field({ version: 370 }))
+    inputPlaceholder = TranslatedString.create();
 
     /// Text below the input field for comments (if any)
     @field({ decoder: StringDecoder, version: 120 })
-    commentsDescription = '';
+    @field(TranslatedString.field({ version: 370 }))
+    commentsDescription = TranslatedString.create();
 
     /**
      * Show a warning if selected / entered (or not selected/entered if inverted)
@@ -301,7 +310,7 @@ export class RecordSettings extends BaseRecordSettings {
         if (this.type === RecordType.Address) {
             let prefix = '';
             const defaultCategory = $t('0a37de09-120b-4bea-8d13-6d7ed6823884');
-            if (this.name !== defaultCategory) {
+            if (this.name.toString() !== defaultCategory) {
                 prefix = this.name + ' - ';
             }
 
@@ -350,7 +359,7 @@ export class RecordSettings extends BaseRecordSettings {
         }
 
         return [{
-            name: this.name,
+            name: this.name.toString(),
             width,
         }];
     }

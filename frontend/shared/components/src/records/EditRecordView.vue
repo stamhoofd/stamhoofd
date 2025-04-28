@@ -11,9 +11,7 @@
 
         <div class="split-inputs">
             <div>
-                <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`21d2abc5-55c1-4ad2-a7ba-44061fae2fd1`)">
-                    <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`79e3b4c3-e117-4907-942b-a0e06e01a573`)">
-                </STInputBox>
+                <TInput v-model="name" error-fields="name" :placeholder="$t(`79e3b4c3-e117-4907-942b-a0e06e01a573`)" :error-box="errors.errorBox" :title="$t(`21d2abc5-55c1-4ad2-a7ba-44061fae2fd1`)" />
             </div>
 
             <div>
@@ -77,27 +75,19 @@
         </h2>
         <p>{{ $t('46374fd8-2e04-4008-a437-ef8da0857400') }}</p>
 
-        <STInputBox :title="labelTitle" error-fields="label" :error-box="errors.errorBox" class="max">
-            <input v-model="label" class="input" type="text" :placeholder="name" autocomplete="off" enterkeyhint="next">
-        </STInputBox>
+        <TInput v-model="label" :title="labelTitle" error-fields="label" :error-box="errors.errorBox" class="max" :placeholder="name" />
 
-        <STInputBox :title="descriptionTitle" error-fields="description" :error-box="errors.errorBox" class="max">
-            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" />
-        </STInputBox>
+        <TTextarea v-model="description" :title="descriptionTitle" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" error-fields="description" :error-box="errors.errorBox" class="max" />
         <p class="style-description-small">
             {{ $t('ee593263-9493-4a9c-a3e5-fe0a4e596887') }}
         </p>
 
-        <STInputBox v-if="shouldAskInputPlaceholder" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`111715d8-0347-4e60-80fc-e405999430ee`)">
-            <input v-model="inputPlaceholder" class="input" type="text" autocomplete="off" :placeholder="$t(`4f04a0fd-f7f9-46b0-9fe0-3d4b443c7f37`)">
-        </STInputBox>
+        <TTextarea v-if="shouldAskInputPlaceholder" v-model="inputPlaceholder" :placeholder="$t(`4f04a0fd-f7f9-46b0-9fe0-3d4b443c7f37`)" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`111715d8-0347-4e60-80fc-e405999430ee`)" />
         <p class="style-description-small">
             {{ $t('9f3d1ce2-aa2e-421b-84f1-07e875e9e4a8') }}
         </p>
 
-        <STInputBox v-if="shouldAskCommentsDescription" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`5a3c9444-fcf0-408c-99fc-4e5395c37eb0`)">
-            <textarea v-model="commentsDescription" class="input" type="text" autocomplete="off" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" />
-        </STInputBox>
+        <TTextarea v-if="shouldAskCommentsDescription" v-model="commentsDescription" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`5a3c9444-fcf0-408c-99fc-4e5395c37eb0`)" />
         <p v-if="shouldAskCommentsDescription" class="style-description-small">
             {{ $t('b8e94451-af94-47ac-8e2c-b39301d3e829') }}
         </p>
@@ -166,10 +156,7 @@
                 </STListItem>
             </STList>
 
-            <STInputBox v-if="warningText !== null" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`73dbf494-16a3-4e9a-8cbe-5170334209c0`)">
-                <input v-model="warningText" class="input" type="text" autocomplete="off" :placeholder="$t(`fd5e3142-7a0e-4305-8a49-35f2f4d89083`)">
-            </STInputBox>
-
+            <TTextarea v-if="warningText !== null" v-model="warningText" :placeholder="$t(`fd5e3142-7a0e-4305-8a49-35f2f4d89083`)" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`73dbf494-16a3-4e9a-8cbe-5170334209c0`)" />
             <STInputBox v-if="warningType" class="max" :title="$t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)">
                 <STList>
                     <STListItem :selectable="true" element-name="label">
@@ -237,7 +224,7 @@ import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-en
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, Checkbox, Dropdown, ErrorBox, GroupUIFilterBuilder, PropertyFilterInput, Radio, STErrorsDefault, STInputBox, STList, STListItem, SaveView, useErrors, usePatch } from '@stamhoofd/components';
-import { FileType, ObjectWithRecords, PermissionLevel, PropertyFilter, RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
+import { FileType, ObjectWithRecords, PermissionLevel, PropertyFilter, RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, TranslatedString } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 import EditRecordChoiceView from './EditRecordChoiceView.vue';
@@ -417,7 +404,7 @@ const descriptionTitle = computed(() => {
 
 const name = computed({
     get: () => patchedRecord.value.name,
-    set: (name: string) => {
+    set: (name) => {
         addPatch({ name });
     },
 });
@@ -431,7 +418,7 @@ const fileType = computed({
 
 const label = computed({
     get: () => patchedRecord.value.label,
-    set: (label: string) => {
+    set: (label) => {
         addPatch({ label });
     },
 });
@@ -452,7 +439,7 @@ const choices = computed({
 
 const inputPlaceholder = computed({
     get: () => patchedRecord.value.inputPlaceholder,
-    set: (inputPlaceholder: string) => {
+    set: (inputPlaceholder) => {
         addPatch({ inputPlaceholder });
     },
 });
@@ -534,8 +521,8 @@ const type = computed({
                 else {
                     patchRecord.value = patchRecord.value.patch({
                         choices: [
-                            RecordChoice.create({ name: $t(`4b9cc9ee-d989-4459-a8d5-727ae490380d`) }),
-                            RecordChoice.create({ name: $t(`a09b08eb-216c-4f07-b05c-0a26a4c580eb`) }),
+                            RecordChoice.create({ name: TranslatedString.create($t(`4b9cc9ee-d989-4459-a8d5-727ae490380d`)) }),
+                            RecordChoice.create({ name: TranslatedString.create($t(`a09b08eb-216c-4f07-b05c-0a26a4c580eb`)) }),
                         ] as any,
                     });
                 }
@@ -550,14 +537,14 @@ const type = computed({
 
 const description = computed({
     get: () => patchedRecord.value.description,
-    set: (description: string) => {
+    set: (description) => {
         addPatch({ description });
     },
 });
 
 const commentsDescription = computed({
     get: () => patchedRecord.value.commentsDescription,
-    set: (commentsDescription: string) => {
+    set: (commentsDescription) => {
         addPatch({ commentsDescription });
     },
 });
@@ -597,7 +584,7 @@ const warningInverted = computed({
 
 const warningText = computed({
     get: () => patchedRecord.value.warning?.text ?? null,
-    set: (text: string | null) => {
+    set: (text: TranslatedString | null) => {
         if (text === null) {
             patchRecord.value = patchRecord.value.patch({
                 warning: null,

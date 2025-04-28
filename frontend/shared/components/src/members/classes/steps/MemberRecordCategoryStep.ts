@@ -19,7 +19,7 @@ export class MemberRecordCategoryStep implements EditMemberStep {
     }
 
     getName(manager: MemberStepManager) {
-        return this.recordCategory.name;
+        return this.recordCategory.name.toString();
     }
 
     isEnabled(manager: MemberStepManager) {

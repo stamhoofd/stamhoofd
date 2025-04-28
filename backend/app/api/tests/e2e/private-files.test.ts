@@ -1,4 +1,4 @@
-import { File, MemberDetails, MemberWithRegistrationsBlob, RecordCategory, RecordFileAnswer, RecordSettings, RecordType, Version } from '@stamhoofd/structures';
+import { File, MemberDetails, MemberWithRegistrationsBlob, RecordCategory, RecordFileAnswer, RecordSettings, RecordType, TranslatedString, Version } from '@stamhoofd/structures';
 
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
@@ -16,7 +16,7 @@ const getMembersEndpoint = new GetUserMembersEndpoint();
 describe('E2E.PrivateFiles', () => {
     const recordSettings = RecordSettings.create({
         id: 'test',
-        name: 'Bestand test',
+        name: TranslatedString.create('Bestand test'),
         type: RecordType.File,
     });
 
@@ -25,7 +25,7 @@ describe('E2E.PrivateFiles', () => {
 
         // Add record settings type
         const category = RecordCategory.create({
-            name: 'Voorbeeld',
+            name: TranslatedString.create('Voorbeeld'),
             defaultEnabled: true,
             records: [
                 recordSettings,

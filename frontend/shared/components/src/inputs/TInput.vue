@@ -7,7 +7,7 @@
                 type="text"
                 autocomplete="off"
                 data-1p-ignore
-                :placeholder="placeholder"
+                :placeholder="typeof placeholder === 'string' ? placeholder : (language ? placeholder.get(language) : placeholder.toString()) ?? ''"
                 :model-value="getForLanguage(language)"
                 :suffix="language ? language.toUpperCase() : ''"
                 @update:model-value="setForLanguage($event, language)"
@@ -43,7 +43,7 @@ registerTranslateableComponent(value);
 withDefaults(
     defineProps<{
         title: string;
-        placeholder?: string;
+        placeholder?: string | TranslatedString;
     }>(), {
         title: '',
         placeholder: '',

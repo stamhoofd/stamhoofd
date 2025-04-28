@@ -14,14 +14,10 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`cbe7db4a-b65b-452b-a5d2-d369182fd28f`)">
-                <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`cbe7db4a-b65b-452b-a5d2-d369182fd28f`)">
-            </STInputBox>
+            <TInput v-model="name" enterkeyhint="next" :placeholder="$t(`cbe7db4a-b65b-452b-a5d2-d369182fd28f`)" error-fields="name" :error-box="errors.errorBox" :title="$t(`cbe7db4a-b65b-452b-a5d2-d369182fd28f`)" />
         </div>
 
-        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
-            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" />
-        </STInputBox>
+        <TTextarea v-model="description" error-fields="description" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" :error-box="errors.errorBox" class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)" />
 
         <STList v-if="(settings.toggleDefaultEnabled && allowChildCategories) || !patchedCategory.defaultEnabled">
             <STListItem :selectable="true" element-name="label">
@@ -493,7 +489,7 @@ async function showCategoryMenu(event: MouseEvent, category: RecordCategory) {
                     ],
                     [
                         ...patchedRootCategories.value.map(c => new ContextMenuItem({
-                            name: c.name,
+                            name: c.name.toString(),
                             disabled: c.id === props.categoryId,
                             action: async () => {
                                 // Transform into a root category

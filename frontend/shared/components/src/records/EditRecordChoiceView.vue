@@ -6,13 +6,8 @@
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <STInputBox error-fields="name" :error-box="errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
-            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`1539d481-12bf-4814-9fe3-3770eaecdda8`)">
-        </STInputBox>
-
-        <STInputBox error-fields="description" :error-box="errorBox" class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
-            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" />
-        </STInputBox>
+        <TInput v-model="name" :placeholder="$t(`1539d481-12bf-4814-9fe3-3770eaecdda8`)" error-fields="name" :error-box="errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)" />
+        <TTextarea v-model="description" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" error-fields="description" :error-box="errorBox" class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)" />
 
         <hr><h2>{{ $t('509ab71d-f9e0-4f2a-8683-590b6363b32d') }}</h2>
         <p>{{ $t('8cc76242-2d6a-4354-b199-c6086e8ea03d') }}</p>
@@ -46,59 +41,56 @@
             </STListItem>
         </STList>
 
-        <STInputBox v-if="warningText !== null" error-fields="label" :error-box="errorBox" class="max" :title="$t(`73dbf494-16a3-4e9a-8cbe-5170334209c0`)">
-            <input v-model="warningText" class="input" type="text" autocomplete="off" :placeholder="$t(`fd5e3142-7a0e-4305-8a49-35f2f4d89083`)">
-        </STInputBox>
+        <TInput v-if="warningText !== null" v-model="warningText" :placeholder="$t(`fd5e3142-7a0e-4305-8a49-35f2f4d89083`)" error-fields="label" :error-box="errorBox" class="max" :title="$t(`73dbf494-16a3-4e9a-8cbe-5170334209c0`)" />
+            <STInputBox v-if="warningType" class="max" :title="$t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)">
+                <STList>
+                    <STListItem :selectable="true" element-name="label">
+                        <template #left>
+                            <Radio v-model="warningType" :value="RecordWarningType.Info" name="warningType" />
+                        </template>
+                        <h3 class="style-title-list">
+                            {{ $t('fd69163a-0141-4540-af7a-ef2b45682383') }}
+                        </h3>
+                        <p class="style-description-small">
+                            {{ $t('90eed78f-7d02-4433-ba89-42da46201282') }}
+                        </p>
+                    </STListItem>
 
-        <STInputBox v-if="warningType" class="max" :title="$t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)">
-            <STList>
-                <STListItem :selectable="true" element-name="label">
-                    <template #left>
-                        <Radio v-model="warningType" :value="RecordWarningType.Info" name="warningType" />
-                    </template>
-                    <h3 class="style-title-list">
-                        {{ $t('fd69163a-0141-4540-af7a-ef2b45682383') }}
-                    </h3>
-                    <p class="style-description-small">
-                        {{ $t('90eed78f-7d02-4433-ba89-42da46201282') }}
-                    </p>
-                </STListItem>
+                    <STListItem :selectable="true" element-name="label">
+                        <template #left>
+                            <Radio v-model="warningType" :value="RecordWarningType.Warning" name="warningType" />
+                        </template>
+                        <h3 class="style-title-list">
+                            {{ $t('509ab71d-f9e0-4f2a-8683-590b6363b32d') }}
+                        </h3>
+                        <p class="style-description-small">
+                            {{ $t('aef8493c-6d75-4270-ba4c-f9f09b65caf7') }}
+                        </p>
+                    </STListItem>
 
-                <STListItem :selectable="true" element-name="label">
-                    <template #left>
-                        <Radio v-model="warningType" :value="RecordWarningType.Warning" name="warningType" />
-                    </template>
-                    <h3 class="style-title-list">
-                        {{ $t('509ab71d-f9e0-4f2a-8683-590b6363b32d') }}
-                    </h3>
-                    <p class="style-description-small">
-                        {{ $t('aef8493c-6d75-4270-ba4c-f9f09b65caf7') }}
-                    </p>
-                </STListItem>
+                    <STListItem :selectable="true" element-name="label">
+                        <template #left>
+                            <Radio v-model="warningType" :value="RecordWarningType.Error" name="warningType" />
+                        </template>
+                        <h3 class="style-title-list">
+                            {{ $t('b4714037-0561-4ce1-9601-9fd753fd9825') }}
+                        </h3>
+                        <p class="style-description-small">
+                            {{ $t("e34424b4-80ff-46a2-987e-85f89cfd806c") }}
+                        </p>
+                    </STListItem>
+                </STList>
+            </STInputBox>
+            <div v-if="!isNew" class="container">
+                <hr><h2>
+                    {{ $t('a7a62bda-0ff0-4e86-b417-14eb65ad378c') }}
+                </h2>
 
-                <STListItem :selectable="true" element-name="label">
-                    <template #left>
-                        <Radio v-model="warningType" :value="RecordWarningType.Error" name="warningType" />
-                    </template>
-                    <h3 class="style-title-list">
-                        {{ $t('b4714037-0561-4ce1-9601-9fd753fd9825') }}
-                    </h3>
-                    <p class="style-description-small">
-                        {{ $t("e34424b4-80ff-46a2-987e-85f89cfd806c") }}
-                    </p>
-                </STListItem>
-            </STList>
-        </STInputBox>
-        <div v-if="!isNew" class="container">
-            <hr><h2>
-                {{ $t('a7a62bda-0ff0-4e86-b417-14eb65ad378c') }}
-            </h2>
-
-            <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
-            </button>
-        </div>
+                <button class="button secundary danger" type="button" @click="deleteMe">
+                    <span class="icon trash" />
+                    <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
+                </button>
+            </div>
     </SaveView>
 </template>
 
@@ -107,7 +99,7 @@ import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchC
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { CenteredMessage, ErrorBox, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from '@stamhoofd/components';
-import { RecordChoice, RecordSettings, RecordWarning, RecordWarningType, Version } from '@stamhoofd/structures';
+import { RecordChoice, RecordSettings, RecordWarning, RecordWarningType, TranslatedString, Version } from '@stamhoofd/structures';
 
 @Component({
     components: {
@@ -156,7 +148,7 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
         return this.patchedChoice.name;
     }
 
-    set name(name: string) {
+    set name(name: TranslatedString) {
         this.patchChoice = this.patchChoice.patch({ name });
     }
 
@@ -164,7 +156,7 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
         return this.patchedChoice.description;
     }
 
-    set description(description: string) {
+    set description(description: TranslatedString) {
         this.patchChoice = this.patchChoice.patch({ description });
     }
 
@@ -199,7 +191,7 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
         return this.patchedChoice.warning?.text ?? null;
     }
 
-    set warningText(text: string | null) {
+    set warningText(text: TranslatedString | null) {
         if (text === null) {
             this.patchChoice = this.patchChoice.patch({
                 warning: null,
