@@ -103,7 +103,7 @@ export class WrapperHTTPRequest implements XMLHttpRequest {
             else {
                 this.response = response.data;
             }
-            this.responseHeaders = response.headers
+            this.responseHeaders = response.headers;
             (this.onreadystatechange as any)?.call(this);
         }).catch((e) => {
             console.log('received error');

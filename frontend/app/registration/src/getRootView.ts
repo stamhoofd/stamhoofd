@@ -4,7 +4,7 @@ import { appToUri, AuthenticatedView, ColorHelper, manualFeatureFlag, PromiseVie
 import { getNonAutoLoginRoot, sessionFromOrganization, wrapContext } from '@stamhoofd/dashboard';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, SessionContext, SessionManager } from '@stamhoofd/networking';
-import { Country, Organization } from '@stamhoofd/structures';
+import { Country, Language, Organization } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 import CartView from './views/cart/CartView.vue';
@@ -65,7 +65,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
     if (STAMHOOFD.singleOrganization && !session.organization) {
         session = await sessionFromOrganization({ organizationId: STAMHOOFD.singleOrganization });
     }
-    await I18nController.loadDefault(session, Country.Belgium, 'nl', session?.organization?.address?.country);
+    await I18nController.loadDefault(session, Country.Belgium, Language.Dutch, session?.organization?.address?.country);
 
     // Set color
     if (session.organization?.meta.color && ownDomain) {

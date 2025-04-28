@@ -41,7 +41,7 @@ import { EventRow, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, us
 import { useMemberManager } from '@stamhoofd/networking';
 import { Event, isEmptyFilter, isEqualFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, onActivated, ref, Ref, watchEffect } from 'vue';
+import { ComponentOptions, computed, onActivated, ref, Ref, watchEffect } from 'vue';
 import EventView from './EventView.vue';
 
 type ObjectType = Event;
@@ -79,7 +79,7 @@ useVisibilityChange(() => {
 });
 
 enum Routes {
-    Event = $t(`efc92098-8600-41e8-bbd9-a2d2edbcd19d`),
+    Event = 'activiteit',
 }
 
 defineRoutes([

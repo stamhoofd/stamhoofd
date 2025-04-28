@@ -25,25 +25,21 @@
 </template>
 
 <script lang="ts" setup>
-import { AddressInput, ErrorBox, SaveView, STErrorsDefault, useErrors } from '@stamhoofd/components';
+import { AddressInput, ErrorBox, SaveView, STErrorsDefault, useErrors, useNavigationActions } from '@stamhoofd/components';
 import { Address, ValidatedAddress } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
-import { useDismiss, useNavigationController, useShow } from '@simonbackx/vue-app-navigation';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
 import { useWebshopManager } from '../../composables/useWebshopManager';
 import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
 
 const loading = ref(false);
 const errors = useErrors();
-const dismiss = useDismiss();
-const show = useShow();
-const navigationController = useNavigationController();
-
 const checkoutManager = useCheckoutManager();
 const webshopManager = useWebshopManager();
 const deliveryMethod = computed(() => checkoutManager.checkout.deliveryMethod);
 const checkout = computed(() => checkoutManager.checkout);
+const navigationActions = useNavigationActions();
 const address = computed({
     get: () => checkoutManager.checkout.address,
     set: (address: ValidatedAddress | Address | null) => {
@@ -69,11 +65,7 @@ async function goNext() {
     errors.errorBox = null;
 
     try {
-        await CheckoutStepsManager.for(checkoutManager).goNext(CheckoutStepType.Address, {
-            dismiss,
-            navigationController: navigationController.value,
-            show,
-        });
+        await CheckoutStepsManager.for(checkoutManager).goNext(CheckoutStepType.Address, navigationActions);
     }
     catch (e) {
         console.error(e);

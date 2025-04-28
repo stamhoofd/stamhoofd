@@ -13,7 +13,7 @@
                     {{ getTypeName(checkoutMethod.type) }}: {{ checkoutMethod.name }}
                 </h2>
                 <p class="style-description-small">
-                    {{ checkoutMethod.description || checkoutMethod.address || "" }}
+                    {{ checkoutMethod.description || (checkoutMethod as any).address || "" }}
                 </p>
                 <p v-if="checkoutMethod.timeSlots.timeSlots.length === 1" class="style-description-small">
                     {{ capitalizeFirstLetter(formatDate(checkoutMethod.timeSlots.timeSlots[0].date)) }} tussen {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].startTime) }} - {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].endTime) }}
@@ -29,10 +29,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ErrorBox, useErrors } from '@stamhoofd/components';
+import { ErrorBox, useErrors, useNavigationActions } from '@stamhoofd/components';
 import { CheckoutMethod, CheckoutMethodType } from '@stamhoofd/structures';
 
-import { useDismiss, useNavigationController, useShow } from '@simonbackx/vue-app-navigation';
 import { computed, ref } from 'vue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
 import { useWebshopManager } from '../../composables/useWebshopManager';
@@ -41,10 +40,7 @@ import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
 const loading = ref(false);
 const errors = useErrors();
 
-const navigationController = useNavigationController();
-const dismiss = useDismiss();
-const show = useShow();
-
+const navigationActions = useNavigationActions();
 const webshopManager = useWebshopManager();
 const checkoutManager = useCheckoutManager();
 const webshop = computed(() => webshopManager.webshop);
@@ -86,11 +82,7 @@ async function goNext() {
     errors.errorBox = null;
 
     try {
-        await CheckoutStepsManager.for(checkoutManager).goNext(CheckoutStepType.Method, {
-            navigationController: navigationController.value,
-            dismiss,
-            show,
-        });
+        await CheckoutStepsManager.for(checkoutManager).goNext(CheckoutStepType.Method, navigationActions);
     }
     catch (e) {
         console.error(e);

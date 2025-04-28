@@ -47,7 +47,7 @@
                         </p>
 
                         <p v-if="getRegistrationsForMember(member).length" class="style-description-small">
-                            {{ $t('f87072d0-0c87-4b31-9068-1471a5f5b3ca', {groups: Formatter.joinLast(getRegistrationsForMember(member).map(r => r.group.settings.name), ', ', ' ' + $t('6a156458-b396-4d0f-b562-adb3e38fc51b') + ' ')}) }}
+                            {{ $t('f87072d0-0c87-4b31-9068-1471a5f5b3ca', {groups: Formatter.joinLast(getRegistrationsForMember(member).map(r => r.group.settings.name.toString()), ', ', ' ' + $t('6a156458-b396-4d0f-b562-adb3e38fc51b') + ' ')}) }}
                         </p>
                         <p v-else class="style-description-small">
                             {{ $t('eb39138f-46b9-4005-b70f-dc1e0f3938f9', {member: member.patchedMember.firstName}) }}
