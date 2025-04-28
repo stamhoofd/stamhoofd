@@ -52,7 +52,7 @@ export class ContextMenu {
         return new ComponentWithProperties(GeneralContextMenuView, { menu: this });
     }
 
-    async show(position: { component?: NavigationMixin; clickEvent?: TouchEvent | MouseEvent; button?: HTMLElement; x?: number; y?: number; xPlacement?: 'right' | 'left'; yPlacement?: 'bottom' | 'top' ; wrapWidth?: number; wrapHeight?: number; yOffset?: number; xOffset?: number }) {
+    async show(position: { component?: typeof NavigationMixin; clickEvent?: TouchEvent | MouseEvent; button?: HTMLElement; x?: number; y?: number; xPlacement?: 'right' | 'left'; yPlacement?: 'bottom' | 'top' ; wrapWidth?: number; wrapHeight?: number; yOffset?: number; xOffset?: number }) {
         if (position.button) {
             const bounds = position.button.getBoundingClientRect();
 

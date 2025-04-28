@@ -1,41 +1,43 @@
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { FinancialSupportSettings, PermissionLevel } from "@stamhoofd/structures";
-import { DataValidator } from "@stamhoofd/utility";
-import { markRaw } from "vue";
-import { MemberStepView } from "../..";
-import { NavigationActions } from "../../../types/NavigationActions";
-import EditMemberFinancialSupportBox from "../../components/edit/EditMemberFinancialSupportBox.vue";
-import { EditMemberStep, MemberStepManager } from "../MemberStepManager";
-import { MemberSharedStepOptions } from "./MemberSharedStepOptions";
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { FinancialSupportSettings, PermissionLevel } from '@stamhoofd/structures';
+import { DataValidator } from '@stamhoofd/utility';
+import { markRaw } from 'vue';
+import { MemberStepView } from '../..';
+import { NavigationActions } from '../../../types/NavigationActions';
+import EditMemberFinancialSupportBox from '../../components/edit/EditMemberFinancialSupportBox.vue';
+import { EditMemberStep, MemberStepManager } from '../MemberStepManager';
+import { MemberSharedStepOptions } from './MemberSharedStepOptions';
 
 export class MemberFinancialSupportStep implements EditMemberStep {
-    options: MemberSharedStepOptions
+    options: MemberSharedStepOptions;
 
     constructor(options: MemberSharedStepOptions) {
-        this.options = options
+        this.options = options;
     }
 
     getName(manager: MemberStepManager) {
-        const settings = manager.member.platform.config.financialSupport ?? FinancialSupportSettings.create({})
-        return settings.title
+        const settings = manager.member.platform.config.financialSupport ?? FinancialSupportSettings.create({});
+        return settings.title;
     }
 
-    isEnabled(manager: MemberStepManager) {    
-        const member = manager.member
+    isEnabled(manager: MemberStepManager) {
+        const member = manager.member;
         const details = member.patchedMember.details;
 
         if (!member.isPropertyEnabled('financialSupport', {
-            checkPermissions: manager.context.user ? {
-                level: PermissionLevel.Write,
-                user: manager.context.user
-            } : undefined
+            checkPermissions: manager.context.user
+                ? {
+                        level: PermissionLevel.Write,
+                        user: manager.context.user,
+                    }
+                : undefined,
         })) {
             return false;
         }
-        
-        if(details.uitpasNumber !== null) {
+
+        if (details.uitpasNumber !== null) {
             // if uitpas number is 'kansentarief' this step can be skipped
-            if(DataValidator.isUitpasNumberKansenTarief(details.uitpasNumber)) {
+            if (DataValidator.isUitpasNumberKansenTarief(details.uitpasNumber)) {
                 return false;
             }
         }
@@ -54,15 +56,14 @@ export class MemberFinancialSupportStep implements EditMemberStep {
     }
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {
-        const config = manager.member.platform.config.recordsConfiguration.financialSupport ?? manager.member.organizations.find(o => o.meta.recordsConfiguration.financialSupport)?.meta.recordsConfiguration.financialSupport ?? null
         return new ComponentWithProperties(MemberStepView, {
-            title: config?.title ?? FinancialSupportSettings.defaultTitle,
+            title: manager.member.platform.config.financialSupport?.title ?? FinancialSupportSettings.defaultTitle,
             member: manager.member,
             component: markRaw(EditMemberFinancialSupportBox),
             saveText: $t(`c72a9ab2-98a0-4176-ba9b-86fe009fa755`),
             saveHandler: async (navigate: NavigationActions) => {
-                await manager.saveHandler(this, navigate)
-            }
-        })
+                await manager.saveHandler(this, navigate);
+            },
+        });
     }
 }

@@ -157,7 +157,7 @@ export class TicketBuilder {
         if (!dryRun) {
             // Generate QR
             const url = 'https://' + this.webshop.getUrl(this.organization) + '/tickets/' + ticket.secret;
-            const imgUrl = await QRCode.toDataURL(url, { margin: 0, width: QR_WIDTH * 2, height: QR_WIDTH * 2 });
+            const imgUrl = await QRCode.toDataURL(url, { margin: 0, width: QR_WIDTH * 2, height: QR_WIDTH * 2 } as { margin: number; width: number });
             this.document.image(imgUrl, x + QR_MARGIN, y + height, {
                 width: QR_WIDTH,
                 height: QR_WIDTH,

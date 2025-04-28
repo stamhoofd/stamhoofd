@@ -82,6 +82,7 @@ declare module '@simonbackx/vue-app-navigation/classes' {
     interface VueComponent {
         $t: typeof import('@stamhoofd/frontend-i18n').I18n.prototype.$t;
         $attrs: any;
+        $props: any;
         $: any;
         $emit: any;
         $slots: any;

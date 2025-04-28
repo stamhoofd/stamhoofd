@@ -11,7 +11,7 @@
             </div>
         </h2>
 
-        <RecordCategoryAnswersBox :value="value" :category="category" :compact="compact" />
+        <RecordCategoryAnswersBox :value="value as ObjectWithRecords" :category="category" :compact="compact" />
     </div>
 </template>
 

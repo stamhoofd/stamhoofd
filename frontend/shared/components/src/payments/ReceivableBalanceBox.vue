@@ -2,8 +2,8 @@
     <LoadingBoxTransition :error-box="errors.errorBox">
         <div v-if="detailedItem" class="container">
             <template v-if="detailedItem.filteredBalanceItems.length">
-                <SegmentedControl v-if="!hideSegmentedControl" v-model="selectedTab" :items="['Gegroepeerd', 'Individueel']" />
-                <ReceivableBalanceList v-if="selectedTab === 'Individueel'" :item="detailedItem" />
+                <SegmentedControl v-if="!hideSegmentedControl" v-model="selectedTab" :items="['grouped', 'individual']" :labels="[$t(`07929b60-3a4c-4de1-8d85-c25e836e0535`), $t(`9544ddfe-bde7-452b-8bfb-0f3ffe8cd0e8`)]" />
+                <ReceivableBalanceList v-if="selectedTab === 'individual'" :item="detailedItem" />
                 <GroupedBalanceList v-else :item="detailedItem" />
                 <BalancePriceBreakdown :item="detailedItem" />
             </template>
@@ -150,7 +150,7 @@ const props = withDefaults(
 const errors = useErrors();
 const detailedItem = ref(null) as Ref<null | DetailedReceivableBalance>;
 const context = useContext();
-const selectedTab = ref(props.hideSegmentedControl ? $t(`9544ddfe-bde7-452b-8bfb-0f3ffe8cd0e8`) : $t(`07929b60-3a4c-4de1-8d85-c25e836e0535`)) as Ref<'Gegroepeerd' | 'Individueel'>;
+const selectedTab = ref(props.hideSegmentedControl ? 'individual' : 'grouped') as Ref<'grouped' | 'individual'>;
 const owner = useRequestOwner();
 const hasWrite = true;
 const present = usePresent();
@@ -181,7 +181,7 @@ async function reload() {
             detailedItem.value = response.data;
 
             if (detailedItem.value.filteredBalanceItems.length <= 4) {
-                selectedTab.value = $t(`9544ddfe-bde7-452b-8bfb-0f3ffe8cd0e8`);
+                selectedTab.value = 'individual';
             }
         }
         else {
