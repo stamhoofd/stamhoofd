@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Company, Organization, Webshop, WebshopTicketType } from '@stamhoofd/structures';
+import { Company, Organization, Webshop, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 import { useContext, usePlatform } from '../hooks';
@@ -56,7 +56,7 @@ import { CenteredMessage } from '../overlays/CenteredMessage';
 const props = withDefaults(
     defineProps<{
         organization: Organization;
-        webshop?: Webshop | null;
+        webshop?: Webshop | WebshopPreview | null;
     }>(),
     {
         webshop: null,

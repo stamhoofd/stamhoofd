@@ -27,10 +27,9 @@
 </template>
 
 <script lang="ts" setup>
-import { EmailInput, ErrorBox, FieldBox, PhoneInput, SaveView, STErrorsDefault, STInputBox, useContext, useErrors } from '@stamhoofd/components';
+import { EmailInput, ErrorBox, FieldBox, PhoneInput, SaveView, STErrorsDefault, STInputBox, useContext, useErrors, useNavigationActions } from '@stamhoofd/components';
 import { WebshopTicketType } from '@stamhoofd/structures';
 
-import { useDismiss, useNavigationController, useShow } from '@simonbackx/vue-app-navigation';
 import { computed, ref } from 'vue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
 import { useWebshopManager } from '../../composables/useWebshopManager';
@@ -41,12 +40,9 @@ const errors = useErrors();
 
 const webshopManager = useWebshopManager();
 const checkoutManager = useCheckoutManager();
-const navigationController = useNavigationController();
-const dismiss = useDismiss();
-const show = useShow();
 const context = useContext();
 const webshop = computed(() => webshopManager.webshop);
-
+const navigationActions = useNavigationActions();
 const phoneEnabled = computed(() => webshop.value.meta.phoneEnabled);
 const isLoggedIn = computed(() => context.value.isComplete() ?? false);
 
@@ -112,11 +108,7 @@ async function goNext() {
     // Clear old open fields
 
     try {
-        await CheckoutStepsManager.for(checkoutManager).goNext(CheckoutStepType.Customer, {
-            navigationController: navigationController.value,
-            dismiss,
-            show,
-        });
+        await CheckoutStepsManager.for(checkoutManager).goNext(CheckoutStepType.Customer, navigationActions);
     }
     catch (e) {
         console.error(e);
