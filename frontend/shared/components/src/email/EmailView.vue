@@ -10,7 +10,7 @@
             <!-- Buttons -->
             <template #buttons>
                 <label v-tooltip="$t('d76495d1-251b-4cf1-9ca1-7e7ac33a046f')" class="button icon attachment">
-                    <input type="file" multiple="true" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile as any"><span v-if="$isMobile && files.length > 0" class="style-bubble">{{ files.length }}</span>
+                    <input type="file" multiple="true" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="(e: any) => changedFile(e)"><span v-if="$isMobile && files.length > 0" class="style-bubble">{{ files.length }}</span>
                 </label>
 
                 <hr v-if="canOpenTemplates"><button v-if="canOpenTemplates" v-tooltip="$t('20bacd85-5b82-4396-bbd5-b6d88e7d90e4')" class="button icon email-template" type="button" @click="openTemplates" />
@@ -726,11 +726,11 @@ async function openTemplates() {
                 types: [type],
                 onSelect: async (template: EmailTemplate) => {
                     if (hasExistingContent) {
-                        if (!await CenteredMessage.confirm(
-                            $t(`e7ff72f3-ca11-4a2d-b6f9-afeb344f5da6`), 
-                            $t(`6d679732-b845-4f36-8ed3-4024cd01f745`), 
-                            $t(`be3680ca-ee60-4d09-b2f4-346617949956`)
-                        )) {
+                        if (!(await CenteredMessage.confirm(
+                            $t(`e7ff72f3-ca11-4a2d-b6f9-afeb344f5da6`),
+                            $t(`6d679732-b845-4f36-8ed3-4024cd01f745`),
+                            $t(`be3680ca-ee60-4d09-b2f4-346617949956`),
+                        ))) {
                             return false;
                         }
                     }
