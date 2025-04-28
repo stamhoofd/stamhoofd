@@ -50,6 +50,10 @@ export class AutoTranslator {
                 }
             });
         }
+
+        console.log(chalk.blue(`Start build locales dist`));
+        await this.manager.buildDist();
+        console.log(chalk.blue(`Done build locales dist`));
         
         console.log(chalk.blue(`Start auto translate (translator: ${this.type})`));
 

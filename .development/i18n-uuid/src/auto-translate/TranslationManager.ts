@@ -23,6 +23,12 @@ export class TranslationManager {
         this.namespaces = this.getAllNamespacesInProject();
     }
 
+    async buildDist() {
+        await new Promise(resolve => {
+            exec(`cd ${globals.I18NUUID_LOCALES_ROOT} && yarn -s build`, resolve);
+        });
+    }
+
     iterateNonDefaultLocalesWithNamespace(callbackfn: (locale: string, namespace: string) => void, locales?: string[]) {
         const otherLocales = this.locales.filter(
             (locale) => {
