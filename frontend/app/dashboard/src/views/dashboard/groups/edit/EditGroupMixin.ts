@@ -1,8 +1,8 @@
-import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { CenteredMessage, ErrorBox, Validator } from '@stamhoofd/components';
-import { Group, OldGroupPrices, GroupPrivateSettings, GroupSettings, Organization, OrganizationRegistrationPeriod, Version } from '@stamhoofd/structures';
+import { Group, GroupPrivateSettings, GroupSettings, Organization, OrganizationRegistrationPeriod, Version } from '@stamhoofd/structures';
 
 @Component
 export default class EditGroupMixin extends Mixins(NavigationMixin) {
@@ -58,10 +58,6 @@ export default class EditGroupMixin extends Mixins(NavigationMixin) {
         const p = OrganizationRegistrationPeriod.patch({});
         p.groups.addPatch(patch);
         this.addPeriodPatch(p);
-    }
-
-    addPricesPatch(patch: PatchableArrayAutoEncoder<OldGroupPrices>) {
-        this.addSettingsPatch({ prices: patch });
     }
 
     addSettingsPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<GroupSettings>>) {

@@ -14,7 +14,7 @@
     },
     "dependencies": {
         "@simonbackx/simple-endpoints": "1.19.1",
-        "@simonbackx/simple-errors": "^1.4",
+        "@simonbackx/simple-errors": "^1.5",
         "@simonbackx/simple-logging": "^1.0.1"
     },
     "publishConfig": {

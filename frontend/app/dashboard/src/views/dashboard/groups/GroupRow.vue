@@ -20,7 +20,7 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { ContextMenu, ContextMenuItem, EditGroupView, GroupAvatar, LongPressDirective, STListItem } from '@stamhoofd/components';
-import { Group, GroupCategory, Organization, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
+import { Group, GroupCategory, Organization, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 @Component({
@@ -107,7 +107,7 @@ export default class GroupRow extends Mixins(NavigationMixin) {
         duplicated.id = uuidv4();
 
         // Remove suffix
-        duplicated.settings.name = duplicated.settings.name.replace(/ \(kopie( \d+)?\)$/, '');
+        duplicated.settings.name = TranslatedString.create(duplicated.settings.name.replace(/ \(kopie( \d+)?\)$/, ''));
 
         const suffix = ' (kopie)';
 
@@ -115,15 +115,14 @@ export default class GroupRow extends Mixins(NavigationMixin) {
         // use this.subGroups
         const suffixes = this.subGroups.map(g => g.settings.name.startsWith(duplicated.settings.name + ' (kopie') && g.settings.name.match(/ \(kopie( \d+)?\)$/));
         const suffixesWithNumber = suffixes.filter(s => !!s) as RegExpMatchArray[];
-        console.log(suffixesWithNumber);
 
         const maxNumber = suffixesWithNumber.length > 0 ? Math.max(...suffixesWithNumber.map(s => parseInt(s[1] ?? '1'))) : 0;
 
         if (maxNumber > 0) {
-            duplicated.settings.name = duplicated.settings.name + ' (kopie ' + (maxNumber + 1) + ')';
+            duplicated.settings.name = TranslatedString.create(duplicated.settings.name + ' (kopie ' + (maxNumber + 1) + ')');
         }
         else {
-            duplicated.settings.name = duplicated.settings.name + suffix;
+            duplicated.settings.name = TranslatedString.create(duplicated.settings.name + suffix);
         }
 
         const p = GroupCategory.patch({ id: this.parentCategory.id });

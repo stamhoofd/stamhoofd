@@ -4109,10 +4109,10 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-endpoints/-/simple-endpoints-1.19.1.tgz#c725a395732bac21e256b335797ef09fc3bfdcd7"
   integrity sha512-o1wAfBtz4qRAQwZyotkk+neAR8xmIIK4hwR6kb+KALl/14FmxXEAf3dBQwbEfu6g9Gr70I8jkpUMYUUeU1421w==
 
-"@simonbackx/simple-errors@^1.4", "@simonbackx/simple-errors@^1.4.0":
-  version "1.4.0"
-  resolved "https://registry.npmjs.org/@simonbackx/simple-errors/-/simple-errors-1.4.0.tgz"
-  integrity sha512-mdZ7pVnsyl3jBPAYGXcjnsi4mCqPAhj6OjQqvtKaBp28AikuCETLXn4AAfaa0woSoyAslGStcIuoq8Se8U2YpQ==
+"@simonbackx/simple-errors@^1.5", "@simonbackx/simple-errors@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-errors/-/simple-errors-1.5.0.tgz#0490057a58da30fc43786f263041a6bd2308cb0b"
+  integrity sha512-UnMU3DQlO0sEGnCld9ASP9YTsTOJ5qvo6ZwyrlVEnsrGMsgaDk5TwONU7Q9kuXYykPMwen7LQPFv41xTF1+eQw==
 
 "@simonbackx/simple-logging@^1.0.0", "@simonbackx/simple-logging@^1.0.1":
   version "1.0.1"
@@ -4121,10 +4121,10 @@
   dependencies:
     chalk "^4.1.2"
 
-"@simonbackx/simple-networking@1.18.1":
-  version "1.18.1"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.18.1.tgz#126bbdf7f62a69ad05d3162b471c3f0d1ff8cd11"
-  integrity sha512-mwx71mmhSSxZQJbwprT8RUvGkAJRRozgF6FXf7Fv6y2s0H8CkJcmdMy+yhAf4dRk8wXBqRD+jWzVGUyS6B0BHQ==
+"@simonbackx/simple-networking@1.20.0":
+  version "1.20.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.20.0.tgz#507f7cbe40fdc93fe95a859a7de7a3eef063862b"
+  integrity sha512-LcVbGxdDGgbyjYSOY27ju8EdaTBhpbslSCDHA8iTV+Ft2SyCSHVGRCgQ3VnBxA5QMythv2ids3MfV5ubRzMxvA==
 
 "@simonbackx/vue-app-navigation@2.9.0":
   version "2.9.0"

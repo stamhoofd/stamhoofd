@@ -33,12 +33,12 @@
         "lint": "eslint"
     },
     "devDependencies": {
-        "@simonbackx/simple-errors": "^1.4",
+        "@simonbackx/simple-errors": "^1.5",
         "@types/uuid": "^8.3.0",
         "uuid": "11.0.3"
     },
     "peerDependencies": {
-        "@simonbackx/simple-errors": "^1.4",
+        "@simonbackx/simple-errors": "^1.5",
         "uuid": "11.0.3"
     },
     "publishConfig": {

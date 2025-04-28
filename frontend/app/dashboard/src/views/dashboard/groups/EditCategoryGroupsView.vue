@@ -256,7 +256,6 @@ async function createGroup() {
         organizationId: props.organization.id,
         periodId: props.organization.period.period.id,
         settings: GroupSettings.create({
-            name: '',
             genderType: props.organization.meta.genderType === OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale,
         }),
         privateSettings: GroupPrivateSettings.create({}),
