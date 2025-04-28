@@ -14,11 +14,11 @@ export function usePatch<T extends AutoEncoder>(obj: T | Ref<T>): {
     if (!initialValue) {
         throw new Error('Expected a reference with an initial value at usePatch');
     }
-    const patch = ref('id' in initialValue ? initialValue.static.patch({ id: initialValue.id }) : initialValue.static.patch({})) as Ref<AutoEncoderPatchType<T>>;
+    const patch = ref('id' in initialValue ? (initialValue.static as any).patch({ id: initialValue.id }) : initialValue.static.patch({})) as Ref<AutoEncoderPatchType<T>>;
 
     const createPatch = () => {
         const iv = unref(obj);
-        return ('id' in iv ? iv.static.patch({ id: iv.id }) : iv.static.patch({})) as AutoEncoderPatchType<T>;
+        return ('id' in iv ? (iv.static as any).patch({ id: iv.id }) : iv.static.patch({})) as AutoEncoderPatchType<T>;
     };
 
     return {

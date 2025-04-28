@@ -619,7 +619,7 @@ const availableWaitingLists = computed(() => {
         const usedByGroups = externalOrganization?.value?.period?.groups.filter(g => g.waitingList?.id === list.id);
         return {
             list,
-            description: usedByGroups?.length ? $t(`877cbb8c-174a-4fe2-8a8a-01908a34c114`) + ' ' + Formatter.joinLast(usedByGroups.map(g => g.settings.name), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') : $t(`daef5a57-e4f0-41f4-b05f-7946913947ef`),
+            description: usedByGroups?.length ? $t(`877cbb8c-174a-4fe2-8a8a-01908a34c114`) + ' ' + Formatter.joinLast(usedByGroups.map(g => g.settings.name.toString()), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') : $t(`daef5a57-e4f0-41f4-b05f-7946913947ef`),
         };
     });
 });
@@ -647,7 +647,7 @@ const name = computed({
         });
 
         if ((!defaultAgeGroupId.value || didSetAutomaticGroup.value)) {
-            const match = defaultAgeGroups.value.find(g => g.names.find(nn => StringCompare.typoCount(nn, name) === 0));
+            const match = defaultAgeGroups.value.find(g => g.names.find(nn => StringCompare.typoCount(nn, name.toString()) === 0));
             if (match) {
                 defaultAgeGroupId.value = match.id;
                 didSetAutomaticGroup.value = true;
@@ -1108,7 +1108,7 @@ async function addWaitingList() {
         periodId: patched.value.periodId,
         type: GroupType.WaitingList,
         settings: GroupSettings.create({
-            name: $t(`c1f1d9d0-3fa1-4633-8e14-8c4fc98b4f0f`) + ' ' + patched.value.settings.name,
+            name: TranslatedString.create($t(`c1f1d9d0-3fa1-4633-8e14-8c4fc98b4f0f`) + ' ' + patched.value.settings.name.toString()),
         }),
     });
 

@@ -175,7 +175,7 @@ export function useRegisterItemFilterBuilders() {
                 name: $t(`ae21b9bf-7441-4f38-b789-58f34612b7af`),
                 options: [
                     ...group.settings.prices.map((price) => {
-                        return new MultipleChoiceUIFilterOption(price.name, price.id);
+                        return new MultipleChoiceUIFilterOption(price.name.toString(), price.id);
                     }),
                 ],
                 allowCreation: group.settings.prices.length > 1,
@@ -252,7 +252,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
             const user = $user.value;
             const hasPlatformPermissions = (user?.permissions?.platform !== null);
 
-            const all = [];
+            const all: UIFilterBuilder[] = [];
             all.push(
                 new StringFilterBuilder({
                     name: $t('2f2899e5-4c62-4452-97d2-97f4fd670e86'),
@@ -380,7 +380,7 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
             const user = $user.value;
             const hasPlatformPermissions = (user?.permissions?.platform !== null);
 
-            const all = [];
+            const all: UIFilterBuilder[] = [];
             all.push(
                 new StringFilterBuilder({
                     name: $t('2f2899e5-4c62-4452-97d2-97f4fd670e86'),

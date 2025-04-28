@@ -21,13 +21,13 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 
 @Component({
-    emits: ['update:modelValue']
+    emits: ['update:modelValue'],
 })
 export default class Checkbox extends VueComponent {
-    @Prop({ default: "", type: String })
+    @Prop({ default: '', type: String })
     name!: string;
 
     @Prop({ default: false })
@@ -47,7 +47,7 @@ export default class Checkbox extends VueComponent {
     indeterminate!: boolean;
 
     get hasDefaultSlot() {
-        return !!this.$slots.default
+        return !!(this as any).$slots.default;
     }
 
     get checkboxValue() {
@@ -55,16 +55,16 @@ export default class Checkbox extends VueComponent {
     }
 
     set checkboxValue(value) {
-        this.$emit("update:modelValue", value)
+        (this as any).$emit('update:modelValue', value)
 
         // Add support for a model that doesn't change
-        this.$nextTick(() => {
+        (this as any).$nextTick(() => {
             if (this.checkboxValue !== value) {
-                if (this.$refs.checkbox) {
-                    (this.$refs.checkbox as any).checked = this.checkboxValue;
+                if ((this as any).$refs.checkbox) {
+                    ((this as any).$refs.checkbox as any).checked = this.checkboxValue;
                 }
             }
-        })
+        });
     }
 }
 </script>

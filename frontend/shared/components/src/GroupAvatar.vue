@@ -33,7 +33,7 @@ export default class GroupAvatar extends VueComponent {
 
     get logoSrcSet() {
         if (!this.group.settings.squarePhoto) {
-            return null;
+            return undefined;
         }
         return (this.group.settings.squarePhoto)!.getPathForSize(24, 24) + ' 1x, ' + (this.group.settings.squarePhoto)!.getPathForSize(24 * 2, 24 * 2) + ' 2x, ' + (this.group.settings.squarePhoto)!.getPathForSize(24 * 3, 24 * 3) + ' 3x';
     }

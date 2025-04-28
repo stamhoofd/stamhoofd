@@ -1,9 +1,9 @@
 <template>
     <label class="age-input input" :class="{ error: !valid }">
-        <!-- 
-            We use type = text here because the specs of number inputs ensure that we can't get 
+        <!--
+            We use type = text here because the specs of number inputs ensure that we can't get
             the raw string value, but we need this for our placeholder logic.
-            Also inputmode is more specific on mobile devices. 
+            Also inputmode is more specific on mobile devices.
             Only downside is that we lose the stepper input on desktop.
         -->
         <input
@@ -27,75 +27,79 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 
 @Component({
-    emits: ['update:modelValue']
+    emits: ['update:modelValue'],
 })
 export default class AgeInput extends VueComponent {
     @Prop({ default: 0 })
-        min!: number
+    min!: number;
 
     @Prop({ default: false })
-        nullable!: boolean
+    nullable!: boolean;
 
     @Prop({ default: 99 })
-        max!: number | null
+    max!: number | null;
 
     @Prop({ default: null })
-        year!: number | null
+    year!: number | null;
 
-    valueString = "";
+    valueString = '';
     valid = true;
 
     /** Price in cents */
     @Prop({ default: null })
-        modelValue!: number | null
+    modelValue!: number | null;
 
-    @Prop({ default: "" })
-        placeholder!: string
+    @Prop({ default: '' })
+    placeholder!: string;
 
     get internalValue() {
-        return this.modelValue
+        return this.modelValue;
     }
 
     set internalValue(val: number | null) {
-        this.$emit('update:modelValue', val)
+        (this as any).$emit('update:modelValue', val);
     }
 
     get descriptionText() {
         if (!this.modelValue) {
-            return ""
+            return '';
         }
-        return $t(`62013f16-5422-44c4-9993-2596eab2dc97`) + ' '+((this.year ?? new Date().getFullYear()) - this.modelValue)+")"
+        return $t(`62013f16-5422-44c4-9993-2596eab2dc97`) + ' ' + ((this.year ?? new Date().getFullYear()) - this.modelValue) + ')';
     }
 
     mounted() {
-        this.clean()
+        this.clean();
     }
 
-    @Watch("valueString")
+    @Watch('valueString')
     onValueChanged(value: string, _oldValue: string) {
         // We need the value string here! Vue does some converting to numbers automatically
         // but for our placeholder system we need exactly the same string
-        if (value === "") {
+        if (value === '') {
             this.valid = true;
             if (this.nullable) {
-                this.internalValue = null
-            } else {
+                this.internalValue = null;
+            }
+            else {
                 this.internalValue = Math.max(0, this.min);
             }
-        } else {
+        }
+        else {
             const v = parseInt(value);
             if (isNaN(v)) {
                 this.valid = false;
 
                 if (this.nullable) {
-                    this.internalValue = null
-                } else {
+                    this.internalValue = null;
+                }
+                else {
                     this.internalValue = this.min;
                 }
-            } else {
+            }
+            else {
                 this.valid = true;
 
                 // Remove extra decimals
@@ -111,11 +115,11 @@ export default class AgeInput extends VueComponent {
             return;
         }
         if (this.internalValue === null) {
-            this.valueString = ""
-            return
+            this.valueString = '';
+            return;
         }
         // Check if has decimals
-        this.valueString = Math.floor(this.internalValue) + "";
+        this.valueString = Math.floor(this.internalValue) + '';
     }
 
     // Limit value to bounds
@@ -124,7 +128,7 @@ export default class AgeInput extends VueComponent {
         if (this.max !== null && value > this.max) {
             value = this.max;
         }
-        return value
+        return value;
     }
 
     step(add: number) {
@@ -135,7 +139,7 @@ export default class AgeInput extends VueComponent {
             return;
         }
         const val = this.constrain(this.internalValue + add);
-        this.valueString = Math.floor(val) + "";
+        this.valueString = Math.floor(val) + '';
     }
 }
 </script>

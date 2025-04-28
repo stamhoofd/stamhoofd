@@ -1,6 +1,6 @@
 <template>
     <form class="st-view" data-submit-last-field @submit.prevent="applyFilter">
-        <STNavigationBar v-if="!popup || canDelete || canPop" :title="capitalizeFirstLetter(filter.name ? filter.name : filter.builder.name)" :disable-dismiss="canPop">
+        <STNavigationBar v-if="!popup || canDelete || canPop" :title="capitalizeFirstLetter((filter as any).name ? (filter as any).name : filter.builder.name)" :disable-dismiss="canPop">
             <template v-if="canDelete" #right>
                 <button class="button icon trash" type="button" @click="deleteFilter" />
             </template>
@@ -8,7 +8,7 @@
 
         <main>
             <h1 v-if="!live">
-                {{ capitalizeFirstLetter(filter.name ? filter.name : filter.builder.name) }}
+                {{ capitalizeFirstLetter((filter as any).name ? (filter as any).name : filter.builder.name) }}
             </h1>
 
             <FramedComponent :root="filterComponent" />

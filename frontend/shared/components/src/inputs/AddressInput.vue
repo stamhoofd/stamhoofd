@@ -72,7 +72,7 @@ export default class AddressInput extends VueComponent {
     addressLine1 = '';
     city = '';
     postalCode = '';
-    country = this.getDefaultCountry();
+    country: Country = this.getDefaultCountry();
 
     @Prop({ default: false })
     linkCountryToLocale: boolean;
@@ -85,6 +85,14 @@ export default class AddressInput extends VueComponent {
 
     get countries() {
         return CountryHelper.getList();
+    }
+
+    /**
+     * For some crazy reason $t is not found in the template by typescript checking
+     * Will get fixed when we switch this component to Setup syntax
+     */
+    get $t() {
+        return $t;
     }
 
     @Watch('modelValue', { deep: true })
@@ -169,7 +177,7 @@ export default class AddressInput extends VueComponent {
             }
 
             if (this.modelValue !== null) {
-                this.$emit('update:modelValue', null);
+                (this as any).$emit('update:modelValue', null);
             }
             return true;
         }
@@ -181,7 +189,7 @@ export default class AddressInput extends VueComponent {
                 }
 
                 if (this.nullable && this.modelValue !== null) {
-                    this.$emit('update:modelValue', null);
+                    (this as any).$emit('update:modelValue', null);
                 }
                 return false;
             }
@@ -205,13 +213,13 @@ export default class AddressInput extends VueComponent {
                     if (!this.hasFocus) {
                         this.updateValues(response.data);
                     }
-                    this.$emit('update:modelValue', response.data);
+                    (this as any).$emit('update:modelValue', response.data);
                 }
                 else {
                     if (!this.hasFocus) {
                         this.updateValues(address);
                     }
-                    this.$emit('update:modelValue', address);
+                    (this as any).$emit('update:modelValue', address);
                 }
             }
             else {
@@ -247,7 +255,7 @@ export default class AddressInput extends VueComponent {
             }
 
             if (!this.required && !silent) {
-                this.$emit('update:modelValue', null);
+                (this as any).$emit('update:modelValue', null);
             }
             return false;
         }
