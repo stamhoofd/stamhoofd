@@ -19,7 +19,7 @@
     "license": "AGPL-3.0-only",
     "scripts": {
         "dev": "yarn clear && yarn clear-vite-cache && concurrently -r 'yarn -s build:shared:watch' 'wait-on shared/object-differ/dist/index.js && wait-on shared/object-differ/dist/index.d.ts && lerna run dev --stream --parallel'",
-        "dev:server": "concurrently -r 'yarn -s dev' 'yarn -s caddy' 'yarn -s dns' 'yarn -s mail' 'yarn -s stripe-webhooks'",
+        "dev:server": "concurrently -n ' ,Caddy,DNS,Mail,Stripe,Frontend Type Checking' -c ',red,red,red,red,blue' 'yarn -s dev' 'yarn -s caddy' 'yarn -s dns' 'yarn -s mail' 'yarn -s stripe-webhooks' 'wait-on shared/object-differ/dist/index.d.ts && yarn -s frontend:types --watch --preserveWatchOutput'",
         "migrate": "yarn -s build:shared && lerna run migrations --concurrency 1",
         "test": "lerna run test",
         "lint": "lerna run lint",
@@ -36,6 +36,7 @@
         "caddy": "caddy run -w --config .development/caddy.json",
         "dns": "export SERVER_IP=127.0.0.1 && cd .development && source loadenv.sh && coredns",
         "mail": "maildev --ip 0.0.0.0 --incoming-user username --incoming-pass password",
+        "frontend:types": "cd frontend/app/dashboard && yarn -s check-types",
         "clear": "rm -rf shared/*/dist shared/*/esm/dist frontend/app/*/dist backend/shared/*/dist backend/app/*/dist",
         "clear-dependencies": "rm -rf node_modules */node_modules **/node_modules",
         "clear-vite-cache": "rm -rf frontend/app/*/node_modules/.vite",
