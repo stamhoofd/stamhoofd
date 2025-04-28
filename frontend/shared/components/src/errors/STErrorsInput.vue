@@ -44,7 +44,7 @@ export default class STErrorsInput extends VueComponent {
         }
 
         this.errors = errors.errors;
-        val.scrollTo(this.errors, (this as any).$refs.errors as HTMLElement);
+        val.scrollTo(this.errors, this.$refs.errors as HTMLElement);
     }
 }
 </script>

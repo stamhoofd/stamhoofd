@@ -18,50 +18,50 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 
 @Component({
     emits: {
-        'update:modelValue': (_value: string) => true
-    }
+        'update:modelValue': (_value: string) => true,
+    },
 })
 export default class PrefixInput extends VueComponent {
     valid = true;
 
     /** Price in cents */
-    @Prop({ default: "" })
-        modelValue!: string
+    @Prop({ default: '' })
+    modelValue!: string;
 
-    @Prop({ default: "" })
-        prefix!: string
+    @Prop({ default: '' })
+    prefix!: string;
 
-    @Prop({ default: "" })
-        placeholder!: string
+    @Prop({ default: '' })
+    placeholder!: string;
 
     @Prop({ default: true })
-        fadePrefix!: boolean
+    fadePrefix!: boolean;
 
     @Prop({ default: null })
-        focusPrefix!: string | null
+    focusPrefix!: string | null;
 
-    focussed = false
+    focussed = false;
 
     onFocus(event) {
-        this.focussed = true
-        this.$emit("focus", event);
+        this.focussed = true;
+        this.$emit('focus', event);
     }
 
     onBlur(event) {
-        this.focussed = false
-        this.$emit("blur", event);
+        this.focussed = false;
+        this.$emit('blur', event);
     }
 
     get internalValue() {
-        return this.modelValue
+        return this.modelValue;
     }
 
     set internalValue(val: string) {
-        this.$emit('update:modelValue', val)
+        this.$emit('update:modelValue', val);
     }
 }
 </script>
@@ -90,8 +90,7 @@ export default class PrefixInput extends VueComponent {
         }
 
         box-sizing: border-box;
-        
-        
+
         line-height: calc(#{$input-height} - 10px - 2 * #{$border-width});
         display: block;
 

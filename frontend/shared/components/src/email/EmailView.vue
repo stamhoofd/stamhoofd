@@ -726,7 +726,11 @@ async function openTemplates() {
                 types: [type],
                 onSelect: async (template: EmailTemplate) => {
                     if (hasExistingContent) {
-                        if (!await CenteredMessage.confirm($t(`e7ff72f3-ca11-4a2d-b6f9-afeb344f5da6`), $t(`6d679732-b845-4f36-8ed3-4024cd01f745`), $t(`be3680ca-ee60-4d09-b2f4-346617949956`))) {
+                        if (!await CenteredMessage.confirm(
+                            $t(`e7ff72f3-ca11-4a2d-b6f9-afeb344f5da6`), 
+                            $t(`6d679732-b845-4f36-8ed3-4024cd01f745`), 
+                            $t(`be3680ca-ee60-4d09-b2f4-346617949956`)
+                        )) {
                             return false;
                         }
                     }

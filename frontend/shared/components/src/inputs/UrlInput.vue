@@ -1,57 +1,57 @@
 <template>
     <STInputBox :title="title" error-fields="url" :error-box="errorBox">
-        <input v-model="urlRaw" class="input" :class="{ error: !valid }" :placeholder="placeholder || $t('5d75775a-a4b5-426a-aea9-b1e75ee5f055')" autocomplete="url" @change="validate(false)" @input="(event) => {urlRaw = event.target.value; onTyping();}">
+        <input v-model="urlRaw" class="input" :class="{ error: !valid }" :placeholder="placeholder || $t('5d75775a-a4b5-426a-aea9-b1e75ee5f055')" autocomplete="url" @change="validate(false)" @input="(event: any) => {urlRaw = event.target.value; onTyping();}">
     </STInputBox>
 </template>
 
 <script lang="ts">
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 
-import {ErrorBox} from "../errors/ErrorBox";
-import {Validator} from "../errors/Validator";
-import STInputBox from "./STInputBox.vue";
+import { ErrorBox } from '../errors/ErrorBox';
+import { Validator } from '../errors/Validator';
+import STInputBox from './STInputBox.vue';
 
 @Component({
     components: {
-        STInputBox
-    }
+        STInputBox,
+    },
 })
 export default class UrlInput extends VueComponent {
-    @Prop({ default: "" })
-        title: string
+    @Prop({ default: '' })
+    title: string;
 
-    @Prop({ default: null }) 
-        validator: Validator | null
+    @Prop({ default: null })
+    validator: Validator | null;
 
-    urlRaw = "";
+    urlRaw = '';
     valid = true;
 
     @Prop({ default: null })
-        modelValue!: string | null
+    modelValue!: string | null;
 
     @Prop({ default: true })
-        required!: boolean
+    required!: boolean;
 
     /**
      * Whether the value can be set to null if it is empty (even when it is required, will still be invalid)
      * Only used if required = false
      */
     @Prop({ default: false })
-        nullable!: boolean
+    nullable!: boolean;
 
-    @Prop({ default: "" })
-        placeholder!: string
+    @Prop({ default: '' })
+    placeholder!: string;
 
-    errorBox: ErrorBox | null = null
+    errorBox: ErrorBox | null = null;
 
     @Watch('modelValue')
     onValueChanged(val: string | null) {
         if (val === null) {
-            this.urlRaw = ""
-            return
+            this.urlRaw = '';
+            return;
         }
-        this.urlRaw = val
+        this.urlRaw = val;
     }
 
     onTyping() {
@@ -62,93 +62,93 @@ export default class UrlInput extends VueComponent {
     mounted() {
         if (this.validator) {
             this.validator.addValidation(this, () => {
-                return this.validate(true)
-            })
+                return this.validate(true);
+            });
         }
 
-        this.urlRaw = this.modelValue ?? ""
+        this.urlRaw = this.modelValue ?? '';
     }
 
     unmounted() {
         if (this.validator) {
-            this.validator.removeValidation(this)
+            this.validator.removeValidation(this);
         }
     }
 
     validate(final: boolean, silent = false) {
         if (this.urlRaw.length === 0) {
-
             if (!this.required) {
                 if (!silent) {
-                    this.errorBox = null
+                    this.errorBox = null;
                 }
 
                 if (this.modelValue !== null) {
-                    this.$emit('update:modelValue', null)
+                    this.$emit('update:modelValue', null);
                 }
-                return true
+                return true;
             }
 
             if (!final) {
                 if (!silent) {
-                    this.errorBox = null
+                    this.errorBox = null;
                 }
 
                 if (this.nullable && this.modelValue !== null) {
-                    this.$emit('update:modelValue', null)
+                    this.$emit('update:modelValue', null);
                 }
-                return false
+                return false;
             }
         }
         try {
-            let autoCorrected = this.urlRaw
+            let autoCorrected = this.urlRaw;
 
-            if (!autoCorrected.startsWith("http://") && !autoCorrected.startsWith("https://")) {
-                autoCorrected = "https://"+autoCorrected
+            if (!autoCorrected.startsWith('http://') && !autoCorrected.startsWith('https://')) {
+                autoCorrected = 'https://' + autoCorrected;
             }
 
             try {
-                const u = new URL(autoCorrected)
+                const u = new URL(autoCorrected);
                 autoCorrected = u.href;
                 if (u.pathname === '/' && autoCorrected[autoCorrected.length - 1] === '/') {
                     // Remove trailing slash on root domains (because ugly)
                     autoCorrected = autoCorrected.substring(0, autoCorrected.length - 1);
                 }
-            } catch (e) {
+            }
+            catch (e) {
                 throw new SimpleError({
                     code: 'invalid_field',
                     field: 'url',
                     message: 'Invalid url',
-                    human: this.$t("a68b5c92-df5d-4413-a00a-61139f6efe19").toString(),
-                })
+                    human: this.$t('a68b5c92-df5d-4413-a00a-61139f6efe19').toString(),
+                });
             }
 
             const v = silent ? this.urlRaw : autoCorrected;
-            this.urlRaw = v
-    
+            this.urlRaw = v;
+
             if (this.modelValue !== v) {
-                this.$emit('update:modelValue', v)
+                this.$emit('update:modelValue', v);
             }
             if (!silent) {
-                this.errorBox = null
+                this.errorBox = null;
             }
-            return true
-        } catch (e) {
-            console.error(e)
+            return true;
+        }
+        catch (e) {
+            console.error(e);
             if (!silent) {
                 if (isSimpleError(e) || isSimpleErrors(e)) {
                     this.errorBox = new ErrorBox(e);
                     return false;
                 }
                 this.errorBox = new ErrorBox(new SimpleError({
-                    "code": "invalid_field",
-                    "message": this.$t("a68b5c92-df5d-4413-a00a-61139f6efe19").toString(),
-                    "field": "url"
-                }))
+                    code: 'invalid_field',
+                    message: this.$t('a68b5c92-df5d-4413-a00a-61139f6efe19').toString(),
+                    field: 'url',
+                }));
             }
-            return false
+            return false;
         }
-        
     }
 }
 </script>

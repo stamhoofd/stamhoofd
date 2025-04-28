@@ -45,11 +45,11 @@ export default class STErrorsDefault extends VueComponent {
             return;
         }
         // Wait for next tick, to prevent a useless rerender of errors that will get removed by other inputs
-        (this as any).$nextTick(() => {
+        this.$nextTick(() => {
             const errors = unref(val).remaining;
             this.errors = errors.errors;
 
-            unref(val).scrollTo(this.errors, (this as any).$refs.errors as HTMLElement);
+            unref(val).scrollTo(this.errors, this.$refs.errors as HTMLElement);
         });
     }
 }

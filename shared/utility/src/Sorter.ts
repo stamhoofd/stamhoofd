@@ -20,7 +20,7 @@ export class Sorter {
     /**
      * Sort strings ASC order
      */
-    static byStringValue(a: string, b: string) {
+    static byStringValue(a: string, b: string): number {
         const af = a.toLowerCase();
         const bf = b.toLowerCase();
 

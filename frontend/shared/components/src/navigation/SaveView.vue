@@ -3,9 +3,9 @@
         <form class="st-view" @submit.prevent="$emit('save')">
             <STNavigationBar :title="title" :disable-pop="true" :disable-dismiss="true">
                 <template v-if="canPop || (!preferLargeButton && ($isMobile || $isIOS || $isAndroid))" #left>
-                    <BackButton v-if="canPop" @click="pop" />
-                    <button v-else-if="$isAndroid" class="button navigation icon close" type="button" @click="pop" />
-                    <button v-else class="button text selected unbold" type="button" @click="pop">
+                    <BackButton v-if="canPop" @click="pop()" />
+                    <button v-else-if="$isAndroid" class="button navigation icon close" type="button" @click="pop()" />
+                    <button v-else class="button text selected unbold" type="button" @click="pop()">
                         {{ cancelText }}
                     </button>
                 </template>
@@ -24,8 +24,8 @@
                         </button>
                     </LoadingButton>
                     <template v-else-if="canDismiss && !(!preferLargeButton && ($isMobile || $isIOS || $isAndroid))">
-                        <button v-if="!$isIOS" class="button navigation icon close" type="button" @click="dismiss" />
-                        <button v-else class="button text selected unbold" type="button" @click="dismiss">
+                        <button v-if="!$isIOS" class="button navigation icon close" type="button" @click="dismiss()" />
+                        <button v-else class="button text selected unbold" type="button" @click="dismiss()">
                             {{ cancelText }}
                         </button>
                     </template>
@@ -42,7 +42,7 @@
                     <div v-if="$slots.toolbar" class="editor-button-bar">
                         <slot name="toolbar" />
                     </div>
-                    <button v-else-if="!$slots.toolbar && addExtraCancel && (canPop || canDismiss) && cancelText !== null" class="button secundary" type="button" @click="pop">
+                    <button v-else-if="!$slots.toolbar && addExtraCancel && (canPop || canDismiss) && cancelText !== null" class="button secundary" type="button" @click="pop()">
                         {{ cancelText }}
                     </button>
                     <LoadingButton :loading="loading">
@@ -90,7 +90,7 @@ withDefaults(
         saveIcon?: string | null;
         saveButtonClass?: string | null;
         saveIconRight?: string | null;
-        saveBadge?: string | null;
+        saveBadge?: string | number | null;
         cancelText?: string | null;
         preferLargeButton?: boolean;
         addExtraCancel?: boolean;

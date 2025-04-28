@@ -87,8 +87,8 @@ export default class ImageComponent extends VueComponent {
     }
 
     updateSize() {
-        this.elWidth = (this.$el as HTMLElement).offsetWidth
-        this.elHeight = this.autoHeight ? null : (this.$el as HTMLElement).offsetHeight
+        this.elWidth = this.$el.offsetWidth
+        this.elHeight = this.autoHeight ? null : this.$el.offsetHeight
     }
 
     get sizerChildStyle() {

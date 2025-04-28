@@ -139,7 +139,7 @@ export class MemberActionBuilder {
                 childActions: () => [
                     ...organization.period.waitingLists.map((g) => {
                         return new InMemoryTableAction({
-                            name: g.settings.name,
+                            name: g.settings.name.toString(),
                             needsSelection: true,
                             allowAutoSelectAll: false,
                             handler: async (members: PlatformMember[]) => {
@@ -184,7 +184,7 @@ export class MemberActionBuilder {
                         childActions: () => [
                             ...organization.period.waitingLists.map((g) => {
                                 return new InMemoryTableAction({
-                                    name: g.settings.name,
+                                    name: g.settings.name.toString(),
                                     needsSelection: true,
                                     allowAutoSelectAll: false,
                                     handler: async (members: PlatformMember[]) => {
@@ -296,7 +296,7 @@ export class MemberActionBuilder {
             }),
             ...category.groups.map((g) => {
                 return new InMemoryTableAction({
-                    name: g.settings.name,
+                    name: g.settings.name.toString(),
                     needsSelection: true,
                     allowAutoSelectAll: false,
                     handler: async (members: PlatformMember[]) => {
@@ -359,10 +359,9 @@ export class MemberActionBuilder {
                 icon: 'download',
                 priority: 11,
                 groupIndex: 3,
-                handler: async (selection) => {
-                    console.log('selection', selection);
+                handler: async (selection: any) => {
                     // TODO: vervangen door een context menu
-                    await this.exportToExcel(selection);
+                    await this.exportToExcel(selection as any);
                 },
             }),
             new MenuTableAction({

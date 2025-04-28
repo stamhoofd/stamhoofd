@@ -47,7 +47,7 @@ export default class Checkbox extends VueComponent {
     indeterminate!: boolean;
 
     get hasDefaultSlot() {
-        return !!(this as any).$slots.default;
+        return !!this.$slots.default;
     }
 
     get checkboxValue() {
@@ -55,13 +55,13 @@ export default class Checkbox extends VueComponent {
     }
 
     set checkboxValue(value) {
-        (this as any).$emit('update:modelValue', value)
+        this.$emit('update:modelValue', value);
 
         // Add support for a model that doesn't change
-        (this as any).$nextTick(() => {
+        this.$nextTick(() => {
             if (this.checkboxValue !== value) {
-                if ((this as any).$refs.checkbox) {
-                    ((this as any).$refs.checkbox as any).checked = this.checkboxValue;
+                if (this.$refs.checkbox) {
+                    (this.$refs.checkbox as any).checked = this.checkboxValue;
                 }
             }
         });

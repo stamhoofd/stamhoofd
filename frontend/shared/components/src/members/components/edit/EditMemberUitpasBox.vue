@@ -51,12 +51,12 @@ const uitpasNumber = computed({
 });
 
 const reviewDate = computed(() => {
-    return props.member.patchedMember.details.reviewTimes.getLastReview($t(`43d59035-b07a-4f51-8e9b-cd136eb3715c`));
+    return props.member.patchedMember.details.reviewTimes.getLastReview('uitpasNumber');
 });
 
 function clear() {
     const times = props.member.patchedMember.details.reviewTimes.clone();
-    times.removeReview($t(`43d59035-b07a-4f51-8e9b-cd136eb3715c`));
+    times.removeReview('uitpasNumber');
     props.member.addDetailsPatch({
         reviewTimes: times,
     });

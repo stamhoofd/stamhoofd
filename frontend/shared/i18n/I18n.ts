@@ -13,7 +13,7 @@ export class I18n {
     messages: Map<string, string>;
 
     install(app: App) {
-        app.config.globalProperties.$t = this.$t.bind(this);
+        (app.config.globalProperties as any).$t = this.$t.bind(this);
     }
 
     get debug() {

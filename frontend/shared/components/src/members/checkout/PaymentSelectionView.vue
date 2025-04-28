@@ -47,7 +47,7 @@ const props = defineProps<{
 
 const errors = useErrors();
 
-const organization = computed(() => props.checkout.singleOrganization);
+const organization = computed(() => props.checkout.singleOrganization!);
 const loading = ref(false);
 const needsPay = computed(() => props.checkout.totalPrice > 0);
 const navigate = useNavigationActions();

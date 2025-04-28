@@ -126,24 +126,24 @@ export default class App extends VueComponent {
 
     mounted() {
         ModalStackEventBus.addListener(this, 'present', async (options: PushOptions | ComponentWithProperties) => {
-            if ((this as any).$refs.modalStack === undefined) {
+            if (this.$refs.modalStack === undefined) {
                 // Could be a webpack dev server error (HMR) (not fixable) or called too early
-                await (this as any).$nextTick();
+                await this.$nextTick();
             }
             if (!(options as any).components) {
-                ((this as any).$refs.modalStack as any).present({ components: [options] });
+                (this.$refs.modalStack as any).present({ components: [options] });
             }
             else {
-                ((this as any).$refs.modalStack as any).present(options);
+                (this.$refs.modalStack as any).present(options);
             }
         });
 
         CenteredMessage.addListener(this, async (centeredMessage) => {
-            if ((this as any).$refs.modalStack === undefined) {
+            if (this.$refs.modalStack === undefined) {
                 // Could be a webpack dev server error (HMR) (not fixable) or called too early
-                await (this as any).$nextTick();
+                await this.$nextTick();
             }
-            ((this as any).$refs.modalStack as any).present({
+            (this.$refs.modalStack as any).present({
                 components: [
                     new ComponentWithProperties(CenteredMessageView, {
                         centeredMessage,

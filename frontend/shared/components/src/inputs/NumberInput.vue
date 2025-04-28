@@ -1,10 +1,10 @@
 <template>
     <div class="number-container">
         <label class="number-input input" :class="{ error: !valid }">
-            <!-- 
-                We use type = text here because the specs of number inputs ensure that we can't get 
+            <!--
+                We use type = text here because the specs of number inputs ensure that we can't get
                 the raw string value, but we need this for our placeholder logic.
-                Also inputmode is more specific on mobile devices. 
+                Also inputmode is more specific on mobile devices.
                 Only downside is that we lose the stepper input on desktop.
             -->
             <input
@@ -33,105 +33,108 @@
 <script lang="ts">
 import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 
-import StepperInput from "./StepperInput.vue";
+import StepperInput from './StepperInput.vue';
 
 @Component({
     components: {
-        StepperInput
+        StepperInput,
     },
-    emits: ["update:modelValue"]
+    emits: ['update:modelValue'],
 })
 export default class NumberInput extends VueComponent {
     /** Price in cents */
     @Prop({ default: 0 })
-        min!: number | null
+    min!: number | null;
 
     /** Price in cents */
     @Prop({ default: null })
-        max!: number | null;
+    max!: number | null;
 
     @Prop({ default: false })
-        stepper!: boolean;
+    stepper!: boolean;
 
-    valueString = "";
+    valueString = '';
     valid = true;
 
     /** Price in cents */
     @Prop({ default: true })
-        required!: boolean
+    required!: boolean;
 
     @Prop({ default: false })
-        disabled!: boolean
+    disabled!: boolean;
 
     /** Price in cents */
     @Prop({ default: 0 })
-        modelValue!: number | null
+    modelValue!: number | null;
 
-    @Prop({ default: "" })
-        suffix: string;
+    @Prop({ default: '' })
+    suffix: string;
 
     @Prop({ default: null })
-        suffixSingular: string | null;
+    suffixSingular: string | null;
 
-    @Prop({ default: "" })
-        placeholder!: string
+    @Prop({ default: '' })
+    placeholder!: string;
 
     @Prop({ default: false })
-        floatingPoint!: boolean // In cents if floating point, never returns floats!
+    floatingPoint!: boolean; // In cents if floating point, never returns floats!
 
-    @Watch("value")
+    @Watch('value')
     onValueChange() {
-        this.clean()
+        this.clean();
     }
 
     get internalValue() {
-        return this.modelValue
+        return this.modelValue;
     }
 
     set internalValue(val: number | null) {
-        if(val === this.modelValue) {
+        if (val === this.modelValue) {
             return;
         }
-        this.$emit('update:modelValue', val)
+        this.$emit('update:modelValue', val);
     }
 
     get stepperValue() {
-        return this.modelValue ?? this.min ?? 0
+        return this.modelValue ?? this.min ?? 0;
     }
 
     set stepperValue(val: number) {
-        this.$emit('update:modelValue', val)
+        this.$emit('update:modelValue', val);
         this.$nextTick(() => {
             this.clean();
-        })
+        });
     }
 
     mounted() {
-        this.clean()
+        this.clean();
     }
 
-    @Watch("valueString")
+    @Watch('valueString')
     onValueChanged(value: string, _oldValue: string) {
         // We need the value string here! Vue does some converting to numbers automatically
         // but for our placeholder system we need exactly the same string
-        if (value === "") {
+        if (value === '') {
             if (this.required) {
                 this.valid = true;
                 this.internalValue = Math.max(0, this.min ?? 0);
-            } else {
+            }
+            else {
                 this.valid = true;
                 this.internalValue = null;
             }
-        } else {
-            if (!value.includes(".")) {
+        }
+        else {
+            if (!value.includes('.')) {
                 // We do this for all locales since some browsers report the language locale instead of the formatting locale
-                value = value.replace(",", ".");
+                value = value.replace(',', '.');
             }
             const v = parseFloat(value);
             if (isNaN(v)) {
                 this.valid = false;
                 this.internalValue = this.min ?? 0;
-            } else {
+            }
+            else {
                 this.valid = true;
 
                 // Remove extra decimals
@@ -154,30 +157,31 @@ export default class NumberInput extends VueComponent {
             return;
         }
 
-        let value = this.modelValue
+        let value = this.modelValue;
         if (value === null) {
             if (!this.required) {
-                this.valueString = ""
-                return
+                this.valueString = '';
+                return;
             }
-            value = this.min ?? 0
+            value = this.min ?? 0;
         }
 
         // Check if has decimals
-        const float = value / (this.floatingPoint ? 100 : 1)
+        const float = value / (this.floatingPoint ? 100 : 1);
         const decimals = float % 1;
         const abs = Math.abs(float);
 
         if (decimals !== 0) {
             // Include decimals
-            this.valueString =
-                (float < 0 ? "-" : "") +
-                Math.floor(abs) +
-                this.whatDecimalSeparator() +
-                 (""+Math.round(Math.abs(decimals) * (this.floatingPoint ? 100 : 1))).padStart(2, "0");
-        } else {
+            this.valueString
+                = (float < 0 ? '-' : '')
+                + Math.floor(abs)
+                + this.whatDecimalSeparator()
+                + ('' + Math.round(Math.abs(decimals) * (this.floatingPoint ? 100 : 1))).padStart(2, '0');
+        }
+        else {
             // Hide decimals
-            this.valueString = float + "";
+            this.valueString = float + '';
         }
     }
 
@@ -185,10 +189,11 @@ export default class NumberInput extends VueComponent {
     constrain(value: number): number {
         if (this.min !== null && value < this.min) {
             value = this.min;
-        } else if (this.max !== null && value > this.max) {
+        }
+        else if (this.max !== null && value > this.max) {
             value = this.max;
         }
-        return value
+        return value;
     }
 
     step(add: number) {
@@ -196,15 +201,14 @@ export default class NumberInput extends VueComponent {
             return;
         }
         const v = this.constrain((this.internalValue ?? this.min ?? 0) + add);
-        this.internalValue = v
+        this.internalValue = v;
         this.$nextTick(() => {
             this.clean();
-        })
-        
+        });
     }
 
     focus() {
-        //(this.$refs["input"] as any).focus()
+        // (this.$refs["input"] as any).focus()
     }
 }
 </script>

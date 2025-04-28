@@ -14,7 +14,7 @@ export class RegisterItemStep implements EditMemberStep {
     }
 
     getName(manager: MemberStepManager) {
-        return this.item.group.settings.name;
+        return this.item.group.settings.name.toString();
     }
 
     isEnabled(_manager: MemberStepManager) {

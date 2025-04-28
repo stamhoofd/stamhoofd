@@ -90,7 +90,7 @@ export class RegistrationActionBuilder {
                         childActions: () => [
                             ...this.organization.period.waitingLists.map((g) => {
                                 return new InMemoryTableAction({
-                                    name: g.settings.name,
+                                    name: g.settings.name.toString(),
                                     needsSelection: true,
                                     allowAutoSelectAll: false,
                                     handler: async () => {
@@ -155,7 +155,7 @@ export class RegistrationActionBuilder {
             }),
             ...category.groups.map((g) => {
                 return new InMemoryTableAction({
-                    name: g.settings.name,
+                    name: g.settings.name.toString(),
                     needsSelection: true,
                     allowAutoSelectAll: false,
                     handler: async () => {
