@@ -58,7 +58,7 @@ export class PlatformManager {
             return manager;
         }
 
-        const platform = reactive(await PlatformManager.fetchPlatform($context)) as Platform;
+        const platform = reactive(await PlatformManager.fetchPlatform($context)) as any as Platform;
         const platformManager = new PlatformManager($context, platform, app);
         await platformManager.savePlatform();
         await GlobalEventBus.sendEvent('platform-updated', platformManager.$platform);

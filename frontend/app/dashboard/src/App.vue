@@ -97,7 +97,7 @@ async function checkGlobalRoutes() {
             const toast = new Toast($t(`6e39ca2a-d279-41d3-b68d-eb17dd4f4331`), 'spinner').setHide(null).show();
 
             try {
-                const session = reactive(parts[1] ? await SessionContext.createFrom({ organizationId: parts[1] }) : new SessionContext(null)) as SessionContext;
+                const session = parts[1] ? await SessionContext.createFrom({ organizationId: parts[1] }) : new SessionContext(null);
                 await session.loadFromStorage();
                 await LoginHelper.verifyEmail(session, code, token);
                 toast.hide();
