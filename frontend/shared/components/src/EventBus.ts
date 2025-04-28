@@ -8,7 +8,7 @@ type Listener<E, Value> = (value: Value, type: E) => Promise<void>;
 export class EventBus<E, Value> {
     protected listeners: Map<any, { type: E; listener: Listener<E, Value> }[]> = markRaw(new Map());
 
-    addListener<T extends E>(owner: any, type: T, listener: Listener<T, Value>) {
+    addListener<T extends E>(owner: any, type: T, listener: Listener<E, Value>) {
         if (isReactive(owner)) {
             console.warn('Adding a listener with a proxy object. This is not recommended and can cause bugs.');
         }

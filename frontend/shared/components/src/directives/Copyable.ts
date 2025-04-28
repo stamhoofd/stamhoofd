@@ -22,7 +22,7 @@ const helper = {
                 w.getSelection().removeAllRanges();
             }
         }
-        this.copiedPopup(event, vnode);
+        this.copiedPopup(event);
 
         (document.activeElement as HTMLElement)?.blur();
     },
@@ -75,7 +75,7 @@ const helper = {
             // Select all
             const myText = bindingValue ?? event.currentTarget.textContent.trim();
             navigator.clipboard.writeText(myText).then(() => {
-                this.copiedPopup(event, vnode);
+                this.copiedPopup(event);
             }).catch((e) => {
                 console.error(e);
                 this.copyElementFallback(event, vnode);

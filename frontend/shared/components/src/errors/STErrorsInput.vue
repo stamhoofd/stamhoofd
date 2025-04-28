@@ -13,18 +13,18 @@
 
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 
-import { ErrorBox } from "./ErrorBox"
-import STErrorBox from "./STErrorBox.vue"
+import { ErrorBox } from './ErrorBox';
+import STErrorBox from './STErrorBox.vue';
 
 @Component({
     components: {
-        STErrorBox
-    }
+        STErrorBox,
+    },
 })
 export default class STErrorsInput extends VueComponent {
-    @Prop({ default: "" }) errorFields: string;
+    @Prop({ default: '' }) errorFields: string;
     @Prop({ default: null }) errorBox: ErrorBox | null;
     errors: SimpleError[] = [];
 
@@ -34,16 +34,17 @@ export default class STErrorsInput extends VueComponent {
             this.errors = [];
             return;
         }
-        let errors: SimpleErrors
-        
-        if (this.errorFields === "*") {
-            errors = val.remaining
-        } else {
-            errors = val.forFields(this.errorFields.split(","))
+        let errors: SimpleErrors;
+
+        if (this.errorFields === '*') {
+            errors = val.remaining;
         }
-        
-        this.errors = errors.errors
-        val.scrollTo(this.errors, this.$refs.errors as HTMLElement)
+        else {
+            errors = val.forFields(this.errorFields.split(','));
+        }
+
+        this.errors = errors.errors;
+        val.scrollTo(this.errors, (this as any).$refs.errors as HTMLElement);
     }
 }
 </script>

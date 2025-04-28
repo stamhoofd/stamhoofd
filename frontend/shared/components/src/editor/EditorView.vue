@@ -113,7 +113,7 @@ import { Editor, EditorContent } from '@tiptap/vue-3';
 
 import { useCanPop, useCanDismiss, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
 import { DataValidator } from '@stamhoofd/utility';
-import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue';
 import UploadButton from '../inputs/UploadButton.vue';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
@@ -197,7 +197,7 @@ const canPop = useCanPop();
 const canDismiss = useCanDismiss();
 const pop = usePop();
 const dismiss = useDismiss();
-const editor = ref(buildEditor());
+const editor = shallowRef(buildEditor());
 
 function buildEditor(content: Content = '') {
     return new Editor({
@@ -240,7 +240,7 @@ function buildEditor(content: Content = '') {
     });
 }
 
-const linkInput = useTemplateRef('linkInput');
+const linkInput = useTemplateRef<HTMLInputElement>('linkInput');
 
 onBeforeUnmount(() => {
     editor.value.destroy();

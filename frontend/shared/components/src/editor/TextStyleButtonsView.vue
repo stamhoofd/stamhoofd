@@ -14,19 +14,10 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { Editor } from '@tiptap/vue-3';
-import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 
-import { default as TooltipDirective } from '../directives/Tooltip';
-
-@Component({
-    directives: {
-        tooltip: TooltipDirective,
-    },
-})
-export default class TextStyleButtonsView extends VueComponent {
-    @Prop({ required: true })
+defineProps<{
     editor: Editor;
-}
+}>();
 </script>

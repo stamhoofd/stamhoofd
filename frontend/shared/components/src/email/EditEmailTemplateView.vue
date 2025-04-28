@@ -30,7 +30,6 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { EmailTemplate, Replacement, getExampleRecipient } from '@stamhoofd/structures';
 import { Ref, computed, nextTick, onMounted, ref } from 'vue';
 import EditorView from '../editor/EditorView.vue';
@@ -53,7 +52,7 @@ const props = withDefaults(
 
 const { patched, addPatch, hasChanges, patch } = usePatch(props.emailTemplate);
 const errors = useErrors();
-const editorView = ref(null) as Ref<EditorView | null>;
+const editorView = ref(null) as Ref<typeof EditorView | null>;
 const editor = computed(() => editorView.value?.editor);
 const pop = usePop();
 
@@ -61,7 +60,7 @@ const organization = useOrganization();
 const platform = usePlatform();
 
 onMounted(() => {
-    if (props.emailTemplate.json && props.emailTemplate.json.type) {
+    if (props.emailTemplate.json && (props.emailTemplate.json as any).type) {
         editor.value?.commands.setContent(props.emailTemplate.json);
     }
 });

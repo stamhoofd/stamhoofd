@@ -2,10 +2,10 @@
     <transition
         appear
         name="error-box-transition"
-        @before-enter="beforeEnter"
-        @enter="enter"
-        @after-enter="afterEnter"
-        @leave="leave"
+        @before-enter="beforeEnter as any"
+        @enter="enter as any"
+        @after-enter="afterEnter as any"
+        @leave="leave as any"
     >
         <div>
             <div class="error-box-parent">
@@ -18,39 +18,36 @@
 </template>
 
 <script lang="ts">
-import { Component, VueComponent } from "@simonbackx/vue-app-navigation/classes";
+import { Component, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 
 @Component({})
 export default class STErrorBox extends VueComponent {
     beforeEnter(el: HTMLElement) {
-        el.style.opacity = "0";
+        el.style.opacity = '0';
     }
 
     enter(el: HTMLElement) {
         const height = el.offsetHeight;
-        el.style.height = "0";
+        el.style.height = '0';
 
         requestAnimationFrame(() => {
-            el.style.height = height+"px";
-            el.style.opacity = "1";
+            el.style.height = height + 'px';
+            el.style.opacity = '1';
         });
-
     }
 
     afterEnter(el: HTMLElement) {
-        el.style.height = "";
+        el.style.height = '';
     }
-
 
     leave(el: HTMLElement) {
         const height = el.offsetHeight;
-        el.style.height = height+"px";
+        el.style.height = height + 'px';
 
         requestAnimationFrame(() => {
-            el.style.height = "0px";
-            el.style.opacity = "0";
+            el.style.height = '0px';
+            el.style.opacity = '0';
         });
-
     }
 }
 </script>
