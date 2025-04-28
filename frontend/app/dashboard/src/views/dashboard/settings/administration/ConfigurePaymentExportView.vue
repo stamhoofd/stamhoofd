@@ -52,7 +52,7 @@
             </STList>
         </template>
 
-        <template v-if="getProvider('Stripe') || useUTCTimezone">
+        <template v-if="getProvider('Stripe' as any) || useUTCTimezone">
             <hr><h2>{{ $t('1f618c07-ec09-4465-b7af-59e30b0c7585') }}</h2>
             <STList>
                 <STListItem :selectable="true" element-name="label">
@@ -133,10 +133,6 @@ export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) 
         this.methods = this.sortedPaymentMethods.slice();
         this.buildSuggestions();
         this.selectSuggestion(this.dateRangeSuggestions[0]);
-    }
-
-    formatDate(date: Date) {
-        return Formatter.dateTime(date) + ':' + date?.getSeconds() + ':' + date?.getMilliseconds();
     }
 
     get startDate() {

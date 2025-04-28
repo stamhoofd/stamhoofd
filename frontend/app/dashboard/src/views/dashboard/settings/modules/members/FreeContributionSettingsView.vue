@@ -229,9 +229,5 @@ export default class FreeContributionSettingsView extends Mixins(NavigationMixin
         }
         return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
-
-    mounted() {
-        this.setUrl('/free-contribution');
-    }
 }
 </script>

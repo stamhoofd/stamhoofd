@@ -10,7 +10,7 @@
                 {{ $t('167706de-e695-4695-95d6-662dd10c2a46') }}
             </p>
 
-            <ModuleSettingsBox />
+            (todo)
         </main>
 
         <STToolbar>
@@ -31,8 +31,6 @@ import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
 import { BackButton, Checkbox, EmailInput, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar } from '@stamhoofd/components';
 
-import ModuleSettingsBox from '../dashboard/settings/ModuleSettingsBox.vue';
-
 @Component({
     components: {
         STToolbar,
@@ -43,7 +41,6 @@ import ModuleSettingsBox from '../dashboard/settings/ModuleSettingsBox.vue';
         BackButton,
         EmailInput,
         Checkbox,
-        ModuleSettingsBox,
     },
 })
 export default class SignupModulesView extends Mixins(NavigationMixin) {

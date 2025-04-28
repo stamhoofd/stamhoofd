@@ -369,8 +369,8 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncPaymentView, CartItemRow, ColorHelper, EditPaymentView, GlobalEventBus, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, useContext, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
-import { AccessRight, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, ProductDateRange, RecordCategory, RecordWarning, TicketPrivate, TicketPublicPrivate } from '@stamhoofd/structures';
+import { AsyncPaymentView, CartItemRow, ColorHelper, EditPaymentView, GlobalEventBus, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, useAuth, useContext, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import { AccessRight, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, ProductDateRange, RecordCategory, RecordWarning, TicketPrivate, TicketPublicPrivate } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { useOrganizationManager } from '@stamhoofd/networking';
@@ -438,38 +438,22 @@ const actionBuilder = computed(() => new OrderActionBuilder({
 const statusName = computed(() => OrderStatusHelper.getName(props.order.status));
 
 const statusColor = computed(() => OrderStatusHelper.getColor(props.order.status));
+const auth = useAuth();
 
 const hasWrite = computed(() => {
-    const p = context.value.organizationPermissions;
-    if (!p) {
-        return false;
-    }
-
-    if (webshop.value === null) {
-        return false;
-    }
-
-    return webshop.value.privateMeta.permissions.hasWriteAccess(p);
+    return auth.canAccessWebshop(webshop.value ?? props.webshopManager.preview, PermissionLevel.Write);
 });
 
 const hasPaymentsWrite = computed(() => {
-    const p = context.value.organizationPermissions;
-    if (!p) {
-        return false;
-    }
-    if (p.hasAccessRight(AccessRight.OrganizationManagePayments)) {
+    if (auth.hasAccessRight(AccessRight.OrganizationManagePayments)) {
         return true;
     }
 
-    if (p.hasAccessRight(AccessRight.OrganizationFinanceDirector)) {
+    if (auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)) {
         return true;
     }
 
-    if (webshop.value === null) {
-        return false;
-    }
-
-    return webshop.value.privateMeta.permissions.hasWriteAccess(p);
+    return auth.canAccessWebshop(webshop.value ?? props.webshopManager.preview, PermissionLevel.Write);
 });
 
 function openPayment(payment: Payment) {

@@ -17,7 +17,7 @@
 
         <STToolbar>
             <template #right>
-                <button class="button primary" @click="dismiss">
+                <button class="button primary" type="button" @click="dismiss()">
                     {{ $t('bef7a2f9-129a-4e1c-b8d2-9003ff0a1f8b') }}
                 </button>
             </template>
