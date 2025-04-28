@@ -48,7 +48,7 @@
                         <p class="style-description-small">
                             {{ $t('b6391640-1e01-47f9-913d-360fb0903b75') }} {{ formatDate(user.createdAt) }}
                         </p>
-                        <p class="style-description-small">
+                        <p v-if="user.expiresAt" class="style-description-small">
                             {{ $t('52ab641f-5864-4fac-8c52-0df00ad7e0a9') }} {{ formatDate(user.expiresAt) }}
                         </p>
 
@@ -122,7 +122,7 @@ export default class ApiUsersView extends Mixins(NavigationMixin) {
         return this.$organization;
     }
 
-    permissionList(user: User) {
+    permissionList(user: ApiUser) {
         const list: string[] = [];
         const o = user.permissions?.organizationPermissions.get(this.organization.id);
         if (o?.level === PermissionLevel.Full) {
