@@ -1,5 +1,5 @@
 <template>
-    <STListItem v-long-press="(e: any) => showContextMenu(e)" :selectable="true" class="right-stack" @contextmenu.prevent="showContextMenu">
+    <STListItem v-long-press="(e: any) => showContextMenu()" :selectable="true" class="right-stack" @contextmenu.prevent="showContextMenu">
         <template #left>
             <span v-if="mergedRole.isEmpty" class="icon layered" :v-tooltip="$t('973b8b5e-9c84-4e86-aae8-da7ae1a1ad6a')">
                 <span class="icon user-blocked-layer-1" />

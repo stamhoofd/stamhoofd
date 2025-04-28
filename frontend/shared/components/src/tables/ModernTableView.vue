@@ -142,7 +142,7 @@ import { Storage } from '@stamhoofd/networking';
 import { isEmptyFilter, LimitedFilteredRequest, mergeFilters, SortItemDirection, StamhoofdFilter, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
-import { ComponentOptions, computed, ComputedRef, getCurrentInstance, onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, Ref, ref, watch, watchEffect } from 'vue';
+import { ComponentOptions, computed, ComputedRef, getCurrentInstance, onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, Ref, ref, shallowRef, watch, watchEffect } from 'vue';
 
 import UIFilterEditor from '../filters/UIFilterEditor.vue';
 import { AsyncTableAction, Column, MenuTableAction, TableAction, TableActionSelection, TableObjectFetcher } from './classes';
@@ -346,7 +346,7 @@ function blurFocus() {
 
 // If the user selects a row, we'll add it in the selectedRows. But if the user selects all rows,
 // we don't want to add them all, that would be a performance hit. So'ill invert it and only save the unselected values here.
-const markedRows = ref(new Map<string, Value>());
+const markedRows = shallowRef(new Map<string, Value>());
 const isRightClicking = ref(false);
 const customFocusedRows = ref(null) as Ref<null | Set<string>>;
 

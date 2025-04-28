@@ -6,7 +6,7 @@ import { Group, Organization, OrganizationAdmins, OrganizationPatch, Organizatio
 import { Ref, inject, toRef } from 'vue';
 
 export function useOrganizationManager(): Ref<OrganizationManager> {
-    return toRef(inject<OrganizationManager>('$organizationManager') as OrganizationManager) as Ref<OrganizationManager>;
+    return toRef(inject<OrganizationManager>('$organizationManager')) as any as Ref<OrganizationManager>;
 }
 
 /**

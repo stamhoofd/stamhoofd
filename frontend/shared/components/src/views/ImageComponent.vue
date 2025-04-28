@@ -1,20 +1,20 @@
 <template>
-    <div class="image-component" :style="{maxHeight: maxHeight ? maxHeight+'px' : null}">
+    <div class="image-component" :style="{maxHeight: maxHeight ? maxHeight+'px' : undefined}">
         <div v-if="autoHeight" class="sizer" :style="sizerStyle">
             <div :style="sizerChildStyle" />
         </div>
 
         <picture v-if="elWidth">
-            <source 
+            <source
                 v-if="imageDark && srcDark && (darkMode === 'Auto' || darkMode === 'On')"
                 :srcset="srcDark"
                 :media="darkMode === 'Auto' ? '(prefers-color-scheme: dark)' : ''"
-                :width="imgWidthDark" 
+                :width="imgWidthDark"
                 :height="imgHeightDark"
             >
-            <img 
+            <img
                 :src="src"
-                :width="imgWidth" 
+                :width="imgWidth"
                 :height="imgHeight"
                 :alt="alt"
             >
@@ -26,48 +26,47 @@
 import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 import { DarkMode, Image } from '@stamhoofd/structures';
 
-
 @Component({})
 export default class ImageComponent extends VueComponent {
     @Prop({ default: '' })
-        alt: string
+    alt: string;
 
     @Prop({ required: true })
-        image: Image
+    image: Image;
 
     @Prop({ default: null })
-        imageDark: Image|null
+    imageDark: Image | null;
 
-    @Prop({ default: DarkMode.Auto})
-        darkMode: DarkMode
+    @Prop({ default: DarkMode.Auto })
+    darkMode: DarkMode;
 
     /**
      * Update the height to match the image resolution.
      * Width will take the available space (can style this with css)
      */
     @Prop({ default: false })
-        autoHeight: boolean
+    autoHeight: boolean;
 
     @Prop({ default: null })
-        maxHeight: number|null
+    maxHeight: number | null;
 
-    elWidth: number|null = null;
-    elHeight: number|null = null;
+    elWidth: number | null = null;
+    elHeight: number | null = null;
 
     get resolution() {
-        return this.image.getResolutionForSize(this.elWidth ?? undefined, this.elHeight ?? undefined)
+        return this.image.getResolutionForSize(this.elWidth ?? undefined, this.elHeight ?? undefined);
     }
 
     get darkResolution() {
-        return (this.imageDark ?? this.image).getResolutionForSize(this.elWidth ?? undefined, this.elHeight ?? undefined)
+        return (this.imageDark ?? this.image).getResolutionForSize(this.elWidth ?? undefined, this.elHeight ?? undefined);
     }
 
     get imgWidth() {
-        return this.resolution.width
+        return this.resolution.width;
     }
 
     get imgHeight() {
-        return this.resolution.height
+        return this.resolution.height;
     }
 
     get src() {
@@ -75,11 +74,11 @@ export default class ImageComponent extends VueComponent {
     }
 
     get imgWidthDark() {
-        return this.darkResolution.width
+        return this.darkResolution.width;
     }
 
     get imgHeightDark() {
-        return this.darkResolution.height
+        return this.darkResolution.height;
     }
 
     get srcDark() {
@@ -87,8 +86,8 @@ export default class ImageComponent extends VueComponent {
     }
 
     updateSize() {
-        this.elWidth = this.$el.offsetWidth
-        this.elHeight = this.autoHeight ? null : this.$el.offsetHeight
+        this.elWidth = this.$el.offsetWidth;
+        this.elHeight = this.autoHeight ? null : this.$el.offsetHeight;
     }
 
     get sizerChildStyle() {
@@ -96,14 +95,14 @@ export default class ImageComponent extends VueComponent {
             return;
         }
         const percentage = (this.imgHeight / this.imgWidth * 100).toFixed(2);
-        return `padding-bottom: ${percentage}%;`
+        return `padding-bottom: ${percentage}%;`;
     }
 
     get sizerStyle() {
         if (!this.autoHeight) {
             return;
         }
-        return `max-height: ${this.imgHeight}px;`
+        return `max-height: ${this.imgHeight}px;`;
     }
 
     // Observe the size of the element and update the used resolution accordingly
@@ -114,11 +113,12 @@ export default class ImageComponent extends VueComponent {
                 this.updateSize();
             });
             resizeObserver.observe(this.$el);
-        } catch (e) {
+        }
+        catch (e) {
             // Not supported
             this.$nextTick(() => {
                 this.updateSize();
-            })
+            });
         }
     }
 }

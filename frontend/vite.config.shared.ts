@@ -36,7 +36,7 @@ else if (process.env.ENV_FILE) {
     const file = path.resolve(process.env.ENV_FILE);
 
     // Load this in the environment
-    const contents = fs.readFileSync(file);
+    const contents = fs.readFileSync(file, { encoding: 'utf-8' });
     const decode = JSON.parse(contents);
     const node_env = JSON.stringify(decode.environment === 'production' ? 'production' : 'development');
 

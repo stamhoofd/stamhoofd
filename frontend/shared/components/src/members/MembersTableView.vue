@@ -50,7 +50,7 @@ const title = computed(() => {
     }
 
     if (props.group) {
-        return props.group.settings.name;
+        return props.group.settings.name.toString();
     }
 
     return $t(`fb35c140-e936-4e91-aa92-ef4dfc59fb51`);
@@ -315,7 +315,7 @@ if (props.group) {
                 allowSorting: false,
                 name: $t('a5ecc2e0-c1f2-4cfb-b4b2-8a17782787bc'),
                 getValue: member => member.filterRegistrations({ groups: [props.group!] }).map(r => r.groupPrice),
-                format: prices => Formatter.joinLast(prices.map(o => o.name).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || $t('e41660ea-180a-45ef-987c-e780319c4331'),
+                format: prices => Formatter.joinLast(prices.map(o => o.name.toString()).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || $t('e41660ea-180a-45ef-987c-e780319c4331'),
                 getStyle: prices => prices.length === 0 ? 'gray' : '',
                 minimumWidth: 100,
                 recommendedWidth: 300,

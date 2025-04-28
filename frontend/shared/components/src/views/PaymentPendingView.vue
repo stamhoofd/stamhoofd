@@ -37,7 +37,7 @@ import { Server } from '@simonbackx/simple-networking';
 import { useNavigationController, usePopup } from '@simonbackx/vue-app-navigation';
 import { LoadingButton, NavigationActions, Spinner, STNavigationBar, STToolbar, useNavigationActions } from '@stamhoofd/components';
 import { PaymentGeneral, PaymentStatus } from '@stamhoofd/structures';
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
 
 const props = withDefaults(defineProps<{
     paymentId: string;
@@ -54,7 +54,7 @@ const props = withDefaults(defineProps<{
 const navigationActions = useNavigationActions();
 const popup = usePopup();
 const navigationController = useNavigationController();
-const payment = ref<PaymentGeneral | null>(null);
+const payment = shallowRef<PaymentGeneral | null>(null);
 const loading = ref(false);
 
 let pollCount = 0;

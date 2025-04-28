@@ -1,5 +1,5 @@
 <template>
-    <div v-if="!category.isEnabled(value)" class="container">
+    <div v-if="!category.isEnabled(value as ObjectWithRecords)" class="container">
         <p v-if="STAMHOOFD.environment === 'development'" class="error-box">
             {{ $t('02b0533d-31b1-44ce-a22b-47d7f90adea8') }}
         </p>

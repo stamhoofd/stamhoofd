@@ -7,7 +7,7 @@
 <script setup lang="ts" generic="T extends ObjectWithRecords">
 import { PatchMap, patchObject } from '@simonbackx/simple-encoding';
 import { ObjectWithRecords, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
-import { computed, ref } from 'vue';
+import { computed, Ref, ref } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
@@ -28,7 +28,7 @@ const props = withDefaults(
     },
 );
 
-const patch = ref(new PatchMap() as PatchAnswers);
+const patch = ref(new PatchMap()) as Ref<PatchAnswers>;
 const patchedValue = computed(() => {
     const patched = props.value.patchRecordAnswers(patch.value);
     return patched;

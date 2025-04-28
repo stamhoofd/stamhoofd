@@ -9,8 +9,6 @@
         >
             <slot />
         </div>
-
-        <div v-if="ignoreHoverTriangle && false" class="triangle" :style="{ 'clip-path': 'polygon('+ignoreHoverTriangle.p1.x+'px '+ignoreHoverTriangle.p1.y+'px, '+ignoreHoverTriangle.p2.x+'px '+ignoreHoverTriangle.p2.y+'px, '+ignoreHoverTriangle.p3.x+'px '+ignoreHoverTriangle.p3.y+'px)'}" />
     </div>
 </template>
 

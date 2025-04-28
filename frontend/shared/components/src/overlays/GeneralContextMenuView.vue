@@ -51,7 +51,7 @@ export default class GeneralContextMenuView extends VueComponent {
         if (!item.action || item.disabled) {
             return;
         }
-        item.action.call(item, event);
+        item.action.call(item);
     }
 
     pop(popParents = false) {
