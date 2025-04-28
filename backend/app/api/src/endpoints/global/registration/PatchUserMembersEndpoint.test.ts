@@ -1,7 +1,7 @@
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import { Endpoint, Request } from '@simonbackx/simple-endpoints';
 import { GroupFactory, MemberFactory, OrganizationFactory, Platform, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
-import { MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PatchAnswers, PermissionLevel, RecordCategory, RecordSettings, RecordTextAnswer } from '@stamhoofd/structures';
+import { MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PatchAnswers, PermissionLevel, RecordCategory, RecordSettings, RecordTextAnswer, TranslatedString } from '@stamhoofd/structures';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { PatchUserMembersEndpoint } from './PatchUserMembersEndpoint';
 import { Database } from '@simonbackx/simple-database';
@@ -170,11 +170,11 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
     describe('Record answers', () => {
         test('A user can save answers of records of an organization it has not yet registered for', async () => {
             const commentsRecord = RecordSettings.create({
-                name: 'Opmerkingen',
+                name: TranslatedString.create('Opmerkingen'),
             });
 
             const recordCategory = RecordCategory.create({
-                name: 'Medische fiche',
+                name: TranslatedString.create('Medische fiche'),
                 records: [
                     commentsRecord,
                 ],
@@ -230,12 +230,12 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
         test('A user cannot save answers to organization read-only records', async () => {
             const commentsRecord = RecordSettings.create({
-                name: 'Opmerkingen',
+                name: TranslatedString.create('Opmerkingen'),
                 externalPermissionLevel: PermissionLevel.Read,
             });
 
             const recordCategory = RecordCategory.create({
-                name: 'Medische fiche',
+                name: TranslatedString.create('Medische fiche'),
                 records: [
                     commentsRecord,
                 ],
@@ -283,11 +283,11 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
         test('A user can save answers of records of the platform', async () => {
             const commentsRecord = RecordSettings.create({
-                name: 'Opmerkingen',
+                name: TranslatedString.create('Opmerkingen'),
             });
 
             const recordCategory = RecordCategory.create({
-                name: 'Medische fiche',
+                name: TranslatedString.create('Medische fiche'),
                 records: [
                     commentsRecord,
                 ],
@@ -342,12 +342,12 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
         test('A user cannot save answers to platform read-only records', async () => {
             const commentsRecord = RecordSettings.create({
-                name: 'Opmerkingen',
+                name: TranslatedString.create('Opmerkingen'),
                 externalPermissionLevel: PermissionLevel.Read,
             });
 
             const recordCategory = RecordCategory.create({
-                name: 'Medische fiche',
+                name: TranslatedString.create('Medische fiche'),
                 records: [
                     commentsRecord,
                 ],
@@ -394,7 +394,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
         test('A user can not save anwers to inexisting records', async () => {
             const commentsRecord = RecordSettings.create({
-                name: 'Opmerkingen',
+                name: TranslatedString.create('Opmerkingen'),
             });
 
             const organization = await new OrganizationFactory({

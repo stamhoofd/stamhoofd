@@ -7,6 +7,7 @@ import { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
 import { getPermissionLevelNumber, PermissionLevel } from '../../PermissionLevel.js';
 import { ObjectWithRecords, PatchAnswers } from '../ObjectWithRecords.js';
 import { RecordFilterOptions, RecordSettings } from './RecordSettings.js';
+import { TranslatedString } from '../../TranslatedString.js';
 
 export interface Filterable {
     doesMatchFilter(filter: StamhoofdFilter): boolean;
@@ -17,10 +18,12 @@ export class RecordCategory extends AutoEncoder {
     id: string;
 
     @field({ decoder: StringDecoder })
-    name = '';
+    @field(TranslatedString.field({ version: 370 }))
+    name = TranslatedString.create();
 
     @field({ decoder: StringDecoder })
-    description = '';
+    @field(TranslatedString.field({ version: 370 }))
+    description = TranslatedString.create();
 
     /**
      * Sometimes a category needs to be in the list but not enabled.
@@ -222,7 +225,7 @@ export class RecordCategory extends AutoEncoder {
                     ...this.flattenCategories(cat.childCategories, filterValue, options).map((c) => {
                         // Make a (not deep!) clone
                         const cc = RecordCategory.create(c);
-                        cc.name = cat.name + ' → ' + c.name;
+                        cc.name = cat.name.append(' → ', c.name);
                         return cc;
                     }),
                 ];
@@ -253,7 +256,7 @@ export class RecordCategory extends AutoEncoder {
                     ...this.flattenCategoriesWith(cat.childCategories, filter).map((c) => {
                         // Make a (not deep!) clone
                         const cc = RecordCategory.create(c);
-                        cc.name = cat.name + ' → ' + c.name;
+                        cc.name = cat.name.append(' → ', c.name);
                         return cc;
                     }),
                 ];

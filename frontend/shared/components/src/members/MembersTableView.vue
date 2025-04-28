@@ -355,7 +355,7 @@ if (props.group) {
                 new Column<ObjectType, RecordAnswer | null>({
                     id: 'record-' + record.id,
                     allowSorting: false,
-                    name: record.name,
+                    name: record.name.toString(),
                     getValue: (member) => {
                         for (const registration of member.filterRegistrations({ groups: [props.group!] })) {
                             const answer = registration.recordAnswers.get(record.id);
@@ -436,7 +436,7 @@ if (groups.length) {
                 const enabledCategories = member.getEnabledRecordCategories(scope);
 
                 const incomplete = enabledCategories.filter(c => !c.isComplete(member));
-                return [...base, ...incomplete.map(c => c.name)];
+                return [...base, ...incomplete.map(c => c.name.toString())];
             },
             format: prices => Formatter.capitalizeFirstLetter(Formatter.joinLast(prices, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || $t('e41660ea-180a-45ef-987c-e780319c4331')),
             getStyle: prices => prices.length === 0 ? 'gray' : '',

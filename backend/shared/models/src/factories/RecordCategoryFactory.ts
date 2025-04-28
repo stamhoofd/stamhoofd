@@ -1,5 +1,5 @@
 import { Factory } from '@simonbackx/simple-database';
-import { RecordCategory, RecordSettings, RecordType } from '@stamhoofd/structures';
+import { RecordCategory, RecordSettings, TranslatedString } from '@stamhoofd/structures';
 import { RecordFactory, RecordOptions } from './RecordFactory';
 
 class Options {
@@ -16,7 +16,7 @@ export class RecordCategoryFactory extends Factory<Options, RecordCategory> {
         }
 
         return RecordCategory.create({
-            name: 'Record category ' + Math.floor(Math.random() * 10000),
+            name: TranslatedString.create('Record category ' + Math.floor(Math.random() * 10000)),
             records,
         });
     }

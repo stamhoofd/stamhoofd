@@ -132,7 +132,7 @@ const sortedWarnings = computed(() => warnings.value.slice().sort(RecordWarning.
 const hasWarnings = computed(() => warnings.value.length > 0);
 
 const unlinkedAnswers = computed(() => usedAnswers.value.filter(a => !!a.reviewedAt));
-const unlinkedAnswersText = computed(() => Formatter.joinLast(unlinkedAnswers.value.map(a => a.settings.name), ', ', ' en '));
+const unlinkedAnswersText = computed(() => Formatter.joinLast(unlinkedAnswers.value.map(a => a.settings.name.toString()), ', ', ' en '));
 
 const actionBuilder = computed(() => {
     return new DocumentActionBuilder({

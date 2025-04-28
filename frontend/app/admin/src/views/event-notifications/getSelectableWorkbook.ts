@@ -69,9 +69,9 @@ export function getSelectableWorkbook(platform: Platform) {
                         return category.getAllRecords().flatMap((record) => {
                             return new SelectableColumn({
                                 id: `recordAnswers.${record.id}`,
-                                name: record.name,
-                                category: category.name,
-                                description: record.description,
+                                name: record.name.toString(),
+                                category: category.name.toString(),
+                                description: record.description.toString(),
                             });
                         });
                     }),

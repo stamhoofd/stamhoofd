@@ -489,7 +489,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
     for (const category of preview.value.meta.recordCategories) {
         for (const record of category.getAllRecords()) {
             cols.push(new Column<PrivateOrder, string | undefined>({
-                name: record.name,
+                name: record.name.toString(),
                 enabled: false,
                 getValue: (order) => {
                     const answer = order.data.recordAnswers.get(record.id);

@@ -10,6 +10,7 @@ import { RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningT
 import { File } from '../../files/File.js';
 import { AuditLogReplacement, AuditLogReplacementType } from '../../AuditLogReplacement.js';
 import { type CellValue } from '@stamhoofd/excel-writer';
+import { TranslatedString } from '../../TranslatedString.js';
 
 export class RecordAnswer extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -90,7 +91,7 @@ export class RecordAnswer extends AutoEncoder {
                     return [
                         RecordWarning.create({
                             id: 'validation-warning-' + this.id,
-                            text: e.getHuman(),
+                            text: TranslatedString.create(e.getHuman()),
                             type: RecordWarningType.Error,
                         }),
                     ];
@@ -337,7 +338,7 @@ export class RecordChooseOneAnswer extends RecordAnswer {
     selectedChoice: RecordChoice | null = null;
 
     get stringValue() {
-        return this.selectedChoice?.name ?? '/';
+        return this.selectedChoice?.name?.toString() ?? '/';
     }
 
     get objectValue() {

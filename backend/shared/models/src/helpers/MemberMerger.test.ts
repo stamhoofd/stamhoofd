@@ -10,6 +10,7 @@ import {
     RecordSettings,
     ReviewTime,
     ReviewTimes,
+    TranslatedString,
 } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { Member } from '../models';
@@ -45,7 +46,7 @@ describe('member merge', () => {
 
             const recordAnswer = RecordAnswer.create({
                 settings: RecordSettings.create({
-                    name: 'answer1',
+                    name: TranslatedString.create('answer1'),
                     required: true,
                     choices: [],
                 }),
@@ -215,7 +216,7 @@ describe('member merge', () => {
 
             const recordAnswer = RecordAnswer.create({
                 settings: RecordSettings.create({
-                    name: 'answer1',
+                    name: TranslatedString.create('answer1'),
                     required: true,
                     choices: [],
                 }),
@@ -407,7 +408,7 @@ describe('member merge', () => {
 
             const recordAnswer1 = RecordAnswer.create({
                 settings: RecordSettings.create({
-                    name: 'answer1',
+                    name: TranslatedString.create('answer1'),
                     required: true,
                     choices: [],
                 }),
@@ -418,7 +419,7 @@ describe('member merge', () => {
 
             const recordAnswer2 = RecordAnswer.create({
                 settings: RecordSettings.create({
-                    name: 'answer2',
+                    name: TranslatedString.create('answer2'),
                     required: true,
                     choices: [],
                 }),

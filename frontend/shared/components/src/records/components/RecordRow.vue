@@ -15,7 +15,7 @@
         <h3 class="style-title-list">
             {{ record.name }}
         </h3>
-        <p v-if="description && description !== record.name" class="style-description">
+        <p v-if="description && description !== record.name.toString()" class="style-description">
             {{ description }}
         </p>
 
@@ -259,7 +259,7 @@ function showContextMenu(event: MouseEvent) {
                 childMenu: new ContextMenu([
                     props.rootCategories.map((category) => {
                         return new ContextMenuItem({
-                            name: category.name,
+                            name: category.name.toString(),
                             action: () => {
                                 moveTo(category);
                             },
@@ -275,7 +275,7 @@ function showContextMenu(event: MouseEvent) {
                                     ],
                                     category.childCategories.map((childCategory) => {
                                         return new ContextMenuItem({
-                                            name: childCategory.name,
+                                            name: childCategory.name.toString(),
                                             action: () => {
                                                 moveTo(childCategory);
                                             },

@@ -15,13 +15,11 @@
         </p>
         <p v-else class="style-description-small">
             <template v-if="category.records.length">
-                {{ category.records.length }} {{ category.records.length === 1 ? "vraag" : "vragen" }}
+                {{ category.records.length }} {{ category.records.length === 1 ? $t("vraag") : $t("vragen") }}
             </template>
-            <template v-if="category.childCategories.length && category.records.length">
-                {{ $t('6a156458-b396-4d0f-b562-adb3e38fc51b') }}
-            </template>
+            <span v-if="category.childCategories.length && category.records.length" v-text="' ' + $t('6a156458-b396-4d0f-b562-adb3e38fc51b') + ' '" />
             <template v-if="category.childCategories.length">
-                {{ category.childCategories.length }} {{ category.childCategories.length === 1 ? "categorie" : "categorieën" }}
+                {{ category.childCategories.length }} {{ category.childCategories.length === 1 ? $t("categorie") : $t("categorieën") }}
             </template>
         </p>
 
@@ -115,7 +113,7 @@ function showContextMenu(event: MouseEvent) {
                     ],
                     [
                         ...props.categories.map(c => new ContextMenuItem({
-                            name: c.name,
+                            name: c.name.toString(),
                             disabled: c.id === props.category.id,
                             action: async () => {
                                 // Transform into a root category

@@ -107,7 +107,7 @@
 
                     <AccessRightPermissionRow :access-right="AccessRight.MemberManageNRN" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
 
-                    <ResourcePermissionRow v-for="{recordCategory, organization} in recordCategories" :key="recordCategory.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: recordCategory.id, name: recordCategory.name, type: PermissionsResourceType.RecordCategories, description: !organization ? $t('1dfaeb07-5f01-42c7-a9a4-0096047da86e') : $t('4dea71e9-0965-4c9a-81ac-6ee7046a0d8e') }" :configurable-access-rights="[]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow v-for="{recordCategory, organization} in recordCategories" :key="recordCategory.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: recordCategory.id, name: recordCategory.name.toString(), type: PermissionsResourceType.RecordCategories, description: !organization ? $t('1dfaeb07-5f01-42c7-a9a4-0096047da86e') : $t('4dea71e9-0965-4c9a-81ac-6ee7046a0d8e') }" :configurable-access-rights="[]" type="resource" @patch:role="addPatch" />
 
                     <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.RecordCategories, patched, recordCategories.map(r => r.recordCategory))" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[]" type="resource" :unlisted="true" @patch:role="addPatch" />
                 </STList>

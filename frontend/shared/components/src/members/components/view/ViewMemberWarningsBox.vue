@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { MemberPlatformMembership, MembershipStatus, PermissionLevel, PlatformMember, RecordAnswer, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
+import { MemberPlatformMembership, MembershipStatus, PermissionLevel, PlatformMember, RecordAnswer, RecordWarning, RecordWarningType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useDataPermissionSettings, useFinancialSupportSettings } from '../../../groups';
@@ -32,7 +32,6 @@ const props = defineProps<{
 }>();
 const auth = useAuth();
 const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), false);
-
 
 // Possible the member didn't fill in the answers yet
 const autoCompletedAnswers = computed(() => {
@@ -71,7 +70,7 @@ const warnings = computed(() => {
     if (isPropertyEnabled('financialSupport')) {
         if (props.member.patchedMember.details.requiresFinancialSupport && props.member.patchedMember.details.requiresFinancialSupport.value) {
             warnings.push(RecordWarning.create({
-                text: financialSupportSettings.value.warningText,
+                text: TranslatedString.create(financialSupportSettings.value.warningText),
                 type: RecordWarningType.Error,
             }));
         }
@@ -80,7 +79,7 @@ const warnings = computed(() => {
     if (isPropertyEnabled('dataPermission')) {
         if (props.member.patchedMember.details.dataPermissions && !props.member.patchedMember.details.dataPermissions.value) {
             warnings.push(RecordWarning.create({
-                text: dataPermissionSettings.value.warningText,
+                text: TranslatedString.create(dataPermissionSettings.value.warningText),
                 type: RecordWarningType.Error,
             }));
         }
@@ -88,7 +87,7 @@ const warnings = computed(() => {
 
     if (props.member.membershipStatus === MembershipStatus.Trial) {
         warnings.push(RecordWarning.create({
-            text: $t('29343dad-93c5-4e72-a6d5-3960cfbfcf42'),
+            text: TranslatedString.create($t('29343dad-93c5-4e72-a6d5-3960cfbfcf42')),
             type: RecordWarningType.Info,
         }));
     }
@@ -99,13 +98,13 @@ const warnings = computed(() => {
 
         if (nextMembership) {
             warnings.push(RecordWarning.create({
-                text: $t('880e4cac-5a7e-4d6d-80ad-c5472a005df6', { date: Formatter.date(nextMembership.startDate) }),
+                text: TranslatedString.create($t('880e4cac-5a7e-4d6d-80ad-c5472a005df6', { date: Formatter.date(nextMembership.startDate) })),
                 type: RecordWarningType.Warning,
             }));
         }
         else {
             warnings.push(RecordWarning.create({
-                text: $t('60871aaf-1b90-4a7c-a755-a4aeb0585a8e'),
+                text: TranslatedString.create($t('60871aaf-1b90-4a7c-a755-a4aeb0585a8e')),
                 type: RecordWarningType.Error,
             }));
         }
@@ -113,7 +112,7 @@ const warnings = computed(() => {
 
     if (props.member.membershipStatus === MembershipStatus.Expiring) {
         warnings.push(RecordWarning.create({
-            text: $t('1af084bf-42d6-4a59-a7da-d1e87c6dba8e'),
+            text: TranslatedString.create($t('1af084bf-42d6-4a59-a7da-d1e87c6dba8e')),
             type: RecordWarningType.Warning,
         }));
     }
@@ -134,7 +133,7 @@ const getNextMembership = (): MemberPlatformMembership | null => {
 
     if (nextMemberships.length > 0) {
         return nextMemberships[0];
-    }
+    }//
 
     return null;
 };

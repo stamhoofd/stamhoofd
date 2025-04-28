@@ -1852,7 +1852,7 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
                     new MultipleChoiceFilterBuilder({
                         name: prefix + categoryPrefix + record.name,
                         options: [
-                            ...record.choices.map(c => new MultipleChoiceUIFilterOption(c.name, c.id)),
+                            ...record.choices.map(c => new MultipleChoiceUIFilterOption(c.name.toString(), c.id)),
                         ],
                         wrapper: {
                             recordAnswers: {
@@ -1874,7 +1874,7 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
                     new MultipleChoiceFilterBuilder({
                         name: prefix + categoryPrefix + record.name,
                         options: [
-                            ...record.choices.map(c => new MultipleChoiceUIFilterOption(c.name, c.id)),
+                            ...record.choices.map(c => new MultipleChoiceUIFilterOption(c.name.toString(), c.id)),
                         ],
                         wrapper: {
                             recordAnswers: {
@@ -1900,7 +1900,7 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
 
         if (allForCategory.length > 0) {
             const group = new GroupUIFilterBuilder({
-                name: category.name,
+                name: category.name.toString(),
                 builders: allForCategory,
             });
             allForCategory.unshift(group);

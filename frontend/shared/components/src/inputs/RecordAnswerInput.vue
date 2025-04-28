@@ -39,10 +39,10 @@
             </STList>
         </STInputBox>
         <STInputBox v-else-if="answer.settings.type === RecordType.Text" :title="label" error-fields="input" :error-box="errors.errorBox">
-            <input v-model="textValue" :placeholder="inputPlaceholder" class="input">
+            <input v-model="textValue" :placeholder="inputPlaceholder.toString()" class="input">
         </STInputBox>
         <STInputBox v-else-if="answer.settings.type === RecordType.Textarea" :title="label" class="max" error-fields="input" :error-box="errors.errorBox">
-            <textarea v-model="textValue" :placeholder="inputPlaceholder" class="input" />
+            <textarea v-model="textValue" :placeholder="inputPlaceholder.toString()" class="input" />
         </STInputBox>
         <AddressInput v-else-if="answer.settings.type === RecordType.Address" v-model="addressValue" :title="label" :required="required" :validator="errors.validator" :nullable="true" />
         <PhoneInput v-else-if="answer.settings.type === RecordType.Phone" v-model="textValue" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="errors.validator" :nullable="true" />
@@ -64,7 +64,7 @@
         </p>
 
         <div v-if="answer.settings.type === RecordType.Checkbox && selected && answer.settings.askComments" class="textarea-container">
-            <textarea v-model="comments" class="input small" :placeholder="inputPlaceholder" />
+            <textarea v-model="comments" class="input small" :placeholder="inputPlaceholder.toString()" />
             <p v-if="answer.settings.commentsDescription" class="info-box">
                 {{ answer.settings.commentsDescription }}
             </p>
@@ -166,7 +166,7 @@ const casted = {
     RecordIntegerAnswer: computed(() => answer.value instanceof RecordIntegerAnswer ? answer.value : null),
 };
 
-const label = computed(() => props.record.label || props.record.name);
+const label = computed(() => props.record.label.length ? props.record.label : props.record.name);
 const required = computed(() => !props.allOptional && props.record.required);
 const inputPlaceholder = computed(() => {
     if (!required.value) {
@@ -178,7 +178,7 @@ const inputPlaceholder = computed(() => {
         }
         return $t(`6b886749-1039-4c0b-b239-fbae9fd5f291`);
     }
-    return answer.value.settings.inputPlaceholder || answer.value.settings.name;
+    return answer.value.settings.inputPlaceholder.length ? answer.value.settings.inputPlaceholder : answer.value.settings.name;
 });
 
 const selected = computed({

@@ -18,7 +18,7 @@ export function uuidToName(uuid: string) {
     for (const list of objectLists) {
         for (const object of list) {
             if (object.id === uuid) {
-                return object.name;
+                return object.name.toString();
             }
         }
     }

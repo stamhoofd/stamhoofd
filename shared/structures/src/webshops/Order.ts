@@ -327,7 +327,7 @@ export class Order extends AutoEncoder {
                 value: a.answer,
             })),
             ...[...this.data.recordAnswers.values()].filter(a => !a.isEmpty || a instanceof RecordCheckboxAnswer).map(a => ({
-                title: a.settings.name,
+                title: a.settings.name.toString(),
                 value: a.stringValue,
             })),
             ...(

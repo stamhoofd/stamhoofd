@@ -61,6 +61,13 @@ export class TranslatedString implements Encodeable, Patchable<TranslatedStringP
         return typeof this.translations === 'string';
     }
 
+    fallback(str: string) {
+        if (this.length === 0) {
+            return str;
+        }
+        return this.toString();
+    }
+
     get length(): number {
         return this.toString().length;
     }
@@ -211,7 +218,7 @@ export class TranslatedString implements Encodeable, Patchable<TranslatedStringP
         return this.translations[Language.English] ?? this.translations[Language.Dutch] ?? this.translations[keys[0]];
     }
 
-    static field(options: { version?: number }) {
+    static field(options: { version?: number; nullable?: boolean }) {
         return {
             ...options,
             decoder: TranslatedStringDecoder,
@@ -253,6 +260,37 @@ export class TranslatedString implements Encodeable, Patchable<TranslatedStringP
             return this.translations[keys[0]];
         }
         return this.translations;
+    }
+
+    clone(): TranslatedString {
+        if (typeof this.translations === 'string') {
+            return new TranslatedString(this.translations);
+        }
+        return new TranslatedString({ ...this.translations });
+    }
+
+    _append(str: string | TranslatedString): this {
+        if (typeof str === 'string') {
+            return this.append(new TranslatedString(str));
+        }
+        const duplicate = this.clone();
+        if (typeof duplicate.translations !== 'string') {
+            for (const key in duplicate.translations) {
+                duplicate.translations[key] += str.get(key as Language);
+            }
+            return duplicate as this;
+        }
+
+        duplicate.translations = duplicate.translations + str.toString();
+        return duplicate as this;
+    }
+
+    append(...str: (string | TranslatedString)[]): this {
+        let duplicate = this;
+        for (const s of str) {
+            duplicate = duplicate._append(s);
+        }
+        return duplicate as this;
     }
 }
 
