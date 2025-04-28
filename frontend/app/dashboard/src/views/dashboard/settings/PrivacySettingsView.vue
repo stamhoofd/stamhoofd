@@ -154,7 +154,6 @@ export default class PrivacySettingsView extends Mixins(NavigationMixin) {
         this.selectedPrivacyType = this.defaultSelectedType;
 
         this.organizationPatch.id = this.$organization.id;
-        this.setUrl('/privacy');
     }
 }
 </script>

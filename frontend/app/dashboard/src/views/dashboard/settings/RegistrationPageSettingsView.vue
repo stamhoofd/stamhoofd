@@ -73,7 +73,7 @@ export default class RegistrationPageSettingsView extends Mixins(NavigationMixin
         return this.organization.meta.type === OrganizationType.Youth;
     }
 
-    copyElement(event) {
+    copyElement(event: any) {
         event.target.contentEditable = true;
 
         document.execCommand('selectAll', false);

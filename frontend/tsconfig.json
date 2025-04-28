@@ -24,6 +24,7 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "strictPropertyInitialization": false,
+        "noImplicitAny": false
     },
     "include": [
         "../*.d.ts",
