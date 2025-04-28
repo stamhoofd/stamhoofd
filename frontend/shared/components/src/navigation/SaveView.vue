@@ -12,7 +12,6 @@
 
                 <template #right>
                     <template v-if="!$isMobile && !$isIOS">
-                        <EditorLanguageButton />
                         <slot name="buttons" />
                     </template>
                     <LoadingButton v-if="canDelete" :loading="deleting">
