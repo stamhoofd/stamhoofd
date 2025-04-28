@@ -9,6 +9,22 @@
     }
 }
 
+.textarea-overlay {
+    position: relative;
+
+    > span {
+        position: absolute;
+        right: 10px;
+        bottom: 5px;
+        pointer-events: none;
+        user-select: none;
+        white-space: nowrap;
+        @extend .style-input;
+        color: $color-dark;
+        opacity: 0.5;
+    }
+}
+
 .input {
     @extend .style-input;
     @extend .style-input-box;
