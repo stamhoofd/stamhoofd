@@ -10,48 +10,47 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 
-import { ErrorBox } from "./ErrorBox"
-import STErrorBox from "./STErrorBox.vue"
+import { ErrorBox } from './ErrorBox';
+import STErrorBox from './STErrorBox.vue';
 import { Ref, unref } from 'vue';
 
 @Component({
     components: {
-        STErrorBox
-    }
+        STErrorBox,
+    },
 })
 export default class STErrorsDefault extends VueComponent {
-    @Prop() 
-        errorBox!: ErrorBox | Ref<ErrorBox> | null;
-    
+    @Prop()
+    errorBox!: ErrorBox | Ref<ErrorBox> | null;
+
     errors: SimpleError[] = [];
 
     mounted() {
-        this.onNewErrors(unref(this.errorBox))
+        this.onNewErrors(unref(this.errorBox));
     }
 
     getErrorMessage(error: SimpleError) {
-        if (error.hasCode("network_error") || error.hasCode("network_timeout")) {
-            return $t(`94bdc2a4-9ebb-42d2-a4e9-d674eb9aafef`)
+        if (error.hasCode('network_error') || error.hasCode('network_timeout')) {
+            return $t(`94bdc2a4-9ebb-42d2-a4e9-d674eb9aafef`);
         }
-        return error.getHuman()
+        return error.getHuman();
     }
 
     @Watch('errorBox')
-    onNewErrors(val: ErrorBox | Ref<ErrorBox> | null ) {
+    onNewErrors(val: ErrorBox | Ref<ErrorBox> | null) {
         if (!val) {
             this.errors = [];
             return;
         }
         // Wait for next tick, to prevent a useless rerender of errors that will get removed by other inputs
-        this.$nextTick(() => {
-            const errors = unref(val).remaining
-            this.errors = errors.errors
+        (this as any).$nextTick(() => {
+            const errors = unref(val).remaining;
+            this.errors = errors.errors;
 
-            unref(val).scrollTo(this.errors, this.$refs.errors as HTMLElement)
+            unref(val).scrollTo(this.errors, (this as any).$refs.errors as HTMLElement);
         });
-        
     }
 }
 </script>

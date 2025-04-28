@@ -85,7 +85,7 @@ const organization = useOrganization();
 
 const googleMapsUrl = computed(() => {
     if (props.event.meta.location?.address) {
-        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(props.event.meta.location.address)}`;
+        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(props.event.meta.location.address.toString())}`;
     }
     return null;
 });

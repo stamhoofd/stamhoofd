@@ -10,7 +10,7 @@
             <!-- Buttons -->
             <template #buttons>
                 <label v-tooltip="$t('d76495d1-251b-4cf1-9ca1-7e7ac33a046f')" class="button icon attachment">
-                    <input type="file" multiple="true" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile"><span v-if="$isMobile && files.length > 0" class="style-bubble">{{ files.length }}</span>
+                    <input type="file" multiple="true" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile as any"><span v-if="$isMobile && files.length > 0" class="style-bubble">{{ files.length }}</span>
                 </label>
 
                 <hr v-if="canOpenTemplates"><button v-if="canOpenTemplates" v-tooltip="$t('20bacd85-5b82-4396-bbd5-b6d88e7d90e4')" class="button icon email-template" type="button" @click="openTemplates" />
@@ -624,7 +624,7 @@ async function showToMenu(event: MouseEvent) {
         ] */
     ]);
 
-    menu.show({ button: event.currentTarget }).catch(console.error);
+    menu.show({ button: event.currentTarget as HTMLElement }).catch(console.error);
 }
 
 function getFileIcon(file: EmailAttachment) {

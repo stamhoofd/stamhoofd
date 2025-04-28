@@ -1,22 +1,19 @@
-import { AppManager } from "@stamhoofd/networking";
-import type {ObjectDirective} from "vue";
+import { AppManager } from '@stamhoofd/networking';
+import type { ObjectDirective } from 'vue';
 
-function getScrollElement(element: HTMLElement | null = null): HTMLElement {
-    if (!element) {
-        element = this.$el as HTMLElement;
-    }
-
+function getScrollElement(element: HTMLElement): HTMLElement {
     const style = window.getComputedStyle(element);
     if (
-        style.overflowY == "scroll" ||
-        style.overflow == "scroll" ||
-        style.overflow == "auto" ||
-        style.overflowY == "auto" || 
-        style.overflow == "overlay" || 
-        style.overflowY == "overlay"
+        style.overflowY == 'scroll'
+        || style.overflow == 'scroll'
+        || style.overflow == 'auto'
+        || style.overflowY == 'auto'
+        || style.overflow == 'overlay'
+        || style.overflowY == 'overlay'
     ) {
         return element;
-    } else {
+    }
+    else {
         if (!element.parentElement) {
             return document.documentElement;
         }
@@ -24,156 +21,150 @@ function getScrollElement(element: HTMLElement | null = null): HTMLElement {
     }
 }
 
-function distance(a: { x: number, y: number }, b: { x: number, y: number }) {
+function distance(a: { x: number; y: number }, b: { x: number; y: number }) {
     return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
 }
 
-const LongPressDirective: ObjectDirective<HTMLElement & {$longPressTimer: NodeJS.Timeout|null, $didTriggerLongPress: boolean}, () => void> = {
+const LongPressDirective: ObjectDirective<HTMLElement & { $longPressTimer: NodeJS.Timeout | null; $didTriggerLongPress: boolean }, (event: MouseEvent) => void> = {
     beforeMount(el, binding) {
         // If we are on Android or Desktop, we can ignore this listener
         if (!(binding.instance?.$.proxy?.$isIOS)) {
-            return
+            return;
         }
 
-        el.$longPressTimer = null
-        el.$didTriggerLongPress = false
-        
-        let scrollElement: HTMLElement | undefined
-        let firstTouch: { x: number, y: number } | undefined
-        let lastTouch: { x: number, y: number } | undefined
+        el.$longPressTimer = null;
+        el.$didTriggerLongPress = false;
 
+        let scrollElement: HTMLElement | undefined;
+        let firstTouch: { x: number; y: number } | undefined;
+        let lastTouch: { x: number; y: number } | undefined;
 
         const scrollListener = (e) => {
             if (el.$longPressTimer && e.currentTarget.scrollTop > 1) {
-                clearTimeout(el.$longPressTimer)
-                e.currentTarget.removeEventListener("scroll", scrollListener)
+                clearTimeout(el.$longPressTimer);
+                e.currentTarget.removeEventListener('scroll', scrollListener);
             }
-        }
+        };
 
         const touchMoveListener = (event: TouchEvent) => {
             if (!event.touches || event.touches.length < 1) {
-                return
+                return;
             }
             lastTouch = {
                 x: event.touches[0].pageX,
-                y: event.touches[0].pageY
-            }
-        }
+                y: event.touches[0].pageY,
+            };
+        };
 
         const cancelLongPress = () => {
             // Cancel timer
             if (el.$longPressTimer) {
-                clearTimeout(el.$longPressTimer)
+                clearTimeout(el.$longPressTimer);
             }
-            el.$longPressTimer = null
-            el.$didTriggerLongPress = false
-            scrollElement?.removeEventListener("scroll", scrollListener)
-            document.removeEventListener("touchmove", touchMoveListener)
-        }
-
+            el.$longPressTimer = null;
+            el.$didTriggerLongPress = false;
+            scrollElement?.removeEventListener('scroll', scrollListener);
+            document.removeEventListener('touchmove', touchMoveListener);
+        };
 
         // Add a hover listener
         el.addEventListener(
-            "touchstart",
+            'touchstart',
             (event) => {
-                cancelLongPress()
+                cancelLongPress();
 
                 if (event.touches.length > 1) {
                     // If more than one finger, do nothing
-                    return
+                    return;
                 }
 
-                if (event.target && event.target.classList.contains('drag')) {
+                if (event.target && (event.target as HTMLElement).classList.contains('drag')) {
                     return;
                 }
 
                 // Register position of touch
                 firstTouch = {
                     x: event.touches[0].pageX,
-                    y: event.touches[0].pageY
-                }
+                    y: event.touches[0].pageY,
+                };
                 lastTouch = {
                     x: event.touches[0].pageX,
-                    y: event.touches[0].pageY
-                }
+                    y: event.touches[0].pageY,
+                };
 
                 // Listen for scroll event of container, and cancel if scrolled
-                scrollElement = getScrollElement(el)
-                scrollElement.addEventListener("scroll", scrollListener, { passive: true })
-                
-                document.addEventListener("touchmove", touchMoveListener, { passive: true })
+                scrollElement = getScrollElement(el);
+                scrollElement.addEventListener('scroll', scrollListener, { passive: true });
+
+                document.addEventListener('touchmove', touchMoveListener, { passive: true });
 
                 el.$longPressTimer = setTimeout(() => {
-                    scrollElement?.removeEventListener("scroll", scrollListener)
-                    document.removeEventListener("touchmove", touchMoveListener)
+                    scrollElement?.removeEventListener('scroll', scrollListener);
+                    document.removeEventListener('touchmove', touchMoveListener);
 
                     // If distance between first touch and last touch is too big, do nothing
                     if (!firstTouch || !lastTouch || distance(firstTouch, lastTouch) > 5) {
-                        cancelLongPress()
-                        return
+                        cancelLongPress();
+                        return;
                     }
-                    console.log(el, el.getAttribute('draggable'))
+                    console.log(el, el.getAttribute('draggable'));
 
-                    el.$longPressTimer = null
+                    el.$longPressTimer = null;
 
-                    AppManager.shared.hapticTap()
+                    AppManager.shared.hapticTap();
 
                     // Call listener
-                    const callback = binding.value
+                    const callback = binding.value;
 
                     const customEvent = {
                         currentTarget: el,
                         target: el,
                         changedTouches: event.changedTouches,
                         touches: event.touches,
-                    }
-                    callback(customEvent)
+                    } as any as MouseEvent;
+                    callback(customEvent);
 
                     // Cancel all move events
-                    el.$didTriggerLongPress = true
+                    el.$didTriggerLongPress = true;
 
                     const onmove = (e) => {
                         // Cancel all default handling from now on
-                        e.preventDefault()
-                    }
-                    document.addEventListener("touchmove", onmove, { passive: false})
+                        e.preventDefault();
+                    };
+                    document.addEventListener('touchmove', onmove, { passive: false });
                     // Remove
-                    document.addEventListener("touchend", () => {
-                        document.removeEventListener("touchmove", onmove)
-                    }, { once: true, passive: true })
-
-                }, 500)
-                
+                    document.addEventListener('touchend', () => {
+                        document.removeEventListener('touchmove', onmove);
+                    }, { once: true, passive: true });
+                }, 500);
             },
-            { passive: true }
+            { passive: true },
         );
 
         // Add a hover listener
         el.addEventListener(
-            "touchend",
+            'touchend',
             (_event) => {
-                cancelLongPress()
-                
+                cancelLongPress();
             },
-            { passive: true }
+            { passive: true },
         );
 
         // Add a hover listener
         el.addEventListener(
-            "contextmenu",
+            'contextmenu',
             (_event) => {
                 // Cancel timer
-                cancelLongPress()
-                
+                cancelLongPress();
             },
-            { passive: true }
+            { passive: true },
         );
     },
 
     unmounted(el, binding, vnode) {
         if (el.$longPressTimer) {
-            clearTimeout(el.$longPressTimer)
+            clearTimeout(el.$longPressTimer);
         }
-    }
+    },
 };
 export default LongPressDirective;
