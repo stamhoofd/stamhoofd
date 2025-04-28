@@ -121,6 +121,14 @@ export class TranslatedString implements Encodeable, Patchable<TranslatedStringP
         return this.toString().split(separator, limit);
     }
 
+    startsWith(searchString: string, position?: number) {
+        return this.toString().startsWith(searchString, position);
+    }
+
+    match(regexp: string | RegExp) {
+        return this.toString().match(regexp);
+    }
+
     patch(patch: string | LanguageMapPatch | TranslatedStringPatch | TranslatedString): this {
         if (typeof patch === 'string') {
             // Set to simple string without translations

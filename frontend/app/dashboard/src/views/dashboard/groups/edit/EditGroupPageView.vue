@@ -4,39 +4,41 @@
             {{ title }}
         </h1>
 
-        <STErrorsDefault :error-box="errorBox"/>
+        <STErrorsDefault :error-box="errorBox" />
 
         <hr><h2 class="style-with-button">
             <div>{{ $t('b8a111c0-5f3d-480b-833a-6d7f05bf134d') }}</div>
             <div>
                 <button v-if="coverPhoto" class="button text only-icon-smartphone" type="button" @click="coverPhoto = null">
-                    <span class="icon trash"/>
+                    <span class="icon trash" />
                     <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
                 </button>
-                <UploadButton v-model="coverPhoto" :text="coverPhoto ? $t(`b7c71a71-9523-4748-a6cd-80b9314b05b2`) : $t(`5be27263-6804-4f1c-92b0-f20cdacc141b`)" :resolutions="hs"/>
+                <UploadButton v-model="coverPhoto" :text="coverPhoto ? $t(`b7c71a71-9523-4748-a6cd-80b9314b05b2`) : $t(`5be27263-6804-4f1c-92b0-f20cdacc141b`)" :resolutions="hs" />
             </div>
         </h2>
 
         <p>{{ $t('28ebd74a-fd45-4987-9578-87438fbff67d') }}</p>
 
         <figure v-if="coverPhotoSrc" class="cover-photo">
-            <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight"></figure>
+            <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight">
+        </figure>
 
         <hr><h2 class="style-with-button">
             <div>{{ $t('fadb7758-81af-40e4-b448-fadf336595b8') }}</div>
             <div>
                 <button v-if="squarePhoto" class="button text only-icon-smartphone" type="button" @click="squarePhoto = null">
-                    <span class="icon trash"/>
+                    <span class="icon trash" />
                     <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
                 </button>
-                <UploadButton v-model="squarePhoto" :text="squarePhoto ? $t(`b7c71a71-9523-4748-a6cd-80b9314b05b2`) : $t(`5be27263-6804-4f1c-92b0-f20cdacc141b`)" :resolutions="hsSquare"/>
+                <UploadButton v-model="squarePhoto" :text="squarePhoto ? $t(`b7c71a71-9523-4748-a6cd-80b9314b05b2`) : $t(`5be27263-6804-4f1c-92b0-f20cdacc141b`)" :resolutions="hsSquare" />
             </div>
         </h2>
 
         <p>{{ $t('4a78fcf6-2564-4846-b828-9eb03c06e0e2') }}</p>
 
         <figure v-if="squarePhotoSrc" class="square-photo">
-            <img :src="squarePhotoSrc"></figure>
+            <img :src="squarePhotoSrc">
+        </figure>
     </SaveView>
 </template>
 
@@ -71,7 +73,7 @@ export default class EditGroupPageView extends Mixins(EditGroupMixin) {
     }
 
     get description() {
-        return this.patchedGroup.settings.description;
+        return this.patchedGroup.settings.description.toString();
     }
 
     set description(description: string) {
@@ -142,7 +144,7 @@ export default class EditGroupPageView extends Mixins(EditGroupMixin) {
     get hsSquare() {
         return [
             ResolutionRequest.create({
-                width: 250
+                width: 250,
             }),
         ];
     }

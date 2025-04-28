@@ -14,7 +14,9 @@
             <Spinner v-if="loadingGroups" />
             <STList v-else-if="groups.length">
                 <STListItem v-for="group in groups" :key="group.id" :selectable="true" @click="openGroup(group)">
-                    <GroupAvatar #left :group="group" />
+                    <template #left>
+                        <GroupAvatar :group="group" />
+                    </template>
 
                     <h2 class="style-title-list">
                         {{ group.settings.name }}
@@ -63,10 +65,6 @@ export default class ArchivedGroupsView extends Mixins(NavigationMixin) {
     mounted() {
         // Load deleted groups
         this.load().catch(console.error);
-    }
-
-    formatDate(date: Date) {
-        return Formatter.dateTime(date);
     }
 
     async load() {

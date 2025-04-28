@@ -13,7 +13,7 @@
         "build": "tsc -b && mkdir -p ./dist/migrations && rsync --exclude='*.ts' --exclude='*.js' -r --checksum ./src/migrations/ ./dist/migrations/"
     },
     "peerDependencies": {
-        "@simonbackx/simple-errors": "^1.4"
+        "@simonbackx/simple-errors": "^1.5"
     },
     "devDependencies": {
         "@types/nodemailer": "6.4.14"
