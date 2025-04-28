@@ -163,7 +163,7 @@ import { downloadDocument } from '@stamhoofd/document-helper';
 import { useMemberManager, useRequestOwner } from '@stamhoofd/networking';
 import { Document, DocumentStatus, GroupType, PlatformMember } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { computed, ref } from 'vue';
+import { computed, Ref, ref } from 'vue';
 
 enum Routes {
     RegisterMembers = 'registerMembers',
@@ -263,7 +263,7 @@ async function addNewMember() {
     });
 }
 
-const downloadingDocuments = ref([] as Document[]);
+const downloadingDocuments = ref([] as Document[]) as Ref<Document[]>;
 
 async function onDownloadDocument(document: Document) {
     if (isDocumentDownloading(document)) {
@@ -274,7 +274,7 @@ async function onDownloadDocument(document: Document) {
         new Toast($t(`78a4c6c3-c0d0-457c-adfb-44122307161a`, { name: member?.member.firstName ?? $t(`dit lid`) }), 'error red').setHide(20000).show();
         return;
     }
-    downloadingDocuments.value.push(document);
+    downloadingDocuments.value.push(document as any); // fix for Type instantiation is excessively deep and possibly infinite
     try {
         await downloadDocument(context.value, document, requestOwner);
     }

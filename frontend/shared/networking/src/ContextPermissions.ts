@@ -203,15 +203,14 @@ export class ContextPermissions {
         if (this.organization) {
             for (const webshopId of payment.webshopIds) {
                 const webshop = this.organization.webshops.find(w => w.id === webshopId);
-                if (webshop && webshop.privateMeta.permissions.hasAccess(this.permissions, level)) {
+                if (webshop && this.canAccessWebshop(webshop, level)) {
                     return true;
                 }
             }
 
             for (const groupId of payment.groupIds) {
                 const group = this.organization.groups.find(w => w.id === groupId);
-
-                if (group && group.privateSettings?.permissions.hasAccess(this.permissions, level)) {
+                if (group && this.canAccessGroup(group, level)) {
                     return true;
                 }
             }

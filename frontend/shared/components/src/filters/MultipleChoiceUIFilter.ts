@@ -122,7 +122,7 @@ export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoi
         allowCreation?: boolean;
     }) {
         this.name = data.name;
-        this.description = data.description;
+        this.description = data.description ?? '';
         this.multipleChoiceOptions = data.options;
         this.wrapper = data.wrapper;
         this.wrapFilter = data.wrapFilter;

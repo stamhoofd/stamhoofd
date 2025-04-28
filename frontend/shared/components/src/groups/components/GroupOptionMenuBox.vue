@@ -68,7 +68,7 @@
                     </p>
 
                     <p v-if="option.stock !== null" class="style-description-small">
-                        {{ $t('dceceb1c-6d55-4a93-bf8f-85ba041786f4', {stock: pluralText(option.getRemainingStock(group), 'stuk', 'stuks')}) }}
+                        {{ $t('dceceb1c-6d55-4a93-bf8f-85ba041786f4', {stock: pluralText(option.getRemainingStock(group)!, 'stuk', 'stuks')}) }}
                     </p>
 
                     <p v-if="option.maximum !== null && option.allowAmount" class="style-description-small">
@@ -127,8 +127,6 @@ const { up, canMoveUp, canMoveDown, down } = usePatchMoveUpDownSingle(props.opti
         }),
     }));
 });
-
-
 
 const patchOptionsArray = (options: PatchableArrayAutoEncoder<GroupOption>) => {
     addPatch({

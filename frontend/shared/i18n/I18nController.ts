@@ -2,7 +2,7 @@
 import { HistoryManager } from '@simonbackx/vue-app-navigation';
 import { countries, languages } from '@stamhoofd/locales';
 import { SessionContext, Storage, UrlHelper } from '@stamhoofd/networking';
-import { Address, Country, CountryCode, countryToCode, Language } from '@stamhoofd/structures';
+import { Country, CountryCode, countryToCode, Language } from '@stamhoofd/structures';
 import { I18n } from './I18n';
 
 export function useTranslate(): typeof I18n.prototype.$t {
@@ -373,11 +373,11 @@ export class I18nController {
 
                 switch (tld) {
                     case 'be': {
-                        language = 'nl';
+                        language = Language.Dutch;
                         break;
                     }
                     case 'nl': {
-                        language = 'nl';
+                        language = Language.Dutch;
                         break;
                     }
                 }
@@ -387,7 +387,7 @@ export class I18nController {
                 }
                 else {
                     console.info('[I18n] Using fallback language nl');
-                    language = 'nl';
+                    language = Language.Dutch;
                 }
             }
             else {

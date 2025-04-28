@@ -16,7 +16,7 @@ class SessionStorage extends AutoEncoder {
     lastOrganizationId: string | null = null;
 }
 
-type AuthenticationStateListener = (changed: 'precentComplete' | 'user' | 'organization' | 'token' | 'session') => void;
+type AuthenticationStateListener = (changed: 'preventComplete' | 'user' | 'organization' | 'token' | 'session') => void;
 
 /**
  * The SessionManager manages the storage of Sessions for different organizations. You can request the session for a given organization.
@@ -290,7 +290,7 @@ export class SessionManagerStatic {
             return session;
         }
         catch (e) {
-            if (e.hasCode('invalid_organization')) {
+            if (isSimpleError(e) && e.hasCode('invalid_organization')) {
                 // Clear from session storage
                 await this.removeOrganizationFromStorage(organization.id);
                 throw new SimpleError({

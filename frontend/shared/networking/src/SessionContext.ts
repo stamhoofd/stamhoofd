@@ -767,8 +767,8 @@ export class SessionContext implements RequestMiddleware {
     }
 
     // Logout without clearing this token
-    setLoadingError(error: Error | null) {
-        this.loadingError = error;
+    setLoadingError(error: unknown) {
+        this.loadingError = error as Error;
         this.callListeners('token');
         this.callListeners('user');
     }
