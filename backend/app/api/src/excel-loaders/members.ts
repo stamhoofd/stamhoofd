@@ -293,7 +293,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformMember> = {
                                     }
 
                                     return {
-                                        value: registration.groupPrice.name,
+                                        value: registration.groupPrice.name.toString(),
                                     };
                                 },
                             },

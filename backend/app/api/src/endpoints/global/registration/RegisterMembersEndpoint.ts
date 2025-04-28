@@ -518,7 +518,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     BalanceItemRelationType.GroupPrice,
                     BalanceItemRelation.create({
                         id: item.groupPrice.id,
-                        name: item.groupPrice.name,
+                        name: item.groupPrice.name.toString(),
                     }),
                 ]);
             }
