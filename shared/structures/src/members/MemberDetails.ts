@@ -491,30 +491,29 @@ export class MemberDetails extends AutoEncoder {
                 if (group.settings.minAge && age < group.settings.minAge) {
                     return {
                         message: $t(`02313223-edde-443f-8620-8951e696e77e`),
-                        description: this.firstName + ' ' + $t(`9ee1ffee-ea40-44ec-b237-947efafb4573`) + ' ' + (group.settings.getAgeGenderDescription({ includeAge: true }) ?? ''),
+                        description: $t(`{firstName} is te jong. Inschrijvingen is beperkt tot leden {born-in-after-1995}`, {
+                            'firstName': this.firstName,
+                            'born-in-after-1995': group.settings.getAgeGenderDescription({ includeAge: true }) ?? '',
+                        }),
                     };
                 }
 
                 if (group.settings.maxAge && age > group.settings.maxAge) {
                     return {
                         message: $t(`af16be1f-5031-4d6d-82f6-85f63fa17500`),
-                        description: this.firstName + ' ' + $t(`9ee1ffee-ea40-44ec-b237-947efafb4573`) + ' ' + (group.settings.getAgeGenderDescription({ includeAge: true }) ?? ''),
+                        description: $t(`{firstName} is te jong. Inschrijvingen is beperkt tot leden {born-in-after-1995}`, {
+                            'firstName': this.firstName,
+                            'born-in-after-1995': group.settings.getAgeGenderDescription({ includeAge: true }) ?? '',
+                        }),
                     };
                 }
             }
         }
 
-        if (this.gender == Gender.Male && group.settings.genderType == GroupGenderType.OnlyFemale) {
+        if (this.gender === Gender.Male && group.settings.genderType == GroupGenderType.OnlyFemale) {
             return {
-                message: $t(`b34be63d-0883-42b5-9d06-b245f065c84d`) + ' ' + group.settings.getAgeGenderDescription({ includeGender: true }),
-                description: $t(`3577e123-cb6a-4d2b-8289-b7bbdb1ba57b`) + ' ' + group.settings.getAgeGenderDescription({ includeGender: true }),
-            };
-        }
-
-        if (this.gender == Gender.Female && group.settings.genderType == GroupGenderType.OnlyMale) {
-            return {
-                message: $t(`b34be63d-0883-42b5-9d06-b245f065c84d`) + ' ' + group.settings.getAgeGenderDescription({ includeGender: true }),
-                description: $t(`3577e123-cb6a-4d2b-8289-b7bbdb1ba57b`) + ' ' + group.settings.getAgeGenderDescription({ includeGender: true }),
+                message: $t(`Enkel {gender}`, { gender: group.settings.getAgeGenderDescription({ includeGender: true })! }),
+                description: $t(`Inschrijvingen is beperkt tot {gender}`, { gender: group.settings.getAgeGenderDescription({ includeGender: true })! }),
             };
         }
 
