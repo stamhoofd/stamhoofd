@@ -112,7 +112,7 @@ import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
 import { CenteredMessage } from '../../../overlays/CenteredMessage';
 import { NavigationActions, useNavigationActions } from '../../../types/NavigationActions';
 import { useIsAllOptional, useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks';
-import {I18nComponent} from '@stamhoofd/frontend-i18n';
+import { I18nComponent } from '@stamhoofd/frontend-i18n';
 
 const props = withDefaults(defineProps<{
     member?: PlatformMember | null;
@@ -269,7 +269,7 @@ async function save() {
                     if (member.patchedMember.details.nationalRegisterNumber === nationalRegisterNumber.value) {
                         se.addError(new SimpleError({
                             code: 'invalid_field',
-                            message: $t(`5ef454a0-9680-4615-bae6-85fa27771010`, {firstName: member.patchedMember.firstName}),
+                            message: $t(`5ef454a0-9680-4615-bae6-85fa27771010`, { firstName: member.patchedMember.firstName }),
                             field: 'nationalRegisterNumber',
                         }));
                     }
@@ -280,7 +280,7 @@ async function save() {
             if (parent) {
                 se.addError(new SimpleError({
                     code: 'invalid_field',
-                    message: $t(`dc69fb48-68a9-480b-a30d-553f8cc2e76f`, {name: parent.name}),
+                    message: $t(`dc69fb48-68a9-480b-a30d-553f8cc2e76f`, { name: parent.name }),
                     field: 'nationalRegisterNumber',
                 }));
             }
@@ -312,10 +312,10 @@ async function save() {
             const minorMembers = family.members.filter(m => m.id !== props.member!.id && m.isPropertyEnabled('parents'));
 
             if (minorMembers.length > 0 && !await CenteredMessage.confirm(
-                $t(`27091cc2-c42d-457d-8250-05abc7d4937d`), 
-                $t(`290ab18c-dc62-4d85-a669-dd83c77758e7`), 
-                $t(`0e3277e8-932a-4555-9f0e-ba3340bf2465`, {memberNames: Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ')}), 
-                $t(`fe636d8c-6506-4c8b-bb79-9c20fb1bc54d`), 
+                $t(`27091cc2-c42d-457d-8250-05abc7d4937d`),
+                $t(`290ab18c-dc62-4d85-a669-dd83c77758e7`),
+                $t(`0e3277e8-932a-4555-9f0e-ba3340bf2465`, { memberNames: Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') }),
+                $t(`fe636d8c-6506-4c8b-bb79-9c20fb1bc54d`),
                 false)) {
                 props.member.addParent(patched.value);
             }
@@ -357,10 +357,10 @@ async function modifyAddress(from: Address, to: Address) {
     }
 
     if (!await CenteredMessage.confirm(
-        $t(`14a6da51-a82f-43b5-9e6a-2d679985d41a`), 
-        $t(`4d5e0d3f-688a-4c8b-bad7-818d976166bf`), 
-        $t(`a87d3f1e-7e08-4415-b1a9-8fd49aafcb12`, {from: from.shortString(), to: to.shortString(), names: Formatter.joinLast(occurrences, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') }),
-        $t(`fe636d8c-6506-4c8b-bb79-9c20fb1bc54d`), 
+        $t(`14a6da51-a82f-43b5-9e6a-2d679985d41a`),
+        $t(`4d5e0d3f-688a-4c8b-bad7-818d976166bf`),
+        $t(`a87d3f1e-7e08-4415-b1a9-8fd49aafcb12`, { from: from.shortString(), to: to.shortString(), names: Formatter.joinLast(occurrences, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') }),
+        $t(`fe636d8c-6506-4c8b-bb79-9c20fb1bc54d`),
         false)
     ) {
         return;
