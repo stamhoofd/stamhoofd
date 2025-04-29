@@ -177,7 +177,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: $t(`f647cb33-7553-4c7b-9ae7-e059a838c63a`) + ' ' + Formatter.date(periodConfig.startDate) + ' ' + $t(`f8a6b25b-d877-4f7a-8bc8-f95d1524e822`),
+                    message: $t(`De startdatum kan niet voor {date} liggen`, {date: Formatter.date(periodConfig.startDate)}),
                 }));
             }
 
@@ -185,7 +185,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: $t(`7e98165e-9c5e-4aa6-a151-931755e7619e`) + ' ' + Formatter.date(periodConfig.endDate) + ' ' + $t(`f8a6b25b-d877-4f7a-8bc8-f95d1524e822`),
+                    message: $t(`De startdatum kan niet na {date} liggen`, {date:  Formatter.date(periodConfig.endDate)}),
                 }));
             }
 
@@ -193,7 +193,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'endDate',
-                    message: $t(`f330e984-a49b-41e3-90fc-4bfffb144724`) + ' ' + Formatter.date(periodConfig.endDate) + ' ' + $t(`f8a6b25b-d877-4f7a-8bc8-f95d1524e822`),
+                    message: $t(`De einddatum kan niet na {date} liggen`, {date: Formatter.date(periodConfig.endDate)}),
                 }));
             }
         }
@@ -203,7 +203,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: $t(`f647cb33-7553-4c7b-9ae7-e059a838c63a`) + ' ' + Formatter.date(periodConfig.startDate) + ' ' + $t(`f8a6b25b-d877-4f7a-8bc8-f95d1524e822`),
+                    message: $t(`De startdatum kan niet voor {date} liggen`, {date: Formatter.date(periodConfig.startDate)}),
                 }));
             }
 
@@ -211,7 +211,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: $t(`7e98165e-9c5e-4aa6-a151-931755e7619e`) + ' ' + Formatter.date(periodConfig.endDate) + ' ' + $t(`f8a6b25b-d877-4f7a-8bc8-f95d1524e822`),
+                    message: $t(`De startdatum kan niet na {date} liggen`, {date:  Formatter.date(periodConfig.endDate)}),
                 }));
             }
         }
