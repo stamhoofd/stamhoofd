@@ -67,10 +67,6 @@
     "original": "*Je kan een openstaand bedrag uitstellen - bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in ‘Mijn account’ vanaf één week voor deze datum (samen met een eventuele automatische e-mail) en moet betaald zijn tegen de ingevulde datum. Het is mogelijk om het al vroeger te betalen, maar zeker niet verplicht.",
     "translation": "*You can postpone an outstanding amount - e.g. for staggered payments or a trial period. It only appears as a quick action in 'My account' from one week before this date (together with any automatic email) and must be paid by the entered date. It is possible to pay it earlier, but certainly not obligatory."
   },
-  "16ba3d97-5943-451d-92b5-0bf21555f7ae": {
-    "original": "KSA Demo",
-    "translation": "KSA Demo"
-  },
   "1985f023-e846-4ea2-9526-b24358c7a294": {
     "original": "Maak een kopie van de instellingen van jouw groep.",
     "translation": "Make a copy of your group's settings."
@@ -635,10 +631,6 @@
     "original": "Zoek jouw groep",
     "translation": "Find your group"
   },
-  "aeace79f-c772-4944-8d1d-f92eb519267f": {
-    "original": "KSA Demo",
-    "translation": "KSA Demo"
-  },
   "b091538b-014e-4db2-8241-9ed98e0c51c7": {
     "original": "Breng een kost in rekening per betaling (dus slechts één keer, ook als er meerdere zaken worden afgerekend in één betaling). Wettelijk gezien is het niet toegestaan dat je deze laat afhangen van de gekozen betaalmethode (dat is dus niet mogelijk).",
     "translation": "Charge a cost per payment (so only once, even if multiple items are charged in one payment). Legally, you are not allowed to make this dependent on the chosen payment method (so that is not possible)."
@@ -858,10 +850,6 @@
   "e5f00b6a-9424-46b7-ada2-9474160189c4": {
     "original": "groep",
     "translation": "group"
-  },
-  "e60df757-6546-41c2-b3d3-599df08f34b6": {
-    "original": "KSA Demo",
-    "translation": "KSA Demo"
   },
   "e6405d38-2bd8-4e24-8e35-24f4daea2a37": {
     "original": "Gegevens van groepen",
