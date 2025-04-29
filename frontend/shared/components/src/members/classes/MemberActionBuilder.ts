@@ -613,7 +613,9 @@ export class MemberActionBuilder {
                         await this.platformFamilyManager.isolatedPatch(members, patch);
                         GlobalEventBus.sendEvent('members-deleted', members).catch(console.error);
 
-                        Toast.success(Formatter.capitalizeFirstLetter(Formatter.pluralText(members.length, $t(`5173cc6a-ed5a-4c13-9b17-e2499ebffbd5`), $t(`39c566d6-520d-4048-bb1a-53eeea3ccea7`))) + ' ' + $t(`0fe765e4-3ec6-43aa-8cae-ef6d89939c85`)).show();
+                        Toast.success(
+                            members.length ? $t('Eén lid is verwijderd') : $t('{count} leden zijn verwijderd', { count: members.length }),
+                        ).show();
                         return true;
                     },
                 }),
