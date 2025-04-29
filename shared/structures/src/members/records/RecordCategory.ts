@@ -93,9 +93,9 @@ export class RecordCategory extends AutoEncoder {
         errors.throwIfNotEmpty();
     }
 
-    isComplete<T extends ObjectWithRecords>(value: T, outdatedTime: number | null = null) {
+    isComplete<T extends ObjectWithRecords>(value: T, outdatedTime: number | null = null, options?: RecordFilterOptions) {
         // check if everything has been answered already + check out of date
-        const records = this.getAllFilteredRecords(value);
+        const records = this.getAllFilteredRecords(value, options);
 
         // Check all the properties in this category and check their last review times
         for (const record of records) {
