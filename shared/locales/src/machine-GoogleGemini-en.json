@@ -18887,6 +18887,10 @@
     "original": "Functies",
     "translation": "Roles"
   },
+  "fc00001e-5d05-485c-b931-1122504e5d36": {
+    "original": "{firstName} is reeds ingeschreven bij {groups}.",
+    "translation": "{firstName} is already registered with {groups}."
+  },
   "fc00d7a3-4ff4-4355-aef0-c73af12218f1": {
     "original": "Politiek",
     "translation": "Politics"
