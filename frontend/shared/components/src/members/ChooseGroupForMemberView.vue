@@ -48,8 +48,6 @@ import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigat
 import { NavigationActions, ScrollableSegmentedControl, Toast, useAppContext, useNavigationActions, useOrganization, useUninheritedPermissions } from '@stamhoofd/components';
 import { Group, GroupCategoryTree, GroupType, Organization, PlatformMember } from '@stamhoofd/structures';
 import { computed, onMounted, Ref, ref, watch } from 'vue';
-
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Formatter } from '@stamhoofd/utility';
 import RegisterMemberGroupRow from './components/group/RegisterMemberGroupRow.vue';
 import SearchOrganizationView from './SearchOrganizationView.vue';
@@ -120,7 +118,7 @@ const alreadyRegisteredMessage = computed(() => {
     if (groups.length > 0) {
         const firstName = props.member.patchedMember.firstName;
         const groupsString = Formatter.joinLast(groups.map(g => g.settings.name.toString()), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ');
-        return $t(`fc00001e-5d05-485c-b931-1122504e5d36`, {firstName, groups: groupsString});
+        return $t(`fc00001e-5d05-485c-b931-1122504e5d36`, { firstName, groups: groupsString });
     }
 
     return null;
