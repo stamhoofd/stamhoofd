@@ -1,10 +1,10 @@
 <template>
-    <SaveView :title="isNew ? $t(`f4d789d3-51e6-40ca-9c10-b81ffff6e32f`) : $t('Keuze bewerken')" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`f4d789d3-51e6-40ca-9c10-b81ffff6e32f`) : $t('573d5fcf-0f9b-4843-9e18-a75adbfea2c8')" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
             {{ $t('f6afa644-22ef-4996-96d5-1f483cdc3255') }}
         </h1>
         <h1 v-else>
-            {{ $t('Keuze bewerken') }}
+            {{ $t('573d5fcf-0f9b-4843-9e18-a75adbfea2c8') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />

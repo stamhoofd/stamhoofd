@@ -27,11 +27,11 @@ async function showMenu(event: MouseEvent) {
         [
             new ContextMenuItem({
                 name: $t('cf9f3bc1-51d7-438b-832c-8757ee79e0d4'),
-                description: !editorLanguage.value ? $t('Alle talen') : LanguageHelper.getName(editorLanguage.value),
+                description: !editorLanguage.value ? $t('c9a10eba-c0b7-492e-b6fa-07ec6ac074f7') : LanguageHelper.getName(editorLanguage.value),
                 childMenu: new ContextMenu([
                     [
                         new ContextMenuItem({
-                            name: $t('Alle talen'),
+                            name: $t('c9a10eba-c0b7-492e-b6fa-07ec6ac074f7'),
                             selected: editorLanguage.value === null,
                             action: () => {
                                 editorLanguage.value = null;

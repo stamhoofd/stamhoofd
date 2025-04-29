@@ -187,7 +187,7 @@ const save = async () => {
                 decoder: UserWithMembers as Decoder<UserWithMembers>,
             });
             user = response.data;
-            new Toast($t(`{firstName} is toegevoegd als beheerder en heeft een uitnodiging via email ontvangen.`, { firstName: user.firstName || user.email }), 'success').setHide(5000).show();
+            new Toast($t(`e54a2770-82f9-4dea-b1fc-5f1b52f3e9ab`, { firstName: user.firstName || user.email }), 'success').setHide(5000).show();
         }
         else {
             const response = await $context.value.authenticatedServer.request({
@@ -197,7 +197,7 @@ const save = async () => {
                 decoder: UserWithMembers as Decoder<UserWithMembers>,
             });
             user = response.data;
-            new Toast($t(`De beheerder is aangepast`), 'success').setHide(2000).show();
+            new Toast($t(`7d09e05b-865e-42dd-8d32-d37fd0b29c40`), 'success').setHide(2000).show();
         }
 
         // Copy all data
@@ -253,7 +253,7 @@ const doDelete = async () => {
         await pop({ force: true });
 
         new Toast(
-            $t('Beheerder {firstName} werd verwijderd', { firstName: props.user.firstName ?? props.user.email }),
+            $t('18385fa4-410f-4adb-9b29-2ba7a3bfc8de', { firstName: props.user.firstName ?? props.user.email }),
             'success',
         ).setHide(2000).show();
     }

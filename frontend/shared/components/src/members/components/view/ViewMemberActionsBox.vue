@@ -89,7 +89,7 @@ async function deleteMember() {
                     GlobalEventBus.sendEvent('members-deleted', [member]).catch(console.error);
 
                     Toast.success(
-                        $t('{name} is verwijderd', {
+                        $t('67ce1c2e-a5ed-4f26-a369-41f4d8000590', {
                             name,
                         }),
                     ).show();

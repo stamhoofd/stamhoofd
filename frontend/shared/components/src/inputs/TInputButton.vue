@@ -31,7 +31,7 @@ async function showMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t('Geen vertaling'),
+                name: $t('04e77650-18ef-40a1-942f-bf755e1ca4dc'),
                 selected: value.value.isDefault,
                 action: () => {
                     value.value = value.value.patch(value.value.toString());

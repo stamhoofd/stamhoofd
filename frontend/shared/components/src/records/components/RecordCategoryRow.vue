@@ -15,11 +15,11 @@
         </p>
         <p v-else class="style-description-small">
             <template v-if="category.records.length">
-                {{ category.records.length }} {{ category.records.length === 1 ? $t("vraag") : $t("vragen") }}
+                {{ category.records.length }} {{ category.records.length === 1 ? $t("92aaacf4-9d90-4874-b80f-eb1f451d4a79") : $t("ca02d25d-e6cb-459a-96f5-1006c046b647") }}
             </template>
             <span v-if="category.childCategories.length && category.records.length" v-text="' ' + $t('6a156458-b396-4d0f-b562-adb3e38fc51b') + ' '" />
             <template v-if="category.childCategories.length">
-                {{ category.childCategories.length }} {{ category.childCategories.length === 1 ? $t("categorie") : $t("categorieën") }}
+                {{ category.childCategories.length }} {{ category.childCategories.length === 1 ? $t("e36359a5-8a89-4a6b-9d7f-ddda3bd448d8") : $t("85d7fbc5-c3e4-4e63-ae61-a5812e3af382") }}
             </template>
         </p>
 
