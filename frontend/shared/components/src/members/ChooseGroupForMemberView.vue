@@ -120,7 +120,7 @@ const alreadyRegisteredMessage = computed(() => {
     if (groups.length > 0) {
         const firstName = props.member.patchedMember.firstName;
         const groupsString = Formatter.joinLast(groups.map(g => g.settings.name.toString()), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ');
-        return `${firstName} is reeds ingeschreven bij ${groupsString}.`;
+        return $t(`{firstName} is reeds ingeschreven bij {groups}.`, {firstName, groups: groupsString});
     }
 
     return null;
