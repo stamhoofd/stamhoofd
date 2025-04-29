@@ -117,7 +117,7 @@ export function useContextOptions() {
         }
 
         for (const organizationId of organizationIds) {
-            const organization = $user.value!.members.organizations.find(o => o.id === organizationId) ?? ($organization.value?.id === organizationId ? $organization.value : null);
+            const organization = $user.value?.members.organizations.find(o => o.id === organizationId) ?? ($organization.value?.id === organizationId ? $organization.value : null);
             if (!organization || $user.value?.permissions?.forOrganization(organization, platform.value)?.isEmpty !== false) {
                 continue;
             }
