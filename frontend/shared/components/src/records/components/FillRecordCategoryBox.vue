@@ -11,7 +11,7 @@
                 {{ titleSuffix }}
             </span>
         </h1>
-        <h2 v-else class="style-with-button">
+        <h2 v-else-if="hasRoot" class="style-with-button">
             <div>
                 {{ category.name }}
                 <span v-if="titleSuffix" class="title-suffix">
@@ -30,8 +30,8 @@
         <slot />
 
         <RecordAnswerInput v-for="record of filteredWriteableRecords" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
-        <div v-for="childCategory of childCategories" :key="childCategory.id" class="container">
-            <hr><h2>{{ level === 1 ? childCategory.name : (category.name + ': ' + childCategory.name) }}</h2>
+        <div v-for="(childCategory, index) of childCategories" :key="childCategory.id" class="container">
+            <hr v-if="index > 0 || hasRoot"><h2>{{ level === 1 ? childCategory.name : (category.name + ': ' + childCategory.name) }}</h2>
             <p v-if="childCategory.description.length" class="style-description pre-wrap style-wysiwyg" v-html="linkText(childCategory.description.toString())" />
 
             <RecordAnswerInput v-for="record of childCategory.filterRecords(props.value, filterOptions)" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
@@ -112,6 +112,10 @@ useValidation(props.validator, () => {
 const emit = defineEmits<{
     patch: [patch: PatchAnswers];
 }>();
+
+const hasRoot = computed(() => {
+    return props.level === 1 || filteredWriteableRecords.value.length > 0 || props.category.description.length > 0;
+});
 
 const addPatch = (patch: PatchAnswers) => {
     emit('patch', patch);
