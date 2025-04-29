@@ -203,7 +203,7 @@
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, useDismiss, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ChangePasswordView, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, Toast, useContext, useErrors, useLoginMethod, useLoginMethodEnabled, usePatch, usePlatform, useUser, useValidation } from '@stamhoofd/components';
-import { I18nController, useTranslate } from '@stamhoofd/frontend-i18n';
+import { I18nController } from '@stamhoofd/frontend-i18n';
 import { LoginHelper } from '@stamhoofd/networking';
 import { LanguageHelper, LoginMethod, LoginProviderType, NewUser, UserMeta } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
@@ -325,7 +325,7 @@ async function deleteRequest() {
         components: [
             new ComponentWithProperties(DeleteView, {
                 title: $t(`de26c235-6736-40b9-880a-82046fc2da66`),
-                description: `Ben je 100% zeker dat je jouw account wilt verwijderen? Vul dan je huidige e-mailadres in ter bevestiging. Al jouw gegevens gaan verloren. Je kan dit niet ongedaan maken.`,
+                description: $t(`4bbc8b26-74b8-43e2-95e7-86fa00ca517b`),
                 confirmationTitle: $t(`6d4c71ba-0757-4792-aab1-a0b7b80e7c30`),
                 confirmationPlaceholder: $t(`6a5dd477-ac82-48a1-9b7a-341192783e22`),
                 confirmationCode,

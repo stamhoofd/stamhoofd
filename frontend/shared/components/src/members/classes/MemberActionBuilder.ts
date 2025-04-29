@@ -4,7 +4,6 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, PermissionLevel, Platform, PlatformMember, RegistrationWithMember, mergeFilters } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 import { markRaw } from 'vue';
 import { EditMemberAllBox, MemberSegmentedView, MemberStepView, checkoutDefaultItem, chooseOrganizationMembersForGroup } from '..';
 import { GlobalEventBus } from '../../EventBus';
@@ -598,8 +597,8 @@ export class MemberActionBuilder {
         await this.present({
             components: [
                 new ComponentWithProperties(DeleteView, {
-                    title: `${name} definitief verwijderen?`,
-                    description: `Ben je 100% zeker dat je ${name} wilt verwijderen? Vul dan de volledige naam van het lid in ter bevestiging. De volledige geschiedenis gaat verloren. Probeer dit absoluut te vermijden en enkel voor uitzonderingen te gebruiken.`,
+                    title: $t('802581b7-38dd-45c3-815d-b786b6f9136c', { name }),
+                    description: $t(`dfbecccd-b964-4e8b-83e4-553b49d9fcc0`, { name }),
                     confirmationTitle: $t(`c15132d6-f507-46eb-8584-e36e7ce343c5`),
                     confirmationPlaceholder: $t(`e4b3d2af-dee8-4f55-88e9-a229513d347c`),
                     confirmationCode: name,
