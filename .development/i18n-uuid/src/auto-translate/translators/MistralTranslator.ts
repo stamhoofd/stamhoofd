@@ -10,7 +10,7 @@ abstract class MistralTranslator extends Translator {
     protected readonly maxBatchLength = 15000;
 
     // Mistral current Requests per second: 1 rps -> 1200ms (with extrta margin)
-    protected readonly queue = this.options.fake ? new PromiseQueue<Batch>(100, 0) : new PromiseQueue<Batch>(20, 1200);
+    protected readonly queue = this.options.fake ? new PromiseQueue<Batch<any>>(100, 0) : new PromiseQueue<Batch<any>>(20, 1200);
     private readonly client: Mistral;
     protected abstract readonly model: string;
 

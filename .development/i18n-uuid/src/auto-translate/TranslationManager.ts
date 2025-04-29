@@ -107,6 +107,22 @@ export class TranslationManager {
         );
     }
 
+    readSourceBaseReplacements(namespace: string): Record<string, string> {
+        return (
+            this.readReplacementsAllowNull(
+                this.getSourcePath('base', namespace),
+            ) ?? {}
+        );
+    }
+
+    readSourceReplacements(locale: string, namespace: string): Record<string, string> {
+        return (
+            this.readReplacementsAllowNull(
+                this.getSourcePath(locale, namespace),
+            ) ?? {}
+        );
+    }
+
     setSourceTranslation({key, value, locale, namespace}: {key: string, value: string, locale: string, namespace: string}) {
         const path = this.getSourcePath(locale, namespace);
         const source = this.readCompleteSource(path) ?? {};
@@ -362,6 +378,23 @@ export class TranslationManager {
         return JSON.parse(
             fs.readFileSync(filePath, "utf8"),
         );
+    }
+
+    private readReplacementsAllowNull(filePath: string): Record<string, string> | null {
+        const parsedTranslations = this.readCompleteSource(filePath);
+        if(parsedTranslations === null) {
+            return null;
+        }
+
+        const replacements = parsedTranslations.replacements ?? {};
+
+        for (const [key, value] of Object.entries(replacements)) {
+            if (typeof value !== "string") {
+                delete replacements[key];
+            }
+        }
+
+        return replacements;
     }
 
     private readTranslationsAllowNull(filePath: string): Translations | null {
