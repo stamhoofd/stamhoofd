@@ -88,7 +88,7 @@ export function useGlobalRoutes() {
             const token = queryString.get('token');
             const organizationId = parts[1] ? parts[1] : null;
 
-            if ((organizationId && context.value.organization?.id == organizationId)) {
+            if (STAMHOOFD.userMode !== 'platform' && (organizationId && context.value.organization?.id !== organizationId)) {
                 console.log('Ignored reset password route because organization is not the same');
                 return;
             }
