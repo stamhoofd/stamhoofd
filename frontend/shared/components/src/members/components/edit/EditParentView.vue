@@ -301,7 +301,12 @@ async function save() {
         if (props.member && props.isNew) {
             const minorMembers = family.members.filter(m => m.id !== props.member!.id && m.isPropertyEnabled('parents'));
 
-            if (minorMembers.length > 0 && !await CenteredMessage.confirm($t(`27091cc2-c42d-457d-8250-05abc7d4937d`), $t(`290ab18c-dc62-4d85-a669-dd83c77758e7`), $t(`81d1f71d-0656-4086-bfd1-de54cd540678`) + ' ' + Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') + '.', $t(`fe636d8c-6506-4c8b-bb79-9c20fb1bc54d`), false)) {
+            if (minorMembers.length > 0 && !await CenteredMessage.confirm(
+                $t(`27091cc2-c42d-457d-8250-05abc7d4937d`), 
+                $t(`290ab18c-dc62-4d85-a669-dd83c77758e7`), 
+                $t(`Je kan deze ouder ook automatisch toevoegen bij {memberNames}.`, {memberNames: Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ')}), 
+                $t(`fe636d8c-6506-4c8b-bb79-9c20fb1bc54d`), 
+                false)) {
                 props.member.addParent(patched.value);
             }
             else {
