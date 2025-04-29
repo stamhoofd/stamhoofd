@@ -40,18 +40,18 @@
                 </EmailInput>
 
                 <p v-if="email && member && app !== 'registration'" class="style-description-small">
-                    {{ $t('189115ef-fb2c-4b15-a2d9-514aaf8a08ae') }} <template v-if="alternativeEmails.length">
-                        {{ $t('4471042e-ccb1-4059-b39c-7302444c3690') }}
+                    <template v-if="alternativeEmails.length">
+                        {{ $t('Deze ouder kan inloggen of registreren op één van de ingevoerde e-mailadressen en krijgt dan automatisch toegang tot de gegevens van {firstName} en het ledenportaal.', {firstName: member.patchedMember.firstName}) }}
                     </template><template v-else>
-                        {{ $t('f90bed26-2790-49b7-9e77-e02518022ee5') }}
-                    </template> {{ $t('281341bb-32fb-4683-8c22-20264fbde679', {member: member.patchedMember.firstName}) }}
+                        {{ $t('Deze ouder kan inloggen of registreren op het ingevoerde e-mailadres en krijgt dan automatisch toegang tot de gegevens van {firstName} en het ledenportaal.', {firstName: member.patchedMember.firstName}) }}
+                    </template>
                 </p>
                 <p v-else-if="firstName && email && member" class="style-description-small">
-                    {{ firstName }} {{ $t('a188581c-4112-42e4-982a-6c57d4af5c74') }} <template v-if="alternativeEmails.length">
-                        {{ $t('4471042e-ccb1-4059-b39c-7302444c3690') }}
+                    <template v-if="alternativeEmails.length">
+                        {{ $t('{firstName} kan inloggen of registreren op één van de ingevoerde e-mailadressen en krijgt dan automatisch toegang tot de gegevens van {firstName} en het ledenportaal.', {firstName: member.patchedMember.firstName}) }}
                     </template><template v-else>
-                        {{ $t('f90bed26-2790-49b7-9e77-e02518022ee5') }}
-                    </template> {{ $t('281341bb-32fb-4683-8c22-20264fbde679', {member: member.patchedMember.firstName}) }}
+                        {{ $t('{firstName} kan inloggen of registreren op het ingevoerde e-mailadres en krijgt dan automatisch toegang tot de gegevens van {firstName} en het ledenportaal.', {firstName: member.patchedMember.firstName}) }}
+                    </template>
                 </p>
 
                 <p v-if="alternativeEmails.length && member" class="style-description-small">
@@ -59,7 +59,7 @@
                         {{ $t('eca0a260-096c-413a-9fa0-0c91acd9c780') }}
                     </template>
                     <template v-else>
-                        {{ firstName }} {{ $t('16f55ca0-6a64-44e0-bcd5-bf5e9df61473') }}
+                        {{ $t('{firstName} ontvangt enkel communicatie op het eerste e-mailadres.', {firstName}) }}
                     </template>
                 </p>
 
@@ -68,14 +68,23 @@
                     <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
                         {{ $t('cb5c9f59-30ae-470a-ab94-ed33b111850c') }} <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
                             {{ $t('c78ae112-296b-4b37-899b-8e3f56729079') }}
-                        </template> {{ $t('b059530c-5267-49a7-b2ee-c7ae33f0c573', {name: firstName || 'deze ouder'}) }} <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
-                            {{ $t('db9b9618-9f98-4b43-9619-4db64c0d7e68') }}
-                        </button>.
+                        </template>
+                        <I18nComponent :t="$t('Als {name} geen Belgische nationaliteit heeft, <button>klik dan hier</button>', {name: firstName || $t('deze ouder')})">
+                            <template #button="{content}">
+                                <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
+                                    {{ content }}
+                                </button>
+                            </template>
+                        </I18nComponent>
                     </p>
                     <p v-else class="style-description-small">
-                        {{ $t('c6b0d0d0-ec52-4716-92b1-db4473b4d6e9') }} <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
-                            {{ $t('db9b9618-9f98-4b43-9619-4db64c0d7e68') }}
-                        </button>.
+                        <I18nComponent :t="$t('Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit, <button>klik dan hier</button>')">
+                            <template #button="{content}">
+                                <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
+                                    {{ content }}
+                                </button>
+                            </template>
+                        </I18nComponent>
                     </p>
                 </template>
             </div>
@@ -103,6 +112,7 @@ import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
 import { CenteredMessage } from '../../../overlays/CenteredMessage';
 import { NavigationActions, useNavigationActions } from '../../../types/NavigationActions';
 import { useIsAllOptional, useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks';
+import {I18nComponent} from '@stamhoofd/frontend-i18n';
 
 const props = withDefaults(defineProps<{
     member?: PlatformMember | null;

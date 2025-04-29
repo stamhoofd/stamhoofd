@@ -76,14 +76,22 @@
                         </template>
                     </NRNInput>
                     <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
-                        {{ $t('77f48757-5c36-47a6-8ce2-d676eef1e778', {member: firstName || $t('dit lid')}) }} <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
-                            {{ $t('db9b9618-9f98-4b43-9619-4db64c0d7e68') }}
-                        </button>.
+                        <I18nComponent :t="$t('Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. Als {firstName} geen Belgische nationaliteit heeft, <button>klik dan hier</button>', {firstName: firstName || $t('dit lid')})">
+                            <template #button="{content}">
+                                <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
+                                    {{ content }}
+                                </button>
+                            </template>
+                        </I18nComponent>
                     </p>
                     <p v-else class="style-description-small">
-                        {{ $t('c6b0d0d0-ec52-4716-92b1-db4473b4d6e9') }} <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
-                            {{ $t('db9b9618-9f98-4b43-9619-4db64c0d7e68') }}
-                        </button>.
+                        <I18nComponent :t="$t('Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit, <button>klik dan hier</button>')">
+                            <template #button="{content}">
+                                <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
+                                    {{ content }}
+                                </button>
+                            </template>
+                        </I18nComponent>
                     </p>
                 </div>
             </div>
@@ -120,6 +128,7 @@ import TrackingYearInput from '../../../inputs/TrackingYearInput.vue';
 import { ContextMenu, ContextMenuItem } from '../../../overlays/ContextMenu';
 import { useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import Title from './Title.vue';
+import {I18nComponent} from '@stamhoofd/frontend-i18n';
 
 defineOptions({
     inheritAttrs: false,
