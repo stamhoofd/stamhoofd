@@ -123,6 +123,7 @@ export function buildConfig(options: { port: number; clientFiles?: string[] }): 
                 },
         publicDir: resolve(__dirname, './public'),
         test: {
+            globals: true,
             setupFiles: ['vitest-browser-vue', __dirname + '/tests/vitest.setup.ts'],
             browser: {
                 provider: 'playwright', // or 'webdriverio'
