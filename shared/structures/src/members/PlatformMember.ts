@@ -1110,7 +1110,7 @@ export class PlatformMember implements ObjectWithRecords {
                         if (isUserManager) {
                             hasUserManagerPermissions = recordCategory.checkPermissionForUserManager(checkPermissions.level);
                         }
-                        if (checkPermissions.user.permissions) {
+                        if (!hasUserManagerPermissions && checkPermissions.user.permissions) {
                             // Check permissions
                             // we need at least permission in one organization
                             for (const organization of scopedOrganizations) {
