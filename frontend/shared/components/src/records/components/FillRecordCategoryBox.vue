@@ -23,7 +23,7 @@
             </div>
         </h2>
 
-        <p v-if="category.description" class="style-description-block pre-wrap" v-text="category.description" />
+        <p v-if="category.description" class="style-description-block pre-wrap style-wysiwyg" v-html="linkText(category.description.toString())" />
 
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -32,7 +32,7 @@
         <RecordAnswerInput v-for="record of filteredWriteableRecords" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
         <div v-for="childCategory of childCategories" :key="childCategory.id" class="container">
             <hr><h2>{{ level === 1 ? childCategory.name : (category.name + ': ' + childCategory.name) }}</h2>
-            <p v-if="childCategory.description" class="style-description pre-wrap" v-text="childCategory.description" />
+            <p v-if="childCategory.description" class="style-description pre-wrap style-wysiwyg" v-html="linkText(childCategory.description.toString())" />
 
             <RecordAnswerInput v-for="record of childCategory.filterRecords(props.value, filterOptions)" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
         </div>
@@ -63,6 +63,7 @@ import { useErrors } from '../../errors/useErrors';
 import { useValidation } from '../../errors/useValidation';
 import RecordAnswerInput from '../../inputs/RecordAnswerInput.vue';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
+import { useLinkableText } from '../../inputs/hooks/useLinkableText';
 
 const props = withDefaults(
     defineProps<{
@@ -85,6 +86,7 @@ const props = withDefaults(
         parentErrorBox: null,
     },
 );
+const linkText = useLinkableText();
 const errors = useErrors({ validator: props.validator });
 const app = useAppContext();
 const isAdmin = app === 'dashboard' || app === 'admin';
