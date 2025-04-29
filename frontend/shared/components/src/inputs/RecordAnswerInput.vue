@@ -4,9 +4,7 @@
             <h3 class="style-title-list">
                 {{ label }}
             </h3>
-            <p v-if="answer.settings.description" class="style-description-small">
-                {{ answer.settings.description }}
-            </p>
+            <p v-if="answer.settings.description" class="style-description-small pre-wrap" v-text="answer.settings.description" />
         </Checkbox>
         <STInputBox v-else-if="answer.settings.type === RecordType.MultipleChoice" class="max" :title="label" error-fields="input" :error-box="errors.errorBox">
             <STList>
@@ -17,9 +15,7 @@
                     <h3 class="style-title-list">
                         {{ choice.name }}
                     </h3>
-                    <p v-if="choice.description" class="style-description-small">
-                        {{ choice.description }}
-                    </p>
+                    <p v-if="choice.description" class="style-description-small pre-wrap" v-text="choice.description" />
                 </STListItem>
             </STList>
         </STInputBox>
@@ -32,9 +28,7 @@
                     <h3 class="style-title-list">
                         {{ choice.name }}
                     </h3>
-                    <p v-if="choice.description" class="style-description-small">
-                        {{ choice.description }}
-                    </p>
+                    <p v-if="choice.description" class="style-description-small pre-wrap" v-text="choice.description" />
                 </STListItem>
             </STList>
         </STInputBox>
@@ -65,16 +59,12 @@
 
         <div v-if="answer.settings.type === RecordType.Checkbox && selected && answer.settings.askComments" class="textarea-container">
             <textarea v-model="comments" class="input small" :placeholder="inputPlaceholder.toString()" />
-            <p v-if="answer.settings.commentsDescription" class="info-box">
-                {{ answer.settings.commentsDescription }}
-            </p>
+            <p v-if="answer.settings.commentsDescription" class="info-box pre-wrap" v-text="answer.settings.commentsDescription" />
         </div>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <p v-if="answer.settings.type !== RecordType.Checkbox && answer.settings.description" class="style-description-small">
-            {{ answer.settings.description }}
-        </p>
+        <p v-if="answer.settings.type !== RecordType.Checkbox && answer.settings.description" class="style-description-small pre-wrap" v-text="answer.settings.description" />
     </div>
 </template>
 
