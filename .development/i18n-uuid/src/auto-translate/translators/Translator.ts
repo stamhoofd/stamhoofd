@@ -76,6 +76,7 @@ export abstract class Translator implements ITranslator {
         const prompt = `Translate the values of the JSON array from ${originalLocal} to ${targetLocal}.${consistentWordsText}
 - Do not translate words between curly brackets (even if it is a consistent word). For example {een-voorbeeld} must remain {een-voorbeeld}, {werkjaar} must remain {werkjaar} (only if between curly brackets, so do translate werkjaar).
 - If you don't have enough context to provide a correct translation, set the value to an empty string.
+- Be consistent and copy the caps and punctuation of the original language unless a capital letter is required in English (e.g. weekdays).
 - If you encounter a persons name (e.g. Klaas) or something similar try to also translate it to a common name in ${targetLocal}.
 
 Translate this array: 
@@ -85,6 +86,7 @@ ${JSON.stringify(batch, undefined, "  ")}
 Translate the above values of the JSON array from ${originalLocal} to ${targetLocal}. 
 - Do not translate words between curly brackets (even if it is a consistent word). For example {een-voorbeeld} must remain {een-voorbeeld}, {werkjaar} must remain {werkjaar} (only if between curly brackets, so do translate werkjaar).
 - If you don't have enough context to provide a correct translation, set the value to an empty string.
+- Be consistent and copy the caps and punctuation of the original language unless a capital letter is required in English (e.g. weekdays).
 - If you encounter a persons name (e.g. Klaas) or something similar try to also translate it to a common name in ${targetLocal}.${consistentWordsText}
 `;
 
@@ -113,6 +115,7 @@ Translate the above values of the JSON array from ${originalLocal} to ${targetLo
 
         const prompt = `Given is an array with an original text in ${originalLocal}, the translation of that text and a variant of the original translation. Translate the variants of the original texts in a consistent way so that the translation of the variant does not differ much of the translation of the original text.${consistentWordsText}
 - Do not translate words between curly brackets (even if it is a consistent word). For example {een-voorbeeld} must remain {een-voorbeeld}, {werkjaar} must remain {werkjaar} (only if between curly brackets, so do translate werkjaar).
+- Be consistent and copy the caps and punctuation of the original language unless a capital letter is required in English (e.g. weekdays).
 - If you don't have enough context to provide a correct translation, set the value to an empty string.
 
 Translate the variants in this array to ${targetLocal}: 
@@ -121,6 +124,7 @@ ${JSON.stringify(batch, undefined, "  ")}
 
 Above is an array with an original text in ${originalLocal}, the translation of that text and a variant of the original translation. Translate the variants of the original texts in a consistent way so that the translation of the variant does not differ much of the translation of the original text.${consistentWordsText}
 - Do not translate words between curly brackets (even if it is a consistent word). For example {een-voorbeeld} must remain {een-voorbeeld}, {werkjaar} must remain {werkjaar} (only if between curly brackets, so do translate werkjaar).
+- Be consistent and copy the caps and punctuation of the original language unless a capital letter is required in English (e.g. weekdays).
 - If you don't have enough context to provide a correct translation, set the value to an empty string.
 `;
 
