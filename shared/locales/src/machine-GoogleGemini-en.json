@@ -76,8 +76,8 @@
     "translation": "Warning for administrator"
   },
   "00cc0002-1674-47dd-ae92-7547a678bafc": {
-    "original": "Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit, <button>klik dan hier</button>",
-    "translation": "You will not receive tax certificates.  Do you have Belgian nationality? <button>click here</button>"
+    "original": "Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit? <button>Klik dan hier</button>",
+    "translation": "You will not receive any tax certificates. Still a Belgian national? <button>Click here</button>"
   },
   "00e66af4-75a2-4e00-8b2e-f51ff670b800": {
     "original": "Ik geef enkel toestemming voor groepsfoto's",
@@ -8063,6 +8063,10 @@
     "original": "Wijzig",
     "translation": "Change"
   },
+  "6c9d1930-5ea0-4136-a463-bba118c8dd6a": {
+    "original": "deze ouder",
+    "translation": "this parent"
+  },
   "6caf3dff-0895-476f-8bf5-fdce81f1fb56": {
     "original": "Voorgesteld bedrag",
     "translation": "Suggested amount"
@@ -11675,6 +11679,10 @@
     "original": "Stel in welke extra gegevens eenheden nog moeten indienen en tegen wanneer.",
     "translation": "Set which additional data units must still submit and by when."
   },
+  "9e5a8bc1-91db-44e5-9059-3312f4145525": {
+    "original": "dit lid",
+    "translation": "this member"
+  },
   "9e68d551-a532-4681-9040-95e4c0f673aa": {
     "original": "Logo groter weergeven (afgeraden)",
     "translation": "Display larger logo (not recommended)"
@@ -14654,10 +14662,6 @@
   "c6a1f96a-0e71-44c1-89a2-20bfd206d9c6": {
     "original": "Om {time}",
     "translation": "At {time}"
-  },
-  "c6b0d0d0-ec52-4716-92b1-db4473b4d6e9": {
-    "original": "Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit,",
-    "translation": "You will not receive tax certificates.  Belgian nationality nevertheless,"
   },
   "c6b66a83-8b28-46f8-bf0b-5052fbe57771": {
     "original": "Startdatum (inclusief)",

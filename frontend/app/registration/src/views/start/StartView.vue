@@ -273,7 +273,7 @@ async function onDownloadDocument(document: Document) {
     }
     if (document.status === DocumentStatus.MissingData) {
         const member = members.value.find(m => m.id === document.memberId);
-        new Toast($t(`78a4c6c3-c0d0-457c-adfb-44122307161a`, { name: member?.member.firstName ?? $t(`dit lid`) }), 'error red').setHide(20000).show();
+        new Toast($t(`78a4c6c3-c0d0-457c-adfb-44122307161a`, { name: member?.member.firstName ?? $t(`9e5a8bc1-91db-44e5-9059-3312f4145525`) }), 'error red').setHide(20000).show();
         return;
     }
     downloadingDocuments.value.push(document as any); // fix for Type instantiation is excessively deep and possibly infinite
