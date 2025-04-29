@@ -1,10 +1,11 @@
+<!-- eslint-disable vue/no-v-html -->
 <template>
     <div>
         <Checkbox v-if="answer.settings.type === RecordType.Checkbox" v-model="selected">
             <h3 class="style-title-list">
                 {{ label }}
             </h3>
-            <p v-if="answer.settings.description" class="style-description-small pre-wrap" v-text="answer.settings.description" />
+            <p v-if="answer.settings.description.length" class="style-description-small pre-wrap style-wysiwyg" v-html="linkText(answer.settings.description.toString())" />
         </Checkbox>
         <STInputBox v-else-if="answer.settings.type === RecordType.MultipleChoice" class="max" :title="label" error-fields="input" :error-box="errors.errorBox">
             <STList>
@@ -15,7 +16,7 @@
                     <h3 class="style-title-list">
                         {{ choice.name }}
                     </h3>
-                    <p v-if="choice.description" class="style-description-small pre-wrap" v-text="choice.description" />
+                    <p v-if="choice.description.length" class="style-description-small pre-wrap" v-text="choice.description" />
                 </STListItem>
             </STList>
         </STInputBox>
@@ -28,7 +29,7 @@
                     <h3 class="style-title-list">
                         {{ choice.name }}
                     </h3>
-                    <p v-if="choice.description" class="style-description-small pre-wrap" v-text="choice.description" />
+                    <p v-if="choice.description.length" class="style-description-small pre-wrap" v-text="choice.description" />
                 </STListItem>
             </STList>
         </STInputBox>
@@ -59,12 +60,14 @@
 
         <div v-if="answer.settings.type === RecordType.Checkbox && selected && answer.settings.askComments" class="textarea-container">
             <textarea v-model="comments" class="input small" :placeholder="inputPlaceholder.toString()" />
-            <p v-if="answer.settings.commentsDescription" class="info-box pre-wrap" v-text="answer.settings.commentsDescription" />
+            <p v-if="answer.settings.commentsDescription.length" class="info-box style-wysiwyg">
+                <span class="pre-wrap" v-html="linkText(answer.settings.commentsDescription.toString())" />
+            </p>
         </div>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <p v-if="answer.settings.type !== RecordType.Checkbox && answer.settings.description" class="style-description-small pre-wrap" v-text="answer.settings.description" />
+        <p v-if="answer.settings.type !== RecordType.Checkbox && answer.settings.description.length" class="style-description-small pre-wrap style-wysiwyg" v-html="linkText(answer.settings.description.toString())" />
     </div>
 </template>
 
@@ -91,6 +94,7 @@ import PhoneInput from './PhoneInput.vue';
 import PriceInput from './PriceInput.vue';
 import Radio from './Radio.vue';
 import STInputBox from './STInputBox.vue';
+import { useLinkableText } from './hooks/useLinkableText';
 
 const props = withDefaults(defineProps<{
     record: RecordSettings;
@@ -103,7 +107,7 @@ const props = withDefaults(defineProps<{
     markReviewed: false,
     allOptional: false,
 });
-
+const linkText = useLinkableText();
 const emit = defineEmits<{
     patch: [patch: PatchAnswers];
 }>();
