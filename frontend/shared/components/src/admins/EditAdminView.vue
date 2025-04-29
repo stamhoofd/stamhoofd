@@ -187,7 +187,7 @@ const save = async () => {
                 decoder: UserWithMembers as Decoder<UserWithMembers>,
             });
             user = response.data;
-            new Toast($t(`2289a0b3-d7e1-45a6-997b-b01a66182df6`) + ' ' + user.firstName + ' ' + $t(`53f702bf-2140-4ebf-8ebd-f6ec31185377`), 'success').setHide(5000).show();
+            new Toast($t(`{firstName} is toegevoegd als beheerder en heeft een uitnodiging via email ontvangen.`, { firstName: user.firstName || user.email }), 'success').setHide(5000).show();
         }
         else {
             const response = await $context.value.authenticatedServer.request({
@@ -197,7 +197,7 @@ const save = async () => {
                 decoder: UserWithMembers as Decoder<UserWithMembers>,
             });
             user = response.data;
-            new Toast($t(`2289a0b3-d7e1-45a6-997b-b01a66182df6`) + ' ' + user.firstName + ' ' + $t(`9e4f2ef0-aa2f-42d3-8079-13f2e071db91`), 'success').setHide(2000).show();
+            new Toast($t(`De beheerder is aangepast`), 'success').setHide(2000).show();
         }
 
         // Copy all data
