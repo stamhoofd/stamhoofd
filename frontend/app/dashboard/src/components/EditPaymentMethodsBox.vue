@@ -439,7 +439,7 @@ function getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined
         case PaymentMethod.DirectDebit:
         case PaymentMethod.Bancontact: {
             if (stripeAccountObject.value) {
-                return PaymentMethodHelper.getNameCapitalized(paymentMethod) + ' ' + $t(`79cb9c3d-fe24-46cb-84bd-f1aa5fd625c5`);
+                return $t(`{paymentMethod} is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de eenheid niet werd ingevuld.`, {paymentMethod: PaymentMethodHelper.getNameCapitalized(paymentMethod)});
             }
             break;
         }
