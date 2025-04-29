@@ -13,21 +13,20 @@
 
                 <STInputBox error-fields="title" :error-box="errors.errorBox" :title="$t(`7fe874c2-4d8c-45f8-8c84-c78422a55ab4`)+'*'">
                     <input v-model="contactTitle" list="emergency-contact-types" class="input" name="type" type="text" :placeholder="$t(`6f54efef-178e-4f56-9645-4cd4690cbe0f`)"><datalist id="emergency-contact-types">
-                        <option v-if="details && details.parents.length === 0" value="Vader" />
-                        <option v-if="details && details.parents.length === 0" value="Moeder" />
-                        <option v-if="details && details.parents.length === 0" value="Ouder" />
-                        <option v-if="details && details.defaultAge < 30" value="Oma" />
-                        <option v-if="details && details.defaultAge < 30" value="Opa" />
-                        <option v-if="details && details.defaultAge < 30" value="Tante" />
-                        <option v-if="details && details.defaultAge < 30" value="Oom" />
-                        <option value="Buurvrouw" />
-                        <option value="Buurman" />
-                        <option value="Vriend" />
-                        <option v-if="details && details.defaultAge < 30" value="Nonkel" />
-                        <option v-if="details && details.defaultAge < 30" value="Pepe" />
-                        <option v-if="details && details.defaultAge < 30" value="Meme" />
-                        <option v-if="details && details.defaultAge < 30" value="Grootvader" />
-                        <option v-if="details && details.defaultAge < 30" value="Grootmoeder" />
+                        <option v-if="details && details.parents.length === 0" :value="$t('Vader')" />
+                        <option v-if="details && details.parents.length === 0" :value="$t('Moeder')" />
+                        <option v-if="details && details.parents.length === 0" :value="$t('Ouder')" />
+                        <option v-if="details && details.defaultAge < 30" :value="$t('Oma')" />
+                        <option v-if="details && details.defaultAge < 30" :value="$t('Opa')" />
+                        <option v-if="details && details.defaultAge < 30" :value="$t('Tante')" />
+                        <option v-if="details && details.defaultAge < 30" :value="$t('Oom')" />
+                        <option :value="$t('Buurvrouw')" />
+                        <option :value="$t('Buurman')" />
+                        <option :value="$t('Vriend')" />
+                        <option v-if="details && details.defaultAge < 30" :value="$t('Nonkel')" />
+                        <option v-if="details && details.defaultAge < 30" :value="$t('Pepe')" />
+                        <option v-if="details && details.defaultAge < 30" :value="$t('Meme')" />
+                        <option v-if="details && details.defaultAge < 30" :value="$t('Grootvader')" />
                     </datalist>
                 </STInputBox>
                 <p class="style-description-small">
