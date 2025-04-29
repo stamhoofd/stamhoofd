@@ -88,7 +88,11 @@ async function deleteMember() {
                     await platformFamilyManager.isolatedPatch([member], patch);
                     GlobalEventBus.sendEvent('members-deleted', [member]).catch(console.error);
 
-                    Toast.success(name + ' ' + $t(`2437b288-7696-4af3-a688-895b6039eb37`)).show();
+                    Toast.success(
+                        $t('{name} is verwijderd', {
+                            name,
+                        }),
+                    ).show();
 
                     await dismiss({ force: true });
                     return true;
