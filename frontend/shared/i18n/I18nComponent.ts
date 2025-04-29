@@ -1,5 +1,5 @@
 // I18n.ts
-import { defineComponent, h, VNode } from 'vue';
+import { computed, defineComponent, h, VNode } from 'vue';
 
 type ParsedPart =
     | { type: 'text'; content: string }
@@ -36,22 +36,20 @@ export default defineComponent({
         },
     },
     setup(props, { slots }) {
-        const parts = parseTranslation(props.t);
+        const parsedParts = computed(() => parseTranslation(props.t));
 
-        const children: VNode[] = parts.map((part, index) => {
-            if (part.type === 'text') {
-                return h('span', { key: index }, part.content);
-            }
+        return () =>
+            h(
+                'span',
+                {},
+                parsedParts.value.map((part, index) => {
+                    if (part.type === 'text') {
+                        return h('span', { key: index }, part.content);
+                    }
 
-            const slotFn = slots[part.tag];
-            if (slotFn) {
-                return slotFn({ content: part.content })[0];
-            }
-            else {
-                return h('span', { key: index }, part.content);
-            }
-        });
-
-        return () => h('span', {}, children);
+                    const slotFn = slots[part.tag];
+                    return slotFn ? slotFn({ content: part.content })[0] : h('span', { key: index }, part.content);
+                }),
+            );
     },
 });
