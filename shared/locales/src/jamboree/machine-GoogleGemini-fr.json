@@ -271,10 +271,6 @@
     "original": "Hier kan je als beheerder leden inschrijven voor een activiteit. Het meest praktische is dat elk lid zichtzelf inschrijft via Jamboree, maar dat is misschien niet altijd mogelijk.",
     "translation": "Ici, en tant qu’administrateur, vous pouvez inscrire des membres à une activité. Le plus pratique est que chaque membre s’inscrive lui-même via Jamboree, mais ce n’est peut-être pas toujours possible."
   },
-  "405a811e-ebb1-4948-84cd-8fb5860104e6": {
-    "original": "Jamboree",
-    "translation": "Jamboree"
-  },
   "40670ad7-7db1-4ec9-84df-68b32642042e": {
     "original": "Je kan geen inschrijvingen wijzigen van {group} omdat dat scoutsjaar is afgesloten.",
     "translation": "Vous ne pouvez pas modifier les inscriptions de {group} car l'année scoute est clôturée."
@@ -510,10 +506,6 @@
   "6793e0dc-66f0-4a70-b8ac-fb41e2063871": {
     "original": "Naam van deze eenheid (kort)",
     "translation": "Nom de cette unité (court)"
-  },
-  "68914509-aa54-40c7-9f53-7b8a02149198": {
-    "original": "Jamboree",
-    "translation": "Jamboree"
   },
   "68c40b9e-30d7-4ce5-8069-f7ca93221906": {
     "original": "Adres van je eenheid",
