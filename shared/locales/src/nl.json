@@ -4970,5 +4970,6 @@
   "b2287bc2-db81-4eb8-8fa1-3b1b70860707": "{firstName} ontvangt enkel communicatie op het eerste e-mailadres.",
   "1394c960-ea6f-44e9-8278-2019623d15bc": "Als {name} geen Belgische nationaliteit heeft, <button>klik dan hier</button>",
   "6c9d1930-5ea0-4136-a463-bba118c8dd6a": "deze ouder",
-  "9e5a8bc1-91db-44e5-9059-3312f4145525": "dit lid"
+  "9e5a8bc1-91db-44e5-9059-3312f4145525": "dit lid",
+  "fc00001e-5d05-485c-b931-1122504e5d36": "{firstName} is reeds ingeschreven bij {groups}."
 }
