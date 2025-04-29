@@ -14,13 +14,13 @@
                     <span>{{ $t('d55c9b50-2f86-4e7a-b6a5-2f03c0fad4fa') }}</span>
                 </button>
 
-                <a :href="$domains.getDocs('mijn-account')" target="_blank" class="button text selected">
+                <a :href="documentationUrl.toString()" target="_blank" class="button text selected">
                     <span class="icon book" />
                     <span>{{ $t('b6994143-5a0c-424d-97b3-8b3cf96a3443') }}</span>
                 </a>
             </p>
             <p v-else class="style-button-bar">
-                <a :href="$domains.getDocs('mijn-account')" target="_blank" class="button text selected">
+                <a :href="documentationUrl.toString()" target="_blank" class="button text selected">
                     <span class="icon book" />
                     <span>{{ $t('b6994143-5a0c-424d-97b3-8b3cf96a3443') }}</span>
                 </a>
@@ -160,8 +160,9 @@
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { MemberIcon, QuickActionsBox, Toast, useAddMember, useChooseGroupForMember, useContext, useRegistrationQuickActions, useUser } from '@stamhoofd/components';
 import { downloadDocument } from '@stamhoofd/document-helper';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { useMemberManager, useRequestOwner } from '@stamhoofd/networking';
-import { Document, DocumentStatus, GroupType, PlatformMember } from '@stamhoofd/structures';
+import { Document, DocumentStatus, GroupType, PlatformMember, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
 
@@ -233,6 +234,7 @@ const members = computed(() => memberManager.family.members);
 const isAcceptingNewMembers = computed(() => memberManager.isAcceptingNewMembers);
 const chooseGroupForMember = useChooseGroupForMember();
 const addMember = useAddMember();
+const documentationUrl = TranslatedString.create(STAMHOOFD.memberDocumentationPage ?? LocalizedDomains.getDocs('mijn-account'));
 
 async function registerMembers() {
     await $navigate(Routes.RegisterMembers);
