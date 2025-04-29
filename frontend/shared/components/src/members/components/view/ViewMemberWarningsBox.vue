@@ -35,7 +35,7 @@ const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), fal
 
 // Possible the member didn't fill in the answers yet
 const autoCompletedAnswers = computed(() => {
-    const recordCategories = props.member.getEnabledRecordCategories({
+    const { categories: recordCategories } = props.member.getEnabledRecordCategories({
         checkPermissions: {
             user: auth.user!,
             level: PermissionLevel.Read,

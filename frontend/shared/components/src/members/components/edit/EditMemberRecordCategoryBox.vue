@@ -1,5 +1,5 @@
 <template>
-    <FillRecordCategoryBox :parent-error-box="parentErrorBox" :category="category" :value="member" :validator="validator" :level="level" :all-optional="allOptional" :title-suffix="titleSuffix" @patch="addPatch" />
+    <FillRecordCategoryBox :is-admin="isAdmin" :parent-error-box="parentErrorBox" :category="category" :value="member" :validator="validator" :level="level" :all-optional="allOptional" :title-suffix="titleSuffix" @patch="addPatch" />
 </template>
 
 <script setup lang="ts">
@@ -14,13 +14,18 @@ import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { useOrganization } from '../../../hooks';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     member: PlatformMember;
     validator: Validator;
     category: RecordCategory;
     parentErrorBox?: ErrorBox | null;
+    isAdmin?: boolean | null;
     level?: number;
-}>();
+}>(), {
+    level: 1,
+    parentErrorBox: null,
+    isAdmin: null,
+});
 
 defineOptions({
     inheritAttrs: false,

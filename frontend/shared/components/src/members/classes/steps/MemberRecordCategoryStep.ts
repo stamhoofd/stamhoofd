@@ -24,7 +24,7 @@ export class MemberRecordCategoryStep implements EditMemberStep {
 
     isEnabled(manager: MemberStepManager) {
         const member = manager.member;
-        const enabledCategories = member.getEnabledRecordCategories({
+        const { categories: enabledCategories } = member.getEnabledRecordCategories({
             scopeOrganization: this.item?.organization,
             scopeGroup: this.item?.group,
         });
@@ -42,7 +42,7 @@ export class MemberRecordCategoryStep implements EditMemberStep {
     getComponent(manager: MemberStepManager): ComponentWithProperties {
         // The record category filters can get adjusted due to inheritance. That is why we need to proplery load them
         const member = manager.member;
-        const enabledCategories = member.getEnabledRecordCategories({
+        const { categories: enabledCategories } = member.getEnabledRecordCategories({
             scopeOrganization: this.item?.organization,
             scopeGroup: this.item?.group,
         });

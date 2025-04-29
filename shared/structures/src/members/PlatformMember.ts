@@ -1080,15 +1080,17 @@ export class PlatformMember implements ObjectWithRecords {
         scopeOrganization?: Organization | null;
         scopeGroup?: Group | null;
         scopeGroups?: Group[] | null;
-    }): RecordCategory[] {
+    }): { categories: RecordCategory[]; adminPermissionsMap: Map<string, boolean> } {
+        const categories: RecordCategory[] = [];
+        const adminPermissionsMap = new Map<string, boolean>();
+
         const checkPermissions = options.checkPermissions;
         const isUserManager = options.checkPermissions?.user.members.members.some(m => m.id === this.id) ?? false;
         if (!isUserManager && (checkPermissions && !checkPermissions.user.permissions)) {
-            return [];
+            return { categories, adminPermissionsMap };
         }
 
         // From organization
-        const categories: RecordCategory[] = [];
         const scopedOrganizations = options.scopeOrganization ? [options.scopeOrganization] : this.filterOrganizations({ currentPeriod: true });
         const recordsConfigurations = this.filterRecordsConfigurations({
             currentPeriod: (options.scopeGroups || options.scopeGroup) ? undefined : true,
@@ -1130,6 +1132,10 @@ export class PlatformMember implements ObjectWithRecords {
                         if (!hasUserManagerPermissions && !hasAdminPermissions) {
                             continue;
                         }
+                        if (hasAdminPermissions) {
+                            // Cache the result
+                            adminPermissionsMap.set(recordCategory.id, true);
+                        }
                     }
 
                     categories.push(recordCategory);
@@ -1137,7 +1143,10 @@ export class PlatformMember implements ObjectWithRecords {
             }
         }
 
-        return categories;
+        return {
+            categories,
+            adminPermissionsMap,
+        };
     }
 
     isExistingMember(organizationId: string): boolean {

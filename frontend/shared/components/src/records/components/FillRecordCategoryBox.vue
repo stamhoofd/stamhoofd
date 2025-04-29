@@ -23,7 +23,7 @@
             </div>
         </h2>
 
-        <p v-if="category.description" class="style-description-block pre-wrap style-wysiwyg" v-html="linkText(category.description.toString())" />
+        <p v-if="category.description.length" class="style-description-block pre-wrap style-wysiwyg" v-html="linkText(category.description.toString())" />
 
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -78,18 +78,23 @@ const props = withDefaults(
         allOptional?: boolean;
         titleSuffix?: string;
         forceMarkReviewed?: boolean | null;
+        /**
+         * An admin can also edit read only fields
+         */
+        isAdmin?: boolean | null;
     }>(), {
         level: 1,
         allOptional: false,
         titleSuffix: '',
         forceMarkReviewed: null,
         parentErrorBox: null,
+        isAdmin: null,
     },
 );
 const linkText = useLinkableText();
 const errors = useErrors({ validator: props.validator });
 const app = useAppContext();
-const isAdmin = app === 'dashboard' || app === 'admin';
+const isAdmin = props.isAdmin ?? (app === 'dashboard' || app === 'admin');
 const markReviewed = props.forceMarkReviewed ?? (app !== 'dashboard' && app !== 'admin');
 const filterOptions = isAdmin
     ? undefined
