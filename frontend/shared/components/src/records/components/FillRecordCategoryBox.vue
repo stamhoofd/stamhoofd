@@ -32,7 +32,7 @@
         <RecordAnswerInput v-for="record of filteredWriteableRecords" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
         <div v-for="childCategory of childCategories" :key="childCategory.id" class="container">
             <hr><h2>{{ level === 1 ? childCategory.name : (category.name + ': ' + childCategory.name) }}</h2>
-            <p v-if="childCategory.description" class="style-description pre-wrap style-wysiwyg" v-html="linkText(childCategory.description.toString())" />
+            <p v-if="childCategory.description.length" class="style-description pre-wrap style-wysiwyg" v-html="linkText(childCategory.description.toString())" />
 
             <RecordAnswerInput v-for="record of childCategory.filterRecords(props.value, filterOptions)" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
         </div>
