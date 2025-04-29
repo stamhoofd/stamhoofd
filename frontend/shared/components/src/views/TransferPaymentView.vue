@@ -203,7 +203,7 @@ import { useCanDismiss, useDismiss, usePop } from '@simonbackx/vue-app-navigatio
 import { NavigationActions } from '@stamhoofd/components';
 import { Country, Organization, Payment, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
 
-import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { LocalizedDomains, useTranslate } from '@stamhoofd/frontend-i18n';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
@@ -336,7 +336,7 @@ const qrMessage = computed(() => {
     const bic = '_';
 
     // Note: structured reference still as normal description (the structured reference ISO is not supported)
-    return 'BCD\n001\n1\nSCT\n' + bic + '\n' + creditorValue + '\n' + ibanValue + '\nEUR' + (props.payment.price / 100).toFixed(2) + '\n\n\n' + transferDescription.value?.substring(0, 140) + '\nhttps://' + $t('ccfc0566-2fc4-4c0a-b1da-c3059cad6586') + '/docs/betalen-qr-code';
+    return 'BCD\n001\n1\nSCT\n' + bic + '\n' + creditorValue + '\n' + ibanValue + '\nEUR' + (props.payment.price / 100).toFixed(2) + '\n\n\n' + transferDescription.value?.substring(0, 140) + '\n' + LocalizedDomains.getDocs('betalen-qr-code');
 });
 
 async function generateQRCode() {
