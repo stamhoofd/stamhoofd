@@ -125,7 +125,7 @@
             </template>
 
             <div v-if="googleConfig && googleEnabled && usesGoogle && (passwordEnabled || ssoEnabled)" class="container">
-                <hr><h2>{{ googleConfig.fullName || 'Inloggen met Google' }}</h2>
+                <hr><h2>{{ googleConfig.fullName || $t('8e74fdc8-06e0-4686-8ca4-dca7e28aebe3') }}</h2>
                 <p>{{ $t('25f4a491-db39-43e0-9424-96217321efc7') }}</p>
 
                 <STList>

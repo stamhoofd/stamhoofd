@@ -313,7 +313,7 @@
                     </STListItem>
                 </STList>
 
-                <PriceBreakdownBox :price-breakdown="[{name: 'Totaal', price: payment.price}]" />
+                <PriceBreakdownBox :price-breakdown="[{name: $t('43cf58c2-2263-4c99-87d2-71d61e8b95fe'), price: payment.price}]" />
             </template>
         </main>
     </div>
