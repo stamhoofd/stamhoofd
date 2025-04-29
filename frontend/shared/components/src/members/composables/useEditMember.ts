@@ -1,8 +1,8 @@
-import { ComponentWithProperties, usePresent } from "@simonbackx/vue-app-navigation";
-import { PlatformMember } from "@stamhoofd/structures";
-import { markRaw } from "vue";
-import { EditMemberAllBox, MemberStepView } from "..";
-import { NavigationActions } from "../../types/NavigationActions";
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { PlatformMember } from '@stamhoofd/structures';
+import { markRaw } from 'vue';
+import { EditMemberAllBox, MemberStepView } from '..';
+import { NavigationActions } from '../../types/NavigationActions';
 
 export function useEditMember() {
     const present = usePresent();
@@ -11,13 +11,13 @@ export function useEditMember() {
         components: [
             new ComponentWithProperties(MemberStepView, {
                 member: member,
-                title: member.member.firstName + ' ' + $t(`ee3bc635-c294-4134-9155-7a74f47dec4f`),
+                title: $t(`{firstName} bewerken`, { firstName: member.member.firstName }),
                 component: markRaw(EditMemberAllBox),
-                saveHandler: async ({dismiss}: NavigationActions) => {
-                    await dismiss({force: true});
-                }
-            })
+                saveHandler: async ({ dismiss }: NavigationActions) => {
+                    await dismiss({ force: true });
+                },
+            }),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
