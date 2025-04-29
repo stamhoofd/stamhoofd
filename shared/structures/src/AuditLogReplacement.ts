@@ -151,6 +151,7 @@ export class AuditLogReplacement extends AutoEncoder {
         if (this.type === AuditLogReplacementType.Key || this.type === AuditLogReplacementType.EmailTemplate) {
             return getAuditLogPatchKeyName(this.value);
         }
+
         if (this.type === AuditLogReplacementType.Uuid || (this.id && !this.value && DataValidator.isUuid(this.id))) {
             if (this.id && !this.value) {
                 const name = AuditLogReplacementDependencies.uuidToName(this.id);

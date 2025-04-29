@@ -1,5 +1,5 @@
 import { ArrayDecoder, AutoEncoder, EnumDecoder, Field, getOptionalId, isPatchMap, SymbolDecoder } from '@simonbackx/simple-encoding';
-import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacement, AuditLogReplacementType, Version } from '@stamhoofd/structures';
+import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacement, AuditLogReplacementType, TranslatedString, Version } from '@stamhoofd/structures';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 
 export type PatchExplainer = {
@@ -87,6 +87,9 @@ function getDiffName(autoEncoder: unknown): AuditLogReplacement | null {
         if (name instanceof AuditLogReplacement) {
             return name;
         }
+        if (name instanceof TranslatedString) {
+            return AuditLogReplacement.string(name.toString());
+        }
     }
 
     if (typeof autoEncoder === 'object' && autoEncoder !== null && 'name' in autoEncoder && typeof autoEncoder.name === 'string') {
@@ -102,6 +105,9 @@ function getDiffPutValue(autoEncoder: unknown, key?: AuditLogReplacement): Audit
         }
         if (name instanceof AuditLogReplacement) {
             return name;
+        }
+        if (name instanceof TranslatedString) {
+            return AuditLogReplacement.string(name.toString());
         }
     }
     return getDiffValue(autoEncoder, key);
@@ -160,6 +166,9 @@ function getDiffValue(autoEncoder: unknown, key?: AuditLogReplacement): AuditLog
         }
         if (name instanceof AuditLogReplacement) {
             return name;
+        }
+        if (name instanceof TranslatedString) {
+            return AuditLogReplacement.string(name.toString());
         }
     }
 
