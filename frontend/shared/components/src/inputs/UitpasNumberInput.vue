@@ -36,9 +36,9 @@ const uitpasNumberRaw = ref(model.value ?? '');
 watch(model, value => uitpasNumberRaw.value = value ?? '');
 
 const placeholder = computed(() => {
-    const base = $t('Bv. {example}', { example: '4329032984732' });
+    const base = $t('5cb71059-9a9c-452c-8957-4622c5dc4af5', { example: '4329032984732' });
     if (props.required) return base;
-    return $t('Optioneel') + '. ' + base;
+    return $t('07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f') + '. ' + base;
 });
 
 const input = ref<HTMLInputElement | null>(null);

@@ -619,7 +619,7 @@ const availableWaitingLists = computed(() => {
         const usedByGroups = externalOrganization?.value?.period?.groups.filter(g => g.waitingList?.id === list.id);
         return {
             list,
-            description: usedByGroups?.length ? $t(`Deze wachtlijst wordt gebruikt door {groupNames}`, {groupNames: Formatter.joinLast(usedByGroups.map(g => g.settings.name.toString()), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ')}) : $t(`daef5a57-e4f0-41f4-b05f-7946913947ef`),
+            description: usedByGroups?.length ? $t(`4f6627be-b20b-48b0-a2f7-8fc68d2465b2`, {groupNames: Formatter.joinLast(usedByGroups.map(g => g.settings.name.toString()), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ')}) : $t(`daef5a57-e4f0-41f4-b05f-7946913947ef`),
         };
     });
 });

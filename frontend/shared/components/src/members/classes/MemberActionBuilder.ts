@@ -614,7 +614,7 @@ export class MemberActionBuilder {
                         GlobalEventBus.sendEvent('members-deleted', members).catch(console.error);
 
                         Toast.success(
-                            members.length ? $t('Eén lid is verwijderd') : $t('{count} leden zijn verwijderd', { count: members.length }),
+                            members.length ? $t('cb9fd3d2-c563-4d46-a26b-4438e5a887ef') : $t('43300d52-0e3f-4189-b5b3-100ecb0f5e70', { count: members.length }),
                         ).show();
                         return true;
                     },

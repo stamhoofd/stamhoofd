@@ -176,7 +176,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: $t(`De startdatum kan niet voor {date} liggen`, { date: Formatter.date(periodConfig.startDate) }),
+                    message: $t(`b7106b5c-ac87-4024-976d-67a456a75ba7`, { date: Formatter.date(periodConfig.startDate) }),
                 }));
             }
 
@@ -184,7 +184,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: $t(`De startdatum kan niet na {date} liggen`, { date: Formatter.date(periodConfig.endDate) }),
+                    message: $t(`3c534380-d395-4f40-8efd-550bb1548159`, { date: Formatter.date(periodConfig.endDate) }),
                 }));
             }
 
@@ -192,7 +192,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'endDate',
-                    message: $t(`De einddatum kan niet na {date} liggen`, { date: Formatter.date(periodConfig.endDate) }),
+                    message: $t(`791cae45-e251-4f12-befc-1c1b44636156`, { date: Formatter.date(periodConfig.endDate) }),
                 }));
             }
         }
@@ -202,7 +202,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: $t(`De startdatum kan niet voor {date} liggen`, { date: Formatter.date(periodConfig.startDate) }),
+                    message: $t(`b7106b5c-ac87-4024-976d-67a456a75ba7`, { date: Formatter.date(periodConfig.startDate) }),
                 }));
             }
 
@@ -210,7 +210,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: $t(`De startdatum kan niet na {date} liggen`, { date: Formatter.date(periodConfig.endDate) }),
+                    message: $t(`3c534380-d395-4f40-8efd-550bb1548159`, { date: Formatter.date(periodConfig.endDate) }),
                 }));
             }
         }

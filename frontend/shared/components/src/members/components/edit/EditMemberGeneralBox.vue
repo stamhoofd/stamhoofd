@@ -169,7 +169,7 @@ useValidation(errors.validator, () => {
         if (clone.phone === null) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Je kan het GSM-nummer van een ouder niet opgeven als het GSM-nummer van {firstName} of omgekeerd. Vul het GSM-nummer van {firstName} zelf in.`, { firstName: props.member.patchedMember.details.firstName }),
+                message: $t(`0fd21e1a-8cf1-4155-81bb-726304485ddd`, { firstName: props.member.patchedMember.details.firstName }),
                 field: 'phone',
             }));
         }
@@ -182,7 +182,7 @@ useValidation(errors.validator, () => {
         if (clone.email === null) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`Je kan het e-mailadres van een ouder niet opgeven als het e-mailadres van {firstName} of omgekeerd. Vul het e-mailadres van {firstName} zelf in.`, { firstName: props.member.patchedMember.details.firstName }),
+                message: $t(`4d1143d6-eae1-4f04-be1b-50ed99182c2a`, { firstName: props.member.patchedMember.details.firstName }),
                 field: 'email',
             }));
         }
@@ -205,7 +205,7 @@ const lidSuffix = computed(() => {
         return '';
     }
     if (props.member.patchedMember.details.defaultAge < 24) {
-        return ' ' + $t(`van {name}`, { name: firstName.value });
+        return ' ' + $t(`006efcef-ff11-4003-b8d1-17d735535c05`, { name: firstName.value });
     }
     return '';
 });

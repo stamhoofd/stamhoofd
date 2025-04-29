@@ -41,7 +41,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                     groupColumns.push(
                         new SelectableColumn({
                             id: `groups.${group.id}.optionMenu.${menu.id}.${option.id}.amount`,
-                            name: menu.name + ' → ' + option.name + ' → ' + $t('Aantal'),
+                            name: menu.name + ' → ' + option.name + ' → ' + $t('ed55e67d-1dce-46b2-8250-948c7cd616c2'),
                             category: group.settings.name.toString(),
                         }),
                     );
