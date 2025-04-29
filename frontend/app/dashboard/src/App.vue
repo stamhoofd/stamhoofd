@@ -12,15 +12,24 @@ import { getScopedAdminRootFromUrl } from '@stamhoofd/admin-frontend';
 import { CenteredMessage, CenteredMessageView, ModalStackEventBus, PromiseView, ReplaceRootEventBus, Toast, ToastBox, uriToApp } from '@stamhoofd/components';
 import { AppManager, LoginHelper, NetworkManager, SessionContext, UrlHelper } from '@stamhoofd/networking';
 import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';
-import { EmailAddressSettings, Platform } from '@stamhoofd/structures';
+import { Country, EmailAddressSettings, Language, Platform } from '@stamhoofd/structures';
 import { nextTick, onMounted, reactive, Ref, ref } from 'vue';
 import { getScopedAutoRoot, getScopedAutoRootFromUrl, getScopedDashboardRootFromUrl } from './getRootViews';
+import { I18nController } from '@stamhoofd/frontend-i18n';
 
 const modalStack = ref(null) as Ref<InstanceType<typeof ModalStackComponent> | null>;
 HistoryManager.activate();
 
 const root = new ComponentWithProperties(PromiseView, {
     promise: async () => {
+        // Load locales first
+        try {
+            await I18nController.loadDefault(null, Country.Belgium, Language.Dutch);
+        }
+        catch (e) {
+            console.error('Failed to load default locale', e);
+        }
+
         try {
             if (navigator.platform.indexOf('Win32') != -1 || navigator.platform.indexOf('Win64') != -1) {
                 // Load Windows stylesheet

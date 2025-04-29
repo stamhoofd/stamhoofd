@@ -613,7 +613,7 @@ export class SessionContext implements RequestMiddleware {
 
         // Auto copy organization data from the response
         if (this.organization) {
-            const returnedOrganization = this.user.members.organizations.find(o => o.id == this.organization?.id);
+            const returnedOrganization = this.user.members.organizations.find(o => o.id === this.organization?.id);
             if (returnedOrganization) {
                 this._lastFetchedOrganization = new Date();
                 this.updateOrganization(returnedOrganization);

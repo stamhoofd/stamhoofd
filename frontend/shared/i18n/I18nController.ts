@@ -179,7 +179,6 @@ export class I18nController {
         // app.config.globalProperties.$country = this.country
 
         const locale = this.locale;
-        console.info('[I18n] Loading locale ' + locale);
         // If the same language
 
         const i18n = I18nController.getI18n();
@@ -190,6 +189,9 @@ export class I18nController {
             const messages = await import(`../../../shared/locales/dist/${namespace}/${locale}.json`);
             i18n.loadLocale(namespace, locale, messages.default);
             console.log('[I18n] Successfully loaded locale', namespace, locale);
+        }
+        else {
+            console.info('[I18n] Loading locale from memory ' + locale);
         }
 
         i18n.setLocale(locale, this.language, this.countryCode);
@@ -339,7 +341,7 @@ export class I18nController {
             }
         }
 
-        // 4. Use the browesr language and/or country
+        // 4. Use the browser language and/or country
         if (!isPrerender) {
             if (!language && navigator.language && navigator.language.length >= 2) {
                 const l = navigator.language.substr(0, 2).toLowerCase();
@@ -425,7 +427,7 @@ export class I18nController {
             if (!$context?.organization) {
                 return;
             }
-            if (changed == 'organization') {
+            if (changed === 'organization') {
                 def.switchToLocale({ country: $context?.organization.address.country }).catch(console.error);
             }
         });

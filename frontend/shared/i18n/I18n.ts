@@ -69,7 +69,11 @@ export class I18n {
     }
 
     $t(key: string, replace?: Record<string, string | { toString(): string }>): string {
-        return this.replace((this.messages?.get(key) ?? key) + (this.debug ? (' (' + this.locale + ')') : ''), replace);
+        return this.replace(this.get(key) + (this.debug ? (' (' + this.locale + ')') : ''), replace);
+    }
+
+    get(key: string): string {
+        return this.messages?.get(key) ?? key;
     }
 
     escapeRegex(string: string) {
