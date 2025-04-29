@@ -205,7 +205,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
         if (this.password.length < minChars) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: '',
-                message: $t(`fa4405a2-cca9-4643-827d-76a5cff2846c`) + ' ' + minChars + ' ' + $t(`89cd482b-36a2-49a3-9601-0b66aa90c7a2`),
+                message: $t(`Jouw wachtwoord moet uit minstens {count} karakters bestaan`, { count: minChars }),
             }));
             return;
         }

@@ -259,7 +259,7 @@ async function save() {
                     if (member.patchedMember.details.nationalRegisterNumber === nationalRegisterNumber.value) {
                         se.addError(new SimpleError({
                             code: 'invalid_field',
-                            message: $t(`a23b0a8b-9048-41f7-8c22-8157cdeec177`) + ' ' + member.patchedMember.firstName + $t(`1e5ac172-0dfe-4861-b299-d0481855efbc`),
+                            message: $t(`Dit rijksregisternummer werd al ingevuld bij {firstName}. Vul a.u.b. het juiste rijksregisternummer in, dit kan invloed hebben op uw belastingaangifte.`, {firstName: member.patchedMember.firstName}),
                             field: 'nationalRegisterNumber',
                         }));
                     }
@@ -270,7 +270,7 @@ async function save() {
             if (parent) {
                 se.addError(new SimpleError({
                     code: 'invalid_field',
-                    message: `Dit rijksregisternummer is al in gebruik door een andere ouder (${parent.name}). Vul a.u.b. het juiste rijksregisternummer in, dit kan invloed hebben op uw belastingaangifte.`,
+                    message: $t(`Dit rijksregisternummer wordt al gebruikt door een andere ouder ({name}). Vul a.u.b. het juiste rijksregisternummer in, dit kan invloed hebben op uw belastingaangifte.`, {name: parent.name}),
                     field: 'nationalRegisterNumber',
                 }));
             }
@@ -341,7 +341,13 @@ async function modifyAddress(from: Address, to: Address) {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`14a6da51-a82f-43b5-9e6a-2d679985d41a`), $t(`4d5e0d3f-688a-4c8b-bad7-818d976166bf`), from.shortString() + ' ' + $t(`acebb7f5-73f6-448c-842b-361da931462f`) + ' ' + Formatter.joinLast(occurrences, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') + $t(`f5962c80-7c80-4d05-a4fe-8a842270d280`) + ' ' + to.shortString() + '.', $t(`fe636d8c-6506-4c8b-bb79-9c20fb1bc54d`), false)) {
+    if (!await CenteredMessage.confirm(
+        $t(`14a6da51-a82f-43b5-9e6a-2d679985d41a`), 
+        $t(`4d5e0d3f-688a-4c8b-bad7-818d976166bf`), 
+        $t(`{from} is ook het adres van {names}. Als je wilt kan je het adres ook daar wijzigen naar {to}.`, {from: from.shortString(), to: to.shortString(), names: Formatter.joinLast(occurrences, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') }),
+        $t(`fe636d8c-6506-4c8b-bb79-9c20fb1bc54d`), 
+        false)
+    ) {
         return;
     }
 
