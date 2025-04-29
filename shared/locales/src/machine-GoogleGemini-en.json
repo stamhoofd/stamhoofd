@@ -75,6 +75,10 @@
     "original": "Waarschuwing voor beheerder",
     "translation": "Warning for administrator"
   },
+  "00cc0002-1674-47dd-ae92-7547a678bafc": {
+    "original": "Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit, <button>klik dan hier</button>",
+    "translation": "You will not receive tax certificates.  Do you have Belgian nationality? <button>click here</button>"
+  },
   "00e66af4-75a2-4e00-8b2e-f51ff670b800": {
     "original": "Ik geef enkel toestemming voor groepsfoto's",
     "translation": "I only give permission for group photos"
@@ -198,6 +202,10 @@
   "02b47907-73e2-4cb2-b398-784f6cbce23a": {
     "original": "Uitbetalingsmededeling",
     "translation": "Payout notification"
+  },
+  "02ed38bf-5516-4e5a-b28c-6e73d7cf1009": {
+    "original": "Deze ouder kan inloggen of registreren op het ingevoerde e-mailadres en krijgt dan automatisch toegang tot de gegevens van {firstName} en het ledenportaal.",
+    "translation": "This parent can log in or register at the entered email address and will then automatically get access to the data of {firstName} and the member portal."
   },
   "02ef437e-2166-49be-b5ae-73e5452546a0": {
     "original": "geen rechten",
@@ -1143,6 +1151,10 @@
     "original": "De URI van de vereniging is te kort",
     "translation": "The association's URI is too short"
   },
+  "0faa16e2-00d5-4427-bfa1-d6b5c9ad4404": {
+    "original": "Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. Als {firstName} geen Belgische nationaliteit heeft, <button>klik dan hier</button>",
+    "translation": "The national register number is used to create tax certificates. If {firstName} does not have Belgian nationality, <button>click here</button>"
+  },
   "0fadc0c2-62b3-4e26-be91-1c05c0951be5": {
     "original": "In welk jaar? (mag maximaal 10 jaar geleden zijn)",
     "translation": "In which year? (maximum 10 years ago)"
@@ -1458,6 +1470,10 @@
   "13839d7e-2260-4ded-945f-02e4479ef0d5": {
     "original": "Als er een wachtlijst is ingesteld kunnen de leden op de wachtlijst inschrijven als de groep volzet is.",
     "translation": "If a waiting list is set up, members on the waiting list can register if the group is full."
+  },
+  "1394c960-ea6f-44e9-8278-2019623d15bc": {
+    "original": "Als {name} geen Belgische nationaliteit heeft, <button>klik dan hier</button>",
+    "translation": "If {name} does not have Belgian nationality, <button>click here</button>"
   },
   "13978903-0724-4935-a004-b9dbd4fe1ab1": {
     "original": "De annuleringskost wordt individueel en rekenkundig afgerond op 1 cent.",
@@ -5378,6 +5394,10 @@
   "492cd771-4145-4249-a009-147e11a6904f": {
     "original": "Je moet nog {price} betalen aan {name}, via het tabblad Boekhouding.",
     "translation": "You still have to pay {price} to {name}, via the Accounting tab."
+  },
+  "49397bef-c935-42b4-980e-a3174d8a4710": {
+    "original": "{firstName} kan inloggen of registreren op één van de ingevoerde e-mailadressen en krijgt dan automatisch toegang tot de gegevens van {firstName} en het ledenportaal.",
+    "translation": "{firstName} can log in or register at one of the entered email addresses and will then automatically get access to {firstName}'s data and the member portal."
   },
   "4943ece9-450b-4913-a6d8-6834d011a1ee": {
     "original": "Waarschuwing",
@@ -10311,6 +10331,10 @@
     "original": "Ongeldige kortingscode",
     "translation": "Invalid discount code"
   },
+  "8bc01345-6078-4949-91e6-c003001896ab": {
+    "original": "Deze ouder kan inloggen of registreren op één van de ingevoerde e-mailadressen en krijgt dan automatisch toegang tot de gegevens van {firstName} en het ledenportaal.",
+    "translation": "This parent can log in or register at one of the entered email addresses and will then automatically get access to the data of {firstName} and the member portal."
+  },
   "8bc53634-08a5-4404-9455-421955e83ce4": {
     "original": "Je hebt geen toegangsrechten om de facturatiegegevens van deze vereniging te bewerken.",
     "translation": "You do not have the access rights to edit the billing data of this association."
@@ -11747,6 +11771,10 @@
     "original": "Je hebt geen toegang tot deze betaling",
     "translation": "You do not have access to this payment"
   },
+  "9f6b9a67-e024-4cbc-9849-769807c6fc69": {
+    "original": "{firstName} kan inloggen of registreren op het ingevoerde e-mailadres en krijgt dan automatisch toegang tot de gegevens van {firstName} en het ledenportaal.",
+    "translation": "{firstName} can log in or register at the entered email address and will then automatically get access to {firstName}'s data and the member portal."
+  },
   "9f72f8ee-74c7-4757-b1dc-948f632114f2": {
     "original": "(BTW-plichtig)",
     "translation": "(VAT-liable)"
@@ -13078,6 +13106,10 @@
   "b2248880-cba7-4115-912b-9cb981e3c2d1": {
     "original": "Domeinnaam wijzigen",
     "translation": "Change domain name"
+  },
+  "b2287bc2-db81-4eb8-8fa1-3b1b70860707": {
+    "original": "{firstName} ontvangt enkel communicatie op het eerste e-mailadres.",
+    "translation": "{firstName} will only receive communication at the first email address."
   },
   "b22d5516-2644-4f4a-bcb5-ad93b82a0d61": {
     "original": "Ik heb",
