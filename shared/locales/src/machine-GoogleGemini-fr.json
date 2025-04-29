@@ -217,7 +217,7 @@
   },
   "02ed38bf-5516-4e5a-b28c-6e73d7cf1009": {
     "original": "Deze ouder kan inloggen of registreren op het ingevoerde e-mailadres en krijgt dan automatisch toegang tot de gegevens van {firstName} en het ledenportaal.",
-    "translation": "Ce parent peut se connecter ou s'enregistrer sur l'adresse électronique saisie et aura alors automatiquement accès aux données de {firstName} et au portail des membres."
+    "translation": "Ce parent peut se connecter ou s'enregistrer avec l'adresse e-mail saisie et aura alors automatiquement accès aux données de {firstName} et au portail des membres."
   },
   "02ef437e-2166-49be-b5ae-73e5452546a0": {
     "original": "geen rechten",
@@ -5683,10 +5683,6 @@
     "original": "Ja, koppelen",
     "translation": "Oui, lier"
   },
-  "4b2e0cb1-29e2-421d-a1c5-19a346a400cd": {
-    "original": "Mama",
-    "translation": "Maman"
-  },
   "4b2f8d1c-ff27-470d-b452-809042fef818": {
     "original": "complexe filtergroep",
     "translation": "groupe de filtres complexes"
@@ -10485,7 +10481,7 @@
   },
   "8bc01345-6078-4949-91e6-c003001896ab": {
     "original": "Deze ouder kan inloggen of registreren op één van de ingevoerde e-mailadressen en krijgt dan automatisch toegang tot de gegevens van {firstName} en het ledenportaal.",
-    "translation": "Ce parent peut se connecter ou s'enregistrer sur l'une des adresses électroniques saisies et aura alors automatiquement accès aux données de {firstName} et au portail des membres."
+    "translation": "Ce parent peut se connecter ou s'enregistrer avec une des adresses e-mails saisies et aura alors automatiquement accès aux données de {firstName} et au portail des membres."
   },
   "8bc53634-08a5-4404-9455-421955e83ce4": {
     "original": "Je hebt geen toegangsrechten om de facturatiegegevens van deze vereniging te bewerken.",
@@ -11965,7 +11961,7 @@
   },
   "9f6b9a67-e024-4cbc-9849-769807c6fc69": {
     "original": "{firstName} kan inloggen of registreren op het ingevoerde e-mailadres en krijgt dan automatisch toegang tot de gegevens van {firstName} en het ledenportaal.",
-    "translation": "{firstName} peut se connecter ou s'enregistrer sur l'adresse électronique saisie et aura alors automatiquement accès aux données de {firstName} et au portail des membres."
+    "translation": "{firstName} peut se connecter ou s'enregistrer avec l'adresse e-mail saisie et aura alors automatiquement accès aux données de {firstName} et au portail des membres."
   },
   "9f72f8ee-74c7-4757-b1dc-948f632114f2": {
     "original": "(BTW-plichtig)",
