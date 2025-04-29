@@ -243,6 +243,11 @@ declare global {
          */
         readonly REDIRECT_LOGIN_DOMAIN?: string
 
+        /**
+         * Custom documentation page for members
+         */
+        readonly memberDocumentationPage?: LanguageMap,
+
     }
 
     /** 
