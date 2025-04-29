@@ -199,6 +199,10 @@
     "original": "Oeps, er zijn nog geen inschrijvingsgroepen gemaakt. Ga naar de instellingen en configureer jouw inschrijvingsgroepen.",
     "translation": "Oups, il n'y a pas encore de groupes d'inscription créés. Allez dans les paramètres et configurez vos groupes d'inscription."
   },
+  "02b0533d-31b1-44ce-a22b-47d7f90adea8": {
+    "original": "This category should be invisible. Check if the record categories are filtered using .filter(c => c.isEnabled(value))",
+    "translation": "Cette catégorie doit être invisible. Vérifiez si les catégories d'enregistrement sont filtrées à l'aide de .filter(c => c.isEnabled(value))"
+  },
   "02b47907-73e2-4cb2-b398-784f6cbce23a": {
     "original": "Uitbetalingsmededeling",
     "translation": "Communication de paiement"
