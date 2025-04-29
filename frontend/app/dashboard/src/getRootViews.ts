@@ -145,7 +145,6 @@ export function getNonAutoLoginRoot(reactiveSession: SessionContext, options: { 
 }
 
 export async function getOrganizationSelectionRoot(session: SessionContext) {
-    const reactiveSession = session;
     await session.loadFromStorage();
     await SessionManager.prepareSessionForUsage(session, false);
 
@@ -159,11 +158,14 @@ export async function getOrganizationSelectionRoot(session: SessionContext) {
         // In platform mode, we need authentication
         baseRoot = new ComponentWithProperties(AuthenticatedView, {
             root: wrapWithModalStack(baseRoot),
-            loginRoot: wrapWithModalStack(getLoginRoot()),
+
+            // If a user gets logged out on the organization selection root, we'll replace the root with the auto selection root
+            // This is because we want the user to automatically go to the right place after signing in
+            loginRoot: wrapWithModalStack(getNonAutoLoginRoot(session)),
         });
     }
 
-    return await wrapContext(reactiveSession, 'auto', baseRoot);
+    return await wrapContext(session, 'auto', baseRoot);
 }
 
 export function getNoPermissionsView() {
@@ -239,8 +241,8 @@ export async function getScopedAutoRoot(session: SessionContext, options: { init
     // Make sure users without permissions always go to the member portal automatically
     if (
         (
-            (!session.organization && session.auth.userPermissions?.isEmpty) // note: we cannot use .isEmpty because the platform is not yet loaded and we cannot detect inheritance
-            || (session.organization && session.auth.permissions?.isEmpty)
+            (!session.organization && (!session.auth.userPermissions || session.auth.userPermissions.isEmpty)) // note: we cannot use .isEmpty because the platform is not yet loaded and we cannot detect inheritance
+            || (session.organization && (!session.auth.permissions || session.auth.permissions.isEmpty))
         ) && (
             STAMHOOFD.userMode === 'platform'
             || (session.organization && session.organization.meta.packages.useMembers)
