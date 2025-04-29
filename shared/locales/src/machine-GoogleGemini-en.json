@@ -5611,6 +5611,10 @@
     "original": "Er werden mogelijks automatische e-mails uitgestuurd als die ingesteld stonden.",
     "translation": "Automatic emails may have been sent if they were set up."
   },
+  "4bbc8b26-74b8-43e2-95e7-86fa00ca517b": {
+    "original": "Ben je 100% zeker dat je jouw account wilt verwijderen? Vul dan je huidige e-mailadres in ter bevestiging. Al jouw gegevens gaan verloren. Je kan dit niet ongedaan maken.",
+    "translation": "Are you 100% sure you want to delete your account? Please enter your current email address to confirm. All your data will be lost. This action cannot be undone."
+  },
   "4bc9a5fd-a1d5-47cd-8e25-2ce20b21a656": {
     "original": "Verwijder vertaling",
     "translation": "Delete translation"
@@ -7422,6 +7426,10 @@
   "636f72d4-77f9-423d-b0f8-82a4fb594e11": {
     "original": "Bewerk en voeg nieuwe tickets en vouchers toe aan je webshop.",
     "translation": "Edit and add new tickets and vouchers to your webshop."
+  },
+  "63786627-79e7-4ab7-b759-774ef3f856d9": {
+    "original": "{name} definitief verwijderen?",
+    "translation": "Permanently delete {name}?"
   },
   "6381fb21-c5be-4318-ba47-a5ee669335a7": {
     "original": "Definitief verwijderen",
@@ -9506,6 +9514,10 @@
   "8012abfe-4a7e-4864-88e5-fcf02f851705": {
     "original": "De link naar de website van jouw vereniging.",
     "translation": "The link to your association's website."
+  },
+  "802581b7-38dd-45c3-815d-b786b6f9136c": {
+    "original": "{name} definitief verwijderen?",
+    "translation": "Permanently delete {name}?"
   },
   "8045db66-859a-4b4c-899f-d2a0d26b15dc": {
     "original": "één stuk",
@@ -14559,6 +14571,10 @@
     "original": "De naam van de vereniging is te lang. Probeer de naam wat te verkorten en probeer opnieuw.",
     "translation": "The name of the association is too long. Try shortening the name and try again."
   },
+  "c4f7d503-ed7f-4526-b082-28dc2ab7cb17": {
+    "original": "Ben je 100% zeker dat je {name} wilt verwijderen? Vul dan de volledige naam van het lid in ter bevestiging. Je kan dit niet ongedaan maken.",
+    "translation": "Are you 100% sure you want to delete {name}? Please enter the member's full name to confirm. This action cannot be undone."
+  },
   "c4fe92c5-851c-422a-842b-da21e56e6f4c": {
     "original": "Contactpersonen",
     "translation": "Contact persons"
@@ -16674,6 +16690,10 @@
   "dfb8feba-663c-41cb-9407-34707a5ab186": {
     "original": "Met deze knop kunnen ontvangers betalen.",
     "translation": "With this button, recipients can pay."
+  },
+  "dfbecccd-b964-4e8b-83e4-553b49d9fcc0": {
+    "original": "Ben je 100% zeker dat je {name} wilt verwijderen? Vul dan de volledige naam van het lid in ter bevestiging. De volledige geschiedenis gaat verloren. Probeer dit absoluut te vermijden en enkel voor uitzonderingen te gebruiken.",
+    "translation": "Are you 100% sure you want to delete {name}? Please enter the member's full name to confirm. The complete history will be lost. Absolutely try to avoid this and only use it for exceptions."
   },
   "dfc24665-451c-45db-a8bf-edf197925154": {
     "original": "Eén artikel",

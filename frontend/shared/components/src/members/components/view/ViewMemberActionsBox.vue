@@ -75,8 +75,8 @@ async function deleteMember() {
     await present({
         components: [
             new ComponentWithProperties(DeleteView, {
-                title: `${name} definitief verwijderen?`,
-                description: `Ben je 100% zeker dat je ${name} wilt verwijderen? Vul dan de volledige naam van het lid in ter bevestiging. Je kan dit niet ongedaan maken.`,
+                title: $t(`63786627-79e7-4ab7-b759-774ef3f856d9`, { name }),
+                description: $t(`c4f7d503-ed7f-4526-b082-28dc2ab7cb17`, { name }),
                 confirmationTitle: $t(`cd2aed8f-03e2-4a54-8bc3-100e2643c74a`),
                 confirmationPlaceholder: $t(`3610e3ed-5df6-41d2-b6e6-a5823abcaff7`),
                 confirmationCode: name,
