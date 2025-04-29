@@ -123,7 +123,13 @@ async function save() {
         if (props.isNew) {
             const minorMembers = props.member.family.members.filter(m => m.id !== props.member.id);
 
-            if (minorMembers.length > 0 && !await CenteredMessage.confirm($t(`7e6694ee-7a21-41a3-8df0-dc9e0df35b2f`), $t(`290ab18c-dc62-4d85-a669-dd83c77758e7`), $t(`0e7e79db-62f1-4be9-9464-1552fa6c1216`) + ' ' + Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') + '.', $t(`fe636d8c-6506-4c8b-bb79-9c20fb1bc54d`), false)) {
+            if (minorMembers.length > 0 && !await CenteredMessage.confirm(
+                $t(`7e6694ee-7a21-41a3-8df0-dc9e0df35b2f`),
+                $t(`290ab18c-dc62-4d85-a669-dd83c77758e7`),
+                $t(`Je kan deze noodcontactpersoon ook automatisch toevoegen bij {memberNames}.`, { memberNames: Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') }),
+                $t(`fe636d8c-6506-4c8b-bb79-9c20fb1bc54d`),
+                false)
+            ) {
                 props.member.addEmergencyContact(patched.value);
             }
             else {
