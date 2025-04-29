@@ -9097,7 +9097,7 @@
   },
   "77f48757-5c36-47a6-8ce2-d676eef1e778": {
     "original": "Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. Heeft {member} geen Belgische nationaliteit,",
-    "translation": "Le numéro national est utilisé pour établir les attestations fiscales. {member} n’a pas la nationalité belge,"
+    "translation": "Le numéro national est utilisé pour établir les attestations fiscales. Si {member} n’a pas la nationalité belge,"
   },
   "780337a3-ce5b-4071-b53f-465e7e55ad65": {
     "original": "Jouw wachtwoord ziet er goed uit",
@@ -13145,7 +13145,7 @@
   },
   "b059530c-5267-49a7-b2ee-c7ae33f0c573": {
     "original": "Heeft {name} geen Belgische nationaliteit,",
-    "translation": "{name} n’a pas la nationalité belge,"
+    "translation": "Si {name} n’a pas la nationalité belge,"
   },
   "b05a9993-9743-4cb3-99f1-6deb5a44b7f5": {
     "original": "Is niet leeg",
