@@ -1,81 +1,441 @@
 {
-  "a379312a-007d-46a2-9533-33c15c524504": {
-    "original": "Voor een API-key die heel intensief gebruik moet maken van de API. Risico op overbelasting als de API niet correct is geimplementeerd en zware requests op korte tijd afvuurt.",
-    "translation": "Pour une API-key qui doit faire un usage très intensif de l'API. Risque de surcharge si l'API n'est pas correctement implémentée et déclenche des requêtes lourdes sur une courte période."
+  "02017e6d-47b0-4867-b590-be85a9b72008": {
+    "original": "Beperk eenheiden",
+    "translation": "Limiter les unités"
   },
-  "ab858fd6-4451-4d88-869e-be425a661169": {
-    "original": "Laag",
-    "translation": "Bas"
+  "0208e14e-b26e-4411-9e8e-461b63b1c0c1": {
+    "original": "Vertel Keeo door aan andere eenheiden",
+    "translation": "Informez Keeo auprès d'autres unités."
   },
-  "b091538b-014e-4db2-8241-9ed98e0c51c7": {
-    "original": "Breng een kost in rekening per betaling (dus slechts één keer, ook als er meerdere zaken worden afgerekend in één betaling). Wettelijk gezien is het niet toegestaan dat je deze laat afhangen van de gekozen betaalmethode (dat is dus niet mogelijk).",
-    "translation": "Facturez un coût par paiement (donc une seule fois, même si plusieurs articles sont facturés dans un seul paiement). Légalement, il n'est pas autorisé de les faire dépendre de la méthode de paiement choisie (ce n'est donc pas possible)."
+  "022aad3d-6250-4000-9336-4ae7e8e75c23": {
+    "original": "Alle leden met deze functie, krijgen automatisch toegangsrechten tot de leeftijdsgroep van een eenheid waarvoor de functie werd toegevoegd - enkel voor één specifiek scoutsjaar.",
+    "translation": "Tous les membres ayant cette fonction obtiennent automatiquement des droits d'accès au groupe d'âge d'une unité pour laquelle la fonction a été ajoutée - uniquement pour une année scoute spécifique."
   },
-  "f477755c-2d6e-473c-b9b9-2ebe0af173f3": {
-    "original": "Verwijder deze eenheid",
-    "translation": "Supprimer cette unité"
+  "02f2c884-7524-4c41-90c9-746a074185aa": {
+    "original": "Sla een kopie van jouw zaalplan op zodat je het kan delen met andere eenheiden.",
+    "translation": "Enregistrez une copie de votre plan de salle afin de pouvoir le partager avec d’autres unités."
   },
-  "eb91fb5c-72fc-44d4-9b84-4c9f7791e27a": {
-    "original": "Bekijk alle leden van deze eenheid via het beheerdersportaal",
-    "translation": "Voir tous les membres de cette unité via le portail administrateur"
+  "05479234-2977-4bfd-a44b-924b01021b6e": {
+    "original": "Op aanraden van andere eenheid / persoon",
+    "translation": "Sur recommandation d’une autre unité/personne"
   },
-  "74303d1c-2700-4340-816e-03cb9c3fb188": {
-    "original": "Adres van deze eenheid",
-    "translation": "Adresse de cette unité"
+  "05723781-9357-41b2-9fb8-cb4f80dde7f9": {
+    "original": "Eenheidsnummer",
+    "translation": "Numéro d'unité"
   },
-  "d4a9ca3f-72c9-4418-90fa-5d648b23ee7e": {
-    "original": "Alle eenheiden",
-    "translation": "Toutes les unités"
+  "07290df8-cad5-40df-9e10-3c7eccc049bc": {
+    "original": "Welpen",
+    "translation": "Louveteaux"
   },
-  "8459189d-6f9a-4541-9fb7-7618061f1969": {
-    "original": "De eenheid is aangemaakt. Log in het beheerderportaal in om andere beheerders toegang te geven.",
-    "translation": "L'unité a été créée. Connectez-vous au portail administrateur pour donner accès à d'autres administrateurs."
+  "07d18e1b-2935-4945-9595-50e16a929b19": {
+    "original": "Voeg zelf nog persoonsgegevens toe die voor alle eenheden beschikbaar zijn. Je kan deze vervolgens verplichten voor alle leden die inschrijven bij gelijk welke standaard-leeftijdsgroep, of deze verplichten per standaard-leeftijdsgroep (via de instellingen van elke standaard-leeftijdsgroep). Indien niet ingeschakeld kunnen eenheden deze ook nog inschakelen volgens hun wensen.",
+    "translation": "Ajoutez vous-même des données personnelles disponibles pour toutes les unités. Vous pouvez ensuite les rendre obligatoires pour tous les membres qui s'inscrivent à n'importe quel groupe d'âge standard, ou les rendre obligatoires par groupe d'âge standard (via les paramètres de chaque groupe d'âge standard). Si cette option n'est pas activée, les unités peuvent également l'activer selon leurs souhaits."
   },
-  "92c19888-7ac0-46b5-b691-05b29e52e110": {
-    "original": "Ben je zeker dat je deze eenheid wil verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer cette unité ?"
+  "08ed827b-4ea2-4abd-966b-672d7dad3b23": {
+    "original": "Om online betalingen te activeren moet je eerst allerlei documenten aanleveren (alle instructies via knop hieronder), de activatie hiervan duurt ongeveer 1 - 3 weken. Hiermee kan je betalingen via Bancontact, Payconiq, iDEAL en kredietkaart activeren. Kredietkaart is enkel mogelijk als je eenheid een ondernemingsnummer heeft.",
+    "translation": "Pour activer les paiements en ligne, vous devez d'abord fournir divers documents (toutes les instructions via le bouton ci-dessous), l'activation prend environ 1 à 3 semaines. Cela vous permet d'activer les paiements via Bancontact, Payconiq, iDEAL et carte de crédit. La carte de crédit n'est possible que si votre unité a un numéro d'entreprise."
   },
-  "2be85b13-52d6-4322-adcc-b491b5749422": {
-    "original": "Bevestiging 2/3. Ben je 100% zeker dat je deze eenheid wilt verwijderen?",
-    "translation": "Confirmation 2/3. Êtes-vous sûr à 100 % de vouloir supprimer cette unité ?"
+  "0998a455-9ffc-4222-8432-ef7681908ad7": {
+    "original": "Als een andere eenheid schulden aan jouw eenheid heeft, kan je hiervoor ook automatische e-mails versturen. Dit gebeurt op basis van functies die je hieronder kan instellen.",
+    "translation": "Si une autre unité a des dettes envers votre unité, vous pouvez également envoyer des e-mails automatiques. Cela se fait sur la base de fonctions que vous pouvez définir ci-dessous."
   },
-  "6435b870-2298-49bb-bd28-904e864178d3": {
-    "original": "Bevestiging 3/3. Ben je 100% zeker dat je deze eenheid wilt verwijderen?",
-    "translation": "Confirmation 3/3. Êtes-vous sûr à 100 % de vouloir supprimer cette unité ?"
+  "0b4ece85-60f0-46b8-a6fc-09eb605b4138": {
+    "original": "naam van je eenheid",
+    "translation": "nom de votre unité"
   },
-  "e276e384-22f1-4894-93ae-8874329c6767": {
-    "original": "Eenheid bewerken",
-    "translation": "Modifier l'unité"
+  "0b6274d7-7a42-4ab3-bc65-5a76c23d07ff": {
+    "original": "Er staat een ander tabblad open van Keeo die werkt in een oudere versie. Sluit die eerst af.",
+    "translation": "Un autre onglet Keeo fonctionnant avec une ancienne version est ouvert. Veuillez d'abord le fermer."
   },
-  "4fa242b7-c05d-44d4-ada5-fb60e91af818": {
-    "original": "Er zijn nog geen eenheiden",
-    "translation": "Il n'y a pas encore d'unités"
+  "0b6949f6-80b7-4d48-9e1e-16bfb826014a": {
+    "original": "E-mail die wordt verzonden naar de indiener (en de ingestelde contactpersonen van de eenheid) als een kampmelding wordt afgekeurd",
+    "translation": "E-mail envoyé au soumetteur (et aux personnes de contact définies de l'unité) lorsqu'une notification de camp est refusée"
+  },
+  "0b7c21d5-b9ed-4ddc-9370-7f58255f4eba": {
+    "original": "Instellen voor scoutsjaar",
+    "translation": "Paramètres pour l'année scoute"
+  },
+  "0c827ab2-42af-4b19-9160-a69475039314": {
+    "original": "Niet alle gegevens van jouw eenheid werden in het Stripe dashboard ingevuld. Kijk na of alles werd ingevuld. Volgende zaken zouden ontbreken:",
+    "translation": "Toutes les données de votre unité n’ont pas été saisies dans le tableau de bord Stripe. Vérifiez si tout a été rempli. Les éléments suivants pourraient manquer :"
+  },
+  "0fa660da-1e74-4940-af88-eafafb1094b6": {
+    "original": "De URI van de eenheid is te kort",
+    "translation": "L’URI de l’unité est trop court"
   },
   "11b55f40-f3d4-4ce7-9831-57d188367b9f": {
     "original": "Vul de naam van de eenheid in",
     "translation": "Veuillez saisir le nom de l'unité"
   },
+  "11ffdf3a-dd66-49ec-b092-c7f3063e19f3": {
+    "original": "Keeo verwijdert automatisch het reeds aangerekende bedrag van het openstaande bedrag van alle leden die je uitschrijft. Als je wilt kan je wel een annuleringskost in rekening brengen, bv. als je het bedrag niet zal terugbetalen stel je dit in op 100%. Als je geen annuleringskost in rekening brengt, zal het openstaande bedrag van een lid dat al betaald had negatief worden en kan je dit terugbetalen via het tabblad ‘Rekening’ van een lid.",
+    "translation": "Keeo supprime automatiquement le montant déjà facturé du montant dû de tous les membres que vous désinscrivez. Si vous le souhaitez, vous pouvez facturer des frais d'annulation, par exemple, si vous ne remboursez pas le montant, vous le définissez sur 100 %. Si vous ne facturez pas de frais d'annulation, le montant dû d'un membre qui a déjà payé deviendra négatif et vous pourrez le rembourser via l'onglet « Compte » d'un membre."
+  },
+  "1316502a-5502-49ec-96fe-93e60cb94268": {
+    "original": "Filter op leden die een inschrijving (zowel huidig scoutsjaar of in een afgelopen scoutsjaar) heeft die aan deze voorwaarden voldoet.",
+    "translation": "Filtrez les membres qui ont une inscription (année scoute actuelle ou année scoute passée) qui répond aux conditions."
+  },
+  "13a4b7fa-7de6-497e-9e7c-6aee4f783260": {
+    "original": "Je kan activiteiten voor andere eenheden enkel aanmaken via het beheerdersportaal van die eenheid zelf.",
+    "translation": "Vous ne pouvez créer des activités pour d’autres unités que via le portail administrateur de cette unité."
+  },
+  "1401fb57-4172-4211-acdb-0afbc87af86e": {
+    "original": "Het huidige scoutsjaar kan niet vergrendeld worden",
+    "translation": "L’année scoute actuelle ne peut pas être verrouillée"
+  },
+  "16a3b696-f8da-4b2b-94b7-49c85ee1c38c": {
+    "original": "Dit scoutsjaar werd niet gevonden",
+    "translation": "Cette année scoute n'a pas été trouvée"
+  },
+  "16ba3d97-5943-451d-92b5-0bf21555f7ae": {
+    "original": "FOS De Goudvis",
+    "translation": "FOS L'Orfé"
+  },
+  "18a41eda-92fd-46a6-acc1-fc35536b86b4": {
+    "original": "Beperk tot bepaalde eenheden (tags)",
+    "translation": "Limiter à certaines unités (tags)"
+  },
+  "1929850b-e0ad-4b35-b3e5-6652dd4774e2": {
+    "original": "Nieuw scoutsjaar",
+    "translation": "Nouvelle année scoute"
+  },
+  "1985f023-e846-4ea2-9526-b24358c7a294": {
+    "original": "Maak een kopie van de instellingen van jouw eenheid.",
+    "translation": "Faire une copie des paramètres de votre unité."
+  },
+  "19e5262f-9dc1-40d9-b905-bda8462b6046": {
+    "original": "Er bestaat al een eenheid met dezelfde naam. Voeg bijvoorbeeld de naam van je gemeente toe.",
+    "translation": "Une unité avec le même nom existe déjà. Ajoutez par exemple le nom de votre commune."
+  },
+  "1af084bf-42d6-4a59-a7da-d1e87c6dba8e": {
+    "original": "Dit lid is niet langer aangesloten bij FOS Open Scouting, en de verzekering loopt binnenkort af",
+    "translation": "Ce membre n'est plus affilié à FOS Open Scouting et l'assurance expire bientôt."
+  },
+  "1bb58aa1-e36e-4384-8c54-be3b71d77a3b": {
+    "original": "E-mail die wordt verzonden naar de indiener (en de ingestelde contactpersonen van de eenheid) als een kampmelding wordt goedgekeurd",
+    "translation": "E-mail envoyé au soumetteur (et aux personnes de contact définies de l'unité) lorsqu'une notification de camp est approuvée"
+  },
+  "1c5ba032-2132-4bda-8aae-7f622f6f3a2a": {
+    "original": "Huidige",
+    "translation": "Actif"
+  },
+  "1cbf76ca-79d3-4f12-8f09-dc585f5e9da3": {
+    "original": "Scoutsjaren",
+    "translation": "Années scoutes"
+  },
+  "1dfaeb07-5f01-42c7-a9a4-0096047da86e": {
+    "original": "Vragenlijst van FOS Open Scouting",
+    "translation": "Questionnaire de FOS Open Scouting"
+  },
+  "1f1d657d-bc73-4cae-9025-b3ec67a705e7": {
+    "original": "Je kan geen aansluitingen meer verwijderen in dit scoutsjaar",
+    "translation": "Vous ne pouvez plus supprimer d'affiliations dans cette année scoute"
+  },
+  "209f9f13-4897-4310-95eb-f436987b8ba7": {
+    "original": "Kijk hieronder na of alle functies toegekend zijn. Om een functie toe te kennen zorg je er eerst voor dat de persoon is ingeschreven in Keeo, daarna kan je functies toekennen door het lid open te klikken in het tabblad ‘Leden’. Daar kan je met de rechtermuisknop op een lid klikken en \"Functies bewerken\" kiezen.",
+    "translation": "Vérifiez ci-dessous si toutes les fonctions ont été attribuées. Pour attribuer une fonction, assurez-vous d'abord que la personne est inscrite dans Keeo, puis vous pouvez attribuer des fonctions en ouvrant le membre dans l'onglet « Membres ». Là, vous pouvez cliquer avec le bouton droit sur un membre et choisir « Modifier les fonctions »."
+  },
+  "227a2170-37b7-46b0-ac1e-516f603379b5": {
+    "original": "Sommige aansluitingen verlopen via FOS Open Scouting (lid betaalt rechtstreeks aan de koepel) en worden dus ook niet echt aangerekend aan een individuele eenheid. Je kan deze via deze filter uitsluiten.",
+    "translation": "Certaines connexions passent par FOS Open Scouting (le membre paie directement à la fédération) et ne sont donc pas réellement facturées à une unité individuelle. Vous pouvez les exclure via ce filtre."
+  },
   "2300284a-a015-4c97-8ad1-6c9f2bbde174": {
     "original": "Log in als een beheerder van deze eenheid en beheer de leden, activiteiten en instellingen.",
     "translation": "Connectez-vous en tant qu'administrateur de cette unité et gérez les membres, les activités et les paramètres."
   },
-  "6793e0dc-66f0-4a70-b8ac-fb41e2063871": {
-    "original": "Naam van deze eenheid (kort)",
-    "translation": "Nom de cette unité (court)"
+  "237be7e0-4534-4008-b7bc-3e6db776a72a": {
+    "original": "Leden die je inschrijft in een leeftijdsgroep die je koppelt aan een standaard leeftijdsgroep van FOS Open Scouting worden automatisch aangesloten. Voor andere leden kan je hier een aansluiting manueel aanvragen.",
+    "translation": "Les membres que vous inscrivez dans un groupe d'âge que vous liez à un groupe d'âge standard de FOS Open Scouting sont automatiquement connectés. Pour les autres membres, vous pouvez demander une connexion manuellement ici."
   },
-  "bc8578de-ee3c-4aac-bd19-3fd4040168a4": {
-    "original": "De naam van deze eenheid",
-    "translation": "Le nom de cette unité"
+  "24a048f6-3c97-4c80-87b7-eccc244b5d12": {
+    "original": "Zoek jouw eenheid",
+    "translation": "Recherchez votre unité"
   },
-  "7066aee7-9e51-4767-b288-460646ceca50": {
-    "original": "Nieuwe eenheid",
-    "translation": "Nouvelle unité"
+  "253a60ce-cba7-4679-863c-494609d03e8f": {
+    "original": "Je kan {paymentMethod} niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Keeo instellingen > Betaalaccounts.",
+    "translation": "Vous ne pouvez pas activer {paymentMethod}, vous devez d'abord vous connecter à un fournisseur de paiement via les paramètres Keeo > Comptes de paiement."
   },
-  "a5b61d4d-207f-485c-8748-cbb04fcb2d23": {
-    "original": "Beheer alle instellingen van deze eenheid",
-    "translation": "Gérer tous les paramètres de cette unité"
+  "2669729c-718d-49a1-9e4f-b3a65a6479a8": {
+    "original": "Zoek een eenheid waar je {firstName} wilt inschrijven",
+    "translation": "Recherchez une unité où vous souhaitez inscrire {firstName}"
+  },
+  "26b8398d-a17c-4854-ae64-99a410ddeffb": {
+    "original": "Je kan niet inschrijven voor {group} omdat scoutsjaar {period} is afgesloten.",
+    "translation": "Vous ne pouvez pas vous inscrire pour {group} car l’année scoute {period} est clôturée."
+  },
+  "275f674b-bf05-4d34-a1ff-105a1563fbcc": {
+    "original": "Je kan pas 2 maand voor de start van het nieuwe scoutsjaar overschakelen.",
+    "translation": "Vous ne pouvez basculer que 2 mois avant le début de la nouvelle année scoute."
+  },
+  "27cfaf26-6b88-4ebc-a50a-627a9f0f9e64": {
+    "original": "Eenheidsnummer",
+    "translation": "Numéro d'unité"
+  },
+  "2803b7f1-be08-48ec-8b4c-2dced27f7113": {
+    "original": "Breid het aantal gegevens van eenheiden zelf nog uit.",
+    "translation": "Élargissez vous-même le nombre de données des unités."
+  },
+  "29343dad-93c5-4e72-a6d5-3960cfbfcf42": {
+    "original": "Dit lid heeft een proefaansluiting bij FOS Open Scouting",
+    "translation": "Ce membre a une connexion d'essai à FOS Open Scouting."
+  },
+  "2aead74c-c67c-4844-8ba2-f7f930b35b5e": {
+    "original": "Mijn eenheid staat er niet tussen",
+    "translation": "Mon unité n’est pas parmi elles"
+  },
+  "2be85b13-52d6-4322-adcc-b491b5749422": {
+    "original": "Bevestiging 2/3. Ben je 100% zeker dat je deze eenheid wilt verwijderen?",
+    "translation": "Confirmation 2/3. Êtes-vous sûr à 100 % de vouloir supprimer cette unité ?"
+  },
+  "2ca73761-bc6c-4ffb-9550-a988376f26ef": {
+    "original": "Lees hier meer over Keeo.",
+    "translation": "En savoir plus sur Keeo."
   },
   "2cc5355d-3c19-4a6e-a2c7-1d93e423a8d2": {
+    "original": "Eenheidsnummer",
+    "translation": "Numéro d'unité"
+  },
+  "2e5e052c-98b7-4375-b771-05a8913c145b": {
+    "original": "Voor nationale activiteiten moet je kiezen via welke eenheid alle betalingen verlopen. De betaalinstellingen van die eenheid worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die eenheid.\\n\\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
+    "translation": "Pour les activités nationales, vous devez choisir via quelle unité tous les paiements sont effectués. Les paramètres de paiement de cette unité sont alors utilisés et toutes les inscriptions sont enregistrées dans la comptabilité de cette unité.\\n\\nEn outre, l’organisateur définit également les paramètres qui influent sur la collecte de données et d’autres aspects plus subtils."
+  },
+  "2e5e2e62-1e0c-406d-96c9-f66e7c8e85bd": {
+    "original": "Gegevens van de eenheid of persoon die instaat voor de opvang.",
+    "translation": "Coordonnées de l'unité ou de la personne responsable de l'accueil."
+  },
+  "2f325358-6e2f-418c-9fea-31a14abbc17a": {
+    "original": "Eenheid",
+    "translation": "Unité"
+  },
+  "2f645618-a9a9-4598-883d-6f1991ae379d": {
+    "original": "Geen rechtspersoonlijkheid (feitelijke eenheid)",
+    "translation": "Pas de personnalité morale (unité de fait)"
+  },
+  "31757907-4cdd-4f0e-bb9d-cba9c1d997e4": {
+    "original": "Deze eenheid bestaat niet",
+    "translation": "Cette unité n’existe pas"
+  },
+  "31982300-fbbf-4f5a-b7ce-26738bd2b23d": {
+    "original": "Je kan een beheerder volledige toegang geven tot alle eenheiden (en dus ook de leden van die eenheid), of per tag de toegang regelen.",
+    "translation": "Vous pouvez donner à un administrateur un accès complet à toutes les unités (et donc aussi aux membres de cette unité), ou gérer l’accès par tag."
+  },
+  "31e91d3b-16e5-4608-9390-75e61d4d090d": {
+    "original": "Je kan het huidig scoutsjaar hier wijzigen. Zorg dat je voor dit scoutsjaar alle aansluitingen hebt ingesteld. Ga daarvoor naar 'aansluitingen en verzekeringen' en voeg het scoutsjaar toe en stel de nieuwe prijzen en periodes correct in.",
+    "translation": "Vous pouvez modifier l'année scoute actuelle ici. Assurez-vous d'avoir défini toutes les affiliations pour cette année scoute. Pour cela, allez à « affiliations et assurances » et ajoutez l'année scoute, puis définissez correctement les nouveaux prix et les nouvelles périodes."
+  },
+  "322dd34f-a4ec-4065-be53-040725915e20": {
+    "original": "Scoutsjaar",
+    "translation": "Année scoute"
+  },
+  "34aff020-6017-4c23-85b1-44a692988ee6": {
+    "original": "Kies een eenheid",
+    "translation": "Choisissez une unité"
+  },
+  "34fdb013-005c-46c4-b52e-e58f7697b586": {
+    "original": "Leden kunnen enkel zelf inschrijven via Keeo",
+    "translation": "Les membres ne peuvent s'inscrire que via Keeo."
+  },
+  "3573c612-1241-4b48-8ed5-8f11b8860e23": {
+    "original": "Je logt in op het feedback systeem met dit account: {email}. Je kan eerst van eenheid veranderen als je met een ander account wilt inloggen.",
+    "translation": "Vous vous connectez au système de feedback avec ce compte : {email}. Vous pouvez d’abord changer d’unité si vous souhaitez vous connecter avec un autre compte."
+  },
+  "369440db-a9e0-4530-a06b-3ea05cc6a2b0": {
+    "original": "Welkom op het ledenplatform van FOS Open Scouting, hier kan je jouw gegevens beheren en je inschrijven bij een eenheid of voor een activiteit.",
+    "translation": "Bienvenue sur la plateforme des membres de FOS Open Scouting, où vous pouvez gérer vos données et vous inscrire à une unité ou à une activité."
+  },
+  "3754b38e-3938-4589-801a-450ba0844990": {
+    "original": "Instellingen per scoutsjaar",
+    "translation": "Paramètres par année scoute"
+  },
+  "39d0d9ca-2f37-40b6-84a4-51fb29b4cce6": {
+    "original": "Deze invoervelden zijn nodig op elk document, maar je moet hier instellen welke gegevens je uit Keeo daarin wilt invullen. Koppel je met meerdere gegevens uit Keeo, dan gaan we de eerste beschikbare op het document invullen. Bv. als er bij het lid zelf geen adres werd ingevuld, neem dan het adres van de eerste ouder.",
+    "translation": "Ces champs de saisie sont nécessaires sur chaque document, mais vous devez définir ici les données de Keeo que vous souhaitez y saisir. Si vous liez plusieurs données de Keeo, nous saisirons la première disponible sur le document. Par exemple, si aucune adresse n'a été saisie pour le membre lui-même, prenez l'adresse du premier parent."
+  },
+  "3ab07939-121b-47f9-956f-a573c57ec008": {
+    "original": "Je kan zelf ook leden inschrijven voor deze activiteit. Jouw groep betaalt dan meteen de kostprijs aan de organisator, waarna Keeo automatisch één of meerdere openstaande bedragen aanmaakt van de ingeschreven leden aan jouw groep (te betalen via het ledenportaal of manueel betaling te registreren).",
+    "translation": "Vous pouvez également inscrire vous-même des membres à cette activité. Votre groupe paie alors immédiatement le prix à l'organisateur, après quoi Keeo crée automatiquement un ou plusieurs montants dus des membres inscrits à votre groupe (à payer via le portail des membres ou à enregistrer manuellement le paiement)."
+  },
+  "3b257435-9ae7-4840-8f0f-f71318013935": {
+    "original": "Je hebt al voor elk scoutsjaar instellingen toegevoegd",
+    "translation": "Vous avez déjà ajouté des paramètres pour chaque année scoute"
+  },
+  "3c584bf6-7e0a-4348-a5e9-2bc0bcb00bde": {
+    "original": "Schulden van eenheiden",
+    "translation": "Dettes des unités"
+  },
+  "3e94193d-873b-4770-ba03-5f7528debf2c": {
+    "original": "Leden kunnen zelfstandig inschrijven via het ledenportaal. Dit is een link die je op jouw website kan plaatsen of kan versturen via e-mail. Daarnaast kan je leden ook uitnodigen om in te schrijven, dat doe je door ze eerst toe te voegen in Keeo en daarna een e-mail te sturen waarbij je de 'magische knop' onderaan toevoegt.",
+    "translation": "Les membres peuvent s'inscrire indépendamment via le portail des membres. Il s'agit d'un lien que vous pouvez placer sur votre site web ou envoyer par e-mail. Vous pouvez également inviter des membres à s'inscrire, en les ajoutant d'abord dans Keeo, puis en leur envoyant un e-mail auquel vous ajoutez le bouton magique en bas."
+  },
+  "3eefa3b1-525b-464b-adef-e3b9efd9257f": {
+    "original": "Eenheidsnaam",
+    "translation": "Nom d'unité"
+  },
+  "3f4666f9-59b5-4a24-b1a7-9f820275c042": {
+    "original": "Hier kan je als beheerder leden inschrijven voor een activiteit. Het meest praktische is dat elk lid zichtzelf inschrijft via Keeo, maar dat is misschien niet altijd mogelijk.",
+    "translation": "En tant qu'administrateur, vous pouvez ici inscrire des membres à une activité. Le plus pratique est que chaque membre s'inscrive lui-même via Keeo, mais ce n'est peut-être pas toujours possible."
+  },
+  "405a811e-ebb1-4948-84cd-8fb5860104e6": {
+    "original": "Keeo",
+    "translation": "Keeo"
+  },
+  "40670ad7-7db1-4ec9-84df-68b32642042e": {
+    "original": "Je kan geen inschrijvingen wijzigen van {group} omdat dat scoutsjaar is afgesloten.",
+    "translation": "Vous ne pouvez pas modifier les inscriptions de {group} car l'année scoute est clôturée."
+  },
+  "410f13a0-286d-4f7a-b6f6-aef22327056b": {
+    "original": "Instellen als huidig scoutsjaar",
+    "translation": "Définir comme année scoute actuelle"
+  },
+  "43cc054d-cf2f-432b-9259-e7764dc929e3": {
+    "original": "Dit scoutsjaar is vergrendeld, je kan geen meldingen meer aanpassen in deze periode",
+    "translation": "Cette année scoute est verrouillée, vous ne pouvez plus modifier les notifications pour cette période"
+  },
+  "43ff8e32-1a0b-41cf-b9a6-8e4c85d12739": {
+    "original": "Je hebt geen rechten om een activiteit aan te maken voor deze eenheid.",
+    "translation": "Vous n’avez pas les droits nécessaires pour créer une activité pour cette unité."
+  },
+  "4697c731-26fd-4ba5-8aeb-0f5b8385a54b": {
+    "original": "Zoek een eenheid",
+    "translation": "Rechercher une unité"
+  },
+  "47754708-6f27-4afd-b9fe-600a209cb980": {
+    "original": "Eenheidsnaam",
+    "translation": "Nom d'unité"
+  },
+  "47e866d9-5349-4318-b779-161da61c2250": {
+    "original": "Openstaande bedragen tussen eenheiden",
+    "translation": "Montants en suspens entre les unités"
+  },
+  "48148df3-81a8-439e-a368-64355aa7da6e": {
+    "original": "Lid betaald rechtstreeks aan FOS Open Scouting",
+    "translation": "Le membre paie directement à FOS Open Scouting"
+  },
+  "4835dfd4-10b0-4e91-b581-d1b3eefa73f7": {
+    "original": "Alle eenheiden",
+    "translation": "Toutes les unités"
+  },
+  "49742012-1ca8-4b91-a176-9ce3e17c1fe0": {
+    "original": "Er kon geen uniek lidnummer aangemaakt worden. Mogelijks zijn er teveel leden met dezelfde geboortedatum. Neem contact op met de eenheid.",
+    "translation": "Il n’a pas été possible de créer un numéro de membre unique. Il y a peut-être trop de membres avec la même date de naissance. Contactez l’unité."
+  },
+  "49753d6a-7ca4-4145-8024-0be05a9ab063": {
+    "original": "Deze beveiligingscode is ongeldig. Probeer het opnieuw of neem contact op met jouw eenheid om de juiste code te ontvangen.",
+    "translation": "Ce code de sécurité est invalide. Veuillez réessayer ou contactez votre unité pour recevoir le code correct."
+  },
+  "49952c7d-05e9-46a2-b5ec-7411ed71be32": {
+    "original": "bv. Ruimtereis eenheid",
+    "translation": "p. ex. unité Voyage spatial"
+  },
+  "4a2a630f-3396-404f-9316-d660df9935a9": {
+    "original": "Alle aansluitingen die (al dan niet automatisch) aan leden worden toegevoegd, worden pas toegevoegd aan het openstaande bedrag van een eenheid na een manuele actie. Daarna kan een eenheid het bedrag betalen via een online betaling in hun beheerdersportaal.",
+    "translation": "Toutes les affiliations qui sont (automatiquement ou non) ajoutées aux membres ne sont ajoutées au montant restant dû d'une unité qu'après une action manuelle. Ensuite, une unité peut payer le montant via un paiement en ligne dans son portail administrateur."
+  },
+  "4a39e12b-efa2-46fe-aa30-83bc576548a3": {
+    "original": "Aangesloten via FOS Open Scouting (niet aangerekend aan een eenheid)",
+    "translation": "Affilié via FOS Open Scouting (non facturé à une unité)"
+  },
+  "4be45e47-0ee2-43cd-b719-8a60513f0965": {
+    "original": "Dit is een standaardinstelling. Een eenheid kan deze instellingen nog aanpassen. Deze instelling dient dus vooral als standaardinstelling en om te communiceren richting eenheden.",
+    "translation": "Il s'agit d'un paramètre standard. Une unité peut encore modifier ces paramètres. Ce paramètre sert donc surtout de paramètre standard et à communiquer avec les unités."
+  },
+  "4bff53d6-7455-45fc-aa6d-ae0bafbe0b47": {
+    "original": "Elke eenheid moet per inschrijvingsgroep een standaard leeftijdsgroep koppelen. Op die manier kan de benaming van de eenheid gekoppeld worden aan de algemene benaming van de koepel.",
+    "translation": "Chaque unité doit associer un groupe d'âge standard par groupe d'inscription. De cette façon, le nom de l'unité peut être lié au nom général de la fédération."
+  },
+  "4c61c43e-ed3c-418e-8773-681d19323520": {
+    "original": "Eenheidsnummer",
+    "translation": "Numéro d'unité"
+  },
+  "4d995169-f792-40f5-addf-60d8aed00362": {
+    "original": "Maak API-keys aan om toegang te krijgen tot de Keeo-API.",
+    "translation": "Créez des clés API pour accéder à l'API Keeo."
+  },
+  "4f7e64c6-4607-446d-9a84-8ebcb7206241": {
+    "original": "Kijk na of je nog een ander tabblad open hebt staan met Keeo en sluit deze. Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer de pagina te herladen of in een andere browser te werken.",
+    "translation": "Vérifiez si vous avez un autre onglet ouvert avec Keeo et fermez-le. Votre navigateur ne prend pas en charge certaines fonctions, ce qui nous empêche de suivre les commandes hors ligne si votre connexion Internet tombe en panne. Essayez de recharger la page ou de travailler dans un autre navigateur."
+  },
+  "4fa242b7-c05d-44d4-ada5-fb60e91af818": {
+    "original": "Er zijn nog geen eenheiden",
+    "translation": "Il n'y a pas encore d'unités"
+  },
+  "50ebabe0-8162-486d-b32a-9ef3016256fb": {
+    "original": "Eenheid",
+    "translation": "Unité"
+  },
+  "51c27c5e-c2be-441b-a571-7bf573ee6848": {
+    "original": "Reken een bedrag aan aan de geselecteerde eenheid.",
+    "translation": "Comptabilisez un montant à l'unité sélectionnée."
+  },
+  "525747e4-48df-4f20-979e-3c18142e64a5": {
+    "original": "Het bedrag zal achteraf door FOS Open Scouting aan {name} worden gefactureerd",
+    "translation": "Le montant sera facturé ultérieurement par FOS Open Scouting à {name}"
+  },
+  "528545c4-028b-4711-9b16-f6fa990c3130": {
+    "original": "Aansluiting/verzekering Keeo*",
+    "translation": "Connexion/assurance Keeo*"
+  },
+  "52b7cfdf-2f2c-4d88-8689-96a91f885654": {
+    "original": "Aanrekening via FOS Open Scouting",
+    "translation": "Facturation via FOS Open Scouting"
+  },
+  "550e876b-f397-44a5-9e0a-fb5ce6df3a40": {
+    "original": "Gebruik de boekhoudmodule van deze eenheid om een zicht te krijgen op alle betalingen.",
+    "translation": "Utilisez le module de comptabilité de cette unité pour avoir un aperçu de tous les paiements."
+  },
+  "57491b1b-a306-479e-9bc0-f0d4839a7f5c": {
+    "original": "Stappenplan opstart scoutsjaar",
+    "translation": "Guide étape par étape pour le démarrage de l'année scoute"
+  },
+  "57e20ed4-d50a-4947-96fc-57958550dcfa": {
+    "original": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijneenheid.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
+    "translation": "Vous pouvez également définir votre propre nom de domaine (par ex. inscription.monunité.be). Pour cela, vous devez avoir déjà acheté le nom de domaine ; c'est généralement déjà le cas si vous avez déjà votre propre site web."
+  },
+  "594307a3-05b8-47cf-81e2-59fb6254deba": {
+    "original": "Feitelijke eenheid",
+    "translation": "Unité de fait"
+  },
+  "5959a6a9-064a-413c-871f-c74a145ed569": {
+    "original": "Oeps, je kan nog geen evenementen met inschrijvingen aanmaken in deze periode. Dit scoutsjaar is nog niet aangemaakt in het systeem.",
+    "translation": "Oups, vous ne pouvez pas encore créer d'événements avec inscriptions pendant cette période. Cette année scoute n'est pas encore créée dans le système."
+  },
+  "5aca8049-d981-4cc5-a86c-0c194047743d": {
+    "original": "Natuureenheid",
+    "translation": "Unité nature"
+  },
+  "5b3e65b1-9444-4b65-a032-e184ed7c2471": {
+    "original": "Mijn eenheid aansluiten",
+    "translation": "Connecter mon unité"
+  },
+  "5c7d8f29-9d83-4f33-9d6b-0f947e384f75": {
+    "original": "Importeer een zaalplan dat jij of een andere eenheid eerder uit Keeo hebt geëxporteerd. Importeren vanaf andere systemen is niet mogelijk.",
+    "translation": "Importez un plan de salle que vous ou une autre unité avez précédemment exporté de Keeo. L'importation à partir d'autres systèmes n'est pas possible."
+  },
+  "5d1da89a-aa00-4953-aa59-53c0342c5c1a": {
+    "original": "Kies voor welke eenheden deze standaard leeftijdsgroep beschikbaar is.",
+    "translation": "Choisissez pour quelles unités ce groupe d'âge standard est disponible."
+  },
+  "5d507258-d6dd-4b3b-a6ef-1b14c6db14bc": {
+    "original": "Je kan meerdere Stripe accounts aanmaken en koppelen aan jouw eenheid. Voor alle inschrijvingen en per webshop kan je een ander Stripe account selecteren bij de betaalinstellingen.",
+    "translation": "Vous pouvez créer plusieurs comptes Stripe et les lier à votre unité. Pour toutes les inscriptions et par boutique en ligne, vous pouvez sélectionner un autre compte Stripe dans les paramètres de paiement."
+  },
+  "5d75775a-a4b5-426a-aea9-b1e75ee5f055": {
+    "original": "bv. https://www.eenheid.be",
+    "translation": "par ex. https://www.unité.be"
+  },
+  "5dbc2f08-f2d0-43bc-973d-b789077ca3ad": {
+    "original": "Welkom op het beheerdersportaal van Keeo. Hier kan je jouw eenheid beheren, leden bekijken, en instellingen aanpassen.",
+    "translation": "Bienvenue sur le portail administrateur de Keeo. Ici, vous pouvez gérer votre unité, consulter les membres et modifier les paramètres."
+  },
+  "5dd0bc69-83ba-4ee7-99e9-141d0cdf5a84": {
+    "original": "Eenheidsnummer",
+    "translation": "Numéro d'unité"
+  },
+  "5e60cf0f-5489-4e90-8dab-97c56c2e989c": {
+    "original": "Je probeert een doorverwijzingslink met korting van een andere eenheid te gebruiken, maar je hebt al een eenheid geregistreerd. Een doorverwijzingslink is enkel geldig voor de eerste eenheid die je op Keeo aansluit.",
+    "translation": "Vous essayez d'utiliser un lien de redirection avec réduction d'une autre unité, mais vous avez déjà enregistré une unité. Un lien de redirection n'est valable que pour la première unité que vous connectez à Keeo."
+  },
+  "5e99e2aa-a240-4894-8de3-f8f0fef20068": {
     "original": "Eenheidsnummer",
     "translation": "Numéro d'unité"
   },
@@ -83,453 +443,245 @@
     "original": "De link naar de website van deze eenheid.",
     "translation": "Le lien vers le site web de cette unité."
   },
-  "e866488b-bc8d-481f-900b-9cf1779f44b8": {
-    "original": "De vervaldatum ligt tussen de start en einddatum en is optioneel. De aansluiting blijft nog geldig na deze datum, maar in het systeem wordt het gedeeltelijk beschouwd als 'verlopen'. Gebruik dit om een aansluiting nog even te laten doorlopen in het nieuwe scoutsjaar.",
-    "translation": "La date d'expiration se situe entre la date de début et la date de fin et est facultative. La connexion reste valable après cette date, mais le système la considère partiellement comme 'expirée'. Utilisez ceci pour prolonger une connexion dans la nouvelle année scoute."
-  },
-  "0b7c21d5-b9ed-4ddc-9370-7f58255f4eba": {
-    "original": "Instellen voor scoutsjaar",
-    "translation": "Paramètres pour l'année scoute"
-  },
-  "3b257435-9ae7-4840-8f0f-f71318013935": {
-    "original": "Je hebt al voor elk scoutsjaar instellingen toegevoegd",
-    "translation": "Vous avez déjà ajouté des paramètres pour chaque année scoute"
-  },
-  "ca303b26-d586-4e46-ad0d-af968d252261": {
-    "original": "Ben je zeker dat je dit scoutsjaar wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer cette année scoute ?"
-  },
-  "9ebbdbf3-f76b-4f9a-89e2-936f56a75723": {
-    "original": "Verwijder scoutsjaar",
-    "translation": "Supprimer l'année scoute"
-  },
-  "ef07b66f-6b78-4c47-9599-d8847ea97aaa": {
-    "original": "Beheer de scoutsjaren en start een nieuw scoutsjaar op",
-    "translation": "Gérez les années scoutes et démarrez une nouvelle année scoute."
-  },
-  "7118def6-da94-4fce-9398-2131b31acf01": {
-    "original": "Scoutsjaar bewerken",
-    "translation": "Modifier l'année scoute"
-  },
-  "1929850b-e0ad-4b35-b3e5-6652dd4774e2": {
-    "original": "Nieuw scoutsjaar",
-    "translation": "Nouvelle année scoute"
-  },
-  "c6f24e63-4735-43c4-a93a-405755ba70c2": {
-    "original": "Scoutsjaar maken",
-    "translation": "Créer une année scoute"
-  },
-  "1cbf76ca-79d3-4f12-8f09-dc585f5e9da3": {
-    "original": "Scoutsjaren",
-    "translation": "Années scoutes"
-  },
-  "daf8a992-77cd-4c20-8bca-5c692fd1e431": {
-    "original": "bv. https://www.eenheid.be/privacy",
-    "translation": "par ex. https://www.unité.be/privacy"
-  },
-  "5d75775a-a4b5-426a-aea9-b1e75ee5f055": {
-    "original": "bv. https://www.eenheid.be",
-    "translation": "par ex. https://www.unité.be"
-  },
-  "adf3218e-a785-4dc9-8d2a-70031c6c8bee": {
-    "original": "Zoek jouw eenheid",
-    "translation": "Recherchez votre unité"
-  },
-  "ec0c482e-0528-499f-82fa-b081bf708ded": {
-    "original": "Dit lid is bij geen enkele eenheid ingeschreven voor het huidige scoutsjaar en kan daardoor niet aangesloten worden",
-    "translation": "Ce membre n'est inscrit dans aucune unité pour l'année scoute en cours et ne peut donc pas être connecté"
-  },
-  "2f645618-a9a9-4598-883d-6f1991ae379d": {
-    "original": "Geen rechtspersoonlijkheid (feitelijke eenheid)",
-    "translation": "Pas de personnalité morale (unité de fait)"
-  },
-  "d687b491-be68-4e5b-9acb-e2c090951c23": {
-    "original": "bv. jouweenheid.be",
-    "translation": "par ex. votreunité.be"
-  },
-  "971f8200-0bfd-4b95-9feb-629044d9af7f": {
-    "original": "Voeg hier de e-mailadressen van jouw eenheid toe. Als je e-mailadressen hebt met jouw eigen domeinnaam (bv. info@mijneenheid.be), kan je e-mails versturen vanaf dat e-mailadres als je jouw domeinnaam eerst toevoegt (kan bij instellingen). Andere e-mails worden vanaf @stamhoofd.email verstuurd. Voeg enkel e-mailadressen toe waar je e-mails op kan ontvangen.",
-    "translation": "Ajoutez ici les adresses e-mail de votre unité. Si vous avez des adresses e-mail avec votre propre nom de domaine (par ex. info@monunité.be), vous pouvez envoyer des e-mails à partir de cette adresse e-mail si vous ajoutez d'abord votre nom de domaine (possible dans les paramètres). Les autres e-mails seront envoyés à partir de @stamhoofd.email. Ajoutez uniquement les adresses e-mail sur lesquelles vous pouvez recevoir des e-mails."
-  },
-  "08ed827b-4ea2-4abd-966b-672d7dad3b23": {
-    "original": "Om online betalingen te activeren moet je eerst allerlei documenten aanleveren (alle instructies via knop hieronder), de activatie hiervan duurt ongeveer 1 - 3 weken. Hiermee kan je betalingen via Bancontact, Payconiq, iDEAL en kredietkaart activeren. Kredietkaart is enkel mogelijk als je eenheid een ondernemingsnummer heeft.",
-    "translation": "Pour activer les paiements en ligne, vous devez d'abord fournir divers documents (toutes les instructions via le bouton ci-dessous), l'activation prend environ 1 à 3 semaines. Cela vous permet d'activer les paiements via Bancontact, Payconiq, iDEAL et carte de crédit. La carte de crédit n'est possible que si votre unité a un numéro d'entreprise."
-  },
-  "57e20ed4-d50a-4947-96fc-57958550dcfa": {
-    "original": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijneenheid.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
-    "translation": "Vous pouvez également définir votre propre nom de domaine (par ex. inscription.monunité.be). Pour cela, vous devez avoir déjà acheté le nom de domaine ; c'est généralement déjà le cas si vous avez déjà votre propre site web."
-  },
-  "c78c4a14-8796-4ddc-a449-33a38ef3a6ac": {
-    "original": "Je kan deze link ook personaliseren met jouw eigen domeinnaam via Instellingen > Personaliseren. bv. inschrijven.mijneenheid.be",
-    "translation": "Vous pouvez également personnaliser ce lien avec votre propre nom de domaine via Paramètres > Personnaliser. par ex. inscription.monunité.be"
-  },
-  "d5d2e25f-588e-496e-925f-f7e375c3888a": {
-    "original": "Mijn eenheid",
-    "translation": "Mon unité"
-  },
-  "34aff020-6017-4c23-85b1-44a692988ee6": {
-    "original": "Kies een eenheid",
-    "translation": "Choisissez une unité"
-  },
-  "4835dfd4-10b0-4e91-b581-d1b3eefa73f7": {
-    "original": "Alle eenheiden",
-    "translation": "Toutes les unités"
-  },
-  "d94db7a1-4167-440a-b556-62ff3291555b": {
-    "original": "Eenheiden",
-    "translation": "Unités"
-  },
-  "2f325358-6e2f-418c-9fea-31a14abbc17a": {
-    "original": "Eenheid",
-    "translation": "Unité"
-  },
-  "c43f09fa-5f39-4e1a-bfbf-80a0d2d4bd6c": {
-    "original": "Zoek een eenheid",
-    "translation": "Rechercher une unité"
-  },
-  "2669729c-718d-49a1-9e4f-b3a65a6479a8": {
-    "original": "Zoek een eenheid waar je {firstName} wilt inschrijven",
-    "translation": "Recherchez une unité où vous souhaitez inscrire {firstName}"
-  },
-  "735ec53c-5b23-469a-9365-d1216e1c739b": {
-    "original": "Geen eenheiden gevonden. Probeer te zoeken op postcode of naam.",
-    "translation": "Aucune unité trouvée. Essayez de rechercher par code postal ou par nom."
-  },
-  "4697c731-26fd-4ba5-8aeb-0f5b8385a54b": {
-    "original": "Zoek een eenheid",
-    "translation": "Rechercher une unité"
-  },
-  "8012abfe-4a7e-4864-88e5-fcf02f851705": {
-    "original": "De link naar de website van jouw eenheid.",
-    "translation": "Le lien vers le site web de votre unité."
-  },
-  "24a048f6-3c97-4c80-87b7-eccc244b5d12": {
-    "original": "Zoek jouw eenheid",
-    "translation": "Recherchez votre unité"
-  },
-  "49753d6a-7ca4-4145-8024-0be05a9ab063": {
-    "original": "Deze beveiligingscode is ongeldig. Probeer het opnieuw of neem contact op met jouw eenheid om de juiste code te ontvangen.",
-    "translation": "Ce code de sécurité est invalide. Veuillez réessayer ou contactez votre unité pour recevoir le code correct."
-  },
-  "76b00f58-a587-431f-9c28-1b86d394fc26": {
-    "original": "Stel in welke soorten lokalen eenheden kunnen toevoegen",
-    "translation": "Définissez les types de locaux que les unités peuvent ajouter"
-  },
-  "f3fc4e4d-76ee-4ca0-b712-9d2c7e5395fc": {
-    "original": "Het maximum geldt per eenheid",
-    "translation": "Le maximum s'applique par unité"
-  },
-  "9d283cbb-7ba2-4a16-88ec-ff0c19f39674": {
-    "original": "Eenheidsnummer",
-    "translation": "Numéro d'unité"
-  },
-  "88119ffc-b692-4222-8217-75a9fa64f675": {
-    "original": "Reken een bedrag aan aan de {count} geselecteerde eenheden.",
-    "translation": "Facturez un montant aux {count} unités sélectionnées."
-  },
-  "51c27c5e-c2be-441b-a571-7bf573ee6848": {
-    "original": "Reken een bedrag aan aan de geselecteerde eenheid.",
-    "translation": "Comptabilisez un montant à l'unité sélectionnée."
-  },
-  "b66501e0-f6de-4259-95ef-13590b24182b": {
-    "original": "eenheid",
-    "translation": "unité"
-  },
-  "05723781-9357-41b2-9fb8-cb4f80dde7f9": {
-    "original": "Eenheidsnummer",
-    "translation": "Numéro d'unité"
-  },
-  "4bff53d6-7455-45fc-aa6d-ae0bafbe0b47": {
-    "original": "Elke eenheid moet per inschrijvingsgroep een standaard leeftijdsgroep koppelen. Op die manier kan de benaming van de eenheid gekoppeld worden aan de algemene benaming van de koepel.",
-    "translation": "Chaque unité doit associer un groupe d'âge standard par groupe d'inscription. De cette façon, le nom de l'unité peut être lié au nom général de la fédération."
-  },
-  "919139ab-1103-4e1b-aaf7-94cfec03a9e3": {
-    "original": "Alle eenheiden in {name}",
-    "translation": "Toutes les unités dans {name}"
-  },
-  "322dd34f-a4ec-4065-be53-040725915e20": {
-    "original": "Scoutsjaar",
-    "translation": "Année scoute"
-  },
-  "5e99e2aa-a240-4894-8de3-f8f0fef20068": {
-    "original": "Eenheidsnummer",
-    "translation": "Numéro d'unité"
-  },
-  "6bf80a05-84b0-47ba-ad41-66e2a106669b": {
-    "original": "Filter alle eenheiden die een lid hebben die aan deze voorwaarden voldoet.",
-    "translation": "Filtrez toutes les unités qui ont un membre qui répond à ces conditions."
-  },
-  "b789017f-58d2-438b-b73a-2a4d075e3c5b": {
-    "original": "Unieke eenheden",
-    "translation": "Unités uniques"
-  },
-  "6e884f27-427f-4f85-914c-d5c2780253b0": {
-    "original": "Eenheden",
-    "translation": "Unités"
-  },
   "5fe7a400-8c6a-42ba-b920-c8518e60e091": {
     "original": "Beperk welke eenheiden hun leden kunnen aansluiten met deze aansluiting.",
     "translation": "Limitez les unités qui peuvent affilier leurs membres avec cette affiliation."
   },
-  "02017e6d-47b0-4867-b590-be85a9b72008": {
-    "original": "Beperk eenheiden",
-    "translation": "Limiter les unités"
+  "601c15e5-cfb0-4c34-af03-7dfc55e39d36": {
+    "original": "Je kan geen aansluitingen maken voor een andere eenheid",
+    "translation": "Vous ne pouvez pas créer d’affiliations pour une autre unité"
   },
-  "cd0975fc-75c4-4c1e-b80a-f611f0992caa": {
-    "original": "Alle eenheden",
-    "translation": "Toutes les unités"
+  "60871aaf-1b90-4a7c-a755-a4aeb0585a8e": {
+    "original": "Dit lid is niet aangesloten bij FOS Open Scouting, en is daardoor ook niet verzekerd",
+    "translation": "Ce membre n'est pas affilié à FOS Open Scouting et n'est donc pas assuré."
   },
-  "e6405d38-2bd8-4e24-8e35-24f4daea2a37": {
-    "original": "Gegevens van eenheiden",
-    "translation": "Données des unités"
+  "6110db94-d89d-43d0-9c1c-d3e71253a795": {
+    "original": "De DNS-instellingen van de domeinnaam van een eenheid zijn correct ingesteld.",
+    "translation": "Les paramètres DNS du nom de domaine d’une unité sont correctement configurés."
   },
-  "f5bf8b84-52d2-49a3-b4b4-73573b320739": {
-    "original": "Kies welke informatie je verzamelt van eenheiden",
-    "translation": "Choisissez les informations que vous collectez auprès des unités"
+  "6149c3a0-74ee-476d-835f-94a4ac59ba34": {
+    "original": "Eenheidsnaam",
+    "translation": "Nom d'unité"
   },
-  "d185d3ca-e20f-43a2-a79f-f77404b8f33a": {
-    "original": "Naam van jouw eenheid",
-    "translation": "Nom de votre unité"
-  },
-  "cb51b737-c4cf-4ea7-aeb5-b5736a43c333": {
-    "original": "De naam van je eenheid",
-    "translation": "Le nom de votre unité"
-  },
-  "840ac72d-d4b3-40ea-afb4-b0109e88c640": {
-    "original": "Naam van je eenheid (kort)",
-    "translation": "Nom de votre unité (court)"
-  },
-  "2803b7f1-be08-48ec-8b4c-2dced27f7113": {
-    "original": "Breid het aantal gegevens van eenheiden zelf nog uit.",
-    "translation": "Élargissez vous-même le nombre de données des unités."
-  },
-  "5959a6a9-064a-413c-871f-c74a145ed569": {
-    "original": "Oeps, je kan nog geen evenementen met inschrijvingen aanmaken in deze periode. Dit scoutsjaar is nog niet aangemaakt in het systeem.",
-    "translation": "Oups, vous ne pouvez pas encore créer d'événements avec inscriptions pendant cette période. Cette année scoute n'est pas encore créée dans le système."
-  },
-  "d41cdbe3-57e3-4a2e-83bc-cb9e65c9c840": {
-    "original": "Je kan een functie enkel toekennen aan leden die zijn ingeschreven in het huidige scoutsjaar",
-    "translation": "Vous ne pouvez attribuer une fonction qu'aux membres inscrits à l'année scoute actuelle"
-  },
-  "e821b318-928b-4eee-9bca-d00366554792": {
-    "original": "De aansluitingsperiode moet binnen de periode van het gekozen scoutsjaar liggen",
-    "translation": "La période d'affiliation doit se situer dans la période de l'année scoute choisie"
-  },
-  "3754b38e-3938-4589-801a-450ba0844990": {
-    "original": "Instellingen per scoutsjaar",
-    "translation": "Paramètres par année scoute"
-  },
-  "8004af94-7b57-4ce2-aa9b-a6658684116d": {
-    "original": "Per scoutsjaar kan je een prijs bepalen voor deze aansluiting, inclusief de start- en einddata.",
-    "translation": "Par année scoute, vous pouvez déterminer un prix pour cette affiliation, y compris les dates de début et de fin."
-  },
-  "cc48e00f-2c6b-4f4d-9bae-65a889364ea3": {
-    "original": "Er kunnen geen wijzigingen meer aangebracht worden aan inschrijvingen in dit scoutsjaar.",
-    "translation": "Aucune modification supplémentaire ne peut être apportée aux inscriptions de cette année scoute."
-  },
-  "b78d9c9e-9099-4fb6-93e1-6bf58e39165f": {
-    "original": "De categorieën en leeftijdsgroepen van de eenheden worden gedupliceerd naar het nieuwe scoutsjaar.",
-    "translation": "Les catégories et les groupes d'âge des unités sont dupliqués vers la nouvelle année scoute."
-  },
-  "c95eb07d-15e3-45da-b2c2-7754c134ae65": {
-    "original": "De leden moeten zich opnieuw inschrijven voor het nieuwe scoutsjaar.",
-    "translation": "Les membres doivent s'inscrire à nouveau pour la nouvelle année scoute."
-  },
-  "9de0900d-9daa-48e5-ab82-496c61dfc5db": {
-    "original": "Alle leeftijdsgroepen worden gesloten (tenzij de eenheid al eerder overschakelde naar dit scoutsjaar)",
-    "translation": "Tous les groupes d'âge sont fermés (sauf si l'unité est déjà passée à cette année scoute)"
-  },
-  "c28ace1d-50ff-4f1a-b403-bd5ab55d9dcb": {
-    "original": "Scoutsjaren",
-    "translation": "Années scoutes"
-  },
-  "671147bd-cf0e-42fc-b456-18ce7d75b867": {
-    "original": "Alle eenheden worden nu overgezet op het nieuw scoutsjaar. Dit kan even duren, mogelijks moet je de pagina nog even herladen om alle laatste wijzigingen correct te zien.",
-    "translation": "Toutes les unités sont désormais transférées vers la nouvelle année scoute. Cela peut prendre un certain temps, vous devrez peut-être recharger la page pour voir toutes les dernières modifications correctement."
-  },
-  "7dd9a44e-8a47-4b74-9d57-d20b1efb706f": {
-    "original": "Dit scoutsjaar is vergrendeld. Je kan geen wijzigingen meer aanbrengen aan inschrijvingen.",
-    "translation": "Cette année scoute est verrouillée. Vous ne pouvez plus apporter de modifications aux inscriptions."
-  },
-  "410f13a0-286d-4f7a-b6f6-aef22327056b": {
-    "original": "Instellen als huidig scoutsjaar",
-    "translation": "Définir comme année scoute actuelle"
-  },
-  "b5f857ee-6c3b-43df-866c-99e7e0954eb1": {
-    "original": "Hoera! Tijd voor een nieuw scoutsjaar.",
-    "translation": "Hourra ! Il est temps pour une nouvelle année scoute."
-  },
-  "c5d21881-b70a-489e-bce9-5bb3d24b6f76": {
-    "original": "Alle leden moeten opnieuw inschrijven voor het nieuwe scoutsjaar, of schrijf je zelf opnieuw in",
-    "translation": "Tous les membres doivent s'inscrire à nouveau pour la nouvelle année scoute, ou inscrivez-vous vous-même à nouveau"
-  },
-  "275f674b-bf05-4d34-a1ff-105a1563fbcc": {
-    "original": "Je kan pas 2 maand voor de start van het nieuwe scoutsjaar overschakelen.",
-    "translation": "Vous ne pouvez basculer que 2 mois avant le début de la nouvelle année scoute."
-  },
-  "57491b1b-a306-479e-9bc0-f0d4839a7f5c": {
-    "original": "Stappenplan opstart scoutsjaar",
-    "translation": "Guide étape par étape pour le démarrage de l'année scoute"
-  },
-  "1316502a-5502-49ec-96fe-93e60cb94268": {
-    "original": "Filter op leden die een inschrijving (zowel huidig scoutsjaar of in een afgelopen scoutsjaar) heeft die aan deze voorwaarden voldoet.",
-    "translation": "Filtrez les membres qui ont une inscription (année scoute actuelle ou année scoute passée) qui répond aux conditions."
-  },
-  "e2130593-e64d-4f3a-bb16-75ba4ed7604e": {
-    "original": "Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorig scoutsjaar van gelijk welke inschrijvingsgroep.",
-    "translation": "Les membres sont considérés comme existants s'ils sont inscrits pour une année scoute précédente de n'importe quel groupe d'inscription."
-  },
-  "fd52fa36-16e6-4106-807c-c387bc0acc0e": {
-    "original": "Geen eenheden beschikbaar in dit scoutsjaar",
-    "translation": "Aucune unité disponible dans cette année scoute"
-  },
-  "9685e11f-a4d0-4709-9f5e-875957ad269b": {
-    "original": "Onbekend scoutsjaar",
-    "translation": "Année scoute inconnue"
-  },
-  "b19c1fb0-f1a7-4435-9150-01bb2bb0799c": {
-    "original": "Dit aansluitingstype is (nog) niet beschikbaar voor dit scoutsjaar",
-    "translation": "Ce type d'affiliation n'est pas (encore) disponible pour cette année scoute"
-  },
-  "022aad3d-6250-4000-9336-4ae7e8e75c23": {
-    "original": "Alle leden met deze functie, krijgen automatisch toegangsrechten tot de leeftijdsgroep van een eenheid waarvoor de functie werd toegevoegd - enkel voor één specifiek scoutsjaar.",
-    "translation": "Tous les membres ayant cette fonction obtiennent automatiquement des droits d'accès au groupe d'âge d'une unité pour laquelle la fonction a été ajoutée - uniquement pour une année scoute spécifique."
-  },
-  "f02ad9a5-f0b4-483e-961c-491ddf7d6f6a": {
-    "original": "Ledenportaal",
-    "translation": "Portail des membres"
-  },
-  "68c40b9e-30d7-4ce5-8069-f7ca93221906": {
-    "original": "Adres van je eenheid",
-    "translation": "Adresse de votre unité"
-  },
-  "ffdbd596-e9c8-4c67-bfdf-41a5199de133": {
-    "original": "De link naar de website van jouw eenheid.",
-    "translation": "Le lien vers le site web de votre unité."
-  },
-  "b263fa75-5a47-43a6-94a5-95eeac94567f": {
-    "original": "Sommige inschrijvingen werden door een eenheid betaald. In dat geval zal de annuleringskost aangerekend worden aan de betalende eenheid (van organisator naar betalende eenheid) én het lid (van de betalende eenheid naar lid).",
-    "translation": "Certaines inscriptions ont été payées par une unité. Dans ce cas, les frais d'annulation seront facturés à l'unité payante (de l'organisateur à l'unité payante) et au membre (de l'unité payante au membre)."
-  },
-  "cd798189-d5c8-4b79-98f7-a68786ab288c": {
-    "original": "Eenheidsnummer",
-    "translation": "Numéro d'unité"
-  },
-  "3c584bf6-7e0a-4348-a5e9-2bc0bcb00bde": {
-    "original": "Schulden van eenheiden",
-    "translation": "Dettes des unités"
-  },
-  "a7585599-1c67-4de7-b552-f5b78c7385db": {
-    "original": "Schakel dit in om leden en eenheiden automatisch te verwittigen als hun openstaand bedrag stijgt.",
-    "translation": "Activez cette option pour avertir automatiquement les membres et les unités si leur montant restant dû augmente."
-  },
-  "6b39d554-a4a7-489c-84b5-3f430457dd50": {
-    "original": "Contactpersonen voor schulden van andere eenheiden",
-    "translation": "Personnes de contact pour les dettes d'autres unités"
-  },
-  "0998a455-9ffc-4222-8432-ef7681908ad7": {
-    "original": "Als een andere eenheid schulden aan jouw eenheid heeft, kan je hiervoor ook automatische e-mails versturen. Dit gebeurt op basis van functies die je hieronder kan instellen.",
-    "translation": "Si une autre unité a des dettes envers votre unité, vous pouvez également envoyer des e-mails automatiques. Cela se fait sur la base de fonctions que vous pouvez définir ci-dessous."
-  },
-  "f1248bd5-36f4-40fd-9467-08bda59127d6": {
-    "original": "Lijst van alle eenheden die nog een openstaand bedrag hebben tegenover {name}",
-    "translation": "Liste de toutes les unités qui ont encore un montant restant dû envers {name}"
-  },
-  "4a2a630f-3396-404f-9316-d660df9935a9": {
-    "original": "Alle aansluitingen die (al dan niet automatisch) aan leden worden toegevoegd, worden pas toegevoegd aan het openstaande bedrag van een eenheid na een manuele actie. Daarna kan een eenheid het bedrag betalen via een online betaling in hun beheerdersportaal.",
-    "translation": "Toutes les affiliations qui sont (automatiquement ou non) ajoutées aux membres ne sont ajoutées au montant restant dû d'une unité qu'après une action manuelle. Ensuite, une unité peut payer le montant via un paiement en ligne dans son portail administrateur."
-  },
-  "f1931dcf-219f-4ca2-935b-d5a6747ddbdb": {
-    "original": "De aansluitingkosten worden altijd aangerekend via een organisatie/eenheid die de koepel vertegenwoordigt. De betaalinstellingen en facturatiegegevens van die eenheid worden gebruikt voor het verzamelen van alle betalingen. Op die manier kan je de beschikbare betaalmethodes en betaalaccounts configureren.",
-    "translation": "Les frais d'affiliation sont toujours facturés via une organisation/unité qui représente la fédération. Les paramètres de paiement et les données de facturation de cette unité sont utilisés pour collecter tous les paiements. De cette façon, vous pouvez configurer les méthodes de paiement et les comptes de paiement disponibles."
-  },
-  "550e876b-f397-44a5-9e0a-fb5ce6df3a40": {
-    "original": "Gebruik de boekhoudmodule van deze eenheid om een zicht te krijgen op alle betalingen.",
-    "translation": "Utilisez le module de comptabilité de cette unité pour avoir un aperçu de tous les paiements."
-  },
-  "f4c0da5a-03a8-4be2-9ae1-ea049b5b46af": {
-    "original": "Er is nog geen verantwoordelijke eenheid ingesteld. Kies een eenheid die verantwoordelijk is voor het verzamelen van de aansluitingskosten.",
-    "translation": "Aucune unité responsable n'a encore été définie. Choisissez une unité responsable de la collecte des frais d'affiliation."
-  },
-  "78f9f25f-e02d-4310-af9e-87b075aa1232": {
-    "original": "Kies een eenheid die verantwoordelijk is voor het verzamelen van de aansluitingskosten",
-    "translation": "Choisissez une unité responsable de la collecte des frais d'affiliation"
-  },
-  "4be45e47-0ee2-43cd-b719-8a60513f0965": {
-    "original": "Dit is een standaardinstelling. Een eenheid kan deze instellingen nog aanpassen. Deze instelling dient dus vooral als standaardinstelling en om te communiceren richting eenheden.",
-    "translation": "Il s'agit d'un paramètre standard. Une unité peut encore modifier ces paramètres. Ce paramètre sert donc surtout de paramètre standard et à communiquer avec les unités."
-  },
-  "ea927f14-835b-43f6-bf6e-3e689b5a0824": {
-    "original": "*Hoe oud het lid wordt in het kalenderjaar van de start van een scoutsjaar (dus leeftijd op 31/12/{startYear}). Ter referentie: leden uit het eerste leerjaar zijn 6 jaar op 31 december. Leden uit het eerste secundair zijn 12 jaar op 31 december.",
-    "translation": "*Âge du membre dans l'année civile du début d'une année scoute (donc âge au 31/12/{startYear}). À titre de référence : les élèves de première année ont 6 ans au 31 décembre. Les élèves de première secondaire ont 12 ans au 31 décembre."
-  },
-  "18a41eda-92fd-46a6-acc1-fc35536b86b4": {
-    "original": "Beperk tot bepaalde eenheden (tags)",
-    "translation": "Limiter à certaines unités (tags)"
-  },
-  "5d1da89a-aa00-4953-aa59-53c0342c5c1a": {
-    "original": "Kies voor welke eenheden deze standaard leeftijdsgroep beschikbaar is.",
-    "translation": "Choisissez pour quelles unités ce groupe d'âge standard est disponible."
-  },
-  "8ecaf93e-e872-4556-9067-f89b3f81332e": {
-    "original": "Een eenheid kan deze template aanpassen. Deze template wordt gebruikt als er geen lokale template is.",
-    "translation": "Une unité peut modifier ce modèle. Ce modèle est utilisé s'il n'y a pas de modèle local."
-  },
-  "07d18e1b-2935-4945-9595-50e16a929b19": {
-    "original": "Voeg zelf nog persoonsgegevens toe die voor alle eenheden beschikbaar zijn. Je kan deze vervolgens verplichten voor alle leden die inschrijven bij gelijk welke standaard-leeftijdsgroep, of deze verplichten per standaard-leeftijdsgroep (via de instellingen van elke standaard-leeftijdsgroep). Indien niet ingeschakeld kunnen eenheden deze ook nog inschakelen volgens hun wensen.",
-    "translation": "Ajoutez vous-même des données personnelles disponibles pour toutes les unités. Vous pouvez ensuite les rendre obligatoires pour tous les membres qui s'inscrivent à n'importe quel groupe d'âge standard, ou les rendre obligatoires par groupe d'âge standard (via les paramètres de chaque groupe d'âge standard). Si cette option n'est pas activée, les unités peuvent également l'activer selon leurs souhaits."
-  },
-  "aad47217-df26-43ce-a43c-896697d5fbd4": {
-    "original": "Voeg eigen functies toe die enkel van toepassing zijn in je eigen eenheid.",
-    "translation": "Ajoutez vos propres fonctions qui ne s'appliquent que dans votre propre unité."
-  },
-  "e6da382b-6acc-4a77-ab74-ece7ea002d5f": {
-    "original": "Deze functies worden gekoppeld aan een lid samen met een eenheid, door een hoofdbeheerder van die eenheid. Een eenheid kan zelf ook nog groepseigenfuncties toevoegen om deze uit te breiden.",
-    "translation": "Ces fonctions sont liées à un membre ainsi qu'à une unité, par un administrateur principal de cette unité. Une unité peut également ajouter des fonctions propres au groupe pour les étendre."
+  "61f434a9-49e6-4a92-b613-965dfd807dca": {
+    "original": "Aansluiting FOS Open Scouting",
+    "translation": "Connexion FOS Open Scouting"
   },
   "62103514-05f5-4dc0-a5cc-c9321f21c63d": {
     "original": "Je kan geen aansluitingen meer toevoegen in dit scoutsjaar",
     "translation": "Vous ne pouvez plus ajouter d'affiliations dans cette année scoute"
   },
-  "1f1d657d-bc73-4cae-9025-b3ec67a705e7": {
-    "original": "Je kan geen aansluitingen meer verwijderen in dit scoutsjaar",
-    "translation": "Vous ne pouvez plus supprimer d'affiliations dans cette année scoute"
+  "62246c37-15c7-4f7d-94e2-7476f971c8da": {
+    "original": "Betalen van inschrijvingsgelden of webshops voor een eenheid via Keeo (partner).",
+    "translation": "Paiement des frais d'inscription ou des boutiques en ligne pour une unité via Keeo (partenaire). "
   },
-  "31e91d3b-16e5-4608-9390-75e61d4d090d": {
-    "original": "Je kan het huidig scoutsjaar hier wijzigen. Zorg dat je voor dit scoutsjaar alle aansluitingen hebt ingesteld. Ga daarvoor naar 'aansluitingen en verzekeringen' en voeg het scoutsjaar toe en stel de nieuwe prijzen en periodes correct in.",
-    "translation": "Vous pouvez modifier l'année scoute actuelle ici. Assurez-vous d'avoir défini toutes les affiliations pour cette année scoute. Pour cela, allez à « affiliations et assurances » et ajoutez l'année scoute, puis définissez correctement les nouveaux prix et les nouvelles périodes."
+  "6348587f-8d3e-4a13-8b52-5fa459366fee": {
+    "original": "Bij een routinecontrole blijken de DNS-instellingen van de domeinnaam van een eenheid ongeldig te zijn.",
+    "translation": "Lors d’un contrôle de routine, il s’avère que les paramètres DNS du nom de domaine d’une unité sont invalides."
   },
-  "b422c6f2-be24-4edd-aa99-a2d72d59c496": {
-    "original": "Dit kan op meerdere niveau's worden uitgebreid: per standaard leeftijdsgroep van de koepel, op lokaal niveau van een eenheid en per leeftijdsgroep, wachtlijst of activiteit van een eenheid (of activiteit op nationaal niveau).",
-    "translation": "Cela peut être étendu à plusieurs niveaux : par groupe d'âge standard de la fédération, au niveau local d'une unité et par groupe d'âge, liste d'attente ou activité d'une unité (ou activité au niveau national)."
+  "6435b870-2298-49bb-bd28-904e864178d3": {
+    "original": "Bevestiging 3/3. Ben je 100% zeker dat je deze eenheid wilt verwijderen?",
+    "translation": "Confirmation 3/3. Êtes-vous sûr à 100 % de vouloir supprimer cette unité ?"
   },
-  "9c916015-e69c-44b3-a568-d0af15854787": {
-    "original": "Alle groepen worden overgezet op dit nieuwe scoutsjaar. Hoofdbeheerders kunnen het vorige scoutsjaar nog bekijken.",
-    "translation": "Tous les groupes sont transférés vers cette nouvelle année scoute. Les administrateurs principaux peuvent toujours consulter la précédente année scoute."
+  "64633f7b-2d6e-4ad2-abb1-e9dd77d9a81f": {
+    "original": "Alle betalingen, transactiekosten en uitbetalingen die via Keeo verliepen.",
+    "translation": "Tous les paiements, frais de transaction et paiements effectués via Keeo."
   },
-  "97616151-90c3-4644-8854-e228c4f355f5": {
-    "original": "Dit scoutsjaar is vergrendeld, je kan geen meldingen meer aanmaken voor deze periode",
-    "translation": "Cette année scoute est verrouillée, vous ne pouvez plus créer de notifications pour cette période"
+  "6507f89c-5c50-4c37-943f-ec17f5831cf0": {
+    "original": "Lid betaald aan individuele eenheid",
+    "translation": "Membre paie à l’unité individuelle"
   },
-  "16a3b696-f8da-4b2b-94b7-49c85ee1c38c": {
-    "original": "Dit scoutsjaar werd niet gevonden",
-    "translation": "Cette année scoute n'a pas été trouvée"
+  "65c9a375-fbca-4a27-9a42-01d49f7f9588": {
+    "original": "Klaas",
+    "translation": "Marc"
   },
-  "43cc054d-cf2f-432b-9259-e7764dc929e3": {
-    "original": "Dit scoutsjaar is vergrendeld, je kan geen meldingen meer aanpassen in deze periode",
-    "translation": "Cette année scoute est verrouillée, vous ne pouvez plus modifier les notifications pour cette période"
+  "65cbb5ad-4a6b-4800-a7db-59627fb576ef": {
+    "original": "Dit lid is niet aangesloten in {werkjaar} bij FOS Open Scouting, en is daardoor ook niet verzekerd.",
+    "translation": "Ce membre n'est pas affilié à FOS Open Scouting en {werkjaar} et n'est donc pas assuré."
   },
-  "f544b972-416c-471d-8836-d7f3b16f947d": {
-    "original": "Dit scoutsjaar is vergrendeld, je kan geen inschrijvingsgroepen meer toevoegen",
-    "translation": "Cette année scoute est verrouillée, vous ne pouvez plus ajouter de groupes d'inscription"
+  "662e1c09-b491-41a4-8e87-220fabc87eb1": {
+    "original": "Je kan geen inschrijvingen wijzigen van {group} omdat scoutsjaar {period} is afgesloten.",
+    "translation": "Vous ne pouvez pas modifier les inscriptions de {group} car l’année scoute {period} est clôturée."
+  },
+  "671147bd-cf0e-42fc-b456-18ce7d75b867": {
+    "original": "Alle eenheden worden nu overgezet op het nieuw scoutsjaar. Dit kan even duren, mogelijks moet je de pagina nog even herladen om alle laatste wijzigingen correct te zien.",
+    "translation": "Toutes les unités sont désormais transférées vers la nouvelle année scoute. Cela peut prendre un certain temps, vous devrez peut-être recharger la page pour voir toutes les dernières modifications correctement."
+  },
+  "67221175-c027-47be-bb1b-2a535cb9fc5f": {
+    "original": "Deze eenheid bestaat niet (meer)",
+    "translation": "Cette unité n’existe plus (ou plus)"
+  },
+  "6793e0dc-66f0-4a70-b8ac-fb41e2063871": {
+    "original": "Naam van deze eenheid (kort)",
+    "translation": "Nom de cette unité (court)"
+  },
+  "68914509-aa54-40c7-9f53-7b8a02149198": {
+    "original": "Keeo",
+    "translation": "Keeo"
+  },
+  "68c40b9e-30d7-4ce5-8069-f7ca93221906": {
+    "original": "Adres van je eenheid",
+    "translation": "Adresse de votre unité"
+  },
+  "6a63ceb0-5926-42db-bb56-4d3a6bd81f7a": {
+    "original": "Buurteenheid",
+    "translation": "Unité de quartier"
+  },
+  "6ad28fe1-da51-4538-90a3-eb42553b7057": {
+    "original": "Studenteneenheid",
+    "translation": "Unité étudiante"
+  },
+  "6ade2adb-91c3-4aa4-95d4-fd4550ec98f4": {
+    "original": "beschrijving van je eenheid",
+    "translation": "description de votre unité"
+  },
+  "6b39d554-a4a7-489c-84b5-3f430457dd50": {
+    "original": "Contactpersonen voor schulden van andere eenheiden",
+    "translation": "Personnes de contact pour les dettes d'autres unités"
+  },
+  "6bf80a05-84b0-47ba-ad41-66e2a106669b": {
+    "original": "Filter alle eenheiden die een lid hebben die aan deze voorwaarden voldoet.",
+    "translation": "Filtrez toutes les unités qui ont un membre qui répond à ces conditions."
+  },
+  "6e675a7d-b124-4507-bf0c-9b70013e98ca": {
+    "original": "Er bestaat al een eenheid met dezelfde URI. Pas deze aan zodat deze uniek is, en controleer of deze eenheid niet al bestaat.",
+    "translation": "Une unité avec le même URI existe déjà. Modifiez-la pour qu’elle soit unique et vérifiez que cette unité n’existe pas déjà."
+  },
+  "6e7658ac-437e-4e1e-9efd-03c0a5cbd5d9": {
+    "original": "website van je eenheid",
+    "translation": "site Web de votre unité"
+  },
+  "6e884f27-427f-4f85-914c-d5c2780253b0": {
+    "original": "Eenheden",
+    "translation": "Unités"
+  },
+  "6ef5e456-73f7-4baf-845c-4321094bbc6b": {
+    "original": "Er ging iets mis. Je hebt geen toegang tot deze eenheid.",
+    "translation": "Une erreur s’est produite. Vous n’avez pas accès à cette unité."
+  },
+  "6efffec1-322e-479d-b411-abbcbc4daf09": {
+    "original": "Gegevens van de eenheid",
+    "translation": "Coordonnées de l'unité"
+  },
+  "6f77926b-801a-477d-8254-78166ca8e6be": {
+    "original": "FOS De Goudvis op Keeo",
+    "translation": "FOS De Goudvis sur Keeo"
+  },
+  "7046d9e3-c3ce-406b-af52-fd2c81220867": {
+    "original": "Geen eenheiden gevonden. Probeer te zoeken op postcode of naam. Is jouw eenheid nog niet aangesloten? Maak dan eerst een eenheid aan.",
+    "translation": "Aucune unité trouvée. Essayez de rechercher par code postal ou par nom. Votre unité n’est pas encore connectée ? Créez d’abord une unité."
+  },
+  "7066aee7-9e51-4767-b288-460646ceca50": {
+    "original": "Nieuwe eenheid",
+    "translation": "Nouvelle unité"
+  },
+  "70894bb8-da5a-4f1a-929d-08f4479c4de3": {
+    "original": "Bevestig dat de betaalmethodes correct zijn ingesteld. Deze betaalmethodes worden gebruikt als leden inschrijven via Keeo.",
+    "translation": "Confirmez que les méthodes de paiement sont correctement configurées. Ces méthodes de paiement sont utilisées lorsque les membres s'inscrivent via Keeo."
+  },
+  "7118def6-da94-4fce-9398-2131b31acf01": {
+    "original": "Scoutsjaar bewerken",
+    "translation": "Modifier l'année scoute"
+  },
+  "711fa35a-e20e-4372-b807-09192714250e": {
+    "original": "Eenheidsnummer betalende groep",
+    "translation": "Numéro d'unité du groupe payant"
+  },
+  "719f31f6-cae0-41b0-97e6-ab8f5ff01d19": {
+    "original": "De velden {unlinkedAnswersText} werden manueel aangepast en zijn niet meer automatisch gelinkt met de waarden in Keeo",
+    "translation": "Les champs {unlinkedAnswersText} ont été modifiés manuellement et ne sont plus automatiquement liés aux valeurs de Keeo."
+  },
+  "735ec53c-5b23-469a-9365-d1216e1c739b": {
+    "original": "Geen eenheiden gevonden. Probeer te zoeken op postcode of naam.",
+    "translation": "Aucune unité trouvée. Essayez de rechercher par code postal ou par nom."
+  },
+  "74303d1c-2700-4340-816e-03cb9c3fb188": {
+    "original": "Adres van deze eenheid",
+    "translation": "Adresse de cette unité"
+  },
+  "75815048-939a-4ac1-a81c-f23fc3ec5006": {
+    "original": "Jouw eenheid betaalt {price} aan FOS Open Scouting.",
+    "translation": "Votre unité paie {price} à FOS Open Scouting."
+  },
+  "768afe13-5f57-4a82-a6ac-77c8999b8aeb": {
+    "original": "Keeo toont op enkele plaatsen het logo van Keeo op jullie webshop. Op die manier kunnen we Keeo bekender maken bij andere eenheiden, waardoor we Keeo ook betaalbaar kunnen houden. Je kan dit verminderen als je dit toch liever niet wilt.",
+    "translation": "Keeo affiche le logo de Keeo à certains endroits sur votre boutique en ligne. De cette façon, nous pouvons faire connaître Keeo à d'autres unités, ce qui nous permet également de maintenir Keeo abordable. Vous pouvez réduire cela si vous préférez."
+  },
+  "76b00f58-a587-431f-9c28-1b86d394fc26": {
+    "original": "Stel in welke soorten lokalen eenheden kunnen toevoegen",
+    "translation": "Définissez les types de locaux que les unités peuvent ajouter"
+  },
+  "78f9f25f-e02d-4310-af9e-87b075aa1232": {
+    "original": "Kies een eenheid die verantwoordelijk is voor het verzamelen van de aansluitingskosten",
+    "translation": "Choisissez une unité responsable de la collecte des frais d'affiliation"
+  },
+  "79cb9c3d-fe24-46cb-84bd-f1aa5fd625c5": {
+    "original": "is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de eenheid niet werd ingevuld.",
+    "translation": "n’est pas encore activé par Stripe. Vérifiez si toutes les informations nécessaires ont été saisies dans votre tableau de bord Stripe. Souvent, le problème est que l’adresse d’un des administrateurs manque dans Stripe ou que le lien du site Web de l’unité n’a pas été rempli."
+  },
+  "7a44f6f1-bb2f-4e46-93c2-afcae9db3f80": {
+    "original": "Opgelet: als je de link naar jouw webshop aanpast, werken mogelijks sommige links in al verzonden e-mails niet meer. De enige uitzondering hierop is als je van een standaard Keeo link overschakelt op een eigen domeinnaam (dan blijven oude links werken). Doe dit dus enkel in het begin van een verkoop.",
+    "translation": "Attention : si vous modifiez le lien vers votre boutique en ligne, certains liens dans les e-mails déjà envoyés risquent de ne plus fonctionner. La seule exception est si vous passez d'un lien Keeo standard à votre propre nom de domaine (dans ce cas, les anciens liens continueront à fonctionner). Ne faites cela qu'au début d'une vente."
+  },
+  "7b181446-ef56-4957-ad13-54644e6d0987": {
+    "original": "Dit is een ongeldige situatie. Een schuld moet tussen verschillende eenheiden zijn.",
+    "translation": "Ceci est une situation invalide. Une dette doit être entre différentes unités."
+  },
+  "7c2fee1a-0838-4346-848d-a3d984e70fdc": {
+    "original": "Het bedrag wordt achteraf door FOS Open Scouting aan je groep gefactureerd.",
+    "translation": "Le montant sera facturé ultérieurement à votre groupe par FOS Open Scouting."
+  },
+  "7c55cb44-8149-414a-a162-ca9859014e81": {
+    "original": "Je kan geen inschrijvingen wijzigen van {group} omdat dat scoutsjaar niet actief is.",
+    "translation": "Vous ne pouvez pas modifier les inscriptions de {group} car cette année scoute n’est pas active."
+  },
+  "7dd9a44e-8a47-4b74-9d57-d20b1efb706f": {
+    "original": "Dit scoutsjaar is vergrendeld. Je kan geen wijzigingen meer aanbrengen aan inschrijvingen.",
+    "translation": "Cette année scoute est verrouillée. Vous ne pouvez plus apporter de modifications aux inscriptions."
+  },
+  "8004af94-7b57-4ce2-aa9b-a6658684116d": {
+    "original": "Per scoutsjaar kan je een prijs bepalen voor deze aansluiting, inclusief de start- en einddata.",
+    "translation": "Par année scoute, vous pouvez déterminer un prix pour cette affiliation, y compris les dates de début et de fin."
+  },
+  "8012abfe-4a7e-4864-88e5-fcf02f851705": {
+    "original": "De link naar de website van jouw eenheid.",
+    "translation": "Le lien vers le site web de votre unité."
+  },
+  "81c91169-db1e-4819-8716-5382ffbaa43b": {
+    "original": "Het eenheidsnummer is een unieke code voor deze eenheid. Deze wordt in de URL-balk van de browser gebruikt.",
+    "translation": "Le numéro d'unité est un code unique pour cette unité. Il est utilisé dans la barre d'URL du navigateur."
+  },
+  "82af2364-c711-4e44-a871-9346c2cab66a": {
+    "original": "Je kan geen aansluitingen aanpassen in een ongeldig scoutsjaar",
+    "translation": "Vous ne pouvez pas modifier les affiliations dans une année scoute invalide"
+  },
+  "840ac72d-d4b3-40ea-afb4-b0109e88c640": {
+    "original": "Naam van je eenheid (kort)",
+    "translation": "Nom de votre unité (court)"
+  },
+  "8459189d-6f9a-4541-9fb7-7618061f1969": {
+    "original": "De eenheid is aangemaakt. Log in het beheerderportaal in om andere beheerders toegang te geven.",
+    "translation": "L'unité a été créée. Connectez-vous au portail administrateur pour donner accès à d'autres administrateurs."
+  },
+  "864675a2-7376-4a61-9c7d-f488e7906d7b": {
+    "original": "De URI van de eenheid is te lang",
+    "translation": "L’URI de l’unité est trop long"
   },
   "87a2582f-6de5-4b59-9395-7c49f8540659": {
     "original": "Eenheid",
     "translation": "Unité"
   },
-  "5dd0bc69-83ba-4ee7-99e9-141d0cdf5a84": {
-    "original": "Eenheidsnummer",
-    "translation": "Numéro d'unité"
+  "880e4cac-5a7e-4d6d-80ad-c5472a005df6": {
+    "original": "De eerstvolgende aansluiting van dit lid start op {date}. Vandaag is dit lid niet aangesloten bij FOS Open Scouting en daardoor niet verzekerd.",
+    "translation": "La prochaine connexion de ce membre commence le {date}. Aujourd'hui, ce membre n'est pas affilié à FOS Open Scouting et n'est donc pas assuré."
+  },
+  "88119ffc-b692-4222-8217-75a9fa64f675": {
+    "original": "Reken een bedrag aan aan de {count} geselecteerde eenheden.",
+    "translation": "Facturez un montant aux {count} unités sélectionnées."
+  },
+  "8ad6c316-22e5-4fbf-b326-25ce5bf640e1": {
+    "original": "Naam eenheid",
+    "translation": "Nom de l'unité"
   },
   "8b9ef669-554d-4ee2-b3bd-2ea12f85fa26": {
     "original": "Bepaal wie een e-mail krijgt als notificatie van een kampmelding op niveau van een eenheid, naast de indiener van de melding.",
@@ -539,784 +691,632 @@
     "original": "Je hebt geen toegangsrechten om de facturatiegegevens van deze eenheid te bewerken.",
     "translation": "Vous n'avez pas les droits d'accès nécessaires pour modifier les données de facturation de cette unité."
   },
-  "fdf6dd9d-25f9-41bc-869b-beb2906aa77f": {
-    "original": "E-mail die wordt verzonden naar de indiener (en de ingestelde contactpersonen van de eenheid) als kopie van een kampmelding",
-    "translation": "E-mail envoyé au soumetteur (et aux personnes de contact définies de l'unité) en copie d'une notification de camp"
-  },
-  "1bb58aa1-e36e-4384-8c54-be3b71d77a3b": {
-    "original": "E-mail die wordt verzonden naar de indiener (en de ingestelde contactpersonen van de eenheid) als een kampmelding wordt goedgekeurd",
-    "translation": "E-mail envoyé au soumetteur (et aux personnes de contact définies de l'unité) lorsqu'une notification de camp est approuvée"
-  },
-  "0b6949f6-80b7-4d48-9e1e-16bfb826014a": {
-    "original": "E-mail die wordt verzonden naar de indiener (en de ingestelde contactpersonen van de eenheid) als een kampmelding wordt afgekeurd",
-    "translation": "E-mail envoyé au soumetteur (et aux personnes de contact définies de l'unité) lorsqu'une notification de camp est refusée"
-  },
-  "e07bc7a1-92c0-48fc-91f3-46e12573ee03": {
-    "original": "Naam eenheid",
-    "translation": "Nom de l'unité"
-  },
-  "40670ad7-7db1-4ec9-84df-68b32642042e": {
-    "original": "Je kan geen inschrijvingen wijzigen van {group} omdat dat scoutsjaar is afgesloten.",
-    "translation": "Vous ne pouvez pas modifier les inscriptions de {group} car l'année scoute est clôturée."
-  },
-  "bc89861d-a799-4100-b06c-29d6808ba8d2": {
-    "original": "Als je een betaling uitvoert in naam van je eenheid, is het noodzakelijk om facturatiegegevens met bedrijfsgegevens in te vullen.",
-    "translation": "Si vous effectuez un paiement au nom de votre unité, il est nécessaire de remplir les données de facturation avec les données de l'entreprise."
-  },
-  "27cfaf26-6b88-4ebc-a50a-627a9f0f9e64": {
-    "original": "Eenheidsnummer",
-    "translation": "Numéro d'unité"
-  },
-  "c14b0320-cb84-4386-a39a-aa9ffb5eb886": {
-    "original": "Eenheidsnaam",
-    "translation": "Nom de l'unité"
-  },
-  "a5332744-e6e1-4af9-b05c-cbc21515c4d0": {
-    "original": "Eenheidsnummer betalende groep",
-    "translation": "Numéro d'unité du groupe payant"
-  },
-  "cc098cc0-d849-4808-b53a-0b99755b3f99": {
-    "original": "verwijderde eenheid",
-    "translation": "unité supprimée"
-  },
-  "50ebabe0-8162-486d-b32a-9ef3016256fb": {
-    "original": "Eenheid",
-    "translation": "Unité"
-  },
-  "2e5e2e62-1e0c-406d-96c9-f66e7c8e85bd": {
-    "original": "Gegevens van de eenheid of persoon die instaat voor de opvang.",
-    "translation": "Coordonnées de l'unité ou de la personne responsable de l'accueil."
-  },
-  "e13d9fec-ff5a-43e0-8cf4-4edc6e576d17": {
-    "original": "Is jouw eenheid een feitelijke eenheid zonder VZW, dan moet je hier het refertenummer invullen dat je bij Belcotax had aangevraagd.",
-    "translation": "Si votre unité est une unité de fait sans ASBL, vous devez indiquer ici le numéro de référence que vous avez demandé à Belcotax."
-  },
-  "6efffec1-322e-479d-b411-abbcbc4daf09": {
-    "original": "Gegevens van de eenheid",
-    "translation": "Coordonnées de l'unité"
-  },
-  "47754708-6f27-4afd-b9fe-600a209cb980": {
-    "original": "Eenheidsnaam",
-    "translation": "Nom d'unité"
-  },
-  "6507f89c-5c50-4c37-943f-ec17f5831cf0": {
-    "original": "Lid betaald aan individuele eenheid",
-    "translation": "Membre paie à l’unité individuelle"
-  },
-  "82af2364-c711-4e44-a871-9346c2cab66a": {
-    "original": "Je kan geen aansluitingen aanpassen in een ongeldig scoutsjaar",
-    "translation": "Vous ne pouvez pas modifier les affiliations dans une année scoute invalide"
-  },
-  "92a41b40-9841-4326-abaf-a8a7d97e5d55": {
-    "original": "Je kan geen aansluitingen wijzigen in een vergrendeld scoutsjaar",
-    "translation": "Vous ne pouvez pas modifier les affiliations dans une année scoute verrouillée"
-  },
-  "dcb9126f-72c4-42c8-990a-8ddc747c0e2b": {
-    "original": "Je kan niet inschrijven voor {group} omdat dit scoutsjaar niet actief is.",
-    "translation": "Vous ne pouvez pas vous inscrire pour {group} car cette année scoute n’est pas active."
-  },
-  "7c55cb44-8149-414a-a162-ca9859014e81": {
-    "original": "Je kan geen inschrijvingen wijzigen van {group} omdat dat scoutsjaar niet actief is.",
-    "translation": "Vous ne pouvez pas modifier les inscriptions de {group} car cette année scoute n’est pas active."
-  },
-  "f6360ada-86e7-4ec8-86fb-fe9e750c4926": {
-    "original": "Je kan niet inschrijven voor {group} omdat dit scoutsjaar is afgesloten.",
-    "translation": "Vous ne pouvez pas vous inscrire pour {group} car cette année scoute est clôturée."
-  },
-  "26b8398d-a17c-4854-ae64-99a410ddeffb": {
-    "original": "Je kan niet inschrijven voor {group} omdat scoutsjaar {period} is afgesloten.",
-    "translation": "Vous ne pouvez pas vous inscrire pour {group} car l’année scoute {period} est clôturée."
-  },
-  "07290df8-cad5-40df-9e10-3c7eccc049bc": {
-    "original": "Welpen",
-    "translation": "Louveteaux"
-  },
-  "5d507258-d6dd-4b3b-a6ef-1b14c6db14bc": {
-    "original": "Je kan meerdere Stripe accounts aanmaken en koppelen aan jouw eenheid. Voor alle inschrijvingen en per webshop kan je een ander Stripe account selecteren bij de betaalinstellingen.",
-    "translation": "Vous pouvez créer plusieurs comptes Stripe et les lier à votre unité. Pour toutes les inscriptions et par boutique en ligne, vous pouvez sélectionner un autre compte Stripe dans les paramètres de paiement."
-  },
-  "a5c0dce2-01df-4a57-8d02-0b79cec9b89d": {
-    "original": "de eenheid {name} op {platform}",
-    "translation": "l’unité {name} sur {platform}"
-  },
-  "43ff8e32-1a0b-41cf-b9a6-8e4c85d12739": {
-    "original": "Je hebt geen rechten om een activiteit aan te maken voor deze eenheid.",
-    "translation": "Vous n’avez pas les droits nécessaires pour créer une activité pour cette unité."
-  },
-  "13a4b7fa-7de6-497e-9e7c-6aee4f783260": {
-    "original": "Je kan activiteiten voor andere eenheden enkel aanmaken via het beheerdersportaal van die eenheid zelf.",
-    "translation": "Vous ne pouvez créer des activités pour d’autres unités que via le portail administrateur de cette unité."
-  },
-  "2e5e052c-98b7-4375-b771-05a8913c145b": {
-    "original": "Voor nationale activiteiten moet je kiezen via welke eenheid alle betalingen verlopen. De betaalinstellingen van die eenheid worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die eenheid.\\n\\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
-    "translation": "Pour les activités nationales, vous devez choisir via quelle unité tous les paiements sont effectués. Les paramètres de paiement de cette unité sont alors utilisés et toutes les inscriptions sont enregistrées dans la comptabilité de cette unité.\\n\\nEn outre, l’organisateur définit également les paramètres qui influent sur la collecte de données et d’autres aspects plus subtils."
-  },
-  "3eefa3b1-525b-464b-adef-e3b9efd9257f": {
-    "original": "Eenheidsnaam",
-    "translation": "Nom d'unité"
-  },
-  "eae11d90-befa-4482-9fe3-412cba791ef5": {
-    "original": "Eenheidsnummer",
-    "translation": "Numéro d'unité"
-  },
-  "a1f57ce7-a96a-4c8d-b43f-79a07a78114f": {
-    "original": "Je kan de hoofdgroep niet verwijderen. Als je dit toch wil doen, kan je eerst een andere eenheid instellen als hoofdgroep via ')Boekhouding en aansluitingen'.",
-    "translation": "Vous ne pouvez pas supprimer le groupe principal. Si vous souhaitez quand même le faire, vous pouvez d’abord définir une autre unité comme groupe principal via ')Comptabilité et affiliations'."
-  },
-  "c4d225ea-8e41-4829-bf0c-bc04755492de": {
-    "original": "De naam van de eenheid is te lang. Probeer de naam wat te verkorten en probeer opnieuw.",
-    "translation": "Le nom de l’unité est trop long. Essayez de raccourcir le nom et réessayez."
-  },
-  "6e675a7d-b124-4507-bf0c-9b70013e98ca": {
-    "original": "Er bestaat al een eenheid met dezelfde URI. Pas deze aan zodat deze uniek is, en controleer of deze eenheid niet al bestaat.",
-    "translation": "Une unité avec le même URI existe déjà. Modifiez-la pour qu’elle soit unique et vérifiez que cette unité n’existe pas déjà."
-  },
-  "19e5262f-9dc1-40d9-b905-bda8462b6046": {
-    "original": "Er bestaat al een eenheid met dezelfde naam. Voeg bijvoorbeeld de naam van je gemeente toe.",
-    "translation": "Une unité avec le même nom existe déjà. Ajoutez par exemple le nom de votre commune."
-  },
-  "31757907-4cdd-4f0e-bb9d-cba9c1d997e4": {
-    "original": "Deze eenheid bestaat niet",
-    "translation": "Cette unité n’existe pas"
-  },
-  "ed22b0bb-8ae7-4ef0-a139-1bc11b2a719e": {
-    "original": "Deze functie kan niet worden toegewezen aan deze eenheid",
-    "translation": "Cette fonction ne peut pas être attribuée à cette unité"
-  },
-  "aa39f949-6fe5-4ed2-acb7-ff3d138cf243": {
-    "original": "Deze functie is niet beschikbaar voor deze eenheid",
-    "translation": "Cette fonction n’est pas disponible pour cette unité"
-  },
-  "601c15e5-cfb0-4c34-af03-7dfc55e39d36": {
-    "original": "Je kan geen aansluitingen maken voor een andere eenheid",
-    "translation": "Vous ne pouvez pas créer d’affiliations pour une autre unité"
-  },
-  "a010c110-bf4e-4c12-a324-6b84c992e728": {
-    "original": "Je kan geen eenheid aanmaken",
-    "translation": "Vous ne pouvez pas créer d’unité"
-  },
-  "fdd15119-b950-4282-9413-fd6973afde07": {
-    "original": "Er kan niet overgeschakeld worden naar een vergrendeld scoutsjaar",
-    "translation": "Il n’est pas possible de passer à une année scoute verrouillée"
-  },
-  "1401fb57-4172-4211-acdb-0afbc87af86e": {
-    "original": "Het huidige scoutsjaar kan niet vergrendeld worden",
-    "translation": "L’année scoute actuelle ne peut pas être verrouillée"
-  },
-  "864675a2-7376-4a61-9c7d-f488e7906d7b": {
-    "original": "De URI van de eenheid is te lang",
-    "translation": "L’URI de l’unité est trop long"
-  },
-  "0fa660da-1e74-4940-af88-eafafb1094b6": {
-    "original": "De URI van de eenheid is te kort",
-    "translation": "L’URI de l’unité est trop court"
-  },
-  "daa7dc61-e8c9-4629-97b6-a75f39eaebac": {
-    "original": "Er bestaat al een eenheid met dezelfde URI. Voeg bijvoorbeeld de naam van je gemeente toe.",
-    "translation": "Une unité avec le même URI existe déjà. Ajoutez par exemple le nom de votre commune."
-  },
-  "fafaf0c2-cbf4-4f5b-8669-eb09303efe1e": {
-    "original": "Je moet volledige platform beheerder zijn om schulden tussen eenheiden te wijzigen of toe te voegen",
-    "translation": "Vous devez être administrateur complet de la plateforme pour modifier ou ajouter des dettes entre les unités"
-  },
-  "7b181446-ef56-4957-ad13-54644e6d0987": {
-    "original": "Dit is een ongeldige situatie. Een schuld moet tussen verschillende eenheiden zijn.",
-    "translation": "Ceci est une situation invalide. Une dette doit être entre différentes unités."
-  },
-  "b906c293-2afa-4ebe-9b33-2d64ab46da34": {
-    "original": "Een wachtlijst kan momenteel niet gedeeld worden tussen verschillende scoutsjaren",
-    "translation": "Une liste d’attente ne peut actuellement pas être partagée entre différentes années scoutes"
-  },
-  "49742012-1ca8-4b91-a176-9ce3e17c1fe0": {
-    "original": "Er kon geen uniek lidnummer aangemaakt worden. Mogelijks zijn er teveel leden met dezelfde geboortedatum. Neem contact op met de eenheid.",
-    "translation": "Il n’a pas été possible de créer un numéro de membre unique. Il y a peut-être trop de membres avec la même date de naissance. Contactez l’unité."
-  },
-  "d5795b94-23d5-4fe7-97e1-6f0fe916caca": {
-    "original": "Deze aansluiting is nog niet beschikbaar voor dit scoutsjaar",
-    "translation": "Cette affiliation n’est pas encore disponible pour cette année scoute"
-  },
-  "594307a3-05b8-47cf-81e2-59fb6254deba": {
-    "original": "Feitelijke eenheid",
-    "translation": "Unité de fait"
-  },
-  "4c61c43e-ed3c-418e-8773-681d19323520": {
-    "original": "Eenheidsnummer",
-    "translation": "Numéro d'unité"
-  },
-  "6149c3a0-74ee-476d-835f-94a4ac59ba34": {
-    "original": "Eenheidsnaam",
-    "translation": "Nom d'unité"
-  },
-  "3573c612-1241-4b48-8ed5-8f11b8860e23": {
-    "original": "Je logt in op het feedback systeem met dit account: {email}. Je kan eerst van eenheid veranderen als je met een ander account wilt inloggen.",
-    "translation": "Vous vous connectez au système de feedback avec ce compte : {email}. Vous pouvez d’abord changer d’unité si vous souhaitez vous connecter avec un autre compte."
-  },
-  "79cb9c3d-fe24-46cb-84bd-f1aa5fd625c5": {
-    "original": "is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de eenheid niet werd ingevuld.",
-    "translation": "n’est pas encore activé par Stripe. Vérifiez si toutes les informations nécessaires ont été saisies dans votre tableau de bord Stripe. Souvent, le problème est que l’adresse d’un des administrateurs manque dans Stripe ou que le lien du site Web de l’unité n’a pas été rempli."
-  },
-  "da2d2d9e-07cc-471e-963a-7915c7698ba9": {
-    "original": "gelezen en ga hiermee akkoord in naam van mijn eenheid.",
-    "translation": "lu et approuvé au nom de mon unité."
-  },
-  "bb17dafc-4305-4213-90c9-2bb2701d777f": {
-    "original": "Deze functie is niet beschikbaar omdat jouw eenheid nog het oude gratis ledenadministratie pakket gebruikt. Via instellingen kunnen hoofdbeheerders overschakelen op de betaalde versie met meer functionaliteiten.",
-    "translation": "Cette fonction n’est pas disponible car votre unité utilise encore l’ancien pack d’administration des membres gratuit. Via les paramètres, les administrateurs principaux peuvent passer à la version payante avec plus de fonctionnalités."
-  },
-  "711fa35a-e20e-4372-b807-09192714250e": {
-    "original": "Eenheidsnummer betalende groep",
-    "translation": "Numéro d'unité du groupe payant"
-  },
-  "1985f023-e846-4ea2-9526-b24358c7a294": {
-    "original": "Maak een kopie van de instellingen van jouw eenheid.",
-    "translation": "Faire une copie des paramètres de votre unité."
-  },
-  "47e866d9-5349-4318-b779-161da61c2250": {
-    "original": "Openstaande bedragen tussen eenheiden",
-    "translation": "Montants en suspens entre les unités"
-  },
-  "ab21ae18-0181-44ea-b41d-ff61c9358858": {
-    "original": "Voor Mollie heb je een VZW nodig. Een feitelijke eenheid is niet voldoende (wordt niet geaccepteerd)",
-    "translation": "Pour Mollie, vous avez besoin d’une ASBL. Une unité de fait ne suffit pas (n’est pas acceptée)"
-  },
-  "f4324095-61d6-44a7-9c81-0a114355cbaa": {
-    "original": "Deze link is al in gebruik. Kies een andere. Voeg iets uniek toe, bv. de naam van je eenheid.",
-    "translation": "Ce lien est déjà utilisé. Choisissez-en un autre. Ajoutez quelque chose d’unique, par exemple le nom de votre unité."
-  },
-  "c244a546-ac11-4aee-be3e-99b0b6079703": {
-    "original": "Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om de kleur van je eenheid te behouden (bij algemene instellingen > personalisatie).",
-    "translation": "Entrez ci-dessus le code couleur HEX de votre couleur principale. Laissez vide pour conserver la couleur de votre unité (dans les paramètres généraux > personnalisation)."
-  },
-  "d8662e1d-2f43-4342-91de-ef9a44cf3e86": {
-    "original": "Logo van eenheid gebruiken",
-    "translation": "Utiliser le logo de l'unité"
-  },
-  "02f2c884-7524-4c41-90c9-746a074185aa": {
-    "original": "Sla een kopie van jouw zaalplan op zodat je het kan delen met andere eenheiden.",
-    "translation": "Enregistrez une copie de votre plan de salle afin de pouvoir le partager avec d’autres unités."
-  },
-  "7046d9e3-c3ce-406b-af52-fd2c81220867": {
-    "original": "Geen eenheiden gevonden. Probeer te zoeken op postcode of naam. Is jouw eenheid nog niet aangesloten? Maak dan eerst een eenheid aan.",
-    "translation": "Aucune unité trouvée. Essayez de rechercher par code postal ou par nom. Votre unité n’est pas encore connectée ? Créez d’abord une unité."
-  },
-  "5b3e65b1-9444-4b65-a032-e184ed7c2471": {
-    "original": "Mijn eenheid aansluiten",
-    "translation": "Connecter mon unité"
-  },
-  "2aead74c-c67c-4844-8ba2-f7f930b35b5e": {
-    "original": "Mijn eenheid staat er niet tussen",
-    "translation": "Mon unité n’est pas parmi elles"
-  },
-  "b66376fb-238e-42dd-aec6-f48b9ee2e215": {
-    "original": "Nieuw scoutsjaar",
-    "translation": "Nouvelle année scoute"
-  },
-  "05479234-2977-4bfd-a44b-924b01021b6e": {
-    "original": "Op aanraden van andere eenheid / persoon",
-    "translation": "Sur recommandation d’une autre unité/personne"
-  },
-  "c82d1491-73f8-4f05-af15-5b7bf58f1bcb": {
-    "original": "Gezien bij andere eenheid",
-    "translation": "Vu chez une autre unité"
-  },
-  "c34ab59f-979c-45e7-acd2-60ff24fc0705": {
-    "original": "Eenheid aanmaken",
-    "translation": "Créer une unité"
-  },
-  "cbdd5da3-8752-423d-8adf-00195fac3864": {
-    "original": "Nieuwe eenheid",
-    "translation": "Nouvelle unité"
-  },
-  "b26772a9-019a-4555-a6ca-7eb5200cab8f": {
-    "original": "Type eenheid",
-    "translation": "Type d'unité"
-  },
-  "bf7f8c10-b6b5-4edb-90d8-a550d061dea6": {
-    "original": "Geef deze beheerders snel lees of bewerk toegang tot alle onderdelen van jouw eenheid.",
-    "translation": "Donnez rapidement à ces administrateurs un accès en lecture ou en modification à toutes les parties de votre unité."
-  },
-  "d431d7b4-8cdd-4307-bb73-2c570fc1a0fa": {
-    "original": "Toegang tot eenheiden",
-    "translation": "Accès aux unités"
-  },
-  "31982300-fbbf-4f5a-b7ce-26738bd2b23d": {
-    "original": "Je kan een beheerder volledige toegang geven tot alle eenheiden (en dus ook de leden van die eenheid), of per tag de toegang regelen.",
-    "translation": "Vous pouvez donner à un administrateur un accès complet à toutes les unités (et donc aussi aux membres de cette unité), ou gérer l’accès par tag."
-  },
-  "9ec8b45b-3321-4c1a-90bb-74e22c3e7f09": {
-    "original": "Een hoofdbeheerder van jouw eenheid moet eerst e-mailadressen instellen voor je een e-mail kan versturen.",
-    "translation": "Un administrateur principal de votre unité doit d’abord définir des adresses e-mail pour que vous puissiez envoyer un e-mail."
-  },
-  "b0c1a91e-f776-4b10-a90f-5806d9fdd400": {
-    "original": "Bij een andere eenheid inschrijven",
-    "translation": "Inscription auprès d’une autre unité"
-  },
-  "b2fbd227-40a3-495d-9826-0e199000cda9": {
-    "original": "Je hebt nog geen facturatiegegevens toegevoegd aan jouw eenheid. Stel deze eerst in voor je verder gaat.",
-    "translation": "Vous n’avez pas encore ajouté de données de facturation à votre unité. Configurez-les d’abord avant de continuer."
-  },
-  "ca923d49-c9c1-4c39-9e52-96b88a0223ed": {
-    "original": "Voeg één of meerdere juridische entiteiten toe. Als je zowel een feitelijke eenheid als een VZW hebt, voeg ze dan beide toe. De eerste in de lijst wordt standaard gebruikt als je betalingen uitvoert.",
-    "translation": "Ajouter une ou plusieurs entités juridiques. Si vous avez à la fois une unité de fait et une ASBL, ajoutez-les toutes les deux. La première de la liste est utilisée par défaut lorsque vous effectuez des paiements."
-  },
-  "becc82f0-4195-4a17-b3f5-03f305582e4a": {
-    "original": "Een feitelijke eenheid is niet geregistreerd en heeft geen ondernemingsnummer",
-    "translation": "Une unité de fait n’est pas enregistrée et n’a pas de numéro d’entreprise"
-  },
-  "8ad6c316-22e5-4fbf-b326-25ce5bf640e1": {
-    "original": "Naam eenheid",
-    "translation": "Nom de l'unité"
-  },
-  "49952c7d-05e9-46a2-b5ec-7411ed71be32": {
-    "original": "bv. Ruimtereis eenheid",
-    "translation": "p. ex. unité Voyage spatial"
-  },
-  "6ef5e456-73f7-4baf-845c-4321094bbc6b": {
-    "original": "Er ging iets mis. Je hebt geen toegang tot deze eenheid.",
-    "translation": "Une erreur s’est produite. Vous n’avez pas accès à cette unité."
-  },
-  "67221175-c027-47be-bb1b-2a535cb9fc5f": {
-    "original": "Deze eenheid bestaat niet (meer)",
-    "translation": "Cette unité n’existe plus (ou plus)"
-  },
-  "6ad28fe1-da51-4538-90a3-eb42553b7057": {
-    "original": "Studenteneenheid",
-    "translation": "Unité étudiante"
-  },
-  "6a63ceb0-5926-42db-bb56-4d3a6bd81f7a": {
-    "original": "Buurteenheid",
-    "translation": "Unité de quartier"
-  },
-  "5aca8049-d981-4cc5-a86c-0c194047743d": {
-    "original": "Natuureenheid",
-    "translation": "Unité nature"
-  },
-  "a40877f1-4d7b-469f-bd5f-574de9f443be": {
-    "original": "Muziekeenheid",
-    "translation": "Unité musique"
-  },
-  "b1491db8-95be-4d67-ad4a-5edb124b23a5": {
-    "original": "Beroepseenheid",
-    "translation": "Unité professionnelle"
-  },
-  "9086aa79-923c-4b8a-8926-45aeee3a8676": {
-    "original": "Kunsteenheid",
-    "translation": "Unité artistique"
-  },
-  "dff05b27-5ad9-416c-b344-f890a4e68255": {
-    "original": "Scoutsjaar",
-    "translation": "Année scoute"
-  },
-  "e43ca9ec-8495-48af-a6df-8327e6f33d85": {
-    "original": "adres van je eenheid",
-    "translation": "adresse de votre unité"
-  },
-  "f7821d11-0b71-4503-a8cb-18b2036611f1": {
-    "original": "telefoonnummer van je eenheid",
-    "translation": "numéro de téléphone de votre unité"
-  },
-  "0b4ece85-60f0-46b8-a6fc-09eb605b4138": {
-    "original": "naam van je eenheid",
-    "translation": "nom de votre unité"
-  },
-  "da498f50-0d40-4c68-a87c-488bd555e752": {
-    "original": "verificatiedocument van je eenheid",
-    "translation": "document de vérification de votre unité"
-  },
-  "6ade2adb-91c3-4aa4-95d4-fd4550ec98f4": {
-    "original": "beschrijving van je eenheid",
-    "translation": "description de votre unité"
-  },
-  "6e7658ac-437e-4e1e-9efd-03c0a5cbd5d9": {
-    "original": "website van je eenheid",
-    "translation": "site Web de votre unité"
-  },
-  "0c827ab2-42af-4b19-9160-a69475039314": {
-    "original": "Niet alle gegevens van jouw eenheid werden in het Stripe dashboard ingevuld. Kijk na of alles werd ingevuld. Volgende zaken zouden ontbreken:",
-    "translation": "Toutes les données de votre unité n’ont pas été saisies dans le tableau de bord Stripe. Vérifiez si tout a été rempli. Les éléments suivants pourraient manquer :"
-  },
-  "b7298a1c-aba3-4839-a7e0-b0e390d07476": {
-    "original": "Naam van de eenheid of van het platform",
-    "translation": "Nom de l’unité ou de la plateforme"
-  },
-  "c14e79ad-18ab-4295-a8b9-fda330e981ec": {
-    "original": "Na periodiek controleren blijken de DNS-instellingen van de domeinnaam van een eenheid instabiel te zijn.",
-    "translation": "Après un contrôle périodique, il s’avère que les paramètres DNS du nom de domaine d’une unité sont instables."
-  },
-  "6348587f-8d3e-4a13-8b52-5fa459366fee": {
-    "original": "Bij een routinecontrole blijken de DNS-instellingen van de domeinnaam van een eenheid ongeldig te zijn.",
-    "translation": "Lors d’un contrôle de routine, il s’avère que les paramètres DNS du nom de domaine d’une unité sont invalides."
-  },
-  "f8f36233-df20-42bd-b9a4-f53005107825": {
-    "original": "Na een controle blijken de DNS-instellingen van de domeinnaam van een eenheid geldig te zijn.",
-    "translation": "Après un contrôle, il s’avère que les paramètres DNS du nom de domaine d’une unité sont valides."
-  },
-  "e82be6d7-1cde-4da3-8018-1e2c796a3f13": {
-    "original": "Na periodiek controleren blijken de DNS-instellingen van de domeinnaam van een eenheid terug stabiel te zijn.",
-    "translation": "Après un contrôle périodique, il s’avère que les paramètres DNS du nom de domaine d’une unité sont à nouveau stables."
-  },
-  "6110db94-d89d-43d0-9c1c-d3e71253a795": {
-    "original": "De DNS-instellingen van de domeinnaam van een eenheid zijn correct ingesteld.",
-    "translation": "Les paramètres DNS du nom de domaine d’une unité sont correctement configurés."
-  },
-  "662e1c09-b491-41a4-8e87-220fabc87eb1": {
-    "original": "Je kan geen inschrijvingen wijzigen van {group} omdat scoutsjaar {period} is afgesloten.",
-    "translation": "Vous ne pouvez pas modifier les inscriptions de {group} car l’année scoute {period} est clôturée."
-  },
-  "0b6274d7-7a42-4ab3-bc65-5a76c23d07ff": {
-    "original": "Er staat een ander tabblad open van Keeo die werkt in een oudere versie. Sluit die eerst af.",
-    "translation": "Un autre onglet Keeo fonctionnant avec une ancienne version est ouvert. Veuillez d'abord le fermer."
-  },
-  "937b407c-7681-45c1-8c29-f415cf03faaf": {
-    "original": "Hoe ken je Keeo?",
-    "translation": "Comment connaissez-vous Keeo?"
-  },
-  "fcd3549b-1d81-4fe7-9e8f-fcd17501c014": {
-    "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Keeo. Voor Microsoft kan je",
-    "translation": "Assurez-vous que les utilisateurs puissent se connecter via votre propre système de compte, séparément de Keeo. Pour Microsoft, vous pouvez"
-  },
-  "62246c37-15c7-4f7d-94e2-7476f971c8da": {
-    "original": "Betalen van inschrijvingsgelden of webshops voor een eenheid via Keeo (partner).",
-    "translation": "Paiement des frais d'inscription ou des boutiques en ligne pour une unité via Keeo (partenaire). "
-  },
-  "ac3b2a14-e029-404c-9fe1-2aab4279a3ac": {
-    "original": "Beheer hier alle personen die toegang hebben tot Keeo, en wijzig hun toegangsrechten.",
-    "translation": "Gérez ici toutes les personnes ayant accès à Keeo et modifiez leurs droits d'accès."
-  },
-  "81c91169-db1e-4819-8716-5382ffbaa43b": {
-    "original": "Het eenheidsnummer is een unieke code voor deze eenheid. Deze wordt in de URL-balk van de browser gebruikt.",
-    "translation": "Le numéro d'unité est un code unique pour cette unité. Il est utilisé dans la barre d'URL du navigateur."
-  },
-  "9021f6b0-d1ae-422b-9651-48c7f5383b0b": {
-    "original": "Soms wil je personen die geen lid zijn toegang geven tot Keeo. Dat kan door externe beheerdersrollen aan te maken, en die rollen vervolgens toe te kennen aan externe beheerders.",
-    "translation": "Parfois, vous souhaitez donner accès à Keeo à des personnes qui ne sont pas membres. Vous pouvez le faire en créant des rôles d'administrateurs externes et en attribuant ensuite ces rôles à des administrateurs externes."
-  },
-  "253a60ce-cba7-4679-863c-494609d03e8f": {
-    "original": "Je kan {paymentMethod} niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Keeo instellingen > Betaalaccounts.",
-    "translation": "Vous ne pouvez pas activer {paymentMethod}, vous devez d'abord vous connecter à un fournisseur de paiement via les paramètres Keeo > Comptes de paiement."
-  },
-  "b4307772-62dd-48a4-bae3-9d46df314727": {
-    "original": "Welkom op Keeo. Zoek hieronder jouw eenheid om je in te schrijven of om jouw gegevens te beheren.",
-    "translation": "Bienvenue sur Keeo. Recherchez votre unité ci-dessous pour vous inscrire ou pour gérer vos données."
-  },
-  "7c2fee1a-0838-4346-848d-a3d984e70fdc": {
-    "original": "Het bedrag wordt achteraf door FOS Open Scouting aan je groep gefactureerd.",
-    "translation": "Le montant sera facturé ultérieurement à votre groupe par FOS Open Scouting."
-  },
-  "fa1b8694-6a8c-46ea-ab5e-7ed792083bf0": {
-    "original": "Je kan online betalingen gebruiken in Keeo door te koppelen met Mollie via de onderstaande knop. Hiermee kan je betalingen via Bancontact, iDEAL en kredietkaart activeren. Je betaalt hier wel hogere transactiekosten dan via onze huidige partner.",
-    "translation": "Vous pouvez utiliser les paiements en ligne dans Keeo en vous connectant à Mollie via le bouton ci-dessous. Cela vous permet d'activer les paiements via Bancontact, iDEAL et carte de crédit. Vous paierez cependant des frais de transaction plus élevés qu'avec notre partenaire actuel."
-  },
-  "3e94193d-873b-4770-ba03-5f7528debf2c": {
-    "original": "Leden kunnen zelfstandig inschrijven via het ledenportaal. Dit is een link die je op jouw website kan plaatsen of kan versturen via e-mail. Daarnaast kan je leden ook uitnodigen om in te schrijven, dat doe je door ze eerst toe te voegen in Keeo en daarna een e-mail te sturen waarbij je de 'magische knop' onderaan toevoegt.",
-    "translation": "Les membres peuvent s'inscrire indépendamment via le portail des membres. Il s'agit d'un lien que vous pouvez placer sur votre site web ou envoyer par e-mail. Vous pouvez également inviter des membres à s'inscrire, en les ajoutant d'abord dans Keeo, puis en leur envoyant un e-mail auquel vous ajoutez le bouton magique en bas."
-  },
-  "94547449-549d-4572-b217-c1a089b12997": {
-    "original": "Jouw domeinnaam is nog niet actief voor het versturen van e-mails vanaf die domeinnaam, maar je kan in tussentijd wel al e-mails versturen via Keeo. Keeo zorgt dat antwoorden op die e-mails wel bij jullie terecht komen.",
-    "translation": "Votre nom de domaine n'est pas encore actif pour l'envoi d'e-mails à partir de ce nom de domaine, mais vous pouvez déjà envoyer des e-mails via Keeo. Keeo s'assure que les réponses à ces e-mails vous parviennent."
-  },
-  "5dbc2f08-f2d0-43bc-973d-b789077ca3ad": {
-    "original": "Welkom op het beheerdersportaal van Keeo. Hier kan je jouw eenheid beheren, leden bekijken, en instellingen aanpassen.",
-    "translation": "Bienvenue sur le portail administrateur de Keeo. Ici, vous pouvez gérer votre unité, consulter les membres et modifier les paramètres."
-  },
-  "7a44f6f1-bb2f-4e46-93c2-afcae9db3f80": {
-    "original": "Opgelet: als je de link naar jouw webshop aanpast, werken mogelijks sommige links in al verzonden e-mails niet meer. De enige uitzondering hierop is als je van een standaard Keeo link overschakelt op een eigen domeinnaam (dan blijven oude links werken). Doe dit dus enkel in het begin van een verkoop.",
-    "translation": "Attention : si vous modifiez le lien vers votre boutique en ligne, certains liens dans les e-mails déjà envoyés risquent de ne plus fonctionner. La seule exception est si vous passez d'un lien Keeo standard à votre propre nom de domaine (dans ce cas, les anciens liens continueront à fonctionner). Ne faites cela qu'au début d'une vente."
-  },
-  "768afe13-5f57-4a82-a6ac-77c8999b8aeb": {
-    "original": "Keeo toont op enkele plaatsen het logo van Keeo op jullie webshop. Op die manier kunnen we Keeo bekender maken bij andere eenheiden, waardoor we Keeo ook betaalbaar kunnen houden. Je kan dit verminderen als je dit toch liever niet wilt.",
-    "translation": "Keeo affiche le logo de Keeo à certains endroits sur votre boutique en ligne. De cette façon, nous pouvons faire connaître Keeo à d'autres unités, ce qui nous permet également de maintenir Keeo abordable. Vous pouvez réduire cela si vous préférez."
-  },
-  "f8f3a5be-624a-4d39-b401-78ad833b64dd": {
-    "original": "Verminder de zichtbaarheid van Keeo",
-    "translation": "Réduire la visibilité de Keeo"
-  },
-  "fd68e1a7-6059-47fc-b7ad-fdfe4924a67d": {
-    "original": "Bepaalde gegevens zijn ingebouwd in Keeo zodat we die ook op een speciale manier kunnen verwerken. Je kan deze hier aan of uit zetten.",
-    "translation": "Certaines données sont intégrées dans Keeo afin que nous puissions également les traiter d'une manière spéciale. Vous pouvez les activer ou les désactiver ici."
-  },
-  "5c7d8f29-9d83-4f33-9d6b-0f947e384f75": {
-    "original": "Importeer een zaalplan dat jij of een andere eenheid eerder uit Keeo hebt geëxporteerd. Importeren vanaf andere systemen is niet mogelijk.",
-    "translation": "Importez un plan de salle que vous ou une autre unité avez précédemment exporté de Keeo. L'importation à partir d'autres systèmes n'est pas possible."
-  },
-  "977fa720-e451-4dd8-a317-881cf7a409b1": {
-    "original": "Er is iets misgelopen bij het importeren van het zaalplan. Kijk na of het bestand dat je hebt gekozen wel uit Keeo afkomstig is.",
-    "translation": "Une erreur s'est produite lors de l'importation du plan de salle. Vérifiez si le fichier que vous avez choisi provient bien de Keeo."
-  },
-  "39d0d9ca-2f37-40b6-84a4-51fb29b4cce6": {
-    "original": "Deze invoervelden zijn nodig op elk document, maar je moet hier instellen welke gegevens je uit Keeo daarin wilt invullen. Koppel je met meerdere gegevens uit Keeo, dan gaan we de eerste beschikbare op het document invullen. Bv. als er bij het lid zelf geen adres werd ingevuld, neem dan het adres van de eerste ouder.",
-    "translation": "Ces champs de saisie sont nécessaires sur chaque document, mais vous devez définir ici les données de Keeo que vous souhaitez y saisir. Si vous liez plusieurs données de Keeo, nous saisirons la première disponible sur le document. Par exemple, si aucune adresse n'a été saisie pour le membre lui-même, prenez l'adresse du premier parent."
-  },
-  "fa988b87-6665-43e4-a177-77031826e9a8": {
-    "original": "Keeo kan de inhoud van documenten automatisch wijzigen als de daarbij horende gegevens wijzigen, en nieuwe documenten aanmaken als er nieuwe inschrijvingen bij komen (ook na publicatie). Dat is ideaal om bijvoorbeeld ontbrekende of foute gegevens door leden nog te laten invullen via het ledenportaal. Op het moment dat je documenten officiëel hebt ingedient (indien van toepassing), zet je dit best uit. Als dit uit staat zullen onvolledige documenten niet langer zichtbaar zijn voor leden.",
-    "translation": "Keeo peut modifier automatiquement le contenu des documents si les données correspondantes changent et créer de nouveaux documents si de nouvelles inscriptions arrivent (même après publication). C'est idéal pour permettre aux membres de compléter ou de corriger des données manquantes via le portail des membres. Au moment où vous avez officiellement soumis vos documents (le cas échéant), il est préférable de désactiver cette option. Si cette option est désactivée, les documents incomplets ne seront plus visibles pour les membres."
-  },
-  "df8e9385-314f-4403-b0d5-e5893f68d442": {
-    "original": "Upload hier het logo zonder extra tekst of witruimtes. Laat leeg als je die niet hebt, en upload dan een banner. Zo kan Keeo de plaatsing optimaliseren. We plaatsen het logo bij voorkeur op de afgedrukte versie van een ticket als zowel een logo als banner aanwezig is.",
-    "translation": "Téléchargez ici le logo sans texte ni espace blanc supplémentaire. Laissez vide si vous n'en avez pas et téléchargez ensuite une bannière. Ainsi, Keeo peut optimiser le placement. Nous plaçons le logo de préférence sur la version imprimée d'un ticket si un logo et une bannière sont présents."
-  },
-  "b375f5be-879c-4696-8ccf-0e7066e3f5f4": {
-    "original": "De ideale afmeting voor een banner van een sponsor is 1104x450px. De banner wordt maximaal 150px hoog getoond, maar een veelvoud is noodzakelijk voor een niet-pixelachtige weergave op smartphones. Upload bij voorkeur voor alle sponsors een afbeelding met dezelfde afmetingen. Vermijd het uploaden van het logo als banner, laat dan de banner weg. Als zowel een logo als banner werd geupload zal Keeo de banner verkiezen op mobiele tickets, en het logo op de afgedrukte tickets.",
-    "translation": "Les dimensions idéales pour une bannière d'un sponsor sont de 1104x450px. La bannière est affichée à une hauteur maximale de 150px, mais un multiple est nécessaire pour un affichage non pixelisé sur les smartphones. Téléchargez de préférence une image aux mêmes dimensions pour tous les sponsors. Évitez de télécharger le logo en tant que bannière, supprimez la bannière dans ce cas. Si un logo et une bannière ont été téléchargés, Keeo privilégiera la bannière sur les tickets mobiles et le logo sur les tickets imprimés."
-  },
-  "5e60cf0f-5489-4e90-8dab-97c56c2e989c": {
-    "original": "Je probeert een doorverwijzingslink met korting van een andere eenheid te gebruiken, maar je hebt al een eenheid geregistreerd. Een doorverwijzingslink is enkel geldig voor de eerste eenheid die je op Keeo aansluit.",
-    "translation": "Vous essayez d'utiliser un lien de redirection avec réduction d'une autre unité, mais vous avez déjà enregistré une unité. Un lien de redirection n'est valable que pour la première unité que vous connectez à Keeo."
-  },
-  "f3236c83-b7ba-453f-981a-3e06925c9b7a": {
-    "original": "Geef iedereen toegang tot Keeo door ze de juiste functies te geven.",
-    "translation": "Donnez à chacun l'accès à Keeo en lui attribuant les fonctions appropriées."
-  },
-  "70894bb8-da5a-4f1a-929d-08f4479c4de3": {
-    "original": "Bevestig dat de betaalmethodes correct zijn ingesteld. Deze betaalmethodes worden gebruikt als leden inschrijven via Keeo.",
-    "translation": "Confirmez que les méthodes de paiement sont correctement configurées. Ces méthodes de paiement sont utilisées lorsque les membres s'inscrivent via Keeo."
-  },
-  "1af084bf-42d6-4a59-a7da-d1e87c6dba8e": {
-    "original": "Dit lid is niet langer aangesloten bij FOS Open Scouting, en de verzekering loopt binnenkort af",
-    "translation": "Ce membre n'est plus affilié à FOS Open Scouting et l'assurance expire bientôt."
-  },
-  "60871aaf-1b90-4a7c-a755-a4aeb0585a8e": {
-    "original": "Dit lid is niet aangesloten bij FOS Open Scouting, en is daardoor ook niet verzekerd",
-    "translation": "Ce membre n'est pas affilié à FOS Open Scouting et n'est donc pas assuré."
-  },
-  "f24d4ba4-4b42-4fa1-b99f-4b90dd1a3208": {
-    "original": "Kies hieronder wat er precies terugbetaald (negatief bedrag invullen) werd. Let op dat Keeo momenteel geen automatische terugbetalingen doet voor online betalingen. Je moet dus zelf het bedrag manueel terugbetalen of storten.",
-    "translation": "Choisissez ci-dessous ce qui a été exactement remboursé (saisir un montant négatif). Veuillez noter que Keeo ne gère actuellement aucun remboursement automatique pour les paiements en ligne. Vous devez donc rembourser ou verser vous-même le montant manuellement."
-  },
-  "369440db-a9e0-4530-a06b-3ea05cc6a2b0": {
-    "original": "Welkom op het ledenplatform van FOS Open Scouting, hier kan je jouw gegevens beheren en je inschrijven bij een eenheid of voor een activiteit.",
-    "translation": "Bienvenue sur la plateforme des membres de FOS Open Scouting, où vous pouvez gérer vos données et vous inscrire à une unité ou à une activité."
-  },
-  "d2749916-b99a-47af-9bc4-300648fe77a7": {
-    "original": "Je moet elke betaling zelf controleren en markeren als betaald in Keeo",
-    "translation": "Vous devez contrôler chaque paiement vous-même et le marquer comme payé dans Keeo."
-  },
-  "4d995169-f792-40f5-addf-60d8aed00362": {
-    "original": "Maak API-keys aan om toegang te krijgen tot de Keeo-API.",
-    "translation": "Créez des clés API pour accéder à l'API Keeo."
-  },
-  "64633f7b-2d6e-4ad2-abb1-e9dd77d9a81f": {
-    "original": "Alle betalingen, transactiekosten en uitbetalingen die via Keeo verliepen.",
-    "translation": "Tous les paiements, frais de transaction et paiements effectués via Keeo."
-  },
-  "0208e14e-b26e-4411-9e8e-461b63b1c0c1": {
-    "original": "Vertel Keeo door aan andere eenheiden",
-    "translation": "Informez Keeo auprès d'autres unités."
-  },
-  "d80e2291-5bb9-4799-9594-bcda54480efa": {
-    "original": "Gebruikt jouw eenheid Keeo al?",
-    "translation": "Votre unité utilise-t-elle déjà Keeo ?"
-  },
-  "719f31f6-cae0-41b0-97e6-ab8f5ff01d19": {
-    "original": "De velden {unlinkedAnswersText} werden manueel aangepast en zijn niet meer automatisch gelinkt met de waarden in Keeo",
-    "translation": "Les champs {unlinkedAnswersText} ont été modifiés manuellement et ne sont plus automatiquement liés aux valeurs de Keeo."
-  },
-  "eb55e12d-0c0a-491e-bdbc-6e705b9d82a7": {
-    "original": "Account loskoppelen van Keeo",
-    "translation": "Déconnecter le compte de Keeo"
-  },
-  "2ca73761-bc6c-4ffb-9550-a988376f26ef": {
-    "original": "Lees hier meer over Keeo.",
-    "translation": "En savoir plus sur Keeo."
-  },
-  "92f76d54-282e-448e-ae15-21411b7bc085": {
-    "original": "Sluit jouw eenheid aan bij Keeo",
-    "translation": "Connectez votre unité à Keeo"
-  },
-  "9f1a0032-32dd-48fd-9d04-0b20bd86aefb": {
-    "original": "Terug naar Keeo",
-    "translation": "Retour à Keeo"
-  },
-  "f511ce18-7a60-4fe8-8695-16216ffb7bdc": {
-    "original": "De betaling loopt niet via Keeo",
-    "translation": "Le paiement ne passe pas par Keeo."
-  },
-  "f0ff8a76-a986-440c-b966-a5579e0844f4": {
-    "original": "Je kan geen documenten aanmaken in de gratis versie van Keeo",
-    "translation": "Vous ne pouvez pas créer de documents dans la version gratuite de Keeo."
-  },
-  "de1d5cdf-6aa6-4912-828a-82cb53f8abf6": {
-    "original": "Dit is geen geldig zaalplan uit Keeo",
-    "translation": "Ceci n'est pas un plan de salle Keeo valide."
-  },
   "8cba151c-54df-4786-8d37-bf2af2005753": {
     "original": "Ticketverkoop via Keeo",
     "translation": "Vente de billets via Keeo"
-  },
-  "34fdb013-005c-46c4-b52e-e58f7697b586": {
-    "original": "Leden kunnen enkel zelf inschrijven via Keeo",
-    "translation": "Les membres ne peuvent s'inscrire que via Keeo."
-  },
-  "cd6e3548-aea1-4f74-9c66-b1fa43de6438": {
-    "original": "Ticketverkoop via Keeo",
-    "translation": "Vente de billets via Keeo"
-  },
-  "d54c9b23-2d3c-49cd-b1fc-7e821d36fd41": {
-    "original": "Inloggen op Keeo",
-    "translation": "Se connecter à Keeo"
-  },
-  "75815048-939a-4ac1-a81c-f23fc3ec5006": {
-    "original": "Jouw eenheid betaalt {price} aan FOS Open Scouting.",
-    "translation": "Votre unité paie {price} à FOS Open Scouting."
-  },
-  "9305016a-babf-4606-af6c-e8ef9f2ba91e": {
-    "original": "Weet je zeker dat je {total} wilt aanrekenen aan {count} eenheid/eenheden?",
-    "translation": "Êtes-vous sûr de vouloir facturer {total} à {count} unité(s) ?"
-  },
-  "a654551b-6dcd-48a9-a5c5-4609fdcba5f3": {
-    "original": "Keeo is in orde",
-    "translation": "Keeo est en ordre"
   },
   "8e77d1c1-87dc-4fdb-ad6e-13145bc96f78": {
     "original": "Breng Keeo in orde",
     "translation": "Mettre Keeo en ordre"
   },
-  "ab0c7981-0d5f-4c36-bd3f-07ddc2a63759": {
-    "original": "Jouw eenheid bevindt zich in een ander scoutsjaar dan FOS Open Scouting.",
-    "translation": "Votre unité se trouve dans une année scoute différente de celle de FOS Open Scouting."
+  "8ecaf93e-e872-4556-9067-f89b3f81332e": {
+    "original": "Een eenheid kan deze template aanpassen. Deze template wordt gebruikt als er geen lokale template is.",
+    "translation": "Une unité peut modifier ce modèle. Ce modèle est utilisé s'il n'y a pas de modèle local."
   },
-  "528545c4-028b-4711-9b16-f6fa990c3130": {
-    "original": "Aansluiting/verzekering Keeo*",
-    "translation": "Connexion/assurance Keeo*"
+  "9021f6b0-d1ae-422b-9651-48c7f5383b0b": {
+    "original": "Soms wil je personen die geen lid zijn toegang geven tot Keeo. Dat kan door externe beheerdersrollen aan te maken, en die rollen vervolgens toe te kennen aan externe beheerders.",
+    "translation": "Parfois, vous souhaitez donner accès à Keeo à des personnes qui ne sont pas membres. Vous pouvez le faire en créant des rôles d'administrateurs externes et en attribuant ensuite ces rôles à des administrateurs externes."
   },
-  "e99c7d31-f9fe-4e0f-8947-bdc30784de5b": {
-    "original": "* Voor de aansluiting bij Keeo moet je nog een correcte standaard inschrijvingsgroep selecteren zodat de benaming die jouw eenheid gebruikt gekoppeld kan worden aan de benaming van Keeo.",
-    "translation": "* Pour la connexion à Keeo, vous devez encore sélectionner un groupe d'inscription standard correct afin que le nom utilisé par votre unité puisse être lié au nom de Keeo."
+  "9086aa79-923c-4b8a-8926-45aeee3a8676": {
+    "original": "Kunsteenheid",
+    "translation": "Unité artistique"
   },
-  "61f434a9-49e6-4a92-b613-965dfd807dca": {
-    "original": "Aansluiting FOS Open Scouting",
-    "translation": "Connexion FOS Open Scouting"
-  },
-  "f5229cc1-c908-4409-855a-1dba40371815": {
-    "original": "Jouw leiding kan in Keeo jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf leiding, vraag het dan aan jouw medeleiding of FOS Open Scouting.",
-    "translation": "Votre direction peut rechercher votre code de sécurité dans Keeo et vous le transmettre. Si vous êtes vous-même un responsable, demandez-le à vos collègues responsables ou à FOS Open Scouting."
-  },
-  "525747e4-48df-4f20-979e-3c18142e64a5": {
-    "original": "Het bedrag zal achteraf door FOS Open Scouting aan {name} worden gefactureerd",
-    "translation": "Le montant sera facturé ultérieurement par FOS Open Scouting à {name}"
-  },
-  "237be7e0-4534-4008-b7bc-3e6db776a72a": {
-    "original": "Leden die je inschrijft in een leeftijdsgroep die je koppelt aan een standaard leeftijdsgroep van FOS Open Scouting worden automatisch aangesloten. Voor andere leden kan je hier een aansluiting manueel aanvragen.",
-    "translation": "Les membres que vous inscrivez dans un groupe d'âge que vous liez à un groupe d'âge standard de FOS Open Scouting sont automatiquement connectés. Pour les autres membres, vous pouvez demander une connexion manuellement ici."
-  },
-  "d68a6d63-d782-49e2-84a5-4f77dbfa2977": {
-    "original": "Nieuwe leden hebben automatisch recht op een proefperiode van {days} voor de aansluiting bij FOS Open Scouting.",
-    "translation": "Les nouveaux membres ont automatiquement droit à une période d'essai de {days} pour l'adhésion à FOS Open Scouting."
-  },
-  "29343dad-93c5-4e72-a6d5-3960cfbfcf42": {
-    "original": "Dit lid heeft een proefaansluiting bij FOS Open Scouting",
-    "translation": "Ce membre a une connexion d'essai à FOS Open Scouting."
-  },
-  "65cbb5ad-4a6b-4800-a7db-59627fb576ef": {
-    "original": "Dit lid is niet aangesloten in {werkjaar} bij FOS Open Scouting, en is daardoor ook niet verzekerd.",
-    "translation": "Ce membre n'est pas affilié à FOS Open Scouting en {werkjaar} et n'est donc pas assuré."
-  },
-  "11ffdf3a-dd66-49ec-b092-c7f3063e19f3": {
-    "original": "Keeo verwijdert automatisch het reeds aangerekende bedrag van het openstaande bedrag van alle leden die je uitschrijft. Als je wilt kan je wel een annuleringskost in rekening brengen, bv. als je het bedrag niet zal terugbetalen stel je dit in op 100%. Als je geen annuleringskost in rekening brengt, zal het openstaande bedrag van een lid dat al betaald had negatief worden en kan je dit terugbetalen via het tabblad ‘Rekening’ van een lid.",
-    "translation": "Keeo supprime automatiquement le montant déjà facturé du montant dû de tous les membres que vous désinscrivez. Si vous le souhaitez, vous pouvez facturer des frais d'annulation, par exemple, si vous ne remboursez pas le montant, vous le définissez sur 100 %. Si vous ne facturez pas de frais d'annulation, le montant dû d'un membre qui a déjà payé deviendra négatif et vous pourrez le rembourser via l'onglet « Compte » d'un membre."
-  },
-  "cd60d49f-9fc8-4fb7-b574-1231874c1d43": {
-    "original": "Overloop alle stappen en bevestig dat je alles hebt nagekeken bij elke stap. Zorg dat alles ten laatste tegen 1 september is nagekeken. De deadline om je leden in te schrijven en op orde te zetten is 15 november.",
-    "translation": "Passez en revue toutes les étapes et confirmez que vous avez vérifié tout à chaque étape. Assurez-vous que tout a été vérifié au plus tard le 1er septembre. La date limite pour inscrire vos membres et les mettre en ordre est le 15 novembre."
-  },
-  "ced29068-facb-4692-9fd7-d9ac74e35359": {
-    "original": "Kijk na of alle instellingen van de groepen correct zijn. Als alles goed staat ingesteld kan je ervoor zorgen dat alle leden via Keeo kunnen inschrijven én betalen. Let dus goed op welke tarieven je instelt, en welke leeftijdsrestricties je gebruikt. Als je klaar bent kan je een leeftijdsgroep openen zodat leden via Keeo kunnen inschrijven.",
-    "translation": "Vérifiez si tous les paramètres des groupes sont corrects. Si tout est correctement configuré, vous pouvez vous assurer que tous les membres peuvent s'inscrire et payer via Keeo. Faites donc attention aux tarifs que vous définissez et aux restrictions d'âge que vous utilisez. Une fois que vous avez terminé, vous pouvez ouvrir un groupe d'âge afin que les membres puissent s'inscrire via Keeo."
-  },
-  "6f77926b-801a-477d-8254-78166ca8e6be": {
-    "original": "FOS De Goudvis op Keeo",
-    "translation": "FOS De Goudvis sur Keeo"
-  },
-  "209f9f13-4897-4310-95eb-f436987b8ba7": {
-    "original": "Kijk hieronder na of alle functies toegekend zijn. Om een functie toe te kennen zorg je er eerst voor dat de persoon is ingeschreven in Keeo, daarna kan je functies toekennen door het lid open te klikken in het tabblad ‘Leden’. Daar kan je met de rechtermuisknop op een lid klikken en \"Functies bewerken\" kiezen.",
-    "translation": "Vérifiez ci-dessous si toutes les fonctions ont été attribuées. Pour attribuer une fonction, assurez-vous d'abord que la personne est inscrite dans Keeo, puis vous pouvez attribuer des fonctions en ouvrant le membre dans l'onglet « Membres ». Là, vous pouvez cliquer avec le bouton droit sur un membre et choisir « Modifier les fonctions »."
-  },
-  "3f4666f9-59b5-4a24-b1a7-9f820275c042": {
-    "original": "Hier kan je als beheerder leden inschrijven voor een activiteit. Het meest praktische is dat elk lid zichtzelf inschrijft via Keeo, maar dat is misschien niet altijd mogelijk.",
-    "translation": "En tant qu'administrateur, vous pouvez ici inscrire des membres à une activité. Le plus pratique est que chaque membre s'inscrive lui-même via Keeo, mais ce n'est peut-être pas toujours possible."
-  },
-  "3ab07939-121b-47f9-956f-a573c57ec008": {
-    "original": "Je kan zelf ook leden inschrijven voor deze activiteit. Jouw groep betaalt dan meteen de kostprijs aan de organisator, waarna Keeo automatisch één of meerdere openstaande bedragen aanmaakt van de ingeschreven leden aan jouw groep (te betalen via het ledenportaal of manueel betaling te registreren).",
-    "translation": "Vous pouvez également inscrire vous-même des membres à cette activité. Votre groupe paie alors immédiatement le prix à l'organisateur, après quoi Keeo crée automatiquement un ou plusieurs montants dus des membres inscrits à votre groupe (à payer via le portail des membres ou à enregistrer manuellement le paiement)."
-  },
-  "52b7cfdf-2f2c-4d88-8689-96a91f885654": {
-    "original": "Aanrekening via FOS Open Scouting",
-    "translation": "Facturation via FOS Open Scouting"
-  },
-  "227a2170-37b7-46b0-ac1e-516f603379b5": {
-    "original": "Sommige aansluitingen verlopen via FOS Open Scouting (lid betaalt rechtstreeks aan de koepel) en worden dus ook niet echt aangerekend aan een individuele eenheid. Je kan deze via deze filter uitsluiten.",
-    "translation": "Certaines connexions passent par FOS Open Scouting (le membre paie directement à la fédération) et ne sont donc pas réellement facturées à une unité individuelle. Vous pouvez les exclure via ce filtre."
-  },
-  "48148df3-81a8-439e-a368-64355aa7da6e": {
-    "original": "Lid betaald rechtstreeks aan FOS Open Scouting",
-    "translation": "Le membre paie directement à FOS Open Scouting"
-  },
-  "880e4cac-5a7e-4d6d-80ad-c5472a005df6": {
-    "original": "De eerstvolgende aansluiting van dit lid start op {date}. Vandaag is dit lid niet aangesloten bij FOS Open Scouting en daardoor niet verzekerd.",
-    "translation": "La prochaine connexion de ce membre commence le {date}. Aujourd'hui, ce membre n'est pas affilié à FOS Open Scouting et n'est donc pas assuré."
-  },
-  "4a39e12b-efa2-46fe-aa30-83bc576548a3": {
-    "original": "Aangesloten via FOS Open Scouting (niet aangerekend aan een eenheid)",
-    "translation": "Affilié via FOS Open Scouting (non facturé à une unité)"
-  },
-  "cd5ee584-5b0c-4acb-af75-7b21ad37cead": {
-    "original": "Het antwoord is niet gekend (werd nog nooit ingevuld in Keeo). Er worden geen lagere tarieven automatisch toegepast.",
-    "translation": "La réponse n'est pas connue (n'a jamais été saisie dans Keeo). Aucun tarif inférieur n'est automatiquement appliqué."
-  },
-  "f6e06abd-3e58-4f99-bc8d-6cf6a44273b3": {
-    "original": "Jouw eenheid betaalt {price} aan FOS Open Scouting, maar voor latere aansluitingen bedraagt het nu {priceReduced}.",
-    "translation": "Votre unité paie {price} à FOS Open Scouting, mais pour les connexions ultérieures, le prix est désormais de {priceReduced}."
-  },
-  "a9605085-cd44-454d-9386-3dd30206f3bf": {
-    "original": "Opgelet, deze beheerders zijn ook niet aangesloten bij FOS Open Scouting, en zijn dus ook niet verzekerd. Gebruik met mate, bv. om externen toegang te geven voor evenementen.",
-    "translation": "Attention, ces administrateurs ne sont pas non plus affiliés à FOS Open Scouting et ne sont donc pas assurés. Utilisez avec modération, par exemple pour donner accès à des personnes externes pour des événements."
-  },
-  "1dfaeb07-5f01-42c7-a9a4-0096047da86e": {
-    "original": "Vragenlijst van FOS Open Scouting",
-    "translation": "Questionnaire de FOS Open Scouting"
+  "919139ab-1103-4e1b-aaf7-94cfec03a9e3": {
+    "original": "Alle eenheiden in {name}",
+    "translation": "Toutes les unités dans {name}"
   },
   "91e43562-956f-41ac-b5b6-a8bcb63edd66": {
     "original": "Deze domeinnaam is al in gebruik door een andere eenheid. Neem contact op met Keeo als je denkt dat je toch toegang zou moeten krijgen.",
     "translation": "Ce nom de domaine est déjà utilisé par une autre unité. Contactez Keeo si vous pensez que vous devriez avoir accès."
   },
-  "4f7e64c6-4607-446d-9a84-8ebcb7206241": {
-    "original": "Kijk na of je nog een ander tabblad open hebt staan met Keeo en sluit deze. Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer de pagina te herladen of in een andere browser te werken.",
-    "translation": "Vérifiez si vous avez un autre onglet ouvert avec Keeo et fermez-le. Votre navigateur ne prend pas en charge certaines fonctions, ce qui nous empêche de suivre les commandes hors ligne si votre connexion Internet tombe en panne. Essayez de recharger la page ou de travailler dans un autre navigateur."
+  "92a41b40-9841-4326-abaf-a8a7d97e5d55": {
+    "original": "Je kan geen aansluitingen wijzigen in een vergrendeld scoutsjaar",
+    "translation": "Vous ne pouvez pas modifier les affiliations dans une année scoute verrouillée"
   },
-  "65c9a375-fbca-4a27-9a42-01d49f7f9588": {
-    "original": "Klaas",
-    "translation": "Marc"
+  "92c19888-7ac0-46b5-b691-05b29e52e110": {
+    "original": "Ben je zeker dat je deze eenheid wil verwijderen?",
+    "translation": "Êtes-vous sûr de vouloir supprimer cette unité ?"
   },
-  "e028c78a-166d-4531-b03b-99a573f1661b": {
-    "original": "Klaassen",
-    "translation": "Marcs"
+  "92f76d54-282e-448e-ae15-21411b7bc085": {
+    "original": "Sluit jouw eenheid aan bij Keeo",
+    "translation": "Connectez votre unité à Keeo"
   },
-  "1c5ba032-2132-4bda-8aae-7f622f6f3a2a": {
-    "original": "Huidige",
-    "translation": "Actif"
+  "9305016a-babf-4606-af6c-e8ef9f2ba91e": {
+    "original": "Weet je zeker dat je {total} wilt aanrekenen aan {count} eenheid/eenheden?",
+    "translation": "Êtes-vous sûr de vouloir facturer {total} à {count} unité(s) ?"
+  },
+  "937b407c-7681-45c1-8c29-f415cf03faaf": {
+    "original": "Hoe ken je Keeo?",
+    "translation": "Comment connaissez-vous Keeo?"
+  },
+  "94547449-549d-4572-b217-c1a089b12997": {
+    "original": "Jouw domeinnaam is nog niet actief voor het versturen van e-mails vanaf die domeinnaam, maar je kan in tussentijd wel al e-mails versturen via Keeo. Keeo zorgt dat antwoorden op die e-mails wel bij jullie terecht komen.",
+    "translation": "Votre nom de domaine n'est pas encore actif pour l'envoi d'e-mails à partir de ce nom de domaine, mais vous pouvez déjà envoyer des e-mails via Keeo. Keeo s'assure que les réponses à ces e-mails vous parviennent."
+  },
+  "9685e11f-a4d0-4709-9f5e-875957ad269b": {
+    "original": "Onbekend scoutsjaar",
+    "translation": "Année scoute inconnue"
+  },
+  "971f8200-0bfd-4b95-9feb-629044d9af7f": {
+    "original": "Voeg hier de e-mailadressen van jouw eenheid toe. Als je e-mailadressen hebt met jouw eigen domeinnaam (bv. info@mijneenheid.be), kan je e-mails versturen vanaf dat e-mailadres als je jouw domeinnaam eerst toevoegt (kan bij instellingen). Andere e-mails worden vanaf @stamhoofd.email verstuurd. Voeg enkel e-mailadressen toe waar je e-mails op kan ontvangen.",
+    "translation": "Ajoutez ici les adresses e-mail de votre unité. Si vous avez des adresses e-mail avec votre propre nom de domaine (par ex. info@monunité.be), vous pouvez envoyer des e-mails à partir de cette adresse e-mail si vous ajoutez d'abord votre nom de domaine (possible dans les paramètres). Les autres e-mails seront envoyés à partir de @stamhoofd.email. Ajoutez uniquement les adresses e-mail sur lesquelles vous pouvez recevoir des e-mails."
+  },
+  "97616151-90c3-4644-8854-e228c4f355f5": {
+    "original": "Dit scoutsjaar is vergrendeld, je kan geen meldingen meer aanmaken voor deze periode",
+    "translation": "Cette année scoute est verrouillée, vous ne pouvez plus créer de notifications pour cette période"
+  },
+  "977fa720-e451-4dd8-a317-881cf7a409b1": {
+    "original": "Er is iets misgelopen bij het importeren van het zaalplan. Kijk na of het bestand dat je hebt gekozen wel uit Keeo afkomstig is.",
+    "translation": "Une erreur s'est produite lors de l'importation du plan de salle. Vérifiez si le fichier que vous avez choisi provient bien de Keeo."
+  },
+  "9c916015-e69c-44b3-a568-d0af15854787": {
+    "original": "Alle groepen worden overgezet op dit nieuwe scoutsjaar. Hoofdbeheerders kunnen het vorige scoutsjaar nog bekijken.",
+    "translation": "Tous les groupes sont transférés vers cette nouvelle année scoute. Les administrateurs principaux peuvent toujours consulter la précédente année scoute."
+  },
+  "9d283cbb-7ba2-4a16-88ec-ff0c19f39674": {
+    "original": "Eenheidsnummer",
+    "translation": "Numéro d'unité"
+  },
+  "9de0900d-9daa-48e5-ab82-496c61dfc5db": {
+    "original": "Alle leeftijdsgroepen worden gesloten (tenzij de eenheid al eerder overschakelde naar dit scoutsjaar)",
+    "translation": "Tous les groupes d'âge sont fermés (sauf si l'unité est déjà passée à cette année scoute)"
+  },
+  "9ebbdbf3-f76b-4f9a-89e2-936f56a75723": {
+    "original": "Verwijder scoutsjaar",
+    "translation": "Supprimer l'année scoute"
+  },
+  "9ec8b45b-3321-4c1a-90bb-74e22c3e7f09": {
+    "original": "Een hoofdbeheerder van jouw eenheid moet eerst e-mailadressen instellen voor je een e-mail kan versturen.",
+    "translation": "Un administrateur principal de votre unité doit d’abord définir des adresses e-mail pour que vous puissiez envoyer un e-mail."
+  },
+  "9f1a0032-32dd-48fd-9d04-0b20bd86aefb": {
+    "original": "Terug naar Keeo",
+    "translation": "Retour à Keeo"
+  },
+  "a010c110-bf4e-4c12-a324-6b84c992e728": {
+    "original": "Je kan geen eenheid aanmaken",
+    "translation": "Vous ne pouvez pas créer d’unité"
+  },
+  "a1f57ce7-a96a-4c8d-b43f-79a07a78114f": {
+    "original": "Je kan de hoofdgroep niet verwijderen. Als je dit toch wil doen, kan je eerst een andere eenheid instellen als hoofdgroep via ')Boekhouding en aansluitingen'.",
+    "translation": "Vous ne pouvez pas supprimer le groupe principal. Si vous souhaitez quand même le faire, vous pouvez d’abord définir une autre unité comme groupe principal via ')Comptabilité et affiliations'."
+  },
+  "a379312a-007d-46a2-9533-33c15c524504": {
+    "original": "Voor een API-key die heel intensief gebruik moet maken van de API. Risico op overbelasting als de API niet correct is geimplementeerd en zware requests op korte tijd afvuurt.",
+    "translation": "Pour une API-key qui doit faire un usage très intensif de l'API. Risque de surcharge si l'API n'est pas correctement implémentée et déclenche des requêtes lourdes sur une courte période."
+  },
+  "a40877f1-4d7b-469f-bd5f-574de9f443be": {
+    "original": "Muziekeenheid",
+    "translation": "Unité musique"
+  },
+  "a5332744-e6e1-4af9-b05c-cbc21515c4d0": {
+    "original": "Eenheidsnummer betalende groep",
+    "translation": "Numéro d'unité du groupe payant"
+  },
+  "a5b61d4d-207f-485c-8748-cbb04fcb2d23": {
+    "original": "Beheer alle instellingen van deze eenheid",
+    "translation": "Gérer tous les paramètres de cette unité"
+  },
+  "a5c0dce2-01df-4a57-8d02-0b79cec9b89d": {
+    "original": "de eenheid {name} op {platform}",
+    "translation": "l’unité {name} sur {platform}"
+  },
+  "a654551b-6dcd-48a9-a5c5-4609fdcba5f3": {
+    "original": "Keeo is in orde",
+    "translation": "Keeo est en ordre"
+  },
+  "a7585599-1c67-4de7-b552-f5b78c7385db": {
+    "original": "Schakel dit in om leden en eenheiden automatisch te verwittigen als hun openstaand bedrag stijgt.",
+    "translation": "Activez cette option pour avertir automatiquement les membres et les unités si leur montant restant dû augmente."
+  },
+  "a9605085-cd44-454d-9386-3dd30206f3bf": {
+    "original": "Opgelet, deze beheerders zijn ook niet aangesloten bij FOS Open Scouting, en zijn dus ook niet verzekerd. Gebruik met mate, bv. om externen toegang te geven voor evenementen.",
+    "translation": "Attention, ces administrateurs ne sont pas non plus affiliés à FOS Open Scouting et ne sont donc pas assurés. Utilisez avec modération, par exemple pour donner accès à des personnes externes pour des événements."
+  },
+  "aa39f949-6fe5-4ed2-acb7-ff3d138cf243": {
+    "original": "Deze functie is niet beschikbaar voor deze eenheid",
+    "translation": "Cette fonction n’est pas disponible pour cette unité"
+  },
+  "aad47217-df26-43ce-a43c-896697d5fbd4": {
+    "original": "Voeg eigen functies toe die enkel van toepassing zijn in je eigen eenheid.",
+    "translation": "Ajoutez vos propres fonctions qui ne s'appliquent que dans votre propre unité."
+  },
+  "ab0c7981-0d5f-4c36-bd3f-07ddc2a63759": {
+    "original": "Jouw eenheid bevindt zich in een ander scoutsjaar dan FOS Open Scouting.",
+    "translation": "Votre unité se trouve dans une année scoute différente de celle de FOS Open Scouting."
+  },
+  "ab21ae18-0181-44ea-b41d-ff61c9358858": {
+    "original": "Voor Mollie heb je een VZW nodig. Een feitelijke eenheid is niet voldoende (wordt niet geaccepteerd)",
+    "translation": "Pour Mollie, vous avez besoin d’une ASBL. Une unité de fait ne suffit pas (n’est pas acceptée)"
+  },
+  "ab858fd6-4451-4d88-869e-be425a661169": {
+    "original": "Laag",
+    "translation": "Bas"
+  },
+  "ac3b2a14-e029-404c-9fe1-2aab4279a3ac": {
+    "original": "Beheer hier alle personen die toegang hebben tot Keeo, en wijzig hun toegangsrechten.",
+    "translation": "Gérez ici toutes les personnes ayant accès à Keeo et modifiez leurs droits d'accès."
+  },
+  "adf3218e-a785-4dc9-8d2a-70031c6c8bee": {
+    "original": "Zoek jouw eenheid",
+    "translation": "Recherchez votre unité"
   },
   "aeace79f-c772-4944-8d1d-f92eb519267f": {
     "original": "FOS De Goudvis",
     "translation": "FOS L'Orfé"
   },
-  "e60df757-6546-41c2-b3d3-599df08f34b6": {
-    "original": "FOS De Goudvis",
-    "translation": "FOS L'Orfé"
+  "b091538b-014e-4db2-8241-9ed98e0c51c7": {
+    "original": "Breng een kost in rekening per betaling (dus slechts één keer, ook als er meerdere zaken worden afgerekend in één betaling). Wettelijk gezien is het niet toegestaan dat je deze laat afhangen van de gekozen betaalmethode (dat is dus niet mogelijk).",
+    "translation": "Facturez un coût par paiement (donc une seule fois, même si plusieurs articles sont facturés dans un seul paiement). Légalement, il n'est pas autorisé de les faire dépendre de la méthode de paiement choisie (ce n'est donc pas possible)."
   },
-  "16ba3d97-5943-451d-92b5-0bf21555f7ae": {
-    "original": "FOS De Goudvis",
-    "translation": "FOS L'Orfé"
+  "b0c1a91e-f776-4b10-a90f-5806d9fdd400": {
+    "original": "Bij een andere eenheid inschrijven",
+    "translation": "Inscription auprès d’une autre unité"
   },
-  "405a811e-ebb1-4948-84cd-8fb5860104e6": {
-    "original": "Keeo",
-    "translation": "Keeo"
+  "b1491db8-95be-4d67-ad4a-5edb124b23a5": {
+    "original": "Beroepseenheid",
+    "translation": "Unité professionnelle"
   },
-  "68914509-aa54-40c7-9f53-7b8a02149198": {
-    "original": "Keeo",
-    "translation": "Keeo"
+  "b19c1fb0-f1a7-4435-9150-01bb2bb0799c": {
+    "original": "Dit aansluitingstype is (nog) niet beschikbaar voor dit scoutsjaar",
+    "translation": "Ce type d'affiliation n'est pas (encore) disponible pour cette année scoute"
+  },
+  "b263fa75-5a47-43a6-94a5-95eeac94567f": {
+    "original": "Sommige inschrijvingen werden door een eenheid betaald. In dat geval zal de annuleringskost aangerekend worden aan de betalende eenheid (van organisator naar betalende eenheid) én het lid (van de betalende eenheid naar lid).",
+    "translation": "Certaines inscriptions ont été payées par une unité. Dans ce cas, les frais d'annulation seront facturés à l'unité payante (de l'organisateur à l'unité payante) et au membre (de l'unité payante au membre)."
+  },
+  "b26772a9-019a-4555-a6ca-7eb5200cab8f": {
+    "original": "Type eenheid",
+    "translation": "Type d'unité"
+  },
+  "b2fbd227-40a3-495d-9826-0e199000cda9": {
+    "original": "Je hebt nog geen facturatiegegevens toegevoegd aan jouw eenheid. Stel deze eerst in voor je verder gaat.",
+    "translation": "Vous n’avez pas encore ajouté de données de facturation à votre unité. Configurez-les d’abord avant de continuer."
+  },
+  "b375f5be-879c-4696-8ccf-0e7066e3f5f4": {
+    "original": "De ideale afmeting voor een banner van een sponsor is 1104x450px. De banner wordt maximaal 150px hoog getoond, maar een veelvoud is noodzakelijk voor een niet-pixelachtige weergave op smartphones. Upload bij voorkeur voor alle sponsors een afbeelding met dezelfde afmetingen. Vermijd het uploaden van het logo als banner, laat dan de banner weg. Als zowel een logo als banner werd geupload zal Keeo de banner verkiezen op mobiele tickets, en het logo op de afgedrukte tickets.",
+    "translation": "Les dimensions idéales pour une bannière d'un sponsor sont de 1104x450px. La bannière est affichée à une hauteur maximale de 150px, mais un multiple est nécessaire pour un affichage non pixelisé sur les smartphones. Téléchargez de préférence une image aux mêmes dimensions pour tous les sponsors. Évitez de télécharger le logo en tant que bannière, supprimez la bannière dans ce cas. Si un logo et une bannière ont été téléchargés, Keeo privilégiera la bannière sur les tickets mobiles et le logo sur les tickets imprimés."
+  },
+  "b422c6f2-be24-4edd-aa99-a2d72d59c496": {
+    "original": "Dit kan op meerdere niveau's worden uitgebreid: per standaard leeftijdsgroep van de koepel, op lokaal niveau van een eenheid en per leeftijdsgroep, wachtlijst of activiteit van een eenheid (of activiteit op nationaal niveau).",
+    "translation": "Cela peut être étendu à plusieurs niveaux : par groupe d'âge standard de la fédération, au niveau local d'une unité et par groupe d'âge, liste d'attente ou activité d'une unité (ou activité au niveau national)."
+  },
+  "b4307772-62dd-48a4-bae3-9d46df314727": {
+    "original": "Welkom op Keeo. Zoek hieronder jouw eenheid om je in te schrijven of om jouw gegevens te beheren.",
+    "translation": "Bienvenue sur Keeo. Recherchez votre unité ci-dessous pour vous inscrire ou pour gérer vos données."
+  },
+  "b5f857ee-6c3b-43df-866c-99e7e0954eb1": {
+    "original": "Hoera! Tijd voor een nieuw scoutsjaar.",
+    "translation": "Hourra ! Il est temps pour une nouvelle année scoute."
+  },
+  "b66376fb-238e-42dd-aec6-f48b9ee2e215": {
+    "original": "Nieuw scoutsjaar",
+    "translation": "Nouvelle année scoute"
+  },
+  "b66501e0-f6de-4259-95ef-13590b24182b": {
+    "original": "eenheid",
+    "translation": "unité"
+  },
+  "b7298a1c-aba3-4839-a7e0-b0e390d07476": {
+    "original": "Naam van de eenheid of van het platform",
+    "translation": "Nom de l’unité ou de la plateforme"
+  },
+  "b789017f-58d2-438b-b73a-2a4d075e3c5b": {
+    "original": "Unieke eenheden",
+    "translation": "Unités uniques"
+  },
+  "b78d9c9e-9099-4fb6-93e1-6bf58e39165f": {
+    "original": "De categorieën en leeftijdsgroepen van de eenheden worden gedupliceerd naar het nieuwe scoutsjaar.",
+    "translation": "Les catégories et les groupes d'âge des unités sont dupliqués vers la nouvelle année scoute."
+  },
+  "b906c293-2afa-4ebe-9b33-2d64ab46da34": {
+    "original": "Een wachtlijst kan momenteel niet gedeeld worden tussen verschillende scoutsjaren",
+    "translation": "Une liste d’attente ne peut actuellement pas être partagée entre différentes années scoutes"
+  },
+  "bb17dafc-4305-4213-90c9-2bb2701d777f": {
+    "original": "Deze functie is niet beschikbaar omdat jouw eenheid nog het oude gratis ledenadministratie pakket gebruikt. Via instellingen kunnen hoofdbeheerders overschakelen op de betaalde versie met meer functionaliteiten.",
+    "translation": "Cette fonction n’est pas disponible car votre unité utilise encore l’ancien pack d’administration des membres gratuit. Via les paramètres, les administrateurs principaux peuvent passer à la version payante avec plus de fonctionnalités."
+  },
+  "bc8578de-ee3c-4aac-bd19-3fd4040168a4": {
+    "original": "De naam van deze eenheid",
+    "translation": "Le nom de cette unité"
+  },
+  "bc89861d-a799-4100-b06c-29d6808ba8d2": {
+    "original": "Als je een betaling uitvoert in naam van je eenheid, is het noodzakelijk om facturatiegegevens met bedrijfsgegevens in te vullen.",
+    "translation": "Si vous effectuez un paiement au nom de votre unité, il est nécessaire de remplir les données de facturation avec les données de l'entreprise."
+  },
+  "becc82f0-4195-4a17-b3f5-03f305582e4a": {
+    "original": "Een feitelijke eenheid is niet geregistreerd en heeft geen ondernemingsnummer",
+    "translation": "Une unité de fait n’est pas enregistrée et n’a pas de numéro d’entreprise"
+  },
+  "bf7f8c10-b6b5-4edb-90d8-a550d061dea6": {
+    "original": "Geef deze beheerders snel lees of bewerk toegang tot alle onderdelen van jouw eenheid.",
+    "translation": "Donnez rapidement à ces administrateurs un accès en lecture ou en modification à toutes les parties de votre unité."
+  },
+  "c14b0320-cb84-4386-a39a-aa9ffb5eb886": {
+    "original": "Eenheidsnaam",
+    "translation": "Nom de l'unité"
+  },
+  "c14e79ad-18ab-4295-a8b9-fda330e981ec": {
+    "original": "Na periodiek controleren blijken de DNS-instellingen van de domeinnaam van een eenheid instabiel te zijn.",
+    "translation": "Après un contrôle périodique, il s’avère que les paramètres DNS du nom de domaine d’une unité sont instables."
+  },
+  "c244a546-ac11-4aee-be3e-99b0b6079703": {
+    "original": "Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om de kleur van je eenheid te behouden (bij algemene instellingen > personalisatie).",
+    "translation": "Entrez ci-dessus le code couleur HEX de votre couleur principale. Laissez vide pour conserver la couleur de votre unité (dans les paramètres généraux > personnalisation)."
+  },
+  "c28ace1d-50ff-4f1a-b403-bd5ab55d9dcb": {
+    "original": "Scoutsjaren",
+    "translation": "Années scoutes"
+  },
+  "c34ab59f-979c-45e7-acd2-60ff24fc0705": {
+    "original": "Eenheid aanmaken",
+    "translation": "Créer une unité"
+  },
+  "c43f09fa-5f39-4e1a-bfbf-80a0d2d4bd6c": {
+    "original": "Zoek een eenheid",
+    "translation": "Rechercher une unité"
+  },
+  "c4d225ea-8e41-4829-bf0c-bc04755492de": {
+    "original": "De naam van de eenheid is te lang. Probeer de naam wat te verkorten en probeer opnieuw.",
+    "translation": "Le nom de l’unité est trop long. Essayez de raccourcir le nom et réessayez."
+  },
+  "c5d21881-b70a-489e-bce9-5bb3d24b6f76": {
+    "original": "Alle leden moeten opnieuw inschrijven voor het nieuwe scoutsjaar, of schrijf je zelf opnieuw in",
+    "translation": "Tous les membres doivent s'inscrire à nouveau pour la nouvelle année scoute, ou inscrivez-vous vous-même à nouveau"
+  },
+  "c6f24e63-4735-43c4-a93a-405755ba70c2": {
+    "original": "Scoutsjaar maken",
+    "translation": "Créer une année scoute"
+  },
+  "c78c4a14-8796-4ddc-a449-33a38ef3a6ac": {
+    "original": "Je kan deze link ook personaliseren met jouw eigen domeinnaam via Instellingen > Personaliseren. bv. inschrijven.mijneenheid.be",
+    "translation": "Vous pouvez également personnaliser ce lien avec votre propre nom de domaine via Paramètres > Personnaliser. par ex. inscription.monunité.be"
+  },
+  "c82d1491-73f8-4f05-af15-5b7bf58f1bcb": {
+    "original": "Gezien bij andere eenheid",
+    "translation": "Vu chez une autre unité"
+  },
+  "c95eb07d-15e3-45da-b2c2-7754c134ae65": {
+    "original": "De leden moeten zich opnieuw inschrijven voor het nieuwe scoutsjaar.",
+    "translation": "Les membres doivent s'inscrire à nouveau pour la nouvelle année scoute."
+  },
+  "ca303b26-d586-4e46-ad0d-af968d252261": {
+    "original": "Ben je zeker dat je dit scoutsjaar wilt verwijderen?",
+    "translation": "Êtes-vous sûr de vouloir supprimer cette année scoute ?"
+  },
+  "ca923d49-c9c1-4c39-9e52-96b88a0223ed": {
+    "original": "Voeg één of meerdere juridische entiteiten toe. Als je zowel een feitelijke eenheid als een VZW hebt, voeg ze dan beide toe. De eerste in de lijst wordt standaard gebruikt als je betalingen uitvoert.",
+    "translation": "Ajouter une ou plusieurs entités juridiques. Si vous avez à la fois une unité de fait et une ASBL, ajoutez-les toutes les deux. La première de la liste est utilisée par défaut lorsque vous effectuez des paiements."
+  },
+  "cb51b737-c4cf-4ea7-aeb5-b5736a43c333": {
+    "original": "De naam van je eenheid",
+    "translation": "Le nom de votre unité"
+  },
+  "cbdd5da3-8752-423d-8adf-00195fac3864": {
+    "original": "Nieuwe eenheid",
+    "translation": "Nouvelle unité"
+  },
+  "cc098cc0-d849-4808-b53a-0b99755b3f99": {
+    "original": "verwijderde eenheid",
+    "translation": "unité supprimée"
+  },
+  "cc48e00f-2c6b-4f4d-9bae-65a889364ea3": {
+    "original": "Er kunnen geen wijzigingen meer aangebracht worden aan inschrijvingen in dit scoutsjaar.",
+    "translation": "Aucune modification supplémentaire ne peut être apportée aux inscriptions de cette année scoute."
+  },
+  "cd0975fc-75c4-4c1e-b80a-f611f0992caa": {
+    "original": "Alle eenheden",
+    "translation": "Toutes les unités"
+  },
+  "cd5ee584-5b0c-4acb-af75-7b21ad37cead": {
+    "original": "Het antwoord is niet gekend (werd nog nooit ingevuld in Keeo). Er worden geen lagere tarieven automatisch toegepast.",
+    "translation": "La réponse n'est pas connue (n'a jamais été saisie dans Keeo). Aucun tarif inférieur n'est automatiquement appliqué."
+  },
+  "cd60d49f-9fc8-4fb7-b574-1231874c1d43": {
+    "original": "Overloop alle stappen en bevestig dat je alles hebt nagekeken bij elke stap. Zorg dat alles ten laatste tegen 1 september is nagekeken. De deadline om je leden in te schrijven en op orde te zetten is 15 november.",
+    "translation": "Passez en revue toutes les étapes et confirmez que vous avez vérifié tout à chaque étape. Assurez-vous que tout a été vérifié au plus tard le 1er septembre. La date limite pour inscrire vos membres et les mettre en ordre est le 15 novembre."
+  },
+  "cd6e3548-aea1-4f74-9c66-b1fa43de6438": {
+    "original": "Ticketverkoop via Keeo",
+    "translation": "Vente de billets via Keeo"
+  },
+  "cd798189-d5c8-4b79-98f7-a68786ab288c": {
+    "original": "Eenheidsnummer",
+    "translation": "Numéro d'unité"
+  },
+  "ced29068-facb-4692-9fd7-d9ac74e35359": {
+    "original": "Kijk na of alle instellingen van de groepen correct zijn. Als alles goed staat ingesteld kan je ervoor zorgen dat alle leden via Keeo kunnen inschrijven én betalen. Let dus goed op welke tarieven je instelt, en welke leeftijdsrestricties je gebruikt. Als je klaar bent kan je een leeftijdsgroep openen zodat leden via Keeo kunnen inschrijven.",
+    "translation": "Vérifiez si tous les paramètres des groupes sont corrects. Si tout est correctement configuré, vous pouvez vous assurer que tous les membres peuvent s'inscrire et payer via Keeo. Faites donc attention aux tarifs que vous définissez et aux restrictions d'âge que vous utilisez. Une fois que vous avez terminé, vous pouvez ouvrir un groupe d'âge afin que les membres puissent s'inscrire via Keeo."
+  },
+  "d185d3ca-e20f-43a2-a79f-f77404b8f33a": {
+    "original": "Naam van jouw eenheid",
+    "translation": "Nom de votre unité"
+  },
+  "d2749916-b99a-47af-9bc4-300648fe77a7": {
+    "original": "Je moet elke betaling zelf controleren en markeren als betaald in Keeo",
+    "translation": "Vous devez contrôler chaque paiement vous-même et le marquer comme payé dans Keeo."
+  },
+  "d41cdbe3-57e3-4a2e-83bc-cb9e65c9c840": {
+    "original": "Je kan een functie enkel toekennen aan leden die zijn ingeschreven in het huidige scoutsjaar",
+    "translation": "Vous ne pouvez attribuer une fonction qu'aux membres inscrits à l'année scoute actuelle"
+  },
+  "d431d7b4-8cdd-4307-bb73-2c570fc1a0fa": {
+    "original": "Toegang tot eenheiden",
+    "translation": "Accès aux unités"
+  },
+  "d4a9ca3f-72c9-4418-90fa-5d648b23ee7e": {
+    "original": "Alle eenheiden",
+    "translation": "Toutes les unités"
+  },
+  "d54c9b23-2d3c-49cd-b1fc-7e821d36fd41": {
+    "original": "Inloggen op Keeo",
+    "translation": "Se connecter à Keeo"
+  },
+  "d5795b94-23d5-4fe7-97e1-6f0fe916caca": {
+    "original": "Deze aansluiting is nog niet beschikbaar voor dit scoutsjaar",
+    "translation": "Cette affiliation n’est pas encore disponible pour cette année scoute"
+  },
+  "d5d2e25f-588e-496e-925f-f7e375c3888a": {
+    "original": "Mijn eenheid",
+    "translation": "Mon unité"
+  },
+  "d687b491-be68-4e5b-9acb-e2c090951c23": {
+    "original": "bv. jouweenheid.be",
+    "translation": "par ex. votreunité.be"
+  },
+  "d68a6d63-d782-49e2-84a5-4f77dbfa2977": {
+    "original": "Nieuwe leden hebben automatisch recht op een proefperiode van {days} voor de aansluiting bij FOS Open Scouting.",
+    "translation": "Les nouveaux membres ont automatiquement droit à une période d'essai de {days} pour l'adhésion à FOS Open Scouting."
+  },
+  "d80e2291-5bb9-4799-9594-bcda54480efa": {
+    "original": "Gebruikt jouw eenheid Keeo al?",
+    "translation": "Votre unité utilise-t-elle déjà Keeo ?"
+  },
+  "d8662e1d-2f43-4342-91de-ef9a44cf3e86": {
+    "original": "Logo van eenheid gebruiken",
+    "translation": "Utiliser le logo de l'unité"
+  },
+  "d94db7a1-4167-440a-b556-62ff3291555b": {
+    "original": "Eenheiden",
+    "translation": "Unités"
+  },
+  "da2d2d9e-07cc-471e-963a-7915c7698ba9": {
+    "original": "gelezen en ga hiermee akkoord in naam van mijn eenheid.",
+    "translation": "lu et approuvé au nom de mon unité."
+  },
+  "da498f50-0d40-4c68-a87c-488bd555e752": {
+    "original": "verificatiedocument van je eenheid",
+    "translation": "document de vérification de votre unité"
+  },
+  "daa7dc61-e8c9-4629-97b6-a75f39eaebac": {
+    "original": "Er bestaat al een eenheid met dezelfde URI. Voeg bijvoorbeeld de naam van je gemeente toe.",
+    "translation": "Une unité avec le même URI existe déjà. Ajoutez par exemple le nom de votre commune."
+  },
+  "daf8a992-77cd-4c20-8bca-5c692fd1e431": {
+    "original": "bv. https://www.eenheid.be/privacy",
+    "translation": "par ex. https://www.unité.be/privacy"
+  },
+  "dcb9126f-72c4-42c8-990a-8ddc747c0e2b": {
+    "original": "Je kan niet inschrijven voor {group} omdat dit scoutsjaar niet actief is.",
+    "translation": "Vous ne pouvez pas vous inscrire pour {group} car cette année scoute n’est pas active."
+  },
+  "de1d5cdf-6aa6-4912-828a-82cb53f8abf6": {
+    "original": "Dit is geen geldig zaalplan uit Keeo",
+    "translation": "Ceci n'est pas un plan de salle Keeo valide."
+  },
+  "df8e9385-314f-4403-b0d5-e5893f68d442": {
+    "original": "Upload hier het logo zonder extra tekst of witruimtes. Laat leeg als je die niet hebt, en upload dan een banner. Zo kan Keeo de plaatsing optimaliseren. We plaatsen het logo bij voorkeur op de afgedrukte versie van een ticket als zowel een logo als banner aanwezig is.",
+    "translation": "Téléchargez ici le logo sans texte ni espace blanc supplémentaire. Laissez vide si vous n'en avez pas et téléchargez ensuite une bannière. Ainsi, Keeo peut optimiser le placement. Nous plaçons le logo de préférence sur la version imprimée d'un ticket si un logo et une bannière sont présents."
+  },
+  "dff05b27-5ad9-416c-b344-f890a4e68255": {
+    "original": "Scoutsjaar",
+    "translation": "Année scoute"
+  },
+  "e028c78a-166d-4531-b03b-99a573f1661b": {
+    "original": "Klaassen",
+    "translation": "Marcs"
+  },
+  "e07bc7a1-92c0-48fc-91f3-46e12573ee03": {
+    "original": "Naam eenheid",
+    "translation": "Nom de l'unité"
+  },
+  "e13d9fec-ff5a-43e0-8cf4-4edc6e576d17": {
+    "original": "Is jouw eenheid een feitelijke eenheid zonder VZW, dan moet je hier het refertenummer invullen dat je bij Belcotax had aangevraagd.",
+    "translation": "Si votre unité est une unité de fait sans ASBL, vous devez indiquer ici le numéro de référence que vous avez demandé à Belcotax."
+  },
+  "e2130593-e64d-4f3a-bb16-75ba4ed7604e": {
+    "original": "Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorig scoutsjaar van gelijk welke inschrijvingsgroep.",
+    "translation": "Les membres sont considérés comme existants s'ils sont inscrits pour une année scoute précédente de n'importe quel groupe d'inscription."
+  },
+  "e276e384-22f1-4894-93ae-8874329c6767": {
+    "original": "Eenheid bewerken",
+    "translation": "Modifier l'unité"
+  },
+  "e43ca9ec-8495-48af-a6df-8327e6f33d85": {
+    "original": "adres van je eenheid",
+    "translation": "adresse de votre unité"
   },
   "e5f00b6a-9424-46b7-ada2-9474160189c4": {
     "original": "eenheid",
     "translation": "unité"
+  },
+  "e60df757-6546-41c2-b3d3-599df08f34b6": {
+    "original": "FOS De Goudvis",
+    "translation": "FOS L'Orfé"
+  },
+  "e6405d38-2bd8-4e24-8e35-24f4daea2a37": {
+    "original": "Gegevens van eenheiden",
+    "translation": "Données des unités"
+  },
+  "e6da382b-6acc-4a77-ab74-ece7ea002d5f": {
+    "original": "Deze functies worden gekoppeld aan een lid samen met een eenheid, door een hoofdbeheerder van die eenheid. Een eenheid kan zelf ook nog groepseigenfuncties toevoegen om deze uit te breiden.",
+    "translation": "Ces fonctions sont liées à un membre ainsi qu'à une unité, par un administrateur principal de cette unité. Une unité peut également ajouter des fonctions propres au groupe pour les étendre."
+  },
+  "e821b318-928b-4eee-9bca-d00366554792": {
+    "original": "De aansluitingsperiode moet binnen de periode van het gekozen scoutsjaar liggen",
+    "translation": "La période d'affiliation doit se situer dans la période de l'année scoute choisie"
+  },
+  "e82be6d7-1cde-4da3-8018-1e2c796a3f13": {
+    "original": "Na periodiek controleren blijken de DNS-instellingen van de domeinnaam van een eenheid terug stabiel te zijn.",
+    "translation": "Après un contrôle périodique, il s’avère que les paramètres DNS du nom de domaine d’une unité sont à nouveau stables."
+  },
+  "e866488b-bc8d-481f-900b-9cf1779f44b8": {
+    "original": "De vervaldatum ligt tussen de start en einddatum en is optioneel. De aansluiting blijft nog geldig na deze datum, maar in het systeem wordt het gedeeltelijk beschouwd als 'verlopen'. Gebruik dit om een aansluiting nog even te laten doorlopen in het nieuwe scoutsjaar.",
+    "translation": "La date d'expiration se situe entre la date de début et la date de fin et est facultative. La connexion reste valable après cette date, mais le système la considère partiellement comme 'expirée'. Utilisez ceci pour prolonger une connexion dans la nouvelle année scoute."
+  },
+  "e99c7d31-f9fe-4e0f-8947-bdc30784de5b": {
+    "original": "* Voor de aansluiting bij Keeo moet je nog een correcte standaard inschrijvingsgroep selecteren zodat de benaming die jouw eenheid gebruikt gekoppeld kan worden aan de benaming van Keeo.",
+    "translation": "* Pour la connexion à Keeo, vous devez encore sélectionner un groupe d'inscription standard correct afin que le nom utilisé par votre unité puisse être lié au nom de Keeo."
+  },
+  "ea927f14-835b-43f6-bf6e-3e689b5a0824": {
+    "original": "*Hoe oud het lid wordt in het kalenderjaar van de start van een scoutsjaar (dus leeftijd op 31/12/{startYear}). Ter referentie: leden uit het eerste leerjaar zijn 6 jaar op 31 december. Leden uit het eerste secundair zijn 12 jaar op 31 december.",
+    "translation": "*Âge du membre dans l'année civile du début d'une année scoute (donc âge au 31/12/{startYear}). À titre de référence : les élèves de première année ont 6 ans au 31 décembre. Les élèves de première secondaire ont 12 ans au 31 décembre."
+  },
+  "eae11d90-befa-4482-9fe3-412cba791ef5": {
+    "original": "Eenheidsnummer",
+    "translation": "Numéro d'unité"
+  },
+  "eb55e12d-0c0a-491e-bdbc-6e705b9d82a7": {
+    "original": "Account loskoppelen van Keeo",
+    "translation": "Déconnecter le compte de Keeo"
+  },
+  "eb91fb5c-72fc-44d4-9b84-4c9f7791e27a": {
+    "original": "Bekijk alle leden van deze eenheid via het beheerdersportaal",
+    "translation": "Voir tous les membres de cette unité via le portail administrateur"
+  },
+  "ec0c482e-0528-499f-82fa-b081bf708ded": {
+    "original": "Dit lid is bij geen enkele eenheid ingeschreven voor het huidige scoutsjaar en kan daardoor niet aangesloten worden",
+    "translation": "Ce membre n'est inscrit dans aucune unité pour l'année scoute en cours et ne peut donc pas être connecté"
+  },
+  "ed22b0bb-8ae7-4ef0-a139-1bc11b2a719e": {
+    "original": "Deze functie kan niet worden toegewezen aan deze eenheid",
+    "translation": "Cette fonction ne peut pas être attribuée à cette unité"
+  },
+  "ef07b66f-6b78-4c47-9599-d8847ea97aaa": {
+    "original": "Beheer de scoutsjaren en start een nieuw scoutsjaar op",
+    "translation": "Gérez les années scoutes et démarrez une nouvelle année scoute."
+  },
+  "f02ad9a5-f0b4-483e-961c-491ddf7d6f6a": {
+    "original": "Ledenportaal",
+    "translation": "Portail des membres"
+  },
+  "f0ff8a76-a986-440c-b966-a5579e0844f4": {
+    "original": "Je kan geen documenten aanmaken in de gratis versie van Keeo",
+    "translation": "Vous ne pouvez pas créer de documents dans la version gratuite de Keeo."
+  },
+  "f1248bd5-36f4-40fd-9467-08bda59127d6": {
+    "original": "Lijst van alle eenheden die nog een openstaand bedrag hebben tegenover {name}",
+    "translation": "Liste de toutes les unités qui ont encore un montant restant dû envers {name}"
+  },
+  "f1931dcf-219f-4ca2-935b-d5a6747ddbdb": {
+    "original": "De aansluitingkosten worden altijd aangerekend via een organisatie/eenheid die de koepel vertegenwoordigt. De betaalinstellingen en facturatiegegevens van die eenheid worden gebruikt voor het verzamelen van alle betalingen. Op die manier kan je de beschikbare betaalmethodes en betaalaccounts configureren.",
+    "translation": "Les frais d'affiliation sont toujours facturés via une organisation/unité qui représente la fédération. Les paramètres de paiement et les données de facturation de cette unité sont utilisés pour collecter tous les paiements. De cette façon, vous pouvez configurer les méthodes de paiement et les comptes de paiement disponibles."
+  },
+  "f24d4ba4-4b42-4fa1-b99f-4b90dd1a3208": {
+    "original": "Kies hieronder wat er precies terugbetaald (negatief bedrag invullen) werd. Let op dat Keeo momenteel geen automatische terugbetalingen doet voor online betalingen. Je moet dus zelf het bedrag manueel terugbetalen of storten.",
+    "translation": "Choisissez ci-dessous ce qui a été exactement remboursé (saisir un montant négatif). Veuillez noter que Keeo ne gère actuellement aucun remboursement automatique pour les paiements en ligne. Vous devez donc rembourser ou verser vous-même le montant manuellement."
+  },
+  "f3236c83-b7ba-453f-981a-3e06925c9b7a": {
+    "original": "Geef iedereen toegang tot Keeo door ze de juiste functies te geven.",
+    "translation": "Donnez à chacun l'accès à Keeo en lui attribuant les fonctions appropriées."
+  },
+  "f3fc4e4d-76ee-4ca0-b712-9d2c7e5395fc": {
+    "original": "Het maximum geldt per eenheid",
+    "translation": "Le maximum s'applique par unité"
+  },
+  "f4324095-61d6-44a7-9c81-0a114355cbaa": {
+    "original": "Deze link is al in gebruik. Kies een andere. Voeg iets uniek toe, bv. de naam van je eenheid.",
+    "translation": "Ce lien est déjà utilisé. Choisissez-en un autre. Ajoutez quelque chose d’unique, par exemple le nom de votre unité."
+  },
+  "f477755c-2d6e-473c-b9b9-2ebe0af173f3": {
+    "original": "Verwijder deze eenheid",
+    "translation": "Supprimer cette unité"
+  },
+  "f4c0da5a-03a8-4be2-9ae1-ea049b5b46af": {
+    "original": "Er is nog geen verantwoordelijke eenheid ingesteld. Kies een eenheid die verantwoordelijk is voor het verzamelen van de aansluitingskosten.",
+    "translation": "Aucune unité responsable n'a encore été définie. Choisissez une unité responsable de la collecte des frais d'affiliation."
+  },
+  "f511ce18-7a60-4fe8-8695-16216ffb7bdc": {
+    "original": "De betaling loopt niet via Keeo",
+    "translation": "Le paiement ne passe pas par Keeo."
+  },
+  "f5229cc1-c908-4409-855a-1dba40371815": {
+    "original": "Jouw leiding kan in Keeo jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf leiding, vraag het dan aan jouw medeleiding of FOS Open Scouting.",
+    "translation": "Votre direction peut rechercher votre code de sécurité dans Keeo et vous le transmettre. Si vous êtes vous-même un responsable, demandez-le à vos collègues responsables ou à FOS Open Scouting."
+  },
+  "f544b972-416c-471d-8836-d7f3b16f947d": {
+    "original": "Dit scoutsjaar is vergrendeld, je kan geen inschrijvingsgroepen meer toevoegen",
+    "translation": "Cette année scoute est verrouillée, vous ne pouvez plus ajouter de groupes d'inscription"
+  },
+  "f5bf8b84-52d2-49a3-b4b4-73573b320739": {
+    "original": "Kies welke informatie je verzamelt van eenheiden",
+    "translation": "Choisissez les informations que vous collectez auprès des unités"
+  },
+  "f6360ada-86e7-4ec8-86fb-fe9e750c4926": {
+    "original": "Je kan niet inschrijven voor {group} omdat dit scoutsjaar is afgesloten.",
+    "translation": "Vous ne pouvez pas vous inscrire pour {group} car cette année scoute est clôturée."
+  },
+  "f6e06abd-3e58-4f99-bc8d-6cf6a44273b3": {
+    "original": "Jouw eenheid betaalt {price} aan FOS Open Scouting, maar voor latere aansluitingen bedraagt het nu {priceReduced}.",
+    "translation": "Votre unité paie {price} à FOS Open Scouting, mais pour les connexions ultérieures, le prix est désormais de {priceReduced}."
+  },
+  "f7821d11-0b71-4503-a8cb-18b2036611f1": {
+    "original": "telefoonnummer van je eenheid",
+    "translation": "numéro de téléphone de votre unité"
+  },
+  "f8f36233-df20-42bd-b9a4-f53005107825": {
+    "original": "Na een controle blijken de DNS-instellingen van de domeinnaam van een eenheid geldig te zijn.",
+    "translation": "Après un contrôle, il s’avère que les paramètres DNS du nom de domaine d’une unité sont valides."
+  },
+  "f8f3a5be-624a-4d39-b401-78ad833b64dd": {
+    "original": "Verminder de zichtbaarheid van Keeo",
+    "translation": "Réduire la visibilité de Keeo"
+  },
+  "fa1b8694-6a8c-46ea-ab5e-7ed792083bf0": {
+    "original": "Je kan online betalingen gebruiken in Keeo door te koppelen met Mollie via de onderstaande knop. Hiermee kan je betalingen via Bancontact, iDEAL en kredietkaart activeren. Je betaalt hier wel hogere transactiekosten dan via onze huidige partner.",
+    "translation": "Vous pouvez utiliser les paiements en ligne dans Keeo en vous connectant à Mollie via le bouton ci-dessous. Cela vous permet d'activer les paiements via Bancontact, iDEAL et carte de crédit. Vous paierez cependant des frais de transaction plus élevés qu'avec notre partenaire actuel."
+  },
+  "fa988b87-6665-43e4-a177-77031826e9a8": {
+    "original": "Keeo kan de inhoud van documenten automatisch wijzigen als de daarbij horende gegevens wijzigen, en nieuwe documenten aanmaken als er nieuwe inschrijvingen bij komen (ook na publicatie). Dat is ideaal om bijvoorbeeld ontbrekende of foute gegevens door leden nog te laten invullen via het ledenportaal. Op het moment dat je documenten officiëel hebt ingedient (indien van toepassing), zet je dit best uit. Als dit uit staat zullen onvolledige documenten niet langer zichtbaar zijn voor leden.",
+    "translation": "Keeo peut modifier automatiquement le contenu des documents si les données correspondantes changent et créer de nouveaux documents si de nouvelles inscriptions arrivent (même après publication). C'est idéal pour permettre aux membres de compléter ou de corriger des données manquantes via le portail des membres. Au moment où vous avez officiellement soumis vos documents (le cas échéant), il est préférable de désactiver cette option. Si cette option est désactivée, les documents incomplets ne seront plus visibles pour les membres."
+  },
+  "fafaf0c2-cbf4-4f5b-8669-eb09303efe1e": {
+    "original": "Je moet volledige platform beheerder zijn om schulden tussen eenheiden te wijzigen of toe te voegen",
+    "translation": "Vous devez être administrateur complet de la plateforme pour modifier ou ajouter des dettes entre les unités"
+  },
+  "fcd3549b-1d81-4fe7-9e8f-fcd17501c014": {
+    "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Keeo. Voor Microsoft kan je",
+    "translation": "Assurez-vous que les utilisateurs puissent se connecter via votre propre système de compte, séparément de Keeo. Pour Microsoft, vous pouvez"
+  },
+  "fd52fa36-16e6-4106-807c-c387bc0acc0e": {
+    "original": "Geen eenheden beschikbaar in dit scoutsjaar",
+    "translation": "Aucune unité disponible dans cette année scoute"
+  },
+  "fd68e1a7-6059-47fc-b7ad-fdfe4924a67d": {
+    "original": "Bepaalde gegevens zijn ingebouwd in Keeo zodat we die ook op een speciale manier kunnen verwerken. Je kan deze hier aan of uit zetten.",
+    "translation": "Certaines données sont intégrées dans Keeo afin que nous puissions également les traiter d'une manière spéciale. Vous pouvez les activer ou les désactiver ici."
+  },
+  "fdd15119-b950-4282-9413-fd6973afde07": {
+    "original": "Er kan niet overgeschakeld worden naar een vergrendeld scoutsjaar",
+    "translation": "Il n’est pas possible de passer à une année scoute verrouillée"
+  },
+  "fdf6dd9d-25f9-41bc-869b-beb2906aa77f": {
+    "original": "E-mail die wordt verzonden naar de indiener (en de ingestelde contactpersonen van de eenheid) als kopie van een kampmelding",
+    "translation": "E-mail envoyé au soumetteur (et aux personnes de contact définies de l'unité) en copie d'une notification de camp"
+  },
+  "ffdbd596-e9c8-4c67-bfdf-41a5199de133": {
+    "original": "De link naar de website van jouw eenheid.",
+    "translation": "Le lien vers le site web de votre unité."
   }
 }
