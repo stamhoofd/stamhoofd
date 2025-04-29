@@ -58,7 +58,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
         await Context.setOptionalOrganizationScope();
         const { user } = await Context.authenticate();
 
-        if (!Context.auth.canUpload()) {
+        if (!Context.auth.canUpload({ private: request.query.isPrivate })) {
             throw Context.auth.error();
         }
 
@@ -126,6 +126,18 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
             prefix += '/';
         }
 
+        prefix += (STAMHOOFD.environment ?? 'development') === 'development' ? ('development/') : ('');
+
+        // Prepend user id to the file path
+        if (request.query.isPrivate && user) {
+            // Private files
+            prefix += 'users/' + user.id + '/';
+        }
+        else {
+            // Public files
+            prefix += 'p/';
+        }
+
         // Also include the source, in private mode
         const fileId = uuidv4();
         let uploadExt = '';
@@ -162,7 +174,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
         }
 
         const filenameWithoutExt = file.originalFilename?.split('.').slice(0, -1).join('.') ?? fileId;
-        const key = prefix + (STAMHOOFD.environment ?? 'development') + '/' + fileId + '/' + (Formatter.slug(filenameWithoutExt) + (uploadExt ? ('.' + uploadExt) : ''));
+        const key = prefix + fileId + '/' + (Formatter.slug(filenameWithoutExt) + (uploadExt ? ('.' + uploadExt) : ''));
         const params = {
             Bucket: STAMHOOFD.SPACES_BUCKET,
             Key: key,
