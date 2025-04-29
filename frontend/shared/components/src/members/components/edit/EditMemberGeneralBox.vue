@@ -76,7 +76,7 @@
                         </template>
                     </NRNInput>
                     <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
-                        <I18nComponent :t="$t('Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. Als {firstName} geen Belgische nationaliteit heeft, <button>klik dan hier</button>', {firstName: firstName || $t('dit lid')})">
+                        <I18nComponent :t="$t('0faa16e2-00d5-4427-bfa1-d6b5c9ad4404', {firstName: firstName || $t('dit lid')})">
                             <template #button="{content}">
                                 <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
                                     {{ content }}
@@ -85,7 +85,7 @@
                         </I18nComponent>
                     </p>
                     <p v-else class="style-description-small">
-                        <I18nComponent :t="$t('Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit, <button>klik dan hier</button>')">
+                        <I18nComponent :t="$t('00cc0002-1674-47dd-ae92-7547a678bafc')">
                             <template #button="{content}">
                                 <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
                                     {{ content }}

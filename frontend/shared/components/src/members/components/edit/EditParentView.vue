@@ -41,16 +41,16 @@
 
                 <p v-if="email && member && app !== 'registration'" class="style-description-small">
                     <template v-if="alternativeEmails.length">
-                        {{ $t('Deze ouder kan inloggen of registreren op één van de ingevoerde e-mailadressen en krijgt dan automatisch toegang tot de gegevens van {firstName} en het ledenportaal.', {firstName: member.patchedMember.firstName}) }}
+                        {{ $t('8bc01345-6078-4949-91e6-c003001896ab', {firstName: member.patchedMember.firstName}) }}
                     </template><template v-else>
-                        {{ $t('Deze ouder kan inloggen of registreren op het ingevoerde e-mailadres en krijgt dan automatisch toegang tot de gegevens van {firstName} en het ledenportaal.', {firstName: member.patchedMember.firstName}) }}
+                        {{ $t('02ed38bf-5516-4e5a-b28c-6e73d7cf1009', {firstName: member.patchedMember.firstName}) }}
                     </template>
                 </p>
                 <p v-else-if="firstName && email && member" class="style-description-small">
                     <template v-if="alternativeEmails.length">
-                        {{ $t('{firstName} kan inloggen of registreren op één van de ingevoerde e-mailadressen en krijgt dan automatisch toegang tot de gegevens van {firstName} en het ledenportaal.', {firstName: member.patchedMember.firstName}) }}
+                        {{ $t('49397bef-c935-42b4-980e-a3174d8a4710', {firstName: member.patchedMember.firstName}) }}
                     </template><template v-else>
-                        {{ $t('{firstName} kan inloggen of registreren op het ingevoerde e-mailadres en krijgt dan automatisch toegang tot de gegevens van {firstName} en het ledenportaal.', {firstName: member.patchedMember.firstName}) }}
+                        {{ $t('9f6b9a67-e024-4cbc-9849-769807c6fc69', {firstName: member.patchedMember.firstName}) }}
                     </template>
                 </p>
 
@@ -59,7 +59,7 @@
                         {{ $t('eca0a260-096c-413a-9fa0-0c91acd9c780') }}
                     </template>
                     <template v-else>
-                        {{ $t('{firstName} ontvangt enkel communicatie op het eerste e-mailadres.', {firstName}) }}
+                        {{ $t('b2287bc2-db81-4eb8-8fa1-3b1b70860707', {firstName}) }}
                     </template>
                 </p>
 
@@ -69,7 +69,7 @@
                         {{ $t('cb5c9f59-30ae-470a-ab94-ed33b111850c') }} <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
                             {{ $t('c78ae112-296b-4b37-899b-8e3f56729079') }}
                         </template>
-                        <I18nComponent :t="$t('Als {name} geen Belgische nationaliteit heeft, <button>klik dan hier</button>', {name: firstName || $t('deze ouder')})">
+                        <I18nComponent :t="$t('1394c960-ea6f-44e9-8278-2019623d15bc', {name: firstName || $t('deze ouder')})">
                             <template #button="{content}">
                                 <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
                                     {{ content }}
@@ -78,7 +78,7 @@
                         </I18nComponent>
                     </p>
                     <p v-else class="style-description-small">
-                        <I18nComponent :t="$t('Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit, <button>klik dan hier</button>')">
+                        <I18nComponent :t="$t('00cc0002-1674-47dd-ae92-7547a678bafc')">
                             <template #button="{content}">
                                 <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
                                     {{ content }}
