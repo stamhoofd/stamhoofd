@@ -819,7 +819,10 @@ export class AdminPermissionChecker {
         return false;
     }
 
-    canUpload() {
+    canUpload(data: { private: boolean }) {
+        if (data.private) {
+            return true;
+        }
         return !!this.user.permissions;
     }
 

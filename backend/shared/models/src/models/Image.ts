@@ -24,7 +24,7 @@ export class Image extends QueryableModel {
     @column({ type: 'datetime' })
     createdAt: Date = new Date();
 
-    static async create(fileContent: string | Buffer, type: string | undefined, resolutions: ResolutionRequest[], isPrivateFile: boolean = false): Promise<Image> {
+    static async create(fileContent: string | Buffer, type: string | undefined, resolutions: ResolutionRequest[], isPrivateFile: boolean = false, user: { id: string } | null = null): Promise<Image> {
         if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
             throw new SimpleError({
                 code: 'not_available',
@@ -92,6 +92,18 @@ export class Image extends QueryableModel {
             prefix += '/';
         }
 
+        prefix += (STAMHOOFD.environment ?? 'development') === 'development' ? ('development/') : ('');
+
+        // Prepend user id to the file path
+        if (isPrivateFile && user) {
+            // Private files
+            prefix += 'users/' + user.id + '/';
+        }
+        else {
+            // Public files
+            prefix += 'p/';
+        }
+
         const uploadPromises: Promise<any>[] = [];
         const image = new Image();
         image.id = uuidv4();
@@ -99,7 +111,7 @@ export class Image extends QueryableModel {
         for (const f of files) {
             const fileId = uuidv4();
 
-            const key = prefix + (STAMHOOFD.environment ?? 'development') + '/' + image.id + '/' + fileId + (!supportsTransparency ? '.jpg' : '.png');
+            const key = prefix + image.id + '/' + fileId + (!supportsTransparency ? '.jpg' : '.png');
             const params = {
                 Bucket: STAMHOOFD.SPACES_BUCKET,
                 Key: key,

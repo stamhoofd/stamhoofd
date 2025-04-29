@@ -64,7 +64,7 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
         await Context.setOptionalOrganizationScope();
         const { user } = await Context.authenticate();
 
-        if (!Context.auth.canUpload()) {
+        if (!Context.auth.canUpload({ private: request.query.isPrivate })) {
             throw Context.auth.error();
         }
 
@@ -131,7 +131,7 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
         });
 
         const fileContent = await fs.readFile(file.filepath);
-        const image = await Image.create(fileContent, file.mimetype ?? undefined, resolutions, request.query.isPrivate);
+        const image = await Image.create(fileContent, file.mimetype ?? undefined, resolutions, request.query.isPrivate, user);
         return new Response(ImageStruct.create(image));
     }
 }
