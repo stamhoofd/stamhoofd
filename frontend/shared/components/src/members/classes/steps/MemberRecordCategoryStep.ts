@@ -1,5 +1,5 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { RecordCategory, RegisterItem } from '@stamhoofd/structures';
+import { PermissionLevel, RecordCategory, RegisterItem } from '@stamhoofd/structures';
 import { markRaw } from 'vue';
 import { MemberStepView } from '../..';
 import { NavigationActions } from '../../../types/NavigationActions';
@@ -36,7 +36,9 @@ export class MemberRecordCategoryStep implements EditMemberStep {
         }
 
         // check if everything has been answered already + check out of date
-        return !this.recordCategory.isComplete(member, this.options.outdatedTime);
+        return !this.recordCategory.isComplete(member, this.options.outdatedTime, {
+            level: PermissionLevel.Write, // Only show records where user managers have write access to
+        });
     }
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {
