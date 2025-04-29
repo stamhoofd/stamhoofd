@@ -84,8 +84,8 @@
     "translation": "Avertissement pour l’administrateur"
   },
   "00cc0002-1674-47dd-ae92-7547a678bafc": {
-    "original": "Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit, <button>klik dan hier</button>",
-    "translation": "Vous ne recevrez pas de certificats fiscaux. Vous avez tout de même une nationalité belge, <button>cliquez ici</button>"
+    "original": "Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit? <button>Klik dan hier</button>",
+    "translation": "Vous ne recevrez pas d'attestations fiscales. Vous avez quand même la nationalité belge ? <button>Cliquez ici</button>"
   },
   "00e66af4-75a2-4e00-8b2e-f51ff670b800": {
     "original": "Ik geef enkel toestemming voor groepsfoto's",
@@ -1189,7 +1189,7 @@
   },
   "0faa16e2-00d5-4427-bfa1-d6b5c9ad4404": {
     "original": "Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. Als {firstName} geen Belgische nationaliteit heeft, <button>klik dan hier</button>",
-    "translation": "Le numéro national est utilisé pour établir les certificats fiscaux. Si {firstName} n'a pas la nationalité belge, <button>cliquez ici</button>"
+    "translation": "Le numéro national est utilisé pour établir les attestations fiscales. Si {firstName} n'a pas la nationalité belge, <button>cliquez ici</button>"
   },
   "0fadc0c2-62b3-4e26-be91-1c05c0951be5": {
     "original": "In welk jaar? (mag maximaal 10 jaar geleden zijn)",
@@ -8195,6 +8195,10 @@
     "original": "Wijzig",
     "translation": "Modifier"
   },
+  "6c9d1930-5ea0-4136-a463-bba118c8dd6a": {
+    "original": "deze ouder",
+    "translation": "ce parent"
+  },
   "6caf3dff-0895-476f-8bf5-fdce81f1fb56": {
     "original": "Voorgesteld bedrag",
     "translation": "Montant proposé"
@@ -9113,7 +9117,7 @@
   },
   "77f48757-5c36-47a6-8ce2-d676eef1e778": {
     "original": "Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. Heeft {member} geen Belgische nationaliteit,",
-    "translation": "Le numéro national est utilisé pour établir les attestations fiscales. Si {member} n’a pas la nationalité belge,"
+    "translation": "Le numéro national est utilisé pour établir les attestations fiscales. {member} n’a pas la nationalité belge,"
   },
   "780337a3-ce5b-4071-b53f-465e7e55ad65": {
     "original": "Jouw wachtwoord ziet er goed uit",
@@ -11862,6 +11866,10 @@
   "9e53d8ca-d01f-4d64-8707-3877435f28fc": {
     "original": "Stel in welke extra gegevens eenheden nog moeten indienen en tegen wanneer.",
     "translation": "Définissez les données supplémentaires que les unités doivent encore soumettre et pour quand."
+  },
+  "9e5a8bc1-91db-44e5-9059-3312f4145525": {
+    "original": "dit lid",
+    "translation": "ce membre"
   },
   "9e68d551-a532-4681-9040-95e4c0f673aa": {
     "original": "Logo groter weergeven (afgeraden)",
@@ -14895,10 +14903,6 @@
     "original": "Om {time}",
     "translation": "À {time}"
   },
-  "c6b0d0d0-ec52-4716-92b1-db4473b4d6e9": {
-    "original": "Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit,",
-    "translation": "Vous ne recevrez pas d’attestations fiscales. Néanmoins, une nationalité belge,"
-  },
   "c6b66a83-8b28-46f8-bf0b-5052fbe57771": {
     "original": "Startdatum (inclusief)",
     "translation": "Date de début (inclus)"
@@ -15233,7 +15237,7 @@
   },
   "cb5c9f59-30ae-470a-ab94-ed33b111850c": {
     "original": "Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken.",
-    "translation": "Le numéro de registre national est utilisé pour établir les attestations fiscales."
+    "translation": "Le numéro national est utilisé pour établir les attestations fiscales."
   },
   "cb6d8561-3187-4b56-bb71-fe6ddaba642f": {
     "original": "Deze bestelling werd nog niet (volledig) betaald.",

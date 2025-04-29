@@ -76,7 +76,7 @@
                         </template>
                     </NRNInput>
                     <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
-                        <I18nComponent :t="$t('0faa16e2-00d5-4427-bfa1-d6b5c9ad4404', {firstName: firstName || $t('dit lid')})">
+                        <I18nComponent :t="$t('0faa16e2-00d5-4427-bfa1-d6b5c9ad4404', {firstName: firstName || $t('9e5a8bc1-91db-44e5-9059-3312f4145525')})">
                             <template #button="{content}">
                                 <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
                                     {{ content }}

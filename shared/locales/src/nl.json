@@ -2909,7 +2909,6 @@
   "670684e7-bfa6-48d1-8260-16739b2b47b7": "Daarnaast kan je in één van de volgende stappen één of meerdere ouders toevoegen, met een e-mailadres, die ook toegang krijgen. Vul hier enkel een e-mailadres van {member} zelf in.",
   "db9b9618-9f98-4b43-9619-4db64c0d7e68": "klik dan hier",
   "ee3bc635-c294-4134-9155-7a74f47dec4f": "bewerken",
-  "c6b0d0d0-ec52-4716-92b1-db4473b4d6e9": "Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit,",
   "a611c2d2-0ac2-430e-8a0f-df2b95bb66cf": "Geboortedatum (optioneel)",
   "0cec2d36-929c-4359-8116-d905c5d0074c": "Identificeert zich als...",
   "e3d3b76b-e18c-4351-b5af-87186ebabe86": "Enkel van lid zelf",
@@ -4963,11 +4962,13 @@
   "121a5916-44ab-4870-9182-ffc53be0ceb2": "{firstName} is te jong. Inschrijvingen is beperkt tot leden {born-in-after-1995}",
   "83c99392-7efa-44d3-8531-1843c5fa7c4d": "Ongeldig tarief",
   "0faa16e2-00d5-4427-bfa1-d6b5c9ad4404": "Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. Als {firstName} geen Belgische nationaliteit heeft, <button>klik dan hier</button>",
-  "00cc0002-1674-47dd-ae92-7547a678bafc": "Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit, <button>klik dan hier</button>",
+  "00cc0002-1674-47dd-ae92-7547a678bafc": "Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit? <button>Klik dan hier</button>",
   "8bc01345-6078-4949-91e6-c003001896ab": "Deze ouder kan inloggen of registreren op één van de ingevoerde e-mailadressen en krijgt dan automatisch toegang tot de gegevens van {firstName} en het ledenportaal.",
   "02ed38bf-5516-4e5a-b28c-6e73d7cf1009": "Deze ouder kan inloggen of registreren op het ingevoerde e-mailadres en krijgt dan automatisch toegang tot de gegevens van {firstName} en het ledenportaal.",
   "49397bef-c935-42b4-980e-a3174d8a4710": "{firstName} kan inloggen of registreren op één van de ingevoerde e-mailadressen en krijgt dan automatisch toegang tot de gegevens van {firstName} en het ledenportaal.",
   "9f6b9a67-e024-4cbc-9849-769807c6fc69": "{firstName} kan inloggen of registreren op het ingevoerde e-mailadres en krijgt dan automatisch toegang tot de gegevens van {firstName} en het ledenportaal.",
   "b2287bc2-db81-4eb8-8fa1-3b1b70860707": "{firstName} ontvangt enkel communicatie op het eerste e-mailadres.",
-  "1394c960-ea6f-44e9-8278-2019623d15bc": "Als {name} geen Belgische nationaliteit heeft, <button>klik dan hier</button>"
+  "1394c960-ea6f-44e9-8278-2019623d15bc": "Als {name} geen Belgische nationaliteit heeft, <button>klik dan hier</button>",
+  "6c9d1930-5ea0-4136-a463-bba118c8dd6a": "deze ouder",
+  "9e5a8bc1-91db-44e5-9059-3312f4145525": "dit lid"
 }

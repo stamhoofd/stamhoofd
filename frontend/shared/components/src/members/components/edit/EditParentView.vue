@@ -69,7 +69,7 @@
                         {{ $t('cb5c9f59-30ae-470a-ab94-ed33b111850c') }} <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
                             {{ $t('c78ae112-296b-4b37-899b-8e3f56729079') }}
                         </template>
-                        <I18nComponent :t="$t('1394c960-ea6f-44e9-8278-2019623d15bc', {name: firstName || $t('deze ouder')})">
+                        <I18nComponent :t="$t('1394c960-ea6f-44e9-8278-2019623d15bc', {name: firstName || $t('6c9d1930-5ea0-4136-a463-bba118c8dd6a')})">
                             <template #button="{content}">
                                 <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
                                     {{ content }}
