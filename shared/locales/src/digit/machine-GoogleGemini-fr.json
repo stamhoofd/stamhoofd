@@ -771,6 +771,10 @@
     "original": "Deze functie is niet beschikbaar voor deze groep",
     "translation": "Cette fonction n'est pas disponible pour ce groupe"
   },
+  "ab0c7981-0d5f-4c36-bd3f-07ddc2a63759": {
+    "original": "Jouw groep bevindt zich in een ander werkjaar dan KSA Nationaal.",
+    "translation": "Votre groupe se trouve dans un exercice différent de celui de KSA National."
+  },
   "ab21ae18-0181-44ea-b41d-ff61c9358858": {
     "original": "Voor Mollie heb je een VZW nodig. Een feitelijke groep is niet voldoende (wordt niet geaccepteerd)",
     "translation": "Pour Mollie, vous avez besoin d'une ASBL. Un groupe de fait ne suffit pas (n'est pas accepté)"
@@ -942,6 +946,10 @@
   "cd5ee584-5b0c-4acb-af75-7b21ad37cead": {
     "original": "Het antwoord is niet gekend (werd nog nooit ingevuld in Ravot). Er worden geen lagere tarieven automatisch toegepast.",
     "translation": "La réponse n'est pas connue (n'a jamais été remplie dans Ravot). Aucun tarif inférieur n'est appliqué automatiquement."
+  },
+  "cd60d49f-9fc8-4fb7-b574-1231874c1d43": {
+    "original": "Overloop alle stappen en bevestig dat je alles hebt nagekeken bij elke stap. Zorg dat alles ten laatste tegen 15 oktober is nagekeken.",
+    "translation": "Consultez toutes les étapes et confirmez que vous avez tout vérifié à chaque étape. Assurez-vous que tout est vérifié au plus tard le 15 octobre."
   },
   "cd6e3548-aea1-4f74-9c66-b1fa43de6438": {
     "original": "Ticketverkoop via Ravot",
