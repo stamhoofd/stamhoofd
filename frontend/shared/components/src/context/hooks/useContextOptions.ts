@@ -111,9 +111,9 @@ export function useContextOptions() {
             opts.push(getRegistrationOption());
         }
 
-        const organizationIds = [...$user.value?.permissions?.organizationPermissions.keys() ?? []];
+        let organizationIds = [...$user.value?.permissions?.organizationPermissions.keys() ?? []];
         if (STAMHOOFD.singleOrganization) {
-            organizationIds.push(STAMHOOFD.singleOrganization);
+            organizationIds = [STAMHOOFD.singleOrganization];
         }
 
         for (const organizationId of organizationIds) {
@@ -189,7 +189,7 @@ export function useContextOptions() {
         else {
             newPrefix = '/' + appToUri(option.app);
         }
-        console.log(href, oldPrefix, newPrefix);
+
         if (oldPrefix) {
             href = href.replace(oldPrefix, newPrefix);
         }
