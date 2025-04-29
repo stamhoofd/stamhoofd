@@ -1,3 +1,4 @@
+
 const locales = new Set([
     "Cy-az-AZ",
     "Cy-sr-SP",
@@ -333,4 +334,20 @@ export function isLanguage(value: string): boolean {
 
 export function isLocale(value: string): boolean {
     return locales.has(value);
+}
+
+export function getCountry(locale: string): string | null {
+    if(isLanguage(locale)) {
+        return null;
+    }
+    
+    return locale.split("-")[1];
+}
+
+export function getLanguage(locale: string): string {
+    if(isLanguage(locale)) {
+        return locale;
+    }
+    
+    return locale.split("-")[0];
 }

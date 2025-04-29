@@ -4,6 +4,7 @@ import { AutoTranslateOptions } from "../../types/AutoTranslateOptions";
 import { Batch } from "../../types/Batch";
 import { PromptBatch } from "../../types/PromptBatch";
 import { Translations } from "../../types/Translations";
+import { TranslationWithVariant } from "../../types/TranslationWithVariant";
 import { PromiseQueue } from "../PromiseQueue";
 import { promptLogger } from "../PromptLogger";
 import { TranslationManager } from "../TranslationManager";
@@ -14,7 +15,7 @@ export abstract class Translator implements ITranslator {
     protected abstract readonly maxBatchLength: number;
 
     // Do not send all prompts at once because api can block requests if too many in short period
-    protected abstract readonly queue: PromiseQueue<Batch>;
+    protected abstract readonly queue: PromiseQueue<Batch<any>>;
 
     constructor(
         protected readonly manager: TranslationManager,
@@ -23,13 +24,14 @@ export abstract class Translator implements ITranslator {
 
     protected abstract generateResponse(prompt: string): Promise<string>;
 
-    private fakeGenerateResponse(
-        batch: PromptBatch,
+    private fakeGenerateResponse<T>(
+        batch: PromptBatch<T>,
         {
             originalLocal,
             targetLocal,
             namespace,
-        }: { originalLocal: string; targetLocal: string; namespace: string },
+            getTranslation
+        }: { originalLocal: string; targetLocal: string; namespace: string; getTranslation: (batchValue: T) => string },
     ): Promise<string> {
         // const randomNumber = Math.random() * 100;
         // if (randomNumber < 20) {
@@ -44,7 +46,7 @@ export abstract class Translator implements ITranslator {
                 batch.map(({ id, value }) => {
                     return {
                         id,
-                        value: infoText + value,
+                        value: infoText + getTranslation(value),
                     };
                 }),
             ),
@@ -52,25 +54,24 @@ export abstract class Translator implements ITranslator {
     }
 
     // override if necessary
-    protected createPrompt(
-        batch: PromptBatch,
+    protected createPromptForSimpleTranslation(
+        batch: PromptBatch<string>,
         {
             originalLocal,
             targetLocal,
             consistentWords,
-            namespace,
         }: {
             originalLocal: string;
             targetLocal: string;
             consistentWords: Record<string, string> | null;
-            namespace: string;
         },
     ): string {
-        const consistentWordsText = consistentWords && Object.keys(consistentWords).length > 0
-            ? `\n- Make sure certain words are translated consistently, most often we use the following words, so try to keep the following translations in sentences if the context makes sense: \n` +
-              JSON.stringify(consistentWords, undefined, '  ') +
-              ".\n"
-            : "";
+        const consistentWordsText =
+            consistentWords && Object.keys(consistentWords).length > 0
+                ? `\n- Make sure certain words are translated consistently, most often we use the following words, so try to keep the following translations in sentences if the context makes sense: \n` +
+                  JSON.stringify(consistentWords, undefined, "  ") +
+                  ".\n"
+                : "";
 
         const prompt = `Translate the values of the JSON array from ${originalLocal} to ${targetLocal}.${consistentWordsText}
 - Do not translate words between curly brackets (even if it is a consistent word). For example {een-voorbeeld} must remain {een-voorbeeld}, {werkjaar} must remain {werkjaar} (only if between curly brackets, so do translate werkjaar).
@@ -79,7 +80,7 @@ export abstract class Translator implements ITranslator {
 
 Translate this array: 
 
-${JSON.stringify(batch, undefined, '  ')}
+${JSON.stringify(batch, undefined, "  ")}
 
 Translate the above values of the JSON array from ${originalLocal} to ${targetLocal}. 
 - Do not translate words between curly brackets (even if it is a consistent word). For example {een-voorbeeld} must remain {een-voorbeeld}, {werkjaar} must remain {werkjaar} (only if between curly brackets, so do translate werkjaar).
@@ -90,8 +91,44 @@ Translate the above values of the JSON array from ${originalLocal} to ${targetLo
         return prompt;
     }
 
-    protected async getTextFromApi(
-        batch: PromptBatch,
+    // override if necessary
+    protected createPromptForTranslationWithVariant(
+        batch: PromptBatch<TranslationWithVariant>,
+        {
+            originalLocal,
+            targetLocal,
+            consistentWords,
+        }: {
+            originalLocal: string;
+            targetLocal: string;
+            consistentWords: Record<string, string> | null;
+        },
+    ): string {
+        const consistentWordsText =
+            consistentWords && Object.keys(consistentWords).length > 0
+                ? `\n- Make sure certain words are translated consistently, most often we use the following words, so try to keep the following translations in sentences if the context makes sense: \n` +
+                  JSON.stringify(consistentWords, undefined, "  ") +
+                  ".\n"
+                : "";
+
+        const prompt = `Given is an array with an original text in ${originalLocal}, the translation of that text and a variant of the original translation. Translate the variants of the original texts in a consistent way so that the translation of the variant does not differ much of the translation of the original text.${consistentWordsText}
+- Do not translate words between curly brackets (even if it is a consistent word). For example {een-voorbeeld} must remain {een-voorbeeld}, {werkjaar} must remain {werkjaar} (only if between curly brackets, so do translate werkjaar).
+- If you don't have enough context to provide a correct translation, set the value to an empty string.
+
+Translate the variants in this array to ${targetLocal}: 
+    
+${JSON.stringify(batch, undefined, "  ")}
+
+Above is an array with an original text in ${originalLocal}, the translation of that text and a variant of the original translation. Translate the variants of the original texts in a consistent way so that the translation of the variant does not differ much of the translation of the original text.${consistentWordsText}
+- Do not translate words between curly brackets (even if it is a consistent word). For example {een-voorbeeld} must remain {een-voorbeeld}, {werkjaar} must remain {werkjaar} (only if between curly brackets, so do translate werkjaar).
+- If you don't have enough context to provide a correct translation, set the value to an empty string.
+`;
+
+        return prompt;
+    }
+
+    protected async getTextFromApiForSimpleTranslation(
+        batch: PromptBatch<string>,
         args: {
             originalLocal: string;
             targetLocal: string;
@@ -101,12 +138,12 @@ Translate the above values of the JSON array from ${originalLocal} to ${targetLo
             totalBatches: number;
         },
     ): Promise<string> {
-        const prompt = this.createPrompt(batch, args);
+        const prompt = this.createPromptForSimpleTranslation(batch, args);
 
         const logResult = promptLogger.prompt(prompt, args);
 
         const text = this.options.fake
-            ? await this.fakeGenerateResponse(batch, args)
+            ? await this.fakeGenerateResponse(batch, {...args, getTranslation: (x) => x})
             : await this.generateResponse(prompt);
 
         logResult(text);
@@ -114,12 +151,36 @@ Translate the above values of the JSON array from ${originalLocal} to ${targetLo
         return text;
     }
 
-    private splitTranslationInBatches(translations: Translations): Batch[] {
-        const batches: Batch[] = [];
+    protected async getTextFromApiForTranslationWithVariant(
+        batch: PromptBatch<TranslationWithVariant>,
+        args: {
+            originalLocal: string;
+            targetLocal: string;
+            consistentWords: Record<string, string> | null;
+            namespace: string;
+            batchNumber: number;
+            totalBatches: number;
+        },
+    ): Promise<string> {
+        const prompt = this.createPromptForTranslationWithVariant(batch, args);
+
+        const logResult = promptLogger.prompt(prompt, args);
+
+        const text = this.options.fake
+            ? await this.fakeGenerateResponse(batch, {...args, getTranslation: (x) => x.variant})
+            : await this.generateResponse(prompt);
+
+        logResult(text);
+
+        return text;
+    }
+
+    private splitInBatches<T>(items: Record<string, T>): Batch<T>[] {
+        const batches: Batch<T>[] = [];
 
         let currentIndex = 0;
 
-        for (const [uuid, value] of Object.entries(translations)) {
+        for (const [uuid, value] of Object.entries(items)) {
             const item = { value, uuid };
             const batchIfNewItem = (batches[currentIndex] ?? []).concat([item]);
 
@@ -139,8 +200,8 @@ Translate the above values of the JSON array from ${originalLocal} to ${targetLo
         return batches;
     }
 
-    protected async translateBatch(
-        batch: Batch,
+    protected async translateSimpleBatch(
+        batch: Batch<string>,
         args: {
             originalLocal: string;
             targetLocal: string;
@@ -149,15 +210,51 @@ Translate the above values of the JSON array from ${originalLocal} to ${targetLo
             batchNumber: number;
             totalBatches: number;
         },
-    ): Promise<Batch> {
-        const promptBatch: PromptBatch = batch.map(({ value }, id) => {
+    ): Promise<Batch<string>> {
+        const promptBatch: PromptBatch<string> = batch.map(({ value }, id) => {
             return {
                 id,
                 value,
             };
         });
 
-        const text = await this.getTextFromApi(promptBatch, args);
+        const text = await this.getTextFromApiForSimpleTranslation(
+            promptBatch,
+            args,
+        );
+        const json = this.textToJson(text);
+
+        return json.map(({ id, value }) => {
+            // the id is the index of the translation in the batch
+            const uuid = batch[id].uuid;
+            return { uuid, value };
+        });
+    }
+
+    protected async translateBatchWithVariant(
+        batch: Batch<TranslationWithVariant>,
+        args: {
+            originalLocal: string;
+            targetLocal: string;
+            consistentWords: Record<string, string> | null;
+            namespace: string;
+            batchNumber: number;
+            totalBatches: number;
+        },
+    ): Promise<Batch<string>> {
+        const promptBatch: PromptBatch<TranslationWithVariant> = batch.map(
+            ({ value }, id) => {
+                return {
+                    id,
+                    value,
+                };
+            },
+        );
+
+        const text = await this.getTextFromApiForTranslationWithVariant(
+            promptBatch,
+            args,
+        );
         const json = this.textToJson(text);
 
         return json.map(({ id, value }) => {
@@ -172,100 +269,128 @@ Translate the above values of the JSON array from ${originalLocal} to ${targetLo
         return false;
     }
 
-    private async translateBatches(
-        batches: Batch[],
+    private async translateBatches<T>(
+        batches: Batch<T>[],
         {
             originalLocal,
             targetLocal,
             translations,
             consistentWords,
             namespace,
+            translateBatch,
+            getUntranslatedValue,
             afterBatchTranslated,
         }: {
             originalLocal: string;
             targetLocal: string;
-            translations: Translations;
+            translations: Record<string, T>;
             consistentWords: Record<string, string> | null;
             namespace: string;
+            translateBatch: (
+                batch: Batch<T>,
+                args: {
+                    originalLocal: string;
+                    targetLocal: string;
+                    consistentWords: Record<string, string> | null;
+                    namespace: string;
+                    batchNumber: number;
+                    totalBatches: number;
+                },
+            ) => Promise<Batch<string>>;
+            getUntranslatedValue: (item: T) => string;
             afterBatchTranslated?: AfterBatchTranslatedCallback;
         },
     ): Promise<Translations> {
-        const promises: Promise<Batch>[] = batches.map(async (batch, i) => {
-            const batchNumber = i + 1;
-            const totalBatches = batches.length;
+        const promises: Promise<Batch<string>>[] = batches.map(
+            async (batch, i) => {
+                const batchNumber = i + 1;
+                const totalBatches = batches.length;
 
-            const tryTranslateBatchInQueue = async () => {
-                try {
-                    const result = await this.queue.add(async () => {
-                        console.log(
-                            chalk.gray(
-                                `Start translating batch ${batchNumber} of ${totalBatches}`,
-                            ),
-                        );
-                        const translatedBatch = await this.translateBatch(
-                            batch,
-                            {
-                                originalLocal,
-                                targetLocal,
-                                consistentWords,
-                                namespace,
-                                batchNumber,
-                                totalBatches,
-                            },
-                        );
+                const tryTranslateBatchInQueue = async () => {
+                    try {
+                        const result = await this.queue.add(async () => {
+                            console.log(
+                                chalk.gray(
+                                    `Start translating batch ${batchNumber} of ${totalBatches}`,
+                                ),
+                            );
 
-                        console.log(
-                            chalk.gray(
-                                `Finished translating batch ${batchNumber} of ${totalBatches}`,
-                            ),
-                        );
+                            const translatedBatch = await translateBatch(
+                                batch,
+                                {
+                                    originalLocal,
+                                    targetLocal,
+                                    consistentWords,
+                                    namespace,
+                                    batchNumber,
+                                    totalBatches,
+                                },
+                            );
 
-                        const validatedBatch = translatedBatch.filter(
-                            ({ uuid, value }) => {
-                                const original = translations[uuid];
-                                return this.validateTranslation(
-                                    original,
-                                    value,
-                                );
-                            },
-                        );
+                            console.log(
+                                chalk.gray(
+                                    `Finished translating batch ${batchNumber} of ${totalBatches}`,
+                                ),
+                            );
 
-                        if(validatedBatch.length > 10) {
-                            // throw error if all translations in batch are equal to original
-                            if(validatedBatch.every(({uuid, value}) => value === translations[uuid])) {
-                                throw new Error('All translations in batch are equal to original');
+                            const validatedBatch: Batch<string> =
+                                translatedBatch.filter(({ uuid, value }) => {
+                                    const original = getUntranslatedValue(
+                                        translations[uuid],
+                                    );
+                                    return this.validateTranslation(
+                                        original,
+                                        value,
+                                    );
+                                });
+
+                            if (validatedBatch.length > 10) {
+                                // throw error if all translations in batch are equal to original
+                                if (
+                                    validatedBatch.every(
+                                        ({ uuid, value }) =>
+                                            value ===
+                                            getUntranslatedValue(
+                                                translations[uuid],
+                                            ),
+                                    )
+                                ) {
+                                    throw new Error(
+                                        "All translations in batch are equal to original",
+                                    );
+                                }
                             }
-                        }
 
-                        if (afterBatchTranslated) {
-                            afterBatchTranslated(validatedBatch);
-                        }
+                            if (afterBatchTranslated) {
+                                afterBatchTranslated(validatedBatch);
+                            }
 
-                        return validatedBatch;
-                    });
+                            return validatedBatch;
+                        });
 
-                    return result;
-                } catch (error) {
-                    const errorMessage = `Failed translating batch ${batchNumber} of ${totalBatches} (from ${originalLocal} to ${targetLocal}, namespace: ${namespace}):
+                        return result;
+                    } catch (error) {
+                        const errorMessage = `Failed translating batch ${batchNumber} of ${totalBatches} (from ${originalLocal} to ${targetLocal}, namespace: ${namespace}):
 ${error}`;
-                    console.error(chalk.red(errorMessage));
-                    promptLogger.error(errorMessage);
+                        console.error(chalk.red(errorMessage));
+                        promptLogger.error(errorMessage);
 
-                    if (this.canRetryBatch(error)) {
-                        console.log(
-                            chalk.yellow(
-                                `Retry translating batch ${batchNumber} of ${totalBatches} from ${originalLocal} to ${targetLocal} for namespace: ${namespace}.`,
-                            ),
-                        );
-                        return await tryTranslateBatchInQueue();
+                        if (this.canRetryBatch(error)) {
+                            console.log(
+                                chalk.yellow(
+                                    `Retry translating batch ${batchNumber} of ${totalBatches} from ${originalLocal} to ${targetLocal} for namespace: ${namespace}.`,
+                                ),
+                            );
+                            return await tryTranslateBatchInQueue();
+                        }
+
+                        return [];
                     }
+                };
 
-                    return [];
-                }
-            };
-
-            return await tryTranslateBatchInQueue();
-        });
+                return await tryTranslateBatchInQueue();
+            },
+        );
 
         const translatedBatches = await Promise.all(promises);
 
@@ -302,7 +427,7 @@ ${error}`;
             throw new Error(message);
         }
 
-        const batches = this.splitTranslationInBatches(translations);
+        const batches = this.splitInBatches(translations);
 
         const consistentWords = this.manager.getConsistentWords(
             targetLocal,
@@ -315,12 +440,59 @@ ${error}`;
             translations,
             consistentWords,
             namespace: args.namespace,
+            translateBatch: (batch, args) => this.translateSimpleBatch(batch, args),
+            getUntranslatedValue: (item: string) => item,
             afterBatchTranslated: args.afterBatchTranslated,
         });
 
         console.log(
             chalk.green(
                 `Finished translate ${Object.keys(translations).length} items from ${args.originalLocal} to ${targetLocal} for namespace ${args.namespace}`,
+            ),
+        );
+
+        return result;
+    }
+
+    async translateAllVariants(
+        translationsWithVariant: Record<string, TranslationWithVariant>,
+        args: {
+            originalLocal: string;
+            targetLocal: string;
+            namespace: string;
+            afterBatchTranslated?: AfterBatchTranslatedCallback;
+        },
+    ) {
+        const targetLocal = args.targetLocal;
+
+        console.log(
+            chalk.white(
+                `Start translate ${Object.keys(translationsWithVariant).length} items with replacements from ${args.originalLocal} to ${targetLocal} for namespace ${args.namespace}`,
+            ),
+        );
+
+        const batches = this.splitInBatches(translationsWithVariant);
+
+        const consistentWords = this.manager.getConsistentWords(
+            targetLocal,
+            args.namespace,
+        );
+
+        const result = await this.translateBatches(batches, {
+            originalLocal: args.originalLocal,
+            targetLocal,
+            translations: translationsWithVariant,
+            consistentWords,
+            namespace: args.namespace,
+            translateBatch: (batch, args) => this.translateBatchWithVariant(batch, args),
+            getUntranslatedValue: (item: TranslationWithVariant) =>
+                item.variant,
+            afterBatchTranslated: args.afterBatchTranslated,
+        });
+
+        console.log(
+            chalk.green(
+                `Finished translate ${Object.keys(translationsWithVariant).length} items from ${args.originalLocal} to ${targetLocal} for namespace ${args.namespace}`,
             ),
         );
 
@@ -338,7 +510,7 @@ ${error}`;
             return false;
         }
 
-        if(original.length > 20 && translation === original) {
+        if (original.length > 20 && translation === original) {
             const errorMessage = `Translation and original are equal: ${original}`;
             console.error(errorMessage);
             promptLogger.error(errorMessage);
@@ -393,7 +565,7 @@ ${error}`;
         return parsedJson;
     }
 
-    private textToJson(result: string): PromptBatch {
+    private textToJson(result: string): PromptBatch<string> {
         const json = JSON.parse(result);
         const { isValid, message } = this.validateJson(json);
 

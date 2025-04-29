@@ -8,7 +8,7 @@ import { Translator } from "./Translator";
 
 export class ClaudeTranslator extends Translator {
     protected readonly maxBatchLength = 3000;
-    protected readonly queue = new PromiseQueue<Batch>(3, 500);
+    protected readonly queue = new PromiseQueue<Batch<any>>(3, 500);
     protected readonly anthropic: Anthropic;
 
     constructor(manager: TranslationManager, options: AutoTranslateOptions) {

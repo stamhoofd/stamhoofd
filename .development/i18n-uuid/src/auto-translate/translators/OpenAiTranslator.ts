@@ -9,7 +9,7 @@ import { Translator } from "./Translator";
 
 export class OpenAiTranslator extends Translator {
     protected readonly maxBatchLength = 3000;
-    protected readonly queue = new PromiseQueue<Batch>(3, 500);
+    protected readonly queue = new PromiseQueue<Batch<any>>(3, 500);
     protected readonly openai: OpenAI;
 
     constructor(manager: TranslationManager, options: AutoTranslateOptions) {

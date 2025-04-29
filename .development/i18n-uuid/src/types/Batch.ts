@@ -1,1 +1,1 @@
-export type Batch = { uuid: string; value: string }[];
+export type Batch<T> = { uuid: string; value: T }[];

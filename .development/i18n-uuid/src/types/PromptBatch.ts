@@ -1,1 +1,1 @@
-export type PromptBatch = { id: number; value: string }[];
+export type PromptBatch<T> = { id: number; value: T }[];
