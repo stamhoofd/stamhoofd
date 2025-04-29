@@ -211,8 +211,10 @@ export class TranslationManager {
             args.locale,
             args.namespace,
         );
+        
+        const sortedDictionary = Object.fromEntries(Object.keys(dictionary).sort().map(key => [key, dictionary[key]]));
 
-        fs.writeFileSync(filePath, JSON.stringify(dictionary, null, 2));
+        fs.writeFileSync(filePath, JSON.stringify(sortedDictionary, null, 2));
     }
 
     setComparison(comparison: MachineTranslationComparison, {locale, namespace}: {locale: string, namespace: string}) {
