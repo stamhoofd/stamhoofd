@@ -117,7 +117,7 @@
   },
   "99df0115-6c75-49be-a20b-fff9944c4bca": {
     "original": "Nieuw aansluitingstype",
-    "translation": "Nouveau type de connexion"
+    "translation": "Nouveau type d'affiliation"
   },
   "b101058a-6b13-4df7-81ef-1f5c925bbf71": {
     "original": "Je kan dit niet ongedaan maken en verliest hierdoor alle bijhorende informatie.",
@@ -125,7 +125,7 @@
   },
   "866219fd-b946-4a96-b84b-3c2d26850cfa": {
     "original": "Ben je zeker dat je dit aansluitingstype wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer ce type de connexion ?"
+    "translation": "Êtes-vous sûr de vouloir supprimer ce type d'affiliation ?"
   },
   "21683697-3ebf-4f15-827a-ff18d1941f32": {
     "original": "Bepaal de beschikbare aansluitingen (o.a. verzekeringen), bijhorende kostprijs en instellingen",
@@ -133,11 +133,11 @@
   },
   "9bc2ae42-208d-475a-8496-82859f04a7be": {
     "original": "Wijzig aansluitingstype",
-    "translation": "Modifier le type de connexion"
+    "translation": "Modifier le type d'affiliation"
   },
   "e866488b-bc8d-481f-900b-9cf1779f44b8": {
     "original": "De vervaldatum ligt tussen de start en einddatum en is optioneel. De aansluiting blijft nog geldig na deze datum, maar in het systeem wordt het gedeeltelijk beschouwd als 'verlopen'. Gebruik dit om een aansluiting nog even te laten doorlopen in het nieuwe werkjaar.",
-    "translation": "La date d'expiration se situe entre la date de début et la date de fin et est facultative. La connexion reste valable après cette date, mais dans le système, elle est partiellement considérée comme 'expirée'. Utilisez-la pour prolonger une connexion dans la nouvelle année scolaire."
+    "translation": "La date d'expiration se situe entre la date de début et la date de fin et est facultative. La connexion reste valable après cette date, mais dans le système, elle est partiellement considérée comme 'expirée'. Utilisez-la pour prolonger une connexion dans la nouvelle année associative."
   },
   "f19516b2-0c37-4dce-86f4-46690ec3dfc9": {
     "original": "Geen vervaldatum",
@@ -149,11 +149,11 @@
   },
   "0b7c21d5-b9ed-4ddc-9370-7f58255f4eba": {
     "original": "Instellen voor werkjaar",
-    "translation": "Paramètres pour l'année scolaire"
+    "translation": "Paramètres pour l'année associative"
   },
   "105eefd4-2e16-4b4e-b964-ec51feb11955": {
     "original": "Nieuw aansluitingstype",
-    "translation": "Nouveau type de connexion"
+    "translation": "Nouveau type d'affiliation"
   },
   "285539ab-4119-4dcd-b0fe-87952f71d90d": {
     "original": "Prijs vanaf datum",
@@ -166,10 +166,6 @@
   "0d0147f0-f42e-4f6b-bf04-16c21fb8ae7d": {
     "original": "Ben je zeker dat je deze instellingen wilt verwijderen?",
     "translation": "Êtes-vous sûr de vouloir supprimer ces paramètres ?"
-  },
-  "3b257435-9ae7-4840-8f0f-f71318013935": {
-    "original": "Je hebt al voor elk werkjaar instellingen toegevoegd",
-    "translation": "Vous avez déjà ajouté des paramètres pour chaque année scolaire"
   },
   "d93bd297-5794-4588-8bfb-17fb2074a364": {
     "original": "Vanaf",
@@ -197,27 +193,27 @@
   },
   "ca303b26-d586-4e46-ad0d-af968d252261": {
     "original": "Ben je zeker dat je dit werkjaar wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer cette année scolaire ?"
+    "translation": "Êtes-vous sûr de vouloir supprimer cette année associative ?"
   },
   "9ebbdbf3-f76b-4f9a-89e2-936f56a75723": {
     "original": "Verwijder werkjaar",
-    "translation": "Supprimer l'année scolaire"
+    "translation": "Supprimer l'année associative"
   },
   "ef07b66f-6b78-4c47-9599-d8847ea97aaa": {
     "original": "Beheer de werkjaren en start een nieuw werkjaar op",
-    "translation": "Gérez les années scolaires et démarrez une nouvelle année scolaire"
+    "translation": "Gérez les années scolaires et démarrez une nouvelle année associative"
   },
   "7118def6-da94-4fce-9398-2131b31acf01": {
     "original": "Werkjaar bewerken",
-    "translation": "Modifier l'année scolaire"
+    "translation": "Modifier l'année associative"
   },
   "1929850b-e0ad-4b35-b3e5-6652dd4774e2": {
     "original": "Nieuw werkjaar",
-    "translation": "Nouvelle année scolaire"
+    "translation": "Nouvelle année associative"
   },
   "c6f24e63-4735-43c4-a93a-405755ba70c2": {
     "original": "Werkjaar maken",
-    "translation": "Créer une année scolaire"
+    "translation": "Créer une année associative"
   },
   "1cbf76ca-79d3-4f12-8f09-dc585f5e9da3": {
     "original": "Werkjaren",
@@ -325,7 +321,7 @@
   },
   "ec0c482e-0528-499f-82fa-b081bf708ded": {
     "original": "Dit lid is bij geen enkele groep ingeschreven voor het huidige werkjaar en kan daardoor niet aangesloten worden",
-    "translation": "Ce membre n'est inscrit à aucun groupe pour l'année scolaire en cours et ne peut donc pas être connecté"
+    "translation": "Ce membre n'est inscrit à aucun groupe pour l'année associative en cours et ne peut donc pas être connecté"
   },
   "3d3a30bb-3628-413e-8d1a-3864b1dae8e1": {
     "original": "Vanaf",
@@ -333,7 +329,7 @@
   },
   "cb85826e-06fc-473c-95c2-ba338fdbab50": {
     "original": "Kies een aansluitingstype",
-    "translation": "Choisissez un type de connexion"
+    "translation": "Choisissez un type d'affiliation"
   },
   "2f645618-a9a9-4598-883d-6f1991ae379d": {
     "original": "Geen rechtspersoonlijkheid (feitelijke vereniging)",
@@ -1837,35 +1833,35 @@
   },
   "5959a6a9-064a-413c-871f-c74a145ed569": {
     "original": "Oeps, je kan nog geen evenementen met inschrijvingen aanmaken in deze periode. Dit werkjaar is nog niet aangemaakt in het systeem.",
-    "translation": "Oups, vous ne pouvez pas encore créer d'événements avec inscriptions pendant cette période. Cette année scolaire n'est pas encore créée dans le système."
+    "translation": "Oups, vous ne pouvez pas encore créer d'événements avec inscriptions pendant cette période. Cette année associative n'est pas encore créée dans le système."
   },
   "d41cdbe3-57e3-4a2e-83bc-cb9e65c9c840": {
     "original": "Je kan een functie enkel toekennen aan leden die zijn ingeschreven in het huidige werkjaar",
-    "translation": "Vous ne pouvez attribuer une fonction qu'aux membres inscrits pour l'année scolaire en cours"
+    "translation": "Vous ne pouvez attribuer une fonction qu'aux membres inscrits pour l'année associative en cours"
   },
   "e821b318-928b-4eee-9bca-d00366554792": {
     "original": "De aansluitingsperiode moet binnen de periode van het gekozen werkjaar liggen",
-    "translation": "La période d'affiliation doit se situer dans la période de l'année scolaire choisie"
+    "translation": "La période d'affiliation doit se situer dans la période de l'année associative choisie"
   },
   "3754b38e-3938-4589-801a-450ba0844990": {
     "original": "Instellingen per werkjaar",
-    "translation": "Paramètres par année scolaire"
+    "translation": "Paramètres par année associative"
   },
   "8004af94-7b57-4ce2-aa9b-a6658684116d": {
     "original": "Per werkjaar kan je een prijs bepalen voor deze aansluiting, inclusief de start- en einddata.",
-    "translation": "Par année scolaire, vous pouvez déterminer un prix pour cette affiliation, y compris les dates de début et de fin."
+    "translation": "Par année associative, vous pouvez déterminer un prix pour cette affiliation, y compris les dates de début et de fin."
   },
   "cc48e00f-2c6b-4f4d-9bae-65a889364ea3": {
     "original": "Er kunnen geen wijzigingen meer aangebracht worden aan inschrijvingen in dit werkjaar.",
-    "translation": "Il n'est plus possible d'apporter des modifications aux inscriptions de cette année scolaire."
+    "translation": "Il n'est plus possible d'apporter des modifications aux inscriptions de cette année associative."
   },
   "b78d9c9e-9099-4fb6-93e1-6bf58e39165f": {
     "original": "De categorieën en leeftijdsgroepen van de groepen worden gedupliceerd naar het nieuwe werkjaar.",
-    "translation": "Les catégories et les groupes d'âge des groupes sont dupliqués vers la nouvelle année scolaire."
+    "translation": "Les catégories et les groupes d'âge des groupes sont dupliqués vers la nouvelle année associative."
   },
   "c95eb07d-15e3-45da-b2c2-7754c134ae65": {
     "original": "De leden moeten zich opnieuw inschrijven voor het nieuwe werkjaar.",
-    "translation": "Les membres doivent s'inscrire à nouveau pour la nouvelle année scolaire."
+    "translation": "Les membres doivent s'inscrire à nouveau pour la nouvelle année associative."
   },
   "865bfcae-44c2-49a5-a887-c70725d53d8b": {
     "original": "Alle functies van leden (behalve die met hoofdbeheerder rechten en nationale functies) worden beëindigd",
@@ -1873,7 +1869,7 @@
   },
   "9de0900d-9daa-48e5-ab82-496c61dfc5db": {
     "original": "Alle leeftijdsgroepen worden gesloten (tenzij de groep al eerder overschakelde naar dit werkjaar)",
-    "translation": "Tous les groupes d'âge sont fermés (sauf si le groupe est déjà passé à cette année scolaire)"
+    "translation": "Tous les groupes d'âge sont fermés (sauf si le groupe est déjà passé à cette année associative)"
   },
   "c28ace1d-50ff-4f1a-b403-bd5ab55d9dcb": {
     "original": "Werkjaren",
@@ -1881,55 +1877,55 @@
   },
   "671147bd-cf0e-42fc-b456-18ce7d75b867": {
     "original": "Alle groepen worden nu overgezet op het nieuw werkjaar. Dit kan even duren, mogelijks moet je de pagina nog even herladen om alle laatste wijzigingen correct te zien.",
-    "translation": "Tous les groupes sont maintenant transférés vers la nouvelle année scolaire. Cela peut prendre un certain temps, vous devrez peut-être recharger la page pour voir toutes les dernières modifications correctement."
+    "translation": "Tous les groupes sont maintenant transférés vers la nouvelle année associative. Cela peut prendre un certain temps, vous devrez peut-être recharger la page pour voir toutes les dernières modifications correctement."
   },
   "7dd9a44e-8a47-4b74-9d57-d20b1efb706f": {
     "original": "Dit werkjaar is vergrendeld. Je kan geen wijzigingen meer aanbrengen aan inschrijvingen.",
-    "translation": "Cette année scolaire est verrouillée. Vous ne pouvez plus apporter de modifications aux inscriptions."
+    "translation": "Cette année associative est verrouillée. Vous ne pouvez plus apporter de modifications aux inscriptions."
   },
   "410f13a0-286d-4f7a-b6f6-aef22327056b": {
     "original": "Instellen als huidig werkjaar",
-    "translation": "Définir comme année scolaire en cours"
+    "translation": "Définir comme année associative en cours"
   },
   "b5f857ee-6c3b-43df-866c-99e7e0954eb1": {
     "original": "Hoera! Tijd voor een nieuw werkjaar.",
-    "translation": "Hourra ! Il est temps pour une nouvelle année scolaire."
+    "translation": "Hourra ! Il est temps pour une nouvelle année associative."
   },
   "c5d21881-b70a-489e-bce9-5bb3d24b6f76": {
     "original": "Alle leden moeten opnieuw inschrijven voor het nieuwe werkjaar, of schrijf je zelf opnieuw in",
-    "translation": "Tous les membres doivent s'inscrire à nouveau pour la nouvelle année scolaire, ou inscrivez-vous vous-même à nouveau"
+    "translation": "Tous les membres doivent s'inscrire à nouveau pour la nouvelle année associative, ou inscrivez-vous vous-même à nouveau"
   },
   "275f674b-bf05-4d34-a1ff-105a1563fbcc": {
     "original": "Je kan pas 2 maand voor de start van het nieuwe werkjaar overschakelen.",
-    "translation": "Vous ne pouvez basculer que 2 mois avant le début de la nouvelle année scolaire."
+    "translation": "Vous ne pouvez basculer que 2 mois avant le début de la nouvelle année associative."
   },
   "57491b1b-a306-479e-9bc0-f0d4839a7f5c": {
     "original": "Stappenplan opstart werkjaar",
-    "translation": "Mode d'emploi de démarrage de l'année scolaire"
+    "translation": "Mode d'emploi de démarrage de l'année associative"
   },
   "1316502a-5502-49ec-96fe-93e60cb94268": {
     "original": "Filter op leden die een inschrijving (zowel huidig werkjaar of in een afgelopen werkjaar) heeft die aan deze voorwaarden voldoet.",
-    "translation": "Filtrer sur les membres ayant une inscription (année scolaire en cours ou année scolaire passée) qui répond aux conditions."
+    "translation": "Filtrer sur les membres ayant une inscription (année associative en cours ou année associative passée) qui répond aux conditions."
   },
   "e2130593-e64d-4f3a-bb16-75ba4ed7604e": {
     "original": "Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorig werkjaar van gelijk welke inschrijvingsgroep.",
-    "translation": "Les membres sont considérés comme existants s'ils sont inscrits pour une année scolaire précédente de n'importe quel groupe d'inscription."
+    "translation": "Les membres sont considérés comme existants s'ils sont inscrits pour une année associative précédente de n'importe quel groupe d'inscription."
   },
   "fd52fa36-16e6-4106-807c-c387bc0acc0e": {
     "original": "Geen groepen beschikbaar in dit werkjaar",
-    "translation": "Aucun groupe disponible cette année scolaire"
+    "translation": "Aucun groupe disponible cette année associative"
   },
   "9685e11f-a4d0-4709-9f5e-875957ad269b": {
     "original": "Onbekend werkjaar",
-    "translation": "Année scolaire inconnue"
+    "translation": "Année associative inconnue"
   },
   "b19c1fb0-f1a7-4435-9150-01bb2bb0799c": {
     "original": "Dit aansluitingstype is (nog) niet beschikbaar voor dit werkjaar",
-    "translation": "Ce type d'affiliation n'est pas (encore) disponible pour cette année scolaire"
+    "translation": "Ce type d'affiliation n'est pas (encore) disponible pour cette année associative"
   },
   "022aad3d-6250-4000-9336-4ae7e8e75c23": {
     "original": "Alle leden met deze functie, krijgen automatisch toegangsrechten tot de leeftijdsgroep van een lokale groep waarvoor de functie werd toegevoegd - enkel voor één specifiek werkjaar.",
-    "translation": "Tous les membres ayant cette fonction obtiennent automatiquement des droits d'accès au groupe d'âge d'un groupe local auquel la fonction a été ajoutée - uniquement pour une année scolaire spécifique."
+    "translation": "Tous les membres ayant cette fonction obtiennent automatiquement des droits d'accès au groupe d'âge d'un groupe local auquel la fonction a été ajoutée - uniquement pour une année associative spécifique."
   },
   "a48e6035-5e61-4fc7-9ac4-89016e7174fe": {
     "original": "Mijn account",
@@ -2217,7 +2213,7 @@
   },
   "ea927f14-835b-43f6-bf6e-3e689b5a0824": {
     "original": "*Hoe oud het lid wordt in het kalenderjaar van de start van een werkjaar (dus leeftijd op 31/12/{startYear}). Ter referentie: leden uit het eerste leerjaar zijn 6 jaar op 31 december. Leden uit het eerste secundair zijn 12 jaar op 31 december.",
-    "translation": "*Quel âge aura le membre au cours de l'année civile du début d'une année scolaire (donc l'âge au 31/12/{startYear}). À titre de référence : les membres de la première année primaire ont 6 ans au 31 décembre. Les membres de la première année secondaire ont 12 ans au 31 décembre."
+    "translation": "*Quel âge aura le membre au cours de l'année civile du début d'une année associative (donc l'âge au 31/12/{startYear}). À titre de référence : les membres de la première année primaire ont 6 ans au 31 décembre. Les membres de la première année secondaire ont 12 ans au 31 décembre."
   },
   "c6c8e406-3d1f-41c4-b3df-d0b1e8661040": {
     "original": "Vereisten",
@@ -2421,7 +2417,7 @@
   },
   "62103514-05f5-4dc0-a5cc-c9321f21c63d": {
     "original": "Je kan geen aansluitingen meer toevoegen in dit werkjaar",
-    "translation": "Vous ne pouvez plus ajouter d'affiliations cette année scolaire"
+    "translation": "Vous ne pouvez plus ajouter d'affiliations cette année associative"
   },
   "745f5355-3398-406d-842e-5c9f7a700e91": {
     "original": "Je kan geen aansluitingen meer toevoegen in {period} (vergrendeld)",
@@ -2429,7 +2425,7 @@
   },
   "1f1d657d-bc73-4cae-9025-b3ec67a705e7": {
     "original": "Je kan geen aansluitingen meer verwijderen in dit werkjaar",
-    "translation": "Vous ne pouvez plus supprimer d'affiliations cette année scolaire"
+    "translation": "Vous ne pouvez plus supprimer d'affiliations cette année associative"
   },
   "2e615670-813a-414f-b06c-f76136891bf8": {
     "original": "Je kan geen aansluitingen meer verwijderen in {period} (vergrendeld)",
@@ -2437,7 +2433,7 @@
   },
   "31e91d3b-16e5-4608-9390-75e61d4d090d": {
     "original": "Je kan het huidig werkjaar hier wijzigen. Zorg dat je voor dit werkjaar alle aansluitingen hebt ingesteld. Ga daarvoor naar 'aansluitingen en verzekeringen' en voeg het werkjaar toe en stel de nieuwe prijzen en periodes correct in.",
-    "translation": "Vous pouvez modifier l'année scolaire actuelle ici. Assurez-vous d'avoir défini toutes les affiliations pour cette année scolaire. Pour ce faire, accédez à « affiliations et assurances » et ajoutez l'année scolaire, puis définissez correctement les nouveaux prix et périodes."
+    "translation": "Vous pouvez modifier l'année associative actuelle ici. Assurez-vous d'avoir défini toutes les affiliations pour cette année associative. Pour ce faire, accédez à « affiliations et assurances » et ajoutez l'année associative, puis définissez correctement les nouveaux prix et périodes."
   },
   "bfc8aada-8c57-4789-9059-a7df4824e67b": {
     "original": "Met een filtergroep kan je combinaties van 'en' en 'of' maken.",
@@ -2453,7 +2449,7 @@
   },
   "9c916015-e69c-44b3-a568-d0af15854787": {
     "original": "Alle groepen worden overgezet op dit nieuwe werkjaar. Hoofdbeheerders kunnen het vorige werkjaar nog bekijken.",
-    "translation": "Tous les groupes sont transférés à cette nouvelle année scolaire. Les administrateurs principaux peuvent toujours consulter l'année scolaire précédente."
+    "translation": "Tous les groupes sont transférés à cette nouvelle année associative. Les administrateurs principaux peuvent toujours consulter l'année associative précédente."
   },
   "d5e39906-8c0b-4006-bab5-96827f8daa53": {
     "original": "Er zijn geen leden die kunnen inschrijven.",
@@ -2477,7 +2473,7 @@
   },
   "97616151-90c3-4644-8854-e228c4f355f5": {
     "original": "Dit werkjaar is vergrendeld, je kan geen meldingen meer aanmaken voor deze periode",
-    "translation": "Cette année scolaire est verrouillée, vous ne pouvez plus créer de notifications pour cette période"
+    "translation": "Cette année associative est verrouillée, vous ne pouvez plus créer de notifications pour cette période"
   },
   "a0c39573-d44e-4ac0-aaeb-f9062fa1b3ce": {
     "original": "De melding werd niet gevonden",
@@ -2497,11 +2493,11 @@
   },
   "16a3b696-f8da-4b2b-94b7-49c85ee1c38c": {
     "original": "Dit werkjaar werd niet gevonden",
-    "translation": "Cette année scolaire n'a pas été trouvée"
+    "translation": "Cette année associative n'a pas été trouvée"
   },
   "43cc054d-cf2f-432b-9259-e7764dc929e3": {
     "original": "Dit werkjaar is vergrendeld, je kan geen meldingen meer aanpassen in deze periode",
-    "translation": "Cette année scolaire est verrouillée, vous ne pouvez plus modifier les notifications pour cette période"
+    "translation": "Cette année associative est verrouillée, vous ne pouvez plus modifier les notifications pour cette période"
   },
   "4d8be2b1-559a-4c16-a76f-67a8ba85de7f": {
     "original": "Dit type melding bestaat niet",
@@ -2517,7 +2513,7 @@
   },
   "f544b972-416c-471d-8836-d7f3b16f947d": {
     "original": "Dit werkjaar is vergrendeld, je kan geen inschrijvingsgroepen meer toevoegen",
-    "translation": "Cette année scolaire est verrouillée, vous ne pouvez plus ajouter de groupes d'inscription"
+    "translation": "Cette année associative est verrouillée, vous ne pouvez plus ajouter de groupes d'inscription"
   },
   "f86bcf9f-ffd2-429a-9b04-778e61c8288c": {
     "original": "Alle meldingen",
@@ -3561,11 +3557,11 @@
   },
   "fa79b34e-deef-4379-9c80-8795b0f5eaa3": {
     "original": "Dit aansluitingstype bestaat niet",
-    "translation": "Ce type de connexion n'existe pas"
+    "translation": "Ce type d'affiliation n'existe pas"
   },
   "a17551ff-5097-4f09-a8bb-19fe377f2b98": {
     "original": "Dit aansluitingstype is niet toegestaan voor dit lid",
-    "translation": "Ce type de connexion n'est pas autorisé pour ce membre"
+    "translation": "Ce type d'affiliation n'est pas autorisé pour ce membre"
   },
   "faf8b6bb-2727-4d2f-847f-203cf3979dfb": {
     "original": "Je kan geen aansluiting toevoegen die overlapt met een bestaande aansluiting van hetzelfde type",
@@ -7569,7 +7565,7 @@
   },
   "b66376fb-238e-42dd-aec6-f48b9ee2e215": {
     "original": "Nieuw werkjaar",
-    "translation": "Nouvelle année scolaire"
+    "translation": "Nouvelle année associative"
   },
   "9128d20d-f23a-4d1e-a631-c61a25ade53c": {
     "original": "Niet beschikbaar",
@@ -11113,7 +11109,7 @@
   },
   "ab4ad0cf-53df-4f35-96a8-59747075417f": {
     "original": "onbekend aansluitingstype",
-    "translation": "type de connexion inconnu"
+    "translation": "type d'affiliation inconnu"
   },
   "9fb913bf-ebc1-48aa-885e-73f24b8da239": {
     "original": "onbekende inschrijvingsgroep",
@@ -11157,7 +11153,7 @@
   },
   "25589636-c28d-4c5b-9b5c-0f1cfd4037ef": {
     "original": "Onbekend aansluitingstype",
-    "translation": "Type de connexion inconnu"
+    "translation": "Type d'affiliation inconnu"
   },
   "362f9b8f-9f87-49bc-8dda-d6014ab9de3f": {
     "original": "Gepubliceerd",
@@ -11477,7 +11473,7 @@
   },
   "dff05b27-5ad9-416c-b344-f890a4e68255": {
     "original": "Werkjaar",
-    "translation": "Année scolaire"
+    "translation": "Année associative"
   },
   "5f235a48-96bc-4db1-9de8-a3266b8edede": {
     "original": "lezen",
@@ -12977,11 +12973,11 @@
   },
   "662e1c09-b491-41a4-8e87-220fabc87eb1": {
     "original": "Je kan geen inschrijvingen wijzigen van {group} omdat werkjaar {period} is afgesloten.",
-    "translation": "Vous ne pouvez pas modifier les inscriptions de {group} car l'année scolaire {period} est terminée."
+    "translation": "Vous ne pouvez pas modifier les inscriptions de {group} car l'année associative {period} est terminée."
   },
   "40670ad7-7db1-4ec9-84df-68b32642042e": {
     "original": "Je kan geen inschrijvingen wijzigen van {group} omdat dat werkjaar is afgesloten.",
-    "translation": "Vous ne pouvez pas modifier les inscriptions de {group} car cette année scolaire est terminée."
+    "translation": "Vous ne pouvez pas modifier les inscriptions de {group} car cette année associative est terminée."
   },
   "d05d3829-a5c2-426c-ae1d-3b0c9cacd536": {
     "original": "De inschrijving die je wou verwijderen kon niet gevonden worden. Het is mogelijk dat deze inschrijving al verwijderd is.",
