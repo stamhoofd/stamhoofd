@@ -30,7 +30,7 @@
             <h3 class="style-definition-label">
                 {{ cc.name }}
             </h3>
-            <RecordCategoryAnswersBox :value="value" :category="cc" :compact="true" />
+            <RecordCategoryAnswersBox :value="value" :category="cc" :compact="true" :is-admin="isAdmin" />
         </STListItem>
     </STList>
 
@@ -76,14 +76,16 @@ const props = withDefaults(
         value: T;
         category: RecordCategory;
         compact?: boolean;
+        isAdmin?: boolean | null;
     }>(),
     {
         compact: false,
+        isAdmin: null,
     },
 );
 
 const app = useAppContext();
-const isAdmin = app === 'dashboard' || app === 'admin';
+const isAdmin = props.isAdmin ?? (app === 'dashboard' || app === 'admin');
 const filterOptions = isAdmin
     ? undefined
     : {

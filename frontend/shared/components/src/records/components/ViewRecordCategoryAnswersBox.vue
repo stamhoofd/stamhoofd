@@ -11,54 +11,25 @@
             </div>
         </h2>
 
-        <RecordCategoryAnswersBox :value="value as ObjectWithRecords" :category="category" :compact="compact" />
+        <RecordCategoryAnswersBox :value="value as ObjectWithRecords" :category="category" :compact="compact" :is-admin="isAdmin" />
     </div>
 </template>
 
 <script lang="ts" setup generic="T extends ObjectWithRecords">
-import { ObjectWithRecords, PermissionLevel, RecordCategory, RecordCheckboxAnswer } from '@stamhoofd/structures';
-import { computed } from 'vue';
-import { useAppContext } from '../../context';
+import { ObjectWithRecords, RecordCategory } from '@stamhoofd/structures';
 import RecordCategoryAnswersBox from './RecordCategoryAnswersBox.vue';
 
-const props = withDefaults(
+withDefaults(
     defineProps<{
         value: T;
         category: RecordCategory;
         compact?: boolean;
+        isAdmin?: boolean | null;
     }>(),
     {
         compact: false,
+        isAdmin: null,
     },
 );
-
-const app = useAppContext();
-const isAdmin = app === 'dashboard' || app === 'admin';
-const filterOptions = isAdmin
-    ? undefined
-    : {
-            level: PermissionLevel.Read,
-        };
-
-const answers = computed(() => {
-    return props.value.getRecordAnswers();
-});
-
-const recordsWithAnswers = computed(() => {
-    const records = props.category.filterRecords(props.value, filterOptions);
-
-    return records.map((record) => {
-        const answer = answers.value.get(record.id);
-        return {
-            record,
-            answer,
-            recordCheckboxAnswer: answer instanceof RecordCheckboxAnswer ? answer : null,
-        };
-    });
-});
-
-const childCategories = computed(() => {
-    return props.category.filterChildCategories(props.value, filterOptions);
-});
 
 </script>

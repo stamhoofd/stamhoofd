@@ -1,6 +1,6 @@
 <template>
     <div>
-        <ViewMemberRecordCategoryBox v-for="category of recordCategories" :key="category.id" :member="member" :category="category" />
+        <ViewMemberRecordCategoryBox v-for="category of recordCategories.categories" :key="category.id" :member="member" :category="category"  :is-admin="recordCategories.adminPermissionsMap.get(category.id) ?? false" />
     </div>
 </template>
 
@@ -27,11 +27,9 @@ const recordCategories = computed(() => {
     };
 
     const member = props.member;
-    const categories = member.getEnabledRecordCategories({
+    return member.getEnabledRecordCategories({
         checkPermissions,
     });
-
-    return RecordCategory.filterCategories(categories, member);
 });
 
 </script>

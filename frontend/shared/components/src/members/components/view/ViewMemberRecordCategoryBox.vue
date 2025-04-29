@@ -1,5 +1,5 @@
 <template>
-    <ViewRecordCategoryAnswersBox :value="member" :category="category">
+    <ViewRecordCategoryAnswersBox :value="member" :category="category" :is-admin="isAdmin">
         <template v-if="titleSuffix" #title-suffix>
             <span class="title-suffix hover-show">
                 {{ titleSuffix }}
@@ -18,6 +18,7 @@ import ViewRecordCategoryAnswersBox from '../../../records/components/ViewRecord
 const props = defineProps<{
     category: RecordCategory;
     member: PlatformMember;
+    isAdmin: boolean;
 }>();
 
 const app = useAppContext();

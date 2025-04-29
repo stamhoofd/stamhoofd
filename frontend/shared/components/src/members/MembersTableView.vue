@@ -433,7 +433,7 @@ if (groups.length) {
                     base.push($t(`d42f4d7d-a453-403b-9b3f-459020fc8849`));
                 }
 
-                const enabledCategories = member.getEnabledRecordCategories(scope);
+                const { categories: enabledCategories } = member.getEnabledRecordCategories(scope);
 
                 const incomplete = enabledCategories.filter(c => !c.isComplete(member));
                 return [...base, ...incomplete.map(c => c.name.toString())];
