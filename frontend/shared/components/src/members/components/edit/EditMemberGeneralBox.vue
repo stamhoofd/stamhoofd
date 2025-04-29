@@ -169,7 +169,7 @@ useValidation(errors.validator, () => {
         if (clone.phone === null) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: `Je kan het GSM-nummer van een ouder niet opgeven als het GSM-nummer van ${props.member.patchedMember.details.firstName} of omgekeerd. Vul het GSM-nummer van ${props.member.patchedMember.details.firstName} zelf in.`,
+                message: $t(`Je kan het GSM-nummer van een ouder niet opgeven als het GSM-nummer van {firstName} of omgekeerd. Vul het GSM-nummer van {firstName} zelf in.`, { firstName: props.member.patchedMember.details.firstName }),
                 field: 'phone',
             }));
         }
@@ -182,7 +182,7 @@ useValidation(errors.validator, () => {
         if (clone.email === null) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: `Je kan het e-mailadres van een ouder niet opgeven als het e-mailadres van ${props.member.patchedMember.details.firstName} of omgekeerd. Vul het e-mailadres van ${props.member.patchedMember.details.firstName} zelf in.`,
+                message: $t(`Je kan het e-mailadres van een ouder niet opgeven als het e-mailadres van {firstName} of omgekeerd. Vul het e-mailadres van {firstName} zelf in.`, { firstName: props.member.patchedMember.details.firstName }),
                 field: 'email',
             }));
         }
@@ -205,7 +205,7 @@ const lidSuffix = computed(() => {
         return '';
     }
     if (props.member.patchedMember.details.defaultAge < 24) {
-        return ' ' + $t(`9ddd7aba-9426-4718-9eb0-673b615efcf4`) + ' ' + firstName.value;
+        return ' ' + $t(`van {name}`, { name: firstName.value });
     }
     return '';
 });
