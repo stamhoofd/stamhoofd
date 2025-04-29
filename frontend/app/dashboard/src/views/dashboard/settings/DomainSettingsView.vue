@@ -59,7 +59,9 @@
             </template>
 
             <STInputBox v-if="enableMemberModule && customRegisterDomain" error-fields="registerDomain" :error-box="errorBox" :title="$t(`ff993893-62e4-459c-88e2-54b5bf760c13`)">
-                <input v-model="registerDomain" class="input" type="text" :placeholder="$t(`075607ec-bef2-4d91-9d72-3f3000a1ef86`) + $t('d687b491-be68-4e5b-9acb-e2c090951c23')" @change="registerDomainChanged">
+                <input v-model="registerDomain" class="input" type="text" 
+                :placeholder="$t('bv. inschrijven.jouwdomein.be')"
+                @change="registerDomainChanged">
             </STInputBox>
         </main>
 
