@@ -252,7 +252,10 @@ const doDelete = async () => {
 
         await pop({ force: true });
 
-        new Toast($t(`2289a0b3-d7e1-45a6-997b-b01a66182df6`) + ' ' + props.user.firstName + ' ' + $t(`4f093ade-8fcd-4849-8b9d-6e2db171880c`), 'success').setHide(2000).show();
+        new Toast(
+            $t('Beheerder {firstName} werd verwijderd', { firstName: props.user.firstName ?? props.user.email }),
+            'success',
+        ).setHide(2000).show();
     }
     catch (e) {
         console.error(e);
