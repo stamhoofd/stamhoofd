@@ -305,6 +305,7 @@ declare global {
         readonly SPACES_KEY: string,
         readonly SPACES_SECRET: string
         readonly AWS_REGION: "eu-west-1" | string, // TODO: add others
+        readonly MINIMUM_BACKUP_SIZE?: number // Expected size (in bytes) of database backup, to detect broken backups
 
         readonly IS_REPLICA?: boolean, // Whether this is a replica server and health checks should also check replica health
 
