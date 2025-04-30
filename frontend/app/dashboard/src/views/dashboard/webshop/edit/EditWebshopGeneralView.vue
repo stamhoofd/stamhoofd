@@ -110,7 +110,7 @@
             </STList>
 
             <STInputBox v-if="numberingType === WebshopNumberingType.Continuous" error-fields="settings.openAt" :error-box="errors.errorBox" :title="$t(`acd40eea-3b58-434b-8be9-52e7a32d7b52`)">
-                <NumberInput v-model="startNumber" :min="1" />
+                <NumberInput v-model="startNumber" :min="1" :max="100000000 - 100000" />
             </STInputBox>
             <p v-if="!isNew && numberingType === WebshopNumberingType.Continuous" class="style-description-small">
                 {{ $t('290f637c-9313-44c1-8e4f-4e5922e9768a') }}
