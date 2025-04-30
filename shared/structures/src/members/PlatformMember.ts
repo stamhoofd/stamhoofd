@@ -565,16 +565,34 @@ export class PlatformMember implements ObjectWithRecords {
     getContinuousMembershipStatus({ start, end }: { start: Date; end: Date }): ContinuousMembershipStatus {
         const memberships = this.patchedMember.platformMemberships.filter(t => !!this.organizations.find(o => o.id === t.organizationId));
 
-        for (const t of memberships) {
-            if (t.endDate >= end && t.startDate <= start) {
-                return ContinuousMembershipStatus.Full;
+        const sorted = memberships
+            // filter memberships in period
+            .filter(m => m.endDate > start && m.startDate < end)
+            // sort by start date (earliest first)
+            .sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+
+        // date until when there is a membership
+        let coveredDate = start;
+
+        for (const t of sorted) {
+            if (t.startDate <= coveredDate) {
+                if (t.endDate > coveredDate) {
+                    coveredDate = t.endDate;
+                }
+            }
+            // there is a gap -> partially covered
+            else {
+                return ContinuousMembershipStatus.Partial;
             }
         }
 
-        for (const t of memberships) {
-            if ((t.endDate < end && t.endDate > start) || (t.startDate < end && t.startDate > start)) {
-                return ContinuousMembershipStatus.Partial;
-            }
+        if (coveredDate >= end) {
+            return ContinuousMembershipStatus.Full;
+        }
+
+        // if there is at least one membership in the period
+        if (sorted.length > 0) {
+            return ContinuousMembershipStatus.Partial;
         }
 
         return ContinuousMembershipStatus.None;
