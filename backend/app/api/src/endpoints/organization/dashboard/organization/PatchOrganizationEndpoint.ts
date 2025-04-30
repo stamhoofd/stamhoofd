@@ -1,17 +1,17 @@
-import { AutoEncoderPatchType, cloneObject, Decoder, isPatchableArray, ObjectData, PatchableArrayAutoEncoder, patchObject } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, cloneObject, Decoder, isPatchableArray, isPatchMap, ObjectData, PatchableArray, PatchableArrayAutoEncoder, PatchMap, patchObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Organization, OrganizationRegistrationPeriod, PayconiqPayment, Platform, RegistrationPeriod, StripeAccount, Webshop } from '@stamhoofd/models';
-import { BuckarooSettings, Company, OrganizationMetaData, OrganizationPatch, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, PlatformConfig } from '@stamhoofd/structures';
+import { BuckarooSettings, Company, MemberResponsibility, OrganizationMetaData, OrganizationPatch, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { BuckarooHelper } from '../../../../helpers/BuckarooHelper';
 import { Context } from '../../../../helpers/Context';
+import { MemberUserSyncer } from '../../../../helpers/MemberUserSyncer';
 import { SetupStepUpdater } from '../../../../helpers/SetupStepUpdater';
 import { TagHelper } from '../../../../helpers/TagHelper';
 import { ViesHelper } from '../../../../helpers/ViesHelper';
-import { MemberUserSyncer } from '../../../../helpers/MemberUserSyncer';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -375,6 +375,130 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     message: 'You do not have permissions to edit the organization settings',
                     statusCode: 403,
                 });
+            }
+
+            // Give users without full access permission to alter responsibilities in order to give other users permissions to resources they also have full permissions to
+            if (request.body.privateMeta && request.body.privateMeta.isPatch()) {
+                if (request.body.privateMeta.inheritedResponsibilityRoles) {
+                    const patchableArray: PatchableArrayAutoEncoder<PermissionRoleForResponsibility> = new PatchableArray();
+
+                    for (const patch of request.body.privateMeta.inheritedResponsibilityRoles.getPatches()) {
+                        const resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = patch.resources.applyTo(new Map<PermissionsResourceType, Map<string, ResourcePermissions>>());
+
+                        if (!await Context.auth.hasFullAccessForOrganizationResources(request.body.id, resources)) {
+                            throw new SimpleError({
+                                code: 'permission_denied',
+                                message: 'You do not have permissions to edit inherited responsibility roles',
+                                statusCode: 403,
+                            });
+                        }
+
+                        patchableArray.addPatch(PermissionRoleForResponsibility.patch({
+                            id: patch.id,
+                            resources: patch.resources,
+                        }));
+                    }
+
+                    for (const { put, afterId } of request.body.privateMeta.inheritedResponsibilityRoles.getPuts()) {
+                        const resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = put.resources;
+
+                        if (!await Context.auth.hasFullAccessForOrganizationResources(request.body.id, resources)) {
+                            throw new SimpleError({
+                                code: 'permission_denied',
+                                message: 'You do not have permissions to add inherited responsibility roles',
+                                statusCode: 403,
+                            });
+                        }
+
+                        const limitedPut = PermissionRoleForResponsibility.create({
+                            id: put.id,
+                            name: put.name,
+                            responsibilityId: put.responsibilityId,
+                            responsibilityGroupId: put.responsibilityGroupId,
+                            resources: put.resources,
+                        });
+
+                        patchableArray.addPut(limitedPut, afterId);
+                    }
+
+                    organization.privateMeta = organization.privateMeta.patch({
+                        inheritedResponsibilityRoles: patchableArray,
+                    });
+                }
+
+                if (request.body.privateMeta.responsibilities) {
+                    const patchableArray: PatchableArrayAutoEncoder<MemberResponsibility> = new PatchableArray();
+
+                    for (const patch of request.body.privateMeta.responsibilities.getPatches()) {
+                        if (!patch.permissions) {
+                            continue;
+                        };
+
+                        const resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = isPatchMap(patch.permissions.resources) ? patch.permissions.resources.applyTo(new Map<PermissionsResourceType, Map<string, ResourcePermissions>>()) : patch.permissions.resources;
+
+                        if (!await Context.auth.hasFullAccessForOrganizationResources(request.body.id, resources)) {
+                            throw new SimpleError({
+                                code: 'permission_denied',
+                                message: 'You do not have permissions to edit responsibilities',
+                                statusCode: 403,
+                            });
+                        }
+
+                        patchableArray.addPatch(MemberResponsibility.patch({
+                            id: patch.id,
+                            permissions: PermissionRoleForResponsibility.patch({
+                                resources: isPatchMap(patch.permissions.resources) ? patch.permissions.resources : new PatchMap(patch.permissions.resources),
+                            }),
+                        }));
+                    }
+
+                    if (request.body.privateMeta.responsibilities.getPuts().length > 0) {
+                        throw new SimpleError({
+                            code: 'permission_denied',
+                            message: 'You do not have permissions to add responsibilities',
+                            statusCode: 403,
+                        });
+                    }
+
+                    organization.privateMeta = organization.privateMeta.patch({
+                        responsibilities: patchableArray,
+                    });
+                }
+
+                if (request.body.privateMeta.roles) {
+                    const patchableArray: PatchableArrayAutoEncoder<PermissionRoleDetailed> = new PatchableArray();
+
+                    for (const patch of request.body.privateMeta.roles.getPatches()) {
+                        const resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = patch.resources.applyTo(new Map<PermissionsResourceType, Map<string, ResourcePermissions>>());
+
+                        if (!await Context.auth.hasFullAccessForOrganizationResources(request.body.id, resources)) {
+                            throw new SimpleError({
+                                code: 'permission_denied',
+                                message: 'You do not have permissions to edit roles',
+                                statusCode: 403,
+                            });
+                        }
+
+                        patchableArray.addPatch(PermissionRoleDetailed.patch({
+                            id: patch.id,
+                            resources: patch.resources,
+                        }));
+                    }
+
+                    if (request.body.privateMeta.roles.getPuts().length > 0) {
+                        throw new SimpleError({
+                            code: 'permission_denied',
+                            message: 'You do not have permissions to add roles',
+                            statusCode: 403,
+                        });
+                    }
+
+                    organization.privateMeta = organization.privateMeta.patch({
+                        roles: patchableArray,
+                    });
+                }
+
+                await organization.save();
             }
         }
 
