@@ -12,7 +12,6 @@ import { Document as DocumentStruct } from '../Document.js';
 import { Platform } from '../Platform.js';
 import { UserWithMembers } from '../UserWithMembers.js';
 import { Address } from '../addresses/Address.js';
-import { Country } from '../addresses/CountryDecoder.js';
 import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import { EmergencyContact } from './EmergencyContact.js';
 import { MemberDetails, MemberProperty } from './MemberDetails.js';
@@ -424,6 +423,12 @@ export enum MembershipStatus {
     Temporary = 'Temporary',
 }
 
+export enum ContinuousMembershipStatus {
+    Full = 'Full',
+    Partial = 'Partial',
+    None = 'None',
+}
+
 export class PlatformMember implements ObjectWithRecords {
     member: MemberWithRegistrationsBlob;
     patch: AutoEncoderPatchType<MemberWithRegistrationsBlob>;
@@ -536,8 +541,61 @@ export class PlatformMember implements ObjectWithRecords {
         return status;
     }
 
+    get hasFutureMembership(): boolean {
+        const now = new Date();
+
+        for (const t of this.patchedMember.platformMemberships) {
+            const organization = this.organizations.find(o => o.id === t.organizationId);
+            if (!organization) {
+                continue;
+            }
+
+            if (t.startDate > now) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     get shouldApplyReducedPrice() {
         return this.patchedMember.details.shouldApplyReducedPrice;
+    }
+
+    getContinuousMembershipStatus({ start, end }: { start: Date; end: Date }): ContinuousMembershipStatus {
+        const memberships = this.patchedMember.platformMemberships.filter(t => !!this.organizations.find(o => o.id === t.organizationId));
+
+        const sorted = memberships
+            // filter memberships in period
+            .filter(m => m.endDate > start && m.startDate < end)
+            // sort by start date (earliest first)
+            .sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+
+        // date until when there is a membership
+        let coveredDate = start;
+
+        for (const t of sorted) {
+            if (t.startDate <= coveredDate) {
+                if (t.endDate > coveredDate) {
+                    coveredDate = t.endDate;
+                }
+            }
+            // there is a gap -> partially covered
+            else {
+                return ContinuousMembershipStatus.Partial;
+            }
+        }
+
+        if (coveredDate >= end) {
+            return ContinuousMembershipStatus.Full;
+        }
+
+        // if there is at least one membership in the period
+        if (sorted.length > 0) {
+            return ContinuousMembershipStatus.Partial;
+        }
+
+        return ContinuousMembershipStatus.None;
     }
 
     addPatch(p: PartialWithoutMethods<AutoEncoderPatchType<MemberWithRegistrationsBlob>>) {
