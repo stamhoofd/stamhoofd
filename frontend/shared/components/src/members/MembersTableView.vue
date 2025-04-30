@@ -314,6 +314,7 @@ const allColumns: Column<ObjectType, any>[] = [
             minimumWidth: 120,
             recommendedWidth: 140,
             allowSorting: false,
+            enabled: false,
         })
         : null,
     new Column<ObjectType, string[]>({
