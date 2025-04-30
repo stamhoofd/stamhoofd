@@ -330,7 +330,7 @@ describe('Endpoint.PatchOrganization', () => {
                 token = await Token.createToken(user);
             });
 
-            test('should be able to put limited roles', async () => {
+            test('should throw if put roles', async () => {
                 const roleName = 'test role 1';
 
                 const role1 = PermissionRoleDetailed.create({
@@ -360,24 +360,11 @@ describe('Endpoint.PatchOrganization', () => {
                 });
 
                 // act
-                const response = await patchOrganization({
+                await expect(patchOrganization({
                     patch,
                     organization,
                     token,
-                });
-
-                // assert
-                expect(response.body).toBeDefined();
-                expect(response.body.privateMeta).not.toBeNull();
-
-                // roles
-                expect(response.body.privateMeta!.roles).toHaveLength(2);
-                expect(response.body.privateMeta!.roles[1].id).toBe(role1.id);
-                expect(response.body.privateMeta!.roles[1].resources.size).toBe(1);
-
-                // level should not be default level
-                expect(response.body.privateMeta!.roles[1].level).toBe(PermissionLevel.None);
-                expect(response.body.privateMeta!.roles[1].accessRights).toBeEmpty();
+                })).rejects.toThrow('You do not have permissions to add roles');
             });
 
             test('should only be able to patch resources of roles', async () => {
@@ -435,7 +422,7 @@ describe('Endpoint.PatchOrganization', () => {
                 expect(response.body.privateMeta!.roles[0].level).toBe(PermissionLevel.None);
             });
 
-            test('should be able to put limited responsibilities', async () => {
+            test('should throw if put responsibilities', async () => {
                 // arrange
                 const inheritedResponsibilityRole = PermissionRoleForResponsibility.create({
                     responsibilityId: 'responsibilityId',
@@ -473,31 +460,11 @@ describe('Endpoint.PatchOrganization', () => {
                 });
 
                 // act
-                const response = await patchOrganization({
+                await expect(patchOrganization({
                     patch,
                     organization,
                     token,
-                });
-
-                // assert
-                expect(response.body).toBeDefined();
-                expect(response.body.privateMeta).not.toBeNull();
-
-                // responsibilities
-                expect(response.body.privateMeta!.responsibilities).toHaveLength(1);
-                expect(response.body.privateMeta!.responsibilities[0].id).toBe(memberResponsibility.id);
-                expect(response.body.privateMeta!.responsibilities[0].permissions).not.toBeNull();
-                expect(response.body.privateMeta!.responsibilities[0].permissions?.resources.size).toBe(1);
-                expect(response.body.privateMeta!.responsibilities[0].permissions?.responsibilityId).toBe('responsibilityId');
-                expect(response.body.privateMeta!.responsibilities[0].permissions?.responsibilityGroupId).toBe('responsibilityGroupId');
-
-                // other fields should be default fields and not be set
-                expect(response.body.privateMeta!.responsibilities[0].permissions?.level).toBe(PermissionLevel.None);
-                expect(response.body.privateMeta!.responsibilities[0].permissions?.accessRights).toBeEmpty();
-                expect(response.body.privateMeta!.responsibilities[0].defaultAgeGroupIds).toBeNull();
-                expect(response.body.privateMeta!.responsibilities[0].organizationTagIds).toBeNull();
-                expect(response.body.privateMeta!.responsibilities[0].groupPermissionLevel).toBe(PermissionLevel.None);
-                expect(response.body.privateMeta!.responsibilities[0].organizationBased).toBe(true);
+                })).rejects.toThrow('You do not have permissions to add responsibilities');
             });
 
             test('should only be able to patch resources of responsibilities', async () => {

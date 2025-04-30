@@ -373,6 +373,9 @@ export class AdminPermissionChecker {
         return false;
     }
 
+    /**
+        Returns true if the user has full access to all resource ids in the provided resources map. The resource permissions in the map are ignored for now.
+    */
     async hasFullAccessForOrganizationResources(organizationId: string, resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>>): Promise<boolean> {
         const organizationPermissions = await this.getOrganizationPermissions(organizationId);
 

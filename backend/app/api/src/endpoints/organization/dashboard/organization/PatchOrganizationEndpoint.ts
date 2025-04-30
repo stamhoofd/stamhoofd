@@ -377,6 +377,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 });
             }
 
+            // Give users without full access permission to alter responsibilities in order to give other users permissions to resources they also have full permissions to
             if (request.body.privateMeta && request.body.privateMeta.isPatch()) {
                 if (request.body.privateMeta.inheritedResponsibilityRoles) {
                     const patchableArray: PatchableArrayAutoEncoder<PermissionRoleForResponsibility> = new PatchableArray();
@@ -451,37 +452,12 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         }));
                     }
 
-                    for (const { put, afterId } of request.body.privateMeta.responsibilities.getPuts()) {
-                        if (!put.permissions) {
-                            continue;
-                        };
-
-                        const resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = put.permissions.resources;
-
-                        if (!await Context.auth.hasFullAccessForOrganizationResources(request.body.id, resources)) {
-                            throw new SimpleError({
-                                code: 'permission_denied',
-                                message: 'You do not have permissions to add responsibilities',
-                                statusCode: 403,
-                            });
-                        }
-
-                        const limitedPut = MemberResponsibility.create({
-                            id: put.id,
-                            name: put.name,
-                            description: put.name,
-                            minimumMembers: put.minimumMembers,
-                            maximumMembers: put.maximumMembers,
-                            permissions: PermissionRoleForResponsibility.create({
-                                id: put.permissions.id,
-                                name: put.permissions.name,
-                                responsibilityId: put.permissions.responsibilityId,
-                                responsibilityGroupId: put.permissions.responsibilityGroupId,
-                                resources: put.permissions.resources,
-                            }),
+                    if (request.body.privateMeta.responsibilities.getPuts().length > 0) {
+                        throw new SimpleError({
+                            code: 'permission_denied',
+                            message: 'You do not have permissions to add responsibilities',
+                            statusCode: 403,
                         });
-
-                        patchableArray.addPut(limitedPut, afterId);
                     }
 
                     organization.privateMeta = organization.privateMeta.patch({
@@ -509,24 +485,12 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         }));
                     }
 
-                    for (const { put, afterId } of request.body.privateMeta.roles.getPuts()) {
-                        const resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = put.resources;
-
-                        if (!await Context.auth.hasFullAccessForOrganizationResources(request.body.id, resources)) {
-                            throw new SimpleError({
-                                code: 'permission_denied',
-                                message: 'You do not have permissions to add roles',
-                                statusCode: 403,
-                            });
-                        }
-
-                        const limitedPut = PermissionRoleDetailed.create({
-                            id: put.id,
-                            name: put.name,
-                            resources: put.resources,
+                    if (request.body.privateMeta.roles.getPuts().length > 0) {
+                        throw new SimpleError({
+                            code: 'permission_denied',
+                            message: 'You do not have permissions to add roles',
+                            statusCode: 403,
                         });
-
-                        patchableArray.addPut(limitedPut, afterId);
                     }
 
                     organization.privateMeta = organization.privateMeta.patch({
