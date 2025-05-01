@@ -4,7 +4,7 @@
         <div>
             <template v-for="error in errors" :key="error.id">
                 <STErrorBox>
-                    {{ error.human || error.message }}
+                    {{ getErrorMessage(error) }}
                 </STErrorBox>
             </template>
         </div>
@@ -17,6 +17,7 @@ import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-naviga
 
 import { ErrorBox } from './ErrorBox';
 import STErrorBox from './STErrorBox.vue';
+import { Request } from '@simonbackx/simple-networking';
 
 @Component({
     components: {
@@ -45,6 +46,13 @@ export default class STErrorsInput extends VueComponent {
 
         this.errors = errors.errors;
         val.scrollTo(this.errors, this.$refs.errors as HTMLElement);
+    }
+
+    getErrorMessage(error: SimpleError) {
+        if (Request.isNetworkError(error as any)) {
+            return $t(`94bdc2a4-9ebb-42d2-a4e9-d674eb9aafef`);
+        }
+        return error.getHuman();
     }
 }
 </script>

@@ -131,6 +131,12 @@ export default class FileInput extends Mixins(NavigationMixin) {
             })
             .catch((e) => {
                 console.error(e);
+                if (Request.isNetworkError(e)) {
+                    e = new SimpleError({
+                        code: 'network_error',
+                        message: $t(`Er was een internetprobleem bij het uploaden van het bestand. Controleer je internetverbinding en probeer het opnieuw.`),
+                    });
+                }
                 this.errorBox = new ErrorBox(e);
             })
             .finally(() => {

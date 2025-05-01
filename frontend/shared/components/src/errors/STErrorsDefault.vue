@@ -15,6 +15,7 @@ import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-naviga
 import { ErrorBox } from './ErrorBox';
 import STErrorBox from './STErrorBox.vue';
 import { Ref, unref } from 'vue';
+import { Request } from '@simonbackx/simple-networking';
 
 @Component({
     components: {
@@ -32,7 +33,7 @@ export default class STErrorsDefault extends VueComponent {
     }
 
     getErrorMessage(error: SimpleError) {
-        if (error.hasCode('network_error') || error.hasCode('network_timeout')) {
+        if (Request.isNetworkError(error as any)) {
             return $t(`94bdc2a4-9ebb-42d2-a4e9-d674eb9aafef`);
         }
         return error.getHuman();
