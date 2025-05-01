@@ -6,7 +6,9 @@
                     <template #left>
                         <Radio v-model="selectedAddress" :value="_address" @update:model-value="changeSelected" />
                     </template>
-                    {{ _address.street }} {{ _address.number }}<br><template #right>
+                    {{ _address.street }} {{ _address.number }}<br>
+                    {{ _address.postalCode }} {{ _address.city }}
+                    <template #right>
                         <button class="button icon gray edit" type="button" @click.stop="doEditAddress(_address)" />
                     </template>
                 </STListItem>
