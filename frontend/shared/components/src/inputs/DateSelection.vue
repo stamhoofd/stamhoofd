@@ -84,10 +84,10 @@ const defaultLocalTime: ComputedRef<{ hour: number; minute: number; second: numb
 
 const present = usePresent();
 const isMobile = useIsMobile();
-const el = useTemplateRef('el');
-const dayInput = useTemplateRef('dayInput');
-const monthInput = useTemplateRef('monthInput');
-const yearInput = useTemplateRef('yearInput');
+const el = useTemplateRef<HTMLDivElement>('el');
+const dayInput = useTemplateRef<HTMLInputElement>('dayInput');
+const monthInput = useTemplateRef<HTMLInputElement>('monthInput');
+const yearInput = useTemplateRef<HTMLInputElement>('yearInput');
 const numberInputs = computed(() => [dayInput.value, monthInput.value, yearInput.value]);
 
 let hasFocus = false;

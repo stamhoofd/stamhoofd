@@ -18,7 +18,7 @@ withDefaults(defineProps<{
     root: ComponentWithProperties;
     keepAlive?: boolean;
 }>(), {
-    keepAlive: true
+    keepAlive: true,
 });
 
 const modalStack = ref(null) as Ref<InstanceType<typeof ModalStackComponent> | null>;
@@ -35,7 +35,7 @@ onMounted(async () => {
 
     ModalStackEventBus.addListener(this, 'present', async (options: PushOptions | ComponentWithProperties) => {
         if (!(options as any).components) {
-            await manualPresent(stack.present, { components: [options] });
+            await manualPresent(stack.present, { components: [options as ComponentWithProperties] });
         }
         else {
             await manualPresent(stack.present, options);

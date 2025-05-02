@@ -51,8 +51,8 @@
                             <DateSelection
                                 v-model="customStartDate"
                                 class="option"
-                                :min="selectedMembershipType.periods.get(period.id)?.startDate ?? null"
-                                :max="selectedMembershipType.periods.get(period.id)?.endDate ?? null"
+                                :min="selectedMembershipType.periods.get(period.id)?.startDate ?? undefined"
+                                :max="selectedMembershipType.periods.get(period.id)?.endDate ?? undefined"
                             />
                         </STInputBox>
                     </div>

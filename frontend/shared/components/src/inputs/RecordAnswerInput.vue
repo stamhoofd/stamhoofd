@@ -43,15 +43,15 @@
         <PhoneInput v-else-if="answer.settings.type === RecordType.Phone" v-model="textValue" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="errors.validator" :nullable="true" />
         <EmailInput v-else-if="answer.settings.type === RecordType.Email" v-model="textValue" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="errors.validator" :nullable="true" />
         <STInputBox v-else-if="answer.settings.type === RecordType.Date" :title="label" error-fields="input" :error-box="errors.errorBox">
-            <DateSelection v-model="dateValue" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
+            <DateSelection v-model="dateValue" :required="required" :validator="validator" :placeholder="inputPlaceholder.toString()" />
         </STInputBox>
         <STInputBox v-else-if="answer.settings.type === RecordType.Price" :title="label" error-fields="input" :error-box="errors.errorBox">
-            <PriceInput v-model="integerValue" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
+            <PriceInput v-model="integerValue" :required="required" :validator="validator" :placeholder="inputPlaceholder.toString()" />
         </STInputBox>
         <ImageInput v-else-if="answer.settings.type === RecordType.Image" v-model="imageValue" :title="label" :required="required" :validator="errors.validator" :resolutions="record.resolutions" :is-private="true" />
         <FileInput v-else-if="answer.settings.type === RecordType.File" v-model="fileValue" :accept="accept" :title="label" :required="required" :validator="errors.validator" :is-private="true" />
         <STInputBox v-else-if="answer.settings.type === RecordType.Integer" :title="label" error-fields="input" :error-box="errors.errorBox">
-            <NumberInput v-model="integerValue" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
+            <NumberInput v-model="integerValue" :required="required" :validator="validator" :placeholder="inputPlaceholder.toString()" />
         </STInputBox>
 
         <p v-else class="error-box">

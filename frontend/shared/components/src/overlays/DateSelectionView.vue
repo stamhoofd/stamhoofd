@@ -82,7 +82,7 @@ const props = withDefaults(defineProps<{
 });
 
 const pop = usePop();
-const aside = useTemplateRef('aside');
+const aside = useTemplateRef<HTMLElement>('aside');
 
 const luxonSelectedDay = computed(() => Formatter.luxon(props.selectedDay));
 const luxonMin = computed(() => props.min ? Formatter.luxon(props.min) : null);

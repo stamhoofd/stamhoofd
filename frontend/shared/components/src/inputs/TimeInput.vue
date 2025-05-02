@@ -29,7 +29,7 @@ withDefaults(defineProps<{
     autocomplete: '',
 });
 
-const model = defineModel<Date>({ required: true });
+const model = defineModel<Date | null>({ required: true });
 
 const timeRawCache = ref(formatDate(model.value));
 
@@ -40,7 +40,7 @@ watch(model, (value) => {
 const timeRaw = computed({
     get: () => timeRawCache.value,
     set: (value: string) => {
-        timeRawCache.value = value?.trim().toLowerCase() ?? ''
+        timeRawCache.value = value?.trim().toLowerCase() ?? '';
     },
 });
 
@@ -49,7 +49,7 @@ const errors = useErrors();
 useValidation(errors.validator, validate);
 
 function formatDate(date: Date | null): string {
-    if(date === null) {
+    if (date === null) {
         return '';
     }
 
