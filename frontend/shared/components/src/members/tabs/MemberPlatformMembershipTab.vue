@@ -137,7 +137,12 @@ const periods = computed(() => platformManager.value.$platform.periods);
 const organization = useOrganization();
 
 function isRegisteredAt(periodId: string, organizationId: string) {
-    return props.member.filterRegistrations({ types: [GroupType.Membership], periodId, organizationId }).length > 0;
+    return props.member.filterRegistrations({ 
+        types: [GroupType.Membership], 
+        periodId, 
+        organizationId,
+        defaultAgeGroupIds: platform.value.config.defaultAgeGroups.filter(g => !!g.defaultMembershipTypeId).map(g => g.id),
+    }).length > 0;
 }
 
 const memberships = computed(() => {

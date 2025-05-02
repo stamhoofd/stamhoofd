@@ -840,7 +840,7 @@ export class PlatformMember implements ObjectWithRecords {
      * @param filters.organizationId - Only show registrations for this organization
      * @returns
      */
-    filterRegistrations(filters: { groups?: Group[] | null; groupIds?: string[] | null; canRegister?: boolean; periodId?: string; includeFuture?: boolean; currentPeriod?: boolean; types?: GroupType[]; organizationId?: string }) {
+    filterRegistrations(filters: { groups?: Group[] | null; groupIds?: string[] | null; defaultAgeGroupIds?: string[]; canRegister?: boolean; periodId?: string; includeFuture?: boolean; currentPeriod?: boolean; types?: GroupType[]; organizationId?: string }) {
         return this.patchedMember.registrations.filter((r) => {
             if (r.registeredAt === null || r.deactivatedAt !== null) {
                 return false;
@@ -861,6 +861,10 @@ export class PlatformMember implements ObjectWithRecords {
             }
 
             if (filters.groupIds && !filters.groupIds.includes(r.groupId)) {
+                return false;
+            }
+
+            if (filters.defaultAgeGroupIds && (!r.group.defaultAgeGroupId || !filters.defaultAgeGroupIds.includes(r.group.defaultAgeGroupId))) {
                 return false;
             }
 
