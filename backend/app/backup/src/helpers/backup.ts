@@ -17,7 +17,7 @@ import { QueueHandler } from '@stamhoofd/queues';
 // Since well create a backup every day, keeping 1000 binary logs would give
 // a full history of 40 days - and leaves us enough margin in case more
 // logs are created in a day
-const MAX_BINARY_LOGS = 1000;
+const MAX_BINARY_LOGS = 200;
 const MAX_BACKUPS = 30; // in days
 const BACKUP_PREFIX = 'backup-';
 const BINARY_LOG_PREFIX = 'binlog.';
