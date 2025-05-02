@@ -6,7 +6,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { ArrayDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import { sendEmailTemplate } from '../helpers/EmailBuilder';
-import { Group, Organization, User } from './';
+import { Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, User } from './';
+
+export type RegistrationWithMember = Registration & { member: Member; responsibilities: MemberResponsibilityRecord[]; platformMemberships: MemberPlatformMembership[] };
 
 export class Registration extends QueryableModel {
     static table = 'registrations';
@@ -134,6 +136,8 @@ export class Registration extends QueryableModel {
     stockReservations: StockReservation[] = [];
 
     static group: ManyToOneRelation<'group', import('./Group').Group>;
+
+    static member: ManyToOneRelation<'member', import('./Member').Member>;
 
     getStructure(this: Registration & { group: import('./Group').Group }) {
         return RegistrationStructure.create({
@@ -305,6 +309,74 @@ export class Registration extends QueryableModel {
             type: 'transactional',
             recipients,
         });
+    }
+
+    static async getAllWithMember(...ids: string[]): Promise<RegistrationWithMember[]> {
+        if (ids.length === 0) {
+            return [];
+        }
+        let query = `SELECT ${Registration.getDefaultSelect()}, ${Member.getDefaultSelect()}, ${User.getDefaultSelect()}  from \`${Registration.table}\`\n`;
+        query += `LEFT JOIN \`${Member.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`canRegister\` = 1)\n`;
+
+        // todo
+        query += Member.users.joinQuery(Member.table, User.table) + '\n';
+
+        query += `where \`${Registration.table}\`.\`${Registration.primary.name}\` = ?`;
+
+        const [results] = await Database.select(query, [ids]);
+        const registrations: RegistrationWithMember[] = [];
+        const members: Member[] = [];
+
+        // Load groups
+        // const groupIds = results.map(r => r[Registration.table]?.groupId).filter(id => id) as string[];
+        // const groups = await Group.getByIDs(...Formatter.uniqueArray(groupIds));
+
+        for (const row of results) {
+            const foundRegistration = Registration.fromRow(row[Registration.table]);
+            if (!foundRegistration) {
+                throw new Error('Expected registration in every row');
+            }
+
+            const foundMember = Member.fromRow(row[Member.table]);
+            if (!foundMember) {
+                throw new Error('Expected member in every row');
+            }
+
+            const _fm = foundMember
+                .setManyRelation(Member.users, []);
+
+            // Seach if we already got this member?
+            const existingMember = members.find(m => m.id === _fm.id);
+
+            const member: Member = (existingMember ?? _fm);
+            if (!existingMember) {
+                members.push(member);
+            }
+
+            const group = await Group.getByID(foundRegistration.groupId);
+            if (!group) {
+                throw new Error('Group not found');
+            }
+
+            const _fr = foundRegistration
+                .setRelation(Registration.group, group)
+                .setRelation(Registration.member, member);
+
+            const existingRegistration = registrations.find(r => r.id === _fr.id);
+
+            // temporary todo!!!!!!!!
+            (_fr as unknown as RegistrationWithMember).responsibilities = [];
+            (_fr as unknown as RegistrationWithMember).platformMemberships = [];
+
+            // todo !!!!!!!!!!!
+            const registration: RegistrationWithMember = existingRegistration ?? _fr as unknown as RegistrationWithMember;
+
+            if (!existingRegistration) {
+                registrations.push(registration);
+            }
+        }
+
+        return registrations;
     }
 
     shouldIncludeStock() {

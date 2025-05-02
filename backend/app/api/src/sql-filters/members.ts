@@ -189,10 +189,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('groups', 'deletedAt'),
                 null,
             ),
-        {
-            ...registrationFilterCompilers,
-            organization: createSQLFilterNamespace(organizationFilterCompilers),
-        },
+        registrationFilterCompilers,
     ),
 
     'responsibilities': createSQLRelationFilterCompiler(

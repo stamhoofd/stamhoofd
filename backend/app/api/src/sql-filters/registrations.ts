@@ -1,4 +1,6 @@
-import { SQLFilterDefinitions, baseSQLFilterCompilers, createSQLColumnFilterCompiler, SQL, createSQLFilterNamespace, createSQLExpressionFilterCompiler, SQLValueType } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
+import { memberFilterCompilers } from './members';
+import { organizationFilterCompilers } from './organizations';
 
 export const registrationFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
@@ -23,4 +25,6 @@ export const registrationFilterCompilers: SQLFilterDefinitions = {
         ),
         defaultAgeGroupId: createSQLColumnFilterCompiler(SQL.column('groups', 'defaultAgeGroupId'), { nullable: true }),
     }),
+    organization: createSQLFilterNamespace(organizationFilterCompilers),
+    member: createSQLFilterNamespace(memberFilterCompilers),
 };

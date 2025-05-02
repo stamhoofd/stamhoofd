@@ -22,8 +22,6 @@ export { Version } from './src/Version.js';
 export * from './src/PriceBreakdown.js';
 
 // General
-export * from './src/Language.js';
-export * from './src/TranslatedString.js';
 export * from './src/AccessRight.js';
 export * from './src/addresses/Address.js';
 export * from './src/addresses/City.js';
@@ -45,6 +43,7 @@ export * from './src/GroupGenderType.js';
 export * from './src/GroupPrivateSettings.js';
 export * from './src/GroupSettings.js';
 export * from './src/GroupType.js';
+export * from './src/Language.js';
 export * from './src/LoginMethod.js';
 export * from './src/MemberResponsibility.js';
 export * from './src/members/MemberPlatformMembership.js';
@@ -87,6 +86,7 @@ export * from './src/SetupStepType.js';
 export * from './src/StockReservation.js';
 export * from './src/StripeAccount.js';
 export * from './src/Token.js';
+export * from './src/TranslatedString.js';
 export * from './src/UmbrellaOrganization.js';
 export * from './src/User.js';
 
@@ -99,8 +99,8 @@ export * from './src/UserWithMembers.js';
 // Endpoints
 export * from './src/DNSRecord.js';
 export * from './src/endpoints/ChargeMembershipsSummary.js';
-export * from './src/endpoints/ChargeOrganizationsRequest.js';
 export * from './src/endpoints/ChargeMembersRequest.js';
+export * from './src/endpoints/ChargeOrganizationsRequest.js';
 export * from './src/endpoints/CheckMollieResponse.js';
 export * from './src/endpoints/CreateOrganization.js';
 export * from './src/endpoints/EmailRequest.js';
@@ -159,6 +159,7 @@ export * from './src/members/Registration.js';
 export * from './src/members/RegistrationPatch.js';
 export * from './src/members/RegistrationWithEncryptedMember.js';
 export * from './src/members/RegistrationWithMember.js';
+export * from './src/members/RegistrationWithTinyMember.js';
 export * from './src/members/ReviewTime.js';
 
 // Register checkout
@@ -231,3 +232,4 @@ export * from './src/AuditLogReplacement.js';
 // Wire up circular dependencies
 import './src/circular-dependencies/AuditLogReplacementDependencies.js';
 import './src/circular-dependencies/ExampleReplacementsDependencies.js';
+
