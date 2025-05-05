@@ -124,7 +124,7 @@
 
             <template v-else>
                 <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="notification">
-                    <template v-if="isReviewer || notification.status === EventNotificationStatus.Rejected" #buttons>
+                    <template v-if="isReviewer || notification.status === EventNotificationStatus.Rejected || notification.status === EventNotificationStatus.PartiallyAccepted" #buttons>
                         <button type="button" class="button icon edit" @click="editRecordCategory(category)" />
                     </template>
                 </ViewRecordCategoryAnswersBox>
@@ -202,10 +202,10 @@
             <template #right>
                 <LoadingButton :loading="isSaving">
                     <button class="button primary" :disabled="!isComplete" type="button" @click="doSubmit">
-                        <span v-if="notification.status === EventNotificationStatus.Rejected" class="icon retry" />
+                        <span v-if="notification.status === EventNotificationStatus.Rejected || notification.status === EventNotificationStatus.PartiallyAccepted" class="icon retry" />
                         <span v-else class="icon success" />
 
-                        <span v-if="notification.status === EventNotificationStatus.Rejected">{{ $t('b72d05c4-9e64-4254-9580-7123bf7479c3') }}</span>
+                        <span v-if="notification.status === EventNotificationStatus.Rejected || notification.status === EventNotificationStatus.PartiallyAccepted">{{ $t('b72d05c4-9e64-4254-9580-7123bf7479c3') }}</span>
                         <span v-else>{{ $t('0b8d1425-4240-4fa8-8150-9a7824ef1c7d') }}</span>
                     </button>
                 </LoadingButton>
