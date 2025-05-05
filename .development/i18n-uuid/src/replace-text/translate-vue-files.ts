@@ -109,7 +109,7 @@ export async function translateVueFileHelper(filePath: string, options: Translat
 
     if(scriptContent !== null) {
         scriptTranslation = await translateTypescript(scriptContent, fileOptions);
-        newFileContent = replaceScript(fileContent, scriptTranslation, scriptContent);
+        newFileContent = replaceScript(newFileContent, scriptTranslation, scriptContent);
     }
 
     if(!isDoubt) {
