@@ -31,6 +31,9 @@ type HtmlTranslatorContext = {
     after: string;
 }
 
+const unpairedTags = ["hr", "br", "link", "meta", 'img','input'];
+const unpairedTagsSet = new Set(unpairedTags);
+
 export class HtmlTranslator {
     private readonly htmlBuilder: XMLBuilder;
     private readonly htmlParser: XMLParser;
@@ -77,6 +80,7 @@ export class HtmlTranslator {
         }
         
         const object = this.htmlParser.parse(html);
+        this.fixUnpairedTagBug(object, null);
 
         let source = object;
         let parent = object;
@@ -123,7 +127,7 @@ export class HtmlTranslator {
             format: false,
             preserveOrder: true,
             suppressEmptyNode: true,
-            unpairedTags: ["hr", "br", "link", "meta", 'img','input'],
+            unpairedTags,
             stopNodes : [ "*.pre", "*.script"],
             processEntities: false,
           }
@@ -135,7 +139,7 @@ export class HtmlTranslator {
         const parsingOptions: X2jOptions = {
             ignoreAttributes: false,
             preserveOrder: true,
-            unpairedTags: ["hr", "br", "link", "meta", 'img', 'input'],
+            unpairedTags,
             stopNodes : [ "*.pre", "*.script"],
             processEntities: false,
             allowBooleanAttributes: true,
@@ -144,6 +148,49 @@ export class HtmlTranslator {
           };
         
         return new XMLParser(parsingOptions);
+    }
+
+    /**
+     * the fast-xml-parser library has a bug where it doesn't process unpaired tags properly
+     * for example, the text after <br> will be lost
+     * @param object 
+     * @param parent 
+     */
+    private fixUnpairedTagBug(object: any, parent: any | null) {
+        if(Array.isArray(object)) {
+            object.forEach((item) => {
+                this.fixUnpairedTagBug(item, object);
+            });
+        } else if(typeof object === 'object') {
+            for(const [key, value] of Object.entries(object)) {
+                // if unpaired tag element
+                if(unpairedTagsSet.has(key)) {
+                    // find array with #text and move text after unpaired tag
+                    if(Array.isArray(value)) {
+                        for(const item of value) {
+                            if(typeof item === 'object') {
+                                for(const [childKey, childValue] of Object.entries(item)) {
+                                    if(childKey === '#text' && typeof childValue === 'string') {
+                                        if(parent && Array.isArray(parent)) {
+                                            // move new text element after unpaired tag
+                                            const index = parent.indexOf(object);
+                                            const newElement = {
+                                                '#text': childValue
+                                            };
+                                            parent.splice(index + 1, 0, newElement);
+                                        }
+
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    this.fixUnpairedTagBug(value, object);
+                }
+            }
+        }
     }
 
     private async processArray(parent: Record<string, any>, array: Record<string, any>[]) {
