@@ -100,7 +100,6 @@ type ObjectType = Event;
 
 const props = defineProps<{
     addGroup: (group: DocumentTemplateGroup, component: NavigationActions) => Promise<void> | void;
-    fieldCategories: RecordCategory[];
 }>();
 
 enum Tab {

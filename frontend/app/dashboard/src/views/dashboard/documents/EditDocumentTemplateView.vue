@@ -711,7 +711,6 @@ async function addGroup() {
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(ChooseDocumentTemplateGroup, {
-                    fieldCategories: patchedDocument.value.privateSettings.templateDefinition.groupFieldCategories,
                     addGroup: async (group: DocumentTemplateGroup, actions: NavigationActions) => {
                         await gotoGroupRecordCategory(group, actions, 0);
                     },
