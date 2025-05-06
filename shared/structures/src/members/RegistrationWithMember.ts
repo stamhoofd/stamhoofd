@@ -1,6 +1,7 @@
 import { ArrayDecoder, field } from '@simonbackx/simple-encoding';
 
 import { MemberPlatformMembershipHelper } from '../helpers/MemberPlatformMembershipHelper.js';
+import { User } from '../User.js';
 import { Member } from './Member.js';
 import { MemberPlatformMembership } from './MemberPlatformMembership.js';
 import { MemberResponsibilityRecord } from './MemberResponsibilityRecord.js';
@@ -15,6 +16,9 @@ export class RegistrationWithMember extends Registration {
 
     @field({ decoder: new ArrayDecoder(MemberPlatformMembership), version: 270 })
     platformMemberships: MemberPlatformMembership[] = [];
+
+    @field({ decoder: new ArrayDecoder(User), version: 32 })
+    users: User[] = [];
 
     get membershipStatus() {
         return MemberPlatformMembershipHelper.getStatus(this.platformMemberships);

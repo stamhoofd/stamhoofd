@@ -1,6 +1,6 @@
 import { usePresent } from '@simonbackx/vue-app-navigation';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
-import { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, PermissionLevel, PlatformMember, RegisterCheckout, RegisterItem, Registration, RegistrationWithMember } from '@stamhoofd/structures';
+import { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, PermissionLevel, PlatformMember, RegisterCheckout, RegisterItem, Registration, RegistrationWithTinyMember } from '@stamhoofd/structures';
 import { checkoutRegisterItem, chooseOrganizationMembersForGroup } from '..';
 import { useContext, useOrganization } from '../../hooks';
 import { InMemoryTableAction, MenuTableAction, TableAction } from '../../tables/classes';
@@ -219,7 +219,7 @@ export class RegistrationActionBuilder {
     }
 
     async deleteRegistration() {
-        const deleteRegistrations: RegistrationWithMember[] = [];
+        const deleteRegistrations: RegistrationWithTinyMember[] = [];
 
         for (const registration of this.registrations) {
             const member = this.members.find(m => m.id === registration.memberId);
@@ -228,7 +228,7 @@ export class RegistrationActionBuilder {
                 continue;
             }
 
-            deleteRegistrations.push(RegistrationWithMember.from(registration, member.patchedMember.tiny));
+            deleteRegistrations.push(RegistrationWithTinyMember.from(registration, member.patchedMember.tiny));
         }
 
         return await chooseOrganizationMembersForGroup({

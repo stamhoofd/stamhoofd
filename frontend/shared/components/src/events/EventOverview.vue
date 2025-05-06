@@ -166,6 +166,7 @@ import EditGroupView from '../groups/EditGroupView.vue';
 import { useAuth, useContext, useGlobalEventListener, useOrganization, usePlatform } from '../hooks';
 import { MembersTableView, useChooseOrganizationMembersForGroup } from '../members';
 import { Toast } from '../overlays/Toast';
+import RegistrationsTableView from '../registrations/RegistrationsTableView.vue';
 import ImageComponent from '../views/ImageComponent.vue';
 import EditEventView from './EditEventView.vue';
 import EventInfoTable from './components/EventInfoTable.vue';
@@ -243,13 +244,14 @@ enum Routes {
 defineRoutes([
     {
         url: Routes.Registrations,
-        component: MembersTableView as ComponentOptions,
+        component: RegistrationsTableView as ComponentOptions,
         paramsToProps: () => {
             if (!props.event.group) {
                 throw new Error('No group found');
             }
 
             return {
+                organization: eventOrganization.value,
                 group: props.event.group,
                 dateRange: {
                     start: props.event.startDate,

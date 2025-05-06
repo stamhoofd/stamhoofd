@@ -1,25 +1,26 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Member, Platform } from '@stamhoofd/models';
-import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import { CountFilteredRequest, Country, CountryCode, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, RegistrationWithMember, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
+import { Group, Member, Platform, Registration, RegistrationWithMember, User } from '@stamhoofd/models';
+import { SQL, SQLSortDefinitions, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
+import { CountFilteredRequest, Country, CountryCode, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, RegistrationWithMember as RegistrationWithMemberStruct, StamhoofdFilter, assertSort } from '@stamhoofd/structures';
 import { DataValidator } from '@stamhoofd/utility';
 
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import parsePhoneNumber from 'libphonenumber-js/max';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
-import { memberFilterCompilers } from '../../../sql-filters/members';
-import { memberSorters } from '../../../sql-sorters/members';
+import { LimitedFilteredRequestHelper } from '../../../helpers/LimitedFilteredRequestHelper';
+import { registrationFilterCompilers } from '../../../sql-filters/registrations';
+import { registrationSorters } from '../../../sql-sorters/registrations';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
 type Body = undefined;
-type ResponseBody = PaginatedResponse<RegistrationWithMember, LimitedFilteredRequest>;
+type ResponseBody = PaginatedResponse<RegistrationWithMemberStruct[], LimitedFilteredRequest>;
 
-const sorters = memberSorters;
-const filterCompilers = memberFilterCompilers;
+const sorters: SQLSortDefinitions<RegistrationWithMember> = registrationSorters;
+const filterCompilers = registrationFilterCompilers;
 
 export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>;
@@ -234,7 +235,7 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
     }
 
     static async buildData(requestQuery: LimitedFilteredRequest, permissionLevel = PermissionLevel.Read) {
-        const query = await GetMembersEndpoint.buildQuery(requestQuery, permissionLevel);
+        const query = await GetRegistrationsEndpoint.buildQuery(requestQuery, permissionLevel);
         let data: SQLResultNamespacedRow[];
 
         try {
@@ -251,45 +252,33 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
             throw error;
         }
 
-        const memberIds = data.map((r) => {
-            if (typeof r.members.id === 'string') {
-                return r.members.id;
+        const registrationIds = data.map((r) => {
+            if (typeof r.registrations.id === 'string') {
+                return r.registrations.id;
             }
             throw new Error('Expected string');
         });
 
-        const _members = await Member.getBlobByIds(...memberIds);
+        const _registrations = await Registration.getAllWithMemberAndUsers(...registrationIds);
         // Make sure members is in same order as memberIds
-        const members = memberIds.map(id => _members.find(m => m.id === id)!);
+        const registrations: (Registration & Record<'group', Group> & Record<'member', Member> & Record<'users', User[]>)[] = registrationIds.map(id => _registrations.find(m => m.id === id)!);
 
-        for (const member of members) {
-            if (!await Context.auth.canAccessMember(member, permissionLevel)) {
+        for (const registration of registrations) {
+            if (!await Context.auth.canAccessRegistrationAndMember(registration, permissionLevel)) {
                 throw Context.auth.error();
             }
         }
 
-        let next: LimitedFilteredRequest | undefined;
+        const results: RegistrationWithMemberStruct[] = await AuthenticatedStructures.registrationsWithMember(registrations);
 
-        if (memberIds.length >= requestQuery.limit) {
-            const lastObject = members[members.length - 1];
-            const nextFilter = getSortFilter(lastObject, sorters, requestQuery.sort);
+        const next = LimitedFilteredRequestHelper.fixInfiniteLoadingLoop({
+            request: requestQuery,
+            results: registrations,
+            sorters,
+        });
 
-            next = new LimitedFilteredRequest({
-                filter: requestQuery.filter,
-                pageFilter: nextFilter,
-                sort: requestQuery.sort,
-                limit: requestQuery.limit,
-                search: requestQuery.search,
-            });
-
-            if (JSON.stringify(nextFilter) === JSON.stringify(requestQuery.pageFilter)) {
-                console.error('Found infinite loading loop for', requestQuery);
-                next = undefined;
-            }
-        }
-
-        return new PaginatedResponse<MembersBlob, LimitedFilteredRequest>({
-            results: await AuthenticatedStructures.membersBlob(members),
+        return new PaginatedResponse<RegistrationWithMemberStruct[], LimitedFilteredRequest>({
+            results,
             next,
         });
     }
@@ -317,7 +306,7 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
         }
 
         return new Response(
-            await GetMembersEndpoint.buildData(request.query),
+            await GetRegistrationsEndpoint.buildData(request.query),
         );
     }
 }

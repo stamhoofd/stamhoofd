@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuditLog, BalanceItem, CachedBalance, Document, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, MemberPlatformMembership as MemberPlatformMembershipStruct, Member as MemberStruct, MemberWithRegistrationsBlob, MembersBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationWithMember as RegistrationWithMemberStruct, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
 import { SQL } from '@stamhoofd/sql';
@@ -382,6 +382,44 @@ export class AuthenticatedStructures {
 
     static async members(members: MemberWithRegistrations[]): Promise<MemberWithRegistrationsBlob[]> {
         return (await this.membersBlob(members, false)).members;
+    }
+
+    static async registrationsWithMember(registrations: (Registration & Record<'group', Group> & Record<'member', Member>)[]): Promise<RegistrationWithMemberStruct[]> {
+        const memberIds = registrations.map(r => r.member.id);
+
+        const allResponsibilities = await MemberResponsibilityRecord.select().where(SQL.where(SQL.column('memberId'), memberIds)).fetch();
+
+        const allPlatformMemberships = await MemberPlatformMembership.select()
+            .where(SQL.where(SQL.column('deletedAt'), null))
+            .andWhere(SQL.where(SQL.column('memberId'), memberIds))
+            .fetch();
+
+        const results: RegistrationWithMemberStruct[] = [];
+
+        for (const registration of registrations) {
+            const memberId = registration.member.id;
+            const group = registration.group;
+
+            // todo: group?
+            const groupStruct = GroupStruct.create({ ...group });
+            const responsibilities = allResponsibilities.filter(r => r.memberId === memberId).map(r => r.getStructure(groupStruct));
+
+            const platformMemberships = allPlatformMemberships.filter(p => p.memberId === memberId).map(p => MemberPlatformMembershipStruct.create(p));
+
+            const registrationStruct = registration.getStructure();
+
+            const member = MemberStruct.create({
+                ...registration.member,
+            });
+
+            const registrationWithMemberStruct = RegistrationWithMemberStruct.from(registrationStruct, member, responsibilities, platformMemberships);
+
+            results.push(registrationWithMemberStruct);
+        }
+
+        // todo: balances??
+
+        return results;
     }
 
     static async membersBlob(members: MemberWithRegistrations[], includeContextOrganization = false, includeUser?: User): Promise<MembersBlob> {

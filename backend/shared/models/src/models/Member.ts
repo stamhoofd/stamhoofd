@@ -1,6 +1,6 @@
 import { column, Database, ManyToManyRelation, ManyToOneRelation, OneToManyRelation } from '@simonbackx/simple-database';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
-import { MemberDetails, NationalRegisterNumberOptOut, RegistrationWithMember as RegistrationWithMemberStruct, TinyMember } from '@stamhoofd/structures';
+import { MemberDetails, NationalRegisterNumberOptOut, RegistrationWithTinyMember, TinyMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -342,8 +342,8 @@ export class Member extends QueryableModel {
         return this.getBlobByIds(...(await this.getMemberIdsWithRegistrationForUser(user)));
     }
 
-    static getRegistrationWithMemberStructure(registration: RegistrationWithMember & { group: import('./Group').Group }): RegistrationWithMemberStruct {
-        return RegistrationWithMemberStruct.create({
+    static getRegistrationWithMemberStructure(registration: RegistrationWithMember & { group: import('./Group').Group }): RegistrationWithTinyMember {
+        return RegistrationWithTinyMember.create({
             ...registration.getStructure(),
             cycle: registration.cycle,
             member: TinyMember.create({

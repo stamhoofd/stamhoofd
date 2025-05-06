@@ -23,13 +23,13 @@
 </template>
 
 <script setup lang="ts">
-import { RegisterCheckout, RegistrationWithMember } from '@stamhoofd/structures';
+import { RegisterCheckout, RegistrationWithTinyMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import GroupIconWithWaitingList from './GroupIconWithWaitingList.vue';
 
 const props = withDefaults(
     defineProps<{
-        registration: RegistrationWithMember;
+        registration: RegistrationWithTinyMember;
         checkout: RegisterCheckout;
     }>(),
     {

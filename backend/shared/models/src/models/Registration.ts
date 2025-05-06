@@ -1,4 +1,4 @@
-import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
+import { column, Database, ManyToManyRelation, ManyToOneRelation } from '@simonbackx/simple-database';
 import { EmailTemplateType, GroupPrice, PaymentMethod, PaymentMethodHelper, Recipient, RecordAnswer, RecordAnswerDecoder, RegisterItemOption, Registration as RegistrationStructure, Replacement, StockReservation } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -8,7 +8,8 @@ import { QueryableModel } from '@stamhoofd/sql';
 import { sendEmailTemplate } from '../helpers/EmailBuilder';
 import { Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, User } from './';
 
-export type RegistrationWithMember = Registration & { member: Member; responsibilities: MemberResponsibilityRecord[]; platformMemberships: MemberPlatformMembership[] };
+// todo: rename?
+export type RegistrationWithMember = Registration & { member: Member; responsibilities: MemberResponsibilityRecord[]; platformMemberships: MemberPlatformMembership[]; users: User[] };
 
 export class Registration extends QueryableModel {
     static table = 'registrations';
@@ -138,6 +139,9 @@ export class Registration extends QueryableModel {
     static group: ManyToOneRelation<'group', import('./Group').Group>;
 
     static member: ManyToOneRelation<'member', import('./Member').Member>;
+
+    // todo: is there a cleaner way to do this?
+    static users = new ManyToManyRelation(Registration, User, 'users');
 
     getStructure(this: Registration & { group: import('./Group').Group }) {
         return RegistrationStructure.create({
@@ -311,7 +315,7 @@ export class Registration extends QueryableModel {
         });
     }
 
-    static async getAllWithMember(...ids: string[]): Promise<RegistrationWithMember[]> {
+    static async getAllWithMemberAndUsers(...ids: string[]): Promise<(Registration & Record<'group', Group> & Record<'member', Member> & Record<'users', User[]>)[]> {
         if (ids.length === 0) {
             return [];
         }
@@ -324,12 +328,12 @@ export class Registration extends QueryableModel {
         query += `where \`${Registration.table}\`.\`${Registration.primary.name}\` = ?`;
 
         const [results] = await Database.select(query, [ids]);
-        const registrations: RegistrationWithMember[] = [];
+        const registrations: (Registration & Record<'group', Group> & Record<'member', Member> & Record<'users', User[]>)[] = [];
         const members: Member[] = [];
 
         // Load groups
-        // const groupIds = results.map(r => r[Registration.table]?.groupId).filter(id => id) as string[];
-        // const groups = await Group.getByIDs(...Formatter.uniqueArray(groupIds));
+        const groupIds = results.map(r => r[Registration.table]?.groupId).filter(id => id) as string[];
+        const groups = await Group.getByIDs(...Formatter.uniqueArray(groupIds));
 
         for (const row of results) {
             const foundRegistration = Registration.fromRow(row[Registration.table]);
@@ -353,26 +357,25 @@ export class Registration extends QueryableModel {
                 members.push(member);
             }
 
-            const group = await Group.getByID(foundRegistration.groupId);
+            const group = groups.find(g => g.id === foundRegistration.groupId);
             if (!group) {
                 throw new Error('Group not found');
             }
 
             const _fr = foundRegistration
                 .setRelation(Registration.group, group)
-                .setRelation(Registration.member, member);
-
-            const existingRegistration = registrations.find(r => r.id === _fr.id);
+                .setRelation(Registration.member, member)
+                // todo!!!
+                .setManyRelation(Registration.users, []);
 
             // temporary todo!!!!!!!!
-            (_fr as unknown as RegistrationWithMember).responsibilities = [];
-            (_fr as unknown as RegistrationWithMember).platformMemberships = [];
+            // (_fr as unknown as RegistrationWithMember).responsibilities = [];
+            // (_fr as unknown as RegistrationWithMember).platformMemberships = [];
+            // (_fr as unknown as RegistrationWithMember).users = [];
 
-            // todo !!!!!!!!!!!
-            const registration: RegistrationWithMember = existingRegistration ?? _fr as unknown as RegistrationWithMember;
-
-            if (!existingRegistration) {
-                registrations.push(registration);
+            if (!registrations.find(r => r.id === _fr.id)) {
+                // todo: users!!!
+                registrations.push(_fr);
             }
         }
 

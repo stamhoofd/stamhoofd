@@ -10,11 +10,12 @@
 
 <script lang="ts" setup>
 import { usePresent } from '@simonbackx/vue-app-navigation';
-import { Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, MemberSegmentedView, ModernTableView, TableAction, useAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
+import { Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, MemberSegmentedView, ModernTableView, TableAction, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
 import { AccessRight, ContinuousMembershipStatus, Group, GroupCategoryTree, GroupPrice, GroupType, MemberResponsibility, MembershipStatus, Organization, RecordAnswer, RegisterItemOption, RegistrationWithMember, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import { useRegistrationsObjectFetcher } from '../fetchers/useRegistrationsObjectFetcher';
+import { useAdvancedRegistrationWithMemberUIFilterBuilders } from '../filters/filter-builders/registrations';
 
 type ObjectType = RegistrationWithMember;
 
@@ -42,7 +43,8 @@ const props = withDefaults(
 
 const waitingList = computed(() => props.group && props.group.type === GroupType.WaitingList);
 
-const { filterBuilders, loading } = useAdvancedMemberWithRegistrationsBlobUIFilterBuilders();
+// todo
+const { filterBuilders, loading } = useAdvancedRegistrationWithMemberUIFilterBuilders();
 
 const title = computed(() => {
     if (props.customTitle) {
@@ -136,24 +138,14 @@ function getRequiredFilter(): StamhoofdFilter | null {
             // (avoid showing old members that moved to other groups)
 
             return {
-                // todo
-                registrations: {
-                    $elemMatch: {
-                        organizationId: props.organization.id,
-                        periodId: props.periodId,
-                    },
-                },
+                organizationId: props.organization.id,
+                periodId: props.periodId,
             };
         }
 
         if (props.periodId) {
             return {
-                // todo
-                registrations: {
-                    $elemMatch: {
-                        periodId: props.periodId,
-                    },
-                },
+                periodId: props.periodId,
             };
         }
         return null;
@@ -176,33 +168,23 @@ function getRequiredFilter(): StamhoofdFilter | null {
         }
 
         extra.push({
-            // todo
-            registrations: {
-                $elemMatch: {
-                    organizationId: props.organization.id,
-                    periodId: {
-                        $in: Formatter.uniqueArray(periodIds),
-                    },
-                },
+            organizationId: props.organization.id,
+            periodId: {
+                $in: Formatter.uniqueArray(periodIds),
             },
         });
     }
 
     return [
-        {
-            // todo
-            registrations: {
-                $elemMatch: props.group
-                    ? {
-                            groupId: props.group.id,
-                        }
-                    : {
-                            groupId: {
-                                $in: groups.map(g => g.id),
-                            },
-                        },
-            },
-        },
+        props.group
+            ? {
+                    groupId: props.group.id,
+                }
+            : {
+                    groupId: {
+                        $in: groups.map(g => g.id),
+                    },
+                },
         ...extra,
     ];
 }

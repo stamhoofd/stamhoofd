@@ -270,6 +270,43 @@ export class AdminPermissionChecker {
         return await this.hasFullAccess(organizationId);
     }
 
+    async canAccessRegistrationAndMember(registration: (Registration & Record<'group', Group> & Record<'member', Member> & Record<'users', User[]>), permissionLevel: PermissionLevel = PermissionLevel.Read) {
+        // todo: users?
+        if (permissionLevel !== PermissionLevel.Full && this.isUserManager(registration)) {
+            return true;
+        }
+
+        // Check user has permissions
+        if (!this.user.permissions) {
+            return false;
+        }
+
+        if (this.hasPlatformFullAccess()) {
+            return true;
+        }
+
+        if (this.getPlatformAccessibleOrganizationTags(permissionLevel) === 'all') {
+            // Can access all members: even members without any registration
+            return true;
+        }
+
+        if (registration.organizationId && await this.hasFullAccess(registration.organizationId, permissionLevel)) {
+            return true;
+        }
+
+        // Temporary access
+        if (hasTemporaryMemberAccess(this.user.id, registration.member.id, permissionLevel)) {
+            console.log('User has temporary access to member', registration.member.id, 'for user', this.user.id);
+            return true;
+        }
+
+        if (await this.canAccessRegistration(registration, permissionLevel)) {
+            return true;
+        }
+
+        return false;
+    }
+
     async canAccessMember(member: MemberWithRegistrations, permissionLevel: PermissionLevel = PermissionLevel.Read) {
         if (permissionLevel !== PermissionLevel.Full && this.isUserManager(member)) {
             return true;
@@ -880,7 +917,7 @@ export class AdminPermissionChecker {
         return !!organizationPermissions && organizationPermissions.hasAccess(level);
     }
 
-    isUserManager(member: MemberWithRegistrations) {
+    isUserManager<M extends { users: User[] }>(member: M): boolean {
         return !!member.users.find(u => u.id === this.user.id);
     }
 

@@ -37,14 +37,14 @@
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { STToolbar, useContext } from '@stamhoofd/components';
 import { useMemberManager } from '@stamhoofd/networking';
-import { BalanceItemRelationType, GroupType, PaymentGeneral, RegisterCheckout, RegistrationWithMember } from '@stamhoofd/structures';
+import { BalanceItemRelationType, GroupType, PaymentGeneral, RegisterCheckout, RegistrationWithTinyMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted } from 'vue';
 
 const props = withDefaults(
     defineProps<{
         checkout?: RegisterCheckout | null;
-        registrations: RegistrationWithMember[];
+        registrations: RegistrationWithTinyMember[];
         payment?: PaymentGeneral | null;
     }>(),
     {
