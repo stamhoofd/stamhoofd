@@ -823,12 +823,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                         body: post
                     })
 
-                    // JSON response content-type header is missing
-                    if (typeof updateResponse.data === 'string') {
-                        lid = JSON.parse(updateResponse.data)
-                    } else {
-                        lid = updateResponse.data
-                    }
+                    lid = updateResponse.data
 
                     // Do a patch for the remaining functies
                     lid = await this.syncLid({
@@ -842,12 +837,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                         body: post
                     })
                     
-                    // JSON response content-type header is missing
-                    if (typeof updateResponse.data === 'string') {
-                        lid = JSON.parse(updateResponse.data)
-                    } else {
-                        lid = updateResponse.data
-                    }
+                    lid = updateResponse.data
 
                     // Mark as synced in Stamhoofd
                     member.details.memberNumber = lid.verbondsgegevens?.lidnummer ?? null
@@ -926,6 +916,9 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         request.overrideXMLHttpRequest = AppManager.shared.overrideXMLHttpRequest
         request.errorDecoder = new SGVFoutenDecoder()
         request.headers["Authorization"] = "Bearer " + this.token.accessToken;
+
+        // The server is a bit buggy, so always parse as JSON
+        request.responseContentTypeOverride = "application/json"
     }
 }
 

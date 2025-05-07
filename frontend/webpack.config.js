@@ -53,7 +53,12 @@ if (process.env.LOAD_ENV) {
 module.exports = {
     mode: "development",
     target: 'web',
-    stats: 'minimal',
+    stats: {
+        preset: "minimal", // same as "minimal"
+        warningsFilter: [
+        /export 'EncodeMedium' .*? '@simonbackx\/simple-encoding'/
+        ]
+    },
     infrastructureLogging: {
         level: 'error',
     },
