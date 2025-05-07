@@ -1,12 +1,13 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Group, Member, Platform, Registration, RegistrationWithMember, User } from '@stamhoofd/models';
+import { Member, Platform, Registration } from '@stamhoofd/models';
 import { SQL, SQLSortDefinitions, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import { CountFilteredRequest, Country, CountryCode, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, RegistrationWithMember as RegistrationWithMemberStruct, StamhoofdFilter, assertSort } from '@stamhoofd/structures';
+import { CountFilteredRequest, Country, CountryCode, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, RegistrationsBlob, StamhoofdFilter, assertSort } from '@stamhoofd/structures';
 import { DataValidator } from '@stamhoofd/utility';
 
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import { RegistrationWithMember } from '@stamhoofd/models/dist/src/models/Registration';
 import parsePhoneNumber from 'libphonenumber-js/max';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
@@ -17,7 +18,7 @@ import { registrationSorters } from '../../../sql-sorters/registrations';
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
 type Body = undefined;
-type ResponseBody = PaginatedResponse<RegistrationWithMemberStruct[], LimitedFilteredRequest>;
+type ResponseBody = PaginatedResponse<RegistrationsBlob, LimitedFilteredRequest>;
 
 const sorters: SQLSortDefinitions<RegistrationWithMember> = registrationSorters;
 const filterCompilers = registrationFilterCompilers;
@@ -259,26 +260,37 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
             throw new Error('Expected string');
         });
 
-        const _registrations = await Registration.getAllWithMemberAndUsers(...registrationIds);
-        // Make sure members is in same order as memberIds
-        const registrations: (Registration & Record<'group', Group> & Record<'member', Member> & Record<'users', User[]>)[] = registrationIds.map(id => _registrations.find(m => m.id === id)!);
+        const _registrations = await Registration.getByIDs(...registrationIds);
+        const memberIds = _registrations.map(r => r.memberId);
+        const _members = await Member.getBlobByIds(...memberIds);
 
-        for (const registration of registrations) {
-            if (!await Context.auth.canAccessRegistrationAndMember(registration, permissionLevel)) {
+        const _registrationsWithMember: RegistrationWithMember[] = _registrations.map((r) => {
+            const member = _members.find(m => m.id === r.memberId);
+            if (!member) {
+                throw new Error('Member not found');
+            }
+            return r.setRelation(Registration.member, member);
+        });
+
+        // Make sure registrationsWithMembers is in same order as registrationIds
+        const registrationsWithMember = registrationIds.map(id => _registrationsWithMember.find(r => r.id === id)!);
+
+        for (const registration of registrationsWithMember) {
+            if (!await Context.auth.canAccessRegistrationWithMember(registration, permissionLevel)) {
                 throw Context.auth.error();
             }
         }
 
-        const results: RegistrationWithMemberStruct[] = await AuthenticatedStructures.registrationsWithMember(registrations);
+        const registrationsBlob = await AuthenticatedStructures.registrationsBlob(registrationsWithMember);
 
         const next = LimitedFilteredRequestHelper.fixInfiniteLoadingLoop({
             request: requestQuery,
-            results: registrations,
+            results: registrationsWithMember,
             sorters,
         });
 
-        return new PaginatedResponse<RegistrationWithMemberStruct[], LimitedFilteredRequest>({
-            results,
+        return new PaginatedResponse<RegistrationsBlob, LimitedFilteredRequest>({
+            results: registrationsBlob,
             next,
         });
     }

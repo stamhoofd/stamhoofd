@@ -1,24 +1,27 @@
 import { Decoder } from '@simonbackx/simple-encoding';
-import { assertSort, CountFilteredRequest, CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, RegistrationWithMember, SortItemDirection, SortList } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, PlatformRegistration, RegistrationsBlob, SortItemDirection, SortList } from '@stamhoofd/structures';
 import { useContext, usePlatform } from '../hooks';
 import { ObjectFetcher } from '../tables';
 
-type ObjectType = RegistrationWithMember;
+type ObjectType = PlatformRegistration;
 
 // todo?
 function extendSort(list: SortList): SortList {
+    // return list;
+
+    // todo
     // Map 'age' to 'birthDay' + reverse direction
     list = list.flatMap((l) => {
-        if (l.key === 'age') {
+        if (l.key === 'member.age') {
             return [
-                { key: 'birthDay', order: l.order === SortItemDirection.ASC ? SortItemDirection.DESC : SortItemDirection.ASC },
+                { key: 'member.birthDay', order: l.order === SortItemDirection.ASC ? SortItemDirection.DESC : SortItemDirection.ASC },
             ];
         }
 
-        if (l.key === 'name') {
+        if (l.key === 'member.name') {
             return [
-                { key: 'firstName', order: l.order },
-                { key: 'lastName', order: l.order },
+                { key: 'member.firstName', order: l.order },
+                { key: 'member.lastName', order: l.order },
             ];
         }
 
@@ -40,7 +43,7 @@ export function useRegistrationsObjectFetcher(overrides?: Partial<ObjectFetcher<
                 method: 'GET',
                 path: '/registrations',
                 // todo
-                decoder: new PaginatedResponseDecoder(RegistrationWithMember as Decoder<RegistrationWithMember[]>, LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
+                decoder: new PaginatedResponseDecoder(RegistrationsBlob as Decoder<RegistrationsBlob>, LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
                 query: data,
                 shouldRetry: false,
                 owner: this,
@@ -49,8 +52,13 @@ export function useRegistrationsObjectFetcher(overrides?: Partial<ObjectFetcher<
 
             console.log('[Done] Registrations.fetch', data, response.data);
 
+            const results = PlatformRegistration.createSingles(response.data.results, {
+                contextOrganization: context.value.organization,
+                platform: platform.value,
+            });
+
             return {
-                results: response.data.results,
+                results,
                 next: response.data.next,
             };
         },

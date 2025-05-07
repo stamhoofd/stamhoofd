@@ -161,6 +161,8 @@ export * from './src/members/RegistrationWithEncryptedMember.js';
 export * from './src/members/RegistrationWithMember.js';
 export * from './src/members/RegistrationWithTinyMember.js';
 export * from './src/members/ReviewTime.js';
+export * from './src/members/RegistrationWithMemberBlob.js';
+export * from './src/members/RegistrationsBlob.js';
 
 // Register checkout
 export * from './src/members/checkout/BalanceItemCartItem.js';

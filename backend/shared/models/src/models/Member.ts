@@ -392,3 +392,6 @@ export class Member extends QueryableModel {
         return true;
     }
 }
+
+Registration.member = new ManyToOneRelation(Member, 'member');
+Registration.member.foreignKey = 'memberId';

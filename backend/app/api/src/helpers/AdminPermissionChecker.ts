@@ -1,6 +1,7 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, CachedBalance, Document, EmailTemplate, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
+import { RegistrationWithMember } from '@stamhoofd/models/dist/src/models/Registration';
 import { AccessRight, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, GroupType, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { MemberRecordStore } from '../services/MemberRecordStore';
@@ -270,41 +271,12 @@ export class AdminPermissionChecker {
         return await this.hasFullAccess(organizationId);
     }
 
-    async canAccessRegistrationAndMember(registration: (Registration & Record<'group', Group> & Record<'member', Member> & Record<'users', User[]>), permissionLevel: PermissionLevel = PermissionLevel.Read) {
-        // todo: users?
-        if (permissionLevel !== PermissionLevel.Full && this.isUserManager(registration)) {
-            return true;
-        }
-
-        // Check user has permissions
-        if (!this.user.permissions) {
+    async canAccessRegistrationWithMember(registration: RegistrationWithMember, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+        if (!await this.canAccessRegistration(registration, permissionLevel)) {
             return false;
         }
 
-        if (this.hasPlatformFullAccess()) {
-            return true;
-        }
-
-        if (this.getPlatformAccessibleOrganizationTags(permissionLevel) === 'all') {
-            // Can access all members: even members without any registration
-            return true;
-        }
-
-        if (registration.organizationId && await this.hasFullAccess(registration.organizationId, permissionLevel)) {
-            return true;
-        }
-
-        // Temporary access
-        if (hasTemporaryMemberAccess(this.user.id, registration.member.id, permissionLevel)) {
-            console.log('User has temporary access to member', registration.member.id, 'for user', this.user.id);
-            return true;
-        }
-
-        if (await this.canAccessRegistration(registration, permissionLevel)) {
-            return true;
-        }
-
-        return false;
+        return this.canAccessMember(registration.member, permissionLevel);
     }
 
     async canAccessMember(member: MemberWithRegistrations, permissionLevel: PermissionLevel = PermissionLevel.Read) {

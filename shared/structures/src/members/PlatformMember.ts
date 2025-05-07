@@ -21,6 +21,8 @@ import { NationalRegisterNumberOptOut } from './NationalRegisterNumberOptOut.js'
 import { ObjectWithRecords, PatchAnswers } from './ObjectWithRecords.js';
 import { OrganizationRecordsConfiguration } from './OrganizationRecordsConfiguration.js';
 import { Parent } from './Parent.js';
+import { Registration } from './Registration.js';
+import { RegistrationsBlob } from './RegistrationsBlob.js';
 import { RegisterCheckout } from './checkout/RegisterCheckout.js';
 import { RegisterItem } from './checkout/RegisterItem.js';
 import { RecordAnswer } from './records/RecordAnswer.js';
@@ -161,6 +163,7 @@ export class PlatformFamily {
             family.members.push(platformMember);
             memberList.push(platformMember);
         }
+
         return memberList;
     }
 
@@ -428,6 +431,44 @@ export enum ContinuousMembershipStatus {
     Full = 'Full',
     Partial = 'Partial',
     None = 'None',
+}
+
+export class PlatformRegistration extends Registration {
+    member: PlatformMember;
+
+    static createSingles(blob: RegistrationsBlob, context: { contextOrganization?: Organization | null; platform: Platform }): PlatformRegistration[] {
+        const results: PlatformRegistration[] = [];
+
+        for (const registration of blob.registrations) {
+            const family = new PlatformFamily(context);
+            const member = registration.member;
+
+            for (const organization of blob.organizations) {
+                // Check if this organization is relevant to this member
+                if (member.registrations.find(r => r.organizationId === organization.id) || member.platformMemberships.find(m => m.organizationId === organization.id) || member.responsibilities.find(r => r.organizationId === organization.id)) {
+                    family.insertOrganization(organization);
+                }
+            }
+
+            const platformMember = new PlatformMember({
+                member,
+                family,
+            });
+
+            const platformRegistration = PlatformRegistration.create({
+                ...registration,
+                member: platformMember,
+            });
+
+            // todo (double in create)
+            platformRegistration.member = platformMember;
+
+            family.members.push(platformMember);
+            results.push(platformRegistration);
+        }
+
+        return results;
+    }
 }
 
 export class PlatformMember implements ObjectWithRecords {

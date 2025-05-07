@@ -1,4 +1,4 @@
-import { column, Database, ManyToManyRelation, ManyToOneRelation } from '@simonbackx/simple-database';
+import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
 import { EmailTemplateType, GroupPrice, PaymentMethod, PaymentMethodHelper, Recipient, RecordAnswer, RecordAnswerDecoder, RegisterItemOption, Registration as RegistrationStructure, Replacement, StockReservation } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -6,10 +6,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { ArrayDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import { sendEmailTemplate } from '../helpers/EmailBuilder';
-import { Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, User } from './';
+import { Group, MemberWithRegistrations, Organization, User } from './';
 
-// todo: rename?
-export type RegistrationWithMember = Registration & { member: Member; responsibilities: MemberResponsibilityRecord[]; platformMemberships: MemberPlatformMembership[]; users: User[] };
+export type RegistrationWithMember = Registration & { member: MemberWithRegistrations };
 
 export class Registration extends QueryableModel {
     static table = 'registrations';
@@ -139,9 +138,6 @@ export class Registration extends QueryableModel {
     static group: ManyToOneRelation<'group', import('./Group').Group>;
 
     static member: ManyToOneRelation<'member', import('./Member').Member>;
-
-    // todo: is there a cleaner way to do this?
-    static users = new ManyToManyRelation(Registration, User, 'users');
 
     getStructure(this: Registration & { group: import('./Group').Group }) {
         return RegistrationStructure.create({
@@ -313,73 +309,6 @@ export class Registration extends QueryableModel {
             type: 'transactional',
             recipients,
         });
-    }
-
-    static async getAllWithMemberAndUsers(...ids: string[]): Promise<(Registration & Record<'group', Group> & Record<'member', Member> & Record<'users', User[]>)[]> {
-        if (ids.length === 0) {
-            return [];
-        }
-        let query = `SELECT ${Registration.getDefaultSelect()}, ${Member.getDefaultSelect()}, ${User.getDefaultSelect()}  from \`${Registration.table}\`\n`;
-        query += `LEFT JOIN \`${Member.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`canRegister\` = 1)\n`;
-
-        // todo
-        query += Member.users.joinQuery(Member.table, User.table) + '\n';
-
-        query += `where \`${Registration.table}\`.\`${Registration.primary.name}\` = ?`;
-
-        const [results] = await Database.select(query, [ids]);
-        const registrations: (Registration & Record<'group', Group> & Record<'member', Member> & Record<'users', User[]>)[] = [];
-        const members: Member[] = [];
-
-        // Load groups
-        const groupIds = results.map(r => r[Registration.table]?.groupId).filter(id => id) as string[];
-        const groups = await Group.getByIDs(...Formatter.uniqueArray(groupIds));
-
-        for (const row of results) {
-            const foundRegistration = Registration.fromRow(row[Registration.table]);
-            if (!foundRegistration) {
-                throw new Error('Expected registration in every row');
-            }
-
-            const foundMember = Member.fromRow(row[Member.table]);
-            if (!foundMember) {
-                throw new Error('Expected member in every row');
-            }
-
-            const _fm = foundMember
-                .setManyRelation(Member.users, []);
-
-            // Seach if we already got this member?
-            const existingMember = members.find(m => m.id === _fm.id);
-
-            const member: Member = (existingMember ?? _fm);
-            if (!existingMember) {
-                members.push(member);
-            }
-
-            const group = groups.find(g => g.id === foundRegistration.groupId);
-            if (!group) {
-                throw new Error('Group not found');
-            }
-
-            const _fr = foundRegistration
-                .setRelation(Registration.group, group)
-                .setRelation(Registration.member, member)
-                // todo!!!
-                .setManyRelation(Registration.users, []);
-
-            // temporary todo!!!!!!!!
-            // (_fr as unknown as RegistrationWithMember).responsibilities = [];
-            // (_fr as unknown as RegistrationWithMember).platformMemberships = [];
-            // (_fr as unknown as RegistrationWithMember).users = [];
-
-            if (!registrations.find(r => r.id === _fr.id)) {
-                // todo: users!!!
-                registrations.push(_fr);
-            }
-        }
-
-        return registrations;
     }
 
     shouldIncludeStock() {
