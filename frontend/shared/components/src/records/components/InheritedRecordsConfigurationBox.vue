@@ -67,9 +67,10 @@
 <script setup lang="ts">
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { NavigationActions, PropertyFilterView, Toast, getMemberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, useEmitPatch, useFinancialSupportSettings, useOrganization } from '@stamhoofd/components';
+import { NavigationActions, PropertyFilterView, Toast, propertyFilterToString, useEmitPatch, useFinancialSupportSettings, useOrganization } from '@stamhoofd/components';
 import { BooleanStatus, MemberDetails, MemberPropertyWithFilter, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, PatchAnswers, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref, watchEffect } from 'vue';
+import { getMemberWithRegistrationsBlobUIFilterBuilders } from '../../filters/filter-builders/members';
 import FillRecordCategoryView from '../FillRecordCategoryView.vue';
 import { RecordEditorSettings, RecordEditorType } from '../RecordEditorSettings';
 

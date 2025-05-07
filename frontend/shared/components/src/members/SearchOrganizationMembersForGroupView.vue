@@ -42,9 +42,10 @@
 <script setup lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, ExternalOrganizationContainer, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useErrors, useInfiniteObjectFetcher, usePositionableSheet } from '@stamhoofd/components';
+import { ErrorBox, ExternalOrganizationContainer, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useErrors, useInfiniteObjectFetcher, usePositionableSheet } from '@stamhoofd/components';
 import { assertSort, Group, isEmptyFilter, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, RegisterCheckout, RegisterItem, SortItemDirection, SortList } from '@stamhoofd/structures';
 import { computed, Ref, ref, watchEffect } from 'vue';
+import { useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '../filters/filter-builders/members';
 import { useAuth, useContext, useOrganization, usePlatform } from '../hooks';
 import { NavigationActions, useNavigationActions } from '../types/NavigationActions';
 import RegisterItemCheckboxRow from './components/group/RegisterItemCheckboxRow.vue';
