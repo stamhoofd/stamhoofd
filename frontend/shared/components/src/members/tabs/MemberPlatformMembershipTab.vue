@@ -44,24 +44,27 @@
                             <p v-if="membership.trialUntil && membership.trialUntil > now" class="style-description-small">
                                 {{ $t('c38818cb-2337-451b-afac-69f22b700d43', {date: formatDate(membership.trialUntil, true)}) }}
                             </p>
+                            <p v-else-if="membership.trialUntil" class="style-description-small">
+                                {{ $t('Proefperiode afgelopen op {date}', {date: formatDate(membership.trialUntil, true)}) }}
+                            </p>
 
                             <p v-if="membership.organizationId === platform.membershipOrganizationId" class="style-description-small">
                                 {{ $t('4a39e12b-efa2-46fe-aa30-83bc576548a3') }}
                             </p>
-                            <p v-else class="style-description-small">
+                            <template v-else>
                                 <p v-if="membership.price === 0" class="style-description-small">
-                                {{ $t('c8f1e4d4-669c-4ccb-a9d9-30584f6c2d55', {organization: getOrganizationName(membership)}) }}
-                            </p>
-                            <p v-else-if="membership.balanceItemId" class="style-description-small">
-                                {{ $t('f1582fe7-3168-4579-bcc5-9db17568dac0', {organization: getOrganizationName(membership)}) }}
-                            </p>
-                            <p v-else-if="membership.trialUntil && membership.trialUntil > now">
-                                {{ $t('b0a70381-66b1-4bff-a613-8332a35bec7a', {organization: getOrganizationName(membership)}) }}
-                            </p>
-                            <p v-else>
-                                {{ $t('a2f6d632-9e20-4366-9393-b52431525596', {organization: getOrganizationName(membership)}) }}
-                            </p>
-                            </p>
+                                    {{ $t('c8f1e4d4-669c-4ccb-a9d9-30584f6c2d55', {organization: getOrganizationName(membership)}) }}
+                                </p>
+                                <p v-else-if="membership.balanceItemId" class="style-description-small">
+                                    {{ $t('f1582fe7-3168-4579-bcc5-9db17568dac0', {organization: getOrganizationName(membership)}) }}
+                                </p>
+                                <p v-else-if="membership.trialUntil && membership.trialUntil > now" class="style-description-small">
+                                    {{ $t('b0a70381-66b1-4bff-a613-8332a35bec7a', {organization: getOrganizationName(membership)}) }}
+                                </p>
+                                <p v-else class="style-description-small">
+                                    {{ $t('a2f6d632-9e20-4366-9393-b52431525596', {organization: getOrganizationName(membership)}) }}
+                                </p>
+                            </template>
 
                             <p v-if="membership.expireDate && membership.expireDate < now && membership.endDate > now" class="style-description-small">
                                 {{ $t('a74f6f39-1eb6-45c4-96e2-6719d9a4401d') }}
@@ -120,7 +123,6 @@ const props = defineProps<{
     member: PlatformMember;
 }>();
 
-
 const present = usePresent();
 const platformFamilyManager = usePlatformFamilyManager();
 const deletingMemberships = ref(new Set());
@@ -137,9 +139,9 @@ const periods = computed(() => platformManager.value.$platform.periods);
 const organization = useOrganization();
 
 function isRegisteredAt(periodId: string, organizationId: string) {
-    return props.member.filterRegistrations({ 
-        types: [GroupType.Membership], 
-        periodId, 
+    return props.member.filterRegistrations({
+        types: [GroupType.Membership],
+        periodId,
         organizationId,
         defaultAgeGroupIds: platform.value.config.defaultAgeGroups.filter(g => !!g.defaultMembershipTypeId).map(g => g.id),
     }).length > 0;

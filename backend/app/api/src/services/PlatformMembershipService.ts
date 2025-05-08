@@ -214,7 +214,6 @@ export class PlatformMembershipService {
                         membershipTypeId: { sign: 'IN', value: types },
                         deletedAt: null,
                     });
-                    const activeMembershipsUndeletable = activeMemberships.filter(m => !m.canDelete() || !m.generated);
 
                     if (defaultMemberships.length === 0) {
                         // Stop all active memberships that were added automatically
@@ -229,23 +228,6 @@ export class PlatformMembershipService {
 
                         if (!silent) {
                             console.log('Skipping automatic membership for: ' + me.id, ' - no default memberships found');
-                        }
-                        continue;
-                    }
-
-                    if (activeMembershipsUndeletable.length) {
-                        // Skip automatic additions
-                        for (const m of activeMembershipsUndeletable) {
-                            try {
-                                await m.calculatePrice(me);
-                            }
-                            catch (e) {
-                                // Ignore error: membership might not be available anymore
-                                if (!silent) {
-                                    console.error('Failed to calculate price for undeletable membership', m.id, e);
-                                }
-                            }
-                            await m.save();
                         }
                         continue;
                     }
@@ -286,34 +268,63 @@ export class PlatformMembershipService {
                     })[0];
 
                     if (!cheapestMembership) {
+                        // Technically not possible, but for type checking
                         console.error('No membership found');
                         continue;
                     }
 
                     // Check if already have the same membership
                     // if that is the case, we'll keep that one and update the price + dates if the organization matches the cheapest/earliest membership
-                    let didFind = false;
+                    let didFind: MemberPlatformMembership | null = null;
                     for (const m of activeMemberships) {
                         if (m.membershipTypeId === cheapestMembership.membership.id && m.organizationId === cheapestMembership.registration.organizationId) {
-                            // Update the price of this active membership (could have changed)
-                            try {
-                                await m.calculatePrice(me, cheapestMembership.registration);
+                            if (!m.locked) {
+                                // Update the price and dates of this active membership (could have changed)
+                                try {
+                                    await m.calculatePrice(me, cheapestMembership.registration);
+                                }
+                                catch (e) {
+                                    // Ignore error: membership might not be available anymore
+                                    if (!silent) {
+                                        console.error('Failed to calculate price for active membership', m.id, e);
+                                    }
+                                }
+                                await m.save();
                             }
-                            catch (e) {
-                                // Ignore error: membership might not be available anymore
-                                if (!silent) {
-                                    console.error('Failed to calculate price for active membership', m.id, e);
+                            didFind = m;
+                            break;
+                        }
+                    }
+
+                    // Delete all other generated memberships that are not the cheapest one
+                    for (const m of activeMemberships) {
+                        if (m.id !== didFind?.id) {
+                            if (!m.locked && (m.generated || m.membershipTypeId === cheapestMembership.membership.id)) {
+                                await m.doDelete();
+                            }
+                            else {
+                                // Update price
+                                if (!m.locked) {
+                                    try {
+                                        await m.calculatePrice(me);
+                                    }
+                                    catch (e) {
+                                    // Ignore error: membership might not be available anymore
+                                        if (!silent) {
+                                            console.error('Failed to calculate price for undeletable membership', m.id, e);
+                                        }
+                                    }
+                                    await m.save();
                                 }
                             }
-                            await m.save();
-                            didFind = true;
-                            break;
                         }
                     }
 
                     if (didFind) {
                         continue;
                     }
+
+                    // Otherwise make sure we create a new membership
 
                     const periodConfig = cheapestMembership.membership.periods.get(period.id);
                     if (!periodConfig) {
@@ -351,16 +362,6 @@ export class PlatformMembershipService {
 
                     await membership.calculatePrice(me, cheapestMembership.registration);
                     await membership.save();
-
-                    // This reasoning allows us to replace an existing membership with a cheaper one (not date based ones, but type based ones)
-                    for (const toDelete of activeMemberships) {
-                        if (toDelete.canDelete() && toDelete.generated) {
-                            if (!silent) {
-                                console.log('Removing membership because cheaper membership found for: ' + me.id + ' - membership ' + toDelete.id);
-                            }
-                            await toDelete.doDelete();
-                        }
-                    }
                 }
             });
         });
