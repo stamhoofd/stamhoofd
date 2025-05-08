@@ -300,6 +300,9 @@ export class PlatformMembershipService {
                     for (const m of activeMemberships) {
                         if (m.id !== didFind?.id) {
                             if (!m.locked && (m.generated || m.membershipTypeId === cheapestMembership.membership.id)) {
+                                if (!silent) {
+                                    console.log('Removing membership because cheaper membership found or duplicate, for: ' + me.id + ' - membership ' + m.id);
+                                }
                                 await m.doDelete();
                             }
                             else {
