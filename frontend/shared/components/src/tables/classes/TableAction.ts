@@ -159,6 +159,10 @@ export abstract class TableAction<T extends { id: string }> {
 
     abstract _adaptToPropertyHelper<X extends { id: string }>(args: TransformTableActionArgs<X, T>): TableAction<X>;
 
+    /**
+     * Adapt the action to reuse with a different table where the value for the provided key is the type for this action.
+     * @returns a new adapted action
+     */
     adaptToProperty<X extends { id: string }>({ key, fetcher }: { key: KeysMatching<X, T> & string; fetcher: ObjectFetcher<T> }): TableAction<X> {
         return this._adaptToPropertyHelper<X>({
             inMemoryTransformer: item => item[key] as T,
@@ -169,6 +173,7 @@ export abstract class TableAction<T extends { id: string }> {
                 });
 
                 const newSelection: TableActionSelection<T> = {
+                    ...selection,
                     filter,
                     fetcher,
                     cachedAllValues: selection.cachedAllValues?.map(x => x[key] as T),

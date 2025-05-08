@@ -259,6 +259,12 @@ const excludeEdit = props.group && props.group.type === GroupType.EventRegistrat
 
 const membersFetcher = useMembersObjectFetcher();
 
+const memberActions = actionBuilder.getActions({ selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value, includeMove: true, includeEdit: !excludeEdit });
+
+if (app !== 'admin' && auth.canManagePayments() && props.organization) {
+    memberActions.push(actionBuilder.getChargeAction(props.organization));
+}
+
 const actions: TableAction<ObjectType>[] = [
     new InMemoryTableAction({
         name: $t(`162644a1-aee8-497b-b837-04abb995047f`),
@@ -274,27 +280,7 @@ const actions: TableAction<ObjectType>[] = [
             });
         },
     }),
-    ...actionBuilder.getActions({ selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value, includeMove: true, includeEdit: !excludeEdit })
-        .map(action => action.adaptToProperty<PlatformRegistration>({ fetcher: membersFetcher, key: 'member' })),
+    ...memberActions.map(action => action.adaptToProperty<PlatformRegistration>({ fetcher: membersFetcher, key: 'member' })),
 ];
 
-// if (app !== 'admin' && auth.canManagePayments()) {
-//     actions.push(new AsyncTableAction({
-//         name: $t(`d799bffc-fd09-4444-abfa-3552b3c46cb9`),
-//         icon: 'calculator',
-//         priority: 13,
-//         groupIndex: 4,
-//         handler: async (selection: TableActionSelection<ObjectType>) => {
-//             await present({
-//                 modalDisplayStyle: 'popup',
-//                 components: [
-//                     new ComponentWithProperties(ChargeMembersView, {
-//                         filter: selection.filter.filter,
-//                         organization: props.organization!,
-//                     }),
-//                 ],
-//             });
-//         },
-//     }));
-// }
 </script>
