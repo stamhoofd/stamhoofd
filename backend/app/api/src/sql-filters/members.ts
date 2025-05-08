@@ -33,7 +33,6 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.gender'),
         { isJSONValue: true, type: SQLValueType.JSONString },
     ),
-
     'birthDay': createSQLColumnFilterCompiler(SQL.column(membersTable, 'birthDay'), {
         normalizeValue: (d) => {
             if (typeof d === 'number') {
@@ -43,12 +42,9 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
             return d;
         },
     }),
-
-    // todo?
     'organizationName': createSQLExpressionFilterCompiler(
         SQL.column('organizations', 'name'),
     ),
-
     'details.requiresFinancialSupport': createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.requiresFinancialSupport.value'),
         { isJSONValue: true, type: SQLValueType.JSONBoolean, checkPermission: async () => {
@@ -69,17 +65,14 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
             }
         } },
     ),
-
     'email': createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.email'),
         { isJSONValue: true, type: SQLValueType.JSONString },
     ),
-
     'parentEmail': createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].email'),
         { isJSONValue: true, isJSONObject: true, type: SQLValueType.JSONString },
     ),
-
     'details.parents[0]': createSQLFilterNamespace({
         name: createSQLExpressionFilterCompiler(
             new SQLConcat(
@@ -90,7 +83,6 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
             { isJSONValue: true, isJSONObject: false, type: SQLValueType.JSONString },
         ),
     }),
-
     'details.parents[1]': createSQLFilterNamespace({
         name: createSQLExpressionFilterCompiler(
             new SQLConcat(
@@ -101,17 +93,14 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
             { isJSONValue: true, isJSONObject: false, type: SQLValueType.JSONString },
         ),
     }),
-
     'unverifiedEmail': createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.unverifiedEmails'),
         { isJSONValue: true, isJSONObject: true, type: SQLValueType.JSONString },
     ),
-
     'phone': createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.phone'),
         { isJSONValue: true },
     ),
-
     'details.address': createSQLFilterNamespace({
         city: createSQLExpressionFilterCompiler(
             SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.address.city'),
@@ -130,7 +119,6 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
             { isJSONValue: true, type: SQLValueType.JSONString },
         ),
     }),
-
     'details.parents[*].address': createSQLFilterNamespace({
         city: createSQLExpressionFilterCompiler(
             SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].address.city'),
@@ -149,12 +137,10 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
             { isJSONValue: true, isJSONObject: true },
         ),
     }),
-
     'parentPhone': createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].phone'),
         { isJSONValue: true, isJSONObject: true },
     ),
-
     'unverifiedPhone': createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.unverifiedPhones'),
         { isJSONValue: true, isJSONObject: true },
@@ -194,7 +180,6 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
             ),
         baseRegistrationFilterCompilers,
     ),
-
     'responsibilities': createSQLRelationFilterCompiler(
         SQL.select()
             .from(
@@ -236,7 +221,6 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
             organization: createSQLFilterNamespace(organizationFilterCompilers),
         },
     ),
-
     'platformMemberships': createSQLRelationFilterCompiler(
         SQL.select()
             .from(
@@ -267,7 +251,6 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
             generated: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'generated')),
         },
     ),
-
     'organizations': createSQLRelationFilterCompiler(
         SQL.select()
             .from(

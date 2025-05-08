@@ -5,11 +5,7 @@ import { ObjectFetcher } from '../tables';
 
 type ObjectType = PlatformRegistration;
 
-// todo?
 function extendSort(list: SortList): SortList {
-    // return list;
-
-    // todo
     // Map 'age' to 'birthDay' + reverse direction
     list = list.flatMap((l) => {
         if (l.key === 'member.age') {
@@ -42,7 +38,6 @@ export function useRegistrationsObjectFetcher(overrides?: Partial<ObjectFetcher<
             const response = await context.value.authenticatedServer.request({
                 method: 'GET',
                 path: '/registrations',
-                // todo
                 decoder: new PaginatedResponseDecoder(RegistrationsBlob as Decoder<RegistrationsBlob>, LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
                 query: data,
                 shouldRetry: false,

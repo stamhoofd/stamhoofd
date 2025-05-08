@@ -4,7 +4,6 @@ import { RegistrationWithMemberBlob } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { memberJoin } from '../sql-filters/registrations';
 
-// todo: test
 export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob> = {
     // WARNING! TEST NEW SORTERS THOROUGHLY!
     // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through

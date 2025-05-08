@@ -27,7 +27,6 @@ export function wrapFilter(filter: UIFilterBuilder<UIFilter>, { key }: WrapFilte
         };
     }
 
-    // todo: test
     filter.unwrapFilter = (value) => {
         if (value && value[key]['$elemMatch']) {
             return value[key]['$elemMatch'];

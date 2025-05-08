@@ -29,36 +29,6 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders() {
 
         return all;
     });
-    //     if (filter.wrapper) {
-    //         filter.wrapper = {
-    //             member: {
-    //                 $elemMatch: filter.wrapper,
-    //             },
-    //         };
-    //     }
-    //     else {
-    //         filter.wrapper = {
-    //             member: {
-    //                 $elemMatch: FilterWrapperMarker,
-    //             },
-    //         };
-    //     }
-
-    //     console.error('filter.wrapper', filter.wrapper);
-
-    //     const unwrapFilter = filter.unwrapFilter;
-
-    //     filter.unwrapFilter = (f: StamhoofdFilter) => {
-    //         if (unwrapFilter) {
-    //             return unwrapFilter(f);
-    //         }
-
-    //         // todo?
-    //         return null;
-    //     };
-
-    //     return filter;
-    // }));
 
     return {
         loading: computed(() => loading.value || loadingMembershipFilters.value),
