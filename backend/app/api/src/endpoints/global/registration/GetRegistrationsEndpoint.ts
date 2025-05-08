@@ -109,6 +109,7 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
         const query = SQL
             .select(
                 SQL.column('registrations', 'id'),
+                SQL.column('registrations', 'memberId'),
             )
             .setMaxExecutionTime(15 * 1000)
             .from(
@@ -253,27 +254,31 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
             throw error;
         }
 
-        const registrationIds = data.map((r) => {
-            if (typeof r.registrations.id === 'string') {
-                return r.registrations.id;
+        const registrationData = data.map((r) => {
+            if (typeof r.registrations.memberId === 'string' && typeof r.registrations.id === 'string') {
+                return { memberId: r.registrations.memberId, id: r.registrations.id };
             }
             throw new Error('Expected string');
         });
 
-        const _registrations = await Registration.getByIDs(...registrationIds);
-        const memberIds = _registrations.map(r => r.memberId);
-        const _members = await Member.getBlobByIds(...memberIds);
+        const members = await Member.getBlobByIds(...registrationData.map(r => r.memberId));
 
-        const _registrationsWithMember: RegistrationWithMember[] = _registrations.map((r) => {
-            const member = _members.find(m => m.id === r.memberId);
+        const _registrationsWithMember: RegistrationWithMember[] = registrationData.map(({ id, memberId }) => {
+            const member = members.find(m => m.id === memberId);
             if (!member) {
-                throw new Error('Member not found');
+                throw new Error(`Member with id ${memberId} not found`);
             }
-            return r.setRelation(Registration.member, member);
+
+            const registration = member.registrations.find(r => r.id === id);
+            if (!registration) {
+                throw new Error(`Registration with id ${id} not found in member ${memberId}`);
+            }
+
+            return registration.setRelation(Registration.member, member);
         });
 
         // Make sure registrationsWithMembers is in same order as registrationIds
-        const registrationsWithMember = registrationIds.map(id => _registrationsWithMember.find(r => r.id === id)!);
+        const registrationsWithMember = registrationData.map(({ id }) => _registrationsWithMember.find(r => r.id === id)!);
 
         for (const registration of registrationsWithMember) {
             if (!await Context.auth.canAccessRegistrationWithMember(registration, permissionLevel)) {
