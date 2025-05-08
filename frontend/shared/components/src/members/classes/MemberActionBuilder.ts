@@ -3,7 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
-import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, PermissionLevel, Platform, PlatformMember, RegistrationWithMember, mergeFilters } from '@stamhoofd/structures';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, PermissionLevel, Platform, PlatformMember, RegistrationWithTinyMember, mergeFilters } from '@stamhoofd/structures';
 import { markRaw } from 'vue';
 import { EditMemberAllBox, MemberSegmentedView, MemberStepView, checkoutDefaultItem, chooseOrganizationMembersForGroup } from '..';
 import { GlobalEventBus } from '../../EventBus';
@@ -640,7 +640,7 @@ export class MemberActionBuilder {
     }
 
     async deleteRegistration(members: PlatformMember[]) {
-        const deleteRegistrations = members.flatMap(m => m.filterRegistrations({ groups: this.groups }).map(r => RegistrationWithMember.from(r, m.patchedMember.tiny)));
+        const deleteRegistrations = members.flatMap(m => m.filterRegistrations({ groups: this.groups }).map(r => RegistrationWithTinyMember.from(r, m.patchedMember.tiny)));
         return await chooseOrganizationMembersForGroup({
             members,
             group: this.groups[0],

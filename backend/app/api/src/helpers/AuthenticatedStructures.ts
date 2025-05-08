@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuditLog, BalanceItem, CachedBalance, Document, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationWithMemberBlob, RegistrationsBlob, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
 import { SQL } from '@stamhoofd/sql';
@@ -521,6 +521,38 @@ export class AuthenticatedStructures {
         return MembersBlob.create({
             members: memberBlobs,
             organizations: organizationStructs,
+        });
+    }
+
+    static async registrationsBlob(registrationData: {
+        memberId: string;
+        id: string;
+    }[], members: MemberWithRegistrations[], includeContextOrganization = false, includeUser?: User): Promise<RegistrationsBlob> {
+        const membersBlob = await this.membersBlob(members, includeContextOrganization, includeUser);
+
+        const memberBlobs = membersBlob.members;
+
+        const registrationWithMemberBlobs = registrationData.map(({ id, memberId }) => {
+            const memberBlob = memberBlobs.find(m => m.id === memberId);
+            if (!memberBlob) {
+                throw new Error('Member not found');
+            }
+
+            const registration = memberBlob.registrations.find(r => r.id === id);
+            if (!registration) {
+                throw new Error('Registration not found');
+            }
+
+            return RegistrationWithMemberBlob.create({
+                ...registration,
+                balances: memberBlob.registrations.find(r => r.id === registration.id)?.balances ?? [],
+                member: memberBlob,
+            });
+        });
+
+        return RegistrationsBlob.create({
+            registrations: registrationWithMemberBlobs,
+            organizations: membersBlob.organizations,
         });
     }
 

@@ -9,7 +9,7 @@ import { PaymentCustomer } from '../../PaymentCustomer.js';
 import { PaymentMethod } from '../../PaymentMethod.js';
 import { PriceBreakdown } from '../../PriceBreakdown.js';
 import { PlatformMember } from '../PlatformMember.js';
-import { RegistrationWithMember } from '../RegistrationWithMember.js';
+import { RegistrationWithTinyMember } from '../RegistrationWithTinyMember.js';
 import { BalanceItemCartItem } from './BalanceItemCartItem.js';
 import { IDRegisterCart, RegisterCart } from './RegisterCart.js';
 import { RegisterItem } from './RegisterItem.js';
@@ -177,7 +177,7 @@ export class RegisterCheckout {
         }
     }
 
-    removeRegistration(registration: RegistrationWithMember, options?: { calculate?: boolean }) {
+    removeRegistration(registration: RegistrationWithTinyMember, options?: { calculate?: boolean }) {
         this.cart.removeRegistration(registration);
         if (options?.calculate !== false) {
             this.updatePrices();
@@ -188,7 +188,7 @@ export class RegisterCheckout {
         }
     }
 
-    unremoveRegistration(registration: RegistrationWithMember, options?: { calculate?: boolean }) {
+    unremoveRegistration(registration: RegistrationWithTinyMember, options?: { calculate?: boolean }) {
         this.cart.unremoveRegistration(registration);
         if (options?.calculate !== false) {
             this.updatePrices();

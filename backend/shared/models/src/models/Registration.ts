@@ -135,6 +135,8 @@ export class Registration extends QueryableModel {
 
     static group: ManyToOneRelation<'group', import('./Group').Group>;
 
+    static member: ManyToOneRelation<'member', import('./Member').Member>;
+
     getStructure(this: Registration & { group: import('./Group').Group }) {
         return RegistrationStructure.create({
             ...this,

@@ -2,7 +2,7 @@ import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/sim
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { BalanceItem } from '../../BalanceItem.js';
 import { Platform } from '../../Platform.js';
-import { RegistrationWithMember } from '../RegistrationWithMember.js';
+import { RegistrationWithTinyMember } from '../RegistrationWithTinyMember.js';
 import { BalanceItemCartItem } from './BalanceItemCartItem.js';
 import { RegisterCheckout, RegisterContext } from './RegisterCheckout.js';
 import { IDRegisterItem, RegisterItem } from './RegisterItem.js';
@@ -22,7 +22,7 @@ export class IDRegisterCart extends AutoEncoder {
         cart.items = this.items.map(i => i.hydrate(context));
         cart.balanceItems = this.balanceItems;
 
-        const registrations: RegistrationWithMember[] = [];
+        const registrations: RegistrationWithTinyMember[] = [];
         for (const registrationId of this.deleteRegistrationIds) {
             let found = false;
             for (const member of context.members) {
@@ -31,7 +31,7 @@ export class IDRegisterCart extends AutoEncoder {
                     continue;
                 }
 
-                registrations.push(RegistrationWithMember.from(registration, member.patchedMember.tiny));
+                registrations.push(RegistrationWithTinyMember.from(registration, member.patchedMember.tiny));
                 found = true;
                 break;
             }
@@ -58,7 +58,7 @@ export class RegisterCart {
     /**
      * You can define which registrations you want remove as part of this register operation.
      */
-    deleteRegistrations: RegistrationWithMember[] = [];
+    deleteRegistrations: RegistrationWithTinyMember[] = [];
 
     calculatePrices() {
         for (const item of this.items) {
@@ -147,14 +147,14 @@ export class RegisterCart {
         }
     }
 
-    removeRegistration(registration: RegistrationWithMember) {
+    removeRegistration(registration: RegistrationWithTinyMember) {
         const index = this.deleteRegistrations.findIndex(r => r.id === registration.id);
         if (index === -1) {
             this.deleteRegistrations.push(registration);
         }
     }
 
-    unremoveRegistration(registration: RegistrationWithMember) {
+    unremoveRegistration(registration: RegistrationWithTinyMember) {
         const index = this.deleteRegistrations.findIndex(r => r.id === registration.id);
         if (index !== -1) {
             this.deleteRegistrations.splice(index, 1);
@@ -291,7 +291,7 @@ export class RegisterCart {
             }
         }
 
-        const cleanedRegistrations: RegistrationWithMember[] = [];
+        const cleanedRegistrations: RegistrationWithTinyMember[] = [];
         const singleOrganization = checkout.singleOrganization;
 
         for (const registration of this.deleteRegistrations) {

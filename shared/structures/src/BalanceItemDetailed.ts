@@ -2,13 +2,13 @@ import { field } from '@simonbackx/simple-encoding';
 
 import { Formatter } from '@stamhoofd/utility';
 import { BalanceItem, BalanceItemPayment } from './BalanceItem.js';
-import { RegistrationWithMember } from './members/RegistrationWithMember.js';
+import { RegistrationWithTinyMember } from './members/RegistrationWithTinyMember.js';
 import { Order } from './webshops/Order.js';
 
 // Do we still need this?
 export class BalanceItemDetailed extends BalanceItem {
-    @field({ decoder: RegistrationWithMember, nullable: true })
-    registration: RegistrationWithMember | null = null;
+    @field({ decoder: RegistrationWithTinyMember, nullable: true })
+    registration: RegistrationWithTinyMember | null = null;
 
     @field({ decoder: Order, nullable: true })
     order: Order | null = null;

@@ -58,10 +58,10 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, useAppContext, useErrors, useOrganization, usePatch, usePlatformMemberFilterBuilders } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { CenteredMessage, ErrorBox, useAppContext, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
 import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
+import { usePlatformMemberFilterBuilders } from '../filters/filter-builders/members';
 import { RecordEditorSettings, RecordEditorType } from './RecordEditorSettings';
 import EditRecordCategoriesBox from './components/EditRecordCategoriesBox.vue';
 import InheritedRecordsConfigurationBox from './components/InheritedRecordsConfigurationBox.vue';
@@ -83,7 +83,6 @@ const errors = useErrors();
 const saving = ref(false);
 const pop = usePop();
 const { patch, patched, addPatch, hasChanges } = usePatch(props.recordsConfiguration);
-
 
 const organization = useOrganization();
 const app = useAppContext();

@@ -1,26 +1,15 @@
-import { SQLFilterDefinitions, baseSQLFilterCompilers, createSQLColumnFilterCompiler, SQL, createSQLFilterNamespace, createSQLExpressionFilterCompiler, SQLValueType } from '@stamhoofd/sql';
+import { Member, Registration } from '@stamhoofd/models';
+import { baseSQLFilterCompilers, createSQLJoinedRelationFilterCompiler, SQL, SQLFilterDefinitions } from '@stamhoofd/sql';
+import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers';
+import { memberFilterCompilers } from './members';
+
+export const memberJoin = SQL.join(Member.table).where(SQL.column(Member.table, 'id'), SQL.column(Registration.table, 'memberId'));
 
 export const registrationFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
-    price: createSQLColumnFilterCompiler('price', { nullable: true }),
-    pricePaid: createSQLColumnFilterCompiler('pricePaid'),
-    canRegister: createSQLColumnFilterCompiler('canRegister'),
-    organizationId: createSQLColumnFilterCompiler('organizationId'),
-    groupId: createSQLColumnFilterCompiler('groupId'),
-    registeredAt: createSQLColumnFilterCompiler('registeredAt', { nullable: true }),
-    periodId: createSQLColumnFilterCompiler(SQL.column('registrations', 'periodId')),
-
-    group: createSQLFilterNamespace({
-        ...baseSQLFilterCompilers,
-        id: createSQLColumnFilterCompiler('groupId'),
-        name: createSQLExpressionFilterCompiler(
-            SQL.jsonValue(SQL.column('groups', 'settings'), '$.value.name'),
-            { isJSONValue: true, type: SQLValueType.JSONString },
-        ),
-        status: createSQLExpressionFilterCompiler(
-            SQL.column('groups', 'status'),
-            { isJSONValue: true, type: SQLValueType.JSONString },
-        ),
-        defaultAgeGroupId: createSQLColumnFilterCompiler(SQL.column('groups', 'defaultAgeGroupId'), { nullable: true }),
-    }),
+    ...baseRegistrationFilterCompilers,
+    member: createSQLJoinedRelationFilterCompiler(
+        memberJoin,
+        memberFilterCompilers,
+    ),
 };

@@ -901,7 +901,7 @@ export class AdminPermissionChecker {
         return !!organizationPermissions && organizationPermissions.hasAccess(level);
     }
 
-    isUserManager(member: MemberWithRegistrations) {
+    isUserManager<M extends { users: User[] }>(member: M): boolean {
         return !!member.users.find(u => u.id === this.user.id);
     }
 
