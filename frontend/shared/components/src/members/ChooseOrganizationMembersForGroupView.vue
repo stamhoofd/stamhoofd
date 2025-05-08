@@ -24,7 +24,7 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <STList>
-            <DeleteRegistrationRow v-for="registration in checkout.cart.deleteRegistrations" :key="registration.id" class="right-stack" :registration="registration" :checkout="checkout" />
+            <DeleteRegistrationRow v-for="registration in checkout.cart.deleteRegistrations" :key="registration.registration.id" class="right-stack" :registration="registration" :checkout="checkout" />
             <RegisterItemRow v-for="item in checkout.cart.items" :key="item.id" class="right-stack" :item="item" :show-group="false" />
             <BalanceItemCartItemRow v-for="item in checkout.cart.balanceItems" :key="item.id" class="right-stack" :item="item" :checkout="checkout" />
         </STList>
@@ -68,7 +68,6 @@
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, PermyriadInput, PriceBreakdownBox, STErrorsDefault, useErrors } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Group, Organization, PlatformFamily, PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 import { startCheckout, useAddMember, useCheckoutDefaultItem, useChooseGroupForMember } from '.';
@@ -109,8 +108,8 @@ const checkoutDefaultItem = useCheckoutDefaultItem();
 const chooseGroupForMember = useChooseGroupForMember();
 
 const isOnlyDeleting = computed(() => props.checkout.cart.items.length === 0 && props.checkout.cart.balanceItems.length === 0 && props.checkout.cart.deleteRegistrations.length > 0);
-const hasPaidRegistrationDelete = computed(() => props.checkout.cart.deleteRegistrations.some(r => r.balances.some(b => b.amountOpen > 0 || b.amountPaid > 0 || b.amountPending > 0)));
-const hadPaidByOrganization = computed(() => props.checkout.cart.deleteRegistrations.some(r => r.payingOrganizationId && r.balances.some(b => b.amountOpen > 0 || b.amountPaid > 0 || b.amountPending > 0)));
+const hasPaidRegistrationDelete = computed(() => props.checkout.cart.deleteRegistrations.some(r => r.registration.balances.some(b => b.amountOpen > 0 || b.amountPaid > 0 || b.amountPending > 0)));
+const hadPaidByOrganization = computed(() => props.checkout.cart.deleteRegistrations.some(r => r.registration.payingOrganizationId && r.registration.balances.some(b => b.amountOpen > 0 || b.amountPaid > 0 || b.amountPending > 0)));
 
 async function addMember() {
     const family = new PlatformFamily({

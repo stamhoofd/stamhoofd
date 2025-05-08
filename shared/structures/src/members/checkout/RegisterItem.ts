@@ -20,6 +20,24 @@ import { RecordSettings } from '../records/RecordSettings.js';
 import { Registration } from '../Registration.js';
 import { RegisterContext } from './RegisterCheckout.js';
 import { TranslatedString } from '../../TranslatedString.js';
+import { RegistrationWithMember } from '../RegistrationWithMember.js';
+
+export class RegistrationWithPlatformMember {
+    registration: Registration;
+    member: PlatformMember;
+
+    constructor(options: { registration: Registration; member: PlatformMember }) {
+        this.registration = options.registration;
+        this.member = options.member;
+    }
+
+    clone() {
+        return new RegistrationWithPlatformMember({
+            registration: this.registration.clone(),
+            member: this.member, // no need to clone because it is a reference
+        });
+    }
+}
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
@@ -99,7 +117,7 @@ export class RegisterItem implements ObjectWithRecords {
     /**
      * These registrations will be replaced as part of this new registration (moving or updating a registration is possible this way)
      */
-    replaceRegistrations: Registration[] = [];
+    replaceRegistrations: RegistrationWithPlatformMember[] = [];
 
     /**
      * Show an error in the cart for recovery
@@ -135,7 +153,7 @@ export class RegisterItem implements ObjectWithRecords {
         groupPrice?: GroupPrice;
         options?: RegisterItemOption[];
         recordAnswers?: Map<string, RecordAnswer>;
-        replaceRegistrations?: Registration[];
+        replaceRegistrations?: RegistrationWithPlatformMember[];
         cartError?: SimpleError | SimpleErrors | null;
         calculatedPrice?: number;
         calculatedRefund?: number;
@@ -298,14 +316,19 @@ export class RegisterItem implements ObjectWithRecords {
             throw new Error('Group not found: ' + idRegisterItem.groupId);
         }
 
-        const replaceRegistrations: Registration[] = [];
+        const replaceRegistrations: RegistrationWithPlatformMember[] = [];
 
         for (const registrationId of idRegisterItem.replaceRegistrationIds) {
             const registration = member.patchedMember.registrations.find(r => r.id === registrationId);
             if (!registration) {
                 throw new Error('Registration not found: ' + registrationId);
             }
-            replaceRegistrations.push(registration);
+            replaceRegistrations.push(
+                new RegistrationWithPlatformMember({
+                    registration: registration,
+                    member: member,
+                }),
+            );
         }
 
         return new RegisterItem({
@@ -330,7 +353,7 @@ export class RegisterItem implements ObjectWithRecords {
             organizationId: this.organization.id,
             groupPrice: this.groupPrice,
             options: this.options,
-            replaceRegistrationIds: this.replaceRegistrations.map(r => r.id),
+            replaceRegistrationIds: this.replaceRegistrations.map(r => r.registration.id),
             recordAnswers: this.recordAnswers,
             trial: this.trial,
             customStartDate: this.customStartDate,
@@ -353,7 +376,7 @@ export class RegisterItem implements ObjectWithRecords {
             this.calculatedPrice += option.option.price.forMember(this.member) * option.amount;
         }
 
-        for (const registration of this.replaceRegistrations) {
+        for (const { registration } of this.replaceRegistrations) {
             this.calculatedRefund += registration.price;
         }
 
@@ -373,7 +396,7 @@ export class RegisterItem implements ObjectWithRecords {
     get priceBreakown(): PriceBreakdown {
         let all: PriceBreakdown = [];
 
-        for (const registration of this.replaceRegistrations) {
+        for (const { registration } of this.replaceRegistrations) {
             all.push({
                 name: this.checkout.isAdminFromSameOrganization ? $t('a87b9dfd-4acd-40c0-b430-f29dc8ec0fbf', { group: registration.group.settings.name }) : $t('Terugbetaling voor {group}', { group: registration.group.settings.name }),
                 price: -registration.price,
@@ -556,7 +579,7 @@ export class RegisterItem implements ObjectWithRecords {
     }
 
     willReplace(registrationId: string) {
-        return this.replaceRegistrations.some(rr => rr.id === registrationId);
+        return this.replaceRegistrations.some(rr => rr.registration.id === registrationId);
     }
 
     isAlreadyRegistered() {
@@ -667,7 +690,7 @@ export class RegisterItem implements ObjectWithRecords {
         const descriptions: string[] = [];
 
         if (this.replaceRegistrations.length > 0) {
-            for (const registration of this.replaceRegistrations) {
+            for (const { registration } of this.replaceRegistrations) {
                 descriptions.push($t(`9b0ace12-de6c-43a8-aed2-e16a81a86d59`) + ' ' + registration.group.settings.name);
             }
         }
@@ -783,9 +806,9 @@ export class RegisterItem implements ObjectWithRecords {
 
     get defaultStartDate() {
         if (this.replaceRegistrations.length > 0) {
-            const reg = this.replaceRegistrations[0];
-            if (reg.startDate && reg.startDate.getTime() >= this.group.settings.startDate.getTime()) {
-                return reg.startDate;
+            const { registration } = this.replaceRegistrations[0];
+            if (registration.startDate && registration.startDate.getTime() >= this.group.settings.startDate.getTime()) {
+                return registration.startDate;
             }
             return this.group.settings.startDate;
         }
@@ -817,7 +840,7 @@ export class RegisterItem implements ObjectWithRecords {
             return false;
         }
 
-        if (this.replaceRegistrations.find(r => r.trialUntil !== null)) {
+        if (this.replaceRegistrations.find(r => r.registration.trialUntil !== null)) {
             return true;
         }
         const currentPeriodId = this.organization.period.period.id;
@@ -990,7 +1013,7 @@ export class RegisterItem implements ObjectWithRecords {
             });
         }
 
-        for (const registration of this.replaceRegistrations) {
+        for (const { registration } of this.replaceRegistrations) {
             // todo: check if you are allowed to move
             if (registration.memberId !== this.member.id) {
                 throw new SimpleError({
@@ -1242,8 +1265,8 @@ export class RegisterItem implements ObjectWithRecords {
      */
     getCartPendingStockReservations() {
         const deleteRegistrations = [
-            ...this.checkout.cart.deleteRegistrations.filter(r => r.groupId === this.group.id),
-            ...this.replaceRegistrations.filter(r => r.groupId === this.group.id),
+            ...this.checkout.cart.deleteRegistrations.filter(r => r.registration.groupId === this.group.id),
+            ...this.replaceRegistrations.filter(r => r.registration.groupId === this.group.id),
         ];
 
         const cartIndex = this.checkout.cart.items.findIndex(i => i.id === this.id);
@@ -1251,7 +1274,7 @@ export class RegisterItem implements ObjectWithRecords {
 
         return StockReservation.removed(
             itemsBefore.flatMap(i => i.getPendingStockReservations()), // these will be removed
-            deleteRegistrations.flatMap(r => r.stockReservations), // these will be freed up
+            deleteRegistrations.flatMap(r => r.registration.stockReservations), // these will be freed up
         );
     }
 
@@ -1284,7 +1307,7 @@ export class RegisterItem implements ObjectWithRecords {
             }),
         ];
 
-        const freed = this.replaceRegistrations.flatMap(r => r.stockReservations);
+        const freed = this.replaceRegistrations.flatMap(r => r.registration.stockReservations);
         return StockReservation.removed(base, freed);
     }
 

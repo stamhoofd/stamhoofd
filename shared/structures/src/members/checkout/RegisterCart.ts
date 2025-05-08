@@ -5,7 +5,7 @@ import { Platform } from '../../Platform.js';
 import { RegistrationWithMember } from '../RegistrationWithMember.js';
 import { BalanceItemCartItem } from './BalanceItemCartItem.js';
 import { RegisterCheckout, RegisterContext } from './RegisterCheckout.js';
-import { IDRegisterItem, RegisterItem } from './RegisterItem.js';
+import { IDRegisterItem, RegisterItem, RegistrationWithPlatformMember } from './RegisterItem.js';
 
 export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(IDRegisterItem) })
@@ -22,7 +22,7 @@ export class IDRegisterCart extends AutoEncoder {
         cart.items = this.items.map(i => i.hydrate(context));
         cart.balanceItems = this.balanceItems;
 
-        const registrations: RegistrationWithMember[] = [];
+        const registrations: RegistrationWithPlatformMember[] = [];
         for (const registrationId of this.deleteRegistrationIds) {
             let found = false;
             for (const member of context.members) {
@@ -31,7 +31,10 @@ export class IDRegisterCart extends AutoEncoder {
                     continue;
                 }
 
-                registrations.push(RegistrationWithMember.from(registration, member.patchedMember.tiny));
+                registrations.push(new RegistrationWithPlatformMember({
+                    registration,
+                    member,
+                }));
                 found = true;
                 break;
             }
@@ -58,7 +61,7 @@ export class RegisterCart {
     /**
      * You can define which registrations you want remove as part of this register operation.
      */
-    deleteRegistrations: RegistrationWithMember[] = [];
+    deleteRegistrations: RegistrationWithPlatformMember[] = [];
 
     calculatePrices() {
         for (const item of this.items) {
@@ -78,7 +81,7 @@ export class RegisterCart {
         return IDRegisterCart.create({
             items: this.items.map(i => i.convert()),
             balanceItems: this.balanceItems,
-            deleteRegistrationIds: this.deleteRegistrations.map(r => r.id),
+            deleteRegistrationIds: this.deleteRegistrations.map(r => r.registration.id),
         });
     }
 
@@ -147,15 +150,15 @@ export class RegisterCart {
         }
     }
 
-    removeRegistration(registration: RegistrationWithMember) {
-        const index = this.deleteRegistrations.findIndex(r => r.id === registration.id);
+    removeRegistration(registration: RegistrationWithPlatformMember) {
+        const index = this.deleteRegistrations.findIndex(r => r.registration.id === registration.registration.id);
         if (index === -1) {
             this.deleteRegistrations.push(registration);
         }
     }
 
-    unremoveRegistration(registration: RegistrationWithMember) {
-        const index = this.deleteRegistrations.findIndex(r => r.id === registration.id);
+    unremoveRegistration(registration: RegistrationWithPlatformMember) {
+        const index = this.deleteRegistrations.findIndex(r => r.registration.id === registration.registration.id);
         if (index !== -1) {
             this.deleteRegistrations.splice(index, 1);
         }
@@ -216,12 +219,16 @@ export class RegisterCart {
     get refund() {
         return this.items.reduce((total, item) => item.calculatedRefund + total, 0)
             + this.deleteRegistrations.reduce((total, item) => {
-                return total + item.price;
+                return total + item.registration.price;
             }, 0);
     }
 
     get singleOrganization() {
         if (this.items.length === 0) {
+            if (this.deleteRegistrations.length > 0) {
+                const organizationId = this.deleteRegistrations[0].registration.group.organizationId;
+                return this.deleteRegistrations[0].member.organizations.find(o => o.id === organizationId) ?? null;
+            }
             return null;
         }
 
@@ -291,11 +298,11 @@ export class RegisterCart {
             }
         }
 
-        const cleanedRegistrations: RegistrationWithMember[] = [];
+        const cleanedRegistrations: RegistrationWithPlatformMember[] = [];
         const singleOrganization = checkout.singleOrganization;
 
         for (const registration of this.deleteRegistrations) {
-            if (checkout.singleOrganizationId && registration.group.organizationId !== checkout.singleOrganizationId) {
+            if (checkout.singleOrganizationId && registration.registration.group.organizationId !== checkout.singleOrganizationId) {
                 errors.addError(new SimpleError({
                     code: 'invalid_organization',
                     message: 'Invalid organization in deleteRegistrations',
@@ -311,14 +318,14 @@ export class RegisterCart {
 
             const platform = Platform.shared;
 
-            const periodId = registration.group.periodId;
-            const period = periodId === platform.period.id ? platform.period : (periodId === singleOrganization.period.period.id ? singleOrganization.period.period : registration.group.settings.period);
+            const periodId = registration.registration.group.periodId;
+            const period = periodId === platform.period.id ? platform.period : (periodId === singleOrganization.period.period.id ? singleOrganization.period.period : registration.registration.group.settings.period);
 
             if (period && period.locked) {
                 errors.addError(new SimpleError({
                     code: 'locked_period',
                     message: 'Locked period',
-                    human: $t('662e1c09-b491-41a4-8e87-220fabc87eb1', { group: registration.group.settings.name, period: period.nameShort }),
+                    human: $t('662e1c09-b491-41a4-8e87-220fabc87eb1', { group: registration.registration.group.settings.name, period: period.nameShort }),
                 }));
                 continue;
             }
@@ -327,7 +334,7 @@ export class RegisterCart {
                 errors.addError(new SimpleError({
                     code: 'locked_period',
                     message: 'Locked period',
-                    human: $t('40670ad7-7db1-4ec9-84df-68b32642042e', { group: registration.group.settings.name }),
+                    human: $t('40670ad7-7db1-4ec9-84df-68b32642042e', { group: registration.registration.group.settings.name }),
                 }));
                 continue;
             }

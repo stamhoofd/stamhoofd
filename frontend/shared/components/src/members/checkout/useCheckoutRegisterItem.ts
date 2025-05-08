@@ -14,6 +14,7 @@ import { EditMemberStep, MemberStepManager } from '../classes/MemberStepManager'
 import { getAllMemberSteps } from '../classes/steps';
 import { RegisterItemStep } from '../classes/steps/RegisterItemStep';
 import { startCheckout } from './startCheckout';
+import { RegistrationWithPlatformMember } from '@stamhoofd/structures';
 
 export async function loadGroupOrganization(context: SessionContext, organizationId: string, owner: any) {
     if (organizationId === context.organization?.id) {
@@ -312,7 +313,7 @@ export async function chooseOrganizationMembersForGroup({ members, group, organi
     organization?: Organization;
     context: SessionContext;
     items?: RegisterItem[];
-    deleteRegistrations?: RegistrationWithMember[];
+    deleteRegistrations?: RegistrationWithPlatformMember[];
     navigate: NavigationActions;
     owner: any;
 }) {

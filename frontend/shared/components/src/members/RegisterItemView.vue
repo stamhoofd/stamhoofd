@@ -11,7 +11,7 @@
                 {{ item.group.settings.period.nameShort }}
             </span>
         </h1>
-        <p v-for="registration in item.replaceRegistrations" :key="registration.id" class="style-description">
+        <p v-for="{registration} in item.replaceRegistrations" :key="registration.id" class="style-description">
             <template v-if="registration.group.id !== item.group.id">
                 {{ $t('ece5e681-db76-4ce3-8e5e-c9dbcc4d8f0e', {group: registration.group.settings.name}) }}
             </template>

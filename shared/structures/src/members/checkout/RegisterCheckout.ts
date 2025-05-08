@@ -12,7 +12,7 @@ import { PlatformMember } from '../PlatformMember.js';
 import { RegistrationWithMember } from '../RegistrationWithMember.js';
 import { BalanceItemCartItem } from './BalanceItemCartItem.js';
 import { IDRegisterCart, RegisterCart } from './RegisterCart.js';
-import { RegisterItem } from './RegisterItem.js';
+import { RegisterItem, RegistrationWithPlatformMember } from './RegisterItem.js';
 
 export type RegisterContext = {
     members: PlatformMember[];
@@ -128,7 +128,7 @@ export class RegisterCheckout {
     }
 
     get singleOrganizationId() {
-        return this.singleOrganization?.id ?? this.cart.deleteRegistrations[0]?.organizationId ?? this.cart.balanceItems[0]?.item.organizationId;
+        return this.singleOrganization?.id ?? this.cart.deleteRegistrations[0]?.registration.organizationId ?? this.cart.balanceItems[0]?.item.organizationId;
     }
 
     setDefaultOrganization(organization: Organization | null) {
@@ -177,7 +177,7 @@ export class RegisterCheckout {
         }
     }
 
-    removeRegistration(registration: RegistrationWithMember, options?: { calculate?: boolean }) {
+    removeRegistration(registration: RegistrationWithPlatformMember, options?: { calculate?: boolean }) {
         this.cart.removeRegistration(registration);
         if (options?.calculate !== false) {
             this.updatePrices();
@@ -188,7 +188,7 @@ export class RegisterCheckout {
         }
     }
 
-    unremoveRegistration(registration: RegistrationWithMember, options?: { calculate?: boolean }) {
+    unremoveRegistration(registration: RegistrationWithPlatformMember, options?: { calculate?: boolean }) {
         this.cart.unremoveRegistration(registration);
         if (options?.calculate !== false) {
             this.updatePrices();

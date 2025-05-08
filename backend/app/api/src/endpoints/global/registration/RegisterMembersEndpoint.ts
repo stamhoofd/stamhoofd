@@ -257,12 +257,12 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             const existingRegistrations = await Registration.where({ memberId: member.id, groupId: item.groupId, cycle: group.cycle, periodId: group.periodId, registeredAt: { sign: '!=', value: null } });
 
             for (const existingRegistration of existingRegistrations) {
-                if (item.replaceRegistrations.some(r => r.id === existingRegistration.id)) {
+                if (item.replaceRegistrations.some(r => r.registration.id === existingRegistration.id)) {
                     // Safe
                     continue;
                 }
 
-                if (checkout.cart.deleteRegistrations.some(r => r.id === existingRegistration.id)) {
+                if (checkout.cart.deleteRegistrations.some(r => r.registration.id === existingRegistration.id)) {
                     // Safe
                     continue;
                 }
@@ -279,7 +279,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             if (item.replaceRegistrations.length === 1) {
                 // Try to reuse this specific one
-                reuseRegistration = (await Registration.getByID(item.replaceRegistrations[0].id)) ?? null;
+                reuseRegistration = (await Registration.getByID(item.replaceRegistrations[0].registration.id)) ?? null;
             }
 
             let startDate = item.calculatedStartDate;
@@ -327,7 +327,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (whoWillPayNow === 'nobody' && item.replaceRegistrations.length > 0) {
                 // If the replace registration was paid by an organization
                 // Make sure this updated registration will also be paid by the organization, not the member
-                const paidAsOrganization = item.replaceRegistrations[0].payingOrganizationId;
+                const paidAsOrganization = item.replaceRegistrations[0].registration.payingOrganizationId;
                 if (paidAsOrganization) {
                     registration.payingOrganizationId = paidAsOrganization;
                 }
@@ -389,7 +389,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 });
             }
 
-            const existingRegistration = await Registration.getByID(registrationStruct.id);
+            const existingRegistration = await Registration.getByID(registrationStruct.registration.id);
             if (!existingRegistration || existingRegistration.organizationId !== organization.id) {
                 throw new SimpleError({
                     code: 'invalid_data',

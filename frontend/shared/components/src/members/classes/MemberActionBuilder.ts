@@ -18,6 +18,7 @@ import { PlatformFamilyManager, usePlatformFamilyManager } from '../PlatformFami
 import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue';
 import { RegistrationActionBuilder } from './RegistrationActionBuilder';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
+import { RegistrationWithPlatformMember } from '@stamhoofd/structures';
 
 export function useDirectMemberActions(options?: { groups?: Group[]; organizations?: Organization[] }) {
     return useMemberActions()(options);
@@ -640,7 +641,10 @@ export class MemberActionBuilder {
     }
 
     async deleteRegistration(members: PlatformMember[]) {
-        const deleteRegistrations = members.flatMap(m => m.filterRegistrations({ groups: this.groups }).map(r => RegistrationWithMember.from(r, m.patchedMember.tiny)));
+        const deleteRegistrations = members.flatMap(member => member.filterRegistrations({ groups: this.groups }).map(registration => new RegistrationWithPlatformMember({
+            registration,
+            member,
+        })));
         return await chooseOrganizationMembersForGroup({
             members,
             group: this.groups[0],

@@ -5,6 +5,7 @@ import { checkoutRegisterItem, chooseOrganizationMembersForGroup } from '..';
 import { useContext, useOrganization } from '../../hooks';
 import { InMemoryTableAction, MenuTableAction, TableAction } from '../../tables/classes';
 import { PlatformFamilyManager, usePlatformFamilyManager } from '../PlatformFamilyManager';
+import { RegistrationWithPlatformMember } from '@stamhoofd/structures';
 
 export function useRegistrationActionBuilder() {
     const present = usePresent();
@@ -219,7 +220,7 @@ export class RegistrationActionBuilder {
     }
 
     async deleteRegistration() {
-        const deleteRegistrations: RegistrationWithMember[] = [];
+        const deleteRegistrations: RegistrationWithPlatformMember[] = [];
 
         for (const registration of this.registrations) {
             const member = this.members.find(m => m.id === registration.memberId);
@@ -228,7 +229,7 @@ export class RegistrationActionBuilder {
                 continue;
             }
 
-            deleteRegistrations.push(RegistrationWithMember.from(registration, member.patchedMember.tiny));
+            deleteRegistrations.push(new RegistrationWithPlatformMember({ registration, member }));
         }
 
         return await chooseOrganizationMembersForGroup({
@@ -263,7 +264,12 @@ export class RegistrationActionBuilder {
             member.family.pendingRegisterItems = [];
 
             const item = registration.group.id === group.id ? RegisterItem.fromRegistration(registration, member, this.organization) : RegisterItem.defaultFor(member, group, this.organization);
-            item.replaceRegistrations = [registration];
+            item.replaceRegistrations = [
+                new RegistrationWithPlatformMember({
+                    registration,
+                    member,
+                }),
+            ];
             items.push(item);
         }
 
@@ -318,7 +324,12 @@ export class RegistrationActionBuilder {
             member.family.pendingRegisterItems = [];
 
             const item = RegisterItem.fromRegistration(registration, member, groupOrganization);
-            item.replaceRegistrations = [registration];
+            item.replaceRegistrations = [
+                new RegistrationWithPlatformMember({
+                    registration,
+                    member,
+                }),
+            ];
             items.push(item);
         }
 
