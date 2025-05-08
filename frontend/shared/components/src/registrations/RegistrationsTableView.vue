@@ -10,7 +10,7 @@
 
 <script lang="ts" setup>
 import { usePresent } from '@simonbackx/vue-app-navigation';
-import { Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
+import { Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useDirectMemberActions, useGlobalEventListener, useMembersObjectFetcher, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
 import { AccessRight, Group, GroupCategoryTree, GroupType, MemberResponsibility, MemberWithRegistrationsBlob, Organization, PlatformRegistration, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
@@ -243,10 +243,9 @@ const Route = {
     }),
 };
 
-// todo
-// const actionBuilder = useDirectMemberActions({
-//     groups: props.group ? [props.group] : (props.category ? props.category.getAllGroups() : []),
-// });
+const actionBuilder = useDirectMemberActions({
+    groups: props.group ? [props.group] : (props.category ? props.category.getAllGroups() : []),
+});
 
 const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup();
 let canAdd = (props.group ? auth.canRegisterMembersInGroup(props.group) : false);
@@ -257,6 +256,8 @@ if (!props.organization) {
 
 // registrations for events of another organization should not be editable
 const excludeEdit = props.group && props.group.type === GroupType.EventRegistration && !!props.organization && props.group.organizationId !== props.organization.id;
+
+const membersFetcher = useMembersObjectFetcher();
 
 const actions: TableAction<ObjectType>[] = [
     new InMemoryTableAction({
@@ -273,7 +274,8 @@ const actions: TableAction<ObjectType>[] = [
             });
         },
     }),
-    // ...actionBuilder.getActions({ selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value, includeMove: true, includeEdit: !excludeEdit }),
+    ...actionBuilder.getActions({ selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value, includeMove: true, includeEdit: !excludeEdit })
+        .map(action => action.adaptToProperty<PlatformRegistration>({ fetcher: membersFetcher, key: 'member' })),
 ];
 
 // if (app !== 'admin' && auth.canManagePayments()) {

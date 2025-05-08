@@ -1,7 +1,7 @@
 import { usePresent } from '@simonbackx/vue-app-navigation';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
-import { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, PermissionLevel, PlatformMember, RegisterCheckout, RegisterItem, Registration, RegistrationWithTinyMember } from '@stamhoofd/structures';
-import { checkoutRegisterItem, chooseOrganizationMembersForGroup } from '..';
+import { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, PermissionLevel, Platform, PlatformMember, RegisterCheckout, RegisterItem, Registration, RegistrationWithTinyMember } from '@stamhoofd/structures';
+import { checkoutRegisterItem, chooseOrganizationMembersForGroup, MemberActionBuilder } from '..';
 import { useContext, useOrganization } from '../../hooks';
 import { InMemoryTableAction, MenuTableAction, TableAction } from '../../tables/classes';
 import { PlatformFamilyManager, usePlatformFamilyManager } from '../PlatformFamilyManager';
@@ -69,6 +69,27 @@ export class RegistrationActionBuilder {
             }
         }
         return true;
+    }
+
+    getMemberActions(options: {
+        includeDelete?: boolean;
+        includeMove?: boolean;
+        includeEdit?: boolean;
+        selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod;
+        forceWriteAccess?: boolean | null;
+        platform: Platform; }): TableAction<PlatformMember>[] {
+        return new MemberActionBuilder({
+            present: this.present,
+            platform: options.platform,
+            context: this.context,
+            // todo
+            groups: this.registrations.map(r => r.group),
+            // todo
+            organizations: [this.organization],
+            platformFamilyManager: this.platformFamilyManager,
+            owner: this.owner,
+            forceWriteAccess: options?.forceWriteAccess,
+        }).getActions(options);
     }
 
     getMoveAction(selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod): TableAction<PlatformMember>[] {

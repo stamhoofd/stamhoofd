@@ -1,6 +1,6 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 
-import { LimitedFilteredRequest } from '@stamhoofd/structures';
+import { LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { fetchAll, FetchAllOptions, ObjectFetcher } from '.';
 import { Toast } from '../../..';
 
@@ -23,6 +23,50 @@ export interface TableActionSelection<T extends ObjectWithId> {
      * When false: all rows are selected, except the marked rows
      */
     markedRowsAreSelected: boolean | null;
+}
+
+type TransformTableActionArgs<X extends { id: string }, T extends { id: string }> = {
+    selectionTransformer: (selection: TableActionSelection<X>) => TableActionSelection<T>;
+    inMemoryTransformer: (item: X) => T;
+};
+
+type KeysMatching<T, V> = { [K in keyof T]-?: T[K] extends V ? K : never }[keyof T];
+
+function transformFilter(filter: any, key: string): StamhoofdFilter {
+    if (!filter) {
+        return filter;
+    }
+
+    if (typeof filter === 'object') {
+        if (Array.isArray(filter)) {
+            return filter.map(item => transformFilter(item, key));
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        for (const [k, value] of Object.entries(filter)) {
+            if (k === key) {
+                if (value?.['$elemMatch']) {
+                    return value['$elemMatch'];
+                };
+
+                return filter;
+            }
+
+            if (k.startsWith('$')) {
+                return transformFilter(value, key);
+            }
+
+            return {
+                registrations: {
+                    $elemMatch: {
+                        [k]: value,
+                    },
+                },
+            } as unknown as StamhoofdFilter;
+        }
+    }
+
+    return filter;
 }
 
 export abstract class TableAction<T extends { id: string }> {
@@ -112,11 +156,56 @@ export abstract class TableAction<T extends { id: string }> {
     }
 
     abstract handle(data: TableActionSelection<T>): Promise<void>;
+
+    abstract _adaptToPropertyHelper<X extends { id: string }>(args: TransformTableActionArgs<X, T>): TableAction<X>;
+
+    adaptToProperty<X extends { id: string }>({ key, fetcher }: { key: KeysMatching<X, T> & string; fetcher: ObjectFetcher<T> }): TableAction<X> {
+        return this._adaptToPropertyHelper<X>({
+            inMemoryTransformer: item => item[key] as T,
+            selectionTransformer: (selection) => {
+                const filter: LimitedFilteredRequest = new LimitedFilteredRequest({
+                    ...selection.filter,
+                    filter: transformFilter(selection.filter.filter, key),
+                });
+
+                const newSelection: TableActionSelection<T> = {
+                    filter,
+                    fetcher,
+                    cachedAllValues: selection.cachedAllValues?.map(x => x[key] as T),
+                    markedRows: new Map([...selection.markedRows.values()].map((row) => {
+                        const x = row[key] as T;
+                        return [x.id, x];
+                    })),
+                    markedRowsAreSelected: selection.markedRowsAreSelected,
+                };
+
+                return newSelection;
+            },
+        });
+    }
 }
 
 export class MenuTableAction<T extends { id: string }> extends TableAction<T> {
     async handle(data: TableActionSelection<T>) {
         // Do nothing
+    }
+
+    _adaptToPropertyHelper<X extends { id: string }>(args: TransformTableActionArgs<X, T>): TableAction<X> {
+        return new MenuTableAction<X>({
+            name: this.name,
+            description: this.description,
+            icon: this.icon,
+            priority: this.priority,
+            groupIndex: this.groupIndex,
+            needsSelection: this.needsSelection,
+            singleSelection: this.singleSelection,
+            tooltip: this.tooltip,
+            enabled: this.enabled,
+            allowAutoSelectAll: this.allowAutoSelectAll,
+            childMenu: this.childMenu,
+            destructive: this.destructive,
+            childActions: this.getChildActions().map(a => a._adaptToPropertyHelper<X>(args)),
+        });
     }
 }
 
@@ -131,6 +220,25 @@ export class AsyncTableAction<T extends { id: string }> extends TableAction<T> {
     async handle(selection: TableActionSelection<T>) {
         // todo
         await this.handler(selection);
+    }
+
+    _adaptToPropertyHelper<X extends { id: string }>(args: TransformTableActionArgs<X, T>): TableAction<X> {
+        return new AsyncTableAction<X>({
+            name: this.name,
+            description: this.description,
+            icon: this.icon,
+            priority: this.priority,
+            groupIndex: this.groupIndex,
+            needsSelection: this.needsSelection,
+            singleSelection: this.singleSelection,
+            tooltip: this.tooltip,
+            enabled: this.enabled,
+            allowAutoSelectAll: this.allowAutoSelectAll,
+            childMenu: this.childMenu,
+            destructive: this.destructive,
+            childActions: this.getChildActions().map(a => a._adaptToPropertyHelper<X>(args)),
+            handler: async (selection: TableActionSelection<X>) => await this.handler(args.selectionTransformer(selection)),
+        });
     }
 }
 
@@ -182,5 +290,26 @@ export class InMemoryTableAction<T extends { id: string }> extends TableAction<T
             clearTimeout(timer);
             toast.hide();
         }
+    }
+
+    _adaptToPropertyHelper<X extends { id: string }>(args: TransformTableActionArgs<X, T>): TableAction<X> {
+        return new InMemoryTableAction<X>({
+            name: this.name,
+            description: this.description,
+            icon: this.icon,
+            priority: this.priority,
+            groupIndex: this.groupIndex,
+            needsSelection: this.needsSelection,
+            singleSelection: this.singleSelection,
+            tooltip: this.tooltip,
+            enabled: this.enabled,
+            allowAutoSelectAll: this.allowAutoSelectAll,
+            childMenu: this.childMenu,
+            destructive: this.destructive,
+            childActions: this.getChildActions().map(a => a._adaptToPropertyHelper<X>(args)),
+            handler: async (items: X[]) => {
+                await this.handler(items.map(i => args.inMemoryTransformer(i)));
+            },
+        });
     }
 }
