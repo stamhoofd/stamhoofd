@@ -1,7 +1,6 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, CachedBalance, Document, EmailTemplate, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
-import { RegistrationWithMember } from '@stamhoofd/models/dist/src/models/Registration';
 import { AccessRight, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, GroupType, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { MemberRecordStore } from '../services/MemberRecordStore';
@@ -269,14 +268,6 @@ export class AdminPermissionChecker {
 
     async canAccessArchivedGroups(organizationId: string) {
         return await this.hasFullAccess(organizationId);
-    }
-
-    async canAccessRegistrationWithMember(registration: RegistrationWithMember, permissionLevel: PermissionLevel = PermissionLevel.Read) {
-        if (!await this.canAccessRegistration(registration, permissionLevel)) {
-            return false;
-        }
-
-        return this.canAccessMember(registration.member, permissionLevel);
     }
 
     async canAccessMember(member: MemberWithRegistrations, permissionLevel: PermissionLevel = PermissionLevel.Read) {

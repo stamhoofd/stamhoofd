@@ -3,7 +3,6 @@ import { AuditLog, BalanceItem, CachedBalance, Document, Event, EventNotificatio
 import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationWithMemberBlob, RegistrationsBlob, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
-import { RegistrationWithMember } from '@stamhoofd/models/dist/src/models/Registration';
 import { SQL } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from './Context';
@@ -525,30 +524,27 @@ export class AuthenticatedStructures {
         });
     }
 
-    static async registrationsBlob(registrations: RegistrationWithMember[], includeContextOrganization = false, includeUser?: User): Promise<RegistrationsBlob> {
-        const membersBlob = await this.membersBlob(registrations.map(r => r.member), includeContextOrganization, includeUser);
+    static async registrationsBlob(registrationData: {
+        memberId: string;
+        id: string;
+    }[], members: MemberWithRegistrations[], includeContextOrganization = false, includeUser?: User): Promise<RegistrationsBlob> {
+        const membersBlob = await this.membersBlob(members, includeContextOrganization, includeUser);
 
         const memberBlobs = membersBlob.members;
 
-        const registrationWithMemberBlobs = registrations.map((registration) => {
-            const memberBlob = memberBlobs.find(m => m.id === registration.memberId);
+        const registrationWithMemberBlobs = registrationData.map(({ id, memberId }) => {
+            const memberBlob = memberBlobs.find(m => m.id === memberId);
             if (!memberBlob) {
                 throw new Error('Member not found');
             }
 
-            const childRegistration = registration.member.registrations.find(r => r.id === registration.id);
-
-            // todo!!!
-            if (!childRegistration) {
+            const registration = memberBlob.registrations.find(r => r.id === id);
+            if (!registration) {
                 throw new Error('Registration not found');
             }
 
-            const registrationWithGroup = registration.setRelation(Registration.group, childRegistration.group);
-
-            const registrationStruct = (registrationWithGroup.getStructure());
-
             return RegistrationWithMemberBlob.create({
-                ...registrationStruct,
+                ...registration,
                 balances: memberBlob.registrations.find(r => r.id === registration.id)?.balances ?? [],
                 member: memberBlob,
             });

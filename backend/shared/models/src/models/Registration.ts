@@ -6,9 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ArrayDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import { sendEmailTemplate } from '../helpers/EmailBuilder';
-import { Group, MemberWithRegistrations, Organization, User } from './';
-
-export type RegistrationWithMember = Registration & { member: MemberWithRegistrations };
+import { Group, Organization, User } from './';
 
 export class Registration extends QueryableModel {
     static table = 'registrations';

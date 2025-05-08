@@ -1,13 +1,12 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Member, Platform, Registration } from '@stamhoofd/models';
+import { Member, Platform } from '@stamhoofd/models';
 import { SQL, SQLSortDefinitions, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import { CountFilteredRequest, Country, CountryCode, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, RegistrationsBlob, StamhoofdFilter, assertSort } from '@stamhoofd/structures';
+import { CountFilteredRequest, Country, CountryCode, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, RegistrationWithMemberBlob, RegistrationsBlob, StamhoofdFilter, assertSort } from '@stamhoofd/structures';
 import { DataValidator } from '@stamhoofd/utility';
 
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { RegistrationWithMember } from '@stamhoofd/models/dist/src/models/Registration';
 import parsePhoneNumber from 'libphonenumber-js/max';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
@@ -20,7 +19,7 @@ type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<RegistrationsBlob, LimitedFilteredRequest>;
 
-const sorters: SQLSortDefinitions<RegistrationWithMember> = registrationSorters;
+const sorters: SQLSortDefinitions<RegistrationWithMemberBlob> = registrationSorters;
 const filterCompilers = registrationFilterCompilers;
 
 export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
@@ -263,34 +262,17 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
 
         const members = await Member.getBlobByIds(...registrationData.map(r => r.memberId));
 
-        const _registrationsWithMember: RegistrationWithMember[] = registrationData.map(({ id, memberId }) => {
-            const member = members.find(m => m.id === memberId);
-            if (!member) {
-                throw new Error(`Member with id ${memberId} not found`);
-            }
-
-            const registration = member.registrations.find(r => r.id === id);
-            if (!registration) {
-                throw new Error(`Registration with id ${id} not found in member ${memberId}`);
-            }
-
-            return registration.setRelation(Registration.member, member);
-        });
-
-        // Make sure registrationsWithMembers is in same order as registrationIds
-        const registrationsWithMember = registrationData.map(({ id }) => _registrationsWithMember.find(r => r.id === id)!);
-
-        for (const registration of registrationsWithMember) {
-            if (!await Context.auth.canAccessRegistrationWithMember(registration, permissionLevel)) {
+        for (const member of members) {
+            if (!await Context.auth.canAccessMember(member, permissionLevel)) {
                 throw Context.auth.error();
             }
         }
 
-        const registrationsBlob = await AuthenticatedStructures.registrationsBlob(registrationsWithMember);
+        const registrationsBlob = await AuthenticatedStructures.registrationsBlob(registrationData, members);
 
         const next = LimitedFilteredRequestHelper.fixInfiniteLoadingLoop({
             request: requestQuery,
-            results: registrationsWithMember,
+            results: registrationsBlob.registrations,
             sorters,
         });
 
