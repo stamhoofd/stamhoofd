@@ -296,7 +296,7 @@ export class MemberPlatformMembership extends QueryableModel {
 
         // Correct dates so we get the correct price config
         await this.correctDates(member, registration);
-        const priceConfig = periodConfig.getPriceConfigForDate(this.startDate);
+        const priceConfig = periodConfig.getPriceConfigForDate(this.trialUntil ?? this.startDate);
         const earliestPriceConfig = periodConfig.getPriceConfigForDate(new Date(1950, 0, 1));
 
         let freeDays = 0;
