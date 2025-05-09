@@ -3,16 +3,15 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Member, Platform } from '@stamhoofd/models';
 import { SQL, SQLSortDefinitions, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import { CountFilteredRequest, Country, CountryCode, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, RegistrationWithMemberBlob, RegistrationsBlob, StamhoofdFilter, assertSort } from '@stamhoofd/structures';
-import { DataValidator } from '@stamhoofd/utility';
+import { CountFilteredRequest, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, RegistrationWithMemberBlob, RegistrationsBlob, StamhoofdFilter, assertSort } from '@stamhoofd/structures';
 
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import parsePhoneNumber from 'libphonenumber-js/max';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
 import { LimitedFilteredRequestHelper } from '../../../helpers/LimitedFilteredRequestHelper';
 import { registrationFilterCompilers } from '../../../sql-filters/registrations';
 import { registrationSorters } from '../../../sql-sorters/registrations';
+import { GetMembersEndpoint } from '../members/GetMembersEndpoint';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
@@ -123,103 +122,16 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
             query.where(await compileToSQLFilter(q.filter, filterCompilers));
         }
 
-        if (q.search) {
-            let searchFilter: StamhoofdFilter | null = null;
+        const memberSearchFilter = GetMembersEndpoint.buildSearchFilter(q.search);
 
-            // is phone?
-            if (!searchFilter && q.search.match(/^\+?[0-9\s-]+$/)) {
-                // Try to format as phone so we have 1:1 space matches
-                try {
-                    const country = (Context.i18n.country as CountryCode) || Country.Belgium;
+        if (memberSearchFilter) {
+            const searchFilter: StamhoofdFilter = {
+                member: {
+                    $elemMatch: memberSearchFilter,
+                },
+            };
 
-                    const phoneNumber = parsePhoneNumber(q.search, country);
-                    if (phoneNumber && phoneNumber.isValid()) {
-                        const formatted = phoneNumber.formatInternational();
-                        searchFilter = {
-                            members: {
-                                $elemMatch: {
-                                    $or: [
-                                        {
-                                            phone: {
-                                                $eq: formatted,
-                                            },
-                                        },
-                                        {
-                                            parentPhone: {
-                                                $eq: formatted,
-                                            },
-                                        },
-                                        {
-                                            unverifiedPhone: {
-                                                $eq: formatted,
-                                            },
-                                        },
-                                    ],
-                                } } };
-                    }
-                }
-                catch (e) {
-                    console.error('Failed to parse phone number', q.search, e);
-                }
-            }
-
-            // Is lidnummer?
-            if (!searchFilter && (q.search.match(/^[0-9]{4}-[0-9]{6}-[0-9]{1,2}$/) || q.search.match(/^[0-9]{9,10}$/))) {
-                searchFilter = {
-                    members: {
-                        $elemMatch: {
-                            memberNumber: {
-                                $eq: q.search,
-                            } } },
-                };
-            }
-
-            // Two search modes:
-            // e-mail or name based searching
-            if (searchFilter) {
-                // already done
-            }
-            else if (q.search.includes('@')) {
-                const isCompleteAddress = DataValidator.isEmailValid(q.search);
-
-                // Member email address contains, or member parent contains
-                searchFilter = {
-                    members: {
-                        $elemMatch: {
-                            $or: [
-                                {
-                                    email: {
-                                        [(isCompleteAddress ? '$eq' : '$contains')]: q.search,
-                                    },
-                                },
-                                {
-                                    parentEmail: {
-                                        [(isCompleteAddress ? '$eq' : '$contains')]: q.search,
-                                    },
-                                },
-                                {
-                                    unverifiedEmail: {
-                                        [(isCompleteAddress ? '$eq' : '$contains')]: q.search,
-                                    },
-                                },
-                            ] } },
-                } as any as StamhoofdFilter;
-            }
-            else {
-                searchFilter = {
-                    members: {
-                        $elemMatch: {
-                            name: {
-                                $contains: q.search,
-                            } } },
-                };
-            }
-
-            // todo: Address search detection
-
-            if (searchFilter) {
-                query.where(await compileToSQLFilter(searchFilter, filterCompilers));
-            }
+            query.where(await compileToSQLFilter(searchFilter, filterCompilers));
         }
 
         if (q instanceof LimitedFilteredRequest) {

@@ -129,95 +129,10 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             query.where(await compileToSQLFilter(q.filter, filterCompilers));
         }
 
-        if (q.search) {
-            let searchFilter: StamhoofdFilter | null = null;
+        const searchFilter = GetMembersEndpoint.buildSearchFilter(q.search);
 
-            // is phone?
-            if (!searchFilter && q.search.match(/^\+?[0-9\s-]+$/)) {
-                // Try to format as phone so we have 1:1 space matches
-                try {
-                    const country = (Context.i18n.country as CountryCode) || Country.Belgium;
-
-                    const phoneNumber = parsePhoneNumber(q.search, country);
-                    if (phoneNumber && phoneNumber.isValid()) {
-                        const formatted = phoneNumber.formatInternational();
-                        searchFilter = {
-                            $or: [
-                                {
-                                    phone: {
-                                        $eq: formatted,
-                                    },
-                                },
-                                {
-                                    parentPhone: {
-                                        $eq: formatted,
-                                    },
-                                },
-                                {
-                                    unverifiedPhone: {
-                                        $eq: formatted,
-                                    },
-                                },
-                            ],
-                        };
-                    }
-                }
-                catch (e) {
-                    console.error('Failed to parse phone number', q.search, e);
-                }
-            }
-
-            // Is lidnummer?
-            if (!searchFilter && (q.search.match(/^[0-9]{4}-[0-9]{6}-[0-9]{1,2}$/) || q.search.match(/^[0-9]{9,10}$/))) {
-                searchFilter = {
-                    memberNumber: {
-                        $eq: q.search,
-                    },
-                };
-            }
-
-            // Two search modes:
-            // e-mail or name based searching
-            if (searchFilter) {
-                // already done
-            }
-            else if (q.search.includes('@')) {
-                const isCompleteAddress = DataValidator.isEmailValid(q.search);
-
-                // Member email address contains, or member parent contains
-                searchFilter = {
-                    $or: [
-                        {
-                            email: {
-                                [(isCompleteAddress ? '$eq' : '$contains')]: q.search,
-                            },
-                        },
-                        {
-                            parentEmail: {
-                                [(isCompleteAddress ? '$eq' : '$contains')]: q.search,
-                            },
-                        },
-                        {
-                            unverifiedEmail: {
-                                [(isCompleteAddress ? '$eq' : '$contains')]: q.search,
-                            },
-                        },
-                    ],
-                } as any as StamhoofdFilter;
-            }
-            else {
-                searchFilter = {
-                    name: {
-                        $contains: q.search,
-                    },
-                };
-            }
-
-            // todo: Address search detection
-
-            if (searchFilter) {
-                query.where(await compileToSQLFilter(searchFilter, filterCompilers));
-            }
+        if (searchFilter) {
+            query.where(await compileToSQLFilter(searchFilter, filterCompilers));
         }
 
         if (q instanceof LimitedFilteredRequest) {
@@ -231,6 +146,99 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         }
 
         return query;
+    }
+
+    static buildSearchFilter(search: string | null): StamhoofdFilter | null {
+        if (!search) {
+            return null;
+        }
+
+        let searchFilter: StamhoofdFilter | null = null;
+
+        // is phone?
+        if (!searchFilter && search.match(/^\+?[0-9\s-]+$/)) {
+            // Try to format as phone so we have 1:1 space matches
+            try {
+                const country = (Context.i18n.country as CountryCode) || Country.Belgium;
+
+                const phoneNumber = parsePhoneNumber(search, country);
+                if (phoneNumber && phoneNumber.isValid()) {
+                    const formatted = phoneNumber.formatInternational();
+                    searchFilter = {
+                        $or: [
+                            {
+                                phone: {
+                                    $eq: formatted,
+                                },
+                            },
+                            {
+                                parentPhone: {
+                                    $eq: formatted,
+                                },
+                            },
+                            {
+                                unverifiedPhone: {
+                                    $eq: formatted,
+                                },
+                            },
+                        ],
+                    };
+                }
+            }
+            catch (e) {
+                console.error('Failed to parse phone number', search, e);
+            }
+        }
+
+        // Is lidnummer?
+        if (!searchFilter && (search.match(/^[0-9]{4}-[0-9]{6}-[0-9]{1,2}$/) || search.match(/^[0-9]{9,10}$/))) {
+            searchFilter = {
+                memberNumber: {
+                    $eq: search,
+                },
+            };
+        }
+
+        // Two search modes:
+        // e-mail or name based searching
+        if (searchFilter) {
+            // already done
+        }
+        else if (search.includes('@')) {
+            const isCompleteAddress = DataValidator.isEmailValid(search);
+
+            // Member email address contains, or member parent contains
+            searchFilter = {
+                $or: [
+                    {
+                        email: {
+                            [(isCompleteAddress ? '$eq' : '$contains')]: search,
+                        },
+                    },
+                    {
+                        parentEmail: {
+                            [(isCompleteAddress ? '$eq' : '$contains')]: search,
+                        },
+                    },
+                    {
+                        unverifiedEmail: {
+                            [(isCompleteAddress ? '$eq' : '$contains')]: search,
+                        },
+                    },
+                ],
+            } as any as StamhoofdFilter;
+        }
+        else {
+            searchFilter = {
+                name: {
+                    $contains: search,
+                },
+            };
+        }
+
+        // todo: Address search detection
+
+        return searchFilter;
     }
 
     static async buildData(requestQuery: LimitedFilteredRequest, permissionLevel = PermissionLevel.Read) {
