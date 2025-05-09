@@ -9,9 +9,8 @@
 </template>
 
 <script lang="ts" setup>
-import { usePresent } from '@simonbackx/vue-app-navigation';
 import { Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useDirectMemberActions, useGlobalEventListener, useMembersObjectFetcher, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
-import { AccessRight, Group, GroupCategoryTree, GroupType, MemberResponsibility, MemberWithRegistrationsBlob, Organization, PlatformRegistration, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight, Group, GroupCategoryTree, GroupType, MemberResponsibility, Organization, PlatformRegistration, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
 import { useRegistrationsObjectFetcher } from '../fetchers/useRegistrationsObjectFetcher';
@@ -45,7 +44,6 @@ const props = withDefaults(
 
 const waitingList = computed(() => props.group && props.group.type === GroupType.WaitingList);
 
-// todo
 const { filterBuilders, loading } = useAdvancedRegistrationWithMemberUIFilterBuilders();
 
 const title = computed(() => {
@@ -71,9 +69,7 @@ const app = useAppContext();
 
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const auth = useAuth();
-// const organization = useOrganization();
 const platform = usePlatform();
-const present = usePresent();
 const filterPeriodId = props.periodId ?? props.group?.periodId ?? props.organization?.period?.period?.id ?? platform.value.period.id;
 const defaultFilter = app === 'admin' && !props.group
     ? {
@@ -120,14 +116,6 @@ const groups = (() => {
     }
     return [];
 })();
-
-const allResponsibilities = computed(() => {
-    const allResponsibilities = platform.value.config.responsibilities;
-    if (props.organization) {
-        allResponsibilities.push(...props.organization.privateMeta?.responsibilities ?? []);
-    }
-    return allResponsibilities;
-});
 
 function getRequiredFilter(): StamhoofdFilter | null {
     if (props.customFilter) {
@@ -196,10 +184,6 @@ const objectFetcher = useRegistrationsObjectFetcher({
 });
 
 const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
-
-function getMember(registration: PlatformRegistration): MemberWithRegistrationsBlob {
-    return registration.member.member;
-}
 
 const memberColumns = getMemberColumns({
     dateRange: props.dateRange,
@@ -282,5 +266,4 @@ const actions: TableAction<ObjectType>[] = [
     }),
     ...memberActions.map(action => action.adaptToProperty<PlatformRegistration>({ fetcher: membersFetcher, key: 'member' })),
 ];
-
 </script>
