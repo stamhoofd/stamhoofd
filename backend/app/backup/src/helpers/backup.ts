@@ -370,7 +370,7 @@ export async function backup() {
         const tmpFile = `${localBackupFolder}${getBackupBaseFileName(new Date())}`;
         const compressedFile = tmpFile + '.gz';
 
-        const cmd = 'mysqldump -u ' + escapeShellArg(STAMHOOFD.DB_USER) + ' -p' + escapeShellArg(STAMHOOFD.DB_PASS) + ' --flush-logs --single-transaction --triggers --routines --events --lock-tables=false ' + escapeShellArg(STAMHOOFD.DB_DATABASE) + ' > ' + escapeShellArg(tmpFile);
+        const cmd = 'mysqldump -u ' + escapeShellArg(STAMHOOFD.DB_USER) + ' -p' + escapeShellArg(STAMHOOFD.DB_PASS) + ' --flush-logs --single-transaction --quick --hex-blob --default-character-set=utf8mb4 --skip-extended-insert --max_allowed_packet=1G --triggers --routines --events --lock-tables=false ' + escapeShellArg(STAMHOOFD.DB_DATABASE) + ' > ' + escapeShellArg(tmpFile);
 
         console.log('Creating MySQL dump...');
         await execPromise(cmd);
