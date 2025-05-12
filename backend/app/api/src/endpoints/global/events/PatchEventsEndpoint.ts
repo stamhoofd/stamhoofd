@@ -239,30 +239,36 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.group, period);
                 }
                 else {
-                    if (event.groupId) {
-                        // need to delete old group first
-                        await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId);
-                        event.groupId = null;
+                    if (event.groupId === patch.group.id) {
+                        // ignore: bad practice: puts are not allowed like this
+                        // risk of deleting data
                     }
-                    patch.group.type = GroupType.EventRegistration;
+                    else {
+                        if (event.groupId) {
+                            // need to delete old group first
+                            await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId);
+                            event.groupId = null;
+                        }
+                        patch.group.type = GroupType.EventRegistration;
 
-                    const period = await RegistrationPeriod.getByDate(event.startDate);
+                        const period = await RegistrationPeriod.getByDate(event.startDate);
 
-                    if (!period) {
-                        throw new SimpleError({
-                            code: 'invalid_period',
-                            message: 'No period found for this start date',
-                            human: Context.i18n.$t('5959a6a9-064a-413c-871f-c74a145ed569'),
-                            field: 'startDate',
-                        });
+                        if (!period) {
+                            throw new SimpleError({
+                                code: 'invalid_period',
+                                message: 'No period found for this start date',
+                                human: Context.i18n.$t('5959a6a9-064a-413c-871f-c74a145ed569'),
+                                field: 'startDate',
+                            });
+                        }
+
+                        const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
+                            patch.group,
+                            patch.group.organizationId,
+                            period,
+                        );
+                        event.groupId = group.id;
                     }
-
-                    const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
-                        patch.group,
-                        patch.group.organizationId,
-                        period,
-                    );
-                    event.groupId = group.id;
                 }
             }
             else {
