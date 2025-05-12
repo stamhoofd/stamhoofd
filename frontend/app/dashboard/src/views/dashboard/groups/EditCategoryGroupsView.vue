@@ -268,20 +268,20 @@ async function createGroup() {
     me.groupIds.addPut(group.id);
     settings.categories.addPatch(me);
 
-    const p = OrganizationRegistrationPeriod.patch({
+    const basePatch = OrganizationRegistrationPeriod.patch({
         settings,
     });
 
-    p.groups.addPut(group);
+    basePatch.groups.addPut(group);
 
     await present({
         components: [
             new ComponentWithProperties(EditGroupView, {
-                group,
+                period: patchedPeriod.value.patch(basePatch),
+                groupId: group.id,
                 isNew: true,
-                saveHandler: (patch: AutoEncoderPatchType<Group>) => {
-                    p.groups.addPatch(patch);
-                    addPatch(p);
+                saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                    addPatch(basePatch.patch(patch));
                 },
             }),
         ],

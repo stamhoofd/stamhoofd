@@ -102,7 +102,7 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { BackButton, ContextMenu, ContextMenuItem, EditGroupView, ErrorBox, GroupAvatar, MembersTableView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from '@stamhoofd/components';
@@ -258,6 +258,8 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     }
 
     createGroup() {
+        const groups: PatchableArrayAutoEncoder<Group> = new PatchableArray();
+
         const group = Group.create({
             organizationId: this.organization.id,
             periodId: this.period.period.id,
@@ -271,16 +273,16 @@ export default class CategoryView extends Mixins(NavigationMixin) {
         me.groupIds.addPut(group.id);
         settings.categories.addPatch(me);
 
+        groups.addPut(group);
+
+        const basePatch = OrganizationRegistrationPeriod.patch({ groups, settings, id: this.period.id });
+
         this.present(new ComponentWithProperties(EditGroupView, {
-            group,
+            period: this.period.patch(basePatch),
+            groupId: group.id,
             isNew: true,
-            saveHandler: async (patch: AutoEncoderPatchType<Group>) => {
-                const p = OrganizationRegistrationPeriod.patch({
-                    id: this.period.id,
-                    settings,
-                });
-                p.groups.addPut(group.patch(patch));
-                await this.$organizationManager.patchPeriod(p);
+            saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                await this.$organizationManager.patchPeriod(basePatch.patch(patch));
             },
         }).setDisplayStyle('popup'));
     }
