@@ -1,15 +1,13 @@
 import { Request } from '@simonbackx/simple-networking';
 import { CountFilteredRequest, LimitedFilteredRequest, SortList, StamhoofdFilter, isEmptyFilter, isEqualFilter, mergeFilters } from '@stamhoofd/structures';
 import { onBeforeUnmount, reactive } from 'vue';
-import { useAuth } from '../../hooks';
 import { ObjectFetcher } from './ObjectFetcher';
 import { AutoEncoder } from '@simonbackx/simple-encoding';
 
 export function useTableObjectFetcher<O extends { id: string }, OF extends ObjectFetcher<O> = ObjectFetcher<O>>(objectFetcher: OF): TableObjectFetcher<O> {
-    const auth = useAuth();
     const fetcher = reactive(new TableObjectFetcher<O>({
         objectFetcher,
-        maxLimit: auth.hasSomePlatformAccess() ? 1000 : 100,
+        maxLimit: 100,
     })) as any;
 
     onBeforeUnmount(() => {
