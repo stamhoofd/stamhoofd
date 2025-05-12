@@ -1,5 +1,5 @@
 import { ObjectFetcher } from '@stamhoofd/components';
-import { assertSort, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, PrivateOrderWithTickets, SortItem, SortList, StamhoofdFilter, TicketPrivate } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, PrivateOrderWithTickets, SortItem, SortItemDirection, SortList, StamhoofdFilter, TicketPrivate } from '@stamhoofd/structures';
 import { parsePhoneNumber } from 'libphonenumber-js';
 import { WebshopManager } from '../WebshopManager';
 import { OrderStoreDataIndex, OrderStoreGeneratedIndex, OrderStoreIndex, orderStoreIndexValueDefinitions } from '../getPrivateOrderIndexes';
@@ -7,8 +7,8 @@ import { OrderStoreDataIndex, OrderStoreGeneratedIndex, OrderStoreIndex, orderSt
 type ObjectType = PrivateOrderWithTickets;
 
 function extendSort(list: SortList): SortList {
-    // todo: add createdAt?
-    return assertSort(list, [{ key: 'id' }]);
+    // Id should always be sorted by ASC if not the only one in the list (because other indexes first sort by own key, then by id ASC)
+    return assertSort(list, [{ key: 'id', order: SortItemDirection.ASC }]);
 }
 
 function searchToFilter(search: string | null): StamhoofdFilter | null {
@@ -35,28 +35,34 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 filters.unshift(data.pageFilter);
             }
 
-            const sortItems = (data.sort as (SortItem & { key: OrderStoreIndex })[]).filter((item) => {
+            for (const item of data.sort) {
                 const key = item.key;
-                // skip id
-                if ((key as string) === 'id') {
-                    // https://www.w3.org/TR/IndexedDB-2/#sorted-list-order
-                    // The records in an index are always sorted according to the record's key. However unlike object stores, a given index can contain multiple records with the same key. Such records are additionally sorted according to the index's record's value (meaning the key of the record in the referenced object store).
-                    return false;
-                }
-                const doesIndexExist = availableIndexes.includes(key);
+                const doesIndexExist = key === 'id' || availableIndexes.includes(key as OrderStoreIndex);
                 if (!doesIndexExist) {
                     console.error(`Index ${key} for IndexedDb order store is not supported.`);
+                    throw new Error(`Index ${key} for IndexedDb order store is not supported.`);
                 }
-                return doesIndexExist;
-            });
-
-            if (sortItems.length > 1) {
-                console.error('Only 1 sort item is supported for the IndexedDb order store');
             }
 
-            const sortItem: (SortItem & { key: OrderStoreIndex }) | undefined = sortItems[0];
+            if (data.sort.length === 0) {
+                throw new Error('No sort items set');
+            }
 
+            if (data.sort.length > 2) {
+                throw new Error('Too many sort items set');
+            }
+
+            if (!data.sort.some(item => item.key === 'id')) {
+                throw new Error('No valid sort set, or id is not in the sort list');
+            }
+
+            const sortItem = data.sort[0] as (SortItem & { key: OrderStoreIndex | 'id' });
             const filter = mergeFilters(filters, '$and');
+
+            if (sortItem.key === 'id' && data.sort.length > 1) {
+                // We don't support this
+                throw new Error('Sorting first by id and other keys is not supported');
+            }
 
             await manager.streamOrders({
                 callback: (order) => {
@@ -75,13 +81,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             let next: LimitedFilteredRequest | undefined = undefined;
 
             if (lastItem && arrayBuffer.length >= data.limit) {
-                const sortList: SortItem[] = [...sortItems];
-                if (sortList.length > 0 && !sortList.some(item => item.key === 'id')) {
-                    const order = sortList[0].order;
-                    sortList.push({ key: 'id', order });
-                }
-
-                const pageFilter = getSortFilter(lastItem, orderStoreIndexValueDefinitions, sortList);
+                const pageFilter = getSortFilter(lastItem, orderStoreIndexValueDefinitions, data.sort);
 
                 next = new LimitedFilteredRequest({
                     filter: data.filter,
@@ -90,6 +90,11 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                     search: data.search,
                     pageFilter,
                 });
+
+                if (!pageFilter || JSON.stringify(pageFilter) === JSON.stringify(data.pageFilter)) {
+                    console.error('Found infinite loading loop for', data);
+                    next = undefined;
+                }
             }
 
             return { results: arrayBuffer, next };

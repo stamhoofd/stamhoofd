@@ -575,7 +575,7 @@ export class WebshopManager {
             callback: (data: PrivateOrder) => void;
             filter?: StamhoofdFilter;
             limit?: number;
-            sortItem?: SortItem & { key: OrderStoreIndex };
+            sortItem?: SortItem & { key: OrderStoreIndex | 'id' };
             networkFetch?: boolean;
         },
     ): Promise<void> {
@@ -602,22 +602,13 @@ export class WebshopManager {
 
             // use an index if a SortItem is defined
             if (sortItem) {
-                const indexName = sortItem.key;
-                const order = sortItem.order;
-                let direction: IDBCursorDirection | undefined = undefined;
+                let direction: IDBCursorDirection = 'next';
 
-                if (order === SortItemDirection.ASC) {
-                    direction = 'next';
-                }
-                else if (order === SortItemDirection.DESC) {
+                if (sortItem.order === SortItemDirection.DESC) {
                     direction = 'prev';
                 }
-                else {
-                    // in case another SortItemDirection is added in the future
-                    console.error(`Order ${order as string} is not supported.`);
-                }
 
-                request = objectStore.index(indexName)
+                request = (sortItem.key === 'id' ? objectStore : objectStore.index(sortItem.key))
                     .openCursor(null, direction);
             }
             else {
