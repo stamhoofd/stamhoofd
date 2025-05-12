@@ -78,7 +78,7 @@ export class DocumentTemplate extends QueryableModel {
         const { items: balanceItems, payments } = await BalanceItem.getForRegistration(registration.id, this.organizationId);
 
         const paidAtDates = payments.flatMap(p => p.paidAt ? [p.paidAt?.getTime()] : []);
-        const price = balanceItems.reduce((sum, item) => sum + item.price, 0);
+        const price = balanceItems.reduce((sum, item) => sum + (item.priceOpen + item.pricePaid + item.pricePending), 0);
         const pricePaid = balanceItems.reduce((sum, item) => sum + item.pricePaid, 0);
 
         // We take the minimum date here, because there is a highter change of later paymetns to be for other things than the registration itself
