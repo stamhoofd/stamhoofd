@@ -236,6 +236,21 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
         }
         return false;
     }
+
+    updatePeriods(periods: OrganizationRegistrationPeriod[]) {
+        // Update in memory
+        for (const period of this.periods?.organizationPeriods ?? []) {
+            const updated = periods.find(p => p.id === period.id);
+            if (updated) {
+                period.deepSet(updated);
+            }
+        }
+
+        const updated = periods.find(p => p.id === this.period.id);
+        if (updated) {
+            this.period.deepSet(updated);
+        }
+    }
 }
 
 export class OrganizationWithWebshop extends AutoEncoder {

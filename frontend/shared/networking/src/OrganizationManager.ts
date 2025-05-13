@@ -2,7 +2,7 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableA
 import { SimpleError } from '@simonbackx/simple-errors';
 import { GlobalEventBus } from '@stamhoofd/components';
 import { LoginHelper, SessionContext, SessionManager } from '@stamhoofd/networking';
-import { Group, Organization, OrganizationAdmins, OrganizationPatch, OrganizationRegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures';
+import { Group, LimitedFilteredRequest, Organization, OrganizationAdmins, OrganizationPatch, OrganizationRegistrationPeriod, PaginatedResponseDecoder, RegistrationPeriod, RegistrationPeriodList, SortItemDirection } from '@stamhoofd/structures';
 import { Ref, inject, toRef } from 'vue';
 
 export function useOrganizationManager(): Ref<OrganizationManager> {
@@ -10,7 +10,9 @@ export function useOrganizationManager(): Ref<OrganizationManager> {
 }
 
 /**
- * Convenient access to the organization of the current session
+ * Convenient access to the organization of the current session.
+ *
+ * Note: this is bad practice and we should replace this with hooks as much as possible in the future.
  */
 export class OrganizationManager {
     $context: SessionContext;
@@ -80,50 +82,6 @@ export class OrganizationManager {
         await GlobalEventBus.sendEvent('organization-updated', this.$context.organization);
     }
 
-    async patchPeriods(patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>, options: { shouldRetry?: boolean; owner?: any } = {}) {
-        const response = await this.$context.authenticatedServer.request({
-            method: 'PATCH',
-            path: '/organization/registration-periods',
-            body: patch,
-            decoder: new ArrayDecoder(OrganizationRegistrationPeriod as Decoder<OrganizationRegistrationPeriod>),
-            shouldRetry: options.shouldRetry ?? false,
-            owner: options.owner,
-        });
-
-        this.updatePeriods(response.data);
-        return response.data;
-    }
-
-    async patchPeriod(patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>, options: { shouldRetry?: boolean; owner?: any } = {}) {
-        const arr = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>;
-        arr.addPatch(patch);
-
-        return await this.patchPeriods(arr, options);
-    }
-
-    updatePeriods(periods: OrganizationRegistrationPeriod[]) {
-        // Update in memory
-        for (const period of this.organization.periods?.organizationPeriods ?? []) {
-            const updated = periods.find(p => p.id === period.id);
-            if (updated) {
-                period.deepSet(updated);
-            }
-        }
-
-        const updated = periods.find(p => p.id === this.organization.period.id);
-        if (updated) {
-            this.organization.period.deepSet(updated);
-        }
-    }
-
-    async patchGroup(organizationPeriod: OrganizationRegistrationPeriod, patch: AutoEncoderPatchType<Group>, options: { shouldRetry?: boolean; owner?: any } = {}) {
-        const periodPatch = OrganizationRegistrationPeriod.patch({
-            id: organizationPeriod.id,
-        });
-        periodPatch.groups.addPatch(patch);
-        await this.patchPeriod(periodPatch, options);
-    }
-
     async loadAdmins(force = false, shouldRetry = true, owner?: any): Promise<OrganizationAdmins> {
         if (!force && this.organization.admins) {
             return this.organization as any;
@@ -149,20 +107,85 @@ export class OrganizationManager {
             return this.organization.periods;
         }
 
-        const response = await this.$context.authenticatedServer.request({
+        // Load last 5 years
+        const startDate = new Date();
+        startDate.setFullYear(startDate.getFullYear() - 6);
+
+        // Load periods
+        const periodsResponse = await this.$context.authenticatedServer.request({
             method: 'GET',
-            path: '/organization/registration-periods',
-            decoder: RegistrationPeriodList as Decoder<RegistrationPeriodList>,
+            path: '/registration-periods',
+            query: new LimitedFilteredRequest({
+                filter: {
+                    startDate: {
+                        sign: '>=',
+                        value: startDate,
+                    },
+                },
+                limit: 10,
+                sort: [
+                    {
+                        key: 'startDate',
+                        order: SortItemDirection.DESC,
+                    },
+                    {
+                        key: 'id',
+                        order: SortItemDirection.ASC,
+                    },
+                ],
+            }),
+            decoder: new PaginatedResponseDecoder(
+                new ArrayDecoder(RegistrationPeriod as Decoder<RegistrationPeriod>),
+                LimitedFilteredRequest,
+            ),
             owner,
             shouldRetry: shouldRetry ?? false,
         });
+
+        const periods = periodsResponse.data.results;
+        let organizationPeriods: OrganizationRegistrationPeriod[] = [];
+
+        if (periods.length !== 0) {
+            const response = await this.$context.authenticatedServer.request({
+                method: 'GET',
+                path: '/organization/registration-periods',
+                query: new LimitedFilteredRequest({
+                    filter: {
+                        periodId: {
+                            $in: periods.map(p => p.id),
+                        },
+                    },
+                    limit: 20,
+                    sort: [
+                        {
+                            key: 'id',
+                            order: SortItemDirection.ASC,
+                        },
+                    ],
+                }),
+                decoder: new PaginatedResponseDecoder(
+                    new ArrayDecoder(OrganizationRegistrationPeriod as Decoder<OrganizationRegistrationPeriod>),
+                    LimitedFilteredRequest,
+                ),
+                owner,
+                shouldRetry: shouldRetry ?? false,
+            });
+            organizationPeriods = response.data.results;
+        }
+
+        const list = RegistrationPeriodList.create({
+            organizationPeriods: organizationPeriods,
+            periods: periods,
+        });
+
         if (this.organization.periods) {
-            this.organization.periods?.deepSet(response.data);
+            this.organization.periods?.deepSet(list);
         }
         else {
-            this.organization.periods = response.data;
+            this.organization.periods = list;
         }
-        return response.data;
+
+        return list;
     }
 
     async loadArchivedGroups({ owner }: { owner?: any }) {

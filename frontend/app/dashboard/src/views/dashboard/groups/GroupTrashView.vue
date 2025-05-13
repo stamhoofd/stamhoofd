@@ -40,7 +40,7 @@
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { CenteredMessage, ContextMenu, ContextMenuItem, GroupAvatar, Spinner, STList, STListItem, STNavigationBar, Toast, useContext } from '@stamhoofd/components';
-import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
+import { useOrganizationManager, usePatchOrganizationPeriod, useRequestOwner } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
@@ -62,6 +62,7 @@ const allCategories = computed(() => props.period.getCategoryTree({
     permissions: context.value.auth.permissions,
 }).getAllCategories().filter(c => c.categories.length === 0));
 const owner = useRequestOwner();
+const patchOrganizationPeriod = usePatchOrganizationPeriod();
 
 load().catch(console.error);
 
@@ -146,7 +147,7 @@ async function restoreTo(group: Group, cat: GroupCategoryTree) {
     }));
 
     try {
-        await organizationManager.value.patchPeriod(patch);
+        await patchOrganizationPeriod(patch);
     }
     catch (e) {
         Toast.fromError(e).show();

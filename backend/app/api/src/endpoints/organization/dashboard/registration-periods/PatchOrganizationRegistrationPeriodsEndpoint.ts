@@ -284,7 +284,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         if (period.startDate > new Date(Date.now() + maximumStart)) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Het werkjaar die je wilt instellen is nog niet gestart',
+                message: $t('Het werkjaar dat je wilt instellen is nog niet gestart'),
                 field: 'period',
             });
         }

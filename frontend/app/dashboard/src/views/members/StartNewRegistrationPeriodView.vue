@@ -31,7 +31,7 @@
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, Toast, useErrors, useOrganization } from '@stamhoofd/components';
-import { useOrganizationManager } from '@stamhoofd/networking';
+import { useOrganizationManager, usePatchOrganizationPeriods } from '@stamhoofd/networking';
 import { Organization, OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/structures';
 import { ref } from 'vue';
 
@@ -45,6 +45,7 @@ const organization = useOrganization();
 const organizationManager = useOrganizationManager();
 const errors = useErrors();
 const pop = usePop();
+const patchOrganizationPeriods = usePatchOrganizationPeriods();
 
 async function start() {
     if (loading.value) {
@@ -59,7 +60,7 @@ async function start() {
         const arr = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>;
         arr.addPut(newOrganizationPeriod);
 
-        await organizationManager.value.patchPeriods(arr);
+        await patchOrganizationPeriods(arr);
 
         await organizationManager.value.patch(
             Organization.patch({

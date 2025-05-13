@@ -92,6 +92,21 @@
                                 </template>
                             </STListItem>
 
+                            <STListItem v-else :selectable="true" class="left-center" @click="createGroup">
+                                <template #left>
+                                    <img src="@stamhoofd/assets/images/illustrations/list.svg">
+                                </template>
+                                <h2 class="style-title-list">
+                                    {{ $t('Inschrijvingen verzamelen') }}
+                                </h2>
+                                <p class="style-description">
+                                    {{ $t('Je kan inschrijvingen verzamelen via deze activiteit') }}
+                                </p>
+                                <template #right>
+                                    <span class="icon arrow-right-small gray" />
+                                </template>
+                            </STListItem>
+
                             <STListItem v-if="event.group" :selectable="true" class="left-center" @click="$navigate(Routes.EditEmails)">
                                 <template #left>
                                     <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
@@ -155,8 +170,10 @@
 
 <script setup lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
-import { EmailTemplateType, Event, Group, Organization } from '@stamhoofd/structures';
+import { usePatchOrganizationPeriod, useRequestOwner } from '@stamhoofd/networking';
+import { EmailTemplateType, Event, Group, LimitedFilteredRequest, Organization, OrganizationRegistrationPeriod, PaginatedResponseDecoder, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, Ref, ref } from 'vue';
 import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';
@@ -170,6 +187,7 @@ import ImageComponent from '../views/ImageComponent.vue';
 import EditEventView from './EditEventView.vue';
 import EventInfoTable from './components/EventInfoTable.vue';
 import EventNotificationRow from './components/EventNotificationRow.vue';
+import { useCreateEventGroup } from './composables/createEventGroup';
 
 const props = defineProps<{
     event: Event;
@@ -182,8 +200,9 @@ const context = useContext();
 const platform = usePlatform();
 const pop = usePop();
 const auth = useAuth();
-
+const createEventGroup = useCreateEventGroup();
 const eventOrganization: Ref<Organization | null> = ref(null);
+const owner = useRequestOwner();
 
 function setOrganization(o: Organization) {
     eventOrganization.value = o;
@@ -196,6 +215,7 @@ function setGroupOrganization(o: Organization) {
 }
 
 const canWriteEvent = computed(() => auth.canWriteEventForOrganization(props.event, eventOrganization.value));
+const patchOrganizationPeriod = usePatchOrganizationPeriod();
 
 const levelPrefix = computed(() => {
     const prefixes: string[] = [];
@@ -285,52 +305,25 @@ defineRoutes([
         url: Routes.EditGroup,
         component: EditGroupView as ComponentOptions,
         present: 'popup',
-        paramsToProps: () => {
+        paramsToProps: async () => {
             if (!props.event.group) {
                 throw new Error('Missing group');
             }
 
+            const group = props.event.group;
+            const period = await prepareOrganizationPeriod(group);
+
             return {
-                group: props.event.group,
+                period,
+                groupId: props.event.group.id,
                 isMultiOrganization: !props.event.organizationId,
                 organizationHint: eventOrganization.value ?? groupOrganization.value,
                 isNew: false,
                 showToasts: true,
-                saveHandler: async (patch: AutoEncoderPatchType<Group>) => {
-                    const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
-
-                    arr.addPatch(Event.patch({
-                        id: props.event.id,
-                        group: patch,
-                    }));
-
-                    const response = await context.value.authenticatedServer.request({
-                        method: 'PATCH',
-                        path: '/events',
-                        body: arr,
-                        decoder: new ArrayDecoder(Event as Decoder<Event>),
+                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                    await patchOrganizationPeriod(patch, {
+                        organizationId: group.organizationId,
                     });
-
-                    // Make sure original event is patched
-                    deepSetArray([props.event], response.data);
-                },
-                deleteHandler: async () => {
-                    const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
-
-                    arr.addPatch(Event.patch({
-                        id: props.event.id,
-                        group: null,
-                    }));
-
-                    const response = await context.value.authenticatedServer.request({
-                        method: 'PATCH',
-                        path: '/events',
-                        body: arr,
-                        decoder: new ArrayDecoder(Event as Decoder<Event>),
-                    });
-
-                    // Make sure original event is patched
-                    deepSetArray([props.event], response.data);
                 },
             };
         },
@@ -355,6 +348,80 @@ defineRoutes([
     },
 ]);
 const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup();
+
+async function prepareOrganizationPeriod(group: Group) {
+    const organizationId = group.organizationId;
+    const periodId = group.periodId;
+
+    // Request data
+    const response = await context.value.authenticatedServer.request({
+        method: 'GET',
+        path: '/organization/registration-periods',
+        query: new LimitedFilteredRequest({
+            filter: {
+                periodId: periodId,
+                organizationId: organizationId,
+            },
+            limit: 1,
+            sort: [
+                {
+                    key: 'id',
+                    order: SortItemDirection.ASC,
+                },
+            ],
+        }),
+        decoder: new PaginatedResponseDecoder(
+            new ArrayDecoder(OrganizationRegistrationPeriod as Decoder<OrganizationRegistrationPeriod>),
+            LimitedFilteredRequest,
+        ),
+        owner,
+        shouldRetry: true,
+    });
+
+    if (!response.data.results[0]) {
+        throw new SimpleError({
+            code: 'missing-organization-period',
+            message: 'Missing organization period',
+            human: $t('Deze #groep is nog niet actief in dit werkjaar, maak dat eerst aan.'),
+        });
+    }
+
+    const period = response.data.results[0];
+
+    // Assert the group inside the period (since it is an event, it won't be included)
+    if (!period.groups.some(g => g.id === group.id)) {
+        // Add the group to the period
+        period.groups.push(group);
+    }
+
+    return period;
+}
+
+function createGroup() {
+    createEventGroup(props.event, async (group: Group) => {
+        // Set event group and save
+        const patch = Event.patch({
+            id: props.event.id,
+            group: group,
+        });
+
+        const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
+        arr.addPatch(patch);
+
+        const response = await context.value.authenticatedServer.request({
+            method: 'PATCH',
+            path: '/events',
+            body: arr,
+            decoder: new ArrayDecoder(Event as Decoder<Event>),
+        });
+
+        // Make sure original event is patched
+        deepSetArray([props.event], response.data);
+
+        // Navigate to the new group settings
+        $navigate(Routes.EditGroup).catch(console.error);
+    });
+}
 
 async function addMembers() {
     if (!props.event.group) {

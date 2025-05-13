@@ -30,6 +30,12 @@ declare module 'vue' {
         $t: typeof import('@stamhoofd/frontend-i18n').I18n.prototype.$t;
         $feature: ReturnType<typeof import('@stamhoofd/components').useFeatureFlag>;
 
+        /**
+         * @deprecated
+         * Only used for legacy code
+         */
+        $patchOrganizationPeriod: ReturnType<typeof import('@stamhoofd/networking').usePatchOrganizationPeriod>;
+
         $context: SessionContext;
         $organization: Organization;
         $platform: Platform;

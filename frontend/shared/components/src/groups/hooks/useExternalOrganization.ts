@@ -93,7 +93,7 @@ export function useExternalOrganization(organizationId: Ref<string | null>, orga
         loading: computed(() => externalOrganization.value === null && !!organizationId.value),
         errorBox,
         externalOrganization,
-        choose: async function chooseOrganizer(title: string, canSelect?: (organization: Organization) => Promise<boolean> | boolean) {
+        choose: async function chooseOrganizer(title: string, canSelect?: (organization: Organization) => (Promise<boolean> | boolean)) {
             await present({
                 components: [
                     new ComponentWithProperties(NavigationController, {

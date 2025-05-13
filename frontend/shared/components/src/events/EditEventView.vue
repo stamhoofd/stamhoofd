@@ -28,19 +28,7 @@
         </STInputBox>
 
         <STList>
-            <STListItem :selectable="true" element-name="button" @click="addRegistrations">
-                <template #left>
-                    <span class="icon gray" :class="patched.group ? 'edit' : 'add'" />
-                </template>
-
-                <h3 class="style-title-list">
-                    {{ patched.group ? $t('76eb7982-9fc5-490a-9414-42bb7f10b8d6') : $t('8c30c20d-b734-4ece-bca9-292d064c5028') }}
-                </h3>
-
-                <p class="style-description-small">
-                    {{ $t('9210b13c-2699-4a7f-b173-a07bafd8a13b') }}
-                </p>
-            </STListItem>
+            <CheckboxListItem v-model="hasGroup" :label="$t('Inschrijvingen verzamelen')" :description="$t('Je kan de instellingen voor inschrijvingen (bv. prijs) wijzigen via het overzicht van de activiteit.')" />
         </STList>
 
         <hr><h2>{{ $t('112b7686-dffc-4ae9-9706-e3efcd34898f') }}</h2>
@@ -89,11 +77,11 @@
         </STList>
 
         <template v-if="canSetNationalActivity && externalOrganization">
-            <hr><h2>{{ $t('113f3407-9b00-4e86-bedd-e61614e78a0b') }}</h2>
-            <p>{{ $t('2662a425-f996-479b-a1fc-8498f068ea97') }}</p>
+            <hr><h2>{{ $t('Lokale activiteit') }}</h2>
+            <p>{{ $t('Deze activiteit is enkel zichtbaar voor leden die inschreven zijn bij deze #groep.') }}</p>
 
             <STList>
-                <STListItem v-if="externalOrganization" :selectable="!organization" @click="chooseOrganizer('Kies een organisator', canSelectOrganization)">
+                <STListItem v-if="externalOrganization" :selectable="!organization" @click="organization ? undefined : chooseOrganizer($t('Kies een #groep'), canSelectOrganization)">
                     <template #left>
                         <OrganizationAvatar :organization="externalOrganization" />
                     </template>
@@ -240,9 +228,8 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AddressInput, CenteredMessage, DateSelection, Dropdown, EditGroupView, ErrorBox, GlobalEventBus, ImageComponent, NavigationActions, OrganizationAvatar, TagIdsInput, TimeInput, Toast, UploadButton, useExternalOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { AccessRight, Event, EventLocation, EventMeta, Group, GroupSettings, GroupType, Organization, ResolutionRequest, TranslatedString } from '@stamhoofd/structures';
+import { AddressInput, CenteredMessage, CheckboxListItem, DateSelection, Dropdown, EditGroupView, ErrorBox, GlobalEventBus, ImageComponent, NavigationActions, OrganizationAvatar, SearchOrganizationView, TagIdsInput, TimeInput, Toast, UploadButton, useExternalOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
+import { AccessRight, Event, EventLocation, EventMeta, Group, GroupSettings, GroupStatus, Organization, ResolutionRequest, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch, watchEffect } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
@@ -250,9 +237,10 @@ import { useErrors } from '../errors/useErrors';
 import { useAuth, useContext, useOrganization, usePatch, usePlatform } from '../hooks';
 import DefaultAgeGroupIdsInput from '../inputs/DefaultAgeGroupIdsInput.vue';
 import GroupsInput from '../inputs/GroupsInput.vue';
-import SearchOrganizationView from '../members/SearchOrganizationView.vue';
 import DeleteView from '../views/DeleteView.vue';
 import { useEventPermissions } from './composables/useEventPermissions';
+import { GroupType } from '@stamhoofd/structures';
+import { useCreateEventGroup } from './composables/createEventGroup';
 
 const props = withDefaults(
     defineProps<{
@@ -354,6 +342,45 @@ const startDate = computed({
             d.setMonth(startDate.getMonth());
             d.setDate(startDate.getDate());
             endDate.value = d;
+        }
+    },
+});
+
+const createEventGroup = useCreateEventGroup()
+const hasGroup = computed({
+    get: () => patched.value.group !== null,
+    set: (enabled) => {
+        if (enabled === hasGroup.value) {
+            return;
+        }
+
+        if (enabled) {
+            const originalGroup = props.event.group;
+            if (originalGroup) {
+                // Keep original group by unsetting the patch explicitly
+                patch.value.group = undefined;
+            }
+            else {
+                createEventGroup(patched.value, (group: Group) => {
+                    addPatch({
+                        // Create a new default group
+                        group,
+                    });
+                })
+            }
+        }
+        else {
+            if (patched.value.group) {
+                if (patched.value.group.settings.getUsedStock(patched.value.group)) {
+                    // Not allowed
+                    Toast.error($t('Je kan inschrijvingen voor deze activiteit momenteel niet uitschakelen omdat er al inschrijvingen zijn. Verwijder die eerst.'))
+                        .show();
+                    return;
+                }
+                addPatch({
+                    group: null,
+                });
+            }
         }
     },
 });
@@ -462,7 +489,7 @@ const isNationalActivity = computed({
             const organizationId = props.event.organizationId || organization.value?.id;
 
             if (!organizationId) {
-                chooseOrganizer($t(`e07de917-f506-4699-9198-de9d4cbb5ca9`), canSelectOrganization).catch(console.error);
+                chooseOrganizer($t(`Van welke #groep is deze activiteit?`), canSelectOrganization).catch(console.error);
                 return;
             }
             addPatch({
@@ -654,102 +681,6 @@ async function save() {
     }
 
     saving.value = false;
-}
-
-async function addRegistrations() {
-    if (patched.value.group) {
-        // Edit the group
-        await present({
-            components: [
-                new ComponentWithProperties(EditGroupView, {
-                    group: patched.value.group,
-                    isMultiOrganization: isNationalActivity.value,
-                    isNew: false,
-                    showToasts: false,
-                    saveHandler: (patch: AutoEncoderPatchType<Group>) => {
-                        addPatch({
-                            group: patch,
-                        });
-                    },
-                    deleteHandler: async () => {
-                        addPatch({
-                            group: null,
-                        });
-                    },
-                }),
-            ],
-            modalDisplayStyle: 'popup',
-        });
-    }
-    else {
-        const organizationId = patched.value.organizationId ?? organization.value?.id ?? '';
-        const group = Group.create({
-            organizationId,
-            periodId: externalOrganization.value?.period.period.id ?? organization.value?.period.period.id,
-            type: GroupType.EventRegistration,
-            settings: GroupSettings.create({
-                name: TranslatedString.create(patched.value.name),
-                allowRegistrationsByOrganization: isNationalActivity.value,
-            }),
-        });
-
-        if (!organizationId) {
-            // Kies een organisator
-            await present({
-                components: [
-                    new ComponentWithProperties(NavigationController, {
-                        root: new ComponentWithProperties(SearchOrganizationView, {
-                            title: $t('67967405-d320-4d40-8dc0-889915da1f34'),
-                            description: $t('2e5e052c-98b7-4375-b771-05a8913c145b'),
-                            selectOrganization: async (organization: Organization, navigation: NavigationActions) => {
-                                group.organizationId = organization.id;
-                                group.periodId = organization.period.period.id;
-                                await navigation.show({
-                                    force: true,
-                                    replace: 1,
-                                    components: [
-                                        new ComponentWithProperties(EditGroupView, {
-                                            group: group,
-                                            isNew: true,
-                                            isMultiOrganization: isNationalActivity.value,
-                                            showToasts: false,
-                                            organizationHint: organization,
-                                            saveHandler: (patch: AutoEncoderPatchType<Group>) => {
-                                                addPatch({
-                                                    group: group.patch(patch),
-                                                });
-                                            },
-                                        }),
-                                    ],
-                                });
-                            },
-                        }),
-                    }),
-                ],
-                modalDisplayStyle: 'popup',
-            });
-            return;
-        }
-
-        // Edit the group
-        await present({
-            components: [
-                new ComponentWithProperties(EditGroupView, {
-                    group: group,
-                    isNew: true,
-                    isMultiOrganization: isNationalActivity.value,
-                    organizationHint: externalOrganization.value,
-                    showToasts: false,
-                    saveHandler: (patch: AutoEncoderPatchType<Group>) => {
-                        addPatch({
-                            group: group.patch(patch),
-                        });
-                    },
-                }),
-            ],
-            modalDisplayStyle: 'popup',
-        });
-    }
 }
 
 async function deleteMe() {

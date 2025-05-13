@@ -1,18 +1,24 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, RegistrationPeriod as RegistrationPeriodStruct, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
 
+import { SimpleError } from '@simonbackx/simple-errors';
 import { RegistrationPeriod } from '@stamhoofd/models';
+import { applySQLSorter, compileToSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { registrationPeriodFilterCompilers } from '../../../sql-filters/registration-periods';
+import { registrationPeriodSorters } from '../../../sql-sorters/registration-periods';
+import { Decoder } from '@simonbackx/simple-encoding';
 
 type Params = Record<string, never>;
-type Query = undefined;
+type Query = LimitedFilteredRequest;
 type Body = undefined;
-type ResponseBody = RegistrationPeriodStruct[];
+type ResponseBody = PaginatedResponse<RegistrationPeriodStruct[], LimitedFilteredRequest>;
 
-/**
- * One endpoint to create, patch and delete members and their registrations and payments
- */
+const filterCompilers: SQLFilterDefinitions = registrationPeriodFilterCompilers;
+const sorters: SQLSortDefinitions<RegistrationPeriod> = registrationPeriodSorters;
 
-export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+    queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>;
+
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
@@ -26,11 +32,103 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
         return [false];
     }
 
+    static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
+        const scopeFilter: StamhoofdFilter | undefined = undefined;
+        const query = RegistrationPeriod.select();
+
+        if (scopeFilter) {
+            query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
+        }
+
+        if (q.filter) {
+            query.where(await compileToSQLFilter(q.filter, filterCompilers));
+        }
+
+        if (q.search) {
+            let searchFilter: StamhoofdFilter | null = null;
+
+            searchFilter = {
+                id: q.search,
+            };
+
+            if (searchFilter) {
+                query.where(await compileToSQLFilter(searchFilter, filterCompilers));
+            }
+        }
+
+        if (q instanceof LimitedFilteredRequest) {
+            if (q.pageFilter) {
+                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers));
+            }
+
+            q.sort = assertSort(q.sort, [{ key: 'id' }]);
+            applySQLSorter(query, q.sort, sorters);
+            query.limit(q.limit);
+        }
+
+        return query;
+    }
+
+    static async buildData(requestQuery: LimitedFilteredRequest) {
+        const query = await GetRegistrationPeriodsEndpoint.buildQuery(requestQuery);
+        const registrationPeriods = await query.fetch();
+
+        let next: LimitedFilteredRequest | undefined;
+
+        if (registrationPeriods.length >= requestQuery.limit) {
+            const lastObject = registrationPeriods[registrationPeriods.length - 1];
+            const nextFilter = getSortFilter(lastObject, sorters, requestQuery.sort);
+
+            next = new LimitedFilteredRequest({
+                filter: requestQuery.filter,
+                pageFilter: nextFilter,
+                sort: requestQuery.sort,
+                limit: requestQuery.limit,
+                search: requestQuery.search,
+            });
+
+            if (JSON.stringify(nextFilter) === JSON.stringify(requestQuery.pageFilter)) {
+                console.error('Found infinite loading loop for', requestQuery);
+                next = undefined;
+            }
+        }
+
+        return new PaginatedResponse<RegistrationPeriodStruct[], LimitedFilteredRequest>({
+            results: registrationPeriods.map(p => p.getStructure()),
+            next,
+        });
+    }
+
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const periods = await RegistrationPeriod.all();
+        if (request.request.getVersion() < 371) {
+            throw new SimpleError({
+                code: 'client_update_required',
+                statusCode: 400,
+                message: 'Er is een noodzakelijke update beschikbaar. Herlaad de pagina en wis indien nodig de cache van jouw browser.',
+                human: $t(`adb0e7c8-aed7-43f5-bfcc-a350f03aaabe`),
+            });
+        }
+
+        const maxLimit = 100;
+
+        if (request.query.limit > maxLimit) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                field: 'limit',
+                message: 'Limit can not be more than ' + maxLimit,
+            });
+        }
+
+        if (request.query.limit < 1) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                field: 'limit',
+                message: 'Limit can not be less than 1',
+            });
+        }
 
         return new Response(
-            periods.map(p => p.getStructure()),
+            await GetRegistrationPeriodsEndpoint.buildData(request.query),
         );
     }
 }

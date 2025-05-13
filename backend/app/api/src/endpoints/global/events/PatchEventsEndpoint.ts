@@ -32,6 +32,48 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         return [false];
     }
 
+    async putEventGroup(event: Event, putGroup: GroupStruct) {
+        const period = await RegistrationPeriod.getByDate(event.startDate);
+
+        if (!period) {
+            throw new SimpleError({
+                code: 'invalid_period',
+                message: 'No period found for this start date',
+                human: Context.i18n.$t('5959a6a9-064a-413c-871f-c74a145ed569'),
+                field: 'startDate',
+            });
+        }
+
+        let group = await Group.getByID(putGroup.id);
+
+        if (!group) {
+            putGroup.type = GroupType.EventRegistration;
+
+            group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
+                putGroup,
+                putGroup.organizationId,
+                period,
+            );
+        }
+        else {
+            if (group.type !== GroupType.EventRegistration) {
+                throw new SimpleError({
+                    code: 'invalid_group',
+                    message: 'Group is not of type EventRegistration',
+                });
+            }
+        }
+
+        if (event.organizationId && group.organizationId !== event.organizationId) {
+            throw new SimpleError({
+                code: 'invalid_group',
+                message: 'Group is not of the same organization',
+            });
+        }
+
+        return group;
+    }
+
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate();
@@ -95,33 +137,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             await PatchEventsEndpoint.checkEventLimits(event);
 
             if (put.group) {
-                const period = await RegistrationPeriod.getByDate(event.startDate);
-
-                if (!period) {
-                    throw new SimpleError({
-                        code: 'invalid_period',
-                        message: 'No period found for this start date',
-                        human: Context.i18n.$t('5959a6a9-064a-413c-871f-c74a145ed569'),
-                        field: 'startDate',
-                    });
-                }
-
-                const group = await Group.getByID(put.group.id);
-
-                if (group === undefined) {
-                    throw new SimpleError({
-                        code: 'invalid_group',
-                        message: 'No group found for this id',
-                    });
-                }
-
-                if (group.type !== GroupType.EventRegistration) {
-                    throw new SimpleError({
-                        code: 'invalid_group',
-                        message: 'Group is not of type EventRegistration',
-                    });
-                }
-
+                const group = await this.putEventGroup(event, put.group);
                 await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
                     await event.syncGroupRequirements(group);
                 });
@@ -249,24 +265,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                             await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId);
                             event.groupId = null;
                         }
-                        patch.group.type = GroupType.EventRegistration;
-
-                        const period = await RegistrationPeriod.getByDate(event.startDate);
-
-                        if (!period) {
-                            throw new SimpleError({
-                                code: 'invalid_period',
-                                message: 'No period found for this start date',
-                                human: Context.i18n.$t('5959a6a9-064a-413c-871f-c74a145ed569'),
-                                field: 'startDate',
-                            });
-                        }
-
-                        const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
-                            patch.group,
-                            patch.group.organizationId,
-                            period,
-                        );
+                        const group = await this.putEventGroup(event, patch.group);
                         event.groupId = group.id;
                     }
                 }

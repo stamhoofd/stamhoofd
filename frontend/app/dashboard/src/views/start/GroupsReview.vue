@@ -22,7 +22,7 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { EditGroupView, PromiseView, Toast, useAuth, useOrganization } from '@stamhoofd/components';
-import { useOrganizationManager } from '@stamhoofd/networking';
+import { useOrganizationManager, usePatchOrganizationPeriod } from '@stamhoofd/networking';
 import { Group, GroupStatus, OrganizationRegistrationPeriod, SetupStepType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import GroupReview from './GroupReview.vue';
@@ -32,6 +32,7 @@ const auth = useAuth();
 const $organization = useOrganization();
 const present = usePresent();
 const organizationManager = useOrganizationManager();
+const patchOrganizationPeriod = usePatchOrganizationPeriod();
 
 const period = computed(() => $organization.value!.period);
 
@@ -57,7 +58,7 @@ async function editGroup(group: Group) {
                         groupId: group.id,
                         iswNew: false,
                         saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                            await organizationManager.value.patchPeriod(patch);
+                            await patchOrganizationPeriod(patch);
                         },
                     });
                 }

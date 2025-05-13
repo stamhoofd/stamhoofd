@@ -1,7 +1,7 @@
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, ObjectData, PatchableArray, PatchableArrayAutoEncoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { AppType, ColorHelper, GlobalEventBus } from '@stamhoofd/components';
 import { SessionContext, Storage } from '@stamhoofd/networking';
-import { Platform, RegistrationPeriod, UserWithMembers, Version } from '@stamhoofd/structures';
+import { LimitedFilteredRequest, OrganizationRegistrationPeriod, PaginatedResponseDecoder, Platform, RegistrationPeriod, SortItemDirection, UserWithMembers, Version } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { inject, reactive, Ref, toRef } from 'vue';
 
@@ -167,12 +167,29 @@ export class PlatformManager {
             const response = await this.$context.optionalAuthenticatedServer.request({
                 method: 'GET',
                 path: '/registration-periods',
-                decoder: new ArrayDecoder(RegistrationPeriod as Decoder<RegistrationPeriod>),
+                query: new LimitedFilteredRequest({
+                    limit: 100,
+                    sort: [
+                        {
+                            key: 'startDate',
+                            order: SortItemDirection.DESC,
+                        },
+                        {
+                            key: 'id',
+                            order: SortItemDirection.ASC,
+                        },
+                    ],
+                }),
+                decoder: new PaginatedResponseDecoder(
+                    new ArrayDecoder(RegistrationPeriod as Decoder<RegistrationPeriod>),
+                    LimitedFilteredRequest,
+                ),
                 owner,
                 shouldRetry: shouldRetry ?? false,
             });
-            this.$platform.periods = response.data.sort((a, b) => Sorter.byDateValue(a.startDate, b.startDate));
-            return response.data;
+            const data = response.data.results;
+            this.$platform.periods = data;
+            return data;
         })();
 
         const awaited = await this._pendingLoadPeriods;

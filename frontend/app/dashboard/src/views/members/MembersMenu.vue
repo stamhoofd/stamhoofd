@@ -70,12 +70,12 @@
 
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, defineRoutes, NavigationController, useCheckRoute, useNavigate, usePresent, useSplitViewController, useUrl } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, NavigationController, useCheckRoute, useNavigate, usePresent, useSplitViewController } from '@simonbackx/vue-app-navigation';
 import { GroupAvatar, MembersTableView, Toast, useAuth, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
-import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
+import { useOrganizationManager, usePatchOrganizationPeriod, useRequestOwner } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentOptions, computed, onActivated } from 'vue';
+import { ComponentOptions, computed } from 'vue';
 import { useCollapsed } from '../../hooks/useCollapsed';
 import EditCategoryGroupsView from '../dashboard/groups/EditCategoryGroupsView.vue';
 import StartNewRegistrationPeriodView from './StartNewRegistrationPeriodView.vue';
@@ -83,7 +83,6 @@ import { useSwitchablePeriod } from './useSwitchablePeriod';
 
 const $organization = useOrganization();
 const $context = useContext();
-const urlHelpers = useUrl();
 const $navigate = useNavigate();
 const collapsed = useCollapsed('leden');
 const platform = usePlatform();
@@ -92,6 +91,7 @@ const owner = useRequestOwner();
 const present = usePresent();
 const auth = useAuth();
 const splitViewController = useSplitViewController();
+const patchOrganizationPeriod = usePatchOrganizationPeriod();
 
 const tree = computed(() => {
     return period.value.getCategoryTree({
@@ -298,7 +298,7 @@ async function editMe() {
             organization: $organization.value,
             saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
                 patch.id = period.value.id;
-                await organizationManager.value.patchPeriod(patch);
+                await patchOrganizationPeriod(patch);
             },
         }),
     }).setDisplayStyle('popup'));

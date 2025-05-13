@@ -200,7 +200,7 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, useNavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ContextMenu, ContextMenuItem, EditEmailTemplatesView, EditGroupView, EditResourceRolesView, MemberCountSpan, MembersTableView, PromiseView, STList, STListItem, STNavigationBar, Toast, useAuth, useOrganization, usePlatform } from '@stamhoofd/components';
-import { useOrganizationManager } from '@stamhoofd/networking';
+import { useOrganizationManager, usePatchOrganizationPeriod } from '@stamhoofd/networking';
 import { EmailTemplateType, Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, MemberResponsibility, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
@@ -225,6 +225,7 @@ const navigationController = useNavigationController();
 const present = usePresent();
 const isLocked = computed(() => props.period.period.locked);
 const platform = usePlatform();
+const patchOrganizationPeriod = usePatchOrganizationPeriod();
 
 enum Routes {
     Members = 'Members',
@@ -340,7 +341,7 @@ async function displayEditComponent(component: any, animated = true) {
                         iswNew: false,
                         saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
                             patch.id = props.period.id;
-                            await organizationManager.value.patchPeriod(patch);
+                            await patchOrganizationPeriod(patch);
                         },
                     });
                 }
@@ -374,7 +375,7 @@ async function editGeneral(animated = true) {
                         groupId: props.group.id,
                         isNew: false,
                         saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                            await organizationManager.value.patchPeriod(patch);
+                            await patchOrganizationPeriod(patch);
                         },
                     });
                 }
@@ -457,7 +458,11 @@ async function openGroup() {
                 registrationEndDate: null,
             });
         }
-        await organizationManager.value.patchGroup(props.period, p);
+        const patch = OrganizationRegistrationPeriod.patch({
+            id: props.period.id,
+        });
+        patch.groups.addPatch(p);
+        await patchOrganizationPeriod(patch);
         new Toast('De inschrijvingen zijn terug open', 'success green').show();
     }
     catch (e) {
@@ -490,7 +495,7 @@ async function archiveGroup() {
             status: GroupStatus.Archived,
         }));
 
-        await organizationManager.value.patchPeriod(patch);
+        await patchOrganizationPeriod(patch);
         new Toast('De groep is gearchiveerd', 'success green').show();
     }
     catch (e) {
@@ -524,7 +529,7 @@ async function deleteGroup() {
         });
         patch.groups.addDelete(props.group.id);
 
-        await organizationManager.value.patchPeriod(patch);
+        await patchOrganizationPeriod(patch);
         new Toast('De groep is verwijderd', 'success green').show();
         await navigationController.value?.pop({ force: true });
     }
@@ -592,7 +597,7 @@ async function unarchiveGroupTo(group: Group, cat: GroupCategoryTree) {
         }));
 
         try {
-            await organizationManager.value.patchPeriod(patch);
+            await patchOrganizationPeriod(patch);
 
             // Manually update this group
             const foundGroup = props.period.groups.find(g => g.id === group.id);
@@ -625,7 +630,7 @@ async function closeGroup() {
             status: GroupStatus.Closed,
         }));
 
-        await organizationManager.value.patchPeriod(patch);
+        await patchOrganizationPeriod(patch);
         new Toast('De inschrijvingen zijn gesloten', 'success green').show();
     }
     catch (e) {

@@ -77,7 +77,7 @@ import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableA
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, Checkbox, EmailInput, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, STListItem, useErrors, useOrganization, usePatchArray, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { useOrganizationManager, usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
+import { useOrganizationManager, usePatchOrganizationPeriod, usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { Group, GroupPrivateSettings, OrganizationEmail, OrganizationPrivateMetaData, OrganizationRegistrationPeriod, Platform, PlatformPrivateConfig, WebshopPreview, WebshopPrivateMetaData } from '@stamhoofd/structures';
 import { computed, onMounted, Ref, ref } from 'vue';
 
@@ -100,6 +100,7 @@ const organizationManager = useOrganizationManager();
 const owner = useRequestOwner();
 const pop = usePop();
 const platformManager = usePlatformManager();
+const patchOrganizationPeriod = usePatchOrganizationPeriod();
 
 const name = computed({
     get: () => patched.value.name,
@@ -268,7 +269,7 @@ async function save() {
             }
 
             if (shouldSavePeriod) {
-                await organizationManager.value.patchPeriod(organizationPeriodPatch, { owner, shouldRetry: false });
+                await patchOrganizationPeriod(organizationPeriodPatch);
             }
         }
         else {

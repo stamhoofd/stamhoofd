@@ -282,7 +282,7 @@ export default class CategoryView extends Mixins(NavigationMixin) {
             groupId: group.id,
             isNew: true,
             saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                await this.$organizationManager.patchPeriod(basePatch.patch(patch));
+                await this.$patchOrganizationPeriod(basePatch.patch(patch));
             },
         }).setDisplayStyle('popup'));
     }

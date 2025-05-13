@@ -2,12 +2,12 @@ import { Request } from '@simonbackx/simple-endpoints';
 import { GroupFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { GroupType, PermissionLevel, Permissions, Version } from '@stamhoofd/structures';
 import { testServer } from '../../../../../tests/helpers/TestServer';
-import { PatchRegistrationPeriodsEndpoint } from './GetOrganizationRegistrationPeriodsEndpoint';
+import { GetOrganizationRegistrationPeriodsEndpoint } from './GetOrganizationRegistrationPeriodsEndpoint';
 
 const baseUrl = `/v${Version}/organization/registration-periods`;
 
 describe('Endpoint.GetOrganizationRegistrationPeriods', () => {
-    const endpoint = new PatchRegistrationPeriodsEndpoint();
+    const endpoint = new GetOrganizationRegistrationPeriodsEndpoint();
 
     let registrationPeriod1: RegistrationPeriod;
     let registrationPeriod2: RegistrationPeriod;

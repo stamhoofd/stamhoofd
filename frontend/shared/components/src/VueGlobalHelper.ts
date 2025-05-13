@@ -1,6 +1,6 @@
 import { Request } from '@simonbackx/simple-networking';
 import { injectHooks, useCurrentComponent, useUrl } from '@simonbackx/vue-app-navigation';
-import { AppManager } from '@stamhoofd/networking';
+import { AppManager, usePatchOrganizationPeriod } from '@stamhoofd/networking';
 import { CountryHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { type App } from 'vue';
@@ -210,6 +210,9 @@ export class VueGlobalHelper {
                     $platform: usePlatform(),
                     $app: useAppContext(),
                     $feature: useFeatureFlag(),
+
+                    // Temporary for legacy code
+                    $patchOrganizationPeriod: usePatchOrganizationPeriod(),
                 };
 
                 injectHooks(this, directives);

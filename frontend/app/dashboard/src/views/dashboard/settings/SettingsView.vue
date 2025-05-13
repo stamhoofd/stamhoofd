@@ -321,7 +321,6 @@ import { AdminsView, EditEmailTemplatesView, EmailSettingsView, GeneralSettingsV
 
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { EmailTemplate, EmailTemplateType, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, StripeAccount } from '@stamhoofd/structures';
 import { ComponentOptions, Ref, computed, ref } from 'vue';
@@ -333,7 +332,7 @@ import PremisesView from './PremisesView.vue';
 import PrivacySettingsView from './PrivacySettingsView.vue';
 import RegistrationPageSettingsView from './RegistrationPageSettingsView.vue';
 import RegistrationPaymentSettingsView from './RegistrationPaymentSettingsView.vue';
-import { buildManageGroupsComponent } from './buildManageGroupsComponent';
+import { useEditGroupsView } from './hooks/useEditGroupsView';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
 
@@ -362,6 +361,7 @@ const isPlatform = STAMHOOFD.userMode === 'platform';
 const $organizationManager = useOrganizationManager();
 const platform = usePlatform();
 const present = usePresent();
+const buildEditGroupsView = useEditGroupsView();
 
 defineRoutes([
     {
@@ -430,7 +430,7 @@ defineRoutes([
         url: Routes.RegistrationGroups,
         present: 'popup',
         handler: async (options) => {
-            const component = buildManageGroupsComponent($organizationManager.value);
+            const component = buildEditGroupsView();
 
             await present({
                 ...(options as any),
