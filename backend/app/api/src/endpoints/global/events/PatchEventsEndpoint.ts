@@ -45,6 +45,12 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         let group = await Group.getByID(putGroup.id);
+        const groupOrganizationId = group?.organizationId ?? putGroup.organizationId;
+
+        if (event.organizationId && groupOrganizationId !== event.organizationId) {
+            // Silently ignore organizationId if it is invalid
+            putGroup.organizationId = event.organizationId;
+        }
 
         if (!group) {
             putGroup.type = GroupType.EventRegistration;
@@ -62,13 +68,6 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     message: 'Group is not of type EventRegistration',
                 });
             }
-        }
-
-        if (event.organizationId && group.organizationId !== event.organizationId) {
-            throw new SimpleError({
-                code: 'invalid_group',
-                message: 'Group is not of the same organization',
-            });
         }
 
         return group;
@@ -125,7 +124,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 });
             }
 
-            const eventOrganization = await this.checkEventAccess(event);
+            const eventOrganization = await Context.auth.checkEventAccess(event);
             event.id = put.id;
             event.name = put.name;
             event.startDate = put.startDate;
@@ -166,7 +165,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 });
             }
 
-            await this.checkEventAccess(event);
+            await Context.auth.checkEventAccess(event);
 
             if (patch.meta?.organizationCache) {
                 throw new SimpleError({
@@ -212,7 +211,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 });
             }
 
-            const eventOrganization = await this.checkEventAccess(event);
+            const eventOrganization = await Context.auth.checkEventAccess(event);
             if (eventOrganization) {
                 event.meta.organizationCache = NamedObject.create({ id: eventOrganization.id, name: eventOrganization.name });
             }
@@ -231,6 +230,8 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
 
             await PatchEventsEndpoint.checkEventLimits(event);
+
+            let group: Group | null = null;
 
             if (patch.group !== undefined) {
                 if (patch.group === null) {
@@ -252,7 +253,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     patch.group.type = GroupType.EventRegistration;
 
                     const period = await RegistrationPeriod.getByDate(event.startDate);
-                    await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.group, period);
+                    group = await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.group, period);
                 }
                 else {
                     if (event.groupId === patch.group.id) {
@@ -265,7 +266,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                             await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId);
                             event.groupId = null;
                         }
-                        const group = await this.putEventGroup(event, patch.group);
+                        group = await this.putEventGroup(event, patch.group);
                         event.groupId = group.id;
                     }
                 }
@@ -277,9 +278,29 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     if (event.groupId) {
                         await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
                             if (event.groupId) {
-                                await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(GroupStruct.patch({ id: event.groupId }), period);
+                                group = await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(GroupStruct.patch({ id: event.groupId }), period);
                             }
                         });
+                    }
+                }
+            }
+
+            if (group || patch.organizationId !== undefined) {
+                if (event.organizationId === null) {
+                    // No validation required
+                }
+                else {
+                    // Validate organizationId of group
+                    if (event.groupId) {
+                        group = group ?? (await Group.getByID(event.groupId) ?? null);
+
+                        if (group && group.organizationId !== event.organizationId) {
+                            throw new SimpleError({
+                                code: 'invalid_group',
+                                message: 'Group is not of the same organization',
+                                human: $t('Je kan de organisator niet wijzigen als er al inschrijvingen gekoppeld zijn aan deze activiteit. Verwijder dan eerst de inschrijvingen.'),
+                            });
+                        }
                     }
                 }
             }
@@ -308,7 +329,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({ code: 'not_found', message: 'Event not found', statusCode: 404 });
             }
 
-            await this.checkEventAccess(event);
+            await Context.auth.checkEventAccess(event);
 
             if (event.groupId) {
                 await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId);
@@ -428,10 +449,6 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 });
             }
         }
-    }
-
-    private async checkEventAccess(event: Event) {
-        return await Context.auth.checkEventAccess(event);
     }
 
     private static throwIfAddressIsMissing(event: Event) {

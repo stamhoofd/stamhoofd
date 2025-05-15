@@ -450,6 +450,8 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
         await model.updateOccupancy();
         await model.save();
+
+        return model;
     }
 
     static async createGroup(struct: GroupStruct, organizationId: string, period: RegistrationPeriod, options?: { allowedIds?: string[] }): Promise<Group> {
@@ -464,6 +466,9 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     throw Context.auth.error($t(`153a7443-e2d9-4126-8e10-089b54964fb8`));
                 }
             }
+        }
+        else {
+            // For events, permission checking needs to happen outside this method (access to event = access to group)
         }
 
         if (period.locked) {
