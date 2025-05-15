@@ -1,10 +1,10 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { GroupFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { GroupType, PermissionLevel, Permissions, Version } from '@stamhoofd/structures';
+import { GroupType, LimitedFilteredRequest, PermissionLevel, Permissions } from '@stamhoofd/structures';
 import { testServer } from '../../../../../tests/helpers/TestServer';
 import { GetOrganizationRegistrationPeriodsEndpoint } from './GetOrganizationRegistrationPeriodsEndpoint';
 
-const baseUrl = `/v${Version}/organization/registration-periods`;
+const baseUrl = `/organization/registration-periods`;
 
 describe('Endpoint.GetOrganizationRegistrationPeriods', () => {
     const endpoint = new GetOrganizationRegistrationPeriodsEndpoint();
@@ -13,8 +13,16 @@ describe('Endpoint.GetOrganizationRegistrationPeriods', () => {
     let registrationPeriod2: RegistrationPeriod;
 
     const get = async (organization: Organization, token: Token) => {
-        const request = Request.buildJson('GET', baseUrl, organization.getApiHost());
-        request.headers.authorization = 'Bearer ' + token.accessToken;
+        const request = Request.get({
+            path: baseUrl,
+            host: organization.getApiHost(),
+            query: new LimitedFilteredRequest({
+                limit: 100,
+            }),
+            headers: {
+                authorization: 'Bearer ' + token.accessToken,
+            },
+        });
         return await testServer.test(endpoint, request);
     };
 
@@ -36,11 +44,11 @@ describe('Endpoint.GetOrganizationRegistrationPeriods', () => {
             .create();
     };
 
-    describe('groups', () => {
+    describe('Groups', () => {
         test('Should contain waiting lists', async () => {
             // arrange
             const organization = await initOrganization(registrationPeriod1);
-            await new OrganizationRegistrationPeriodFactory({
+            const organizationPeriod = await new OrganizationRegistrationPeriodFactory({
                 organization,
                 period: registrationPeriod1,
             }).create();
@@ -74,19 +82,21 @@ describe('Endpoint.GetOrganizationRegistrationPeriods', () => {
 
             const groupWithWaitingList = await new GroupFactory({
                 organization,
+                waitingListId: waitingList1.id,
             }).create();
 
-            groupWithWaitingList.waitingListId = waitingList1.id;
-            await groupWithWaitingList.save();
+            // Make sure the group is in a category of the organization period
+            organizationPeriod.settings.rootCategory?.groupIds.push(groupWithWaitingList.id);
+            await organizationPeriod.save();
 
             // act
             const result = await get(organization, token);
 
             // assert
             expect(result.body).toBeDefined();
-            expect(result.body.organizationPeriods.length).toBe(1);
-            const organizationPeriod = result.body.organizationPeriods[0];
-            const groups = organizationPeriod.groups;
+            expect(result.body.results.length).toBe(1);
+            const organizationPeriodStruct = result.body.results[0];
+            const groups = organizationPeriodStruct.groups;
             expect(groups.length).toBe(3);
             expect(groups).toEqual(expect.arrayContaining([
                 expect.objectContaining({
@@ -99,13 +109,13 @@ describe('Endpoint.GetOrganizationRegistrationPeriods', () => {
                     id: waitingList2.id,
                 }),
             ]));
-            expect(organizationPeriod.waitingLists.length).toBe(2);
+            expect(organizationPeriodStruct.waitingLists.length).toBe(2);
         });
 
-        test('Should contain only groups of the organization registration period', async () => {
+        test('Should not contain groups of other organizations or periods', async () => {
             // arrange
             const organization = await initOrganization(registrationPeriod1);
-            await new OrganizationRegistrationPeriodFactory({
+            const organizationPeriod = await new OrganizationRegistrationPeriodFactory({
                 organization,
                 period: registrationPeriod1,
             }).create();
@@ -130,12 +140,27 @@ describe('Endpoint.GetOrganizationRegistrationPeriods', () => {
                 period: registrationPeriod1,
             }).create();
 
+            // Make sure the groups are in a category of the organization period
+            organizationPeriod.settings.rootCategory?.groupIds.push(group1.id);
+            organizationPeriod.settings.rootCategory?.groupIds.push(group2.id);
+
+            await organizationPeriod.save();
+
             // group list of other organization
             const otherOrganization = await initOrganization(registrationPeriod1);
-
-            await new GroupFactory({
+            const otherOrganizationPeriod = await new OrganizationRegistrationPeriodFactory({
                 organization: otherOrganization,
+                period: registrationPeriod1,
             }).create();
+
+            const otherGroup1 = await new GroupFactory({
+                organization: otherOrganization,
+                period: registrationPeriod1,
+            }).create();
+
+            // Add the group to the other organization's period
+            otherOrganizationPeriod.settings.rootCategory?.groupIds.push(otherGroup1.id);
+            await otherOrganizationPeriod.save();
 
             // group of other period
             await new GroupFactory({
@@ -148,8 +173,8 @@ describe('Endpoint.GetOrganizationRegistrationPeriods', () => {
 
             // assert
             expect(result.body).toBeDefined();
-            expect(result.body.organizationPeriods.length).toBe(1);
-            const groups = result.body.organizationPeriods[0].groups;
+            expect(result.body.results.length).toBe(1);
+            const groups = result.body.results[0].groups;
             expect(groups.length).toBe(2);
             expect(groups).toEqual(expect.arrayContaining([
                 expect.objectContaining({

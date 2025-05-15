@@ -12,9 +12,9 @@ class Options {
     reducedPrice?: number;
     stock?: number;
     type?: GroupType;
-    skipCategory?: boolean;
     maxMembers?: number | null;
     period?: RegistrationPeriod;
+    waitingListId?: string;
 }
 
 export class GroupFactory extends Factory<Options, Group> {
@@ -30,6 +30,7 @@ export class GroupFactory extends Factory<Options, Group> {
         else {
             group.periodId = organization.periodId;
         }
+        group.waitingListId = this.options.waitingListId ?? null;
 
         group.settings = GroupSettings.create({
             name: new TranslatedString('Group name'),
@@ -54,12 +55,6 @@ export class GroupFactory extends Factory<Options, Group> {
         }
 
         await group.save();
-
-        if (!this.options.skipCategory) {
-            organization.meta.rootCategory!.groupIds.push(group.id);
-            await organization.save();
-        }
-
         return group;
     }
 }

@@ -13,7 +13,7 @@
         "build": "tsc -b"
     },
     "dependencies": {
-        "@simonbackx/simple-endpoints": "1.19.1",
+        "@simonbackx/simple-endpoints": "1.20.1",
         "@simonbackx/simple-errors": "^1.5",
         "@simonbackx/simple-logging": "^1.0.1"
     },
