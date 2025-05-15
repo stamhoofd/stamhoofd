@@ -92,21 +92,6 @@
                                 </template>
                             </STListItem>
 
-                            <STListItem v-else :selectable="true" class="left-center" @click="createGroup">
-                                <template #left>
-                                    <img src="@stamhoofd/assets/images/illustrations/list.svg">
-                                </template>
-                                <h2 class="style-title-list">
-                                    {{ $t('Inschrijvingen verzamelen') }}
-                                </h2>
-                                <p class="style-description">
-                                    {{ $t('Je kan inschrijvingen verzamelen via deze activiteit') }}
-                                </p>
-                                <template #right>
-                                    <span class="icon arrow-right-small gray" />
-                                </template>
-                            </STListItem>
-
                             <STListItem v-if="event.group" :selectable="true" class="left-center" @click="$navigate(Routes.EditEmails)">
                                 <template #left>
                                     <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
@@ -127,41 +112,72 @@
                             </template>
                         </STList>
                     </div>
-                    <hr><h2>{{ $t('cd9912f4-89a4-44ea-b8a0-40371a53b90a') }}</h2>
-                    <p>{{ $t("40b31f32-5a02-488d-beb3-d987ea5c9315") }}</p>
 
-                    <div class="input-with-buttons">
-                        <div>
-                            <input class="input" :value="link" readonly>
-                        </div>
-                        <div>
-                            <button v-copyable="link" type="button" class="button text">
-                                <span class="icon copy" />
-                                <span class="hide-small">{{ $t('b8e302b4-e30d-4892-9407-e72207d4c516') }}</span>
-                            </button>
-                        </div>
-                    </div>
+                    <hr>
+                    <h2>{{ $t('Acties') }}</h2>
+                    <STList>
+                        <STListItem v-if="!event.group && canWriteEvent" :selectable="true" class="left-center" @click="createGroup">
+                            <template #left>
+                                <IconContainer icon="group" class="success">
+                                    <template #aside>
+                                        <span class="icon success stroke small" />
+                                    </template>
+                                </IconContainer>
+                            </template>
+                            <h2 class="style-title-list">
+                                {{ $t('Inschrijvingen activeren') }}
+                            </h2>
+                            <p class="style-description-small">
+                                {{ $t('Manueel inschrijvingen bijhouden of leden online laten inschrijven.') }}
+                            </p>
+                            <template #right>
+                                <span class="icon arrow-right-small gray" />
+                            </template>
+                        </STListItem>
 
-                    <template v-if="event.group && auth.canRegisterMembersInGroup(event.group)">
-                        <hr><h2>{{ $t('f4186487-551f-4268-b811-c2b31ace72d1') }}</h2>
+                        <STListItem v-if="event.group && auth.canRegisterMembersInGroup(event.group)" :selectable="true" class="left-center" @click="addMembers">
+                            <template #left>
+                                <IconContainer icon="group">
+                                    <template #aside>
+                                        <span class="icon add small stroke" />
+                                    </template>
+                                </IconContainer>
+                            </template>
+                            <h2 class="style-title-list">
+                                {{ $t('f4186487-551f-4268-b811-c2b31ace72d1') }}
+                            </h2>
+                            <p v-if="organization && event.organizationId === organization.id" class="style-description-small">
+                                {{ $t('3f4666f9-59b5-4a24-b1a7-9f820275c042') }}
+                            </p>
+                            <p v-else-if="!event.group.settings.isFree" class="style-description-small">
+                                {{ $t('3ab07939-121b-47f9-956f-a573c57ec008') }}
+                            </p>
+                            <p v-else class="style-description-small">
+                                {{ $t('7cac9136-10b5-4f1c-b9a4-0fb3f8410a9b') }}
+                            </p>
+                            <template #right>
+                                <span class="icon arrow-right-small gray" />
+                            </template>
+                        </STListItem>
 
-                        <p v-if="organization && event.organizationId === organization.id">
-                            {{ $t('3f4666f9-59b5-4a24-b1a7-9f820275c042') }}
-                        </p>
-                        <p v-else-if="!event.group.settings.isFree">
-                            {{ $t('3ab07939-121b-47f9-956f-a573c57ec008') }}
-                        </p>
-                        <p v-else>
-                            {{ $t('7cac9136-10b5-4f1c-b9a4-0fb3f8410a9b') }}
-                        </p>
-
-                        <p class="style-button-bar">
-                            <button class="button primary" type="button" @click="addMembers">
-                                <span class="icon add" />
-                                <span>{{ $t('433a5c63-b0b9-4f04-962f-d84880701fd2') }}</span>
-                            </button>
-                        </p>
-                    </template>
+                        <STListItem v-copyable="link" :selectable="true" class="left-center">
+                            <template #left>
+                                <IconContainer icon="link" />
+                            </template>
+                            <h2 class="style-title-list">
+                                {{ $t('cd9912f4-89a4-44ea-b8a0-40371a53b90a') }}
+                            </h2>
+                            <p class="style-description-small">
+                                {{ $t("40b31f32-5a02-488d-beb3-d987ea5c9315") }}
+                            </p>
+                            <div class="split-inputs option">
+                                <input class="input" :value="link" readonly>
+                            </div>
+                            <template #right>
+                                <span class="icon arrow-right-small gray" />
+                            </template>
+                        </STListItem>
+                    </STList>
                 </main>
             </div>
         </ExternalOrganizationContainer>
@@ -188,6 +204,8 @@ import EditEventView from './EditEventView.vue';
 import EventInfoTable from './components/EventInfoTable.vue';
 import EventNotificationRow from './components/EventNotificationRow.vue';
 import { useCreateEventGroup } from './composables/createEventGroup';
+import { CenteredMessage } from '../overlays/CenteredMessage';
+import IconContainer from '../icons/IconContainer.vue';
 
 const props = defineProps<{
     event: Event;
@@ -397,7 +415,16 @@ async function prepareOrganizationPeriod(group: Group) {
     return period;
 }
 
-function createGroup() {
+async function createGroup() {
+    if (!await CenteredMessage.confirm(
+        $t('Inschrijvingen verzamelen voor deze activiteit?'),
+        $t('Inschrijvingen activeren'),
+        $t('Geen paniek, je inschrijvingen gaan nog niet meteen online staan. Je kan inschrijvinen later terug uitschakelen via de algemene instellingen van de activiteit.'),
+        undefined,
+        false
+    )) {
+        return;
+    }
     createEventGroup(props.event, async (group: Group) => {
         // Set event group and save
         const patch = Event.patch({
@@ -419,7 +446,7 @@ function createGroup() {
         deepSetArray([props.event], response.data);
 
         // Navigate to the new group settings
-        $navigate(Routes.EditGroup).catch(console.error);
+        // $navigate(Routes.EditGroup).catch(console.error);
     });
 }
 

@@ -2,6 +2,10 @@
     display: flex;
     flex-direction: row;
 
+    &.option {
+        margin-top: 7px
+    }
+
     .st-input-box > & {
         gap: 10px;
 

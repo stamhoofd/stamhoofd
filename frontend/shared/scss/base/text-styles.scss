@@ -1022,6 +1022,18 @@
     position: relative;
     margin-right: 5px;
 
+    // Default color primary for icon
+    color: $color-primary-dark;
+    
+    figure {
+        background: $color-primary-background;
+        color: $color-primary-dark;
+    }
+
+    > aside {
+        color: $color-primary;
+    }
+
     &.success {
         color: $color-success-dark;
         figure {
@@ -1082,6 +1094,19 @@
         }
     }
 
+    &.gray {
+        color: $color-dark;
+        
+        figure {
+            background: $color-background-shade;
+            color: $color-dark;
+        }
+
+        > aside {
+            color: $color-dark;
+        }
+    }
+
     .image-component {
         width: var(--block-width, 40px);
         height: var(--block-width, 40px);
@@ -1100,8 +1125,6 @@
         height: var(--block-width, 40px);
         border-radius: $border-radius;
         text-align: center;
-        background: $color-primary-background;
-        color: $color-primary-dark;
         text-transform: uppercase;
         line-height: var(--block-width, 40px);
         font-size: 14px;
@@ -1123,15 +1146,6 @@
 
         > img {
             display: block;
-        }
-    }
-
-    &.gray {
-        color: $color-dark;
-        figure {
-            background: $color-background-shade;
-            color: $color-dark;
-            
         }
     }
 
