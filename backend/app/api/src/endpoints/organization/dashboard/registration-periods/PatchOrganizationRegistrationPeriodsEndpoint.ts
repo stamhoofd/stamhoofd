@@ -50,6 +50,8 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             periods.push(await PatchOrganizationRegistrationPeriodsEndpoint.createOrganizationPeriod(organization, put));
         }
 
+        const forceGroupIds: string[] = [];
+
         for (const patch of request.body.getPatches()) {
             const organizationPeriod = await OrganizationRegistrationPeriod.getByID(patch.id);
             if (!organizationPeriod || organizationPeriod.organizationId !== organization.id) {
@@ -209,12 +211,14 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
             for (const groupPut of patch.groups.getPuts()) {
                 shouldUpdateSetupSteps = true;
-                await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(groupPut.put, organization.id, period, { allowedIds });
+                const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(groupPut.put, organization.id, period, { allowedIds });
                 deleteUnreachable = true;
+                forceGroupIds.push(group.id);
             }
 
             for (const struct of patch.groups.getPatches()) {
-                await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(struct, period);
+                const group = await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(struct, period);
+                forceGroupIds.push(group.id);
             }
 
             if (deleteUnreachable) {
@@ -233,7 +237,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         }
 
         return new Response(
-            await AuthenticatedStructures.organizationRegistrationPeriods(periods),
+            await AuthenticatedStructures.organizationRegistrationPeriods(periods, undefined, { forceGroupIds }),
         );
     }
 
