@@ -40,9 +40,9 @@ export class TableObjectFetcher<O extends { id: string }> {
     fetchingData = false;
     delayFetchUntil: Date | null = null;
 
-    limit = STAMHOOFD.environment === 'development' ? 1 : 100; // To help catch bugs in pagination
+    limit = STAMHOOFD.environment === 'development' ? 100 : 100; // To help catch bugs in pagination
     maxLimit = 100;
-    minimumLimit = STAMHOOFD.environment === 'development' ? 1 : 20; // To help catch bugs in pagination
+    minimumLimit = STAMHOOFD.environment === 'development' ? 20 : 20; // To help catch bugs in pagination
     sort: SortList = [];
 
     retryTimer: NodeJS.Timeout | null = null;
