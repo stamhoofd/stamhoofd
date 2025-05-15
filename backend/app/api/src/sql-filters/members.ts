@@ -1,5 +1,5 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { SQL, SQLAge, SQLConcat, SQLFilterDefinitions, SQLScalar, SQLValueType, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler } from '@stamhoofd/sql';
+import { SQL, SQLAge, SQLConcat, SQLFilterDefinitions, SQLScalar, SQLValueType, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLOneToOneRelationFilterCompiler, createSQLRelationFilterCompiler } from '@stamhoofd/sql';
 import { AccessRight } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from '../helpers/Context';
@@ -168,14 +168,6 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                     SQL.column('registrations', 'groupId'),
                 ),
             )
-            .join(
-                SQL.join(
-                    SQL.table('organizations'),
-                ).where(
-                    SQL.column('organizations', 'id'),
-                    SQL.column('registrations', 'organizationId'),
-                ),
-            )
             .where(
                 SQL.column('memberId'),
                 SQL.column('members', 'id'),
@@ -191,7 +183,15 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
             ),
         {
             ...registrationFilterCompilers,
-            organization: createSQLFilterNamespace(organizationFilterCompilers),
+            organization: createSQLOneToOneRelationFilterCompiler(
+                SQL.select()
+                    .from(SQL.table('organizations'))
+                    .where(
+                        SQL.column('organizations', 'id'),
+                        SQL.column('registrations', 'organizationId'),
+                    ),
+                organizationFilterCompilers,
+            ),
         },
     ),
 

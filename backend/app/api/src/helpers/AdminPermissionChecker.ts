@@ -20,7 +20,7 @@ export class AdminPermissionChecker {
     platform: PlatformStruct;
 
     organizationCache: Map<string, Organization | Promise<Organization | undefined>> = new Map();
-    organizationGroupsCache: Map<string, Group[] | Promise<Group[]>> = new Map();
+    groupsCache: Map<string, Group | null | Promise<Group | null>> = new Map();
 
     constructor(user: User, platform: PlatformStruct, organization?: Organization) {
         this.user = user;
@@ -64,17 +64,30 @@ export class AdminPermissionChecker {
         return id;
     }
 
-    async getOrganizationGroups(id: string) {
-        const c = this.organizationGroupsCache.get(id);
-        if (c) {
-            return await c;
+    async getGroup(groupId: string): Promise<Group | null> {
+        const cache = this.groupsCache.get(groupId);
+        if (cache !== undefined) {
+            return await cache;
         }
-        const organization = await this.getOrganization(id);
-        const promise = Group.getAll(id, organization.periodId, true);
-        this.organizationGroupsCache.set(id, promise);
-        const result = await promise;
-        this.organizationGroupsCache.set(id, result);
-        return result;
+
+        const promise = Group.select()
+            .where('id', groupId)
+            .first(false);
+
+        this.groupsCache.set(groupId, promise);
+        const group = await promise;
+        this.groupsCache.set(groupId, group);
+        return group;
+    }
+
+    cacheGroup(group: Group) {
+        this.groupsCache.set(group.id, group);
+    }
+
+    cacheGroups(groups: Group[]) {
+        for (const group of groups) {
+            this.cacheGroup(group);
+        }
     }
 
     async getOrganizationCurrentPeriod(id: string | Organization): Promise<OrganizationRegistrationPeriod> {
@@ -360,8 +373,7 @@ export class AdminPermissionChecker {
             return true;
         }
 
-        const allGroups = await this.getOrganizationGroups(registration.organizationId);
-        const group = allGroups.find(g => g.id === registration.groupId);
+        const group = await this.getGroup(registration.groupId);
         if (!group || group.deletedAt) {
             return false;
         }
@@ -1114,20 +1126,16 @@ export class AdminPermissionChecker {
         };
     }
 
-    async getAccessibleGroups(organizationId: string, level: PermissionLevel = PermissionLevel.Read): Promise<string[] | 'all'> {
-        if (await this.hasFullAccess(organizationId, level)) {
-            return 'all';
+    /**
+     * Performance helper
+     */
+    async canAccessAllMembers(organizationId: string, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
+        const permissions = await this.getOrganizationPermissions(organizationId);
+        if (!permissions) {
+            return false;
         }
 
-        const groups = await this.getOrganizationGroups(organizationId);
-        const accessibleGroups: string[] = [];
-
-        for (const group of groups) {
-            if (await this.canAccessGroup(group, level)) {
-                accessibleGroups.push(group.id);
-            }
-        }
-        return accessibleGroups;
+        return permissions.hasResourceAccess(PermissionsResourceType.Groups, '', level);
     }
 
     /**

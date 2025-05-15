@@ -137,6 +137,14 @@ export function createSQLRelationFilterCompiler(baseSelect: InstanceType<typeof 
     };
 }
 
+export function createSQLOneToOneRelationFilterCompiler(baseSelect: InstanceType<typeof SQLSelect> & SQLExpression, definitions: SQLFilterDefinitions): SQLFilterCompiler {
+    return async (filter: StamhoofdFilter) => {
+        const w = await compileToSQLFilter(filter, definitions);
+        const q = baseSelect.clone().where(w);
+        return new SQLWhereExists(q);
+    };
+}
+
 // Already joined, but creates a namespace
 export function createSQLFilterNamespace(definitions: SQLFilterDefinitions): SQLFilterCompiler {
     return (filter: StamhoofdFilter) => {

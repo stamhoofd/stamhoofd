@@ -101,7 +101,7 @@ export class AuthenticatedStructures {
         return structs;
     }
 
-    static async organizationRegistrationPeriods(organizationRegistrationPeriods: OrganizationRegistrationPeriod[], periods?: RegistrationPeriod[]) {
+    static async organizationRegistrationPeriods(organizationRegistrationPeriods: OrganizationRegistrationPeriod[], periods?: RegistrationPeriod[], options?: { forceGroupIds?: string[] }) {
         if (organizationRegistrationPeriods.length === 0) {
             return [];
         }
@@ -114,7 +114,10 @@ export class AuthenticatedStructures {
 
         const organizationIds = Formatter.uniqueArray(organizationRegistrationPeriods.map(r => r.organizationId));
 
-        const groupIds = Formatter.uniqueArray(organizationRegistrationPeriods.flatMap(p => p.settings.categories.flatMap(c => c.groupIds)));
+        const groupIds = Formatter.uniqueArray([
+            ...organizationRegistrationPeriods.flatMap(p => p.settings.categories.flatMap(c => c.groupIds)),
+            ...(options?.forceGroupIds ?? []),
+        ]);
 
         let groups: Group[] = [];
 
