@@ -9,6 +9,6 @@ export function usePatchOrganizationPeriod() {
         const arr = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>;
         arr.addPatch(patch);
 
-        return await patchOrganizationPeriods(arr, options);
+        return (await patchOrganizationPeriods(arr, options))[0];
     };
 }
