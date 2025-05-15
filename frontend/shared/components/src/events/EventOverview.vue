@@ -339,9 +339,17 @@ defineRoutes([
                 isNew: false,
                 showToasts: true,
                 saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                    await patchOrganizationPeriod(patch, {
+                    const updatedPeriod = await patchOrganizationPeriod(patch, {
                         organizationId: group.organizationId,
                     });
+
+                    const updatedGroup = updatedPeriod.groups.find(g => g.id === group.id);
+                    if (updatedGroup) {
+                        group.deepSet(updatedGroup);
+                    }
+                    else {
+                        console.warn('Group not found in updated period', group.id, updatedPeriod.groups);
+                    }
                 },
             };
         },
@@ -421,7 +429,7 @@ async function createGroup() {
         $t('Inschrijvingen activeren'),
         $t('Geen paniek, je inschrijvingen gaan nog niet meteen online staan. Je kan inschrijvinen later terug uitschakelen via de algemene instellingen van de activiteit.'),
         undefined,
-        false
+        false,
     )) {
         return;
     }
