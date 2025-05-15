@@ -20,7 +20,7 @@
         "dev": "yarn clear && yarn clear-vite-cache && concurrently -r 'yarn -s build:shared:watch' 'wait-on shared/object-differ/dist/index.js && wait-on shared/object-differ/dist/index.d.ts && lerna run dev --stream --parallel'",
         "dev:server": "concurrently -n ' ,Caddy,DNS,Mail,Stripe,Frontend Type Checking' -c ',red,red,red,red,blue' 'yarn -s dev' 'yarn -s caddy' 'yarn -s dns' 'yarn -s mail' 'yarn -s stripe-webhooks' 'wait-on shared/object-differ/dist/index.d.ts && yarn -s frontend:types --watch --preserveWatchOutput'",
         "migrate": "yarn -s build:shared && lerna run migrations --concurrency 1",
-        "test": "lerna run test",
+        "test": "lerna run test -- --passWithNoTests",
         "lint": "lerna run lint",
         "vitest": "ENV_FILE=frontend/.env.json vitest",
         "app:release": "cd devops && yarn -s build-code -s app && cd ../frontend/app/mobile && yarn ios && yarn android",
