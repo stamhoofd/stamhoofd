@@ -98,12 +98,20 @@ export class Group extends QueryableModel {
     stockReservations: StockReservation[] = [];
 
     static async getAll(organizationId: string, periodId: string | null, active = true) {
-        const w: any = periodId ? { periodId } : {};
+        const query = Group.select()
+            .where('organizationId', organizationId);
+
         if (active) {
-            return await Group.where({ organizationId, deletedAt: null, ...w });
+            query.andWhere('deletedAt', null);
         }
 
-        return await Group.where({ organizationId, ...w });
+        if (periodId) {
+            query.andWhere('periodId', periodId);
+        }
+
+        query.andWhere('type', GroupType.Membership);
+
+        return await query.fetch();
     }
 
     /**
