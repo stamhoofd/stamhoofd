@@ -86,6 +86,9 @@ export class Group extends AutoEncoder {
     // Permission checking cache:
     event: Event | null = null;
 
+    // Permission checking cache (waiting list -> group -> event)
+    parentGroup: Group | null = null;
+
     getDiffName() {
         return this.settings.name;
     }
@@ -376,5 +379,16 @@ export class Group extends AutoEncoder {
         }
 
         return filter;
+    }
+
+    static decode(...args: Parameters<typeof AutoEncoder.decode>) {
+        const result = super.decode.call(this, ...args) as any as Group;
+
+        // Create circular reference for permission checking in the frontend
+        if (result.waitingList && result.type === GroupType.EventRegistration) {
+            result.waitingList.parentGroup = result;
+        }
+
+        return result as any;
     }
 }

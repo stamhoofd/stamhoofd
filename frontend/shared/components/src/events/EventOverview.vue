@@ -19,7 +19,7 @@
                     </template>
 
                     <EventInfoTable :event="event">
-                        <template v-if="event.group && (!organization || event.group.organizationId === organization.id || event.group.settings.allowRegistrationsByOrganization)">
+                        <template v-if="event.group && (!organization || (event.group.organizationId === organization.id && auth.canAccessGroup(event.group)) || event.group.settings.allowRegistrationsByOrganization)">
                             <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.Registrations)">
                                 <template #left>
                                     <span class="icon group" />
@@ -37,7 +37,7 @@
                                 </template>
                             </STListItem>
 
-                            <STListItem v-if="event.group.waitingList && (!organization || event.group.organizationId === organization.id || event.group.waitingList.settings.allowRegistrationsByOrganization)" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.WaitingList)">
+                            <STListItem v-if="event.group.waitingList && (!organization || (event.group.waitingList.organizationId === organization.id && auth.canAccessGroup(event.group.waitingList)) || event.group.waitingList.settings.allowRegistrationsByOrganization)" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.WaitingList)">
                                 <template #left>
                                     <span class="icon clock" />
                                 </template>

@@ -132,6 +132,11 @@ export class ContextPermissions {
             return this.canWriteEventForOrganization(group.event, this.organization);
         }
 
+        if (group.type === GroupType.WaitingList && group.parentGroup && group.parentGroup.type === GroupType.EventRegistration && group.parentGroup.event && group.parentGroup.event.organizationId === this.organization.id) {
+            // we'll need to check the event permissions
+            return this.canWriteEventForOrganization(group.parentGroup.event, this.organization);
+        }
+
         return false;
     }
 

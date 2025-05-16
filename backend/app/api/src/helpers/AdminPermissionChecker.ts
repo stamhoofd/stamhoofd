@@ -218,6 +218,19 @@ export class AdminPermissionChecker {
             }
         }
 
+        if (group.type === GroupType.WaitingList) {
+            // Check if this is a waiting list for an event
+            const parentGroup = await Group.select()
+                .where('type', GroupType.EventRegistration)
+                .where('organizationId', group.organizationId)
+                .where('waitingListId', group.id)
+                .first(false);
+
+            if (parentGroup) {
+                return await this.canAccessGroup(parentGroup, permissionLevel);
+            }
+        }
+
         return false;
     }
 
