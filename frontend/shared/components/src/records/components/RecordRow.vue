@@ -24,6 +24,8 @@
         </p>
 
         <template #right>
+            <span v-if="record.externalPermissionLevel === PermissionLevel.None" v-tooltip="$t('Onzichtbaar voor leden')" class="button icon eye-off gray" />
+            <span v-if="record.externalPermissionLevel === PermissionLevel.Read" v-tooltip="$t('Niet bewerkbaar voor leden')" class="button icon no-edit gray" />
             <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />
         </template>
@@ -32,7 +34,7 @@
 
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { RecordCategory, RecordSettings, RecordType } from '@stamhoofd/structures';
+import { PermissionLevel, RecordCategory, RecordSettings, RecordType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { propertyFilterToString } from '../../filters/UIFilter';
 import { usePatchMoveUpDownSingle } from '../../hooks';

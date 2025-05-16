@@ -174,6 +174,18 @@ export class RecordCategory extends AutoEncoder {
         return false;
     }
 
+    get externalPermissionLevel(): PermissionLevel {
+        const maximumPermissionLevel = this.getAllRecords().reduce((max, record) => {
+            const recordPermissionLevel = record.externalPermissionLevel;
+            if (getPermissionLevelNumber(recordPermissionLevel) > getPermissionLevelNumber(max)) {
+                return recordPermissionLevel;
+            }
+            return max;
+        }, PermissionLevel.None);
+
+        return maximumPermissionLevel;
+    }
+
     checkPermissionForUserManager(level: PermissionLevel): boolean {
         const levelNumber = getPermissionLevelNumber(level);
         const hasPermission = this.records.some(r => getPermissionLevelNumber(r.externalPermissionLevel) >= levelNumber);

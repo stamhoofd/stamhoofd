@@ -25,6 +25,8 @@
 
         <template #right>
             <span v-if="category.containsSensitiveData" class="icon privacy gray" :v-tooltip="$t('007c7ed0-9cac-4697-8ad7-d18684608013')" />
+            <span v-if="category.externalPermissionLevel === PermissionLevel.None" v-tooltip="$t('Onzichtbaar')" class="button icon eye-off gray" />
+            <span v-if="category.externalPermissionLevel === PermissionLevel.Read" v-tooltip="$t('Niet bewerkbaar voor leden')" class="button icon no-edit gray" />
 
             <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />
@@ -34,7 +36,7 @@
 
 <script setup lang="ts">
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { RecordCategory } from '@stamhoofd/structures';
+import { PermissionLevel, RecordCategory } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { propertyFilterToString } from '../../filters/UIFilter';
 import { useEmitPatchArray, usePatchMoveUpDownSingle } from '../../hooks';
