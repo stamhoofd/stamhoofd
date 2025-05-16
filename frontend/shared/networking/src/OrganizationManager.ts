@@ -111,6 +111,11 @@ export class OrganizationManager {
         const startDate = new Date();
         startDate.setFullYear(startDate.getFullYear() - 6);
 
+        // Improve http caching
+        startDate.setDate(1);
+        startDate.setMonth(0);
+        startDate.setHours(0, 0, 0, 0);
+
         // Load periods
         const periodsResponse = await this.$context.authenticatedServer.request({
             method: 'GET',
@@ -118,8 +123,7 @@ export class OrganizationManager {
             query: new LimitedFilteredRequest({
                 filter: {
                     startDate: {
-                        sign: '>=',
-                        value: startDate,
+                        $gt: startDate,
                     },
                 },
                 limit: 10,

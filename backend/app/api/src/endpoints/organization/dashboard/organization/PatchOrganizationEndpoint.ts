@@ -330,7 +330,8 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 if (!organizationPeriod || organizationPeriod.organizationId !== organization.id) {
                     throw new SimpleError({
                         code: 'invalid_field',
-                        message: 'De periode die je wilt instellen bestaat niet (meer)',
+                        message: 'The period you want to set does not exist (anymore)',
+                        human: $t('De periode die je wilt instellen bestaat niet (meer)'),
                         field: 'period',
                     });
                 }
@@ -339,7 +340,8 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 if (!period || (period.organizationId && period.organizationId !== organization.id)) {
                     throw new SimpleError({
                         code: 'invalid_field',
-                        message: 'De periode die je wilt instellen bestaat niet (meer)',
+                        message: 'The period you want to set does not exist (anymore)',
+                        human: $t('De periode die je wilt instellen bestaat niet (meer)'),
                         field: 'period',
                     });
                 }
@@ -347,7 +349,8 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 if (period.locked) {
                     throw new SimpleError({
                         code: 'invalid_field',
-                        message: 'De periode die je wilt instellen is reeds afgesloten',
+                        message: 'The period you want to set is already closed',
+                        human: $t('De periode die je wilt instellen is reeds afgesloten'),
                         field: 'period',
                     });
                 }
@@ -356,7 +359,8 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 if (period.startDate > new Date(Date.now() + maximumStart)) {
                     throw new SimpleError({
                         code: 'invalid_field',
-                        message: 'Het werkjaar die je wilt instellen is nog niet gestart',
+                        message: 'The period you want to set has not started yet',
+                        human: $t('Het werkjaar die je wilt instellen is nog niet gestart'),
                         field: 'period',
                     });
                 }

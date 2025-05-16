@@ -58,6 +58,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Period not found',
+                    human: $t('Dit werkjaar bestaat niet of is niet gekoppeld aan jouw organisatie.'),
                     statusCode: 404,
                 });
             }
@@ -68,16 +69,16 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Period not found',
+                    human: $t('Dit werkjaar bestaat niet of is niet gekoppeld aan jouw organisatie.'),
                     statusCode: 404,
                 });
             }
 
             if (period.locked) {
                 throw new SimpleError({
-                    code: 'not_found',
-                    message: 'Period not found',
-                    human: $t(`d19ec3c4-6320-4f65-8890-74ba1a5bc375`) + ' ' + period.getStructure().name + ' ' + $t(`cb4b72b3-3990-4870-ab85-08ef7c7eadaa`),
-                    statusCode: 404,
+                    code: 'locked_period',
+                    message: 'This period is locked',
+                    human: $t(`Je kan geen wijzigingen meer aanbrengen in werkjaar {2000-2001} omdat deze is afgesloten.`, { '2000-2001': period.getStructure().nameShort }),
                 });
             }
 
@@ -276,19 +277,39 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
     static async createOrganizationPeriod(organization: Organization, struct: OrganizationRegistrationPeriodStruct) {
         const period = await RegistrationPeriod.getByID(struct.period.id);
 
-        if (!period || period.locked) {
+        if (!period) {
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Period not found',
+                human: $t('Dit werkjaar bestaat niet of is niet gekoppeld aan jouw organisatie.'),
                 statusCode: 404,
             });
         }
 
+        if (period?.locked) {
+            throw new SimpleError({
+                code: 'locked_period',
+                message: 'Period is locked',
+                human: $t(`Je kan geen wijzigingen meer aanbrengen in werkjaar {2000-2001} omdat deze is afgesloten.`, { '2000-2001': period.getStructure().nameShort }),
+            });
+        }
+
         const maximumStart = 1000 * 60 * 60 * 24 * 31 * 2; // 2 months in advance
-        if (period.startDate > new Date(Date.now() + maximumStart)) {
+        if (STAMHOOFD.environment !== 'development' && period.startDate > new Date(Date.now() + maximumStart)) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t('Het werkjaar dat je wilt instellen is nog niet gestart'),
+                message: 'Period start date is too far in the future',
+                human: $t('Het werkjaar dat je wilt instellen is nog niet gestart'),
+                field: 'period',
+            });
+        }
+
+        // Period has ended
+        if (STAMHOOFD.environment !== 'development' && period.endDate < new Date()) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: 'Period has ended',
+                human: $t('Het werkjaar dat je wilt instellen is al afgelopen'),
                 field: 'period',
             });
         }

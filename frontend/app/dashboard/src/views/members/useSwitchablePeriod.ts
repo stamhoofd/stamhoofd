@@ -13,7 +13,6 @@ export function useSwitchablePeriod(options?: { onSwitch?: () => void | Promise<
     const owner = useRequestOwner();
     const platform = usePlatform();
     const present = usePresent();
-    
 
     async function switchPeriod(event: MouseEvent) {
         const button = event.currentTarget as HTMLElement;
@@ -31,12 +30,13 @@ export function useSwitchablePeriod(options?: { onSwitch?: () => void | Promise<
                     action: async () => {
                         const organizationPeriod = list.organizationPeriods.find(o => o.period.id === p.id);
                         if (!organizationPeriod) {
-                            // Can not start if ended, or if not starging withing 2 months
-                            if (p.endDate < new Date() || p.startDate < organization.period.period.startDate) {
+                            // Can not start if ended
+                            if (STAMHOOFD.environment !== 'development' && (p.endDate < new Date() || p.startDate < organization.period.period.startDate)) {
                                 new CenteredMessage($t(`9128d20d-f23a-4d1e-a631-c61a25ade53c`), $t(`b34e7f10-2e03-42f5-b865-2d88571d2a6e`)).addCloseButton().show();
                                 return false;
                             }
 
+                            // or if not starging within 2 months
                             if (p.startDate.getTime() > new Date().getTime() + 1000 * 60 * 60 * 24 * 62 && STAMHOOFD.environment !== 'development') {
                                 new CenteredMessage($t(`9128d20d-f23a-4d1e-a631-c61a25ade53c`), $t('275f674b-bf05-4d34-a1ff-105a1563fbcc')).addCloseButton().show();
                                 return false;
