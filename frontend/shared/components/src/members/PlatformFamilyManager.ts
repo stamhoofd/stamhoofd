@@ -198,15 +198,22 @@ export function updateContextFromMembersBlob(context: SessionContext, blob: Memb
         const userId = user.id;
         const userMemberId = user.memberId;
 
-        const newUserMemberId = blob.members
+        const foundUser = blob.members
             .flatMap(cm => cm.users)
-            .find(u => u.id === userId)?.memberId ?? null;
+            .find(u => u.id === userId);
 
-        // Update user blob
-        user.members = blob;
+        if (foundUser) {
+            // We did patch a member we 'own'
+            const newUserMemberId = foundUser.memberId ?? null;
 
-        if (userMemberId !== newUserMemberId) {
-            context.updateData(true, false, false).catch(console.error);
+            // Update user blob
+            user.members = blob;
+
+            if (userMemberId !== newUserMemberId) {
+                // The user has been associated with a different member, we need to update our session data
+                // permissions might have changed
+                context.updateData(true, false, false).catch(console.error);
+            }
         }
     }
 

@@ -1137,12 +1137,17 @@ export class PlatformMember implements ObjectWithRecords {
                             continue;
                         }
                         if (hasAdminPermissions) {
-                            // Cache the result
+                            /**
+                             * If the user has admin permissions to this record category, we'll cache this
+                             * This will make sure that we won't filter individual records inside the category by their
+                             * user manager permissions (some fields are hidden for user managers, or read-only)
+                             */
                             adminPermissionsMap.set(recordCategory.id, true);
                         }
                     }
 
                     categories.push(recordCategory);
+                    console.log('Added record category', recordCategory.name, 'usermanager', isUserManager, 'admin', adminPermissionsMap.get(recordCategory.id) ?? false);
                 }
             }
         }
