@@ -41,7 +41,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="group.waitingList" :selectable="true" class="left-center right-stack" @click="navigate(Routes.WaitingList)">
+                <STListItem v-if="group.waitingList && auth.canAccessGroup(group.waitingList, PermissionLevel.Read)" :selectable="true" class="left-center right-stack" @click="navigate(Routes.WaitingList)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/clock.svg">
                     </template>
