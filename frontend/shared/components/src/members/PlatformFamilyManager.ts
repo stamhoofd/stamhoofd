@@ -3,7 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Request, RequestResult } from '@simonbackx/simple-networking';
 import { AppType, useAppContext, useContext } from '@stamhoofd/components';
 import { SessionContext } from '@stamhoofd/networking';
-import { MemberWithRegistrationsBlob, MembersBlob, PlatformFamily, PlatformMember, Registration, Version } from '@stamhoofd/structures';
+import { Group, MemberWithRegistrationsBlob, MembersBlob, OrganizationRegistrationPeriod, PlatformFamily, PlatformMember, Registration, Version } from '@stamhoofd/structures';
 import { onBeforeUnmount, unref } from 'vue';
 
 export function usePlatformFamilyManager() {
@@ -230,7 +230,14 @@ export function updateContextFromMembersBlob(context: SessionContext, blob: Memb
         for (const member of members) {
             for (const registration of member.registrations) {
                 if (registration.organizationId === context.organization.id && !processedGroups.has(registration.groupId)) {
-                    const originalGroup = context.organization.period.groups.find(g => g.id === registration.groupId);
+                    const periodId = registration.group.periodId;
+                    let period: OrganizationRegistrationPeriod | undefined = context.organization.period;
+
+                    if (context.organization.period.period.id !== periodId) {
+                        period = context.organization.periods?.organizationPeriods.find(p => p.period.id === periodId);
+                    }
+
+                    const originalGroup = period?.groups.find(g => g.id === registration.groupId) ?? period?.waitingLists.find(g => g.id === registration.groupId);
                     originalGroup?.deepSet(registration.group);
                     processedGroups.add(registration.groupId);
                 }
