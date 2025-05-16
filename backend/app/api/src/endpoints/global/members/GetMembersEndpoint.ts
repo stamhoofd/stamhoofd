@@ -1,9 +1,9 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Group, Member, Platform } from '@stamhoofd/models';
+import { Member, Platform } from '@stamhoofd/models';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import { CountFilteredRequest, Country, CountryCode, FilterWrapperMarker, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, WrapperFilter, assertSort, getSortFilter, unwrapFilter } from '@stamhoofd/structures';
+import { CountFilteredRequest, Country, CountryCode, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 import { DataValidator } from '@stamhoofd/utility';
 
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';

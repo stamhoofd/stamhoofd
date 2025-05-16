@@ -24,12 +24,20 @@ export async function validateGroupFilter(filter: StamhoofdFilter, permissionLev
             $in: FilterWrapperMarker,
         })?.markerValue;
 
-    if (!Array.isArray(groupIds) || groupIds.length === 0) {
+    if (!Array.isArray(groupIds)) {
         throw new SimpleError({
             code: 'invalid_field',
             field: 'filter',
             message: 'You must filter on a group of the organization you are trying to access',
             human: $t(`Je hebt geen toegangsrechten om alle leden te bekijken`),
+        });
+    }
+
+    if (groupIds.length === 0) {
+        throw new SimpleError({
+            code: 'invalid_field',
+            field: 'filter',
+            message: 'Filtering on an empty list of groups is not supported',
         });
     }
 
@@ -50,12 +58,9 @@ export async function validateGroupFilter(filter: StamhoofdFilter, permissionLev
 
     for (const group of groups) {
         if (!await Context.auth.canAccessGroup(group, permissionLevel)) {
-            throw new SimpleError({
-                code: 'invalid_field',
-                field: 'filter',
-                message: 'You do not have access to this group',
-                human: $t(`Je hebt geen toegang tot leden uit {groupName}`, { groupName: group.settings.name }),
-            });
+            return false;
         }
     }
+
+    return true;
 }
