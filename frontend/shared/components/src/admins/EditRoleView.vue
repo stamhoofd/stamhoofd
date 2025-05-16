@@ -218,7 +218,10 @@ const { sortedAdmins, loading, getPermissions, getUnloadedPermissions } = useAdm
 const organization = useOrganization();
 const platform = usePlatform();
 const { patched, addPatch, hasChanges, patch } = usePatch(props.role);
-const groups: Ref<Group[]> = computed(() => organization.value?.adminAvailableGroups ?? []);
+const groups: Ref<Group[]> = computed(() => [
+    ...(organization.value?.adminAvailableGroups ?? []),
+    ...(organization.value?.period.waitingLists ?? []),
+]);
 const webshops: Ref<WebshopPreview[]> = computed(() => organization.value?.webshops ?? []);
 const categories: Ref<GroupCategory[]> = computed(() => organization.value?.getCategoryTree({ permissions: auth.permissions }).categories ?? []);
 const tags = computed(() => platform.value.config.tags);
