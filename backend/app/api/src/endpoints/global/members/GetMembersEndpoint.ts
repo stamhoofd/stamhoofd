@@ -99,7 +99,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         code: 'invalid_field',
                         field: 'filter',
                         message: 'You must filter on a group of the organization you are trying to access',
-                        human: $t(`Je hebt geen toegangsrechten om alle leden te bekijken`),
+                        human: $t(`Je hebt geen toegangsrechten om deze leden te bekijken`),
                     });
                 }
             }
