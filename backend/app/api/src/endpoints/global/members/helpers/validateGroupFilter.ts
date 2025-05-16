@@ -58,9 +58,7 @@ export async function validateGroupFilter(filter: StamhoofdFilter, permissionLev
 
     for (const group of groups) {
         if (!await Context.auth.canAccessGroup(group, permissionLevel)) {
-            throw new SimpleError({
-                code: 'invalid_field',
-                field: 'filter',
+            throw Context.auth.error({
                 message: 'You do not have access to this group',
                 human: $t(`Je hebt geen toegang tot leden uit {groupName}`, { groupName: group.settings.name }),
             });

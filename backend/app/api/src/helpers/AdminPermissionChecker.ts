@@ -95,11 +95,14 @@ export class AdminPermissionChecker {
         return await organization.getPeriod();
     }
 
-    error(message?: string): SimpleError {
+    error(humanOrData?: string | { message: string; human?: string }): SimpleError {
+        const human = typeof humanOrData === 'string' ? humanOrData : (humanOrData?.human ?? $t(`ab071f11-e05b-4bd9-9370-cd4f220c1b54`));
+        const message = typeof humanOrData === 'string' ? humanOrData : (humanOrData?.message ?? 'You do not have permissions for this action');
+
         return new SimpleError({
             code: 'permission_denied',
-            message: 'You do not have permissions for this action',
-            human: message ?? $t(`ab071f11-e05b-4bd9-9370-cd4f220c1b54`),
+            message,
+            human,
             statusCode: 403,
         });
     }

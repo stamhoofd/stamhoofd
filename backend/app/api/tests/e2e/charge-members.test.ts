@@ -1,7 +1,7 @@
 import { Request, Response } from '@simonbackx/simple-endpoints';
 import { GroupFactory, MemberFactory, Organization, OrganizationFactory, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AccessRight, BalanceItemWithPayments, ChargeMembersRequest, LimitedFilteredRequest, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, StamhoofdFilter, Version } from '@stamhoofd/structures';
-import { TestUtils } from '@stamhoofd/test-utils';
+import { SHExpect, TestUtils } from '@stamhoofd/test-utils';
 import { ChargeMembersEndpoint } from '../../src/endpoints/admin/members/ChargeMembersEndpoint';
 import { GetMemberBalanceEndpoint } from '../../src/endpoints/organization/dashboard/payments/GetMemberBalanceEndpoint';
 import { testServer } from '../helpers/TestServer';
@@ -149,7 +149,7 @@ describe('E2E.ChargeMembers', () => {
 
             await expect(async () => await postCharge(filter, organization, body, token))
                 .rejects
-                .toThrow('You do not have permissions for this action');
+                .toThrow(SHExpect.errorWithCode('permission_denied'));
         }
     });
 
@@ -423,7 +423,7 @@ describe('E2E.ChargeMembers', () => {
 
             await expect(async () => await postCharge(filter, organization, body, token))
                 .rejects
-                .toThrow('You do not have permissions for this action');
+                .toThrow(SHExpect.errorWithCode('permission_denied'));
         });
     });
 });

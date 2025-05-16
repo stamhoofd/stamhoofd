@@ -107,9 +107,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     }
 
                     if (groupIds.length === 0) {
-                        throw new SimpleError({
-                            code: 'invalid_field',
-                            field: 'filter',
+                        throw Context.auth.error({
                             message: 'You must filter on a group of the organization you are trying to access',
                             human: $t(`Je hebt geen toegangsrechten om deze leden te bekijken`),
                         });
