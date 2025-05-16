@@ -1,9 +1,9 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Member, Platform } from '@stamhoofd/models';
+import { Group, Member, Platform } from '@stamhoofd/models';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import { CountFilteredRequest, Country, CountryCode, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
+import { CountFilteredRequest, Country, CountryCode, GroupType, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 import { DataValidator } from '@stamhoofd/utility';
 
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
@@ -95,12 +95,35 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     }
                 }
                 else {
-                    throw new SimpleError({
-                        code: 'invalid_field',
-                        field: 'filter',
-                        message: 'You must filter on a group of the organization you are trying to access',
-                        human: $t(`Je hebt geen toegangsrechten om deze leden te bekijken`),
-                    });
+                    // Check which normal membership groups we have access to and filter on those
+                    const groups = await Group.getAll(organization.id, organization.periodId, true, [GroupType.Membership, GroupType.WaitingList]);
+                    Context.auth.cacheGroups(groups);
+                    const groupIds: string[] = [];
+
+                    for (const group of groups) {
+                        if (await Context.auth.canAccessGroup(group, permissionLevel)) {
+                            groupIds.push(group.id);
+                        }
+                    }
+
+                    if (groupIds.length === 0) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            field: 'filter',
+                            message: 'You must filter on a group of the organization you are trying to access',
+                            human: $t(`Je hebt geen toegangsrechten om deze leden te bekijken`),
+                        });
+                    }
+
+                    scopeFilter = {
+                        registrations: {
+                            $elemMatch: {
+                                groupId: {
+                                    $in: groupIds,
+                                },
+                            },
+                        },
+                    };
                 }
             }
         }

@@ -97,7 +97,7 @@ export class Group extends QueryableModel {
     @column({ type: 'json', decoder: new ArrayDecoder(StockReservation) })
     stockReservations: StockReservation[] = [];
 
-    static async getAll(organizationId: string, periodId: string | null, active = true) {
+    static async getAll(organizationId: string, periodId: string | null, active = true, types: GroupType[] = [GroupType.Membership]): Promise<Group[]> {
         const query = Group.select()
             .where('organizationId', organizationId);
 
@@ -109,7 +109,7 @@ export class Group extends QueryableModel {
             query.andWhere('periodId', periodId);
         }
 
-        query.andWhere('type', GroupType.Membership);
+        query.andWhere('type', types);
 
         return await query.fetch();
     }
