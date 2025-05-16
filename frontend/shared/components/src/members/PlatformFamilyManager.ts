@@ -245,7 +245,14 @@ export function updateContextFromMembersBlob(context: SessionContext, blob: Memb
                     }
 
                     const originalGroup = period?.groups.find(g => g.id === registration.groupId) ?? period?.waitingLists.find(g => g.id === registration.groupId);
-                    originalGroup?.deepSet(registration.group);
+                    if (originalGroup) {
+                        const waitingList = originalGroup.waitingList;
+                        originalGroup.deepSet(registration.group);
+                        if (!originalGroup.waitingList && waitingList) {
+                            // The backend not always returns the waiting list in deeper requests.
+                            originalGroup.waitingList = waitingList;
+                        }
+                    }
                     processedGroups.add(registration.groupId);
                 }
             }
