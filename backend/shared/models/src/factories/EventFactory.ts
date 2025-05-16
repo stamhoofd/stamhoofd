@@ -4,6 +4,7 @@ import { EventMeta } from '@stamhoofd/structures';
 import { Event } from '../models/Event';
 import { Organization } from '../models/Organization';
 import { PlatformEventTypeFactory } from './PlatformEventTypeFactory';
+import { Group } from '../models/Group';
 
 class Options {
     organization?: Organization;
@@ -12,6 +13,7 @@ class Options {
     startDate?: Date;
     endDate?: Date;
     typeId?: string;
+    group?: Group;
 }
 
 export class EventFactory extends Factory<Options, Event> {
@@ -24,8 +26,13 @@ export class EventFactory extends Factory<Options, Event> {
         event.endDate = this.options.endDate ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
         event.name = this.options.name ?? 'Event ' + (new Date().getTime() + Math.floor(Math.random() * 999999));
         event.meta = this.options.meta ?? EventMeta.create({});
+        event.groupId = this.options.group?.id ?? null;
 
         await event.save();
+
+        if (this.options.group) {
+            await event.syncGroupRequirements(this.options.group);
+        }
         return event;
     }
 }
