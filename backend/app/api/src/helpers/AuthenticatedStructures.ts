@@ -4,6 +4,8 @@ import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruc
 import { Sorter } from '@stamhoofd/utility';
 
 import { SQL } from '@stamhoofd/sql';
+import { RegistrationWithMemberBlob } from '@stamhoofd/structures/dist/src/members/RegistrationWithMemberBlob';
+import { RegistrationsBlob } from '@stamhoofd/structures/dist/src/members/RegistrationsBlob';
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from './Context';
 
@@ -551,6 +553,38 @@ export class AuthenticatedStructures {
 
     static async eventNotification(eventNotification: EventNotification): Promise<EventNotificationStruct> {
         return (await this.eventNotifications([eventNotification]))[0];
+    }
+
+    static async registrationsBlob(registrationData: {
+        memberId: string;
+        id: string;
+    }[], members: MemberWithRegistrations[], includeContextOrganization = false, includeUser?: User): Promise<RegistrationsBlob> {
+        const membersBlob = await this.membersBlob(members, includeContextOrganization, includeUser);
+
+        const memberBlobs = membersBlob.members;
+
+        const registrationWithMemberBlobs = registrationData.map(({ id, memberId }) => {
+            const memberBlob = memberBlobs.find(m => m.id === memberId);
+            if (!memberBlob) {
+                throw new Error('Member not found');
+            }
+
+            const registration = memberBlob.registrations.find(r => r.id === id);
+            if (!registration) {
+                throw new Error('Registration not found');
+            }
+
+            return RegistrationWithMemberBlob.create({
+                ...registration,
+                balances: memberBlob.registrations.find(r => r.id === registration.id)?.balances ?? [],
+                member: memberBlob,
+            });
+        });
+
+        return RegistrationsBlob.create({
+            registrations: registrationWithMemberBlobs,
+            organizations: membersBlob.organizations,
+        });
     }
 
     static async eventNotifications(eventNotifications: EventNotification[]): Promise<EventNotificationStruct[]> {
