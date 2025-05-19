@@ -35,7 +35,7 @@
     </label>
 </template>
 
-<script lang="ts" setup>
+<script lang="ts" setup generic="T extends number | null">
 import { nextTick, ref, watch } from 'vue';
 
 const props = withDefaults(defineProps<{
@@ -54,7 +54,7 @@ const props = withDefaults(defineProps<{
     required: true,
 });
 
-const model = defineModel<number | null>('modelValue', {
+const model = defineModel<T>('modelValue', {
     required: true,
 });
 
@@ -70,20 +70,20 @@ watch(model, (newValue, oldValue) => {
 
     if (newValue === null) {
         if (props.required) {
-            model.value = constrain(props.min ?? 0);
+            model.value = constrain(props.min ?? 0) as T;
         }
         clean();
         return;
     }
 
-    model.value = constrain(newValue);
+    model.value = constrain(newValue) as T;
     clean();
 }, { immediate: true });
 
 watch(valueString, (value) => {
     const { valid: v, value: newValue } = stringToValue(value);
     valid.value = v;
-    model.value = newValue;
+    model.value = newValue as T;
 }, { immediate: false });
 
 function stringToValue(str: string) {
@@ -180,7 +180,7 @@ function step(add: number) {
     if (!valid.value) {
         return;
     }
-    model.value = constrain((model.value ?? props.min ?? 0) + add);
+    model.value = constrain((model.value ?? props.min ?? 0) + add) as T;
     nextTick(() => {
         clean();
     }).catch(console.error);

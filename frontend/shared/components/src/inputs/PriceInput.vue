@@ -2,7 +2,7 @@
     <FloatInput v-bind="props" v-model="model" :suffix="currency" />
 </template>
 
-<script lang="ts" setup>
+<script lang="ts" setup generic="T extends number | null">
 import FloatInput from './FloatInput.vue';
 
 const props = withDefaults(defineProps<{
@@ -21,7 +21,7 @@ const props = withDefaults(defineProps<{
     required: true,
 });
 
-const model = defineModel<number | null>('modelValue', {
+const model = defineModel<T>('modelValue', {
     required: true,
 });
 </script>
