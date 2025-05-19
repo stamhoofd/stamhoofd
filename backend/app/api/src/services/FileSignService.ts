@@ -96,8 +96,6 @@ export class FileSignService {
     }
 
     static async withSignedUrl(file: File, duration = 60 * 60) {
-        console.log('Generating signed url:', file.id);
-
         if (file.signedUrl) {
             console.error('Warning: file already signed');
         }
@@ -108,8 +106,6 @@ export class FileSignService {
                 Key: file.path,
                 Expires: duration,
             });
-
-            console.log('Signed url:', url);
 
             return new File({
                 ...file,
