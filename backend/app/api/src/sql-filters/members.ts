@@ -1,10 +1,10 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { SQL, SQLAge, SQLConcat, SQLFilterDefinitions, SQLScalar, SQLValueType, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLOneToOneRelationFilterCompiler, createSQLRelationFilterCompiler } from '@stamhoofd/sql';
+import { SQL, SQLAge, SQLConcat, SQLFilterDefinitions, SQLScalar, SQLValueType, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler } from '@stamhoofd/sql';
 import { AccessRight } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from '../helpers/Context';
+import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers';
 import { organizationFilterCompilers } from './organizations';
-import { registrationFilterCompilers } from './registrations';
 
 /**
  * Defines how to filter members in the database from StamhoofdFilter objects
@@ -181,18 +181,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('groups', 'deletedAt'),
                 null,
             ),
-        {
-            ...registrationFilterCompilers,
-            organization: createSQLOneToOneRelationFilterCompiler(
-                SQL.select()
-                    .from(SQL.table('organizations'))
-                    .where(
-                        SQL.column('organizations', 'id'),
-                        SQL.column('registrations', 'organizationId'),
-                    ),
-                organizationFilterCompilers,
-            ),
-        },
+        baseRegistrationFilterCompilers,
     ),
 
     'responsibilities': createSQLRelationFilterCompiler(
