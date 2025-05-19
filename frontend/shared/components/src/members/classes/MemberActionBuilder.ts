@@ -3,7 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
-import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, PermissionLevel, Platform, PlatformMember, RegistrationWithMember, mergeFilters } from '@stamhoofd/structures';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, PermissionLevel, Platform, PlatformMember, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
 import { markRaw } from 'vue';
 import { EditMemberAllBox, MemberSegmentedView, MemberStepView, checkoutDefaultItem, chooseOrganizationMembersForGroup } from '..';
 import { GlobalEventBus } from '../../EventBus';
@@ -18,7 +18,6 @@ import { PlatformFamilyManager, usePlatformFamilyManager } from '../PlatformFami
 import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue';
 import { RegistrationActionBuilder } from './RegistrationActionBuilder';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
-import { RegistrationWithPlatformMember } from '@stamhoofd/structures';
 
 export function useDirectMemberActions(options?: { groups?: Group[]; organizations?: Organization[] }) {
     return useMemberActions()(options);

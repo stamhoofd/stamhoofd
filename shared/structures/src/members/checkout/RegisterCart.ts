@@ -2,7 +2,6 @@ import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/sim
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { BalanceItem } from '../../BalanceItem.js';
 import { Platform } from '../../Platform.js';
-import { RegistrationWithMember } from '../RegistrationWithMember.js';
 import { BalanceItemCartItem } from './BalanceItemCartItem.js';
 import { RegisterCheckout, RegisterContext } from './RegisterCheckout.js';
 import { IDRegisterItem, RegisterItem, RegistrationWithPlatformMember } from './RegisterItem.js';

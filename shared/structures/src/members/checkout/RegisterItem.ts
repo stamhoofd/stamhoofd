@@ -12,6 +12,7 @@ import { Organization } from '../../Organization.js';
 import { PlatformMembershipTypeBehaviour } from '../../Platform.js';
 import { PriceBreakdown } from '../../PriceBreakdown.js';
 import { StockReservation } from '../../StockReservation.js';
+import { TranslatedString } from '../../TranslatedString.js';
 import { ObjectWithRecords, PatchAnswers } from '../ObjectWithRecords.js';
 import { PlatformMember } from '../PlatformMember.js';
 import { RecordAnswer, RecordAnswerDecoder } from '../records/RecordAnswer.js';
@@ -19,8 +20,6 @@ import { RecordCategory } from '../records/RecordCategory.js';
 import { RecordSettings } from '../records/RecordSettings.js';
 import { Registration } from '../Registration.js';
 import { RegisterContext } from './RegisterCheckout.js';
-import { TranslatedString } from '../../TranslatedString.js';
-import { RegistrationWithMember } from '../RegistrationWithMember.js';
 
 export class RegistrationWithPlatformMember {
     registration: Registration;

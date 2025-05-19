@@ -2,7 +2,7 @@ import { ArrayDecoder, AutoEncoder, Decoder, field, StringDecoder } from '@simon
 
 import { MembersBlob } from '../members/MemberWithRegistrationsBlob.js';
 import { Payment } from '../members/Payment.js';
-import { RegistrationWithMember } from '../members/RegistrationWithMember.js';
+import { RegistrationWithTinyMember } from '../members/RegistrationWithTinyMember.js';
 
 export class RegisterResponse extends AutoEncoder {
     @field({ decoder: Payment, nullable: true })
@@ -14,6 +14,6 @@ export class RegisterResponse extends AutoEncoder {
     @field({ decoder: MembersBlob as Decoder<MembersBlob> })
     members: MembersBlob;
 
-    @field({ decoder: new ArrayDecoder(RegistrationWithMember), version: 19 })
-    registrations: RegistrationWithMember[] = [];
+    @field({ decoder: new ArrayDecoder(RegistrationWithTinyMember), version: 19 })
+    registrations: RegistrationWithTinyMember[] = [];
 }

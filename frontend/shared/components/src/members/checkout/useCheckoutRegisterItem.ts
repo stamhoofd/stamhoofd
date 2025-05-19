@@ -1,7 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
-import { Group, GroupType, Organization, PlatformFamily, PlatformMember, RegisterCheckout, RegisterItem, RegistrationWithMember } from '@stamhoofd/structures';
+import { Group, GroupType, Organization, PlatformFamily, PlatformMember, RegisterCheckout, RegisterItem, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { ChooseGroupForMemberView } from '..';
 import { useAppContext } from '../../context/appContext';
 import { GlobalEventBus } from '../../EventBus';
@@ -14,7 +14,6 @@ import { EditMemberStep, MemberStepManager } from '../classes/MemberStepManager'
 import { getAllMemberSteps } from '../classes/steps';
 import { RegisterItemStep } from '../classes/steps/RegisterItemStep';
 import { startCheckout } from './startCheckout';
-import { RegistrationWithPlatformMember } from '@stamhoofd/structures';
 
 export async function loadGroupOrganization(context: SessionContext, organizationId: string, owner: any) {
     if (organizationId === context.organization?.id) {

@@ -697,7 +697,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         return new Response(RegisterResponse.create({
             payment: payment ? PaymentStruct.create(payment) : null,
             members: await AuthenticatedStructures.membersBlob(updatedMembers),
-            registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r)),
+            registrations: registrations.map(r => Member.getRegistrationWithTinyMemberStructure(r)),
             paymentUrl,
         }));
     }

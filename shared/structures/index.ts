@@ -158,7 +158,7 @@ export * from './src/members/records/RecordSettings.js';
 export * from './src/members/Registration.js';
 export * from './src/members/RegistrationPatch.js';
 export * from './src/members/RegistrationWithEncryptedMember.js';
-export * from './src/members/RegistrationWithMember.js';
+export * from './src/members/RegistrationWithTinyMember.js';
 export * from './src/members/ReviewTime.js';
 
 // Register checkout

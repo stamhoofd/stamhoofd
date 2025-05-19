@@ -1,4 +1,3 @@
-import { ManyToOneRelation } from '@simonbackx/simple-database';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Group, Member, Payment, Registration } from '@stamhoofd/models';
@@ -61,7 +60,7 @@ export class GetPaymentRegistrations extends Endpoint<Params, Query, Body, Respo
                 paidAt: payment.paidAt,
                 createdAt: payment.createdAt,
                 updatedAt: payment.updatedAt,
-                registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r.setRelation(Registration.group, groups.find(g => g.id === r.groupId)!))),
+                registrations: registrations.map(r => Member.getRegistrationWithTinyMemberStructure(r.setRelation(Registration.group, groups.find(g => g.id === r.groupId)!))),
             }),
         );
     }
