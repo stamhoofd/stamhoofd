@@ -4,21 +4,21 @@
         <STInputBox :title="title" error-fields="price" :error-box="errorBox">
             <PriceInput v-model="price" :min="min" :placeholder="$t(`99e41cea-bce3-4329-8b17-e3487c4534ac`)" />
             <p v-if="defaultMembershipTypeId" class="style-description-small">
-                {{ formatPriceForPlatform(defaultPrice, defaultPriceNow) }}
+                {{ formatPriceForPlatform(platformMembershipPrice, platformMembershipPriceNow) }}
             </p>
         </STInputBox>
 
-        <STInputBox v-if="$showReducedPrice" :title="financialSupportSettings.priceName" error-fields="price" :error-box="errorBox">
+        <STInputBox v-if="showReducedPrice" :title="financialSupportSettings.priceName" error-fields="price" :error-box="errorBox">
             <PriceInput v-model="reducedPrice" :placeholder="formatPrice(price)" :min="min" :required="false" />
             <p v-if="defaultMembershipTypeId" class="style-description-small">
-                {{ formatPriceForPlatform(defaultReducedPrice, defaultReducedPriceNow) }}
+                {{ formatPriceForPlatform(platformMembershipReducedPrice, platformMembershipReducedPriceNow) }}
             </p>
         </STInputBox>
 
         <slot v-else-if="$slots.end" name="end" />
     </div>
 
-    <div v-if="$slots.end && $showReducedPrice" class="split-inputs">
+    <div v-if="$slots.end && showReducedPrice" class="split-inputs">
         <slot name="end" />
     </div>
 </template>
@@ -26,7 +26,6 @@
 <script setup lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { PriceInput, STErrorsDefault, useErrors, useOrganization, usePlatform, useValidation, Validator } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Group, ReduceablePrice } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
@@ -58,25 +57,25 @@ const { enabled, financialSupportSettings } = useFinancialSupportSettings({
 const platform = usePlatform();
 const organization = useOrganization();
 
-const $showReducedPrice = computed(() => enabled || reducedPrice.value !== null);
+const showReducedPrice = computed(() => enabled || reducedPrice.value !== null);
 
-const defaultReducedPrice = computed(() => getDefaultPrice(true, new Date(0)));
-const defaultPrice = computed(() => getDefaultPrice(false, new Date(0)));
+const platformMembershipReducedPrice = computed(() => getPlatformMembershipPrice(true, new Date(0)));
+const platformMembershipPrice = computed(() => getPlatformMembershipPrice(false, new Date(0)));
 
-const defaultReducedPriceNow = computed(() => getDefaultPrice(true, new Date()));
-const defaultPriceNow = computed(() => getDefaultPrice(false, new Date()));
+const platformMembershipReducedPriceNow = computed(() => getPlatformMembershipPrice(true, new Date()));
+const platformMembershipPriceNow = computed(() => getPlatformMembershipPrice(false, new Date()));
 
 const minPriceDifference = computed(() =>
     Math.max(0,
         Math.min(
             // It is possible that the difference changes over the year, so we should allow them to also alter it after this date
-            defaultPrice.value - defaultReducedPrice.value,
-            defaultPriceNow.value - defaultReducedPriceNow.value,
+            platformMembershipPrice.value - platformMembershipReducedPrice.value,
+            platformMembershipPriceNow.value - platformMembershipReducedPriceNow.value,
         ),
     ),
 );
 
-function getDefaultPrice(isReduced: boolean, date: Date) {
+function getPlatformMembershipPrice(isReduced: boolean, date: Date) {
     if (!props.defaultMembershipTypeId) {
         return 0;
     }
