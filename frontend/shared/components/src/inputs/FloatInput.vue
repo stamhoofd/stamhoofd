@@ -1,5 +1,5 @@
 <template>
-    <label class="float-input input" :class="{ error: !valid, disabled }">
+    <div class="float-input input" :class="{ error: !valid, disabled }">
         <div class="clear">
             <div class="left">
                 <!--
@@ -25,14 +25,16 @@
                 <div v-else-if="valueString !== ''">
                     <span>{{ valueString }}</span> {{ suffix }}
                 </div>
-                <div v-else class="placeholder">{{ placeholder }}</div>
+                <div v-else class="placeholder">
+                    {{ placeholder }}
+                </div>
             </div>
 
             <div class="right">
                 <slot name="right" />
             </div>
         </div>
-    </label>
+    </div>
 </template>
 
 <script lang="ts" setup generic="T extends number | null">
@@ -206,56 +208,59 @@ function step(add: number) {
         display: grid;
         grid-template-columns: 1fr auto;
         align-items: center;
-    }
 
-    .left {
-        & > div {
-            pointer-events: none;
-            user-select: none;
-            white-space: nowrap;
-            padding: 5px 15px;
+        > .left {
+            position: relative;
 
-            span {
-                white-space: pre;
-            }
+            & > div {
+                pointer-events: none;
+                user-select: none;
+                white-space: nowrap;
+                padding: 5px 15px;
 
-            &.placeholder {
-                opacity: 0.5;
-            }
-        }
+                span {
+                    white-space: pre;
+                }
 
-        & > input {
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            opacity: 0;
-            width: 100%;
-            box-sizing: border-box;
-            padding: 5px 15px;
-            height:  calc(#{$input-height} - 2 * #{$border-width});
-            line-height: calc(#{$input-height} - 10px - 2 * #{$border-width});
-
-            &:focus {
-                opacity: 1;
-
-                & + div {
+                &.placeholder {
                     opacity: 0.5;
+                }
+            }
 
-                    span {
-                        visibility: hidden;
+            & > input {
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 0;
+                bottom: 0;
+                opacity: 0;
+                width: 100%;
+                box-sizing: border-box;
+                padding: 5px 15px;
+                height:  calc(#{$input-height} - 2 * #{$border-width});
+                line-height: calc(#{$input-height} - 10px - 2 * #{$border-width});
+
+                &:focus {
+                    opacity: 1;
+
+                    & + div {
+                        opacity: 0.5;
+
+                        span {
+                            visibility: hidden;
+                        }
                     }
                 }
             }
         }
-    }
 
-    .right {
-        padding: 5px 15px;
+        > .right {
+            padding: 5px 15px;
+            text-align: right;
 
-        &:empty {
-            display: none;
+            &:empty {
+                display: none;
+            }
         }
     }
 }
