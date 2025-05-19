@@ -13,6 +13,7 @@ import { Platform } from '../Platform.js';
 import { UserWithMembers } from '../UserWithMembers.js';
 import { Address } from '../addresses/Address.js';
 import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
+import { MemberPlatformMembershipHelper } from '../helpers/MemberPlatformMembershipHelper.js';
 import { EmergencyContact } from './EmergencyContact.js';
 import { MemberDetails, MemberProperty } from './MemberDetails.js';
 import { MembersBlob, MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob.js';
@@ -495,67 +496,16 @@ export class PlatformMember implements ObjectWithRecords {
         return this._savingPatch !== null || this._isCreating !== null;
     }
 
+    get filteredMemberships() {
+        return this.patchedMember.platformMemberships.filter(t => !!this.organizations.find(o => o.id === t.organizationId));
+    }
+
     get membershipStatus() {
-        let status = MembershipStatus.Inactive;
-        const now = new Date();
-
-        for (const t of this.patchedMember.platformMemberships) {
-            const organization = this.organizations.find(o => o.id === t.organizationId);
-            if (!organization) {
-                continue;
-            }
-
-            if (t.endDate && t.endDate < now) {
-                continue;
-            }
-
-            if (t.startDate > now) {
-                continue;
-            }
-
-            if (t.expireDate && t.expireDate < now) {
-                if (status === MembershipStatus.Inactive) {
-                    status = MembershipStatus.Expiring;
-                }
-                continue;
-            }
-
-            const isTemporary = t.endDate.getTime() - t.startDate.getTime() < 1000 * 60 * 60 * 24 * 31;
-
-            if (status === MembershipStatus.Inactive || ((status === MembershipStatus.Expiring || status === MembershipStatus.Temporary) && !isTemporary)) {
-                if (isTemporary) {
-                    status = MembershipStatus.Temporary;
-                }
-                else {
-                    if (t.trialUntil && t.trialUntil > now) {
-                        status = MembershipStatus.Trial;
-                    }
-                    else {
-                        status = MembershipStatus.Active;
-                        break;
-                    }
-                }
-            }
-        }
-
-        return status;
+        return MemberPlatformMembershipHelper.getStatus(this.filteredMemberships);
     }
 
     get hasFutureMembership(): boolean {
-        const now = new Date();
-
-        for (const t of this.patchedMember.platformMemberships) {
-            const organization = this.organizations.find(o => o.id === t.organizationId);
-            if (!organization) {
-                continue;
-            }
-
-            if (t.startDate > now) {
-                return true;
-            }
-        }
-
-        return false;
+        return MemberPlatformMembershipHelper.hasFutureMembership(this.filteredMemberships);
     }
 
     get shouldApplyReducedPrice() {
@@ -563,39 +513,11 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     getContinuousMembershipStatus({ start, end }: { start: Date; end: Date }): ContinuousMembershipStatus {
-        const memberships = this.patchedMember.platformMemberships.filter(t => !!this.organizations.find(o => o.id === t.organizationId));
-
-        const sorted = memberships
-            // filter memberships in period
-            .filter(m => m.endDate > start && m.startDate < end)
-            // sort by start date (earliest first)
-            .sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
-
-        // date until when there is a membership
-        let coveredDate = start;
-
-        for (const t of sorted) {
-            if (t.startDate <= coveredDate) {
-                if (t.endDate > coveredDate) {
-                    coveredDate = t.endDate;
-                }
-            }
-            // there is a gap -> partially covered
-            else {
-                return ContinuousMembershipStatus.Partial;
-            }
-        }
-
-        if (coveredDate >= end) {
-            return ContinuousMembershipStatus.Full;
-        }
-
-        // if there is at least one membership in the period
-        if (sorted.length > 0) {
-            return ContinuousMembershipStatus.Partial;
-        }
-
-        return ContinuousMembershipStatus.None;
+        return MemberPlatformMembershipHelper.getContinuousMembershipStatus({
+            memberships: this.filteredMemberships,
+            start,
+            end,
+        });
     }
 
     addPatch(p: PartialWithoutMethods<AutoEncoderPatchType<MemberWithRegistrationsBlob>>) {
