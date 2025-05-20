@@ -21,7 +21,7 @@ export class BundleDiscount extends AutoEncoder {
      * Whether all registrations of the family are counted together (true), or they are all counted separately per member (false).
      */
     @field({ decoder: BooleanDecoder })
-    countWholeFamily = true;
+    countWholeFamily = false;
 
     /**
      * Whether all registrations are counted together regardless the group (false), or each group is counted separately (true).
