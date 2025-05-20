@@ -2,8 +2,12 @@
     <SaveView :loading="saving" :title="title" :disabled="!hasChanges" @save="save">
         <h1>
             {{ title }}
+
+            <span class="title-suffix">
+                {{ props.period.period.nameShort }}
+            </span>
         </h1>
-        <p>{{ $t('Geef korting bij meerdere inschrijvingen van een lid of gezin, bv. voor broers of zussen die inschrijven voor een kamp, of leden die meerdere lessen volgen.') }}</p>
+        <p>{{ $t('Geef korting bij meerdere inschrijvingen van een lid of gezin, bv. voor broers of zussen die inschrijven voor een kamp, of leden die meerdere lessen volgen in hetzelfde werkjaar.') }}</p>
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <STList v-model="draggableBundles" :draggable="true">

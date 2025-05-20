@@ -3,6 +3,7 @@
         <h1>
             {{ title }}
         </h1>
+        <p>{{ $t('Een bundelkorting maak je aan en koppel je vervolgens aan één of meerdere activiteiten of inschrijvingsgroepen waarop die korting geldt. Afhankelijk van de ingestelde toepassingsregels krijgen leden dan korting voor de tweede, derde, vierde... inschrijving bij die ingestelde activiteiten of inschrijvinsgroepen.') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -64,7 +65,7 @@
                         {{ $t('Het aantal inschrijvingen voor alle gekoppelde activiteiten wordt samengeteld om de tweede, derde... inschrijving te bepalen') }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('Bijvoorbeeld: een broer krijgt korting op activiteit B als zijn zus voor activiteit A is ingeschreven, of hetzelfde lid krijgt korting op activiteit B als het ook is ingeschreven voor activiteit A.') }}
+                        {{ $t('Bijvoorbeeld: een lid krijgt korting op activiteit B als hetzelf of een familielid voor activiteit A, B, C... is ingeschreven') }}
                     </p>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label" class="left-center">
@@ -86,7 +87,7 @@
 
         <hr>
         <h2>Standaard korting</h2>
-        <p>Je kan hiervan afwijken door dit aan te passen bij de instellingen van de leeftijdsgroep of activiteit.</p>
+        <p>Je kan hiervan afwijken door dit aan te passen bij de instellingen van de leeftijdsgroep of activiteit. De grootst mogelijke korting wordt steeds berekend.</p>
 
         <GroupPriceDiscountsInput v-model="discounts" />
 
@@ -214,7 +215,7 @@ async function doDelete() {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('Ben je zeker dat je deze kortingbundel wilt verwijderen?'), $t('838cae8b-92a5-43d2-82ba-01b8e830054b'))) {
+    if (!await CenteredMessage.confirm($t('Ben je zeker dat je deze bundelkorting wilt verwijderen?'), $t('838cae8b-92a5-43d2-82ba-01b8e830054b'))) {
         return;
     }
 

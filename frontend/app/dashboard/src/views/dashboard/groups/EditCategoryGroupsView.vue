@@ -3,8 +3,8 @@
         <h1>
             {{ title }}
 
-            <span v-if="organization" class="title-suffix">
-                {{ period.period.nameShort }}
+            <span class="title-suffix">
+                {{ props.period.period.nameShort }}
             </span>
         </h1>
 
