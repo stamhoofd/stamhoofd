@@ -1,8 +1,8 @@
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder, deepSetArray } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { GlobalEventBus } from '@stamhoofd/components';
 import { LoginHelper, SessionContext, SessionManager } from '@stamhoofd/networking';
-import { Group, LimitedFilteredRequest, Organization, OrganizationAdmins, OrganizationPatch, OrganizationRegistrationPeriod, PaginatedResponseDecoder, RegistrationPeriod, RegistrationPeriodList, SortItemDirection } from '@stamhoofd/structures';
+import { Group, LimitedFilteredRequest, Organization, OrganizationAdmins, OrganizationRegistrationPeriod, PaginatedResponseDecoder, RegistrationPeriod, RegistrationPeriodList, SortItemDirection } from '@stamhoofd/structures';
 import { Ref, inject, toRef } from 'vue';
 
 export function useOrganizationManager(): Ref<OrganizationManager> {
@@ -35,7 +35,7 @@ export class OrganizationManager {
     }
 
     getPatch() {
-        return OrganizationPatch.create({
+        return Organization.patch({
             id: this.organization.id,
         });
     }
