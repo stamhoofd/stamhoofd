@@ -265,7 +265,11 @@ export class RegisterCheckout {
     }
 
     get totalPrice() {
-        return Math.max(0, this.cart.price + this.administrationFee + this.freeContribution - this.cart.refund);
+        return Math.max(0, this.cart.price + this.administrationFee + this.freeContribution - this.bundleDiscounts) - this.cart.refund;
+    }
+
+    get bundleDiscounts() {
+        return this.cart.bundleDiscounts.map(d => d.netTotal).reduce((a, b) => a + b, 0);
     }
 
     get priceBreakown(): PriceBreakdown {

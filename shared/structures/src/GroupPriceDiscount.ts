@@ -19,7 +19,7 @@ export class GroupPriceDiscount extends AutoEncoder {
             return Math.max(0, Math.min(price, this.value.forMember(member)));
         }
         return Math.max(0, Math.min(price,
-            Math.round(price * this.value.forMember(member) / 100)),
+            Math.round(price * this.value.forMember(member) / 100_00)),
         );
     }
 }

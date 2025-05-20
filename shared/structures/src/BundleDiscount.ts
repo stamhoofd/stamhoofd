@@ -75,15 +75,16 @@ export class BundleDiscount extends AutoEncoder {
                         registration,
                         member,
                     });
-                    const calculation = group.getCalculationFor(registrationWithPlatformMember, {
+                    const cc = group.getCalculationFor(registrationWithPlatformMember, {
                         // Only add it to the calculation if this registration is relevant for a new or removed registration that was added earlier
                         onlyExisting: true,
                     });
-                    calculation?.add(registrationWithPlatformMember);
+                    cc?.addIfNotBeingRemoved(registrationWithPlatformMember);
                 }
             }
         }
 
+        group.calculate();
         return group;
     }
 
@@ -113,6 +114,12 @@ class BundleDiscountCalculationGroup {
         this.bundle = options.bundle;
     }
 
+    calculate() {
+        for (const calculation of this.calculations.values()) {
+            calculation.calculate();
+        }
+    }
+
     getCalculationFor(item: RegisterItem | RegistrationWithPlatformMember, options?: { onlyExisting?: boolean }) {
         if (!this.bundle.applyableTo(item)) {
             return null;
@@ -122,7 +129,7 @@ class BundleDiscountCalculationGroup {
         let member: PlatformMember | null = null;
 
         if (this.bundle.countWholeFamily) {
-            if (!this.bundle.countPerGroup) {
+            if (this.bundle.countPerGroup) {
                 groupingCode = item.group.id;
                 group = item.group;
             }
@@ -205,8 +212,8 @@ export class BundleDiscountCalculation {
         The total dicount, not taking into account what has already been given in the past
     */
     get total() {
-        return Object.values(this.items).reduce((a, b) => a + b, 0)
-            + Object.values(this.registrations).reduce((a, b) => a + b, 0);
+        return [...this.items.values()].reduce((a, b) => a + b, 0)
+            + [...this.registrations.values()].reduce((a, b) => a + b, 0);
     }
 
     get totalAlreadyApplied() {
@@ -223,6 +230,17 @@ export class BundleDiscountCalculation {
 
     get netTotal() {
         return this.total - this.totalAlreadyApplied;
+    }
+
+    addIfNotBeingRemoved(item: RegisterItem | RegistrationWithPlatformMember) {
+        // Only add if it is not being removed at the same time
+        if (item instanceof RegistrationWithPlatformMember) {
+            if (this.deleteRegistrations.find(r => r.registration.id === item.registration.id)) {
+                return;
+            }
+        }
+
+        this.add(item);
     }
 
     add(item: RegisterItem | RegistrationWithPlatformMember) {
@@ -256,9 +274,15 @@ export class BundleDiscountCalculation {
                 ? (item.groupPrice.bundleDiscounts.get(this.bundle.id)?.customDiscounts ?? this.bundle.discounts)
                 : (item.registration.groupPrice.bundleDiscounts.get(this.bundle.id)?.customDiscounts ?? this.bundle.discounts);
 
-            const row = [0];
+            const row: number[] = [];
 
-            for (const discount of discounts) {
+            for (const [index] of arr.entries()) {
+                if (index === 0) {
+                    row.push(0);
+                    continue;
+                }
+
+                const discount = discounts[index - 1] ?? discounts[discounts.length - 1]; // Repeat last
                 const calculated = discount.calculateDiscount(price, item.member);
                 row.push(calculated);
             }

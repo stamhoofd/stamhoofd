@@ -74,11 +74,12 @@ export class RegisterCart {
         // Now calculate discounts
         this.bundleDiscounts = [];
         if (this.singleOrganization) {
-            const bundleDiscounts: BundleDiscount[] = [];
-            for (const bundleDiscount of bundleDiscounts) {
+            for (const bundleDiscount of this.singleOrganization.period.settings.bundleDiscounts) {
                 const grouped = bundleDiscount.calculate(this);
                 for (const [_, calculation] of grouped.calculations) {
-                    this.bundleDiscounts.push(calculation);
+                    if (calculation.netTotal !== 0) {
+                        this.bundleDiscounts.push(calculation);
+                    }
                 }
             }
         }
