@@ -2,6 +2,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, Decoder, EnumDe
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
+import { BundleDiscountGroupPriceSettings } from './BundleDiscountGroupPriceSettings.js';
 import { Group } from './Group.js';
 import { GroupGenderType } from './GroupGenderType.js';
 import { OldGroupPrices } from './OldGroupPrices.js';
@@ -10,7 +11,6 @@ import { StockReservation } from './StockReservation.js';
 import { TranslatedString } from './TranslatedString.js';
 import { Image } from './files/Image.js';
 import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
-import { PlatformMember } from './members/PlatformMember.js';
 import { RegisterItem } from './members/checkout/RegisterItem.js';
 import { RecordCategory } from './members/records/RecordCategory.js';
 import { ReduceablePrice } from './ReduceablePrice.js';
@@ -46,6 +46,12 @@ export class GroupPrice extends AutoEncoder {
      */
     @field({ decoder: IntegerDecoder, optional: true, field: 'reserved' })
     _reserved = 0;
+
+    /**
+     * Bundle discounts that are enabled for this group price, and possible custom settings
+     */
+    @field({ decoder: new MapDecoder(StringDecoder, BundleDiscountGroupPriceSettings), ...NextVersion })
+    bundleDiscounts: Map<string, BundleDiscountGroupPriceSettings> = new Map();
 
     getUsedStock(group: Group) {
         const groupStockReservations = group.stockReservations;
