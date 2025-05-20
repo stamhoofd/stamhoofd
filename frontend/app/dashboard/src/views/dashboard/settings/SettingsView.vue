@@ -160,6 +160,22 @@
                         </template>
                     </STListItem>
 
+                    <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.BundleDiscounts)" v-if="$feature('bundle-discounts')">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/discount.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('Bundelkortingen') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('Korting voor tweede of derde inschrijvingen.') }}
+                        </p>
+
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
                     <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.RegistrationRecords)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/health-data.svg">
@@ -317,13 +333,14 @@
 </template>
 
 <script lang="ts" setup>
-import { AdminsView, EditEmailTemplatesView, EmailSettingsView, GeneralSettingsView, RecordsConfigurationView, SSOSettingsView, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useMembersPackage, usePlatform, useSalesDisabled } from '@stamhoofd/components';
+import { AdminsView, EditEmailTemplatesView, EmailSettingsView, GeneralSettingsView, RecordsConfigurationView, SSOSettingsView, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useMembersPackage, useOrganization, usePlatform, useSalesDisabled } from '@stamhoofd/components';
 
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
-import { EmailTemplate, EmailTemplateType, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, StripeAccount } from '@stamhoofd/structures';
+import { useOrganizationManager, usePatchOrganizationPeriod, useRequestOwner } from '@stamhoofd/networking';
+import { EmailTemplate, EmailTemplateType, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, StripeAccount } from '@stamhoofd/structures';
 import { ComponentOptions, Ref, computed, ref } from 'vue';
+import BundleDiscountSettingsView from '../bundle-discounts/BundleDiscountSettingsView.vue';
 import BalanceNotificationSettingsView from './BalanceNotificationSettingsView.vue';
 import LabsView from './LabsView.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
@@ -347,6 +364,7 @@ enum Routes {
     RegistrationPaymentMethods = 'inschrijvingen/betaalmethodes',
     RegistrationPage = 'inschrijvingen/pagina',
     RegistrationGroups = 'inschrijvingen/groepen',
+    BundleDiscounts = 'inschrijvingen/kortingen',
     RegistrationRecords = 'inschrijvingen/persoonsgegevens',
     RegistrationFreeContributions = 'inschrijvingen/vrije-bijdrage',
     SingleSignOn = 'sso',
@@ -362,6 +380,8 @@ const $organizationManager = useOrganizationManager();
 const platform = usePlatform();
 const present = usePresent();
 const buildEditGroupsView = useEditGroupsView();
+const organization = useOrganization();
+const patchOrganizationPeriod = usePatchOrganizationPeriod();
 
 defineRoutes([
     {
@@ -436,6 +456,20 @@ defineRoutes([
                 ...(options as any),
                 components: [component],
             });
+        },
+    },
+    {
+        url: Routes.BundleDiscounts,
+        present: 'popup',
+        component: BundleDiscountSettingsView as ComponentOptions,
+        paramsToProps() {
+            return {
+                period: organization.value!.period,
+                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                    patch.id = organization.value!.period.id;
+                    await patchOrganizationPeriod(patch);
+                },
+            };
         },
     },
     {
