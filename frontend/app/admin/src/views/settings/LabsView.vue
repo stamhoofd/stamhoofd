@@ -44,6 +44,10 @@
             {{ $t('caf486c6-818a-4d2b-9fdb-728c6af71481') }}
         </Checkbox>
 
+        <Checkbox :model-value="getFeatureFlag('bundle-discounts')" @update:model-value="setFeatureFlag('bundle-discounts', !!$event)">
+            Broer en zuskorting (bundelkortingen)
+        </Checkbox>
+
         <Checkbox :model-value="!!STAMHOOFD.domains.webshop" :disabled="true">
             {{ $t('e85a86ee-7751-4791-984b-f67dc1106f6b') }}
         </Checkbox>
