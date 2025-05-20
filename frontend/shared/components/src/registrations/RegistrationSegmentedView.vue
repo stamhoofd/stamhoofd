@@ -4,7 +4,7 @@
 
 <script lang="ts" setup>
 import { Group, PlatformMember, PlatformRegistration } from '@stamhoofd/structures';
-import MemberSegmentedView from './MemberSegmentedView.vue';
+import MemberSegmentedView from '../members/MemberSegmentedView.vue';
 
 type PropType = {
     registration: PlatformRegistration;

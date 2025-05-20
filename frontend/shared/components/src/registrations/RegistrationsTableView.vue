@@ -13,8 +13,8 @@ import { Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, M
 import { Group, GroupCategoryTree, GroupType, MemberResponsibility, Organization, PlatformRegistration, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
-import { useRegistrationsObjectFetcher } from '../../fetchers/useRegistrationsObjectFetcher';
-import { useAdvancedRegistrationWithMemberUIFilterBuilders } from '../../filters/filter-builders/registrations-with-member';
+import { useRegistrationsObjectFetcher } from '../fetchers/useRegistrationsObjectFetcher';
+import { useAdvancedRegistrationWithMemberUIFilterBuilders } from '../filters/filter-builders/registrations-with-member';
 import RegistrationSegmentedView from './RegistrationSegmentedView.vue';
 
 type ObjectType = PlatformRegistration;
