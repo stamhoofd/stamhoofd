@@ -1,7 +1,6 @@
 import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { City } from '@stamhoofd/models';
-import { Province } from '@stamhoofd/models';
+import { City, Province } from '@stamhoofd/models';
 import { City as CityStruct, Country, Province as ProvinceStruct, SearchRegions } from '@stamhoofd/structures';
 import { StringCompare } from '@stamhoofd/utility';
 
@@ -71,6 +70,10 @@ export class SearchRegionsEndpoint extends Endpoint<Params, Query, Body, Respons
         const cities = await City.where({ name: match }, {
             limit: 5,
             sort: [
+                {
+                    column: { name: rawQuery },
+                    direction: 'DESC',
+                },
                 {
                     column: { name: match },
                     direction: 'DESC',
