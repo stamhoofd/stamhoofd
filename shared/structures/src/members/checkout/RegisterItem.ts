@@ -36,6 +36,11 @@ export class RegistrationWithPlatformMember {
             member: this.member, // no need to clone because it is a reference
         });
     }
+
+    // Convenience helpers
+    get group() {
+        return this.registration.group;
+    }
 }
 
 export class RegisterItemOption extends AutoEncoder {
