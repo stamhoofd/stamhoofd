@@ -1,8 +1,7 @@
 import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { City } from '@stamhoofd/models';
-import { Province } from '@stamhoofd/models';
-import { City as CityStruct, Country, Province as ProvinceStruct,SearchRegions } from "@stamhoofd/structures";
+import { City, Province } from '@stamhoofd/models';
+import { City as CityStruct, Country, Province as ProvinceStruct, SearchRegions } from "@stamhoofd/structures";
 import { StringCompare } from '@stamhoofd/utility';
 
 type Params = Record<string, never>;
@@ -69,12 +68,17 @@ export class SearchRegionsEndpoint extends Endpoint<Params, Query, Body, Respons
         const cities = await City.where({ name: match }, {
             limit: 5,
             sort: [
-                {
-                    column: { name: match },
-                    direction: "DESC"
-                }
-            ]
-        });
+              {
+                column: { name: rawQuery },
+                direction: "DESC",
+              },
+              {
+                column: { name: match },
+                direction: "DESC",
+              },
+            ],
+          }
+        );
         const loadedCities: (City & { province: Province })[] = []
 
         // We had to add an order by in the query to fix the limit. MySQL doesn't want to limit the results correctly if we don't explicitly sort the results on their relevance
