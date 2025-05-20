@@ -10,11 +10,12 @@
 
 <script lang="ts" setup>
 import { Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useDirectMemberActions, useGlobalEventListener, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
-import { Group, GroupCategoryTree, GroupType, MemberResponsibility, Organization, PlatformRegistration, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight, Group, GroupCategoryTree, GroupType, MemberResponsibility, Organization, PlatformRegistration, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
 import { useRegistrationsObjectFetcher } from '../fetchers/useRegistrationsObjectFetcher';
 import { useAdvancedRegistrationWithMemberUIFilterBuilders } from '../filters/filter-builders/registrations-with-member';
+import { getRegistrationColumns } from '../members/helpers/getRegistrationColumns';
 import RegistrationSegmentedView from './RegistrationSegmentedView.vue';
 
 type ObjectType = PlatformRegistration;
@@ -40,6 +41,8 @@ const props = withDefaults(
         dateRange: null,
     },
 );
+
+const waitingList = computed(() => props.group && props.group.type === GroupType.WaitingList);
 
 const { filterBuilders, loading } = useAdvancedRegistrationWithMemberUIFilterBuilders();
 
@@ -102,6 +105,8 @@ useGlobalEventListener('paymentPatch', async () => {
 const configurationId = computed(() => {
     return 'registrations-' + app + '-org-' + (props.organization?.id ?? 'null') + '-' + (props.group ? '-group-' + props.group.id : '') + (props.category ? '-category-' + props.category.id : '') + (props.responsibility ? '-responsibility-' + props.responsibility.id : '');
 });
+
+const financialRead = computed(() => auth.permissions?.hasAccessRight(AccessRight.MemberReadFinancialData) ?? false);
 
 const groups = (() => {
     if (props.group) {
@@ -181,18 +186,19 @@ const objectFetcher = useRegistrationsObjectFetcher({
 
 const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
 
-const allColumns: Column<ObjectType, any>[] = [
-    new Column<ObjectType, string>({
-        id: 'id',
-        name: 'id',
-        getValue: registration => registration.id,
-        minimumWidth: 100,
-        recommendedWidth: 150,
-        grow: true,
-        allowSorting: true,
-        enabled: true,
-    }),
-].filter(column => column !== null);
+const allColumns: Column<ObjectType, any>[] = getRegistrationColumns({
+    dateRange: props.dateRange,
+    group: props.group,
+    periodId: props.periodId,
+    category: props.category,
+    organization: props.organization,
+    groups,
+    filterPeriodId,
+    auth,
+    app,
+    waitingList: waitingList.value,
+    financialRead: financialRead.value,
+});
 
 const Route = {
     Component: RegistrationSegmentedView,
