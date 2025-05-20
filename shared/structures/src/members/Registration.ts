@@ -11,6 +11,7 @@ import { RegisterItemOption } from './checkout/RegisterItem.js';
 import { ObjectWithRecords, PatchAnswers } from './ObjectWithRecords.js';
 import { RecordAnswer, RecordAnswerDecoder } from './records/RecordAnswer.js';
 import { RecordSettings } from './records/RecordSettings.js';
+import { AppliedRegistrationDiscount } from '../AppliedRegistrationDiscount.js';
 
 export class Registration extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -117,6 +118,16 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
 
     @field({ decoder: new ArrayDecoder(GenericBalance), version: 354 })
     balances: GenericBalance[] = [];
+
+    /**
+     * Discounts that were applied to this registration.
+     * Note that these discounts are saved in separate balance items and
+     * are not included in the price.
+     *
+     * Reason is that discounts can change after you've been registered
+     */
+    @field({ decoder: new MapDecoder(StringDecoder, AppliedRegistrationDiscount), ...NextVersion })
+    discounts = new Map<string, AppliedRegistrationDiscount>();
 
     get isTrial() {
         return this.trialUntil !== null && (this.deactivatedAt ? (this.trialUntil >= this.deactivatedAt) : (this.trialUntil > new Date()));
