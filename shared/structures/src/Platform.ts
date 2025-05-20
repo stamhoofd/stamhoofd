@@ -6,7 +6,7 @@ import { DefaultAgeGroup } from './DefaultAgeGroup.js';
 import { Replacement } from './endpoints/EmailRequest.js';
 import { EventNotificationType } from './EventNotificationType.js';
 import { Image } from './files/Image.js';
-import { ReduceablePrice } from './GroupSettings.js';
+import { ReduceablePrice } from './ReduceablePrice.js';
 import { LoginMethod, LoginMethodConfig } from './LoginMethod.js';
 import { MemberResponsibility } from './MemberResponsibility.js';
 import { DataPermissionsSettings, FinancialSupportSettings, OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
