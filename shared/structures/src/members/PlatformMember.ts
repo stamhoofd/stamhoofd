@@ -1096,7 +1096,6 @@ export class PlatformMember implements ObjectWithRecords {
                     }
 
                     categories.push(recordCategory);
-                    console.log('Added record category', recordCategory.name, 'usermanager', isUserManager, 'admin', adminPermissionsMap.get(recordCategory.id) ?? false);
                 }
             }
         }
