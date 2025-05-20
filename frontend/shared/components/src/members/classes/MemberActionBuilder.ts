@@ -10,6 +10,7 @@ import { GlobalEventBus } from '../../EventBus';
 import { AuditLogsView } from '../../audit-logs';
 import EmailView, { RecipientChooseOneOption } from '../../email/EmailView.vue';
 import { manualFeatureFlag, useContext, useOrganization, usePlatform } from '../../hooks';
+import ChargeMembersView from '../../members/ChargeMembersView.vue';
 import { Toast } from '../../overlays/Toast';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, TableActionSelection } from '../../tables/classes';
 import { NavigationActions } from '../../types/NavigationActions';
@@ -279,6 +280,26 @@ export class MemberActionBuilder {
                 await this.deleteRegistration(members);
             },
         })];
+    }
+
+    getChargeAction(organization: Organization) {
+        return new AsyncTableAction({
+            name: $t(`d799bffc-fd09-4444-abfa-3552b3c46cb9`),
+            icon: 'calculator',
+            priority: 13,
+            groupIndex: 4,
+            handler: async (selection: TableActionSelection<PlatformMember>) => {
+                await this.present({
+                    modalDisplayStyle: 'popup',
+                    components: [
+                        new ComponentWithProperties(ChargeMembersView, {
+                            filter: selection.filter.filter,
+                            organization,
+                        }),
+                    ],
+                });
+            },
+        });
     }
 
     getActionsForCategory(category: GroupCategoryTree, action: (members: PlatformMember[], group: Group) => void | Promise<void>): TableAction<PlatformMember>[] {

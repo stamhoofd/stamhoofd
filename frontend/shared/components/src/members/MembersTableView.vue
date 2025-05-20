@@ -9,14 +9,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, TableActionSelection, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
+import { usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
 import { AccessRight, Group, GroupCategoryTree, GroupType, MemberResponsibility, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
 import { useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '../filters/filter-builders/members';
-import ChargeMembersView from './ChargeMembersView.vue';
 import { useDirectMemberActions } from './classes/MemberActionBuilder';
 import { getMemberColumns } from './helpers/getMemberColumns';
 import MemberSegmentedView from './MemberSegmentedView.vue';
@@ -258,22 +257,6 @@ const actions: TableAction<ObjectType>[] = [
 ];
 
 if (app !== 'admin' && auth.canManagePayments()) {
-    actions.push(new AsyncTableAction({
-        name: $t(`d799bffc-fd09-4444-abfa-3552b3c46cb9`),
-        icon: 'calculator',
-        priority: 13,
-        groupIndex: 4,
-        handler: async (selection: TableActionSelection<ObjectType>) => {
-            await present({
-                modalDisplayStyle: 'popup',
-                components: [
-                    new ComponentWithProperties(ChargeMembersView, {
-                        filter: selection.filter.filter,
-                        organization: organization.value!,
-                    }),
-                ],
-            });
-        },
-    }));
+    actions.push(actionBuilder.getChargeAction(organization.value!));
 }
 </script>
