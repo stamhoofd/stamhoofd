@@ -1,16 +1,11 @@
 import 'jest-extended';
-// 139
 import { MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob.js';
-// 48
 import { MemberPlatformMembership } from './MemberPlatformMembership.js';
-// 72
 import { Platform } from '../Platform.js';
-
-// 148
 import { Organization } from '../Organization.js';
 import { MemberDetails } from './MemberDetails.js';
+import { ContinuousMembershipStatus } from './MembershipStatus.js';
 import {
-    ContinuousMembershipStatus,
     PlatformFamily,
     PlatformMember,
 } from './PlatformMember.js';
