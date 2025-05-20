@@ -7,32 +7,13 @@ import { GroupGenderType } from './GroupGenderType.js';
 import { OldGroupPrices } from './OldGroupPrices.js';
 import { RegistrationPeriodBase } from './RegistrationPeriodBase.js';
 import { StockReservation } from './StockReservation.js';
+import { TranslatedString } from './TranslatedString.js';
 import { Image } from './files/Image.js';
 import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
 import { PlatformMember } from './members/PlatformMember.js';
 import { RegisterItem } from './members/checkout/RegisterItem.js';
 import { RecordCategory } from './members/records/RecordCategory.js';
-import { TranslatedString } from './TranslatedString.js';
-
-export class ReduceablePrice extends AutoEncoder {
-    @field({ decoder: IntegerDecoder })
-    price = 0;
-
-    @field({ decoder: IntegerDecoder, nullable: true })
-    reducedPrice: number | null = null;
-
-    getPrice(isReduced: boolean) {
-        if (this.reducedPrice === null) {
-            return this.price;
-        }
-
-        return isReduced ? this.reducedPrice : this.price;
-    }
-
-    forMember(member: PlatformMember) {
-        return this.getPrice(member.patchedMember.details.shouldApplyReducedPrice);
-    }
-}
+import { ReduceablePrice } from './ReduceablePrice.js';
 
 export class GroupPrice extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

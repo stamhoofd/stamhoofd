@@ -35,6 +35,7 @@ export * from './src/Company.js';
 export * from './src/DefaultAgeGroup.js';
 export * from './src/Document.js';
 export * from './src/Event.js';
+export * from './src/ReduceablePrice.js';
 export * from './src/EventNotification.js';
 export * from './src/EventNotificationStatus.js';
 export * from './src/EventNotificationType.js';
