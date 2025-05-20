@@ -213,7 +213,7 @@ export class I18n {
         for (const key in replace) {
             if (replace.hasOwnProperty(key)) {
                 const value = replace[key];
-                text = text.replace(new RegExp('{' + this.escapeRegex(key) + '}', 'g'), value.toString());
+                text = text.replace(new RegExp('\\{' + this.escapeRegex(key) + '\\}', 'g'), value.toString());
             }
         }
         return text;
