@@ -160,7 +160,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.BundleDiscounts)" v-if="$feature('bundle-discounts')">
+                    <STListItem v-if="$feature('bundle-discounts')" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.BundleDiscounts)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/discount.svg">
                         </template>
@@ -333,14 +333,13 @@
 </template>
 
 <script lang="ts" setup>
-import { AdminsView, EditEmailTemplatesView, EmailSettingsView, GeneralSettingsView, RecordsConfigurationView, SSOSettingsView, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useMembersPackage, useOrganization, usePlatform, useSalesDisabled } from '@stamhoofd/components';
+import { BundleDiscountSettingsView, AdminsView, EditEmailTemplatesView, EmailSettingsView, GeneralSettingsView, RecordsConfigurationView, SSOSettingsView, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useMembersPackage, useOrganization, usePlatform, useSalesDisabled } from '@stamhoofd/components';
 
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import { useOrganizationManager, usePatchOrganizationPeriod, useRequestOwner } from '@stamhoofd/networking';
 import { EmailTemplate, EmailTemplateType, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, StripeAccount } from '@stamhoofd/structures';
 import { ComponentOptions, Ref, computed, ref } from 'vue';
-import BundleDiscountSettingsView from '../bundle-discounts/BundleDiscountSettingsView.vue';
 import BalanceNotificationSettingsView from './BalanceNotificationSettingsView.vue';
 import LabsView from './LabsView.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';

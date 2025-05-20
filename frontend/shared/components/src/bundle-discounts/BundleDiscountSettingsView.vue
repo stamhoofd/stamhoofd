@@ -36,7 +36,6 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, Toast, useDraggableArray, useErrors, usePatch } from '@stamhoofd/components';
-import { usePatchOrganizationPeriod } from '@stamhoofd/networking';
 import { BundleDiscount, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { ref } from 'vue';
 
@@ -53,7 +52,6 @@ const title = $t('Bundelkortingen');
 const pop = usePop();
 
 const { patched: patchedPeriod, hasChanges, addPatch, patch } = usePatch(props.period);
-const patchOrganizationPeriod = usePatchOrganizationPeriod();
 
 const draggableBundles = useDraggableArray(() => patchedPeriod.value.settings.bundleDiscounts,
     (patch) => {
@@ -147,7 +145,7 @@ async function save() {
     try {
         if (await errors.validator.validate()) {
             patch.value.id = props.period.id;
-            await patchOrganizationPeriod(patch.value);
+            await props.saveHandler(patch.value);
             await pop({ force: true });
         }
     }
