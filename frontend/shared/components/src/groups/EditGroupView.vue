@@ -96,6 +96,10 @@
                                 {{ reducedPriceName }}: <span>{{ formatPrice(price.price.reducedPrice) }}</span>
                             </p>
 
+                            <p v-for="[id, discount] of price.bundleDiscounts" :key="id" class="style-description-small">
+                                {{ discount.name.toString() }}
+                            </p>
+
                             <p v-if="price.isSoldOut(patchedGroup)" class="style-description-small">
                                 {{ $t('44ba544c-3db6-4f35-b7d1-b63fdcadd9ab') }}
                             </p>
@@ -111,7 +115,7 @@
                         </STListItem>
                     </template>
                 </STList>
-                <GroupPriceBox v-else :price="patchedGroup.settings.prices[0]" :group="patchedGroup" :errors="errors" :default-membership-type-id="defaultMembershipTypeId" @patch:price="addPricePatch" />
+                <GroupPriceBox v-else :period="patchedPeriod" @patch:period="addPatch" :price="patchedGroup.settings.prices[0]" :group="patchedGroup" :errors="errors" :default-membership-type-id="defaultMembershipTypeId" @patch:price="addPricePatch" />
             </div>
 
             <div v-for="optionMenu of patchedGroup.settings.optionMenus" :key="optionMenu.id" class="container">
@@ -495,7 +499,6 @@ import GroupOptionMenuView from './components/GroupOptionMenuView.vue';
 import GroupPriceBox from './components/GroupPriceBox.vue';
 import GroupPriceView from './components/GroupPriceView.vue';
 import { useExternalOrganization, useFinancialSupportSettings } from './hooks';
-import { C } from 'vitest/dist/chunks/reporters.66aFHiyX.js';
 
 const props = withDefaults(
     defineProps<{
@@ -567,7 +570,7 @@ function addRecordCategoriesPatch(categories: PatchableArrayAutoEncoder<RecordCa
     });
 }
 
-const { addPatch: addPricePatch, addPut: addPricePut, addDelete: addPriceDelete } = usePatchableArray(patchPricesArray);
+const { addPatch: addPricePatch, addDelete: addPriceDelete } = usePatchableArray(patchPricesArray);
 const draggablePrices = useDraggableArray(() => patchedGroup.value.settings.prices, patchPricesArray);
 
 const { addPatch: addOptionMenuPatch, addPut: addOptionMenuPut, addDelete: addOptionMenuDelete } = usePatchableArray((optionMenus: PatchableArrayAutoEncoder<GroupOptionMenu>) => {
@@ -1041,16 +1044,27 @@ async function addGroupPrice() {
             price: patchedGroup.value.settings.prices[0]?.price?.clone(),
         });
 
+        const basePatch = OrganizationRegistrationPeriod.patch({});
+        const settingsPatch = GroupSettings.patch({});
+        settingsPatch.prices.addPut(price);
+
+        const groupPatch = Group.patch({
+            id: patchedGroup.value.id,
+            settings: settingsPatch
+        });
+        basePatch.groups.addPatch(groupPatch);
+
         await present({
             components: [
                 new ComponentWithProperties(GroupPriceView, {
+                    period: patchedPeriod.value.patch(basePatch),
                     price,
                     group: patchedGroup,
                     isNew: true,
                     defaultMembershipTypeId,
                     showNameAlways: true,
-                    saveHandler: async (patch: AutoEncoderPatchType<GroupPrice>) => {
-                        addPricePut(price.patch(patch));
+                    saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                        addPatch(basePatch.patch(patch));
                     },
                 }),
             ],
@@ -1063,12 +1077,13 @@ async function editGroupPrice(price: GroupPrice) {
     await present({
         components: [
             new ComponentWithProperties(GroupPriceView, {
+                period: patchedPeriod.value,
                 price,
                 group: patchedGroup,
                 isNew: false,
                 defaultMembershipTypeId,
-                saveHandler: async (patch: AutoEncoderPatchType<GroupPrice>) => {
-                    addPricePatch(patch);
+                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                    addPatch(patch);
                 },
                 deleteHandler: async () => {
                     addPriceDelete(price.id);

@@ -5,15 +5,14 @@
         </h1>
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <GroupPriceBox :price="patched" :group="group" :errors="errors" :default-membership-type-id="defaultMembershipTypeId" :show-name-always="showNameAlways" @patch:price="addPatch" />
+        <GroupPriceBox :period="patchedPeriod" :price="patched" :group="patchedGroup" :errors="errors" :default-membership-type-id="defaultMembershipTypeId" :show-name-always="showNameAlways" @patch:period="addPeriodPatch" @patch:price="addPatch" />
     </SaveView>
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Group, GroupPrice } from '@stamhoofd/structures';
+import { Group, GroupPrice, GroupSettings, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { useErrors } from '../../errors/useErrors';
 import { usePatch } from '../../hooks';
@@ -27,7 +26,8 @@ const props = withDefaults(
         price: GroupPrice;
         group: Group;
         isNew: boolean;
-        saveHandler: (price: AutoEncoderPatchType<GroupPrice>) => Promise<void>;
+        period: OrganizationRegistrationPeriod;
+        saveHandler: (period: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => Promise<void>;
         deleteHandler?: (() => Promise<void>) | null;
         showToasts?: boolean;
         defaultMembershipTypeId?: string | null;
@@ -41,7 +41,28 @@ const props = withDefaults(
     },
 );
 
-const { patched, hasChanges, addPatch, patch } = usePatch(props.price);
+const { patched: patchedPeriod, hasChanges, addPatch: addPeriodPatch, patch: periodPatch } = usePatch(props.period);
+const patchedGroup = computed(() => {
+    return patchedPeriod.value.groups.find(g => g.id === props.group.id) ?? props.group;
+});
+const patched = computed(() => {
+    return patchedGroup.value.settings.prices.find(p => p.id === props.price.id) ?? props.price;
+});
+
+function addGroupPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<Group>>) {
+    const groups: PatchableArrayAutoEncoder<Group> = new PatchableArray();
+    groups.addPatch(Group.patch({ id: props.group.id, ...patch }));
+    addPeriodPatch({ groups });
+}
+
+function addPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<GroupPrice>>) {
+    const prices: PatchableArrayAutoEncoder<GroupPrice> = new PatchableArray();
+    prices.addPatch(GroupPrice.patch({ id: props.price.id, ...patch }));
+    addGroupPatch({ settings: GroupSettings.patch({ prices }) });
+}
+
+// const { patched, hasChanges, addPatch, patch } = usePatch(props.price);
+
 const errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
@@ -63,7 +84,7 @@ async function save() {
             saving.value = false;
             return;
         }
-        await props.saveHandler(patch.value);
+        await props.saveHandler(periodPatch.value);
         await pop({ force: true });
     }
     catch (e) {

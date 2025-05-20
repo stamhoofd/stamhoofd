@@ -91,6 +91,7 @@ export * from './src/Token.js';
 export * from './src/UmbrellaOrganization.js';
 export * from './src/User.js';
 export * from './src/BundleDiscount.js';
+export * from './src/BundleDiscountGroupPriceSettings.js';
 export * from './src/GroupPriceDiscount.js';
 export * from './src/members/MembershipStatus.js';
 
