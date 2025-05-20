@@ -127,7 +127,7 @@ export default class PrivacySettingsView extends Mixins(NavigationMixin) {
 
         try {
             await this.$organizationManager.patch(this.organizationPatch);
-            this.organizationPatch = Organization.patch this.$organization.id });
+            this.organizationPatch = Organization.patch({ id: this.$organization.id });
             new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
             this.dismiss({ force: true });
         }
