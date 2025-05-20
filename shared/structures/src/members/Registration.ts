@@ -30,6 +30,14 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: GroupPrice, version: 305 })
     groupPrice: GroupPrice;
 
+    /**
+     * The group price inside a registration is cached and is a snapshot of the group price at the time of registration.
+     * This method returns the most up to date group price we can still find.
+     */
+    get updatedGroupPrice() {
+        return this.group.settings.prices.find(price => price.id === this.groupPrice.id) ?? this.groupPrice;
+    }
+
     @field({ decoder: new ArrayDecoder(RegisterItemOption), version: 305 })
     options: RegisterItemOption[] = [];
 
