@@ -47,3 +47,4 @@ export { default as MultipleChoiceInput } from './MultipleChoiceInput.vue';
 export { default as TTextarea } from './TTextarea.vue';
 export { default as TInput } from './TInput.vue';
 export { default as EditorLanguageButton } from './EditorLanguageButton.vue';
+export { default as PriceOrPercentageInput } from './PriceOrPercentageInput.vue';
