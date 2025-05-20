@@ -1,6 +1,7 @@
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { BalanceItem } from '../../BalanceItem.js';
+import { BundleDiscount, type BundleDiscountCalculation } from '../../BundleDiscount.js';
 import { Platform } from '../../Platform.js';
 import { BalanceItemCartItem } from './BalanceItemCartItem.js';
 import { RegisterCheckout, RegisterContext } from './RegisterCheckout.js';
@@ -62,9 +63,23 @@ export class RegisterCart {
      */
     deleteRegistrations: RegistrationWithPlatformMember[] = [];
 
+    bundleDiscounts: BundleDiscountCalculation[] = [];
+
     calculatePrices() {
         for (const item of this.items) {
             item.calculatePrice();
+        }
+
+        // Now calculate discounts
+        this.bundleDiscounts = [];
+        if (this.singleOrganization) {
+            const bundleDiscounts: BundleDiscount[] = [];
+            for (const bundleDiscount of bundleDiscounts) {
+                const grouped = bundleDiscount.calculate(this);
+                for (const [_, calculation] of grouped.calculations) {
+                    this.bundleDiscounts.push(calculation);
+                }
+            }
         }
     }
 

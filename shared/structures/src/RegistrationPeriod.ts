@@ -6,6 +6,7 @@ import { GroupType } from './GroupType.js';
 import { Organization } from './Organization.js';
 import { RegistrationPeriodBase } from './RegistrationPeriodBase.js';
 import { SetupSteps } from './SetupSteps.js';
+import { BundleDiscount } from './BundleDiscount.js';
 
 export class RegistrationPeriodSettings extends AutoEncoder {
     // todo
@@ -32,6 +33,9 @@ export class OrganizationRegistrationPeriodSettings extends AutoEncoder {
     get rootCategory(): GroupCategory | undefined {
         return this.categories.find(c => c.id === this.rootCategoryId);
     }
+
+    @field({ decoder: new ArrayDecoder(BundleDiscount), ...NextVersion })
+    bundleDiscounts: BundleDiscount[] = [];
 }
 
 export class OrganizationRegistrationPeriod extends AutoEncoder {

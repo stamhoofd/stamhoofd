@@ -287,6 +287,17 @@ export class RegisterCheckout {
             },
         ].filter(a => a.price !== 0);
 
+        // Discounts
+        for (const discount of this.cart.bundleDiscounts) {
+            const value = discount.netTotal;
+            if (value !== 0) {
+                all.push({
+                    name: discount.name,
+                    price: -value,
+                });
+            }
+        }
+
         if (all.length > 0) {
             all.unshift({
                 name: $t(`8a04f032-01e5-4ee0-98fb-6f36bf971080`),
