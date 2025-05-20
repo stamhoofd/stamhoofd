@@ -77,6 +77,7 @@ declare module 'vue' {
         formatCountry: typeof CountryHelper.getName;
         formatInteger: typeof Formatter.integer;
         formatFloat: typeof Formatter.float;
+        formatPercentage: typeof Formatter.percentage;
         pluralText: typeof Formatter.pluralText;
 
         vFormatInput: typeof FormatInputDirective;

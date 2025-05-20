@@ -17,6 +17,7 @@ import STListItem from './layout/STListItem.vue';
 import STNavigationBar from './navigation/STNavigationBar.vue';
 import TTextarea from './inputs/TTextarea.vue';
 import TInput from './inputs/TInput.vue';
+import { format } from 'libphonenumber-js';
 
 export type ComponentExposed<T> =
 	T extends new (...args: any[]) => infer E ? E :
@@ -235,6 +236,7 @@ export class VueGlobalHelper {
                 formatCountry: CountryHelper.getName.bind(CountryHelper),
                 formatInteger: Formatter.integer.bind(Formatter),
                 formatFloat: Formatter.float.bind(Formatter),
+                formatPercentage: Formatter.percentage.bind(Formatter),
                 pluralText: Formatter.pluralText.bind(Formatter),
             },
         });
