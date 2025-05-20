@@ -100,7 +100,7 @@ import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
 import { CenteredMessage, Checkbox, ColorInput, ErrorBox, ImageInput, SaveView, STErrorsDefault, Toast, Validator } from '@stamhoofd/components';
-import { Image, Organization, OrganizationMetaData, OrganizationPatch, ResolutionFit, ResolutionRequest, Version } from '@stamhoofd/structures';
+import { Image, Organization, OrganizationMetaData, ResolutionFit, ResolutionRequest, Version } from '@stamhoofd/structures';
 
 import DNSRecordsView from './DNSRecordsView.vue';
 import DomainSettingsView from './DomainSettingsView.vue';
@@ -124,7 +124,7 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
     temp_organization = this.$organization;
     showDomainSettings = true;
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({});
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = Organization.patch({});
 
     created() {
         this.organizationPatch.id = this.$organization.id;
@@ -279,7 +279,7 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
 
         try {
             await this.$organizationManager.patch(this.organizationPatch);
-            this.organizationPatch = OrganizationPatch.create({ id: this.$organization.id });
+            this.organizationPatch = Organization.patch({ id: this.$organization.id });
             new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
             this.dismiss({ force: true });
         }

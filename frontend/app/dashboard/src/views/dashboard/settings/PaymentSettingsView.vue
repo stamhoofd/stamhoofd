@@ -290,7 +290,7 @@ import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
 import { CenteredMessage, CenteredMessageButton, Checkbox, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, TooltipDirective, Validator } from '@stamhoofd/components';
 import { AppManager, Storage, UrlHelper } from '@stamhoofd/networking';
-import { BuckarooSettings, CheckMollieResponse, Country, MollieProfile, Organization, OrganizationPatch, OrganizationPrivateMetaData, PayconiqAccount, PaymentMethod, StripeAccount, Version } from '@stamhoofd/structures';
+import { BuckarooSettings, CheckMollieResponse, Country, MollieProfile, Organization, OrganizationPrivateMetaData, PayconiqAccount, PaymentMethod, StripeAccount, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue';
 
@@ -324,7 +324,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     stripeAccounts: StripeAccount[] = [];
     mollieProfiles: MollieProfile[] = [];
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({});
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = Organization.patch({});
 
     created() {
         this.organizationPatch.id = this.$organization.id;
@@ -547,7 +547,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
 
         try {
             await this.$organizationManager.patch(this.organizationPatch);
-            this.organizationPatch = OrganizationPatch.create({ id: this.$organization.id });
+            this.organizationPatch = Organization.patch({ id: this.$organization.id });
             new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
             this.dismiss({ force: true });
         }

@@ -52,7 +52,7 @@ import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
 import { CenteredMessage, Checkbox, ErrorBox, PriceInput, SaveView, STErrorsDefault, STInputBox, Toast, Validator } from '@stamhoofd/components';
-import { FreeContributionSettings, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, Version } from '@stamhoofd/structures';
+import { FreeContributionSettings, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, Version } from '@stamhoofd/structures';
 
 @Component({
     components: {
@@ -69,7 +69,7 @@ export default class FreeContributionSettingsView extends Mixins(NavigationMixin
     saving = false;
     temp_organization = this.$organization;
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({});
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = Organization.patch({});
 
     created() {
         this.organizationPatch.id = this.$organization.id;
@@ -208,7 +208,7 @@ export default class FreeContributionSettingsView extends Mixins(NavigationMixin
 
         try {
             await this.$organizationManager.patch(this.organizationPatch);
-            this.organizationPatch = OrganizationPatch.create({ id: this.$organization.id });
+            this.organizationPatch = Organization.patch({ id: this.$organization.id });
             new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
             this.dismiss({ force: true });
         }

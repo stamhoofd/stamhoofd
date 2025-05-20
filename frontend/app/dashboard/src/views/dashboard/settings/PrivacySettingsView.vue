@@ -37,7 +37,7 @@ import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
 import { CenteredMessage, ErrorBox, FileInput, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, Toast, Validator } from '@stamhoofd/components';
-import { File, Organization, OrganizationMetaData, OrganizationPatch, Version } from '@stamhoofd/structures';
+import { File, Organization, OrganizationMetaData, Version } from '@stamhoofd/structures';
 
 @Component({
     components: {
@@ -58,7 +58,7 @@ export default class PrivacySettingsView extends Mixins(NavigationMixin) {
     defaultSelectedType = 'none';
     selectedPrivacyType = 'none';
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({});
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = Organization.patch
 
     get organization() {
         return this.$organization.patch(this.organizationPatch);
@@ -127,7 +127,7 @@ export default class PrivacySettingsView extends Mixins(NavigationMixin) {
 
         try {
             await this.$organizationManager.patch(this.organizationPatch);
-            this.organizationPatch = OrganizationPatch.create({ id: this.$organization.id });
+            this.organizationPatch = Organization.patch this.$organization.id });
             new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
             this.dismiss({ force: true });
         }

@@ -277,5 +277,3 @@ export class GetWebshopFromDomainResult extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(WebshopPreview), version: 137 })
     webshops: WebshopPreview[] = [];
 }
-
-export const OrganizationPatch = Organization.patchType();

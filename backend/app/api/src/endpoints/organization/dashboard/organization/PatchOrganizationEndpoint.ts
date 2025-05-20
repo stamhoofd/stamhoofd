@@ -2,7 +2,7 @@ import { AutoEncoderPatchType, cloneObject, Decoder, isPatchableArray, isPatchMa
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Organization, OrganizationRegistrationPeriod, PayconiqPayment, Platform, RegistrationPeriod, StripeAccount, Webshop } from '@stamhoofd/models';
-import { BuckarooSettings, Company, MemberResponsibility, OrganizationMetaData, OrganizationPatch, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
+import { BuckarooSettings, Company, MemberResponsibility, OrganizationMetaData, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
@@ -23,7 +23,7 @@ type ResponseBody = OrganizationStruct;
  */
 
 export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = OrganizationPatch as Decoder<AutoEncoderPatchType<OrganizationStruct>>;
+    bodyDecoder = OrganizationStruct.patchType() as Decoder<AutoEncoderPatchType<OrganizationStruct>>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {

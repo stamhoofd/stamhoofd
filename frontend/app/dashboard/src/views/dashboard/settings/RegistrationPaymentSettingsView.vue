@@ -23,7 +23,7 @@ import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { CenteredMessage, Checkbox, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, ReviewCheckbox, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, useReview, useSetupStepTranslations, Validator } from '@stamhoofd/components';
-import { Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PaymentConfiguration, PaymentMethod, PrivatePaymentConfiguration, SetupStepType, Version } from '@stamhoofd/structures';
+import { Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, PaymentConfiguration, PaymentMethod, PrivatePaymentConfiguration, SetupStepType, Version } from '@stamhoofd/structures';
 
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue';
@@ -59,7 +59,7 @@ export default class RegistrationPaymentSettingsView extends Mixins(NavigationMi
     review = useReview(SetupStepType.Payment);
     hasReviewChanges = this.review.$hasChanges;
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({});
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = Organization.patch({});
 
     created() {
         this.organizationPatch.id = this.$organization.id;
@@ -137,7 +137,7 @@ export default class RegistrationPaymentSettingsView extends Mixins(NavigationMi
         try {
             if (this.hasChanges) {
                 await this.$organizationManager.patch(this.organizationPatch);
-                this.organizationPatch = OrganizationPatch.create({ id: this.$organization.id });
+                this.organizationPatch = Organization.patch({ id: this.$organization.id });
             }
 
             if (this.hasReviewChanges) {
