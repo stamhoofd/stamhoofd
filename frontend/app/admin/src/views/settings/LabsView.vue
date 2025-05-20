@@ -44,6 +44,10 @@
             {{ $t('caf486c6-818a-4d2b-9fdb-728c6af71481') }}
         </Checkbox>
 
+        <Checkbox :model-value="getFeatureFlag('table-registrations')" @update:model-value="setFeatureFlag('table-registrations', !!$event)">
+            {{ $t('Tabel inschrijvingen') }}
+        </Checkbox>
+
         <Checkbox :model-value="getFeatureFlag('bundle-discounts')" @update:model-value="setFeatureFlag('bundle-discounts', !!$event)">
             Broer en zuskorting (bundelkortingen)
         </Checkbox>
@@ -78,7 +82,6 @@
 import { ConvertArrayToPatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, CheckboxListItem, ErrorBox, LoginMethodConfigView, Toast, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager } from '@stamhoofd/networking';
 import { LoginMethod, LoginMethodConfig, PlatformConfig } from '@stamhoofd/structures';
 import { ref } from 'vue';

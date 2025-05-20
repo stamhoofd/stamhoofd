@@ -196,16 +196,17 @@ import ExternalOrganizationContainer from '../containers/ExternalOrganizationCon
 import { appToUri } from '../context';
 import { EditEmailTemplatesView } from '../email';
 import EditGroupView from '../groups/EditGroupView.vue';
-import { useAuth, useContext, useGlobalEventListener, useOrganization, usePlatform } from '../hooks';
+import { useAuth, useContext, useFeatureFlag, useGlobalEventListener, useOrganization, usePlatform } from '../hooks';
+import IconContainer from '../icons/IconContainer.vue';
 import { MembersTableView, useChooseOrganizationMembersForGroup } from '../members';
+import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
+import RegistrationsTableView from '../registrations/RegistrationsTableView.vue';
 import ImageComponent from '../views/ImageComponent.vue';
 import EditEventView from './EditEventView.vue';
 import EventInfoTable from './components/EventInfoTable.vue';
 import EventNotificationRow from './components/EventNotificationRow.vue';
 import { useCreateEventGroup } from './composables/createEventGroup';
-import { CenteredMessage } from '../overlays/CenteredMessage';
-import IconContainer from '../icons/IconContainer.vue';
 
 const props = defineProps<{
     event: Event;
@@ -278,24 +279,45 @@ enum Routes {
     EditEmails = 'emails',
 }
 
-defineRoutes([
-    {
-        url: Routes.Registrations,
-        component: MembersTableView as ComponentOptions,
-        paramsToProps: () => {
-            if (!props.event.group) {
-                throw new Error('No group found');
-            }
+const isRegistrationsTableEnabled = useFeatureFlag()('table-registrations');
 
-            return {
-                group: props.event.group,
-                dateRange: {
-                    start: props.event.startDate,
-                    end: props.event.endDate,
+defineRoutes([
+    isRegistrationsTableEnabled
+        ? {
+                url: Routes.Registrations,
+                component: RegistrationsTableView as ComponentOptions,
+                paramsToProps: () => {
+                    if (!props.event.group) {
+                        throw new Error('No group found');
+                    }
+
+                    return {
+                        organization: eventOrganization.value,
+                        group: props.event.group,
+                        dateRange: {
+                            start: props.event.startDate,
+                            end: props.event.endDate,
+                        },
+                    };
                 },
-            };
-        },
-    },
+            }
+        : {
+                url: Routes.Registrations,
+                component: MembersTableView as ComponentOptions,
+                paramsToProps: () => {
+                    if (!props.event.group) {
+                        throw new Error('No group found');
+                    }
+
+                    return {
+                        group: props.event.group,
+                        dateRange: {
+                            start: props.event.startDate,
+                            end: props.event.endDate,
+                        },
+                    };
+                },
+            },
     {
         url: Routes.WaitingList,
         component: MembersTableView as ComponentOptions,
