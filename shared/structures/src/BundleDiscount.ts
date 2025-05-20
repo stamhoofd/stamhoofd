@@ -2,10 +2,11 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, StringDecoder } from 
 import { Group } from './Group.js';
 import { GroupPriceDiscount } from './GroupPriceDiscount.js';
 import { type RegisterCart } from './members/checkout/RegisterCart.js';
-import { RegisterItem, RegistrationWithPlatformMember } from './members/checkout/RegisterItem.js';
+import { RegisterItem } from './members/checkout/RegisterItem.js';
 import { type PlatformFamily, type PlatformMember } from './members/PlatformMember.js';
 import { v4 as uuidv4 } from 'uuid';
 import { TranslatedString } from './TranslatedString.js';
+import { RegistrationWithPlatformMember } from './members/checkout/RegistrationWithPlatformMember.js';
 
 export class BundleDiscount extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

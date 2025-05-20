@@ -92,6 +92,7 @@ export * from './src/UmbrellaOrganization.js';
 export * from './src/User.js';
 export * from './src/BundleDiscount.js';
 export * from './src/GroupPriceDiscount.js';
+export * from './src/members/MembershipStatus.js';
 
 export * from './src/LoadedPermissions.js';
 
@@ -171,6 +172,7 @@ export * from './src/members/checkout/BalanceItemCartItem.js';
 export * from './src/members/checkout/RegisterCart.js';
 export * from './src/members/checkout/RegisterCheckout.js';
 export * from './src/members/checkout/RegisterItem.js';
+export * from './src/members/checkout/RegistrationWithPlatformMember.js';
 
 // Webshop
 export * from './src/endpoints/WebshopOrdersQuery.js';

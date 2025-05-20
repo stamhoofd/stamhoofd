@@ -28,6 +28,7 @@ import { RegisterItem } from './checkout/RegisterItem.js';
 import { RecordAnswer } from './records/RecordAnswer.js';
 import { RecordCategory } from './records/RecordCategory.js';
 import { RecordSettings } from './records/RecordSettings.js';
+import { type ContinuousMembershipStatus } from './MembershipStatus.js';
 
 export class PlatformFamily {
     members: PlatformMember[] = [];
@@ -416,20 +417,6 @@ export class PlatformFamily {
     setDocuments(documents: DocumentStruct[]) {
         this.documents = documents;
     }
-}
-
-export enum MembershipStatus {
-    Active = 'Active',
-    Trial = 'Trial',
-    Expiring = 'Expiring',
-    Inactive = 'Inactive',
-    Temporary = 'Temporary',
-}
-
-export enum ContinuousMembershipStatus {
-    Full = 'Full',
-    Partial = 'Partial',
-    None = 'None',
 }
 
 export class PlatformRegistration extends Registration {

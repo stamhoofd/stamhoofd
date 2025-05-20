@@ -7,11 +7,10 @@ import { StamhoofdFilterDecoder } from '../filters/FilteredRequest.js';
 import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import { MemberDetails } from '../members/MemberDetails.js';
 import { MemberWithRegistrationsBlob } from '../members/MemberWithRegistrationsBlob.js';
-import { EmailTemplate, EmailTemplateType } from './EmailTemplate.js';
-import { Platform } from '../Platform.js';
 import { OrganizationMetaData } from '../OrganizationMetaData.js';
 import { OrganizationPrivateMetaData } from '../OrganizationPrivateMetaData.js';
-import { Version } from '../Version.js';
+import { Platform } from '../Platform.js';
+import { EmailTemplate } from './EmailTemplate.js';
 
 export enum EmailRecipientFilterType {
     Members = 'Members',

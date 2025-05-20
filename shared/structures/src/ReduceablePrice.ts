@@ -1,6 +1,6 @@
 import { AutoEncoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
 
-import { PlatformMember } from './members/PlatformMember.js';
+import { type PlatformMember } from './members/PlatformMember.js';
 
 export class ReduceablePrice extends AutoEncoder {
     @field({ decoder: IntegerDecoder })

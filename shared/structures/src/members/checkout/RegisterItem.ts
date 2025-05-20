@@ -8,40 +8,19 @@ import { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
 import { Group } from '../../Group.js';
 import { GroupOption, GroupOptionMenu, GroupPrice, WaitingListType } from '../../GroupSettings.js';
 import { GroupType } from '../../GroupType.js';
-import { Organization } from '../../Organization.js';
+import { type Organization } from '../../Organization.js';
 import { PlatformMembershipTypeBehaviour } from '../../Platform.js';
 import { PriceBreakdown } from '../../PriceBreakdown.js';
 import { StockReservation } from '../../StockReservation.js';
 import { TranslatedString } from '../../TranslatedString.js';
 import { ObjectWithRecords, PatchAnswers } from '../ObjectWithRecords.js';
-import { PlatformMember } from '../PlatformMember.js';
+import { type PlatformMember } from '../PlatformMember.js';
 import { RecordAnswer, RecordAnswerDecoder } from '../records/RecordAnswer.js';
 import { RecordCategory } from '../records/RecordCategory.js';
 import { RecordSettings } from '../records/RecordSettings.js';
-import { Registration } from '../Registration.js';
-import { RegisterContext } from './RegisterCheckout.js';
-
-export class RegistrationWithPlatformMember {
-    registration: Registration;
-    member: PlatformMember;
-
-    constructor(options: { registration: Registration; member: PlatformMember }) {
-        this.registration = options.registration;
-        this.member = options.member;
-    }
-
-    clone() {
-        return new RegistrationWithPlatformMember({
-            registration: this.registration.clone(),
-            member: this.member, // no need to clone because it is a reference
-        });
-    }
-
-    // Convenience helpers
-    get group() {
-        return this.registration.group;
-    }
-}
+import { type Registration } from '../Registration.js';
+import { type RegisterContext } from './RegisterCheckout.js';
+import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })

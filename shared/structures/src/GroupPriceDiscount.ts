@@ -1,6 +1,6 @@
 import { AutoEncoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
 import { ReduceablePrice } from './ReduceablePrice.js';
-import { PlatformMember } from './members/PlatformMember.js';
+import { type PlatformMember } from './members/PlatformMember.js';
 
 export enum GroupPriceDiscountType {
     Fixed = 'Fixed',

@@ -3,15 +3,16 @@ import { AutoEncoder, EnumDecoder, field, IntegerDecoder, StringDecoder, URLDeco
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { BalanceItem } from '../../BalanceItem.js';
-import { Group } from '../../Group.js';
+import { type Group } from '../../Group.js';
 import { Organization } from '../../Organization.js';
 import { PaymentCustomer } from '../../PaymentCustomer.js';
 import { PaymentMethod } from '../../PaymentMethod.js';
 import { PriceBreakdown } from '../../PriceBreakdown.js';
-import { PlatformMember } from '../PlatformMember.js';
+import { type PlatformMember } from '../PlatformMember.js';
 import { BalanceItemCartItem } from './BalanceItemCartItem.js';
 import { IDRegisterCart, RegisterCart } from './RegisterCart.js';
-import { RegisterItem, RegistrationWithPlatformMember } from './RegisterItem.js';
+import { RegisterItem } from './RegisterItem.js';
+import { type RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
 
 export type RegisterContext = {
     members: PlatformMember[];
