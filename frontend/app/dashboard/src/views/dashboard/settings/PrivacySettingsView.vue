@@ -58,7 +58,7 @@ export default class PrivacySettingsView extends Mixins(NavigationMixin) {
     defaultSelectedType = 'none';
     selectedPrivacyType = 'none';
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = Organization.patch
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = Organization.patch({});
 
     get organization() {
         return this.$organization.patch(this.organizationPatch);
