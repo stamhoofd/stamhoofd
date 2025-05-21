@@ -229,6 +229,10 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
     }
 
     if (groups.length) {
+        /**
+         * Note: this column has a large performance impact, and causes lag, because it needs to do permission checking and checking whether properties are enabled/required.
+         * It needs some caching.
+         */
         allColumns.push(
             new Column<ObjectType, string[]>({
                 id: 'missing-record-categories',
