@@ -73,7 +73,7 @@ const auth = useAuth();
 const platform = usePlatform();
 const filterPeriodId = props.periodId ?? props.group?.periodId ?? props.organization?.period?.period?.id ?? platform.value.period.id;
 
-const defaultFilter = app === 'admin' && !props.group
+const defaultFilter: StamhoofdFilter = app === 'admin' && !props.group
     ? {
             deactivatedAt: null,
             platformMemberships: {

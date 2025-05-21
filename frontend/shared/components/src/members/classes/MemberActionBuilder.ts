@@ -336,6 +336,10 @@ export class MemberActionBuilder {
         return r;
     }
 
+    editResponsibilities(member: PlatformMember) {
+        presentEditMember({ member, present: this.present }).catch(console.error);
+    }
+
     getActions(options: { includeDelete?: boolean; includeMove?: boolean; includeEdit?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}): TableAction<PlatformMember>[] {
         const actions = [
             new InMemoryTableAction({
@@ -347,7 +351,7 @@ export class MemberActionBuilder {
                 singleSelection: true,
                 enabled: this.hasWrite,
                 handler: (members: PlatformMember[]) => {
-                    presentEditMember({ member: members[0], present: this.present }).catch(console.error);
+                    this.editResponsibilities(members[0]);
                 },
             }),
 
