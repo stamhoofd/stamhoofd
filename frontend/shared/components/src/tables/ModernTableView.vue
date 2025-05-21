@@ -1180,6 +1180,11 @@ function updateRecommendedWidths() {
     document.body.appendChild(measureDiv);
 
     for (const column of columns.value) {
+        // skip invisible columns
+        if (!column.enabled) {
+            continue;
+        }
+
         let maximum = column.minimumWidth;
 
         // Title
