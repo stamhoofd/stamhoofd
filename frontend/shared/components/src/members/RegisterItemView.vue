@@ -132,7 +132,7 @@
             <hr><FillRecordCategoryBox :category="category" :value="item" :validator="errors.validator" :level="2" :all-optional="false" :force-mark-reviewed="true" @patch="addRecordAnswersPatch" />
         </div>
 
-        <div class="pricing-box max" v-if="cachedPriceBreakdown">
+        <div v-if="cachedPriceBreakdown" class="pricing-box max">
             <PriceBreakdownBox :price-breakdown="cachedPriceBreakdown" />
         </div>
     </SaveView>
