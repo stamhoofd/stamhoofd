@@ -207,7 +207,7 @@ async function addToCart() {
             saving.value = false;
             return;
         }
-        validate();
+        props.item.validate({ final: true });
         await props.saveHandler(props.item, navigationActions);
     }
     catch (e) {
