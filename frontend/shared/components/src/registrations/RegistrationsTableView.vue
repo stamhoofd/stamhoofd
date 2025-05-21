@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useDirectMemberActions, useGlobalEventListener, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
+import { Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
 import { AccessRight, Group, GroupCategoryTree, GroupType, MemberResponsibility, Organization, PlatformRegistration, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
@@ -17,6 +17,7 @@ import { useRegistrationsObjectFetcher } from '../fetchers/useRegistrationsObjec
 import { useAdvancedRegistrationWithMemberUIFilterBuilders } from '../filters/filter-builders/registrations-with-member';
 import { getRegistrationColumns } from '../members/helpers/getRegistrationColumns';
 import RegistrationSegmentedView from './RegistrationSegmentedView.vue';
+import { useDirectRegistrationActions } from './classes/RegistrationActionBuilder';
 
 type ObjectType = PlatformRegistration;
 
@@ -82,12 +83,6 @@ const defaultFilter = app === 'admin' && !props.group
             },
         }
     : null;
-
-const organizationRegistrationPeriod = computed(() => {
-    const periodId = filterPeriodId;
-
-    return props.organization?.periods?.organizationPeriods?.find(p => p.period.id === periodId);
-});
 
 useGlobalEventListener('members-deleted', async () => {
     tableObjectFetcher.reset(true, true);
@@ -208,7 +203,7 @@ const Route = {
     }),
 };
 
-const actionBuilder = useDirectMemberActions({
+const actionBuilder = useDirectRegistrationActions({
     groups: props.group ? [props.group] : (props.category ? props.category.getAllGroups() : []),
 });
 
@@ -219,14 +214,7 @@ if (!props.organization) {
     canAdd = false;
 }
 
-// registrations for events of another organization should not be editable
-const excludeEdit = props.group && props.group.type === GroupType.EventRegistration && !!props.organization && props.group.organizationId !== props.organization.id;
-
-const memberActions = actionBuilder.getActions({ selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value, includeMove: true, includeEdit: !excludeEdit });
-
-if (app !== 'admin' && auth.canManagePayments() && props.organization) {
-    memberActions.push(actionBuilder.getChargeAction(props.organization));
-}
+const registrationActions = actionBuilder.getActions();
 
 const actions: TableAction<ObjectType>[] = [
     new InMemoryTableAction({
@@ -243,5 +231,6 @@ const actions: TableAction<ObjectType>[] = [
             });
         },
     }),
+    ...registrationActions,
 ];
 </script>
