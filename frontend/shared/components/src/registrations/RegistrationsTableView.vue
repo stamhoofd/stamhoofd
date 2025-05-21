@@ -75,7 +75,6 @@ const filterPeriodId = props.periodId ?? props.group?.periodId ?? props.organiza
 
 const defaultFilter: StamhoofdFilter = app === 'admin' && !props.group
     ? {
-            deactivatedAt: null,
             platformMemberships: {
                 $elemMatch: {
                     endDate: {
@@ -84,7 +83,7 @@ const defaultFilter: StamhoofdFilter = app === 'admin' && !props.group
                 },
             },
         }
-    : { deactivatedAt: null };
+    : null;
 
 useGlobalEventListener('members-deleted', async () => {
     tableObjectFetcher.reset(true, true);
@@ -128,15 +127,19 @@ function getRequiredFilter(): StamhoofdFilter | null {
             return {
                 organizationId: props.organization.id,
                 periodId: props.periodId,
+                deactivatedAt: null,
             };
         }
 
         if (props.periodId) {
             return {
                 periodId: props.periodId,
+                deactivatedAt: null,
             };
         }
-        return null;
+        return {
+            deactivatedAt: null,
+        };
     }
 
     const extra: StamhoofdFilter[] = [];
@@ -167,11 +170,13 @@ function getRequiredFilter(): StamhoofdFilter | null {
         props.group
             ? {
                     groupId: props.group.id,
+                    deactivatedAt: null,
                 }
             : {
                     groupId: {
                         $in: groups.map(g => g.id),
                     },
+                    deactivatedAt: null,
                 },
         ...extra,
     ];

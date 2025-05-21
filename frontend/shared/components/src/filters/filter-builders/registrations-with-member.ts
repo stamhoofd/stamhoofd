@@ -1,10 +1,9 @@
-import { FilterWrapperMarker, StamhoofdFilter } from '@stamhoofd/structures';
+import { FilterWrapperMarker } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useFinancialSupportSettings } from '../../groups';
 import { useAuth, useOrganization, usePlatform, useUser } from '../../hooks';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
-import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 import { UIFilter, UIFilterBuilder } from '../UIFilter';
 import { createMemberWithRegistrationsBlobFilterBuilders, useAdvancedPlatformMembershipUIFilterBuilders } from './members';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
@@ -31,52 +30,6 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders() {
             name: $t('Inschrijvingsdatum'),
             key: 'registeredAt',
         }));
-
-        all.push(
-            new MultipleChoiceFilterBuilder({
-                name: $t(`Status`),
-                options: ([[$t('Actief'), RegistrationStatus.Active], [$t('Verwijderd'), RegistrationStatus.Inactive]] as [string, RegistrationStatus][]).map(([name, value]) => {
-                    return new MultipleChoiceUIFilterOption(name, value);
-                }),
-                wrapFilter: (f: StamhoofdFilter) => {
-                    const choices = Array.isArray(f) ? f : [f];
-                    if (choices.length === 0 || choices.length === 2) {
-                        return null;
-                    }
-
-                    if (choices.includes(RegistrationStatus.Active)) {
-                        return {
-                            deactivatedAt: null,
-                        };
-                    }
-
-                    return {
-                        deactivatedAt: {
-                            $neq: null,
-                        },
-                    };
-                },
-                unwrapFilter: (f: StamhoofdFilter): StamhoofdFilter | null => {
-                    if (typeof f !== 'object') return null;
-
-                    const deactivatedAt = f?.['deactivatedAt'];
-
-                    if (deactivatedAt === undefined) {
-                        return null;
-                    }
-
-                    if (deactivatedAt === null || deactivatedAt['$eq'] === null) {
-                        return [RegistrationStatus.Active];
-                    }
-
-                    if (deactivatedAt['$neq'] === null) {
-                        return [RegistrationStatus.Inactive];
-                    }
-
-                    return null;
-                },
-            }),
-        );
 
         const originalFilters = createMemberWithRegistrationsBlobFilterBuilders({
             organization,
