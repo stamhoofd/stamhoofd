@@ -17,7 +17,7 @@ import { NavigationActions } from '../../types/NavigationActions';
 import DeleteView from '../../views/DeleteView.vue';
 import { PlatformFamilyManager, usePlatformFamilyManager } from '../PlatformFamilyManager';
 import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue';
-import { RegistrationActionBuilder } from './RegistrationActionBuilder';
+import { RegistrationsActionBuilder } from './RegistrationsActionBuilder';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 
 export function useDirectMemberActions(options?: { groups?: Group[]; organizations?: Organization[] }) {
@@ -106,7 +106,7 @@ export class MemberActionBuilder {
         const groupOrganization = this.organizations[0];
         const registrations = members.flatMap(m => m.filterRegistrations({ groups: this.groups, organizationId: groupOrganization.id }));
 
-        return new RegistrationActionBuilder({
+        return new RegistrationsActionBuilder({
             context: this.context,
             owner: this.owner,
             present: this.present,

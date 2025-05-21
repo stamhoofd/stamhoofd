@@ -6,7 +6,7 @@ import { useContext, useOrganization } from '../../hooks';
 import { InMemoryTableAction, MenuTableAction, TableAction } from '../../tables/classes';
 import { PlatformFamilyManager, usePlatformFamilyManager } from '../PlatformFamilyManager';
 
-export function useRegistrationActionBuilder() {
+export function useRegistrationsActionBuilder() {
     const present = usePresent();
     const context = useContext();
     const platformFamilyManager = usePlatformFamilyManager();
@@ -20,7 +20,7 @@ export function useRegistrationActionBuilder() {
             throw new Error('Organization not found for registration');
         }
 
-        return new RegistrationActionBuilder({
+        return new RegistrationsActionBuilder({
             present,
             context: context.value,
             members: [options.member],
@@ -32,7 +32,7 @@ export function useRegistrationActionBuilder() {
     };
 }
 
-export class RegistrationActionBuilder {
+export class RegistrationsActionBuilder {
     /**
      * Determines which registrations will get moved or removed
      */

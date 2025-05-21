@@ -53,7 +53,7 @@ import { Toast } from '../../../overlays/Toast';
 import { TableActionSelection } from '../../../tables';
 import TableActionsContextMenu from '../../../tables/TableActionsContextMenu.vue';
 import { useChooseGroupForMember } from '../../checkout';
-import { useRegistrationActionBuilder } from '../../classes/RegistrationActionBuilder';
+import { useRegistrationsActionBuilder } from '../../classes/RegistrationsActionBuilder';
 import ViewMemberRegistrationRow from './ViewMemberRegistrationRow.vue';
 
 const props = defineProps<{
@@ -124,7 +124,7 @@ async function openCart() {
     await GlobalEventBus.sendEvent('selectTabByName', 'mandje');
 }
 
-const buildActions = useRegistrationActionBuilder();
+const buildActions = useRegistrationsActionBuilder();
 const objectFetcher = useMembersObjectFetcher();
 
 async function editRegistration(registration: Registration, event: MouseEvent) {
