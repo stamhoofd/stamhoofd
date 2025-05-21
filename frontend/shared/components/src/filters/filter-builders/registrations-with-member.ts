@@ -82,7 +82,7 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders() {
                         return [RegistrationStatus.Active];
                     }
 
-                    if (deactivatedAt['$ne'] === null) {
+                    if (deactivatedAt['$neq'] === null) {
                         return [RegistrationStatus.Inactive];
                     }
 
