@@ -1060,7 +1060,10 @@ onBeforeUnmount(() => {
 
 function doRefresh() {
     if (document.visibilityState === 'visible') {
-        refresh();
+        // Only refresh after 1 minute minimum
+        if (lastRefresh.value.getTime() + 1000 * 60 < new Date().getTime()) {
+            refresh();
+        }
     }
 }
 
