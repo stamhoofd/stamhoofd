@@ -61,7 +61,7 @@
             </p>
         </div>
 
-        <PriceBreakdownBox v-if="!checkout.isAdminFromSameOrganization" :price-breakdown="checkout.priceBreakown" />
+        <PriceBreakdownBox :price-breakdown="checkout.priceBreakown" />
     </SaveView>
 </template>
 
@@ -93,6 +93,7 @@ onMounted(() => {
     catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
+    props.checkout.cart.calculatePrices();
 });
 
 const context = useContext();

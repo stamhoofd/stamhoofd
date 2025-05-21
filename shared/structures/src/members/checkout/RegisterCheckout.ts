@@ -265,11 +265,21 @@ export class RegisterCheckout {
     }
 
     get totalPrice() {
-        return Math.max(0, this.cart.price + this.administrationFee + this.freeContribution - this.bundleDiscounts) - this.cart.refund;
+        return Math.max(0, this.cart.price + this.administrationFee + this.freeContribution - this.bundleDiscount) - this.cart.refund;
     }
 
-    get bundleDiscounts() {
-        return this.cart.bundleDiscounts.map(d => d.netTotal).reduce((a, b) => a + b, 0);
+    /**
+     * Discounts that will be applied to items that are due now
+     */
+    get bundleDiscount() {
+        return this.cart.bundleDiscounts.map(d => d.netTotalDueNow).reduce((a, b) => a + b, 0);
+    }
+
+    /**
+     * Discounts that will be applied to items that are due later
+     */
+    get bundleDiscountDueLater() {
+        return this.cart.bundleDiscounts.map(d => d.netTotalDueLater).reduce((a, b) => a + b, 0);
     }
 
     get priceBreakown(): PriceBreakdown {
@@ -285,10 +295,6 @@ export class RegisterCheckout {
             {
                 name: $t(`35443bbe-49e8-488e-bb71-c28f30d63f4a`),
                 price: -this.cart.refund,
-            },
-            {
-                name: $t(`7e1d2f82-ca2d-4acc-ab37-88834e63c999`),
-                price: this.cart.priceDueLater,
             },
         ].filter(a => a.price !== 0);
 
@@ -306,8 +312,17 @@ export class RegisterCheckout {
         if (all.length > 0) {
             all.unshift({
                 name: $t(`8a04f032-01e5-4ee0-98fb-6f36bf971080`),
-                price: this.cart.price,
+                price: this.cart.price + this.cart.priceDueLater,
             });
+        }
+
+        if (this.cart.priceDueLater !== 0) {
+            all.push(
+                {
+                    name: $t(`7e1d2f82-ca2d-4acc-ab37-88834e63c999`),
+                    price: this.cart.priceDueLater - this.bundleDiscountDueLater,
+                },
+            );
         }
 
         return [

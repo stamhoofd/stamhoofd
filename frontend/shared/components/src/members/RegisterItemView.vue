@@ -132,8 +132,8 @@
             <hr><FillRecordCategoryBox :category="category" :value="item" :validator="errors.validator" :level="2" :all-optional="false" :force-mark-reviewed="true" @patch="addRecordAnswersPatch" />
         </div>
 
-        <div class="pricing-box max">
-            <PriceBreakdownBox :price-breakdown="item.priceBreakown" />
+        <div class="pricing-box max" v-if="cachedPriceBreakdown">
+            <PriceBreakdownBox :price-breakdown="cachedPriceBreakdown" />
         </div>
     </SaveView>
 </template>
@@ -142,7 +142,7 @@
 import { patchObject } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CheckboxListItem, DateSelection, ErrorBox, ImageComponent, NavigationActions, NumberInput, PriceBreakdownBox, STList, useErrors, useNavigationActions, useOrganization } from '@stamhoofd/components';
-import { GroupOption, GroupOptionMenu, GroupType, PatchAnswers, RegisterItem, RegisterItemOption } from '@stamhoofd/structures';
+import { GroupOption, GroupOptionMenu, GroupType, PatchAnswers, PriceBreakdown, RegisterItem, RegisterItemOption } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, Ref, ref, watch } from 'vue';
 import FillRecordCategoryBox from '../records/components/FillRecordCategoryBox.vue';
@@ -266,6 +266,7 @@ async function deleteMe() {
     await pop({ force: true });
 }
 
+const cachedPriceBreakdown = ref<PriceBreakdown | null>(null);
 watch(() => [props.item.groupPrice, props.item.options, props.item.trial], () => {
     // We need to do cart level calculation, because discounts might be applied
     const clonedCart = checkout.value.cart.clone();
@@ -279,6 +280,8 @@ watch(() => [props.item.groupPrice, props.item.options, props.item.trial], () =>
     props.item.calculatedPrice = clone.calculatedPrice;
     props.item.calculatedRefund = clone.calculatedRefund;
     props.item.calculatedPriceDueLater = clone.calculatedPriceDueLater;
+
+    cachedPriceBreakdown.value = clone.getPriceBreakown(clonedCart);
 }, { deep: true });
 
 </script>

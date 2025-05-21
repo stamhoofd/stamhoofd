@@ -21,6 +21,7 @@ import { RecordSettings } from '../records/RecordSettings.js';
 import { type Registration } from '../Registration.js';
 import { type RegisterContext } from './RegisterCheckout.js';
 import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
+import { type RegisterCart } from './RegisterCart.js';
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
@@ -377,6 +378,10 @@ export class RegisterItem implements ObjectWithRecords {
     }
 
     get priceBreakown(): PriceBreakdown {
+        return this.getPriceBreakown(null);
+    }
+
+    getPriceBreakown(cart: RegisterCart | null): PriceBreakdown {
         let all: PriceBreakdown = [];
 
         for (const { registration } of this.replaceRegistrations) {
@@ -386,11 +391,43 @@ export class RegisterItem implements ObjectWithRecords {
             });
         }
 
+        // Discounts
+        let discountsTotal = 0;
+        let discountsLater = 0;
+        if (cart) {
+            for (const discount of cart.bundleDiscounts) {
+                const value = discount.getNetTotalFor(this);
+                if (value !== 0) {
+                    all.push({
+                        name: discount.name,
+                        price: -value,
+                    });
+                    if (this.calculatedTrialUntil) {
+                        discountsLater += value;
+                    }
+                    else {
+                        discountsTotal += value;
+                    }
+                }
+
+                for (const registration of this.replaceRegistrations) {
+                    const value = discount.getNetTotalFor(registration);
+                    if (value !== 0) {
+                        all.push({
+                            name: discount.name,
+                            price: -value,
+                        });
+                        discountsTotal += value;
+                    }
+                }
+            }
+        }
+
         if (this.calculatedPriceDueLater !== 0) {
             const trialUntil = this.calculatedTrialUntil;
             all.push({
                 name: $t('45d9b6c1-1af8-4590-88ff-091a2a93c71a'),
-                price: this.calculatedPriceDueLater,
+                price: this.calculatedPriceDueLater - discountsLater,
                 description: trialUntil ? $t('4789d323-f2da-4e87-a17c-7d29f813d68e', { date: Formatter.date(trialUntil) }) : undefined,
             });
         }
@@ -400,14 +437,16 @@ export class RegisterItem implements ObjectWithRecords {
         if (all.length > 0) {
             all.unshift({
                 name: $t('bf12f6a6-3513-451e-bf8e-fdec5833f5da'),
-                price: this.calculatedPrice,
+                price: this.calculatedPrice + this.calculatedPriceDueLater,
             });
         }
+
+        const correctedTotalPrice = this.totalPrice - discountsTotal;
         return [
             ...all,
             {
-                name: this.checkout.isAdminFromSameOrganization ? (this.totalPrice >= 0 ? $t('566df267-1215-4b90-b893-0344c1f1f3d3') : $t('566e4010-63b7-42e7-9b94-fcdec3f95767')) : (this.calculatedPriceDueLater !== 0 ? $t('6219b760-90aa-4758-8102-119af7e596e7') : $t('482bf48b-ebbc-42e5-8718-6ee11d217510')),
-                price: this.checkout.isAdminFromSameOrganization ? Math.abs(this.totalPrice) : this.totalPrice,
+                name: /* this.checkout.isAdminFromSameOrganization ? (correctedTotalPrice >= 0 ? $t('566df267-1215-4b90-b893-0344c1f1f3d3') : $t('566e4010-63b7-42e7-9b94-fcdec3f95767')) : */(this.calculatedPriceDueLater !== 0 ? $t('6219b760-90aa-4758-8102-119af7e596e7') : $t('482bf48b-ebbc-42e5-8718-6ee11d217510')),
+                price: /* this.checkout.isAdminFromSameOrganization ? Math.abs(correctedTotalPrice) : */ correctedTotalPrice,
             },
         ];
     }

@@ -261,6 +261,31 @@ export class BundleDiscountCalculation {
         return this.total - this.totalAlreadyApplied;
     }
 
+    get netTotalDueLater() {
+        let sum = 0;
+        for (const [item, value] of this.items) {
+            if (item.calculatedTrialUntil) {
+                // Due later
+                sum += value;
+            }
+        }
+        return sum;
+    }
+
+    get netTotalDueNow() {
+        return this.netTotal - this.netTotalDueLater;
+    }
+
+    getNetTotalFor(item: RegisterItem | RegistrationWithPlatformMember) {
+        if (item instanceof RegisterItem) {
+            return this.items.get(item) ?? 0;
+        }
+        else if (item instanceof RegistrationWithPlatformMember) {
+            return this.registrations.get(item) ?? 0;
+        }
+        return 0;
+    }
+
     addIfNotBeingRemoved(item: RegisterItem | RegistrationWithPlatformMember) {
         // Only add if it is not being removed at the same time
         if (item instanceof RegistrationWithPlatformMember) {
@@ -298,7 +323,7 @@ export class BundleDiscountCalculation {
         const priceMatrix: number[][] = [];
 
         for (const item of arr) {
-            const price = item instanceof RegisterItem ? item.calculatedPrice : item.registration.price;
+            const price = item instanceof RegisterItem ? (item.calculatedPrice + item.calculatedPriceDueLater) : item.registration.price;
             const discounts = item instanceof RegisterItem
                 ? (item.groupPrice.bundleDiscounts.get(this.bundle.id)?.customDiscounts ?? this.bundle.discounts)
                 : (item.registration.groupPrice.bundleDiscounts.get(this.bundle.id)?.customDiscounts ?? this.bundle.discounts);

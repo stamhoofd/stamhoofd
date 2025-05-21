@@ -565,6 +565,11 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
+        // Discounts
+        for (const discount of checkout.cart.bundleDiscounts) {
+            // Create negative balance items
+        }
+
         const oldestMember = members.slice().sort((a, b) => b.details.defaultAge - a.details.defaultAge)[0];
         if (checkout.freeContribution && !request.body.asOrganizationId) {
             // Create balance item
