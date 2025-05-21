@@ -11,7 +11,7 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
     groupId: createSQLColumnFilterCompiler('groupId'),
     registeredAt: createSQLColumnFilterCompiler('registeredAt', { nullable: true }),
     periodId: createSQLColumnFilterCompiler(SQL.column('registrations', 'periodId')),
-
+    deactivatedAt: createSQLColumnFilterCompiler(SQL.column('registrations', 'deactivatedAt'), { nullable: true }),
     group: createSQLFilterNamespace({
         ...baseSQLFilterCompilers,
         id: createSQLColumnFilterCompiler('groupId'),

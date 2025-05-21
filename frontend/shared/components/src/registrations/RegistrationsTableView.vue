@@ -72,8 +72,10 @@ const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTa
 const auth = useAuth();
 const platform = usePlatform();
 const filterPeriodId = props.periodId ?? props.group?.periodId ?? props.organization?.period?.period?.id ?? platform.value.period.id;
+
 const defaultFilter = app === 'admin' && !props.group
     ? {
+            deactivatedAt: null,
             platformMemberships: {
                 $elemMatch: {
                     endDate: {
@@ -82,7 +84,7 @@ const defaultFilter = app === 'admin' && !props.group
                 },
             },
         }
-    : null;
+    : { deactivatedAt: null };
 
 useGlobalEventListener('members-deleted', async () => {
     tableObjectFetcher.reset(true, true);
