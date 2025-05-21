@@ -276,11 +276,6 @@ watch(() => [props.item.groupPrice, props.item.options, props.item.trial], () =>
     clonedCart.add(clone);
 
     clonedCart.calculatePrices();
-
-    props.item.calculatedPrice = clone.calculatedPrice;
-    props.item.calculatedRefund = clone.calculatedRefund;
-    props.item.calculatedPriceDueLater = clone.calculatedPriceDueLater;
-
     cachedPriceBreakdown.value = clone.getPriceBreakown(clonedCart);
 }, { deep: true });
 
