@@ -347,7 +347,7 @@ export class MemberActionBuilder {
                 singleSelection: true,
                 enabled: this.hasWrite,
                 handler: (members: PlatformMember[]) => {
-                    this.editMember(members[0]);
+                    presentEditMember({ member: members[0], present: this.present }).catch(console.error);
                 },
             }),
 
@@ -360,7 +360,7 @@ export class MemberActionBuilder {
                 singleSelection: true,
                 enabled: this.context.auth.hasFullAccess(),
                 handler: (members: PlatformMember[]) => {
-                    this.editResponsibilities(members[0]);
+                    presentEditResponsibilities({ member: members[0], present: this.present }).catch(console.error);
                 },
             }),
 
@@ -572,38 +572,6 @@ export class MemberActionBuilder {
         });
     }
 
-    editMember(member: PlatformMember) {
-        this.present({
-            components: [
-                new ComponentWithProperties(MemberStepView, {
-                    member,
-                    title: member.member.firstName + ' ' + $t(`ee3bc635-c294-4134-9155-7a74f47dec4f`),
-                    component: markRaw(EditMemberAllBox),
-                    saveHandler: async ({ dismiss }: NavigationActions) => {
-                        await dismiss({ force: true });
-                    },
-                }),
-            ],
-            modalDisplayStyle: 'popup',
-        }).catch(console.error);
-    }
-
-    editResponsibilities(member: PlatformMember) {
-        this.present({
-            components: [
-                new ComponentWithProperties(MemberStepView, {
-                    member,
-                    title: $t(`53ffa1a5-9b55-4ff9-9c97-eeaf54ce6b47`) + ' ' + member.member.firstName,
-                    component: markRaw(EditMemberResponsibilitiesBox),
-                    saveHandler: async ({ dismiss }: NavigationActions) => {
-                        await dismiss({ force: true });
-                    },
-                }),
-            ],
-            modalDisplayStyle: 'popup',
-        }).catch(console.error);
-    }
-
     async deleteMembers(members: PlatformMember[]) {
         if (members.length > 1) {
             throw new SimpleError({
@@ -730,4 +698,36 @@ export class MemberActionBuilder {
             },
         });
     }
+}
+
+export async function presentEditMember({ member, present }: { member: PlatformMember; present: ReturnType<typeof usePresent> }) {
+    await present({
+        components: [
+            new ComponentWithProperties(MemberStepView, {
+                member,
+                title: member.member.firstName + ' ' + $t(`ee3bc635-c294-4134-9155-7a74f47dec4f`),
+                component: markRaw(EditMemberAllBox),
+                saveHandler: async ({ dismiss }: NavigationActions) => {
+                    await dismiss({ force: true });
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
+
+export async function presentEditResponsibilities({ member, present }: { member: PlatformMember; present: ReturnType<typeof usePresent> }) {
+    await present({
+        components: [
+            new ComponentWithProperties(MemberStepView, {
+                member,
+                title: $t(`53ffa1a5-9b55-4ff9-9c97-eeaf54ce6b47`) + ' ' + member.member.firstName,
+                component: markRaw(EditMemberResponsibilitiesBox),
+                saveHandler: async ({ dismiss }: NavigationActions) => {
+                    await dismiss({ force: true });
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
 }
