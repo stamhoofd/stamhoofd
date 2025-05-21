@@ -4,7 +4,13 @@ import { organizationFilterCompilers } from './organizations';
 export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
     id: createSQLColumnFilterCompiler('id'),
+    /**
+     * @deprecated
+     */
     price: createSQLColumnFilterCompiler('price', { nullable: true }),
+    /**
+     * @deprecated
+     */
     pricePaid: createSQLColumnFilterCompiler('pricePaid'),
     canRegister: createSQLColumnFilterCompiler('canRegister'),
     organizationId: createSQLColumnFilterCompiler('organizationId'),

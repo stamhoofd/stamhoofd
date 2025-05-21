@@ -5,7 +5,6 @@ import { useAuth, useOrganization, usePlatform, useUser } from '../../hooks';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
-import { NumberFilterBuilder, NumberFilterFormat } from '../NumberUIFilter';
 import { UIFilter, UIFilterBuilder } from '../UIFilter';
 import { createMemberWithRegistrationsBlobFilterBuilders, useAdvancedPlatformMembershipUIFilterBuilders } from './members';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
@@ -31,18 +30,6 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders() {
         all.push(new DateFilterBuilder({
             name: $t('Inschrijvingsdatum'),
             key: 'registeredAt',
-        }));
-
-        all.push(new NumberFilterBuilder({
-            name: $t('b4f47589-f6b4-4f9e-a83b-ad4cbb3de416'),
-            key: 'price',
-            type: NumberFilterFormat.Currency,
-        }));
-
-        all.push(new NumberFilterBuilder({
-            name: $t('Betaald bedrag'),
-            key: 'pricePaid',
-            type: NumberFilterFormat.Currency,
         }));
 
         all.push(
