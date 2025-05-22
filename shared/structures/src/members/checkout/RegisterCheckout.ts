@@ -179,6 +179,18 @@ export class RegisterCheckout {
 
     removeRegistration(registration: RegistrationWithPlatformMember, options?: { calculate?: boolean }) {
         this.cart.removeRegistration(registration);
+
+        if (this.cart.deleteRegistrations.length === 1) {
+            // Set the default cancellation fee
+            if (registration.registration.balances.reduce((total, balance) => total + balance.amountPaid + balance.amountPending, 0) > 0) {
+                // Already paid. By default we try to be undestructive. This means not refunding the already paid amount
+                this.cancellationFeePercentage = 100_00;
+            }
+            else {
+                // Not yet paid, by default we are undescructive. This means we try to 'refund' the already paid amount. Since it is not paid, this is no-op
+                this.cancellationFeePercentage = 0;
+            }
+        }
         if (options?.calculate !== false) {
             this.updatePrices();
         }
