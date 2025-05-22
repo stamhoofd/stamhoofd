@@ -197,20 +197,21 @@ function step(add: number) {
 .float-input {
     position: relative;
 
-    .clear {
-        // Clear any padding or margin
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
+    // Clear any padding or margin
+    padding: 0 !important;
 
+    .clear {
+        position: relative;
         display: grid;
         grid-template-columns: 1fr auto;
         align-items: center;
+        min-width: 100px;
 
         > .left {
             position: relative;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
 
             & > div {
                 pointer-events: none;
