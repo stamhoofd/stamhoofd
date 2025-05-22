@@ -24,13 +24,13 @@ export const PaymentReallocationService = {
     },
 
     async reallocate(organizationId: string, objectId: string, type: ReceivableBalanceType) {
-        if (STAMHOOFD.environment === 'production') {
+        if (STAMHOOFD.environment === 'production' || (true as any)) {
             // Disabled on production for now
             // until this has been tested more
             return;
         }
 
-        let balanceItems = await CachedBalance.balanceForObjects(organizationId, [objectId], type);
+        let balanceItems = (await CachedBalance.balanceForObjects(organizationId, [objectId], type)).filter(b => b.isAfterDueDate);
 
         const didMerge: BalanceItem[] = [];
 
@@ -46,7 +46,7 @@ export const PaymentReallocationService = {
                 // Not possible to merge into one: there are 2 due items
                 continue;
             }
-            const similarCanceledItems = balanceItems.filter(b => b.id !== balanceItem.id && b.type === balanceItem.type && b.status !== BalanceItemStatus.Due && doBalanceItemRelationsMatch(b.relations, balanceItem.relations, 0));
+            const similarCanceledItems = balanceItems.filter(b => b.id !== balanceItem.id && b.type === balanceItem.type && b.status !== BalanceItemStatus.Due && (b.pricePaid !== 0 || b.pricePending !== 0) && doBalanceItemRelationsMatch(b.relations, balanceItem.relations, 0));
 
             if (similarCanceledItems.length) {
                 await this.mergeBalanceItems(balanceItem, similarCanceledItems);
@@ -59,7 +59,7 @@ export const PaymentReallocationService = {
             await BalanceItem.updateOutstanding(didMerge);
 
             // Reload balance items
-            balanceItems = await CachedBalance.balanceForObjects(organizationId, [objectId], type);
+            balanceItems = (await CachedBalance.balanceForObjects(organizationId, [objectId], type)).filter(b => b.isAfterDueDate);
         }
 
         // The algorithm:

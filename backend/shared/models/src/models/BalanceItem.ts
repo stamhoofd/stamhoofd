@@ -142,6 +142,27 @@ export class BalanceItem extends QueryableModel {
         return this.unitPrice * this.amount;
     }
 
+    get isAfterDueDate() {
+        if (this.dueAt === null) {
+            return true;
+        }
+
+        const now = new Date();
+        now.setMilliseconds(0);
+        return this.dueAt <= now;
+    }
+
+    /**
+     * Note: cancelled balance items can also return 'true', because if they have pending/paid payments, they are still due with a negative price
+     */
+    get isDue() {
+        if (this.status === BalanceItemStatus.Hidden) {
+            return false;
+        }
+
+        return this.isAfterDueDate;
+    }
+
     get calculatedPriceOpen() {
         if (this.status !== BalanceItemStatus.Due) {
             return -this.pricePaid - this.pricePending;

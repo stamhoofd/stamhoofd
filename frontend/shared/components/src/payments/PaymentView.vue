@@ -82,9 +82,9 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="payment.paidAt">
+                <STListItem v-if="payment.paidAt && (payment.type === PaymentType.Payment || payment.type === PaymentType.Refund)">
                     <h3 v-if="payment.price == 0" class="style-definition-label">
-                        {{ $t('37260a82-e32b-4ba3-b5c5-cb78fb25b94d') }}
+                        {{ $t('Verrekend op') }}
                     </h3>
                     <h3 v-else-if="payment.price >= 0" class="style-definition-label">
                         {{ $t('445f778c-5d66-44d3-af4a-84254a4475ea') }}

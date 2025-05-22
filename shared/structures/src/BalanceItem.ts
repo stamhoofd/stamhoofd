@@ -37,6 +37,7 @@ export enum BalanceItemType {
     Other = 'Other',
     PlatformMembership = 'PlatformMembership',
     CancellationFee = 'CancellationFee',
+    RegistrationBundleDiscount = 'RegistrationBundleDiscount',
 }
 
 export function getBalanceItemStatusName(type: BalanceItemStatus): string {
@@ -56,6 +57,7 @@ export function getBalanceItemTypeName(type: BalanceItemType): string {
         case BalanceItemType.Other: return $t(`8f7475aa-c110-49b2-8017-1a6dd0fe72f9`);
         case BalanceItemType.PlatformMembership: return $t(`c0277e8e-a2e0-4ec3-9339-c2e1be2e6e2d`);
         case BalanceItemType.CancellationFee: return $t(`ac2be546-732b-4c1a-ace3-c9076795afa0`);
+        case BalanceItemType.RegistrationBundleDiscount: return $t(`Bundelkorting`);
     }
 }
 
@@ -68,6 +70,7 @@ export function getBalanceItemTypeIcon(type: BalanceItemType): string | null {
         case BalanceItemType.Other: return 'box';
         case BalanceItemType.PlatformMembership: return 'membership-filled';
         case BalanceItemType.CancellationFee: return 'canceled';
+        case BalanceItemType.RegistrationBundleDiscount: return 'label';
     }
 }
 
@@ -79,6 +82,7 @@ export enum BalanceItemRelationType {
     GroupOption = 'GroupOption', // Contains the option that was chosen for the group
     Member = 'Member', // Contains the name of the member you registered
     MembershipType = 'MembershipType',
+    Discount = 'Discount', // Name and id of the related discount
 }
 
 export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): string {
@@ -90,6 +94,7 @@ export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): s
         case BalanceItemRelationType.GroupOption: return $t(`6c80efa8-5658-4728-ba95-d0536fdd25bd`);
         case BalanceItemRelationType.Member: return $t(`f4052a0b-9564-49c4-a6b6-41af3411f3b0`);
         case BalanceItemRelationType.MembershipType: return 'Aansluitingstype';
+        case BalanceItemRelationType.Discount: return $t(`Korting`);
     }
 }
 
@@ -102,14 +107,25 @@ export function getBalanceItemRelationTypeDescription(type: BalanceItemRelationT
         case BalanceItemRelationType.GroupOption: return $t(`c18b4ad6-4b29-43bf-bb6d-7e3c34ffe80a`);
         case BalanceItemRelationType.Member: return $t(`15cd9dab-e1d5-4f02-b260-bd587ba3cf1e`);
         case BalanceItemRelationType.MembershipType: return 'Naam van het aansluitingstype geassocieerd aan dit item';
+        case BalanceItemRelationType.Discount: return $t(`Naam van de korting geassocieerd aan dit item`);
     }
 }
 
-export function shouldAggregateOnRelationType(type: BalanceItemRelationType, allRelations: Map<BalanceItemRelationType, BalanceItemRelation>): boolean {
+/**
+ * Return true if it is allowed to group balance items if they have a different value for this relation type
+ */
+export function shouldAggregateOnRelationType(type: BalanceItemRelationType, item: { type: BalanceItemType; relations: Map<BalanceItemRelationType, BalanceItemRelation> }): boolean {
     switch (type) {
+        case BalanceItemRelationType.Group: {
+            if (item.type === BalanceItemType.RegistrationBundleDiscount) {
+                // Aggregate across all groups
+                return true;
+            }
+            return false;
+        }
         case BalanceItemRelationType.GroupPrice:
             // Only aggregate on group price if it is not for a specific option (we'll combine all options in one group, regardless of the corresponding groupPrice)
-            return !allRelations.has(BalanceItemRelationType.GroupOption);
+            return !item.relations.has(BalanceItemRelationType.GroupOption);
         case BalanceItemRelationType.Member: return true;
     }
     return false;
@@ -325,6 +341,12 @@ export class BalanceItem extends AutoEncoder {
 
                 return $t(`7a6a379d-97fb-4874-bdcf-48be82a76087`) + ' ' + group;
             }
+
+            case BalanceItemType.RegistrationBundleDiscount: {
+                const discount = this.relations.get(BalanceItemRelationType.Discount);
+                return discount?.name || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount);
+            }
+
             case BalanceItemType.CancellationFee: {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
                 const group = this.relations.get(BalanceItemRelationType.Group)?.name;
@@ -354,6 +376,10 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Registration: {
                 return this.relations.get(BalanceItemRelationType.Group)?.name ?? $t(`9fb913bf-ebc1-48aa-885e-73f24b8da239`);
             }
+            case BalanceItemType.RegistrationBundleDiscount: {
+                const discount = this.relations.get(BalanceItemRelationType.Discount);
+                return discount?.name || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount);
+            }
             case BalanceItemType.CancellationFee: return this.relations.get(BalanceItemRelationType.Group)?.name ?? this.relations.get(BalanceItemRelationType.Webshop)?.name ?? this.relations.get(BalanceItemRelationType.MembershipType)?.name ?? $t(`77828342-0662-4a7c-846b-e4fb4ae91553`);
             case BalanceItemType.AdministrationFee: return $t(`13fbbe0e-5326-4cc8-928e-5fc50b27654a`);
             case BalanceItemType.FreeContribution: return $t(`1a36fef2-0e2f-4dca-b661-7274ef63dbb5`);
@@ -381,7 +407,7 @@ export class BalanceItem extends AutoEncoder {
                 const list: string[] = [];
                 // List all relations
                 for (const [key, value] of this.relations.entries()) {
-                    if (shouldAggregateOnRelationType(key, this.relations)) {
+                    if (shouldAggregateOnRelationType(key, this)) {
                         list.push(getBalanceItemRelationTypeName(key) + ': ' + value.name);
                     }
                 }
@@ -436,7 +462,7 @@ export class BalanceItem extends AutoEncoder {
             + '-unit-price-' + this.unitPrice
             + '-due-date-' + (this.dueAt ? Formatter.dateIso(this.dueAt) : 'null')
             + '-relations' + Array.from(this.relations.entries())
-            .filter(([key]) => !shouldAggregateOnRelationType(key, this.relations))
+            .filter(([key]) => !shouldAggregateOnRelationType(key, this))
             .map(([key, value]) => key + '-' + value.id)
             .join('-');
     }
@@ -455,6 +481,10 @@ export class BalanceItem extends AutoEncoder {
                 const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`0a54d0a3-e963-447a-81ac-6982a7508649`);
                 const price = this.relations.get(BalanceItemRelationType.GroupPrice)?.name;
                 return $t(`d07f7f84-0d5d-43fd-a7df-f58ca0f3245d`) + ' ' + group + (price && price !== 'Standaardtarief' ? ' (' + price + ')' : '');
+            }
+            case BalanceItemType.RegistrationBundleDiscount: {
+                const discount = this.relations.get(BalanceItemRelationType.Discount);
+                return discount?.name || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount);
             }
             case BalanceItemType.CancellationFee: return $t(`ac2be546-732b-4c1a-ace3-c9076795afa0`);
             case BalanceItemType.AdministrationFee: return $t(`be98be36-f796-4f96-b054-4d2a09be3d79`);
@@ -482,6 +512,18 @@ export class BalanceItem extends AutoEncoder {
                     return (prefix ? (prefix + '\n') : '') + member.name;
                 }
                 return prefix;
+            }
+            case BalanceItemType.RegistrationBundleDiscount: {
+                const descriptions: string[] = [];
+                const member = this.relations.get(BalanceItemRelationType.Member);
+                if (member) {
+                    descriptions.push(member.name);
+                }
+                const group = this.relations.get(BalanceItemRelationType.Group);
+                if (group) {
+                    descriptions.push($t(`d07f7f84-0d5d-43fd-a7df-f58ca0f3245d`) + ' ' + group.name);
+                }
+                return descriptions.join('\n');
             }
             case BalanceItemType.PlatformMembership: {
                 const member = this.relations.get(BalanceItemRelationType.Member);

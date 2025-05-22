@@ -117,10 +117,17 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             memberBalanceItemsStructs = balanceItemsModels.map(i => i.getStructure());
         }
 
-        const memberIds = Formatter.uniqueArray(
-            [...request.body.memberIds, ...deleteRegistrationModels.map(i => i.memberId), ...balanceItemsModels.map(i => i.memberId).filter(m => m !== null)],
-        );
-        const members = await Member.getBlobByIds(...memberIds);
+        let members: MemberWithRegistrations[] = [];
+        if (request.body.asOrganizationId) {
+            const memberIds = Formatter.uniqueArray(
+                [...request.body.memberIds, ...deleteRegistrationModels.map(i => i.memberId), ...balanceItemsModels.map(i => i.memberId).filter(m => m !== null)],
+            );
+            members = await Member.getBlobByIds(...memberIds);
+        }
+        else {
+            // Load the user family (required to correctly calculate discounts across family members)
+            members = await Member.getMembersWithRegistrationForUser(user);
+        }
         const groupIds = request.body.groupIds;
         const groups = await Group.getByIDs(...groupIds);
 
@@ -436,7 +443,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             deactivatedRegistrationGroupIds.push(existingRegistration.groupId);
         }
 
-        async function createBalanceItem({ registration, skipZero, amount, unitPrice, description, type, relations }: { amount?: number; skipZero?: boolean; registration: RegistrationWithMemberAndGroup; unitPrice: number; description: string; relations: Map<BalanceItemRelationType, BalanceItemRelation>; type: BalanceItemType }) {
+        async function createBalanceItem({ registration, skipZero, amount, unitPrice, description, type, relations }: { amount?: number; skipZero?: boolean; registration: { id: string; payingOrganizationId: string | null; memberId: string; trialUntil: Date | null }; unitPrice: number; description: string; relations: Map<BalanceItemRelationType, BalanceItemRelation>; type: BalanceItemType }) {
             // NOTE: We also need to save zero-price balance items because for online payments, we need to know which registrations to activate after payment
             if (skipZero === true) {
                 if (unitPrice === 0 || amount === 0) {
@@ -563,11 +570,95 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     ]),
                 });
             }
+
+            // Discounts
+            for (const discount of checkout.cart.bundleDiscounts) {
+                const discountValue = discount.getNetTotalFor(item);
+
+                if (discountValue !== 0) {
+                    // Base price
+                    await createBalanceItem({
+                        registration,
+                        unitPrice: -discountValue,
+                        type: BalanceItemType.RegistrationBundleDiscount,
+                        description: discount.name,
+                        relations: new Map([
+                            ...sharedRelations,
+                            [
+                                BalanceItemRelationType.Discount,
+                                BalanceItemRelation.create({
+                                    id: discount.bundle.id,
+                                    name: discount.bundle.name.toString(),
+                                }),
+                            ],
+                        ]),
+                    });
+                }
+            }
         }
 
-        // Discounts
+        // Discounts for existing registrations that have changed
         for (const discount of checkout.cart.bundleDiscounts) {
-            // Create negative balance items
+            const loopMap = new Map(discount.registrations);
+            for (const deleteRegistration of discount.deleteRegistrations) {
+                loopMap.set(deleteRegistration, 0);
+            }
+
+            for (const [registration, newDiscountValue] of loopMap) {
+                const oldDiscountValue = registration.registration.discounts.get(discount.bundle.id)?.amount ?? 0;
+
+                // Saving the discount change directly on the registration now is not safe , because it can only be applied after the payment has succeededs)
+                // Solution: let the balance item handle it in its 'paid' handlers
+                const difference = newDiscountValue - oldDiscountValue;
+
+                if (difference === 0) {
+                    continue;
+                }
+
+                // Create balance items
+                const sharedRelations: [BalanceItemRelationType, BalanceItemRelation][] = [
+                    [
+                        BalanceItemRelationType.Member,
+                        BalanceItemRelation.create({
+                            id: registration.member.id,
+                            name: registration.member.patchedMember.name,
+                        }),
+                    ],
+                    [
+                        BalanceItemRelationType.Group,
+                        BalanceItemRelation.create({
+                            id: registration.group.id,
+                            name: registration.group.settings.name.toString(),
+                        }),
+                    ],
+                ];
+
+                if (registration.group.settings.prices.length > 1) {
+                    sharedRelations.push([
+                        BalanceItemRelationType.GroupPrice,
+                        BalanceItemRelation.create({
+                            id: registration.registration.groupPrice.id,
+                            name: registration.registration.groupPrice.name.toString(),
+                        }),
+                    ]);
+                }
+
+                await createBalanceItem({
+                    registration: registration.registration,
+                    unitPrice: -difference,
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    description: discount.name,
+                    relations: new Map([
+                        [
+                            BalanceItemRelationType.Discount,
+                            BalanceItemRelation.create({
+                                id: discount.bundle.id,
+                                name: discount.bundle.name.toString(),
+                            }),
+                        ],
+                    ]),
+                });
+            }
         }
 
         const oldestMember = members.slice().sort((a, b) => b.details.defaultAge - a.details.defaultAge)[0];
@@ -697,7 +788,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
-        const updatedMembers = await Member.getBlobByIds(...memberIds);
+        const updatedMembers = await Member.getBlobByIds(...members.map(m => m.id));
 
         return new Response(RegisterResponse.create({
             payment: payment ? PaymentStruct.create(payment) : null,
@@ -757,6 +848,15 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 message: $t(`725715e5-b0ac-43c1-adef-dd42b8907327`),
             });
         }
+
+        if (totalPrice !== checkout.totalPrice) {
+            // Changed!
+            throw new SimpleError({
+                code: 'changed_price',
+                message: $t(`e424d549-2bb8-4103-9a14-ac4063d7d454`, { total: Formatter.price(totalPrice) }),
+            });
+        }
+
         const payment = new Payment();
         payment.method = checkout.paymentMethod ?? PaymentMethod.Unknown;
 
