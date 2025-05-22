@@ -83,9 +83,8 @@ export class RegistrationActionBuilder {
 
     getActions(options: { includeDeleteMember?: boolean; includeMove?: boolean; includeEdit?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}) {
         const actions: TableAction<PlatformRegistration>[] = [
-            ...this.getMemberActions(),
+            ...this.getMemberActions(options),
             // todo: e-mail
-            // todo: export excel
             this.getExportToExcelAction(),
             (options.includeMove ? this.getMoveAction(options.selectedOrganizationRegistrationPeriod) : null),
             (options.includeEdit ? this.getEditAction() : null),
@@ -96,7 +95,7 @@ export class RegistrationActionBuilder {
         return actions;
     }
 
-    private getMemberActions() {
+    private getMemberActions(options: { includeDeleteMember?: boolean }) {
         const actions: TableAction<PlatformRegistration>[] = [
             new InMemoryTableAction({
                 name: $t(`28f20fae-6270-4210-b49d-68b9890dbfaf`),
@@ -137,9 +136,8 @@ export class RegistrationActionBuilder {
                 enabled: this.hasWrite && !!this.context.organization,
                 childActions: () => this.getRegisterActions(),
             }),
-
-            // todo: delete
-        ];
+            (options.includeDeleteMember ? this.getDeleteMemberAction() : null),
+        ].filter(a => a !== null);
 
         return actions;
     }

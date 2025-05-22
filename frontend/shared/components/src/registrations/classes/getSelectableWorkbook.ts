@@ -58,7 +58,6 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             name: $t(`ae21b9bf-7441-4f38-b789-58f34612b7af`),
         }),
         ...groupColumns,
-        // todo: groups. should not be included?
         ...memberColumns.map((column) => {
             return new SelectableColumn({
                 ...column,
