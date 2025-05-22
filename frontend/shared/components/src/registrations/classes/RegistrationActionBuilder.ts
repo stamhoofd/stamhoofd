@@ -392,7 +392,7 @@ export class RegistrationActionBuilder {
                     root: new ComponentWithProperties(ExcelExportView, {
                         type: ExcelExportType.Registrations,
                         filter: selection.filter,
-                        workbook: getSelectableWorkbook(this.platform, this.organizations.length === 1 ? this.organizations[0] : null, this.context.auth),
+                        workbook: getSelectableWorkbook(this.platform, this.organizations.length === 1 ? this.organizations[0] : null, this.groups, this.context.auth),
                         configurationId: 'registrations',
                     }),
                 }),
