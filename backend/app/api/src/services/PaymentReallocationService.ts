@@ -24,7 +24,7 @@ export const PaymentReallocationService = {
     },
 
     async reallocate(organizationId: string, objectId: string, type: ReceivableBalanceType) {
-        if (STAMHOOFD.environment === 'production' || (true as any)) {
+        if (STAMHOOFD.environment === 'production') {
             // Disabled on production for now
             // until this has been tested more
             return;
