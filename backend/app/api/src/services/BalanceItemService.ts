@@ -1,5 +1,5 @@
 import { BalanceItem, Order, Organization, Payment, Webshop } from '@stamhoofd/models';
-import { AuditLogSource, BalanceItemStatus, OrderStatus, ReceivableBalanceType } from '@stamhoofd/structures';
+import { AuditLogSource, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderStatus, ReceivableBalanceType } from '@stamhoofd/structures';
 import { AuditLogService } from './AuditLogService';
 import { RegistrationService } from './RegistrationService';
 import { PaymentReallocationService } from './PaymentReallocationService';
@@ -58,6 +58,13 @@ export const BalanceItemService = {
 
         if (reactivate.length > 0) {
             await BalanceItem.reactivateItems(reactivate);
+
+            if (balanceItem.type === BalanceItemType.RegistrationBundleDiscount) {
+                // Save the applied discount to the related registration
+                if (balanceItem.registrationId) {
+                    await RegistrationService.updateDiscounts(balanceItem.registrationId);
+                }
+            }
         }
     },
 

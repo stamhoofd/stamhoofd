@@ -151,17 +151,38 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
-        const blob = await AuthenticatedStructures.membersBlob(members, true);
         const platformMembers: PlatformMember[] = [];
 
         if (request.body.asOrganizationId) {
-            const _m = PlatformFamily.createSingles(blob, {
-                platform: await Platform.getSharedStruct(),
-                contextOrganization: await AuthenticatedStructures.organization(organization),
-            });
-            platformMembers.push(..._m);
+            const memberIds = Formatter.uniqueArray(
+                [...request.body.memberIds, ...deleteRegistrationModels.map(i => i.memberId), ...balanceItemsModels.map(i => i.memberId).filter(m => m !== null)],
+            );
+
+            // todo: optimize performance of this
+            // Load family for each member
+            // this is required for family based discounts
+            const platformStruct = await Platform.getSharedStruct();
+            const contextOrganization = await AuthenticatedStructures.organization(organization);
+            for (const memberId of memberIds) {
+                const familyMembers = (await Member.getFamilyWithRegistrations(memberId));
+                members.push(...familyMembers);
+                const blob = await AuthenticatedStructures.membersBlob(familyMembers, true);
+                const family = PlatformFamily.create(blob, {
+                    platform: platformStruct,
+                    contextOrganization,
+                });
+                const platformMember = family.members.find(m => m.id === memberId);
+                if (!platformMember) {
+                    throw new SimpleError({
+                        code: 'invalid_data',
+                        message: 'Something went wrong while configuring the data',
+                    });
+                }
+                platformMembers.push(platformMember);
+            }
         }
         else {
+            const blob = await AuthenticatedStructures.membersBlob(members, true);
             const family = PlatformFamily.create(blob, {
                 platform: await Platform.getSharedStruct(),
                 contextOrganization: await AuthenticatedStructures.organization(organization),
@@ -206,13 +227,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             throw new SimpleError({
                 code: 'changed_price',
                 message: $t(`e424d549-2bb8-4103-9a14-ac4063d7d454`, { total: Formatter.price(totalPrice) }),
-            });
-        }
-
-        if (totalPrice < 0) {
-            throw new SimpleError({
-                code: 'empty_data',
-                message: $t(`725715e5-b0ac-43c1-adef-dd42b8907327`),
             });
         }
 
@@ -377,7 +391,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         console.log('Registering members using whoWillPayNow', whoWillPayNow, checkout.paymentMethod, totalPrice);
 
         const createdBalanceItems: BalanceItem[] = [];
-        const unrelatedCreatedBalanceItems: BalanceItem[] = [];
         const deletedBalanceItems: BalanceItem[] = [];
         const shouldMarkValid = whoWillPayNow === 'nobody' || checkout.paymentMethod === PaymentMethod.Transfer || checkout.paymentMethod === PaymentMethod.PointOfSale || checkout.paymentMethod === PaymentMethod.Unknown;
 
@@ -422,7 +435,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
 
             // We can alter right away since whoWillPayNow is nobody, and shouldMarkValid will always be true
-            // Find all balance items of this registration and set them to zero
+            // Find all balance items of this registration and set them to Canceled
             deletedBalanceItems.push(...(await BalanceItem.deleteForDeletedRegistration(existingRegistration.id, {
                 cancellationFeePercentage: deleted ? checkout.cancellationFeePercentage : 0,
             })));
@@ -649,6 +662,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     type: BalanceItemType.RegistrationBundleDiscount,
                     description: discount.name,
                     relations: new Map([
+                        ...sharedRelations,
                         [
                             BalanceItemRelationType.Discount,
                             BalanceItemRelation.create({
@@ -721,7 +735,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Delay marking as valid as late as possible so any errors will prevent creating valid balance items
         // Keep a copy because createdBalanceItems will be altered - and we don't want to mark added items as valid
-        const markValidList = [...createdBalanceItems, ...unrelatedCreatedBalanceItems];
+        const markValidList = [...createdBalanceItems];
 
         async function markValidIfNeeded() {
             if (shouldMarkValid) {
@@ -751,7 +765,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
 
             // Make sure every price is accurate before creating a payment
-            await BalanceItem.updateOutstanding([...createdBalanceItems, ...unrelatedCreatedBalanceItems]);
+            await BalanceItem.updateOutstanding([...createdBalanceItems]);
             try {
                 const response = await this.createPayment({
                     balanceItems: mappedBalanceItems,
@@ -774,11 +788,11 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
         else {
             await markValidIfNeeded();
-            await BalanceItem.updateOutstanding([...createdBalanceItems, ...unrelatedCreatedBalanceItems]);
+            await BalanceItem.updateOutstanding([...createdBalanceItems]);
         }
 
         // Reallocate
-        await BalanceItemService.reallocate([...createdBalanceItems, ...unrelatedCreatedBalanceItems, ...deletedBalanceItems], organization.id);
+        await BalanceItemService.reallocate([...createdBalanceItems, ...deletedBalanceItems], organization.id);
 
         // Update occupancy
         for (const group of groups) {

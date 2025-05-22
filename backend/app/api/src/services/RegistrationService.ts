@@ -1,6 +1,6 @@
 import { ManyToOneRelation } from '@simonbackx/simple-database';
-import { Document, Group, Member, Registration } from '@stamhoofd/models';
-import { AuditLogSource, EmailTemplateType, StockReservation } from '@stamhoofd/structures';
+import { BalanceItem, Document, Group, Member, Registration } from '@stamhoofd/models';
+import { AppliedRegistrationDiscount, AuditLogSource, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, EmailTemplateType, StockReservation, TranslatedString } from '@stamhoofd/structures';
 import { AuditLogService } from './AuditLogService';
 import { GroupService } from './GroupService';
 import { PlatformMembershipService } from './PlatformMembershipService';
@@ -42,6 +42,50 @@ export const RegistrationService = {
         await GroupService.updateOccupancy(registration.groupId);
 
         return true;
+    },
+
+    async updateDiscounts(registrationId: string) {
+        await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
+            await QueueHandler.schedule('registration-discounts-update-' + registrationId, async function (this: undefined) {
+                const registration = await Registration.getByID(registrationId);
+                if (!registration) {
+                    throw new Error('Registration not found');
+                }
+
+                // Fetch all discounts that have been granted to this registration
+                const discountBalanceItems = await BalanceItem.select()
+                    .where('registrationId', registrationId)
+                    .where('organizationId', registration.organizationId)
+                    .where('type', BalanceItemType.RegistrationBundleDiscount)
+                    .where('status', BalanceItemStatus.Due)
+                    .fetch();
+
+                // Reset registration discounts
+                registration.discounts = new Map();
+
+                for (const balanceItem of discountBalanceItems) {
+                    const discount = balanceItem.relations.get(BalanceItemRelationType.Discount);
+                    if (!discount) {
+                        continue;
+                    }
+
+                    let existing = registration.discounts.get(discount.id);
+
+                    if (!existing) {
+                        existing = AppliedRegistrationDiscount.create({
+                            name: discount.name,
+                            amount: 0,
+                        });
+                        registration.discounts.set(discount.id, existing);
+                    }
+                    existing.amount += -balanceItem.price; // price is negative means it has been discounted, and we store a positive amount with the discount
+                }
+
+                console.log('Saving updated discounts for', registrationId, registration.discounts);
+                await registration.save();
+                return true;
+            });
+        });
     },
 
     async deactivate(registration: Registration, _group?: Group, _member?: Member) {

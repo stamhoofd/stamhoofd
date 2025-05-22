@@ -94,6 +94,7 @@ export * from './src/BundleDiscount.js';
 export * from './src/BundleDiscountGroupPriceSettings.js';
 export * from './src/GroupPriceDiscount.js';
 export * from './src/members/MembershipStatus.js';
+export * from './src/AppliedRegistrationDiscount.js';
 
 export * from './src/LoadedPermissions.js';
 

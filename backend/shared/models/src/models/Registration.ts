@@ -1,5 +1,5 @@
 import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
-import { EmailTemplateType, GroupPrice, PaymentMethod, PaymentMethodHelper, Recipient, RecordAnswer, RecordAnswerDecoder, RegisterItemOption, Registration as RegistrationStructure, Replacement, StockReservation } from '@stamhoofd/structures';
+import { AppliedRegistrationDiscount, EmailTemplateType, GroupPrice, PaymentMethod, PaymentMethodHelper, Recipient, RecordAnswer, RecordAnswerDecoder, RegisterItemOption, Registration as RegistrationStructure, Replacement, StockReservation } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -132,6 +132,18 @@ export class Registration extends QueryableModel {
      */
     @column({ type: 'json', decoder: new ArrayDecoder(StockReservation) })
     stockReservations: StockReservation[] = [];
+
+    /**
+     * Cached value for calculation of discounts of other registrations (based on the single-source-of-truth stored in balance items)
+     *
+     * Discounts that were applied to this registration.
+     * Note that these discounts are saved in separate balance items and
+     * are not included in the price.
+     *
+     * Reason is that discounts can change after you've been registered
+     */
+    @column({ type: 'json', decoder: new MapDecoder(StringDecoder, AppliedRegistrationDiscount) })
+    discounts = new Map<string, AppliedRegistrationDiscount>();
 
     static group: ManyToOneRelation<'group', import('./Group').Group>;
 

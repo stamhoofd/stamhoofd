@@ -323,7 +323,7 @@ export class BundleDiscountCalculation {
         const priceMatrix: number[][] = [];
 
         for (const item of arr) {
-            const price = item instanceof RegisterItem ? (item.calculatedPrice + item.calculatedPriceDueLater) : item.registration.price;
+            const price = item instanceof RegisterItem ? (item.calculatedPrice + item.calculatedPriceDueLater) : item.registration.calculatedPrice;
             const discounts = item instanceof RegisterItem
                 ? (item.groupPrice.bundleDiscounts.get(this.bundle.id)?.customDiscounts ?? this.bundle.discounts)
                 : (item.registration.groupPrice.bundleDiscounts.get(this.bundle.id)?.customDiscounts ?? this.bundle.discounts);
