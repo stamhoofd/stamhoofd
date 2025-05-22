@@ -115,6 +115,7 @@ const start = async () => {
 
     // Register Email Recipient loaders
     await import('./src/email-recipient-loaders/members');
+    await import('./src/email-recipient-loaders/registrations');
     await import('./src/email-recipient-loaders/orders');
     await import('./src/email-recipient-loaders/receivable-balances');
     await import('./src/excel-loaders/registrations');

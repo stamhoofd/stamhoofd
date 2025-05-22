@@ -13,6 +13,9 @@ import { Platform } from '../Platform.js';
 import { EmailTemplate } from './EmailTemplate.js';
 
 export enum EmailRecipientFilterType {
+    RegistrationMembers = 'RegistrationMembers',
+    RegistrationParents = 'RegistrationParents',
+    RegistrationUnverified = 'RegistrationUnverified',
     Members = 'Members',
     MemberParents = 'MemberParents',
     MemberUnverified = 'MemberUnverified',
