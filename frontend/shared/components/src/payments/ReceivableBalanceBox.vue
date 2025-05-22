@@ -32,6 +32,26 @@
                     </template>
                 </STListItem>
 
+                <STListItem :selectable="true" element-name="button" class="theme-secundary" @click="createBalanceItem" v-if="false">
+                    <template #left>
+                        <IconContainer icon="wand">
+                            <template #aside>
+                                <span class="icon add small primary" />
+                            </template>
+                        </IconContainer>
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('Saldoverrekening') }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ $t('Maak een saldoverrekening aan met een totaalprijs van 0 euro die negatieve en positieve items combineert om de openstaande rekening te vereenvoudigen.') }}
+                    </p>
+
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
                 <STListItem v-if="detailedItem.amountOpen >= 0" :selectable="true" element-name="button" @click="createPayment">
                     <template #left>
                         <IconContainer icon="receive">
