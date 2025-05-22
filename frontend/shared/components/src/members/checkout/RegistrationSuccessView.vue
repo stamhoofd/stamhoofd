@@ -75,7 +75,7 @@ if (props.payment && names.length === 0 && waitingListNames.length === 0) {
             if (!p.balanceItem.relations.get(BalanceItemRelationType.Group)) {
                 return [];
             }
-            const id = p.balanceItem.relations.get(BalanceItemRelationType.Member)?.name;
+            const id = p.balanceItem.relations.get(BalanceItemRelationType.Member)?.name?.toString();
             return id ? [id] : [];
         }),
     );
