@@ -356,7 +356,7 @@ describe('Endpoint.RegisterMembers', () => {
             // #region act and assert
             await expect(async () => await post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('No permission to register this member'));
+                .toThrow(new RegExp('Member not found'));
             // #endregion
         });
 
