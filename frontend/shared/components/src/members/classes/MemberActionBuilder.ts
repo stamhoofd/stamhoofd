@@ -370,9 +370,9 @@ export class MemberActionBuilder {
                 icon: 'download',
                 priority: 11,
                 groupIndex: 3,
-                handler: async (selection: any) => {
+                handler: async (selection: TableActionSelection<PlatformMember>) => {
                     // TODO: vervangen door een context menu
-                    await this.exportToExcel(selection as any);
+                    await this.exportToExcel(selection);
                 },
             }),
             new MenuTableAction({
