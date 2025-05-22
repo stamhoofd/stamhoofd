@@ -2,8 +2,7 @@ import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoof
 import { ContextPermissions } from '@stamhoofd/networking';
 import { AccessRight, FinancialSupportSettings, Group, Organization, Platform, RecordCategory } from '@stamhoofd/structures';
 
-// , permissions?: UserPermissions|null
-export function getSelectableWorkbook(platform: Platform, organization: Organization | null, groups: Group[] = [], auth: ContextPermissions) {
+export function getSelectableColumns({ platform, organization, auth, groupColumns }: { platform: Platform; organization: Organization | null; auth: ContextPermissions; groupColumns?: SelectableColumn[] }) {
     const recordCategories = [
         ...(organization?.meta.recordsConfiguration.recordCategories ?? []),
         ...platform.config.recordsConfiguration.recordCategories,
@@ -14,56 +13,6 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
 
     const flattenedCategories = RecordCategory.flattenCategoriesWith(recordCategories, r => r.excelColumns.length > 0);
 
-    const groupColumns: SelectableColumn[] = [];
-
-    for (const group of groups) {
-        if (group.settings.prices.length > 1) {
-            groupColumns.push(
-                new SelectableColumn({
-                    id: `groups.${group.id}.price`,
-                    name: $t(`ae21b9bf-7441-4f38-b789-58f34612b7af`),
-                    category: group.settings.name.toString(),
-                }),
-            );
-        }
-
-        for (const menu of group.settings.optionMenus) {
-            groupColumns.push(
-                new SelectableColumn({
-                    id: `groups.${group.id}.optionMenu.${menu.id}`,
-                    name: menu.name,
-                    category: group.settings.name.toString(),
-                }),
-            );
-
-            for (const option of menu.options) {
-                if (option.allowAmount) {
-                    groupColumns.push(
-                        new SelectableColumn({
-                            id: `groups.${group.id}.optionMenu.${menu.id}.${option.id}.amount`,
-                            name: menu.name + ' → ' + option.name + ' → ' + $t('ed55e67d-1dce-46b2-8250-948c7cd616c2'),
-                            category: group.settings.name.toString(),
-                        }),
-                    );
-                }
-            }
-        }
-
-        for (const recordCategory of group.settings.recordCategories) {
-            const records = recordCategory.getAllRecords();
-
-            for (const record of records) {
-                groupColumns.push(
-                    new SelectableColumn({
-                        id: `groups.${group.id}.recordAnswers.${record.id}`,
-                        name: recordCategory.name + ' → ' + record.name,
-                        category: group.settings.name.toString(),
-                    }),
-                );
-            }
-        }
-    }
-
     const returnNullIfNoAccessRight = (column: SelectableColumn, requiresAccessRights: AccessRight[]) => {
         if (requiresAccessRights.some(accessRight => !auth.hasAccessRight(accessRight))) {
             return null;
@@ -72,7 +21,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         return column;
     };
 
-    const columns: (SelectableColumn | null) [] = [
+    const columns: SelectableColumn[] = [
         new SelectableColumn({
             id: 'id',
             name: $t(`8daf57de-69cf-48fe-b09b-772c54473184`),
@@ -158,7 +107,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             name: $t(`439176a5-dd35-476b-8c65-3216560cac2f`),
         }), [AccessRight.MemberManageNRN]),
 
-        ...groupColumns,
+        ...(groupColumns ?? []),
 
         ...(!organization
             ? [
@@ -275,14 +224,69 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                 });
             });
         }),
-    ];
+    ].filter(column => column !== null);
+
+    return columns;
+}
+
+// , permissions?: UserPermissions|null
+export function getSelectableWorkbook(platform: Platform, organization: Organization | null, groups: Group[] = [], auth: ContextPermissions) {
+    const groupColumns: SelectableColumn[] = [];
+
+    for (const group of groups) {
+        if (group.settings.prices.length > 1) {
+            groupColumns.push(
+                new SelectableColumn({
+                    id: `groups.${group.id}.price`,
+                    name: $t(`ae21b9bf-7441-4f38-b789-58f34612b7af`),
+                    category: group.settings.name.toString(),
+                }),
+            );
+        }
+
+        for (const menu of group.settings.optionMenus) {
+            groupColumns.push(
+                new SelectableColumn({
+                    id: `groups.${group.id}.optionMenu.${menu.id}`,
+                    name: menu.name,
+                    category: group.settings.name.toString(),
+                }),
+            );
+
+            for (const option of menu.options) {
+                if (option.allowAmount) {
+                    groupColumns.push(
+                        new SelectableColumn({
+                            id: `groups.${group.id}.optionMenu.${menu.id}.${option.id}.amount`,
+                            name: menu.name + ' → ' + option.name + ' → ' + $t('ed55e67d-1dce-46b2-8250-948c7cd616c2'),
+                            category: group.settings.name.toString(),
+                        }),
+                    );
+                }
+            }
+        }
+
+        for (const recordCategory of group.settings.recordCategories) {
+            const records = recordCategory.getAllRecords();
+
+            for (const record of records) {
+                groupColumns.push(
+                    new SelectableColumn({
+                        id: `groups.${group.id}.recordAnswers.${record.id}`,
+                        name: recordCategory.name + ' → ' + record.name,
+                        category: group.settings.name.toString(),
+                    }),
+                );
+            }
+        }
+    }
 
     return new SelectableWorkbook({
         sheets: [
             new SelectableSheet({
                 id: 'members',
                 name: $t(`97dc1e85-339a-4153-9413-cca69959d731`),
-                columns: columns.filter(column => column !== null),
+                columns: getSelectableColumns({ platform, organization, auth, groupColumns }),
             }),
         ],
     });
