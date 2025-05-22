@@ -1,7 +1,8 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
-import { ExcelExportType, Group, GroupType, Organization, OrganizationRegistrationPeriod, PermissionLevel, Platform, PlatformMember, PlatformRegistration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupType, mergeFilters, Organization, OrganizationRegistrationPeriod, PermissionLevel, Platform, PlatformMember, PlatformRegistration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
+import { EmailView, RecipientChooseOneOption } from '../../email';
 import { useContext, useOrganization, usePlatform } from '../../hooks';
 import { checkoutDefaultItem, chooseOrganizationMembersForGroup, getActionsForCategory, PlatformFamilyManager, presentDeleteMembers, presentEditMember, presentEditResponsibilities, usePlatformFamilyManager } from '../../members';
 import { RegistrationsActionBuilder } from '../../members/classes/RegistrationsActionBuilder';
@@ -84,7 +85,7 @@ export class RegistrationActionBuilder {
     getActions(options: { includeDeleteMember?: boolean; includeMove?: boolean; includeEdit?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}) {
         const actions: TableAction<PlatformRegistration>[] = [
             ...this.getMemberActions(options),
-            // todo: e-mail
+            this.getEmailAction(),
             this.getExportToExcelAction(),
             (options.includeMove ? this.getMoveAction(options.selectedOrganizationRegistrationPeriod) : null),
             (options.includeEdit ? this.getEditAction() : null),
@@ -331,6 +332,169 @@ export class RegistrationActionBuilder {
                 // TODO: vervangen door een context menu
                 await this.exportToExcel(selection);
             },
+        });
+    }
+
+    private getEmailAction() {
+        return new AsyncTableAction({
+            name: $t(`f92ad3ab-8743-4d37-8b3f-c9d5ca756b16`),
+            icon: 'email',
+            priority: 12,
+            groupIndex: 3,
+            handler: async (selection: TableActionSelection<PlatformRegistration>) => {
+                await this.openMail(selection);
+            },
+        });
+    }
+
+    async openMail(selection: TableActionSelection<PlatformRegistration>) {
+        const filter = selection.filter.filter;
+        const search = selection.filter.search;
+
+        const options: RecipientChooseOneOption[] = [];
+
+        options.push({
+            type: 'ChooseOne',
+            options: [
+                {
+                    id: 'all',
+                    name: $t(`379d43fb-034f-4280-bb99-ea658eaec729`),
+                    value: [
+                        EmailRecipientSubfilter.create({
+                            type: EmailRecipientFilterType.RegistrationMembers,
+                            filter,
+                            search,
+                        }),
+                    ],
+                },
+                {
+                    id: 'none',
+                    name: $t(`2035a033-bd26-492b-8d91-473b2a033029`),
+                    value: [],
+                },
+                {
+                    id: 'adults',
+                    name: $t(`756cf0cd-8992-452a-9eb8-46e1c7ca5650`),
+                    value: [
+                        EmailRecipientSubfilter.create({
+                            type: EmailRecipientFilterType.RegistrationMembers,
+                            filter: mergeFilters([
+                                filter,
+                                {
+                                    member: {
+                                        $elemMatch: {
+                                            age: {
+                                                $gt: 17,
+                                            },
+                                        },
+                                    },
+                                },
+                            ]),
+                            search,
+                        }),
+                    ],
+                },
+            ],
+        });
+
+        options.push({
+            type: 'ChooseOne',
+            options: [
+                {
+                    id: 'minors',
+                    name: $t(`f6b27311-6878-4d14-90de-7a49a7f2b8f2`),
+                    value: [
+                        EmailRecipientSubfilter.create({
+                            type: EmailRecipientFilterType.RegistrationParents,
+                            filter: mergeFilters([
+                                filter,
+                                {
+                                    member: {
+                                        $elemMatch: {
+                                            age: {
+                                                $lt: 18,
+                                            },
+                                        },
+                                    },
+                                },
+                            ]),
+                            search,
+                        }),
+                    ],
+                },
+                {
+                    id: 'all',
+                    name: $t(`5c6c917c-c07c-4825-9f58-a8dade4e4875`),
+                    value: [
+                        EmailRecipientSubfilter.create({
+                            type: EmailRecipientFilterType.RegistrationParents,
+                            filter,
+                            search,
+                        }),
+                    ],
+                },
+                {
+                    id: 'none',
+                    name: $t(`71065f0c-5d13-4b38-ba35-9b17aca66fbf`),
+                    value: [],
+                },
+            ],
+        });
+
+        options.push({
+            type: 'ChooseOne',
+            options: [
+                {
+                    id: 'none',
+                    name: $t(`2f4a25b4-1c98-4449-9ba1-75418393f0c9`),
+                    value: [],
+                },
+                {
+                    id: 'minors',
+                    name: $t(`62844f9d-a3d3-4b83-bafe-e8e97bc6aa3b`),
+                    value: [
+                        EmailRecipientSubfilter.create({
+                            type: EmailRecipientFilterType.RegistrationUnverified,
+                            filter: mergeFilters([
+                                filter,
+                                {
+                                    member: {
+                                        $elemMatch: {
+                                            age: {
+                                                $lt: 18,
+                                            },
+                                        },
+                                    },
+                                },
+                            ]),
+                            search,
+                        }),
+                    ],
+                },
+                {
+                    id: 'all',
+                    name: $t(`09c2a259-7c8f-4a97-8eb2-05fa9d56865e`),
+                    value: [
+                        EmailRecipientSubfilter.create({
+                            type: EmailRecipientFilterType.RegistrationUnverified,
+                            filter,
+                            search,
+                        }),
+                    ],
+                },
+            ],
+        });
+
+        const displayedComponent = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(EmailView, {
+                recipientFilterOptions: options,
+            }),
+        });
+        await this.present({
+            components: [
+                displayedComponent,
+            ],
+            modalDisplayStyle: 'popup',
         });
     }
 
