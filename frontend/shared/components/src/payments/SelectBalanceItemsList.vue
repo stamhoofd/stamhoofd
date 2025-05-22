@@ -1,24 +1,30 @@
 <template>
     <STList>
-        <STListItem v-for="item in filteredBalanceItems" :key="item.id" element-name="label" :selectable="true" class="right-stack no-margin">
+        <STListItem v-for="item in filteredBalanceItems" :key="item.id" element-name="label" :selectable="true">
             <template #left>
                 <Checkbox :model-value="isItemSelected(item)" :disabled="isPayable && item.priceOpen < 0" @update:model-value="setItemSelected(item, $event)" />
             </template>
 
-            <BalanceItemTitleBox :item="item" :is-payable="isPayable" />
+            <BalanceItemTitleBox :item="item" :is-payable="isPayable" :show-prices="false" />
+
+            <div v-if="isItemSelected(item) && isCustomizeItemValue(item)" class="split-inputs option" @click.stop>
+                <div>
+                    <STInputBox :title="$t('Hoeveel nu betalen?')">
+                        <PriceInput :currency="getItemPrice(item) === item.priceOpen ? 'euro' : ('/ ' + formatFloat(item.priceOpen / 100) + ' euro')" :model-value="getItemPrice(item)" :min="item.priceOpen < 0 ? item.priceOpen : 0" :max="item.priceOpen >= 0 ? item.priceOpen : 0" :placeholder="$t(`240b3e60-bab9-47d6-bcfb-71e138d2cd2c`)" @update:model-value="setItemPrice(item, $event)" />
+                    </STInputBox>
+                </div>
+            </div>
+            <p v-else class="style-description">
+                <span v-if="!item.isDue" v-tooltip="item.dueAt ? ('Te betalen tegen ' + formatDate(item.dueAt)) : undefined" class="style-price-base disabled style-tooltip">
+                    ({{ formatPrice(item.priceOpen) }})
+                </span>
+                <span v-else class="style-price-base" :class="{negative: item.priceOpen < 0}">
+                    {{ formatPrice(item.priceOpen) }}
+                </span>
+            </p>
 
             <template #right>
-                <div v-if="isItemSelected(item)">
-                    <p v-if="isPayable && getItemPrice(item) < 0" class="style-price-base">
-                        {{ formatPrice(getItemPrice(item)) }}
-                    </p>
-                    <PriceInput v-else :model-value="getItemPrice(item)" :min="item.priceOpen < 0 ? item.priceOpen : 0" :max="item.priceOpen >= 0 ? item.priceOpen : 0" :placeholder="$t(`240b3e60-bab9-47d6-bcfb-71e138d2cd2c`)" @update:model-value="setItemPrice(item, $event)" />
-                </div>
-                <template v-else>
-                    <p class="style-discount-old-price disabled">
-                        ({{ formatPrice(item.priceOpen) }})
-                    </p>
-                </template>
+                <button v-if="isItemSelected(item) && item.priceOpen > 0" v-tooltip="$t('Slechts deel betalen')" :class="{'no-partially': isCustomizeItemValue(item), 'partially': !isCustomizeItemValue(item)}" type="button" class="button icon" @click="toggleCustomizeItemValue(item)" />
             </template>
         </STListItem>
     </STList>
@@ -28,9 +34,9 @@
 
 <script setup lang="ts">
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PriceBreakdownBox, PriceInput } from '@stamhoofd/components';
+import { PriceBreakdownBox, PriceInput, STInputBox } from '@stamhoofd/components';
 import { BalanceItem, BalanceItemPaymentDetailed } from '@stamhoofd/structures';
-import { computed, nextTick, onMounted } from 'vue';
+import { computed, nextTick, onMounted, ref } from 'vue';
 import BalanceItemTitleBox from './BalanceItemTitleBox.vue';
 
 const props = defineProps<{
@@ -38,6 +44,7 @@ const props = defineProps<{
     list: BalanceItemPaymentDetailed[];
     isPayable: boolean;
 }>();
+const customizeItemValues = ref(new Set<string>());
 
 onMounted(async () => {
     if (props.list.length === 0) {
@@ -84,6 +91,20 @@ const priceBreakdown = computed(() => {
         },
     ];
 });
+
+function toggleCustomizeItemValue(item: BalanceItem) {
+    if (customizeItemValues.value.has(item.id)) {
+        customizeItemValues.value.delete(item.id);
+        setItemPrice(item, item.priceOpen);
+    }
+    else {
+        customizeItemValues.value.add(item.id);
+    }
+}
+
+function isCustomizeItemValue(item: BalanceItem) {
+    return customizeItemValues.value.has(item.id);
+}
 
 function addPatch(p: PatchableArrayAutoEncoder<BalanceItemPaymentDetailed>) {
     emit('patch', p);
