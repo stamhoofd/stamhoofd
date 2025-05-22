@@ -1,4 +1,4 @@
-import { XlsxTransformerColumn } from '@stamhoofd/excel-writer';
+import { isXlsxTransformerConcreteColumn, XlsxTransformerColumn, XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import { Address, CountryHelper, Parent, ParentTypeHelper, PlatformMember, RecordAnswer, RecordCategory, RecordSettings, RecordType } from '@stamhoofd/structures';
 
 export class XlsxTransformerColumnHelper {
@@ -236,6 +236,49 @@ export class XlsxTransformerColumnHelper {
                         };
                     });
                 }
+            },
+        };
+    }
+
+    /**
+     * Makes it possible to reuse an XlsxTransformerColumn, for example member columns exist, PlatformRegistration has
+     * a property member, so we can reuse the member columns for PlatformRegistration.
+     * @param param0
+     * @returns
+     */
+    private static transformConcreteColumnForProperty<T, O>({ column, key, getPropertyValue }: { column: XlsxTransformerConcreteColumn<T>; key: string; getPropertyValue: (object: O) => T }): XlsxTransformerConcreteColumn<O> {
+        return {
+            ...column,
+            id: `${key}.${column.id}`,
+            getValue: (object: O) => column.getValue(getPropertyValue(object)),
+        };
+    }
+
+    /**
+     * Makes it possible to reuse an XlsxTransformerColumn, for example member columns exist, PlatformRegistration has
+     * a property member, so we can reuse the member columns for PlatformRegistration.
+     * @param param0
+     * @returns
+     */
+    static transformColumnForProperty<T, O>({ column, key, getPropertyValue }: { column: XlsxTransformerColumn<T>; key: string; getPropertyValue: (object: O) => T }): XlsxTransformerColumn<O> {
+        if (isXlsxTransformerConcreteColumn(column)) {
+            return this.transformConcreteColumnForProperty({ column, key, getPropertyValue });
+        }
+
+        return {
+            match: (id: string) => {
+                if (!id.startsWith(key + '.')) {
+                    return;
+                }
+
+                const subId = id.substring(key.length + 1);
+                const subColumns = column.match(subId);
+
+                if (!subColumns) {
+                    return;
+                }
+
+                return subColumns.map(column => XlsxTransformerColumnHelper.transformConcreteColumnForProperty({ column, key, getPropertyValue }));
             },
         };
     }

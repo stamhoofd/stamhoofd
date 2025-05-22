@@ -12,6 +12,10 @@ export type XlsxTransformerColumn<T> = XlsxTransformerConcreteColumn<T> | {
     match: (id: string) => (XlsxTransformerConcreteColumn<T>[] | undefined);
 };
 
+export function isXlsxTransformerConcreteColumn<T>(column: XlsxTransformerColumn<T>): column is XlsxTransformerConcreteColumn<T> {
+    return (column as XlsxTransformerConcreteColumn<T>).id !== undefined;
+}
+
 export interface XlsxTransformerSheet<A, B = A> {
     id: string;
     name: string;

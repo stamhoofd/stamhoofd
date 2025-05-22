@@ -4,6 +4,7 @@ import { LimitedFilteredRequest } from './FilteredRequest.js';
 export enum ExcelExportType {
     Payments = 'payments',
     Members = 'members',
+    Registrations = 'registrations',
     Organizations = 'organizations',
     ReceivableBalances = 'receivable-balances',
     EventNotifications = 'event-notifications',

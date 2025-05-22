@@ -117,6 +117,7 @@ const start = async () => {
     await import('./src/email-recipient-loaders/members');
     await import('./src/email-recipient-loaders/orders');
     await import('./src/email-recipient-loaders/receivable-balances');
+    await import('./src/excel-loaders/registrations');
 
     console.log('Opening port...');
     routerServer.listen(STAMHOOFD.PORT ?? 9090);

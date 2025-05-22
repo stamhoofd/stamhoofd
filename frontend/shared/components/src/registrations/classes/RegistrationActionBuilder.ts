@@ -1,10 +1,12 @@
-import { usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
-import { Group, GroupType, Organization, OrganizationRegistrationPeriod, PermissionLevel, PlatformMember, PlatformRegistration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
-import { useContext, useOrganization } from '../../hooks';
+import { ExcelExportType, Group, GroupType, Organization, OrganizationRegistrationPeriod, PermissionLevel, Platform, PlatformMember, PlatformRegistration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
+import { useContext, useOrganization, usePlatform } from '../../hooks';
 import { checkoutDefaultItem, chooseOrganizationMembersForGroup, getActionsForCategory, PlatformFamilyManager, presentDeleteMembers, presentEditMember, presentEditResponsibilities, usePlatformFamilyManager } from '../../members';
 import { RegistrationsActionBuilder } from '../../members/classes/RegistrationsActionBuilder';
-import { InMemoryTableAction, MenuTableAction, TableAction } from '../../tables';
+import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, TableActionSelection } from '../../tables';
+import { getSelectableWorkbook } from './getSelectableWorkbook';
 
 export function useDirectRegistrationActions(options?: { groups?: Group[];
     organizations?: Organization[];
@@ -18,12 +20,14 @@ export function useRegistrationActions() {
     const platformFamilyManager = usePlatformFamilyManager();
     const owner = useRequestOwner();
     const organization = useOrganization();
+    const platform = usePlatform();
 
     return (options?: { groups?: Group[];
         organizations?: Organization[];
         forceWriteAccess?: boolean | null; }) => {
         return new RegistrationActionBuilder({
             present,
+            platform: platform.value,
             context: context.value,
             groups: options?.groups ?? [],
             organizations: organization.value ? [organization.value] : (options?.organizations ?? []),
@@ -36,6 +40,7 @@ export function useRegistrationActions() {
 
 export class RegistrationActionBuilder {
     private groups: Group[];
+    private platform: Platform;
     private organizations: Organization[];
     private context: SessionContext;
     private platformFamilyManager: PlatformFamilyManager;
@@ -60,6 +65,7 @@ export class RegistrationActionBuilder {
         present: ReturnType<typeof usePresent>;
         context: SessionContext;
         groups: Group[];
+        platform: Platform;
         organizations: Organization[];
         platformFamilyManager: PlatformFamilyManager;
         forceWriteAccess?: boolean | null;
@@ -72,6 +78,7 @@ export class RegistrationActionBuilder {
         this.platformFamilyManager = settings.platformFamilyManager;
         this.owner = settings.owner;
         this.forceWriteAccess = settings.forceWriteAccess ?? null;
+        this.platform = settings.platform;
     }
 
     getActions(options: { includeDeleteMember?: boolean; includeMove?: boolean; includeEdit?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}) {
@@ -79,6 +86,7 @@ export class RegistrationActionBuilder {
             ...this.getMemberActions(),
             // todo: e-mail
             // todo: export excel
+            this.getExportToExcelAction(),
             (options.includeMove ? this.getMoveAction(options.selectedOrganizationRegistrationPeriod) : null),
             (options.includeEdit ? this.getEditAction() : null),
             (options.includeDeleteMember ? this.getDeleteMemberAction() : null),
@@ -315,6 +323,19 @@ export class RegistrationActionBuilder {
         });
     }
 
+    private getExportToExcelAction() {
+        return new AsyncTableAction({
+            name: $t(`0302eaa0-ce2a-4ef0-b652-88b26b9c53e9`),
+            icon: 'download',
+            priority: 11,
+            groupIndex: 3,
+            handler: async (selection: TableActionSelection<PlatformRegistration>) => {
+                // TODO: vervangen door een context menu
+                await this.exportToExcel(selection);
+            },
+        });
+    }
+
     private async editRegistrations(registrations: PlatformRegistration[]) {
         return this.getRegistrationActionBuilder(registrations)?.editRegistrations();
     }
@@ -361,6 +382,22 @@ export class RegistrationActionBuilder {
                 pop: () => Promise.resolve(),
                 dismiss: () => Promise.resolve(),
             },
+        });
+    }
+
+    private async exportToExcel(selection: TableActionSelection<PlatformRegistration>) {
+        await this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(ExcelExportView, {
+                        type: ExcelExportType.Registrations,
+                        filter: selection.filter,
+                        workbook: getSelectableWorkbook(this.platform, this.organizations.length === 1 ? this.organizations[0] : null, this.context.auth),
+                        configurationId: 'registrations',
+                    }),
+                }),
+            ],
+            modalDisplayStyle: 'popup',
         });
     }
 }
