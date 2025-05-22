@@ -129,6 +129,10 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: new MapDecoder(StringDecoder, AppliedRegistrationDiscount), ...NextVersion })
     discounts = new Map<string, AppliedRegistrationDiscount>();
 
+    get calculatedPrice() {
+        return this.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending), 0);
+    }
+
     get isTrial() {
         return this.trialUntil !== null && (this.deactivatedAt ? (this.trialUntil >= this.deactivatedAt) : (this.trialUntil > new Date()));
     }
