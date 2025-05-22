@@ -189,8 +189,8 @@ async function doExport() {
             const filename = Formatter.fileSlug(props.type) + '.xlsx';
             new Toast('Jouw bestand is klaar, download het hier', 'download')
                 .setButton(
-                    new ToastButton('Downloaden', async () => {
-                        await AppManager.shared.downloadFile(url, filename);
+                    new ToastButton('Downloaden', () => {
+                        void AppManager.shared.downloadFile(url, filename);
                     }),
                 )
                 .setHide(null)
