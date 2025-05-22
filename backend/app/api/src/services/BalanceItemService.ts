@@ -43,16 +43,21 @@ export const BalanceItemService = {
     },
 
     async markDue(balanceItem: BalanceItem) {
+        const reactivate: BalanceItem[] = [];
         if (balanceItem.status === BalanceItemStatus.Hidden) {
-            await BalanceItem.reactivateItems([balanceItem]);
+            reactivate.push(balanceItem);
         }
 
         // status and pricePaid changes are handled inside balanceitempayment
         if (balanceItem.dependingBalanceItemId) {
             const depending = await BalanceItem.getByID(balanceItem.dependingBalanceItemId);
             if (depending && depending.status === BalanceItemStatus.Hidden) {
-                await BalanceItem.reactivateItems([depending]);
+                reactivate.push(depending);
             }
+        }
+
+        if (reactivate.length > 0) {
+            await BalanceItem.reactivateItems(reactivate);
         }
     },
 
