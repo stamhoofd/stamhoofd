@@ -60,7 +60,7 @@ export class PaymentGeneral extends Payment {
 
     get memberNames() {
         const ids = this.balanceItemPayments.flatMap((p) => {
-            const id = p.balanceItem.relations.get(BalanceItemRelationType.Member)?.name;
+            const id = p.balanceItem.relations.get(BalanceItemRelationType.Member)?.name.toString();
             return id ? [id] : [];
         });
 

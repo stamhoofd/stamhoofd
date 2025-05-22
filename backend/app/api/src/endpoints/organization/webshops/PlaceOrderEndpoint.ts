@@ -5,7 +5,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Order, PayconiqPayment, Payment, RateLimiter, Webshop, WebshopDiscountCode } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderData, OrderResponse, Order as OrderStruct, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, Version, WebshopAuthType, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderData, OrderResponse, Order as OrderStruct, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, TranslatedString, Version, WebshopAuthType, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
@@ -205,7 +205,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         BalanceItemRelationType.Webshop,
                         BalanceItemRelation.create({
                             id: webshop.id,
-                            name: webshop.meta.name,
+                            name: new TranslatedString(webshop.meta.name),
                         }),
                     ],
                 ]);

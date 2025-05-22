@@ -5,7 +5,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, Group, Member, MemberWithRegistrations, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, Platform, RateLimiter, Registration, User } from '@stamhoofd/models';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItem as BalanceItemStruct, BalanceItemType, IDRegisterCheckout, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PaymentType, PermissionLevel, PlatformFamily, PlatformMember, RegisterItem, RegisterResponse, Version } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItem as BalanceItemStruct, BalanceItemType, IDRegisterCheckout, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PaymentType, PermissionLevel, PlatformFamily, PlatformMember, RegisterItem, RegisterResponse, TranslatedString, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -508,14 +508,14 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     BalanceItemRelationType.Member,
                     BalanceItemRelation.create({
                         id: item.member.id,
-                        name: item.member.patchedMember.name,
+                        name: new TranslatedString(item.member.patchedMember.name),
                     }),
                 ],
                 [
                     BalanceItemRelationType.Group,
                     BalanceItemRelation.create({
                         id: item.group.id,
-                        name: item.group.settings.name.toString(),
+                        name: item.group.settings.name,
                     }),
                 ],
             ];
@@ -525,7 +525,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     BalanceItemRelationType.GroupPrice,
                     BalanceItemRelation.create({
                         id: item.groupPrice.id,
-                        name: item.groupPrice.name.toString(),
+                        name: item.groupPrice.name,
                     }),
                 ]);
             }
@@ -557,14 +557,14 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                             BalanceItemRelationType.GroupOptionMenu,
                             BalanceItemRelation.create({
                                 id: option.optionMenu.id,
-                                name: option.optionMenu.name,
+                                name: new TranslatedString(option.optionMenu.name),
                             }),
                         ],
                         [
                             BalanceItemRelationType.GroupOption,
                             BalanceItemRelation.create({
                                 id: option.option.id,
-                                name: option.option.name,
+                                name: new TranslatedString(option.option.name),
                             }),
                         ],
                     ]),
@@ -588,7 +588,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                                 BalanceItemRelationType.Discount,
                                 BalanceItemRelation.create({
                                     id: discount.bundle.id,
-                                    name: discount.bundle.name.toString(),
+                                    name: discount.bundle.name,
                                 }),
                             ],
                         ]),
@@ -621,14 +621,14 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                         BalanceItemRelationType.Member,
                         BalanceItemRelation.create({
                             id: registration.member.id,
-                            name: registration.member.patchedMember.name,
+                            name: new TranslatedString(registration.member.patchedMember.name),
                         }),
                     ],
                     [
                         BalanceItemRelationType.Group,
                         BalanceItemRelation.create({
                             id: registration.group.id,
-                            name: registration.group.settings.name.toString(),
+                            name: registration.group.settings.name,
                         }),
                     ],
                 ];
@@ -638,7 +638,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                         BalanceItemRelationType.GroupPrice,
                         BalanceItemRelation.create({
                             id: registration.registration.groupPrice.id,
-                            name: registration.registration.groupPrice.name.toString(),
+                            name: registration.registration.groupPrice.name,
                         }),
                     ]);
                 }
@@ -653,7 +653,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                             BalanceItemRelationType.Discount,
                             BalanceItemRelation.create({
                                 id: discount.bundle.id,
-                                name: discount.bundle.name.toString(),
+                                name: discount.bundle.name,
                             }),
                         ],
                     ]),

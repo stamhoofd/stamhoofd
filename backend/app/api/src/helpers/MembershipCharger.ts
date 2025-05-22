@@ -1,7 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, Member, MemberPlatformMembership, Platform } from '@stamhoofd/models';
 import { SQL, SQLOrderBy, SQLWhereSign } from '@stamhoofd/sql';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { BalanceItemService } from '../services/BalanceItemService';
 
@@ -104,14 +104,14 @@ export const MembershipCharger = {
                         BalanceItemRelationType.Member,
                         BalanceItemRelation.create({
                             id: member.id,
-                            name: member.details.name,
+                            name: new TranslatedString(member.details.name),
                         }),
                     ],
                     [
                         BalanceItemRelationType.MembershipType,
                         BalanceItemRelation.create({
                             id: type.id,
-                            name: type.name,
+                            name: new TranslatedString(type.name),
                         }),
                     ],
                 ]);

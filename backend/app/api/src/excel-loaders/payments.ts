@@ -184,7 +184,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
                                 name: getBalanceItemRelationTypeName(type),
                                 width: 35,
                                 getValue: (object: PaymentWithItem) => ({
-                                    value: object.balanceItemPayment.balanceItem.relations.get(type)?.name || '',
+                                    value: object.balanceItemPayment.balanceItem.relations.get(type)?.name?.toString() || '',
                                 }),
                             },
                         ];

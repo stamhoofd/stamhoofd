@@ -1,5 +1,5 @@
 import { BalanceItem, BalanceItemPayment, MemberFactory, Organization, OrganizationFactory, Payment } from '@stamhoofd/models';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, PaymentMethod, PaymentStatus, ReceivableBalanceType } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, PaymentMethod, PaymentStatus, ReceivableBalanceType, TranslatedString } from '@stamhoofd/structures';
 import { PaymentReallocationService } from './PaymentReallocationService';
 
 let sharedOrganization: Organization | undefined;
@@ -46,7 +46,7 @@ async function createItem(options: {
         for (const [type, id] of Object.entries(options.relations)) {
             b.relations.set(type as BalanceItemRelationType, BalanceItemRelation.create({
                 id,
-                name: 'Test ' + id,
+                name: new TranslatedString('Test ' + id),
             }));
         }
     }

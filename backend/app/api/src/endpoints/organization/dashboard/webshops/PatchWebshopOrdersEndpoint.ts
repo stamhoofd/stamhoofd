@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, BalanceItemPayment, Order, Payment, Webshop, WebshopCounter } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, TranslatedString, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
 import { AuditLogService } from '../../../../services/AuditLogService';
@@ -178,7 +178,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                                 BalanceItemRelationType.Webshop,
                                 BalanceItemRelation.create({
                                     id: webshop.id,
-                                    name: webshop.meta.name,
+                                    name: new TranslatedString(webshop.meta.name),
                                 }),
                             ],
                         ]);

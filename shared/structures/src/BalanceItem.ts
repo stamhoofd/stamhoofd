@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Payment, PrivatePayment } from './members/Payment.js';
 import { PriceBreakdown } from './PriceBreakdown.js';
+import { TranslatedString } from './TranslatedString.js';
 
 export enum BalanceItemStatusV352 {
     Hidden = 'Hidden',
@@ -139,7 +140,8 @@ export class BalanceItemRelation extends AutoEncoder {
     id: string;
 
     @field({ decoder: StringDecoder })
-    name = '';
+    @field(TranslatedString.field({ version: 372 }))
+    name = new TranslatedString();
 }
 
 export function doBalanceItemRelationsMatch(a: Map<BalanceItemRelationType, BalanceItemRelation>, b: Map<BalanceItemRelationType, BalanceItemRelation>, allowedDifference = 0) {
@@ -333,7 +335,7 @@ export class BalanceItem extends AutoEncoder {
         switch (this.type) {
             case BalanceItemType.Registration: {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
-                const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`0a54d0a3-e963-447a-81ac-6982a7508649`);
+                const group = this.relations.get(BalanceItemRelationType.Group)?.name.toString() || $t(`0a54d0a3-e963-447a-81ac-6982a7508649`);
 
                 if (option) {
                     return $t(`973d141e-441d-41b8-ad43-06f71c10126f`) + ' ' + group;
@@ -344,12 +346,12 @@ export class BalanceItem extends AutoEncoder {
 
             case BalanceItemType.RegistrationBundleDiscount: {
                 const discount = this.relations.get(BalanceItemRelationType.Discount);
-                return discount?.name || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount);
+                return discount?.name?.toString() || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount);
             }
 
             case BalanceItemType.CancellationFee: {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
-                const group = this.relations.get(BalanceItemRelationType.Group)?.name;
+                const group = this.relations.get(BalanceItemRelationType.Group)?.name.toString();
 
                 if (group) {
                     if (option) {
@@ -362,7 +364,7 @@ export class BalanceItem extends AutoEncoder {
             }
             case BalanceItemType.AdministrationFee: return $t(`13fbbe0e-5326-4cc8-928e-5fc50b27654a`);
             case BalanceItemType.FreeContribution: return $t(`1a36fef2-0e2f-4dca-b661-7274ef63dbb5`);
-            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name || $t(`b05702b7-72bc-4dbd-8197-cf758442dc5f`);
+            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() || $t(`b05702b7-72bc-4dbd-8197-cf758442dc5f`);
             case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return $t(`03df4cd8-446f-4f40-8d27-90a51bb5a6ba`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t(`ab4ad0cf-53df-4f35-96a8-59747075417f`);
         }
@@ -374,18 +376,18 @@ export class BalanceItem extends AutoEncoder {
     get category(): string {
         switch (this.type) {
             case BalanceItemType.Registration: {
-                return this.relations.get(BalanceItemRelationType.Group)?.name ?? $t(`9fb913bf-ebc1-48aa-885e-73f24b8da239`);
+                return this.relations.get(BalanceItemRelationType.Group)?.name.toString() ?? $t(`9fb913bf-ebc1-48aa-885e-73f24b8da239`);
             }
             case BalanceItemType.RegistrationBundleDiscount: {
                 const discount = this.relations.get(BalanceItemRelationType.Discount);
-                return discount?.name || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount);
+                return discount?.name.toString() || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount);
             }
-            case BalanceItemType.CancellationFee: return this.relations.get(BalanceItemRelationType.Group)?.name ?? this.relations.get(BalanceItemRelationType.Webshop)?.name ?? this.relations.get(BalanceItemRelationType.MembershipType)?.name ?? $t(`77828342-0662-4a7c-846b-e4fb4ae91553`);
+            case BalanceItemType.CancellationFee: return this.relations.get(BalanceItemRelationType.Group)?.name.toString() ?? this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() ?? this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t(`77828342-0662-4a7c-846b-e4fb4ae91553`);
             case BalanceItemType.AdministrationFee: return $t(`13fbbe0e-5326-4cc8-928e-5fc50b27654a`);
             case BalanceItemType.FreeContribution: return $t(`1a36fef2-0e2f-4dca-b661-7274ef63dbb5`);
-            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name ?? $t(`b05702b7-72bc-4dbd-8197-cf758442dc5f`);
+            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() ?? $t(`b05702b7-72bc-4dbd-8197-cf758442dc5f`);
             case BalanceItemType.Other: return this.description;
-            case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name ?? $t(`5026a42a-66ad-4cc1-9400-c7c1407bc7c0`);
+            case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t(`5026a42a-66ad-4cc1-9400-c7c1407bc7c0`);
         }
     }
 
@@ -408,7 +410,7 @@ export class BalanceItem extends AutoEncoder {
                 // List all relations
                 for (const [key, value] of this.relations.entries()) {
                     if (shouldAggregateOnRelationType(key, this)) {
-                        list.push(getBalanceItemRelationTypeName(key) + ': ' + value.name);
+                        list.push(getBalanceItemRelationTypeName(key) + ': ' + value.name.toString());
                     }
                 }
                 return list.join('\n');
@@ -479,19 +481,19 @@ export class BalanceItem extends AutoEncoder {
                     return (optionMenu?.name ?? $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`)) + ': ' + option.name;
                 }
                 const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`0a54d0a3-e963-447a-81ac-6982a7508649`);
-                const price = this.relations.get(BalanceItemRelationType.GroupPrice)?.name;
+                const price = this.relations.get(BalanceItemRelationType.GroupPrice)?.name.toString();
                 return $t(`d07f7f84-0d5d-43fd-a7df-f58ca0f3245d`) + ' ' + group + (price && price !== 'Standaardtarief' ? ' (' + price + ')' : '');
             }
             case BalanceItemType.RegistrationBundleDiscount: {
                 const discount = this.relations.get(BalanceItemRelationType.Discount);
-                return discount?.name || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount);
+                return discount?.name.toString() || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount);
             }
             case BalanceItemType.CancellationFee: return $t(`ac2be546-732b-4c1a-ace3-c9076795afa0`);
             case BalanceItemType.AdministrationFee: return $t(`be98be36-f796-4f96-b054-4d2a09be3d79`);
             case BalanceItemType.FreeContribution: return $t(`16ca0372-9c8f-49f0-938d-aee012e59f8c`);
-            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name || $t(`8ce0947e-8681-4abd-b8ef-27d0218fa4a1`);
+            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() || $t(`8ce0947e-8681-4abd-b8ef-27d0218fa4a1`);
             case BalanceItemType.Other: return this.description;
-            case BalanceItemType.PlatformMembership: return $t(`0495e7f0-10bf-4cd9-8d93-1a8b62ce19aa`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t(`25589636-c28d-4c5b-9b5c-0f1cfd4037ef`);
+            case BalanceItemType.PlatformMembership: return $t(`0495e7f0-10bf-4cd9-8d93-1a8b62ce19aa`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() || $t(`25589636-c28d-4c5b-9b5c-0f1cfd4037ef`);
         }
     }
 
@@ -504,7 +506,7 @@ export class BalanceItem extends AutoEncoder {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
                 let prefix = '';
                 if (option) {
-                    const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`0a54d0a3-e963-447a-81ac-6982a7508649`);
+                    const group = this.relations.get(BalanceItemRelationType.Group)?.name.toString() || $t(`0a54d0a3-e963-447a-81ac-6982a7508649`);
                     prefix = $t(`ab7efbf3-6dff-4237-93ba-4ac34f75765b`) + ' ' + group;
                 }
                 const member = this.relations.get(BalanceItemRelationType.Member);
@@ -517,7 +519,7 @@ export class BalanceItem extends AutoEncoder {
                 const descriptions: string[] = [];
                 const member = this.relations.get(BalanceItemRelationType.Member);
                 if (member) {
-                    descriptions.push(member.name);
+                    descriptions.push(member.name.toString());
                 }
                 const group = this.relations.get(BalanceItemRelationType.Group);
                 if (group) {
@@ -528,7 +530,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.PlatformMembership: {
                 const member = this.relations.get(BalanceItemRelationType.Member);
                 if (member) {
-                    return member.name;
+                    return member.name.toString();
                 }
                 break;
             }
@@ -536,7 +538,7 @@ export class BalanceItem extends AutoEncoder {
                 const list: string[] = [];
                 // List all relations
                 for (const [key, value] of this.relations.entries()) {
-                    list.push(getBalanceItemRelationTypeName(key) + ': ' + value.name);
+                    list.push(getBalanceItemRelationTypeName(key) + ': ' + value.name.toString());
                 }
                 return list.join('\n');
             }

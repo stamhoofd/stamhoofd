@@ -214,7 +214,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
                                 name: getBalanceItemRelationTypeName(type),
                                 width: 35,
                                 getValue: (object: ReceivableBalanceWithItem) => ({
-                                    value: object.balanceItem.relations.get(type)?.name || '',
+                                    value: object.balanceItem.relations.get(type)?.name?.toString() || '',
                                 }),
                             },
                         ];
