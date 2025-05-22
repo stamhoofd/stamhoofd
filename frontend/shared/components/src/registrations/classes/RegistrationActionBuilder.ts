@@ -1,8 +1,9 @@
 import { usePresent } from '@simonbackx/vue-app-navigation';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
-import { Group, Organization, PermissionLevel, PlatformMember, PlatformRegistration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
+import { Group, GroupType, Organization, OrganizationRegistrationPeriod, PermissionLevel, PlatformMember, PlatformRegistration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { useContext, useOrganization } from '../../hooks';
-import { checkoutDefaultItem, chooseOrganizationMembersForGroup, getActionsForCategory, presentEditMember, presentEditResponsibilities } from '../../members';
+import { checkoutDefaultItem, chooseOrganizationMembersForGroup, getActionsForCategory, PlatformFamilyManager, presentEditMember, presentEditResponsibilities, usePlatformFamilyManager } from '../../members';
+import { RegistrationsActionBuilder } from '../../members/classes/RegistrationsActionBuilder';
 import { InMemoryTableAction, MenuTableAction, TableAction } from '../../tables';
 
 export function useDirectRegistrationActions(options?: { groups?: Group[];
@@ -14,6 +15,7 @@ export function useDirectRegistrationActions(options?: { groups?: Group[];
 export function useRegistrationActions() {
     const present = usePresent();
     const context = useContext();
+    const platformFamilyManager = usePlatformFamilyManager();
     const owner = useRequestOwner();
     const organization = useOrganization();
 
@@ -25,6 +27,7 @@ export function useRegistrationActions() {
             context: context.value,
             groups: options?.groups ?? [],
             organizations: organization.value ? [organization.value] : (options?.organizations ?? []),
+            platformFamilyManager,
             forceWriteAccess: options?.forceWriteAccess,
             owner,
         });
@@ -35,6 +38,7 @@ export class RegistrationActionBuilder {
     private groups: Group[];
     private organizations: Organization[];
     private context: SessionContext;
+    private platformFamilyManager: PlatformFamilyManager;
     private forceWriteAccess: boolean | null = null;
     private present: ReturnType<typeof usePresent>;
     private owner: any;
@@ -57,6 +61,7 @@ export class RegistrationActionBuilder {
         context: SessionContext;
         groups: Group[];
         organizations: Organization[];
+        platformFamilyManager: PlatformFamilyManager;
         forceWriteAccess?: boolean | null;
         owner: any;
     }) {
@@ -64,13 +69,18 @@ export class RegistrationActionBuilder {
         this.context = settings.context;
         this.groups = settings.groups;
         this.organizations = settings.organizations;
+        this.platformFamilyManager = settings.platformFamilyManager;
         this.owner = settings.owner;
         this.forceWriteAccess = settings.forceWriteAccess ?? null;
     }
 
-    getActions() {
+    getActions(options: { includeDelete?: boolean; includeMove?: boolean; includeEdit?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}) {
         const actions: TableAction<PlatformRegistration>[] = [
             ...this.getMemberActions(),
+            // todo: e-mail
+            // todo: export excel
+            (options.includeMove === true ? this.getMoveAction(options.selectedOrganizationRegistrationPeriod) : null),
+            (options.includeEdit === true ? this.getEditAction() : null),
             this.getUnsubscribeAction(),
         ].filter(a => a !== null);
 
@@ -118,6 +128,8 @@ export class RegistrationActionBuilder {
                 enabled: this.hasWrite && !!this.context.organization,
                 childActions: () => this.getRegisterActions(),
             }),
+
+            // todo: delete
         ];
 
         return actions;
@@ -217,6 +229,94 @@ export class RegistrationActionBuilder {
             handler: async (registrations: PlatformRegistration[]) => {
                 await this.deleteRegistrations(registrations);
             },
+        });
+    }
+
+    private getMoveAction(selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod): TableAction<PlatformRegistration> | null {
+        if (this.organizations.length !== 1 || this.groups.filter(g => g.type !== GroupType.EventRegistration).length === 0) {
+            console.error('Cannot move registrations');
+            return null;
+        }
+
+        const organization = this.organizations[0];
+        const period = selectedOrganizationRegistrationPeriod ?? organization.period;
+
+        return new MenuTableAction({
+            name: $t(`507c48cb-35ae-4c94-bc7a-4611360409c8`),
+            priority: 1,
+            groupIndex: 5,
+            needsSelection: true,
+            allowAutoSelectAll: false,
+            enabled: this.hasWrite,
+            childActions: () => [
+                new MenuTableAction({
+                    name: $t(`93d604bc-fddf-434d-a993-e6e456d32231`),
+                    groupIndex: 0,
+                    enabled: organization.period.waitingLists.length > 0,
+                    childActions: () => [
+                        ...organization.period.waitingLists.map((g) => {
+                            return new InMemoryTableAction({
+                                name: g.settings.name.toString(),
+                                needsSelection: true,
+                                allowAutoSelectAll: false,
+                                handler: async (registrations: PlatformRegistration[]) => {
+                                    await this.moveRegistrations(registrations, g);
+                                },
+                            });
+                        }),
+                    ],
+                }),
+                ...getActionsForCategory<PlatformRegistration>(period.adminCategoryTree, (registrations, group) => this.moveRegistrations(registrations, group)).map((r) => {
+                    r.description = period.period.name;
+                    return r;
+                }),
+            ],
+        });
+    }
+
+    private getEditAction(): TableAction<PlatformRegistration> | null {
+        if (this.organizations.length !== 1 || this.groups.length === 0) {
+            return null;
+        }
+
+        return new InMemoryTableAction({
+            name: $t(`ffe15b57-4e70-4657-9a0b-af860eed503e`),
+            priority: 1,
+            groupIndex: 1,
+            needsSelection: true,
+            allowAutoSelectAll: false,
+            enabled: this.hasWrite,
+            handler: async (registrations: PlatformRegistration[]) => {
+                await this.editRegistrations(registrations);
+            },
+            icon: 'edit',
+        });
+    }
+
+    private async editRegistrations(registrations: PlatformRegistration[]) {
+        return this.getRegistrationActionBuilder(registrations)?.editRegistrations();
+    }
+
+    private async moveRegistrations(registrations: PlatformRegistration[], group: Group) {
+        return this.getRegistrationActionBuilder(registrations)?.moveRegistrations(group);
+    }
+
+    private getRegistrationActionBuilder(registrations: PlatformRegistration[]) {
+        if (this.organizations.length !== 1) {
+            return;
+        }
+
+        const groupOrganization = this.organizations[0];
+        const members = getUniqueMembersFromRegistrations(registrations);
+
+        return new RegistrationsActionBuilder({
+            context: this.context,
+            owner: this.owner,
+            present: this.present,
+            organization: groupOrganization,
+            registrations,
+            members,
+            platformFamilyManager: this.platformFamilyManager,
         });
     }
 

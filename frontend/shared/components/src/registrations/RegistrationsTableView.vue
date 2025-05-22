@@ -85,6 +85,12 @@ const defaultFilter: StamhoofdFilter = app === 'admin' && !props.group
         }
     : null;
 
+const organizationRegistrationPeriod = computed(() => {
+    const periodId = filterPeriodId;
+
+    return props.organization?.periods?.organizationPeriods?.find(p => p.period.id === periodId);
+});
+
 useGlobalEventListener('members-deleted', async () => {
     tableObjectFetcher.reset(true, true);
 });
@@ -221,7 +227,14 @@ if (!props.organization) {
     canAdd = false;
 }
 
-const registrationActions = actionBuilder.getActions();
+// registrations for events of another organization should not be editable
+const excludeEdit = props.group && props.group.type === GroupType.EventRegistration && !!props.organization && props.group.organizationId !== props.organization.id;
+
+const registrationActions = actionBuilder.getActions({
+    selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value,
+    includeMove: true,
+    includeEdit: !excludeEdit,
+});
 
 const actions: TableAction<ObjectType>[] = [
     new InMemoryTableAction({
