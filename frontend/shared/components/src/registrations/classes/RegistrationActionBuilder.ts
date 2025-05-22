@@ -74,14 +74,14 @@ export class RegistrationActionBuilder {
         this.forceWriteAccess = settings.forceWriteAccess ?? null;
     }
 
-    getActions(options: { includeDelete?: boolean; includeMove?: boolean; includeEdit?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}) {
+    getActions(options: { includeDeleteMember?: boolean; includeMove?: boolean; includeEdit?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}) {
         const actions: TableAction<PlatformRegistration>[] = [
             ...this.getMemberActions(),
             // todo: e-mail
             // todo: export excel
             (options.includeMove ? this.getMoveAction(options.selectedOrganizationRegistrationPeriod) : null),
             (options.includeEdit ? this.getEditAction() : null),
-            (options.includeDelete ? this.getDeleteAction() : null),
+            (options.includeDeleteMember ? this.getDeleteMemberAction() : null),
             this.getUnsubscribeAction(),
         ].filter(a => a !== null);
 
@@ -233,7 +233,7 @@ export class RegistrationActionBuilder {
         });
     }
 
-    private getDeleteAction() {
+    private getDeleteMemberAction() {
         return new InMemoryTableAction({
             name: $t('Lid definitief verwijderen'),
             destructive: true,
