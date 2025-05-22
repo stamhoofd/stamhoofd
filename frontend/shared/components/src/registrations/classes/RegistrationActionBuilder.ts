@@ -2,7 +2,7 @@ import { usePresent } from '@simonbackx/vue-app-navigation';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
 import { Group, GroupType, Organization, OrganizationRegistrationPeriod, PermissionLevel, PlatformMember, PlatformRegistration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { useContext, useOrganization } from '../../hooks';
-import { checkoutDefaultItem, chooseOrganizationMembersForGroup, getActionsForCategory, PlatformFamilyManager, presentEditMember, presentEditResponsibilities, usePlatformFamilyManager } from '../../members';
+import { checkoutDefaultItem, chooseOrganizationMembersForGroup, getActionsForCategory, PlatformFamilyManager, presentDeleteMembers, presentEditMember, presentEditResponsibilities, usePlatformFamilyManager } from '../../members';
 import { RegistrationsActionBuilder } from '../../members/classes/RegistrationsActionBuilder';
 import { InMemoryTableAction, MenuTableAction, TableAction } from '../../tables';
 
@@ -79,8 +79,9 @@ export class RegistrationActionBuilder {
             ...this.getMemberActions(),
             // todo: e-mail
             // todo: export excel
-            (options.includeMove === true ? this.getMoveAction(options.selectedOrganizationRegistrationPeriod) : null),
-            (options.includeEdit === true ? this.getEditAction() : null),
+            (options.includeMove ? this.getMoveAction(options.selectedOrganizationRegistrationPeriod) : null),
+            (options.includeEdit ? this.getEditAction() : null),
+            (options.includeDelete ? this.getDeleteAction() : null),
             this.getUnsubscribeAction(),
         ].filter(a => a !== null);
 
@@ -228,6 +229,27 @@ export class RegistrationActionBuilder {
             enabled: this.hasWrite,
             handler: async (registrations: PlatformRegistration[]) => {
                 await this.deleteRegistrations(registrations);
+            },
+        });
+    }
+
+    private getDeleteAction() {
+        return new InMemoryTableAction({
+            name: $t('Lid definitief verwijderen'),
+            destructive: true,
+            priority: 1,
+            groupIndex: 100,
+            needsSelection: true,
+            singleSelection: true,
+            allowAutoSelectAll: false,
+            icon: 'trash',
+            enabled: !this.context.organization && this.context.auth.hasPlatformFullAccess(),
+            handler: async (registrations: PlatformRegistration[]) => {
+                await presentDeleteMembers({
+                    members: getUniqueMembersFromRegistrations(registrations),
+                    present: this.present,
+                    platformFamilyManager: this.platformFamilyManager,
+                });
             },
         });
     }

@@ -156,6 +156,27 @@ export class MemberActionBuilder {
         ];
     }
 
+    private getDeleteAction() {
+        return [new InMemoryTableAction({
+            name: $t('Lid definitief verwijderen'),
+            destructive: true,
+            priority: 1,
+            groupIndex: 100,
+            needsSelection: true,
+            singleSelection: true,
+            allowAutoSelectAll: false,
+            icon: 'trash',
+            enabled: !this.context.organization && this.context.auth.hasPlatformFullAccess(),
+            handler: async (members: PlatformMember[]) => {
+                await presentDeleteMembers({
+                    members,
+                    present: this.present,
+                    platformFamilyManager: this.platformFamilyManager,
+                });
+            },
+        })];
+    }
+
     getMoveAction(selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod): TableAction<PlatformMember>[] {
         if (this.organizations.length !== 1) {
             return [];
@@ -363,28 +384,12 @@ export class MemberActionBuilder {
                 enabled: this.hasWrite && !!this.context.organization,
                 childActions: () => this.getRegisterActions(),
             }),
-            ...(options.includeMove === true ? this.getMoveAction(options.selectedOrganizationRegistrationPeriod) : []),
-            ...(options.includeEdit === true ? this.getEditAction() : []),
+            ...(options.includeMove ? this.getMoveAction(options.selectedOrganizationRegistrationPeriod) : []),
+            ...(options.includeEdit ? this.getEditAction() : []),
+            ...(options.includeDelete ? this.getDeleteAction() : []),
             ...this.getUnsubscribeAction(),
             ...this.getAuditLogAction(),
         ];
-
-        if (options.includeDelete) {
-            actions.push(
-                new InMemoryTableAction({
-                    name: $t(`6381fb21-c5be-4318-ba47-a5ee669335a7`),
-                    destructive: true,
-                    priority: 1,
-                    groupIndex: 100,
-                    needsSelection: true,
-                    allowAutoSelectAll: false,
-                    icon: 'trash',
-                    enabled: !this.context.organization && this.context.auth.hasFullPlatformAccess(),
-                    handler: async (members: PlatformMember[]) => {
-                        await this.deleteMembers(members);
-                    },
-                }));
-        }
 
         return actions;
     }
@@ -542,46 +547,6 @@ export class MemberActionBuilder {
         });
     }
 
-    async deleteMembers(members: PlatformMember[]) {
-        if (members.length > 1) {
-            throw new SimpleError({
-                code: 'not-supported',
-                message: $t('2fcd7b68-2fd1-4b8c-afae-4dc60dcd96a5'),
-            });
-        }
-
-        const member = members[0].patchedMember;
-        const name = member.name;
-
-        await this.present({
-            components: [
-                new ComponentWithProperties(DeleteView, {
-                    title: $t('802581b7-38dd-45c3-815d-b786b6f9136c', { name }),
-                    description: $t(`dfbecccd-b964-4e8b-83e4-553b49d9fcc0`, { name }),
-                    confirmationTitle: $t(`c15132d6-f507-46eb-8584-e36e7ce343c5`),
-                    confirmationPlaceholder: $t(`e4b3d2af-dee8-4f55-88e9-a229513d347c`),
-                    confirmationCode: name,
-                    checkboxText: $t(`738eb984-4a2e-455d-b6d5-5204173039dc`),
-                    onDelete: async () => {
-                        const patch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
-                        for (const member of members) {
-                            patch.addDelete(member.id);
-                        }
-
-                        await this.platformFamilyManager.isolatedPatch(members, patch);
-                        GlobalEventBus.sendEvent('members-deleted', members).catch(console.error);
-
-                        Toast.success(
-                            members.length ? $t('cb9fd3d2-c563-4d46-a26b-4438e5a887ef') : $t('43300d52-0e3f-4189-b5b3-100ecb0f5e70', { count: members.length }),
-                        ).show();
-                        return true;
-                    },
-                }),
-            ],
-            modalDisplayStyle: 'sheet',
-        });
-    }
-
     async exportToExcel(selection: TableActionSelection<PlatformMember>) {
         await this.present({
             components: [
@@ -733,5 +698,45 @@ export async function presentEditResponsibilities({ member, present }: { member:
             }),
         ],
         modalDisplayStyle: 'popup',
+    });
+}
+
+export async function presentDeleteMembers({ members, present, platformFamilyManager }: { members: PlatformMember[]; present: ReturnType<typeof usePresent>; platformFamilyManager: PlatformFamilyManager }) {
+    if (members.length > 1) {
+        throw new SimpleError({
+            code: 'not-supported',
+            message: $t('2fcd7b68-2fd1-4b8c-afae-4dc60dcd96a5'),
+        });
+    }
+
+    const member = members[0].patchedMember;
+    const name = member.name;
+
+    await present({
+        components: [
+            new ComponentWithProperties(DeleteView, {
+                title: $t('802581b7-38dd-45c3-815d-b786b6f9136c', { name }),
+                description: $t(`dfbecccd-b964-4e8b-83e4-553b49d9fcc0`, { name }),
+                confirmationTitle: $t(`c15132d6-f507-46eb-8584-e36e7ce343c5`),
+                confirmationPlaceholder: $t(`e4b3d2af-dee8-4f55-88e9-a229513d347c`),
+                confirmationCode: name,
+                checkboxText: $t(`738eb984-4a2e-455d-b6d5-5204173039dc`),
+                onDelete: async () => {
+                    const patch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
+                    for (const member of members) {
+                        patch.addDelete(member.id);
+                    }
+
+                    await platformFamilyManager.isolatedPatch(members, patch);
+                    GlobalEventBus.sendEvent('members-deleted', members).catch(console.error);
+
+                    Toast.success(
+                        members.length ? $t('cb9fd3d2-c563-4d46-a26b-4438e5a887ef') : $t('43300d52-0e3f-4189-b5b3-100ecb0f5e70', { count: members.length }),
+                    ).show();
+                    return true;
+                },
+            }),
+        ],
+        modalDisplayStyle: 'sheet',
     });
 }
