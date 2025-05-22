@@ -1,11 +1,12 @@
 import { usePresent } from '@simonbackx/vue-app-navigation';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
-import { Group, PermissionLevel, PlatformMember, PlatformRegistration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
-import { useContext } from '../../hooks';
-import { chooseOrganizationMembersForGroup, presentEditMember, presentEditResponsibilities } from '../../members';
+import { Group, Organization, PermissionLevel, PlatformMember, PlatformRegistration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
+import { useContext, useOrganization } from '../../hooks';
+import { checkoutDefaultItem, chooseOrganizationMembersForGroup, getActionsForCategory, presentEditMember, presentEditResponsibilities } from '../../members';
 import { InMemoryTableAction, MenuTableAction, TableAction } from '../../tables';
 
 export function useDirectRegistrationActions(options?: { groups?: Group[];
+    organizations?: Organization[];
 }) {
     return useRegistrationActions()(options);
 }
@@ -14,13 +15,16 @@ export function useRegistrationActions() {
     const present = usePresent();
     const context = useContext();
     const owner = useRequestOwner();
+    const organization = useOrganization();
 
     return (options?: { groups?: Group[];
+        organizations?: Organization[];
         forceWriteAccess?: boolean | null; }) => {
         return new RegistrationActionBuilder({
             present,
             context: context.value,
             groups: options?.groups ?? [],
+            organizations: organization.value ? [organization.value] : (options?.organizations ?? []),
             forceWriteAccess: options?.forceWriteAccess,
             owner,
         });
@@ -29,6 +33,7 @@ export function useRegistrationActions() {
 
 export class RegistrationActionBuilder {
     private groups: Group[];
+    private organizations: Organization[];
     private context: SessionContext;
     private forceWriteAccess: boolean | null = null;
     private present: ReturnType<typeof usePresent>;
@@ -51,27 +56,21 @@ export class RegistrationActionBuilder {
         present: ReturnType<typeof usePresent>;
         context: SessionContext;
         groups: Group[];
+        organizations: Organization[];
         forceWriteAccess?: boolean | null;
         owner: any;
     }) {
         this.present = settings.present;
         this.context = settings.context;
         this.groups = settings.groups;
+        this.organizations = settings.organizations;
         this.owner = settings.owner;
         this.forceWriteAccess = settings.forceWriteAccess ?? null;
     }
 
     getActions() {
         const actions: TableAction<PlatformRegistration>[] = [
-            new MenuTableAction({
-                name: $t('Lid'),
-                groupIndex: 0,
-                singleSelection: true,
-                enabled: this.hasWrite,
-                needsSelection: true,
-                allowAutoSelectAll: false,
-                childActions: () => this.getMemberActions(),
-            }),
+            ...this.getMemberActions(),
             this.getUnsubscribeAction(),
         ].filter(a => a !== null);
 
@@ -79,7 +78,7 @@ export class RegistrationActionBuilder {
     }
 
     private getMemberActions() {
-        const actions = [
+        const actions: TableAction<PlatformRegistration>[] = [
             new InMemoryTableAction({
                 name: $t(`28f20fae-6270-4210-b49d-68b9890dbfaf`),
                 icon: 'edit',
@@ -109,9 +108,97 @@ export class RegistrationActionBuilder {
                     }
                 },
             }),
+
+            new MenuTableAction<PlatformRegistration>({
+                name: $t(`800d8458-da0f-464f-8b82-4e28599c8598`),
+                priority: 1,
+                groupIndex: 5,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                enabled: this.hasWrite && !!this.context.organization,
+                childActions: () => this.getRegisterActions(),
+            }),
         ];
 
         return actions;
+    }
+
+    private getRegisterActions(organization?: Organization): TableAction<PlatformRegistration>[] {
+        if (!organization) {
+            if (this.organizations.length === 1) {
+                return this.getRegisterActions(this.organizations[0]);
+            }
+            return this.organizations.map((org) => {
+                return new MenuTableAction({
+                    name: $t(`26a122e0-4312-4473-90c6-85f5c9f678be`) + ' ' + org.name,
+                    groupIndex: 0,
+                    childActions: () => this.getRegisterActions(org),
+                });
+            });
+        }
+
+        return [
+            new MenuTableAction({
+                name: $t(`93d604bc-fddf-434d-a993-e6e456d32231`),
+                groupIndex: 0,
+                enabled: organization.period.waitingLists.length > 0,
+                childActions: () => [
+                    ...organization.period.waitingLists.map((g) => {
+                        return new InMemoryTableAction({
+                            name: g.settings.name.toString(),
+                            needsSelection: true,
+                            allowAutoSelectAll: false,
+                            handler: async (registrations: PlatformRegistration[]) => {
+                                const members = getUniqueMembersFromRegistrations(registrations);
+                                await this.register(members, g);
+                            },
+                        });
+                    }),
+                ],
+            }),
+            ...getActionsForCategory<PlatformRegistration>(organization.period.adminCategoryTree, async (registrations, group) => await this.register(getUniqueMembersFromRegistrations(registrations), group)).map((r) => {
+                r.description = organization.period.period.name;
+                return r;
+            }),
+        ];
+    }
+
+    private async register(members: PlatformMember[], group: Group) {
+        if (members.length === 1) {
+            return await checkoutDefaultItem({
+                member: members[0],
+                group,
+                admin: true,
+                groupOrganization: this.organizations.find(o => o.id === group.organizationId)!,
+                context: this.context,
+                navigate: {
+                    present: this.present,
+                    show: this.present,
+                    pop: () => Promise.resolve(),
+                    dismiss: () => Promise.resolve(),
+                },
+                displayOptions: {
+                    action: 'present',
+                    modalDisplayStyle: 'popup',
+                },
+
+                // Immediately checkout instead of only adding it to the cart
+                startCheckoutFlow: true,
+            });
+        }
+
+        return await chooseOrganizationMembersForGroup({
+            members,
+            group,
+            context: this.context,
+            owner: this.owner,
+            navigate: {
+                present: this.present,
+                show: this.present,
+                pop: () => Promise.resolve(),
+                dismiss: () => Promise.resolve(),
+            },
+        });
     }
 
     private getUnsubscribeAction(): InMemoryTableAction<PlatformRegistration> | null {

@@ -149,7 +149,7 @@ export class MemberActionBuilder {
                     }),
                 ],
             }),
-            ...this.getActionsForCategory(organization.period.adminCategoryTree, async (members, group) => await this.register(members, group)).map((r) => {
+            ...getActionsForCategory<PlatformMember>(organization.period.adminCategoryTree, async (members, group) => await this.register(members, group)).map((r) => {
                 r.description = organization.period.period.name;
                 return r;
             }),
@@ -194,7 +194,7 @@ export class MemberActionBuilder {
                             }),
                         ],
                     }),
-                    ...this.getActionsForCategory(period.adminCategoryTree, (members, group) => this.moveRegistrations(members, group)).map((r) => {
+                    ...getActionsForCategory<PlatformMember>(period.adminCategoryTree, (members, group) => this.moveRegistrations(members, group)).map((r) => {
                         r.description = period.period.name;
                         return r;
                     }),
@@ -300,40 +300,6 @@ export class MemberActionBuilder {
                 });
             },
         });
-    }
-
-    getActionsForCategory(category: GroupCategoryTree, action: (members: PlatformMember[], group: Group) => void | Promise<void>): TableAction<PlatformMember>[] {
-        const r = [
-            ...category.categories.map((c) => {
-                return new MenuTableAction({
-                    name: c.settings.name,
-                    groupIndex: 2,
-                    needsSelection: true,
-                    allowAutoSelectAll: false,
-                    enabled: c.groups.length > 0 || c.categories.length > 0,
-                    childActions: this.getActionsForCategory(c, action),
-                });
-            }),
-            ...category.groups.map((g) => {
-                return new InMemoryTableAction({
-                    name: g.settings.name.toString(),
-                    needsSelection: true,
-                    allowAutoSelectAll: false,
-                    handler: async (members: PlatformMember[]) => {
-                        await action(members, g);
-                    },
-                });
-            }),
-        ];
-
-        if (r.filter(rr => rr.enabled).length === 1) {
-            const rr = r.filter(rr => rr.enabled)[0];
-            if (rr instanceof MenuTableAction && Array.isArray(rr.childActions)) {
-                return rr.childActions;
-            }
-        }
-
-        return r;
     }
 
     editResponsibilities(member: PlatformMember) {
@@ -702,6 +668,40 @@ export class MemberActionBuilder {
             },
         });
     }
+}
+
+export function getActionsForCategory<T extends { id: string }>(category: GroupCategoryTree, action: (items: T[], group: Group) => void | Promise<void>): TableAction<T>[] {
+    const r = [
+        ...category.categories.map((c) => {
+            return new MenuTableAction({
+                name: c.settings.name,
+                groupIndex: 2,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                enabled: c.groups.length > 0 || c.categories.length > 0,
+                childActions: getActionsForCategory(c, action),
+            });
+        }),
+        ...category.groups.map((g) => {
+            return new InMemoryTableAction({
+                name: g.settings.name.toString(),
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                handler: async (items: T[]) => {
+                    await action(items, g);
+                },
+            });
+        }),
+    ];
+
+    if (r.filter(rr => rr.enabled).length === 1) {
+        const rr = r.filter(rr => rr.enabled)[0];
+        if (rr instanceof MenuTableAction && Array.isArray(rr.childActions)) {
+            return rr.childActions;
+        }
+    }
+
+    return r;
 }
 
 export async function presentEditMember({ member, present }: { member: PlatformMember; present: ReturnType<typeof usePresent> }) {
