@@ -721,7 +721,7 @@ describe('E2E.Register', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 30,
+                totalPrice: 30 - 25,
                 customer: null,
                 asOrganizationId: organization.id,
             });
@@ -857,7 +857,7 @@ describe('E2E.Register', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 30,
+                totalPrice: 30 - 50,
                 customer: null,
                 asOrganizationId: organization.id,
             });
@@ -966,10 +966,10 @@ describe('E2E.Register', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 30,
+                totalPrice: 30 - 25 + 5, // 20% of 25 is 5
                 customer: null,
                 asOrganizationId: organization.id,
-                cancellationFeePercentage: 2000,
+                cancellationFeePercentage: 20_00,
             });
             // #endregion
 

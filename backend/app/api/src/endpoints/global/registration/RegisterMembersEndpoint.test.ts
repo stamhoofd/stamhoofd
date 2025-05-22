@@ -2124,7 +2124,7 @@ describe('Endpoint.RegisterMembers', () => {
                     administrationFee: 0,
                     freeContribution: 0,
                     paymentMethod: PaymentMethod.PointOfSale,
-                    totalPrice: 30,
+                    totalPrice: 30 - 25 + Math.round(25 * cancellationFeePercentage / 10000),
                     asOrganizationId: organization.id,
                     customer: null,
                 });
