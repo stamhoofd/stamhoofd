@@ -686,7 +686,7 @@ describe('PaymentReallocationService', () => {
             });
         });
 
-        it('Balances with different relations should create a reallocation payment with 3 items and remaining open should prefer first due amount', async () => {
+        it('Balances due in the future should not be reallocated', async () => {
             const memberId = (await getMember()).id;
             const b1 = await createItem({
                 unitPrice: 40 * 100,
@@ -728,17 +728,17 @@ describe('PaymentReallocationService', () => {
 
             // Check if the balance items are now equal
             await expectItem(b1, {
-                priceOpen: 0,
-                paid: [40 * 100, -40 * 100],
+                priceOpen: -25_00, // Still paid 25 too much
+                paid: [40 * 100, -15 * 100],
             });
 
             await expectItem(b2, {
-                priceOpen: 5 * 100,
-                paid: [25 * 100],
+                priceOpen: 30 * 100,
+                paid: [],
             });
 
             await expectItem(b3, {
-                priceOpen: 0 * 100,
+                priceOpen: 0 * 100, // Paid with canceled balance item that was already paid and should be refunded
                 paid: [15 * 100],
             });
         });
