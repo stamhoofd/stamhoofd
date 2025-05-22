@@ -8,11 +8,6 @@ import { UIFilter, UIFilterBuilder } from '../UIFilter';
 import { createMemberWithRegistrationsBlobFilterBuilders, useAdvancedPlatformMembershipUIFilterBuilders } from './members';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
 
-enum RegistrationStatus {
-    Active,
-    Inactive,
-}
-
 export function useAdvancedRegistrationWithMemberUIFilterBuilders() {
     const $platform = usePlatform();
     const $user = useUser();
@@ -43,8 +38,8 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders() {
 
         all.push(
             new GroupUIFilterBuilder({
-                name: $t('lid'),
-                description: $t('Filter op leden'),
+                name: $t('Bijhorend lid'),
+                description: $t('Filter op de leden die bij de inschrijving horen'),
                 builders: originalFilters,
                 wrapper: {
                     member: {
