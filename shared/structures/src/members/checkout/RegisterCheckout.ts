@@ -265,7 +265,7 @@ export class RegisterCheckout {
     }
 
     get totalPrice() {
-        return Math.max(0, this.cart.price + this.administrationFee + this.freeContribution - this.bundleDiscount) - this.cart.refund;
+        return Math.max(0, this.cart.price + this.administrationFee + this.freeContribution - this.bundleDiscount) - this.cart.refund + this.cart.getCancellationFees(this.cancellationFeePercentage);
     }
 
     /**
@@ -295,6 +295,10 @@ export class RegisterCheckout {
             {
                 name: $t(`35443bbe-49e8-488e-bb71-c28f30d63f4a`),
                 price: -this.cart.refund,
+            },
+            {
+                name: $t(`Annuleringskosten`),
+                price: this.cart.getCancellationFees(this.cancellationFeePercentage),
             },
         ].filter(a => a.price !== 0);
 

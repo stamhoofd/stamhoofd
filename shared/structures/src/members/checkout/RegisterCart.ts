@@ -235,8 +235,20 @@ export class RegisterCart {
     get refund() {
         return this.items.reduce((total, item) => item.calculatedRefund + total, 0)
             + this.deleteRegistrations.reduce((total, item) => {
-                return total + item.registration.price;
+                return total + item.registration.calculatedPrice;
             }, 0);
+    }
+
+    getCancellationFees(cancellationFeePercentage: number) {
+        return this.items.reduce((total, item) => this.calculateCancellationFee(item.calculatedRefund, cancellationFeePercentage) + total, 0)
+            + this.deleteRegistrations.reduce((total, item) => {
+                return total + this.calculateCancellationFee(item.registration.calculatedPrice, cancellationFeePercentage);
+            }, 0);
+    }
+
+    calculateCancellationFee(price: number, cancellationFeePercentage: number) {
+        const cancellationFee = Math.round(price * cancellationFeePercentage / 10000);
+        return cancellationFee;
     }
 
     get singleOrganization() {
