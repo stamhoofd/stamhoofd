@@ -130,7 +130,7 @@ export class Registration extends QueryableModel {
     /**
      * Set to null if no reservations are made, to help faster querying
      */
-    @column({ type: 'json', decoder: new ArrayDecoder(StockReservation), nullable: true })
+    @column({ type: 'json', decoder: new ArrayDecoder(StockReservation) })
     stockReservations: StockReservation[] = [];
 
     static group: ManyToOneRelation<'group', import('./Group').Group>;
