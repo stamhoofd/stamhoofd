@@ -13,6 +13,7 @@ export * from './src/EventBus';
 export * from './src/ViewportHelper';
 
 export * from './src/members';
+export * from './src/registrations';
 export * from './src/email';
 export * from './src/payments';
 export * from './src/events';

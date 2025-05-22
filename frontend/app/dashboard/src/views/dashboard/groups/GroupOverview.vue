@@ -199,7 +199,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, useNavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, EditEmailTemplatesView, EditGroupView, EditResourceRolesView, MemberCountSpan, MembersTableView, PromiseView, STList, STListItem, STNavigationBar, Toast, useAuth, useOrganization, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, ContextMenu, ContextMenuItem, EditEmailTemplatesView, EditGroupView, EditResourceRolesView, MemberCountSpan, MembersTableView, PromiseView, RegistrationsTableView, STList, STListItem, STNavigationBar, Toast, useAuth, useFeatureFlag, useOrganization, usePlatform } from '@stamhoofd/components';
 import { useOrganizationManager, usePatchOrganizationPeriod } from '@stamhoofd/networking';
 import { EmailTemplateType, Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, MemberResponsibility, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
 
@@ -228,22 +228,36 @@ const platform = usePlatform();
 const patchOrganizationPeriod = usePatchOrganizationPeriod();
 
 enum Routes {
+    Registrations = 'inschrijvingen',
     Members = 'Members',
     WaitingList = 'WaitingList',
     Responsibility = 'Responsibility',
 }
 
+const isRegistrationsTableEnabled = useFeatureFlag()('table-registrations');
+
 defineRoutes([
-    {
-        url: 'inschrijvingen',
-        name: Routes.Members,
-        component: MembersTableView as ComponentOptions,
-        paramsToProps: () => {
-            return {
-                group: props.group,
-            };
-        },
-    },
+    isRegistrationsTableEnabled
+        ? {
+                url: 'inschrijvingen',
+                name: Routes.Members,
+                component: RegistrationsTableView as ComponentOptions,
+                paramsToProps: () => {
+                    return {
+                        group: props.group,
+                    };
+                },
+            }
+        : {
+                url: 'inschrijvingen',
+                name: Routes.Members,
+                component: MembersTableView as ComponentOptions,
+                paramsToProps: () => {
+                    return {
+                        group: props.group,
+                    };
+                },
+            },
     {
         url: 'wachtlijst',
         name: Routes.WaitingList,
