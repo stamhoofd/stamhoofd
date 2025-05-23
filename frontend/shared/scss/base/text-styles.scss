@@ -485,6 +485,17 @@
     }
 }
 
+.style-description, .style-description-large, .style-description-small, .style-title-list {
+    /**
+        Small optimizations for modern browsers only
+    */
+    &:has(> .icon) {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+    }
+}
+
 .pre-wrap {
     white-space: pre-wrap;
 }

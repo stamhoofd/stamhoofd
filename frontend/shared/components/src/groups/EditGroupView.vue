@@ -97,7 +97,7 @@
                             </p>
 
                             <p v-for="[id, discount] of price.bundleDiscounts" :key="id" class="style-description-small">
-                                {{ discount.name.toString() }}
+                                <span class="icon small label" /><span>{{ discount.name.toString() }}</span>
                             </p>
 
                             <p v-if="price.isSoldOut(patchedGroup)" class="style-description-small">
