@@ -212,6 +212,7 @@ function step(add: number) {
             text-overflow: ellipsis;
             overflow: hidden;
             white-space: nowrap;
+            height: $input-height; // In case the input is empty, need to maintain the height with the absolute positioned input
 
             & > div {
                 pointer-events: none;
