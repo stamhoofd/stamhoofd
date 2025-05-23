@@ -63,7 +63,6 @@ export class RegisterCart {
      * You can define which registrations you want remove as part of this register operation.
      */
     deleteRegistrations: RegistrationWithPlatformMember[] = [];
-
     bundleDiscounts: BundleDiscountCalculation[] = [];
 
     calculatePrices() {

@@ -299,7 +299,7 @@ export class BalanceItem extends QueryableModel {
     static async deleteForDeletedRegistration(registrationId: string, options?: { cancellationFeePercentage?: number }) {
         const items = await BalanceItem.select()
             .where('registrationId', registrationId)
-            .where('type', BalanceItemType.Registration)
+            .where('type', [BalanceItemType.Registration, BalanceItemType.RegistrationBundleDiscount])
             .fetch();
         return await this.deleteItems(items, options);
     }

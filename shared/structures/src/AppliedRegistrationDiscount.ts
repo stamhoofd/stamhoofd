@@ -10,7 +10,8 @@ export class AppliedRegistrationDiscount extends AutoEncoder {
     name = new TranslatedString('');
 
     /**
-     * Discount in cents
+     * Discount in cents.
+     * Positive means discount, negative means extra cost.
      */
     @field({ decoder: IntegerDecoder })
     amount: number;

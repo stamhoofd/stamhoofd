@@ -133,7 +133,7 @@ function setupDiscountTest({
     };
 }
 
-function addHistoricRegistration(member: ReturnType<typeof createTestFamily>['members'][0], group: Group, organization: Organization) {
+function addHistoricRegistration(member: ReturnType<typeof createTestFamily>['members'][0], group: Group, organization: Organization, appliedDiscounts: Map<string, AppliedRegistrationDiscount> = new Map()) {
     const registration = Registration.create({
         group: group,
         groupPrice: group.settings.prices[0],
@@ -146,10 +146,11 @@ function addHistoricRegistration(member: ReturnType<typeof createTestFamily>['me
             GenericBalance.create({
                 organizationId: organization.id,
                 amountPaid: 0,
-                amountOpen: group.settings.prices[0].price.price,
+                amountOpen: group.settings.prices[0].price.price - [...appliedDiscounts.values()].reduce((acc, d) => acc + d.amount, 0),
                 amountPending: 0,
             }),
         ],
+        discounts: appliedDiscounts,
     });
     member.member.registrations.push(registration);
     member.family.insertOrganization(organization);
@@ -354,14 +355,17 @@ describe('Unit.RegisterCart', () => {
             const [memberA, memberB] = family.members;
 
             const registrationA = addHistoricRegistration(memberA, groupA, organization);
-            const registrationB = addHistoricRegistration(memberB, groupB, organization);
+            const registrationB = addHistoricRegistration(memberB, groupB, organization, new Map([
+                [
+                    discount.id,
+                    AppliedRegistrationDiscount.create({
+                        name: discount.name,
+                        amount: 10_00, // 10% discount on 100_00 = 10_00
+                    }),
+                ],
+            ]));
 
-            registrationA.discounts.set(discount.id, AppliedRegistrationDiscount.create({
-                name: discount.name,
-                amount: 10_00, // 10% discount on 100_00 = 10_00
-            }));
-
-            // If we delete registration B, the discount should be taken into account
+            // If we delete registration B, the discount won't be visible in the cart because it is included in the registration
             const checkout = family.checkout;
             const cart = checkout.cart;
             cart.removeRegistration(
@@ -373,23 +377,13 @@ describe('Unit.RegisterCart', () => {
 
             cart.calculatePrices();
 
-            expect(cart.bundleDiscounts).toHaveLength(1);
-            expect(cart.bundleDiscounts[0].total).toEqual(0);
-            expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(10_00); // The previous discount
-            expect(cart.bundleDiscounts[0].netTotal).toEqual(-10_00);
+            expect(cart.bundleDiscounts).toHaveLength(0);
 
             expect(checkout.totalPrice).toEqual(-30_00);
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: 0, // Cart total
+                    price: -40_00 + 10_00,
                 }),
-                expect.objectContaining({
-                    price: -40_00, // Cart refund
-                }),
-                {
-                    name: 'Multiple family members discount',
-                    price: 10_00,
-                },
                 expect.objectContaining({
                     price: -40_00 + 10_00,
                 }),
@@ -402,7 +396,7 @@ describe('Unit.RegisterCart', () => {
                     member: memberB,
                 }));
 
-            // Remove registration A, this should give the same result
+            // Remove registration A, this should show the discount because it is a side effect of deleting the registration
 
             cart.removeRegistration(
                 new RegistrationWithPlatformMember({
@@ -419,13 +413,10 @@ describe('Unit.RegisterCart', () => {
             expect(checkout.totalPrice).toEqual(-90_00);
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: 0, // Cart total
-                }),
-                expect.objectContaining({
-                    price: -100_00, // Cart refund
+                    price: -100_00, // Reeds aangerekend
                 }),
                 {
-                    name: 'Multiple family members discount',
+                    name: 'Ongedaan maken korting (Multiple family members discount)',
                     price: 10_00,
                 },
                 expect.objectContaining({
@@ -434,7 +425,112 @@ describe('Unit.RegisterCart', () => {
             ]);
         });
 
-        test('Replacing a registration also removes the attached discount', () => {
+        test('Deleting a registration with cancellation fees', () => {
+            // We have two family members with existing registrations.
+            // One of those registrations received a discount earlier.
+            // But since we are adding a new registration in our cart, a more optimal discount
+            // would be if that registration would get the newly higher discount instead
+            // (because it is percentage based)
+
+            const { organization, groups, family, discount } = setupDiscountTest({
+                memberCount: 2,
+                bundleDiscount: createBundleDiscount({
+                    name: 'Multiple family members discount',
+                    countWholeFamily: true,
+                    countPerGroup: false,
+                    discounts: [
+                        { value: 10_00, type: GroupPriceDiscountType.Percentage },
+                        { value: 15_00, type: GroupPriceDiscountType.Percentage },
+                    ],
+                }),
+                groupPrices: [100_00, 40_00],
+            });
+
+            const [groupA, groupB] = groups;
+            const [memberA, memberB] = family.members;
+
+            const registrationA = addHistoricRegistration(memberA, groupA, organization);
+            const registrationB = addHistoricRegistration(memberB, groupB, organization, new Map([
+                [
+                    discount.id,
+                    AppliedRegistrationDiscount.create({
+                        name: discount.name,
+                        amount: 10_00, // 10% discount on 100_00 = 10_00
+                    }),
+                ],
+            ]));
+
+            // If we delete registration B, the discount won't be visible in the cart because it is included in the registration
+            const checkout = family.checkout;
+            checkout.cancellationFeePercentage = 50_00;
+            const cart = checkout.cart;
+            cart.removeRegistration(
+                new RegistrationWithPlatformMember({
+                    registration: registrationB,
+                    member: memberB,
+                }),
+            );
+
+            cart.calculatePrices();
+
+            expect(cart.bundleDiscounts).toHaveLength(0);
+
+            expect(checkout.totalPrice).toEqual(-15_00);
+            expect(checkout.priceBreakown).toEqual([
+                expect.objectContaining({
+                    price: -40_00 + 10_00, // Already charged amount
+                }),
+                // Cancellation fee = 50% of the balance total, 30_00 = 15_00
+                expect.objectContaining({
+                    price: 15_00,
+                }),
+                expect.objectContaining({
+                    price: -15_00,
+                }),
+            ]);
+
+            // Now readd the registration
+            cart.unremoveRegistration(
+                new RegistrationWithPlatformMember({
+                    registration: registrationB,
+                    member: memberB,
+                }));
+
+            // Remove registration A, this should show the discount because it is a side effect of deleting the registration
+
+            cart.removeRegistration(
+                new RegistrationWithPlatformMember({
+                    registration: registrationA,
+                    member: memberA,
+                }),
+            );
+            cart.calculatePrices();
+
+            expect(cart.bundleDiscounts).toHaveLength(1);
+            expect(cart.bundleDiscounts[0].total).toEqual(0);
+            expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(10_00); // The previous discount
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(-10_00);
+            expect(checkout.totalPrice).toEqual(-40_00);
+            expect(checkout.priceBreakown).toEqual([
+                expect.objectContaining({
+                    price: -100_00, // Already charged for registration A that is being deleted
+                }),
+                // Cancellation fee = 50% of the balance total, 100_00 = 50_00
+                expect.objectContaining({
+                    price: 50_00,
+                }),
+                {
+                    // Side effect in registration B
+                    name: 'Ongedaan maken korting (Multiple family members discount)',
+                    price: 10_00,
+                },
+                expect.objectContaining({
+                    price: -40_00,
+                }),
+            ]);
+        });
+
+        test('Replacing a registration without discount also removes the attached discount in another registration if the new registration in not elegible', () => {
             // Create a family with two members, each with a registration
             // Add a discount to one of the registrations (like it should have been calculated at the time)
             // Next, move one of the registrations to a different group that does not have the discount
@@ -456,11 +552,15 @@ describe('Unit.RegisterCart', () => {
             const [groupA, groupB] = groups;
             const [memberA, memberB] = family.members;
             const registrationA = addHistoricRegistration(memberA, groupA, organization);
-            addHistoricRegistration(memberB, groupB, organization);
-            registrationA.discounts.set(discount.id, AppliedRegistrationDiscount.create({
-                name: discount.name,
-                amount: 10_00, // 10% discount on 100_00 = 10_00
-            }));
+            addHistoricRegistration(memberB, groupB, organization, new Map([
+                [
+                    discount.id,
+                    AppliedRegistrationDiscount.create({
+                        name: discount.name,
+                        amount: 10_00, // 10% discount on 100_00 = 10_00
+                    }),
+                ],
+            ]));
 
             const groupCPrice = GroupPrice.create({
                 price: ReduceablePrice.create({
@@ -513,7 +613,7 @@ describe('Unit.RegisterCart', () => {
                     price: -100_00,
                 }),
                 {
-                    name: 'Multiple family members discount',
+                    name: 'Ongedaan maken korting (Multiple family members discount)',
                     price: 10_00,
                 },
                 expect.objectContaining({
@@ -560,6 +660,128 @@ describe('Unit.RegisterCart', () => {
                 },
                 expect.objectContaining({
                     price: -50_00 - 15_00,
+                }),
+            ]);
+        });
+
+        test('Replacing a registration with discount also removes the attached discount registration if the new registration in not elegible', () => {
+            const { organization, groups, family, discount } = setupDiscountTest({
+                memberCount: 2,
+                bundleDiscount: createBundleDiscount({
+                    name: 'Multiple family members discount',
+                    countWholeFamily: true,
+                    countPerGroup: false,
+                    discounts: [
+                        { value: 10_00, type: GroupPriceDiscountType.Percentage },
+                        { value: 15_00, type: GroupPriceDiscountType.Percentage },
+                    ],
+                }),
+                groupPrices: [100_00, 40_00],
+            });
+            const [groupA, groupB] = groups;
+            const [memberA, memberB] = family.members;
+            const registrationA = addHistoricRegistration(memberA, groupA, organization, new Map([
+                [
+                    discount.id,
+                    AppliedRegistrationDiscount.create({
+                        name: discount.name,
+                        amount: 10_00, // 10% discount on 100_00 = 10_00
+                    }),
+                ],
+            ]));
+            addHistoricRegistration(memberB, groupB, organization);
+
+            const groupCPrice = GroupPrice.create({
+                price: ReduceablePrice.create({
+                    price: 50_00,
+                }),
+            });
+            const groupC = Group.create({
+                organizationId: organization.id,
+                periodId: organization.period.id,
+                settings: GroupSettings.create({
+                    name: new TranslatedString('Group C'),
+                    prices: [
+                        groupCPrice,
+                    ],
+                }),
+            });
+
+            const checkout = family.checkout;
+            const cart = checkout.cart;
+
+            const itemA = RegisterItem.defaultFor(memberA, groupC, organization);
+            itemA.replaceRegistrations = [
+                new RegistrationWithPlatformMember({
+                    registration: registrationA,
+                    member: memberA,
+                }),
+            ];
+            cart.add(itemA);
+            cart.calculatePrices();
+
+            // Check price for items
+            expect(itemA.calculatedPrice).toEqual(50_00);
+            expect(itemA.calculatedRefund).toEqual(90_00);
+            expect(itemA.calculatedPriceDueLater).toEqual(0);
+
+            // No discounts anymore
+            expect(cart.bundleDiscounts).toHaveLength(0);
+
+            expect(checkout.totalPrice).toEqual(50_00 - 90_00);
+            expect(checkout.priceBreakown).toEqual([
+                expect.objectContaining({
+                    // Subtotal (normal price)
+                    price: 50_00,
+                }),
+                expect.objectContaining({
+                    // Refund for the previous registration, without the discount that was granted
+                    price: -90_00,
+                }),
+                expect.objectContaining({
+                    price: 50_00 - 90_00,
+                }),
+            ]);
+
+            // Now, what if groupC does have a higher discount instead of no discount?
+            groupCPrice.bundleDiscounts.set(discount.id, BundleDiscountGroupPriceSettings.create({
+                name: discount.name,
+                customDiscounts: [
+                    // Custom discount for this price
+                    GroupPriceDiscount.create({
+                        value: ReduceablePrice.create({
+                            price: 25_00,
+                        }),
+                        type: GroupPriceDiscountType.Fixed,
+                    }),
+                ],
+            }));
+
+            // Recalculate
+            cart.calculatePrices();
+
+            // Check discount should be given back
+            expect(cart.bundleDiscounts).toHaveLength(1);
+            expect(cart.bundleDiscounts[0].total).toEqual(25_00);
+            expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(0); // Not included here, because the registration will be removed including the applied discount
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(25_00);
+
+            expect(checkout.totalPrice).toEqual(50_00 - 90_00 - 25_00);
+            expect(checkout.priceBreakown).toEqual([
+                expect.objectContaining({
+                    // Subtotal (normal price)
+                    price: 50_00,
+                }),
+                expect.objectContaining({
+                    // Refund for the previous registration
+                    price: -90_00,
+                }),
+                {
+                    name: 'Multiple family members discount',
+                    price: -25_00,
+                },
+                expect.objectContaining({
+                    price: 50_00 - 90_00 - 25_00,
                 }),
             ]);
         });

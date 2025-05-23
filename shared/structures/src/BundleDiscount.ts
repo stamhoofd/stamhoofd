@@ -206,7 +206,7 @@ export class BundleDiscountCalculation {
     registrations: Map<RegistrationWithPlatformMember, number>;
 
     /**
-        Will set the applied discount for these registrations to zero
+     * Keeps track of the deleted registrations so we can exclude these registrations from the calculation
     */
     deleteRegistrations: RegistrationWithPlatformMember[];
 
@@ -251,9 +251,9 @@ export class BundleDiscountCalculation {
             c += registration.registration.discounts.get(this.bundle.id)?.amount ?? 0;
         }
 
-        for (const registration of this.deleteRegistrations) {
-            c += registration.registration.discounts.get(this.bundle.id)?.amount ?? 0;
-        }
+        // Note: do not subtract the discounts on the deleted registrations
+        // These registrations will be deleted anyway, so their balance will be cancelled, that balance includes their discounts
+        // the bundle discounts only reflect the situation without all the deleted registrations
         return c;
     }
 
@@ -281,7 +281,8 @@ export class BundleDiscountCalculation {
             return this.items.get(item) ?? 0;
         }
         else if (item instanceof RegistrationWithPlatformMember) {
-            return this.registrations.get(item) ?? 0;
+            // Calculated discount minus the already applied discount
+            return (this.registrations.get(item) ?? 0); // - (item.registration.discounts.get(this.bundle.id)?.amount ?? 0);
         }
         return 0;
     }
@@ -323,7 +324,8 @@ export class BundleDiscountCalculation {
         const priceMatrix: number[][] = [];
 
         for (const item of arr) {
-            const price = item instanceof RegisterItem ? (item.calculatedPrice + item.calculatedPriceDueLater) : item.registration.calculatedPrice;
+            // We always use the group price here, because this is safer, also for registrations (in case we have deactivated registrations with cancallation fees)
+            const price = item instanceof RegisterItem ? (item.groupPrice.price.forMember(item.member)) : item.registration.groupPrice.price.forMember(item.member);
             const discounts = item instanceof RegisterItem
                 ? (item.groupPrice.bundleDiscounts.get(this.bundle.id)?.customDiscounts ?? this.bundle.discounts)
                 : (item.registration.groupPrice.bundleDiscounts.get(this.bundle.id)?.customDiscounts ?? this.bundle.discounts);

@@ -22,6 +22,7 @@ import { type Registration } from '../Registration.js';
 import { type RegisterContext } from './RegisterCheckout.js';
 import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
 import { type RegisterCart } from './RegisterCart.js';
+import { BalanceItem } from '../../BalanceItem.js';
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
@@ -361,10 +362,10 @@ export class RegisterItem implements ObjectWithRecords {
         }
 
         for (const { registration } of this.replaceRegistrations) {
-            this.calculatedRefund += registration.price;
+            this.calculatedRefund += registration.calculatedPrice;
         }
 
-        if (this.calculatedTrialUntil) {
+        if (this.calculatedTrialUntil && this.calculatedTrialUntil >= BalanceItem.getDueOffset()) {
             this.calculatedPriceDueLater = this.calculatedPrice;
             this.calculatedPrice = 0;
         }
@@ -387,7 +388,7 @@ export class RegisterItem implements ObjectWithRecords {
         for (const { registration } of this.replaceRegistrations) {
             all.push({
                 name: this.checkout.isAdminFromSameOrganization ? $t('a87b9dfd-4acd-40c0-b430-f29dc8ec0fbf', { group: registration.group.settings.name }) : $t('Terugbetaling voor {group}', { group: registration.group.settings.name }),
-                price: -registration.price,
+                price: -registration.calculatedPrice,
             });
         }
 
@@ -445,8 +446,8 @@ export class RegisterItem implements ObjectWithRecords {
         return [
             ...all,
             {
-                name: /* this.checkout.isAdminFromSameOrganization ? (correctedTotalPrice >= 0 ? $t('566df267-1215-4b90-b893-0344c1f1f3d3') : $t('566e4010-63b7-42e7-9b94-fcdec3f95767')) : */(this.calculatedPriceDueLater !== 0 ? $t('6219b760-90aa-4758-8102-119af7e596e7') : $t('482bf48b-ebbc-42e5-8718-6ee11d217510')),
-                price: /* this.checkout.isAdminFromSameOrganization ? Math.abs(correctedTotalPrice) : */ correctedTotalPrice,
+                name: this.checkout.isAdminFromSameOrganization ? (correctedTotalPrice >= 0 ? $t('566df267-1215-4b90-b893-0344c1f1f3d3') : $t('566e4010-63b7-42e7-9b94-fcdec3f95767')) : (this.calculatedPriceDueLater !== 0 ? $t('6219b760-90aa-4758-8102-119af7e596e7') : $t('482bf48b-ebbc-42e5-8718-6ee11d217510')),
+                price: this.checkout.isAdminFromSameOrganization ? Math.abs(correctedTotalPrice) : correctedTotalPrice,
             },
         ];
     }

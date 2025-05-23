@@ -486,6 +486,11 @@ export class BalanceItem extends AutoEncoder {
             }
             case BalanceItemType.RegistrationBundleDiscount: {
                 const discount = this.relations.get(BalanceItemRelationType.Discount);
+
+                if (this.price > 0) {
+                    // Undo the discount
+                    return $t('Ongedaan maken korting') + ' (' + (discount?.name.toString() || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount)) + ')';
+                }
                 return discount?.name.toString() || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount);
             }
             case BalanceItemType.CancellationFee: return $t(`ac2be546-732b-4c1a-ace3-c9076795afa0`);

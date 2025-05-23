@@ -116,6 +116,10 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: new ArrayDecoder(StockReservation), nullable: true, version: 299 })
     stockReservations: StockReservation[] = [];
 
+    /**
+     * The total balance that has been charged for this registration.
+     * This includes discounts, and manually adjusted balances.
+     */
     @field({ decoder: new ArrayDecoder(GenericBalance), version: 354 })
     balances: GenericBalance[] = [];
 
@@ -129,8 +133,17 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: new MapDecoder(StringDecoder, AppliedRegistrationDiscount), ...NextVersion })
     discounts = new Map<string, AppliedRegistrationDiscount>();
 
+    /**
+     * The total price that has been charged for this registration.
+     * This includes discounts, and manually adjusted balances.
+     */
     get calculatedPrice() {
         return this.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending), 0);
+    }
+
+    get calculatedPriceWithoutDiscounts() {
+        // Discounts have been substracted from the calculated price already, so we have to add them back to get the price without discounts
+        return this.calculatedPrice + Array.from(this.discounts.values()).reduce((sum, r) => sum + r.amount, 0);
     }
 
     get isTrial() {

@@ -305,7 +305,7 @@ export class RegisterCheckout {
                 price: this.freeContribution,
             },
             {
-                name: $t(`35443bbe-49e8-488e-bb71-c28f30d63f4a`),
+                name: $t(`Reeds aangerekend`),
                 price: -this.cart.refund,
             },
             {
@@ -318,35 +318,52 @@ export class RegisterCheckout {
         for (const discount of this.cart.bundleDiscounts) {
             const value = discount.netTotal;
             if (value !== 0) {
-                all.push({
-                    name: discount.name,
-                    price: -value,
-                });
+                if (value < 0) {
+                    all.push({
+                        name: $t('Ongedaan maken korting') + ' (' + discount.name + ')',
+                        price: -value,
+                    });
+                }
+                else {
+                    all.push({
+                        name: discount.name,
+                        price: -value,
+                    });
+                }
             }
         }
 
-        if (all.length > 0) {
+        if (all.length > 0 && (this.cart.price + this.cart.priceDueLater) !== 0) {
             all.unshift({
                 name: $t(`8a04f032-01e5-4ee0-98fb-6f36bf971080`),
                 price: this.cart.price + this.cart.priceDueLater,
             });
         }
 
-        if (this.cart.priceDueLater !== 0) {
+        const totalLater = this.cart.priceDueLater - this.bundleDiscountDueLater;
+
+        if (totalLater !== 0) {
             all.push(
                 {
                     name: $t(`7e1d2f82-ca2d-4acc-ab37-88834e63c999`),
-                    price: this.cart.priceDueLater - this.bundleDiscountDueLater,
+                    price: totalLater,
                 },
             );
         }
 
-        return [
-            ...all,
-            {
+        if (this.isAdminFromSameOrganization) {
+            all.push({
+                name: (this.totalPrice >= 0 ? $t('566df267-1215-4b90-b893-0344c1f1f3d3') : $t('566e4010-63b7-42e7-9b94-fcdec3f95767')),
+                price: Math.abs(this.totalPrice),
+            });
+        }
+        else {
+            all.push({
                 name: this.cart.priceDueLater ? $t(`bedb1bf7-9b38-4ef4-a1f3-53ade0f56352`) : $t(`e67d0122-6f15-46c6-af94-92a79268710a`),
                 price: this.totalPrice,
-            },
-        ];
+            });
+        }
+
+        return all;
     }
 }
