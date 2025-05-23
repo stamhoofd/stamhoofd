@@ -45,9 +45,13 @@
             {{ $t('1db1b8fa-1544-43be-a016-9d38c62cd8aa') }}
         </p>
 
-        <template v-if="isEditable" #right>
-            <span v-if="registration.balances.length" class="style-price-base">{{ formatPrice(registration.calculatedPrice) }}</span>
-            <span class="icon arrow-down-small gray" />
+        <p v-if="registration.deactivatedAt && registration.calculatedPrice" class="style-description-small">
+            {{ $t('Annulatiekost') }}: {{ formatPrice(registration.calculatedPrice) }}
+        </p>
+
+        <template #right>
+            <span v-if="!registration.deactivatedAt && registration.balances.length" class="style-price-base">{{ formatPrice(registration.calculatedPrice) }}</span>
+            <span v-if="isEditable" class="icon arrow-down-small gray" />
         </template>
     </STListItem>
 </template>
