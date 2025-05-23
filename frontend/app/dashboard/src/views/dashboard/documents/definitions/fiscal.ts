@@ -24,7 +24,7 @@ export const fiscal = DocumentTemplateDefinition.create({
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
-                    id: 'organization.address',
+                    id: 'organization.companyAddress',
                     name: TranslatedString.create($t(`2f10996e-ea97-4345-b997-c93198c7d67f`)),
                     required: true,
                     type: RecordType.Address,

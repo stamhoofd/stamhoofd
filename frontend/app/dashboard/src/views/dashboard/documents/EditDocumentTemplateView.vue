@@ -450,6 +450,7 @@ function getLinkedFieldsChoices(field: RecordSettings) {
 function getDefaultSupportedIds() {
     return [
         'organization.name',
+        'organization.companyAddress',
         'organization.companyName',
         'organization.companyNumber',
         'organization.address',
@@ -593,6 +594,10 @@ function getDefaultGlobalData(): Record<string, RecordAnswer> {
         'organization.address': RecordAddressAnswer.create({
             settings: RecordSettings.create({}), // settings will be overwritten
             address: organization.value.address,
+        }),
+        'organization.companyAddress': RecordAddressAnswer.create({
+            settings: RecordSettings.create({}), // settings will be overwritten
+            address: organization.value.meta.companies[0]?.address ?? organization.value.address,
         }),
     };
 
