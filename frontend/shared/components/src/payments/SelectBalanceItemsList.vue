@@ -9,8 +9,8 @@
 
             <div v-if="isItemSelected(item) && isCustomizeItemValue(item)" class="split-inputs option" @click.stop>
                 <div>
-                    <STInputBox :title="$t('Hoeveel nu betalen?')">
-                        <PriceInput :currency="getItemPrice(item) === item.priceOpen ? 'euro' : ('/ ' + formatFloat(item.priceOpen / 100) + ' euro')" :model-value="getItemPrice(item)" :min="item.priceOpen < 0 ? item.priceOpen : 0" :max="item.priceOpen >= 0 ? item.priceOpen : 0" :placeholder="$t(`240b3e60-bab9-47d6-bcfb-71e138d2cd2c`)" @update:model-value="setItemPrice(item, $event)" />
+                    <STInputBox :title="item.priceOpen >= 0 ? $t('Hoeveel nu betalen?') : $t('Hoeveel terugbetalen?')">
+                        <PriceInput :currency="getItemPrice(item) === item.priceOpen ? 'euro' : ('/ ' + formatFloat(Math.abs(item.priceOpen) / 100) + ' euro')" :model-value="Math.abs(getItemPrice(item))" :min="0" :max="Math.abs(item.priceOpen)" :placeholder="$t(`240b3e60-bab9-47d6-bcfb-71e138d2cd2c`)" @update:model-value="setItemPrice(item, Math.abs($event) * Math.sign(item.priceOpen))" />
                     </STInputBox>
                 </div>
             </div>
@@ -24,7 +24,7 @@
             </p>
 
             <template #right>
-                <button v-if="isItemSelected(item) && item.priceOpen > 0" v-tooltip="$t('Slechts deel betalen')" :class="{'no-partially': isCustomizeItemValue(item), 'partially': !isCustomizeItemValue(item)}" type="button" class="button icon" @click="toggleCustomizeItemValue(item)" />
+                <button v-if="isItemSelected(item) && (!isPayable || item.priceOpen > 0)" v-tooltip="$t('Slechts deel betalen')" :class="{'no-partially': isCustomizeItemValue(item), 'partially': !isCustomizeItemValue(item)}" type="button" class="button icon" @click="toggleCustomizeItemValue(item)" />
             </template>
         </STListItem>
     </STList>
