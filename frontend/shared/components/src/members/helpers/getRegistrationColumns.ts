@@ -402,8 +402,9 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
 
     allColumns.push(
         new Column<ObjectType, Date | null>({
+            id: 'registeredAt',
             name: waitingList ? $t(`2a96fc1f-3710-4eae-bd01-b95ef8c2622b`) : $t(`8895f354-658f-48bd-9d5d-2e0203ca2a36`),
-            allowSorting: false,
+            allowSorting: true,
             getValue: (registration) => {
                 const registeredAt = registration.registeredAt;
                 if (registeredAt === null) {

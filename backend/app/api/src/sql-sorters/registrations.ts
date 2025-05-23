@@ -24,6 +24,17 @@ export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob>
             });
         },
     },
+    'registeredAt': {
+        getValue(a) {
+            return a.registeredAt;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('registeredAt'),
+                direction,
+            });
+        },
+    },
     'member.firstName': {
         getValue(a) {
             return a.member.firstName;

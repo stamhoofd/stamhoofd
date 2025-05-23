@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition>
-        <ModernTableView v-if="!loading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :estimated-rows="estimatedRows" :Route="Route">
+        <ModernTableView v-if="!loading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :estimated-rows="estimatedRows" :Route="Route" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection">
             <template #empty>
                 {{ $t('Geen inschrijvingen') }}
             </template>
@@ -10,7 +10,7 @@
 
 <script lang="ts" setup>
 import { Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
-import { AccessRight, Group, GroupCategoryTree, GroupType, MemberResponsibility, Organization, PlatformRegistration, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight, Group, GroupCategoryTree, GroupType, MemberResponsibility, Organization, PlatformRegistration, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
 import { useRegistrationsObjectFetcher } from '../fetchers/useRegistrationsObjectFetcher';
@@ -207,6 +207,9 @@ const allColumns: Column<ObjectType, any>[] = getRegistrationColumns({
     waitingList: waitingList.value,
     financialRead: financialRead.value,
 });
+
+const defaultSortColumn = allColumns.find(c => c.id === 'registeredAt') ?? null;
+const defaultSortDirection = defaultSortColumn ? SortItemDirection.DESC : null;
 
 const Route = {
     Component: RegistrationSegmentedView,
