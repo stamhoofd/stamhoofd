@@ -30,18 +30,6 @@ export const BalanceItemPaymentService = {
     },
 
     /**
-     * Safe method to correct balance items that missed a markPaid call, but avoid double marking an order as valid.
-     */
-    async markPaidRepeated(balanceItemPayment: BalanceItemPayment & Loaded<typeof BalanceItemPayment.balanceItem> & Loaded<typeof BalanceItemPayment.payment>, organization: Organization) {
-        const isPaid = balanceItemPayment.balanceItem.isPaid;
-
-        // Do logic of balance item
-        if (isPaid && balanceItemPayment.price >= 0 && balanceItemPayment.balanceItem.status === BalanceItemStatus.Due) {
-            await BalanceItemService.markPaidRepeated(balanceItemPayment.balanceItem, balanceItemPayment.payment, organization);
-        }
-    },
-
-    /**
      * Call balanceItemPayment once a earlier succeeded payment is no longer succeeded
      */
     async undoPaid(balanceItemPayment: BalanceItemPayment & Loaded<typeof BalanceItemPayment.balanceItem> & Loaded<typeof BalanceItemPayment.payment>, organization: Organization) {
