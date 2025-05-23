@@ -61,8 +61,13 @@ async function balanceEmails() {
             systemUser,
             templateType: EmailTemplateType.UserBalanceIncreaseNotification,
             filter: {
-                reminderAmountIncreased: true,
-                reminderEmailCount: 0,
+                $or: [
+                    // The amount has increased since the last reminder
+                    { reminderAmountIncreased: true },
+
+                    // Or we didn't send a reminder at all yet (since the last time it was zero)
+                    { reminderEmailCount: 0 },
+                ],
             },
         });
 
@@ -74,8 +79,13 @@ async function balanceEmails() {
                 systemUser,
                 templateType: EmailTemplateType.OrganizationBalanceIncreaseNotification,
                 filter: {
-                    reminderAmountIncreased: true,
-                    reminderEmailCount: 0,
+                    $or: [
+                        // The amount has increased since the last reminder
+                        { reminderAmountIncreased: true },
+
+                        // Or we didn't send a reminder at all yet (since the last time it was zero)
+                        { reminderEmailCount: 0 },
+                    ],
                 },
                 subfilter: organization.privateMeta.balanceNotificationSettings.organizationContactsFilter,
             });
@@ -147,7 +157,10 @@ async function sendTemplate({
     subfilter?: StamhoofdFilter;
 }) {
     // Do not send to persons that already received a similar email before this date
-    const weekAgo = new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * organization.privateMeta.balanceNotificationSettings.minimumDaysBetween); // 5 instead of 7 so the email received is on another working day
+    const weekAgo = new Date(
+        new Date().getTime() - 1000 * 60 * 60 * 24 * Math.max(1, organization.privateMeta.balanceNotificationSettings.minimumDaysBetween)
+            + 12 * 1000 * 60 * 60, // Add a half day offset so we don't get trapped in small differences in time of sending
+    ); // 5 instead of 7 so the email received is on another working day
 
     const model = new Email();
     model.userId = null; // This is a system e-mail
@@ -172,18 +185,6 @@ async function sendTemplate({
                             ],
                         },
                         filter,
-                        /* {
-                            // Do not send if already received any email very recently
-                            $not: {
-                                emails: {
-                                    $elemMatch: {
-                                        sentAt: {
-                                            $gt: weekAgo,
-                                        },
-                                    },
-                                },
-                            },
-                        }, */
                     ],
 
                 },
