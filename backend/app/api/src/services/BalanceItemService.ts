@@ -71,13 +71,21 @@ export const BalanceItemService = {
     async markPaid(balanceItem: BalanceItem, payment: Payment | null, organization: Organization) {
         await this.markDue(balanceItem);
 
+        if (balanceItem.paidAt) {
+            // Already ran side effects
+            // If we for example deleted a related order or registration - and we still have the balance item, mark it as paid again, we don't want to reactivate the order or registration
+            return;
+        }
+
         // It is possible this balance item was earlier paid
         // and later the regigstration / order has been canceled and it became a negative balance item - which as some point has been reembursed and marked as 'paid'
         // in that case, we should be careful not to mark the registration as valid again
 
         // If registration
         if (balanceItem.registrationId) {
-            await RegistrationService.markValid(balanceItem.registrationId);
+            if (balanceItem.type === BalanceItemType.Registration) {
+                await RegistrationService.markValid(balanceItem.registrationId);
+            }
         }
 
         // If order
@@ -97,6 +105,9 @@ export const BalanceItemService = {
                 }
             }
         }
+
+        balanceItem.paidAt = new Date();
+        await balanceItem.save();
     },
 
     async reallocate(balanceItems: BalanceItem[], organizationId: string) {
@@ -136,6 +147,7 @@ export const BalanceItemService = {
         if (balanceItem.orderId) {
             const order = await Order.getByID(balanceItem.orderId);
             if (order) {
+                // This is safe to run multiple times. Doesn't have side effects
                 await order.undoPaid(payment, organization);
             }
         }

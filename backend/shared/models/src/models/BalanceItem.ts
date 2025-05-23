@@ -116,6 +116,12 @@ export class BalanceItem extends QueryableModel {
     @column({ type: 'datetime', nullable: true })
     dueAt: Date | null = null;
 
+    /**
+     * Marking a balance item as 'paid' can have side effects. To prevent executing these side effects multiple times, we store it in here.
+     */
+    @column({ type: 'datetime', nullable: true })
+    paidAt: Date | null = null;
+
     @column({
         type: 'datetime', beforeSave(old?: any) {
             if (old !== undefined) {
