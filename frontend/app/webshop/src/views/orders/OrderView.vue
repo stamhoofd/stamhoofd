@@ -410,7 +410,7 @@ function share() {
     navigator.share({
         title: 'Bestelling ' + webshopManager.webshop.meta.name,
         text: 'Bekijk mijn bestelling bij ' + webshopManager.webshop.meta.name + ' via deze link.',
-        url: webshopManager.webshop.getUrl(organization.value) + '/order/' + order.value!.id,
+        url: 'https://' + webshopManager.webshop.getUrl(organization.value) + '/order/' + order.value!.id,
     }).catch(e => console.error(e));
 }
 
