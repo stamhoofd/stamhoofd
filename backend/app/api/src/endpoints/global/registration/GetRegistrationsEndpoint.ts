@@ -1,9 +1,9 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Member, Platform } from '@stamhoofd/models';
+import { Group, Member, Platform } from '@stamhoofd/models';
 import { SQL, SQLSortDefinitions, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import { CountFilteredRequest, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort } from '@stamhoofd/structures';
+import { CountFilteredRequest, GroupType, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort } from '@stamhoofd/structures';
 
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { RegistrationsBlob } from '@stamhoofd/structures/dist/src/members/RegistrationsBlob';
@@ -14,6 +14,7 @@ import { LimitedFilteredRequestHelper } from '../../../helpers/LimitedFilteredRe
 import { registrationFilterCompilers } from '../../../sql-filters/registrations';
 import { registrationSorters } from '../../../sql-sorters/registrations';
 import { GetMembersEndpoint } from '../members/GetMembersEndpoint';
+import { validateGroupFilter } from '../members/helpers/validateGroupFilter';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
@@ -43,72 +44,75 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
         const organization = Context.organization;
         let scopeFilter: StamhoofdFilter | undefined = undefined;
 
-        if (!organization && !Context.auth.canAccessAllPlatformMembers()) {
-            const tags = Context.auth.getPlatformAccessibleOrganizationTags(permissionLevel);
-            if (tags !== 'all' && tags.length === 0) {
-                throw Context.auth.error();
-            }
+        // First do a quick validation of the groups, so that prevents the backend from having to add a scope filter
+        if (!Context.auth.canAccessAllPlatformMembers() && !await validateGroupFilter({ filter: q.filter, permissionLevel, key: null })) {
+            if (!organization) {
+                const tags = Context.auth.getPlatformAccessibleOrganizationTags(permissionLevel);
+                if (tags !== 'all' && tags.length === 0) {
+                    throw Context.auth.error();
+                }
 
-            if (tags !== 'all') {
-                const platform = await Platform.getShared();
+                if (tags !== 'all') {
+                    const platform = await Platform.getShared();
 
-                // Add organization scope filter
-                scopeFilter = {
-                    $elemMatch: {
-                        organization: {
-                            tags: {
-                                $in: tags,
-                            },
-                        },
+                    // Add organization scope filter
+                    scopeFilter = {
                         periodId: platform.periodId,
-                    },
-                };
+                        organization: {
+                            $elemMatch: {
+                                tags: {
+                                    $in: tags,
+                                },
+                            },
+
+                        },
+                    };
+                }
             }
-        }
 
-        if (organization && !Context.auth.canAccessAllPlatformMembers()) {
-            throw new SimpleError({
-                code: 'not_supported',
-                message: 'Get registrations is currently only supported if uaser has access to all platform members',
-                human: $t('Inschrijvingen ophalen is momenteel enkel ondersteund voor gebruikers met toegang tot alle leden'),
-            });
-            // Add organization scope filter
-            // const groups = await Context.auth.getAccessibleGroups(organization.id, permissionLevel);
+            if (organization) {
+                // Add organization scope filter
+                if (await Context.auth.canAccessAllMembers(organization.id, permissionLevel)) {
+                    if (await Context.auth.hasFullAccess(organization.id, permissionLevel)) {
+                        // Can access full history for now
+                        scopeFilter = {
+                            organizationId: organization.id,
+                        };
+                    }
+                    else {
+                        // Can only access current period
+                        scopeFilter = {
+                            organizationId: organization.id,
+                            periodId: organization.periodId,
+                        };
+                    }
+                }
+                else {
+                    // Check which normal membership groups we have access to and filter on those
+                    const groups = await Group.getAll(organization.id, organization.periodId, true, [GroupType.Membership, GroupType.WaitingList]);
+                    Context.auth.cacheGroups(groups);
+                    const groupIds: string[] = [];
 
-            // if (groups.length === 0) {
-            //     throw Context.auth.error();
-            // }
+                    for (const group of groups) {
+                        if (await Context.auth.canAccessGroup(group, permissionLevel)) {
+                            groupIds.push(group.id);
+                        }
+                    }
 
-            // if (groups === 'all') {
-            //     if (await Context.auth.hasFullAccess(organization.id, permissionLevel)) {
-            //         // Can access full history for now
-            //         scopeFilter = {
-            //             $elemMatch: {
-            //                 organizationId: organization.id,
-            //             },
-            //         };
-            //     }
-            //     else {
-            //         // Can only access current period
-            //         scopeFilter = {
-            //             $elemMatch: {
-            //                 organizationId: organization.id,
-            //                 periodId: organization.periodId,
-            //             },
-            //         };
-            //     }
-            // }
-            // else {
-            //     scopeFilter = {
-            //         $elemMatch: {
-            //             organizationId: organization.id,
-            //             periodId: organization.periodId,
-            //             groupId: {
-            //                 $in: groups,
-            //             },
-            //         },
-            //     };
-            // }
+                    if (groupIds.length === 0) {
+                        throw Context.auth.error({
+                            message: 'You must filter on a group of the organization you are trying to access',
+                            human: $t(`Je hebt geen toegangsrechten om deze inschrijvingen te bekijken`),
+                        });
+                    }
+
+                    scopeFilter = {
+                        groupId: {
+                            $in: groupIds,
+                        },
+                    };
+                }
+            }
         }
 
         const query = SQL

@@ -1,17 +1,21 @@
 import { SimpleError } from '@simonbackx/simple-errors';
+import { Group } from '@stamhoofd/models';
 import { FilterWrapperMarker, PermissionLevel, StamhoofdFilter, unwrapFilter, WrapperFilter } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context';
-import { Group } from '@stamhoofd/models';
 
-export async function validateGroupFilter(filter: StamhoofdFilter, permissionLevel: PermissionLevel) {
+export async function validateGroupFilter({ filter, permissionLevel, key }: { filter: StamhoofdFilter; permissionLevel: PermissionLevel; key: string | null }) {
     // Require presence of a filter
-    const requiredFilter: WrapperFilter = {
-        registrations: {
-            $elemMatch: {
+    const requiredFilter: WrapperFilter = key
+        ? {
+                [key]: {
+                    $elemMatch: {
+                        groupId: FilterWrapperMarker,
+                    },
+                },
+            }
+        : {
                 groupId: FilterWrapperMarker,
-            },
-        },
-    };
+            };
 
     const unwrapped = unwrapFilter(filter, requiredFilter);
     if (!unwrapped.match) {
