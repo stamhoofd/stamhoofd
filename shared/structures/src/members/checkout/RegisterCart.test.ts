@@ -17,6 +17,7 @@ import { BundleDiscount } from '../../BundleDiscount.js';
 import { Registration } from '../Registration.js';
 import { AppliedRegistrationDiscount } from '../../AppliedRegistrationDiscount.js';
 import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
+import { GenericBalance } from '../../GenericBalance.js';
 
 // Helper functions to reduce code duplication
 function createTestPeriod() {
@@ -141,6 +142,14 @@ function addHistoricRegistration(member: ReturnType<typeof createTestFamily>['me
         registeredAt: new Date('2023-01-01'),
         startDate: new Date('2023-01-01'),
         price: group.settings.prices[0].price.price,
+        balances: [
+            GenericBalance.create({
+                organizationId: organization.id,
+                amountPaid: 0,
+                amountOpen: group.settings.prices[0].price.price,
+                amountPending: 0,
+            }),
+        ],
     });
     member.member.registrations.push(registration);
     member.family.insertOrganization(organization);
