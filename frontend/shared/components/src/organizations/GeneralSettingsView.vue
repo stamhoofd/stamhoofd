@@ -20,7 +20,7 @@
             </div>
 
             <div>
-                <STInputBox :title="$t('4c61c43e-ed3c-418e-8773-681d19323520')" :error-box="errors.errorBox">
+                <STInputBox :title="$t('4c61c43e-ed3c-418e-8773-681d19323520')" error-fields="uri" :error-box="errors.errorBox">
                     <input id="organization-uri" :value="uri" class="input" type="text" disabled>
                 </STInputBox>
 
