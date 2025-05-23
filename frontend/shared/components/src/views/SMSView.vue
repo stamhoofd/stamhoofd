@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts" setup>
-import { CenteredMessage, Dropdown, STInputBox, STNavigationBar, STToolbar, useOrganization } from '@stamhoofd/components';
+import { CenteredMessage, Dropdown, STInputBox, STNavigationBar, STToolbar } from '@stamhoofd/components';
 import { Customer, Member } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 
@@ -60,7 +60,6 @@ const props = withDefaults(defineProps<{
     customers: () => [],
 });
 
-const organization = useOrganization();
 const smsFilter = ref('all');
 const message = ref('');
 
@@ -69,8 +68,7 @@ const isSupported = ['unknown', 'windows'].every(item => item !== os);
 const canUseBody = ['unknown', 'windows', 'macOS-old'].every(item => item !== os);
 
 const parentsEnabled = computed(() => {
-    const enabled = organization.value!.meta.recordsConfiguration.parents !== null;
-    return enabled && props.members.some(member => member.details.parents.length > 0);
+    return props.members.some(member => member.details.parents.length > 0);
 });
 
 onMounted(() => {

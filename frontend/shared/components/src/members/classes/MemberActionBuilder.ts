@@ -4,10 +4,12 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, PermissionLevel, Platform, PlatformMember, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { markRaw } from 'vue';
 import { EditMemberAllBox, MemberSegmentedView, MemberStepView, checkoutDefaultItem, chooseOrganizationMembersForGroup } from '..';
 import { GlobalEventBus } from '../../EventBus';
 import { AuditLogsView } from '../../audit-logs';
+import { LoadComponent } from '../../containers/AsyncComponent';
 import EmailView, { RecipientChooseOneOption } from '../../email/EmailView.vue';
 import { manualFeatureFlag, useContext, useOrganization, usePlatform } from '../../hooks';
 import ChargeMembersView from '../../members/ChargeMembersView.vue';
@@ -364,6 +366,7 @@ export class MemberActionBuilder {
                     await this.openMail(selection);
                 },
             }),
+            this.getSmsAction(),
 
             new AsyncTableAction({
                 name: $t(`0302eaa0-ce2a-4ef0-b652-88b26b9c53e9`),
@@ -392,6 +395,29 @@ export class MemberActionBuilder {
         ];
 
         return actions;
+    }
+
+    private getSmsAction() {
+        return new InMemoryTableAction({
+            name: $t(`73d85ece-245e-4e48-a833-1e78cf810b03`),
+            icon: 'feedback-line',
+            priority: 9,
+            groupIndex: 3,
+            fetchLimitSettings: { limit: 200, createErrorMessage: (count, limit) => {
+                return $t('Je kan een sms naar maximaal {limit} leden sturen. Er zijn {count} leden geselecteerd.', { count: Formatter.float(count), limit: Formatter.float(limit) });
+            } },
+
+            handler: async (members: PlatformMember[]) => {
+                await this.openSms(members);
+            },
+        });
+    }
+
+    private async openSms(members: PlatformMember[]) {
+        const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "SMSView" */ '@stamhoofd/components/src/views/SMSView.vue'), {
+            members: members.map(pm => pm.member),
+        });
+        this.present(displayedComponent.setDisplayStyle('popup')).catch(console.error);
     }
 
     // Action implementations

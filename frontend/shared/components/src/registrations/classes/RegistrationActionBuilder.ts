@@ -2,6 +2,8 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupType, mergeFilters, Organization, OrganizationRegistrationPeriod, PermissionLevel, Platform, PlatformMember, PlatformRegistration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { LoadComponent } from '../../containers/AsyncComponent';
 import { EmailView, RecipientChooseOneOption } from '../../email';
 import { useContext, useOrganization, usePlatform } from '../../hooks';
 import { checkoutDefaultItem, chooseOrganizationMembersForGroup, getActionsForCategory, PlatformFamilyManager, presentDeleteMembers, presentEditMember, presentEditResponsibilities, usePlatformFamilyManager } from '../../members';
@@ -86,6 +88,7 @@ export class RegistrationActionBuilder {
         const actions: TableAction<PlatformRegistration>[] = [
             ...this.getMemberActions(options),
             this.getEmailAction(),
+            this.getSmsAction(),
             this.getExportToExcelAction(),
             (options.includeMove ? this.getMoveAction(options.selectedOrganizationRegistrationPeriod) : null),
             (options.includeEdit ? this.getEditAction() : null),
@@ -345,6 +348,28 @@ export class RegistrationActionBuilder {
                 await this.openMail(selection);
             },
         });
+    }
+
+    private getSmsAction() {
+        return new InMemoryTableAction({
+            name: $t(`73d85ece-245e-4e48-a833-1e78cf810b03`),
+            icon: 'feedback-line',
+            priority: 9,
+            groupIndex: 3,
+            fetchLimitSettings: { limit: 200, createErrorMessage: (count, limit) => {
+                return $t('Je kan een sms naar maximaal {limit} leden sturen. Er zijn {count} leden geselecteerd.', { count: Formatter.float(count), limit: Formatter.float(limit) });
+            } },
+            handler: async (registrations: PlatformRegistration[]) => {
+                await this.openSms(registrations);
+            },
+        });
+    }
+
+    private async openSms(registrations: PlatformRegistration[]) {
+        const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "SMSView" */ '@stamhoofd/components/src/views/SMSView.vue'), {
+            members: getUniqueMembersFromRegistrations(registrations).map(pm => pm.member),
+        });
+        this.present(displayedComponent.setDisplayStyle('popup')).catch(console.error);
     }
 
     async openMail(selection: TableActionSelection<PlatformRegistration>) {
