@@ -224,7 +224,7 @@ export class BalanceItem extends QueryableModel {
 
                 // Refund the user
                 const cancellationFee = Math.round(item.price * options.cancellationFeePercentage / 10000);
-                if (cancellationFee > 0) {
+                if (cancellationFee !== 0) {
                     // Create a new item
                     const cancellationItem = await item.createCancellationItem(cancellationFee);
                     deletedItems.push(cancellationItem);
@@ -245,6 +245,7 @@ export class BalanceItem extends QueryableModel {
         item.memberId = this.memberId;
         item.userId = this.userId;
         item.payingOrganizationId = this.payingOrganizationId;
+        item.registrationId = this.registrationId;
 
         item.type = BalanceItemType.CancellationFee;
         item.relations = this.relations;
