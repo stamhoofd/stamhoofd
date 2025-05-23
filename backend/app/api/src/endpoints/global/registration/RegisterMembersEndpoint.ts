@@ -4,7 +4,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
-import { BalanceItem, BalanceItemPayment, Group, Member, MemberWithRegistrations, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, Platform, RateLimiter, Registration, User } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, CachedBalance, Group, Member, MemberWithRegistrations, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, Platform, RateLimiter, Registration, User } from '@stamhoofd/models';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItem as BalanceItemStruct, BalanceItemType, IDRegisterCheckout, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PaymentType, PermissionLevel, PlatformFamily, PlatformMember, RegisterItem, RegisterResponse, TranslatedString, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -307,7 +307,18 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             if (!reuseRegistration) {
                 // Otherwise try to reuse a registration in the same period, for the same group that has been deactived for less than 7 days since the start of the new registration
-                reuseRegistration = existingRegistrations.find(r => r.deactivatedAt !== null && r.deactivatedAt.getTime() > startDate.getTime() - 7 * 24 * 60 * 60 * 1000) ?? null;
+                const possibleReuseRegistrations = existingRegistrations.filter(r =>
+                    r.deactivatedAt !== null
+                    && r.deactivatedAt.getTime() > startDate.getTime() - 7 * 24 * 60 * 60 * 1000,
+                );
+
+                // Never reuse a registration that has a balance - that means they had a cancellation fee and not all balance items were canceled (we don't want to merge in that state)
+                const balances = await CachedBalance.getForObjects(possibleReuseRegistrations.map(r => r.id), null);
+
+                reuseRegistration = possibleReuseRegistrations.find((r) => {
+                    const balance = balances.filter(b => b.objectId === r.id).reduce((a, b) => a + b.amountOpen + b.amountPaid + b.amountPending, 0);
+                    return balance === 0;
+                }) ?? null;
 
                 if (reuseRegistration && reuseRegistration.startDate && reuseRegistration.startDate < startDate && reuseRegistration.startDate >= group.settings.startDate && !item.trial) {
                     startDate = reuseRegistration.startDate;
@@ -436,7 +447,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // We can alter right away since whoWillPayNow is nobody, and shouldMarkValid will always be true
             // Find all balance items of this registration and set them to Canceled
-            if (checkout.cancellationFeePercentage !== 100_00) {
+            if ((deleted ? checkout.cancellationFeePercentage : 0) !== 100_00) {
                 // Only cancel balances if we don't charge 100% cancellation fee
                 // Also - this avoid creating a new cancellation fee balance item together with canceling the registration balance item, which is more complicated
                 deletedBalanceItems.push(...(await BalanceItem.deleteForDeletedRegistration(existingRegistration.id, {
