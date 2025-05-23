@@ -1,7 +1,7 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 
 import { LimitedFilteredRequest } from '@stamhoofd/structures';
-import { fetchAll, FetchAllOptions, ObjectFetcher } from '.';
+import { fetchAll, FetchAllOptions, FetchLimitSettings, ObjectFetcher } from '.';
 import { Toast } from '../../..';
 
 type ObjectWithId = { id: string };
@@ -136,14 +136,16 @@ export class AsyncTableAction<T extends { id: string }> extends TableAction<T> {
 
 export class InMemoryTableAction<T extends { id: string }> extends TableAction<T> {
     handler: (item: T[]) => Promise<void> | void;
+    fetchLimitSettings?: FetchLimitSettings;
 
-    constructor(settings: Partial<TableAction<T>> & { handler: (item: T[]) => Promise<void> | void }) {
+    constructor(settings: Partial<TableAction<T>> & { handler: (item: T[]) => Promise<void> | void; fetchLimitSettings?: FetchLimitSettings }) {
         super(settings);
         this.handler = settings.handler ?? (() => { throw new Error('No handler defined'); });
+        this.fetchLimitSettings = settings.fetchLimitSettings;
     }
 
     async fetchAll(initialRequest: LimitedFilteredRequest, objectFetcher: ObjectFetcher<T>, options?: FetchAllOptions<T>) {
-        return await fetchAll(initialRequest, objectFetcher, options);
+        return await fetchAll(initialRequest, objectFetcher, { ...options, fetchLimitSettings: this.fetchLimitSettings });
     }
 
     async getSelection(selection: TableActionSelection<T>, options: FetchAllOptions<T>) {

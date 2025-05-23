@@ -1,3 +1,4 @@
+import { SimpleError } from '@simonbackx/simple-errors';
 import { CountFilteredRequest, LimitedFilteredRequest, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 
 export interface ObjectFetcher<O> {
@@ -10,9 +11,16 @@ export interface ObjectFetcher<O> {
     destroy?(): void;
 }
 
+export interface FetchLimitSettings {
+    // if the total count is higher than this limit an error will be thrown
+    limit: number;
+    createErrorMessage: (count: number, limit: number) => string;
+}
+
 export type FetchAllOptions<T> = {
     onProgress?: (count: number, total: number) => void;
     onResultsReceived?: (results: T[]) => void;
+    fetchLimitSettings?: FetchLimitSettings;
 };
 
 export async function fetchAll<T>(initialRequest: LimitedFilteredRequest, objectFetcher: ObjectFetcher<T>, options?: FetchAllOptions<T>) {
@@ -20,8 +28,15 @@ export async function fetchAll<T>(initialRequest: LimitedFilteredRequest, object
     let next: LimitedFilteredRequest | null = initialRequest;
 
     let totalFilteredCount: number | null = null;
-    if (options?.onProgress) {
+    if (options?.onProgress || options?.fetchLimitSettings !== undefined) {
         totalFilteredCount = await objectFetcher.fetchCount(initialRequest);
+
+        if (options.fetchLimitSettings !== undefined && totalFilteredCount > options.fetchLimitSettings.limit) {
+            throw new SimpleError({
+                code: 'fetch_limit_exceeded',
+                message: options.fetchLimitSettings.createErrorMessage(totalFilteredCount, options.fetchLimitSettings.limit),
+            });
+        }
     }
 
     const results: T[] = [];
