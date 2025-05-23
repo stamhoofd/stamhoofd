@@ -24,7 +24,7 @@ export const PaymentReallocationService = {
     },
 
     async reallocate(organizationId: string, objectId: string, type: ReceivableBalanceType) {
-        if (STAMHOOFD.environment !== 'test') {
+        if (STAMHOOFD.environment === 'production') {
             // Disabled on production for now
             // until this has been tested more
             return;
@@ -35,7 +35,7 @@ export const PaymentReallocationService = {
         const didMerge: BalanceItem[] = [];
 
         // First try to merge balance items that are the same and have canceled variants
-        for (const balanceItem of balanceItems) {
+        /* for (const balanceItem of balanceItems) {
             if (balanceItem.status !== BalanceItemStatus.Due) {
                 continue;
             }
@@ -52,7 +52,7 @@ export const PaymentReallocationService = {
                 await this.mergeBalanceItems(balanceItem, similarCanceledItems);
                 didMerge.push(balanceItem, ...similarCanceledItems);
             }
-        }
+        } */
 
         if (didMerge.length) {
             // Update outstanding
@@ -94,6 +94,13 @@ export const PaymentReallocationService = {
                 },
             },
             {
+                // Priority 1: same relation ids, same amount
+                alterPayments: false,
+                match: (negativeItem, p) => {
+                    return p.remaining === -negativeItem.remaining && p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 0);
+                },
+            },
+            {
                 // Priority 2: same relation ids, different amount
                 alterPayments: true,
                 match: (negativeItem, p) => {
@@ -101,9 +108,19 @@ export const PaymentReallocationService = {
                 },
             },
             {
+                // Priority 2: same relation ids, different amount
+                alterPayments: false,
+                match: (negativeItem, p) => {
+                    return p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 0);
+                },
+            },
+
+            // For now I would skip the next priorties because merging these often creates a lot of confusion
+            /* {
                 // Priority 3: same type, one mismatching relation id
                 alterPayments: false,
                 match: (negativeItem, p) => {
+                    // todo: maybe do allow this, but only if the amount is the same
                     return p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 1);
                 },
             },
@@ -111,6 +128,7 @@ export const PaymentReallocationService = {
                 // Priority 4: same type, two mismatching relation ids
                 alterPayments: false,
                 match: (negativeItem, p) => {
+                    // todo: maybe do allow this, but only if the amount is the same
                     return p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 2);
                 },
             },
@@ -120,8 +138,8 @@ export const PaymentReallocationService = {
                 match: (negativeItem, p) => {
                     return p.balanceItem.type === negativeItem.balanceItem.type && p.remaining === -negativeItem.remaining;
                 },
-            },
-            {
+            }, */
+            /* {
                 // Priority 6: same type
                 alterPayments: false,
                 match: (negativeItem, p) => {
@@ -134,7 +152,7 @@ export const PaymentReallocationService = {
                 match: () => {
                     return true;
                 },
-            },
+            }, */
         ];
 
         for (const matchMethod of matchMethods) {
