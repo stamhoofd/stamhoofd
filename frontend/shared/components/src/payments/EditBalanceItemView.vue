@@ -25,7 +25,18 @@
             </div>
         </div>
 
-        <div class="split-inputs">
+        <STInputBox v-if="balanceItem.status === BalanceItemStatus.Canceled" error-fields="status" :error-box="errors.errorBox" :title="$t('Status')">
+            <Dropdown v-model="status">
+                <option :value="BalanceItemStatus.Due">
+                    {{ $t('Verschuldigd') }}
+                </option>
+                <option :value="BalanceItemStatus.Canceled">
+                    {{ $t('Geannuleerd') }}
+                </option>
+            </Dropdown>
+        </STInputBox>
+
+        <div v-if="balanceItem.status === BalanceItemStatus.Due" class="split-inputs">
             <STInputBox error-fields="unitPrice" :error-box="errors.errorBox" :title="$t(`bab8d047-63db-4d0f-82c7-3a8d69a85745`)">
                 <PriceInput v-model="unitPrice" :min="null" :placeholder="$t(`99e41cea-bce3-4329-8b17-e3487c4534ac`)" />
             </STInputBox>
@@ -34,7 +45,7 @@
                 <NumberInput v-model="amount" :min="Math.min(1, balanceItem.amount)" :stepper="true" :placeholder="$t(`bfcceb79-e614-4e9c-9fba-0ec2bd3f8f2a`)" />
             </STInputBox>
         </div>
-        <template v-if="$feature('member-trials') && (patchedBalanceItem.price >= 0 || dueAt !== null)">
+        <template v-if="(patchedBalanceItem.price >= 0 && balanceItem.status === BalanceItemStatus.Due) || dueAt !== null">
             <STInputBox error-fields="dueAt" :error-box="errors.errorBox" :title="$t(`bf30128b-4c99-4a97-b4d2-1a4e62f33f41`)">
                 <DateSelection v-model="dueAt" :required="false" :time="{hours: 0, minutes: 0, seconds: 0}" :placeholder="$t(`ef2b5d01-756d-46d0-8e1d-a200f43a3921`)" />
             </STInputBox>
@@ -118,7 +129,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, DateSelection, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, useContext, useErrors, useOrganization, usePatch, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
+import { CenteredMessage, DateSelection, Dropdown, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, useContext, useErrors, useOrganization, usePatch, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments, PlatformFamily, UserWithMembers } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
@@ -158,6 +169,11 @@ const sortedPayments = computed(() => {
         return [];
     }
     return patchedBalanceItem.value.payments.slice().sort((a, b) => Sorter.byDateValue(a.payment.paidAt ?? a.payment.createdAt, b.payment.paidAt ?? b.payment.createdAt));
+});
+
+const status = computed({
+    get: () => patchedBalanceItem.value.status,
+    set: value => addPatch({ status: value }),
 });
 
 const description = computed({
