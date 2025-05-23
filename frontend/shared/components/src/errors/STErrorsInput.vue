@@ -35,6 +35,9 @@ export default class STErrorsInput extends VueComponent {
             this.errors = [];
             return;
         }
+        if (this.errorFields === '') {
+            return;
+        }
         let errors: SimpleErrors;
 
         if (this.errorFields === '*') {
