@@ -41,7 +41,7 @@
             <p>{{ $t('Met bundelkortingen kan je korting geven op de tweede, derde, vierde... inschrijving. Een bundelkorting maak je aan en koppel je vervolgens aan één of meerdere activiteiten of inschrijvingsgroepen (of tarieven daarvan) waarop die korting geldt.') }}</p>
 
             <STList>
-                <STListItem v-for="bundleDiscount of period.settings.bundleDiscounts" :key="bundleDiscount.id" class="right-description right-stack" :selectable="true" element-name="label">
+                <STListItem v-for="bundleDiscount of period.settings.bundleDiscounts" :key="bundleDiscount.id" class="right-top" :selectable="true" element-name="label">
                     <template #left>
                         <Checkbox :model-value="getBundleDiscountSelected(bundleDiscount)" @update:model-value="setBundleDiscountSelected(bundleDiscount, $event)" />
                     </template>
@@ -51,18 +51,23 @@
                     <p class="style-description-small">
                         {{ bundleDiscount.humanDescription }}
                     </p>
-                    <p v-if="bundleDiscount.discountsText" class="style-description-small">
+                    <p v-if="!getOverrideBundleDiscountSelected(bundleDiscount) && bundleDiscount.discountsText" class="style-description-small">
                         {{ bundleDiscount.discountsText }}
                     </p>
 
-                    <div v-if="getBundleDiscountSelected(bundleDiscount)" class="split-inputs option" @click.stop>
+                    <div v-if="getOverrideBundleDiscountSelected(bundleDiscount)" class="split-inputs option" @click.stop>
                         <div>
-                            <Checkbox :model-value="getOverrideBundleDiscountSelected(bundleDiscount)" @update:model-value="setOverrideBundleDiscountSelected(bundleDiscount, $event)">
-                                Andere kortingsbedragen voor deze groep
-                            </Checkbox>
-                            <GroupPriceDiscountsInput v-if="getOverrideBundleDiscountSelected(bundleDiscount)" :model-value="getCustomBundleDiscounts(bundleDiscount)" @update:model-value="setCustomBundleDiscounts(bundleDiscount, $event)" />
+                            <GroupPriceDiscountsInput :model-value="getCustomBundleDiscounts(bundleDiscount)" @update:model-value="setCustomBundleDiscounts(bundleDiscount, $event)" />
                         </div>
                     </div>
+
+                    <template v-if="getBundleDiscountSelected(bundleDiscount)" #right>
+                        <button v-if="getOverrideBundleDiscountSelected(bundleDiscount)" v-tooltip="$t('Terug standaard kortingsbedragen gebruiken')" type="button" class="button text selected" @click="() => setOverrideBundleDiscountSelected(bundleDiscount, false)">
+                            <span class="icon sliders" />
+                            <span>{{ $t('Afwijkend') }}</span>
+                        </button>
+                        <button v-else v-tooltip="$t('Andere kortingsbedragen instellen voor deze specifieke inschrijvingen')" type="button" class="button icon sliders" @click="() => setOverrideBundleDiscountSelected(bundleDiscount, true)" />
+                    </template>
                 </STListItem>
             </STList>
 
@@ -161,7 +166,11 @@ function setBundleDiscountSelected(bundleDiscount: BundleDiscount, selected: boo
 }
 
 function getOverrideBundleDiscountSelected(bundleDiscount: BundleDiscount) {
-    return patched.value.bundleDiscounts.get(bundleDiscount.id)?.customDiscounts !== null;
+    const d = patched.value.bundleDiscounts.get(bundleDiscount.id);
+    if (!d) {
+        return false;
+    }
+    return d.customDiscounts !== null;
 }
 
 function setOverrideBundleDiscountSelected(bundleDiscount: BundleDiscount, selected: boolean) {
