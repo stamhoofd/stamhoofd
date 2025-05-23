@@ -30,15 +30,7 @@
         <p v-if="item.description" class="style-description-small pre-wrap" v-text="item.description" />
 
         <template v-if="item.totalPrice !== 0">
-            <footer v-if="item.checkout.isAdminFromSameOrganization">
-                <p v-if="item.totalPrice >= 0" class="style-price">
-                    {{ $t('8f5787b9-ad3e-41e2-b996-9e7704688b13', {price: formatPrice(item.totalPrice)}) }}
-                </p>
-                <p v-else class="style-price">
-                    {{ $t('2f76634a-16b6-494c-90b1-b70644b6503b', {price: formatPrice(-item.totalPrice)}) }}
-                </p>
-            </footer>
-            <footer v-else>
+            <footer>
                 <p class="style-price">
                     {{ formatPrice(item.totalPrice) }}
                 </p>
