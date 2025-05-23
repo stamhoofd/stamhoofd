@@ -367,17 +367,7 @@ export class MemberActionBuilder {
                 },
             }),
             this.getSmsAction(),
-
-            new AsyncTableAction({
-                name: $t(`0302eaa0-ce2a-4ef0-b652-88b26b9c53e9`),
-                icon: 'download',
-                priority: 11,
-                groupIndex: 3,
-                handler: async (selection: TableActionSelection<PlatformMember>) => {
-                    // TODO: vervangen door een context menu
-                    await this.exportToExcel(selection);
-                },
-            }),
+            this.getExportAction(),
             new MenuTableAction({
                 name: $t(`800d8458-da0f-464f-8b82-4e28599c8598`),
                 priority: 1,
@@ -406,7 +396,6 @@ export class MemberActionBuilder {
             fetchLimitSettings: { limit: 200, createErrorMessage: (count, limit) => {
                 return $t('Je kan een sms naar maximaal {limit} leden sturen. Er zijn {count} leden geselecteerd.', { count: Formatter.float(count), limit: Formatter.float(limit) });
             } },
-
             handler: async (members: PlatformMember[]) => {
                 await this.openSms(members);
             },
@@ -573,6 +562,30 @@ export class MemberActionBuilder {
         });
     }
 
+    private getExportAction() {
+        return new MenuTableAction({
+            name: 'Exporteren naar',
+            icon: 'download',
+            priority: 8,
+            groupIndex: 3,
+            childActions: [
+                this.getExportToExcelAction(),
+                this.getExportToPdfAction(),
+            ],
+        });
+    }
+
+    private getExportToExcelAction() {
+        return new AsyncTableAction({
+            name: $t('Excel...'),
+            priority: 0,
+            groupIndex: 0,
+            handler: async (selection: TableActionSelection<PlatformMember>) => {
+                await this.exportToExcel(selection);
+            },
+        });
+    }
+
     async exportToExcel(selection: TableActionSelection<PlatformMember>) {
         await this.present({
             components: [
@@ -586,6 +599,20 @@ export class MemberActionBuilder {
                 }),
             ],
             modalDisplayStyle: 'popup',
+        });
+    }
+
+    private getExportToPdfAction() {
+        return new InMemoryTableAction({
+            name: $t('PDF...'),
+            priority: 0,
+            groupIndex: 0,
+            fetchLimitSettings: { limit: 200, createErrorMessage: (count, limit) => {
+                return $t('Je kan maximaal {limit} leden exporteren naar pdf. Er zijn {count} leden geselecteerd.', { count: Formatter.float(count), limit: Formatter.float(limit) });
+            } },
+            handler: async (_members: PlatformMember[]) => {
+                throw new Error('Nog niet geïmplementeerd.');
+            },
         });
     }
 
