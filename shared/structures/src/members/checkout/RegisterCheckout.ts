@@ -276,6 +276,9 @@ export class RegisterCheckout {
         this.customer = null;
     }
 
+    /**
+     * Only includes 'due now' items - so excludes trials (doesn't work 100% yet with deleted registrations but this is not a problem at the moment)
+     */
     get totalPrice() {
         return Math.max(0, this.cart.price + this.administrationFee + this.freeContribution - this.bundleDiscount) - this.cart.refund + this.cart.getCancellationFees(this.cancellationFeePercentage);
     }

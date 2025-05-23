@@ -956,7 +956,7 @@ describe('Endpoint.RegisterMembers', () => {
             expect(updatedGroup!.settings.reservedMembers).toBe(1);
         });
 
-        test('Register for group with trial should set trail period', async () => {
+        test('Register for group with trial should set trial period', async () => {
             // #region arrange
             const date = new Date('2023-05-14');
             jest.useFakeTimers().setSystemTime(date);
@@ -1764,7 +1764,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 30,
+                totalPrice: 30 - 25,
                 asOrganizationId: organization.id,
                 customer: PaymentCustomer.create({
                     company,

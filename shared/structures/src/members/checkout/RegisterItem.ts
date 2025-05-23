@@ -365,7 +365,11 @@ export class RegisterItem implements ObjectWithRecords {
             this.calculatedRefund += registration.calculatedPrice;
         }
 
-        if (this.calculatedTrialUntil && this.calculatedTrialUntil >= BalanceItem.getDueOffset()) {
+        // Small edge case for admins:
+        // The registrations we are going to replace, can be in trial, and it is possible they have a balance already (shows as - X.XX in the cart total)
+        // but if we add an item in trial, with a very short trail period, it will get added to the balance immediately (if we add it to calculatedPriceDueLater, it won't count the two together)
+        // in order to calculate the difference between the added and removed balance, we are using getDueOffset
+        if (this.calculatedTrialUntil && (this.replaceRegistrations.length === 0 || this.calculatedTrialUntil >= BalanceItem.getDueOffset())) {
             this.calculatedPriceDueLater = this.calculatedPrice;
             this.calculatedPrice = 0;
         }
