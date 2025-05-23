@@ -444,8 +444,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 })));
             }
 
-            // todo: add cancelation fee
-
             // Clear the registration
             let group = groups.find(g => g.id === existingRegistration.groupId);
             if (!group) {
@@ -617,9 +615,11 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         // Discounts for existing registrations that have changed
         for (const discount of checkout.cart.bundleDiscounts) {
             const loopMap = new Map(discount.registrations);
-            for (const deleteRegistration of discount.deleteRegistrations) {
-                loopMap.set(deleteRegistration, 0);
-            }
+
+            // We'll just cancel discount balance items for deleted registrations instead of creating a counter balance item
+            // for (const deleteRegistration of discount.deleteRegistrations) {
+            //    loopMap.set(deleteRegistration, 0);
+            // }
 
             for (const [registration, newDiscountValue] of loopMap) {
                 const oldDiscountValue = registration.registration.discounts.get(discount.bundle.id)?.amount ?? 0;
