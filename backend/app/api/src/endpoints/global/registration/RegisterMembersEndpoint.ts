@@ -436,9 +436,13 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // We can alter right away since whoWillPayNow is nobody, and shouldMarkValid will always be true
             // Find all balance items of this registration and set them to Canceled
-            deletedBalanceItems.push(...(await BalanceItem.deleteForDeletedRegistration(existingRegistration.id, {
-                cancellationFeePercentage: deleted ? checkout.cancellationFeePercentage : 0,
-            })));
+            if (checkout.cancellationFeePercentage !== 100_00) {
+                // Only cancel balances if we don't charge 100% cancellation fee
+                // Also - this avoid creating a new cancellation fee balance item together with canceling the registration balance item, which is more complicated
+                deletedBalanceItems.push(...(await BalanceItem.deleteForDeletedRegistration(existingRegistration.id, {
+                    cancellationFeePercentage: deleted ? checkout.cancellationFeePercentage : 0,
+                })));
+            }
 
             // todo: add cancelation fee
 
