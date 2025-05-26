@@ -298,10 +298,11 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             let reuseRegistration: Registration | null = null;
 
-            if (item.replaceRegistrations.length === 1) {
+            // For now don't reuse replace registrations - it has too many side effects and not a lot of added value
+            /* if (item.replaceRegistrations.length === 1) {
                 // Try to reuse this specific one
                 reuseRegistration = (await Registration.getByID(item.replaceRegistrations[0].registration.id)) ?? null;
-            }
+            } */
 
             let startDate = item.calculatedStartDate;
 
@@ -814,7 +815,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Update occupancy
         for (const group of groups) {
-            if (registrations.some(r => r.groupId === group.id) || deactivatedRegistrationGroupIds.some(id => id === group.id)) {
+            if (deactivatedRegistrationGroupIds.some(id => id === group.id)) {
                 await group.updateOccupancy();
                 await group.save();
             }

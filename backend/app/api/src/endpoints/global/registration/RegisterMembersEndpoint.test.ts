@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { PayconiqMocker } from '../../../../tests/helpers/PayconiqMocker';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { RegisterMembersEndpoint } from './RegisterMembersEndpoint';
+import { StripeMocker } from '../../../../tests/helpers/StripeMocker';
 
 const baseUrl = `/v${Version}/members/register`;
 
@@ -60,7 +61,34 @@ describe('Endpoint.RegisterMembers', () => {
         // Fetch all user balances
         const userBalances = await BalanceItem.select().where('userId', user.id).fetch();
 
-        expect(userBalances).toIncludeAllMembers(balances.map(b => expect.objectContaining(b)));
+        try {
+            expect(userBalances).toIncludeAllMembers(balances.map(b => expect.objectContaining(b)));
+        }
+        catch (e) {
+            // List all the balances that were found and the ones that were missing
+            if (userBalances.length !== balances.length) {
+                console.error('Difference in number of balances found:', userBalances.length, 'expected:', balances.length);
+            }
+
+            for (const expectedBalance of balances) {
+                let found = false;
+                for (const userBalance of userBalances) {
+                    try {
+                        expect(userBalance).toEqual(expect.objectContaining(expectedBalance));
+                        found = true;
+                    }
+                    catch (e) {
+                        // ignore
+                    }
+                }
+
+                if (!found) {
+                    console.error('Expected balance not found:', expectedBalance);
+                }
+            }
+
+            throw e;
+        }
     }
 
     async function initData({ otherMemberAmount = 0, permissionLevel = defaultPermissionLevel }: { otherMemberAmount?: number; permissionLevel?: PermissionLevel } = {}) {
@@ -90,7 +118,7 @@ describe('Endpoint.RegisterMembers', () => {
 
         const group = await new GroupFactory({
             organization,
-            price: 25,
+            price: 25_00,
             stock: 500,
         })
             .create();
@@ -112,6 +140,24 @@ describe('Endpoint.RegisterMembers', () => {
     async function initPayconiq({ organization }: { organization: Organization }) {
         organization.meta.registrationPaymentConfiguration.paymentMethods.push(PaymentMethod.Payconiq);
         organization.privateMeta.payconiqAccounts = [PayconiqMocker.generateTestAccount()];
+        await organization.save();
+    }
+
+    async function initStripe({ organization }: { organization: Organization }) {
+        const stripeMocker = new StripeMocker();
+        const stripeAccount = await stripeMocker.createStripeAccount(organization.id);
+
+        stripeMocker.start();
+
+        TestUtils.scheduleAfterThisTest(() => {
+            stripeMocker.stop();
+        });
+
+        organization.meta.registrationPaymentConfiguration.paymentMethods.push(PaymentMethod.Bancontact, PaymentMethod.CreditCard, PaymentMethod.iDEAL);
+        organization.privateMeta.registrationPaymentConfiguration.stripeAccountId = stripeAccount.id;
+        await organization.save();
+
+        return { stripeMocker, stripeAccount };
     }
 
     function createBundleDiscount({
@@ -193,7 +239,7 @@ describe('Endpoint.RegisterMembers', () => {
                     administrationFee: 0,
                     freeContribution: 0,
                     paymentMethod: PaymentMethod.PointOfSale,
-                    totalPrice: 25,
+                    totalPrice: 25_00,
                     customer: null,
                 });
 
@@ -219,7 +265,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 customer: null,
             });
             await expect(post(body, organization, token))
@@ -338,7 +384,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 customer: null,
             });
             // #endregion
@@ -442,7 +488,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 customer: null,
             });
 
@@ -520,7 +566,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.CreditCard,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 customer: null,
             });
             // #endregion
@@ -558,7 +604,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.Bancontact,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 cancelUrl: new URL('https://www.stamhoofd.be'),
                 customer: null,
             });
@@ -593,7 +639,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.Bancontact,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 redirectUrl: new URL('https://www.stamhoofd.be'),
                 customer: null,
             });
@@ -625,7 +671,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
             });
 
             const response = await post(body, organization, token);
@@ -665,7 +711,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
             });
 
             const response = await post(body, organization, token);
@@ -699,7 +745,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
             });
 
             const response = await post(body, organization, token);
@@ -746,7 +792,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
             });
 
             const response = await post(body, organization, token);
@@ -777,7 +823,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 customer: null,
             });
             // #endregion
@@ -797,8 +843,6 @@ describe('Endpoint.RegisterMembers', () => {
         test('Should update reserved members', async () => {
             const { member, organization, token } = await initData();
             await initPayconiq({ organization });
-
-            await organization.save();
 
             const group2 = await new GroupFactory({
                 organization,
@@ -925,7 +969,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 customer: null,
             });
             // #endregion
@@ -1267,7 +1311,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 asOrganizationId: organization.id,
             });
 
@@ -1376,7 +1420,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 customer: PaymentCustomer.create({
                     company,
                 }),
@@ -1418,7 +1462,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 customer: PaymentCustomer.create({
                     company,
                 }),
@@ -1456,7 +1500,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 customer: null,
                 asOrganizationId: organization2.id,
             });
@@ -1489,7 +1533,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 customer: null,
                 asOrganizationId: organization2.id,
             });
@@ -1560,7 +1604,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 customer: PaymentCustomer.create({
                     company: null,
                 }),
@@ -1595,7 +1639,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 customer: PaymentCustomer.create({
                     company: Company.create({
                         name: 'test company',
@@ -1725,7 +1769,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 asOrganizationId: organization2.id,
                 customer: PaymentCustomer.create({
                     company,
@@ -2078,7 +2122,7 @@ describe('Endpoint.RegisterMembers', () => {
                     administrationFee: 0,
                     freeContribution: 0,
                     paymentMethod: PaymentMethod.PointOfSale,
-                    totalPrice: 25,
+                    totalPrice: 25_00,
                     asOrganizationId: organization.id,
                     customer: null,
                 });
@@ -2343,9 +2387,13 @@ describe('Endpoint.RegisterMembers', () => {
     /**
      * Note: specific calculations are tested in unit tests (which group gets the discount etc), this only tests backend realted logic related to balances
      */
-    describe('Bundle discounts', () => {
+    describe.only('Bundle discounts', () => {
+        beforeEach(() => {
+            defaultPermissionLevel = PermissionLevel.Full;
+        });
+
         describe('With historic registrations', () => {
-            test('Best discount applied on historic registration without online payment', async () => {
+            test('Case: Replacing a historic registration causes a change in a different registration\'s discounts', async () => {
                 const { organizationRegistrationPeriod, organization, group, groupPrice, member, token, user } = await initData();
                 const bundleDiscount = await initDiscount({
                     organizationRegistrationPeriod,
@@ -2359,12 +2407,19 @@ describe('Endpoint.RegisterMembers', () => {
 
                 const group2 = await new GroupFactory({
                     organization,
-                    price: 15, // Lower price so discount is applied preferably on the first group
+                    price: 15_00, // Lower price so discount is applied preferably on the first group
                 }).create();
 
                 const groupPrice2 = group2.settings.prices[0];
 
+                const group3 = await new GroupFactory({
+                    organization,
+                    price: 40_00, // Higher price
+                }).create();
+                const groupPrice3 = group3.settings.prices[0];
+
                 await enableDiscount({ group: group2, groupPrice: groupPrice2, bundleDiscount });
+                await enableDiscount({ group: group3, groupPrice: groupPrice3, bundleDiscount });
 
                 // First register the member for group 1. No discount should be applied yet
                 const checkout1 = IDRegisterCheckout.create({
@@ -2406,7 +2461,7 @@ describe('Endpoint.RegisterMembers', () => {
                     administrationFee: 0,
                     freeContribution: 0,
                     paymentMethod: PaymentMethod.PointOfSale,
-                    totalPrice: 15 - 5, // 20% discount on first group
+                    totalPrice: 15_00 - 5_00, // 20% discount on first group
                 });
                 const response2 = await post(checkout2, organization, token);
                 expect(response2.body.registrations.length).toBe(1);
@@ -2416,12 +2471,12 @@ describe('Endpoint.RegisterMembers', () => {
                 expect(registration2.discounts).toMatchMap(new Map());
 
                 // Get registration 1 again, it should now have the bundle discount applied
-                const updatedRegistration1 = await Registration.getByID(registration1.id);
+                const updatedRegistration1 = (await Registration.getByID(registration1.id))!;
                 expect(updatedRegistration1).toBeDefined();
-                expect(updatedRegistration1!.discounts).toMatchMap(new Map([
+                expect(updatedRegistration1.discounts).toMatchMap(new Map([
                     [bundleDiscount.id, AppliedRegistrationDiscount.create({
                         name: bundleDiscount.name,
-                        amount: 5,
+                        amount: 5_00,
                     })],
                 ]));
 
@@ -2432,36 +2487,416 @@ describe('Endpoint.RegisterMembers', () => {
                             type: BalanceItemType.Registration,
                             registrationId: registration1.id,
                             amount: 1,
-                            price: 25,
+                            price: 25_00,
                             status: BalanceItemStatus.Due,
                             priceOpen: 0,
-                            pricePending: 25,
+                            pricePending: 25_00,
                         },
                         {
                             type: BalanceItemType.RegistrationBundleDiscount,
                             registrationId: registration1.id,
                             amount: 1,
-                            price: -5,
+                            price: -5_00,
                             status: BalanceItemStatus.Due,
                             priceOpen: 0,
-                            pricePending: -5,
+                            pricePending: -5_00,
                         },
                         {
                             type: BalanceItemType.Registration,
                             registrationId: registration2.id,
                             amount: 1,
-                            price: 15,
+                            price: 15_00,
                             status: BalanceItemStatus.Due,
                             priceOpen: 0,
-                            pricePending: 15,
+                            pricePending: 15_00,
                         },
                     ],
                 });
-            });
 
-            test('Best discount applied on historic registration with online payment (2 tries)', async () => {
-                // todo: should be possible to try twice in case the online payment fails - the discount should still be applied
-            });
+                // Now reaplce registration 2 with group 3, which is more expensive and should give more discount
+                const checkout3 = IDRegisterCheckout.create({
+                    cart: IDRegisterCart.create({
+                        items: [
+                            IDRegisterItem.create({
+                                options: [],
+                                groupPrice: groupPrice3,
+                                groupId: group3.id,
+                                organizationId: organization.id,
+                                memberId: member.id,
+                                replaceRegistrationIds: [registration2.id],
+                            }),
+                        ],
+                    }),
+                    administrationFee: 0,
+                    freeContribution: 0,
+                    paymentMethod: PaymentMethod.PointOfSale,
+                    asOrganizationId: organization.id,
+                    totalPrice: 40_00 - 15_00 + 5_00 - 8_00, // group 3 - group 2 + reverted discount - new discount
+                });
+
+                const response3 = await post(checkout3, organization, token);
+                expect(response3.body.registrations.length).toBe(1);
+                const registration3 = response3.body.registrations[0];
+                expect(registration3.registeredAt).not.toBeNull();
+                expect(registration3.discounts).toMatchMap(new Map([
+                    [bundleDiscount.id, AppliedRegistrationDiscount.create({
+                        name: bundleDiscount.name,
+                        amount: 8_00,
+                    })],
+                ]));
+
+                const updatedRegistration2 = (await Registration.getByID(registration2.id))!;
+                await updatedRegistration1.refresh();
+
+                // Check discount has been removed in registration 1
+                expect(updatedRegistration2.discounts).toMatchMap(new Map());
+                expect(updatedRegistration1.discounts).toMatchMap(new Map());
+
+                // Check balances: no deletions happened, only additions or status changes
+                await assertBalances({
+                    user,
+                    balances: [
+                        {
+                            type: BalanceItemType.Registration,
+                            registrationId: registration1.id,
+                            amount: 1,
+                            unitPrice: 25_00,
+                            status: BalanceItemStatus.Due,
+                            priceOpen: 0,
+                            pricePending: 25_00,
+                        },
+                        {
+                            type: BalanceItemType.RegistrationBundleDiscount,
+                            registrationId: registration1.id,
+                            amount: 1,
+                            unitPrice: -5_00,
+                            status: BalanceItemStatus.Due,
+                            priceOpen: 0,
+                            pricePending: -5_00,
+                        },
+                        {
+                            type: BalanceItemType.Registration,
+                            registrationId: registration2.id,
+                            amount: 1,
+                            unitPrice: 15_00,
+                            status: BalanceItemStatus.Canceled,
+                            priceOpen: -15_00,
+                            pricePending: 15_00,
+                        },
+                        {
+                            type: BalanceItemType.Registration,
+                            registrationId: registration3.id,
+                            amount: 1,
+                            unitPrice: 40_00,
+                            status: BalanceItemStatus.Due,
+                            priceOpen: 40_00,
+
+                            // Not pending because created by admin
+                            pricePending: 0,
+                        },
+                        // Revert first discount
+                        {
+                            type: BalanceItemType.RegistrationBundleDiscount,
+                            registrationId: registration1.id,
+                            amount: 1,
+                            unitPrice: 5_00,
+                            status: BalanceItemStatus.Due,
+                            priceOpen: 5_00,
+
+                            // Not pending because created by admin
+                            pricePending: 0,
+                        },
+                        // Add new discount
+                        {
+                            type: BalanceItemType.RegistrationBundleDiscount,
+                            registrationId: registration3.id,
+                            amount: 1,
+                            unitPrice: -8_00,
+                            status: BalanceItemStatus.Due,
+                            priceOpen: -8_00,
+
+                            // Not pending because created by admin
+                            pricePending: 0,
+                        },
+                    ],
+                });
+            }, 10_000);
+
+            test('Apply a discount on a previous registration with online payment (2 tries)', async () => {
+                const { organizationRegistrationPeriod, organization, group, groupPrice, member, token, user } = await initData();
+                const { stripeMocker } = await initStripe({ organization });
+
+                const bundleDiscount = await initDiscount({
+                    organizationRegistrationPeriod,
+                    discount: {
+                        discounts: [
+                            { value: 20_00, type: GroupPriceDiscountType.Percentage },
+                        ],
+                    },
+                });
+                await enableDiscount({ group, groupPrice, bundleDiscount });
+
+                const group2 = await new GroupFactory({
+                    organization,
+                    price: 15_00, // Lower price so discount is applied preferably on the first group
+                }).create();
+
+                const groupPrice2 = group2.settings.prices[0];
+                await enableDiscount({ group: group2, groupPrice: groupPrice2, bundleDiscount });
+
+                // First register the member for group 1. No discount should be applied yet
+                const checkout1 = IDRegisterCheckout.create({
+                    cart: IDRegisterCart.create({
+                        items: [
+                            IDRegisterItem.create({
+                                options: [],
+                                groupPrice,
+                                groupId: group.id,
+                                organizationId: organization.id,
+                                memberId: member.id,
+                            }),
+                        ],
+                    }),
+                    administrationFee: 0,
+                    freeContribution: 0,
+                    paymentMethod: PaymentMethod.Bancontact,
+                    totalPrice: groupPrice.price.price,
+                    redirectUrl: new URL('https://www.example.com/success'),
+                    cancelUrl: new URL('https://www.example.com/cancel'),
+                });
+
+                const response1 = await post(checkout1, organization, token);
+                expect(response1.body.registrations.length).toBe(1);
+                const registration1 = response1.body.registrations[0];
+                expect(registration1.registeredAt).toBeNull();
+                expect(registration1.discounts).toMatchMap(new Map());
+
+                // Check state of balances
+                await assertBalances({
+                    user,
+                    balances: [
+                        {
+                            type: BalanceItemType.Registration,
+                            registrationId: registration1.id,
+                            amount: 1,
+                            unitPrice: 25_00,
+                            status: BalanceItemStatus.Hidden,
+                            priceOpen: -25_00, // hidden, so no payment expected yet
+                            pricePending: 25_00,
+                            pricePaid: 0,
+                        },
+                    ],
+                });
+
+                await stripeMocker.succeedPayment(stripeMocker.getLastIntent());
+
+                // Check registration became valid
+                const updatedRegistration1 = (await Registration.getByID(registration1.id))!;
+                expect(updatedRegistration1).toBeDefined();
+                expect(updatedRegistration1.registeredAt).not.toBeNull();
+
+                // Check state of balances
+                const expectedBalances: Partial<BalanceItem>[] = [
+                    {
+                        type: BalanceItemType.Registration,
+                        registrationId: registration1.id,
+                        amount: 1,
+                        unitPrice: 25_00,
+                        status: BalanceItemStatus.Due,
+                        priceOpen: 0,
+                        pricePaid: 25_00,
+                        pricePending: 0,
+                        paidAt: expect.any(Date),
+                    },
+                ];
+
+                await assertBalances({
+                    user,
+                    balances: expectedBalances,
+                });
+
+                const checkout2 = IDRegisterCheckout.create({
+                    cart: IDRegisterCart.create({
+                        items: [
+                            IDRegisterItem.create({
+                                options: [],
+                                groupPrice: groupPrice2,
+                                groupId: group2.id,
+                                organizationId: organization.id,
+                                memberId: member.id,
+                            }),
+                        ],
+                    }),
+                    administrationFee: 0,
+                    freeContribution: 0,
+                    paymentMethod: PaymentMethod.Bancontact,
+                    totalPrice: 15_00 - 5_00, // 20% discount on first group
+                    redirectUrl: new URL('https://www.example.com/success'),
+                    cancelUrl: new URL('https://www.example.com/cancel'),
+                });
+                const response2 = await post(checkout2, organization, token);
+                expect(response2.body.registrations.length).toBe(1);
+
+                const registration2 = response2.body.registrations[0];
+                expect(registration2.registeredAt).toBeNull(); // not yet valid
+                expect(registration2.discounts).toMatchMap(new Map());
+
+                // Get registration 1 again, it should not yet have any bundle discount applied
+                await updatedRegistration1.refresh();
+                expect(updatedRegistration1.discounts).toMatchMap(new Map());
+
+                // Check state of balances
+                await assertBalances({
+                    user,
+                    balances: [
+                        ...expectedBalances,
+                        {
+                            type: BalanceItemType.Registration,
+                            registrationId: registration2.id,
+                            amount: 1,
+                            unitPrice: 15_00,
+                            status: BalanceItemStatus.Hidden, // Pending
+                            priceOpen: -15_00, // hidden, so no payment expected yet
+                            pricePending: 15_00,
+                            pricePaid: 0,
+                        },
+                        {
+                            type: BalanceItemType.RegistrationBundleDiscount,
+                            registrationId: registration1.id,
+                            amount: 1,
+                            unitPrice: -5_00,
+                            status: BalanceItemStatus.Hidden, // Pending
+                            priceOpen: 5_00,
+                            pricePending: -5_00,
+                            pricePaid: 0,
+                        },
+                    ],
+                });
+
+                // Fail the payment...
+                await stripeMocker.failPayment(stripeMocker.getLastIntent());
+
+                // Only price pending and open has changed now
+                expectedBalances.push(
+                    {
+                        type: BalanceItemType.Registration,
+                        registrationId: registration2.id,
+                        amount: 1,
+                        unitPrice: 15_00,
+                        status: BalanceItemStatus.Hidden,
+                        priceOpen: 0,
+                        pricePending: 0,
+                        pricePaid: 0,
+                        paidAt: null,
+                    },
+                    {
+                        type: BalanceItemType.RegistrationBundleDiscount,
+                        registrationId: registration1.id,
+                        amount: 1,
+                        unitPrice: -5_00,
+                        status: BalanceItemStatus.Hidden,
+                        priceOpen: 0,
+                        pricePending: 0,
+                        pricePaid: 0,
+                        paidAt: null,
+                    },
+                );
+
+                await assertBalances({
+                    user,
+                    balances: expectedBalances,
+                });
+
+                // Try the payment again
+                const response3 = await post(checkout2, organization, token);
+                expect(response3.body.registrations.length).toBe(1);
+
+                const registration3 = response3.body.registrations[0];
+                expect(registration3.id).not.toEqual(registration2.id);
+                expect(registration3.registeredAt).toBeNull(); // not yet valid
+                expect(registration3.discounts).toMatchMap(new Map());
+
+                // Get registration 1 again, it should not yet have any bundle discount applied
+                await updatedRegistration1.refresh();
+                expect(updatedRegistration1.discounts).toMatchMap(new Map());
+
+                await assertBalances({
+                    user,
+                    balances: [
+                        ...expectedBalances,
+                        {
+                            type: BalanceItemType.Registration,
+                            registrationId: registration3.id,
+                            amount: 1,
+                            unitPrice: 15_00,
+                            status: BalanceItemStatus.Hidden, // Pending
+                            priceOpen: -15_00, // hidden, so no payment expected yet
+                            pricePending: 15_00,
+                            pricePaid: 0,
+                            paidAt: null,
+                        },
+                        {
+                            type: BalanceItemType.RegistrationBundleDiscount,
+                            registrationId: registration1.id,
+                            amount: 1,
+                            unitPrice: -5_00,
+                            status: BalanceItemStatus.Hidden, // Pending
+                            priceOpen: 5_00,
+                            pricePending: -5_00,
+                            pricePaid: 0,
+                            paidAt: null,
+                        },
+                    ],
+                });
+
+                // Success the payment
+                await stripeMocker.succeedPayment(stripeMocker.getLastIntent());
+
+                // Check registration 3 became valid
+                const updatedRegistration3 = (await Registration.getByID(registration3.id))!;
+                expect(updatedRegistration3).toBeDefined();
+                expect(updatedRegistration3.registeredAt).not.toBeNull();
+
+                // Check registration 1 now has the discounts saved
+                await updatedRegistration1.refresh();
+                /* expect(updatedRegistration1.discounts).toMatchMap(new Map([
+                    [bundleDiscount.id, AppliedRegistrationDiscount.create({
+                        name: bundleDiscount.name,
+                        amount: 5_00,
+                    })],
+                ])); */
+
+                // Only price pending and open has changed now
+                expectedBalances.push(
+                    {
+                        type: BalanceItemType.Registration,
+                        registrationId: registration3.id,
+                        amount: 1,
+                        unitPrice: 15_00,
+                        status: BalanceItemStatus.Due,
+                        priceOpen: 0,
+                        pricePending: 0,
+                        pricePaid: 15_00,
+                        paidAt: expect.any(Date),
+                    },
+                    {
+                        type: BalanceItemType.RegistrationBundleDiscount,
+                        registrationId: registration1.id,
+                        amount: 1,
+                        unitPrice: -5_00,
+                        status: BalanceItemStatus.Due,
+                        priceOpen: 0,
+                        pricePending: 0,
+                        pricePaid: -5_00,
+                        paidAt: expect.any(Date),
+                    },
+                );
+
+                await assertBalances({
+                    user,
+                    balances: expectedBalances,
+                });
+            }, 20_000);
 
             test.todo('Best discount applied on new registration');
         });

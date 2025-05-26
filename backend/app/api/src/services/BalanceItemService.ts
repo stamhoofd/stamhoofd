@@ -1,9 +1,9 @@
 import { BalanceItem, Order, Organization, Payment, Webshop } from '@stamhoofd/models';
-import { AuditLogSource, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderStatus, ReceivableBalanceType } from '@stamhoofd/structures';
-import { AuditLogService } from './AuditLogService';
-import { RegistrationService } from './RegistrationService';
-import { PaymentReallocationService } from './PaymentReallocationService';
+import { AuditLogSource, BalanceItemStatus, BalanceItemType, OrderStatus, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { AuditLogService } from './AuditLogService';
+import { PaymentReallocationService } from './PaymentReallocationService';
+import { RegistrationService } from './RegistrationService';
 
 export const BalanceItemService = {
     async markDue(balanceItem: BalanceItem) {
@@ -38,6 +38,7 @@ export const BalanceItemService = {
         if (balanceItem.paidAt) {
             // Already ran side effects
             // If we for example deleted a related order or registration - and we still have the balance item, mark it as paid again, we don't want to reactivate the order or registration
+            await this.markUpdated(balanceItem, payment, organization);
             return;
         }
 

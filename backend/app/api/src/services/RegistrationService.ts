@@ -79,6 +79,11 @@ export const RegistrationService = {
                         registration.discounts.set(discount.id, existing);
                     }
                     existing.amount += -balanceItem.price; // price is negative means it has been discounted, and we store a positive amount with the discount
+
+                    if (existing.amount === 0) {
+                        // Delete the discount
+                        registration.discounts.delete(discount.id);
+                    }
                 }
 
                 console.log('Saving updated discounts for', registrationId, registration.discounts);
