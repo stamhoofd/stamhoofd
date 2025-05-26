@@ -552,6 +552,7 @@ class EmailStatic {
         const mail = Object.assign(data, {
             from: this.getWebmasterFromEmail(),
             to: [this.getWebmasterToEmail()],
+            type: data.type ?? 'transactional',
         });
         this.send(mail);
     }
