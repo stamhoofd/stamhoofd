@@ -708,7 +708,6 @@ describe('Endpoint.RegisterMembers', () => {
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
                 totalPrice: 25,
-                asOrganizationId: organization.id,
                 customer: null,
             });
             // #endregion
@@ -726,7 +725,6 @@ describe('Endpoint.RegisterMembers', () => {
         });
 
         test('Should update reserved members', async () => {
-            // #region arrange
             const { member, organization, token } = await initData();
 
             organization.meta.registrationPaymentConfiguration.paymentMethods = [PaymentMethod.PointOfSale, PaymentMethod.Payconiq];
@@ -787,7 +785,6 @@ describe('Endpoint.RegisterMembers', () => {
                         },
                     },
                 });
-            // #endregion
 
             // act
             const response = await post(body, organization, token);
