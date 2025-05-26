@@ -268,7 +268,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             submittedBy: expect.objectContaining({ id: user.id }),
         });
 
-        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+        expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
             expect.objectContaining({
                 to: 'event-notification-reviewer@example.com',
                 subject: EmailTemplateType.EventNotificationSubmittedReviewer,
@@ -314,7 +314,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             submittedBy: expect.objectContaining({ id: user.id }),
         });
 
-        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+        expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
             expect.objectContaining({
                 to: 'event-notification-reviewer@example.com',
                 subject: EmailTemplateType.EventNotificationSubmittedReviewer,
@@ -360,7 +360,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             submittedBy: expect.objectContaining({ id: user.id }),
         });
 
-        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+        expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
             expect.objectContaining({
                 to: 'event-notification-reviewer@example.com',
                 subject: EmailTemplateType.EventNotificationSubmittedReviewer,
@@ -638,7 +638,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         });
 
         // Check mails
-        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+        expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
             expect.objectContaining({
                 to: user.email,
                 subject: EmailTemplateType.EventNotificationAccepted,
@@ -699,7 +699,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         });
 
         // Check mails
-        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+        expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
             expect.objectContaining({
                 to: user.email,
                 subject: EmailTemplateType.EventNotificationPartiallyAccepted,
@@ -761,7 +761,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         });
 
         // Check mails
-        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+        expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
             expect.objectContaining({
                 to: user.email,
                 subject: EmailTemplateType.EventNotificationRejected,
@@ -821,7 +821,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         });
 
         // Check mails
-        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([]);
+        expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([]);
     });
 
     test('An admin can edit an accepted event notification', async () => {
@@ -884,7 +884,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         });
 
         // Check mails
-        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([]);
+        expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([]);
     });
 
     test('An admin can delete an event notification', async () => {
@@ -928,7 +928,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         expect(result.body).toHaveLength(0);
 
         // Check mails
-        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([]);
+        expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([]);
 
         // Check not exists
         const model = await EventNotification.getByID(eventNotification.id);

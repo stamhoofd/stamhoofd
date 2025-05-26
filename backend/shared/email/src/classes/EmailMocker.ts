@@ -98,11 +98,13 @@ export class EmailMocker {
     }
 
     // Helpers
-    getSucceededCount() {
+    async getSucceededCount() {
+        await Email.wait();
         return this.sentEmails.length;
     }
 
-    getFailedCount() {
+    async getFailedCount() {
+        await Email.wait();
         return this.failedEmails.length;
     }
 
@@ -110,7 +112,13 @@ export class EmailMocker {
         return this.sentEmails[index];
     }
 
-    getSucceededEmails() {
+    async getSucceededEmails() {
+        await Email.wait();
         return this.sentEmails;
+    }
+
+    async getFailedEmails() {
+        await Email.wait();
+        return this.failedEmails;
     }
 }
