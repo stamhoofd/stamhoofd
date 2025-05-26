@@ -209,7 +209,9 @@ async function getEmailBuilderForTemplate(organization: Organization | null, opt
     });
 
     if (!template) {
-        console.warn('No email template found for ' + options.template.type);
+        if (STAMHOOFD.environment === 'production') {
+            console.warn('No email template found for ' + options.template.type);
+        }
         return undefined;
     }
 

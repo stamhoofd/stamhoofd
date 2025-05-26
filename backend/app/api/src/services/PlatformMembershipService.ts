@@ -138,9 +138,6 @@ export class PlatformMembershipService {
 
     static async updateMembershipsForId(id: string, silent = false) {
         if (STAMHOOFD.userMode === 'organization') {
-            if (!silent) {
-                console.warn('Skipping automatic membership for: ' + id, ' - organization mode');
-            }
             return;
         }
 
