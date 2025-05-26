@@ -5,7 +5,7 @@ import { MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, Organ
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { PatchUserMembersEndpoint } from './PatchUserMembersEndpoint';
 import { Database } from '@simonbackx/simple-database';
-import { SHExpect, TestUtils } from '@stamhoofd/test-utils';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 
 const baseUrl = `/members`;
 const endpoint = new PatchUserMembersEndpoint();
@@ -53,7 +53,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             request.headers.authorization = 'Bearer ' + token.accessToken;
             await expect(testServer.test(endpoint, request))
                 .rejects
-                .toThrow(SHExpect.errorWithCode('known_member_missing_rights'));
+                .toThrow(STExpect.errorWithCode('known_member_missing_rights'));
         });
 
         test('The security code is not a requirement for members without additional data', async () => {
@@ -278,7 +278,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request)).rejects.toThrow(SHExpect.errorWithCode('permission_denied'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
         });
 
         test('A user can save answers of records of the platform', async () => {
@@ -389,7 +389,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request)).rejects.toThrow(SHExpect.errorWithCode('permission_denied'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
         });
 
         test('A user can not save anwers to inexisting records', async () => {
@@ -435,7 +435,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request)).rejects.toThrow(SHExpect.errorWithCode('permission_denied'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
         });
     });
 });

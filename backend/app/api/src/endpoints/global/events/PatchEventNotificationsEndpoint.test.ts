@@ -3,7 +3,7 @@ import { Endpoint, Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import { EmailTemplateFactory, EventFactory, EventNotification, EventNotificationFactory, EventNotificationTypeFactory, Organization, OrganizationFactory, RecordAnswerFactory, RecordCategoryFactory, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
 import { AccessRight, BaseOrganization, EmailTemplateType, Event, EventNotificationStatus, EventNotification as EventNotificationStruct, Permissions, PermissionsResourceType, RecordType, ResourcePermissions } from '@stamhoofd/structures';
-import { SHExpect, TestUtils } from '@stamhoofd/test-utils';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { PatchEventNotificationsEndpoint } from './PatchEventNotificationsEndpoint';
 
@@ -150,7 +150,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'invalid_field', field: 'typeId' }),
+            STExpect.simpleError({ code: 'invalid_field', field: 'typeId' }),
         );
     });
 
@@ -175,7 +175,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'invalid_field', field: 'events' }),
+            STExpect.simpleError({ code: 'invalid_field', field: 'events' }),
         );
     });
 
@@ -209,7 +209,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             }),
         );
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'invalid_period', field: 'startDate' }),
+            STExpect.simpleError({ code: 'invalid_period', field: 'startDate' }),
         );
     });
 
@@ -237,7 +237,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'invalid_field', field: 'events' }),
+            STExpect.simpleError({ code: 'invalid_field', field: 'events' }),
         );
     });
 
@@ -397,7 +397,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'permission_denied' }),
+            STExpect.simpleError({ code: 'permission_denied' }),
         );
     });
 
@@ -423,7 +423,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'permission_denied' }),
+            STExpect.simpleError({ code: 'permission_denied' }),
         );
     });
 
@@ -449,7 +449,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'permission_denied' }),
+            STExpect.simpleError({ code: 'permission_denied' }),
         );
     });
 
@@ -475,7 +475,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'permission_denied' }),
+            STExpect.simpleError({ code: 'permission_denied' }),
         );
     });
 
@@ -501,7 +501,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'permission_denied' }),
+            STExpect.simpleError({ code: 'permission_denied' }),
         );
     });
 
@@ -584,7 +584,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'permission_denied' }),
+            STExpect.simpleError({ code: 'permission_denied' }),
         );
     });
 
@@ -972,7 +972,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'permission_denied' }),
+            STExpect.simpleError({ code: 'permission_denied' }),
         );
     });
 });

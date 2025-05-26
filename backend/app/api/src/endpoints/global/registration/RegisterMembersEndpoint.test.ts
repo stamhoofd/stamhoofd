@@ -6,7 +6,7 @@ import nock from 'nock';
 import { v4 as uuidv4 } from 'uuid';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { RegisterMembersEndpoint } from './RegisterMembersEndpoint';
-import { SHExpect } from '@stamhoofd/test-utils';
+import { STExpect } from '@stamhoofd/test-utils';
 
 const baseUrl = `/v${Version}/members/register`;
 
@@ -296,7 +296,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             await expect(post(body, organization, token))
                 .rejects
-                .toThrow(SHExpect.simpleError({ code: 'changed_price' }));
+                .toThrow(STExpect.simpleError({ code: 'changed_price' }));
         });
 
         test('Should fail when pay balance item as organization', async () => {

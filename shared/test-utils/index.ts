@@ -100,7 +100,7 @@ class TestInstance {
 
 export const TestUtils = new TestInstance();
 
-export const SHExpect = {
+export const STExpect = {
     errorWithCode: (code: string) => expect.objectContaining({ code }) as jest.Constructable,
     errorWithMessage: (message: string) => expect.objectContaining({ message }) as jest.Constructable,
     simpleError: (data: {
