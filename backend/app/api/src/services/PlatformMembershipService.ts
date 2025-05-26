@@ -154,10 +154,17 @@ export class PlatformMembershipService {
                     }
                     return;
                 }
+                if (me.organizationId) {
+                    if (!silent) {
+                        console.warn('Cannot update members for a member with organization set', me.id);
+                    }
+                    return;
+                }
+
                 const platform = await Platform.getSharedStruct();
                 const periods = await RegistrationPeriod.select()
                     .where('locked', false)
-                    .where('organizationId', me.organizationId)
+                    .where('organizationId', null)
                     .where('endDate', SQLWhereSign.GreaterEqual, new Date()) // Avoid updating the price of past periods that were not yet locked
                     .fetch();
 

@@ -1,7 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
-import { BalanceItem, BalanceItemFactory, Group, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { BalanceItemCartItem, BalanceItemType, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PayconiqAccount, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, ReduceablePrice, RegisterItemOption, STPackageStatus, STPackageType, UserPermissions, Version } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemFactory, Group, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import { AppliedRegistrationDiscount, BalanceItemCartItem, BalanceItemType, BundleDiscount, BundleDiscountGroupPriceSettings, Company, GroupOption, GroupOptionMenu, GroupPrice, GroupPriceDiscount, GroupPriceDiscountType, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PayconiqAccount, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, ReduceablePrice, RegisterItemOption, STPackageStatus, STPackageType, TranslatedString, UserPermissions, Version } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { RegisterMembersEndpoint } from './RegisterMembersEndpoint';
@@ -36,19 +36,28 @@ describe('Endpoint.RegisterMembers', () => {
 
     beforeEach(async () => {
         TestUtils.setEnvironment('userMode', 'platform');
+
+        // Set current date within period
+        const date = new Date('2023-05-14');
+        jest.useFakeTimers({ now: date, advanceTimers: true });
     });
 
     afterEach(() => {
         jest.restoreAllMocks();
+        jest.useRealTimers();
     });
 
     const initOrganization = async (registrationPeriod: RegistrationPeriod = period) => {
-        return await new OrganizationFactory({ period: registrationPeriod })
+        const organization = await new OrganizationFactory({ period: registrationPeriod })
             .create();
+
+        const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: registrationPeriod }).create();
+
+        return { organization, organizationRegistrationPeriod };
     };
 
     async function initData({ otherMemberAmount = 0, permissionLevel = defaultPermissionLevel }: { otherMemberAmount?: number; permissionLevel?: PermissionLevel } = {}) {
-        const organization = await initOrganization(period);
+        const { organization, organizationRegistrationPeriod } = await initOrganization(period);
 
         const user = await new UserFactory({
             organization,
@@ -83,6 +92,7 @@ describe('Endpoint.RegisterMembers', () => {
 
         return {
             organization,
+            organizationRegistrationPeriod,
             user,
             token,
             member,
@@ -1217,45 +1227,6 @@ describe('Endpoint.RegisterMembers', () => {
             expect(response.body.registrations[0].id).toEqual(firstRegistration.id);
         });
 
-        test('Deleting registrations should fail if cannot manage finances', async () => {
-            const { member, group, groupPrice, organization, token } = await initData();
-            const organization2 = await initOrganization();
-
-            const registration = await new RegistrationFactory({
-                member,
-                group,
-                groupPrice,
-            }).create();
-
-            const body = IDRegisterCheckout.create({
-                cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
-                            groupPrice,
-                            organizationId: organization.id,
-                            groupId: group.id,
-                            memberId: member.id,
-                        }),
-                    ],
-                    balanceItems: [],
-                    deleteRegistrationIds: [registration.id],
-                }),
-                administrationFee: 0,
-                freeContribution: 0,
-                paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 5,
-                asOrganizationId: organization2.id,
-                customer: null,
-            });
-
-            await expect(async () => await post(body, organization, token))
-                .rejects
-                .toThrow('No permission to register as this organization for a different organization');
-        });
-
         test('Cannot pay balances as organization', async () => {
             const { member, user, organization, token } = await initData();
 
@@ -1310,7 +1281,7 @@ describe('Endpoint.RegisterMembers', () => {
             await base.group.save();
 
             // Give the user permission for a different organization
-            const organization2 = await initOrganization();
+            const { organization: organization2 } = await initOrganization();
             base.user.permissions = UserPermissions.create({
                 organizationPermissions: new Map([
                     [organization2.id, Permissions.create({
@@ -1479,6 +1450,44 @@ describe('Endpoint.RegisterMembers', () => {
                 .toThrow(new RegExp('customer is required when paying as an organization'));
         });
 
+        test('Deleting registrations is not allowed', async () => {
+            const { member, group, groupPrice, organization, token, organization2 } = await initDualData();
+
+            const registration = await new RegistrationFactory({
+                member,
+                group,
+                groupPrice,
+            }).create();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [],
+                    deleteRegistrationIds: [registration.id],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 5,
+                asOrganizationId: organization2.id,
+                customer: null,
+            });
+
+            await expect(async () => await post(body, organization, token))
+                .rejects
+                .toThrow(STExpect.simpleError({ code: 'forbidden' }));
+        });
+
         test('Should fail if no company on customer', async () => {
             const { organization, group, groupPrice, member, token, organization2 } = await initDualData();
 
@@ -1618,13 +1627,12 @@ describe('Endpoint.RegisterMembers', () => {
             expect(updatedGroup1After!.settings.reservedMembers).toBe(0);
         });
 
-        test('Should set paid as organization on new registration', async () => {
-            // #region arrange
+        test('When replacing a registration, we should keep the original paying organization id', async () => {
             const { organization, group: group1, groupPrice: groupPrice1, token, member, user } = await initData();
 
             group1.settings.allowRegistrationsByOrganization = true;
             await group1.save();
-            const organization2 = await initOrganization();
+            const { organization: organization2 } = await initOrganization();
 
             user.permissions = UserPermissions.create({
                 organizationPermissions: new Map([
@@ -1712,9 +1720,7 @@ describe('Endpoint.RegisterMembers', () => {
                     company,
                 }),
             });
-            // #endregion
 
-            // #region act and assert
             const response = await post(body2, organization, token);
 
             expect(response.body).toBeDefined();
@@ -1722,7 +1728,6 @@ describe('Endpoint.RegisterMembers', () => {
 
             // the payingOrganizationId should equal the id of the paying organization of the replaced registration
             expect(response.body.registrations[0].payingOrganizationId).toEqual(organization2.id);
-            // #endregion
         });
 
         test('Replace registration by registration of other member should fail', async () => {
@@ -2283,6 +2288,150 @@ describe('Endpoint.RegisterMembers', () => {
             await post(body1, organization, token);
             await expect(async () => await post(body2, organization, token)).rejects.toThrow(/No permission to delete this registration/);
             // #endregion
+        });
+    });
+
+    /**
+     * Note: specific calculations are tested in unit tests (which group gets the discount etc), this only tests backend realted logic related to balances
+     */
+    describe('Bundle discounts', () => {
+        function createBundleDiscount({
+            name = 'Bundle discount',
+            countWholeFamily = true,
+            countPerGroup = false,
+            discounts = [
+                { value: 10_00, type: GroupPriceDiscountType.Fixed },
+                { value: 15_00, type: GroupPriceDiscountType.Fixed },
+            ],
+        }: {
+            name?: string;
+            countWholeFamily?: boolean;
+            countPerGroup?: boolean;
+            discounts?: Array<{ value: number; type: GroupPriceDiscountType; reducedValue?: number }>;
+        } = {}) {
+            return BundleDiscount.create({
+                name: new TranslatedString(name),
+                countWholeFamily,
+                countPerGroup,
+                discounts: discounts.map(d => GroupPriceDiscount.create({
+                    value: ReduceablePrice.create({
+                        price: d.value,
+                        reducedPrice: d.reducedValue ?? null,
+                    }),
+                    type: d.type,
+                })),
+            });
+        }
+
+        async function enableDiscount({ group, groupPrice, bundleDiscount }: { group: Group; groupPrice: GroupPrice; bundleDiscount: BundleDiscount }) {
+            groupPrice.bundleDiscounts.set(bundleDiscount.id, BundleDiscountGroupPriceSettings.create({
+                name: bundleDiscount.name,
+            }));
+            await group.save();
+        }
+
+        async function initDiscount({ organizationRegistrationPeriod, discount }: { organizationRegistrationPeriod: OrganizationRegistrationPeriod; discount: Parameters<typeof createBundleDiscount>[0] }) {
+            const bundleDiscount = createBundleDiscount(discount);
+            organizationRegistrationPeriod.settings.bundleDiscounts.push(bundleDiscount);
+            await organizationRegistrationPeriod.save();
+            return bundleDiscount;
+        }
+
+        describe('With historic registrations', () => {
+            test('Best discount applied on historic registration without online payment', async () => {
+                const { organizationRegistrationPeriod, organization, group, groupPrice, member, token } = await initData();
+                const bundleDiscount = await initDiscount({
+                    organizationRegistrationPeriod,
+                    discount: {
+                        discounts: [
+                            { value: 20_00, type: GroupPriceDiscountType.Percentage },
+                        ],
+                    },
+                });
+                await enableDiscount({ group, groupPrice, bundleDiscount });
+
+                const group2 = await new GroupFactory({
+                    organization,
+                    price: groupPrice.price.price - 10, // Lower price so discount is applied preferably on the first group
+                }).create();
+
+                const groupPrice2 = group2.settings.prices[0];
+
+                await enableDiscount({ group: group2, groupPrice: groupPrice2, bundleDiscount });
+
+                // First register the member for group 1. No discount should be applied yet
+                const checkout1 = IDRegisterCheckout.create({
+                    cart: IDRegisterCart.create({
+                        items: [
+                            IDRegisterItem.create({
+                                options: [],
+                                groupPrice,
+                                groupId: group.id,
+                                organizationId: organization.id,
+                                memberId: member.id,
+                            }),
+                        ],
+                    }),
+                    administrationFee: 0,
+                    freeContribution: 0,
+                    paymentMethod: PaymentMethod.PointOfSale,
+                    totalPrice: groupPrice.price.price,
+                });
+
+                const response1 = await post(checkout1, organization, token);
+                expect(response1.body.registrations.length).toBe(1);
+                const registration1 = response1.body.registrations[0];
+                expect(registration1.registeredAt).not.toBeNull();
+                expect(registration1.discounts).toMatchMap(new Map());
+
+                const checkout2 = IDRegisterCheckout.create({
+                    cart: IDRegisterCart.create({
+                        items: [
+                            IDRegisterItem.create({
+                                options: [],
+                                groupPrice: groupPrice2,
+                                groupId: group2.id,
+                                organizationId: organization.id,
+                                memberId: member.id,
+                            }),
+                        ],
+                    }),
+                    administrationFee: 0,
+                    freeContribution: 0,
+                    paymentMethod: PaymentMethod.PointOfSale,
+                    totalPrice: groupPrice2.price.price - Math.round(0.2 * groupPrice.price.price), // 20% discount on first group
+                });
+                const response2 = await post(checkout2, organization, token);
+                expect(response2.body.registrations.length).toBe(1);
+
+                const registration2 = response2.body.registrations[0];
+                expect(registration2.registeredAt).not.toBeNull();
+                expect(registration2.discounts).toMatchMap(new Map());
+
+                // Get registration 1 again, it should now have the bundle discount applied
+                const updatedRegistration1 = await Registration.getByID(registration1.id);
+                expect(updatedRegistration1).toBeDefined();
+                expect(updatedRegistration1!.discounts).toMatchMap(new Map([
+                    [bundleDiscount.id, AppliedRegistrationDiscount.create({
+                        name: bundleDiscount.name,
+                        amount: Math.round(0.2 * groupPrice.price.price),
+                    })],
+                ]));
+            });
+
+            test('Best discount applied on historic registration with online payment (2 tries)', async () => {
+                // todo: should be possible to try twice in case the online payment fails - the discount should still be applied
+            });
+
+            test.todo('Best discount applied on new registration');
+        });
+
+        describe('Deleting a registration', () => {
+            test.todo('With cancellation fee: Causes bundle discount on other historic registration to be recalculated');
+            test.todo('With cancellation fee: Causes bundle discount on deleted registration to be recalculated');
+
+            test.todo('Without cancellation fee: Causes bundle discount on other historic registration to be recalculated');
+            test.todo('Without cancellation fee: Causes bundle discount on deleted registration to be recalculated');
         });
     });
 });
