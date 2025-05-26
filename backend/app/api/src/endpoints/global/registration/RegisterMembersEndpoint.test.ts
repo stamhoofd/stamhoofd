@@ -125,7 +125,6 @@ describe('Endpoint.RegisterMembers', () => {
                     freeContribution: 0,
                     paymentMethod: PaymentMethod.PointOfSale,
                     totalPrice: 25,
-                    asOrganizationId: organization.id,
                     customer: null,
                 });
 
@@ -152,7 +151,6 @@ describe('Endpoint.RegisterMembers', () => {
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
                 totalPrice: 25,
-                asOrganizationId: organization.id,
                 customer: null,
             });
             await expect(post(body, organization, token))
@@ -427,55 +425,6 @@ describe('Endpoint.RegisterMembers', () => {
                     { code: 'duplicate_register_item' },
                     { code: 'duplicate_register_item' },
                 ]));
-        });
-
-        test('Should fail register by other organization if disabled by group', async () => {
-            // #region arrange
-            const { organization, group, groupPrice, token, member, user } = await initData();
-
-            const { organization: organization2 } = await initData();
-
-            user.permissions = UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization2.id, Permissions.create({
-                        level: PermissionLevel.Full,
-                    })],
-                ]),
-            });
-
-            await user.save();
-
-            const body = IDRegisterCheckout.create({
-                cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
-                            groupPrice,
-                            organizationId: organization.id,
-                            groupId: group.id,
-                            memberId: member.id,
-                        }),
-                    ],
-                    balanceItems: [
-                    ],
-                    deleteRegistrationIds: [],
-                }),
-                administrationFee: 0,
-                freeContribution: 0,
-                paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
-                customer: null,
-                asOrganizationId: organization2.id,
-            });
-            // #endregion
-
-            // #region act and assert
-            await expect(async () => await post(body, organization, token))
-                .rejects
-                .toThrow(new RegExp('allowRegistrationsByOrganization disabled'));
-            // #endregion
         });
 
         test('Should fail if invalid payment', async () => {
@@ -1394,8 +1343,9 @@ describe('Endpoint.RegisterMembers', () => {
 
     describe('Register by other organization', () => {
         test('Should fail if disabled by group', async () => {
-            // #region arrange
             const { organization, group, groupPrice, token, member, user } = await initData();
+            group.settings.allowRegistrationsByOrganization = false;
+            await group.save();
 
             const { organization: organization2 } = await initData();
 
@@ -1433,13 +1383,10 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
                 asOrganizationId: organization2.id,
             });
-            // #endregion
 
-            // #region act and assert
             await expect(async () => await post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('allowRegistrationsByOrganization disabled'));
-            // #endregion
+                .toThrow(STExpect.simpleError({ code: 'as_organization_disabled' }));
         });
 
         test('Should fail if no customer', async () => {
