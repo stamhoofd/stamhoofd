@@ -1473,13 +1473,10 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
                 asOrganizationId: organization2.id,
             });
-            // #endregion
 
-            // #region act and assert
             await expect(async () => await post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('customer is required when paying as an organization'));
-            // #endregion
         });
 
         test('Should fail if no company on customer', async () => {
@@ -1511,13 +1508,10 @@ describe('Endpoint.RegisterMembers', () => {
                 }),
                 asOrganizationId: organization2.id,
             });
-            // #endregion
 
-            // #region act and assert
             await expect(async () => await post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('customer.company is required'));
-            // #endregion
         });
 
         test('Should fail if company does not exist on organization', async () => {
@@ -1551,13 +1545,10 @@ describe('Endpoint.RegisterMembers', () => {
                 }),
                 asOrganizationId: organization2.id,
             });
-            // #endregion
 
-            // #region act and assert
             await expect(async () => await post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('Oeps, de facturatiegegevens die je probeerde te selecteren lijken niet meer te bestaan.'));
-            // #endregion
         });
     });
 
