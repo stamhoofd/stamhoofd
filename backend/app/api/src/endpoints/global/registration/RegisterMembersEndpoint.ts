@@ -518,7 +518,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             // Reserve registration for 30 minutes (if needed)
             const group = groups.find(g => g.id === registration.groupId);
 
-            if (group && group.settings.maxMembers !== null) {
+            if (group && group.settings.maxMembers !== null && whoWillPayNow !== 'nobody') {
                 registration.reservedUntil = new Date(new Date().getTime() + 1000 * 60 * 30);
             }
 
@@ -758,6 +758,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     // Mark valid
                     await BalanceItemService.markPaid(balanceItem, payment, organization);
                 }
+
+                // We'll need to update the returned registrations as their values will have changed by marking the registration as valid
+                await Registration.refreshAll(registrations);
             }
         }
 

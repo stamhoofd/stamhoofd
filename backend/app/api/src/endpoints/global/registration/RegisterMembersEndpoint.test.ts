@@ -73,7 +73,7 @@ describe('Endpoint.RegisterMembers', () => {
         const group = await new GroupFactory({
             organization,
             price: 25,
-            stock: 5,
+            stock: 500,
         })
             .create();
 
@@ -92,7 +92,6 @@ describe('Endpoint.RegisterMembers', () => {
 
     describe('Register as member', () => {
         test('Should fail if demo limit reached', async () => {
-            // Temorary set usermode for this test only
             TestUtils.setEnvironment('userMode', 'organization');
             const { member, group, groupPrice, organization, token, otherMembers } = await initData({ otherMemberAmount: 10 });
 
@@ -503,7 +502,6 @@ describe('Endpoint.RegisterMembers', () => {
         });
 
         test('Should fail if no cancel url for online payment', async () => {
-            // #region arrange
             const { organization, group, groupPrice, token, member } = await initData();
             organization.meta.registrationPaymentConfiguration.paymentMethods.push(PaymentMethod.Bancontact);
             await organization.save();
@@ -521,9 +519,6 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
-                    deleteRegistrationIds: [],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
@@ -532,17 +527,13 @@ describe('Endpoint.RegisterMembers', () => {
                 redirectUrl: new URL('https://www.stamhoofd.be'),
                 customer: null,
             });
-            // #endregion
 
-            // #region act and assert
             await expect(async () => await post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('redirectUrl or cancelUrl is missing'));
-            // #endregion
         });
 
-        test('Should reserve if group has max members', async () => {
-            // #region arrange
+        test('Should not reserve for point of sale payment method if group has max members', async () => {
             const { organization, group, groupPrice, token, member } = await initData();
             group.settings.maxMembers = 5;
             await group.save();
@@ -560,22 +551,23 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
-                    deleteRegistrationIds: [],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
                 totalPrice: 25,
             });
-            // #endregion
 
-            // #region act and assert
             const response = await post(body, organization, token);
             expect(response.body.registrations.length).toBe(1);
-            expect(response.body.registrations[0].reservedUntil).not.toBeNull();
-            // #endregion
+
+            const updatedRegistration = (await Registration.getByID(response.body.registrations[0].id))!;
+            expect(updatedRegistration.registeredAt).not.toBeNull();
+            expect(updatedRegistration.reservedUntil).toBeNull();
+
+            // Check if response is up-to-date (if it fails here, data storage is okay, but returned API response is not up-to-date)
+            expect(response.body.registrations[0].registeredAt).not.toBeNull();
+            expect(response.body.registrations[0].reservedUntil).toBeNull();
         });
 
         test('Should reuse existing registration if it has zero balance', async () => {
@@ -604,7 +596,6 @@ describe('Endpoint.RegisterMembers', () => {
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
                 totalPrice: 25,
-                asOrganizationId: organization.id,
             });
 
             const response = await post(body, organization, token);
@@ -634,15 +625,11 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
-                    deleteRegistrationIds: [],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
                 totalPrice: 25,
-                asOrganizationId: organization.id,
             });
 
             const response = await post(body, organization, token);
@@ -685,15 +672,11 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
-                    deleteRegistrationIds: [],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
                 totalPrice: 25,
-                asOrganizationId: organization.id,
             });
 
             const response = await post(body, organization, token);

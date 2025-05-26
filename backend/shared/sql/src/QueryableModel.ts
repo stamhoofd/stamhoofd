@@ -46,4 +46,27 @@ export class QueryableModel extends Model {
             this[column.name] = me[column.name];
         }
     }
+
+    static async refreshAll<T extends typeof QueryableModel>(this: T, list: InstanceType<T>[]) {
+        // Cut up in batches of max 100
+        const batchSize = 100;
+        for (let i = 0; i < list.length; i += batchSize) {
+            const batch = list.slice(i, i + batchSize);
+            const ids = list.map(item => item.getPrimaryKey()).filter(id => id !== null);
+            if (ids.length === 0) {
+                continue;
+            }
+
+            const refreshed = await this.getByIDs(...ids);
+
+            for (const item of batch) {
+                const refreshedItem = refreshed.find(r => r.getPrimaryKey() === item.getPrimaryKey());
+                if (refreshedItem) {
+                    for (const column of this.columns.values()) {
+                        item[column.name] = refreshedItem[column.name];
+                    }
+                }
+            }
+        }
+    }
 }
