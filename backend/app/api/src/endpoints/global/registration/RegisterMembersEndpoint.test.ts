@@ -246,59 +246,6 @@ describe('Endpoint.RegisterMembers', () => {
                 .toThrow(STExpect.simpleError({ code: 'changed_price' }));
         });
 
-        test('Should fail when pay balance item as organization', async () => {
-            // #region arrange
-            const { member, group, user, groupPrice, organization, token } = await initData();
-
-            const balanceItem1 = await new BalanceItemFactory({
-                organizationId: organization.id,
-                memberId: member.id,
-                userId: user.id,
-                payingOrganizationId: organization.id,
-                type: BalanceItemType.Registration,
-                amount: 10,
-                unitPrice: 2,
-            }).create();
-
-            const cartItem = BalanceItemCartItem.create({
-                item: balanceItem1.getStructure(),
-                price: 20,
-            });
-
-            const body = IDRegisterCheckout.create({
-                cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
-                            groupPrice,
-                            organizationId: organization.id,
-                            groupId: group.id,
-                            memberId: member.id,
-                        }),
-                    ],
-                    balanceItems: [
-                        cartItem,
-                    ],
-                    deleteRegistrationIds: [],
-                }),
-                administrationFee: 0,
-                freeContribution: 0,
-                paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 45,
-                asOrganizationId: organization.id,
-                customer: null,
-            });
-            // #endregion
-
-            // #region act and assert
-            await expect(async () => await post(body, organization, token))
-                .rejects
-                .toThrow(new RegExp('Not possible to pay balance items as the organization'));
-            // #endregion
-        });
-
         test('Should fail if has no write access for member', async () => {
             // #region arrange
             const { organization, group, groupPrice, token } = await initData();
@@ -1415,6 +1362,47 @@ describe('Endpoint.RegisterMembers', () => {
             await expect(async () => await post(body, organization, token))
                 .rejects
                 .toThrow('No permission to register as this organization for a different organization');
+        });
+
+        test('Cannot pay balances as organization', async () => {
+            const { member, user, organization, token } = await initData();
+
+            const balanceItem1 = await new BalanceItemFactory({
+                organizationId: organization.id,
+                memberId: member.id,
+                userId: user.id,
+                payingOrganizationId: organization.id,
+                type: BalanceItemType.Registration,
+                amount: 10,
+                unitPrice: 2,
+            }).create();
+
+            const cartItem = BalanceItemCartItem.create({
+                item: balanceItem1.getStructure(),
+                price: 20,
+            });
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [],
+                    balanceItems: [
+                        cartItem,
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 20,
+                asOrganizationId: organization.id,
+                customer: null,
+            });
+
+            await expect(post(body, organization, token))
+                .rejects
+                .toThrow(STExpect.simpleError({
+                    code: 'cannot_pay_balance_items',
+                }));
         });
     });
 

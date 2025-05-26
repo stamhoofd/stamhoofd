@@ -739,7 +739,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         if (checkout.cart.balanceItems.length && whoWillPayNow === 'nobody') {
             throw new SimpleError({
-                code: 'invalid_data',
+                code: 'cannot_pay_balance_items',
                 message: 'Not possible to pay balance items as the organization',
                 statusCode: 400,
             });
