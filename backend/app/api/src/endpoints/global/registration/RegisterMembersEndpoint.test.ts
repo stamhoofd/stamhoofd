@@ -1,12 +1,12 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
-import { BalanceItem, BalanceItemFactory, Group, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { AppliedRegistrationDiscount, BalanceItemCartItem, BalanceItemType, BundleDiscount, BundleDiscountGroupPriceSettings, Company, GroupOption, GroupOptionMenu, GroupPrice, GroupPriceDiscount, GroupPriceDiscountType, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PayconiqAccount, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, ReduceablePrice, RegisterItemOption, STPackageStatus, STPackageType, TranslatedString, UserPermissions, Version } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemFactory, Group, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
+import { AppliedRegistrationDiscount, BalanceItemCartItem, BalanceItemStatus, BalanceItemType, BundleDiscount, BundleDiscountGroupPriceSettings, Company, GroupOption, GroupOptionMenu, GroupPrice, GroupPriceDiscount, GroupPriceDiscountType, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, ReduceablePrice, RegisterItemOption, STPackageStatus, STPackageType, TranslatedString, UserPermissions, Version } from '@stamhoofd/structures';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
+import { PayconiqMocker } from '../../../../tests/helpers/PayconiqMocker';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { RegisterMembersEndpoint } from './RegisterMembersEndpoint';
-import { STExpect, TestUtils } from '@stamhoofd/test-utils';
-import { PayconiqMocker } from '../../../../tests/helpers/PayconiqMocker';
 
 const baseUrl = `/v${Version}/members/register`;
 
@@ -55,6 +55,13 @@ describe('Endpoint.RegisterMembers', () => {
 
         return { organization, organizationRegistrationPeriod };
     };
+
+    async function assertBalances({ user, balances }: { user: User; balances: Partial<BalanceItem>[] }) {
+        // Fetch all user balances
+        const userBalances = await BalanceItem.select().where('userId', user.id).fetch();
+
+        expect(userBalances).toIncludeAllMembers(balances.map(b => expect.objectContaining(b)));
+    }
 
     async function initData({ otherMemberAmount = 0, permissionLevel = defaultPermissionLevel }: { otherMemberAmount?: number; permissionLevel?: PermissionLevel } = {}) {
         const { organization, organizationRegistrationPeriod } = await initOrganization(period);
@@ -105,6 +112,48 @@ describe('Endpoint.RegisterMembers', () => {
     async function initPayconiq({ organization }: { organization: Organization }) {
         organization.meta.registrationPaymentConfiguration.paymentMethods.push(PaymentMethod.Payconiq);
         organization.privateMeta.payconiqAccounts = [PayconiqMocker.generateTestAccount()];
+    }
+
+    function createBundleDiscount({
+        name = 'Bundle discount',
+        countWholeFamily = true,
+        countPerGroup = false,
+        discounts = [
+            { value: 10_00, type: GroupPriceDiscountType.Fixed },
+            { value: 15_00, type: GroupPriceDiscountType.Fixed },
+        ],
+    }: {
+        name?: string;
+        countWholeFamily?: boolean;
+        countPerGroup?: boolean;
+        discounts?: Array<{ value: number; type: GroupPriceDiscountType; reducedValue?: number }>;
+    } = {}) {
+        return BundleDiscount.create({
+            name: new TranslatedString(name),
+            countWholeFamily,
+            countPerGroup,
+            discounts: discounts.map(d => GroupPriceDiscount.create({
+                value: ReduceablePrice.create({
+                    price: d.value,
+                    reducedPrice: d.reducedValue ?? null,
+                }),
+                type: d.type,
+            })),
+        });
+    }
+
+    async function enableDiscount({ group, groupPrice, bundleDiscount }: { group: Group; groupPrice: GroupPrice; bundleDiscount: BundleDiscount }) {
+        groupPrice.bundleDiscounts.set(bundleDiscount.id, BundleDiscountGroupPriceSettings.create({
+            name: bundleDiscount.name,
+        }));
+        await group.save();
+    }
+
+    async function initDiscount({ organizationRegistrationPeriod, discount }: { organizationRegistrationPeriod: OrganizationRegistrationPeriod; discount: Parameters<typeof createBundleDiscount>[0] }) {
+        const bundleDiscount = createBundleDiscount(discount);
+        organizationRegistrationPeriod.settings.bundleDiscounts.push(bundleDiscount);
+        await organizationRegistrationPeriod.save();
+        return bundleDiscount;
     }
 
     describe('Register as member', () => {
@@ -1728,7 +1777,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             // the payingOrganizationId should equal the id of the paying organization of the replaced registration
             expect(response.body.registrations[0].payingOrganizationId).toEqual(organization2.id);
-        });
+        }, 10_000);
 
         test('Replace registration by registration of other member should fail', async () => {
             // #region arrange
@@ -2295,51 +2344,9 @@ describe('Endpoint.RegisterMembers', () => {
      * Note: specific calculations are tested in unit tests (which group gets the discount etc), this only tests backend realted logic related to balances
      */
     describe('Bundle discounts', () => {
-        function createBundleDiscount({
-            name = 'Bundle discount',
-            countWholeFamily = true,
-            countPerGroup = false,
-            discounts = [
-                { value: 10_00, type: GroupPriceDiscountType.Fixed },
-                { value: 15_00, type: GroupPriceDiscountType.Fixed },
-            ],
-        }: {
-            name?: string;
-            countWholeFamily?: boolean;
-            countPerGroup?: boolean;
-            discounts?: Array<{ value: number; type: GroupPriceDiscountType; reducedValue?: number }>;
-        } = {}) {
-            return BundleDiscount.create({
-                name: new TranslatedString(name),
-                countWholeFamily,
-                countPerGroup,
-                discounts: discounts.map(d => GroupPriceDiscount.create({
-                    value: ReduceablePrice.create({
-                        price: d.value,
-                        reducedPrice: d.reducedValue ?? null,
-                    }),
-                    type: d.type,
-                })),
-            });
-        }
-
-        async function enableDiscount({ group, groupPrice, bundleDiscount }: { group: Group; groupPrice: GroupPrice; bundleDiscount: BundleDiscount }) {
-            groupPrice.bundleDiscounts.set(bundleDiscount.id, BundleDiscountGroupPriceSettings.create({
-                name: bundleDiscount.name,
-            }));
-            await group.save();
-        }
-
-        async function initDiscount({ organizationRegistrationPeriod, discount }: { organizationRegistrationPeriod: OrganizationRegistrationPeriod; discount: Parameters<typeof createBundleDiscount>[0] }) {
-            const bundleDiscount = createBundleDiscount(discount);
-            organizationRegistrationPeriod.settings.bundleDiscounts.push(bundleDiscount);
-            await organizationRegistrationPeriod.save();
-            return bundleDiscount;
-        }
-
         describe('With historic registrations', () => {
             test('Best discount applied on historic registration without online payment', async () => {
-                const { organizationRegistrationPeriod, organization, group, groupPrice, member, token } = await initData();
+                const { organizationRegistrationPeriod, organization, group, groupPrice, member, token, user } = await initData();
                 const bundleDiscount = await initDiscount({
                     organizationRegistrationPeriod,
                     discount: {
@@ -2352,7 +2359,7 @@ describe('Endpoint.RegisterMembers', () => {
 
                 const group2 = await new GroupFactory({
                     organization,
-                    price: groupPrice.price.price - 10, // Lower price so discount is applied preferably on the first group
+                    price: 15, // Lower price so discount is applied preferably on the first group
                 }).create();
 
                 const groupPrice2 = group2.settings.prices[0];
@@ -2399,7 +2406,7 @@ describe('Endpoint.RegisterMembers', () => {
                     administrationFee: 0,
                     freeContribution: 0,
                     paymentMethod: PaymentMethod.PointOfSale,
-                    totalPrice: groupPrice2.price.price - Math.round(0.2 * groupPrice.price.price), // 20% discount on first group
+                    totalPrice: 15 - 5, // 20% discount on first group
                 });
                 const response2 = await post(checkout2, organization, token);
                 expect(response2.body.registrations.length).toBe(1);
@@ -2414,9 +2421,42 @@ describe('Endpoint.RegisterMembers', () => {
                 expect(updatedRegistration1!.discounts).toMatchMap(new Map([
                     [bundleDiscount.id, AppliedRegistrationDiscount.create({
                         name: bundleDiscount.name,
-                        amount: Math.round(0.2 * groupPrice.price.price),
+                        amount: 5,
                     })],
                 ]));
+
+                await assertBalances({
+                    user,
+                    balances: [
+                        {
+                            type: BalanceItemType.Registration,
+                            registrationId: registration1.id,
+                            amount: 1,
+                            price: 25,
+                            status: BalanceItemStatus.Due,
+                            priceOpen: 0,
+                            pricePending: 25,
+                        },
+                        {
+                            type: BalanceItemType.RegistrationBundleDiscount,
+                            registrationId: registration1.id,
+                            amount: 1,
+                            price: -5,
+                            status: BalanceItemStatus.Due,
+                            priceOpen: 0,
+                            pricePending: -5,
+                        },
+                        {
+                            type: BalanceItemType.Registration,
+                            registrationId: registration2.id,
+                            amount: 1,
+                            price: 15,
+                            status: BalanceItemStatus.Due,
+                            priceOpen: 0,
+                            pricePending: 15,
+                        },
+                    ],
+                });
             });
 
             test('Best discount applied on historic registration with online payment (2 tries)', async () => {
