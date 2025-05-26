@@ -91,49 +91,6 @@ describe('Endpoint.RegisterMembers', () => {
     };
 
     describe('Register as member', () => {
-        test('Should fail if cannot manage finances', async () => {
-            // #region arrange
-            const { member, group, groupPrice, organization, token } = await initData();
-            const organization2 = await initOrganization();
-
-            const registration = await new RegistrationFactory({
-                member,
-                group,
-                groupPrice,
-            }).create();
-
-            const body = IDRegisterCheckout.create({
-                cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
-                            groupPrice,
-                            organizationId: organization.id,
-                            groupId: group.id,
-                            memberId: member.id,
-                        }),
-                    ],
-                    balanceItems: [],
-                    deleteRegistrationIds: [registration.id],
-                }),
-                administrationFee: 0,
-                freeContribution: 0,
-                paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 5,
-                asOrganizationId: organization2.id,
-                customer: null,
-            });
-            // #endregion
-
-            // #region act and assert
-            await expect(async () => await post(body, organization, token))
-                .rejects
-                .toThrow('No permission to register as this organization for a different organization');
-            // #endregion
-        });
-
         test('Should fail if demo limit reached', async () => {
             // Temorary set usermode for this test only
             TestUtils.setEnvironment('userMode', 'organization');
@@ -1417,6 +1374,47 @@ describe('Endpoint.RegisterMembers', () => {
             const result = await post(body, organization, token);
             expect(result).toBeDefined();
             // #endregion
+        });
+    });
+
+    describe('Register as organization', () => {
+        test('Deleting registrations should fail if cannot manage finances', async () => {
+            const { member, group, groupPrice, organization, token } = await initData();
+            const organization2 = await initOrganization();
+
+            const registration = await new RegistrationFactory({
+                member,
+                group,
+                groupPrice,
+            }).create();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [],
+                    deleteRegistrationIds: [registration.id],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 5,
+                asOrganizationId: organization2.id,
+                customer: null,
+            });
+
+            await expect(async () => await post(body, organization, token))
+                .rejects
+                .toThrow('No permission to register as this organization for a different organization');
         });
     });
 
