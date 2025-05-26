@@ -2,11 +2,11 @@ import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemFactory, Group, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { BalanceItemCartItem, BalanceItemType, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PayconiqAccount, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, ReduceablePrice, RegisterItemOption, STPackageStatus, STPackageType, UserPermissions, Version } from '@stamhoofd/structures';
-import nock from 'nock';
 import { v4 as uuidv4 } from 'uuid';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { RegisterMembersEndpoint } from './RegisterMembersEndpoint';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
+import { PayconiqMocker } from '../../../../tests/helpers/PayconiqMocker';
 
 const baseUrl = `/v${Version}/members/register`;
 
@@ -89,6 +89,11 @@ describe('Endpoint.RegisterMembers', () => {
             groupPrice,
         };
     };
+
+    async function initPayconiq({ organization }: { organization: Organization }) {
+        organization.meta.registrationPaymentConfiguration.paymentMethods.push(PaymentMethod.Payconiq);
+        organization.privateMeta.payconiqAccounts = [PayconiqMocker.generateTestAccount()];
+    }
 
     describe('Register as member', () => {
         test('Should fail if demo limit reached', async () => {
@@ -726,18 +731,7 @@ describe('Endpoint.RegisterMembers', () => {
 
         test('Should update reserved members', async () => {
             const { member, organization, token } = await initData();
-
-            organization.meta.registrationPaymentConfiguration.paymentMethods = [PaymentMethod.PointOfSale, PaymentMethod.Payconiq];
-
-            organization.privateMeta.payconiqAccounts = [PayconiqAccount.create({
-                id: uuidv4(),
-                apiKey: 'testKey',
-                merchantId: 'test',
-                profileId: 'test',
-                name: 'test',
-                iban: 'BE56587127952688', // = random IBAN
-                callbackUrl: 'https://www.example.com',
-            })];
+            await initPayconiq({ organization });
 
             await organization.save();
 
@@ -775,23 +769,13 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            nock('https://api.ext.payconiq.com')
-                .post('/v3/payments')
-                .reply(200, {
-                    paymentId: 'testPaymentId',
-                    _links: {
-                        checkout: {
-                            href: 'https://www.example.com',
-                        },
-                    },
-                });
-
             // act
             const response = await post(body, organization, token);
 
             // assert
             expect(response.body).toBeDefined();
             expect(response.body.registrations.length).toBe(1);
+            expect(response.body.paymentUrl).toMatch(/payconiq\.com/);
 
             const updatedGroup = await Group.getByID(group2.id);
             expect(updatedGroup!.settings.registeredMembers).toBe(0);
@@ -1929,9 +1913,10 @@ describe('Endpoint.RegisterMembers', () => {
             // #endregion
         });
 
-        test('Should throw error if with payment', async () => {
+        test('Should throw error if deleting registrations as normal member', async () => {
             // #region arrange
             const { member, group: group1, groupPrice: groupPrice1, organization: organization1, token } = await initData();
+            await initPayconiq({ organization: organization1 });
 
             const registration = await new RegistrationFactory({
                 member,
@@ -1944,7 +1929,6 @@ describe('Endpoint.RegisterMembers', () => {
                 organization: organization1,
                 price: 30,
                 stock: 5,
-                maxMembers: 1,
             }).create();
 
             const groupPrice = group.settings.prices[0];
@@ -1973,16 +1957,8 @@ describe('Endpoint.RegisterMembers', () => {
                 totalPrice: 5,
                 customer: null,
             });
-            // #endregion
-
-            // #region act and assert
-
-            // update occupancy to be sure occupancy is 1
-            await group1.updateOccupancy();
-            expect(group1.settings.registeredMembers).toBe(1);
 
             await expect(async () => await post(body, organization1, token)).rejects.toThrow('Permission denied: you are not allowed to delete registrations');
-            // #endregion
         });
 
         test('Should deactivate registration', async () => {

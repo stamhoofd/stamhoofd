@@ -11,6 +11,7 @@ import { GlobalHelper } from '../src/helpers/GlobalHelper';
 import * as jose from 'jose';
 import { TestUtils } from '@stamhoofd/test-utils';
 import './toMatchMap';
+import { PayconiqMocker } from './helpers/PayconiqMocker';
 
 // Set version of saved structures
 Column.setJSONVersion(Version);
@@ -85,3 +86,4 @@ afterAll(async () => {
 
 TestUtils.setup();
 EmailMocker.infect();
+PayconiqMocker.infect();
