@@ -1,12 +1,12 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { Email } from '@stamhoofd/email';
+import { EmailMocker } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemFactory, Group, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { BalanceItemCartItem, BalanceItemType, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PayconiqAccount, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, ReduceablePrice, RegisterItemOption, STPackageStatus, STPackageType, UserPermissions, Version } from '@stamhoofd/structures';
 import nock from 'nock';
 import { v4 as uuidv4 } from 'uuid';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { RegisterMembersEndpoint } from './RegisterMembersEndpoint';
-import { STExpect } from '@stamhoofd/test-utils';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 
 const baseUrl = `/v${Version}/members/register`;
 
@@ -135,13 +135,8 @@ describe('Endpoint.RegisterMembers', () => {
         });
 
         test('Should fail if demo limit reached', async () => {
-            // #region arrange
-            (STAMHOOFD.userMode as string) = 'organization';
-
-            const spySendWebmaster = jest.spyOn(Email, 'sendWebmaster').mockImplementation(() => {
-                // do nothing
-            });
-
+            // Temorary set usermode for this test only
+            TestUtils.setEnvironment('userMode', 'organization');
             const { member, group, groupPrice, organization, token, otherMembers } = await initData({ otherMemberAmount: 10 });
 
             organization.meta.packages = OrganizationPackages.create({
@@ -203,22 +198,20 @@ describe('Endpoint.RegisterMembers', () => {
                 asOrganizationId: organization.id,
                 customer: null,
             });
-            // #endregion
-
-            // #region act and assert
-
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
-                .toThrow('Too many e-mails limited');
+                .toThrow(STExpect.simpleError({ code: 'too_many_emails_period' }));
 
-            expect(spySendWebmaster).toHaveBeenCalledOnce();
-            // #endregion
-
-            (STAMHOOFD.userMode as string) = 'platform';
+            expect(await EmailMocker.transactional.getSucceededEmails()).toEqual([
+                expect.objectContaining({
+                    to: '"Stamhoofd" <hallo@stamhoofd.be>',
+                    from: '"Ravot" <webmaster@stamhoofd.be>',
+                    subject: '[Limiet] Limiet bereikt voor aantal inschrijvingen',
+                }),
+            ]);
         });
 
         test('Should fail if balance item deleted', async () => {
-            // #region arrange
             const { member, user, organization, token } = await initData();
 
             const balanceItem1 = await new BalanceItemFactory({
@@ -250,15 +243,12 @@ describe('Endpoint.RegisterMembers', () => {
                 totalPrice: 20,
                 customer: null,
             });
-            // #endregion
 
-            // #region act and assert
             await balanceItem1.delete();
 
             await expect(async () => await post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('Oeps, één of meerdere openstaande bedragen in jouw winkelmandje zijn aangepast'));
-            // #endregion
         });
 
         test('Should fail if balance item price difference', async () => {
