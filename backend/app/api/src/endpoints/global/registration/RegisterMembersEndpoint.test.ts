@@ -14,16 +14,12 @@ describe('Endpoint.RegisterMembers', () => {
     // #region global
     const endpoint = new RegisterMembersEndpoint();
     let period: RegistrationPeriod;
-
-    // #region helpers
+    let defaultPermissionLevel = PermissionLevel.None;
     const post = async (body: IDRegisterCheckout, organization: Organization, token: Token) => {
         const request = Request.buildJson('POST', baseUrl, organization.getApiHost(), body);
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test(endpoint, request);
     };
-    // #endregion
-
-    // #endregion
 
     beforeAll(async () => {
         const previousPeriod = await new RegistrationPeriodFactory({
@@ -38,6 +34,10 @@ describe('Endpoint.RegisterMembers', () => {
         }).create();
     });
 
+    beforeEach(async () => {
+        TestUtils.setEnvironment('userMode', 'platform');
+    });
+
     afterEach(() => {
         jest.restoreAllMocks();
     });
@@ -47,14 +47,16 @@ describe('Endpoint.RegisterMembers', () => {
             .create();
     };
 
-    const initData = async ({ otherMemberAmount = 0, permissionLevel = PermissionLevel.Full }: { otherMemberAmount?: number; permissionLevel?: PermissionLevel } = {}) => {
+    async function initData({ otherMemberAmount = 0, permissionLevel = defaultPermissionLevel }: { otherMemberAmount?: number; permissionLevel?: PermissionLevel } = {}) {
         const organization = await initOrganization(period);
 
         const user = await new UserFactory({
             organization,
-            permissions: Permissions.create({
-                level: permissionLevel,
-            }),
+            permissions: permissionLevel !== PermissionLevel.None
+                ? Permissions.create({
+                    level: permissionLevel,
+                })
+                : null,
         })
             .create();
 
@@ -88,7 +90,7 @@ describe('Endpoint.RegisterMembers', () => {
             group,
             groupPrice,
         };
-    };
+    }
 
     async function initPayconiq({ organization }: { organization: Organization }) {
         organization.meta.registrationPaymentConfiguration.paymentMethods.push(PaymentMethod.Payconiq);
@@ -96,6 +98,10 @@ describe('Endpoint.RegisterMembers', () => {
     }
 
     describe('Register as member', () => {
+        beforeEach(() => {
+            defaultPermissionLevel = PermissionLevel.None;
+        });
+
         test('Should fail if demo limit reached', async () => {
             TestUtils.setEnvironment('userMode', 'organization');
             const { member, group, groupPrice, organization, token, otherMembers } = await initData({ otherMemberAmount: 10 });
@@ -813,7 +819,6 @@ describe('Endpoint.RegisterMembers', () => {
                     freeContribution: 0,
                     paymentMethod: PaymentMethod.PointOfSale,
                     totalPrice: 0,
-                    asOrganizationId: organization.id,
                     customer: null,
                 });
                 // #endregion
@@ -862,7 +867,6 @@ describe('Endpoint.RegisterMembers', () => {
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
                 totalPrice: 25,
-                asOrganizationId: organization.id,
                 customer: null,
             });
             // #endregion
@@ -1166,20 +1170,14 @@ describe('Endpoint.RegisterMembers', () => {
     });
 
     describe('Register as organization', () => {
+        beforeEach(() => {
+            defaultPermissionLevel = PermissionLevel.Full;
+        });
+
         test('Should reuse recently deactivated registration', async () => {
-            const { organization, group, groupPrice, token, member, user } = await initData();
+            const { organization, group, groupPrice, token, member } = await initData();
             group.settings.allowRegistrationsByOrganization = true;
             await group.save();
-
-            user.permissions = UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization.id, Permissions.create({
-                        level: PermissionLevel.Full,
-                    })],
-                ]),
-            });
-
-            await user.save();
 
             const firstRegistration = await new RegistrationFactory({
                 member,
@@ -1301,22 +1299,122 @@ describe('Endpoint.RegisterMembers', () => {
     });
 
     describe('Register by other organization', () => {
-        test('Should fail if disabled by group', async () => {
-            const { organization, group, groupPrice, token, member, user } = await initData();
-            group.settings.allowRegistrationsByOrganization = false;
-            await group.save();
+        beforeEach(() => {
+            defaultPermissionLevel = PermissionLevel.Full;
+        });
 
-            const { organization: organization2 } = await initData();
+        async function initDualData(options?: Parameters<typeof initData>[0]) {
+            const base = await initData(options);
 
-            user.permissions = UserPermissions.create({
+            base.group.settings.allowRegistrationsByOrganization = true;
+            await base.group.save();
+
+            // Give the user permission for a different organization
+            const organization2 = await initOrganization();
+            base.user.permissions = UserPermissions.create({
                 organizationPermissions: new Map([
                     [organization2.id, Permissions.create({
-                        level: PermissionLevel.Full,
+                        level: options?.permissionLevel ?? defaultPermissionLevel,
                     })],
                 ]),
             });
+            await base.user.save();
 
-            await user.save();
+            return {
+                ...base,
+                organization2,
+            };
+        }
+
+        test('Should set paying organization id', async () => {
+            const { organization, group, groupPrice, member, token, organization2 } = await initDualData();
+
+            const company = Company.create({
+                name: 'test company',
+            });
+
+            organization2.meta.companies.push(company);
+            await organization2.save();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25,
+                customer: PaymentCustomer.create({
+                    company,
+                }),
+                asOrganizationId: organization2.id,
+            });
+
+            const response = await post(body, organization, token);
+            expect(response.body.registrations.length).toBe(1);
+            expect(response.body.registrations[0].payingOrganizationId).toEqual(organization2.id);
+        });
+
+        test('Should fail if not sufficient permissions', async () => {
+            const { organization, group, groupPrice, member, token, organization2 } = await initDualData({ permissionLevel: PermissionLevel.Read });
+
+            const company = Company.create({
+                name: 'test company',
+            });
+
+            organization2.meta.companies.push(company);
+            await organization2.save();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25,
+                customer: PaymentCustomer.create({
+                    company,
+                }),
+                asOrganizationId: organization2.id,
+            });
+
+            await expect(async () => await post(body, organization, token))
+                .rejects
+                .toThrow(STExpect.simpleError({ code: 'forbidden' }));
+        });
+
+        test('Should fail if disabled by group', async () => {
+            const { organization, group, groupPrice, member, token, organization2 } = await initDualData();
+
+            group.settings.allowRegistrationsByOrganization = false;
+            await group.save();
 
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
@@ -1349,22 +1447,7 @@ describe('Endpoint.RegisterMembers', () => {
         });
 
         test('Should fail if no customer', async () => {
-            // #region arrange
-            const { organization, group, groupPrice, token, member, user } = await initData();
-            group.settings.allowRegistrationsByOrganization = true;
-            await group.save();
-
-            const { organization: organization2 } = await initData();
-
-            user.permissions = UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization2.id, Permissions.create({
-                        level: PermissionLevel.Full,
-                    })],
-                ]),
-            });
-
-            await user.save();
+            const { organization, group, groupPrice, member, token, organization2 } = await initDualData();
 
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
@@ -1400,22 +1483,7 @@ describe('Endpoint.RegisterMembers', () => {
         });
 
         test('Should fail if no company on customer', async () => {
-            // #region arrange
-            const { organization, group, groupPrice, token, member, user } = await initData();
-            group.settings.allowRegistrationsByOrganization = true;
-            await group.save();
-
-            const { organization: organization2 } = await initData();
-
-            user.permissions = UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization2.id, Permissions.create({
-                        level: PermissionLevel.Full,
-                    })],
-                ]),
-            });
-
-            await user.save();
+            const { organization, group, groupPrice, member, token, organization2 } = await initDualData();
 
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
@@ -1453,22 +1521,7 @@ describe('Endpoint.RegisterMembers', () => {
         });
 
         test('Should fail if company does not exist on organization', async () => {
-            // #region arrange
-            const { organization, group, groupPrice, token, member, user } = await initData();
-            group.settings.allowRegistrationsByOrganization = true;
-            await group.save();
-
-            const { organization: organization2 } = await initData();
-
-            user.permissions = UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization2.id, Permissions.create({
-                        level: PermissionLevel.Full,
-                    })],
-                ]),
-            });
-
-            await user.save();
+            const { organization, group, groupPrice, member, token, organization2 } = await initDualData();
 
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
@@ -1506,70 +1559,14 @@ describe('Endpoint.RegisterMembers', () => {
                 .toThrow(new RegExp('Oeps, de facturatiegegevens die je probeerde te selecteren lijken niet meer te bestaan.'));
             // #endregion
         });
-
-        test('Should set paying organization id', async () => {
-            // #region arrange
-            const { organization, group, groupPrice, token, member, user } = await initData();
-            group.settings.allowRegistrationsByOrganization = true;
-            await group.save();
-
-            const { organization: organization2 } = await initData();
-            const company = Company.create({
-                name: 'test company',
-            });
-
-            organization2.meta.companies.push(company);
-            await organization2.save();
-
-            user.permissions = UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization2.id, Permissions.create({
-                        level: PermissionLevel.Full,
-                    })],
-                ]),
-            });
-
-            await user.save();
-
-            const body = IDRegisterCheckout.create({
-                cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
-                            groupPrice,
-                            organizationId: organization.id,
-                            groupId: group.id,
-                            memberId: member.id,
-                        }),
-                    ],
-                    balanceItems: [
-                    ],
-                    deleteRegistrationIds: [],
-                }),
-                administrationFee: 0,
-                freeContribution: 0,
-                paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
-                customer: PaymentCustomer.create({
-                    company,
-                }),
-                asOrganizationId: organization2.id,
-            });
-            // #endregion
-
-            // #region act and assert
-            const response = await post(body, organization, token);
-            expect(response.body.registrations.length).toBe(1);
-            expect(response.body.registrations[0].payingOrganizationId).toEqual(organization2.id);
-            // #endregion
-        });
     });
 
     describe('Replace registrations', () => {
+        beforeEach(() => {
+            defaultPermissionLevel = PermissionLevel.Full;
+        });
+
         test('Should update registered members', async () => {
-            // #region arrange
             const { organization, group: group1, groupPrice: groupPrice1, token, member } = await initData();
 
             const registration = await new RegistrationFactory({
@@ -1610,11 +1607,7 @@ describe('Endpoint.RegisterMembers', () => {
                 asOrganizationId: organization.id,
                 customer: null,
             });
-            // #endregion
 
-            // #region act and assert
-
-            // update occupancy to be sure occupancy is 1
             await group1.updateOccupancy();
             expect(group1.settings.registeredMembers).toBe(1);
 
@@ -1632,7 +1625,6 @@ describe('Endpoint.RegisterMembers', () => {
             // occupancy should go from 1 to 0 because the registration should be replaced
             expect(updatedGroup1After!.settings.registeredMembers).toBe(0);
             expect(updatedGroup1After!.settings.reservedMembers).toBe(0);
-            // #endregion
         });
 
         test('Should set paid as organization on new registration', async () => {
@@ -1846,6 +1838,10 @@ describe('Endpoint.RegisterMembers', () => {
     });
 
     describe('Delete registrations', () => {
+        beforeEach(() => {
+            defaultPermissionLevel = PermissionLevel.Full;
+        });
+
         test('Should update registered members', async () => {
             // #region arrange
             const { member, group: group1, groupPrice: groupPrice1, organization: organization1, token } = await initData();
