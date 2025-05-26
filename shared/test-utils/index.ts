@@ -119,4 +119,13 @@ export const STExpect = {
         }
         return expect.objectContaining(d) as jest.Constructable;
     },
+    simpleErrors: (data: {
+        code?: string;
+        message?: string;
+        field?: string;
+    }[]) => {
+        return expect.objectContaining({
+            errors: data.map(d => STExpect.simpleError(d)),
+        }) as jest.Constructable;
+    },
 };

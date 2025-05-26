@@ -323,7 +323,6 @@ describe('Endpoint.RegisterMembers', () => {
         });
 
         test('Should fail if price changed', async () => {
-            // #region arrange
             const { member, group, groupPrice, organization, token } = await initData();
 
             const body = IDRegisterCheckout.create({
@@ -344,22 +343,16 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 30,
-                asOrganizationId: organization.id,
+                totalPrice: groupPrice.price.price + 5, // too much
                 customer: null,
             });
-            // #endregion
-
-            // #region act and assert
 
             await expect(async () => await post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('Oeps! De prijs is gewijzigd terwijl je aan het afrekenen was'));
-            // #endregion
+                .toThrow(STExpect.simpleError({ code: 'changed_price' }));
         });
 
         test('Should fail if member is already registered', async () => {
-            // #region arrange
             const { organization, group, groupPrice, token, member } = await initData();
 
             const body = IDRegisterCheckout.create({
@@ -385,21 +378,17 @@ describe('Endpoint.RegisterMembers', () => {
                 totalPrice: 25,
                 customer: null,
             });
-            // #endregion
 
-            // #region act and assert
             // register first time
             await post(body, organization, token);
 
             // second time should fail
             await expect(async () => await post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('Already registered'));
-            // #endregion
+                .toThrow(STExpect.simpleError({ code: 'already_registered' }));
         });
 
         test('Should fail if duplicate registration in cart', async () => {
-            // #region arrange
             const { organization, group, groupPrice, token, member } = await initData();
 
             const body = IDRegisterCheckout.create({
@@ -424,9 +413,6 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
-                    deleteRegistrationIds: [],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
@@ -434,13 +420,13 @@ describe('Endpoint.RegisterMembers', () => {
                 totalPrice: 50,
                 customer: null,
             });
-            // #endregion
 
-            // #region act and assert
             await expect(async () => await post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('duplicate_register_item'));
-            // #endregion
+                .toThrow(STExpect.simpleErrors([
+                    { code: 'duplicate_register_item' },
+                    { code: 'duplicate_register_item' },
+                ]));
         });
 
         test('Should fail register by other organization if disabled by group', async () => {
