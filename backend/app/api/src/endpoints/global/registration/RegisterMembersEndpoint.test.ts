@@ -1,6 +1,6 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { Email } from '@stamhoofd/email';
-import { BalanceItemFactory, Group, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemFactory, Group, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { BalanceItemCartItem, BalanceItemType, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PayconiqAccount, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, ReduceablePrice, RegisterItemOption, STPackageStatus, STPackageType, UserPermissions, Version } from '@stamhoofd/structures';
 import nock from 'nock';
 import { v4 as uuidv4 } from 'uuid';
@@ -89,7 +89,7 @@ describe('Endpoint.RegisterMembers', () => {
         };
     };
 
-    describe('Register', () => {
+    describe('Register as member', () => {
         test('Should fail if cannot manage finances', async () => {
             // #region arrange
             const { member, group, groupPrice, organization, token } = await initData();
@@ -720,32 +720,13 @@ describe('Endpoint.RegisterMembers', () => {
             // #endregion
         });
 
-        test('Should reuse existing registration', async () => {
-            // #region arrange
-            const { organization, group, groupPrice, token, member, user } = await initData();
-            group.settings.allowRegistrationsByOrganization = true;
-            await group.save();
-
-            user.permissions = UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization.id, Permissions.create({
-                        level: PermissionLevel.Full,
-                    })],
-                ]),
-            });
-
-            await user.save();
-
-            const group2 = await new GroupFactory({
-                organization,
-                price: 25,
-                stock: 5,
-            }).create();
-
+        test('Should reuse existing registration if it has zero balance', async () => {
+            const { organization, group, groupPrice, token, member } = await initData();
             const firstRegistration = await new RegistrationFactory({
                 member,
-                group: group2,
-                groupPrice: group2.settings.prices[0],
+                group: group,
+                groupPrice: group.settings.prices[0],
+                deactivatedAt: new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
             }).create();
 
             const body = IDRegisterCheckout.create({
@@ -753,7 +734,41 @@ describe('Endpoint.RegisterMembers', () => {
                     items: [
                         IDRegisterItem.create({
                             id: uuidv4(),
-                            replaceRegistrationIds: [firstRegistration.id],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25,
+                asOrganizationId: organization.id,
+            });
+
+            const response = await post(body, organization, token);
+            expect(response.body.registrations.length).toBe(1);
+            expect(response.body.registrations[0].id).toEqual(firstRegistration.id);
+        });
+
+        test('Should not reuse existing registration if it is older than 7 days', async () => {
+            const { organization, group, groupPrice, token, member } = await initData();
+
+            const firstRegistration = await new RegistrationFactory({
+                member,
+                group: group,
+                groupPrice: group.settings.prices[0],
+                deactivatedAt: new Date(new Date().getTime() - 8 * 24 * 60 * 60 * 1000), // 8 days ago
+            }).create();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
                             options: [],
                             groupPrice,
                             organizationId: organization.id,
@@ -772,13 +787,60 @@ describe('Endpoint.RegisterMembers', () => {
                 asOrganizationId: organization.id,
             });
 
-            // #endregion
-
-            // #region act and assert
             const response = await post(body, organization, token);
             expect(response.body.registrations.length).toBe(1);
-            expect(response.body.registrations[0].id).toEqual(firstRegistration.id);
-            // #endregion
+            expect(response.body.registrations[0].id).not.toEqual(firstRegistration.id);
+        });
+
+        test('Should not reuse existing registration if has a non-zero balance', async () => {
+            const { organization, group, groupPrice, token, member, user } = await initData();
+            const firstRegistration = await new RegistrationFactory({
+                member,
+                group,
+                groupPrice: group.settings.prices[0],
+                deactivatedAt: new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+            }).create();
+
+            // Create a balance item for the first registration
+            const item = await new BalanceItemFactory({
+                organizationId: organization.id,
+                memberId: member.id,
+                userId: user.id,
+                type: BalanceItemType.Registration,
+                amount: 1,
+                unitPrice: group.settings.prices[0].price.price,
+                registrationId: firstRegistration.id,
+            }).create();
+
+            // Update outstanding cache
+            await BalanceItem.updateOutstanding([item]);
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25,
+                asOrganizationId: organization.id,
+            });
+
+            const response = await post(body, organization, token);
+            expect(response.body.registrations.length).toBe(1);
+            expect(response.body.registrations[0].id).not.toEqual(firstRegistration.id);
         });
 
         test('Should reuse recently deactivated registration', async () => {
