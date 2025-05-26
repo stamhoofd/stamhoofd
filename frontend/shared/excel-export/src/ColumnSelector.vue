@@ -1,11 +1,11 @@
 <template>
-    <div v-for="({categoryName, columns}, index) in groupedColumns" :key="visibleSheet.name + '-' + categoryName" class="container">
+    <div v-for="({categoryName, columns: _columns}, index) in groupedColumns" :key="name + '-' + categoryName" class="container">
         <hr v-if="index > 0"><h2>{{ categoryName }}</h2>
 
         <STList>
             <STListItem element-name="label" :selectable="true" class="full-border">
                 <template #left>
-                    <Checkbox :model-value="getAllSelected(columns)" :indeterminate="getAllSelectedindeterminate(columns)" @update:model-value="setAllSelected($event, columns)" />
+                    <Checkbox :model-value="getAllSelected(_columns)" :indeterminate="getAllSelectedindeterminate(_columns)" @update:model-value="setAllSelected($event, _columns)" />
                 </template>
 
                 <div class="style-table-head">
@@ -13,7 +13,7 @@
                 </div>
             </STListItem>
 
-            <STListItem v-for="column of columns" :key="column.id" element-name="label" :selectable="true">
+            <STListItem v-for="column of _columns" :key="column.id" element-name="label" :selectable="true">
                 <template #left>
                     <Checkbox v-model="column.enabled" />
                 </template>
@@ -30,20 +30,18 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { SelectableColumn } from './SelectableColumn';
-import { SelectableWorkbook } from './SelectableWorkbook';
 
 const props = defineProps<{
-    workbook: SelectableWorkbook;
+    name: string;
+    columns: SelectableColumn[];
 }>();
-
-const visibleSheet = ref(props.workbook.sheets[0]);
 
 const groupedColumns = computed(() => {
     const categories: Map<string, { columns: SelectableColumn[]; categoryName: string }> = new Map();
 
-    for (const column of visibleSheet.value.columns) {
+    for (const column of props.columns) {
         const category = column.category || '';
 
         if (!categories.has(category)) {

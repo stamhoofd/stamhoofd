@@ -33,7 +33,7 @@
             </STListItem>
         </STList>
 
-        <ColumnSelector :workbook="workbook" />
+        <ColumnSelector :name="visibleSheet.name" :columns="visibleSheet.columns" />
     </SaveView>
 </template>
 
