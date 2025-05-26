@@ -6,6 +6,7 @@ import nock from 'nock';
 import { v4 as uuidv4 } from 'uuid';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { RegisterMembersEndpoint } from './RegisterMembersEndpoint';
+import { SHExpect } from '@stamhoofd/test-utils';
 
 const baseUrl = `/v${Version}/members/register`;
 
@@ -216,9 +217,9 @@ describe('Endpoint.RegisterMembers', () => {
             (STAMHOOFD.userMode as string) = 'platform';
         });
 
-        test('Should fail if balance items changed', async () => {
+        test('Should fail if balance item deleted', async () => {
             // #region arrange
-            const { member, group, user, groupPrice, organization, token } = await initData();
+            const { member, user, organization, token } = await initData();
 
             const balanceItem1 = await new BalanceItemFactory({
                 organizationId: organization.id,
@@ -237,17 +238,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
-                            groupPrice,
-                            organizationId: organization.id,
-                            groupId: group.id,
-                            memberId: member.id,
-                        }),
-                    ],
+                    items: [],
                     balanceItems: [
                         cartItem,
                     ],
@@ -256,7 +247,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 45,
+                totalPrice: 20,
                 customer: null,
             });
             // #endregion
@@ -268,6 +259,44 @@ describe('Endpoint.RegisterMembers', () => {
                 .rejects
                 .toThrow(new RegExp('Oeps, één of meerdere openstaande bedragen in jouw winkelmandje zijn aangepast'));
             // #endregion
+        });
+
+        test('Should fail if balance item price difference', async () => {
+            const { member, user, organization, token } = await initData();
+
+            const balanceItem1 = await new BalanceItemFactory({
+                organizationId: organization.id,
+                memberId: member.id,
+                userId: user.id,
+                payingOrganizationId: organization.id,
+                type: BalanceItemType.Registration,
+                amount: 10,
+                unitPrice: 2,
+            }).create();
+
+            const cartItem = BalanceItemCartItem.create({
+                item: balanceItem1.getStructure(),
+                price: 30, // too much
+            });
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [],
+                    balanceItems: [
+                        cartItem,
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 30,
+                customer: null,
+            });
+
+            await expect(post(body, organization, token))
+                .rejects
+                .toThrow(SHExpect.simpleError({ code: 'changed_price' }));
         });
 
         test('Should fail when pay balance item as organization', async () => {
