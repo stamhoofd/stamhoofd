@@ -570,7 +570,7 @@ describe('Endpoint.RegisterMembers', () => {
             expect(response.body.registrations[0].reservedUntil).toBeNull();
         });
 
-        test('Should reuse existing registration if it has zero balance', async () => {
+        test('Should reuse recently deactivated registration if it has zero balance', async () => {
             const { organization, group, groupPrice, token, member } = await initData();
             const firstRegistration = await new RegistrationFactory({
                 member,
@@ -682,64 +682,6 @@ describe('Endpoint.RegisterMembers', () => {
             const response = await post(body, organization, token);
             expect(response.body.registrations.length).toBe(1);
             expect(response.body.registrations[0].id).not.toEqual(firstRegistration.id);
-        });
-
-        test('Should reuse recently deactivated registration', async () => {
-            // #region arrange
-            const { organization, group, groupPrice, token, member, user } = await initData();
-            group.settings.allowRegistrationsByOrganization = true;
-            await group.save();
-
-            user.permissions = UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization.id, Permissions.create({
-                        level: PermissionLevel.Full,
-                    })],
-                ]),
-            });
-
-            await user.save();
-
-            const firstRegistration = await new RegistrationFactory({
-                member,
-                group,
-                groupPrice,
-            }).create();
-
-            firstRegistration.deactivatedAt = new Date();
-            await firstRegistration.save();
-
-            const body = IDRegisterCheckout.create({
-                cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
-                            groupPrice,
-                            organizationId: organization.id,
-                            groupId: group.id,
-                            memberId: member.id,
-                        }),
-                    ],
-                    balanceItems: [
-                    ],
-                    deleteRegistrationIds: [],
-                }),
-                administrationFee: 0,
-                freeContribution: 0,
-                paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
-                asOrganizationId: organization.id,
-            });
-
-            // #endregion
-
-            // #region act and assert
-            const response = await post(body, organization, token);
-            expect(response.body.registrations.length).toBe(1);
-            expect(response.body.registrations[0].id).toEqual(firstRegistration.id);
-            // #endregion
         });
 
         test('Should update registered members', async () => {
@@ -1243,6 +1185,59 @@ describe('Endpoint.RegisterMembers', () => {
     });
 
     describe('Register as organization', () => {
+        test('Should reuse recently deactivated registration', async () => {
+            const { organization, group, groupPrice, token, member, user } = await initData();
+            group.settings.allowRegistrationsByOrganization = true;
+            await group.save();
+
+            user.permissions = UserPermissions.create({
+                organizationPermissions: new Map([
+                    [organization.id, Permissions.create({
+                        level: PermissionLevel.Full,
+                    })],
+                ]),
+            });
+
+            await user.save();
+
+            const firstRegistration = await new RegistrationFactory({
+                member,
+                group,
+                groupPrice,
+            }).create();
+
+            firstRegistration.deactivatedAt = new Date();
+            await firstRegistration.save();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25,
+                asOrganizationId: organization.id,
+            });
+
+            const response = await post(body, organization, token);
+            expect(response.body.registrations.length).toBe(1);
+            expect(response.body.registrations[0].id).toEqual(firstRegistration.id);
+        });
+
         test('Deleting registrations should fail if cannot manage finances', async () => {
             const { member, group, groupPrice, organization, token } = await initData();
             const organization2 = await initOrganization();
