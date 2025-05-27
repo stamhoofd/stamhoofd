@@ -1,6 +1,7 @@
 import { BalanceItem, BalanceItemPayment, MemberFactory, Organization, OrganizationFactory, Payment } from '@stamhoofd/models';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, PaymentMethod, PaymentStatus, ReceivableBalanceType, TranslatedString } from '@stamhoofd/structures';
 import { PaymentReallocationService } from './PaymentReallocationService';
+import { BalanceItemService } from './BalanceItemService';
 
 let sharedOrganization: Organization | undefined;
 
@@ -100,7 +101,7 @@ async function createItem(options: {
         await balanceItemPayment.save();
     }
 
-    await BalanceItem.updateOutstanding([b]);
+    await BalanceItemService.updatePaidAndPending([b]);
     const balance = (await BalanceItem.getByID(b.id))!;
 
     await expectItem(balance, {
@@ -116,7 +117,7 @@ async function createItem(options: {
 }
 
 async function expectItem(b: BalanceItem, options: { pricePaid?: number; priceOpen?: number; pricePending?: number; paid?: number[]; pending?: number[]; failed?: number[] }) {
-    await BalanceItem.updateOutstanding([b]);
+    await BalanceItemService.updatePaidAndPending([b]);
     b = (await BalanceItem.getByID(b.id))!;
 
     const loaded = await BalanceItem.loadPayments([b]);

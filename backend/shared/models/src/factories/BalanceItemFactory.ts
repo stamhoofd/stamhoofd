@@ -1,6 +1,6 @@
 import { Factory } from '@simonbackx/simple-database';
 
-import { BalanceItemType } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType } from '@stamhoofd/structures';
 import { BalanceItem } from '../models';
 
 class Options {
@@ -19,6 +19,8 @@ class Options {
     dueAt?: Date | null;
     createdAt?: Date;
     updatedAt?: Date;
+    status?: BalanceItemStatus;
+    relations?: Map<BalanceItemRelationType, BalanceItemRelation>;
 }
 
 export class BalanceItemFactory extends Factory<Options, BalanceItem> {
@@ -31,6 +33,7 @@ export class BalanceItemFactory extends Factory<Options, BalanceItem> {
         balanceItem.registrationId = this.options.registrationId ?? null;
         balanceItem.orderId = this.options.orderId ?? null;
         balanceItem.dependingBalanceItemId = this.options.dependingBalanceItemId ?? null;
+        balanceItem.relations = this.options.relations ?? new Map();
 
         if (this.options.type) {
             balanceItem.type = this.options.type;
@@ -50,8 +53,11 @@ export class BalanceItemFactory extends Factory<Options, BalanceItem> {
         if (this.options.updatedAt) {
             balanceItem.updatedAt = this.options.updatedAt;
         }
+        balanceItem.status = this.options.status ?? BalanceItemStatus.Due;
 
         await balanceItem.save();
+
+        // await BalanceItem.updateOutstanding([balanceItem]);
         return balanceItem;
     }
 }

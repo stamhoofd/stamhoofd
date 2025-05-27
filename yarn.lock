@@ -4012,10 +4012,10 @@
     "@sigstore/core" "^1.1.0"
     "@sigstore/protobuf-specs" "^0.3.1"
 
-"@simonbackx/simple-database@1.29.1":
-  version "1.29.1"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.29.1.tgz#e21fcab0e6429e240434b5b656227865354ea951"
-  integrity sha512-4B6hx/mPSwSvbl7MtVmB6NlBJcI0pLSK2Wqcl0Q2z3eyOmdrNshDpTlGih3MXKZ5MLbuvSzrtuT/zvpmK/0GXQ==
+"@simonbackx/simple-database@1.30.0":
+  version "1.30.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.30.0.tgz#1e86c0a3bc061e1eff2225421c158b7030887f5c"
+  integrity sha512-eGwEPZK1FUI9ovzCqk0BqwgCLm9D7uQeLwT/9SEhIU3o7/4d6UB7GfGX2RCr/i9ehy5OMjSu9AW3E3m/6qoyjg==
   dependencies:
     "@simonbackx/simple-logging" "^1.0.0"
     colors "^1.4.0"

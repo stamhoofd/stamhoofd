@@ -2,6 +2,7 @@ import { BalanceItem, BalanceItemPayment, CachedBalance, Payment } from '@stamho
 import { SQL } from '@stamhoofd/sql';
 import { BalanceItemStatus, doBalanceItemRelationsMatch, PaymentMethod, PaymentStatus, PaymentType, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
+import { BalanceItemService } from './BalanceItemService';
 
 type BalanceItemWithRemaining = {
     balanceItem: BalanceItem;
@@ -56,7 +57,7 @@ export const PaymentReallocationService = {
 
         if (didMerge.length) {
             // Update outstanding
-            await BalanceItem.updateOutstanding(didMerge);
+            await BalanceItemService.updatePaidAndPending(didMerge);
 
             // Reload balance items
             balanceItems = (await CachedBalance.balanceForObjects(organizationId, [objectId], type)).filter(b => b.isAfterDueDate);
@@ -223,7 +224,7 @@ export const PaymentReallocationService = {
         }
 
         // Update outstanding
-        await BalanceItem.updateOutstanding([
+        await BalanceItemService.updatePaidAndPending([
             ...negativeItems.filter(n => n.remaining !== n.balanceItem.priceOpen).map(n => n.balanceItem),
             ...positiveItems.filter(p => p.remaining !== p.balanceItem.priceOpen).map(p => p.balanceItem),
         ]);

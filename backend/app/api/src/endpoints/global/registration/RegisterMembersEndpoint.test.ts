@@ -669,7 +669,7 @@ describe('Endpoint.RegisterMembers', () => {
             }).create();
 
             // Update outstanding cache
-            await BalanceItem.updateOutstanding([item]);
+            // await BalanceItem.updateOutstanding([item]);
 
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({

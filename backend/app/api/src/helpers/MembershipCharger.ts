@@ -131,10 +131,10 @@ export const MembershipCharger = {
                 createdPrice += membership.price;
             }
 
-            await BalanceItem.updateOutstanding(createdBalanceItems);
+            // await BalanceItem.updateOutstanding(createdBalanceItems);
 
             // Reallocate
-            await BalanceItemService.reallocate(createdBalanceItems, chargeVia);
+            // await BalanceItemService.reallocate(createdBalanceItems, chargeVia);
 
             if (memberships.length < chunkSize) {
                 break;

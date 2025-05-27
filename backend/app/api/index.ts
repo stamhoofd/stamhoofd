@@ -16,6 +16,7 @@ import { GlobalHelper } from './src/helpers/GlobalHelper';
 import { SetupStepUpdater } from './src/helpers/SetupStepUpdater';
 import { ContextMiddleware } from './src/middleware/ContextMiddleware';
 import { AuditLogService } from './src/services/AuditLogService';
+import { BalanceItemService } from './src/services/BalanceItemService';
 import { DocumentService } from './src/services/DocumentService';
 import { FileSignService } from './src/services/FileSignService';
 import { PlatformMembershipService } from './src/services/PlatformMembershipService';
@@ -209,13 +210,14 @@ const start = async () => {
 
     // Register crons
     await import('./src/crons');
-    startCrons();
-    seeds().catch(console.error);
 
     AuditLogService.listen();
     PlatformMembershipService.listen();
     DocumentService.listen();
     SetupStepUpdater.listen();
+
+    startCrons();
+    seeds().catch(console.error);
 };
 
 start().catch((error) => {

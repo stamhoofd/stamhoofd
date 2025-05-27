@@ -1,8 +1,19 @@
 import { BalanceItem } from '@stamhoofd/models';
 
-export async function assertBalances(selector: { user: { id: string | null } }, balances: Partial<BalanceItem>[]) {
+export async function assertBalances(selector: { user: { id: string | null } } | { member: { id: string | null } }, balances: Partial<BalanceItem>[]) {
     // Fetch all user balances
-    const userBalances = await BalanceItem.select().where('userId', selector.user.id).fetch();
+    const q = BalanceItem.select();
+    if ('user' in selector && selector.user.id) {
+        q.where('userId', selector.user.id);
+    }
+    else if ('member' in selector && selector.member.id) {
+        q.where('memberId', selector.member.id);
+    }
+    else {
+        throw new Error('Selector must contain either user or member with an id');
+    }
+
+    const userBalances = await q.fetch();
 
     try {
         expect(userBalances).toIncludeAllMembers(balances.map(b => expect.objectContaining(b)));

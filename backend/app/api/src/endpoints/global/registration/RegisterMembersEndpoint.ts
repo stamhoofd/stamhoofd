@@ -499,7 +499,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 balanceItem.memberId = registration.memberId;
 
                 if (!checkout.asOrganizationId) {
-                balanceItem.userId = user.id;
+                    balanceItem.userId = user.id;
                 }
             }
 
@@ -729,6 +729,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
             else {
                 balanceItem.userId = user.id;
+
                 // Connect this to the oldest member
                 if (oldestMember) {
                     balanceItem.memberId = oldestMember.id;
@@ -787,7 +788,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
 
             // Make sure every price is accurate before creating a payment
-            await BalanceItem.updateOutstanding([...createdBalanceItems]);
+            await BalanceItemService.updatePaidAndPending([...createdBalanceItems]);
             try {
                 const response = await this.createPayment({
                     balanceItems: mappedBalanceItems,
@@ -805,12 +806,12 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
             finally {
                 // Update cached balance items pending amount (only created balance items, because those are involved in the payment)
-                await BalanceItem.updateOutstanding(createdBalanceItems);
+                await BalanceItemService.updatePaidAndPending(createdBalanceItems);
             }
         }
         else {
             await markValidIfNeeded();
-            await BalanceItem.updateOutstanding([...createdBalanceItems]);
+            await BalanceItemService.updateOutstanding([...createdBalanceItems]);
         }
 
         // Reallocate

@@ -15,10 +15,10 @@ export class OrganizationCharger {
         }));
 
         await Promise.all(balanceItems.map(balanceItem => balanceItem.save()));
-        await BalanceItem.updateOutstanding(balanceItems);
+        // await BalanceItem.updateOutstanding(balanceItems);
 
         // Reallocate
-        await BalanceItemService.reallocate(balanceItems, chargingOrganizationId);
+        // await BalanceItemService.reallocate(balanceItems, chargingOrganizationId);
     }
 
     private static createBalanceItem({ price, amount, description, chargingOrganizationId, organizationBeingCharged, dueAt, createdAt }: { price: number; amount?: number; description: string; chargingOrganizationId: string; organizationBeingCharged: OrganizationStruct; dueAt: Date | null; createdAt: Date | null }): BalanceItem {

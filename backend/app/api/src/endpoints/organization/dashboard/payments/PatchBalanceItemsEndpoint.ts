@@ -231,10 +231,10 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
             }
         });
 
-        await BalanceItem.updateOutstanding(updateOutstandingBalance, additionalItems);
+        // await BalanceItem.updateOutstanding(updateOutstandingBalance, additionalItems);
 
         // Reallocate
-        await BalanceItemService.reallocate(updateOutstandingBalance, organization.id);
+        // await BalanceItemService.reallocate(updateOutstandingBalance, organization.id);
 
         // Reload returnedModels
         const returnedModelsReloaded = await BalanceItem.getByIDs(...returnedModels.map(m => m.id));

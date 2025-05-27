@@ -1,33 +1,127 @@
-import { BalanceItem, Order, Organization, Payment, Webshop } from '@stamhoofd/models';
+import { BalanceItem, CachedBalance, Document, MemberUser, Order, Organization, Payment, Webshop } from '@stamhoofd/models';
 import { AuditLogSource, BalanceItemStatus, BalanceItemType, OrderStatus, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { AuditLogService } from './AuditLogService';
 import { PaymentReallocationService } from './PaymentReallocationService';
 import { RegistrationService } from './RegistrationService';
+import { Model } from '@simonbackx/simple-database';
 
 export const BalanceItemService = {
+    listening: false,
+
+    listen() {
+        if (this.listening) {
+            return;
+        }
+        this.listening = true;
+        Model.modelEventBus.addListener(this, async (event) => {
+            if (!(event.model instanceof BalanceItem)) {
+                return;
+            }
+
+            if (event.type === 'created' || event.type === 'deleted') {
+                await this.scheduleUpdate(event.model);
+                return;
+            }
+
+            // Check changed:
+            // status, unitPrice, dueAt, amount
+            if (
+                'status' in event.changedFields
+                || 'unitPrice' in event.changedFields
+                || 'dueAt' in event.changedFields
+                || 'amount' in event.changedFields
+                || 'memberId' in event.changedFields
+                || 'userId' in event.changedFields
+                || 'payingOrganizationId' in event.changedFields
+                || 'registrationId' in event.changedFields
+            ) {
+                await this.scheduleUpdate(event.model);
+            }
+        });
+    },
+
+    /**
+     * Todo: actually schedule the update and auto-flush on the next BalanceItem selection
+     */
+    async scheduleUpdate(item: BalanceItem) {
+        await this.updateOutstanding([item]);
+
+        // Todo: optimize
+        if (item.type === BalanceItemType.RegistrationBundleDiscount) {
+            // Save the applied discount to the related registration
+            if (item.registrationId) {
+                await RegistrationService.updateDiscounts(item.registrationId);
+            }
+        }
+    },
+
+    /**
+     * Call this when a payment or payment balance items have changed.
+     * It will also call updateOutstanding automatically, so no need to call that separately again
+     */
+    async updatePaidAndPending(items: BalanceItem[]) {
+        console.log('updatePaidAndPending for', items.length, 'items');
+        await BalanceItem.updatePricePaid(items.map(i => i.id));
+        await this.updateOutstanding(items);
+    },
+
+    /**
+     * Update how many every object in the system owes or needs to be reimbursed
+     * and also updates the pricePaid/pricePending cached values in Balance items and members
+     */
+    async updateOutstanding(items: BalanceItem[], additionalItems: { memberId: string; organizationId: string }[] = []) {
+        console.log('Update outstanding balance for', items.length, 'items');
+
+        const organizationIds = Formatter.uniqueArray(items.map(p => p.organizationId));
+        for (const organizationId of organizationIds) {
+            const filteredItems = items.filter(i => i.organizationId === organizationId);
+            const filteredAdditionalItems = additionalItems.filter(i => i.organizationId === organizationId);
+
+            const memberIds = Formatter.uniqueArray(
+                [
+                    ...filteredItems.map(p => p.memberId).filter(id => id !== null),
+                    ...filteredAdditionalItems.map(i => i.memberId),
+                ],
+            );
+
+            await CachedBalance.updateForMembers(organizationId, memberIds);
+
+            let userIds = filteredItems.filter(p => p.userId !== null).map(p => p.userId!);
+
+            if (memberIds.length) {
+                // Now also include the userIds of the members
+                const userMemberIds = (await MemberUser.select().where('membersId', memberIds).fetch()).map(m => m.usersId);
+                userIds.push(...userMemberIds);
+            }
+            userIds = Formatter.uniqueArray(userIds);
+
+            await CachedBalance.updateForUsers(organizationId, userIds);
+
+            const organizationIds = Formatter.uniqueArray(filteredItems.map(p => p.payingOrganizationId).filter(id => id !== null));
+            await CachedBalance.updateForOrganizations(organizationId, organizationIds);
+
+            const registrationIds: string[] = Formatter.uniqueArray(filteredItems.map(p => p.registrationId).filter(id => id !== null));
+            await CachedBalance.updateForRegistrations(organizationId, registrationIds);
+
+            if (registrationIds.length) {
+                await Document.updateForRegistrations(registrationIds, organizationId);
+            }
+        }
+    },
+
     async markDue(balanceItem: BalanceItem) {
-        const reactivate: BalanceItem[] = [];
         if (balanceItem.status === BalanceItemStatus.Hidden) {
-            reactivate.push(balanceItem);
+            balanceItem.status = BalanceItemStatus.Due;
+            await balanceItem.save();
         }
 
         // status and pricePaid changes are handled inside balanceitempayment
         if (balanceItem.dependingBalanceItemId) {
             const depending = await BalanceItem.getByID(balanceItem.dependingBalanceItemId);
             if (depending && depending.status === BalanceItemStatus.Hidden) {
-                reactivate.push(depending);
-            }
-        }
-
-        if (reactivate.length > 0) {
-            await BalanceItem.reactivateItems(reactivate);
-
-            if (balanceItem.type === BalanceItemType.RegistrationBundleDiscount) {
-                // Save the applied discount to the related registration
-                if (balanceItem.registrationId) {
-                    await RegistrationService.updateDiscounts(balanceItem.registrationId);
-                }
+                depending.status = BalanceItemStatus.Due;
+                await balanceItem.save();
             }
         }
     },

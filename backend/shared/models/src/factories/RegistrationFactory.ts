@@ -1,6 +1,6 @@
 import { Factory } from '@simonbackx/simple-database';
 
-import { GroupPrice } from '@stamhoofd/structures';
+import { BundleDiscount, GroupPrice } from '@stamhoofd/structures';
 import { Group } from '../models/Group';
 import { Member } from '../models/Member';
 import { Registration } from '../models/Registration';
@@ -36,6 +36,9 @@ export class RegistrationFactory extends Factory<Options, Registration> {
         registration.deactivatedAt = this.options.deactivatedAt || null;
 
         await registration.save();
+
+        // Create a balance item
+
         return registration;
     }
 }

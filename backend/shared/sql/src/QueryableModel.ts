@@ -41,10 +41,7 @@ export class QueryableModel extends Model {
         }
 
         const me = await (this.static as typeof QueryableModel).select().where(this.static.primary.name, this.getPrimaryKey()).first(true);
-
-        for (const column of this.static.columns.values()) {
-            this[column.name] = me[column.name];
-        }
+        this.copyFrom(me);
     }
 
     static async refreshAll<T extends typeof QueryableModel>(this: T, list: InstanceType<T>[]) {

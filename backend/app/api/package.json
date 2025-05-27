@@ -34,7 +34,7 @@
     "dependencies": {
         "@bwip-js/node": "^4.5.1",
         "@mollie/api-client": "3.7.0",
-        "@simonbackx/simple-database": "1.29.1",
+        "@simonbackx/simple-database": "1.30.0",
         "@simonbackx/simple-encoding": "2.22.0",
         "@simonbackx/simple-endpoints": "1.20.1",
         "@simonbackx/simple-logging": "^1.0.1",
