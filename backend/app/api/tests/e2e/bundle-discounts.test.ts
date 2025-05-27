@@ -1,6 +1,6 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { BalanceItem, GroupFactory, MemberFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { AppliedRegistrationDiscount, BalanceItemStatus, BalanceItemType, GroupPriceDiscountType, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, PermissionLevel, Permissions, Version } from '@stamhoofd/structures';
+import { AppliedRegistrationDiscount, BalanceItemStatus, BalanceItemType, GroupPriceDiscountType, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, PermissionLevel, Permissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { RegisterMembersEndpoint } from '../../src/endpoints/global/registration/RegisterMembersEndpoint';
 import { assertBalances } from '../assertions/assertBalances';
@@ -82,6 +82,62 @@ describe('E2E.Bundle Discounts', () => {
             member,
         };
     }
+
+    test('The first registration has no discount applied', async () => {
+        const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+        const bundleDiscount = await initBundleDiscount({
+            organizationRegistrationPeriod,
+            discount: {
+                discounts: [
+                    { value: 20_00, type: GroupPriceDiscountType.Percentage },
+                ],
+            },
+        });
+
+        const group = await new GroupFactory({
+            organization,
+            price: 25_00,
+            stock: 500,
+            bundleDiscount,
+        })
+            .create();
+
+        const groupPrice = group.settings.prices[0];
+
+        // First register the member for group 1. No discount should be applied yet
+        const checkout1 = IDRegisterCheckout.create({
+            cart: IDRegisterCart.create({
+                items: [
+                    IDRegisterItem.create({
+                        groupPrice,
+                        groupId: group.id,
+                        organizationId: organization.id,
+                        memberId: member.id,
+                    }),
+                ],
+            }),
+            paymentMethod: PaymentMethod.PointOfSale,
+            totalPrice: 25_00,
+        });
+
+        const response1 = await post(checkout1, organization, token);
+        expect(response1.body.registrations.length).toBe(1);
+        const registration1 = response1.body.registrations[0];
+        expect(registration1.registeredAt).not.toBeNull();
+        expect(registration1.discounts).toMatchMap(new Map());
+
+        await assertBalances({ user }, [
+            {
+                type: BalanceItemType.Registration,
+                registrationId: registration1.id,
+                amount: 1,
+                price: 25_00,
+                status: BalanceItemStatus.Due,
+                priceOpen: 0,
+                pricePending: 25_00,
+            },
+        ]);
+    });
 
     describe('With historic registrations', () => {
         test('Case: Replacing a historic registration causes a change in a different registration\'s discounts', async () => {
@@ -179,38 +235,35 @@ describe('E2E.Bundle Discounts', () => {
                 })],
             ]));
 
-            await assertBalances({
-                user,
-                balances: [
-                    {
-                        type: BalanceItemType.Registration,
-                        registrationId: registration1.id,
-                        amount: 1,
-                        price: 25_00,
-                        status: BalanceItemStatus.Due,
-                        priceOpen: 0,
-                        pricePending: 25_00,
-                    },
-                    {
-                        type: BalanceItemType.RegistrationBundleDiscount,
-                        registrationId: registration1.id,
-                        amount: 1,
-                        price: -5_00,
-                        status: BalanceItemStatus.Due,
-                        priceOpen: 0,
-                        pricePending: -5_00,
-                    },
-                    {
-                        type: BalanceItemType.Registration,
-                        registrationId: registration2.id,
-                        amount: 1,
-                        price: 15_00,
-                        status: BalanceItemStatus.Due,
-                        priceOpen: 0,
-                        pricePending: 15_00,
-                    },
-                ],
-            });
+            await assertBalances({ user }, [
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration1.id,
+                    amount: 1,
+                    price: 25_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 0,
+                    pricePending: 25_00,
+                },
+                {
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    registrationId: registration1.id,
+                    amount: 1,
+                    price: -5_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 0,
+                    pricePending: -5_00,
+                },
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration2.id,
+                    amount: 1,
+                    price: 15_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 0,
+                    pricePending: 15_00,
+                },
+            ]);
 
             // Now reaplce registration 2 with group 3, which is more expensive and should give more discount
             const checkout3 = IDRegisterCheckout.create({
@@ -252,73 +305,70 @@ describe('E2E.Bundle Discounts', () => {
             expect(updatedRegistration1.discounts).toMatchMap(new Map());
 
             // Check balances: no deletions happened, only additions or status changes
-            await assertBalances({
-                user,
-                balances: [
-                    {
-                        type: BalanceItemType.Registration,
-                        registrationId: registration1.id,
-                        amount: 1,
-                        unitPrice: 25_00,
-                        status: BalanceItemStatus.Due,
-                        priceOpen: 0,
-                        pricePending: 25_00,
-                    },
-                    {
-                        type: BalanceItemType.RegistrationBundleDiscount,
-                        registrationId: registration1.id,
-                        amount: 1,
-                        unitPrice: -5_00,
-                        status: BalanceItemStatus.Due,
-                        priceOpen: 0,
-                        pricePending: -5_00,
-                    },
-                    {
-                        type: BalanceItemType.Registration,
-                        registrationId: registration2.id,
-                        amount: 1,
-                        unitPrice: 15_00,
-                        status: BalanceItemStatus.Canceled,
-                        priceOpen: -15_00,
-                        pricePending: 15_00,
-                    },
-                    {
-                        type: BalanceItemType.Registration,
-                        registrationId: registration3.id,
-                        amount: 1,
-                        unitPrice: 40_00,
-                        status: BalanceItemStatus.Due,
-                        priceOpen: 40_00,
+            await assertBalances({ user }, [
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration1.id,
+                    amount: 1,
+                    unitPrice: 25_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 0,
+                    pricePending: 25_00,
+                },
+                {
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    registrationId: registration1.id,
+                    amount: 1,
+                    unitPrice: -5_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 0,
+                    pricePending: -5_00,
+                },
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration2.id,
+                    amount: 1,
+                    unitPrice: 15_00,
+                    status: BalanceItemStatus.Canceled,
+                    priceOpen: -15_00,
+                    pricePending: 15_00,
+                },
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration3.id,
+                    amount: 1,
+                    unitPrice: 40_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 40_00,
 
-                        // Not pending because created by admin
-                        pricePending: 0,
-                    },
-                    // Revert first discount
-                    {
-                        type: BalanceItemType.RegistrationBundleDiscount,
-                        registrationId: registration1.id,
-                        amount: 1,
-                        unitPrice: 5_00,
-                        status: BalanceItemStatus.Due,
-                        priceOpen: 5_00,
+                    // Not pending because created by admin
+                    pricePending: 0,
+                },
+                // Revert first discount
+                {
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    registrationId: registration1.id,
+                    amount: 1,
+                    unitPrice: 5_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 5_00,
 
-                        // Not pending because created by admin
-                        pricePending: 0,
-                    },
-                    // Add new discount
-                    {
-                        type: BalanceItemType.RegistrationBundleDiscount,
-                        registrationId: registration3.id,
-                        amount: 1,
-                        unitPrice: -8_00,
-                        status: BalanceItemStatus.Due,
-                        priceOpen: -8_00,
+                    // Not pending because created by admin
+                    pricePending: 0,
+                },
+                // Add new discount
+                {
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    registrationId: registration3.id,
+                    amount: 1,
+                    unitPrice: -8_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: -8_00,
 
-                        // Not pending because created by admin
-                        pricePending: 0,
-                    },
-                ],
-            });
+                    // Not pending because created by admin
+                    pricePending: 0,
+                },
+            ]);
         }, 10_000);
 
         test('Apply a discount on a previous registration with online payment (2 tries)', async () => {
@@ -379,21 +429,18 @@ describe('E2E.Bundle Discounts', () => {
             expect(registration1.discounts).toMatchMap(new Map());
 
             // Check state of balances
-            await assertBalances({
-                user,
-                balances: [
-                    {
-                        type: BalanceItemType.Registration,
-                        registrationId: registration1.id,
-                        amount: 1,
-                        unitPrice: 25_00,
-                        status: BalanceItemStatus.Hidden,
-                        priceOpen: -25_00, // hidden, so no payment expected yet
-                        pricePending: 25_00,
-                        pricePaid: 0,
-                    },
-                ],
-            });
+            await assertBalances({ user }, [
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration1.id,
+                    amount: 1,
+                    unitPrice: 25_00,
+                    status: BalanceItemStatus.Hidden,
+                    priceOpen: -25_00, // hidden, so no payment expected yet
+                    pricePending: 25_00,
+                    pricePaid: 0,
+                },
+            ]);
 
             await stripeMocker.succeedPayment(stripeMocker.getLastIntent());
 
@@ -417,10 +464,7 @@ describe('E2E.Bundle Discounts', () => {
                 },
             ];
 
-            await assertBalances({
-                user,
-                balances: expectedBalances,
-            });
+            await assertBalances({ user }, expectedBalances);
 
             const checkout2 = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
@@ -453,32 +497,29 @@ describe('E2E.Bundle Discounts', () => {
             expect(updatedRegistration1.discounts).toMatchMap(new Map());
 
             // Check state of balances
-            await assertBalances({
-                user,
-                balances: [
-                    ...expectedBalances,
-                    {
-                        type: BalanceItemType.Registration,
-                        registrationId: registration2.id,
-                        amount: 1,
-                        unitPrice: 15_00,
-                        status: BalanceItemStatus.Hidden, // Pending
-                        priceOpen: -15_00, // hidden, so no payment expected yet
-                        pricePending: 15_00,
-                        pricePaid: 0,
-                    },
-                    {
-                        type: BalanceItemType.RegistrationBundleDiscount,
-                        registrationId: registration1.id,
-                        amount: 1,
-                        unitPrice: -5_00,
-                        status: BalanceItemStatus.Hidden, // Pending
-                        priceOpen: 5_00,
-                        pricePending: -5_00,
-                        pricePaid: 0,
-                    },
-                ],
-            });
+            await assertBalances({ user }, [
+                ...expectedBalances,
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration2.id,
+                    amount: 1,
+                    unitPrice: 15_00,
+                    status: BalanceItemStatus.Hidden, // Pending
+                    priceOpen: -15_00, // hidden, so no payment expected yet
+                    pricePending: 15_00,
+                    pricePaid: 0,
+                },
+                {
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    registrationId: registration1.id,
+                    amount: 1,
+                    unitPrice: -5_00,
+                    status: BalanceItemStatus.Hidden, // Pending
+                    priceOpen: 5_00,
+                    pricePending: -5_00,
+                    pricePaid: 0,
+                },
+            ]);
 
             // Fail the payment...
             await stripeMocker.failPayment(stripeMocker.getLastIntent());
@@ -509,10 +550,7 @@ describe('E2E.Bundle Discounts', () => {
                 },
             );
 
-            await assertBalances({
-                user,
-                balances: expectedBalances,
-            });
+            await assertBalances({ user }, expectedBalances);
 
             // Try the payment again
             const response3 = await post(checkout2, organization, token);
@@ -527,34 +565,31 @@ describe('E2E.Bundle Discounts', () => {
             await updatedRegistration1.refresh();
             expect(updatedRegistration1.discounts).toMatchMap(new Map());
 
-            await assertBalances({
-                user,
-                balances: [
-                    ...expectedBalances,
-                    {
-                        type: BalanceItemType.Registration,
-                        registrationId: registration3.id,
-                        amount: 1,
-                        unitPrice: 15_00,
-                        status: BalanceItemStatus.Hidden, // Pending
-                        priceOpen: -15_00, // hidden, so no payment expected yet
-                        pricePending: 15_00,
-                        pricePaid: 0,
-                        paidAt: null,
-                    },
-                    {
-                        type: BalanceItemType.RegistrationBundleDiscount,
-                        registrationId: registration1.id,
-                        amount: 1,
-                        unitPrice: -5_00,
-                        status: BalanceItemStatus.Hidden, // Pending
-                        priceOpen: 5_00,
-                        pricePending: -5_00,
-                        pricePaid: 0,
-                        paidAt: null,
-                    },
-                ],
-            });
+            await assertBalances({ user }, [
+                ...expectedBalances,
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration3.id,
+                    amount: 1,
+                    unitPrice: 15_00,
+                    status: BalanceItemStatus.Hidden, // Pending
+                    priceOpen: -15_00, // hidden, so no payment expected yet
+                    pricePending: 15_00,
+                    pricePaid: 0,
+                    paidAt: null,
+                },
+                {
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    registrationId: registration1.id,
+                    amount: 1,
+                    unitPrice: -5_00,
+                    status: BalanceItemStatus.Hidden, // Pending
+                    priceOpen: 5_00,
+                    pricePending: -5_00,
+                    pricePaid: 0,
+                    paidAt: null,
+                },
+            ]);
 
             // Success the payment
             await stripeMocker.succeedPayment(stripeMocker.getLastIntent());
@@ -599,10 +634,7 @@ describe('E2E.Bundle Discounts', () => {
                 },
             );
 
-            await assertBalances({
-                user,
-                balances: expectedBalances,
-            });
+            await assertBalances({ user }, expectedBalances);
         }, 20_000);
 
         test.todo('Best discount applied on new registration');
