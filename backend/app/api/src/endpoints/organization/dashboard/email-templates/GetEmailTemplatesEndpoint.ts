@@ -49,11 +49,6 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
                 throw Context.auth.error();
             }
         }
-        else {
-            if (!Context.auth.hasPlatformFullAccess()) {
-                throw Context.auth.error();
-            }
-        }
 
         if (request.query.types?.length === 0) {
             throw new SimpleError({
@@ -120,6 +115,14 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
             defaultTemplates.unshift(...orgDefaults);
         }
 
-        return new Response(templates.concat(defaultTemplates).map(template => EmailTemplateStruct.create(template)));
+        const allTemplates: EmailTemplate[] = [];
+
+        for (const template of templates.concat(defaultTemplates)) {
+            if (await Context.auth.canAccessEmailTemplate(template)) {
+                allTemplates.push(template);
+            }
+        }
+
+        return new Response(allTemplates.map(template => EmailTemplateStruct.create(template)));
     }
 }
