@@ -497,7 +497,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
             else {
                 balanceItem.memberId = registration.memberId;
+
+                if (!checkout.asOrganizationId) {
                 balanceItem.userId = user.id;
+                }
             }
 
             balanceItem.status = BalanceItemStatus.Hidden;
