@@ -117,10 +117,10 @@ describe('E2E.Documents', () => {
         const registrationModel = (await Registration.getByID(registration.id))!;
 
         const expectations = [
-            member.firstName,
-            'Member name using other variable: ' + member.firstName,
-            member.lastName,
-            group.settings.name.toString(),
+            Formatter.escapeHtml(member.firstName),
+            'Member name using other variable: ' + Formatter.escapeHtml(member.firstName),
+            Formatter.escapeHtml(member.lastName),
+            Formatter.escapeHtml(group.settings.name.toString()),
             'Price: ' + Formatter.price(price),
             organization.name,
             Formatter.dateNumber(registrationModel.startDate!, true),
