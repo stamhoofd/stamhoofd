@@ -815,7 +815,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Update occupancy
         for (const group of groups) {
-            if (deactivatedRegistrationGroupIds.some(id => id === group.id)) {
+            if (registrations.some(r => r.groupId === group.id) || deactivatedRegistrationGroupIds.some(id => id === group.id)) {
                 await group.updateOccupancy();
                 await group.save();
             }

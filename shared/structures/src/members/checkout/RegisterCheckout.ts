@@ -265,6 +265,14 @@ export class RegisterCheckout {
             // Automatically clear free contribution if there are no options
             this.freeContribution = 0;
         }
+
+        if (this.cancellationFeePercentage > 100_00 || this.cancellationFeePercentage < 0) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                field: 'cancellationFeePercentage',
+                message: 'Invalid cancellation fee percentage',
+            });
+        }
     }
 
     clear() {

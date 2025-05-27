@@ -1,5 +1,5 @@
 import { Factory } from '@simonbackx/simple-database';
-import { GroupPrice, GroupSettings, GroupType, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
+import { BundleDiscount, BundleDiscountGroupPriceSettings, GroupPrice, GroupSettings, GroupType, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
 
 import { RegistrationPeriod } from '../models';
 import { Group } from '../models/Group';
@@ -15,6 +15,11 @@ class Options {
     maxMembers?: number | null;
     period?: RegistrationPeriod;
     waitingListId?: string;
+
+    /**
+     * Enable a given bundle discount on the group(price).
+     */
+    bundleDiscount?: BundleDiscount;
 }
 
 export class GroupFactory extends Factory<Options, Group> {
@@ -49,6 +54,12 @@ export class GroupFactory extends Factory<Options, Group> {
             ],
             maxMembers: this.options.maxMembers === undefined ? null : this.options.maxMembers,
         });
+
+        if (this.options.bundleDiscount) {
+            group.settings.prices[0].bundleDiscounts.set(this.options.bundleDiscount.id, BundleDiscountGroupPriceSettings.create({
+                name: this.options.bundleDiscount.name,
+            }));
+        }
 
         if (this.options.type) {
             group.type = this.options.type;
