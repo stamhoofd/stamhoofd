@@ -164,8 +164,7 @@ describe('E2E.Bundle Discounts', () => {
                 organization,
                 price: 25_00,
                 bundleDiscount,
-            })
-                .create();
+            }).create();
 
             const groupPrice = group.settings.prices[0];
 
@@ -376,6 +375,194 @@ describe('E2E.Bundle Discounts', () => {
             ]);
         }, 10_000);
 
+        /**
+         * If you cancel a registration with 100% cancellation fee, we'll keep the balances items 'Due'.
+         * This tests that we don't substract the discounts on those registration on new registrations.
+         */
+        test('A previous discount on a cancelled registration that has a 100% cancellation fee is not taken into account', async () => {
+            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const bundleDiscount = await initBundleDiscount({
+                organizationRegistrationPeriod,
+                discount: {
+                    discounts: [
+                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
+                        { value: 100_00, type: GroupPriceDiscountType.Percentage },
+                    ],
+                },
+            });
+
+            const groups = [
+                await new GroupFactory({
+                    organization,
+                    price: 25_00,
+                    bundleDiscount,
+                }).create(),
+
+                await new GroupFactory({
+                    organization,
+                    price: 15_00,
+                    bundleDiscount,
+                }).create(),
+
+                await new GroupFactory({
+                    organization,
+                    price: 35_00,
+                    bundleDiscount,
+                }).create(),
+            ];
+
+            const registrations = [
+                await new RegistrationFactory({
+                    organization,
+                    member,
+                    group: groups[0],
+                    deactivatedAt: new Date(), // had a discount in the past - but was cancelled
+                }).create(),
+                await new RegistrationFactory({
+                    organization,
+                    member,
+                    group: groups[1],
+                }).create(),
+            ];
+
+            // Create initial balances
+            await new BalanceItemFactory({
+                userId: user.id,
+                memberId: member.id,
+                organizationId: organization.id,
+                registrationId: registrations[0].id,
+                type: BalanceItemType.Registration,
+                amount: 1,
+                unitPrice: 25_00,
+                status: BalanceItemStatus.Due, // Still due, because we had a 100% cancellation fee
+            }).create();
+
+            // Create applied discount
+            await new BalanceItemFactory({
+                userId: user.id,
+                memberId: member.id,
+                organizationId: organization.id,
+                registrationId: registrations[0].id,
+                type: BalanceItemType.RegistrationBundleDiscount,
+                amount: 1,
+                unitPrice: -5_00,
+                status: BalanceItemStatus.Due, // Still due, because we had a 100% cancellation fee
+                relations: new Map([
+                    [
+                        BalanceItemRelationType.Discount,
+                        BalanceItemRelation.create({
+                            // We need the ID of the discount saved here
+                            id: bundleDiscount.id,
+                            name: bundleDiscount.name,
+                        }),
+                    ],
+                ]),
+            }).create();
+
+            await new BalanceItemFactory({
+                userId: user.id,
+                memberId: member.id,
+                organizationId: organization.id,
+                registrationId: registrations[1].id,
+                type: BalanceItemType.Registration,
+                amount: 1,
+                unitPrice: 15_00,
+                status: BalanceItemStatus.Due,
+            }).create();
+
+            // Register for group 3
+            const checkout = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            options: [],
+                            groupPrice: groups[2].settings.prices[0],
+                            groupId: groups[2].id,
+                            organizationId: organization.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 35_00 - 7_00, // 20% of 35 = 7_00
+            });
+            const response = await post(checkout, organization, token);
+            const registration3 = response.body.registrations[0];
+
+            // Check did not reuse id
+            expect(registration3.id).not.toEqual(registrations[0].id);
+
+            expect(registration3).toMatchObject({
+                registeredAt: expect.any(Date),
+                discounts: new Map([
+                    [bundleDiscount.id, AppliedRegistrationDiscount.create({
+                        name: bundleDiscount.name,
+                        amount: 7_00,
+                    })],
+                ]),
+            });
+
+            // Check registration 1 still has the discount applied
+            await registrations[0].refresh();
+            expect(registrations[0].discounts).toMatchMap(new Map([
+                [bundleDiscount.id, AppliedRegistrationDiscount.create({
+                    name: bundleDiscount.name,
+                    amount: 5_00,
+                })],
+            ]));
+
+            // Check balances as expected
+            await assertBalances({ user }, [
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registrations[0].id,
+                    amount: 1,
+                    price: 25_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 25_00,
+                    pricePending: 0,
+                },
+                {
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    registrationId: registrations[0].id,
+                    amount: 1,
+                    price: -5_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: -5_00,
+                    pricePending: 0,
+                },
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registrations[1].id,
+                    amount: 1,
+                    price: 15_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 15_00,
+                    pricePending: 0,
+                },
+                {
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    registrationId: registration3.id,
+                    amount: 1,
+                    price: -7_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 0,
+                    pricePending: -7_00,
+                },
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration3.id,
+                    amount: 1,
+                    price: 35_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 0,
+                    pricePending: 35_00,
+                },
+            ]);
+        });
+
         test.todo('A failed payment cancels the registration and bundle discount');
 
         test.todo('When a bundle discount is altered, new registrations autocorrect if they are eleigible for the discount');
@@ -482,225 +669,7 @@ describe('E2E.Bundle Discounts', () => {
                 },
             ]);
         }, 10_000);
-    });
 
-    describe('Changing registrations as admin', () => {
-        /**
-         * If you replace a registration, it is possible that a bundle discount of a different registration is not optimal anymore and
-         * a more optimal discount can be applied. In that case, the bundle discount can be moved from the unaltered registration to the newly created registration.
-         */
-        test('Replacing a registration can move the bundle discount of an unaltered registration', async () => {
-            const { organizationRegistrationPeriod, organization, member, user } = await initData();
-            const { adminToken } = await initAdmin({ organization });
-
-            const bundleDiscount = await initBundleDiscount({
-                organizationRegistrationPeriod,
-                discount: {
-                    discounts: [
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                    ],
-                },
-            });
-
-            const groups = [
-                await new GroupFactory({
-                    organization,
-                    price: 25_00,
-                    bundleDiscount,
-                }).create(),
-                await new GroupFactory({
-                    organization,
-                    price: 15_00,
-                    bundleDiscount,
-                }).create(),
-                await new GroupFactory({
-                    organization,
-                    price: 40_00,
-                    bundleDiscount,
-                }).create(),
-            ];
-
-            // First register the member for group 1 & 2
-            const registration1 = await new RegistrationFactory({
-                organization,
-                member,
-                group: groups[0],
-            }).create();
-
-            const registration2 = await new RegistrationFactory({
-                organization,
-                member,
-                group: groups[1],
-            }).create();
-
-            // Create initial balances
-            await new BalanceItemFactory({
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration1.id,
-                type: BalanceItemType.Registration,
-                amount: 1,
-                unitPrice: 25_00,
-                status: BalanceItemStatus.Due,
-            }).create();
-
-            // Create applied discount
-            await new BalanceItemFactory({
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration1.id,
-                type: BalanceItemType.RegistrationBundleDiscount,
-                amount: 1,
-                unitPrice: -5_00,
-                status: BalanceItemStatus.Due,
-                relations: new Map([
-                    [
-                        BalanceItemRelationType.Discount,
-                        BalanceItemRelation.create({
-                            // We need the ID of the discount saved here
-                            id: bundleDiscount.id,
-                            name: bundleDiscount.name,
-                        }),
-                    ],
-                ]),
-            }).create();
-
-            await new BalanceItemFactory({
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration2.id,
-                type: BalanceItemType.Registration,
-                amount: 1,
-                unitPrice: 15_00,
-                status: BalanceItemStatus.Due,
-            }).create();
-
-            await registration1.refresh();
-            expect(registration1).toMatchObject({
-                groupId: groups[0].id,
-                registeredAt: expect.any(Date),
-                discounts: new Map([
-                    [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                        name: bundleDiscount.name,
-                        amount: 5_00,
-                    })],
-                ]),
-            });
-
-            // Now replace registration 2 with group 3, which is more expensive and should give more discount
-            const checkout = IDRegisterCheckout.create({
-                cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            groupPrice: groups[2].settings.prices[0],
-                            groupId: groups[2].id,
-                            organizationId: organization.id,
-                            memberId: member.id,
-                            replaceRegistrationIds: [registration2.id],
-                        }),
-                    ],
-                }),
-                asOrganizationId: organization.id,
-                totalPrice: 40_00 - 15_00 + 5_00 - 8_00, // group 3 - group 2 + reverted discount - new discount
-            });
-
-            const response = await post(checkout, organization, adminToken);
-            expect(response.body.registrations.length).toBe(1);
-
-            const registration3 = response.body.registrations[0];
-            expect(registration3).toMatchObject({
-                groupId: groups[2].id,
-                registeredAt: expect.any(Date),
-                discounts: new Map([
-                    [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                        name: bundleDiscount.name,
-                        amount: 8_00,
-                    })],
-                ]),
-            });
-
-            await registration2.refresh();
-            await registration1.refresh();
-
-            // Check discount has been removed in registration 1
-            expect(registration2.discounts).toMatchMap(new Map());
-            expect(registration1.discounts).toMatchMap(new Map());
-
-            // Check balances: no deletions happened, only additions or status changes
-            await assertBalances({ member }, [
-                {
-                    type: BalanceItemType.Registration,
-                    registrationId: registration1.id,
-                    amount: 1,
-                    unitPrice: 25_00,
-                    status: BalanceItemStatus.Due,
-                    priceOpen: 25_00,
-                    pricePending: 0,
-                },
-                {
-                    type: BalanceItemType.RegistrationBundleDiscount,
-                    registrationId: registration1.id,
-                    amount: 1,
-                    unitPrice: -5_00,
-                    status: BalanceItemStatus.Due,
-                    pricePending: 0,
-                    priceOpen: -5_00,
-                },
-                {
-                    type: BalanceItemType.Registration,
-                    registrationId: registration2.id,
-                    amount: 1,
-                    unitPrice: 15_00,
-                    status: BalanceItemStatus.Canceled,
-                    pricePending: 0,
-                    priceOpen: 0,
-                },
-                {
-                    type: BalanceItemType.Registration,
-                    userId: null,
-                    memberId: member.id,
-                    registrationId: registration3.id,
-                    amount: 1,
-                    unitPrice: 40_00,
-                    status: BalanceItemStatus.Due,
-                    priceOpen: 40_00,
-
-                    // Not pending because created by admin
-                    pricePending: 0,
-                },
-                // Revert first discount
-                {
-                    type: BalanceItemType.RegistrationBundleDiscount,
-                    userId: null,
-                    memberId: member.id,
-                    registrationId: registration1.id,
-                    amount: 1,
-                    unitPrice: 5_00,
-                    status: BalanceItemStatus.Due,
-                    priceOpen: 5_00,
-
-                    // Not pending because created by admin
-                    pricePending: 0,
-                },
-                // Add new discount
-                {
-                    type: BalanceItemType.RegistrationBundleDiscount,
-                    userId: null,
-                    memberId: member.id,
-                    registrationId: registration3.id,
-                    amount: 1,
-                    unitPrice: -8_00,
-                    status: BalanceItemStatus.Due,
-                    priceOpen: -8_00,
-
-                    // Not pending because created by admin
-                    pricePending: 0,
-                },
-            ]);
-        });
-    });
-
-    describe('With historic registrations', () => {
         test('Apply a discount on a previous registration with online payment (2 tries)', async () => {
             const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
             const { stripeMocker } = await initStripe({ organization });
@@ -966,7 +935,456 @@ describe('E2E.Bundle Discounts', () => {
 
             await assertBalances({ user }, expectedBalances);
         }, 20_000);
+    });
 
+    describe('Changing registrations as admin', () => {
+        async function initDataWithRegistrations() {
+            const { organizationRegistrationPeriod, organization, member, user } = await initData();
+
+            const bundleDiscount = await initBundleDiscount({
+                organizationRegistrationPeriod,
+                discount: {
+                    discounts: [
+                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
+                    ],
+                },
+            });
+
+            const groups = [
+                await new GroupFactory({
+                    organization,
+                    price: 25_00,
+                    bundleDiscount,
+                }).create(),
+                await new GroupFactory({
+                    organization,
+                    price: 15_00,
+                    bundleDiscount,
+                }).create(),
+                await new GroupFactory({
+                    organization,
+                    price: 40_00,
+                    bundleDiscount,
+                }).create(),
+            ];
+
+            // First register the member for group 1 & 2
+            const registration1 = await new RegistrationFactory({
+                organization,
+                member,
+                group: groups[0],
+            }).create();
+
+            const registration2 = await new RegistrationFactory({
+                organization,
+                member,
+                group: groups[1],
+            }).create();
+
+            // Create initial balances
+            await new BalanceItemFactory({
+                memberId: member.id,
+                organizationId: organization.id,
+                registrationId: registration1.id,
+                type: BalanceItemType.Registration,
+                amount: 1,
+                unitPrice: 25_00,
+                status: BalanceItemStatus.Due,
+            }).create();
+
+            // Create applied discount
+            await new BalanceItemFactory({
+                memberId: member.id,
+                organizationId: organization.id,
+                registrationId: registration1.id,
+                type: BalanceItemType.RegistrationBundleDiscount,
+                amount: 1,
+                unitPrice: -5_00,
+                status: BalanceItemStatus.Due,
+                relations: new Map([
+                    [
+                        BalanceItemRelationType.Discount,
+                        BalanceItemRelation.create({
+                            // We need the ID of the discount saved here
+                            id: bundleDiscount.id,
+                            name: bundleDiscount.name,
+                        }),
+                    ],
+                ]),
+            }).create();
+
+            await new BalanceItemFactory({
+                memberId: member.id,
+                organizationId: organization.id,
+                registrationId: registration2.id,
+                type: BalanceItemType.Registration,
+                amount: 1,
+                unitPrice: 15_00,
+                status: BalanceItemStatus.Due,
+            }).create();
+
+            await registration1.refresh();
+            expect(registration1).toMatchObject({
+                groupId: groups[0].id,
+                registeredAt: expect.any(Date),
+                discounts: new Map([
+                    [bundleDiscount.id, AppliedRegistrationDiscount.create({
+                        name: bundleDiscount.name,
+                        amount: 5_00,
+                    })],
+                ]),
+            });
+
+            return {
+                organization,
+                user,
+                groups,
+                registration1,
+                registration2,
+                member,
+                bundleDiscount,
+            };
+        }
+
+        /**
+         * If you replace a registration, it is possible that a bundle discount of a different registration is not optimal anymore and
+         * a more optimal discount can be applied. In that case, the bundle discount can be moved from the unaltered registration to the newly created registration.
+         */
+        test('Replacing a registration can move the bundle discount of an unaltered registration', async () => {
+            const { organization, bundleDiscount, groups, registration1, registration2, member } = await initDataWithRegistrations();
+            const { adminToken } = await initAdmin({ organization });
+
+            // Now replace registration 2 with group 3, which is more expensive and should give more discount
+            const checkout = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            groupPrice: groups[2].settings.prices[0],
+                            groupId: groups[2].id,
+                            organizationId: organization.id,
+                            memberId: member.id,
+                            replaceRegistrationIds: [registration2.id],
+                        }),
+                    ],
+                }),
+                asOrganizationId: organization.id,
+                totalPrice: 40_00 - 15_00 + 5_00 - 8_00, // group 3 - group 2 + reverted discount - new discount
+            });
+
+            const response = await post(checkout, organization, adminToken);
+            expect(response.body.registrations.length).toBe(1);
+
+            const registration3 = response.body.registrations[0];
+            expect(registration3).toMatchObject({
+                groupId: groups[2].id,
+                registeredAt: expect.any(Date),
+                discounts: new Map([
+                    [bundleDiscount.id, AppliedRegistrationDiscount.create({
+                        name: bundleDiscount.name,
+                        amount: 8_00,
+                    })],
+                ]),
+            });
+
+            await registration2.refresh();
+            await registration1.refresh();
+
+            // Check discount has been removed in registration 1
+            expect(registration2.discounts).toMatchMap(new Map());
+            expect(registration1.discounts).toMatchMap(new Map());
+
+            // Check balances: no deletions happened, only additions or status changes
+            await assertBalances({ member }, [
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration1.id,
+                    amount: 1,
+                    unitPrice: 25_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 25_00,
+                    pricePending: 0,
+                },
+                {
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    registrationId: registration1.id,
+                    amount: 1,
+                    unitPrice: -5_00,
+                    status: BalanceItemStatus.Due,
+                    pricePending: 0,
+                    priceOpen: -5_00,
+                },
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration2.id,
+                    amount: 1,
+                    unitPrice: 15_00,
+                    status: BalanceItemStatus.Canceled,
+                    pricePending: 0,
+                    priceOpen: 0,
+                },
+                {
+                    type: BalanceItemType.Registration,
+                    userId: null,
+                    memberId: member.id,
+                    registrationId: registration3.id,
+                    amount: 1,
+                    unitPrice: 40_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 40_00,
+
+                    // Not pending because created by admin
+                    pricePending: 0,
+                },
+                // Revert first discount
+                {
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    userId: null,
+                    memberId: member.id,
+                    registrationId: registration1.id,
+                    amount: 1,
+                    unitPrice: 5_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 5_00,
+
+                    // Not pending because created by admin
+                    pricePending: 0,
+                },
+                // Add new discount
+                {
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    userId: null,
+                    memberId: member.id,
+                    registrationId: registration3.id,
+                    amount: 1,
+                    unitPrice: -8_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: -8_00,
+
+                    // Not pending because created by admin
+                    pricePending: 0,
+                },
+            ]);
+        });
+
+        test('Replacing a registration with discount', async () => {
+            const { organization, bundleDiscount, groups, registration1, registration2, member } = await initDataWithRegistrations();
+            const { adminToken } = await initAdmin({ organization });
+
+            // Now replace registration 2 with group 3, which is more expensive and should give more discount
+            const checkout = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            groupPrice: groups[2].settings.prices[0],
+                            groupId: groups[2].id,
+                            organizationId: organization.id,
+                            memberId: member.id,
+                            replaceRegistrationIds: [registration1.id],
+                        }),
+                    ],
+                }),
+                asOrganizationId: organization.id,
+                totalPrice: 40_00 - 25_00 + 5_00 - 8_00, // group 3 - group 1 + reverted discount - new discount
+            });
+
+            const response = await post(checkout, organization, adminToken);
+            expect(response.body.registrations.length).toBe(1);
+
+            const registration3 = response.body.registrations[0];
+            expect(registration3).toMatchObject({
+                groupId: groups[2].id,
+                registeredAt: expect.any(Date),
+                discounts: new Map([
+                    [bundleDiscount.id, AppliedRegistrationDiscount.create({
+                        name: bundleDiscount.name,
+                        amount: 8_00,
+                    })],
+                ]),
+            });
+
+            await registration2.refresh();
+            await registration1.refresh();
+
+            // Check discount has been removed in registration 1
+            expect(registration2.discounts).toMatchMap(new Map());
+            expect(registration1.discounts).toMatchMap(new Map());
+
+            // Check balances
+            await assertBalances({ member }, [
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration1.id,
+                    amount: 1,
+                    unitPrice: 25_00,
+                    status: BalanceItemStatus.Canceled, // has been cancelled
+                    priceOpen: 0,
+                    pricePending: 0,
+                },
+                {
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    registrationId: registration1.id,
+                    amount: 1,
+                    unitPrice: -5_00,
+                    status: BalanceItemStatus.Canceled, // has been cancelled
+                    pricePending: 0,
+                    priceOpen: 0,
+                },
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration2.id,
+                    amount: 1,
+                    unitPrice: 15_00,
+                    status: BalanceItemStatus.Due,
+                    pricePending: 0,
+                    priceOpen: 15_00,
+                },
+                {
+                    type: BalanceItemType.Registration,
+                    userId: null,
+                    memberId: member.id,
+                    registrationId: registration3.id,
+                    amount: 1,
+                    unitPrice: 40_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 40_00,
+
+                    // Not pending because created by admin
+                    pricePending: 0,
+                },
+                // Add new discount
+                {
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    userId: null,
+                    memberId: member.id,
+                    registrationId: registration3.id,
+                    amount: 1,
+                    unitPrice: -8_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: -8_00,
+
+                    // Not pending because created by admin
+                    pricePending: 0,
+                },
+            ]);
+        });
+
+        test('Deleting a registration with discount, without cancellation fee', async () => {
+            const { organization, registration1, registration2, member } = await initDataWithRegistrations();
+            const { adminToken } = await initAdmin({ organization });
+
+            // Now delete registration 1, which has discount
+            const checkout = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    deleteRegistrationIds: [registration1.id],
+                }),
+                asOrganizationId: organization.id,
+                totalPrice: -25_00 + 5_00,
+                cancellationFeePercentage: 0,
+            });
+
+            await post(checkout, organization, adminToken);
+            await registration2.refresh();
+            await registration1.refresh();
+
+            // Check discount has been removed in registration 1
+            expect(registration2.discounts).toMatchMap(new Map());
+            expect(registration1.discounts).toMatchMap(new Map());
+            expect(registration1.deactivatedAt).not.toBeNull(); // should be cancelled
+
+            // Check balances
+            await assertBalances({ member }, [
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration1.id,
+                    amount: 1,
+                    unitPrice: 25_00,
+                    status: BalanceItemStatus.Canceled, // has been cancelled
+                    priceOpen: 0,
+                    pricePending: 0,
+                },
+                {
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    registrationId: registration1.id,
+                    amount: 1,
+                    unitPrice: -5_00,
+                    status: BalanceItemStatus.Canceled, // has been cancelled
+                    pricePending: 0,
+                    priceOpen: 0,
+                },
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration2.id,
+                    amount: 1,
+                    unitPrice: 15_00,
+                    status: BalanceItemStatus.Due,
+                    pricePending: 0,
+                    priceOpen: 15_00,
+                },
+            ]);
+        });
+
+        test('Deleting a registration with discount, with cancellation fee', async () => {
+            const { organization, bundleDiscount, registration1, registration2, member } = await initDataWithRegistrations();
+            const { adminToken } = await initAdmin({ organization });
+
+            // Now delete registration 1, which has discount
+            const checkout = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    deleteRegistrationIds: [registration1.id],
+                }),
+                asOrganizationId: organization.id,
+                totalPrice: 0, // no change in outstanding balance, because we charge a cancellation fee
+                cancellationFeePercentage: 100_00,
+            });
+
+            await post(checkout, organization, adminToken);
+            await registration2.refresh();
+            await registration1.refresh();
+
+            // Check discount has NOT been removed in registration 1
+            expect(registration2.discounts).toMatchMap(new Map());
+            expect(registration1.discounts).toMatchMap(new Map([
+                [bundleDiscount.id, AppliedRegistrationDiscount.create({
+                    name: bundleDiscount.name,
+                    amount: 5_00,
+                })],
+            ]));
+            expect(registration1.deactivatedAt).not.toBeNull(); // should be cancelled
+
+            // Check balances
+            await assertBalances({ member }, [
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration1.id,
+                    amount: 1,
+                    unitPrice: 25_00,
+                    status: BalanceItemStatus.Due, // NOT cancelled, because we charge a cancellation fee
+                    priceOpen: 25_00, // cancellation fee
+                    pricePending: 0,
+                },
+                {
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    registrationId: registration1.id,
+                    amount: 1,
+                    unitPrice: -5_00,
+                    status: BalanceItemStatus.Due, // NOT cancelled, because we charge a cancellation fee
+                    priceOpen: -5_00,
+                    pricePending: 0,
+                },
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration2.id,
+                    amount: 1,
+                    unitPrice: 15_00,
+                    status: BalanceItemStatus.Due,
+                    pricePending: 0,
+                    priceOpen: 15_00,
+                },
+            ]);
+        });
+    });
+
+    describe('With historic registrations', () => {
         test.todo('Best discount applied on new registration');
     });
 
