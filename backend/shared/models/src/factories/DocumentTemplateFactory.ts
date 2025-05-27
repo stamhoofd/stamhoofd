@@ -18,11 +18,12 @@ export class DocumentTemplateFactory extends Factory<Options, DocumentTemplate> 
         const documentTemplate = new DocumentTemplate();
         documentTemplate.organizationId = organizationId;
 
+        // HTML escaping is disabled to allow easy string contain checking in tests.
         documentTemplate.html = 'Document template HTML content';
-        documentTemplate.html += '\nOrganization name: {{organization.name}}';
-        documentTemplate.html += '\nMember name: {{member.firstName}} {{member.lastName}}';
+        documentTemplate.html += '\nOrganization name: {{{organization.name}}}';
+        documentTemplate.html += '\nMember name: {{{member.firstName}}} {{{member.lastName}}}';
         documentTemplate.html += '\nMember name using other variable: {{renamedValue}}';
-        documentTemplate.html += '\nGroup name: {{group.name}}';
+        documentTemplate.html += '\nGroup name: {{{group.name}}}';
         documentTemplate.html += '\nStart: {{formatDate registration.startDate}}';
         documentTemplate.html += '\nEnd: {{formatDate registration.endDate}}';
         documentTemplate.html += '\nPrice: {{formatPrice registration.price}}';
