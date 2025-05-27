@@ -222,7 +222,7 @@ describe('E2E.Bundle Discounts', () => {
                     pricePending: 35_00,
                 },
             ]);
-        }, 10_000);
+        });
 
         test('PointOfSale: A bundle discount can be applied to a previous registration', async () => {
             const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
@@ -333,7 +333,7 @@ describe('E2E.Bundle Discounts', () => {
                     pricePending: 15_00,
                 },
             ]);
-        }, 10_000);
+        });
 
         test('PointOfSale: A bundle discount can be applied to an added registration', async () => {
             const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
@@ -448,7 +448,7 @@ describe('E2E.Bundle Discounts', () => {
                     pricePending: 35_00,
                 },
             ]);
-        }, 10_000);
+        });
 
         test('PointOfSale: A bundle discount can be applied to a new and previous registration at the same time', async () => {
             const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
@@ -585,7 +585,7 @@ describe('E2E.Bundle Discounts', () => {
                     pricePending: -18_00,
                 },
             ]);
-        }, 10_000);
+        });
 
         /**
          * When we calculate the discounts, we calculate the discount based on the group price at the time of the registration.
@@ -691,7 +691,7 @@ describe('E2E.Bundle Discounts', () => {
                     pricePending: -6_00,
                 },
             ]);
-        }, 10_000);
+        });
 
         /**
          * If you cancel a registration with 100% cancellation fee, we'll keep the balances items 'Due'.
@@ -1273,7 +1273,7 @@ describe('E2E.Bundle Discounts', () => {
                     pricePending: 15_00,
                 },
             ]);
-        }, 10_000);
+        });
 
         test('Apply a discount on a previous registration with online payment (2 tries)', async () => {
             const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
@@ -1539,7 +1539,7 @@ describe('E2E.Bundle Discounts', () => {
             );
 
             await assertBalances({ user }, expectedBalances);
-        }, 20_000);
+        });
     });
 
     describe('Changing registrations as admin', () => {

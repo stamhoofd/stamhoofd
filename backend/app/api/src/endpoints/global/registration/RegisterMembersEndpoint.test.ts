@@ -1705,7 +1705,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             // the payingOrganizationId should equal the id of the paying organization of the replaced registration
             expect(response.body.registrations[0].payingOrganizationId).toEqual(organization2.id);
-        }, 10_000);
+        });
 
         test('Replace registration by registration of other member should fail', async () => {
             // #region arrange
