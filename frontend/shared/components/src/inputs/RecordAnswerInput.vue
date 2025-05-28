@@ -4,9 +4,7 @@
             <h3 class="style-title-list">
                 {{ label }}
             </h3>
-            <p v-if="answer.settings.description" class="style-description-small">
-                {{ answer.settings.description }}
-            </p>
+            <p v-if="answer.settings.description" class="style-description-small pre-wrap" v-text="answer.settings.description" />
         </Checkbox>
         <STInputBox v-else-if="answer.settings.type == RecordType.MultipleChoice" class="max" :title="label" error-fields="input" :error-box="errorBox">
             <STList>
@@ -15,9 +13,7 @@
                     <h3 class="style-title-list">
                         {{ choice.name }}
                     </h3>
-                    <p v-if="choice.description" class="style-description-small">
-                        {{ choice.description }}
-                    </p>
+                    <p v-if="choice.description" class="style-description-small pre-wrap" v-text="choice.description" />
                 </STListItem>
             </STList>
         </STInputBox>
@@ -28,9 +24,7 @@
                     <h3 class="style-title-list">
                         {{ choice.name }}
                     </h3>
-                    <p v-if="choice.description" class="style-description-small">
-                        {{ choice.description }}
-                    </p>
+                    <p v-if="choice.description" class="style-description-small pre-wrap" v-text="choice.description" />
                 </STListItem>
             </STList>
         </STInputBox>
@@ -61,26 +55,22 @@
         <!-- Comments if checkbox is selected -->
         <div v-if="answer.settings.type == RecordType.Checkbox && answer.selected && answer.settings.askComments" class="textarea-container">
             <textarea v-model="answer.comments" class="input small" :placeholder="inputPlaceholder" />
-            <p v-if="answer.settings.commentsDescription" class="info-box">
-                {{ answer.settings.commentsDescription }}
-            </p>
+            <p v-if="answer.settings.commentsDescription" class="info-box pre-wrap" v-text="answer.settings.commentsDescription" />
         </div>
 
         <!-- Unhandled errors -->
         <STErrorsDefault :error-box="errorBox" />
 
         <!-- Footer description -->
-        <p v-if="answer.settings.type != RecordType.Checkbox && answer.settings.description" class="style-description-small">
-            {{ answer.settings.description }}
-        </p>
+        <p v-if="answer.settings.type != RecordType.Checkbox && answer.settings.description" class="style-description-small pre-wrap" v-text="answer.settings.description" />
     </div>
 </template>
 
 
 <script lang="ts">
-import { AddressInput,Checkbox,DateSelection, EmailInput, ErrorBox, ImageInput, NumberInput, PhoneInput,PriceInput, Radio,STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components"
+import { AddressInput, Checkbox, DateSelection, EmailInput, ErrorBox, ImageInput, NumberInput, PhoneInput, PriceInput, Radio, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
 import { RecordAnswer, RecordAnswerDecoder, RecordChoice, RecordMultipleChoiceAnswer, RecordSettings, RecordType } from "@stamhoofd/structures";
-import { Component, Prop,Vue } from "vue-property-decorator";
+import { Component, Prop, Vue } from "vue-property-decorator";
 
 @Component({
     components: {
