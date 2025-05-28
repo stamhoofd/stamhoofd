@@ -221,9 +221,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         // Validate the cart
         checkout.validate({ memberBalanceItems: memberBalanceItemsStructs });
 
-        // Recalculate the price
-        checkout.updatePrices();
-
         const totalPrice = checkout.totalPrice;
 
         if (totalPrice !== request.body.totalPrice) {
@@ -884,7 +881,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         if (totalPrice < 0) {
             // todo: try to make it non-negative by reducing some balance items
             throw new SimpleError({
-                code: 'empty_data',
+                code: 'negative_price',
                 message: $t(`725715e5-b0ac-43c1-adef-dd42b8907327`),
             });
         }

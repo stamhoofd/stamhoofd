@@ -1,5 +1,5 @@
 import { Factory } from '@simonbackx/simple-database';
-import { BundleDiscount, BundleDiscountGroupPriceSettings, GroupPrice, GroupSettings, GroupType, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
+import { BundleDiscount, BundleDiscountGroupPriceSettings, GroupPrice, GroupPriceDiscount, GroupSettings, GroupType, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
 
 import { RegistrationPeriod } from '../models';
 import { Group } from '../models/Group';
@@ -20,6 +20,7 @@ class Options {
      * Enable a given bundle discount on the group(price).
      */
     bundleDiscount?: BundleDiscount;
+    bundleDiscounts?: BundleDiscount[] | Map<BundleDiscount, GroupPriceDiscount[] | null>;
 }
 
 export class GroupFactory extends Factory<Options, Group> {
@@ -59,6 +60,26 @@ export class GroupFactory extends Factory<Options, Group> {
             group.settings.prices[0].bundleDiscounts.set(this.options.bundleDiscount.id, BundleDiscountGroupPriceSettings.create({
                 name: this.options.bundleDiscount.name,
             }));
+        }
+
+        if (this.options.bundleDiscounts) {
+            let map: Map<BundleDiscount, GroupPriceDiscount[] | null>;
+            if (Array.isArray(this.options.bundleDiscounts)) {
+                map = new Map<BundleDiscount, GroupPriceDiscount[] | null>();
+                for (const discount of this.options.bundleDiscounts) {
+                    map.set(discount, null);
+                }
+            }
+            else {
+                map = this.options.bundleDiscounts;
+            }
+
+            for (const [discount, customDiscounts] of map.entries()) {
+                group.settings.prices[0].bundleDiscounts.set(discount.id, BundleDiscountGroupPriceSettings.create({
+                    name: discount.name,
+                    customDiscounts,
+                }));
+            }
         }
 
         if (this.options.type) {

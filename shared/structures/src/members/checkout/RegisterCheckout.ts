@@ -260,6 +260,7 @@ export class RegisterCheckout {
         }
 
         this.cart.validate(this, data);
+        this.updatePrices();
 
         if (this.singleOrganization && (this.singleOrganization.meta.recordsConfiguration.freeContribution?.amounts.length ?? 0) === 0) {
             // Automatically clear free contribution if there are no options
@@ -272,6 +273,17 @@ export class RegisterCheckout {
                 field: 'cancellationFeePercentage',
                 message: 'Invalid cancellation fee percentage',
             });
+        }
+
+        if (!this.isAdminFromSameOrganization) {
+            if (this.totalPrice < 0) {
+                // If the total price is negative, we cannot charge the user
+                throw new SimpleError({
+                    code: 'negative_price',
+                    message: 'Total price cannot be negative',
+                    human: $t(`De totaalprijs is negatief, maak de nodige aanpassingen aan je winkelmandje zodat het totaalbedrag minstens 0 is.`),
+                });
+            }
         }
     }
 
@@ -288,7 +300,7 @@ export class RegisterCheckout {
      * Only includes 'due now' items - so excludes trials (doesn't work 100% yet with deleted registrations but this is not a problem at the moment)
      */
     get totalPrice() {
-        return Math.max(0, this.cart.price + this.administrationFee + this.freeContribution - this.bundleDiscount) - this.cart.refund + this.cart.getCancellationFees(this.cancellationFeePercentage);
+        return this.cart.price + this.administrationFee + this.freeContribution - this.bundleDiscount - this.cart.refund + this.cart.getCancellationFees(this.cancellationFeePercentage);
     }
 
     /**

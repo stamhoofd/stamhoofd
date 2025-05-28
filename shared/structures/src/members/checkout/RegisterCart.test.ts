@@ -1540,6 +1540,53 @@ describe('Unit.RegisterCart', () => {
             ]);
         });
 
+        test('Fixed discounts are limited to the group price', () => {
+            const { organization, groups, family, discount } = setupDiscountTest({
+                memberCount: 2,
+                groupNames: ['Group A', 'Group B'],
+                bundleDiscount: createBundleDiscount({
+                    name: 'Multiple family members discount',
+                    countWholeFamily: true,
+                    countPerGroup: false,
+                    discounts: [
+                        { value: 1000_00, type: GroupPriceDiscountType.Fixed },
+                    ],
+                }),
+            });
+            const [groupA, groupB] = groups;
+            const [memberA, memberB] = family.members;
+
+            const itemA = RegisterItem.defaultFor(memberA, groupA, organization);
+            const itemB = RegisterItem.defaultFor(memberB, groupB, organization);
+
+            // Add to a single cart
+            const checkout = family.checkout;
+            const cart = checkout.cart;
+            cart.add(itemA);
+            cart.add(itemB);
+            cart.calculatePrices();
+
+            expect(cart.bundleDiscounts).toHaveLength(1);
+            expect(cart.bundleDiscounts[0].total).toEqual(50_00);
+            expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(0);
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(50_00);
+            expect(cart.price).toEqual(50_00 + 40_00);
+            expect(checkout.totalPrice).toEqual(40_00);
+
+            expect(checkout.priceBreakown).toEqual([
+                expect.objectContaining({
+                    price: 50_00 + 40_00,
+                }),
+                {
+                    name: 'Multiple family members discount',
+                    price: -50_00,
+                },
+                expect.objectContaining({
+                    price: 40_00,
+                }),
+            ]);
+        });
+
         test.todo('Can handle bundle discounts for a future period');
         test.todo('Families should be calculated correctly for admins');
         test.todo('The price per item can never be negative');
