@@ -166,6 +166,7 @@ const start = async () => {
             console.error(err);
         }
 
+        await BalanceItemService.flushAll();
         await waitForCrons();
 
         try {
