@@ -8,6 +8,7 @@ import { testServer } from '../helpers/TestServer';
 import { initBundleDiscount } from '../init/initBundleDiscount';
 import { initStripe } from '../init/initStripe';
 import { initAdmin } from '../init/initAdmin';
+import { BalanceItemService } from '../../src/services/BalanceItemService';
 
 const baseUrl = `/members/register`;
 
@@ -1497,6 +1498,7 @@ describe('E2E.Bundle Discounts', () => {
 
             // Success the payment
             await stripeMocker.succeedPayment(stripeMocker.getLastIntent());
+            await BalanceItemService.flushCaches(organization.id);
 
             // Check registration 3 became valid
             const updatedRegistration3 = (await Registration.getByID(registration3.id))!;
@@ -1627,6 +1629,8 @@ describe('E2E.Bundle Discounts', () => {
                 unitPrice: 15_00,
                 status: BalanceItemStatus.Due,
             }).create();
+
+            await BalanceItemService.flushCaches(organization.id);
 
             await registration1.refresh();
             expect(registration1).toMatchObject({

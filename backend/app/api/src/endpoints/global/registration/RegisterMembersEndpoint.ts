@@ -99,6 +99,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
+        // Update balances before we start
+        await BalanceItemService.flushCaches(organization.id);
+
         const deleteRegistrationIds = request.body.cart.deleteRegistrationIds;
         const deleteRegistrationModels = (deleteRegistrationIds.length ? (await Registration.getByIDs(...deleteRegistrationIds)) : []).filter(r => r.organizationId === organization.id);
 
@@ -764,6 +767,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     await BalanceItemService.markPaid(balanceItem, payment, organization);
                 }
 
+                // Flush balance caches so we return an up-to-date balance
+                await BalanceItemService.flushRegistrationDiscountsCache();
+
                 // We'll need to update the returned registrations as their values will have changed by marking the registration as valid
                 await Registration.refreshAll(registrations);
             }
@@ -787,8 +793,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 createdBalanceItems.push(balanceItem);
             }
 
-            // Make sure every price is accurate before creating a payment
-            await BalanceItemService.updatePaidAndPending([...createdBalanceItems]);
             try {
                 const response = await this.createPayment({
                     balanceItems: mappedBalanceItems,
@@ -811,11 +815,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
         else {
             await markValidIfNeeded();
-            await BalanceItemService.updateOutstanding([...createdBalanceItems]);
         }
 
         // Reallocate
-        await BalanceItemService.reallocate([...createdBalanceItems, ...deletedBalanceItems], organization.id);
+        // await BalanceItemService.reallocate([...createdBalanceItems, ...deletedBalanceItems], organization.id);
 
         // Update occupancy
         for (const group of groups) {

@@ -5,6 +5,39 @@ import { AuditLogService } from './AuditLogService';
 import { PaymentReallocationService } from './PaymentReallocationService';
 import { RegistrationService } from './RegistrationService';
 import { Model } from '@simonbackx/simple-database';
+import { GroupedThrottledQueue } from '../helpers/GroupedThrottledQueue';
+import { ThrottledQueue } from '../helpers/ThrottledQueue';
+
+const memberUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, memberIds: string[]) => {
+    await CachedBalance.updateForMembers(organizationId, memberIds);
+
+    if (memberIds.length) {
+        // Now also include the userIds of the members
+        const userMemberIds = (await MemberUser.select().where('membersId', memberIds).fetch()).map(m => m.usersId);
+        // await CachedBalance.updateForUsers(organizationId, userMemberIds);
+
+        userUpdateQueue.addItems(organizationId, userMemberIds);
+    }
+}, { maxDelay: 10_000 });
+
+const userUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, userIds: string[]) => {
+    await CachedBalance.updateForUsers(organizationId, userIds);
+}, { maxDelay: 10_000 });
+
+const organizationUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, organizationIds: string[]) => {
+    await CachedBalance.updateForOrganizations(organizationId, organizationIds);
+}, { maxDelay: 60_000 });
+
+export const registrationUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, registrationIds: string[]) => {
+    await CachedBalance.updateForRegistrations(organizationId, registrationIds);
+    await Document.updateForRegistrations(registrationIds, organizationId);
+}, { maxDelay: 10_000 });
+
+const bundleDiscountsUpdateQueue = new ThrottledQueue(async (registrationIds: string[]) => {
+    for (const registrationId of registrationIds) {
+        await RegistrationService.updateDiscounts(registrationId);
+    }
+}, { maxDelay: 10_000 });
 
 export const BalanceItemService = {
     listening: false,
@@ -42,16 +75,19 @@ export const BalanceItemService = {
     },
 
     /**
-     * Todo: actually schedule the update and auto-flush on the next BalanceItem selection
+     * Schedule an update for the balance item:
+     * - Updates cached outstanding balances for members, users, organizations and registrations
+     *
+     * Does not execute the update immediately, but schedules it to be run in the background.
      */
     async scheduleUpdate(item: BalanceItem) {
-        await this.updateOutstanding([item]);
+        await this.scheduleUpdates([item]);
 
         // Todo: optimize
         if (item.type === BalanceItemType.RegistrationBundleDiscount) {
             // Save the applied discount to the related registration
             if (item.registrationId) {
-                await RegistrationService.updateDiscounts(item.registrationId);
+                bundleDiscountsUpdateQueue.addItem(item.registrationId);
             }
         }
     },
@@ -63,49 +99,57 @@ export const BalanceItemService = {
     async updatePaidAndPending(items: BalanceItem[]) {
         console.log('updatePaidAndPending for', items.length, 'items');
         await BalanceItem.updatePricePaid(items.map(i => i.id));
-        await this.updateOutstanding(items);
+        await this.scheduleUpdates(items);
+    },
+
+    /**
+     * In some situations we need immediate updates
+     */
+    async flushRegistrationDiscountsCache() {
+        await bundleDiscountsUpdateQueue.flushAndWait();
+    },
+
+    /**
+     * Make sure all the pending changes for cached balances are run
+     */
+    async flushCaches(organizationId: string) {
+        await memberUpdateQueue.flushGroupAndWait(organizationId);
+        await userUpdateQueue.flushGroupAndWait(organizationId);
+        await organizationUpdateQueue.flushGroupAndWait(organizationId);
+        await registrationUpdateQueue.flushGroupAndWait(organizationId);
+        await bundleDiscountsUpdateQueue.flushAndWait();
+    },
+
+    async flushAll() {
+        await memberUpdateQueue.flushAndWait();
+        await userUpdateQueue.flushAndWait();
+        await organizationUpdateQueue.flushAndWait();
+        await registrationUpdateQueue.flushAndWait();
+        await bundleDiscountsUpdateQueue.flushAndWait();
     },
 
     /**
      * Update how many every object in the system owes or needs to be reimbursed
      * and also updates the pricePaid/pricePending cached values in Balance items and members
      */
-    async updateOutstanding(items: BalanceItem[], additionalItems: { memberId: string; organizationId: string }[] = []) {
-        console.log('Update outstanding balance for', items.length, 'items');
+    async scheduleUpdates(items: BalanceItem[]) {
+        console.log('Schedule outstanding balance for', items.length, 'items');
 
-        const organizationIds = Formatter.uniqueArray(items.map(p => p.organizationId));
-        for (const organizationId of organizationIds) {
-            const filteredItems = items.filter(i => i.organizationId === organizationId);
-            const filteredAdditionalItems = additionalItems.filter(i => i.organizationId === organizationId);
-
-            const memberIds = Formatter.uniqueArray(
-                [
-                    ...filteredItems.map(p => p.memberId).filter(id => id !== null),
-                    ...filteredAdditionalItems.map(i => i.memberId),
-                ],
-            );
-
-            await CachedBalance.updateForMembers(organizationId, memberIds);
-
-            let userIds = filteredItems.filter(p => p.userId !== null).map(p => p.userId!);
-
-            if (memberIds.length) {
-                // Now also include the userIds of the members
-                const userMemberIds = (await MemberUser.select().where('membersId', memberIds).fetch()).map(m => m.usersId);
-                userIds.push(...userMemberIds);
+        for (const item of items) {
+            if (item.memberId) {
+                memberUpdateQueue.addItem(item.organizationId, item.memberId);
             }
-            userIds = Formatter.uniqueArray(userIds);
 
-            await CachedBalance.updateForUsers(organizationId, userIds);
+            if (item.userId) {
+                userUpdateQueue.addItem(item.organizationId, item.userId);
+            }
 
-            const organizationIds = Formatter.uniqueArray(filteredItems.map(p => p.payingOrganizationId).filter(id => id !== null));
-            await CachedBalance.updateForOrganizations(organizationId, organizationIds);
+            if (item.payingOrganizationId) {
+                organizationUpdateQueue.addItem(item.organizationId, item.payingOrganizationId);
+            }
 
-            const registrationIds: string[] = Formatter.uniqueArray(filteredItems.map(p => p.registrationId).filter(id => id !== null));
-            await CachedBalance.updateForRegistrations(organizationId, registrationIds);
-
-            if (registrationIds.length) {
-                await Document.updateForRegistrations(registrationIds, organizationId);
+            if (item.registrationId) {
+                registrationUpdateQueue.addItem(item.organizationId, item.registrationId);
             }
         }
     },

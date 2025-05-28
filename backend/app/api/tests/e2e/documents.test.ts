@@ -10,6 +10,7 @@ import { patchUserMember } from '../actions/patchUserMember';
 import { testServer } from '../helpers/TestServer';
 import { initAdmin } from '../init/initAdmin';
 import { initStripe } from '../init/initStripe';
+import { registrationUpdateQueue } from '../../src/services/BalanceItemService';
 
 const baseUrl = `/members/register`;
 
@@ -104,11 +105,13 @@ describe('E2E.Documents', () => {
     }
 
     async function assertNoDocument(registration: { id: string }) {
+        await registrationUpdateQueue.flushAndWait();
         const document = await Document.select().where('registrationId', registration.id).first(false);
         expect(document).toBeNull();
     }
 
     async function assertDocument({ registration, organization, member, group, price, pricePaid }: { registration: { id: string }; organization: Organization; member: Member; group: Group; price: number; pricePaid?: number }) {
+        await registrationUpdateQueue.flushAndWait();
         const document = await Document.select().where('registrationId', registration.id).first(false);
         expect(document).not.toBeNull();
 

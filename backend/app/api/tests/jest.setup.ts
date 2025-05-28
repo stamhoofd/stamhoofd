@@ -12,6 +12,7 @@ import * as jose from 'jose';
 import { TestUtils } from '@stamhoofd/test-utils';
 import './toMatchMap';
 import { PayconiqMocker } from './helpers/PayconiqMocker';
+import { BalanceItemService } from '../src/services/BalanceItemService';
 
 // Set version of saved structures
 Column.setJSONVersion(Version);
@@ -76,6 +77,10 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+    // Call twice to also wait on items that are scheduled withing scheduled tasks
+    await BalanceItemService.flushAll();
+    await BalanceItemService.flushAll();
+
     // Wait for email queue etc
     while (Email.currentQueue.length > 0) {
         console.info('Emails still in queue. Waiting...');

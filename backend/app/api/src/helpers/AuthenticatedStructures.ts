@@ -6,6 +6,7 @@ import { Sorter } from '@stamhoofd/utility';
 import { SQL } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from './Context';
+import { BalanceItemService } from '../services/BalanceItemService';
 
 /**
  * Builds authenticated structures for the current user
@@ -394,6 +395,10 @@ export class AuthenticatedStructures {
         const organizations = new Map<string, Organization>();
 
         const registrationIds = Formatter.uniqueArray(members.flatMap(m => m.registrations.map(r => r.id)));
+
+        if (Context.organization) {
+            await BalanceItemService.flushCaches(Context.organization.id);
+        }
         const balances = await CachedBalance.getForObjects(registrationIds, null);
 
         if (includeUser) {

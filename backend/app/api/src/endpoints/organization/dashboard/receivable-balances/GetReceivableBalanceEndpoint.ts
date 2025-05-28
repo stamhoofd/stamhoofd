@@ -5,6 +5,7 @@ import { BalanceItem, BalanceItemPayment, CachedBalance, Payment } from '@stamho
 import { Context } from '../../../../helpers/Context';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { SQL } from '@stamhoofd/sql';
+import { BalanceItemService } from '../../../../services/BalanceItemService';
 
 type Params = { id: string; type: ReceivableBalanceType };
 type Query = undefined;
@@ -36,6 +37,9 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
         if (!await Context.auth.canManageFinances(organization.id)) {
             throw Context.auth.error();
         }
+
+        // Flush caches (this makes sure that we do a reload in the frontend after a registration or change, we get the newest balances)
+        await BalanceItemService.flushCaches(organization.id);
 
         const balanceItemModels = await CachedBalance.balanceForObjects(organization.id, [request.params.id], request.params.type, true);
         let paymentModels: Payment[] = [];

@@ -155,7 +155,7 @@ export class Document extends QueryableModel {
             if (member) {
                 const organizationIds = Formatter.uniqueArray(member.registrations.map(r => r.organizationId));
                 for (const organizationId of organizationIds) {
-                    await this.updateForRegistrations(member.registrations.filter(r => r.organizationId === organizationId).map(r => r.id), organizationId);
+                    await this.updateForRegistrations(member.registrations.filter(r => r.registeredAt && r.deactivatedAt === null && r.organizationId === organizationId).map(r => r.id), organizationId);
                 }
             }
         }

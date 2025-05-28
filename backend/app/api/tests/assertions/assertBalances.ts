@@ -1,6 +1,9 @@
 import { BalanceItem } from '@stamhoofd/models';
+import { BalanceItemService } from '../../src/services/BalanceItemService';
 
 export async function assertBalances(selector: { user: { id: string | null } } | { member: { id: string | null } }, balances: Partial<BalanceItem>[]) {
+    await BalanceItemService.flushAll();
+
     // Fetch all user balances
     const q = BalanceItem.select();
     if ('user' in selector && selector.user.id) {
