@@ -56,6 +56,10 @@
             {{ $t('e85a86ee-7751-4791-984b-f67dc1106f6b') }}
         </Checkbox>
 
+        <Checkbox v-if="!!STAMHOOFD.domains.webshop" :model-value="getFeatureFlag('webshop-advanced-settings')" @update:model-value="setFeatureFlag('webshop-advanced-settings', !!$event)">
+            {{ $t('Geavanceerde instellingen voor webshops') }}
+        </Checkbox>
+
         <hr><h2>{{ $t('57dd24f3-ae95-42d7-aaab-48e43483c018') }}</h2>
 
         <STList>

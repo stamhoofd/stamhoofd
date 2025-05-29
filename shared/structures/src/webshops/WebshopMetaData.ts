@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Data, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, NumberDecoder, PatchableDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Data, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, PatchableDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Colors, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -540,6 +540,9 @@ export class WebshopMetaData extends AutoEncoder {
 
     @field({ decoder: new EnumDecoder(WebshopAuthType), version: 188 })
     authType: WebshopAuthType = WebshopAuthType.Disabled;
+
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    customCode: string | null = null;
 
     get hasTickets() {
         return this.ticketType === WebshopTicketType.SingleTicket || this.ticketType === WebshopTicketType.Tickets;

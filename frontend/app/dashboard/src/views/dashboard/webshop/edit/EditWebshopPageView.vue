@@ -129,13 +129,23 @@
                 {{ $t('f8f3a5be-624a-4d39-b401-78ad833b64dd') }}
             </Checkbox>
         </template>
+
+        <div v-if="areAdvancedWebshopSettingsEnabled" class="container">
+            <hr><h2>{{ $t('Geavanceerd') }}</h2>
+            <p>
+                {{ $t('Geavanceerde instellingen.') }}
+            </p>
+            <STInputBox error-fields="meta.customCode" :error-box="errors.errorBox" class="max" :title="$t('Custom code')">
+                <textarea v-model="customCode" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t('Code om te injecteren')" />
+            </STInputBox>
+        </div>
     </SaveView>
 </template>
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { Checkbox, ColorInput, DetailedTicketView, LogoEditor, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, UploadButton, useOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
+import { Checkbox, ColorInput, DetailedTicketView, LogoEditor, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, UploadButton, useFeatureFlag, useOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
 import { Cart, CartItem, CartReservedSeat, DarkMode, Image, Policy, PrivateWebshop, ProductType, ResolutionRequest, RichText, SponsorConfig, TicketPublic, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
@@ -151,6 +161,8 @@ const { webshop, addPatch, errors, saving, save, hasChanges } = useEditWebshop({
 const present = usePresent();
 const organization = useOrganization();
 const viewTitle = 'Webshop pagina wijzigen';
+
+const areAdvancedWebshopSettingsEnabled = useFeatureFlag()('webshop-advanced-settings');
 
 const hasTickets = computed(() => webshop.value.hasTickets);
 
@@ -239,6 +251,14 @@ const coverPhoto = computed({
     get: () => webshop.value.meta.coverPhoto,
     set: (coverPhoto: Image | null) => {
         const patch = WebshopMetaData.patch({ coverPhoto });
+        addPatch(PrivateWebshop.patch({ meta: patch }));
+    },
+});
+
+const customCode = computed({
+    get: () => webshop.value.meta.customCode,
+    set: (customCode: string | null) => {
+        const patch = WebshopMetaData.patch({ customCode });
         addPatch(PrivateWebshop.patch({ meta: patch }));
     },
 });
