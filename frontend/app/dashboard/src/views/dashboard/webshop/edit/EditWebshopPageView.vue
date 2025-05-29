@@ -263,12 +263,8 @@ const coverPhoto = computed({
 });
 
 const customCode = computed({
-    get: () => webshop.value.meta.customCode,
-    set: (customCode: string | null) => {
-        if (customCode !== null && customCode.trim().length === 0) {
-            customCode = null;
-        }
-
+    get: () => webshop.value.meta.customCode ?? '',
+    set: (customCode: string) => {
         const patch = WebshopMetaData.patch({ customCode });
         addPatch(PrivateWebshop.patch({ meta: patch }));
     },
