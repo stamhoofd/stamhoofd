@@ -65,7 +65,7 @@
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, type useDismiss, type usePopup, usePresent } from '@simonbackx/vue-app-navigation';
-import { CategoryBox, CenteredMessage, GlobalEventBus, LegalFooter, MetaKey, NavigationActions, OrganizationLogo, PaymentPendingView, ProductGrid, STNavigationBar, Toast, useContext, useMetaInfo } from '@stamhoofd/components';
+import { CategoryBox, CenteredMessage, GlobalEventBus, injectCustomCode, LegalFooter, MetaKey, NavigationActions, OrganizationLogo, PaymentPendingView, ProductGrid, STNavigationBar, Toast, useContext, useMetaInfo } from '@stamhoofd/components';
 import { UrlHelper } from '@stamhoofd/networking';
 import { CartItem, LoginProviderType, Payment, PaymentStatus } from '@stamhoofd/structures';
 
@@ -99,6 +99,8 @@ const bannerImage = computed(() => webshop.value.meta.coverPhoto?.getResolutionF
 const bannerImageSrc = computed(() => bannerImage.value?.file.getPublicPath());
 const bannerImageWidth = computed(() => bannerImage.value?.width);
 const bannerImageHeight = computed(() => bannerImage.value?.height);
+
+injectCustomCode(webshopManager.webshop);
 
 useMetaInfo({
     title: `${webshopManager.webshop.meta.name} | ${webshopManager.organization.name}`,

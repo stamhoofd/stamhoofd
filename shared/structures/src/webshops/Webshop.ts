@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { DNSRecord, DNSRecordType } from '../DNSRecord.js';
+import { DNSRecord } from '../DNSRecord.js';
 
 import { Organization } from '../Organization.js';
 import { Category } from './Category.js';
@@ -214,6 +214,10 @@ export class Webshop extends AutoEncoder {
         return this.canEnableCart;
     }
 
+    get hasCustomDomain(): boolean {
+        return !!this.domain && this.meta.domainActive;
+    }
+
     getDefaultDomain(organization: Organization): string {
         if (!STAMHOOFD.domains.webshop) {
             console.error('No webshop domains configured');
@@ -232,7 +236,7 @@ export class Webshop extends AutoEncoder {
     }
 
     getUrl(organization: Organization): string {
-        if (this.domain && this.meta.domainActive) {
+        if (this.hasCustomDomain) {
             return this.getDomainUrl();
         }
 
