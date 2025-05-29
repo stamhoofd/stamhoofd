@@ -135,8 +135,11 @@
             <p>
                 {{ $t('Geavanceerde instellingen.') }}
             </p>
+            <p v-if="!hasCustomDomain" class="info-box">
+                {{ $t('Je kan enkel custom code gebruiken als je een eigen domein hebt.') }}
+            </p>
             <STInputBox error-fields="meta.customCode" :error-box="errors.errorBox" class="max" :title="$t('Custom code')">
-                <textarea v-model="customCode" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t('Code om te injecteren')" />
+                <textarea v-model="customCode" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t('Deze code wordt toegevoegd aan de head van de webshop.')" :disabled="!hasCustomDomain" />
             </STInputBox>
         </div>
     </SaveView>
@@ -167,6 +170,8 @@ const hasFullAccess = computed(() => auth.permissions?.hasFullAccess() ?? false)
 const areAdvancedWebshopSettingsEnabled = useFeatureFlag()('webshop-advanced-settings');
 
 const hasTickets = computed(() => webshop.value.hasTickets);
+
+const hasCustomDomain = computed(() => webshop.value.hasCustomDomain || STAMHOOFD.environment === 'development');
 
 function addMetaPatch(patch: AutoEncoderPatchType<WebshopMetaData>) {
     addPatch(PrivateWebshop.patch({ meta: patch }));
