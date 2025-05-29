@@ -130,7 +130,7 @@
             </Checkbox>
         </template>
 
-        <div v-if="areAdvancedWebshopSettingsEnabled" class="container">
+        <div v-if="hasFullAccess && areAdvancedWebshopSettingsEnabled" class="container">
             <hr><h2>{{ $t('Geavanceerd') }}</h2>
             <p>
                 {{ $t('Geavanceerde instellingen.') }}
@@ -145,7 +145,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { Checkbox, ColorInput, DetailedTicketView, LogoEditor, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, UploadButton, useFeatureFlag, useOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
+import { Checkbox, ColorInput, DetailedTicketView, LogoEditor, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, UploadButton, useAuth, useFeatureFlag, useOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
 import { Cart, CartItem, CartReservedSeat, DarkMode, Image, Policy, PrivateWebshop, ProductType, ResolutionRequest, RichText, SponsorConfig, TicketPublic, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
@@ -161,6 +161,8 @@ const { webshop, addPatch, errors, saving, save, hasChanges } = useEditWebshop({
 const present = usePresent();
 const organization = useOrganization();
 const viewTitle = 'Webshop pagina wijzigen';
+const auth = useAuth();
+const hasFullAccess = computed(() => auth.permissions?.hasFullAccess() ?? false);
 
 const areAdvancedWebshopSettingsEnabled = useFeatureFlag()('webshop-advanced-settings');
 

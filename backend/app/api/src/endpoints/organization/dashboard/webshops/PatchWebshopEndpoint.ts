@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Token, Webshop } from '@stamhoofd/models';
+import { Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PermissionLevel, PrivateWebshop, WebshopPrivateMetaData } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -52,6 +52,9 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
             // Do all updates
             if (request.body.meta) {
                 request.body.meta.domainActive = undefined;
+                if (request.body.meta.customCode !== undefined && !await Context.auth.hasFullAccess(organization.id)) {
+                    throw Context.auth.error($t('Je hebt niet voldoende rechten om de custom code aan te passen.'));
+                }
                 webshop.meta.patchOrPut(request.body.meta);
             }
 
