@@ -61,6 +61,9 @@ export class MemberManager {
         }, { deep: true });
     }
 
+    /**
+     * @broken
+     */
     async loadGroupsById(groupIds: string[], skipOrganizationIds: string[] = [], { owner, shouldRetry }: { owner?: any; shouldRetry?: boolean } = {}) {
         if (groupIds.length === 0) {
             return GroupsWithOrganizations.create({

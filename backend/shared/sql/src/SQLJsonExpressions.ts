@@ -57,6 +57,25 @@ export class SQLJsonExtract implements SQLExpression {
     }
 }
 
+/**
+ * Same as target->path, JSON_EXTRACT(target, path)
+ */
+export class SQLJsonKeys implements SQLExpression {
+    target: SQLExpression;
+
+    constructor(target: SQLExpression) {
+        this.target = target;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            'JSON_KEYS(',
+            this.target.getSQL(options),
+            ')',
+        ]);
+    }
+}
+
 export class SQLJsonLength implements SQLExpression {
     target: SQLExpression;
     path?: SQLExpression;

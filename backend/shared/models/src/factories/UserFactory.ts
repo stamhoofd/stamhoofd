@@ -23,7 +23,7 @@ export class UserFactory extends Factory<Options, User> {
     async create(): Promise<User> {
         let organization: Organization | null = null;
 
-        if (!this.options.organization && STAMHOOFD.userMode !== 'platform') {
+        if (!this.options.organization && STAMHOOFD.userMode !== 'platform' && !this.options.globalPermissions) {
             const organizationFactory = new OrganizationFactory({});
             organization = await organizationFactory.create();
         }

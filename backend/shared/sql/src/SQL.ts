@@ -4,7 +4,7 @@ import { isSQLExpression, SQLExpression } from './SQLExpression';
 import { SQLAssignment, SQLColumnExpression, SQLColumnExpressionParams, SQLIf, SQLSafeValue, SQLScalar, SQLScalarValue, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions';
 import { SQLInsert } from './SQLInsert';
 import { SQLJoin, SQLJoinType } from './SQLJoin';
-import { SQLJsonExtract, SQLJsonLength, SQLJsonUnquote, SQLLpad } from './SQLJsonExpressions';
+import { SQLJsonExtract, SQLJsonKeys, SQLJsonLength, SQLJsonUnquote, SQLLpad } from './SQLJsonExpressions';
 import { parseTable, SQLSelect } from './SQLSelect';
 import { SQLUpdate } from './SQLUpdate';
 import { ParseWhereArguments, SQLEmptyWhere, SQLWhere } from './SQLWhere';
@@ -20,6 +20,10 @@ class StaticSQL {
 
     jsonValue(column: SQLExpression, path: string, asScalar = false): SQLJsonExtract {
         return new SQLJsonExtract(column, asScalar ? new SQLScalar(path) : new SQLSafeValue(path));
+    }
+
+    jsonKeys(column: SQLExpression): SQLJsonKeys {
+        return new SQLJsonKeys(column);
     }
 
     lpad(column: SQLExpression, length: number, value: string): SQLLpad {

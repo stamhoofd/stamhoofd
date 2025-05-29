@@ -1,34 +1,25 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { Group, Organization } from '@stamhoofd/models';
-import { GroupsWithOrganizations } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, getSortFilter, Group as GroupStruct, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
 
-import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { Formatter } from '@stamhoofd/utility';
-import { StringArrayDecoder } from '../../../decoders/StringArrayDecoder';
+import { Decoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { Group } from '@stamhoofd/models';
+import { applySQLSorter, compileToSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { groupFilterCompilers } from '../../../sql-filters/groups';
+import { groupSorters } from '../../../sql-sorters/groups';
+
 type Params = Record<string, never>;
-
-class Query extends AutoEncoder {
-    @field({ decoder: new StringArrayDecoder(StringDecoder) })
-    ids: string[];
-
-    /**
-     * List of organizations the requester already knows and doesn't need to be included in the response
-     */
-    @field({ decoder: new StringArrayDecoder(StringDecoder), optional: true })
-    excludeOrganizationIds: string[] = [];
-}
-
+type Query = LimitedFilteredRequest;
 type Body = undefined;
-type ResponseBody = GroupsWithOrganizations;
+type ResponseBody = PaginatedResponse<GroupStruct[], LimitedFilteredRequest>;
 
-/**
- * Get the members of the user
- */
+const filterCompilers: SQLFilterDefinitions = groupFilterCompilers;
+const sorters: SQLSortDefinitions<Group> = groupSorters;
+
 export class GetGroupsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    queryDecoder = Query as Decoder<Query>;
+    queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
@@ -40,40 +31,123 @@ export class GetGroupsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         if (params) {
             return [true, params as Params];
         }
-
         return [false];
     }
 
-    async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOptionalOrganizationScope();
-        await Context.optionalAuthenticate();
+    static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
+        const organization = Context.organization;
+        let scopeFilter: StamhoofdFilter | undefined = undefined;
 
-        if (request.query.ids.length === 0) {
-            return new Response(
-                GroupsWithOrganizations.create({
-                    groups: [],
-                    organizations: [],
-                }),
-            );
+        if (organization) {
+            scopeFilter = {
+                organizationId: organization.id,
+            };
         }
 
-        if (request.query.ids.length > 100) {
+        const query = Group.select();
+
+        if (scopeFilter) {
+            query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
+        }
+
+        if (q.filter) {
+            query.where(await compileToSQLFilter(q.filter, filterCompilers));
+        }
+
+        if (q.search) {
+            let searchFilter: StamhoofdFilter | null = null;
+
+            searchFilter = {
+                id: q.search,
+            };
+
+            if (searchFilter) {
+                query.where(await compileToSQLFilter(searchFilter, filterCompilers));
+            }
+        }
+
+        if (q instanceof LimitedFilteredRequest) {
+            if (q.pageFilter) {
+                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers));
+            }
+
+            q.sort = assertSort(q.sort, [{ key: 'id' }]);
+            applySQLSorter(query, q.sort, sorters);
+            query.limit(q.limit);
+        }
+
+        return query;
+    }
+
+    static async buildData(requestQuery: LimitedFilteredRequest) {
+        const query = await GetGroupsEndpoint.buildQuery(requestQuery);
+        const groups = await query.fetch();
+
+        let next: LimitedFilteredRequest | undefined;
+
+        if (groups.length >= requestQuery.limit) {
+            const lastObject = groups[groups.length - 1];
+            const nextFilter = getSortFilter(lastObject, sorters, requestQuery.sort);
+
+            next = new LimitedFilteredRequest({
+                filter: requestQuery.filter,
+                pageFilter: nextFilter,
+                sort: requestQuery.sort,
+                limit: requestQuery.limit,
+                search: requestQuery.search,
+            });
+
+            if (JSON.stringify(nextFilter) === JSON.stringify(requestQuery.pageFilter)) {
+                console.error('Found infinite loading loop for', requestQuery);
+                next = undefined;
+            }
+        }
+
+        return new PaginatedResponse<GroupStruct[], LimitedFilteredRequest>({
+            results: await AuthenticatedStructures.groups(groups),
+            next,
+        });
+    }
+
+    async handle(request: DecodedRequest<Params, Query, Body>) {
+        if (request.request.getVersion() < 373) {
             throw new SimpleError({
-                code: 'too_many_ids',
-                message: "You can't request more than 100 groups at once",
+                code: 'client_update_required',
+                statusCode: 400,
+                message: 'Er is een noodzakelijke update beschikbaar. Herlaad de pagina en wis indien nodig de cache van jouw browser.',
+                human: $t(`adb0e7c8-aed7-43f5-bfcc-a350f03aaabe`),
             });
         }
 
-        const groups = await Group.getByIDs(...request.query.ids);
-        const organizationIds = Formatter.uniqueArray(groups.map(g => g.organizationId).filter(id => !request.query.excludeOrganizationIds.includes(id)));
+        const organization = await Context.setOptionalOrganizationScope();
+        await Context.optionalAuthenticate();
 
-        const organizations = organizationIds.length > 0 ? (await Organization.getByIDs(...organizationIds)) : [];
+        if (!organization) {
+            if (!Context.auth.hasSomePlatformAccess()) {
+                throw Context.auth.error();
+            }
+        }
+
+        const maxLimit = Context.auth.hasSomePlatformAccess() ? 1000 : 100;
+
+        if (request.query.limit > maxLimit) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                field: 'limit',
+                message: 'Limit can not be more than ' + maxLimit,
+            });
+        }
+
+        if (request.query.limit < 1) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                field: 'limit',
+                message: 'Limit can not be less than 1',
+            });
+        }
 
         return new Response(
-            GroupsWithOrganizations.create({
-                groups: await AuthenticatedStructures.groups(groups),
-                organizations: await AuthenticatedStructures.organizations(organizations),
-            }),
+            await GetGroupsEndpoint.buildData(request.query),
         );
     }
 }
