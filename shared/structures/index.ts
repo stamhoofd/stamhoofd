@@ -111,7 +111,6 @@ export * from './src/endpoints/CheckMollieResponse.js';
 export * from './src/endpoints/CreateOrganization.js';
 export * from './src/endpoints/EmailRequest.js';
 export * from './src/endpoints/ForgotPasswordRequest.js';
-export * from './src/endpoints/GroupsWithOrganizations.js';
 export * from './src/endpoints/OrganizationAdmins.js';
 export * from './src/endpoints/OrganizationDomains.js';
 export * from './src/endpoints/PayableBalanceCollection.js';

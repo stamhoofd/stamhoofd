@@ -18,6 +18,18 @@ export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(StringDecoder), optional: true })
     deleteRegistrationIds: string[] = [];
 
+    get organizationId() {
+        if (this.items.length > 0) {
+            return this.items[0].organizationId;
+        }
+        if (this.balanceItems.length > 0) {
+            return this.balanceItems[0].item.organizationId;
+        }
+        // for deleted registrations, we don't have the id at the moment
+        // that is not a disaster since we don't need to load these carts from storage
+        return null;
+    }
+
     hydrate(context: RegisterContext) {
         const cart = new RegisterCart();
         cart.items = this.items.map(i => i.hydrate(context));

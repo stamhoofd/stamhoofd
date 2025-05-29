@@ -65,6 +65,10 @@ export class IDRegisterCheckout extends AutoEncoder {
     @field({ decoder: IntegerDecoder, nullable: true })
     totalPrice: number | null = null;
 
+    get organizationId() {
+        return this.cart.organizationId;
+    }
+
     hydrate(context: RegisterContext) {
         const checkout = new RegisterCheckout();
         checkout.cart = this.cart.hydrate(context);
