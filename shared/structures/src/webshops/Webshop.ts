@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
-import { DNSRecord, DNSRecordType } from '../DNSRecord';
+import { DNSRecord } from '../DNSRecord';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Organization } from '../Organization';
 import { Category } from './Category';
@@ -109,185 +109,202 @@ export class WebshopPreview extends AutoEncoder {
 }
 
 export class Webshop extends AutoEncoder {
-    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
-    id: string;
+  @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+  id: string;
 
-    /**
-     * Not writeable
-     */
-    @field({ decoder: StringDecoder, version: 134 })
-    uri = ""
+  /**
+   * Not writeable
+   */
+  @field({ decoder: StringDecoder, version: 134 })
+  uri = "";
 
-    /**
-     * Not writeable
-     */
-    @field({ decoder: StringDecoder, field: "uri"  })
-    @field({ 
-        decoder: StringDecoder, 
-        nullable: true, 
-        version: 134, 
-        downgrade: function(this: Webshop) {
-            return this.legacyUri ?? this.uri
+  /**
+   * Not writeable
+   */
+  @field({ decoder: StringDecoder, field: "uri" })
+  @field({
+    decoder: StringDecoder,
+    nullable: true,
+    version: 134,
+    downgrade: function (this: Webshop) {
+      return this.legacyUri ?? this.uri;
+    },
+  })
+  legacyUri: string | null = null;
+
+  @field({ decoder: StringDecoder, nullable: true })
+  domain: string | null = null;
+
+  @field({ decoder: StringDecoder, nullable: true })
+  domainUri: string | null = null;
+
+  @field({ decoder: WebshopMetaData })
+  meta = WebshopMetaData.create({});
+
+  @field({ decoder: new ArrayDecoder(Product) })
+  products: Product[] = [];
+
+  @field({ decoder: new ArrayDecoder(Category) })
+  categories: Category[] = [];
+
+  get hasSingleTickets() {
+    return this.meta.hasSingleTickets;
+  }
+
+  get hasTickets() {
+    return this.meta.hasTickets;
+  }
+
+  /**
+   * Whether we need to show the text 'Free' in webshops (only if we have at least one non-free product)
+   */
+  get isAllFree() {
+    for (const product of this.products) {
+      for (const price of product.prices) {
+        if (price.price) {
+          return false;
         }
-    })
-    legacyUri: string | null = null
+      }
 
-    @field({ decoder: StringDecoder, nullable: true })
-    domain: string | null = null;
-
-    @field({ decoder: StringDecoder, nullable: true })
-    domainUri: string | null = null;
-
-    @field({ decoder: WebshopMetaData })
-    meta = WebshopMetaData.create({})
-
-    @field({ decoder: new ArrayDecoder(Product) })
-    products: Product[] = []
-
-    @field({ decoder: new ArrayDecoder(Category) })
-    categories: Category[] = []
-
-    get hasSingleTickets() {
-        return this.meta.hasSingleTickets
-    }
-
-    get hasTickets() {
-        return this.meta.hasTickets
-    }
-
-    /**
-     * Whether we need to show the text 'Free' in webshops (only if we have at least one non-free product)
-     */
-    get isAllFree() {
-        for (const product of this.products) {
-            for (const price of product.prices) {
-                if (price.price) {
-                    return false
-                }
-            }
-
-            for (const menu of product.optionMenus) {
-                for (const option of menu.options) {
-                    if (option.price) {
-                        return false
-                    }
-                }
-            }
-        }
-
-        for (const plan of this.meta.seatingPlans) {
-            for (const category of plan.categories) {
-                if (category.price) {
-                    return false
-                }
-            }
-        }
-
-        if (this.meta.paymentConfiguration.administrationFee.fixed) {
+      for (const menu of product.optionMenus) {
+        for (const option of menu.options) {
+          if (option.price) {
             return false;
+          }
         }
-        
-        return true
+      }
     }
 
-    get canEnableCart() {
-        if (this.products.length === 1 && !this.meta.allowDiscountCodeEntry) {
-            const product = this.products[0]
-            if (product.isUnique) {
-                return false
-            }
+    for (const plan of this.meta.seatingPlans) {
+      for (const category of plan.categories) {
+        if (category.price) {
+          return false;
         }
-        return true
+      }
     }
 
-    get shouldEnableCart() {
-        if (!this.meta.cartEnabled) {
-            return false
-        }
-        return this.canEnableCart
+    if (this.meta.paymentConfiguration.administrationFee.fixed) {
+      return false;
     }
 
-    getDefaultDomain(organization: Organization): string  {
-        return (STAMHOOFD.domains.webshop[organization.address.country] ?? STAMHOOFD.domains.webshop[""])
+    return true;
+  }
+
+  get canEnableCart() {
+    if (this.products.length === 1 && !this.meta.allowDiscountCodeEntry) {
+      const product = this.products[0];
+      if (product.isUnique) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  get shouldEnableCart() {
+    if (!this.meta.cartEnabled) {
+      return false;
+    }
+    return this.canEnableCart;
+  }
+
+  get hasCustomDomain(): boolean {
+    return !!this.domain && this.meta.domainActive;
+  }
+
+  getDefaultDomain(organization: Organization): string {
+    return (
+      STAMHOOFD.domains.webshop[organization.address.country] ??
+      STAMHOOFD.domains.webshop[""]
+    );
+  }
+
+  getDefaultUrl(organization: Organization): string {
+    return this.getDefaultDomain(organization) + this.getDefaultSuffix();
+  }
+
+  getDomainUrl(): string {
+    return this.domain + this.getDomainSuffix();
+  }
+
+  getUrl(organization: Organization): string {
+    if (this.domain && this.meta.domainActive) {
+      return this.getDomainUrl();
     }
 
-    getDefaultUrl(organization: Organization): string {
-        return this.getDefaultDomain(organization)+this.getDefaultSuffix()
+    return this.getDefaultUrl(organization);
+  }
+
+  getLegacyUrl(organization: Organization): string | null {
+    if (this.legacyUri === null) {
+      return null;
+    }
+    return (
+      organization.uri +
+      "." +
+      STAMHOOFD.domains.legacyWebshop +
+      (this.legacyUri ? "/" + this.legacyUri : "")
+    );
+  }
+
+  getDomainSuffix(): string {
+    if (!this.domainUri) {
+      return "";
+    }
+    return "/" + this.domainUri;
+  }
+
+  getDefaultSuffix(): string {
+    if (!this.uri) {
+      return "";
+    }
+    return "/" + this.uri;
+  }
+
+  getUrlSuffix(): string {
+    if (this.domain) {
+      return this.getDomainSuffix();
+    }
+    return this.getDefaultSuffix();
+  }
+
+  buildDNSRecords(): DNSRecord[] {
+    if (!this.domain) {
+      return [];
+    }
+    return WebshopPrivateMetaData.buildDNSRecords(this.domain);
+  }
+
+  isClosed(margin = 0) {
+    if (
+      this.meta.status !== WebshopStatus.Open ||
+      (this.meta.availableUntil &&
+        this.meta.availableUntil.getTime() < new Date().getTime() + margin) ||
+      this.opensInTheFuture()
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  opensInTheFuture() {
+    if (this.meta.status !== WebshopStatus.Open) {
+      return false;
+    }
+    if (this.meta.openAt && this.meta.openAt.getTime() > new Date().getTime()) {
+      return true;
+    }
+    return false;
+  }
+
+  clearStock() {
+    for (const product of this.products) {
+      product.clearStock();
     }
 
-    getDomainUrl(): string {
-        return this.domain+this.getDomainSuffix()
+    for (const method of this.meta.checkoutMethods) {
+      method.clearStock();
     }
-
-    getUrl(organization: Organization): string {
-        if (this.domain && this.meta.domainActive) {
-            return this.getDomainUrl()
-        }
-
-        return this.getDefaultUrl(organization)
-    }
-    
-    getLegacyUrl(organization: Organization): string | null {
-        if (this.legacyUri === null) {
-            return null
-        }
-        return organization.uri+"."+STAMHOOFD.domains.legacyWebshop+(this.legacyUri ? "/"+this.legacyUri : "")
-    }
-
-    getDomainSuffix(): string {
-        if (!this.domainUri) {
-            return ""
-        }
-        return "/"+this.domainUri
-    }
-
-    getDefaultSuffix(): string {
-        if (!this.uri) {
-            return ""
-        }
-        return "/"+this.uri
-    }
-
-    getUrlSuffix(): string {
-        if (this.domain) {
-            return this.getDomainSuffix()
-        }
-        return this.getDefaultSuffix()
-    }
-
-    buildDNSRecords(): DNSRecord[] {
-        if (!this.domain) {
-            return []
-        }
-        return WebshopPrivateMetaData.buildDNSRecords(this.domain)
-    }
-
-    isClosed(margin = 0) {
-        if (this.meta.status !== WebshopStatus.Open || (this.meta.availableUntil && this.meta.availableUntil.getTime() < new Date().getTime() + margin) || this.opensInTheFuture()) {
-            return true
-        }
-        return false
-    }
-
-    opensInTheFuture() {
-        if (this.meta.status !== WebshopStatus.Open) {
-            return false;
-        }
-        if (this.meta.openAt && this.meta.openAt.getTime() > new Date().getTime()) {
-            return true
-        }
-        return false
-    }
-
-    clearStock() {
-        for (const product of this.products) {
-            product.clearStock()
-        }
-
-        for (const method of this.meta.checkoutMethods) {
-            method.clearStock()
-        }
-    }
+  }
 }
 
 export class PrivateWebshop extends Webshop {

@@ -86,6 +86,10 @@
                 Webshop auth
             </Checkbox>
 
+            <Checkbox :checked="getFeatureFlag('webshop-advanced-settings')" @change="setFeatureFlag('webshop-advanced-settings', !!$event)">
+                Geavanceerde instellingen voor webshops
+            </Checkbox>
+
             <hr>
 
             <button class="button text" type="button" @click="applyDiscountCode">

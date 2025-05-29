@@ -138,22 +138,32 @@
             Verminder de zichtbaarheid van Stamhoofd
         </Checkbox>
 
+        <div v-if="hasFullAccess && areAdvancedWebshopSettingsEnabled" class="container">
+            <hr><h2>{{ $t('Geavanceerd') }}</h2>
+            <p>
+                {{ $t('Geavanceerde instellingen.') }}
+            </p>
+            <p v-if="!hasCustomDomain" class="info-box">
+                {{ $t('Je kan enkel custom code gebruiken als je een eigen domein hebt.') }}
+            </p>
+            <STInputBox error-fields="meta.customCode" :error-box="errorBox" class="max" :title="$t('Custom code')">
+                <textarea v-model="customCode" class="input" type="text" autocomplete="off" enterkeyhint="next" placeholder="Deze code wordt toegevoegd aan de head van de webshop." :disabled="!hasCustomDomain" />
+            </STInputBox>
+        </div>
     </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
-import { ColorInput, DetailedTicketView, LogoEditor, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, UploadButton, WYSIWYGTextInput, Checkbox } from "@stamhoofd/components";
-import { UrlHelper } from "@stamhoofd/networking";
-import { Cart, CartReservedSeat, TicketPublic } from "@stamhoofd/structures";
-import { CartItem } from "@stamhoofd/structures";
-import { DarkMode, Image, Policy, PrivateWebshop, ProductType, ResolutionRequest, RichText, SponsorConfig, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
+import { Checkbox, ColorInput, DetailedTicketView, LogoEditor, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, UploadButton, WYSIWYGTextInput } from "@stamhoofd/components";
+import { SessionManager, UrlHelper } from "@stamhoofd/networking";
+import { Cart, CartItem, CartReservedSeat, DarkMode, Image, Policy, PrivateWebshop, ProductType, ResolutionRequest, RichText, SponsorConfig, TicketPublic, WebshopLayout, WebshopMetaData } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
-import EditSponsorsBox from "../../sponsors/EditSponsorsBox.vue"
+import EditSponsorsBox from "../../sponsors/EditSponsorsBox.vue";
 import EditPolicyBox from "./EditPolicyBox.vue";
 import EditWebshopMixin from "./EditWebshopMixin";
 
@@ -190,6 +200,22 @@ export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
 
     get hasTickets() {
         return this.webshop.hasTickets
+    }
+
+    get hasCustomDomain() {
+        return this.webshop.hasCustomDomain || STAMHOOFD.environment === 'development'
+    }
+
+    get hasFullAccess() {
+        return SessionManager.currentSession?.user?.permissions?.hasFullAccess(this.organization.privateMeta?.roles ?? [], ) ?? false
+    }
+
+    get areAdvancedWebshopSettingsEnabled() {
+        return this.getFeatureFlag('webshop-advanced-settings');
+    }
+
+    getFeatureFlag(flag: string) {
+        return this.organization.privateMeta?.featureFlags.includes(flag) ?? false
     }
 
     addMetaPatch(patch: AutoEncoderPatchType<WebshopMetaData>) {
@@ -288,6 +314,20 @@ export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
     set coverPhoto(coverPhoto: Image | null) {
         const patch = WebshopMetaData.patch({ coverPhoto })
         this.addPatch(PrivateWebshop.patch({ meta: patch }) )
+    }
+
+    get customCode() {
+        return this.webshop.meta.customCode ?? '';
+    }
+
+    set customCode(value: string) {
+        let customCode: string | null = value
+        if(value.trim().length === 0) {
+            customCode = null;
+        }
+        
+        const patch = WebshopMetaData.patch({ customCode });
+        this.addPatch(PrivateWebshop.patch({ meta: patch}) );
     }
 
     get hs() {

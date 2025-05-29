@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Data, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, NumberDecoder, PatchableDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Data, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, PatchableDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Colors, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
@@ -359,208 +359,224 @@ export enum WebshopAuthType {
 }
 
 export class WebshopMetaData extends AutoEncoder {
-    @field({ decoder: StringDecoder })
-    name = ""
+  @field({ decoder: StringDecoder })
+  name = "";
 
-    @field({ decoder: StringDecoder })
-    title = ""
+  @field({ decoder: StringDecoder })
+  title = "";
 
-    @field({ decoder: StringDecoder })
-    @field({ decoder: RichText, version: 181, upgrade: (data) => RichText.create({ text: data }), downgrade: (data) => data.text, upgradePatch: (data) => RichText.patch({ text: data }), downgradePatch: (data) => data.text })
-    description = RichText.create({})
+  @field({ decoder: StringDecoder })
+  @field({
+    decoder: RichText,
+    version: 181,
+    upgrade: (data) => RichText.create({ text: data }),
+    downgrade: (data) => data.text,
+    upgradePatch: (data) => RichText.patch({ text: data }),
+    downgradePatch: (data) => data.text,
+  })
+  description = RichText.create({});
 
-    @field({ decoder: new EnumDecoder(WebshopTicketType), version: 105 })
-    ticketType = WebshopTicketType.None
+  @field({ decoder: new EnumDecoder(WebshopTicketType), version: 105 })
+  ticketType = WebshopTicketType.None;
 
-    @field({ decoder: Image, nullable: true })
-    coverPhoto: Image | null = null
+  @field({ decoder: Image, nullable: true })
+  coverPhoto: Image | null = null;
 
-    @field({ decoder: BooleanDecoder, version: 94 })
-    allowComments = false
+  @field({ decoder: BooleanDecoder, version: 94 })
+  allowComments = false;
 
-    @field({ decoder: BooleanDecoder, optional: true })
-    phoneEnabled = true
+  @field({ decoder: BooleanDecoder, optional: true })
+  phoneEnabled = true;
 
-    @field({ decoder: BooleanDecoder, version: 242 })
-    allowDiscountCodeEntry = false
+  @field({ decoder: BooleanDecoder, version: 242 })
+  allowDiscountCodeEntry = false;
 
-    @field({ decoder: new ArrayDecoder(RecordCategory as Decoder<RecordCategory>), optional: true })
-    recordCategories: RecordCategory[] = []
+  @field({
+    decoder: new ArrayDecoder(RecordCategory as Decoder<RecordCategory>),
+    optional: true,
+  })
+  recordCategories: RecordCategory[] = [];
 
-    /**
-     * @deprecated
-     */
-    @field({ decoder: new ArrayDecoder(WebshopField), version: 94 })
-    customFields: WebshopField[] = []
+  /**
+   * @deprecated
+   */
+  @field({ decoder: new ArrayDecoder(WebshopField), version: 94 })
+  customFields: WebshopField[] = [];
 
-    @field({ decoder: new ArrayDecoder(AnyCheckoutMethodDecoder) })
-    checkoutMethods: CheckoutMethod[] = []
+  @field({ decoder: new ArrayDecoder(AnyCheckoutMethodDecoder) })
+  checkoutMethods: CheckoutMethod[] = [];
 
-    @field({ decoder: new ArrayDecoder(SeatingPlan), version: 211 })
-    seatingPlans: SeatingPlan[] = []
+  @field({ decoder: new ArrayDecoder(SeatingPlan), version: 211 })
+  seatingPlans: SeatingPlan[] = [];
 
-    @field({ decoder: BooleanDecoder, version: 233, optional: true })
-    reduceBranding = false
+  @field({ decoder: BooleanDecoder, version: 233, optional: true })
+  reduceBranding = false;
 
-    @field({ decoder: new ArrayDecoder(Discount), version: 235 })
-    defaultDiscounts: Discount[] = []
+  @field({ decoder: new ArrayDecoder(Discount), version: 235 })
+  defaultDiscounts: Discount[] = [];
 
-    /**
-     * @deprecated
-     * Use paymentConfiguration.paymentMethods instead
-     */
-    @field({ 
-        decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)), 
-        version: 151, 
-        field: 'paymentMethods',
-        optional: true // We no longer expect this from the backend, so it can get removed in a future version
-    })
-    @field({ 
-        decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)), 
-        version: 208, 
-        field: 'oldPaymentMethods',
-        optional: true, // We no longer expect this from the backend, so it can get removed in a future version
-        downgrade: function() {
-            // This return value for old clients
-            return this.paymentMethods
-        }
-    })
-    oldPaymentMethods: PaymentMethod[] = [PaymentMethod.Transfer]
+  /**
+   * @deprecated
+   * Use paymentConfiguration.paymentMethods instead
+   */
+  @field({
+    decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)),
+    version: 151,
+    field: "paymentMethods",
+    optional: true, // We no longer expect this from the backend, so it can get removed in a future version
+  })
+  @field({
+    decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)),
+    version: 208,
+    field: "oldPaymentMethods",
+    optional: true, // We no longer expect this from the backend, so it can get removed in a future version
+    downgrade: function () {
+      // This return value for old clients
+      return this.paymentMethods;
+    },
+  })
+  oldPaymentMethods: PaymentMethod[] = [PaymentMethod.Transfer];
 
-    /**
-     * @deprecated
-     * Use paymentConfiguration.transferSettings instead
-     */
-    @field({ 
-        decoder: TransferSettings, 
-        version: 49, 
-        field: 'transferSettings',
-        optional: true // We no longer expect this from the backend, so it can get removed in a future version
-    })
-    @field({ 
-        decoder: TransferSettings, 
-        version: 208, 
-        field: 'oldTransferSettings',
-        optional: true, // We no longer expect this from the backend, so it can get removed in a future version
-        downgrade: function() {
-            // This return value for old clients
-            return this.transferSettings
-        }
-    })
-    oldTransferSettings = TransferSettings.create({})
+  /**
+   * @deprecated
+   * Use paymentConfiguration.transferSettings instead
+   */
+  @field({
+    decoder: TransferSettings,
+    version: 49,
+    field: "transferSettings",
+    optional: true, // We no longer expect this from the backend, so it can get removed in a future version
+  })
+  @field({
+    decoder: TransferSettings,
+    version: 208,
+    field: "oldTransferSettings",
+    optional: true, // We no longer expect this from the backend, so it can get removed in a future version
+    downgrade: function () {
+      // This return value for old clients
+      return this.transferSettings;
+    },
+  })
+  oldTransferSettings = TransferSettings.create({});
 
-    @field({ 
-        decoder: PaymentConfiguration, 
-        version: 205,
-        upgrade: function () {
-            return PaymentConfiguration.create({
-                transferSettings: this.oldTransferSettings,
-                paymentMethods: this.oldPaymentMethods
-            })
-        },
-    })
-    paymentConfiguration = PaymentConfiguration.create({})
+  @field({
+    decoder: PaymentConfiguration,
+    version: 205,
+    upgrade: function () {
+      return PaymentConfiguration.create({
+        transferSettings: this.oldTransferSettings,
+        paymentMethods: this.oldPaymentMethods,
+      });
+    },
+  })
+  paymentConfiguration = PaymentConfiguration.create({});
 
-    /**
-     * @deprecated
-     * Use paymentConfiguration.paymentMethods instead
-     */
-    get paymentMethods(): PaymentMethod[] {
-        return this.paymentConfiguration.paymentMethods
+  /**
+   * @deprecated
+   * Use paymentConfiguration.paymentMethods instead
+   */
+  get paymentMethods(): PaymentMethod[] {
+    return this.paymentConfiguration.paymentMethods;
+  }
+
+  /**
+   * @deprecated
+   * Use paymentConfiguration.paymentMethods instead
+   */
+  get transferSettings(): TransferSettings {
+    return this.paymentConfiguration.transferSettings;
+  }
+
+  @field({ decoder: new ArrayDecoder(Policy), version: 116 })
+  policies: Policy[] = [];
+
+  @field({ decoder: SponsorConfig, version: 226, nullable: true })
+  sponsors: SponsorConfig | null = null;
+
+  @field({ decoder: DateDecoder, nullable: true, version: 43 })
+  availableUntil: Date | null = null;
+
+  @field({ decoder: DateDecoder, nullable: true, version: 170 })
+  openAt: Date | null = null;
+
+  /**
+   * Manually close a webshop
+   */
+  @field({ decoder: new EnumDecoder(WebshopStatus), version: 136 })
+  status = WebshopStatus.Open;
+
+  @field({ decoder: new EnumDecoder(WebshopLayout), version: 180 })
+  layout = WebshopLayout.Default;
+
+  @field({ decoder: new EnumDecoder(DarkMode), version: 182 })
+  darkMode = DarkMode.Off;
+
+  @field({ decoder: StringDecoder, nullable: true, version: 183 })
+  color: string | null = null;
+
+  @field({ decoder: Image, nullable: true, version: 183 })
+  horizontalLogo: Image | null = null;
+
+  @field({ decoder: Image, nullable: true, version: 183 })
+  squareLogo: Image | null = null;
+
+  @field({ decoder: Image, nullable: true, version: 183 })
+  horizontalLogoDark: Image | null = null;
+
+  @field({ decoder: Image, nullable: true, version: 183 })
+  squareLogoDark: Image | null = null;
+
+  @field({ decoder: BooleanDecoder, version: 184 })
+  useLogo = false;
+
+  @field({ decoder: BooleanDecoder, optional: true, version: 183 })
+  expandLogo = false;
+
+  @field({ decoder: BooleanDecoder, version: 180 })
+  cartEnabled = true;
+
+  /**
+   * Whether the domain name has been validated and is active. Only used to know if this domain should get used emails and in the dashboard.
+   * This is to prevent invalid url's from being used in emails.
+   * Lookups for a given domain still work if not active
+   */
+  @field({ decoder: BooleanDecoder, version: 135 })
+  domainActive = false;
+
+  @field({ decoder: new EnumDecoder(WebshopAuthType), version: 188 })
+  authType: WebshopAuthType = WebshopAuthType.Disabled;
+
+  @field({ decoder: StringDecoder, nullable: true, optional: true })
+  customCode: string | null = null;
+
+  get hasTickets() {
+    return (
+      this.ticketType === WebshopTicketType.SingleTicket ||
+      this.ticketType === WebshopTicketType.Tickets
+    );
+  }
+
+  get hasSingleTickets() {
+    return this.ticketType === WebshopTicketType.SingleTicket;
+  }
+
+  getEmailReplacements() {
+    // Do not return a replacement in case we don't have a color (= default to organization color)
+    if (!this.color) {
+      return [];
     }
 
-    /**
-     * @deprecated
-     * Use paymentConfiguration.paymentMethods instead
-     */
-    get transferSettings(): TransferSettings {
-        return this.paymentConfiguration.transferSettings
-    }
-
-    @field({ decoder: new ArrayDecoder(Policy), version: 116 })
-    policies: Policy[] = []
-
-    @field({ decoder: SponsorConfig, version: 226, nullable: true })
-    sponsors: SponsorConfig|null = null
-
-    @field({ decoder: DateDecoder, nullable: true, version: 43 })
-    availableUntil: Date | null = null
-
-    @field({ decoder: DateDecoder, nullable: true, version: 170 })
-    openAt: Date | null = null
-
-    /**
-     * Manually close a webshop
-     */
-    @field({ decoder: new EnumDecoder(WebshopStatus), version: 136 })
-    status = WebshopStatus.Open
-
-    @field({ decoder: new EnumDecoder(WebshopLayout), version: 180 })
-    layout = WebshopLayout.Default
-
-    @field({ decoder: new EnumDecoder(DarkMode), version: 182 })
-    darkMode = DarkMode.Off
-
-    @field({ decoder: StringDecoder, nullable: true, version: 183 })
-    color: string | null = null
-
-    @field({ decoder: Image, nullable: true, version: 183 })
-    horizontalLogo: Image | null = null
-
-    @field({ decoder: Image, nullable: true, version: 183 })
-    squareLogo: Image | null = null
-
-    @field({ decoder: Image, nullable: true, version: 183 })
-    horizontalLogoDark: Image | null = null
-
-    @field({ decoder: Image, nullable: true, version: 183 })
-    squareLogoDark: Image | null = null
-
-    @field({ decoder: BooleanDecoder, version: 184 })
-    useLogo = false
-
-    @field({ decoder: BooleanDecoder, optional: true, version: 183 })
-    expandLogo = false
-
-    @field({ decoder: BooleanDecoder, version: 180 })
-    cartEnabled = true
-
-    /**
-     * Whether the domain name has been validated and is active. Only used to know if this domain should get used emails and in the dashboard.
-     * This is to prevent invalid url's from being used in emails.
-     * Lookups for a given domain still work if not active
-     */
-    @field({ decoder: BooleanDecoder, version: 135 })
-    domainActive = false
-
-    @field({ decoder: new EnumDecoder(WebshopAuthType), version: 188 })
-    authType: WebshopAuthType = WebshopAuthType.Disabled
-
-    get hasTickets() {
-        return this.ticketType === WebshopTicketType.SingleTicket || this.ticketType === WebshopTicketType.Tickets
-    }
-
-    get hasSingleTickets() {
-        return this.ticketType === WebshopTicketType.SingleTicket
-    }
-
-    getEmailReplacements() {
-        // Do not return a replacement in case we don't have a color (= default to organization color)
-        if (!this.color) {
-            return []
-        }
-        
-        return [
-            Replacement.create({
-                token: "primaryColor",
-                value: this.color
-            }),
-            Replacement.create({
-                token: "primaryColorContrast",
-                value: this.color ? Colors.getContrastColor(this.color) : "#fff"
-            }),
-        ]
-    }
+    return [
+      Replacement.create({
+        token: "primaryColor",
+        value: this.color,
+      }),
+      Replacement.create({
+        token: "primaryColorContrast",
+        value: this.color ? Colors.getContrastColor(this.color) : "#fff",
+      }),
+    ];
+  }
 }
 
 export class WebshopPrivateMetaData extends AutoEncoder {

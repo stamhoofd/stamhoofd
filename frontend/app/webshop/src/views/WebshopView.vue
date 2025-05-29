@@ -64,7 +64,7 @@
 
 import { SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CategoryBox, CenteredMessage, Checkbox, GlobalEventBus, LegalFooter,LoadingView, OrganizationLogo, PaymentPendingView, ProductGrid, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { CategoryBox, CenteredMessage, Checkbox, GlobalEventBus, injectCustomCode, LegalFooter, LoadingView, OrganizationLogo, PaymentPendingView, ProductGrid, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { CartItem, LoginProviderType, Payment, PaymentStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -358,7 +358,8 @@ export default class WebshopView extends Mixins(NavigationMixin){
         const params = UrlHelper.shared.getSearchParams()
         UrlHelper.shared.clear()
 
-        UrlHelper.setUrl("/")
+        UrlHelper.setUrl("/");
+        injectCustomCode(this.webshop);
         this.check().catch(console.error)
 
         if (path.length == 2 && path[0] == 'code') {
