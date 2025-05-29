@@ -320,12 +320,7 @@ export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
         return this.webshop.meta.customCode ?? '';
     }
 
-    set customCode(value: string) {
-        let customCode: string | null = value
-        if(value.trim().length === 0) {
-            customCode = null;
-        }
-        
+    set customCode(customCode: string) {
         const patch = WebshopMetaData.patch({ customCode });
         this.addPatch(PrivateWebshop.patch({ meta: patch}) );
     }
