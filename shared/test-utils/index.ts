@@ -5,6 +5,7 @@ class TestInstance {
     onceAfterEachCallbacks: AfterCallback[] = [];
     afterEachCallbacks: AfterCallback[] = [];
     beforeAllCallbacks: AfterCallback[] = [];
+    afterAllCallbacks: AfterCallback[] = [];
 
     permanentEnvironmentOverrides: Record<string, any> = {};
 
@@ -38,6 +39,10 @@ class TestInstance {
         this.beforeAllCallbacks.push(callback);
     }
 
+    addAfterAll(callback: AfterCallback) {
+        this.afterAllCallbacks.push(callback);
+    }
+
     async beforeAll() {
         for (const callback of this.beforeAllCallbacks) {
             await callback();
@@ -53,6 +58,12 @@ class TestInstance {
             await callback();
         }
         this.onceAfterEachCallbacks = [];
+    }
+
+    async afterAll() {
+        for (const callback of this.afterAllCallbacks) {
+            await callback();
+        }
     }
 
     loadEnvironment() {
@@ -84,6 +95,10 @@ class TestInstance {
 
         afterEach(async () => {
             await this.afterEach();
+        });
+
+        afterAll(async () => {
+            await this.afterAll();
         });
 
         // Sometimes there is code outside the test 'describe' that needs the environment already

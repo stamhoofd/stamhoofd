@@ -10,7 +10,8 @@
         "dist"
     ],
     "scripts": {
-        "build": "tsc -b"
+        "build": "tsc -b",
+        "test": "jest"
     },
     "publishConfig": {
         "access": "public"

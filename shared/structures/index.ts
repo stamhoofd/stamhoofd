@@ -214,6 +214,7 @@ export * from './src/email/EmailTemplate.js';
 
 // Filters
 export * from './src/filters/FilteredRequest.js';
+export * from './src/filters/FilterCompilers.js';
 export * from './src/filters/InMemoryFilter.js';
 export * from './src/filters/inMemoryFilterDefinitions.js';
 export * from './src/filters/InMemorySorter.js';

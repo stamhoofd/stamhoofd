@@ -128,8 +128,14 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
 
         // Where
         if (this._where) {
-            query.push('WHERE');
-            query.push(this._where.getSQL(options));
+            const always = this._where.isAlways;
+            if (always === false) {
+                throw new Error('Cannot use SQLSelect with a where that is not always true');
+            }
+            else if (always === null) {
+                query.push('WHERE');
+                query.push(this._where.getSQL(options));
+            }
         }
 
         if (this._groupBy.length > 0) {
@@ -163,6 +169,10 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     }
 
     async fetch(): Promise<T[]> {
+        if (this._where && this._where.isAlways === false) {
+            return [];
+        }
+
         const { query, params } = normalizeSQLQuery(this.getSQL());
 
         // when debugging: log all queries

@@ -121,6 +121,18 @@ export abstract class SQLWhere implements SQLExpression {
         return false;
     }
 
+    get isAlways(): boolean | null {
+        return null;
+    }
+
+    get isAlwaysTrue(): boolean {
+        return this.isAlways === true;
+    }
+
+    get isAlwaysFalse(): boolean {
+        return this.isAlways === false;
+    }
+
     abstract getSQL(options?: SQLExpressionOptions): SQLQuery;
     getJoins(): SQLJoin[] {
         return [];
@@ -250,7 +262,7 @@ export class SQLWhereEqual extends SQLWhere {
 
             return joinSQLQuery([
                 this.column.getSQL(options),
-                ` IS ${(this.sign === SQLWhereSign.NotEqual) ? 'NOT ' : ''} `,
+                ` IS ${(this.sign === SQLWhereSign.NotEqual) ? 'NOT ' : ''}`,
                 this.value.getSQL(options),
             ]);
         }
@@ -430,8 +442,8 @@ export class SQLWhereAnd extends SQLWhere {
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         return joinSQLQuery(
-            this.children.map((c) => {
-                if (c.isSingle) {
+            this.filteredChildren.map((c) => {
+                if (c.isSingle || this.filteredChildren.length === 1) {
                     return c.getSQL(options);
                 }
                 return joinSQLQuery(['(', c.getSQL(options), ')']);
@@ -440,8 +452,37 @@ export class SQLWhereAnd extends SQLWhere {
         );
     }
 
+    get filteredChildren(): SQLWhere[] {
+        // Children that always return true should not be included in the query (because the result only depends on the other children)
+        return this.children.filter(c => c.isAlways !== true);
+    }
+
     getJoins(): SQLJoin[] {
-        return this.children.flatMap(c => c.getJoins());
+        return this.filteredChildren.flatMap(c => c.getJoins());
+    }
+
+    get isSingle(): boolean {
+        return this.filteredChildren.length === 1 && this.filteredChildren[0].isSingle;
+    }
+
+    get isAlways(): boolean | null {
+        for (const c of this.children) {
+            const v = c.isAlways;
+            if (v === false) {
+                // If any child is always false, the whole AND is false
+                return false;
+            }
+            if (v === null) {
+                return null;
+            }
+        }
+
+        return true;
+    }
+
+    inverted(): SQLWhereOr {
+        // NOT (A AND B) is the same as (NOT A OR NOT B)
+        return new SQLWhereOr(this.children.map(c => new SQLWhereNot(c)));
     }
 }
 
@@ -455,8 +496,8 @@ export class SQLWhereOr extends SQLWhere {
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         return joinSQLQuery(
-            this.children.map((c) => {
-                if (c.isSingle) {
+            this.filteredChildren.map((c) => {
+                if (c.isSingle || this.filteredChildren.length === 1) {
                     return c.getSQL(options);
                 }
                 return joinSQLQuery(['(', c.getSQL(options), ')']);
@@ -466,7 +507,36 @@ export class SQLWhereOr extends SQLWhere {
     }
 
     getJoins(): SQLJoin[] {
-        return this.children.flatMap(c => c.getJoins());
+        return this.filteredChildren.flatMap(c => c.getJoins());
+    }
+
+    get filteredChildren(): SQLWhere[] {
+        // Children that always return false should not be included in the query (because the result only depends on the other children)
+        return this.children.filter(c => c.isAlways !== false);
+    }
+
+    get isSingle(): boolean {
+        return this.filteredChildren.length === 1 && this.filteredChildren[0].isSingle;
+    }
+
+    get isAlways(): boolean | null {
+        for (const c of this.children) {
+            const v = c.isAlways;
+            if (v === true) {
+                // If any child is always true, the whole OR is true
+                return true;
+            }
+            if (v === null) {
+                return null;
+            }
+        }
+
+        return false;
+    }
+
+    inverted(): SQLWhereOr {
+        // NOT (A OR B) is the same as (NOT A AND NOT B)
+        return new SQLWhereAnd(this.children.map(c => new SQLWhereNot(c)));
     }
 }
 
@@ -484,7 +554,7 @@ export class SQLWhereNot extends SQLWhere {
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         // Optimize query
-        if (this.a instanceof SQLWhereEqual) {
+        if (this.a instanceof SQLWhereEqual || this.a instanceof SQLWhereAnd || this.a instanceof SQLWhereOr || this.a instanceof SQLWhereNot) {
             return this.a.inverted().getSQL(options);
         }
 
@@ -498,5 +568,20 @@ export class SQLWhereNot extends SQLWhere {
 
     getJoins(): SQLJoin[] {
         return this.a.getJoins();
+    }
+
+    get isAlways(): boolean | null {
+        const v = this.a.isAlways;
+        if (v === true) {
+            return false;
+        }
+        if (v === false) {
+            return true;
+        }
+        return null;
+    }
+
+    inverted(): SQLWhere {
+        return this.a; // NOT NOT A is just A
     }
 }
