@@ -1,0 +1,327 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`$in JSON Can check if a JSON string equals values, case insensitive: SQL Query for filter: {"settings.name":{"$in":["Apple","other"]}} 1`] = `
+{
+  "params": [
+    [
+      "apple",
+      "other",
+    ],
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE CAST( JSON_UNQUOTE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) AS CHAR) IN (?)",
+}
+`;
+
+exports[`$in JSON Can check if a JSON string equals values, case insensitive: SQL Query for filter: {"settings.name":{"$in":["apple","banana","other"]}} 1`] = `
+{
+  "params": [
+    [
+      "apple",
+      "banana",
+      "other",
+    ],
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE CAST( JSON_UNQUOTE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) AS CHAR) IN (?)",
+}
+`;
+
+exports[`$in JSON Can check if a JSON string equals values, case insensitive: SQL Query for filter: {"settings.name":{"$in":["apple"]}} 1`] = `
+{
+  "params": [
+    "apple",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE CAST( JSON_UNQUOTE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) AS CHAR) = ?",
+}
+`;
+
+exports[`$in JSON Can check if a string is in a JSON string array, case insensitive: SQL Query for filter: {"settings.randomValues":{"$in":["Apple","banana","other"]}} 1`] = `
+{
+  "params": [
+    "["apple","banana","other"]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can check if a string is in a JSON string array, case insensitive: SQL Query for filter: {"settings.randomValues":{"$in":["apple","banana","cherry","other"]}} 1`] = `
+{
+  "params": [
+    "["apple","banana","cherry","other"]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can check if a string is in a JSON string array, case insensitive: SQL Query for filter: {"settings.randomValues":{"$in":["apple","banana","other"]}} 1`] = `
+{
+  "params": [
+    "["apple","banana","other"]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can check if a string is in a JSON string array, case insensitive: SQL Query for not match filter: {"settings.randomValues":{"$in":["orange","kiwi"]}} 1`] = `
+{
+  "params": [
+    "["orange","kiwi"]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can check if a string is in a JSON string array, case insensitive: SQL Query for not match filter: {"settings.randomValues":{"$in":["pple"]}} 1`] = `
+{
+  "params": [
+    "["pple"]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can check if a string is in a JSON string array, case insensitive: SQL Query for not match filter: {"settings.randomValues":{"$in":["àpple"]}} 1`] = `
+{
+  "params": [
+    "["àpple"]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can check if an emoji is in a JSON string array: SQL Query for filter: {"settings.randomValues":{"$in":["🍎","🍌","other"]}} 1`] = `
+{
+  "params": [
+    "["🍎","🍌","other"]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can check if an emoji is in a JSON string array: SQL Query for filter: {"settings.randomValues":{"$in":["🍎","🍌","👩🏽‍🎤","other"]}} 1`] = `
+{
+  "params": [
+    "["🍎","🍌","👩🏽‍🎤","other"]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can check if an emoji is in a JSON string array: SQL Query for filter: {"settings.randomValues":{"$in":["👩🏽‍🎤","other"]}} 1`] = `
+{
+  "params": [
+    "["👩🏽‍🎤","other"]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can check if an emoji is in a JSON string array: SQL Query for filter: {"settings.randomValues":{"$in":["👩🏽‍🎤"]}} 1`] = `
+{
+  "params": [
+    "["👩🏽‍🎤"]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can check if an emoji is in a JSON string array: SQL Query for not match filter: {"settings.randomValues":{"$in":["other"]}} 1`] = `
+{
+  "params": [
+    "["other"]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can check if an emoji is in a JSON string array: SQL Query for not match filter: {"settings.randomValues":{"$in":["👩🏻‍🎤"]}} 1`] = `
+{
+  "params": [
+    "["👩🏻‍🎤"]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can check if an emoji is in a JSON string array: SQL Query for not match filter: {"settings.randomValues":{"$in":["👩🏽"]}} 1`] = `
+{
+  "params": [
+    "["👩🏽"]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can check if null is in a JSON array: SQL Query for filter: {"settings.randomValues":{"$in":["apple",null]}} 1`] = `
+{
+  "params": [
+    "null",
+    "["apple"]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE ((JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL) OR (JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?))",
+}
+`;
+
+exports[`$in JSON Can check if null is in a JSON array: SQL Query for not match filter: {"settings.randomValues":{"$in":["apple"]}} 1`] = `
+{
+  "params": [
+    "["apple"]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can search booleans in a JSON array: SQL Query for filter: {"settings.randomValues":{"$in":[false,true]}} 1`] = `
+{
+  "params": [
+    "[false,true]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can search booleans in a JSON array: SQL Query for filter: {"settings.randomValues":{"$in":[false]}} 1`] = `
+{
+  "params": [
+    "[false]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can search booleans in a JSON array: SQL Query for not match filter: {"settings.randomValues":{"$in":[0]}} 1`] = `
+{
+  "params": [
+    "[0]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can search booleans in a JSON array: SQL Query for not match filter: {"settings.randomValues":{"$in":[true]}} 1`] = `
+{
+  "params": [
+    "[true]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can search numbers in a JSON array: SQL Query for filter: {"settings.randomValues":{"$in":[5,15]}} 1`] = `
+{
+  "params": [
+    "[5,15]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can search numbers in a JSON array: SQL Query for filter: {"settings.randomValues":{"$in":[5]}} 1`] = `
+{
+  "params": [
+    "[5]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can search numbers in a JSON array: SQL Query for filter: {"settings.randomValues":{"$in":[15]}} 1`] = `
+{
+  "params": [
+    "[15]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can search numbers in a JSON array: SQL Query for filter: {"settings.randomValues":{"$in":[99,15]}} 1`] = `
+{
+  "params": [
+    "[99,15]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can search numbers in a JSON array: SQL Query for not match filter: {"settings.randomValues":{"$in":[6,10]}} 1`] = `
+{
+  "params": [
+    "[6,10]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Can search numbers in a JSON array: SQL Query for not match filter: {"settings.randomValues":{"$in":[99,14]}} 1`] = `
+{
+  "params": [
+    "[99,14]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON If a json array exists and does not contain null, it is not included when checking for null: SQL Query for filter: {"settings.randomValues":{"$in":[false]}} 1`] = `
+{
+  "params": [
+    "[false]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON If a json array exists and does not contain null, it is not included when checking for null: SQL Query for not match filter: {"settings.randomValues":{"$in":["apple",null]}} 1`] = `
+{
+  "params": [
+    "null",
+    "["apple"]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE ((JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL) OR (JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?))",
+}
+`;
+
+exports[`$in JSON Including null also matches when a JSON path does not exist: SQL Query for filter: {"settings.randomValues":{"$in":["apple","banana","cherry",null]}} 1`] = `
+{
+  "params": [
+    "null",
+    "["apple","banana","cherry"]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE ((JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL) OR (JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?))",
+}
+`;
+
+exports[`$in JSON Including null also matches when a JSON path does not exist: SQL Query for not match filter: {"settings.randomValues":{"$in":["apple","banana","cherry"]}} 1`] = `
+{
+  "params": [
+    "["apple","banana","cherry"]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON Including null will also check on key existence for json arrays: SQL Query for filter: {"settings.randomValues":{"$in":["apple",null]}} 1`] = `
+{
+  "params": [
+    "null",
+    "["apple"]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE ((JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL) OR (JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?))",
+}
+`;
+
+exports[`$in JSON Including null will also check on key existence for json arrays: SQL Query for filter: {"settings.randomValues":{"$in":[null]}} 1`] = `
+{
+  "params": [
+    "null",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL",
+}
+`;
+
+exports[`$in JSON Including null will also check on key existence for json arrays: SQL Query for not match filter: {"settings.randomValues":{"$in":["apple"]}} 1`] = `
+{
+  "params": [
+    "["apple"]",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;

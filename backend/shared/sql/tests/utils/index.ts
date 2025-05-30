@@ -1,6 +1,6 @@
 import { StamhoofdFilter } from '@stamhoofd/structures';
 import { compileToSQLFilter, SQLFilterDefinitions } from '../../src/filters/SQLModernFilter';
-import { SQLQuery } from '../../src/SQLExpression';
+import { NormalizedSQLQuery, SQLQuery } from '../../src/SQLExpression';
 import { Database, SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { SQLSelect } from '../../src/SQLSelect';
 import { SQLScalarValue } from '../../src/SQLExpressions';
@@ -140,6 +140,11 @@ export async function testMatch({ tableDefinition, rows, doMatch, doNotMatch, fi
                 throw e;
             }
             expect(results).toHaveLength(rows.length);
+            const query = select.getSQL() as NormalizedSQLQuery;
+            expect({
+                query: query.query.replaceAll('`' + tableName + '`', '`test_table`'),
+                params: query.params,
+            }).toMatchSnapshot('SQL Query for filter: ' + JSON.stringify(filter));
         }
 
         for (const filter of doNotMatch ?? []) {
@@ -155,6 +160,14 @@ export async function testMatch({ tableDefinition, rows, doMatch, doNotMatch, fi
                 throw e;
             }
             expect(results).toHaveLength(0);
+
+            if (!select._where || !select._where.isAlwaysFalse) {
+                const query = select.getSQL() as NormalizedSQLQuery;
+                expect({
+                    query: query.query.replaceAll('`' + tableName + '`', '`test_table`'),
+                    params: query.params,
+                }).toMatchSnapshot('SQL Query for not match filter: ' + JSON.stringify(filter));
+            }
         }
     }
     finally {

@@ -165,8 +165,6 @@ export function $equalsSQLFilterCompiler(filter: StamhoofdFilter, _: SQLFilterCo
             return where;
         }
 
-        const expression = convertToExpression(b, column.type);
-
         if (b === null && isJSONColumn(column)) {
             // JSON values can either resolve to null or "null" in MySQL.
             return new SQLWhereOr([
@@ -185,6 +183,7 @@ export function $equalsSQLFilterCompiler(filter: StamhoofdFilter, _: SQLFilterCo
 
         // Cast any JSONString to a CHAR (only do this at the end because sometimes we need to check for JSON null)
         const casted = cast(a, b, column.type);
+        const expression = convertToExpression(b, column.type);
 
         return new SQLWhereEqual(
             casted,
@@ -439,14 +438,14 @@ function isJSONColumn({ type }: SQLCurrentColumn): boolean {
 }
 
 function convertToExpression(val: string | number | Date | null | boolean, type: SQLValueType) {
-    /* if (
-        type === SQLValueType.JSONString
-        || type === SQLValueType.JSONBoolean
-        || type === SQLValueType.JSONNumber
-        || type === SQLValueType.JSONArray
-        || type === SQLValueType.JSONObject
-    ) {
-        return scalarToSQLJSONExpression(val);
-    } */
+    // if (
+    //    type === SQLValueType.JSONString
+    //    || type === SQLValueType.JSONBoolean
+    //    || type === SQLValueType.JSONNumber
+    //    || type === SQLValueType.JSONArray
+    //    || type === SQLValueType.JSONObject
+    // ) {
+    //    return scalarToSQLJSONExpression(val);
+    // }
     return scalarToSQLExpression(val);
 }

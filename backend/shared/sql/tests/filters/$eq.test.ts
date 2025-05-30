@@ -380,6 +380,14 @@ describe('$eq', () => {
                 { type: SQLValueType.JSONArray, nullable: true },
             ),
             'settings': createColumnFilter(SQL.column('settings'), { type: SQLValueType.JSONObject, nullable: true }),
+            'settings.enabled': createColumnFilter(
+                SQL.jsonValue(SQL.column('settings'), '$.enabled'),
+                { type: SQLValueType.JSONBoolean, nullable: true },
+            ),
+            'settings.age': createColumnFilter(
+                SQL.jsonValue(SQL.column('settings'), '$.age'),
+                { type: SQLValueType.JSONNumber, nullable: true },
+            ),
         };
 
         it('JSON strings match case insensitive and whole string', async () => {
@@ -606,6 +614,190 @@ describe('$eq', () => {
                     },
                     {
                         'settings.parents[*].name': null,
+                    },
+                ],
+            });
+        });
+
+        it('Can check JSON booleans', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            enabled: true,
+                        },
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.enabled': true,
+                    },
+                    {
+                        'settings.enabled': 1,
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.enabled': false,
+                    },
+                    {
+                        'settings.enabled': null,
+                    },
+                ],
+            });
+
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            enabled: false,
+                        },
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.enabled': false,
+                    },
+                    {
+                        'settings.enabled': 0,
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.enabled': true,
+                    },
+                    {
+                        'settings.enabled': null,
+                    },
+                ],
+            });
+
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            enabled: null,
+                        },
+                    },
+                    {
+                        settings: {},
+                    },
+                    {
+                        settings: null,
+                    },
+                    {
+                        settings: 'null',
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.enabled': null,
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.enabled': true,
+                    },
+                    {
+                        'settings.enabled': false,
+                    },
+                ],
+            });
+        });
+
+        it('Can compare JSON numbers', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            age: 10,
+                        },
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.age': 10,
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.age': 11,
+                    },
+                    {
+                        'settings.age': 9,
+                    },
+                ],
+            });
+
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            age: null,
+                        },
+                    },
+                    {
+                        settings: { },
+                    },
+                    {
+                        settings: null,
+                    },
+                    {
+                        settings: 'null',
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.age': null,
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.age': 0,
+                    },
+                ],
+            });
+
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            enabled: null,
+                        },
+                    },
+                    {
+                        settings: {},
+                    },
+                    {
+                        settings: null,
+                    },
+                    {
+                        settings: 'null',
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.enabled': null,
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.enabled': true,
+                    },
+                    {
+                        'settings.enabled': false,
                     },
                 ],
             });
