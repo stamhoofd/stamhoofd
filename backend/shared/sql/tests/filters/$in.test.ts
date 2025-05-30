@@ -196,11 +196,27 @@ describe('$in', () => {
         });
     });
 
+    it('throws an error when trying to search in json objects', async () => {
+        const filters = {
+            ...baseSQLFilterCompilers,
+            settings: createColumnFilter(SQL.column('settings'), { type: SQLValueType.JSONObject, nullable: false }),
+        };
+        await testError({
+            filter: {
+                settings: {
+                    $in: ['apple', 'banana'],
+                },
+            },
+            filters,
+            error: 'Cannot compare with a JSON object',
+        });
+    });
+
     describe('JSON', () => {
         const tableDefinition: TableDefinition = {
             settings: {
                 type: 'json',
-                nullable: false,
+                nullable: true,
             },
         };
         const filters = {
@@ -208,6 +224,10 @@ describe('$in', () => {
             'settings.randomValues': createColumnFilter(
                 SQL.jsonValue(SQL.column('settings'), '$.randomValues'),
                 { type: SQLValueType.JSONArray, nullable: true },
+            ),
+            'settings.name': createColumnFilter(
+                SQL.jsonValue(SQL.column('settings'), '$.name'),
+                { type: SQLValueType.JSONString, nullable: true },
             ),
         };
 
@@ -229,17 +249,17 @@ describe('$in', () => {
                 doMatch: [
                     {
                         'settings.randomValues': {
-                            $in: ['apple', 'banana', 'cherry'],
+                            $in: ['apple', 'banana', 'cherry', 'other'],
                         },
                     },
                     {
                         'settings.randomValues': {
-                            $in: ['apple', 'banana'],
+                            $in: ['apple', 'banana', 'other'],
                         },
                     },
                     {
                         'settings.randomValues': {
-                            $in: ['Apple', 'banana'],
+                            $in: ['Apple', 'banana', 'other'],
                         },
                     },
                 ],
@@ -247,6 +267,116 @@ describe('$in', () => {
                     {
                         'settings.randomValues': {
                             $in: ['orange', 'kiwi'],
+                        },
+                    },
+                    {
+                        'settings.randomValues': {
+                            $in: ['pple'],
+                        },
+                    },
+                    {
+                        'settings.randomValues': {
+                            $in: ['àpple'],
+                        },
+                    },
+                ],
+            });
+        });
+
+        it('Can check if a JSON string equals values, case insensitive', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            name: 'aPple',
+                        },
+                    },
+                    {
+                        settings: {
+                            name: 'apple',
+                        },
+                    },
+                    {
+                        settings: {
+                            name: 'APPLE',
+                        },
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.name': {
+                            $in: ['apple', 'banana', 'other'],
+                        },
+                    },
+                    {
+                        'settings.name': {
+                            $in: ['apple'],
+                        },
+                    },
+                    {
+                        'settings.name': {
+                            $in: ['Apple', 'other'],
+                        },
+                    },
+                ],
+                doNotMatch: [
+                ],
+            });
+        });
+
+        it('Can check if an emoji is in a JSON string array', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            randomValues: [
+                                '🍎',
+                                '🍌',
+                                '👩🏽‍🎤',
+                            ],
+                        },
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.randomValues': {
+                            $in: ['🍎', '🍌', '👩🏽‍🎤', 'other'],
+                        },
+                    },
+                    {
+                        'settings.randomValues': {
+                            $in: ['🍎', '🍌', 'other'],
+                        },
+                    },
+                    {
+                        'settings.randomValues': {
+                            $in: ['👩🏽‍🎤', 'other'],
+                        },
+                    },
+                    {
+                        'settings.randomValues': {
+                            $in: ['👩🏽‍🎤'],
+                        },
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.randomValues': {
+                            $in: ['other'],
+                        },
+                    },
+                    {
+                        'settings.randomValues': {
+                            $in: ['👩🏽'],
+                        },
+                    },
+                    {
+                        'settings.randomValues': {
+                            $in: ['👩🏻‍🎤'],
                         },
                     },
                 ],
@@ -273,6 +403,45 @@ describe('$in', () => {
                     {
                         'settings.randomValues': {
                             $in: ['apple', null],
+                        },
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.randomValues': {
+                            $in: ['apple'],
+                        },
+                    },
+                ],
+            });
+        });
+
+        it('Including null will also check on key existence for json arrays', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: null,
+                    },
+                    {
+                        settings: {},
+                    },
+                    {
+                        settings: {
+                            randomValues: null,
+                        },
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.randomValues': {
+                            $in: ['apple', null],
+                        },
+                    },
+                    {
+                        'settings.randomValues': {
+                            $in: [null],
                         },
                     },
                 ],

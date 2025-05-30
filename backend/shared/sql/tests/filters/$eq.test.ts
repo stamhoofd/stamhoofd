@@ -357,7 +357,7 @@ describe('$eq', () => {
         const tableDefinition: TableDefinition = {
             settings: {
                 type: 'json',
-                nullable: false,
+                nullable: true,
             },
         };
         const filters = {
@@ -379,6 +379,7 @@ describe('$eq', () => {
                 SQL.jsonValue(SQL.column('settings'), '$.randomValues'),
                 { type: SQLValueType.JSONArray, nullable: true },
             ),
+            'settings': createColumnFilter(SQL.column('settings'), { type: SQLValueType.JSONObject, nullable: true }),
         };
 
         it('JSON strings match case insensitive and whole string', async () => {
@@ -605,6 +606,167 @@ describe('$eq', () => {
                     },
                     {
                         'settings.parents[*].name': null,
+                    },
+                ],
+            });
+        });
+
+        it('Checking a json value for null also matches if the key does not exist', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: null,
+                    },
+                    {
+                        settings: {
+                            something: false,
+                        },
+                    },
+                    {
+                        settings: {
+                            name: null,
+                        },
+                    },
+                    {
+                        settings: {
+                            parents: [
+                                { name: null },
+                            ],
+                        },
+                    },
+                    {
+                        settings: {
+                            parents: [
+                                { age: null },
+                            ],
+                        },
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.name': null,
+                    },
+                    {
+                        'settings.parents[*].age': null,
+                    },
+                    {
+                        'settings.parents[*].name': null,
+                    },
+                ],
+            });
+        });
+
+        it('can check if a json object column is null', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: 'null',
+                    },
+                    {
+                        settings: null,
+                    },
+                ],
+                doMatch: [
+                    {
+                        settings: {
+                            $eq: null,
+                        },
+                    },
+                    {
+                        settings: null,
+                    },
+                ],
+            });
+
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {},
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        settings: {
+                            $eq: null,
+                        },
+                    },
+                    {
+                        settings: null,
+                    },
+                ],
+            });
+        });
+
+        it('can check if a JSON array column is null', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: 'null',
+                    },
+                    {
+                        settings: null,
+                    },
+                    {
+                        settings: {},
+                    },
+                    {
+                        settings: {
+                            randomValues: null,
+                        },
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.randomValues': {
+                            $eq: null,
+                        },
+                    },
+                    {
+                        'settings.randomValues': null,
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.randomValues': {
+                            $neq: null,
+                        },
+                    },
+                ],
+            });
+
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            randomValues: [],
+                        },
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.randomValues': {
+                            $eq: null,
+                        },
+                    },
+                    {
+                        'settings.randomValues': null,
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.randomValues': {
+                            $neq: null,
+                        },
                     },
                 ],
             });

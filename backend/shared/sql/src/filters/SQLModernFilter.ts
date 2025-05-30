@@ -3,9 +3,10 @@ import { assertFilterCompareValue, compileFilter, FilterCompiler, FilterCompiler
 import { SQL } from '../SQL';
 import { SQLExpression, SQLExpressionOptions, SQLQuery } from '../SQLExpression';
 import { SQLWhere, SQLWhereAnd, SQLWhereEqual, SQLWhereLike, SQLWhereNot, SQLWhereOr, SQLWhereSign } from '../SQLWhere';
-import { scalarToSQLExpression, SQLArray, SQLCast, SQLLower, SQLNull } from '../SQLExpressions';
+import { scalarToSQLExpression, SQLArray, SQLCast, SQLJSONValue, SQLLower, SQLNull } from '../SQLExpressions';
 import { scalarToSQLJSONExpression, SQLJsonContains, SQLJsonOverlaps, SQLJsonSearch, SQLJsonUnquote } from '../SQLJsonExpressions';
 
+export type SQLSyncFilterRunner = (column: SQLCurrentColumn) => SQLWhere;
 export type SQLFilterRunner = (column: SQLCurrentColumn) => Promise<SQLWhere> | SQLWhere;
 export type SQLFilterCompiler = FilterCompiler<SQLFilterRunner>;
 export type SQLFilterDefinitions = FilterDefinitions<SQLFilterRunner>;
@@ -42,7 +43,15 @@ export enum SQLValueType {
 
 export type SQLCurrentColumn = {
     expression: SQLExpression;
+
+    /**
+     * MySQL nullable
+     */
     nullable?: boolean;
+
+    /**
+     * JSON nullable
+     */
 
     /**
      * Type of this column, use to normalize values received from filters
@@ -68,30 +77,6 @@ export function createColumnFilter(expression: SQLExpression, options: { type: S
 export function createStringColumnFilter(name: string): SQLFilterCompiler {
     return createColumnFilter(SQL.column(name), { type: SQLValueType.String, nullable: false });
 }
-
-/*
-export function createStringColumnFilter(name: string): SQLFilterCompiler {
-
-}
-
-export function jsonString(name: string): SQLFilterRunner {
-    return (column: SQLCurrentColumn) => {
-        if (column.type !== SQLValueType.JSONObject) {
-            throw new SimpleError({
-                code: 'invalid_filter',
-                message: 'Invalid filter, expected a JSON object',
-            });
-        }
-
-        const expression = SQL.jsonValue(column.expression, '$.' + name);
-        return runner({
-            ...column,
-            expression,
-            isJSONValue: true,
-            type: SQLValueType.JSONString,
-        });
-    };
-} */
 
 function filterDefinitionsToSelector(definitions: SQLFilterDefinitions): SQLFilterCompilerSelector {
     return (key: string) => {
@@ -131,9 +116,9 @@ export function $notSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilte
     };
 }
 
-export function $equalsSQLFilterCompiler(filter: StamhoofdFilter, _: SQLFilterCompilerSelector): SQLFilterRunner {
-    return async (column: SQLCurrentColumn) => {
-        const a = normalizeExpression(column.expression, column.type);
+export function $equalsSQLFilterCompiler(filter: StamhoofdFilter, _: SQLFilterCompilerSelector): SQLSyncFilterRunner {
+    return (column: SQLCurrentColumn) => {
+        const a = column.expression;
         const b = normalizeValue(assertFilterCompareValue(filter), column.type);
         /**
          * Special case, checking for equality with a JSON array.
@@ -142,16 +127,15 @@ export function $equalsSQLFilterCompiler(filter: StamhoofdFilter, _: SQLFilterCo
          * This differs from $contains, which will check for 'LIKE' inside the JSON array.
          */
         if (column.type === SQLValueType.JSONArray) {
+            let where: SQLWhere;
+
             if (typeof b === 'string') {
-                return new SQLWhereEqual(
+                where = new SQLWhereEqual(
                     new SQLJsonSearch(
                         new SQLLower(a),
                         'one',
-                        normalizeExpression(
-                            convertToExpression(
-                                SQLWhereLike.escape(b),
-                                SQLValueType.JSONString,
-                            ),
+                        convertToExpression(
+                            SQLWhereLike.escape(b),
                             SQLValueType.JSONString,
                         ),
                     ),
@@ -159,38 +143,71 @@ export function $equalsSQLFilterCompiler(filter: StamhoofdFilter, _: SQLFilterCo
                     new SQLNull(),
                 );
             }
-
-            return new SQLJsonContains(
-                a,
-                normalizeExpression(
+            else {
+                where = new SQLJsonContains(
+                    a,
                     convertToExpression(JSON.stringify(b), column.type),
-                    column.type,
-                ),
-            );
+                );
+            }
+
+            // If comparing against null, also check for native MySQL null (the column does not exist)
+            if (b === null) {
+                where = new SQLWhereOr([
+                    where,
+                    new SQLWhereEqual(
+                        a,
+                        SQLWhereSign.Equal,
+                        new SQLNull(),
+                    ),
+                ]);
+            }
+
+            return where;
         }
 
+        const expression = convertToExpression(b, column.type);
+
+        if (b === null && isJSONColumn(column)) {
+            // JSON values can either resolve to null or "null" in MySQL.
+            return new SQLWhereOr([
+                new SQLWhereEqual(
+                    a,
+                    SQLWhereSign.Equal,
+                    new SQLJSONValue(null),
+                ),
+                new SQLWhereEqual(
+                    a,
+                    SQLWhereSign.Equal,
+                    new SQLNull(),
+                ),
+            ]);
+        }
+
+        // Cast any JSONString to a CHAR (only do this at the end because sometimes we need to check for JSON null)
+        const casted = cast(a, b, column.type);
+
         return new SQLWhereEqual(
-            a,
+            casted,
             SQLWhereSign.Equal,
-            normalizeExpression(convertToExpression(b, column.type), column.type),
+            expression,
         );
     };
 }
 
-export function $greaterThanSQLFilterCompiler(filter: StamhoofdFilter, _: SQLFilterCompilerSelector): SQLFilterRunner {
-    return async (column: SQLCurrentColumn) => {
-        const a = normalizeExpression(column.expression, column.type);
+export function $greaterThanSQLFilterCompiler(filter: StamhoofdFilter, _: SQLFilterCompilerSelector): SQLSyncFilterRunner {
+    return (column: SQLCurrentColumn) => {
+        const a = column.expression;
         const b = normalizeValue(assertFilterCompareValue(filter), column.type);
         return new SQLWhereEqual(
             a,
             SQLWhereSign.Greater,
-            normalizeExpression(convertToExpression(b, column.type), column.type),
+            convertToExpression(b, column.type),
         );
     };
 }
 
-export function $lessThanSQLFilterCompiler(filter: StamhoofdFilter, _: SQLFilterCompilerSelector): SQLFilterRunner {
-    return async (column: SQLCurrentColumn) => {
+export function $lessThanSQLFilterCompiler(filter: StamhoofdFilter, _: SQLFilterCompilerSelector): SQLSyncFilterRunner {
+    return (column: SQLCurrentColumn) => {
         const a = normalizeExpression(column.expression, column.type);
         const b = normalizeValue(assertFilterCompareValue(filter), column.type);
         return new SQLWhereEqual(
@@ -201,8 +218,8 @@ export function $lessThanSQLFilterCompiler(filter: StamhoofdFilter, _: SQLFilter
     };
 }
 
-export function $inSQLFilterCompiler(filter: StamhoofdFilter, _: SQLFilterCompilerSelector): SQLFilterRunner {
-    return async (column: SQLCurrentColumn) => {
+export function $inSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilterCompilerSelector): SQLSyncFilterRunner {
+    return (column: SQLCurrentColumn) => {
         if (!Array.isArray(filter)) {
             throw new SimpleError({
                 code: 'invalid_filter',
@@ -228,42 +245,31 @@ export function $inSQLFilterCompiler(filter: StamhoofdFilter, _: SQLFilterCompil
         const valuesWithoutNulls = values.filter(val => val !== null);
         const hasNull = values.length !== valuesWithoutNulls.length;
 
+        if (hasNull) {
+            return new SQLWhereOr([
+                $equalsSQLFilterCompiler(null, filters)(column),
+                $inSQLFilterCompiler(valuesWithoutNulls, filters)(column),
+            ]);
+        }
+
         if (column.type === SQLValueType.JSONArray) {
             const jsonValues = JSON.stringify(values); // we do include null here, because null can also be in the JSON array
             const valuesExpression = normalizeExpression(convertToExpression(jsonValues, column.type), column.type);
 
-            if (hasNull) {
-                // PROBLEM: The sql expression can either not exist (= resolve to mysql null), contains null in json (= JSON null), or contain a value.
-                // that makes comparing more difficult, to combat this, we still need to use SQLJsonOverlaps with the JSON null value
-                return new SQLWhereOr([
-                    new SQLWhereEqual(columnExpression, SQLWhereSign.Equal, new SQLNull()), // checks path not exists (= mysql null)
-                    new SQLJsonOverlaps(
-                        columnExpression,
-                        valuesExpression, // contains json null
-                    ),
-                ]);
-            }
-
-            // else
+            // PROBLEM: The sql expression can either not exist (= resolve to mysql null), contains null in json (= JSON null), or contain a value.
+            // that makes comparing more difficult, to combat this, we still need to use SQLJsonOverlaps with the JSON null value
             return new SQLJsonOverlaps(
                 columnExpression,
-                valuesExpression,
+                valuesExpression, // contains json null
             );
         }
         const valuesExpression = valuesWithoutNulls.length === 1 ? normalizeExpression(convertToExpression(valuesWithoutNulls[0], column.type), column.type) : new SQLArray(valuesWithoutNulls);
 
-        if (hasNull) {
-            if (valuesWithoutNulls.length === 0) {
-                return new SQLWhereEqual(columnExpression, SQLWhereSign.Equal, new SQLNull());
-            }
-            return new SQLWhereOr([
-                new SQLWhereEqual(columnExpression, SQLWhereSign.Equal, new SQLNull()),
-                new SQLWhereEqual(columnExpression, SQLWhereSign.Equal, valuesExpression),
-            ]);
-        }
+        // Cast any JSONString to a CHAR (only do this at the end because sometimes we need to check for JSON null)
+        const casted = cast(columnExpression, valuesWithoutNulls, column.type);
 
         return new SQLWhereEqual(
-            columnExpression,
+            casted,
             SQLWhereSign.Equal,
             valuesExpression,
         );
@@ -328,6 +334,9 @@ function normalizeValue(val: StamhoofdCompareValue, againstType: SQLValueType): 
     }
 
     if (againstType === SQLValueType.JSONObject) {
+        if (val === null) {
+            return null;
+        }
         throw new Error('Cannot compare with a JSON object');
     }
 
@@ -408,14 +417,29 @@ function normalizeValue(val: StamhoofdCompareValue, againstType: SQLValueType): 
 }
 
 function normalizeExpression(expression: SQLExpression, type: SQLValueType): SQLExpression {
-    if (type === SQLValueType.JSONString) {
+    /* if (type === SQLValueType.JSONString && !(expression instanceof SQLJSONValue)) {
         return new SQLCast(new SQLJsonUnquote(expression), 'CHAR');
-    }
+    } */
     return expression;
 }
 
+function cast(a: SQLExpression, b: (string | number | Date | null | boolean) | (string | number | Date | null | boolean)[], type: SQLValueType): SQLExpression {
+    if (type === SQLValueType.JSONString && b !== null) {
+        return new SQLCast(new SQLJsonUnquote(a), 'CHAR');
+    }
+    return a;
+}
+
+function isJSONColumn({ type }: SQLCurrentColumn): boolean {
+    return type === SQLValueType.JSONString
+        || type === SQLValueType.JSONBoolean
+        || type === SQLValueType.JSONNumber
+        || type === SQLValueType.JSONArray
+        || type === SQLValueType.JSONObject;
+}
+
 function convertToExpression(val: string | number | Date | null | boolean, type: SQLValueType) {
-    if (
+    /* if (
         type === SQLValueType.JSONString
         || type === SQLValueType.JSONBoolean
         || type === SQLValueType.JSONNumber
@@ -423,6 +447,6 @@ function convertToExpression(val: string | number | Date | null | boolean, type:
         || type === SQLValueType.JSONObject
     ) {
         return scalarToSQLJSONExpression(val);
-    }
+    } */
     return scalarToSQLExpression(val);
 }
