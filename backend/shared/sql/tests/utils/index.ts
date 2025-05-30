@@ -1,12 +1,11 @@
-import { StamhoofdFilter } from '@stamhoofd/structures';
-import { compileToSQLFilter, SQLFilterDefinitions } from '../../src/filters/SQLModernFilter';
-import { NormalizedSQLQuery, SQLQuery } from '../../src/SQLExpression';
 import { Database, SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { SQLSelect } from '../../src/SQLSelect';
-import { SQLScalarValue } from '../../src/SQLExpressions';
 import { PlainObject } from '@simonbackx/simple-encoding';
-import { SQL } from '../../src/SQL';
+import { StamhoofdFilter } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
+import { compileToSQLFilter, SQLFilterDefinitions } from '../../src/filters/SQLModernFilter';
+import { SQL } from '../../src/SQL';
+import { NormalizedSQLQuery, SQLQuery } from '../../src/SQLExpression';
+import { SQLScalarValue } from '../../src/SQLExpressions';
 
 export async function testError({ filter, filters, error }: { filter: StamhoofdFilter; filters: SQLFilterDefinitions; error: string }) {
     await expect(
