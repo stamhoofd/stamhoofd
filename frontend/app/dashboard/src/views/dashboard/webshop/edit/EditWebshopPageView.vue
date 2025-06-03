@@ -131,15 +131,13 @@
         </template>
 
         <div v-if="hasFullAccess && areAdvancedWebshopSettingsEnabled" class="container">
-            <hr><h2>{{ $t('Geavanceerd') }}</h2>
-            <p>
-                {{ $t('Geavanceerde instellingen.') }}
-            </p>
+            <hr>
+            <h2>{{ $t('Geavanceerd') }}</h2>
             <p v-if="!hasCustomDomain" class="info-box">
-                {{ $t('Je kan enkel custom code gebruiken als je een eigen domein hebt.') }}
+                {{ $t('Je kan enkel code injecteren als je een eigen domeinnaam voor je webshop hebt ingesteld.') }}
             </p>
-            <STInputBox error-fields="meta.customCode" :error-box="errors.errorBox" class="max" :title="$t('Custom code')">
-                <textarea v-model="customCode" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t('Deze code wordt toegevoegd aan de head van de webshop.')" :disabled="!hasCustomDomain" />
+            <STInputBox error-fields="meta.customCode" :error-box="errors.errorBox" class="max" :title="$t('Code injection')">
+                <textarea v-model="customCode" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t('Deze code wordt toegevoegd aan de head tag van de webshop.')" :disabled="!hasCustomDomain" />
             </STInputBox>
         </div>
     </SaveView>

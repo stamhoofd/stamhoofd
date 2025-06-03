@@ -57,7 +57,7 @@
         </Checkbox>
 
         <Checkbox v-if="!!STAMHOOFD.domains.webshop" :model-value="getFeatureFlag('webshop-advanced-settings')" @update:model-value="setFeatureFlag('webshop-advanced-settings', !!$event)">
-            {{ $t('Geavanceerde instellingen voor webshops') }}
+            {{ $t('Geavanceerde instellingen voor webshops (code injection)') }}
         </Checkbox>
 
         <hr><h2>{{ $t('57dd24f3-ae95-42d7-aaab-48e43483c018') }}</h2>
