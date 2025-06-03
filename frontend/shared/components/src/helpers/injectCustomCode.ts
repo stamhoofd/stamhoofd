@@ -6,7 +6,7 @@ export function injectCustomCode(webshop: Webshop) {
     const customCode = webshop.meta.customCode;
 
     if (
-        customCode === null || customCode.trim().length === 0 || !isLocationCustomDomain(webshop)
+        !customCode || customCode.trim().length === 0 || !isLocationCustomDomain(webshop)
     ) {
         return;
     }
