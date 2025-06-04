@@ -288,6 +288,8 @@ exports[`$lt MySQL Behaviour NULL values are always the smallest for JSON number
 }
 `;
 
+exports[`$lt MySQL Behaviour NULL values are always the smallest for JSON numbers: SQL Query for not match filter: {"settings.age":{"$lt":null}} 1`] = `"always false"`;
+
 exports[`$lt MySQL Behaviour NULL values are always the smallest for JSON strings: SQL Query for filter: {"settings.name":{"$lt":""}} 1`] = `
 {
   "params": [
@@ -306,6 +308,8 @@ exports[`$lt MySQL Behaviour NULL values are always the smallest for JSON string
 }
 `;
 
+exports[`$lt MySQL Behaviour NULL values are always the smallest for JSON strings: SQL Query for not match filter: {"settings.name":{"$lt":null}} 1`] = `"always false"`;
+
 exports[`$lt MySQL Behaviour NULL values are always the smallest for strings: SQL Query for filter: {"name":{"$lt":""}} 1`] = `
 {
   "params": [
@@ -323,3 +327,5 @@ exports[`$lt MySQL Behaviour NULL values are always the smallest for strings: SQ
   "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` IS NULL OR \`test_table\`.\`name\` < ?",
 }
 `;
+
+exports[`$lt MySQL Behaviour NULL values are always the smallest for strings: SQL Query for not match filter: {"name":{"$lt":null}} 1`] = `"always false"`;

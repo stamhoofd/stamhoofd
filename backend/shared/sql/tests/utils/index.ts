@@ -139,6 +139,9 @@ export async function testMatch({ tableDefinition, rows, doMatch, doNotMatch, fi
                 console.error('SQL error for filter:', filter, 'on table:', tableName, 'with where:', select.getSQL(), e);
                 throw e;
             }
+            if (results.length !== rows.length) {
+                console.error('Unexpected results for filter:', filter, 'on table:', tableName, 'with where:', select.getSQL(), results);
+            }
             expect(results).toHaveLength(rows.length);
             const query = select.getSQL() as NormalizedSQLQuery;
             expect({
@@ -170,6 +173,9 @@ export async function testMatch({ tableDefinition, rows, doMatch, doNotMatch, fi
                     query: query.query.replaceAll('`' + tableName + '`', '`test_table`'),
                     params: query.params,
                 }).toMatchSnapshot('SQL Query for not match filter: ' + JSON.stringify(filter));
+            }
+            else {
+                expect('always false').toMatchSnapshot('SQL Query for not match filter: ' + JSON.stringify(filter));
             }
         }
     }

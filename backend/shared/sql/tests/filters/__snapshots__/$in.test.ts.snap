@@ -188,6 +188,8 @@ exports[`$in JSON Can search booleans in a JSON array: SQL Query for filter: {"s
 }
 `;
 
+exports[`$in JSON Can search booleans in a JSON array: SQL Query for not match filter: {"settings.randomValues":{"$in":[]}} 1`] = `"always false"`;
+
 exports[`$in JSON Can search booleans in a JSON array: SQL Query for not match filter: {"settings.randomValues":{"$in":[0]}} 1`] = `
 {
   "params": [
@@ -241,6 +243,8 @@ exports[`$in JSON Can search numbers in a JSON array: SQL Query for filter: {"se
   "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
 }
 `;
+
+exports[`$in JSON Can search numbers in a JSON array: SQL Query for not match filter: {"settings.randomValues":{"$in":[]}} 1`] = `"always false"`;
 
 exports[`$in JSON Can search numbers in a JSON array: SQL Query for not match filter: {"settings.randomValues":{"$in":[6,10]}} 1`] = `
 {
