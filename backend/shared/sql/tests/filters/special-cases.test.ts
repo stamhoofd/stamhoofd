@@ -6,8 +6,8 @@ describe('Special filter cases', () => {
     it('Can combine $and with $or', async () => {
         const filters = {
             ...baseSQLFilterCompilers,
-            name: createColumnFilter(SQL.column('name'), { type: SQLValueType.String, nullable: true }),
-            age: createColumnFilter(SQL.column('age'), { type: SQLValueType.Number, nullable: false }),
+            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
+            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
         };
 
         await test({

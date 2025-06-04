@@ -452,7 +452,7 @@ exports[`$eq JSON JSON strings match case insensitive and whole string: SQL Quer
   "params": [
     "john doe",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE CAST( JSON_UNQUOTE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) AS CHAR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4) = ?",
 }
 `;
 
@@ -461,7 +461,7 @@ exports[`$eq JSON JSON strings match case insensitive and whole string: SQL Quer
   "params": [
     "john doe",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE CAST( JSON_UNQUOTE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) AS CHAR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4) = ?",
 }
 `;
 
@@ -470,7 +470,7 @@ exports[`$eq JSON JSON strings match case insensitive and whole string: SQL Quer
   "params": [
     "john doe",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE CAST( JSON_UNQUOTE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) AS CHAR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4) = ?",
 }
 `;
 
@@ -479,7 +479,7 @@ exports[`$eq JSON JSON strings match case insensitive and whole string: SQL Quer
   "params": [
     "john doe",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE CAST( JSON_UNQUOTE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) AS CHAR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4) = ?",
 }
 `;
 
@@ -488,7 +488,7 @@ exports[`$eq JSON JSON strings match case insensitive and whole string: SQL Quer
   "params": [
     "jane doe",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE CAST( JSON_UNQUOTE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) AS CHAR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4) = ?",
 }
 `;
 
@@ -497,7 +497,7 @@ exports[`$eq JSON JSON strings match case insensitive and whole string: SQL Quer
   "params": [
     "john",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE CAST( JSON_UNQUOTE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) AS CHAR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4) = ?",
 }
 `;
 
@@ -506,7 +506,7 @@ exports[`$eq JSON JSON strings match case insensitive and whole string: SQL Quer
   "params": [
     "john",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE CAST( JSON_UNQUOTE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) AS CHAR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4) = ?",
 }
 `;
 

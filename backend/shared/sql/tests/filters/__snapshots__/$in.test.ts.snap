@@ -8,7 +8,7 @@ exports[`$in JSON Can check if a JSON string equals values, case insensitive: SQ
       "other",
     ],
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE CAST( JSON_UNQUOTE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) AS CHAR) IN (?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4) IN (?)",
 }
 `;
 
@@ -21,7 +21,7 @@ exports[`$in JSON Can check if a JSON string equals values, case insensitive: SQ
       "other",
     ],
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE CAST( JSON_UNQUOTE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) AS CHAR) IN (?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4) IN (?)",
 }
 `;
 
@@ -30,7 +30,7 @@ exports[`$in JSON Can check if a JSON string equals values, case insensitive: SQ
   "params": [
     "apple",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE CAST( JSON_UNQUOTE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) AS CHAR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4) = ?",
 }
 `;
 

@@ -269,7 +269,7 @@ export class SQLCast implements SQLExpression {
     }
 }
 
-export class SQLJSONValue implements SQLExpression {
+class SQLCastedJson implements SQLExpression {
     value: null | true | false;
 
     constructor(value: null | true | false) {
@@ -280,6 +280,9 @@ export class SQLJSONValue implements SQLExpression {
         return "CAST('" + JSON.stringify(this.value) + "' AS JSON)";
     }
 }
+export const SQLJSONNull = new SQLCastedJson(null);
+export const SQLJSONTrue = new SQLCastedJson(true);
+export const SQLJSONFalse = new SQLCastedJson(false);
 
 export class SQLNull implements SQLExpression {
     getSQL(options?: SQLExpressionOptions): SQLQuery {

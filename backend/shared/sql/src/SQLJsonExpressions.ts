@@ -1,18 +1,18 @@
 import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery } from './SQLExpression';
-import { SQLJSONValue, SQLSafeValue, SQLScalar, SQLScalarValue } from './SQLExpressions';
+import { SQLJSONFalse, SQLJSONNull, SQLJSONTrue, SQLSafeValue, SQLScalar, SQLScalarValue } from './SQLExpressions';
 import { SQLWhere } from './SQLWhere';
 
 export function scalarToSQLJSONExpression(s: SQLScalarValue | null): SQLExpression {
     if (s === null) {
-        return new SQLJSONValue(null);
+        return SQLJSONNull;
     }
 
     if (s === true) {
-        return new SQLJSONValue(true);
+        return SQLJSONTrue;
     }
 
     if (s === false) {
-        return new SQLJSONValue(false);
+        return SQLJSONFalse;
     }
 
     return new SQLScalar(s);
@@ -29,6 +29,39 @@ export class SQLJsonUnquote implements SQLExpression {
         return joinSQLQuery([
             'JSON_UNQUOTE(',
             this.target.getSQL(options),
+            ')',
+        ]);
+    }
+}
+
+export type SQLJsonValueType = 'FLOAT' | 'DOUBLE' | 'DECIMAL' | 'SIGNED' | 'UNSIGNED' | 'DATE' | 'TIME' | 'DATETIME' | 'YEAR' | 'CHAR' | 'JSON';
+
+export class SQLJsonValue implements SQLExpression {
+    target: SQLExpression;
+    path: SQLExpression;
+    type?: SQLJsonValueType;
+
+    constructor(target: SQLExpression, type?: SQLJsonValueType, path?: SQLExpression) {
+        this.target = target;
+        this.type = type;
+
+        if (!path && target instanceof SQLJsonExtract) {
+            // If the target is a SQLJsonExtract, we can use its path directly
+            this.target = target.target;
+            this.path = target.path;
+            return;
+        }
+
+        this.path = path ?? new SQLSafeValue('$');
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            'JSON_VALUE(',
+            this.target.getSQL(options),
+            ',',
+            this.path.getSQL(options),
+            (this.type ? ' RETURNING ' + this.type + (this.type === 'CHAR' ? ' CHARACTER SET utf8mb4' : '') : ''),
             ')',
         ]);
     }

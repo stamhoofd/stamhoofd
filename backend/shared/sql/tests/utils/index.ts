@@ -57,7 +57,8 @@ export type TableDefinition = Record<string, { type: 'varchar' | 'test' | 'json'
 
 export function createTableDefinition(tableName: string, definition: TableDefinition): string {
     const columns = Object.entries(definition).map(([name, { type, nullable }]) => {
-        return `\`${name}\` ${type}${nullable ? '' : ' NOT NULL'}`;
+        const stringType = type === 'varchar' ? 'VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci' : type;
+        return `\`${name}\` ${stringType}${nullable ? '' : ' NOT NULL'}`;
     }).join(',\n');
     return `CREATE TABLE \`${tableName}\` (\n${columns}\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;`;
 }
@@ -157,6 +158,9 @@ export async function testMatch({ tableDefinition, rows, doMatch, doNotMatch, fi
             catch (e) {
                 console.error('SQL error for filter:', filter, 'on table:', tableName, 'with where:', select.getSQL(), e);
                 throw e;
+            }
+            if (results.length > 0) {
+                console.error('Unexpected results for filter:', filter, 'on table:', tableName, 'with where:', select.getSQL(), results);
             }
             expect(results).toHaveLength(0);
 

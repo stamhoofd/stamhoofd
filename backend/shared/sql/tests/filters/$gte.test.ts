@@ -13,7 +13,7 @@ describe('$gte', () => {
     it('can filter on $gte', async () => {
         const filters = {
             ...baseSQLFilterCompilers,
-            age: createColumnFilter(SQL.column('age'), { type: SQLValueType.Number, nullable: false }),
+            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
         };
 
         await test({
@@ -33,7 +33,7 @@ describe('$gte', () => {
     it('can invert $gte inside', async () => {
         const filters = {
             ...baseSQLFilterCompilers,
-            age: createColumnFilter(SQL.column('age'), { type: SQLValueType.Number, nullable: false }),
+            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
         };
 
         await test({
@@ -55,7 +55,7 @@ describe('$gte', () => {
     it('can invert $gte outside', async () => {
         const filters = {
             ...baseSQLFilterCompilers,
-            age: createColumnFilter(SQL.column('age'), { type: SQLValueType.Number, nullable: false }),
+            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
         };
 
         await test({

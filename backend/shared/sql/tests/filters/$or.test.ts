@@ -13,8 +13,8 @@ describe('$or', () => {
     it('$or object children are $and together', async () => {
         const filters = {
             ...baseSQLFilterCompilers,
-            name: createColumnFilter(SQL.column('name'), { type: SQLValueType.String, nullable: true }),
-            age: createColumnFilter(SQL.column('age'), { type: SQLValueType.Number, nullable: false }),
+            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
+            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
         };
 
         await test({
@@ -48,7 +48,7 @@ describe('$or', () => {
     it('empty $or branches are removed', async () => {
         const filters = {
             ...baseSQLFilterCompilers,
-            name: createColumnFilter(SQL.column('name'), { type: SQLValueType.String, nullable: false }),
+            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
         };
 
         await test({
@@ -76,7 +76,7 @@ describe('$or', () => {
     it('deep $or branches are cleaned up', async () => {
         const filters = {
             ...baseSQLFilterCompilers,
-            name: createColumnFilter(SQL.column('name'), { type: SQLValueType.String, nullable: false }),
+            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
         };
 
         await test({
