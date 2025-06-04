@@ -169,6 +169,7 @@ export class SQLWhereEqual extends SQLWhere {
     column: SQLExpression;
     sign = SQLWhereSign.Equal;
     value: SQLExpression;
+    nullable = false;
 
     static parseWhere(...parsed: ParseWhereArguments): SQLWhere {
         if (parsed[1] === undefined) {
@@ -211,7 +212,11 @@ export class SQLWhereEqual extends SQLWhere {
     }
 
     get isSingle(): boolean {
-        return true;
+        return this.transformed?.isSingle ?? true;
+    }
+
+    get isAlways(): boolean | null {
+        return this.transformed?.isAlways ?? null;
     }
 
     inverted(): this {
@@ -242,7 +247,55 @@ export class SQLWhereEqual extends SQLWhere {
         return this;
     }
 
+    setNullable(nullable: boolean = true): this {
+        this.nullable = nullable;
+        return this;
+    }
+
+    get transformed() {
+        if (this.value instanceof SQLNull) {
+            // We'll do some transformations to make this query work as expected.
+            // < null = always false
+            // > null = (IS NOT null)
+            // <= null = (IS null)
+            // >= null = always true
+            if (this.sign === SQLWhereSign.Less) {
+                // always false
+                return new SQLWhereOr([]);
+            }
+            if (this.sign === SQLWhereSign.Greater) {
+                // > null = (IS NOT null)
+                return new SQLWhereEqual(this.column, SQLWhereSign.NotEqual, this.value);
+            }
+            if (this.sign === SQLWhereSign.LessEqual) {
+                // (IS null)
+                return new SQLWhereEqual(this.column, SQLWhereSign.Equal, this.value);
+            }
+            if (this.sign === SQLWhereSign.GreaterEqual) {
+                // always true
+                return new SQLWhereAnd([]);
+            }
+        }
+
+        // If the expression is nullable, we'll need to do some handling to make sure the query works as expected.
+        if (this.nullable && !(this.value instanceof SQLNull)) {
+            // <: should also include null values
+            // <=: should also include null values
+            if (this.sign === SQLWhereSign.Less || this.sign === SQLWhereSign.LessEqual) {
+                return new SQLWhereOr([
+                    this.clone().setNullable(false),
+                    new SQLWhereEqual(this.column, SQLWhereSign.Equal, new SQLNull()),
+                ]);
+            }
+        }
+
+        return null;
+    }
+
     getSQL(options?: SQLExpressionOptions): SQLQuery {
+        if (this.transformed) {
+            return this.transformed.getSQL(options);
+        }
         if (this.value instanceof SQLArray) {
             if (this.sign !== SQLWhereSign.Equal && this.sign !== SQLWhereSign.NotEqual) {
                 throw new Error('Unsupported sign for array: ' + this.sign);

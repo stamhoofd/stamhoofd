@@ -6,7 +6,7 @@ import { SQLCast } from '../SQLExpressions';
 import { SQLJsonUnquote, SQLJsonValue } from '../SQLJsonExpressions';
 import { SQLWhere, SQLWhereAnd, SQLWhereNot, SQLWhereOr } from '../SQLWhere';
 import { $equalsSQLFilterCompiler, $greaterThanSQLFilterCompiler, $inSQLFilterCompiler, $lessThanSQLFilterCompiler } from './compilers';
-import { isJSONColumn } from './helpers/isJSONColumn';
+import { isJSONColumn, isJSONType } from './helpers/isJSONColumn';
 
 export type SQLSyncFilterRunner = (column: SQLCurrentColumn) => SQLWhere;
 export type SQLFilterRunner = (column: SQLCurrentColumn) => Promise<SQLWhere> | SQLWhere;
@@ -179,10 +179,44 @@ export function unquoteJSONValue(a: SQLExpression, column: SQLCurrentColumn): SQ
  *
  * Returns the new expression (casted or not)
  */
-export function cast(a: SQLExpression, b: (string | number | Date | null | boolean) | (string | number | Date | null | boolean)[], type: SQLValueType): SQLExpression {
-    if (type === SQLValueType.JSONString && b !== null) {
-        return new SQLJsonValue(a, 'CHAR');
-        // return new SQLCast(new SQLJsonUnquote(a), 'CHAR');
+function normalizeExpression(a: SQLExpression, type: SQLValueType): { expression: SQLExpression; type: SQLValueType } {
+    if (type === SQLValueType.JSONString) {
+        return {
+            expression: new SQLJsonValue(a, 'CHAR'),
+            type: SQLValueType.String,
+        };
     }
-    return a;
+
+    if (type === SQLValueType.JSONBoolean) {
+        return {
+            expression: new SQLJsonValue(a, 'UNSIGNED'),
+            type: SQLValueType.Boolean,
+        };
+    }
+    if (type === SQLValueType.JSONNumber) {
+        return {
+            expression: new SQLJsonValue(a, 'UNSIGNED'),
+            type: SQLValueType.Number,
+        };
+    }
+    return {
+        expression: a,
+        type,
+    };
+}
+
+/**
+ * Given an expression of type 'type'. Optionally cast the expression in SQL to a better type so we can compare it with b.
+ *
+ * Returns the new expression (casted or not)
+ */
+export function cast(a: SQLExpression, b: (string | number | Date | null | boolean) | (string | number | Date | null | boolean)[], type: SQLValueType): SQLExpression {
+    return normalizeExpression(a, type).expression;
+}
+
+export function normalizeColumn(column: SQLCurrentColumn): SQLCurrentColumn {
+    return {
+        ...column,
+        ...normalizeExpression(column.expression, column.type),
+    };
 }

@@ -107,7 +107,7 @@ describe('$gt', () => {
             },
             filters,
             query: {
-                query: 'JSON_VALUE(`default`.`settings`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4) > ?',
+                query: 'JSON_VALUE(`default`.`settings`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) > ?',
                 params: ['alice'],
             },
         });

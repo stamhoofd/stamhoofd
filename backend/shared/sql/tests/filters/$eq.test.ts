@@ -832,6 +832,94 @@ describe('$eq', () => {
             });
         });
 
+        it('Can check if a json string is null', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            name: null,
+                        },
+                    },
+                    {
+                        settings: null,
+                    },
+                    {
+                        settings: {},
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.name': null,
+                    },
+                ],
+            });
+        });
+
+        it('Can check if a json number is null', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            age: null,
+                        },
+                    },
+                    {
+                        settings: null,
+                    },
+                    {
+                        settings: {},
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.age': null,
+                    },
+                ],
+            });
+        });
+
+        it('Can differentiate null string vs json null when comparing to null', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            name: 'null',
+                        },
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.name': null,
+                    },
+                ],
+            });
+        });
+
+        it('Can differentiate 0 number vs json null when comparing to null', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            age: 0,
+                        },
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.age': null,
+                    },
+                ],
+            });
+        });
+
         it('can check if a json object column is null', async () => {
             await testMatch({
                 tableDefinition,

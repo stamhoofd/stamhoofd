@@ -3,12 +3,12 @@ import { assertFilterCompareValue, StamhoofdFilter } from '@stamhoofd/structures
 import { scalarToSQLExpression, SQLArray } from '../../SQLExpressions';
 import { SQLJsonOverlaps } from '../../SQLJsonExpressions';
 import { SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '../../SQLWhere';
-import { cast, SQLCurrentColumn, SQLFilterCompilerSelector, SQLSyncFilterRunner, SQLValueType } from '../SQLModernFilter';
+import { normalizeColumn, SQLCurrentColumn, SQLFilterCompilerSelector, SQLSyncFilterRunner, SQLValueType } from '../SQLModernFilter';
 import { normalizeCompareValue } from '../helpers/normalizeCompareValue';
 import { $equalsSQLFilterCompiler } from './equals';
 
 export function $inSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilterCompilerSelector): SQLSyncFilterRunner {
-    return (column: SQLCurrentColumn) => {
+    return (originalColumn: SQLCurrentColumn) => {
         if (!Array.isArray(filter)) {
             throw new SimpleError({
                 code: 'invalid_filter',
@@ -23,7 +23,7 @@ export function $inSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilter
             });
         }
 
-        const columnExpression = column.expression;
+        const column = normalizeColumn(originalColumn);
         const values = filter.map(val => normalizeCompareValue(assertFilterCompareValue(val), column.type));
 
         if (values.length === 0) {
@@ -47,17 +47,14 @@ export function $inSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilter
             const valuesExpression = scalarToSQLExpression(jsonValues);
 
             return new SQLJsonOverlaps(
-                columnExpression,
+                column.expression,
                 valuesExpression,
             );
         }
         const valuesExpression = valuesWithoutNulls.length === 1 ? scalarToSQLExpression(valuesWithoutNulls[0]) : new SQLArray(valuesWithoutNulls);
 
-        // Cast any JSONString to a CHAR (only do this at the end because sometimes we need to check for JSON null)
-        const casted = cast(columnExpression, valuesWithoutNulls, column.type);
-
         return new SQLWhereEqual(
-            casted,
+            column.expression,
             SQLWhereSign.Equal,
             valuesExpression,
         );

@@ -1,34 +1,19 @@
 import { assertFilterCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
 import { scalarToSQLExpression } from '../../SQLExpressions';
-import { SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '../../SQLWhere';
-import { cast, SQLCurrentColumn, SQLFilterCompilerSelector, SQLSyncFilterRunner } from '../SQLModernFilter';
+import { SQLWhereEqual, SQLWhereSign } from '../../SQLWhere';
+import { normalizeColumn, SQLCurrentColumn, SQLFilterCompilerSelector, SQLSyncFilterRunner } from '../SQLModernFilter';
 import { normalizeCompareValue } from '../helpers/normalizeCompareValue';
-import { $equalsSQLFilterCompiler } from './equals';
 
-export function $lessThanSQLFilterCompiler(filter: StamhoofdFilter, selector: SQLFilterCompilerSelector): SQLSyncFilterRunner {
-    return (column: SQLCurrentColumn) => {
-        const a = column.expression;
-        const b = normalizeCompareValue(assertFilterCompareValue(filter), column.type);
-
-        if (b === null) {
-            // "< null" is always false in MySQL, so treat as 'always false'
-            return new SQLWhereOr([]);
-        }
+export function $lessThanSQLFilterCompiler(filter: StamhoofdFilter, _: SQLFilterCompilerSelector): SQLSyncFilterRunner {
+    return (originalColumn: SQLCurrentColumn) => {
+        const column = normalizeColumn(originalColumn);
+        const value = normalizeCompareValue(assertFilterCompareValue(filter), column.type);
 
         const base = new SQLWhereEqual(
-            cast(a, b, column.type),
+            column.expression,
             SQLWhereSign.Less,
-            scalarToSQLExpression(b),
-        );
-
-        if (column.nullable) {
-            // Null values are always smaller than any value, so we need to handle that by including them in the result
-            return new SQLWhereOr([
-                $equalsSQLFilterCompiler(null, selector)(column),
-                base,
-            ]);
-        }
-
+            scalarToSQLExpression(value),
+        ).setNullable(column.nullable);
         return base;
     };
 }
