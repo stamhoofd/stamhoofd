@@ -29,7 +29,7 @@
         "formidable": "3.5.1",
         "luxon": "3.4.4",
         "mockdate": "^3.0.2",
-        "mysql": "^2.18.1"
+        "mysql2": "^3.14.1"
     },
     "publishConfig": {
         "access": "public"
