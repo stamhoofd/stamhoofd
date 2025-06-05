@@ -1,5 +1,6 @@
 import { Model } from '@simonbackx/simple-database';
 import { Organization, Platform } from '@stamhoofd/models';
+import { QueueHandler } from '@stamhoofd/queues';
 import { RecordSettings } from '@stamhoofd/structures';
 
 export type RecordCacheEntry = { record: RecordSettings; rootCategoryId: string; organizationId: string | null };
@@ -118,34 +119,42 @@ export class MemberRecordStore {
     static async loadAll() {
         this.cache = new Map<string, RecordCacheEntry>();
 
-        const platform = await Platform.getShared();
-        for (const recordCategory of platform.config.recordsConfiguration.recordCategories) {
-            for (const record of recordCategory.getAllRecords()) {
-                // Add to cache
-                this.cache.set(record.id, {
-                    record: record.clone(),
-                    organizationId: null,
-                    rootCategoryId: recordCategory.id,
-                });
-            }
-        }
+        // We use a queue here so we can abort this long running task properly
+        // + can await it when shutting down the server or tests
+        await QueueHandler.schedule('MemberRecordStore.loadAll', async ({ abort }) => {
+            this.cache = new Map<string, RecordCacheEntry>();
 
-        for await (const organization of Organization.select().all()) {
-            for (const recordCategory of organization.meta.recordsConfiguration.recordCategories) {
+            const platform = await Platform.getShared();
+            for (const recordCategory of platform.config.recordsConfiguration.recordCategories) {
                 for (const record of recordCategory.getAllRecords()) {
-                    if (this.cache.has(record.id)) {
-                        console.error(`Duplicate record id ${record.id} found in organization ${organization.id} for record ${record.name} (${record.id}) in ${recordCategory.name}`);
-                        continue;
-                    }
                     // Add to cache
                     this.cache.set(record.id, {
                         record: record.clone(),
-                        organizationId: organization.id,
+                        organizationId: null,
                         rootCategoryId: recordCategory.id,
                     });
                 }
             }
-        }
+            abort.throwIfAborted();
+
+            for await (const organization of Organization.select().all()) {
+                for (const recordCategory of organization.meta.recordsConfiguration.recordCategories) {
+                    for (const record of recordCategory.getAllRecords()) {
+                        if (this.cache.has(record.id)) {
+                            console.error(`Duplicate record id ${record.id} found in organization ${organization.id} for record ${record.name} (${record.id}) in ${recordCategory.name}`);
+                            continue;
+                        }
+                        // Add to cache
+                        this.cache.set(record.id, {
+                            record: record.clone(),
+                            organizationId: organization.id,
+                            rootCategoryId: recordCategory.id,
+                        });
+                    }
+                }
+                abort.throwIfAborted();
+            }
+        });
     }
 
     static async getRecord(id: string): Promise<RecordCacheEntry | null> {
