@@ -1,7 +1,7 @@
 import { PatchableArray, PatchMap, patchObject } from '@simonbackx/simple-encoding';
 import { Endpoint, Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
-import { EmailTemplateFactory, EventFactory, EventNotification, EventNotificationFactory, EventNotificationTypeFactory, Organization, OrganizationFactory, RecordAnswerFactory, RecordCategoryFactory, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
+import { EmailTemplateFactory, EventFactory, EventNotification, EventNotificationFactory, EventNotificationTypeFactory, Organization, OrganizationFactory, Platform, RecordAnswerFactory, RecordCategoryFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
 import { AccessRight, BaseOrganization, EmailTemplateType, Event, EventNotificationStatus, EventNotification as EventNotificationStruct, Permissions, PermissionsResourceType, RecordType, ResourcePermissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer';
@@ -180,6 +180,12 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
     });
 
     test('It throws when trying to create an event notification for a locked period', async () => {
+        // Clear all periods and organizations (to make sure the right locked period is used)
+        const platform = await Platform.getForEditing();
+        await platform.delete();
+        await Organization.delete();
+        await RegistrationPeriod.delete();
+
         await new RegistrationPeriodFactory({
             startDate: new Date(2050, 0, 1),
             endDate: new Date(2051, 11, 31),
