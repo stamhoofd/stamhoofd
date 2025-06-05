@@ -1,6 +1,7 @@
 import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery, normalizeSQLQuery } from './SQLExpression';
 import { SQLArray, SQLColumnExpression, SQLDynamicExpression, SQLNull, readDynamicSQLExpression } from './SQLExpressions';
-import { SQLJoin } from './SQLJoin';
+import { SQLJoin, SQLJoinType } from './SQLJoin';
+import { SQLSelect } from './SQLSelect';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -162,6 +163,10 @@ export class SQLEmptyWhere extends SQLWhere {
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         throw new Error('Empty where');
+    }
+
+    get isAlways() {
+        return true;
     }
 }
 
@@ -450,6 +455,24 @@ export class SQLWhereExists extends SQLWhere {
         return this;
     }
 
+    get isAlways(): boolean | null {
+        if (this.subquery instanceof SQLSelect) {
+            const value = this.subquery.isAlways;
+            if (this.notExists) {
+                if (value === true) {
+                    // If the subquery is always true, then NOT EXISTS is always false
+                    return false;
+                }
+                if (value === false) {
+                    // If the subquery is always false, then NOT EXISTS is always true
+                    return true;
+                }
+            }
+            return value;
+        }
+        return null;
+    }
+
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         return joinSQLQuery([
             `${this.notExists ? 'NOT EXISTS' : 'EXISTS'} (`,
@@ -466,22 +489,45 @@ export class SQLWhereJoin extends SQLWhere {
     join: SQLJoin;
     where: SQLWhere;
 
-    constructor(join: SQLJoin, where: SQLWhere) {
+    /**
+     * When this is true, this means we know this relation will always exist.
+     *
+     * This information will be used to optimize the query.
+     */
+    doesRelationAlwaysExist = false;
+
+    constructor(join: SQLJoin, where: SQLWhere, options?: { doesRelationAlwaysExist?: boolean }) {
         super();
         this.join = join;
         this.where = where;
+        this.doesRelationAlwaysExist = options?.doesRelationAlwaysExist ?? false;
     }
 
     get isSingle(): boolean {
         return this.where.isSingle;
     }
 
+    get isAlways(): boolean | null {
+        return this.where.isAlways;
+    }
+
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        return this.where.getSQL(options);
+        if (this.where.isAlways !== null && (this.doesRelationAlwaysExist || this.join.type === SQLJoinType.Left)) {
+            throw new Error('SQLWhereJoin: should not be included in query if result is determined');
+        }
+
+        return this.where.getSQL({
+            ...options,
+            parentNamespace: options?.defaultNamespace,
+            defaultNamespace: this.join.table.getName(),
+        });
     }
 
     getJoins(): SQLJoin[] {
-        return [this.join];
+        if (this.where.isAlways !== null && (this.doesRelationAlwaysExist || this.join.type === SQLJoinType.Left)) {
+            return [];
+        }
+        return [this.join, ...this.where.getJoins()];
     }
 }
 
@@ -515,7 +561,7 @@ export class SQLWhereAnd extends SQLWhere {
     }
 
     getJoins(): SQLJoin[] {
-        return this.filteredChildren.flatMap(c => c.getJoins());
+        return this.children.flatMap(c => c.getJoins()); // note: keep all joins
     }
 
     get isSingle(): boolean {
@@ -570,7 +616,7 @@ export class SQLWhereOr extends SQLWhere {
     }
 
     getJoins(): SQLJoin[] {
-        return this.filteredChildren.flatMap(c => c.getJoins());
+        return this.children.flatMap(c => c.getJoins());
     }
 
     get filteredChildren(): SQLWhere[] {

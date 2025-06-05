@@ -2,10 +2,12 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { compileFilter, FilterCompiler, FilterCompilerSelector, FilterDefinitions, StamhoofdFilter } from '@stamhoofd/structures';
 import { SQLExpression, SQLExpressionOptions, SQLQuery } from '../SQLExpression';
 import { SQLJsonUnquote, SQLJsonValue } from '../SQLJsonExpressions';
-import { SQLWhere, SQLWhereAnd, SQLWhereNot, SQLWhereOr } from '../SQLWhere';
+import { SQLWhere, SQLWhereAnd, SQLWhereExists, SQLWhereJoin, SQLWhereNot, SQLWhereOr } from '../SQLWhere';
 import { $equalsSQLFilterCompiler, $greaterThanSQLFilterCompiler, $inSQLFilterCompiler, $lessThanSQLFilterCompiler } from './compilers';
 import { isJSONColumn } from './helpers/isJSONColumn';
 import { $containsSQLFilterCompiler } from './compilers/contains';
+import { SQLSelect } from '../SQLSelect';
+import { SQLJoin } from '../SQLJoin';
 
 export type SQLSyncFilterRunner = (column: SQLCurrentColumn) => SQLWhere;
 export type SQLFilterRunner = (column: SQLCurrentColumn) => Promise<SQLWhere> | SQLWhere;
@@ -71,6 +73,69 @@ export function createColumnFilter(column: SQLCurrentColumn): SQLFilterCompiler 
             return runner({
                 nullable: false,
                 ...column,
+            });
+        };
+    };
+}
+
+/**
+ * Creates a new namespace with different filters.
+ *
+ * E.g. if you always join with a specific table, and you can filter on those columns.
+ */
+export function createFilterNamespace(definitions: SQLFilterDefinitions): SQLFilterCompiler {
+    const selector = filterDefinitionsToSelector(definitions);
+    return (filter: StamhoofdFilter, _: SQLFilterCompilerSelector) => {
+        const runner = $andSQLFilterCompiler(filter, selector);
+        return async (_: SQLCurrentColumn) => {
+            // We reset the column (no columns cross the namespace boundary)
+            return await runner({
+                expression: SQLRootExpression,
+                type: SQLValueType.Table,
+                nullable: false,
+            });
+        };
+    };
+}
+
+/**
+ * Filter with a subquery that should return at least one result.
+ */
+export function createExistsFilter(baseSelect: InstanceType<typeof SQLSelect> & SQLExpression, definitions: SQLFilterDefinitions): SQLFilterCompiler {
+    return (filter: StamhoofdFilter, _: SQLFilterCompilerSelector) => {
+        if (filter !== null && typeof filter === 'object' && '$elemMatch' in filter) {
+            filter = filter['$elemMatch'] as StamhoofdFilter;
+        }
+
+        const runner = compileToSQLRunner(filter, definitions);
+
+        return async (_: SQLCurrentColumn) => {
+            const w = await runner({
+                expression: SQLRootExpression,
+                type: SQLValueType.Table,
+                nullable: false,
+            });
+            const q = baseSelect.clone().andWhere(w);
+            return new SQLWhereExists(q);
+        };
+    };
+}
+
+/**
+ * WARNING: only use this on one-to-one relations. Using it on one-to-many relations will result in duplicate results.
+ *
+ * By default doesRelationAlwaysExist is set to true, this means we expect the relation to always exist. This helps optimize the query (dropping the join if the where clause in the join is always true)
+ */
+export function createJoinedRelationFilter(join: SQLJoin, definitions: SQLFilterDefinitions, options: { doesRelationAlwaysExist: boolean } = { doesRelationAlwaysExist: true }): SQLFilterCompiler {
+    return (filter: StamhoofdFilter, _: SQLFilterCompilerSelector) => {
+        if (filter !== null && typeof filter === 'object' && '$elemMatch' in filter) {
+            filter = filter['$elemMatch'] as StamhoofdFilter;
+        }
+
+        return async (_: SQLCurrentColumn) => {
+            const w = await compileToSQLFilter(filter, definitions);
+            return new SQLWhereJoin(join, w, {
+                doesRelationAlwaysExist: options.doesRelationAlwaysExist,
             });
         };
     };
@@ -151,11 +216,18 @@ export const SQLRootExpression: SQLExpression = {
     },
 };
 
-export async function compileToSQLFilter(filter: StamhoofdFilter, filters: SQLFilterDefinitions): Promise<SQLWhere> {
+export function compileToSQLRunner(filter: StamhoofdFilter, filters: SQLFilterDefinitions): SQLFilterRunner {
     if (filter === null) {
-        return new SQLWhereAnd([]); // No filter, return empty where
+        return () => {
+            return new SQLWhereAnd([]); // No filter, return empty where
+        };
     }
     const runner = $andSQLFilterCompiler(filter, filterDefinitionsToSelector(filters));
+    return runner;
+};
+
+export async function compileToSQLFilter(filter: StamhoofdFilter, filters: SQLFilterDefinitions): Promise<SQLWhere> {
+    const runner = compileToSQLRunner(filter, filters);
     return await runner({
         expression: SQLRootExpression,
         type: SQLValueType.Table,

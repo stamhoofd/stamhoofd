@@ -1,5 +1,5 @@
 import { Database } from '@simonbackx/simple-database';
-import { joinSQLQuery, SQLExpression, SQLExpressionOptions, SQLQuery } from './SQLExpression';
+import { joinSQLQuery, SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery } from './SQLExpression';
 import { ParseWhereArguments, SQLEmptyWhere } from './SQLWhere';
 
 export type SQLScalarValue = string | number | boolean | Date;
@@ -421,26 +421,32 @@ export class SQLColumnExpression implements SQLExpression {
     }
 }
 
-export class SQLTableExpression implements SQLExpression {
-    namespace?: string;
+export class SQLTableExpression implements SQLNamedExpression {
+    /**
+     * By default the table name will be used as the namespace by MySQL.
+     */
+    asNamespace?: string;
+
+    /**
+     * For now this is just a string, but thearetically it could be a subquery.
+     * We don't support that yet, as those queries are not optimized for performance.
+     */
     table: string;
 
-    constructor(namespace: string, table: string);
-    constructor(table: string);
-    constructor(namespaceOrTable: string, table?: string) {
-        if (table === undefined) {
-            this.table = namespaceOrTable;
-            return;
-        }
-        this.namespace = namespaceOrTable;
+    constructor(table: string, asNamespace?: string) {
+        this.asNamespace = asNamespace;
         this.table = table;
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        if (!this.namespace) {
+        if (!this.asNamespace) {
             return Database.escapeId(this.table);
         }
-        return Database.escapeId(this.table) + ' ' + Database.escapeId(this.namespace);
+        return Database.escapeId(this.table) + ' ' + Database.escapeId(this.asNamespace);
+    }
+
+    getName(): string {
+        return this.asNamespace ?? this.table;
     }
 }
 

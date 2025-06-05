@@ -1,4 +1,4 @@
-import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery } from './SQLExpression';
+import { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery, joinSQLQuery } from './SQLExpression';
 import { Whereable } from './SQLWhere';
 
 export enum SQLJoinType {
@@ -11,9 +11,9 @@ export enum SQLJoinType {
 class EmptyClass {}
 export class SQLJoin extends Whereable(EmptyClass) implements SQLExpression {
     type = SQLJoinType.Left;
-    table: SQLExpression;
+    table: SQLNamedExpression;
 
-    constructor(type: SQLJoinType, table: SQLExpression) {
+    constructor(type: SQLJoinType, table: SQLNamedExpression) {
         super();
         this.type = type;
         this.table = table;
@@ -33,7 +33,11 @@ export class SQLJoin extends Whereable(EmptyClass) implements SQLExpression {
             this.getJoinPrefix(),
             this.table?.getSQL(options),
             this._where ? 'ON' : undefined,
-            this._where?.getSQL(options),
+            this._where?.getSQL({
+                ...options,
+                parentNamespace: options?.defaultNamespace,
+                defaultNamespace: this.table.getName(),
+            }),
         ], ' ');
     }
 }

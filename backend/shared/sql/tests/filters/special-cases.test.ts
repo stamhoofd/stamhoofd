@@ -57,7 +57,7 @@ describe('Special filter cases', () => {
     });
 
     describe('Empty filters', () => {
-        it('an empty object filter returns an empty query', async () => {
+        it('an empty object filter is always true', async () => {
             const filters = {
                 ...baseSQLFilterCompilers,
             };
@@ -66,13 +66,13 @@ describe('Special filter cases', () => {
                 filter: {},
                 filters,
                 query: {
-                    query: '',
+                    query: 'true',
                     params: [],
                 },
             });
         });
 
-        it('an empty array filter returns an empty query', async () => {
+        it('an empty array filter is always true', async () => {
             const filters = {
                 ...baseSQLFilterCompilers,
             };
@@ -81,13 +81,13 @@ describe('Special filter cases', () => {
                 filter: [],
                 filters,
                 query: {
-                    query: '',
+                    query: 'true',
                     params: [],
                 },
             });
         });
 
-        it('a null filter returns an empty query', async () => {
+        it('a null filter is always true', async () => {
             const filters = {
                 ...baseSQLFilterCompilers,
             };
@@ -96,7 +96,7 @@ describe('Special filter cases', () => {
                 filter: null,
                 filters,
                 query: {
-                    query: '',
+                    query: 'true',
                     params: [],
                 },
             });

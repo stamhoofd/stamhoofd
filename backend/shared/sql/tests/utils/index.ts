@@ -6,6 +6,7 @@ import { compileToSQLFilter, SQLFilterDefinitions } from '../../src/filters/SQLM
 import { SQL } from '../../src/SQL';
 import { NormalizedSQLQuery, SQLQuery } from '../../src/SQLExpression';
 import { SQLScalarValue } from '../../src/SQLExpressions';
+import { SQLWhereAnd } from '../../src/SQLWhere';
 
 export async function testError({ filter, filters, error }: { filter: StamhoofdFilter; filters: SQLFilterDefinitions; error: string }) {
     await expect(
@@ -13,12 +14,51 @@ export async function testError({ filter, filters, error }: { filter: StamhoofdF
     ).rejects.toThrow(error);
 }
 
+/**
+ * Only compares the WHERE clause of the query.
+ */
 export async function test({ filter, filters, query }: { filter: StamhoofdFilter; filters: SQLFilterDefinitions; query: SQLQuery }) {
     const where = await compileToSQLFilter(filter, filters);
+    if (where.isAlways === false) {
+        doesQueryMatch('', query);
+        return;
+    }
+
+    if (where.isAlways === true) {
+        doesQueryMatch('true', query);
+        return;
+    }
+
     const sql = where.getSQL({
         defaultNamespace: 'default',
         parentNamespace: 'parent',
     });
+    doesQueryMatch(sql, query);
+}
+
+/**
+ * Use to also test joins. This will use `test_table` as the table name in your query.
+ */
+export async function testSelect({ filter, filters, query }: { filter: StamhoofdFilter; filters: SQLFilterDefinitions; query: SQLQuery }) {
+    const where = await compileToSQLFilter(filter, filters);
+
+    if (where.isAlways === false) {
+        doesQueryMatch('', query);
+        return;
+    }
+
+    const select = SQL.select().from('test_table').where(where);
+
+    let sql: SQLQuery;
+    try {
+        sql = select.getSQL();
+    }
+    catch (e) {
+        console.error('Error in testSelect:', e);
+        console.error('testSelect', select, where, (where instanceof SQLWhereAnd ? where.children : where));
+
+        throw e;
+    }
     doesQueryMatch(sql, query);
 }
 
