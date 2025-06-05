@@ -5,6 +5,7 @@ import { SQLJsonUnquote, SQLJsonValue } from '../SQLJsonExpressions';
 import { SQLWhere, SQLWhereAnd, SQLWhereNot, SQLWhereOr } from '../SQLWhere';
 import { $equalsSQLFilterCompiler, $greaterThanSQLFilterCompiler, $inSQLFilterCompiler, $lessThanSQLFilterCompiler } from './compilers';
 import { isJSONColumn } from './helpers/isJSONColumn';
+import { $containsSQLFilterCompiler } from './compilers/contains';
 
 export type SQLSyncFilterRunner = (column: SQLCurrentColumn) => SQLWhere;
 export type SQLFilterRunner = (column: SQLCurrentColumn) => Promise<SQLWhere> | SQLWhere;
@@ -135,6 +136,8 @@ export const baseSQLFilterCompilers: SQLFilterDefinitions = {
     $gte: invertFilterCompiler($lessThanSQLFilterCompiler),
 
     $in: $inSQLFilterCompiler,
+
+    $contains: $containsSQLFilterCompiler,
 };
 
 const compileSQLFilter = compileFilter<SQLFilterRunner>;

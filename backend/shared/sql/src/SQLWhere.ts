@@ -340,7 +340,7 @@ export class SQLWhereLike extends SQLWhere {
     }
 
     static escape(str: string) {
-        return str.replace(/([%_])/g, '\\$1');
+        return str.replace(/([%_\\])/g, '\\$1');
     }
 
     clone(): this {
