@@ -1,12 +1,10 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { compileFilter, FilterCompiler, FilterCompilerSelector, FilterDefinitions, StamhoofdFilter } from '@stamhoofd/structures';
-import { SQL } from '../SQL';
 import { SQLExpression, SQLExpressionOptions, SQLQuery } from '../SQLExpression';
-import { SQLCast } from '../SQLExpressions';
 import { SQLJsonUnquote, SQLJsonValue } from '../SQLJsonExpressions';
 import { SQLWhere, SQLWhereAnd, SQLWhereNot, SQLWhereOr } from '../SQLWhere';
 import { $equalsSQLFilterCompiler, $greaterThanSQLFilterCompiler, $inSQLFilterCompiler, $lessThanSQLFilterCompiler } from './compilers';
-import { isJSONColumn, isJSONType } from './helpers/isJSONColumn';
+import { isJSONColumn } from './helpers/isJSONColumn';
 
 export type SQLSyncFilterRunner = (column: SQLCurrentColumn) => SQLWhere;
 export type SQLFilterRunner = (column: SQLCurrentColumn) => Promise<SQLWhere> | SQLWhere;
@@ -163,60 +161,28 @@ export async function compileToSQLFilter(filter: StamhoofdFilter, filters: SQLFi
 };
 
 /**
- * Given an expression of type 'type'. Optionally cast the expression in SQL to a better type so we can compare it with b.
- *
- * Returns the new expression (casted or not)
+ * Casts json strings, numbers and booleans to native MySQL types. This includes json null to mysql null.
  */
-export function unquoteJSONValue(a: SQLExpression, column: SQLCurrentColumn): SQLExpression {
-    if (isJSONColumn(column)) {
-        return new SQLJsonUnquote(a);
-    }
-    return a;
-}
-
-/**
- * Given an expression of type 'type'. Optionally cast the expression in SQL to a better type so we can compare it with b.
- *
- * Returns the new expression (casted or not)
- */
-function normalizeExpression(a: SQLExpression, type: SQLValueType): { expression: SQLExpression; type: SQLValueType } {
-    if (type === SQLValueType.JSONString) {
+export function normalizeColumn(column: SQLCurrentColumn): SQLCurrentColumn {
+    if (column.type === SQLValueType.JSONString) {
         return {
-            expression: new SQLJsonValue(a, 'CHAR'),
+            expression: new SQLJsonValue(column.expression, 'CHAR'),
             type: SQLValueType.String,
         };
     }
 
-    if (type === SQLValueType.JSONBoolean) {
+    if (column.type === SQLValueType.JSONBoolean) {
         return {
-            expression: new SQLJsonValue(a, 'UNSIGNED'),
+            expression: new SQLJsonValue(column.expression, 'UNSIGNED'),
             type: SQLValueType.Boolean,
         };
     }
-    if (type === SQLValueType.JSONNumber) {
+
+    if (column.type === SQLValueType.JSONNumber) {
         return {
-            expression: new SQLJsonValue(a, 'UNSIGNED'),
+            expression: new SQLJsonValue(column.expression, 'UNSIGNED'),
             type: SQLValueType.Number,
         };
     }
-    return {
-        expression: a,
-        type,
-    };
-}
-
-/**
- * Given an expression of type 'type'. Optionally cast the expression in SQL to a better type so we can compare it with b.
- *
- * Returns the new expression (casted or not)
- */
-export function cast(a: SQLExpression, b: (string | number | Date | null | boolean) | (string | number | Date | null | boolean)[], type: SQLValueType): SQLExpression {
-    return normalizeExpression(a, type).expression;
-}
-
-export function normalizeColumn(column: SQLCurrentColumn): SQLCurrentColumn {
-    return {
-        ...column,
-        ...normalizeExpression(column.expression, column.type),
-    };
+    return column;
 }
