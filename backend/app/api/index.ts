@@ -21,6 +21,8 @@ import { DocumentService } from './src/services/DocumentService';
 import { FileSignService } from './src/services/FileSignService';
 import { PlatformMembershipService } from './src/services/PlatformMembershipService';
 import { UniqueUserService } from './src/services/UniqueUserService';
+import { QueueHandler } from '@stamhoofd/queues';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -168,11 +170,19 @@ const start = async () => {
 
         await BalanceItemService.flushAll();
         await waitForCrons();
+        QueueHandler.abortAll(
+            new SimpleError({
+                code: 'SHUTDOWN',
+                message: 'Shutting down',
+                statusCode: 503,
+            }),
+        );
+        await QueueHandler.awaitAll();
 
         try {
             while (Email.currentQueue.length > 0) {
-                console.log('Emails still in queue. Waiting 2 seconds...');
-                await sleep(2000);
+                console.log(`${Email.currentQueue.length} emails still in queue. Waiting 500ms...`);
+                await sleep(500);
             }
         }
         catch (err) {
