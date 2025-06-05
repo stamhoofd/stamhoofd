@@ -13,6 +13,7 @@ import { TestUtils } from '@stamhoofd/test-utils';
 import './toMatchMap';
 import { PayconiqMocker } from './helpers/PayconiqMocker';
 import { BalanceItemService } from '../src/services/BalanceItemService';
+import { QueueHandler } from '@stamhoofd/queues';
 
 // Set version of saved structures
 Column.setJSONVersion(Version);
@@ -87,6 +88,10 @@ afterAll(async () => {
         await sleep(100);
     }
     await Database.end();
+});
+
+afterEach(async () => {
+    await QueueHandler.awaitAll();
 });
 
 TestUtils.setup();
