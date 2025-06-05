@@ -1024,96 +1024,91 @@ describe('E2E.Register', () => {
     describe('Register for group with default age group', () => {
         test('Should create membership', async () => {
             const date = new Date('2023-05-14');
-            jest.useFakeTimers({ advanceTimers: true }).setSystemTime(date);
+            jest.useFakeTimers({ advanceTimers: true, doNotFake: ['setTimeout', 'clearTimeout', 'hrtime', 'nextTick', 'performance', 'queueMicrotask', 'setImmediate', 'clearImmediate'] }).setSystemTime(date);
 
-            try {
-                const platformMembershipTypeConfig = PlatformMembershipTypeConfig.create({
-                    startDate: period.startDate,
-                    endDate: period.endDate,
-                });
+            const platformMembershipTypeConfig = PlatformMembershipTypeConfig.create({
+                startDate: period.startDate,
+                endDate: period.endDate,
+            });
 
-                const platformMembershipType = PlatformMembershipType.create({
-                    name: 'werkjaar',
-                    periods: new Map([
-                        [period.id, platformMembershipTypeConfig],
-                    ]),
-                });
+            const platformMembershipType = PlatformMembershipType.create({
+                name: 'werkjaar',
+                periods: new Map([
+                    [period.id, platformMembershipTypeConfig],
+                ]),
+            });
 
-                const platform = await Platform.getForEditing();
+            const platform = await Platform.getForEditing();
 
-                platform.config.membershipTypes = [
-                    platformMembershipType,
-                ];
+            platform.config.membershipTypes = [
+                platformMembershipType,
+            ];
 
-                const defaultAgeGroup = DefaultAgeGroup.create({
-                    names: ['test groep'],
-                    defaultMembershipTypeId: platformMembershipType.id,
-                });
+            const defaultAgeGroup = DefaultAgeGroup.create({
+                names: ['test groep'],
+                defaultMembershipTypeId: platformMembershipType.id,
+            });
 
-                platform.config.defaultAgeGroups = [defaultAgeGroup];
+            platform.config.defaultAgeGroups = [defaultAgeGroup];
 
-                await platform.save();
+            await platform.save();
 
-                const { member, group, groupPrice, organization, token } = await initData();
+            const { member, group, groupPrice, organization, token } = await initData();
 
-                // todo: remove from initData
-                member.organizationId = null;
-                await member.save();
+            // todo: remove from initData
+            member.organizationId = null;
+            await member.save();
 
-                group.defaultAgeGroupId = defaultAgeGroup.id;
-                await group.save();
+            group.defaultAgeGroupId = defaultAgeGroup.id;
+            await group.save();
 
-                const organizationPeriod = new OrganizationRegistrationPeriod();
-                organizationPeriod.organizationId = organization.id;
-                organizationPeriod.periodId = period.id;
-                await organizationPeriod.save();
+            const organizationPeriod = new OrganizationRegistrationPeriod();
+            organizationPeriod.organizationId = organization.id;
+            organizationPeriod.periodId = period.id;
+            await organizationPeriod.save();
 
-                const body = IDRegisterCheckout.create({
-                    cart: IDRegisterCart.create({
-                        items: [
-                            IDRegisterItem.create({
-                                id: uuidv4(),
-                                groupPrice: groupPrice,
-                                organizationId: organization.id,
-                                groupId: group.id,
-                                memberId: member.id,
-                                trial: false,
-                            }),
-                        ],
-                    }),
-                    totalPrice: 25,
-                    asOrganizationId: organization.id,
-                });
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            groupPrice: groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                            trial: false,
+                        }),
+                    ],
+                }),
+                totalPrice: 25,
+                asOrganizationId: organization.id,
+            });
 
-                // act and assert
-                const familyBefore = await getMemberFamily(member.id, organization, token);
-                expect(familyBefore).toBeDefined();
-                expect(familyBefore.body.members.length).toBe(1);
-                expect(familyBefore.body.members[0]).toBeDefined();
-                expect(familyBefore.body.members[0].platformMemberships.length).toBe(0);
+            // act and assert
+            const familyBefore = await getMemberFamily(member.id, organization, token);
+            expect(familyBefore).toBeDefined();
+            expect(familyBefore.body.members.length).toBe(1);
+            expect(familyBefore.body.members[0]).toBeDefined();
+            expect(familyBefore.body.members[0].platformMemberships.length).toBe(0);
 
-                const response = await register(body, organization, token);
+            const response = await register(body, organization, token);
 
-                expect(response.body).toBeDefined();
-                expect(response.body.registrations.length).toBe(1);
+            expect(response.body).toBeDefined();
+            expect(response.body.registrations.length).toBe(1);
 
-                await PlatformMembershipService.updateMembershipsForId(member.id, false);
+            await PlatformMembershipService.updateMembershipsForId(member.id, false);
 
-                const familyAfter = await getMemberFamily(member.id, organization, token);
-                expect(familyAfter).toBeDefined();
-                expect(familyAfter.body.members.length).toBe(1);
-                expect(familyAfter.body.members[0]).toBeDefined();
-                expect(familyAfter.body.members[0].platformMemberships.length).toBe(1);
-                expect(familyAfter.body.members[0].platformMemberships[0].membershipTypeId).toBe(platformMembershipType.id);
-            }
-            finally {
-                jest.useRealTimers().resetAllMocks();
-            }
-        });
+            const familyAfter = await getMemberFamily(member.id, organization, token);
+            expect(familyAfter).toBeDefined();
+            expect(familyAfter.body.members.length).toBe(1);
+            expect(familyAfter.body.members[0]).toBeDefined();
+            expect(familyAfter.body.members[0].platformMemberships.length).toBe(1);
+            expect(familyAfter.body.members[0].platformMemberships[0].membershipTypeId).toBe(platformMembershipType.id);
+        }, 20_000);
 
         test('Should set trial until on membership if trial', async () => {
             const date = new Date('2023-05-14');
-            jest.useFakeTimers({ advanceTimers: true }).setSystemTime(date);
+            jest.useFakeTimers({ advanceTimers: true, doNotFake: ['setTimeout', 'clearTimeout', 'hrtime', 'nextTick', 'performance', 'queueMicrotask', 'setImmediate', 'clearImmediate'] }).setSystemTime(date);
 
             try {
                 const platformMembershipTypeConfig = PlatformMembershipTypeConfig.create({

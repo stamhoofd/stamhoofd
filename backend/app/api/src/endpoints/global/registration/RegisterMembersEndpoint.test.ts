@@ -787,7 +787,7 @@ describe('Endpoint.RegisterMembers', () => {
         test('Register for group with trial should set trial period', async () => {
             // #region arrange
             const date = new Date('2023-05-14');
-            jest.useFakeTimers({ advanceTimers: true }).setSystemTime(date);
+            jest.useFakeTimers({ advanceTimers: true, doNotFake: ['setTimeout', 'clearTimeout', 'hrtime', 'nextTick', 'performance', 'queueMicrotask', 'setImmediate', 'clearImmediate'] }).setSystemTime(date);
 
             try {
                 const { member, group, groupPrice, organization, token } = await initData();
