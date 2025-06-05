@@ -40,6 +40,7 @@ describe('Endpoint.RegisterMembers', () => {
 
     afterEach(() => {
         jest.restoreAllMocks();
+        jest.useRealTimers();
     });
 
     const initOrganization = async (registrationPeriod: RegistrationPeriod = period) => {
@@ -786,7 +787,7 @@ describe('Endpoint.RegisterMembers', () => {
         test('Register for group with trial should set trial period', async () => {
             // #region arrange
             const date = new Date('2023-05-14');
-            jest.useFakeTimers().setSystemTime(date);
+            jest.useFakeTimers({ advanceTimers: true }).setSystemTime(date);
 
             try {
                 const { member, group, groupPrice, organization, token } = await initData();
@@ -832,9 +833,9 @@ describe('Endpoint.RegisterMembers', () => {
                 expect(trialUntil!.getDate()).toBe(19);
             }
             finally {
-                jest.useFakeTimers().resetAllMocks();
+                jest.useRealTimers();
             }
-        });
+        }, 20_000);
 
         test('Should update group stock reservations', async () => {
             // #region arrange

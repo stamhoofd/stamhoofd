@@ -43,6 +43,10 @@ describe('E2E.Register', () => {
         TestUtils.setEnvironment('userMode', 'platform');
     });
 
+    afterEach(() => {
+        jest.useRealTimers();
+    });
+
     beforeAll(async () => {
         const previousPeriod = await new RegistrationPeriodFactory({
             startDate: new Date(2022, 0, 1),
@@ -51,7 +55,7 @@ describe('E2E.Register', () => {
 
         period = await new RegistrationPeriodFactory({
             startDate: new Date(2023, 0, 1),
-            endDate: new Date(2023, 11, 31),
+            endDate: new Date(2050, 11, 31),
         }).create();
 
         period.previousPeriodId = previousPeriod.id;
@@ -1020,7 +1024,7 @@ describe('E2E.Register', () => {
     describe('Register for group with default age group', () => {
         test('Should create membership', async () => {
             const date = new Date('2023-05-14');
-            jest.useFakeTimers().setSystemTime(date);
+            jest.useFakeTimers({ advanceTimers: true }).setSystemTime(date);
 
             try {
                 const platformMembershipTypeConfig = PlatformMembershipTypeConfig.create({
@@ -1103,13 +1107,13 @@ describe('E2E.Register', () => {
                 expect(familyAfter.body.members[0].platformMemberships[0].membershipTypeId).toBe(platformMembershipType.id);
             }
             finally {
-                jest.useFakeTimers().resetAllMocks();
+                jest.useRealTimers().resetAllMocks();
             }
-        }, 20_000);
+        });
 
         test('Should set trial until on membership if trial', async () => {
             const date = new Date('2023-05-14');
-            jest.useFakeTimers().setSystemTime(date);
+            jest.useFakeTimers({ advanceTimers: true }).setSystemTime(date);
 
             try {
                 const platformMembershipTypeConfig = PlatformMembershipTypeConfig.create({
@@ -1199,7 +1203,7 @@ describe('E2E.Register', () => {
                 expect(trialUntil!.getDate()).toBe(24);
             }
             finally {
-                jest.useFakeTimers().resetAllMocks();
+                jest.useRealTimers().resetAllMocks();
             }
         });
     });
