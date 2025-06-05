@@ -2,6 +2,7 @@ import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-en
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
+import PdfExportView from '@stamhoofd/frontend-excel-export/src/PdfExportView.vue';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, PermissionLevel, Platform, PlatformMember, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -20,6 +21,7 @@ import DeleteView from '../../views/DeleteView.vue';
 import { PlatformFamilyManager, usePlatformFamilyManager } from '../PlatformFamilyManager';
 import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue';
 import { RegistrationsActionBuilder } from './RegistrationsActionBuilder';
+import { getPdfDocuments } from './getPdfDocuments';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 
 export function useDirectMemberActions(options?: { groups?: Group[]; organizations?: Organization[] }) {
@@ -610,9 +612,35 @@ export class MemberActionBuilder {
             fetchLimitSettings: { limit: 200, createErrorMessage: (count, limit) => {
                 return $t('Je kan maximaal {limit} leden exporteren naar pdf. Er zijn {count} leden geselecteerd.', { count: Formatter.float(count), limit: Formatter.float(limit) });
             } },
-            handler: async (_members: PlatformMember[]) => {
-                throw new Error('Nog niet geïmplementeerd.');
+            handler: async (members: PlatformMember[]) => {
+                await this.exportToPdf(members);
             },
+        });
+    }
+
+    private async exportToPdf(members: PlatformMember[]) {
+        const documents = getPdfDocuments({ platform: this.platform, organization: this.organizations.length === 1 ? this.organizations[0] : null, groups: this.groups, auth: this.context.auth });
+
+        const group = this.groups.length === 1 ? this.groups[0] : undefined;
+
+        let documentTitle = 'Samenvatting';
+
+        if (group) {
+            documentTitle += ' ' + group.settings.name;
+        }
+
+        await this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(PdfExportView, {
+                        documents,
+                        configurationId: 'members',
+                        items: members,
+                        documentTitle,
+                    }),
+                }),
+            ],
+            modalDisplayStyle: 'popup',
         });
     }
 

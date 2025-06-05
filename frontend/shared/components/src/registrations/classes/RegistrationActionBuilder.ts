@@ -1,5 +1,6 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
+import PdfExportView from '@stamhoofd/frontend-excel-export/src/PdfExportView.vue';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupType, mergeFilters, Organization, OrganizationRegistrationPeriod, PermissionLevel, Platform, PlatformMember, PlatformRegistration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -7,6 +8,7 @@ import { LoadComponent } from '../../containers/AsyncComponent';
 import { EmailView, RecipientChooseOneOption } from '../../email';
 import { useContext, useOrganization, usePlatform } from '../../hooks';
 import { checkoutDefaultItem, chooseOrganizationMembersForGroup, getActionsForCategory, PlatformFamilyManager, presentDeleteMembers, presentEditMember, presentEditResponsibilities, usePlatformFamilyManager } from '../../members';
+import { getPdfDocuments } from '../../members/classes/getPdfDocuments';
 import { RegistrationsActionBuilder } from '../../members/classes/RegistrationsActionBuilder';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, TableActionSelection } from '../../tables';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
@@ -357,8 +359,8 @@ export class RegistrationActionBuilder {
             fetchLimitSettings: { limit: 200, createErrorMessage: (count, limit) => {
                 return $t('Je kan maximaal {limit} leden exporteren naar pdf. Er zijn {count} leden geselecteerd.', { count: Formatter.float(count), limit: Formatter.float(limit) });
             } },
-            handler: async (_registrations: PlatformRegistration[]) => {
-                throw new Error('Nog niet geïmplementeerd.');
+            handler: async (registrations: PlatformRegistration[]) => {
+                await this.exportToPdf(registrations);
             },
         });
     }
@@ -606,6 +608,32 @@ export class RegistrationActionBuilder {
                         filter: selection.filter,
                         workbook: getSelectableWorkbook(this.platform, this.organizations.length === 1 ? this.organizations[0] : null, this.groups, this.context.auth),
                         configurationId: 'registrations',
+                    }),
+                }),
+            ],
+            modalDisplayStyle: 'popup',
+        });
+    }
+
+    private async exportToPdf(registrations: PlatformRegistration[]) {
+        const documents = getPdfDocuments({ platform: this.platform, organization: this.organizations.length === 1 ? this.organizations[0] : null, groups: this.groups, auth: this.context.auth });
+
+        const group = this.groups.length === 1 ? this.groups[0] : undefined;
+
+        let documentTitle = 'Samenvatting';
+
+        if (group) {
+            documentTitle += ' ' + group.settings.name;
+        }
+
+        await this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(PdfExportView, {
+                        documents,
+                        configurationId: 'registrations',
+                        items: registrations,
+                        documentTitle,
                     }),
                 }),
             ],

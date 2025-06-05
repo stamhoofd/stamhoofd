@@ -223,6 +223,7 @@ export * from './src/filters/searchFilterFactories.js';
 export * from './src/filters/Sorters.js';
 export * from './src/filters/SortList.js';
 export * from './src/filters/StamhoofdFilter.js';
+export * from './src/filters/PdfDocumentsFilter.js';
 
 // Balance
 export * from './src/BalanceItem.js';

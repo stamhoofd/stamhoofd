@@ -15,8 +15,10 @@ import { Address } from '../addresses/Address.js';
 import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import { MemberPlatformMembershipHelper } from '../helpers/MemberPlatformMembershipHelper.js';
 import { EmergencyContact } from './EmergencyContact.js';
+import { Member } from './Member.js';
 import { MemberDetails, MemberProperty } from './MemberDetails.js';
 import { MembersBlob, MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob.js';
+import { type ContinuousMembershipStatus } from './MembershipStatus.js';
 import { NationalRegisterNumberOptOut } from './NationalRegisterNumberOptOut.js';
 import { ObjectWithRecords, PatchAnswers } from './ObjectWithRecords.js';
 import { OrganizationRecordsConfiguration } from './OrganizationRecordsConfiguration.js';
@@ -28,7 +30,6 @@ import { RegisterItem } from './checkout/RegisterItem.js';
 import { RecordAnswer } from './records/RecordAnswer.js';
 import { RecordCategory } from './records/RecordCategory.js';
 import { RecordSettings } from './records/RecordSettings.js';
-import { type ContinuousMembershipStatus } from './MembershipStatus.js';
 
 export class PlatformFamily {
     members: PlatformMember[] = [];
@@ -1150,5 +1151,12 @@ export class PlatformMember implements ObjectWithRecords {
     getResponsibilities(filter?: { organization?: Organization | null | undefined }) {
         return this.patchedMember.responsibilities
             .filter(r => r.isActive && (filter?.organization === undefined || (filter.organization ? r.organizationId === filter.organization.id : r.organizationId === null)));
+    }
+
+    static sorterByName(sortDirection = 'ASC') {
+        const memberSorter = Member.sorterByName(sortDirection);
+        return (a: PlatformMember, b: PlatformMember) => {
+            return memberSorter(a.member, b.member);
+        };
     }
 }
