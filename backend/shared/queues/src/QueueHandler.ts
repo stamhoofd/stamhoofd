@@ -150,6 +150,12 @@ export class QueueHandler {
         }
     }
 
+    static abortAll(error?: Error) {
+        for (const queueName of this.queues.keys()) {
+            this.abort(queueName, error);
+        }
+    }
+
     /** $
      * Waits {timeout} ms before executing the handler, if another call is made to the same queue, the timeout is reset
      * and the other users will receive an error.
@@ -231,6 +237,23 @@ export class QueueHandler {
     static getSize(queue: string) {
         const q = this.queues.get(queue);
         return q ? (q.runCount + q.items.length) : 0;
+    }
+
+    static async awaitAll(): Promise<void> {
+        for (const queue of this.queues.keys()) {
+            if (this.getSize(queue) > 0) {
+                let didResolve = false;
+                if (STAMHOOFD.environment !== 'production') {
+                    setTimeout(() => {
+                        if (!didResolve) {
+                            console.warn('[QUEUE] Still waiting for queue', queue, 'to finish. This might indicate a deadlock or a long-running task.');
+                        }
+                    }, 2000);
+                }
+                await this.schedule(queue, async () => {});
+                didResolve = true;
+            }
+        }
     }
 
     private static async runNext(queue: string) {
