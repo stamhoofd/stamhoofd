@@ -243,8 +243,9 @@ export class QueueHandler {
         for (const queue of this.queues.keys()) {
             if (this.getSize(queue) > 0) {
                 let didResolve = false;
+                let timeout: NodeJS.Timeout | undefined;
                 if (STAMHOOFD.environment !== 'production') {
-                    setTimeout(() => {
+                    timeout = setTimeout(() => {
                         if (!didResolve) {
                             console.warn('[QUEUE] Still waiting for queue', queue, 'to finish. This might indicate a deadlock or a long-running task.');
                         }
@@ -252,6 +253,9 @@ export class QueueHandler {
                 }
                 await this.schedule(queue, async () => {});
                 didResolve = true;
+                if (timeout) {
+                    clearTimeout(timeout);
+                }
             }
         }
     }
