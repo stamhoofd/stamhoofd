@@ -14,6 +14,7 @@ import './toMatchMap';
 import { PayconiqMocker } from './helpers/PayconiqMocker';
 import { BalanceItemService } from '../src/services/BalanceItemService';
 import { QueueHandler } from '@stamhoofd/queues';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 // Set version of saved structures
 Column.setJSONVersion(Version);
@@ -81,6 +82,22 @@ afterAll(async () => {
     // Call twice to also wait on items that are scheduled withing scheduled tasks
     await BalanceItemService.flushAll();
     await BalanceItemService.flushAll();
+    QueueHandler.abortAll(
+        new SimpleError({
+            code: 'SHUTDOWN',
+            message: 'Shutting down',
+            statusCode: 503,
+        }),
+    );
+    await QueueHandler.awaitAll();
+    QueueHandler.abortAll(
+        new SimpleError({
+            code: 'SHUTDOWN',
+            message: 'Shutting down',
+            statusCode: 503,
+        }),
+    );
+    await QueueHandler.awaitAll();
 
     // Wait for email queue etc
     while (Email.currentQueue.length > 0) {
