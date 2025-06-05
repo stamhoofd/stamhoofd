@@ -1,9 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
+import {
+    DeleteMessageCommand,
+    ReceiveMessageCommand,
+    SQSClient,
+} from '@aws-sdk/client-sqs';
 import { registerCron } from '@stamhoofd/crons';
 import { Email, EmailAddress } from '@stamhoofd/email';
 import { AuditLog, Organization } from '@stamhoofd/models';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
-import AWS from 'aws-sdk';
 import { ForwardHandler } from '../helpers/ForwardHandler';
 
 registerCron('checkComplaints', checkComplaints);
@@ -192,10 +196,25 @@ async function handleForward(message: any) {
     }
 }
 
+let sharedClient: SQSClient | null = null;
+function getClient() {
+    if (!sharedClient) {
+        sharedClient = new SQSClient({});
+    }
+    return sharedClient;
+}
+
 async function readFromQueue(queueUrl: string) {
     console.log('[AWS Queue] Checking ' + queueUrl);
-    const sqs = new AWS.SQS();
-    const messages = await sqs.receiveMessage({ QueueUrl: queueUrl, MaxNumberOfMessages: 10 }).promise();
+
+    const client = getClient();
+
+    const cmd = new ReceiveMessageCommand({
+        MaxNumberOfMessages: 10,
+        QueueUrl: queueUrl,
+    });
+
+    const messages = await client.send(cmd);
     let didProcess = 0;
     if (messages.Messages) {
         for (const message of messages.Messages) {
@@ -204,10 +223,12 @@ async function readFromQueue(queueUrl: string) {
 
             if (message.ReceiptHandle) {
                 if (STAMHOOFD.environment !== 'development') {
-                    await sqs.deleteMessage({
+                    const deleteCmd = new DeleteMessageCommand({
                         QueueUrl: queueUrl,
                         ReceiptHandle: message.ReceiptHandle,
-                    }).promise();
+                    });
+
+                    await client.send(deleteCmd);
                     console.log('[AWS Queue] Deleted from queue');
                 }
             }

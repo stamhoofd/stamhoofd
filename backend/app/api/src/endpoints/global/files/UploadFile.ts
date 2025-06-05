@@ -1,15 +1,16 @@
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules import
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { File } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import AWS from 'aws-sdk';
 import formidable from 'formidable';
 import { promises as fs } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 
+import { AutoEncoder, BooleanDecoder, Decoder, field } from '@simonbackx/simple-encoding';
 import { Context } from '../../../helpers/Context';
 import { limiter } from './UploadImage';
-import { AutoEncoder, BooleanDecoder, Decoder, field } from '@simonbackx/simple-encoding';
+import { Image } from '@stamhoofd/models';
 
 type Params = Record<string, never>;
 class Query extends AutoEncoder {
@@ -115,12 +116,6 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
 
         const fileContent = await fs.readFile(file.filepath);
 
-        const s3 = new AWS.S3({
-            endpoint: STAMHOOFD.SPACES_ENDPOINT,
-            accessKeyId: STAMHOOFD.SPACES_KEY,
-            secretAccessKey: STAMHOOFD.SPACES_SECRET,
-        });
-
         let prefix = (STAMHOOFD.SPACES_PREFIX ?? '');
         if (prefix.length > 0) {
             prefix += '/';
@@ -175,13 +170,6 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
 
         const filenameWithoutExt = file.originalFilename?.split('.').slice(0, -1).join('.') ?? fileId;
         const key = prefix + fileId + '/' + (Formatter.slug(filenameWithoutExt) + (uploadExt ? ('.' + uploadExt) : ''));
-        const params = {
-            Bucket: STAMHOOFD.SPACES_BUCKET,
-            Key: key,
-            Body: fileContent, // TODO
-            ContentType: file.mimetype ?? 'application/pdf',
-            ACL: request.query.isPrivate ? 'private' : 'public-read',
-        };
 
         const fileStruct = new File({
             id: fileId,
@@ -204,7 +192,14 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
             }
         }
 
-        await s3.putObject(params).promise();
+        const cmd = new PutObjectCommand({
+            Bucket: STAMHOOFD.SPACES_BUCKET,
+            Key: key,
+            Body: fileContent,
+            ContentType: file.mimetype ?? 'application/pdf',
+            ACL: request.query.isPrivate ? 'private' : 'public-read',
+        });
+        await Image.getS3Client().send(cmd);
 
         return new Response(fileStruct);
     }

@@ -32,6 +32,11 @@
         "sinon": "^18.0.0"
     },
     "dependencies": {
+        "@aws-sdk/client-s3": "3.823.0",
+        "@aws-sdk/client-ses": "3.823.0",
+        "@aws-sdk/client-sesv2": "3.823.0",
+        "@aws-sdk/client-sqs": "3.823.0",
+        "@aws-sdk/s3-request-presigner": "3.823.0",
         "@bwip-js/node": "^4.5.1",
         "@mollie/api-client": "3.7.0",
         "@simonbackx/simple-database": "1.32.0",
@@ -47,7 +52,6 @@
         "@stamhoofd/structures": "2.83.5",
         "@stamhoofd/utility": "2.83.5",
         "archiver": "^7.0.1",
-        "aws-sdk": "^2.885.0",
         "axios": "1.6.8",
         "cookie": "^0.5.0",
         "formidable": "3.5.1",
