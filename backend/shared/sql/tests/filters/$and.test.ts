@@ -10,6 +10,100 @@ describe('$and', () => {
         // todo
     });
 
+    it('If one child is always false, the whole $and is always false', async () => {
+        const filters = {
+            ...baseSQLFilterCompilers,
+            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
+        };
+
+        await test({
+            filter: {
+                name: {
+                    $and: {
+                        $eq: 'John Doe',
+                        $lt: null, // This will always be false
+                    },
+                },
+            },
+            filters,
+            query: {
+                query: '',
+                params: [],
+            },
+        });
+    });
+
+    it('An empty $and is always true', async () => {
+        const filters = {
+            ...baseSQLFilterCompilers,
+            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
+        };
+
+        await test({
+            filter: {
+                $and: {},
+            },
+            filters,
+            query: {
+                query: 'true',
+                params: [],
+            },
+        });
+    });
+
+    it('If all children are always true, the whole $and is always true', async () => {
+        const filters = {
+            ...baseSQLFilterCompilers,
+            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
+        };
+
+        await test({
+            filter: {
+                name: {
+                    $and: [
+                        {
+                            $gte: null, // This will always be true
+                        },
+                        {
+                            $gte: null, // This will always be true
+                        },
+                    ],
+                },
+            },
+            filters,
+            query: {
+                query: 'true',
+                params: [],
+            },
+        });
+    });
+
+    it('Children that are always true are removed from the $and', async () => {
+        const filters = {
+            ...baseSQLFilterCompilers,
+            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
+        };
+
+        await test({
+            filter: {
+                name: {
+                    $and: [
+                        { $eq: 'John Doe' },
+                        { $gte: null },
+                        { $gte: null },
+                        { $and: [] },
+                        { $neq: 'test' },
+                    ],
+                },
+            },
+            filters,
+            query: {
+                query: '`default`.`name` = ? AND `default`.`name` != ?',
+                params: ['john doe', 'test'],
+            },
+        });
+    });
+
     it('Can be used with direct object child', async () => {
         const filters = {
             ...baseSQLFilterCompilers,

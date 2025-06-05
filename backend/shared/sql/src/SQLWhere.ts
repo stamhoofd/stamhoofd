@@ -494,6 +494,10 @@ export class SQLWhereAnd extends SQLWhere {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
+        if (this.isAlways === false) {
+            throw new Error('SQLWhereAnd: $and is always false and should be removed from the query');
+        }
+
         return joinSQLQuery(
             this.filteredChildren.map((c) => {
                 if (c.isSingle || this.filteredChildren.length === 1) {
@@ -519,6 +523,7 @@ export class SQLWhereAnd extends SQLWhere {
     }
 
     get isAlways(): boolean | null {
+        let allTrue = true;
         for (const c of this.children) {
             const v = c.isAlways;
             if (v === false) {
@@ -526,11 +531,11 @@ export class SQLWhereAnd extends SQLWhere {
                 return false;
             }
             if (v === null) {
-                return null;
+                allTrue = false;
             }
         }
 
-        return true;
+        return allTrue ? true : null;
     }
 
     inverted(): SQLWhereOr {
@@ -548,6 +553,11 @@ export class SQLWhereOr extends SQLWhere {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
+        if (this.filteredChildren.length === 0) {
+            // Always false: throw an error (the parent should filter out this query)
+            throw new Error('SQLWhereOr: empty $or is always false and should be removed from the query');
+        }
+
         return joinSQLQuery(
             this.filteredChildren.map((c) => {
                 if (c.isSingle || this.filteredChildren.length === 1) {
@@ -573,6 +583,7 @@ export class SQLWhereOr extends SQLWhere {
     }
 
     get isAlways(): boolean | null {
+        let isAllFalse = true;
         for (const c of this.children) {
             const v = c.isAlways;
             if (v === true) {
@@ -580,11 +591,11 @@ export class SQLWhereOr extends SQLWhere {
                 return true;
             }
             if (v === null) {
-                return null;
+                isAllFalse = false;
             }
         }
 
-        return false;
+        return isAllFalse ? false : null;
     }
 
     inverted(): SQLWhereOr {
