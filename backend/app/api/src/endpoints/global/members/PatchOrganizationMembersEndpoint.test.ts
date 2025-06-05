@@ -2033,7 +2033,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             await member3.refresh();
 
             // Check all contacts equal
-            const expectedParent = contact2.patch({ createdAt: contact2.createdAt }); // the oldest one is used
+            const expectedParent = contact2.patch({ createdAt: contact1.createdAt }); // the oldest one is used
 
             expect(member1.details.emergencyContacts).toEqual([expectedParent]);
             expect(member2.details.emergencyContacts).toEqual([expectedParent]);
