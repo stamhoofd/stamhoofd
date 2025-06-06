@@ -1,4 +1,4 @@
-import { baseSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/SQLModernFilter';
+import { baseModernSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/SQLModernFilter';
 import { SQL } from '../../src/SQL';
 import { test } from '../utils';
 
@@ -12,7 +12,7 @@ describe('$not', () => {
 
     it('is not null via $neq', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
         };
 
@@ -32,7 +32,7 @@ describe('$not', () => {
 
     it('is not null via $not', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
         };
 

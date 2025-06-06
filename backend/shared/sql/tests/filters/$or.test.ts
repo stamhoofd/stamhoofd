@@ -1,4 +1,4 @@
-import { baseSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/SQLModernFilter';
+import { baseModernSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/SQLModernFilter';
 import { SQL } from '../../src/SQL';
 import { test } from '../utils';
 
@@ -12,7 +12,7 @@ describe('$or', () => {
 
     it('If one child is always true, the whole $or is always true', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
         };
 
@@ -35,7 +35,7 @@ describe('$or', () => {
 
     it('An empty $or is always false', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
         };
 
@@ -53,7 +53,7 @@ describe('$or', () => {
 
     it('If all children are always false, the whole $or is always false', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
         };
 
@@ -80,7 +80,7 @@ describe('$or', () => {
 
     it('Children that are always false are removed from the $or', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
         };
 
@@ -105,7 +105,7 @@ describe('$or', () => {
 
     it('$or object children are $and together', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
             age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
         };
@@ -140,7 +140,7 @@ describe('$or', () => {
 
     it('empty $or branches are removed', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
         };
 
@@ -168,7 +168,7 @@ describe('$or', () => {
 
     it('deep $or branches are cleaned up', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
         };
 

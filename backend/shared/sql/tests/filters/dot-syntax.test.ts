@@ -1,18 +1,18 @@
-import { baseSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/SQLModernFilter';
+import { baseModernSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/SQLModernFilter';
 import { SQL } from '../../src/SQL';
 import { test, testError } from '../utils';
 
 describe('Dot syntax', () => {
     const filters = {
-        ...baseSQLFilterCompilers,
+        ...baseModernSQLFilterCompilers,
         name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
         age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
         settings: {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: true }),
             age: createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.age'), type: SQLValueType.JSONNumber, nullable: true }),
             dog: {
-                ...baseSQLFilterCompilers,
+                ...baseModernSQLFilterCompilers,
                 name: createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.dog.name'), type: SQLValueType.JSONString, nullable: true }),
                 age: createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.dog.age'), type: SQLValueType.JSONNumber, nullable: true }),
             },

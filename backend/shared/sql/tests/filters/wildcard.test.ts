@@ -1,18 +1,18 @@
-import { baseSQLFilterCompilers, createColumnFilter, createWildcardColumnFilter, SQLFilterDefinitions, SQLValueType } from '../../src/filters/SQLModernFilter';
+import { baseModernSQLFilterCompilers, createColumnFilter, createWildcardColumnFilter, SQLFilterDefinitions, SQLValueType } from '../../src/filters/SQLModernFilter';
 import { SQL } from '../../src/SQL';
 import { test } from '../utils';
 
 describe('Wildcards', () => {
     const filters: SQLFilterDefinitions = {
-        ...baseSQLFilterCompilers,
+        ...baseModernSQLFilterCompilers,
         name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
         age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
         settings: {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             records: createWildcardColumnFilter(
                 (key: string) => ({ expression: SQL.jsonValue(SQL.jsonValue(SQL.column('settings'), '$.records'), '$.' + key, true), type: SQLValueType.JSONObject, nullable: true }),
                 (key: string) => ({
-                    ...baseSQLFilterCompilers,
+                    ...baseModernSQLFilterCompilers,
                     name: createColumnFilter({ expression: SQL.jsonValue(SQL.jsonValue(SQL.jsonValue(SQL.column('settings'), '$.records'), '$.' + key, true), '$.name'), type: SQLValueType.JSONString, nullable: true }),
                 }),
             ),

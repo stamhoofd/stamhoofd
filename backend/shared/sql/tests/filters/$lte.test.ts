@@ -1,4 +1,4 @@
-import { baseSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/SQLModernFilter';
+import { baseModernSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/SQLModernFilter';
 import { SQL } from '../../src/SQL';
 import { TableDefinition, test, testMatch } from '../utils';
 
@@ -12,7 +12,7 @@ describe('$lte', () => {
 
     it('can filter on $lte', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
         };
 
@@ -32,7 +32,7 @@ describe('$lte', () => {
 
     it('can invert $lte inside', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
         };
 
@@ -54,7 +54,7 @@ describe('$lte', () => {
 
     it('can invert $lte outside', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
         };
 
@@ -90,7 +90,7 @@ describe('$lte', () => {
             },
         };
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             'name': createColumnFilter(
                 { expression: SQL.column('name'), type: SQLValueType.String, nullable: true },
             ),

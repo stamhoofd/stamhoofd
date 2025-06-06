@@ -66,7 +66,7 @@ export type SQLCurrentColumn = {
 
 export function createColumnFilter(column: SQLCurrentColumn, childDefinitions?: SQLFilterDefinitions): SQLFilterCompiler {
     return (filter: StamhoofdFilter) => {
-        const compiler = childDefinitions ? filterDefinitionsToCompiler(childDefinitions) : filterDefinitionsToCompiler(baseSQLFilterCompilers);
+        const compiler = childDefinitions ? filterDefinitionsToCompiler(childDefinitions) : filterDefinitionsToCompiler(baseModernSQLFilterCompilers);
         const runner = $andSQLFilterCompiler(filter, compiler);
 
         return (_: SQLCurrentColumn) => {
@@ -80,7 +80,7 @@ export function createColumnFilter(column: SQLCurrentColumn, childDefinitions?: 
 
 export function createWildcardColumnFilter(getColumn: (key: string) => SQLCurrentColumn, childDefinitions?: (key: string) => SQLFilterDefinitions): SQLFilterCompiler {
     const wildcardCompiler = (filter: StamhoofdFilter, _, key: string) => {
-        const compiler = childDefinitions ? filterDefinitionsToCompiler(childDefinitions(key)) : filterDefinitionsToCompiler(baseSQLFilterCompilers);
+        const compiler = childDefinitions ? filterDefinitionsToCompiler(childDefinitions(key)) : filterDefinitionsToCompiler(baseModernSQLFilterCompilers);
         const runner = $andSQLFilterCompiler(filter, compiler);
 
         return (_: SQLCurrentColumn) => {
@@ -98,10 +98,10 @@ export function createWildcardColumnFilter(getColumn: (key: string) => SQLCurren
 
 export function createWildcardFilter(compiler: (key: string) => SQLFilterCompiler, childDefinitions: (key: string) => SQLFilterDefinitions): SQLFilterDefinitions {
     return {
-        ...baseSQLFilterCompilers,
+        ...baseModernSQLFilterCompilers,
         '*': (filter, parentCompiler, key) => {
             const childCompiler = filterDefinitionsToCompiler({
-                ...baseSQLFilterCompilers,
+                ...baseModernSQLFilterCompilers,
                 ...childDefinitions(key),
             });
 
@@ -145,7 +145,7 @@ export function createJoinedRelationFilter(join: SQLJoin, definitions: SQLFilter
         }
 
         return async (_: SQLCurrentColumn) => {
-            const w = await compileToSQLFilter(filter, definitions);
+            const w = await compileToModernSQLFilter(filter, definitions);
             return new SQLWhereJoin(join, w, {
                 doesRelationAlwaysExist: options.doesRelationAlwaysExist,
             });
@@ -194,7 +194,7 @@ function invertFilterCompiler(compiler: SQLRequiredFilterCompiler): SQLRequiredF
     };
 }
 
-export const baseSQLFilterCompilers: SQLFilterDefinitions = {
+export const baseModernSQLFilterCompilers: SQLFilterDefinitions = {
     $and: $andSQLFilterCompiler,
     $or: $orSQLFilterCompiler,
     $not: $notSQLFilterCompiler,
@@ -233,7 +233,7 @@ export function compileToSQLRunner(filter: StamhoofdFilter, definitions: SQLFilt
     return runner;
 };
 
-export async function compileToSQLFilter(filter: StamhoofdFilter, filters: SQLFilterDefinitions): Promise<SQLWhere> {
+export async function compileToModernSQLFilter(filter: StamhoofdFilter, filters: SQLFilterDefinitions): Promise<SQLWhere> {
     const runner = compileToSQLRunner(filter, filters);
     return await runner({
         expression: SQLRootExpression,

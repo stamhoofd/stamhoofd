@@ -1,4 +1,4 @@
-import { baseSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/SQLModernFilter';
+import { baseModernSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/SQLModernFilter';
 import { SQL } from '../../src/SQL';
 import { TableDefinition, test, testError, testMatch, testMultiple, testMultipleErrors } from '../utils';
 
@@ -9,7 +9,7 @@ describe('$eq', () => {
     describe('Common checks', () => {
         it('Cannot be used at the root level', async () => {
             const filters = {
-                ...baseSQLFilterCompilers,
+                ...baseModernSQLFilterCompilers,
             };
 
             await testMultipleErrors({
@@ -34,7 +34,7 @@ describe('$eq', () => {
 
     it('removes caps when filtering strings', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
         };
 
@@ -55,7 +55,7 @@ describe('$eq', () => {
 
     it('converts true to 1', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             enabled: createColumnFilter({ expression: SQL.column('enabled'), type: SQLValueType.Boolean, nullable: false }),
         };
 
@@ -80,7 +80,7 @@ describe('$eq', () => {
 
     it('converts false to 0', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             enabled: createColumnFilter({ expression: SQL.column('enabled'), type: SQLValueType.Boolean, nullable: false }),
         };
 
@@ -105,7 +105,7 @@ describe('$eq', () => {
 
     it('allows  1 as true', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             enabled: createColumnFilter({ expression: SQL.column('enabled'), type: SQLValueType.Boolean, nullable: false }),
         };
 
@@ -130,7 +130,7 @@ describe('$eq', () => {
 
     it('allows 0 as false', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             enabled: createColumnFilter({ expression: SQL.column('enabled'), type: SQLValueType.Boolean, nullable: false }),
         };
 
@@ -155,7 +155,7 @@ describe('$eq', () => {
 
     it('does not allow numbers as boolean value', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             enabled: createColumnFilter({ expression: SQL.column('enabled'), type: SQLValueType.Boolean, nullable: false }),
         };
 
@@ -192,7 +192,7 @@ describe('$eq', () => {
 
     it('cannot compare a number with a string', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
         };
 
@@ -209,7 +209,7 @@ describe('$eq', () => {
 
     it('cannot compare a string with a number', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
         };
 
@@ -226,7 +226,7 @@ describe('$eq', () => {
 
     it('cannot compare a number with a date', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             createdAt: createColumnFilter({ expression: SQL.column('createdAt'), type: SQLValueType.Datetime, nullable: false }),
         };
 
@@ -243,7 +243,7 @@ describe('$eq', () => {
 
     it('cannot compare a date with a string', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
         };
 
@@ -260,7 +260,7 @@ describe('$eq', () => {
 
     it('cannot compare a date magic variable with a string', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
         };
 
@@ -279,7 +279,7 @@ describe('$eq', () => {
 
     it('$eq filter is interpreted automatically for numbers', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
         };
 
@@ -297,7 +297,7 @@ describe('$eq', () => {
 
     it('$eq filter is interpreted automatically for strings', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
         };
 
@@ -315,7 +315,7 @@ describe('$eq', () => {
 
     it('$eq filter is interpreted automatically for null', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
         };
 
@@ -333,7 +333,7 @@ describe('$eq', () => {
 
     it('$eq filter is interpreted automatically for magic variables', async () => {
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             createdAt: createColumnFilter({ expression: SQL.column('createdAt'), type: SQLValueType.Datetime, nullable: false }),
         };
 
@@ -361,7 +361,7 @@ describe('$eq', () => {
             },
         };
         const filters = {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             'settings.name': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: false }),
             // wip:
             'settings.parents[*].name': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.parents[*].name'), type: SQLValueType.JSONArray, nullable: false }),
