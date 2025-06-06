@@ -5,10 +5,10 @@ import { mmToPoints } from './pdf-builder/pdf-helpers';
 import { PdfItem, PdfItemDrawOptions } from './pdf-builder/pdf-item';
 import { H3 } from './pdf-builder/pdf-items/H3';
 import { LabelWithValue } from './pdf-builder/pdf-items/LabelWithValue';
-import { PdfContainer } from './pdf-builder/pdf-items/PdfContainer';
 import { PdfHorizontalGrid } from './pdf-builder/pdf-items/PdfHorizontalGrid';
 import { PdfText } from './pdf-builder/pdf-items/PdfText';
 import { Spacing } from './pdf-builder/pdf-items/Spacing';
+import { VerticalStack } from './pdf-builder/pdf-items/VerticalStack';
 import { SelectablePdfColumn } from './SelectablePdfColumn';
 
 export interface MembersHorizontalGridArgs<T> {
@@ -106,7 +106,7 @@ function membersHorizontalGridFactory<T>({ objects, columns, selectableColumns, 
                 return result;
             });
 
-            const container = new PdfContainer([
+            const container = new VerticalStack([
                 title,
                 spacing4mm,
                 ...values,

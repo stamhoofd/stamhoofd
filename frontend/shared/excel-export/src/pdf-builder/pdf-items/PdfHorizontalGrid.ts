@@ -1,7 +1,7 @@
 import { PdfFont } from '../pdf-font';
 import { getLastPageNumber, getPageHeighthWithoutMargins, getPageWidthWithoutMargins } from '../pdf-helpers';
 import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../pdf-item';
-import { PdfContainer } from './PdfContainer';
+import { VerticalStack } from './VerticalStack';
 
 export interface PdfHorizontalGridOptions {
     columns: number;
@@ -77,8 +77,6 @@ export class PdfHorizontalGrid implements PdfItem {
             goToNextRow(doc.page.margins.top);
         };
 
-        let count = 1;
-
         /**
          * Draw the items.
          * Calls itself recursively if a container is split.
@@ -99,10 +97,10 @@ export class PdfHorizontalGrid implements PdfItem {
                 const heightExceedsPageHeight = itemHeight > getPageHeighthWithoutMargins(doc);
                 const availableHeight = pageBottomLimit - rowTop;
 
+                // if the item height exceeds the page height, split the item
                 if (heightExceedsPageHeight) {
                     didCurrentRowOverflow = true;
-                    if (item instanceof PdfContainer) {
-                        console.log(`column: ${currentColumn}, page height: ${doc.page.height}, rowTop: ${rowTop}, margin bottom: ${doc.page.margins.bottom}`);
+                    if (item instanceof VerticalStack) {
                         const splitItems = item.splitVertical(doc, getHeightOptions, availableHeight);
                         drawItems(splitItems);
                         continue;
@@ -110,16 +108,12 @@ export class PdfHorizontalGrid implements PdfItem {
                     console.warn('Item height exceeds page height');
                 }
 
-                console.log(`item ${count}`);
-                count++;
-
                 if (itemHeight > heightOfHighestItemOnRow) {
                     heightOfHighestItemOnRow = itemHeight;
                 }
 
                 // go to the next page if the item will not fit
                 if (itemHeight > availableHeight) {
-                    console.log(`next page: not enough space for item (itemHeight: ${itemHeight}, availableHeight: ${availableHeight})`);
                     goToNextPage();
                 }
 
@@ -129,17 +123,16 @@ export class PdfHorizontalGrid implements PdfItem {
                 if (currentColumn === 0) {
                     if (didCurrentRowOverflow) {
                         // do not go to next page immediatetely because ony needed if there is another item
-                        console.log('next page: current row did overFlow');
                         shouldGoToNextPage = true;
                     }
                     else {
-                        console.log('next row');
                         const nextRowTop = rowTop + this.rowGap + heightOfHighestItemOnRow;
 
+                        // if next row is below the bottom of the page, go to next page
                         if (nextRowTop > pageBottomLimit) {
-                            console.log('next page: page bottom limit exceeded');
                             shouldGoToNextPage = true;
                         }
+                        // else go to next row
                         else {
                             goToNextRow(nextRowTop);
                         }
@@ -156,7 +149,6 @@ export class PdfHorizontalGrid implements PdfItem {
 
     getHeight(_doc: PDFKit.PDFDocument): number {
         throw new Error('Method not implemented.');
-        // return this.items.reduce((acc, item) => acc + item.getHeight(doc), 0);
     }
 
     getWidth(doc: PDFKit.PDFDocument): number {

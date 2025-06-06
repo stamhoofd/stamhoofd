@@ -2,10 +2,10 @@ import { PdfFont } from '../pdf-font';
 import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../pdf-item';
 
 /**
- * Represents a container of items and
- * makes it possible to set a max width.
+ * A group of pdf items that are drawn in a vertical stack.
+ * This makes it possible to set a max width.
  */
-export class PdfContainer implements PdfItem {
+export class VerticalStack implements PdfItem {
     /**
      *
      * @param items the items in the container
@@ -14,19 +14,24 @@ export class PdfContainer implements PdfItem {
     constructor(private readonly items: PdfItem[], private readonly maxWidth?: number) {
     }
 
-    splitVertical(doc: PDFKit.PDFDocument, options: PdfItemGetHeightOptions, maxHeight: number): PdfContainer[] {
-        console.error('split, max height:', maxHeight);
+    splitVertical(doc: PDFKit.PDFDocument, options: PdfItemGetHeightOptions, maxHeight: number): VerticalStack[] {
         let currentHeight = 0;
-        const containers: PdfContainer[] = [];
-        let itemGroup: PdfItem[] = [];
+        const containers: VerticalStack[] = [];
+        const itemGroup: PdfItem[] = [];
 
-        for (const item of this.items) {
+        for (let i = 0; i < this.items.length; i++) {
+            const item = this.items[i];
             const itemHeight = item.getHeight(doc, options);
 
             if (currentHeight + itemHeight > maxHeight) {
-                containers.push(new PdfContainer(itemGroup, this.maxWidth));
-                itemGroup = [item];
-                currentHeight = itemHeight;
+                containers.push(new VerticalStack(itemGroup, this.maxWidth));
+                // itemGroup = [item];
+                // currentHeight = itemHeight;
+                // if(i < this.items.length - 1) {
+
+                // }
+                containers.push(new VerticalStack(this.items.slice(i), this.maxWidth));
+                break;
             }
             else {
                 itemGroup.push(item);
@@ -34,9 +39,27 @@ export class PdfContainer implements PdfItem {
             }
         }
 
-        if (itemGroup.length > 0) {
-            containers.push(new PdfContainer(itemGroup, this.maxWidth));
+        if (containers.length === 0) {
+            containers.push(new VerticalStack(itemGroup, this.maxWidth));
         }
+
+        // for (const item of this.items) {
+        //     const itemHeight = item.getHeight(doc, options);
+
+        //     if (currentHeight + itemHeight > maxHeight) {
+        //         containers.push(new VerticalStack(itemGroup, this.maxWidth));
+        //         itemGroup = [item];
+        //         currentHeight = itemHeight;
+        //     }
+        //     else {
+        //         itemGroup.push(item);
+        //         currentHeight += itemHeight;
+        //     }
+        // }
+
+        // if (itemGroup.length > 0) {
+        //     containers.push(new VerticalStack(itemGroup, this.maxWidth));
+        // }
 
         return containers;
     }
