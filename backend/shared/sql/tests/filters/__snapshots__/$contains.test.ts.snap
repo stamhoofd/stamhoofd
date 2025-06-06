@@ -72,6 +72,15 @@ exports[`$contains MySQL behaviour JSON arrays Can search for backslash in the a
 }
 `;
 
+exports[`$contains MySQL behaviour JSON arrays Can search in the array: SQL Query for filter: {"settings":{"names":{"$contains":"pple"}}} 1`] = `
+{
+  "params": [
+    "%pple%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.names")),"one",?) IS NOT NULL",
+}
+`;
+
 exports[`$contains MySQL behaviour JSON arrays Can search in the array: SQL Query for filter: {"settings.names":{"$contains":"BAnana"}} 1`] = `
 {
   "params": [

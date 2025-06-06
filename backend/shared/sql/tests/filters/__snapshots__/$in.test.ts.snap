@@ -157,7 +157,7 @@ exports[`$in JSON Can check if null is in a JSON array: SQL Query for filter: {"
     "null",
     "["apple"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE ((JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL) OR (JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?))",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL OR (JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?))",
 }
 `;
 
@@ -279,7 +279,7 @@ exports[`$in JSON If a json array exists and does not contain null, it is not in
     "null",
     "["apple"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE ((JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL) OR (JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?))",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL OR (JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?))",
 }
 `;
 
@@ -289,7 +289,7 @@ exports[`$in JSON Including null also matches when a JSON path does not exist: S
     "null",
     "["apple","banana","cherry"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE ((JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL) OR (JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?))",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL OR (JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?))",
 }
 `;
 
@@ -308,7 +308,7 @@ exports[`$in JSON Including null will also check on key existence for json array
     "null",
     "["apple"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE ((JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL) OR (JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?))",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL OR (JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?))",
 }
 `;
 

@@ -544,9 +544,13 @@ describe('$contains', () => {
                     nullable: true,
                 },
             };
+
             const filters = {
                 ...baseSQLFilterCompilers,
-                'settings.names': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.names'), type: SQLValueType.JSONArray, nullable: false }),
+                settings: {
+                    ...baseSQLFilterCompilers,
+                    names: createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.names'), type: SQLValueType.JSONArray, nullable: false }),
+                },
             };
 
             it('Can search in the array', async () => {
@@ -564,6 +568,13 @@ describe('$contains', () => {
                         {
                             'settings.names': {
                                 $contains: 'pple',
+                            },
+                        },
+                        {
+                            settings: {
+                                names: {
+                                    $contains: 'pple',
+                                },
                             },
                         },
                         {

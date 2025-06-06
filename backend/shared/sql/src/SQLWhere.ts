@@ -557,7 +557,7 @@ export class SQLWhereAnd extends SQLWhere {
 
     get filteredChildren(): SQLWhere[] {
         // Children that always return true should not be included in the query (because the result only depends on the other children)
-        return this.children.filter(c => c.isAlways !== true);
+        return this.children.filter(c => c.isAlways !== true).flatMap(c => c instanceof SQLWhereAnd ? c.filteredChildren : [c]);
     }
 
     getJoins(): SQLJoin[] {
@@ -621,7 +621,7 @@ export class SQLWhereOr extends SQLWhere {
 
     get filteredChildren(): SQLWhere[] {
         // Children that always return false should not be included in the query (because the result only depends on the other children)
-        return this.children.filter(c => c.isAlways !== false);
+        return this.children.filter(c => c.isAlways !== false).flatMap(c => c instanceof SQLWhereOr ? c.filteredChildren : [c]);
     }
 
     get isSingle(): boolean {

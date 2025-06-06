@@ -1,18 +1,22 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { compileFilter, FilterCompiler, FilterCompilerSelector, FilterDefinitions, StamhoofdFilter } from '@stamhoofd/structures';
+import { compileFilter, FilterCompiler, FilterCompilerSelector, FilterDefinitions, filterDefinitionsToCompiler, RequiredFilterCompiler, StamhoofdFilter } from '@stamhoofd/structures';
 import { SQLExpression, SQLExpressionOptions, SQLQuery } from '../SQLExpression';
-import { SQLJsonUnquote, SQLJsonValue } from '../SQLJsonExpressions';
+import { SQLJoin } from '../SQLJoin';
+import { SQLJsonValue } from '../SQLJsonExpressions';
+import { SQLSelect } from '../SQLSelect';
 import { SQLWhere, SQLWhereAnd, SQLWhereExists, SQLWhereJoin, SQLWhereNot, SQLWhereOr } from '../SQLWhere';
 import { $equalsSQLFilterCompiler, $greaterThanSQLFilterCompiler, $inSQLFilterCompiler, $lessThanSQLFilterCompiler } from './compilers';
-import { isJSONColumn } from './helpers/isJSONColumn';
 import { $containsSQLFilterCompiler } from './compilers/contains';
-import { SQLSelect } from '../SQLSelect';
-import { SQLJoin } from '../SQLJoin';
 
 export type SQLSyncFilterRunner = (column: SQLCurrentColumn) => SQLWhere;
 export type SQLFilterRunner = (column: SQLCurrentColumn) => Promise<SQLWhere> | SQLWhere;
 export type SQLFilterCompiler = FilterCompiler<SQLFilterRunner>;
+export type SQLRequiredFilterCompiler = RequiredFilterCompiler<SQLFilterRunner>;
 export type SQLFilterDefinitions = FilterDefinitions<SQLFilterRunner>;
+
+/**
+ * @deprecated
+ */
 export type SQLFilterCompilerSelector = FilterCompilerSelector<SQLFilterRunner>;
 
 export enum SQLValueType {
@@ -65,9 +69,10 @@ export type SQLCurrentColumn = {
     checkPermission?: () => Promise<void>;
 };
 
-export function createColumnFilter(column: SQLCurrentColumn): SQLFilterCompiler {
-    return (filter: StamhoofdFilter, filters: SQLFilterCompilerSelector) => {
-        const runner = $andSQLFilterCompiler(filter, filters);
+export function createColumnFilter(column: SQLCurrentColumn, childDefinitions?: SQLFilterDefinitions): SQLFilterCompiler {
+    return (filter: StamhoofdFilter) => {
+        const compiler = childDefinitions ? filterDefinitionsToCompiler(childDefinitions) : filterDefinitionsToCompiler(baseSQLFilterCompilers);
+        const runner = $andSQLFilterCompiler(filter, compiler);
 
         return (_: SQLCurrentColumn) => {
             return runner({
@@ -78,23 +83,35 @@ export function createColumnFilter(column: SQLCurrentColumn): SQLFilterCompiler 
     };
 }
 
-/**
- * Creates a new namespace with different filters.
- *
- * E.g. if you always join with a specific table, and you can filter on those columns.
- */
-export function createFilterNamespace(definitions: SQLFilterDefinitions): SQLFilterCompiler {
-    const selector = filterDefinitionsToSelector(definitions);
-    return (filter: StamhoofdFilter, _: SQLFilterCompilerSelector) => {
-        const runner = $andSQLFilterCompiler(filter, selector);
-        return async (_: SQLCurrentColumn) => {
-            // We reset the column (no columns cross the namespace boundary)
-            return await runner({
-                expression: SQLRootExpression,
-                type: SQLValueType.Table,
+export function createWildcardColumnFilter(getColumn: (key: string) => SQLCurrentColumn, childDefinitions?: (key: string) => SQLFilterDefinitions): SQLFilterCompiler {
+    const wildcardCompiler = (filter: StamhoofdFilter, _, key: string) => {
+        const compiler = childDefinitions ? filterDefinitionsToCompiler(childDefinitions(key)) : filterDefinitionsToCompiler(baseSQLFilterCompilers);
+        const runner = $andSQLFilterCompiler(filter, compiler);
+
+        return (_: SQLCurrentColumn) => {
+            return runner({
                 nullable: false,
+                ...getColumn(key),
             });
         };
+    };
+
+    return (filter: StamhoofdFilter) => {
+        return $andSQLFilterCompiler(filter, wildcardCompiler);
+    };
+}
+
+export function createWildcardFilter(compiler: (key: string) => SQLFilterCompiler, childDefinitions: (key: string) => SQLFilterDefinitions): SQLFilterDefinitions {
+    return {
+        ...baseSQLFilterCompilers,
+        '*': (filter, parentCompiler, key) => {
+            const childCompiler = filterDefinitionsToCompiler({
+                ...baseSQLFilterCompilers,
+                ...childDefinitions(key),
+            });
+
+            return compiler(key)(filter, childCompiler, '$and');
+        },
     };
 }
 
@@ -141,12 +158,6 @@ export function createJoinedRelationFilter(join: SQLJoin, definitions: SQLFilter
     };
 }
 
-function filterDefinitionsToSelector(definitions: SQLFilterDefinitions): SQLFilterCompilerSelector {
-    return (key: string) => {
-        return definitions[key];
-    };
-}
-
 export function $andSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilterCompilerSelector): SQLFilterRunner {
     const runners = compileSQLFilter(filter, filters);
 
@@ -179,9 +190,9 @@ export function $notSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilte
     };
 }
 
-function invertFilterCompiler(compiler: SQLFilterCompiler): SQLFilterCompiler {
-    return (filter: StamhoofdFilter, compilers: SQLFilterCompilerSelector) => {
-        const runner = compiler(filter, compilers);
+function invertFilterCompiler(compiler: SQLRequiredFilterCompiler): SQLRequiredFilterCompiler {
+    return (filter: StamhoofdFilter, parentCompiler: SQLFilterCompilerSelector) => {
+        const runner = compiler(filter, parentCompiler);
         return async (column) => {
             return new SQLWhereNot(await runner(column));
         };
@@ -216,13 +227,14 @@ export const SQLRootExpression: SQLExpression = {
     },
 };
 
-export function compileToSQLRunner(filter: StamhoofdFilter, filters: SQLFilterDefinitions): SQLFilterRunner {
+export function compileToSQLRunner(filter: StamhoofdFilter, definitions: SQLFilterDefinitions): SQLFilterRunner {
     if (filter === null) {
         return () => {
             return new SQLWhereAnd([]); // No filter, return empty where
         };
     }
-    const runner = $andSQLFilterCompiler(filter, filterDefinitionsToSelector(filters));
+    const compiler = filterDefinitionsToCompiler(definitions); // this compiler searches in the definition for the right compiler for the given key
+    const runner = $andSQLFilterCompiler(filter, compiler);
     return runner;
 };
 

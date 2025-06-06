@@ -31,7 +31,7 @@ describe('Special filter cases', () => {
             ],
             filters,
             query: {
-                query: '(`default`.`name` = ? OR `default`.`age` = ?) AND (`default`.`age` = ? AND `default`.`name` = ?)',
+                query: '(`default`.`name` = ? OR `default`.`age` = ?) AND `default`.`age` = ? AND `default`.`name` = ?',
                 params: [
                     'john doe',
                     11,
@@ -52,7 +52,25 @@ describe('Special filter cases', () => {
                 name: 'John Doe',
             },
             filters,
-            error: 'Unsupported filter name',
+            error: 'Unknown filter name',
+        });
+    });
+
+    it('Cannot stack column filters', async () => {
+        const filters = {
+            ...baseSQLFilterCompilers,
+            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
+            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
+        };
+
+        await testError({
+            filter: {
+                name: {
+                    age: 12,
+                },
+            },
+            filters,
+            error: 'Unknown filter age',
         });
     });
 
