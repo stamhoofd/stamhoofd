@@ -10,3 +10,7 @@ export function getLastPageNumber(doc: PDFKit.PDFDocument) {
 export function getPageWidthWithoutMargins(doc: PDFKit.PDFDocument): number {
     return doc.page.width - doc.page.margins.left - doc.page.margins.right;
 }
+
+export function getPageHeighthWithoutMargins(doc: PDFKit.PDFDocument): number {
+    return doc.page.height - doc.page.margins.top - doc.page.margins.bottom;
+}

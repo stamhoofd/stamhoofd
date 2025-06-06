@@ -1,3 +1,4 @@
+import { colorDark } from './pdf-builder/colors';
 import { metropolisBold, metropolisMedium } from './pdf-builder/fonts';
 import { PdfFont } from './pdf-builder/pdf-font';
 import { mmToPoints } from './pdf-builder/pdf-helpers';
@@ -6,6 +7,7 @@ import { H3 } from './pdf-builder/pdf-items/H3';
 import { LabelWithValue } from './pdf-builder/pdf-items/LabelWithValue';
 import { PdfContainer } from './pdf-builder/pdf-items/PdfContainer';
 import { PdfHorizontalGrid } from './pdf-builder/pdf-items/PdfHorizontalGrid';
+import { PdfText } from './pdf-builder/pdf-items/PdfText';
 import { Spacing } from './pdf-builder/pdf-items/Spacing';
 import { SelectablePdfColumn } from './SelectablePdfColumn';
 
@@ -57,9 +59,33 @@ function membersHorizontalGridFactory<T>({ objects, columns, selectableColumns, 
 
         const containers = objects.map((o) => {
             const title = new H3(getName(o));
-            const spacing = new Spacing(mmToPoints(2));
+            const spacing4mm = new Spacing(mmToPoints(4));
+            const spacing2mm = new Spacing(mmToPoints(2));
+            const spacing1mm = new Spacing(mmToPoints(1));
+
+            let currentCategory: string | undefined = undefined;
 
             const values = enabledColumns.flatMap((c) => {
+                const result: PdfItem[] = [];
+
+                if (c.category) {
+                    // if new category
+                    if (c.category !== currentCategory) {
+                        result.push(spacing2mm);
+                        const subTitle = new PdfText(c.category, { font: metropolisBold, fontSize: 9, fillColor: colorDark, align: 'left' });
+                        result.push(subTitle);
+                        result.push(spacing2mm);
+                        currentCategory = c.category;
+                    }
+                }
+                else {
+                    // if end of category
+                    if (currentCategory !== undefined) {
+                        result.push(spacing2mm);
+                    }
+                    currentCategory = undefined;
+                }
+
                 const labelWithValue = new LabelWithValue({
                     label: {
                         text: c.name,
@@ -69,14 +95,20 @@ function membersHorizontalGridFactory<T>({ objects, columns, selectableColumns, 
                         text: c.getStringValue(o),
                     },
                     gapBetween: mmToPoints(2),
+                    // lineGap of 1mm (for small spacing between lines of the value and label text)
+                    lineGap: mmToPoints(1),
                 });
+                result.push(labelWithValue);
 
-                return [labelWithValue, spacing];
+                // extra spacing of 1mm (already 1mm of lineGap, => total 2mm)
+                result.push(spacing1mm);
+
+                return result;
             });
 
             const container = new PdfContainer([
                 title,
-                spacing,
+                spacing4mm,
                 ...values,
             ]);
 

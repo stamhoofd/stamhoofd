@@ -45,8 +45,7 @@ export class PdfRenderer {
                 await this.registerFonts(doc, pdfItem.getFonts());
             }
 
-            // todo: where should be checked if next page is needed?
-            pdfItem.draw(doc);
+            pdfItem.draw(doc, {});
         }
 
         doc.end();

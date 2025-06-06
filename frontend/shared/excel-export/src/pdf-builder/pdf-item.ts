@@ -8,9 +8,14 @@ export type PdfItemDrawOptions = {
     };
 };
 
+export type PdfItemGetHeightOptions = {
+    maxWidth?: number;
+};
+
 export interface PdfItem {
-    draw(doc: PDFKit.PDFDocument, options?: PdfItemDrawOptions): void;
-    getHeight(doc: PDFKit.PDFDocument): number;
+    draw(doc: PDFKit.PDFDocument, options: PdfItemDrawOptions): void;
+    getHeight(doc: PDFKit.PDFDocument, options: PdfItemGetHeightOptions): number;
     getWidth(doc: PDFKit.PDFDocument): number | undefined;
     getFonts?(): PdfFont[];
+    onLeavePage?: () => void;
 }

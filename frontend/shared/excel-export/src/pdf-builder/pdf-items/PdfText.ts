@@ -1,5 +1,5 @@
 import { PdfFont } from '../pdf-font';
-import { PdfItem, PdfItemDrawOptions } from '../pdf-item';
+import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../pdf-item';
 
 export type PdfTextOptions = {
     font?: PdfFont;
@@ -34,7 +34,6 @@ export class PdfText implements PdfItem {
 
     private configure(doc: PDFKit.PDFDocument) {
         if (this.options.font !== undefined) {
-            console.log('this.options.font.name', this.options.font.name);
             doc.font(this.options.font.name);
         }
 
@@ -47,9 +46,20 @@ export class PdfText implements PdfItem {
         }
     }
 
-    getHeight(doc: PDFKit.PDFDocument): number {
+    private getTextOptions(maxWidth: number | undefined) {
+        const textOptions = { ...this.options };
+        if (maxWidth !== undefined && (textOptions.width === undefined || maxWidth < textOptions.width)) {
+            textOptions.width = maxWidth;
+        }
+        return textOptions;
+    }
+
+    getHeight(doc: PDFKit.PDFDocument, options: PdfItemGetHeightOptions = {}): number {
         this.configure(doc);
-        return doc.heightOfString(this.text, this.options) + this.marginBottom;
+
+        const textOptions = this.getTextOptions(options.maxWidth);
+
+        return doc.heightOfString(this.text, textOptions) + this.marginBottom;
     }
 
     getWidth(doc: PDFKit.PDFDocument) {
@@ -65,7 +75,7 @@ export class PdfText implements PdfItem {
         return [];
     }
 
-    draw(doc: PDFKit.PDFDocument, options?: PdfItemDrawOptions) {
+    draw(doc: PDFKit.PDFDocument, options: PdfItemDrawOptions) {
         this.configure(doc);
 
         let x = options?.position?.x === undefined ? doc.x : options.position.x;
@@ -76,10 +86,7 @@ export class PdfText implements PdfItem {
             y = this.options.position.y;
         }
 
-        const textOptions = { ...this.options };
-        if (options?.maxWidth) {
-            textOptions.width = options.maxWidth;
-        }
+        const textOptions = this.getTextOptions(options.maxWidth);
 
         doc.text(this.text, x, y, textOptions);
         if (this.marginBottom > 0) {
