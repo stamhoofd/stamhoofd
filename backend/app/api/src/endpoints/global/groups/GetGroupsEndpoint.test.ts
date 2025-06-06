@@ -153,7 +153,7 @@ describe('Endpoint.GetGroupsEndpoint', () => {
         ]);
     });
 
-    it.skip('Can return a group by bundle discount id', async () => {
+    it('Can return a group by bundle discount id', async () => {
         const { organizationRegistrationPeriod, organization, token, group, event } = await initTest();
         const bundleDiscount = await initBundleDiscount({ organizationRegistrationPeriod, discount: {} });
 
@@ -177,7 +177,9 @@ describe('Endpoint.GetGroupsEndpoint', () => {
             token,
             filter: {
                 bundleDiscounts: {
-                    $in: [bundleDiscount.id],
+                    [bundleDiscount.id]: {
+                        $neq: null,
+                    },
                 },
             },
         });
@@ -187,6 +189,45 @@ describe('Endpoint.GetGroupsEndpoint', () => {
             }),
             expect.objectContaining({
                 id: group.id,
+            }),
+        ]);
+    });
+
+    it('Safely escapes ids', async () => {
+        const { organizationRegistrationPeriod, organization, token, group, event } = await initTest();
+        const bundleDiscount = await initBundleDiscount({ organizationRegistrationPeriod, discount: {} });
+        const id = `This Id. contains "[10] and .**' inside of it... \\"\\'"'`;
+        const differentId = `This Id. contains "[10] and .**' inside of it... "\\'"'`;
+
+        // Add a price to event with a bundle discount
+        const eventGroupPriceAdded = GroupPrice.create({
+            bundleDiscounts: new Map([
+                [id, BundleDiscountGroupPriceSettings.create({ name: bundleDiscount.name })],
+            ]),
+        });
+        event.settings.prices.push(eventGroupPriceAdded);
+        await event.save();
+
+        // Set the main group price to the group
+        group.settings.prices[0].bundleDiscounts.set(differentId, BundleDiscountGroupPriceSettings.create({
+            name: bundleDiscount.name,
+        }));
+        await group.save();
+
+        const result = await get({
+            organization,
+            token,
+            filter: {
+                bundleDiscounts: {
+                    [id]: {
+                        $neq: null,
+                    },
+                },
+            },
+        });
+        expect(result).toIncludeAllMembers([
+            expect.objectContaining({
+                id: event.id,
             }),
         ]);
     });

@@ -88,6 +88,15 @@ export class SQLJsonExtract implements SQLExpression {
             ')',
         ]);
     }
+
+    /**
+     * NOTE: this has to be combined with asScalar = true! Never let user input in a query without passing it as a parameter.
+     *
+     * E.g. SQL.jsonValue(SQL.column('settings'), `$.value.prices[*].bundleDiscounts.${SQLJsonExtract.escapePathComponent(key)}`, true) (note that last true!)
+     */
+    static escapePathComponent(str: string) {
+        return '"' + str.replace(/(["\\])/g, '\\$1') + '"';
+    }
 }
 
 /**

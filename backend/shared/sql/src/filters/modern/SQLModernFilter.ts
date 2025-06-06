@@ -96,20 +96,6 @@ export function createWildcardColumnFilter(getColumn: (key: string) => SQLCurren
     };
 }
 
-export function createWildcardFilter(compiler: (key: string) => SQLFilterCompiler, childDefinitions: (key: string) => SQLModernFilterDefinitions): SQLModernFilterDefinitions {
-    return {
-        ...baseModernSQLFilterCompilers,
-        '*': (filter, parentCompiler, key) => {
-            const childCompiler = filterDefinitionsToCompiler({
-                ...baseModernSQLFilterCompilers,
-                ...childDefinitions(key),
-            });
-
-            return compiler(key)(filter, childCompiler, '$and');
-        },
-    };
-}
-
 /**
  * Filter with a subquery that should return at least one result.
  */
