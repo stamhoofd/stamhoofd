@@ -1,5 +1,5 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { compileFilter, FilterCompiler, FilterCompilerSelector, FilterDefinitions, filterDefinitionsToCompiler, RequiredFilterCompiler, StamhoofdFilter } from '@stamhoofd/structures';
+import { compileFilter, FilterCompiler, FilterDefinitions, filterDefinitionsToCompiler, RequiredFilterCompiler, StamhoofdFilter } from '@stamhoofd/structures';
 import { SQLExpression, SQLExpressionOptions, SQLQuery } from '../SQLExpression';
 import { SQLJoin } from '../SQLJoin';
 import { SQLJsonValue } from '../SQLJsonExpressions';
@@ -13,11 +13,6 @@ export type SQLFilterRunner = (column: SQLCurrentColumn) => Promise<SQLWhere> | 
 export type SQLFilterCompiler = FilterCompiler<SQLFilterRunner>;
 export type SQLRequiredFilterCompiler = RequiredFilterCompiler<SQLFilterRunner>;
 export type SQLFilterDefinitions = FilterDefinitions<SQLFilterRunner>;
-
-/**
- * @deprecated
- */
-export type SQLFilterCompilerSelector = FilterCompilerSelector<SQLFilterRunner>;
 
 export enum SQLValueType {
     /** At the root of a select */
@@ -119,7 +114,7 @@ export function createWildcardFilter(compiler: (key: string) => SQLFilterCompile
  * Filter with a subquery that should return at least one result.
  */
 export function createExistsFilter(baseSelect: InstanceType<typeof SQLSelect> & SQLExpression, definitions: SQLFilterDefinitions): SQLFilterCompiler {
-    return (filter: StamhoofdFilter, _: SQLFilterCompilerSelector) => {
+    return (filter: StamhoofdFilter, _: SQLFilterCompiler) => {
         if (filter !== null && typeof filter === 'object' && '$elemMatch' in filter) {
             filter = filter['$elemMatch'] as StamhoofdFilter;
         }
@@ -144,7 +139,7 @@ export function createExistsFilter(baseSelect: InstanceType<typeof SQLSelect> & 
  * By default doesRelationAlwaysExist is set to true, this means we expect the relation to always exist. This helps optimize the query (dropping the join if the where clause in the join is always true)
  */
 export function createJoinedRelationFilter(join: SQLJoin, definitions: SQLFilterDefinitions, options: { doesRelationAlwaysExist: boolean } = { doesRelationAlwaysExist: true }): SQLFilterCompiler {
-    return (filter: StamhoofdFilter, _: SQLFilterCompilerSelector) => {
+    return (filter: StamhoofdFilter, _: SQLFilterCompiler) => {
         if (filter !== null && typeof filter === 'object' && '$elemMatch' in filter) {
             filter = filter['$elemMatch'] as StamhoofdFilter;
         }
@@ -158,7 +153,7 @@ export function createJoinedRelationFilter(join: SQLJoin, definitions: SQLFilter
     };
 }
 
-export function $andSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilterCompilerSelector): SQLFilterRunner {
+export function $andSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilterCompiler): SQLFilterRunner {
     const runners = compileSQLFilter(filter, filters);
 
     return async (column: SQLCurrentColumn) => {
@@ -170,7 +165,7 @@ export function $andSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilte
     };
 }
 
-export function $orSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilterCompilerSelector): SQLFilterRunner {
+export function $orSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilterCompiler): SQLFilterRunner {
     const runners = compileSQLFilter(filter, filters);
 
     return async (column: SQLCurrentColumn) => {
@@ -182,7 +177,7 @@ export function $orSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilter
     };
 }
 
-export function $notSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilterCompilerSelector): SQLFilterRunner {
+export function $notSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilterCompiler): SQLFilterRunner {
     const andRunner = $andSQLFilterCompiler(filter, filters);
 
     return async (column: SQLCurrentColumn) => {
@@ -191,7 +186,7 @@ export function $notSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilte
 }
 
 function invertFilterCompiler(compiler: SQLRequiredFilterCompiler): SQLRequiredFilterCompiler {
-    return (filter: StamhoofdFilter, parentCompiler: SQLFilterCompilerSelector) => {
+    return (filter: StamhoofdFilter, parentCompiler: SQLFilterCompiler) => {
         const runner = compiler(filter, parentCompiler);
         return async (column) => {
             return new SQLWhereNot(await runner(column));

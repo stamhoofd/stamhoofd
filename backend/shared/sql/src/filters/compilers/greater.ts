@@ -1,10 +1,10 @@
 import { assertFilterCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
 import { scalarToSQLExpression } from '../../SQLExpressions';
 import { SQLWhereEqual, SQLWhereSign } from '../../SQLWhere';
-import { normalizeColumn, SQLCurrentColumn, SQLFilterCompilerSelector, SQLSyncFilterRunner } from '../SQLModernFilter';
+import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner } from '../SQLModernFilter';
 import { normalizeCompareValue } from '../helpers/normalizeCompareValue';
 
-export function $greaterThanSQLFilterCompiler(filter: StamhoofdFilter, _: SQLFilterCompilerSelector): SQLSyncFilterRunner {
+export function $greaterThanSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilterRunner {
     return (originalColumn: SQLCurrentColumn) => {
         const column = normalizeColumn(originalColumn);
         const value = normalizeCompareValue(assertFilterCompareValue(filter), column.type);

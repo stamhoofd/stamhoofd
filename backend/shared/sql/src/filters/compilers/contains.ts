@@ -1,12 +1,12 @@
+import { SimpleError } from '@simonbackx/simple-errors';
 import { assertFilterCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
 import { scalarToSQLExpression, SQLLower, SQLNull } from '../../SQLExpressions';
-import { SQLWhereEqual, SQLWhereLike, SQLWhereSign } from '../../SQLWhere';
-import { normalizeColumn, SQLCurrentColumn, SQLFilterCompilerSelector, SQLSyncFilterRunner, SQLValueType } from '../SQLModernFilter';
-import { normalizeCompareValue } from '../helpers/normalizeCompareValue';
-import { SimpleError } from '@simonbackx/simple-errors';
 import { SQLJsonSearch } from '../../SQLJsonExpressions';
+import { SQLWhereEqual, SQLWhereLike, SQLWhereSign } from '../../SQLWhere';
+import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner, SQLValueType } from '../SQLModernFilter';
+import { normalizeCompareValue } from '../helpers/normalizeCompareValue';
 
-export function $containsSQLFilterCompiler(filter: StamhoofdFilter, _: SQLFilterCompilerSelector): SQLSyncFilterRunner {
+export function $containsSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilterRunner {
     return (originalColumn: SQLCurrentColumn) => {
         const column = normalizeColumn(originalColumn);
         const value = normalizeCompareValue(assertFilterCompareValue(filter), column.type);

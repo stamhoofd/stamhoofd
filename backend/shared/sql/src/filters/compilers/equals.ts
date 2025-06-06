@@ -2,11 +2,11 @@ import { assertFilterCompareValue, StamhoofdFilter } from '@stamhoofd/structures
 import { scalarToSQLExpression, SQLLower, SQLNull } from '../../SQLExpressions';
 import { SQLJsonContains, SQLJsonSearch, SQLJsonValue } from '../../SQLJsonExpressions';
 import { SQLWhere, SQLWhereEqual, SQLWhereLike, SQLWhereOr, SQLWhereSign } from '../../SQLWhere';
-import { normalizeColumn, SQLCurrentColumn, SQLFilterCompilerSelector, SQLSyncFilterRunner, SQLValueType } from '../SQLModernFilter';
+import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner, SQLValueType } from '../SQLModernFilter';
 import { isJSONColumn } from '../helpers/isJSONColumn';
 import { normalizeCompareValue } from '../helpers/normalizeCompareValue';
 
-export function $equalsSQLFilterCompiler(filter: StamhoofdFilter, _: SQLFilterCompilerSelector): SQLSyncFilterRunner {
+export function $equalsSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilterRunner {
     return (originalColumn: SQLCurrentColumn) => {
         const column = normalizeColumn(originalColumn);
         const value = normalizeCompareValue(assertFilterCompareValue(filter), column.type);
