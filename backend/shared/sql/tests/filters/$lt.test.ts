@@ -1,4 +1,4 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/SQLModernFilter';
+import { baseModernSQLFilterCompilers, createColumnFilter, SQLModernValueType } from '../../src/filters/SQLModernFilter';
 import { SQL } from '../../src/SQL';
 import { TableDefinition, test, testMatch } from '../utils';
 
@@ -13,7 +13,7 @@ describe('$lt', () => {
     it('can filter on $lt', async () => {
         const filters = {
             ...baseModernSQLFilterCompilers,
-            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
+            age: createColumnFilter({ expression: SQL.column('age'), type: SQLModernValueType.Number, nullable: false }),
         };
 
         await test({
@@ -33,7 +33,7 @@ describe('$lt', () => {
     it('can invert $lt inside', async () => {
         const filters = {
             ...baseModernSQLFilterCompilers,
-            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
+            age: createColumnFilter({ expression: SQL.column('age'), type: SQLModernValueType.Number, nullable: false }),
         };
 
         await test({
@@ -55,7 +55,7 @@ describe('$lt', () => {
     it('can invert $lt outside', async () => {
         const filters = {
             ...baseModernSQLFilterCompilers,
-            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
+            age: createColumnFilter({ expression: SQL.column('age'), type: SQLModernValueType.Number, nullable: false }),
         };
 
         await test({
@@ -92,17 +92,17 @@ describe('$lt', () => {
         const filters = {
             ...baseModernSQLFilterCompilers,
             'name': createColumnFilter(
-                { expression: SQL.column('name'), type: SQLValueType.String, nullable: true },
+                { expression: SQL.column('name'), type: SQLModernValueType.String, nullable: true },
             ),
             'age': createColumnFilter(
-                { expression: SQL.column('age'), type: SQLValueType.Number, nullable: true },
+                { expression: SQL.column('age'), type: SQLModernValueType.Number, nullable: true },
             ),
-            'settings.name': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: true },
+            'settings.name': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.name'), type: SQLModernValueType.JSONString, nullable: true },
             ),
-            'settings': createColumnFilter({ expression: SQL.column('settings'), type: SQLValueType.JSONObject, nullable: true }),
-            'settings.enabled': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.enabled'), type: SQLValueType.JSONBoolean, nullable: true },
+            'settings': createColumnFilter({ expression: SQL.column('settings'), type: SQLModernValueType.JSONObject, nullable: true }),
+            'settings.enabled': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.enabled'), type: SQLModernValueType.JSONBoolean, nullable: true },
             ),
-            'settings.age': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.age'), type: SQLValueType.JSONNumber, nullable: true },
+            'settings.age': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.age'), type: SQLModernValueType.JSONNumber, nullable: true },
             ),
         };
 

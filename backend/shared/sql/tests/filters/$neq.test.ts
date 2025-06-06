@@ -1,4 +1,4 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/SQLModernFilter';
+import { baseModernSQLFilterCompilers, createColumnFilter, SQLModernValueType } from '../../src/filters/SQLModernFilter';
 import { SQL } from '../../src/SQL';
 import { test } from '../utils';
 
@@ -13,7 +13,7 @@ describe('$neq', () => {
     it('removes caps when filtering strings', async () => {
         const filters = {
             ...baseModernSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
+            name: createColumnFilter({ expression: SQL.column('name'), type: SQLModernValueType.String, nullable: false }),
         };
 
         await test({

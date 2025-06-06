@@ -2,7 +2,7 @@ import { assertFilterCompareValue, StamhoofdFilter } from '@stamhoofd/structures
 import { scalarToSQLExpression, SQLLower, SQLNull } from '../../SQLExpressions';
 import { SQLJsonContains, SQLJsonSearch, SQLJsonValue } from '../../SQLJsonExpressions';
 import { SQLWhere, SQLWhereEqual, SQLWhereLike, SQLWhereOr, SQLWhereSign } from '../../SQLWhere';
-import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner, SQLValueType } from '../SQLModernFilter';
+import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner, SQLModernValueType } from '../SQLModernFilter';
 import { isJSONColumn } from '../helpers/isJSONColumn';
 import { normalizeCompareValue } from '../helpers/normalizeCompareValue';
 
@@ -16,7 +16,7 @@ export function $equalsSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilter
          *
          * This differs from $contains, which will check for 'LIKE' inside the JSON array.
          */
-        if (column.type === SQLValueType.JSONArray) {
+        if (column.type === SQLModernValueType.JSONArray) {
             let where: SQLWhere;
 
             if (typeof value === 'string') {

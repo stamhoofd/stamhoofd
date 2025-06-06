@@ -3,7 +3,7 @@ import { assertFilterCompareValue, StamhoofdFilter } from '@stamhoofd/structures
 import { scalarToSQLExpression, SQLArray } from '../../SQLExpressions';
 import { SQLJsonOverlaps } from '../../SQLJsonExpressions';
 import { SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '../../SQLWhere';
-import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner, SQLValueType } from '../SQLModernFilter';
+import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner, SQLModernValueType } from '../SQLModernFilter';
 import { normalizeCompareValue } from '../helpers/normalizeCompareValue';
 import { $equalsSQLFilterCompiler } from './equals';
 
@@ -42,7 +42,7 @@ export function $inSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilterRunn
             ]);
         }
 
-        if (column.type === SQLValueType.JSONArray) {
+        if (column.type === SQLModernValueType.JSONArray) {
             const jsonValues = JSON.stringify(valuesWithoutNulls);
             const valuesExpression = scalarToSQLExpression(jsonValues);
 

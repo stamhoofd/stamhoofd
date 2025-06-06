@@ -14,7 +14,7 @@ export type SQLFilterCompiler = FilterCompiler<SQLFilterRunner>;
 export type SQLRequiredFilterCompiler = RequiredFilterCompiler<SQLFilterRunner>;
 export type SQLFilterDefinitions = FilterDefinitions<SQLFilterRunner>;
 
-export enum SQLValueType {
+export enum SQLModernValueType {
     /** At the root of a select */
     Table = 'Table',
 
@@ -60,7 +60,7 @@ export type SQLCurrentColumn = {
     /**
      * Type of this column, use to normalize values received from filters
      */
-    type: SQLValueType;
+    type: SQLModernValueType;
     checkPermission?: () => Promise<void>;
 };
 
@@ -124,7 +124,7 @@ export function createExistsFilter(baseSelect: InstanceType<typeof SQLSelect> & 
         return async (_: SQLCurrentColumn) => {
             const w = await runner({
                 expression: SQLRootExpression,
-                type: SQLValueType.Table,
+                type: SQLModernValueType.Table,
                 nullable: false,
             });
             const q = baseSelect.clone().andWhere(w);
@@ -237,7 +237,7 @@ export async function compileToModernSQLFilter(filter: StamhoofdFilter, filters:
     const runner = compileToSQLRunner(filter, filters);
     return await runner({
         expression: SQLRootExpression,
-        type: SQLValueType.Table,
+        type: SQLModernValueType.Table,
         nullable: false,
     });
 };
@@ -246,24 +246,24 @@ export async function compileToModernSQLFilter(filter: StamhoofdFilter, filters:
  * Casts json strings, numbers and booleans to native MySQL types. This includes json null to mysql null.
  */
 export function normalizeColumn(column: SQLCurrentColumn): SQLCurrentColumn {
-    if (column.type === SQLValueType.JSONString) {
+    if (column.type === SQLModernValueType.JSONString) {
         return {
             expression: new SQLJsonValue(column.expression, 'CHAR'),
-            type: SQLValueType.String,
+            type: SQLModernValueType.String,
         };
     }
 
-    if (column.type === SQLValueType.JSONBoolean) {
+    if (column.type === SQLModernValueType.JSONBoolean) {
         return {
             expression: new SQLJsonValue(column.expression, 'UNSIGNED'),
-            type: SQLValueType.Boolean,
+            type: SQLModernValueType.Boolean,
         };
     }
 
-    if (column.type === SQLValueType.JSONNumber) {
+    if (column.type === SQLModernValueType.JSONNumber) {
         return {
             expression: new SQLJsonValue(column.expression, 'UNSIGNED'),
-            type: SQLValueType.Number,
+            type: SQLModernValueType.Number,
         };
     }
     return column;
