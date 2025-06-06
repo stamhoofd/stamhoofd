@@ -17,5 +17,4 @@ export interface PdfItem {
     getHeight(doc: PDFKit.PDFDocument, options: PdfItemGetHeightOptions): number;
     getWidth(doc: PDFKit.PDFDocument): number | undefined;
     getFonts?(): PdfFont[];
-    onLeavePage?: () => void;
 }
