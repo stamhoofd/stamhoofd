@@ -32,14 +32,14 @@ export class MembersPdfDocument {
                 x: pageMargin,
                 y: pageMargin,
             },
-            margin: {
+            spacing: {
                 bottom: mmToPoints(2),
             },
         });
         items.push(documentTitle);
 
         const documentDescription = new DefaultText($t('Bewaar dit document op een veilige plaats en vernietig het na gebruik.'), {
-            margin: {
+            spacing: {
                 bottom: mmToPoints(4),
             },
         });

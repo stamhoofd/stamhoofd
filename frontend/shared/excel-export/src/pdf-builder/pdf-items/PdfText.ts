@@ -13,7 +13,7 @@ export type PdfTextOptions = {
         x: number;
         y: number;
     };
-    margin?: {
+    spacing?: {
         /**
          * spacing below the text
          */
@@ -26,7 +26,7 @@ export type PdfTextOptions = {
  */
 export class PdfText implements PdfItem {
     private get marginBottom() {
-        return this.options.margin?.bottom ?? 0;
+        return this.options.spacing?.bottom ?? 0;
     }
 
     constructor(private readonly text: string, private readonly options: PdfTextOptions = {}) {
