@@ -8,60 +8,49 @@ import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../pdf-ite
 export class VerticalStack implements PdfItem {
     /**
      *
-     * @param items the items in the container
-     * @param maxWidth the max width of the container
+     * @param items the items in the vertical stack
+     * @param maxWidth the max width of the vertical stack
      */
     constructor(private readonly items: PdfItem[], private readonly maxWidth?: number) {
     }
 
-    splitVertical(doc: PDFKit.PDFDocument, options: PdfItemGetHeightOptions, maxHeight: number): VerticalStack[] {
+    /**
+     * Split the vertical stack in two separate vertical stacks.
+     * @param doc
+     * @param options
+     * @param maxHeight max height of the first stack
+     * @returns one or two stacks (one if the max height is not exceeded)
+     */
+    split(doc: PDFKit.PDFDocument, options: PdfItemGetHeightOptions, maxHeight: number): VerticalStack[] {
         let currentHeight = 0;
-        const containers: VerticalStack[] = [];
-        const itemGroup: PdfItem[] = [];
+        const stacks: VerticalStack[] = [];
+        const itemsInFirstStack: PdfItem[] = [];
 
         for (let i = 0; i < this.items.length; i++) {
             const item = this.items[i];
             const itemHeight = item.getHeight(doc, options);
 
+            // if the total height of the first stack will exceed the max height
             if (currentHeight + itemHeight > maxHeight) {
-                containers.push(new VerticalStack(itemGroup, this.maxWidth));
-                // itemGroup = [item];
-                // currentHeight = itemHeight;
-                // if(i < this.items.length - 1) {
+                // create the first stack
+                stacks.push(new VerticalStack(itemsInFirstStack, this.maxWidth));
 
-                // }
-                containers.push(new VerticalStack(this.items.slice(i), this.maxWidth));
+                // add the remaining items to the second stack
+                stacks.push(new VerticalStack(this.items.slice(i), this.maxWidth));
                 break;
             }
             else {
-                itemGroup.push(item);
+                itemsInFirstStack.push(item);
                 currentHeight += itemHeight;
             }
         }
 
-        if (containers.length === 0) {
-            containers.push(new VerticalStack(itemGroup, this.maxWidth));
+        // if the total height of all the items did not exceed the max height
+        if (stacks.length === 0) {
+            stacks.push(new VerticalStack(itemsInFirstStack, this.maxWidth));
         }
 
-        // for (const item of this.items) {
-        //     const itemHeight = item.getHeight(doc, options);
-
-        //     if (currentHeight + itemHeight > maxHeight) {
-        //         containers.push(new VerticalStack(itemGroup, this.maxWidth));
-        //         itemGroup = [item];
-        //         currentHeight = itemHeight;
-        //     }
-        //     else {
-        //         itemGroup.push(item);
-        //         currentHeight += itemHeight;
-        //     }
-        // }
-
-        // if (itemGroup.length > 0) {
-        //     containers.push(new VerticalStack(itemGroup, this.maxWidth));
-        // }
-
-        return containers;
+        return stacks;
     }
 
     draw(doc: PDFKit.PDFDocument, options?: PdfItemDrawOptions): void {

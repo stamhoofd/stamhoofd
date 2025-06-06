@@ -101,7 +101,7 @@ export class PdfHorizontalGrid implements PdfItem {
                 if (heightExceedsPageHeight) {
                     didCurrentRowOverflow = true;
                     if (item instanceof VerticalStack) {
-                        const splitItems = item.splitVertical(doc, getHeightOptions, availableHeight);
+                        const splitItems = item.split(doc, getHeightOptions, availableHeight);
                         drawItems(splitItems);
                         continue;
                     }
