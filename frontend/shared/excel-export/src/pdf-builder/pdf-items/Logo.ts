@@ -1,7 +1,16 @@
 import { PdfItem } from '../pdf-item';
 
+/**
+ * A fixed logo in the top right corner
+ */
 export class Logo implements PdfItem {
-    constructor(private readonly options: { src: PDFKit.Mixins.ImageSrc; width: number }) {
+    constructor(private readonly options: {
+        src: PDFKit.Mixins.ImageSrc;
+        /**
+         * The width of the logo
+         */
+        width: number;
+    }) {
     }
 
     draw(doc: PDFKit.PDFDocument): void {

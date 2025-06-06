@@ -1,6 +1,6 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import PdfExportView from '@stamhoofd/frontend-excel-export/src/PdfExportView.vue';
+import MembersPdfExportView from '@stamhoofd/frontend-excel-export/src/MembersPdfExportView.vue';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupType, mergeFilters, Organization, OrganizationRegistrationPeriod, PermissionLevel, Platform, PlatformMember, PlatformRegistration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -629,7 +629,7 @@ export class RegistrationActionBuilder {
         await this.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(PdfExportView, {
+                    root: new ComponentWithProperties(MembersPdfExportView, {
                         documents,
                         configurationId: 'registrations',
                         items: registrations,

@@ -37,12 +37,12 @@
     </SaveView>
 </template>
 
-<script lang="ts" setup generic="T">
+<script lang="ts" setup>
 import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, ScrollableSegmentedControl, useContext, useErrors } from '@stamhoofd/components';
 import { Storage } from '@stamhoofd/networking';
-import { PdfDocumentsFilter, Version } from '@stamhoofd/structures';
+import { PdfDocumentsFilter, PlatformMember, Version } from '@stamhoofd/structures';
 import { onMounted, ref } from 'vue';
 import ColumnSelector from './ColumnSelector.vue';
 import { MembersPdfDocument } from './MembersPdfDocument';
@@ -50,9 +50,9 @@ import { PdfDocuments } from './PdfDocuments';
 
 const props = defineProps<{
     documentTitle: string;
-    documents: PdfDocuments<T>;
+    documents: PdfDocuments<PlatformMember>;
     configurationId: string; // How to store the filters for easy reuse
-    items: T[];
+    items: PlatformMember[];
 }>();
 
 const exporting = ref(false);
@@ -117,13 +117,21 @@ async function startExport() {
 }
 
 async function doExport() {
-    const document = new MembersPdfDocument(props.items, props.documents, props.documentTitle);
+    // todo: refactor
+    // todo: maybe make generic?
+    const memberDetailsDocument = props.documents.documents[0];
+    if (!memberDetailsDocument) {
+        return;
+    }
+
+    const document = new MembersPdfDocument(props.items, memberDetailsDocument.items, props.documentTitle);
 
     try {
         await document.download();
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);
+        console.error(e);
     }
 }
 

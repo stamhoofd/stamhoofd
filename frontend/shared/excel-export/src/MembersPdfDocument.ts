@@ -1,18 +1,19 @@
 import logoUrl from '@stamhoofd/assets/images/logo/logo-horizontal.png';
-import { PdfDocuments } from '@stamhoofd/frontend-excel-export/src/PdfDocuments';
-import { ItemDetailsGrid } from './ItemDetailsGrid';
+import { PlatformMember } from '@stamhoofd/structures';
+import { MembersHorizontalGrid } from './MembersHorizontalGrid';
 import { mmToPoints } from './pdf-builder/pdf-helpers';
 import { PdfItem } from './pdf-builder/pdf-item';
 import { DefaultText } from './pdf-builder/pdf-items/DefaultText';
 import { H1 } from './pdf-builder/pdf-items/H1';
-import { Logo } from './pdf-builder/pdf-items/logo';
+import { Logo } from './pdf-builder/pdf-items/Logo';
 import { PdfRenderer } from './pdf-builder/pdf-renderer';
+import { SelectablePdfColumn } from './SelectablePdfColumn';
 
 const pageMargin = mmToPoints(10);
 
-export class MembersPdfDocument<T> {
+export class MembersPdfDocument {
     // todo: remove dependency on documents
-    constructor(private readonly items: T[], private readonly documents: PdfDocuments<T>, private readonly title: string) {
+    constructor(private readonly items: PlatformMember[], private readonly memberDetailsSelectableColumns: SelectablePdfColumn<PlatformMember>[], private readonly title: string) {
     }
 
     private async createDoc(): Promise<PDFKit.PDFDocument> {
@@ -37,23 +38,24 @@ export class MembersPdfDocument<T> {
         });
         items.push(documentTitle);
 
-        const documentDescription = new DefaultText('Bewaar dit document op een veilige plaats en vernietig het na gebruik.', {
+        const documentDescription = new DefaultText($t('Bewaar dit document op een veilige plaats en vernietig het na gebruik.'), {
             margin: {
-                bottom: mmToPoints(2),
+                bottom: mmToPoints(4),
             },
         });
         items.push(documentDescription);
 
-        for (const document of this.documents.documents) {
-            if (!document.enabled) {
-                continue;
-            }
-            const grid = new ItemDetailsGrid(document, this.items);
-            items.push(grid);
-        }
+        const grid = new MembersHorizontalGrid({
+            objects: this.items.sort(PlatformMember.sorterByName('ASC')),
+            columns: 2,
+            selectableColumns: this.memberDetailsSelectableColumns,
+            getName: (o: PlatformMember) => o.patchedMember.details.name,
+        });
+        items.push(grid);
 
         const renderer = new PdfRenderer();
-        return renderer.render(await this.createDoc(), items);
+        const doc = await this.createDoc();
+        return renderer.render(doc, items);
     }
 
     async download() {

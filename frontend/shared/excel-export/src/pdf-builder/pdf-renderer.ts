@@ -8,6 +8,8 @@ import { PdfItem } from './pdf-item';
 globalThis.Buffer = Buffer;
 
 export class PdfRenderer {
+    private readonly registeredFonts: Set<PdfFont> = new Set();
+
     private createBuffer(doc: PDFKit.PDFDocument) {
         return new Promise<Buffer>((resolve) => {
             const bufs: any[] = [];
@@ -23,8 +25,15 @@ export class PdfRenderer {
     }
 
     private async registerFonts(doc: PDFKit.PDFDocument, fonts: PdfFont[]) {
-        for (const { name, url } of fonts) {
-            doc.registerFont(name, await (await fetch(url)).arrayBuffer());
+        for (const font of fonts) {
+            if (this.registeredFonts.has(font)) {
+                continue;
+            }
+
+            const { name, url } = font;
+            const response = await fetch(url);
+            doc.registerFont(name, await response.arrayBuffer());
+            this.registeredFonts.add(font);
         }
     }
 

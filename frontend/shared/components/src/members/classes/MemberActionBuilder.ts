@@ -2,7 +2,7 @@ import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-en
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import PdfExportView from '@stamhoofd/frontend-excel-export/src/PdfExportView.vue';
+import MembersPdfExportView from '@stamhoofd/frontend-excel-export/src/MembersPdfExportView.vue';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, PermissionLevel, Platform, PlatformMember, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -623,7 +623,7 @@ export class MemberActionBuilder {
 
         const group = this.groups.length === 1 ? this.groups[0] : undefined;
 
-        let documentTitle = 'Samenvatting';
+        let documentTitle = $t('Samenvatting');
 
         if (group) {
             documentTitle += ' ' + group.settings.name;
@@ -632,7 +632,7 @@ export class MemberActionBuilder {
         await this.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(PdfExportView, {
+                    root: new ComponentWithProperties(MembersPdfExportView, {
                         documents,
                         configurationId: 'members',
                         items: members,
