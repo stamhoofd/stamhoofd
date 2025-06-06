@@ -505,7 +505,7 @@ const props = withDefaults(
         isNew: boolean;
         period: OrganizationRegistrationPeriod;
         groupId: string;
-        isMultiOrganization: boolean;
+        isMultiOrganization?: boolean;
         saveHandler: (period: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => Promise<void>;
         deleteHandler?: (() => Promise<void>) | null;
         showToasts?: boolean;

@@ -12,6 +12,11 @@ export const groupFilterCompilers: SQLModernFilterDefinitions = {
         type: SQLModernValueType.String,
         nullable: false,
     }),
+    periodId: createColumnFilter({
+        expression: SQL.column('periodId'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
     name: createColumnFilter({
         expression: SQL.jsonValue(SQL.column('settings'), '$.value.name'),
         type: SQLModernValueType.JSONString,

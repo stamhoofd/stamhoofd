@@ -90,28 +90,48 @@
         </STInputBox>
 
         <hr>
-        <h2>Standaard korting</h2>
-        <p>Je kan hiervan afwijken door dit aan te passen bij de instellingen van de leeftijdsgroep of activiteit. De grootst mogelijke korting wordt steeds berekend.</p>
+        <h2>{{ $t('Standaard korting') }}</h2>
+        <p>{{ $t('Je kan hiervan afwijken door dit aan te passen bij de instellingen van de leeftijdsgroep of activiteit. De grootst mogelijke korting wordt steeds berekend.') }}</p>
 
         <GroupPriceDiscountsInput v-model="discounts" />
 
         <hr>
-        <h2>Activiteiten en inschrijvingsgroepen</h2>
+        <h2>{{ $t('Activiteiten en inschrijvingsgroepen') }}</h2>
         <p>
-            {{ $t('Kies de activiteiten en inschrijvingsgroepen waarvoor deze bundelkorting geldt. Je kan dit later ook nog koppelen bij de instellingen van de leeftijdsgroep of activiteit.') }}
+            {{ $t('Hieronder vindt je een overzicht van alle activiteiten en inschrijvingsgroepen waarvoor deze bundelkorting is ingesteld. Je kan dit aanpassen bij de instellingen van de leeftijdsgroep of activiteit.') }}
         </p>
 
-        <p>todo</p>
+        <LoadingBoxTransition :error-box="errors.errorBox">
+            <div v-if="groups !== null && groups.length === 0" class="info-box">
+                {{ $t('Er zijn geen groepen die aan deze bundelkorting gekoppeld zijn. Je kan activiteiten en groepen koppelen via de instellingen van elke activiteit of groep.') }}
+            </div>
+            <STList v-if="groups !== null">
+                <STListItem v-for="group of groups" :key="group.id" class="container" :selectable="true" @click="editGroup(group)">
+                    <template #left>
+                        <GroupAvatar :group="group" />
+                    </template>
+
+                    <h3 class="style-title-list">
+                        {{ group.settings.name }}
+                    </h3>
+
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </STList>
+        </LoadingBoxTransition>
     </SaveView>
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, GroupPriceDiscountsInput, useErrors, usePatch, useValidation } from '@stamhoofd/components';
-import { BundleDiscount, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
-import { computed, ref } from 'vue';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { GroupAvatar, LoadingBoxTransition, CenteredMessage, ErrorBox, GroupPriceDiscountsInput, useErrors, usePatch, useValidation, useContext, EditGroupView } from '@stamhoofd/components';
+import { useRequestOwner } from '@stamhoofd/networking';
+import { BundleDiscount, Group, LimitedFilteredRequest, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PaginatedResponseDecoder, SortItemDirection } from '@stamhoofd/structures';
+import { computed, Ref, ref } from 'vue';
 
 const props = withDefaults(
     defineProps<{
@@ -130,6 +150,72 @@ const deleting = ref(false);
 const pop = usePop();
 const errors = useErrors();
 const saving = ref(false);
+const groups = ref(null) as Ref<null | Group[]>;
+const context = useContext();
+const owner = useRequestOwner();
+const present = usePresent();
+
+loadGroups().catch(console.error);
+async function loadGroups() {
+    if (props.isNew) {
+        groups.value = [];
+        return;
+    }
+
+    try {
+        const response = await context.value.authenticatedServer.request({
+            method: 'GET',
+            path: '/groups',
+            query: new LimitedFilteredRequest({
+                filter: {
+                    periodId: props.period.period.id,
+                    bundleDiscounts: {
+                        [props.id]: {
+                            $neq: null,
+                        },
+                    },
+                },
+                limit: 100,
+            }),
+            decoder: new PaginatedResponseDecoder(
+                new ArrayDecoder(Group as Decoder<Group>),
+                LimitedFilteredRequest,
+            ),
+            owner,
+            shouldRetry: true,
+        });
+        groups.value = response.data.results;
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+        return;
+    }
+}
+
+async function editGroup(group: Group) {
+    if (props.period.groups.find(g => g.id === group.id) === undefined) {
+        props.period.groups.push(group);
+    }
+
+    await present({
+        components: [
+            new ComponentWithProperties(EditGroupView, {
+                period: props.period,
+                groupId: group.id,
+                isNew: false,
+                saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                    addPeriodPatch(patch);
+
+                    const patchedGroup = patchedPeriod.value.groups.find(g => g.id === group.id);
+                    if (patchedGroup) {
+                        group.deepSet(patchedGroup);
+                    }
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
 
 const { patched: patchedPeriod, hasChanges, addPatch: addPeriodPatch, patch } = usePatch(props.period);
 const bundleDiscount = computed(() => patchedPeriod.value.settings.bundleDiscounts.find(b => b.id === props.id)!);
