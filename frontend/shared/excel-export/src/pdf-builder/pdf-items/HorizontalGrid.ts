@@ -3,7 +3,7 @@ import { getLastPageNumber, getPageHeighthWithoutMargins, getPageWidthWithoutMar
 import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../pdf-item';
 import { VerticalStack } from './VerticalStack';
 
-export interface HorizontalGridOptions {
+export interface PdfHorizontalGridOptions {
     columns: number;
     columnGap?: number;
     rowGap?: number;
@@ -27,7 +27,7 @@ export class HorizontalGrid implements PdfItem {
     // max width of the grid
     private readonly maxWidth?: number;
 
-    constructor(private readonly items: PdfItem[], options: HorizontalGridOptions) {
+    constructor(private readonly items: PdfItem[], options: PdfHorizontalGridOptions) {
         this.columns = options.columns;
         this.columnGap = options.columnGap ?? 0;
         this.rowGap = options.rowGap ?? 0;

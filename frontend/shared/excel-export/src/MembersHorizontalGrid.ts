@@ -5,7 +5,7 @@ import { mmToPoints } from './pdf-builder/pdf-helpers';
 import { PdfItem, PdfItemDrawOptions } from './pdf-builder/pdf-item';
 import { H3 } from './pdf-builder/pdf-items/H3';
 import { LabelWithValue } from './pdf-builder/pdf-items/LabelWithValue';
-import { PdfHorizontalGrid } from './pdf-builder/pdf-items/PdfHorizontalGrid';
+import { HorizontalGrid } from './pdf-builder/pdf-items/PdfHorizontalGrid';
 import { PdfText } from './pdf-builder/pdf-items/PdfText';
 import { Spacing } from './pdf-builder/pdf-items/Spacing';
 import { VerticalStack } from './pdf-builder/pdf-items/VerticalStack';
@@ -19,7 +19,7 @@ export interface MembersHorizontalGridArgs<T> {
 }
 
 export class MembersHorizontalGrid<T> implements PdfItem {
-    private readonly factory: (doc: PDFKit.PDFDocument) => PdfHorizontalGrid;
+    private readonly factory: (doc: PDFKit.PDFDocument) => HorizontalGrid;
 
     constructor(private readonly args: MembersHorizontalGridArgs<T>) {
         this.factory = membersHorizontalGridFactory(this.args);
@@ -49,7 +49,7 @@ export class MembersHorizontalGrid<T> implements PdfItem {
     }
 }
 
-function membersHorizontalGridFactory<T>({ objects, columns, selectableColumns, getName }: MembersHorizontalGridArgs<T>): (doc: PDFKit.PDFDocument) => PdfHorizontalGrid {
+function membersHorizontalGridFactory<T>({ objects, columns, selectableColumns, getName }: MembersHorizontalGridArgs<T>): (doc: PDFKit.PDFDocument) => HorizontalGrid {
     const enabledColumns = selectableColumns.filter(c => c.enabled);
     const labels = enabledColumns.map(c => c.name);
     const longestLabel = labels.reduce((a, b) => a.length > b.length ? a : b, '');
@@ -115,7 +115,7 @@ function membersHorizontalGridFactory<T>({ objects, columns, selectableColumns, 
             return container;
         });
 
-        const grid = new PdfHorizontalGrid(containers, {
+        const grid = new HorizontalGrid(containers, {
             columns,
             columnGap: mmToPoints(10),
             rowGap: mmToPoints(5),
