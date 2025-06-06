@@ -2,7 +2,7 @@ import { Database, SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { PlainObject } from '@simonbackx/simple-encoding';
 import { StamhoofdFilter } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
-import { compileToModernSQLFilter, SQLFilterDefinitions } from '../../src/filters/SQLModernFilter';
+import { compileToModernSQLFilter, SQLFilterDefinitions } from '../../src/filters/modern/SQLModernFilter';
 import { SQL } from '../../src/SQL';
 import { NormalizedSQLQuery, SQLQuery } from '../../src/SQLExpression';
 import { SQLScalarValue } from '../../src/SQLExpressions';

@@ -1,7 +1,7 @@
 import { assertFilterCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
-import { scalarToSQLExpression, SQLLower, SQLNull } from '../../SQLExpressions';
-import { SQLJsonContains, SQLJsonSearch, SQLJsonValue } from '../../SQLJsonExpressions';
-import { SQLWhere, SQLWhereEqual, SQLWhereLike, SQLWhereOr, SQLWhereSign } from '../../SQLWhere';
+import { scalarToSQLExpression, SQLLower, SQLNull } from '../../../SQLExpressions';
+import { SQLJsonContains, SQLJsonSearch, SQLJsonValue } from '../../../SQLJsonExpressions';
+import { SQLWhere, SQLWhereEqual, SQLWhereLike, SQLWhereOr, SQLWhereSign } from '../../../SQLWhere';
 import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner, SQLModernValueType } from '../SQLModernFilter';
 import { isJSONColumn } from '../helpers/isJSONColumn';
 import { normalizeCompareValue } from '../helpers/normalizeCompareValue';

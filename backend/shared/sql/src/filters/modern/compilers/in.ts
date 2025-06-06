@@ -1,8 +1,8 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { assertFilterCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
-import { scalarToSQLExpression, SQLArray } from '../../SQLExpressions';
-import { SQLJsonOverlaps } from '../../SQLJsonExpressions';
-import { SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '../../SQLWhere';
+import { scalarToSQLExpression, SQLArray } from '../../../SQLExpressions';
+import { SQLJsonOverlaps } from '../../../SQLJsonExpressions';
+import { SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '../../../SQLWhere';
 import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner, SQLModernValueType } from '../SQLModernFilter';
 import { normalizeCompareValue } from '../helpers/normalizeCompareValue';
 import { $equalsSQLFilterCompiler } from './equals';

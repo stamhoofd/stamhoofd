@@ -1,10 +1,10 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { compileFilter, FilterCompiler, FilterDefinitions, filterDefinitionsToCompiler, RequiredFilterCompiler, StamhoofdFilter } from '@stamhoofd/structures';
-import { SQLExpression, SQLExpressionOptions, SQLQuery } from '../SQLExpression';
-import { SQLJoin } from '../SQLJoin';
-import { SQLJsonValue } from '../SQLJsonExpressions';
-import { SQLSelect } from '../SQLSelect';
-import { SQLWhere, SQLWhereAnd, SQLWhereExists, SQLWhereJoin, SQLWhereNot, SQLWhereOr } from '../SQLWhere';
+import { SQLExpression, SQLExpressionOptions, SQLQuery } from '../../SQLExpression';
+import { SQLJoin } from '../../SQLJoin';
+import { SQLJsonValue } from '../../SQLJsonExpressions';
+import { SQLSelect } from '../../SQLSelect';
+import { SQLWhere, SQLWhereAnd, SQLWhereExists, SQLWhereJoin, SQLWhereNot, SQLWhereOr } from '../../SQLWhere';
 import { $equalsSQLFilterCompiler, $greaterThanSQLFilterCompiler, $inSQLFilterCompiler, $lessThanSQLFilterCompiler } from './compilers';
 import { $containsSQLFilterCompiler } from './compilers/contains';
 
