@@ -12,7 +12,7 @@ export type SQLSyncFilterRunner = (column: SQLCurrentColumn) => SQLWhere;
 export type SQLFilterRunner = (column: SQLCurrentColumn) => Promise<SQLWhere> | SQLWhere;
 export type SQLFilterCompiler = FilterCompiler<SQLFilterRunner>;
 export type SQLRequiredFilterCompiler = RequiredFilterCompiler<SQLFilterRunner>;
-export type SQLFilterDefinitions = FilterDefinitions<SQLFilterRunner>;
+export type SQLModernFilterDefinitions = FilterDefinitions<SQLFilterRunner>;
 
 export enum SQLModernValueType {
     /** At the root of a select */
@@ -64,7 +64,7 @@ export type SQLCurrentColumn = {
     checkPermission?: () => Promise<void>;
 };
 
-export function createColumnFilter(column: SQLCurrentColumn, childDefinitions?: SQLFilterDefinitions): SQLFilterCompiler {
+export function createColumnFilter(column: SQLCurrentColumn, childDefinitions?: SQLModernFilterDefinitions): SQLFilterCompiler {
     return (filter: StamhoofdFilter) => {
         const compiler = childDefinitions ? filterDefinitionsToCompiler(childDefinitions) : filterDefinitionsToCompiler(baseModernSQLFilterCompilers);
         const runner = $andSQLFilterCompiler(filter, compiler);
@@ -78,7 +78,7 @@ export function createColumnFilter(column: SQLCurrentColumn, childDefinitions?: 
     };
 }
 
-export function createWildcardColumnFilter(getColumn: (key: string) => SQLCurrentColumn, childDefinitions?: (key: string) => SQLFilterDefinitions): SQLFilterCompiler {
+export function createWildcardColumnFilter(getColumn: (key: string) => SQLCurrentColumn, childDefinitions?: (key: string) => SQLModernFilterDefinitions): SQLFilterCompiler {
     const wildcardCompiler = (filter: StamhoofdFilter, _, key: string) => {
         const compiler = childDefinitions ? filterDefinitionsToCompiler(childDefinitions(key)) : filterDefinitionsToCompiler(baseModernSQLFilterCompilers);
         const runner = $andSQLFilterCompiler(filter, compiler);
@@ -96,7 +96,7 @@ export function createWildcardColumnFilter(getColumn: (key: string) => SQLCurren
     };
 }
 
-export function createWildcardFilter(compiler: (key: string) => SQLFilterCompiler, childDefinitions: (key: string) => SQLFilterDefinitions): SQLFilterDefinitions {
+export function createWildcardFilter(compiler: (key: string) => SQLFilterCompiler, childDefinitions: (key: string) => SQLModernFilterDefinitions): SQLModernFilterDefinitions {
     return {
         ...baseModernSQLFilterCompilers,
         '*': (filter, parentCompiler, key) => {
@@ -113,7 +113,7 @@ export function createWildcardFilter(compiler: (key: string) => SQLFilterCompile
 /**
  * Filter with a subquery that should return at least one result.
  */
-export function createExistsFilter(baseSelect: InstanceType<typeof SQLSelect> & SQLExpression, definitions: SQLFilterDefinitions): SQLFilterCompiler {
+export function createExistsFilter(baseSelect: InstanceType<typeof SQLSelect> & SQLExpression, definitions: SQLModernFilterDefinitions): SQLFilterCompiler {
     return (filter: StamhoofdFilter, _: SQLFilterCompiler) => {
         if (filter !== null && typeof filter === 'object' && '$elemMatch' in filter) {
             filter = filter['$elemMatch'] as StamhoofdFilter;
@@ -138,7 +138,7 @@ export function createExistsFilter(baseSelect: InstanceType<typeof SQLSelect> & 
  *
  * By default doesRelationAlwaysExist is set to true, this means we expect the relation to always exist. This helps optimize the query (dropping the join if the where clause in the join is always true)
  */
-export function createJoinedRelationFilter(join: SQLJoin, definitions: SQLFilterDefinitions, options: { doesRelationAlwaysExist: boolean } = { doesRelationAlwaysExist: true }): SQLFilterCompiler {
+export function createJoinedRelationFilter(join: SQLJoin, definitions: SQLModernFilterDefinitions, options: { doesRelationAlwaysExist: boolean } = { doesRelationAlwaysExist: true }): SQLFilterCompiler {
     return (filter: StamhoofdFilter, _: SQLFilterCompiler) => {
         if (filter !== null && typeof filter === 'object' && '$elemMatch' in filter) {
             filter = filter['$elemMatch'] as StamhoofdFilter;
@@ -194,7 +194,7 @@ function invertFilterCompiler(compiler: SQLRequiredFilterCompiler): SQLRequiredF
     };
 }
 
-export const baseModernSQLFilterCompilers: SQLFilterDefinitions = {
+export const baseModernSQLFilterCompilers: SQLModernFilterDefinitions = {
     $and: $andSQLFilterCompiler,
     $or: $orSQLFilterCompiler,
     $not: $notSQLFilterCompiler,
@@ -222,7 +222,7 @@ export const SQLRootExpression: SQLExpression = {
     },
 };
 
-export function compileToSQLRunner(filter: StamhoofdFilter, definitions: SQLFilterDefinitions): SQLFilterRunner {
+export function compileToSQLRunner(filter: StamhoofdFilter, definitions: SQLModernFilterDefinitions): SQLFilterRunner {
     if (filter === null) {
         return () => {
             return new SQLWhereAnd([]); // No filter, return empty where
@@ -233,7 +233,7 @@ export function compileToSQLRunner(filter: StamhoofdFilter, definitions: SQLFilt
     return runner;
 };
 
-export async function compileToModernSQLFilter(filter: StamhoofdFilter, filters: SQLFilterDefinitions): Promise<SQLWhere> {
+export async function compileToModernSQLFilter(filter: StamhoofdFilter, filters: SQLModernFilterDefinitions): Promise<SQLWhere> {
     const runner = compileToSQLRunner(filter, filters);
     return await runner({
         expression: SQLRootExpression,

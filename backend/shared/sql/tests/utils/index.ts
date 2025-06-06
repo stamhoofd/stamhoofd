@@ -2,13 +2,13 @@ import { Database, SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { PlainObject } from '@simonbackx/simple-encoding';
 import { StamhoofdFilter } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
-import { compileToModernSQLFilter, SQLFilterDefinitions } from '../../src/filters/modern/SQLModernFilter';
+import { compileToModernSQLFilter, SQLModernFilterDefinitions } from '../../src/filters/modern/SQLModernFilter';
 import { SQL } from '../../src/SQL';
 import { NormalizedSQLQuery, SQLQuery } from '../../src/SQLExpression';
 import { SQLScalarValue } from '../../src/SQLExpressions';
 import { SQLWhereAnd } from '../../src/SQLWhere';
 
-export async function testError({ filter, filters, error }: { filter: StamhoofdFilter; filters: SQLFilterDefinitions; error: string }) {
+export async function testError({ filter, filters, error }: { filter: StamhoofdFilter; filters: SQLModernFilterDefinitions; error: string }) {
     await expect(
         compileToModernSQLFilter(filter, filters),
     ).rejects.toThrow(error);
@@ -17,7 +17,7 @@ export async function testError({ filter, filters, error }: { filter: StamhoofdF
 /**
  * Only compares the WHERE clause of the query.
  */
-export async function test({ filter, filters, query }: { filter: StamhoofdFilter; filters: SQLFilterDefinitions; query: SQLQuery }) {
+export async function test({ filter, filters, query }: { filter: StamhoofdFilter; filters: SQLModernFilterDefinitions; query: SQLQuery }) {
     const where = await compileToModernSQLFilter(filter, filters);
     if (where.isAlways === false) {
         doesQueryMatch('', query);
@@ -39,7 +39,7 @@ export async function test({ filter, filters, query }: { filter: StamhoofdFilter
 /**
  * Use to also test joins. This will use `test_table` as the table name in your query.
  */
-export async function testSelect({ filter, filters, query }: { filter: StamhoofdFilter; filters: SQLFilterDefinitions; query: SQLQuery }) {
+export async function testSelect({ filter, filters, query }: { filter: StamhoofdFilter; filters: SQLModernFilterDefinitions; query: SQLQuery }) {
     const where = await compileToModernSQLFilter(filter, filters);
 
     if (where.isAlways === false) {
@@ -62,7 +62,7 @@ export async function testSelect({ filter, filters, query }: { filter: Stamhoofd
     doesQueryMatch(sql, query);
 }
 
-export async function testMultiple({ testFilters, filters, query }: { testFilters: StamhoofdFilter[]; filters: SQLFilterDefinitions; query: SQLQuery }) {
+export async function testMultiple({ testFilters, filters, query }: { testFilters: StamhoofdFilter[]; filters: SQLModernFilterDefinitions; query: SQLQuery }) {
     for (const filter of testFilters) {
         await test({
             filter,
@@ -72,7 +72,7 @@ export async function testMultiple({ testFilters, filters, query }: { testFilter
     }
 }
 
-export async function testMultipleErrors({ testFilters, filters, error }: { testFilters: StamhoofdFilter[]; filters: SQLFilterDefinitions; error: string }) {
+export async function testMultipleErrors({ testFilters, filters, error }: { testFilters: StamhoofdFilter[]; filters: SQLModernFilterDefinitions; error: string }) {
     for (const filter of testFilters) {
         await testError({
             filter,
@@ -127,7 +127,7 @@ function closeDatabaseAfterTests() {
  *
  * Snapshots the query.
  */
-export async function testMatch({ tableDefinition, rows, doMatch, doNotMatch, filters }: { doMatch?: StamhoofdFilter[]; doNotMatch?: StamhoofdFilter[]; tableDefinition: TableDefinition; rows: Record<string, SQLScalarValue | null | PlainObject>[]; filters: SQLFilterDefinitions }) {
+export async function testMatch({ tableDefinition, rows, doMatch, doNotMatch, filters }: { doMatch?: StamhoofdFilter[]; doNotMatch?: StamhoofdFilter[]; tableDefinition: TableDefinition; rows: Record<string, SQLScalarValue | null | PlainObject>[]; filters: SQLModernFilterDefinitions }) {
     const tableName = 'test_table_' + Math.random().toString(36).substring(2, 15);
     const createTableSQL = createTableDefinition(tableName, tableDefinition);
 
