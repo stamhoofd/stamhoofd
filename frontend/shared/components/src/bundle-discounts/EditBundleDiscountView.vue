@@ -6,7 +6,7 @@
         <p>{{ $t('Een bundelkorting maak je aan en koppel je vervolgens aan één of meerdere activiteiten of inschrijvingsgroepen waarop die korting geldt. Afhankelijk van de ingestelde toepassingsregels krijgen leden dan korting voor de tweede, derde, vierde... inschrijving bij die ingestelde activiteiten of inschrijvinsgroepen.') }}</p>
 
         <p class="warning-box">
-            {{ $t('Opgelet, als je een korting wijzigt of toevoegt heeft dit ook gevolgen voor bestaande inschrijvingen die deze korting al hadden gekregen / niet hadden gekregen. Test je kortingen goed uit en lees de documentatie grondig.') }}
+            {{ $t('Opgelet, als je een korting wijzigt of toevoegt heeft dit ook gevolgen voor bestaande inschrijvingen die deze korting al hadden gekregen / niet hadden gekregen. Test je kortingen goed uit en lees de beschrijvingen hieronder grondig.') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
