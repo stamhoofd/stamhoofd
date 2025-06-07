@@ -42,12 +42,12 @@ export class BundleDiscount extends AutoEncoder {
         return $t('Korting voor leden die inschrijven voor meerdere activiteiten uit deze bundel.');
     }
 
-    get discountsText() {
-        if (this.discounts.length === 0) {
+    static discountsToText(discounts: GroupPriceDiscount[]) {
+        if (discounts.length === 0) {
             return '';
         }
-        return this.discounts.map((d, i) => {
-            if (i === this.discounts.length - 1) {
+        return discounts.map((d, i) => {
+            if (i === discounts.length - 1) {
                 return $t('{5%} korting op de {2}e en volgende inschrijvingen', {
                     '5%': d.toString(),
                     '2': i + 2,
@@ -58,6 +58,10 @@ export class BundleDiscount extends AutoEncoder {
                 '2': i + 2,
             });
         }).join(', ');
+    }
+
+    get discountsText() {
+        return BundleDiscount.discountsToText(this.discounts);
     }
 
     calculate(cart: RegisterCart): BundleDiscountCalculationGroup {
