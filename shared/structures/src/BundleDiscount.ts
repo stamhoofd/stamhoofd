@@ -34,12 +34,12 @@ export class BundleDiscount extends AutoEncoder {
     get humanDescription() {
         if (this.countWholeFamily) {
             if (this.countPerGroup) {
-                return $t('Korting voor gezinsleden die inschrijven voor dezelfde activiteit.');
+                return $t('Korting als meerdere gezinsleden inschrijven voor dezelfde inschrijvingsgroep/activiteit.');
             }
-            return $t('Korting voor gezinsleden die inschrijven voor verschillende activiteiten uit deze bundel.');
+            return $t('Korting voor gezinsleden die inschrijven voor verschillende inschrijvingsgroepen/activiteiten met deze korting.');
         }
 
-        return $t('Korting voor leden die inschrijven voor meerdere activiteiten uit deze bundel.');
+        return $t('Korting voor hetzelfde lid dat inschrijven voor meerdere inschrijvingsgroepen/activiteiten met deze korting.');
     }
 
     static discountsToText(discounts: GroupPriceDiscount[]) {
