@@ -13,7 +13,15 @@
         <STList v-model="draggableBundles" :draggable="true">
             <template #item="{item: bundleDiscount}">
                 <STListItem :selectable="true" class="right-description right-stack" @click="() => $navigate(Routes.BundleDiscount, { params: { id: bundleDiscount.id } })">
-                    <h3>{{ bundleDiscount.name || $t('Naamloos') }}</h3>
+                    <h3 class="style-title-list">
+                        {{ bundleDiscount.name || $t('Naamloos') }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ bundleDiscount.humanDescription }}
+                    </p>
+                    <p class="style-description-small">
+                        {{ bundleDiscount.discountsText }}
+                    </p>
 
                     <template #right>
                         <span class="button icon drag gray" @click.stop @contextmenu.stop />

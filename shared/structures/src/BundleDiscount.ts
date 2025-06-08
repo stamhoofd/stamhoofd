@@ -44,7 +44,7 @@ export class BundleDiscount extends AutoEncoder {
 
     static discountsToText(discounts: GroupPriceDiscount[]) {
         if (discounts.length === 0) {
-            return '';
+            return $t('Geen korting, maar telt mee in aantal');
         }
         return discounts.map((d, i) => {
             if (i === discounts.length - 1) {
