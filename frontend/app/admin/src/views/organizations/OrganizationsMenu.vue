@@ -51,7 +51,7 @@ import { useAuth, usePlatform } from '@stamhoofd/components';
 import { useCollapsed } from '@stamhoofd/dashboard/src/hooks/useCollapsed';
 import { OrganizationTag, OrganizationTagType, PermissionLevel, TagHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentOptions, computed } from 'vue';
+import { computed } from 'vue';
 import OrganizationsTableView from './OrganizationsTableView.vue';
 import OrganizationTagView from './OrganizationTagView.vue';
 import EditOrganizationTagsView from './tags/EditOrganizationTagsView.vue';
@@ -71,7 +71,7 @@ defineRoutes([
         url: 'allemaal',
         name: Routes.All,
         show: 'detail',
-        component: OrganizationsTableView as unknown as ComponentOptions,
+        component: OrganizationsTableView,
         isDefault: {
             properties: {},
         },
@@ -80,7 +80,7 @@ defineRoutes([
         url: 'tag/@slug/groepen',
         name: Routes.Organizations,
         show: 'detail',
-        component: OrganizationsTableView as unknown as ComponentOptions,
+        component: OrganizationsTableView,
         params: {
             slug: String,
         },
@@ -110,7 +110,7 @@ defineRoutes([
         url: 'tag/@slug',
         name: Routes.Tag,
         show: 'detail',
-        component: OrganizationTagView as unknown as ComponentOptions,
+        component: OrganizationTagView,
         params: {
             slug: String,
         },
@@ -141,7 +141,7 @@ defineRoutes([
                 url: 'tags',
                 name: Routes.Tags,
                 present: 'popup',
-                component: EditOrganizationTagsView as unknown as ComponentOptions,
+                component: EditOrganizationTagsView,
             } as Route<any>]
         : []),
 ]);

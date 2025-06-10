@@ -145,7 +145,7 @@ import { Storage } from '@stamhoofd/networking';
 import { isEmptyFilter, LimitedFilteredRequest, mergeFilters, SortItemDirection, StamhoofdFilter, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
-import { ComponentOptions, computed, ComputedRef, getCurrentInstance, onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, Ref, ref, shallowRef, watch, watchEffect } from 'vue';
+import { Component, computed, ComputedRef, getCurrentInstance, onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, Ref, ref, shallowRef, watch, watchEffect } from 'vue';
 
 import UIFilterEditor from '../filters/UIFilterEditor.vue';
 import { AsyncTableAction, Column, MenuTableAction, TableAction, TableActionSelection, TableObjectFetcher } from './classes';
@@ -252,7 +252,7 @@ if (props.Route) {
     defineRoutes([{
         name: Routes.Object,
         url: '@id',
-        component: props.Route.Component as unknown as ComponentOptions,
+        component: props.Route.Component as Component,
         params: {
             id: String,
         },

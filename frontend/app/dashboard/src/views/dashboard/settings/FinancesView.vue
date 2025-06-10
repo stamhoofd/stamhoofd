@@ -182,7 +182,7 @@ defineRoutes([
         name: Routes.Export,
         url: 'exporteren',
         present: 'popup',
-        component: ConfigurePaymentExportView as unknown as ComponentOptions,
+        component: ConfigurePaymentExportView,
     },
     {
         name: Routes.PayableBalance,

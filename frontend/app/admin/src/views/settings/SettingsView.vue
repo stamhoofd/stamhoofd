@@ -557,7 +557,7 @@ defineRoutes([
     {
         url: Routes.OrganizationRecordConfiguration,
         present: 'popup',
-        component: OrganizationRecordConfigurationView as unknown as ComponentOptions,
+        component: OrganizationRecordConfigurationView,
         paramsToProps() {
             return {
                 recordsConfiguration: platform.value.config.organizationLevelRecordsConfiguration,
@@ -580,7 +580,7 @@ defineRoutes([
         params: {
             provider: String,
         },
-        component: SSOSettingsView as unknown as ComponentOptions,
+        component: SSOSettingsView,
 
         async paramsToProps(params: { provider: string }) {
             const provider = Object.values(LoginProviderType).includes(params.provider as LoginProviderType) ? params.provider as LoginProviderType : null;

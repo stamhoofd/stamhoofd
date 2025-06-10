@@ -27,7 +27,7 @@ import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { EmailSettingsView, GeneralSettingsView, GlobalEventBus, SetupStepRows, TransitionFade, useOrganization, usePlatform, useVisibilityChange } from '@stamhoofd/components';
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { SetupStepType } from '@stamhoofd/structures';
-import { ComponentOptions, computed, onActivated, ref } from 'vue';
+import { computed, onActivated, ref } from 'vue';
 import PremisesView from '../../views/dashboard/settings/PremisesView.vue';
 import RegistrationPaymentSettingsView from '../dashboard/settings/RegistrationPaymentSettingsView.vue';
 import GroupsReview from './GroupsReview.vue';
@@ -81,37 +81,37 @@ defineRoutes([
     {
         url: Routes.Premises,
         present: 'popup',
-        component: PremisesView as unknown as ComponentOptions,
+        component: PremisesView,
         paramsToProps: paramToPropsFactory({ isReview: true }),
     },
     {
         url: Routes.Companies,
         present: 'popup',
-        component: GeneralSettingsView as unknown as ComponentOptions,
+        component: GeneralSettingsView,
         paramsToProps: paramToPropsFactory({ isReview: true }),
     },
     {
         url: Routes.Payment,
         present: 'popup',
-        component: RegistrationPaymentSettingsView as unknown as ComponentOptions,
+        component: RegistrationPaymentSettingsView,
         paramsToProps: paramToPropsFactory({ isReview: true }),
     },
     {
         url: Routes.Groups,
         present: 'popup',
-        component: GroupsReview as unknown as ComponentOptions,
+        component: GroupsReview,
         paramsToProps: paramToPropsFactory(),
     },
     {
         url: Routes.Responsibilities,
         present: 'popup',
-        component: FunctionsReview as unknown as ComponentOptions,
+        component: FunctionsReview,
         paramsToProps: paramToPropsFactory(),
     },
     {
         url: Routes.Emails,
         present: 'popup',
-        component: EmailSettingsView as unknown as ComponentOptions,
+        component: EmailSettingsView,
         paramsToProps: paramToPropsFactory(),
     },
 ]);

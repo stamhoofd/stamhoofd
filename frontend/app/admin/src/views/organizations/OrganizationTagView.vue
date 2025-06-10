@@ -45,7 +45,7 @@ import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { STList, STListItem, STNavigationBar, usePlatform } from '@stamhoofd/components';
 import { OrganizationTag, OrganizationTagType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentOptions, computed } from 'vue';
+import { computed } from 'vue';
 import OrganizationsTableView from './OrganizationsTableView.vue';
 import OrganizationTagView from './OrganizationTagView.vue';
 
@@ -66,7 +66,7 @@ defineRoutes([
     {
         url: 'groepen',
         name: Routes.All,
-        component: OrganizationsTableView as unknown as ComponentOptions,
+        component: OrganizationsTableView,
         params: {
             slug: String,
         },
@@ -79,7 +79,7 @@ defineRoutes([
     {
         url: 'tag/@slug/groepen',
         name: Routes.Organizations,
-        component: OrganizationsTableView as unknown as ComponentOptions,
+        component: OrganizationsTableView,
         params: {
             slug: String,
         },
@@ -108,7 +108,7 @@ defineRoutes([
     {
         url: 'tag/@slug',
         name: Routes.Tag,
-        component: OrganizationTagView as unknown as ComponentOptions,
+        component: OrganizationTagView,
         params: {
             slug: String,
         },

@@ -64,7 +64,7 @@ import {
     WebshopStatus,
 } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { ComponentOptions, computed, ref } from 'vue';
+import { computed, ref } from 'vue';
 
 // #region composables
 const $organization = useOrganization();
@@ -161,7 +161,7 @@ defineRoutes([
         show: 'detail',
         component: async () =>
             (await import('../dashboard/webshop/WebshopOverview.vue'))
-                .default as unknown as ComponentOptions,
+                .default,
         paramsToProps: ({ slug }: { slug: string }) => {
             const webshop = visibleWebshops.value.find(
                 shop => Formatter.slug(shop.id) === slug,
@@ -207,7 +207,7 @@ defineRoutes([
         present: 'popup',
         component: async () =>
             (await import('../dashboard/webshop/edit/EditWebshopGeneralView.vue'))
-                .default as unknown as ComponentOptions,
+                .default,
         paramsToProps: () => {
             selectButton(Button.AddWebshop);
             return {};
@@ -219,7 +219,7 @@ defineRoutes([
         show: 'detail',
         component: async () =>
             (await import('../dashboard/webshop/WebshopArchiveView.vue'))
-                .default as unknown as ComponentOptions,
+                .default,
         paramsToProps: () => {
             selectButton(Button.Archive);
             return {};
