@@ -1,0 +1,448 @@
+import { SelectableColumn } from '@stamhoofd/frontend-excel-export';
+import { ContextPermissions } from '@stamhoofd/networking';
+import { AccessRight, FinancialSupportSettings, Gender, Group, GroupType, Organization, Parent, Platform, PlatformMember, RecordCategory } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { SelectablePdfData } from '../../export/SelectablePdfData';
+
+// todo: make reusable?
+function formatGender(gender: Gender) {
+    switch (gender) {
+        case Gender.Male:
+            return $t(`f972abd4-de1e-484b-b7da-ad4c75d37808`);
+        case Gender.Female:
+            return $t(`e21f499d-1078-4044-be5d-6693d2636699`);
+        default:
+            return $t(`60f13ba4-c6c9-4388-9add-43a996bf6bee`);
+    }
+}
+
+export function getSelectablePdfData({ platform, organization, auth, groupColumns }: { platform: Platform; organization: Organization | null; auth: ContextPermissions; groupColumns?: SelectablePdfData<PlatformMember>[] }) {
+    const recordCategories = [
+        ...(organization?.meta.recordsConfiguration.recordCategories ?? []),
+        ...platform.config.recordsConfiguration.recordCategories,
+    ];
+
+    const financialSupportSettings = platform.config.financialSupport ?? FinancialSupportSettings.create({});
+    const financialSupportTitle = financialSupportSettings.title;
+
+    const flattenedCategories = RecordCategory.flattenCategoriesWith(recordCategories, r => r.excelColumns.length > 0);
+
+    const returnNullIfNoAccessRight = <T extends SelectableColumn>(column: T, requiresAccessRights: AccessRight[]): T | null => {
+        if (requiresAccessRights.some(accessRight => !auth.hasAccessRight(accessRight))) {
+            return null;
+        }
+
+        return column;
+    };
+
+    const columns: SelectablePdfData<PlatformMember>[] = [
+        new SelectablePdfData<PlatformMember>({
+            id: 'id',
+            name: $t(`8daf57de-69cf-48fe-b09b-772c54473184`),
+            description: $t(`b697f010-9b5f-4944-8cae-8c8649d2c2f2`),
+            enabled: false,
+            getValue: member => member.id,
+        }),
+        // todo: only if platform?
+        new SelectablePdfData<PlatformMember>({
+            id: 'memberNumber',
+            name: $t(`89eafa94-6447-4608-a71e-84752eab10c8`),
+            description: $t(`f4b7e513-6e08-4b46-a3ae-3e4a974f1a3e`),
+            getValue: ({ patchedMember: object }: PlatformMember) =>
+                object.details.memberNumber,
+        }),
+        new SelectablePdfData<PlatformMember>({
+            id: 'firstName',
+            name: $t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`),
+            getValue: ({ patchedMember: object }: PlatformMember) =>
+                object.details.firstName,
+        }),
+        new SelectablePdfData<PlatformMember>({
+            id: 'lastName',
+            name: $t(`171bd1df-ed4b-417f-8c5e-0546d948469a`),
+            getValue: ({ patchedMember: object }: PlatformMember) =>
+                object.details.lastName,
+        }),
+        new SelectablePdfData<PlatformMember>({
+            id: 'birthDay',
+            name: $t(`f3b87bd8-e36c-4fb8-917f-87b18ece750e`),
+            getValue: ({ patchedMember: object }: PlatformMember) =>
+                object.details.birthDay,
+        }),
+        new SelectablePdfData<PlatformMember>({
+            id: 'age',
+            name: $t(`e96d9ea7-f8cc-42c6-b23d-f46e1a56e043`),
+            enabled: false,
+            getValue: ({ patchedMember: object }: PlatformMember) =>
+                object.details.age,
+        }),
+        new SelectablePdfData<PlatformMember>({
+            id: 'gender',
+            name: $t(`3048ad16-fd3b-480e-b458-10365339926b`),
+            getValue: ({ patchedMember: object }: PlatformMember) =>
+                formatGender(object.details.gender),
+        }),
+        new SelectablePdfData<PlatformMember>({
+            id: 'phone',
+            name: $t(`de70b659-718d-445a-9dca-4d14e0a7a4ec`),
+            getValue: ({ patchedMember: object }: PlatformMember) =>
+                object.details.phone,
+        }),
+        new SelectablePdfData<PlatformMember>({
+            id: 'email',
+            name: $t(`7400cdce-dfb4-40e7-996b-4817385be8d8`),
+            getValue: ({ patchedMember: object }: PlatformMember) =>
+                object.details.email,
+        }),
+        new SelectablePdfData<PlatformMember>({
+            id: 'address',
+            name: $t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`),
+            description: $t(`01e99208-dce7-4109-8cf2-3cc74c4df45c`),
+            // todo: check if this is correct?
+            getValue: ({ patchedMember: object }: PlatformMember) => object.details.address?.toString(),
+        }),
+        new SelectablePdfData<PlatformMember>({
+            id: 'securityCode',
+            name: $t(`ba5f8036-1788-408a-8c44-1db80a53c087`),
+            enabled: false,
+            description: $t(`aa45000f-8cff-4cb6-99b2-3202eb64c4a8`),
+            getValue: ({ patchedMember: object }: PlatformMember) => object.details.securityCode,
+        }),
+
+        returnNullIfNoAccessRight(new SelectablePdfData<PlatformMember>({
+            id: 'requiresFinancialSupport',
+            name: financialSupportTitle,
+            enabled: false,
+            // todo!!!!!!!!!!!!
+            getValue: ({ patchedMember: object }: PlatformMember) => false.toString(),
+        }), [AccessRight.MemberReadFinancialData]),
+        returnNullIfNoAccessRight(new SelectablePdfData<PlatformMember>({
+            id: 'uitpasNumber',
+            name: $t(`d70f2a7f-d8b4-4846-8dc0-a8e978765b9d`),
+            getValue: ({ patchedMember: object }: PlatformMember) => object.details.uitpasNumber,
+        }), [AccessRight.MemberReadFinancialData]),
+
+        new SelectablePdfData<PlatformMember>({
+            id: 'notes',
+            name: $t(`7f3af27c-f057-4ce3-8385-36dfb99745e8`),
+            enabled: false,
+            getValue: ({ patchedMember: object }: PlatformMember) => object.details.notes,
+        }),
+        returnNullIfNoAccessRight(new SelectablePdfData<PlatformMember>({
+            id: 'nationalRegisterNumber',
+            name: $t(`439176a5-dd35-476b-8c65-3216560cac2f`),
+            getValue: ({ patchedMember: object }: PlatformMember) => object.details.nationalRegisterNumber?.toString() ?? '',
+        }), [AccessRight.MemberManageNRN]),
+
+        ...(groupColumns ?? []),
+
+        ...(!organization
+            ? [
+                    new SelectablePdfData<PlatformMember>({
+                        id: 'organization',
+                        name: $t(`a0b1e726-345d-4288-a1db-7437d1b47482`),
+                        enabled: false,
+                        getValue: (member: PlatformMember) => {
+                            const organizations = member.filterOrganizations({
+                                currentPeriod: true,
+                                types: [GroupType.Membership],
+                            });
+                            const str
+                    = Formatter.joinLast(
+                        organizations.map(o => o.name).sort(),
+                        ', ',
+                        ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ',
+                    )
+                    || $t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
+
+                            return str;
+                        },
+                    }),
+                    new SelectablePdfData<PlatformMember>({
+                        id: 'uri',
+                        name: $t(`4c61c43e-ed3c-418e-8773-681d19323520`),
+                        enabled: false,
+                        getValue: (member: PlatformMember) => {
+                            const organizations = member.filterOrganizations({
+                                currentPeriod: true,
+                                types: [GroupType.Membership],
+                            });
+                            const str
+                    = Formatter.joinLast(
+                        organizations.map(o => o.uri).sort(),
+                        ', ',
+                        ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ',
+                    )
+                    || $t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
+
+                            return str;
+                        },
+                    }),
+                    new SelectablePdfData<PlatformMember>({
+                        id: 'defaultAgeGroup',
+                        name: $t(`494ad9b9-c644-4b71-bd38-d6845706231f`),
+                        enabled: false,
+                        getValue: (member: PlatformMember) => {
+                            const groups = member.filterRegistrations({
+                                currentPeriod: true,
+                                types: [GroupType.Membership],
+                                // todo: check if this is correct
+                                organizationId: undefined,
+                            });
+                            const defaultAgeGroupIds = Formatter.uniqueArray(
+                                groups.filter(o => o.group.defaultAgeGroupId),
+                            );
+                            const defaultAgeGroups = defaultAgeGroupIds.map(
+                                o =>
+                                    Platform.shared.config.defaultAgeGroups.find(
+                                        g => g.id === o.group.defaultAgeGroupId,
+                                    )?.name ?? $t(`6aeee253-beb2-4548-b60e-30836afcf2f0`),
+                            );
+                            const str
+                    = Formatter.joinLast(
+                        Formatter.uniqueArray(defaultAgeGroups).sort(),
+                        ', ',
+                        ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ',
+                    )
+                    || $t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
+
+                            return str;
+                        },
+                    }),
+                ]
+            : []),
+
+        ...(organization
+            ? [
+                    new SelectablePdfData<PlatformMember>({
+                        id: 'group',
+                        name: $t(`fb629dba-088e-4c97-b201-49787bcda0ac`),
+                        enabled: false,
+                        getValue: (member: PlatformMember) => {
+                            const groups = member.filterRegistrations({
+                                currentPeriod: true,
+                                types: [GroupType.Membership],
+                                // todo: check if this is correct
+                                organizationId: organization.id,
+                            });
+                            const str
+                    = Formatter.joinLast(
+                        Formatter.uniqueArray(
+                            groups.map(o => o.group.settings.name.toString()),
+                        ).sort(),
+                        ', ',
+                        ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ',
+                    )
+                    || $t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
+
+                            return str;
+                        },
+                    }),
+                ]
+            : []),
+
+        ...[1, 2].flatMap((parentNumber, parentIndex) => {
+            const getId = (value: string) => `parent.${parentIndex}.${value}`;
+            const category = `Ouder ${parentNumber}`;
+            const enabled = false;
+            const getParent = (member: PlatformMember): Parent | null | undefined => member.patchedMember.details.parents[parentIndex];
+
+            return [
+                new SelectablePdfData<PlatformMember>({
+                    id: getId('type'),
+                    name: $t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`),
+                    category,
+                    enabled,
+                    getValue: (object: PlatformMember) => getParent(object)?.type,
+                }),
+                new SelectablePdfData<PlatformMember>({
+                    id: getId('firstName'),
+                    name: $t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`),
+                    category,
+                    enabled,
+                    getValue: (object: PlatformMember) => getParent(object)?.firstName,
+                }),
+                new SelectablePdfData<PlatformMember>({
+                    id: getId('lastName'),
+                    name: $t(`171bd1df-ed4b-417f-8c5e-0546d948469a`),
+                    category,
+                    enabled,
+                    getValue: (object: PlatformMember) => getParent(object)?.lastName,
+                }),
+                new SelectablePdfData<PlatformMember>({
+                    id: getId('phone'),
+                    name: $t(`de70b659-718d-445a-9dca-4d14e0a7a4ec`),
+                    category,
+                    enabled,
+                    getValue: (object: PlatformMember) => getParent(object)?.phone,
+                }),
+                new SelectablePdfData<PlatformMember>({
+                    id: getId('email'),
+                    name: $t(`7400cdce-dfb4-40e7-996b-4817385be8d8`),
+                    category,
+                    enabled,
+                    getValue: (object: PlatformMember) => getParent(object)?.email,
+                }),
+                new SelectablePdfData<PlatformMember>({
+                    id: getId('address'),
+                    name: $t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`),
+                    category,
+                    enabled,
+                    // todo: check if this is correct?
+                    getValue: (object: PlatformMember) => getParent(object)?.address?.toString(),
+
+                }),
+                returnNullIfNoAccessRight(new SelectablePdfData<PlatformMember>({
+                    id: getId('nationalRegisterNumber'),
+                    name: $t(`439176a5-dd35-476b-8c65-3216560cac2f`),
+                    category,
+                    enabled,
+                    getValue: (object: PlatformMember) => getParent(object)?.nationalRegisterNumber?.toString(),
+                }), [AccessRight.MemberManageNRN]),
+            ];
+        }),
+
+        new SelectablePdfData<PlatformMember>({
+            id: 'unverifiedPhones',
+            name: $t(`62ce5fa4-3ea4-4fa8-a495-ff5eef1ec5d4`),
+            category: $t(`94823cfc-f583-4288-bf44-0a7cfec9e61f`),
+            enabled: false,
+            getValue: ({ patchedMember: object }: PlatformMember) => object.details.unverifiedPhones.join(', '),
+        }),
+        new SelectablePdfData<PlatformMember>({
+            id: 'unverifiedEmails',
+            name: $t(`7766ee8a-cd92-4d6f-a3fa-f79504fbcdda`),
+            category: $t(`94823cfc-f583-4288-bf44-0a7cfec9e61f`),
+            enabled: false,
+            getValue: ({ patchedMember: object }: PlatformMember) => object.details.unverifiedEmails.join(', '),
+        }),
+
+        ...[1, 2].map((number, index) => {
+            return new SelectablePdfData<PlatformMember>({
+                id: `unverifiedAddresses.${index}`,
+                name: `Adres ${number}`,
+                category: $t(`94823cfc-f583-4288-bf44-0a7cfec9e61f`),
+                enabled: false,
+                getValue: ({ patchedMember: object }: PlatformMember) => object.details.unverifiedAddresses.map(a => a.toString()).join('; '),
+            });
+        }),
+
+        ...flattenedCategories.flatMap((category) => {
+            return category.getAllRecords().flatMap((record) => {
+                return new SelectablePdfData<PlatformMember>({
+                    id: `recordAnswers.${record.id}`,
+                    name: record.name.toString(),
+                    category: category.name.toString(),
+                    description: record.description.toString(),
+                    getValue: ({ patchedMember: object }: PlatformMember) => {
+                        // todo: multiple values possible?
+                        return object.details.recordAnswers.get(record.id)?.stringValue;
+                    },
+                });
+            });
+        }),
+    ].filter(column => column !== null);
+
+    return columns;
+}
+
+export function getSelectableGroupPdfData(groups: Group[] = []) {
+    const groupColumns: SelectablePdfData<PlatformMember>[] = [];
+
+    for (const group of groups) {
+        const getRegistration = (object: PlatformMember) => object.filterRegistrations({ groupIds: [group.id] })[0] ?? null;
+
+        if (group.settings.prices.length > 1) {
+            groupColumns.push(
+                new SelectablePdfData<PlatformMember>({
+                    id: `groups.${group.id}.price`,
+                    name: $t(`ae21b9bf-7441-4f38-b789-58f34612b7af`),
+                    category: group.settings.name.toString(),
+                    getValue: (object: PlatformMember) => getRegistration(object)?.groupPrice.name.toString(),
+                }),
+            );
+        }
+
+        for (const menu of group.settings.optionMenus) {
+            groupColumns.push(
+                new SelectablePdfData<PlatformMember>({
+                    id: `groups.${group.id}.optionMenu.${menu.id}`,
+                    name: menu.name,
+                    category: group.settings.name.toString(),
+                    getValue: (member: PlatformMember) => {
+                        const registration = getRegistration(member);
+                        if (!registration) {
+                            return null;
+                        }
+
+                        const menuId = menu.id;
+
+                        const options = registration.options.filter(o => o.optionMenu.id === menuId);
+
+                        if (!options.length) {
+                            return null;
+                        }
+
+                        return options.map(option => (option.amount > 1 ? `${option.amount}x ` : '') + option.option.name).join(', ');
+                    },
+                }),
+            );
+
+            for (const option of menu.options) {
+                if (option.allowAmount) {
+                    groupColumns.push(
+                        new SelectablePdfData<PlatformMember>({
+                            id: `groups.${group.id}.optionMenu.${menu.id}.${option.id}.amount`,
+                            name: menu.name + ' → ' + option.name + ' → ' + $t('ed55e67d-1dce-46b2-8250-948c7cd616c2'),
+                            category: group.settings.name.toString(),
+                            getValue: (member: PlatformMember) => {
+                                const registration = getRegistration(member);
+                                if (!registration) {
+                                    return null;
+                                }
+
+                                const menuId = menu.id;
+
+                                const options = registration.options.filter(o => o.optionMenu.id === menuId);
+
+                                if (!options.length) {
+                                    return null;
+                                }
+
+                                return options.map(option => (option.amount > 1 ? `${option.amount}x ` : '') + option.option.name).join(', ');
+                            },
+                        }),
+                    );
+                }
+            }
+        }
+
+        for (const recordCategory of group.settings.recordCategories) {
+            const records = recordCategory.getAllRecords();
+
+            for (const record of records) {
+                groupColumns.push(
+                    new SelectablePdfData<PlatformMember>({
+                        id: `groups.${group.id}.recordAnswers.${record.id}`,
+                        name: recordCategory.name + ' → ' + record.name,
+                        category: group.settings.name.toString(),
+                        getValue: (member: PlatformMember) => {
+                            const registration = getRegistration(member);
+                            if (!registration) {
+                                return null;
+                            }
+                            return registration.recordAnswers.get(record.id)?.stringValue;
+                        },
+                    }),
+                );
+            }
+        }
+    }
+
+    return groupColumns;
+}
+
+export function getAllSelectablePdfDataForMemberDetails(args: { platform: Platform; organization: Organization | null; groups?: Group[]; auth: ContextPermissions }) {
+    const groupColumns = getSelectableGroupPdfData(args.groups ?? []);
+    return getSelectablePdfData({ ...args, groupColumns });
+}
