@@ -1,12 +1,14 @@
 import logoUrl from '@stamhoofd/assets/images/logo/logo-horizontal.png';
-import { colorDark, DefaultText, H1, H3, HorizontalGrid, LabelWithValue, Logo, metropolisBold, metropolisMedium, mmToPoints, PdfFont, PdfItem, PdfItemDrawOptions, PdfRenderer, PdfText, Spacing, VerticalStack } from '@stamhoofd/frontend-pdf-builder';
+import { colorDark, DefaultText, H1, H3, HorizontalGrid, LabelWithValue, Logo, metropolisBold, metropolisMedium, mmToPoints, PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, PdfRenderer, PdfText, Spacing, VerticalStack } from '@stamhoofd/frontend-pdf-builder';
 import { PlatformMember } from '@stamhoofd/structures';
+import { MembersSummaryHorizontalGrid } from './MembersSummaryHorizontalGrid';
+import { PdfDocument } from './PdfDocuments';
 import { SelectablePdfData } from './SelectablePdfData';
 
 const pageMargin = mmToPoints(10);
 
 export class MembersPdfDocument {
-    constructor(private readonly items: PlatformMember[], private readonly memberDetailsSelectableColumns: SelectablePdfData<PlatformMember>[], private readonly title: string) {
+    constructor(private readonly items: PlatformMember[], private readonly memberDetailsDocument: PdfDocument<PlatformMember>, private readonly membersSummaryDocument: PdfDocument<PlatformMember>, private readonly title: string) {
     }
 
     private async createDoc(): Promise<PDFKit.PDFDocument> {
@@ -41,14 +43,32 @@ export class MembersPdfDocument {
         });
         items.push(documentDescription);
 
+        const sortedMembers = [...this.items].sort(PlatformMember.sorterByName('ASC'));
+
         // member details
-        const grid = new MembersHorizontalGrid({
-            members: this.items.sort(PlatformMember.sorterByName('ASC')),
-            columns: 2,
-            selectableColumns: this.memberDetailsSelectableColumns,
-            getName: (o: PlatformMember) => o.patchedMember.details.name,
-        });
-        items.push(grid);
+        if (this.memberDetailsDocument.enabled) {
+            const grid = new MembersDetailHorizontalGrid({
+                members: sortedMembers,
+                columns: 2,
+                selectableColumns: this.memberDetailsDocument.items,
+                getName: (o: PlatformMember) => o.patchedMember.details.name,
+            });
+            items.push(grid);
+        }
+
+        // member summary
+        if (this.membersSummaryDocument.enabled) {
+            this.membersSummaryDocument.items.forEach((selectableColumn) => {
+                const summaryGrid = new MembersSummaryHorizontalGrid({
+                    members: sortedMembers,
+                    columns: 2,
+                    selectableColumn,
+                    getName: (o: PlatformMember) => o.patchedMember.details.name,
+                });
+
+                items.push(summaryGrid);
+            });
+        }
 
         // render
         const renderer = new PdfRenderer();
@@ -71,30 +91,30 @@ interface MembersHorizontalGridArgs {
 /**
  * A horizontal grid of member details
  */
-class MembersHorizontalGrid implements PdfItem {
-    private readonly factory: (doc: PDFKit.PDFDocument) => HorizontalGrid;
+class MembersDetailHorizontalGrid implements PdfItem {
+    private readonly factory: (docWrapper: PdfDocWrapper) => HorizontalGrid;
 
     constructor(private readonly args: MembersHorizontalGridArgs) {
-        this.factory = createMembersHorizontalGridFactory(this.args);
+        this.factory = createMembersDetailHorizontalGridFactory(this.args);
     }
 
-    private createGrid(doc: PDFKit.PDFDocument) {
-        return this.factory(doc);
+    private createGrid(docWrapper: PdfDocWrapper) {
+        return this.factory(docWrapper);
     }
 
-    draw(doc: PDFKit.PDFDocument, options?: PdfItemDrawOptions): void {
-        const grid = this.createGrid(doc);
-        grid.draw(doc, options);
+    draw(docWrapper: PdfDocWrapper, options?: PdfItemDrawOptions): void {
+        const grid = this.createGrid(docWrapper);
+        grid.draw(docWrapper, options);
     }
 
-    getHeight(doc: PDFKit.PDFDocument): number {
-        const grid = this.createGrid(doc);
-        return grid.getHeight(doc);
+    getHeight(docWrapper: PdfDocWrapper): number {
+        const grid = this.createGrid(docWrapper);
+        return grid.getHeight(docWrapper);
     }
 
-    getWidth(doc: PDFKit.PDFDocument): number | undefined {
-        const grid = this.createGrid(doc);
-        return grid.getWidth(doc);
+    getWidth(docWrapper: PdfDocWrapper): number | undefined {
+        const grid = this.createGrid(docWrapper);
+        return grid.getWidth(docWrapper);
     }
 
     getFonts(): PdfFont[] {
@@ -102,17 +122,17 @@ class MembersHorizontalGrid implements PdfItem {
     }
 }
 
-function createMembersHorizontalGridFactory({ members, columns, selectableColumns, getName }: MembersHorizontalGridArgs): (doc: PDFKit.PDFDocument) => HorizontalGrid {
+function createMembersDetailHorizontalGridFactory({ members, columns, selectableColumns, getName }: MembersHorizontalGridArgs): (docWrapper: PdfDocWrapper) => HorizontalGrid {
     const enabledColumns = selectableColumns.filter(c => c.enabled);
     const labels = enabledColumns.map(c => c.name);
     const longestLabel = labels.reduce((a, b) => a.length > b.length ? a : b, '');
 
-    return (doc: PDFKit.PDFDocument) => {
+    return (docWrapper: PdfDocWrapper) => {
         // same label width for each member
-        const minLabelWidth = LabelWithValue.widthOfLabel(doc, longestLabel);
+        const minLabelWidth = LabelWithValue.widthOfLabel(docWrapper, longestLabel);
 
         // create a vertical stack for each member
-        const memberStacks = members.map(member => memberVerticalStackFactory(member, enabledColumns, getName(member), minLabelWidth));
+        const memberStacks = members.map(member => memberDetailsVerticalStackFactory(member, enabledColumns, getName(member), minLabelWidth));
 
         // create a horizontal grid containing the vertical stacks
         const grid = new HorizontalGrid(memberStacks, {
@@ -133,7 +153,7 @@ function createMembersHorizontalGridFactory({ members, columns, selectableColumn
  * @param minLabelWidth
  * @returns
  */
-function memberVerticalStackFactory(member: PlatformMember, columns: SelectablePdfData<PlatformMember>[], name: string, minLabelWidth: number): VerticalStack {
+function memberDetailsVerticalStackFactory(member: PlatformMember, columns: SelectablePdfData<PlatformMember>[], name: string, minLabelWidth: number): VerticalStack {
     // name of the member
     const title = new H3(name);
 

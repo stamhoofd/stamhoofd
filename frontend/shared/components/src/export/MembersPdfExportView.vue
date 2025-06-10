@@ -124,7 +124,15 @@ async function doExport() {
         return;
     }
 
-    const document = new MembersPdfDocument(props.items, memberDetailsDocument.items, props.documentTitle);
+    const membersSummaryDocument = props.documents.documents[1];
+    if (!membersSummaryDocument) {
+        return;
+    }
+
+    const document = new MembersPdfDocument(props.items,
+        memberDetailsDocument,
+        membersSummaryDocument,
+        props.documentTitle);
 
     try {
         await document.download();

@@ -72,8 +72,8 @@ export class OrganizationSummary extends Organization {
     @field({ decoder: STBillingStatus })
     billingStatus: STBillingStatus;
 
-    @field({ decoder: DateDecoder })
-    createdAt: Date;
+    // @field({ decoder: DateDecoder })
+    // createdAt: Date;
 
     @field({ decoder: DateDecoder, nullable: true })
     lastActiveAt: Date | null = null;
