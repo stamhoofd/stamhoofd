@@ -142,7 +142,7 @@ defineRoutes([
                 name: Routes.Tags,
                 present: 'popup',
                 component: EditOrganizationTagsView as unknown as ComponentOptions,
-            } as Route<any, undefined>]
+            } as Route<any>]
         : []),
 ]);
 
