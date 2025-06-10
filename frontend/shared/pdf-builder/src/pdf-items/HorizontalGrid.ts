@@ -1,5 +1,6 @@
+import { PdfDocWrapper } from '../pdf-doc-wrapper';
 import { PdfFont } from '../pdf-font';
-import { getLastPageNumber, getPageHeighthWithoutMargins, getPageWidthWithoutMargins } from '../pdf-helpers';
+import { getPageHeighthWithoutMargins } from '../pdf-helpers';
 import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../pdf-item';
 import { VerticalStack } from './VerticalStack';
 
@@ -34,12 +35,12 @@ export class HorizontalGrid implements PdfItem {
         this.maxWidth = options.maxWidth;
     }
 
-    draw(doc: PDFKit.PDFDocument, options: PdfItemDrawOptions = {}): void {
-        const position = options.position;
+    draw(docWrapper: PdfDocWrapper, options: PdfItemDrawOptions = {}): void {
+        const doc = docWrapper.doc;
 
-        let x = position?.x === undefined ? doc.x : position.x;
-        let y = position?.y === undefined ? doc.y : position.y;
-        const maxPageWidth = getPageWidthWithoutMargins(doc);
+        let { x, y } = docWrapper.getNextPosition(options);
+
+        const maxPageWidth = docWrapper.getPageWidthWithoutMargins();
 
         const widths: number[] = [maxPageWidth];
         if (this.maxWidth) {
@@ -54,7 +55,7 @@ export class HorizontalGrid implements PdfItem {
         const getHeightOptions: PdfItemGetHeightOptions = { maxWidth: columnWidth };
 
         const originalX = x;
-        let currentPageNumber = getLastPageNumber(doc) - 1;
+        let currentPageNumber = docWrapper.getLastPageNumber() - 1;
         let currentColumn = 0;
         let didCurrentRowOverflow = false;
         let heightOfHighestItemOnRow = 0;
@@ -91,7 +92,7 @@ export class HorizontalGrid implements PdfItem {
                 }
 
                 // first calculate height to check if the item will fit on the current page
-                const itemHeight = item.getHeight(doc, getHeightOptions);
+                const itemHeight = item.getHeight(docWrapper, getHeightOptions);
 
                 const pageBottomLimit = doc.page.height - doc.page.margins.bottom;
                 const heightExceedsPageHeight = itemHeight > getPageHeighthWithoutMargins(doc);
@@ -101,7 +102,7 @@ export class HorizontalGrid implements PdfItem {
                 if (heightExceedsPageHeight) {
                     didCurrentRowOverflow = true;
                     if (item instanceof VerticalStack) {
-                        const splitItems = item.split(doc, getHeightOptions, availableHeight);
+                        const splitItems = item.split(docWrapper, getHeightOptions, availableHeight);
                         drawItems(splitItems);
                         continue;
                     }
@@ -117,7 +118,7 @@ export class HorizontalGrid implements PdfItem {
                     goToNextPage();
                 }
 
-                item.draw(doc, { ...options, maxWidth: columnWidth, position: { x, y } });
+                item.draw(docWrapper, { ...options, maxWidth: columnWidth, position: { x, y } });
 
                 currentColumn = (currentColumn + 1) % this.columns;
                 if (currentColumn === 0) {
@@ -147,12 +148,12 @@ export class HorizontalGrid implements PdfItem {
         drawItems(this.items);
     }
 
-    getHeight(_doc: PDFKit.PDFDocument): number {
+    getHeight(_docWrapper: PdfDocWrapper): number {
         throw new Error('Method not implemented.');
     }
 
-    getWidth(doc: PDFKit.PDFDocument): number {
-        return this.maxWidth === undefined ? getPageWidthWithoutMargins(doc) : this.maxWidth;
+    getWidth(docWrapper: PdfDocWrapper): number {
+        return this.maxWidth === undefined ? docWrapper.getPageWidthWithoutMargins() : this.maxWidth;
     }
 
     getFonts(): PdfFont[] {

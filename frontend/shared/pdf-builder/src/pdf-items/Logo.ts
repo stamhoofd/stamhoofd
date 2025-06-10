@@ -1,3 +1,4 @@
+import { PdfDocWrapper } from '../pdf-doc-wrapper';
 import { PdfItem } from '../pdf-item';
 
 /**
@@ -13,18 +14,19 @@ export class Logo implements PdfItem {
     }) {
     }
 
-    draw(doc: PDFKit.PDFDocument): void {
+    draw(docWrapper: PdfDocWrapper): void {
+        const doc = docWrapper.doc;
         const { src, width } = this.options;
         const margins = doc.page.margins;
 
         doc.image(src, doc.page.width - margins.right - width, margins.top, { width });
     }
 
-    getWidth(_doc: PDFKit.PDFDocument): number {
+    getWidth(_docWrapper: PdfDocWrapper): number {
         return this.options.width;
     }
 
-    getHeight(_doc: PDFKit.PDFDocument): number {
+    getHeight(_docWrapper: PdfDocWrapper): number {
         // todo?
         return 0;
     }

@@ -1,5 +1,6 @@
 export * from './colors';
 export * from './fonts';
+export * from './pdf-doc-wrapper';
 export * from './pdf-font';
 export * from './pdf-helpers';
 export * from './pdf-item';

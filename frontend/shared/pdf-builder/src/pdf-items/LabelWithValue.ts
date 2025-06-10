@@ -1,4 +1,5 @@
 import { colorDark, colorGray } from '../colors';
+import { PdfDocWrapper } from '../pdf-doc-wrapper';
 import { PdfFont } from '../pdf-font';
 import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../pdf-item';
 import { DefaultText } from './DefaultText';
@@ -34,9 +35,9 @@ export class LabelWithValue implements PdfItem {
         this.valueText = LabelWithValue.createValueText({ ...options.value, lineGap: options.lineGap });
     }
 
-    static widthOfLabel(doc: PDFKit.PDFDocument, text: string): number {
+    static widthOfLabel(docWrapper: PdfDocWrapper, text: string): number {
         // lineGap is irrelevant for width
-        return LabelWithValue.createLabel({ text, minWidth: 0, lineGap: 0 }).getWidth(doc);
+        return LabelWithValue.createLabel({ text, minWidth: 0, lineGap: 0 }).getWidth(docWrapper);
     }
 
     private static createLabel({ text, minWidth, lineGap }: { text: string; minWidth: number; lineGap: number }) {
@@ -63,25 +64,24 @@ export class LabelWithValue implements PdfItem {
         };
     }
 
-    draw(doc: PDFKit.PDFDocument, options?: PdfItemDrawOptions): void {
-        const x = options?.position?.x === undefined ? doc.x : options.position.x;
-        const y = options?.position?.y === undefined ? doc.y : options.position.y;
+    draw(docWrapper: PdfDocWrapper, options?: PdfItemDrawOptions): void {
+        const { x, y } = docWrapper.getNextPosition(options);
 
         const { labelWidth, valueWidth } = this.getLabelAndValueWidth(options?.maxWidth);
 
-        this.labelText.draw(doc, { ...options, maxWidth: labelWidth, position: { x, y } });
-        this.valueText.draw(doc, { ...options, maxWidth: valueWidth, position: { x: x + labelWidth + this.options.gapBetween, y } });
+        this.labelText.draw(docWrapper, { ...options, maxWidth: labelWidth, position: { x, y } });
+        this.valueText.draw(docWrapper, { ...options, maxWidth: valueWidth, position: { x: x + labelWidth + this.options.gapBetween, y } });
     }
 
-    getHeight(doc: PDFKit.PDFDocument, options?: PdfItemGetHeightOptions): number {
+    getHeight(docWrapper: PdfDocWrapper, options?: PdfItemGetHeightOptions): number {
         const { labelWidth, valueWidth } = this.getLabelAndValueWidth(options?.maxWidth);
         return Math.max(
-            this.labelText.getHeight(doc, { ...options, maxWidth: labelWidth }),
-            this.valueText.getHeight(doc, { ...options, maxWidth: valueWidth }),
+            this.labelText.getHeight(docWrapper, { ...options, maxWidth: labelWidth }),
+            this.valueText.getHeight(docWrapper, { ...options, maxWidth: valueWidth }),
         );
     }
 
-    getWidth(_doc: PDFKit.PDFDocument): number | undefined {
+    getWidth(_docWrapper: PdfDocWrapper): number | undefined {
         return undefined;
     }
 

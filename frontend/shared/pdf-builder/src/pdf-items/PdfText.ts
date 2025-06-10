@@ -1,3 +1,4 @@
+import { PdfDocWrapper } from '../pdf-doc-wrapper';
 import { PdfFont } from '../pdf-font';
 import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../pdf-item';
 
@@ -54,7 +55,8 @@ export class PdfText implements PdfItem {
         return textOptions;
     }
 
-    getHeight(doc: PDFKit.PDFDocument, options: PdfItemGetHeightOptions = {}): number {
+    getHeight(docWrapper: PdfDocWrapper, options: PdfItemGetHeightOptions = {}): number {
+        const doc = docWrapper.doc;
         this.configure(doc);
 
         const textOptions = this.getTextOptions(options.maxWidth);
@@ -62,7 +64,8 @@ export class PdfText implements PdfItem {
         return doc.heightOfString(this.text, textOptions) + this.marginBottom;
     }
 
-    getWidth(doc: PDFKit.PDFDocument) {
+    getWidth(docWrapper: PdfDocWrapper) {
+        const doc = docWrapper.doc;
         this.configure(doc);
         return doc.widthOfString(this.text, this.options);
     }
@@ -75,11 +78,11 @@ export class PdfText implements PdfItem {
         return [];
     }
 
-    draw(doc: PDFKit.PDFDocument, options: PdfItemDrawOptions) {
+    draw(docWrapper: PdfDocWrapper, options: PdfItemDrawOptions) {
+        const doc = docWrapper.doc;
         this.configure(doc);
 
-        let x = options?.position?.x === undefined ? doc.x : options.position.x;
-        let y = options?.position?.y === undefined ? doc.y : options.position.y;
+        let { x, y } = docWrapper.getNextPosition(options);
 
         if (this.options.position) {
             x = this.options.position.x;

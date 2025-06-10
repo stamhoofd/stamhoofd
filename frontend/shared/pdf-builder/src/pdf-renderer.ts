@@ -1,6 +1,7 @@
 import { AppManager } from '@stamhoofd/networking';
 import { Formatter } from '@stamhoofd/utility';
 import { Buffer } from 'buffer';
+import { PdfDocWrapper } from './pdf-doc-wrapper';
 import { PdfFont } from './pdf-font';
 import { PdfItem } from './pdf-item';
 
@@ -39,13 +40,14 @@ export class PdfRenderer {
 
     async render(doc: PDFKit.PDFDocument, pdfItems: PdfItem[]) {
         const bufferPromise = this.createBuffer(doc);
+        const docWrapper = new PdfDocWrapper(doc);
 
         for (const pdfItem of pdfItems) {
             if (pdfItem.getFonts) {
                 await this.registerFonts(doc, pdfItem.getFonts());
             }
 
-            pdfItem.draw(doc, {});
+            pdfItem.draw(docWrapper, {});
         }
 
         doc.end();

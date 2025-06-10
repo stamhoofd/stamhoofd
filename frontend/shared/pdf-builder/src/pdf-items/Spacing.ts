@@ -1,3 +1,4 @@
+import { PdfDocWrapper } from '../pdf-doc-wrapper';
 import { PdfItem, PdfItemDrawOptions } from '../pdf-item';
 
 /**
@@ -12,9 +13,9 @@ export class Spacing implements PdfItem {
     constructor(private readonly height: number = 0, private readonly width: number = 0) {
     }
 
-    draw(doc: PDFKit.PDFDocument, options?: PdfItemDrawOptions): void {
-        const x = options?.position?.x === undefined ? doc.x : options.position.x;
-        const y = options?.position?.y === undefined ? doc.y : options.position.y;
+    draw(docWrapper: PdfDocWrapper, options?: PdfItemDrawOptions): void {
+        const { x, y } = docWrapper.getNextPosition(options);
+        const doc = docWrapper.doc;
 
         if (this.height > 0) {
             doc.y = y + this.height;
@@ -25,11 +26,11 @@ export class Spacing implements PdfItem {
         }
     }
 
-    getHeight(_doc: PDFKit.PDFDocument): number {
+    getHeight(_docWrapper: PdfDocWrapper): number {
         return this.height;
     }
 
-    getWidth(_doc: PDFKit.PDFDocument): number | undefined {
+    getWidth(_docWrapper: PdfDocWrapper): number | undefined {
         return this.width;
     }
 }

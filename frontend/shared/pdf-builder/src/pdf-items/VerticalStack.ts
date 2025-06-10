@@ -1,3 +1,4 @@
+import { PdfDocWrapper } from '../pdf-doc-wrapper';
 import { PdfFont } from '../pdf-font';
 import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../pdf-item';
 
@@ -21,14 +22,14 @@ export class VerticalStack implements PdfItem {
      * @param maxHeight max height of the first stack
      * @returns one or two stacks (one if the max height is not exceeded)
      */
-    split(doc: PDFKit.PDFDocument, options: PdfItemGetHeightOptions, maxHeight: number): VerticalStack[] {
+    split(docWrapper: PdfDocWrapper, options: PdfItemGetHeightOptions, maxHeight: number): VerticalStack[] {
         let currentHeight = 0;
         const stacks: VerticalStack[] = [];
         const itemsInFirstStack: PdfItem[] = [];
 
         for (let i = 0; i < this.items.length; i++) {
             const item = this.items[i];
-            const itemHeight = item.getHeight(doc, options);
+            const itemHeight = item.getHeight(docWrapper, options);
 
             // if the total height of the first stack will exceed the max height
             if (currentHeight + itemHeight > maxHeight) {
@@ -53,9 +54,9 @@ export class VerticalStack implements PdfItem {
         return stacks;
     }
 
-    draw(doc: PDFKit.PDFDocument, options?: PdfItemDrawOptions): void {
+    draw(docWrapper: PdfDocWrapper, options?: PdfItemDrawOptions): void {
         const _options = { ...options };
-        const originalX = options?.position?.x === undefined ? doc.x : options.position.x;
+        const originalX = docWrapper.getNextPosition(options).x;
 
         if (this.maxWidth !== undefined) {
             if (options?.maxWidth !== undefined) {
@@ -67,7 +68,7 @@ export class VerticalStack implements PdfItem {
         }
 
         this.items.forEach((item, index) => {
-            item.draw(doc, _options);
+            item.draw(docWrapper, _options);
 
             if (index === 0) {
                 _options.position = {
@@ -78,11 +79,11 @@ export class VerticalStack implements PdfItem {
         });
     }
 
-    getHeight(doc: PDFKit.PDFDocument, options: PdfItemGetHeightOptions = {}): number {
-        return this.items.reduce((acc, item) => acc + item.getHeight(doc, options), 0);
+    getHeight(docWrapper: PdfDocWrapper, options: PdfItemGetHeightOptions = {}): number {
+        return this.items.reduce((acc, item) => acc + item.getHeight(docWrapper, options), 0);
     }
 
-    getWidth(_doc: PDFKit.PDFDocument): number | undefined {
+    getWidth(_docWrapper: PdfDocWrapper): number | undefined {
         return this.maxWidth;
     }
 
