@@ -1,7 +1,7 @@
 import { ContextPermissions } from '@stamhoofd/networking';
 import { Group, Organization, Platform, PlatformMember } from '@stamhoofd/structures';
 import { PdfDocument, PdfDocuments } from '../../export/PdfDocuments';
-import { getAllSelectablePdfDataForMemberDetails } from './getSelectablePdfData';
+import { getAllSelectablePdfDataForMemberDetails, getAllSelectablePdfDataForSummary } from './getSelectablePdfData';
 
 export function getPdfDocuments(args: { platform: Platform; organization: Organization | null; groups?: Group[]; auth: ContextPermissions }) {
     const sorter = PlatformMember.sorterByName('ASC');
@@ -9,7 +9,7 @@ export function getPdfDocuments(args: { platform: Platform; organization: Organi
     return new PdfDocuments({
         documents: [
             new PdfDocument({
-                id: 'members',
+                id: 'member-details',
                 name: $t('Kenmerken per lid'),
                 description: $t('Selecteer hier alle kenmerken die je in de samenvatting wilt oplijsten, gegroepeerd per lid.'),
                 items: getAllSelectablePdfDataForMemberDetails(args),
@@ -18,12 +18,12 @@ export function getPdfDocuments(args: { platform: Platform; organization: Organi
                 sorter,
             }),
             new PdfDocument({
-                id: 'members',
+                id: 'member-summary',
                 name: $t('Leden oplijsten per categorie'),
                 description: $t('Je kan ook leden oplijsten per categorie, eventueel met extra opmerkingen erbij (bv. bij aanvinkvakjes met opmerkingen).'),
-                items: [],
+                items: getAllSelectablePdfDataForSummary(args),
                 // todo
-                getItemName: _item => 'todo',
+                getItemName: item => item.patchedMember.details.name,
                 columnCount: 1,
                 sorter,
             }),

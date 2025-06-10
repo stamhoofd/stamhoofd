@@ -35,9 +35,13 @@ export class SelectablePdfData<T> implements SelectableData {
         return SelectablePdfData.valueToString(this.getValue(item));
     }
 
-    static valueToString(value: SelectablePdfColumnValue): string {
+    getStringValueOrNull(item: T) {
+        return SelectablePdfData.valueToStringOrNull(this.getValue(item));
+    }
+
+    static valueToStringOrNull(value: SelectablePdfColumnValue): string | null {
         if (value === null || value === undefined) {
-            return '';
+            return null;
         }
 
         switch (typeof value) {
@@ -56,5 +60,14 @@ export class SelectablePdfData<T> implements SelectableData {
             default:
                 return '';
         }
+    }
+
+    static valueToString(value: SelectablePdfColumnValue): string {
+        const valueOrNull = this.valueToStringOrNull(value);
+        if (valueOrNull === null) {
+            return '';
+        }
+
+        return valueOrNull;
     }
 }

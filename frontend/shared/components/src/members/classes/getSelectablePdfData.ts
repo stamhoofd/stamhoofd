@@ -1,6 +1,6 @@
 import { SelectableColumn } from '@stamhoofd/frontend-excel-export';
 import { ContextPermissions } from '@stamhoofd/networking';
-import { AccessRight, FinancialSupportSettings, Gender, Group, GroupType, Organization, Parent, Platform, PlatformMember, RecordCategory } from '@stamhoofd/structures';
+import { AccessRight, FinancialSupportSettings, Gender, Group, GroupType, Organization, Parent, Platform, PlatformMember, RecordCategory, RecordCheckboxAnswer, RecordSettings, RecordType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { SelectablePdfData } from '../../export/SelectablePdfData';
 
@@ -16,6 +16,16 @@ function formatGender(gender: Gender) {
     }
 }
 
+function returnNullIfNoAccessRightFactory(auth: ContextPermissions) {
+    return <T extends SelectableColumn>(column: T, requiresAccessRights: AccessRight[]): T | null => {
+        if (requiresAccessRights.some(accessRight => !auth.hasAccessRight(accessRight))) {
+            return null;
+        }
+
+        return column;
+    };
+}
+
 export function getSelectablePdfData({ platform, organization, auth, groupColumns }: { platform: Platform; organization: Organization | null; auth: ContextPermissions; groupColumns?: SelectablePdfData<PlatformMember>[] }) {
     const recordCategories = [
         ...(organization?.meta.recordsConfiguration.recordCategories ?? []),
@@ -27,13 +37,7 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
 
     const flattenedCategories = RecordCategory.flattenCategoriesWith(recordCategories, r => r.excelColumns.length > 0);
 
-    const returnNullIfNoAccessRight = <T extends SelectableColumn>(column: T, requiresAccessRights: AccessRight[]): T | null => {
-        if (requiresAccessRights.some(accessRight => !auth.hasAccessRight(accessRight))) {
-            return null;
-        }
-
-        return column;
-    };
+    const returnNullIfNoAccessRight = returnNullIfNoAccessRightFactory(auth);
 
     const columns: SelectablePdfData<PlatformMember>[] = [
         new SelectablePdfData<PlatformMember>({
@@ -445,4 +449,97 @@ export function getSelectableGroupPdfData(groups: Group[] = []) {
 export function getAllSelectablePdfDataForMemberDetails(args: { platform: Platform; organization: Organization | null; groups?: Group[]; auth: ContextPermissions }) {
     const groupColumns = getSelectableGroupPdfData(args.groups ?? []);
     return getSelectablePdfData({ ...args, groupColumns });
+}
+
+export function getAllSelectablePdfDataForSummary({ platform, organization, auth, groups }: { platform: Platform; organization: Organization | null; auth: ContextPermissions; groups?: Group[] }) {
+    const recordCategories = [
+        ...(organization?.meta.recordsConfiguration.recordCategories ?? []),
+        ...platform.config.recordsConfiguration.recordCategories,
+    ];
+
+    const flattenedCategories = RecordCategory.flattenCategoriesWith(recordCategories, r => r.excelColumns.length > 0);
+
+    const financialSupportSettings = platform.config.financialSupport ?? FinancialSupportSettings.create({});
+    const financialSupportTitle = financialSupportSettings.title;
+
+    const returnNullIfNoAccessRight = returnNullIfNoAccessRightFactory(auth);
+
+    const columns: SelectablePdfData<PlatformMember>[] = [
+        returnNullIfNoAccessRight(new SelectablePdfData<PlatformMember>({
+            id: 'requiresFinancialSupport',
+            name: financialSupportTitle,
+            enabled: false,
+            // todo!!!!!!!!!!!!
+            getValue: ({ patchedMember: object }: PlatformMember) => false.toString(),
+        }), [AccessRight.MemberReadFinancialData]),
+        new SelectablePdfData<PlatformMember>({
+            id: 'dataPermissions',
+            name: $t('Geen toestemming verzamelen gevoelige gegevens'),
+            enabled: false,
+            getValue: ({ patchedMember: object }: PlatformMember) => object.details.dataPermissions?.value ? null : '',
+        }),
+    ].filter(column => column !== null);
+
+    flattenedCategories.forEach((recordCategory) => {
+        const categoryName = recordCategory.name.toString();
+        columns.push(...getSelectabelPdfDataFromRecordCatagoryForSummary({ recordCategory, categoryName,
+            getBaseId: (record: RecordSettings) => `recordAnswers.${record.id}`,
+            getBaseName: (record: RecordSettings) => record.name.toString(),
+        }));
+    });
+
+    for (const group of groups ?? []) {
+        const getRegistration = (object: PlatformMember) => object.filterRegistrations({ groupIds: [group.id] })[0] ?? null;
+
+        group.settings.recordCategories.forEach((recordCategory) => {
+            const categoryName = group.settings.name.toString();
+            columns.push(...getSelectabelPdfDataFromRecordCatagoryForSummary({ recordCategory, categoryName,
+                getBaseId: (record: RecordSettings) => `groups.${group.id}.recordAnswers.${record.id}`,
+                getBaseName: (record: RecordSettings) => recordCategory.name + ' → ' + record.name,
+            }));
+        });
+    }
+
+    return columns;
+}
+
+function getSelectabelPdfDataFromRecordCatagoryForSummary({ recordCategory, categoryName: category, getBaseId, getBaseName }: { recordCategory: RecordCategory; categoryName: string | undefined; getBaseId: (record: RecordSettings) => string; getBaseName: (record: RecordSettings) => string }): SelectablePdfData<PlatformMember>[] {
+    return recordCategory.getAllRecords().flatMap((record) => {
+        const baseId = getBaseId(record);
+        const baseName = getBaseName(record);
+        const type = record.type;
+
+        switch (type) {
+            case RecordType.Checkbox: {
+                return [
+                    new SelectablePdfData<PlatformMember>({
+                        id: `${baseId}.checked`,
+                        name: `${baseName}: ${$t('aangevinkt')}`,
+                        category,
+                        getValue: ({ patchedMember: object }: PlatformMember) => {
+                            const answer = object.details.recordAnswers.get(record.id);
+                            if (answer instanceof RecordCheckboxAnswer) {
+                                return answer.selected ? (answer.comments ?? '') : null;
+                            }
+                            return null;
+                        },
+                    }), new SelectablePdfData<PlatformMember>({
+                        id: `${baseId}.notChecked`,
+                        name: `${baseName}: ${$t('niet aangevinkt')}`,
+                        category,
+                        getValue: ({ patchedMember: object }: PlatformMember) => {
+                            const answer = object.details.recordAnswers.get(record.id);
+                            if (answer instanceof RecordCheckboxAnswer) {
+                                return answer.selected ? null : '';
+                            }
+                            return '';
+                        },
+                    }),
+                ];
+            }
+            default: {
+                return [];
+            }
+        }
+    });
 }
