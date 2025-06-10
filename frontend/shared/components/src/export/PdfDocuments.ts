@@ -1,5 +1,5 @@
 import { PdfDocumentFilter, PdfDocumentsFilter, PdfItemFilter } from '@stamhoofd/structures';
-import { SelectablePdfColumn } from './SelectablePdfColumn';
+import { SelectablePdfData } from './SelectablePdfData';
 
 export type PdfItemSorter<T> = (a: T, b: T) => 0 | 1 | -1;
 
@@ -7,7 +7,7 @@ export class PdfDocument<T> {
     readonly id: string;
     readonly name: string;
     readonly description: string;
-    readonly items: SelectablePdfColumn<T>[] = [];
+    readonly items: SelectablePdfData<T>[] = [];
     private withCategoryRow: boolean = true;
     readonly getItemName: (item: T) => string;
     readonly columnCount = 1;
@@ -17,7 +17,7 @@ export class PdfDocument<T> {
         id: string;
         name: string;
         description?: string;
-        items: SelectablePdfColumn<T>[];
+        items: SelectablePdfData<T>[];
         getItemName: (item: T) => string;
         columnCount?: number;
         sorter?: PdfItemSorter<T>;

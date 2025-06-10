@@ -33,7 +33,7 @@
             </STListItem>
         </STList> -->
 
-        <ColumnSelector :name="'pdf'" :columns="visibleDocument.items" />
+        <DataSelector :name="'pdf'" :selectable-data="visibleDocument.items" />
     </SaveView>
 </template>
 
@@ -44,7 +44,7 @@ import { ErrorBox, ScrollableSegmentedControl, useContext, useErrors } from '@st
 import { Storage } from '@stamhoofd/networking';
 import { PdfDocumentsFilter, PlatformMember, Version } from '@stamhoofd/structures';
 import { onMounted, ref } from 'vue';
-import ColumnSelector from './ColumnSelector.vue';
+import DataSelector from './DataSelector.vue';
 import { MembersPdfDocument } from './MembersPdfDocument';
 import { PdfDocuments } from './PdfDocuments';
 

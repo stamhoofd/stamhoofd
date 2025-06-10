@@ -1,11 +1,11 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import MembersPdfExportView from '@stamhoofd/frontend-excel-export/src/MembersPdfExportView.vue';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupType, mergeFilters, Organization, OrganizationRegistrationPeriod, PermissionLevel, Platform, PlatformMember, PlatformRegistration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { LoadComponent } from '../../containers/AsyncComponent';
 import { EmailView, RecipientChooseOneOption } from '../../email';
+import MembersPdfExportView from '../../export/MembersPdfExportView.vue';
 import { useContext, useOrganization, usePlatform } from '../../hooks';
 import { checkoutDefaultItem, chooseOrganizationMembersForGroup, getActionsForCategory, PlatformFamilyManager, presentDeleteMembers, presentEditMember, presentEditResponsibilities, usePlatformFamilyManager } from '../../members';
 import { getPdfDocuments } from '../../members/classes/getPdfDocuments';

@@ -2,7 +2,6 @@ import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-en
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import MembersPdfExportView from '@stamhoofd/frontend-excel-export/src/MembersPdfExportView.vue';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, PermissionLevel, Platform, PlatformMember, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -12,6 +11,7 @@ import { GlobalEventBus } from '../../EventBus';
 import { AuditLogsView } from '../../audit-logs';
 import { LoadComponent } from '../../containers/AsyncComponent';
 import EmailView, { RecipientChooseOneOption } from '../../email/EmailView.vue';
+import MembersPdfExportView from '../../export/MembersPdfExportView.vue';
 import { manualFeatureFlag, useContext, useOrganization, usePlatform } from '../../hooks';
 import ChargeMembersView from '../../members/ChargeMembersView.vue';
 import { Toast } from '../../overlays/Toast';

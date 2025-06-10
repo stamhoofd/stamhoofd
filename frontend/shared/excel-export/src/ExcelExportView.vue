@@ -33,19 +33,18 @@
             </STListItem>
         </STList>
 
-        <ColumnSelector :name="visibleSheet.name" :columns="visibleSheet.columns" />
+        <DataSelector :name="visibleSheet.name" :selectable-data="visibleSheet.columns" />
     </SaveView>
 </template>
 
 <script lang="ts" setup>
 import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, ScrollableSegmentedControl, Toast, ToastButton, useContext, useErrors } from '@stamhoofd/components';
+import { DataSelector, ErrorBox, ScrollableSegmentedControl, Toast, ToastButton, useContext, useErrors } from '@stamhoofd/components';
 import { AppManager, Storage } from '@stamhoofd/networking';
 import { ExcelExportRequest, ExcelExportResponse, ExcelExportType, ExcelWorkbookFilter, LimitedFilteredRequest, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { onMounted, ref } from 'vue';
-import ColumnSelector from './ColumnSelector.vue';
 import { SelectableWorkbook } from './SelectableWorkbook';
 
 const props = defineProps<{

@@ -1,0 +1,11 @@
+{
+    "name": "@stamhoofd/frontend-pdf-builder",
+    "version": "1.0.0",
+    "private": true,
+    "main": "index.ts",
+    "type": "module",
+    "dependencies": {
+        "@stamhoofd/structures": "*",
+        "@stamhoofd/components": "*"
+    }
+}

@@ -1,6 +1,6 @@
-import { PdfDocument, PdfDocuments } from '@stamhoofd/frontend-excel-export/src/PdfDocuments';
 import { ContextPermissions } from '@stamhoofd/networking';
 import { Group, Organization, Platform, PlatformMember } from '@stamhoofd/structures';
+import { PdfDocument, PdfDocuments } from '../../export/PdfDocuments';
 import { getAllSelectableColumns } from './getSelectableWorkbook';
 
 export function getPdfDocuments(args: { platform: Platform; organization: Organization | null; groups?: Group[]; auth: ContextPermissions }) {

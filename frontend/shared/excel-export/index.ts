@@ -1,5 +1,4 @@
 export * from './src/SelectableColumn';
-export * from './src/SelectablePdfColumn';
 export * from './src/SelectableSheet';
 export * from './src/SelectableWorkbook';
 

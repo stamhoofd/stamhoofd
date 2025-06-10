@@ -1,9 +1,15 @@
 import { Formatter } from '@stamhoofd/utility';
-import { SelectableColumn } from './SelectableColumn';
+import { SelectableData } from './SelectableData';
 
 export type SelectablePdfColumnValue = string | null | undefined | number | boolean | Date;
 
-export class SelectablePdfColumn<T> extends SelectableColumn {
+export class SelectablePdfData<T> implements SelectableData {
+    enabled: boolean = true;
+    id: string;
+
+    name: string;
+    description: string = '';
+    category?: string | null = null;
     getValue: (object: T) => SelectablePdfColumnValue;
 
     constructor(data: {
@@ -14,19 +20,19 @@ export class SelectablePdfColumn<T> extends SelectableColumn {
         category?: string | null;
         getValue: (object: T) => SelectablePdfColumnValue;
     }) {
-        super(data);
+        Object.assign(this, data);
         this.getValue = data.getValue;
     }
 
-    static fromSelectableColumn<T>(selectableColumn: SelectableColumn, getValue: (object: T) => SelectablePdfColumnValue) {
-        return new SelectablePdfColumn({
-            ...selectableColumn,
+    static fromSelectableData<T>(data: SelectableData, getValue: (object: T) => SelectablePdfColumnValue) {
+        return new SelectablePdfData({
+            ...data,
             getValue,
         });
     }
 
     getStringValue(item: T) {
-        return SelectablePdfColumn.valueToString(this.getValue(item));
+        return SelectablePdfData.valueToString(this.getValue(item));
     }
 
     static valueToString(value: SelectablePdfColumnValue): string {

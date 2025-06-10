@@ -1,26 +1,12 @@
 import logoUrl from '@stamhoofd/assets/images/logo/logo-horizontal.png';
+import { colorDark, DefaultText, H1, H3, HorizontalGrid, LabelWithValue, Logo, metropolisBold, metropolisMedium, mmToPoints, PdfFont, PdfItem, PdfItemDrawOptions, PdfRenderer, PdfText, Spacing, VerticalStack } from '@stamhoofd/frontend-pdf-builder';
 import { PlatformMember } from '@stamhoofd/structures';
-import { colorDark } from './pdf-builder/colors';
-import { metropolisBold, metropolisMedium } from './pdf-builder/fonts';
-import { PdfFont } from './pdf-builder/pdf-font';
-import { mmToPoints } from './pdf-builder/pdf-helpers';
-import { PdfItem, PdfItemDrawOptions } from './pdf-builder/pdf-item';
-import { DefaultText } from './pdf-builder/pdf-items/DefaultText';
-import { H1 } from './pdf-builder/pdf-items/H1';
-import { H3 } from './pdf-builder/pdf-items/H3';
-import { LabelWithValue } from './pdf-builder/pdf-items/LabelWithValue';
-import { Logo } from './pdf-builder/pdf-items/Logo';
-import { HorizontalGrid } from './pdf-builder/pdf-items/PdfHorizontalGrid';
-import { PdfText } from './pdf-builder/pdf-items/PdfText';
-import { Spacing } from './pdf-builder/pdf-items/Spacing';
-import { VerticalStack } from './pdf-builder/pdf-items/VerticalStack';
-import { PdfRenderer } from './pdf-builder/pdf-renderer';
-import { SelectablePdfColumn } from './SelectablePdfColumn';
+import { SelectablePdfData } from './SelectablePdfData';
 
 const pageMargin = mmToPoints(10);
 
 export class MembersPdfDocument {
-    constructor(private readonly items: PlatformMember[], private readonly memberDetailsSelectableColumns: SelectablePdfColumn<PlatformMember>[], private readonly title: string) {
+    constructor(private readonly items: PlatformMember[], private readonly memberDetailsSelectableColumns: SelectablePdfData<PlatformMember>[], private readonly title: string) {
     }
 
     private async createDoc(): Promise<PDFKit.PDFDocument> {
@@ -78,7 +64,7 @@ export class MembersPdfDocument {
 interface MembersHorizontalGridArgs {
     members: PlatformMember[];
     columns: number;
-    selectableColumns: SelectablePdfColumn<PlatformMember>[];
+    selectableColumns: SelectablePdfData<PlatformMember>[];
     getName: (member: PlatformMember) => string;
 }
 
@@ -147,7 +133,7 @@ function createMembersHorizontalGridFactory({ members, columns, selectableColumn
  * @param minLabelWidth
  * @returns
  */
-function memberVerticalStackFactory(member: PlatformMember, columns: SelectablePdfColumn<PlatformMember>[], name: string, minLabelWidth: number): VerticalStack {
+function memberVerticalStackFactory(member: PlatformMember, columns: SelectablePdfData<PlatformMember>[], name: string, minLabelWidth: number): VerticalStack {
     // name of the member
     const title = new H3(name);
 
