@@ -1,6 +1,6 @@
-import { PdfDocWrapper } from '../pdf-doc-wrapper';
-import { PdfFont } from '../pdf-font';
-import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../pdf-item';
+import { PdfDocWrapper } from '../PdfDocWrapper';
+import { PdfFont } from '../PdfFont';
+import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../PdfItem';
 
 /**
  * A group of pdf items that are drawn in a vertical stack.

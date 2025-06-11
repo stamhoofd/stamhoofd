@@ -1,5 +1,5 @@
-import { PdfDocWrapper } from './pdf-doc-wrapper';
-import { PdfFont } from './pdf-font';
+import { PdfDocWrapper } from './PdfDocWrapper';
+import { PdfFont } from './PdfFont';
 
 export type PdfItemDrawOptions = {
     maxWidth?: number;

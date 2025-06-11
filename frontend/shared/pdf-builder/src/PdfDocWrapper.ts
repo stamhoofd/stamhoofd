@@ -1,5 +1,5 @@
 import { getLastPageIndex, getLastPageNumber } from './pdf-helpers';
-import { PdfItemDrawOptions } from './pdf-item';
+import { PdfItemDrawOptions } from './PdfItem';
 
 export class PdfDocWrapper {
     get safeMargins(): PDFKit.PDFPage['margins'] {

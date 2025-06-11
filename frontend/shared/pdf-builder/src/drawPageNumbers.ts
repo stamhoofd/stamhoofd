@@ -1,4 +1,4 @@
-import { PdfDocWrapper } from './pdf-doc-wrapper';
+import { PdfDocWrapper } from './PdfDocWrapper';
 import { PdfText, PdfTextOptions } from './pdf-items';
 
 /**
