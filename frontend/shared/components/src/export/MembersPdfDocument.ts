@@ -59,6 +59,17 @@ export class MembersPdfDocument {
         // member summary
         if (this.membersSummaryDocument.enabled) {
             this.membersSummaryDocument.items.forEach((selectableColumn) => {
+                if (!selectableColumn.enabled) {
+                    return;
+                }
+
+                const summaryTitle = new H3(selectableColumn.name, {
+                    spacing: {
+                        bottom: mmToPoints(2),
+                    },
+                });
+                items.push(summaryTitle);
+
                 const summaryGrid = new MembersSummaryHorizontalGrid({
                     members: sortedMembers,
                     columns: 2,

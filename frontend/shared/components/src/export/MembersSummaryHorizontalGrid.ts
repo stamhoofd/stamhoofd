@@ -13,7 +13,7 @@ interface MembersSummaryHorizontalGridArgs {
  * A horizontal grid with a summary of the members
  */
 export class MembersSummaryHorizontalGrid implements PdfItem {
-    private readonly factory: (docWrapper: PdfDocWrapper) => HorizontalGrid;
+    private readonly factory: (docWrapper: PdfDocWrapper) => HorizontalGrid | null;
 
     constructor(private readonly args: MembersSummaryHorizontalGridArgs) {
         this.factory = createMembersHorizontalGridFactory(this.args);
@@ -25,17 +25,30 @@ export class MembersSummaryHorizontalGrid implements PdfItem {
 
     draw(docWrapper: PdfDocWrapper, options?: PdfItemDrawOptions): void {
         const grid = this.createGrid(docWrapper);
-        grid.draw(docWrapper, options);
+
+        if (grid) {
+            grid.draw(docWrapper, options);
+        }
     }
 
     getHeight(docWrapper: PdfDocWrapper): number {
         const grid = this.createGrid(docWrapper);
-        return grid.getHeight(docWrapper);
+
+        if (grid) {
+            return grid.getHeight(docWrapper);
+        }
+
+        return 0;
     }
 
     getWidth(docWrapper: PdfDocWrapper): number | undefined {
         const grid = this.createGrid(docWrapper);
-        return grid.getWidth(docWrapper);
+
+        if (grid) {
+            return grid.getWidth(docWrapper);
+        }
+
+        return 0;
     }
 
     getFonts(): PdfFont[] {
@@ -43,7 +56,7 @@ export class MembersSummaryHorizontalGrid implements PdfItem {
     }
 }
 
-function createMembersHorizontalGridFactory({ members, columns, selectableColumn, getName }: MembersSummaryHorizontalGridArgs): (docWrapper: PdfDocWrapper) => HorizontalGrid {
+function createMembersHorizontalGridFactory({ members, columns, selectableColumn, getName }: MembersSummaryHorizontalGridArgs): (docWrapper: PdfDocWrapper) => HorizontalGrid | null {
     const labels = members.map(m => getName(m));
     const longestLabel = labels.reduce((a, b) => a.length > b.length ? a : b, '');
 
@@ -52,7 +65,7 @@ function createMembersHorizontalGridFactory({ members, columns, selectableColumn
         const minLabelWidth = LabelWithValue.widthOfLabel(docWrapper, longestLabel);
 
         // create a single stack
-        const stack = new VerticalStack(members.flatMap((member) => {
+        const stackItems = members.flatMap((member) => {
             const value = selectableColumn.getStringValueOrNull(member);
 
             if (value === null) {
@@ -74,7 +87,13 @@ function createMembersHorizontalGridFactory({ members, columns, selectableColumn
             });
 
             return [labelWithValue];
-        }));
+        });
+
+        if (stackItems.length === 0) {
+            return null;
+        }
+
+        const stack = new VerticalStack(stackItems);
 
         // create a horizontal grid containing the vertical stacks
         const grid = new HorizontalGrid([stack], {

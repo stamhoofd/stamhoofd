@@ -1,6 +1,5 @@
 import { PdfDocWrapper } from '../pdf-doc-wrapper';
 import { PdfFont } from '../pdf-font';
-import { getPageHeighthWithoutMargins } from '../pdf-helpers';
 import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../pdf-item';
 import { VerticalStack } from './VerticalStack';
 
@@ -36,6 +35,10 @@ export class HorizontalGrid implements PdfItem {
     }
 
     draw(docWrapper: PdfDocWrapper, options: PdfItemDrawOptions = {}): void {
+        if (this.items.length === 0) {
+            return;
+        }
+
         const doc = docWrapper.doc;
 
         let { x, y } = docWrapper.getNextPosition(options);
@@ -55,26 +58,35 @@ export class HorizontalGrid implements PdfItem {
         const getHeightOptions: PdfItemGetHeightOptions = { maxWidth: columnWidth };
 
         const originalX = x;
-        let currentPageNumber = docWrapper.getLastPageNumber() - 1;
         let currentColumn = 0;
         let didCurrentRowOverflow = false;
         let heightOfHighestItemOnRow = 0;
         let rowTop = y;
         let shouldGoToNextPage = false;
+        let pageTop = rowTop;
+
+        const setX = (newX: number) => {
+            x = newX;
+            doc.x = x;
+        };
+
+        const setY = (newY: number) => {
+            y = newY;
+            doc.y = y;
+        };
 
         const goToNextRow = (newY: number) => {
-            y = newY;
+            setY(newY);
             currentColumn = 0;
             rowTop = y;
-            x = originalX;
+            setX(originalX);
             heightOfHighestItemOnRow = 0;
             didCurrentRowOverflow = false;
         };
 
         const goToNextPage = () => {
-            doc.addPage();
-            doc.switchToPage(currentPageNumber + 1);
-            currentPageNumber++;
+            pageTop = doc.page.margins.top;
+            docWrapper.goToNextPage();
             goToNextRow(doc.page.margins.top);
         };
 
@@ -83,8 +95,10 @@ export class HorizontalGrid implements PdfItem {
          * Calls itself recursively if a container is split.
          * @param items
          */
-        const drawItems = (items: PdfItem[]) => {
-            for (const item of items) {
+        const drawItems = (items: PdfItem[], isLastBatch: boolean) => {
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+
                 // go to next page if a new page is needed after the previous item
                 if (shouldGoToNextPage) {
                     shouldGoToNextPage = false;
@@ -95,15 +109,18 @@ export class HorizontalGrid implements PdfItem {
                 const itemHeight = item.getHeight(docWrapper, getHeightOptions);
 
                 const pageBottomLimit = doc.page.height - doc.page.margins.bottom;
-                const heightExceedsPageHeight = itemHeight > getPageHeighthWithoutMargins(doc);
+                const totalAvailableHeightOnPage = pageBottomLimit - pageTop;
+                const heightExceedsTotalAvailableHeightOnPage = itemHeight > totalAvailableHeightOnPage;
                 const availableHeight = pageBottomLimit - rowTop;
 
                 // if the item height exceeds the page height, split the item
-                if (heightExceedsPageHeight) {
+                if (heightExceedsTotalAvailableHeightOnPage) {
                     didCurrentRowOverflow = true;
                     if (item instanceof VerticalStack) {
-                        const splitItems = item.split(docWrapper, getHeightOptions, availableHeight);
-                        drawItems(splitItems);
+                        const splitItems = item.split(docWrapper, getHeightOptions, totalAvailableHeightOnPage);
+                        const isLastItemInBatch = i === items.length - 1;
+                        const isCurrentLastItem = isLastBatch && isLastItemInBatch;
+                        drawItems(splitItems, isCurrentLastItem);
                         continue;
                     }
                     console.warn('Item height exceeds page height');
@@ -121,7 +138,12 @@ export class HorizontalGrid implements PdfItem {
                 item.draw(docWrapper, { ...options, maxWidth: columnWidth, position: { x, y } });
 
                 currentColumn = (currentColumn + 1) % this.columns;
-                if (currentColumn === 0) {
+                const isLastItemInGrid = isLastBatch && i === items.length - 1;
+
+                if (isLastItemInGrid) {
+                    goToNextRow(rowTop + heightOfHighestItemOnRow);
+                }
+                else if (currentColumn === 0) {
                     if (didCurrentRowOverflow) {
                         // do not go to next page immediatetely because ony needed if there is another item
                         shouldGoToNextPage = true;
@@ -140,12 +162,12 @@ export class HorizontalGrid implements PdfItem {
                     }
                 }
                 else {
-                    x = originalX + (currentColumn * (this.columnGap + columnWidth));
+                    setX(originalX + (currentColumn * (this.columnGap + columnWidth)));
                 }
             }
         };
 
-        drawItems(this.items);
+        drawItems(this.items, true);
     }
 
     getHeight(_docWrapper: PdfDocWrapper): number {

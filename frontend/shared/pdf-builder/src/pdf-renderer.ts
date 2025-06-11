@@ -48,6 +48,10 @@ export class PdfRenderer {
             }
 
             pdfItem.draw(docWrapper, {});
+
+            if (doc.y > doc.page.height - doc.page.margins.bottom) {
+                docWrapper.goToNextPage();
+            }
         }
 
         doc.end();

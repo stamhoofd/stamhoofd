@@ -70,7 +70,14 @@ export class LabelWithValue implements PdfItem {
         const { labelWidth, valueWidth } = this.getLabelAndValueWidth(options?.maxWidth);
 
         this.labelText.draw(docWrapper, { ...options, maxWidth: labelWidth, position: { x, y } });
+        const labelY = docWrapper.doc.y;
+
         this.valueText.draw(docWrapper, { ...options, maxWidth: valueWidth, position: { x: x + labelWidth + this.options.gapBetween, y } });
+        const valueY = docWrapper.doc.y;
+
+        if (labelY > valueY) {
+            docWrapper.doc.y = labelY;
+        }
     }
 
     getHeight(docWrapper: PdfDocWrapper, options?: PdfItemGetHeightOptions): number {
