@@ -1,11 +1,11 @@
 import logoUrl from '@stamhoofd/assets/images/logo/logo-horizontal.png';
-import { colorDark, DefaultText, H1, H3, HorizontalGrid, LabelWithValue, Logo, metropolisBold, metropolisMedium, mmToPoints, PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, PdfRenderer, PdfText, Spacing, VerticalStack } from '@stamhoofd/frontend-pdf-builder';
+import { colorDark, colorGray, DefaultText, drawPageNumbers, H1, H3, HorizontalGrid, LabelWithValue, Logo, metropolisBold, metropolisMedium, mmToPoints, PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, PdfRenderer, PdfText, PdfTextOptions, Spacing, VerticalStack } from '@stamhoofd/frontend-pdf-builder';
 import { PlatformMember } from '@stamhoofd/structures';
 import { MembersSummaryHorizontalGrid } from './MembersSummaryHorizontalGrid';
 import { PdfDocument } from './PdfDocuments';
 import { SelectablePdfData } from './SelectablePdfData';
 
-const pageMargin = mmToPoints(10);
+const pageMargin = mmToPoints(15);
 
 export class MembersPdfDocument {
     constructor(private readonly items: PlatformMember[], private readonly memberDetailsDocument: PdfDocument<PlatformMember>, private readonly membersSummaryDocument: PdfDocument<PlatformMember>, private readonly title: string) {
@@ -86,7 +86,19 @@ export class MembersPdfDocument {
         // render
         const renderer = new PdfRenderer();
         const doc = await this.createDoc();
-        return renderer.render(doc, items);
+        const docWrapper = new PdfDocWrapper(doc, mmToPoints(5));
+
+        return renderer.render(docWrapper, items, (docWrapper) => {
+            const textOptions: PdfTextOptions = {
+                font: metropolisMedium,
+                fontSize: 9,
+                fillColor: colorGray,
+                align: 'right',
+                baseline: 'bottom',
+            };
+
+            drawPageNumbers(docWrapper, this.title, textOptions);
+        });
     }
 
     async download() {

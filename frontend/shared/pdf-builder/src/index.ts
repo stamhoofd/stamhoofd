@@ -6,3 +6,4 @@ export * from './pdf-helpers';
 export * from './pdf-item';
 export * from './pdf-items';
 export * from './pdf-renderer';
+export * from './render-page-numbers';

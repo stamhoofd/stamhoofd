@@ -38,9 +38,9 @@ export class PdfRenderer {
         }
     }
 
-    async render(doc: PDFKit.PDFDocument, pdfItems: PdfItem[]) {
+    async render(docWrapper: PdfDocWrapper, pdfItems: PdfItem[], beforeFlush?: (docWrapper: PdfDocWrapper) => void) {
+        const doc = docWrapper.doc;
         const bufferPromise = this.createBuffer(doc);
-        const docWrapper = new PdfDocWrapper(doc);
 
         for (const pdfItem of pdfItems) {
             if (pdfItem.getFonts) {
@@ -49,10 +49,17 @@ export class PdfRenderer {
 
             pdfItem.draw(docWrapper, {});
 
-            if (doc.y > doc.page.height - doc.page.margins.bottom) {
+            if (doc.y > doc.page.height - docWrapper.safeMargins.bottom) {
                 docWrapper.goToNextPage();
             }
         }
+
+        if (beforeFlush) {
+            beforeFlush(docWrapper);
+        }
+
+        // manually flush pages that have been buffered
+        doc.flushPages();
 
         doc.end();
 

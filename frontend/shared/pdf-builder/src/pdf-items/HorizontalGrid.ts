@@ -85,9 +85,9 @@ export class HorizontalGrid implements PdfItem {
         };
 
         const goToNextPage = () => {
-            pageTop = doc.page.margins.top;
+            pageTop = docWrapper.safeMargins.top;
             docWrapper.goToNextPage();
-            goToNextRow(doc.page.margins.top);
+            goToNextRow(docWrapper.safeMargins.top);
         };
 
         /**
@@ -108,7 +108,7 @@ export class HorizontalGrid implements PdfItem {
                 // first calculate height to check if the item will fit on the current page
                 const itemHeight = item.getHeight(docWrapper, getHeightOptions);
 
-                const pageBottomLimit = doc.page.height - doc.page.margins.bottom;
+                const pageBottomLimit = doc.page.height - docWrapper.safeMargins.bottom;
                 const totalAvailableHeightOnPage = Math.floor(pageBottomLimit - pageTop);
                 const heightExceedsTotalAvailableHeightOnPage = itemHeight > totalAvailableHeightOnPage;
                 const availableHeight = pageBottomLimit - rowTop;

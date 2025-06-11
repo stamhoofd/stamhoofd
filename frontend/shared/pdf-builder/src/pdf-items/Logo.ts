@@ -17,7 +17,7 @@ export class Logo implements PdfItem {
     draw(docWrapper: PdfDocWrapper): void {
         const doc = docWrapper.doc;
         const { src, width } = this.options;
-        const margins = doc.page.margins;
+        const margins = docWrapper.safeMargins;
 
         doc.image(src, doc.page.width - margins.right - width, margins.top, { width });
     }

@@ -1,12 +1,24 @@
-import { getLastPageIndex, getLastPageNumber, getPageWidthWithoutMargins } from './pdf-helpers';
+import { getLastPageIndex, getLastPageNumber } from './pdf-helpers';
 import { PdfItemDrawOptions } from './pdf-item';
 
 export class PdfDocWrapper {
-    constructor(readonly doc: PDFKit.PDFDocument) {
+    get safeMargins(): PDFKit.PDFPage['margins'] {
+        return {
+            left: this.doc.page.margins.left,
+            right: this.doc.page.margins.right,
+            top: this.doc.page.margins.top,
+            bottom: this.doc.page.margins.bottom + this.extraBottomMargin,
+        };
+    }
+
+    constructor(readonly doc: PDFKit.PDFDocument, private readonly extraBottomMargin: number) {
     }
 
     getPageWidthWithoutMargins() {
-        return getPageWidthWithoutMargins(this.doc);
+        const page = this.doc.page;
+        const margins = page.margins;
+
+        return page.width - margins.left - margins.right;
     }
 
     getLastPageNumber() {
@@ -21,7 +33,7 @@ export class PdfDocWrapper {
         const currentPageIndex = this.getLastPageIndex();
         this.doc.addPage();
         this.doc.switchToPage(currentPageIndex + 1);
-        this.doc.y = this.doc.page.margins.top;
+        this.doc.y = this.safeMargins.top;
     }
 
     getNextPosition(options: PdfItemDrawOptions = {}) {
