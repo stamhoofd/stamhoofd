@@ -65,7 +65,7 @@ export class MembersPdfDocument {
 
                 const summaryTitle = new H3(selectableColumn.name, {
                     spacing: {
-                        bottom: mmToPoints(2),
+                        bottom: mmToPoints(4),
                     },
                 });
                 items.push(summaryTitle);
@@ -78,6 +78,8 @@ export class MembersPdfDocument {
                 });
 
                 items.push(summaryGrid);
+
+                items.push(new Spacing(mmToPoints(5)));
             });
         }
 
