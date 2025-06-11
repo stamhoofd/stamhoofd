@@ -15,6 +15,7 @@ export interface LabelWithValueOptions {
     };
     value: {
         text: string;
+        defaultText?: string;
     };
     /**
      * horizontal gap between the label and the value
@@ -44,9 +45,14 @@ export class LabelWithValue implements PdfItem {
         return new DefaultText(text, { fillColor: colorGray, width: minWidth, lineGap });
     }
 
-    private static createValueText({ text, lineGap }: { text: string; lineGap: number }) {
+    private static createValueText({ text, lineGap, defaultText }: { text: string; lineGap: number; defaultText?: string }) {
         const isEmpty = text.length === 0;
-        return new DefaultText(isEmpty ? '/' : text, { fillColor: isEmpty ? colorGray : colorDark, lineGap });
+
+        if (isEmpty) {
+            text = defaultText ? defaultText : '/';
+        }
+
+        return new DefaultText(text, { fillColor: isEmpty ? colorGray : colorDark, lineGap });
     }
 
     private getLabelAndValueWidth(maxWidth: number | undefined) {

@@ -80,6 +80,7 @@ function createMembersHorizontalGridFactory({ members, columns, selectableColumn
                 },
                 value: {
                     text: value,
+                    defaultText: ' ',
                 },
                 gapBetween: mmToPoints(2),
                 // lineGap of 1mm (for small spacing between lines of the value and label text)
