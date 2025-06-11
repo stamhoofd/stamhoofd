@@ -7,6 +7,7 @@ interface MembersHorizontalGridArgs {
     columns: number;
     selectableColumns: SelectablePdfData<PlatformMember>[];
     getName: (member: PlatformMember) => string;
+    shouldHideEmptyDetails: boolean;
 }
 
 /**
@@ -43,7 +44,7 @@ export class MembersDetailHorizontalGrid implements PdfItem {
     }
 }
 
-function createMembersDetailHorizontalGridFactory({ members, columns, selectableColumns, getName }: MembersHorizontalGridArgs): (docWrapper: PdfDocWrapper) => HorizontalGrid {
+function createMembersDetailHorizontalGridFactory({ members, columns, selectableColumns, getName, shouldHideEmptyDetails }: MembersHorizontalGridArgs): (docWrapper: PdfDocWrapper) => HorizontalGrid {
     const enabledColumns = selectableColumns.filter(c => c.enabled);
     const labels = enabledColumns.map(c => c.name);
     const longestLabel = labels.reduce((a, b) => a.length > b.length ? a : b, '');
@@ -53,7 +54,7 @@ function createMembersDetailHorizontalGridFactory({ members, columns, selectable
         const minLabelWidth = LabelWithValue.widthOfLabel(docWrapper, longestLabel);
 
         // create a vertical stack for each member
-        const memberStacks = members.map(member => memberDetailsVerticalStackFactory(member, enabledColumns, getName(member), minLabelWidth));
+        const memberStacks = members.map(member => memberDetailsVerticalStackFactory(member, enabledColumns, getName(member), minLabelWidth, shouldHideEmptyDetails));
 
         // create a horizontal grid containing the vertical stacks
         const grid = new HorizontalGrid(memberStacks, {
@@ -74,7 +75,7 @@ function createMembersDetailHorizontalGridFactory({ members, columns, selectable
  * @param minLabelWidth
  * @returns
  */
-function memberDetailsVerticalStackFactory(member: PlatformMember, columns: SelectablePdfData<PlatformMember>[], name: string, minLabelWidth: number): VerticalStack {
+function memberDetailsVerticalStackFactory(member: PlatformMember, columns: SelectablePdfData<PlatformMember>[], name: string, minLabelWidth: number, shouldHideEmptyDetails: boolean): VerticalStack {
     // name of the member
     const title = new H3(name);
 
@@ -87,6 +88,21 @@ function memberDetailsVerticalStackFactory(member: PlatformMember, columns: Sele
 
     // create pdf items for each member detail
     const detailItems = columns.flatMap((c) => {
+        let stringValue: string;
+
+        if (shouldHideEmptyDetails) {
+            const stringValueOrNull = c.getStringValueOrNull(member);
+
+            if (!stringValueOrNull) {
+                return [];
+            }
+
+            stringValue = stringValueOrNull;
+        }
+        else {
+            stringValue = c.getStringValue(member);
+        }
+
         const result: PdfItem[] = [];
 
         // add a category title
@@ -115,7 +131,7 @@ function memberDetailsVerticalStackFactory(member: PlatformMember, columns: Sele
                 minWidth: minLabelWidth,
             },
             value: {
-                text: c.getStringValue(member),
+                text: stringValue,
             },
             gapBetween: mmToPoints(2),
             // lineGap of 1mm (for small spacing between lines of the value and label text)

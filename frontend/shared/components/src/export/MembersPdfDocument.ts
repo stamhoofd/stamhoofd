@@ -52,6 +52,7 @@ export class MembersPdfDocument {
                 columns: 2,
                 selectableColumns: this.memberDetailsDocument.items,
                 getName: (o: PlatformMember) => o.patchedMember.details.name,
+                shouldHideEmptyDetails: true,
             });
             items.push(grid);
         }
