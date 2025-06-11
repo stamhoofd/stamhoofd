@@ -1,4 +1,4 @@
-import { HorizontalGrid, LabelWithValue, metropolisBold, metropolisMedium, mmToPoints, PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, VerticalStack } from '@stamhoofd/frontend-pdf-builder';
+import { colorDark, DefaultText, HorizontalGrid, LabelWithValue, metropolisBold, metropolisMedium, mmToPoints, PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, VerticalStack } from '@stamhoofd/frontend-pdf-builder';
 import { PlatformMember } from '@stamhoofd/structures';
 import { SelectablePdfData } from './SelectablePdfData';
 
@@ -23,11 +23,18 @@ export class MembersSummaryHorizontalGrid implements PdfItem {
         return this.factory(docWrapper);
     }
 
-    draw(docWrapper: PdfDocWrapper, options?: PdfItemDrawOptions): void {
+    private createEmptyText() {
+        return new DefaultText($t('Geen leden'), { fillColor: colorDark });
+    }
+
+    draw(docWrapper: PdfDocWrapper, options: PdfItemDrawOptions): void {
         const grid = this.createGrid(docWrapper);
 
         if (grid) {
             grid.draw(docWrapper, options);
+        }
+        else {
+            this.createEmptyText().draw(docWrapper, options);
         }
     }
 
@@ -38,7 +45,7 @@ export class MembersSummaryHorizontalGrid implements PdfItem {
             return grid.getHeight(docWrapper);
         }
 
-        return 0;
+        return this.createEmptyText().getHeight(docWrapper);
     }
 
     getWidth(docWrapper: PdfDocWrapper): number | undefined {
@@ -48,7 +55,7 @@ export class MembersSummaryHorizontalGrid implements PdfItem {
             return grid.getWidth(docWrapper);
         }
 
-        return 0;
+        return this.createEmptyText().getWidth(docWrapper);
     }
 
     getFonts(): PdfFont[] {
