@@ -48,10 +48,47 @@ export class VerticalStack implements PdfItem {
 
         // if the total height of all the items did not exceed the max height
         if (stacks.length === 0) {
-            stacks.push(new VerticalStack(itemsInFirstStack, this.maxWidth));
+            return [new VerticalStack(itemsInFirstStack, this.maxWidth)];
         }
 
         return stacks;
+    }
+
+    splitInEqualParts(docWrapper: PdfDocWrapper, options: PdfItemGetHeightOptions, parts: number): VerticalStack[] {
+        const heights: number[] = this.items.map(item => item.getHeight(docWrapper, options));
+        const totalHeight = heights.reduce((acc, height) => acc + height, 0);
+        const maxHeight = Math.ceil(totalHeight / parts);
+        const stackItems: PdfItem[][] = [[]];
+        let currentHeight = 0;
+
+        for (let i = 0; i < this.items.length; i++) {
+            const item = this.items[i];
+            const itemHeight = heights[i];
+            const currentStack = stackItems[stackItems.length - 1];
+
+            // if the total height of the first stack will exceed the max height
+            if (currentHeight + itemHeight > maxHeight) {
+                stackItems.push([item]);
+                currentHeight = 0;
+            }
+            else {
+                currentStack.push(item);
+                currentHeight += itemHeight;
+            }
+        }
+
+        // if there are more stacks than parts
+        if (stackItems.length > parts) {
+            // remove the last stack
+            const lastStack = stackItems.pop();
+
+            // and add it to the new last stack
+            if (lastStack) {
+                stackItems[stackItems.length - 1].push(...lastStack);
+            }
+        }
+
+        return stackItems.map(stack => new VerticalStack(stack, this.maxWidth));
     }
 
     draw(docWrapper: PdfDocWrapper, options?: PdfItemDrawOptions): void {

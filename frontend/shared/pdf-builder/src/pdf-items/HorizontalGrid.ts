@@ -109,18 +109,29 @@ export class HorizontalGrid implements PdfItem {
                 const itemHeight = item.getHeight(docWrapper, getHeightOptions);
 
                 const pageBottomLimit = doc.page.height - doc.page.margins.bottom;
-                const totalAvailableHeightOnPage = pageBottomLimit - pageTop;
+                const totalAvailableHeightOnPage = Math.floor(pageBottomLimit - pageTop);
                 const heightExceedsTotalAvailableHeightOnPage = itemHeight > totalAvailableHeightOnPage;
                 const availableHeight = pageBottomLimit - rowTop;
+
+                const isLastItemInBatch = i === items.length - 1;
+                const isCurrentLastItem = isLastBatch && isLastItemInBatch;
+
+                // maximize the use of the available height on the page by splitting the last item
+                if (isCurrentLastItem && currentColumn === 0 && itemHeight / this.columns < totalAvailableHeightOnPage) {
+                    if (item instanceof VerticalStack) {
+                        const itemsToDraw = item.splitInEqualParts(docWrapper, getHeightOptions, this.columns);
+                        drawItems(itemsToDraw, isCurrentLastItem);
+                        continue;
+                    }
+                }
 
                 // if the item height exceeds the page height, split the item
                 if (heightExceedsTotalAvailableHeightOnPage) {
                     didCurrentRowOverflow = true;
                     if (item instanceof VerticalStack) {
-                        const splitItems = item.split(docWrapper, getHeightOptions, totalAvailableHeightOnPage);
-                        const isLastItemInBatch = i === items.length - 1;
-                        const isCurrentLastItem = isLastBatch && isLastItemInBatch;
-                        drawItems(splitItems, isCurrentLastItem);
+                        const itemsToDraw = item.split(docWrapper, getHeightOptions, totalAvailableHeightOnPage);
+
+                        drawItems(itemsToDraw, isCurrentLastItem);
                         continue;
                     }
                     console.warn('Item height exceeds page height');
