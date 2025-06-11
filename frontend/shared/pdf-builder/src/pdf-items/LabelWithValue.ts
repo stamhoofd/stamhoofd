@@ -3,6 +3,7 @@ import { PdfDocWrapper } from '../PdfDocWrapper';
 import { PdfFont } from '../PdfFont';
 import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../PdfItem';
 import { DefaultText } from './DefaultText';
+import { PdfTextOptions } from './PdfText';
 
 export interface LabelWithValueOptions {
     label: {
@@ -12,10 +13,12 @@ export interface LabelWithValueOptions {
          * if more space is available the label will expand
          */
         minWidth: number;
+        textOptions?: PdfTextOptions;
     };
     value: {
         text: string;
         defaultText?: string;
+        textOptions?: PdfTextOptions;
     };
     /**
      * horizontal gap between the label and the value
@@ -30,29 +33,30 @@ export interface LabelWithValueOptions {
 export class LabelWithValue implements PdfItem {
     private readonly labelText: DefaultText;
     private readonly valueText: DefaultText;
+    private static defaultLabelTextOptions: PdfTextOptions = { fillColor: colorDark };
 
     constructor(private readonly options: LabelWithValueOptions) {
-        this.labelText = LabelWithValue.createLabel({ ...options.label, lineGap: options.lineGap });
-        this.valueText = LabelWithValue.createValueText({ ...options.value, lineGap: options.lineGap });
+        this.labelText = LabelWithValue.createLabel({ ...options.label, lineGap: options.lineGap, textOptions: options.label.textOptions ?? {} });
+        this.valueText = LabelWithValue.createValueText({ ...options.value, lineGap: options.lineGap, textOptions: options.value.textOptions ?? {} });
     }
 
-    static widthOfLabel(docWrapper: PdfDocWrapper, text: string): number {
+    static widthOfLabel(docWrapper: PdfDocWrapper, text: string, textOptions: PdfTextOptions = this.defaultLabelTextOptions): number {
         // lineGap is irrelevant for width
-        return LabelWithValue.createLabel({ text, minWidth: 0, lineGap: 0 }).getWidth(docWrapper);
+        return LabelWithValue.createLabel({ text, minWidth: 0, lineGap: 0, textOptions }).getWidth(docWrapper);
     }
 
-    private static createLabel({ text, minWidth, lineGap }: { text: string; minWidth: number; lineGap: number }) {
-        return new DefaultText(text, { fillColor: colorGray, width: minWidth, lineGap });
+    private static createLabel({ text, minWidth, lineGap, textOptions }: { text: string; minWidth: number; lineGap: number; textOptions: PdfTextOptions }) {
+        return new DefaultText(text, { ...this.defaultLabelTextOptions, width: minWidth, lineGap, ...textOptions });
     }
 
-    private static createValueText({ text, lineGap, defaultText }: { text: string; lineGap: number; defaultText?: string }) {
+    private static createValueText({ text, lineGap, defaultText, textOptions }: { text: string; lineGap: number; defaultText?: string; textOptions: PdfTextOptions }) {
         const isEmpty = text.length === 0;
 
         if (isEmpty) {
             text = defaultText ? defaultText : '/';
         }
 
-        return new DefaultText(text, { fillColor: isEmpty ? colorGray : colorDark, lineGap });
+        return new DefaultText(text, { fillColor: isEmpty ? colorGray : colorGray, lineGap, ...textOptions });
     }
 
     private getLabelAndValueWidth(maxWidth: number | undefined) {

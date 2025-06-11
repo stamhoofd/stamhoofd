@@ -110,7 +110,7 @@ function memberDetailsVerticalStackFactory(member: PlatformMember, columns: Sele
             // only if it's a new category
             if (c.category !== currentCategory) {
                 result.push(spacing2mm);
-                const subTitle = new PdfText(c.category, { font: metropolisBold, fontSize: 9, fillColor: colorDark, align: 'left' });
+                const subTitle = new PdfText(c.category, { font: metropolisBold, fontSize: 9, fillColor: colorDark, align: 'left', underline: true });
                 result.push(subTitle);
                 result.push(spacing2mm);
                 currentCategory = c.category;
