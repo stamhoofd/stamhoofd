@@ -117,8 +117,7 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
             id: 'requiresFinancialSupport',
             name: financialSupportTitle,
             enabled: false,
-            // todo!!!!!!!!!!!!
-            getValue: ({ patchedMember: object }: PlatformMember) => false.toString(),
+            getValue: ({ patchedMember: object }: PlatformMember) => !!object.details.requiresFinancialSupport?.value,
         }), [AccessRight.MemberReadFinancialData]),
         returnNullIfNoAccessRight(new SelectablePdfData<PlatformMember>({
             id: 'uitpasNumber',
@@ -469,8 +468,7 @@ export function getAllSelectablePdfDataForSummary({ platform, organization, auth
             id: 'requiresFinancialSupport',
             name: financialSupportTitle,
             enabled: false,
-            // todo!!!!!!!!!!!!
-            getValue: ({ patchedMember: object }: PlatformMember) => false.toString(),
+            getValue: ({ patchedMember: object }: PlatformMember) => object.details.requiresFinancialSupport?.value ? '' : null,
         }), [AccessRight.MemberReadFinancialData]),
         new SelectablePdfData<PlatformMember>({
             id: 'dataPermissions',
