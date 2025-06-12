@@ -1,6 +1,6 @@
 import { colorDark, H3, HorizontalGrid, LabelWithValue, metropolisBold, metropolisMedium, mmToPoints, PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, PdfText, Spacing, VerticalStack } from '@stamhoofd/frontend-pdf-builder';
 import { PlatformMember } from '@stamhoofd/structures';
-import { SelectablePdfData } from './SelectablePdfData';
+import { SelectablePdfData } from '../SelectablePdfData';
 
 interface MembersHorizontalGridArgs {
     members: PlatformMember[];
@@ -13,7 +13,7 @@ interface MembersHorizontalGridArgs {
 /**
  * A horizontal grid of member details
  */
-export class MembersDetailHorizontalGrid implements PdfItem {
+export class MembersDetail implements PdfItem {
     private readonly factory: (docWrapper: PdfDocWrapper) => HorizontalGrid;
 
     constructor(private readonly args: MembersHorizontalGridArgs) {

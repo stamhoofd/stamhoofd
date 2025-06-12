@@ -1,9 +1,9 @@
 import logoUrl from '@stamhoofd/assets/images/logo/logo-horizontal.png';
 import { colorGray, DefaultText, drawPageNumbers, H1, H3, Logo, metropolisMedium, mmToPoints, PdfDocWrapper, PdfItem, PdfRenderer, PdfTextOptions, Spacing } from '@stamhoofd/frontend-pdf-builder';
 import { PlatformMember } from '@stamhoofd/structures';
-import { MembersDetailHorizontalGrid } from './MembersDetailHorizontalGrid';
-import { MembersSummaryHorizontalGrid } from './MembersSummaryHorizontalGrid';
-import { PdfDocument } from './PdfDocuments';
+import { PdfDocument } from '../PdfDocuments';
+import { MembersDetail } from './MembersDetail';
+import { MembersSummary } from './MembersSummary';
 
 const pageMargin = mmToPoints(15);
 
@@ -47,7 +47,7 @@ export class MembersPdfDocument {
 
         // member details
         if (this.memberDetailsDocument.enabled) {
-            const grid = new MembersDetailHorizontalGrid({
+            const grid = new MembersDetail({
                 members: sortedMembers,
                 columns: 2,
                 selectableColumns: this.memberDetailsDocument.items,
@@ -71,7 +71,7 @@ export class MembersPdfDocument {
                 });
                 items.push(summaryTitle);
 
-                const summaryGrid = new MembersSummaryHorizontalGrid({
+                const summaryGrid = new MembersSummary({
                     members: sortedMembers,
                     columns: 2,
                     selectableColumn,
