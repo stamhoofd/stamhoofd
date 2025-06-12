@@ -1,6 +1,6 @@
 import { PdfDocWrapper } from '../PdfDocWrapper';
 import { PdfFont } from '../PdfFont';
-import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../PdfItem';
+import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions, PdfItemGetWidthOptions } from '../PdfItem';
 
 export type PdfTextOptions = {
     font?: PdfFont;
@@ -64,10 +64,25 @@ export class PdfText implements PdfItem {
         return doc.heightOfString(this.text, textOptions) + this.marginBottom;
     }
 
-    getWidth(docWrapper: PdfDocWrapper) {
+    getWidth(docWrapper: PdfDocWrapper, options?: PdfItemGetWidthOptions): number {
         const doc = docWrapper.doc;
         this.configure(doc);
-        return doc.widthOfString(this.text, this.options);
+
+        const defaultWidth = doc.widthOfString(this.text, this.options);
+
+        let maxHeight = options?.maxHeight;
+        if (maxHeight !== undefined) {
+            if (maxHeight < 1) {
+                maxHeight = 1;
+            }
+
+            const valueLineHeight = this.getHeight(docWrapper);
+            const maxLines = Math.floor(maxHeight / valueLineHeight);
+
+            return Math.ceil(defaultWidth / maxLines);
+        }
+
+        return defaultWidth;
     }
 
     getFonts() {

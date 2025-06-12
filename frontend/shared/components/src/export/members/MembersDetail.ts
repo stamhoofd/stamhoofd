@@ -1,10 +1,10 @@
-import { colorDark, H3, HorizontalGrid, LabelWithValue, metropolisBold, metropolisMedium, mmToPoints, PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions, PdfText, Spacing, VerticalStack } from '@stamhoofd/frontend-pdf-builder';
+import { colorDark, H3, HorizontalGrid, LabelWithValue, metropolisBold, metropolisMedium, mmToPoints, PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions, PdfItemGetWidthOptions, PdfText, Spacing, VerticalStack } from '@stamhoofd/frontend-pdf-builder';
 import { PlatformMember } from '@stamhoofd/structures';
 import { SelectablePdfData } from '../SelectablePdfData';
 
 interface MembersDetailArgs {
     members: PlatformMember[];
-    columns: number;
+    columns: number | 'auto';
     selectableColumns: SelectablePdfData<PlatformMember>[];
     getName: (member: PlatformMember) => string;
     shouldHideEmptyDetails: boolean;
@@ -34,9 +34,9 @@ export class MembersDetail implements PdfItem {
         return grid.getHeight(docWrapper, options);
     }
 
-    getWidth(docWrapper: PdfDocWrapper): number | undefined {
+    getWidth(docWrapper: PdfDocWrapper, options: PdfItemGetWidthOptions): number | undefined {
         const grid = this.createGrid(docWrapper);
-        return grid.getWidth(docWrapper);
+        return grid.getWidth(docWrapper, options);
     }
 
     getFonts(): PdfFont[] {

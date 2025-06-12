@@ -49,7 +49,7 @@ export class MembersPdfDocument {
         if (this.memberDetailsDocument.enabled) {
             const grid = new MembersDetail({
                 members: sortedMembers,
-                columns: 2,
+                columns: 'auto',
                 selectableColumns: this.memberDetailsDocument.items,
                 getName: (o: PlatformMember) => o.patchedMember.details.name,
                 shouldHideEmptyDetails: true,

@@ -1,4 +1,4 @@
-import { colorDark, DefaultText, H3, HorizontalGrid, LabelWithValue, metropolisBold, metropolisMedium, mmToPoints, PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions, Spacing, VerticalStack, VerticalStackOptions } from '@stamhoofd/frontend-pdf-builder';
+import { colorDark, DefaultText, H3, HorizontalGrid, LabelWithValue, metropolisBold, metropolisMedium, mmToPoints, PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions, PdfItemGetWidthOptions, Spacing, VerticalStack, VerticalStackOptions } from '@stamhoofd/frontend-pdf-builder';
 import { PlatformMember } from '@stamhoofd/structures';
 import { SelectablePdfData } from '../SelectablePdfData';
 
@@ -32,8 +32,8 @@ export class MembersSummary implements PdfItem {
         return this.create(docWrapper).getHeight(docWrapper, options);
     }
 
-    getWidth(docWrapper: PdfDocWrapper): number | undefined {
-        return this.create(docWrapper).getWidth(docWrapper);
+    getWidth(docWrapper: PdfDocWrapper, options: PdfItemGetWidthOptions): number | undefined {
+        return this.create(docWrapper).getWidth(docWrapper, options);
     }
 
     getFonts(): PdfFont[] {
@@ -130,7 +130,7 @@ function createMembersHorizontalGridFactory({ members, selectableColumn, getName
 function calculateAutoColumns(docWrapper: PdfDocWrapper, stackItems: LabelWithValue[], gridColumnGap: number) {
     let columns = 1;
 
-    const maxLabelWithValueWidth = stackItems.reduce((a, b) => Math.max(a, b.getWidth(docWrapper)), 0);
+    const maxLabelWithValueWidth = stackItems.reduce((a, b) => Math.max(a, b.getWidth(docWrapper, {})), 0);
     const availableWidth = docWrapper.getPageWidthWithoutMargins();
     let totalWidthIfNextColumn = Math.ceil(2 * maxLabelWithValueWidth + gridColumnGap);
 

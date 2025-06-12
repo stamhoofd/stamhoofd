@@ -1,7 +1,7 @@
 import { colorDark, colorGray } from '../colors';
 import { PdfDocWrapper } from '../PdfDocWrapper';
 import { PdfFont } from '../PdfFont';
-import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../PdfItem';
+import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions, PdfItemGetWidthOptions } from '../PdfItem';
 import { DefaultText } from './DefaultText';
 import { PdfTextOptions } from './PdfText';
 
@@ -98,8 +98,8 @@ export class LabelWithValue implements PdfItem {
         );
     }
 
-    getWidth(docWrapper: PdfDocWrapper): number {
-        return this.labelText.getWidth(docWrapper) + this.valueText.getWidth(docWrapper) + this.options.gapBetween;
+    getWidth(docWrapper: PdfDocWrapper, options: PdfItemGetWidthOptions): number {
+        return this.options.label.minWidth + this.valueText.getWidth(docWrapper, options) + this.options.gapBetween;
     }
 
     getFonts(): PdfFont[] {

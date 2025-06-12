@@ -1,6 +1,6 @@
 import { PdfDocWrapper } from '../PdfDocWrapper';
 import { PdfFont } from '../PdfFont';
-import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../PdfItem';
+import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions, PdfItemGetWidthOptions } from '../PdfItem';
 
 export interface VerticalStackOptions {
     maxWidth?: number;
@@ -144,8 +144,27 @@ export class VerticalStack implements PdfItem {
         return this.items.reduce((acc, item) => acc + item.getHeight(docWrapper, options), 0);
     }
 
-    getWidth(_docWrapper: PdfDocWrapper): number | undefined {
-        return this.options.maxWidth;
+    getWidth(docWrapper: PdfDocWrapper, options: PdfItemGetWidthOptions): number | undefined {
+        const maxWidth = this.options.maxWidth;
+        let largestWidth = 0;
+
+        for (const item of this.items) {
+            const width = item.getWidth(docWrapper, options);
+            // unable to determine width
+            if (width === undefined) {
+                return maxWidth;
+            }
+
+            if (width > largestWidth) {
+                largestWidth = width;
+            }
+        }
+
+        if (maxWidth === undefined) {
+            return largestWidth;
+        }
+
+        return Math.min(largestWidth, maxWidth);
     }
 
     getFonts(): PdfFont[] {
