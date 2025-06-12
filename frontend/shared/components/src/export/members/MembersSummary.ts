@@ -133,12 +133,12 @@ function calculateAutoColumns(docWrapper: PdfDocWrapper, stackItems: LabelWithVa
 
     const maxLabelWithValueWidth = stackItems.reduce((a, b) => Math.max(a, b.getWidth(docWrapper)), 0);
     const availableWidth = docWrapper.getPageWidthWithoutMargins();
-    let totalWidthIfNextColumn = 2 * maxLabelWithValueWidth + gridColumnGap;
+    let totalWidthIfNextColumn = Math.ceil(2 * maxLabelWithValueWidth + gridColumnGap);
 
     while (totalWidthIfNextColumn < availableWidth) {
         columns++;
-        totalWidthIfNextColumn += maxLabelWithValueWidth + gridColumnGap;
+        totalWidthIfNextColumn = Math.ceil(totalWidthIfNextColumn + maxLabelWithValueWidth + gridColumnGap);
     }
 
-    return columns;
+    return Math.min(stackItems.length, columns);
 }
