@@ -149,6 +149,9 @@ async function addMember() {
                 Toast.warning($t(`eb3037bc-a195-41a8-ad30-947dce3ed73c`, { name: member.patchedMember.name })).show();
             }
 
+            // Make sure record questions for this item are included in the edit dialog;
+            member.family.pendingRegisterItems = [item];
+
             // First ask the user to complete or verify the member details
             await editMember(member, {
                 title: !member._oldId ? $t('2a44031f-dfa5-45df-824e-ba107d311c13') : $t('733d4169-a86f-425e-bb4b-15ce3af5aa60'),
