@@ -111,15 +111,34 @@ function createMembersHorizontalGridFactory({ members, columns, selectableColumn
             return null;
         }
 
+        const gridColumnGap = mmToPoints(10);
+
+        const columns = calculateAutoColumns(docWrapper, stackItems, gridColumnGap);
+
         const stack = new VerticalStack(stackItems);
 
         // create a horizontal grid containing the vertical stacks
         const grid = new HorizontalGrid([stack], {
             columns,
-            columnGap: mmToPoints(10),
+            columnGap: gridColumnGap,
             rowGap: mmToPoints(5),
         });
 
         return grid;
     };
+}
+
+function calculateAutoColumns(docWrapper: PdfDocWrapper, stackItems: LabelWithValue[], gridColumnGap: number) {
+    let columns = 1;
+
+    const maxLabelWithValueWidth = stackItems.reduce((a, b) => Math.max(a, b.getWidth(docWrapper)), 0);
+    const availableWidth = docWrapper.getPageWidthWithoutMargins();
+    let totalWidthIfNextColumn = 2 * maxLabelWithValueWidth + gridColumnGap;
+
+    while (totalWidthIfNextColumn < availableWidth) {
+        columns++;
+        totalWidthIfNextColumn += maxLabelWithValueWidth + gridColumnGap;
+    }
+
+    return columns;
 }

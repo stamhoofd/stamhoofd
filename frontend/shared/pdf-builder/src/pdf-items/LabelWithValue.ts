@@ -98,8 +98,8 @@ export class LabelWithValue implements PdfItem {
         );
     }
 
-    getWidth(_docWrapper: PdfDocWrapper): number | undefined {
-        return undefined;
+    getWidth(docWrapper: PdfDocWrapper): number {
+        return this.labelText.getWidth(docWrapper) + this.valueText.getWidth(docWrapper) + this.options.gapBetween;
     }
 
     getFonts(): PdfFont[] {
