@@ -1,8 +1,8 @@
-import { colorDark, DefaultText, HorizontalGrid, LabelWithValue, metropolisBold, metropolisMedium, mmToPoints, PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, VerticalStack } from '@stamhoofd/frontend-pdf-builder';
+import { colorDark, DefaultText, H3, HorizontalGrid, LabelWithValue, metropolisBold, metropolisMedium, mmToPoints, PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions, Spacing, VerticalStack } from '@stamhoofd/frontend-pdf-builder';
 import { PlatformMember } from '@stamhoofd/structures';
 import { SelectablePdfData } from '../SelectablePdfData';
 
-interface MembersSummaryHorizontalGridArgs {
+interface MembersSummarydArgs {
     members: PlatformMember[];
     columns: number;
     selectableColumn: SelectablePdfData<PlatformMember>;
@@ -13,49 +13,27 @@ interface MembersSummaryHorizontalGridArgs {
  * A horizontal grid with a summary of the members
  */
 export class MembersSummary implements PdfItem {
-    private readonly factory: (docWrapper: PdfDocWrapper) => HorizontalGrid | null;
+    private readonly factory: (docWrapper: PdfDocWrapper) => VerticalStack;
 
-    constructor(private readonly args: MembersSummaryHorizontalGridArgs) {
-        this.factory = createMembersHorizontalGridFactory(this.args);
+    constructor(private readonly args: MembersSummarydArgs) {
+        this.factory = createMembersSummaryStack(this.args);
     }
 
-    private createGrid(docWrapper: PdfDocWrapper) {
+    private create(docWrapper: PdfDocWrapper) {
         return this.factory(docWrapper);
     }
 
-    private createEmptyText() {
-        return new DefaultText($t('Geen leden'), { fillColor: colorDark });
-    }
-
     draw(docWrapper: PdfDocWrapper, options: PdfItemDrawOptions): void {
-        const grid = this.createGrid(docWrapper);
-
-        if (grid) {
-            grid.draw(docWrapper, options);
-        }
-        else {
-            this.createEmptyText().draw(docWrapper, options);
-        }
+        const stack = this.create(docWrapper);
+        stack.draw(docWrapper, options);
     }
 
-    getHeight(docWrapper: PdfDocWrapper): number {
-        const grid = this.createGrid(docWrapper);
-
-        if (grid) {
-            return grid.getHeight(docWrapper);
-        }
-
-        return this.createEmptyText().getHeight(docWrapper);
+    getHeight(docWrapper: PdfDocWrapper, options: PdfItemGetHeightOptions): number {
+        return this.create(docWrapper).getHeight(docWrapper, options);
     }
 
     getWidth(docWrapper: PdfDocWrapper): number | undefined {
-        const grid = this.createGrid(docWrapper);
-
-        if (grid) {
-            return grid.getWidth(docWrapper);
-        }
-
-        return this.createEmptyText().getWidth(docWrapper);
+        return this.create(docWrapper).getWidth(docWrapper);
     }
 
     getFonts(): PdfFont[] {
@@ -63,7 +41,32 @@ export class MembersSummary implements PdfItem {
     }
 }
 
-function createMembersHorizontalGridFactory({ members, columns, selectableColumn, getName }: MembersSummaryHorizontalGridArgs): (docWrapper: PdfDocWrapper) => HorizontalGrid | null {
+function createMembersSummaryStack({ members, columns, selectableColumn, getName }: MembersSummarydArgs): (docWrapper: PdfDocWrapper) => VerticalStack {
+    return (docWrapper: PdfDocWrapper) => {
+        const title = new H3(selectableColumn.name, {
+            spacing: {
+                bottom: mmToPoints(4),
+            },
+        });
+
+        const grid = createMembersHorizontalGridFactory({ members, columns, selectableColumn, getName })(docWrapper);
+        if (grid === null) {
+            return new VerticalStack([
+                title,
+                new DefaultText($t('Geen leden'), { fillColor: colorDark }),
+                new Spacing(mmToPoints(5)),
+            ]);
+        }
+
+        return new VerticalStack([
+            title,
+            grid,
+            new Spacing(mmToPoints(5)),
+        ]);
+    };
+}
+
+function createMembersHorizontalGridFactory({ members, columns, selectableColumn, getName }: MembersSummarydArgs): (docWrapper: PdfDocWrapper) => HorizontalGrid | null {
     const labels = members.map(m => getName(m));
     const longestLabel = labels.reduce((a, b) => a.length > b.length ? a : b, '');
 

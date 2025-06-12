@@ -1,5 +1,5 @@
 import logoUrl from '@stamhoofd/assets/images/logo/logo-horizontal.png';
-import { colorGray, DefaultText, drawPageNumbers, H1, H3, Logo, metropolisMedium, mmToPoints, PdfDocWrapper, PdfItem, PdfRenderer, PdfTextOptions, Spacing } from '@stamhoofd/frontend-pdf-builder';
+import { colorGray, DefaultText, drawPageNumbers, H1, Logo, metropolisMedium, mmToPoints, PdfDocWrapper, PdfItem, PdfRenderer, PdfTextOptions } from '@stamhoofd/frontend-pdf-builder';
 import { PlatformMember } from '@stamhoofd/structures';
 import { PdfDocument } from '../PdfDocuments';
 import { MembersDetail } from './MembersDetail';
@@ -59,29 +59,14 @@ export class MembersPdfDocument {
 
         // member summary
         if (this.membersSummaryDocument.enabled) {
-            this.membersSummaryDocument.items.forEach((selectableColumn) => {
-                if (!selectableColumn.enabled) {
-                    return;
-                }
-
-                const summaryTitle = new H3(selectableColumn.name, {
-                    spacing: {
-                        bottom: mmToPoints(4),
-                    },
-                });
-                items.push(summaryTitle);
-
-                const summaryGrid = new MembersSummary({
+            items.push(...this.membersSummaryDocument.items
+                .filter(c => c.enabled)
+                .map(selectableColumn => new MembersSummary({
                     members: sortedMembers,
                     columns: 2,
                     selectableColumn,
                     getName: (o: PlatformMember) => o.patchedMember.details.name,
-                });
-
-                items.push(summaryGrid);
-
-                items.push(new Spacing(mmToPoints(5)));
-            });
+                })));
         }
 
         // render

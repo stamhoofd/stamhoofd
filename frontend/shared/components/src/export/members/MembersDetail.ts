@@ -2,7 +2,7 @@ import { colorDark, H3, HorizontalGrid, LabelWithValue, metropolisBold, metropol
 import { PlatformMember } from '@stamhoofd/structures';
 import { SelectablePdfData } from '../SelectablePdfData';
 
-interface MembersHorizontalGridArgs {
+interface MembersDetailArgs {
     members: PlatformMember[];
     columns: number;
     selectableColumns: SelectablePdfData<PlatformMember>[];
@@ -16,7 +16,7 @@ interface MembersHorizontalGridArgs {
 export class MembersDetail implements PdfItem {
     private readonly factory: (docWrapper: PdfDocWrapper) => HorizontalGrid;
 
-    constructor(private readonly args: MembersHorizontalGridArgs) {
+    constructor(private readonly args: MembersDetailArgs) {
         this.factory = createMembersDetailHorizontalGridFactory(this.args);
     }
 
@@ -44,7 +44,7 @@ export class MembersDetail implements PdfItem {
     }
 }
 
-function createMembersDetailHorizontalGridFactory({ members, columns, selectableColumns, getName, shouldHideEmptyDetails }: MembersHorizontalGridArgs): (docWrapper: PdfDocWrapper) => HorizontalGrid {
+function createMembersDetailHorizontalGridFactory({ members, columns, selectableColumns, getName, shouldHideEmptyDetails }: MembersDetailArgs): (docWrapper: PdfDocWrapper) => HorizontalGrid {
     const enabledColumns = selectableColumns.filter(c => c.enabled);
     const labels = enabledColumns.map(c => c.name);
     const longestLabel = labels.reduce((a, b) => a.length > b.length ? a : b, '');

@@ -45,7 +45,7 @@ import { Storage } from '@stamhoofd/networking';
 import { PdfDocumentsFilter, PlatformMember, Version } from '@stamhoofd/structures';
 import { onMounted, ref } from 'vue';
 import DataSelector from './DataSelector.vue';
-import { MembersPdfDocument } from './MembersPdfDocument';
+import { MembersPdfDocument } from './members/MembersPdfDocument';
 import { PdfDocuments } from './PdfDocuments';
 
 const props = defineProps<{
