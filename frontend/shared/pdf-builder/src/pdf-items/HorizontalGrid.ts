@@ -181,8 +181,159 @@ export class HorizontalGrid implements PdfItem {
         drawItems(this.items, true);
     }
 
-    getHeight(_docWrapper: PdfDocWrapper): number {
-        throw new Error('Method not implemented.');
+    getHeight(docWrapper: PdfDocWrapper, options: PdfItemGetHeightOptions): number {
+        let totalHeight: number = 0;
+
+        if (this.items.length === 0) {
+            return totalHeight;
+        }
+
+        const doc = docWrapper.doc;
+
+        let { x, y } = docWrapper.getNextPosition(options);
+
+        const maxPageWidth = docWrapper.getPageWidthWithoutMargins();
+
+        const widths: number[] = [maxPageWidth];
+        if (this.maxWidth) {
+            widths.push(this.maxWidth);
+        }
+        if (options?.maxWidth !== undefined) {
+            widths.push(options.maxWidth);
+        }
+        const maxWidth = Math.min(...widths);
+
+        const columnWidth = (maxWidth - (this.columnGap * (this.columns - 1))) / this.columns;
+        const getHeightOptions: PdfItemGetHeightOptions = { maxWidth: columnWidth };
+
+        const originalX = x;
+        let currentColumn = 0;
+        let didCurrentRowOverflow = false;
+        let heightOfHighestItemOnRow = 0;
+        let rowTop = y;
+        let shouldGoToNextPage = false;
+        let pageTop = rowTop;
+
+        const setX = (newX: number) => {
+            x = newX;
+        };
+
+        const setY = (newY: number) => {
+            y = newY;
+        };
+
+        const goToNextRow = (newY: number) => {
+            const originalY = y;
+            setY(newY);
+            currentColumn = 0;
+            rowTop = y;
+            setX(originalX);
+
+            if (newY > originalY) {
+                totalHeight += newY - originalY;
+            }
+            else {
+                totalHeight += newY - docWrapper.safeMargins.top;
+            }
+
+            heightOfHighestItemOnRow = 0;
+            didCurrentRowOverflow = false;
+        };
+
+        const goToNextPage = () => {
+            pageTop = docWrapper.safeMargins.top;
+            goToNextRow(docWrapper.safeMargins.top);
+        };
+
+        /**
+         * Add the height of items.
+         * Calls itself recursively if a container is split.
+         * @param items
+         */
+        const addHeightOfItems = (items: PdfItem[], isLastBatch: boolean) => {
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+
+                // go to next page if a new page is needed after the previous item
+                if (shouldGoToNextPage) {
+                    shouldGoToNextPage = false;
+                    goToNextPage();
+                }
+
+                // first calculate height to check if the item will fit on the current page
+                const itemHeight = item.getHeight(docWrapper, getHeightOptions);
+
+                const pageBottomLimit = doc.page.height - docWrapper.safeMargins.bottom;
+                const totalAvailableHeightOnPage = Math.floor(pageBottomLimit - pageTop);
+                const heightExceedsTotalAvailableHeightOnPage = itemHeight > totalAvailableHeightOnPage;
+                const availableHeight = pageBottomLimit - rowTop;
+
+                const isLastItemInBatch = i === items.length - 1;
+                const isCurrentLastItem = isLastBatch && isLastItemInBatch;
+
+                // maximize the use of the available height on the page by splitting the last item
+                if (isCurrentLastItem && currentColumn === 0 && itemHeight / this.columns < totalAvailableHeightOnPage) {
+                    if (item instanceof VerticalStack) {
+                        const itemsToDraw = item.splitInEqualParts(docWrapper, getHeightOptions, this.columns);
+                        addHeightOfItems(itemsToDraw, isCurrentLastItem);
+                        continue;
+                    }
+                }
+
+                // if the item height exceeds the page height, split the item
+                if (heightExceedsTotalAvailableHeightOnPage) {
+                    didCurrentRowOverflow = true;
+                    if (item instanceof VerticalStack) {
+                        const itemsToDraw = item.split(docWrapper, getHeightOptions, totalAvailableHeightOnPage);
+
+                        addHeightOfItems(itemsToDraw, isCurrentLastItem);
+                        continue;
+                    }
+                    console.warn('Item height exceeds page height');
+                }
+
+                if (itemHeight > heightOfHighestItemOnRow) {
+                    heightOfHighestItemOnRow = itemHeight;
+                }
+
+                // go to the next page if the item will not fit
+                if (itemHeight > availableHeight) {
+                    goToNextPage();
+                }
+
+                currentColumn = (currentColumn + 1) % this.columns;
+                const isLastItemInGrid = isLastBatch && i === items.length - 1;
+
+                if (isLastItemInGrid) {
+                    goToNextRow(rowTop + heightOfHighestItemOnRow);
+                }
+                else if (currentColumn === 0) {
+                    if (didCurrentRowOverflow) {
+                        // do not go to next page immediatetely because ony needed if there is another item
+                        shouldGoToNextPage = true;
+                    }
+                    else {
+                        const nextRowTop = rowTop + this.rowGap + heightOfHighestItemOnRow;
+
+                        // if next row is below the bottom of the page, go to next page
+                        if (nextRowTop > pageBottomLimit) {
+                            shouldGoToNextPage = true;
+                        }
+                        // else go to next row
+                        else {
+                            goToNextRow(nextRowTop);
+                        }
+                    }
+                }
+                else {
+                    setX(originalX + (currentColumn * (this.columnGap + columnWidth)));
+                }
+            }
+        };
+
+        addHeightOfItems(this.items, true);
+
+        return totalHeight;
     }
 
     getWidth(docWrapper: PdfDocWrapper): number {

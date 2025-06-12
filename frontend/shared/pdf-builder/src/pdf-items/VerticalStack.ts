@@ -2,6 +2,14 @@ import { PdfDocWrapper } from '../PdfDocWrapper';
 import { PdfFont } from '../PdfFont';
 import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../PdfItem';
 
+export interface VerticalStackOptions {
+    maxWidth?: number;
+    /**
+     * Place on another page if the available height is less than this (unless the total height of the stack is less).
+     */
+    minAvailableHeight?: number;
+}
+
 /**
  * A group of pdf items that are drawn in a vertical stack.
  * This makes it possible to set a max width.
@@ -12,7 +20,7 @@ export class VerticalStack implements PdfItem {
      * @param items the items in the vertical stack
      * @param maxWidth the max width of the vertical stack
      */
-    constructor(private readonly items: PdfItem[], private readonly maxWidth?: number) {
+    constructor(private readonly items: PdfItem[], private readonly options: VerticalStackOptions = {}) {
     }
 
     /**
@@ -34,10 +42,10 @@ export class VerticalStack implements PdfItem {
             // if the total height of the first stack will exceed the max height
             if (currentHeight + itemHeight > maxHeight) {
                 // create the first stack
-                stacks.push(new VerticalStack(itemsInFirstStack, this.maxWidth));
+                stacks.push(new VerticalStack(itemsInFirstStack, this.options));
 
                 // add the remaining items to the second stack
-                stacks.push(new VerticalStack(this.items.slice(i), this.maxWidth));
+                stacks.push(new VerticalStack(this.items.slice(i), this.options));
                 break;
             }
             else {
@@ -48,7 +56,7 @@ export class VerticalStack implements PdfItem {
 
         // if the total height of all the items did not exceed the max height
         if (stacks.length === 0) {
-            return [new VerticalStack(itemsInFirstStack, this.maxWidth)];
+            return [new VerticalStack(itemsInFirstStack, this.options)];
         }
 
         return stacks;
@@ -88,19 +96,31 @@ export class VerticalStack implements PdfItem {
             }
         }
 
-        return stackItems.map(stack => new VerticalStack(stack, this.maxWidth));
+        return stackItems.map(stack => new VerticalStack(stack, this.options));
     }
 
     draw(docWrapper: PdfDocWrapper, options?: PdfItemDrawOptions): void {
         const _options = { ...options };
+
+        if (this.options.minAvailableHeight !== undefined) {
+            // check if sufficient space on page
+            const availableHeight = docWrapper.getAvailableHeight();
+            if (availableHeight < this.options.minAvailableHeight) {
+                const height = this.getHeight(docWrapper, options);
+                if (height > availableHeight) {
+                    docWrapper.goToNextPage();
+                }
+            }
+        }
+
         const originalX = docWrapper.getNextPosition(options).x;
 
-        if (this.maxWidth !== undefined) {
+        if (this.options.maxWidth !== undefined) {
             if (options?.maxWidth !== undefined) {
-                _options.maxWidth = Math.min(this.maxWidth, options.maxWidth);
+                _options.maxWidth = Math.min(this.options.maxWidth, options.maxWidth);
             }
             else {
-                _options.maxWidth = this.maxWidth;
+                _options.maxWidth = this.options.maxWidth;
             }
         }
 
@@ -121,7 +141,7 @@ export class VerticalStack implements PdfItem {
     }
 
     getWidth(_docWrapper: PdfDocWrapper): number | undefined {
-        return this.maxWidth;
+        return this.options.maxWidth;
     }
 
     getFonts(): PdfFont[] {

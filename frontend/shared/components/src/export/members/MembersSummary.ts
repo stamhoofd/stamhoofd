@@ -1,4 +1,4 @@
-import { colorDark, DefaultText, H3, HorizontalGrid, LabelWithValue, metropolisBold, metropolisMedium, mmToPoints, PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions, Spacing, VerticalStack } from '@stamhoofd/frontend-pdf-builder';
+import { colorDark, DefaultText, H3, HorizontalGrid, LabelWithValue, metropolisBold, metropolisMedium, mmToPoints, PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions, Spacing, VerticalStack, VerticalStackOptions } from '@stamhoofd/frontend-pdf-builder';
 import { PlatformMember } from '@stamhoofd/structures';
 import { SelectablePdfData } from '../SelectablePdfData';
 
@@ -10,7 +10,8 @@ interface MembersSummarydArgs {
 }
 
 /**
- * A horizontal grid with a summary of the members
+ * A vertical stack containing a title, a horizontal grid with a summary of the members (or a text if no members)
+ * and spacing.
  */
 export class MembersSummary implements PdfItem {
     private readonly factory: (docWrapper: PdfDocWrapper) => VerticalStack;
@@ -50,19 +51,25 @@ function createMembersSummaryStack({ members, columns, selectableColumn, getName
         });
 
         const grid = createMembersHorizontalGridFactory({ members, columns, selectableColumn, getName })(docWrapper);
+        const spacing = new Spacing(mmToPoints(5));
+
+        const stackOptions: VerticalStackOptions = {
+            minAvailableHeight: mmToPoints(200),
+        };
+
         if (grid === null) {
             return new VerticalStack([
                 title,
                 new DefaultText($t('Geen leden'), { fillColor: colorDark }),
-                new Spacing(mmToPoints(5)),
-            ]);
+                spacing,
+            ], stackOptions);
         }
 
         return new VerticalStack([
             title,
             grid,
-            new Spacing(mmToPoints(5)),
-        ]);
+            spacing,
+        ], stackOptions);
     };
 }
 

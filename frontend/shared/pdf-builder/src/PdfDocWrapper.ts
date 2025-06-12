@@ -29,6 +29,11 @@ export class PdfDocWrapper {
         return getLastPageIndex(this.doc);
     }
 
+    getAvailableHeight(): number {
+        const y = this.doc.y;
+        return this.doc.page.height - y - this.safeMargins.bottom;
+    }
+
     goToNextPage() {
         const currentPageIndex = this.getLastPageIndex();
         this.doc.addPage();
