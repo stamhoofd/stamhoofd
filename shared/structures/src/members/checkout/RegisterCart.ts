@@ -243,6 +243,20 @@ export class RegisterCart {
         return this.items.reduce((total, item) => item.calculatedPriceDueLater + total, 0);
     }
 
+    /**
+     * Discounts that will be applied to items that are due now
+     */
+    get bundleDiscount() {
+        return this.bundleDiscounts.map(d => d.netTotalDueNow).reduce((a, b) => a + b, 0);
+    }
+
+    /**
+         * Discounts that will be applied to items that are due later
+         */
+    get bundleDiscountDueLater() {
+        return this.bundleDiscounts.map(d => d.netTotalDueLater).reduce((a, b) => a + b, 0);
+    }
+
     get refund() {
         return this.items.reduce((total, item) => item.calculatedRefund + total, 0)
             + this.deleteRegistrations.reduce((total, item) => {

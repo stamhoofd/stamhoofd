@@ -297,6 +297,7 @@ export class RegisterCheckout {
         this.cart.items = [];
         this.cart.balanceItems = [];
         this.cart.deleteRegistrations = [];
+        this.cart.bundleDiscounts = [];
         this.customer = null;
     }
 
@@ -311,14 +312,14 @@ export class RegisterCheckout {
      * Discounts that will be applied to items that are due now
      */
     get bundleDiscount() {
-        return this.cart.bundleDiscounts.map(d => d.netTotalDueNow).reduce((a, b) => a + b, 0);
+        return this.cart.bundleDiscount;
     }
 
     /**
      * Discounts that will be applied to items that are due later
      */
     get bundleDiscountDueLater() {
-        return this.cart.bundleDiscounts.map(d => d.netTotalDueLater).reduce((a, b) => a + b, 0);
+        return this.cart.bundleDiscountDueLater;
     }
 
     get priceBreakown(): PriceBreakdown {

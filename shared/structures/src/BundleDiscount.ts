@@ -280,13 +280,12 @@ export class BundleDiscountCalculation {
         return this.netTotal - this.netTotalDueLater;
     }
 
-    getNetTotalFor(item: RegisterItem | RegistrationWithPlatformMember) {
+    getTotalFor(item: RegisterItem | RegistrationWithPlatformMember) {
         if (item instanceof RegisterItem) {
             return this.items.get(item) ?? 0;
         }
         else if (item instanceof RegistrationWithPlatformMember) {
-            // Calculated discount minus the already applied discount
-            return (this.registrations.get(item) ?? 0); // - (item.registration.discounts.get(this.bundle.id)?.amount ?? 0);
+            return (this.registrations.get(item) ?? 0);
         }
         return 0;
     }

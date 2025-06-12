@@ -603,7 +603,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // Discounts
             for (const discount of checkout.cart.bundleDiscounts) {
-                const discountValue = discount.getNetTotalFor(item);
+                const discountValue = discount.getTotalFor(item);
 
                 if (discountValue !== 0) {
                     // Base price

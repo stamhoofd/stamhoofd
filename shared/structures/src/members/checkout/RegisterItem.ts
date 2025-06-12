@@ -401,7 +401,7 @@ export class RegisterItem implements ObjectWithRecords {
         let discountsLater = 0;
         if (cart) {
             for (const discount of cart.bundleDiscounts) {
-                const value = discount.getNetTotalFor(this);
+                const value = discount.getTotalFor(this);
                 if (value !== 0) {
                     all.push({
                         name: discount.name,
@@ -416,7 +416,7 @@ export class RegisterItem implements ObjectWithRecords {
                 }
 
                 for (const registration of this.replaceRegistrations) {
-                    const value = discount.getNetTotalFor(registration);
+                    const value = discount.getTotalFor(registration);
                     if (value !== 0) {
                         all.push({
                             name: discount.name,
