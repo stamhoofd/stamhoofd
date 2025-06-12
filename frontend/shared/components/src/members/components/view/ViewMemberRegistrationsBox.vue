@@ -116,7 +116,10 @@ const visibleRegistrations = computed(() => {
 const chooseGroupForMember = useChooseGroupForMember();
 
 async function addRegistration() {
-    await chooseGroupForMember({ member: props.member, displayOptions: { action: 'present', modalDisplayStyle: 'popup' } });
+    await chooseGroupForMember({
+        member: props.member,
+        displayOptions: app === 'registration' ? { action: 'show' } : { action: 'present', modalDisplayStyle: 'popup' },
+    });
 }
 
 async function openCart() {
