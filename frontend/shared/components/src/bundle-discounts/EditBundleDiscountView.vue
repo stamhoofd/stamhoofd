@@ -3,19 +3,19 @@
         <h1>
             {{ title }}
         </h1>
-        <p>{{ $t('Een bundelkorting maak je aan en koppel je vervolgens aan één of meerdere activiteiten of inschrijvingsgroepen waarop die korting geldt. Afhankelijk van de ingestelde toepassingsregels krijgen leden dan korting voor de tweede, derde, vierde... inschrijving bij die ingestelde activiteiten of inschrijvinsgroepen.') }}</p>
+        <p>{{ $t('ca70876e-5a32-40fe-9224-6e61ed055df6') }}</p>
 
         <p class="warning-box">
-            {{ $t('Opgelet, als je een korting wijzigt of toevoegt heeft dit ook gevolgen voor bestaande inschrijvingen die deze korting al hadden gekregen / niet hadden gekregen. Test je kortingen goed uit en lees de beschrijvingen hieronder grondig.') }}
+            {{ $t('2b00749a-bd88-4140-a074-79bf08d359fe') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
             <div>
-                <TInput v-model="name" :placeholder="$t(`bv. Kampkorting broers en zussen`)" error-fields="name" :error-box="errors.errorBox" :title="$t(`Naam`)" />
+                <TInput v-model="name" :placeholder="$t(`0f3a6e76-b5f2-4f92-b4e4-d709dffc1bde`)" error-fields="name" :error-box="errors.errorBox" :title="$t(`8822547e-03a0-4e70-bdce-9661a6c6f613`)" />
                 <p class="style-description-small">
-                    {{ $t('Geef de bundelkorting een duidelijke en korte naam. Deze naam zal zichtbaar zijn voor leden.') }}
+                    {{ $t('c1ed9e16-70d4-4337-a4e1-ecf31ec00bed') }}
                 </p>
             </div>
         </div>
@@ -23,20 +23,20 @@
         <hr>
         <h2>Toepassingsregels</h2>
 
-        <STInputBox :title="$t('Geldt de korting ook voor gezinsleden?')" class="max">
+        <STInputBox :title="$t('59a2cb2c-8935-42df-afab-6c5995e2cea3')" class="max">
             <STList>
                 <STListItem :selectable="true" element-name="label" class="left-center">
                     <template #left>
                         <Radio v-model="countWholeFamily" :value="false" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Nee, alleen per invividueel lid') }}
+                        {{ $t('1337c2d7-aec6-4ca9-be43-b211421b772a') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Korting geldt alleen bij meerdere inschrijvingen van hetzelfde lid.') }}
+                        {{ $t('09389428-111c-453b-8ed9-884e4b26fcb3') }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('Bijvoorbeeld: een lid krijgt korting als het zich inschrijft voor meerdere activiteiten of inschrijvingsgroepen.') }}
+                        {{ $t('cafe0f16-604c-436e-b12e-ef6b0e9d2387') }}
                     </p>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label" class="left-center">
@@ -44,32 +44,32 @@
                         <Radio v-model="countWholeFamily" :value="true" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Ja, ook voor gezinsleden') }}
+                        {{ $t('7bf36754-abf8-40f0-a7f0-70439bbbecac') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Korting geldt ook als gezinsleden zich inschrijven.') }}
+                        {{ $t('02a33069-e9a3-4477-a55b-e05a627976f1') }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('Bijvoorbeeld: een broer of zus krijgt korting als een ander gezinslid al is ingeschreven.') }}
+                        {{ $t('2509e2f2-111f-4eb5-8612-487dd62950a2') }}
                     </p>
                 </STListItem>
             </STList>
         </STInputBox>
 
-        <STInputBox v-if="countWholeFamily" :title="$t('Mag de korting gelden over verschillende activiteiten heen?')" class="max">
+        <STInputBox v-if="countWholeFamily" :title="$t('6a21c1ba-b3fb-4a6f-983f-7f407a2a3f66')" class="max">
             <STList>
                 <STListItem :selectable="true" element-name="label" class="left-center">
                     <template #left>
                         <Radio v-model="countPerGroup" :value="false" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Ja, over alle gekoppelde activiteiten en inschrijvingsgroepen') }}
+                        {{ $t('3ce43f2c-d59c-4cb7-8957-3508770fd5a8') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Het aantal inschrijvingen voor alle gekoppelde activiteiten wordt samengeteld om de tweede, derde... inschrijving te bepalen') }}
+                        {{ $t('b9b2c925-1396-4536-b883-6f7d82acfcb1') }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('Bijvoorbeeld: een lid krijgt korting op activiteit B als hetzelf of een familielid voor activiteit A, B, C... is ingeschreven') }}
+                        {{ $t('a7ec27e7-ec66-41da-ae2d-ea67fe8a088d') }}
                     </p>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label" class="left-center">
@@ -77,33 +77,33 @@
                         <Radio v-model="countPerGroup" :value="true" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Nee, alleen binnen dezelfde activiteit of inschrijvingsgroep') }}
+                        {{ $t('ea9dfea3-7c81-4b90-9d1a-aee6a9e34aea') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Korting geldt alleen bij meerdere inschrijvingen voor dezelfde activiteit.') }}
+                        {{ $t('374ffe63-707c-4e33-958b-30c91db2a527') }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('Bijvoorbeeld: een broer krijgt alleen korting op activiteit A als zijn zus ook op activiteit A is ingeschreven.') }}
+                        {{ $t('fef46e6b-6dd7-406b-947e-8317a6736d68') }}
                     </p>
                 </STListItem>
             </STList>
         </STInputBox>
 
         <hr>
-        <h2>{{ $t('Standaard korting') }}</h2>
-        <p>{{ $t('Je kan hiervan afwijken door dit aan te passen bij de instellingen van de leeftijdsgroep of activiteit. De grootst mogelijke korting wordt steeds berekend.') }}</p>
+        <h2>{{ $t('e3e20081-5971-478e-a69b-09b61fb858da') }}</h2>
+        <p>{{ $t('09087d69-6c29-447e-8d6c-0b1aac491afc') }}</p>
 
         <GroupPriceDiscountsInput v-model="discounts" />
 
         <hr>
-        <h2>{{ $t('Activiteiten en inschrijvingsgroepen') }}</h2>
+        <h2>{{ $t('98666406-d3e9-4c35-a1c8-d6dc80949866') }}</h2>
         <p>
-            {{ $t('Hieronder vindt je een overzicht van alle activiteiten en inschrijvingsgroepen waarvoor deze bundelkorting is ingesteld. Je kan dit aanpassen bij de instellingen van de leeftijdsgroep of activiteit.') }}
+            {{ $t('1eb85876-5ca5-4388-9a1a-bfece589bdcf') }}
         </p>
 
         <LoadingBoxTransition :error-box="errors.errorBox">
             <div v-if="patchedGroups !== null && patchedGroups.length === 0" class="info-box">
-                {{ $t('Er zijn geen groepen die aan deze bundelkorting gekoppeld zijn. Je kan activiteiten en groepen koppelen via de instellingen van elke activiteit of groep.') }}
+                {{ $t('d64c7018-f8f5-4532-88b4-a1a29490a49c') }}
             </div>
             <STList v-if="patchedGroups !== null">
                 <STListItem v-for="group of patchedGroups" :key="group.id" class="container" :selectable="true" @click="editGroup(group)">
@@ -149,7 +149,7 @@ const props = withDefaults(
     },
 );
 
-const title = $t('Bundelkorting');
+const title = $t('472a987d-498d-46b0-b925-3963f729492b');
 const deleting = ref(false);
 const pop = usePop();
 const errors = useErrors();
@@ -210,7 +210,7 @@ useValidation(errors.validator, () => {
     if (name.value.length === 0) {
         throw new SimpleError({
             code: 'invalid_field',
-            message: $t('Geef je bundelkorting een naam'),
+            message: $t('c6be4ce9-199f-43cc-9c64-1b2ec1c83b80'),
             field: 'name',
         });
     }
@@ -294,7 +294,7 @@ function getDescriptionForGroup(group: Group): string | undefined {
     if (group.settings.prices.length === 1) {
         const customDiscounts = group.settings.prices[0].bundleDiscounts.get(props.id)?.customDiscounts;
         if (customDiscounts) {
-            return $t('Aangepaste kortingen') + '\n' + BundleDiscount.discountsToText(customDiscounts);
+            return $t('62397a8b-fcf1-404e-afef-d6cc49c577d6') + '\n' + BundleDiscount.discountsToText(customDiscounts);
         }
         return;
     }
@@ -306,18 +306,18 @@ function getDescriptionForGroup(group: Group): string | undefined {
     if (applicablePrices.length === group.settings.prices.length) {
         const hasCustom = group.settings.prices.map(p => ({ name: p.name, customDiscounts: p.bundleDiscounts.get(props.id)?.customDiscounts })).filter(p => !!p.customDiscounts);
         if (hasCustom.length) {
-            return $t('Met aangepaste kortingen:') + '\n' + hasCustom.map(p => `${p.name}: ${BundleDiscount.discountsToText(p.customDiscounts!)}`).join('\n');
+            return $t('d4db6f9b-ede7-4c60-b910-5ca947208d91') + '\n' + hasCustom.map(p => `${p.name}: ${BundleDiscount.discountsToText(p.customDiscounts!)}`).join('\n');
         }
         // default prices
         return;
     }
 
     if (applicablePrices.length === 1) {
-        return $t('Enkel op tarief {priceName}', {
+        return $t('2bd72941-dfeb-48a8-872a-16ef0aff1dc6', {
             priceName: applicablePrices[0].name,
         });
     }
-    return $t('Enkel voor tarieven:') + applicablePrices.map(p => p.name).join(', ');
+    return $t('1363a154-392e-41a2-b18f-938fb72c3ef3') + applicablePrices.map(p => p.name).join(', ');
 }
 
 async function save() {
@@ -342,7 +342,7 @@ async function doDelete() {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('Ben je zeker dat je deze bundelkorting wilt verwijderen?'), $t('838cae8b-92a5-43d2-82ba-01b8e830054b'))) {
+    if (!await CenteredMessage.confirm($t('f79934ca-a26c-4728-9a5f-c9cec74d6b90'), $t('838cae8b-92a5-43d2-82ba-01b8e830054b'))) {
         return;
     }
 

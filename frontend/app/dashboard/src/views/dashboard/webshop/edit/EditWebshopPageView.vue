@@ -132,12 +132,12 @@
 
         <div v-if="hasFullAccess && areAdvancedWebshopSettingsEnabled" class="container">
             <hr>
-            <h2>{{ $t('Geavanceerd') }}</h2>
+            <h2>{{ $t('badafccc-80ac-4716-87dc-0385f4741af7') }}</h2>
             <p v-if="!hasCustomDomain" class="info-box">
-                {{ $t('Je kan enkel code injecteren als je een eigen domeinnaam voor je webshop hebt ingesteld.') }}
+                {{ $t('4b9e6ec2-a698-43b7-aa6e-be4b05dfd34e') }}
             </p>
-            <STInputBox error-fields="meta.customCode" :error-box="errors.errorBox" class="max" :title="$t('Code injection')">
-                <textarea v-model="customCode" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t('Deze code wordt toegevoegd aan de head tag van de webshop.')" :disabled="!hasCustomDomain" />
+            <STInputBox error-fields="meta.customCode" :error-box="errors.errorBox" class="max" :title="$t('239382e0-0906-4e0f-ba1a-c58574b92e78')">
+                <textarea v-model="customCode" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t('887a8ef4-989d-4dff-a565-d67fdcb95c48')" :disabled="!hasCustomDomain" />
             </STInputBox>
         </div>
     </SaveView>

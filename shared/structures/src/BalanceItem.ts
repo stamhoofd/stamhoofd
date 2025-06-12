@@ -58,7 +58,7 @@ export function getBalanceItemTypeName(type: BalanceItemType): string {
         case BalanceItemType.Other: return $t(`8f7475aa-c110-49b2-8017-1a6dd0fe72f9`);
         case BalanceItemType.PlatformMembership: return $t(`c0277e8e-a2e0-4ec3-9339-c2e1be2e6e2d`);
         case BalanceItemType.CancellationFee: return $t(`ac2be546-732b-4c1a-ace3-c9076795afa0`);
-        case BalanceItemType.RegistrationBundleDiscount: return $t(`Bundelkorting`);
+        case BalanceItemType.RegistrationBundleDiscount: return $t(`472a987d-498d-46b0-b925-3963f729492b`);
     }
 }
 
@@ -95,7 +95,7 @@ export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): s
         case BalanceItemRelationType.GroupOption: return $t(`6c80efa8-5658-4728-ba95-d0536fdd25bd`);
         case BalanceItemRelationType.Member: return $t(`f4052a0b-9564-49c4-a6b6-41af3411f3b0`);
         case BalanceItemRelationType.MembershipType: return 'Aansluitingstype';
-        case BalanceItemRelationType.Discount: return $t(`Korting`);
+        case BalanceItemRelationType.Discount: return $t(`40939025-cebb-4afb-90e9-847233cb256f`);
     }
 }
 
@@ -108,7 +108,7 @@ export function getBalanceItemRelationTypeDescription(type: BalanceItemRelationT
         case BalanceItemRelationType.GroupOption: return $t(`c18b4ad6-4b29-43bf-bb6d-7e3c34ffe80a`);
         case BalanceItemRelationType.Member: return $t(`15cd9dab-e1d5-4f02-b260-bd587ba3cf1e`);
         case BalanceItemRelationType.MembershipType: return 'Naam van het aansluitingstype geassocieerd aan dit item';
-        case BalanceItemRelationType.Discount: return $t(`Naam van de korting geassocieerd aan dit item`);
+        case BalanceItemRelationType.Discount: return $t(`4d5cd18a-ad96-4b2b-aa91-80af307cb8cd`);
     }
 }
 
@@ -489,7 +489,7 @@ export class BalanceItem extends AutoEncoder {
 
                 if (this.price > 0) {
                     // Undo the discount
-                    return $t('Ongedaan maken korting') + ' (' + (discount?.name.toString() || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount)) + ')';
+                    return $t('766a39be-a4af-4a04-baf0-1f064d2fed16') + ' (' + (discount?.name.toString() || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount)) + ')';
                 }
                 return discount?.name.toString() || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount);
             }

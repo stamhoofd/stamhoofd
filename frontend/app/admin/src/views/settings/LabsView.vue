@@ -45,7 +45,7 @@
         </Checkbox>
 
         <Checkbox :model-value="getFeatureFlag('table-registrations')" @update:model-value="setFeatureFlag('table-registrations', !!$event)">
-            {{ $t('Tabel inschrijvingen') }}
+            {{ $t('331da9e3-2c97-4c70-a3d5-aa0ddb9625ad') }}
         </Checkbox>
 
         <Checkbox :model-value="getFeatureFlag('bundle-discounts')" @update:model-value="setFeatureFlag('bundle-discounts', !!$event)">
@@ -57,7 +57,7 @@
         </Checkbox>
 
         <Checkbox v-if="!!STAMHOOFD.domains.webshop" :model-value="getFeatureFlag('webshop-advanced-settings')" @update:model-value="setFeatureFlag('webshop-advanced-settings', !!$event)">
-            {{ $t('Geavanceerde instellingen voor webshops (code injection)') }}
+            {{ $t('f0815834-0750-41d6-aa93-26203b2aedb6') }}
         </Checkbox>
 
         <hr><h2>{{ $t('57dd24f3-ae95-42d7-aaab-48e43483c018') }}</h2>

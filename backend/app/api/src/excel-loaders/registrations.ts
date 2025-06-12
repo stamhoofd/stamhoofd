@@ -11,7 +11,7 @@ import { baseMemberColumns } from './members';
 // Assign to a typed variable to assure we have correct type checking in place
 const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
     id: 'registrations',
-    name: $t('Inschrijvingen'),
+    name: $t('938926c1-cb27-427d-aabd-638c5ec1d14a'),
     columns: [
         {
             id: 'id',

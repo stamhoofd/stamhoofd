@@ -134,7 +134,7 @@ export default class FileInput extends Mixins(NavigationMixin) {
                 if (Request.isNetworkError(e)) {
                     e = new SimpleError({
                         code: 'network_error',
-                        message: $t(`Er was een internetprobleem bij het uploaden van het bestand. Controleer je internetverbinding en probeer het opnieuw.`),
+                        message: $t(`b9912181-cf0a-4c85-bb9a-fc9ee7fa54f5`),
                     });
                 }
                 this.errorBox = new ErrorBox(e);

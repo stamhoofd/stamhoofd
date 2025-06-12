@@ -303,7 +303,7 @@ export class RegisterCheckout {
                 throw new SimpleError({
                     code: 'negative_price',
                     message: 'Total price cannot be negative',
-                    human: $t(`De totaalprijs is negatief, maak de nodige aanpassingen aan je winkelmandje zodat het totaalbedrag minstens 0 is.`),
+                    human: $t(`e0883f65-bd4d-4faa-aba2-71d96001fe42`),
                 });
             }
         }
@@ -353,11 +353,11 @@ export class RegisterCheckout {
                 price: this.freeContribution,
             },
             {
-                name: $t(`Reeds aangerekend`),
+                name: $t(`3a50492b-087a-4a83-a386-4d30fabbc3c2`),
                 price: -this.cart.refund,
             },
             {
-                name: $t(`Annuleringskosten`),
+                name: $t(`aaa4eb2d-cae9-4c5d-8e6a-7e1ee3709689`),
                 price: this.cart.getCancellationFees(this.cancellationFeePercentage),
             },
         ].filter(a => a.price !== 0);
@@ -368,7 +368,7 @@ export class RegisterCheckout {
             if (value !== 0) {
                 if (value < 0) {
                     all.push({
-                        name: $t('Ongedaan maken korting') + ' (' + discount.name + ')',
+                        name: $t('766a39be-a4af-4a04-baf0-1f064d2fed16') + ' (' + discount.name + ')',
                         price: -value,
                     });
                 }

@@ -298,7 +298,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                             throw new SimpleError({
                                 code: 'invalid_group',
                                 message: 'Group is not of the same organization',
-                                human: $t('Je kan de organisator niet wijzigen als er al inschrijvingen gekoppeld zijn aan deze activiteit. Verwijder dan eerst de inschrijvingen.'),
+                                human: $t('1f64237b-84c4-43e7-b752-2875fd1eb075'),
                             });
                         }
                     }

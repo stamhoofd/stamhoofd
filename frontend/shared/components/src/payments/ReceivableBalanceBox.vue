@@ -41,10 +41,10 @@
                         </IconContainer>
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Saldoverrekening') }}
+                        {{ $t('f70ecedf-608c-4330-89e6-8e0a7a5ac264') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Maak een saldoverrekening aan met een totaalprijs van 0 euro die negatieve en positieve items combineert om de openstaande rekening te vereenvoudigen.') }}
+                        {{ $t('f3f810dd-cd4b-4766-b19e-ec995c9cca77') }}
                     </p>
 
                     <template #right>

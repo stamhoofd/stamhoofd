@@ -7,14 +7,14 @@
                 {{ props.period.period.nameShort }}
             </span>
         </h1>
-        <p>{{ $t('Geef korting bij meerdere inschrijvingen van een lid of gezin, bv. voor broers of zussen die inschrijven voor een kamp, of leden die meerdere lessen volgen in hetzelfde werkjaar.') }}</p>
+        <p>{{ $t('9c775d8c-1e2c-40c4-9f61-6be6cb6bd5bb') }}</p>
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <STList v-model="draggableBundles" :draggable="true">
             <template #item="{item: bundleDiscount}">
                 <STListItem :selectable="true" class="right-description right-stack" @click="() => $navigate(Routes.BundleDiscount, { params: { id: bundleDiscount.id } })">
                     <h3 class="style-title-list">
-                        {{ bundleDiscount.name || $t('Naamloos') }}
+                        {{ bundleDiscount.name || $t('0a0f4ac1-1b0e-48f0-9f21-d1c77ec3f008') }}
                     </h3>
                     <p class="style-description-small">
                         {{ bundleDiscount.humanDescription }}
@@ -34,7 +34,7 @@
         <p>
             <button class="button text" type="button" @click="$navigate(Routes.CreateBundleDiscount)">
                 <span class="icon add" />
-                <span>{{ $t('Nieuwe bundelkorting') }}</span>
+                <span>{{ $t('9a7749d3-dac4-4baa-99e7-8048fe9ff743') }}</span>
             </button>
         </p>
     </SaveView>
@@ -56,7 +56,7 @@ const props = withDefaults(
     },
 );
 
-const title = $t('Bundelkortingen');
+const title = $t('98237c41-e107-4997-a645-cc4c16bb5b9a');
 const pop = usePop();
 
 const { patched: patchedPeriod, hasChanges, addPatch, patch } = usePatch(props.period);
@@ -128,7 +128,7 @@ defineRoutes([
                     },
                 };
             }
-            Toast.error($t(`Korting niet gevonden`)).show();
+            Toast.error($t(`1e050d5b-9e14-41ea-9334-9b11a10eedde`)).show();
             throw new Error('Discount not found');
         },
 

@@ -53,7 +53,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
             if (request.body.meta) {
                 request.body.meta.domainActive = undefined;
                 if (request.body.meta.customCode !== undefined && !await Context.auth.hasFullAccess(organization.id)) {
-                    throw Context.auth.error($t('Je hebt niet voldoende rechten om de custom code aan te passen.'));
+                    throw Context.auth.error($t('c8e499c2-8d90-480c-a15e-d9da5291b40e'));
                 }
                 webshop.meta.patchOrPut(request.body.meta);
             }

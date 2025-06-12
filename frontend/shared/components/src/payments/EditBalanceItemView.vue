@@ -25,13 +25,13 @@
             </div>
         </div>
 
-        <STInputBox v-if="balanceItem.status === BalanceItemStatus.Canceled" error-fields="status" :error-box="errors.errorBox" :title="$t('Status')">
+        <STInputBox v-if="balanceItem.status === BalanceItemStatus.Canceled" error-fields="status" :error-box="errors.errorBox" :title="$t('f21f3447-bb11-4474-8597-b9cae359faec')">
             <Dropdown v-model="status">
                 <option :value="BalanceItemStatus.Due">
-                    {{ $t('Verschuldigd') }}
+                    {{ $t('a8fc4892-7a37-4748-9249-3499524ad288') }}
                 </option>
                 <option :value="BalanceItemStatus.Canceled">
-                    {{ $t('Geannuleerd') }}
+                    {{ $t('21ae7df0-9833-46e7-9735-ffabf99f8cdd') }}
                 </option>
             </Dropdown>
         </STInputBox>

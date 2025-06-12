@@ -982,7 +982,7 @@ export class PlatformMember implements ObjectWithRecords {
     get registrationDescription() {
         const groups = this.groups;
         if (groups.length === 0) {
-            return $t('Niet ingeschreven');
+            return $t('57109b34-1238-4e62-84a0-14a81d7c2bfa');
         }
         return groups.map(g => g.settings.name).join(', ');
     }

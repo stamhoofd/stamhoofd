@@ -22,7 +22,7 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders() {
         const all: UIFilterBuilder<UIFilter>[] = [];
 
         all.push(new DateFilterBuilder({
-            name: $t('Inschrijvingsdatum'),
+            name: $t('ae9274f4-87fd-4221-bd81-3ff8b609eb4b'),
             key: 'registeredAt',
         }));
 
@@ -38,8 +38,8 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders() {
 
         all.push(
             new GroupUIFilterBuilder({
-                name: $t('Bijhorend lid'),
-                description: $t('Filter op de leden die bij de inschrijving horen'),
+                name: $t('6c7534a5-53c7-4343-b9e0-5277fe640496'),
+                description: $t('4251f966-99ca-4ad8-ba39-9848aa67ecea'),
                 builders: originalFilters,
                 wrapper: {
                     member: {

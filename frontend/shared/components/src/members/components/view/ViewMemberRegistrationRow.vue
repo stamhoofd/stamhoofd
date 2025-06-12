@@ -46,7 +46,7 @@
         </p>
 
         <p v-if="registration.deactivatedAt && registration.calculatedPrice" class="style-description-small">
-            {{ $t('Annulatiekost') }}: {{ formatPrice(registration.calculatedPrice) }}
+            {{ $t('b557c22d-d44e-43ad-9f05-de74d956c413') }}: {{ formatPrice(registration.calculatedPrice) }}
         </p>
 
         <template #right>

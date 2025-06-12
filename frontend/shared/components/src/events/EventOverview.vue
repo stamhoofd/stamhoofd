@@ -114,7 +114,7 @@
                     </div>
 
                     <hr>
-                    <h2>{{ $t('Acties') }}</h2>
+                    <h2>{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</h2>
                     <STList>
                         <STListItem v-if="!event.group && canWriteEvent" :selectable="true" class="left-center" @click="createGroup">
                             <template #left>
@@ -125,10 +125,10 @@
                                 </IconContainer>
                             </template>
                             <h2 class="style-title-list">
-                                {{ $t('Inschrijvingen activeren') }}
+                                {{ $t('26667b28-4e39-4218-9f9b-131bf3bae6ab') }}
                             </h2>
                             <p class="style-description-small">
-                                {{ $t('Manueel inschrijvingen bijhouden of leden online laten inschrijven.') }}
+                                {{ $t('004bab40-945f-4f6d-8316-b0a8f2748f7a') }}
                             </p>
                             <template #right>
                                 <span class="icon arrow-right-small gray" />
@@ -430,7 +430,7 @@ async function prepareOrganizationPeriod(group: Group) {
         throw new SimpleError({
             code: 'missing-organization-period',
             message: 'Missing organization period',
-            human: $t('Deze #groep is nog niet actief in dit werkjaar, maak dat eerst aan.'),
+            human: $t('cd37a13c-6779-49fa-a97f-1eddb6b61ebb'),
         });
     }
 
@@ -447,9 +447,9 @@ async function prepareOrganizationPeriod(group: Group) {
 
 async function createGroup() {
     if (!await CenteredMessage.confirm(
-        $t('Inschrijvingen verzamelen voor deze activiteit?'),
-        $t('Inschrijvingen activeren'),
-        $t('Geen paniek, je inschrijvingen gaan nog niet meteen online staan. Je kan inschrijvinen later terug uitschakelen via de algemene instellingen van de activiteit.'),
+        $t('e8050ed2-af7e-4ffd-a9c9-e2fda7ef9bf5'),
+        $t('26667b28-4e39-4218-9f9b-131bf3bae6ab'),
+        $t('3fa34288-9872-4c2b-af11-2d112b905eef'),
         undefined,
         false,
     )) {

@@ -34,26 +34,26 @@ export class BundleDiscount extends AutoEncoder {
     get humanDescription() {
         if (this.countWholeFamily) {
             if (this.countPerGroup) {
-                return $t('Korting als meerdere gezinsleden inschrijven voor dezelfde inschrijvingsgroep/activiteit.');
+                return $t('43c1d02d-ca64-4809-95d6-50491c712cbb');
             }
-            return $t('Korting voor gezinsleden die inschrijven voor verschillende inschrijvingsgroepen/activiteiten met deze korting.');
+            return $t('d098add1-c1b8-44d1-bf96-d762db3ea3cc');
         }
 
-        return $t('Korting voor hetzelfde lid dat inschrijven voor meerdere inschrijvingsgroepen/activiteiten met deze korting.');
+        return $t('200b5e3d-93d1-4c1c-80be-6eb0f2f75793');
     }
 
     static discountsToText(discounts: GroupPriceDiscount[]) {
         if (discounts.length === 0) {
-            return $t('Geen korting, maar telt mee in aantal');
+            return $t('d3c259e4-4f8b-4f2f-9051-a943ef41dbd2');
         }
         return discounts.map((d, i) => {
             if (i === discounts.length - 1) {
-                return $t('{5%} korting op de {2}e en volgende inschrijvingen', {
+                return $t('cb8ccc1d-7ec0-4c9d-bf02-6759109324ce', {
                     '5%': d.toString(),
                     '2': i + 2,
                 });
             }
-            return $t('{5%} korting op de {2}e inschrijving', {
+            return $t('4eda3d41-73fe-4063-8036-ccbd7290deaf', {
                 '5%': d.toString(),
                 '2': i + 2,
             });

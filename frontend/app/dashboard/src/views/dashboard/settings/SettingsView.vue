@@ -165,10 +165,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/discount.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Bundelkortingen') }}
+                            {{ $t('98237c41-e107-4997-a645-cc4c16bb5b9a') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Korting voor tweede of derde inschrijvingen.') }}
+                            {{ $t('86fbcc70-2118-4399-9b7c-4461b8d40369') }}
                         </p>
 
                         <template #right>

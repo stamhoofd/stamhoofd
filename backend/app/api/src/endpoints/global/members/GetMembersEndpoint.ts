@@ -109,7 +109,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     if (groupIds.length === 0) {
                         throw Context.auth.error({
                             message: 'You must filter on a group of the organization you are trying to access',
-                            human: $t(`Je hebt geen toegangsrechten om deze leden te bekijken`),
+                            human: $t(`737f9ff3-8eca-40f5-8f03-d303d53de5d1`),
                         });
                     }
 

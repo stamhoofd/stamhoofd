@@ -24,8 +24,8 @@
         </p>
 
         <template #right>
-            <span v-if="record.externalPermissionLevel === PermissionLevel.None" v-tooltip="$t('Onzichtbaar voor leden')" class="button icon eye-off gray" />
-            <span v-if="record.externalPermissionLevel === PermissionLevel.Read" v-tooltip="$t('Niet bewerkbaar voor leden')" class="button icon no-edit gray" />
+            <span v-if="record.externalPermissionLevel === PermissionLevel.None" v-tooltip="$t('1ece4680-9858-4f37-b6b1-7a3b872d3cd6')" class="button icon eye-off gray" />
+            <span v-if="record.externalPermissionLevel === PermissionLevel.Read" v-tooltip="$t('c393d4d3-9cc2-4da8-a8ae-569f48412e12')" class="button icon no-edit gray" />
             <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />
         </template>
