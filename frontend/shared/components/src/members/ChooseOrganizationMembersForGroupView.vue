@@ -119,6 +119,7 @@ async function addMember() {
         contextOrganization: contextOrganization.value,
         platform: platform.value,
     });
+    family._isSingle = true;
     family.checkout = props.checkout;
 
     await doAddMember(family, {

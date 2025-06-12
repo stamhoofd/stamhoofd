@@ -135,6 +135,7 @@ import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments, PlatformFamily
 import { Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import PaymentRow from './components/PaymentRow.vue';
+import { useLoadFamilyFromId } from '../members/hooks/useLoadFamily';
 
 const props = defineProps<{
     balanceItem: BalanceItemWithPayments | BalanceItem;
@@ -152,6 +153,7 @@ const errors = useErrors();
 const pop = usePop();
 const context = useContext();
 const owner = useRequestOwner();
+const loadFamilyFromId = useLoadFamilyFromId();
 
 // Load mmeber on load
 loadMember().catch(console.error);
@@ -282,7 +284,7 @@ async function loadMember() {
         return;
     }
     try {
-        const familyBlob = await platformFamilyManager.loadFamilyBlob(props.balanceItem.memberId);
+        const familyBlob = await loadFamilyFromId(props.balanceItem.memberId);
         family.value = PlatformFamily.create(familyBlob, {
             contextOrganization: organization.value,
             platform: platform.value,

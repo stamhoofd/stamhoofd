@@ -16,7 +16,7 @@ import { Ref, computed, ref } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
 import { useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '../filters/filter-builders/members';
 import { useDirectMemberActions } from './classes/MemberActionBuilder';
-import { getMemberColumns } from './helpers/getMemberColumns';
+import { getMemberColumns } from './helpers';
 import MemberSegmentedView from './MemberSegmentedView.vue';
 
 type ObjectType = PlatformMember;

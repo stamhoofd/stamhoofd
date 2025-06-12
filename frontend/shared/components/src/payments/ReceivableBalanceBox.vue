@@ -149,7 +149,7 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { BalancePriceBreakdown, EditBalanceItemView, EditPaymentView, ErrorBox, GlobalEventBus, GroupedBalanceList, IconContainer, LoadingBoxTransition, PaymentRow, SegmentedControl, useContext, useErrors, usePlatformFamilyManager } from '@stamhoofd/components';
+import { BalancePriceBreakdown, EditBalanceItemView, EditPaymentView, ErrorBox, GlobalEventBus, GroupedBalanceList, IconContainer, LoadingBoxTransition, PaymentRow, SegmentedControl, useContext, useErrors, useLoadFamily, usePlatformFamilyManager } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { BalanceItemWithPayments, DetailedReceivableBalance, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PlatformMember, ReceivableBalance, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
@@ -174,6 +174,7 @@ const selectedTab = ref(props.hideSegmentedControl ? 'individual' : 'grouped') a
 const owner = useRequestOwner();
 const hasWrite = true;
 const present = usePresent();
+const loadFamily = useLoadFamily();
 
 const pendingPayments = computed(() => {
     return detailedItem.value?.payments.filter(p => p.isPending).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt)) ?? [];
@@ -227,13 +228,11 @@ GlobalEventBus.addListener(owner, 'balanceItemPatch', async () => {
     await reload();
 });
 
-const platformFamilyManager = usePlatformFamilyManager();
-
 async function reloadFamily() {
     if (!props.member) {
         return;
     }
-    await platformFamilyManager.loadFamilyMembers(props.member, { shouldRetry: false });
+    await loadFamily(props.member, { shouldRetry: false });
 }
 
 async function createPayment() {

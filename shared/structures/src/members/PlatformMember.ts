@@ -47,6 +47,14 @@ export class PlatformFamily {
     platform: Platform;
     organizations: Organization[] = [];
 
+    /**
+     * Helper data point, to know whether we already tried loading the full family for this member.
+     *
+     * By default it is false, which is okay most of the times. Set it to true when you know you didn't really load the full family and there is a chance
+     * there are unknown members in the family.
+     */
+    _isSingle = false;
+
     constructor(context: { contextOrganization?: Organization | null; platform: Platform }) {
         this.platform = context.platform;
         this.organizations = context.contextOrganization ? [context.contextOrganization] : [];
@@ -148,6 +156,7 @@ export class PlatformFamily {
 
         for (const member of blob.members) {
             const family = new PlatformFamily(context);
+            family._isSingle = true;
 
             for (const organization of blob.organizations) {
                 // Check if this organization is relevant to this member
@@ -165,16 +174,6 @@ export class PlatformFamily {
             memberList.push(platformMember);
         }
         return memberList;
-    }
-
-    insertSingle(member: MemberWithRegistrationsBlob): PlatformMember {
-        const platformMember = new PlatformMember({
-            member,
-            family: this,
-        });
-
-        this.members.push(platformMember);
-        return platformMember;
     }
 
     /**

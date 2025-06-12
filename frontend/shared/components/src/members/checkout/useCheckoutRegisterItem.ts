@@ -78,6 +78,11 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
         item.cartError = originalItem.cartError;
     }
 
+    if (item.family._isSingle && item.groupPrice.bundleDiscounts.size > 0) {
+        // Load the full family first if there are bundle discounts
+        // todo
+    }
+
     const member = item.member;
 
     // Add it to the platform member
