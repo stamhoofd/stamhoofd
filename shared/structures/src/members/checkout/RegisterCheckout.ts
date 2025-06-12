@@ -310,6 +310,7 @@ export class RegisterCheckout {
 
     /**
      * Discounts that will be applied to items that are due now
+     * (net, so minus the already applied discounts)
      */
     get bundleDiscount() {
         return this.cart.bundleDiscount;
@@ -317,6 +318,7 @@ export class RegisterCheckout {
 
     /**
      * Discounts that will be applied to items that are due later
+     * (net, so minus the already applied discounts)
      */
     get bundleDiscountDueLater() {
         return this.cart.bundleDiscountDueLater;
