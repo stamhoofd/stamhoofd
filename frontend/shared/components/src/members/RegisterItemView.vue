@@ -32,7 +32,7 @@
             {{ validationWarning }}
         </p>
 
-        <p v-if="item.totalPrice && contextOrganization && checkout.asOrganizationId && !checkout.isAdminFromSameOrganization" class="warning-box">
+        <p v-if="cachedTotalPrice && contextOrganization && checkout.asOrganizationId && !checkout.isAdminFromSameOrganization" class="warning-box">
             {{ $t('4e758459-990f-488d-b457-d2e0f7edd9cc', {organization: contextOrganization.name}) }}
         </p>
 
@@ -267,6 +267,7 @@ async function deleteMe() {
 }
 
 const cachedPriceBreakdown = ref<PriceBreakdown | null>(null);
+const cachedTotalPrice = ref<number | null>(null);
 watch(() => [props.item.groupPrice, props.item.options, props.item.trial], () => {
     // We need to do cart level calculation, because discounts might be applied
     const clonedCheckout = checkout.value.clone();
@@ -281,9 +282,11 @@ watch(() => [props.item.groupPrice, props.item.options, props.item.trial], () =>
     if (props.willStartCheckoutFlow) {
         // Show the cart breakdown instead of only the item breakdown
         cachedPriceBreakdown.value = clonedCheckout.priceBreakown;
-    } else {
+    }
+    else {
         cachedPriceBreakdown.value = clone.getPriceBreakown(clonedCheckout.cart);
     }
+    cachedTotalPrice.value = clone.totalPrice;
 }, { deep: true });
 
 </script>
