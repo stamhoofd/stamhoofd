@@ -106,8 +106,17 @@ export class ContextInstance {
         });
     }
 
-    static async start<T>(request: Request, handler: () => Promise<T>): Promise<T> {
+    static getContextFromRequest(request: Request): ContextInstance {
+        if ((request as any)._context) {
+            return (request as any)._context as ContextInstance;
+        }
         const context = new ContextInstance(request);
+        (request as any)._context = context;
+        return context;
+    }
+
+    static async start<T>(request: Request, handler: () => Promise<T>): Promise<T> {
+        const context = this.getContextFromRequest(request);
 
         return await this.asyncLocalStorage.run(context, async () => {
             return await handler();
@@ -223,6 +232,11 @@ export class ContextInstance {
         const token = await Token.getByAccessToken(accessToken, true);
 
         if (!token || (this.organization && token.user.organizationId !== null && token.user.organizationId !== this.organization.id) || (!this.organization && token.user.organizationId)) {
+            if (token?.user) {
+                console.log(
+                    'Failed auth: ' + token?.user.email + ' (' + token?.user.id + ')',
+                );
+            }
             throw new SimpleError({
                 code: 'invalid_access_token',
                 message: 'The access token is invalid',
@@ -232,6 +246,11 @@ export class ContextInstance {
         }
 
         if (token.isAccessTokenExpired()) {
+            if (token?.user) {
+                console.log(
+                    'Failed auth: ' + token?.user.email + ' (' + token?.user.id + ')',
+                );
+            }
             throw new SimpleError({
                 code: 'expired_access_token',
                 message: 'The access token is expired',
@@ -241,6 +260,11 @@ export class ContextInstance {
         }
 
         if (!token.user.hasAccount() && !allowWithoutAccount) {
+            if (token?.user) {
+                console.log(
+                    'Failed auth: ' + token?.user.email + ' (' + token?.user.id + ')',
+                );
+            }
             throw new SimpleError({
                 code: 'not_activated',
                 message: 'This user is not yet activated',
@@ -256,6 +280,10 @@ export class ContextInstance {
 
         const user = token.user;
         this.user = user;
+
+        console.log(
+            'Auth: ' + user.email + ' (' + user.id + ')',
+        );
 
         // Load member of user
         // todo

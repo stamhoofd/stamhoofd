@@ -6,18 +6,20 @@ export function loadLogger() {
     logger.hideTags('silent-seed');
 
     // Requests
-    logger.addClassStyle(['request', 'tag'], ['cyan']);
+    logger.addClassStyle(['request', 'tag', 'first'], ['cyan']);
+    logger.addClassStyle(['request', 'tag', 'output'], ['cyan', 'dim']);
+    logger.addClassStyle(['request', 'tag', 'query'], ['cyan']);
+    logger.addClassStyle(['request', 'tag', 'body'], ['cyan']);
 
-    logger.addClassStyle(['request', 'tag', 'output'], ['dim']);
     logger.addClassAfterStyle(['request', 'tag', 'output'], ['dim']);
-
-    logger.addClassStyle(['request', 'time'], ['dim']);
-    logger.addClassAfterStyle(['request', 'time'], ['dim']);
 
     logger.addClassStyle(['request', 'ip'], ['dim', 'italic']);
     logger.addClassAfterStyle(['request', 'ip'], ['dim']);
     logger.addClassStyle(['request', 'host'], ['dim', 'italic']);
     logger.addClassStyle(['request', 'method'], ['cyan', 'italic']);
+
+    logger.addClassStyle(['request', 'status-code'], ['bold']);
+    logger.addClassAfterStyle(['request', 'status-code'], ['dim']);
 
     // CRONS
     logger.addClassStyle(['crons', 'tag'], ['magenta']);

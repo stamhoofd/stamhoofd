@@ -10,7 +10,7 @@ export const ContextMiddleware: RequestMiddleware = {
         return ContextInstance.start(request, run);
     },
 
-    handleRequest: function (request: Request) {
+    handleRequest() {
         // Noop
     },
 };
