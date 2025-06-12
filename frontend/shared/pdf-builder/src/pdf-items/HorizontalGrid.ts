@@ -1,7 +1,6 @@
-import { mmToPoints } from '../pdf-helpers';
 import { PdfDocWrapper } from '../PdfDocWrapper';
 import { PdfFont } from '../PdfFont';
-import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions, PdfItemGetWidthOptions } from '../PdfItem';
+import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../PdfItem';
 import { VerticalStack } from './VerticalStack';
 
 export interface PdfHorizontalGridOptions {
@@ -45,21 +44,27 @@ export class HorizontalGrid implements PdfItem {
 
     private calculateAutoColumns(docWrapper: PdfDocWrapper, availableWidth: number): number {
         let columns = 1;
+        let totalItems = 0;
+        let maxItemWidth = 0;
 
-        const maxItemWidth = Math.ceil(this.items.reduce((a, b) => {
-            // todo
-            const width = b.getWidth(docWrapper, { maxHeight: mmToPoints(15) });
+        for (const item of this.items) {
+            const width = item.getMinWidth ? item.getMinWidth(docWrapper) : item.getWidth(docWrapper);
             if (width === undefined) {
                 // if width is undefined, we can't calculate the max width
-                return Number.MAX_VALUE;
+                return 1;
             }
 
-            if (width > a) {
-                return width;
+            if (width > maxItemWidth) {
+                maxItemWidth = Math.ceil(width);
             }
 
-            return a;
-        }, 0));
+            if (item instanceof VerticalStack) {
+                totalItems += item.size;
+            }
+            else {
+                totalItems++;
+            }
+        }
 
         let totalWidthIfNextColumn = Math.ceil(2 * maxItemWidth + this.columnGap);
 
@@ -68,7 +73,7 @@ export class HorizontalGrid implements PdfItem {
             totalWidthIfNextColumn = Math.ceil(totalWidthIfNextColumn + maxItemWidth + this.columnGap);
         }
 
-        const result = Math.min(this.items.length, columns);
+        const result = Math.min(totalItems, columns);
 
         return result;
     }
@@ -379,7 +384,7 @@ export class HorizontalGrid implements PdfItem {
         return totalHeight;
     }
 
-    getWidth(docWrapper: PdfDocWrapper, _options: PdfItemGetWidthOptions): number {
+    getWidth(docWrapper: PdfDocWrapper): number {
         return this.maxWidth === undefined ? docWrapper.getPageWidthWithoutMargins() : this.maxWidth;
     }
 

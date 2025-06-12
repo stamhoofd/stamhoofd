@@ -1,4 +1,4 @@
-import { colorDark, H3, HorizontalGrid, LabelWithValue, metropolisBold, metropolisMedium, mmToPoints, PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions, PdfItemGetWidthOptions, PdfText, Spacing, VerticalStack } from '@stamhoofd/frontend-pdf-builder';
+import { colorDark, H3, HorizontalGrid, LabelWithValue, metropolisBold, metropolisMedium, mmToPoints, PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions, PdfText, Spacing, VerticalStack } from '@stamhoofd/frontend-pdf-builder';
 import { PlatformMember } from '@stamhoofd/structures';
 import { SelectablePdfData } from '../SelectablePdfData';
 
@@ -34,9 +34,9 @@ export class MembersDetail implements PdfItem {
         return grid.getHeight(docWrapper, options);
     }
 
-    getWidth(docWrapper: PdfDocWrapper, options: PdfItemGetWidthOptions): number | undefined {
+    getWidth(docWrapper: PdfDocWrapper): number | undefined {
         const grid = this.createGrid(docWrapper);
-        return grid.getWidth(docWrapper, options);
+        return grid.getWidth(docWrapper);
     }
 
     getFonts(): PdfFont[] {
@@ -132,6 +132,7 @@ function memberDetailsVerticalStackFactory(member: PlatformMember, columns: Sele
             },
             value: {
                 text: stringValue,
+                preferredMaxHeight: mmToPoints(15),
             },
             gapBetween: mmToPoints(2),
             // lineGap of 1mm (for small spacing between lines of the value and label text)

@@ -13,13 +13,23 @@ export type PdfItemGetHeightOptions = {
     maxWidth?: number;
 };
 
-export type PdfItemGetWidthOptions = {
-    maxHeight?: number;
-};
-
 export interface PdfItem {
     draw(docWrapper: PdfDocWrapper, options: PdfItemDrawOptions): void;
+    /**
+     * The height if the item would be drawn on an empty page
+     * @param docWrapper
+     * @param options
+     */
     getHeight(docWrapper: PdfDocWrapper, options: PdfItemGetHeightOptions): number;
-    getWidth(docWrapper: PdfDocWrapper, options: PdfItemGetWidthOptions): number | undefined;
+    /**
+     * The width if the item would be drawn on an empty page
+     * @param docWrapper
+     */
+    getWidth(docWrapper: PdfDocWrapper): number | undefined;
+    /**
+     * The minimum width of the item
+     * @param docWrapper
+     */
+    getMinWidth?(docWrapper: PdfDocWrapper): number | undefined;
     getFonts?(): PdfFont[];
 }

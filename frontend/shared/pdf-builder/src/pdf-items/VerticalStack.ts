@@ -1,6 +1,6 @@
 import { PdfDocWrapper } from '../PdfDocWrapper';
 import { PdfFont } from '../PdfFont';
-import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions, PdfItemGetWidthOptions } from '../PdfItem';
+import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../PdfItem';
 
 export interface VerticalStackOptions {
     maxWidth?: number;
@@ -15,6 +15,10 @@ export interface VerticalStackOptions {
  * This makes it possible to set a max width.
  */
 export class VerticalStack implements PdfItem {
+    get size(): number {
+        return this.items.length;
+    }
+
     /**
      *
      * @param items the items in the vertical stack
@@ -144,12 +148,32 @@ export class VerticalStack implements PdfItem {
         return this.items.reduce((acc, item) => acc + item.getHeight(docWrapper, options), 0);
     }
 
-    getWidth(docWrapper: PdfDocWrapper, options: PdfItemGetWidthOptions): number | undefined {
+    getWidth(docWrapper: PdfDocWrapper): number | undefined {
+        return this.getWidthHelper(docWrapper, false);
+    }
+
+    getMinWidth(docWrapper: PdfDocWrapper): number | undefined {
+        return this.getWidthHelper(docWrapper, true);
+    }
+
+    getFonts(): PdfFont[] {
+        return this.items.flatMap(item => item.getFonts ? item.getFonts() : []);
+    }
+
+    private getWidthHelper(docWrapper: PdfDocWrapper, isMinWidth: boolean): number | undefined {
         const maxWidth = this.options.maxWidth;
         let largestWidth = 0;
 
         for (const item of this.items) {
-            const width = item.getWidth(docWrapper, options);
+            let width: number | undefined;
+
+            if (isMinWidth) {
+                width = item.getMinWidth ? item.getMinWidth(docWrapper) : item.getWidth(docWrapper);
+            }
+            else {
+                width = item.getWidth(docWrapper);
+            }
+
             // unable to determine width
             if (width === undefined) {
                 return maxWidth;
@@ -165,9 +189,5 @@ export class VerticalStack implements PdfItem {
         }
 
         return Math.min(largestWidth, maxWidth);
-    }
-
-    getFonts(): PdfFont[] {
-        return this.items.flatMap(item => item.getFonts ? item.getFonts() : []);
     }
 }

@@ -1,4 +1,4 @@
-import { colorDark, DefaultText, H3, HorizontalGrid, LabelWithValue, metropolisBold, metropolisMedium, mmToPoints, PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions, PdfItemGetWidthOptions, Spacing, VerticalStack, VerticalStackOptions } from '@stamhoofd/frontend-pdf-builder';
+import { colorDark, DefaultText, H3, HorizontalGrid, LabelWithValue, metropolisBold, metropolisMedium, mmToPoints, PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions, Spacing, VerticalStack, VerticalStackOptions } from '@stamhoofd/frontend-pdf-builder';
 import { PlatformMember } from '@stamhoofd/structures';
 import { SelectablePdfData } from '../SelectablePdfData';
 
@@ -32,8 +32,8 @@ export class MembersSummary implements PdfItem {
         return this.create(docWrapper).getHeight(docWrapper, options);
     }
 
-    getWidth(docWrapper: PdfDocWrapper, options: PdfItemGetWidthOptions): number | undefined {
-        return this.create(docWrapper).getWidth(docWrapper, options);
+    getWidth(docWrapper: PdfDocWrapper): number | undefined {
+        return this.create(docWrapper).getWidth(docWrapper);
     }
 
     getFonts(): PdfFont[] {
@@ -97,6 +97,7 @@ function createMembersHorizontalGridFactory({ members, selectableColumn, getName
                 value: {
                     text: value,
                     defaultText: ' ',
+                    preferredMaxHeight: mmToPoints(15),
                 },
                 gapBetween: mmToPoints(2),
                 // lineGap of 1mm (for small spacing between lines of the value and label text)
@@ -112,32 +113,15 @@ function createMembersHorizontalGridFactory({ members, selectableColumn, getName
 
         const gridColumnGap = mmToPoints(10);
 
-        const columns = calculateAutoColumns(docWrapper, stackItems, gridColumnGap);
-
         const stack = new VerticalStack(stackItems);
 
         // create a horizontal grid containing the vertical stacks
         const grid = new HorizontalGrid([stack], {
-            columns,
+            columns: 'auto',
             columnGap: gridColumnGap,
             rowGap: mmToPoints(5),
         });
 
         return grid;
     };
-}
-
-function calculateAutoColumns(docWrapper: PdfDocWrapper, stackItems: LabelWithValue[], gridColumnGap: number) {
-    let columns = 1;
-
-    const maxLabelWithValueWidth = stackItems.reduce((a, b) => Math.max(a, b.getWidth(docWrapper, {})), 0);
-    const availableWidth = docWrapper.getPageWidthWithoutMargins();
-    let totalWidthIfNextColumn = Math.ceil(2 * maxLabelWithValueWidth + gridColumnGap);
-
-    while (totalWidthIfNextColumn < availableWidth) {
-        columns++;
-        totalWidthIfNextColumn = Math.ceil(totalWidthIfNextColumn + maxLabelWithValueWidth + gridColumnGap);
-    }
-
-    return Math.min(stackItems.length, columns);
 }
