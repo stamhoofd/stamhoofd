@@ -17,11 +17,8 @@
                 <h3 class="style-title-list">
                     {{ familyMember.patchedMember.firstName }} {{ familyMember.patchedMember.details ? familyMember.patchedMember.details.lastName : "" }}
                 </h3>
-                <p v-if="familyMember.groups.length > 0" class="style-description-small">
-                    {{ familyMember.groups.map(g => g.settings.name).join(", ") }}
-                </p>
-                <p v-else class="style-description-small">
-                    {{ $t('Niet ingeschreven') }}
+                <p class="style-description-small">
+                    {{ member.registrationDescription }}
                 </p>
                 <template #right>
                     <span class="icon arrow-right-small gray" />

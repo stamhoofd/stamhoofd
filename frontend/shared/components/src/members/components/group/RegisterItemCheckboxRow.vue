@@ -8,6 +8,15 @@
             {{ member.patchedMember.name }}
         </h3>
 
+        <template v-if="app !== 'registration'">
+            <p v-if="member.patchedMember.details.birthDay" class="style-description-small">
+                {{ formatDate(member.patchedMember.details.birthDay, true) }}
+            </p>
+            <p class="style-description-small">
+                {{ member.registrationDescription }}
+            </p>
+        </template>
+
         <p v-if="validationError" class="style-description-small">
             {{ validationError }}
         </p>
@@ -28,12 +37,15 @@
 import { Group, GroupType, Organization, PlatformMember, RegisterItem } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useCheckoutRegisterItem } from '../../checkout';
+import { useAppContext } from '../../../context';
 
 const props = defineProps<{
     group: Group;
     member: PlatformMember;
     groupOrganization: Organization;
 }>();
+
+const app = useAppContext();
 
 // We do some caching here to prevent too many calculations on cart changes
 const inCartRegisterItem = computed(() => props.member.family.checkout.cart.getMemberAndGroup(props.member.id, props.group.id));

@@ -976,7 +976,15 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     get groups() {
-        return this.filterGroups({ currentPeriod: true, includePending: false });
+        return this.filterGroups({ currentPeriod: true, includePending: false, types: [GroupType.Membership, GroupType.WaitingList] });
+    }
+
+    get registrationDescription() {
+        const groups = this.groups;
+        if (groups.length === 0) {
+            return $t('Niet ingeschreven');
+        }
+        return groups.map(g => g.settings.name).join(', ');
     }
 
     insertOrganization(organization: Organization) {
