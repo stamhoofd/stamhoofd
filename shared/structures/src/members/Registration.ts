@@ -134,13 +134,26 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
     discounts = new Map<string, AppliedRegistrationDiscount>();
 
     /**
+     * @danger this could be glitchy
      * The total price that has been charged for this registration.
      * This includes discounts, and manually adjusted balances.
+     *
+     * Note: only returns balances that are due now. For trials this can be 0 until the trial becomes payable (± 1 week before the trial ends).
      */
     get calculatedPrice() {
         return this.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending), 0);
     }
 
+    /**
+     * @danger
+     * The registration's balances only include the balance items that are due. It is possible in some weird situations that a registration
+     * has discounts that are only due in more than a week, in that case, the balance could be:
+     * € 0
+     * € 40 is due in 2 weeks for the normal price
+     * € -10 is due in 2 week for the discount
+     * The discounts object will already contain the -10.
+     * So this method will return 10 euro instead of €40
+     */
     get calculatedPriceWithoutDiscounts() {
         // Discounts have been substracted from the calculated price already, so we have to add them back to get the price without discounts
         return this.calculatedPrice + Array.from(this.discounts.values()).reduce((sum, r) => sum + r.amount, 0);
