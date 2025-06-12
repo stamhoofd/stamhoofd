@@ -137,10 +137,6 @@ export class HorizontalGrid implements PdfItem {
                     console.warn('Item height exceeds page height');
                 }
 
-                if (itemHeight > heightOfHighestItemOnRow) {
-                    heightOfHighestItemOnRow = itemHeight;
-                }
-
                 // go to the next page if the item will not fit
                 if (itemHeight > availableHeight) {
                     goToNextPage();
@@ -149,6 +145,10 @@ export class HorizontalGrid implements PdfItem {
                 item.draw(docWrapper, { ...options, maxWidth: columnWidth, position: { x, y } });
 
                 currentColumn = (currentColumn + 1) % this.columns;
+                if (itemHeight > heightOfHighestItemOnRow) {
+                    heightOfHighestItemOnRow = itemHeight;
+                }
+
                 const isLastItemInGrid = isLastBatch && i === items.length - 1;
 
                 if (isLastItemInGrid) {
