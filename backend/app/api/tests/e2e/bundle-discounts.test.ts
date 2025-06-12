@@ -1637,7 +1637,7 @@ describe('E2E.Bundle Discounts', () => {
                         bundleDiscounts[1].id,
                         AppliedRegistrationDiscount.create({
                             name: bundleDiscounts[1].name,
-                            amount: 5_00,
+                            amount: 50,
                         }),
                     ],
                 ]),
@@ -1657,7 +1657,7 @@ describe('E2E.Bundle Discounts', () => {
                         bundleDiscounts[1].id,
                         AppliedRegistrationDiscount.create({
                             name: bundleDiscounts[1].name,
-                            amount: 50,
+                            amount: 5_00,
                         }),
                     ],
                 ]),
@@ -1697,10 +1697,10 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration2.id,
                     amount: 1,
-                    unitPrice: -5_00,
+                    unitPrice: -50,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: -5_00,
+                    pricePending: -50,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
@@ -1715,10 +1715,10 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration3.id,
                     amount: 1,
-                    unitPrice: -50,
+                    unitPrice: -5_00,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: -50,
+                    pricePending: -5_00,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,

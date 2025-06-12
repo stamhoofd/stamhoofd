@@ -416,7 +416,7 @@ describe('Unit.RegisterCart', () => {
                     price: -100_00, // Reeds aangerekend
                 }),
                 {
-                    name: 'Ongedaan maken korting (Multiple family members discount)',
+                    name: '766a39be-a4af-4a04-baf0-1f064d2fed16 (Multiple family members discount)',
                     price: 10_00,
                 },
                 expect.objectContaining({
@@ -521,7 +521,7 @@ describe('Unit.RegisterCart', () => {
                 }),
                 {
                     // Side effect in registration B
-                    name: 'Ongedaan maken korting (Multiple family members discount)',
+                    name: '766a39be-a4af-4a04-baf0-1f064d2fed16 (Multiple family members discount)',
                     price: 10_00,
                 },
                 expect.objectContaining({
@@ -613,7 +613,7 @@ describe('Unit.RegisterCart', () => {
                     price: -100_00,
                 }),
                 {
-                    name: 'Ongedaan maken korting (Multiple family members discount)',
+                    name: '766a39be-a4af-4a04-baf0-1f064d2fed16 (Multiple family members discount)',
                     price: 10_00,
                 },
                 expect.objectContaining({
