@@ -1,6 +1,6 @@
 import { SelectableColumn } from '@stamhoofd/frontend-excel-export';
 import { ContextPermissions } from '@stamhoofd/networking';
-import { AccessRight, FinancialSupportSettings, Gender, Group, GroupType, Organization, Parent, Platform, PlatformMember, RecordCategory, RecordCheckboxAnswer, RecordSettings, RecordType } from '@stamhoofd/structures';
+import { AccessRight, FinancialSupportSettings, Gender, Group, GroupType, Organization, Parent, Platform, PlatformMember, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { SelectablePdfData } from '../../export/SelectablePdfData';
 
@@ -507,12 +507,16 @@ function getSelectabelPdfDataFromRecordCatagoryForSummary({ recordCategory, cate
         const baseName = getBaseName(record);
         const type = record.type;
 
+        // todo
+        const preferInverted = false;
+
         switch (type) {
             case RecordType.Checkbox: {
                 return [
                     new SelectablePdfData<PlatformMember>({
                         id: `${baseId}.checked`,
                         name: `${baseName}: ${$t('aangevinkt')}`,
+                        enabled: !preferInverted && !!record.warning,
                         category,
                         getValue: ({ patchedMember: object }: PlatformMember) => {
                             const answer = object.details.recordAnswers.get(record.id);
@@ -524,6 +528,7 @@ function getSelectabelPdfDataFromRecordCatagoryForSummary({ recordCategory, cate
                     }), new SelectablePdfData<PlatformMember>({
                         id: `${baseId}.notChecked`,
                         name: `${baseName}: ${$t('niet aangevinkt')}`,
+                        enabled: preferInverted && !!record.warning,
                         category,
                         getValue: ({ patchedMember: object }: PlatformMember) => {
                             const answer = object.details.recordAnswers.get(record.id);
@@ -535,8 +540,58 @@ function getSelectabelPdfDataFromRecordCatagoryForSummary({ recordCategory, cate
                     }),
                 ];
             }
+            case RecordType.ChooseOne: {
+                return record.choices.map((choice) => {
+                    return new SelectablePdfData<PlatformMember>({
+                        id: `${baseId}.${choice.id}`,
+                        name: `${baseName}: ${choice.name.toString()}`,
+                        enabled: !!choice.warning,
+                        category,
+                        getValue: ({ patchedMember: object }: PlatformMember) => {
+                            const answer = object.details.recordAnswers.get(record.id);
+                            if (answer instanceof RecordChooseOneAnswer) {
+                                return answer.selectedChoice?.id === choice.id ? '' : null;
+                            }
+                            return null;
+                        },
+                    });
+                });
+            }
+            case RecordType.MultipleChoice: {
+                return record.choices.map((choice) => {
+                    return new SelectablePdfData<PlatformMember>({
+                        id: `${baseId}.${choice.id}`,
+                        name: `${baseName}: ${choice.name.toString()}`,
+                        enabled: !!choice.warning,
+                        category,
+                        getValue: ({ patchedMember: object }: PlatformMember) => {
+                            const answer = object.details.recordAnswers.get(record.id);
+                            if (answer instanceof RecordMultipleChoiceAnswer) {
+                                return answer.selectedChoices.find(c => c.id === choice.id) ? '' : null;
+                            }
+                            return null;
+                        },
+                    });
+                });
+            }
             default: {
-                return [];
+                return [
+                    new SelectablePdfData<PlatformMember>({
+                        id: baseId,
+                        name: baseName,
+                        enabled: !!record.warning,
+                        category,
+                        getValue: ({ patchedMember: object }: PlatformMember) => {
+                            const answer = object.details.recordAnswers.get(record.id);
+                            if (!answer) {
+                                return null;
+                            }
+
+                            const value = answer.stringValue.trim();
+                            return value && value !== '/' && value.toLowerCase() !== 'nee' && value.toLowerCase() !== 'neen' && value.toLowerCase() !== 'nvt' && value.toLowerCase() !== 'n.v.t.' ? value : null;
+                        },
+                    }),
+                ];
             }
         }
     });
