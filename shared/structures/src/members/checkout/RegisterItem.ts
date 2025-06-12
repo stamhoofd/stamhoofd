@@ -402,18 +402,18 @@ export class RegisterItem implements ObjectWithRecords {
         if (cart) {
             for (const discount of cart.bundleDiscounts) {
                 const value = discount.getTotalFor(this);
-                // if (value !== 0) {
-                all.push({
-                    name: discount.name,
-                    price: -value,
-                });
-                if (this.calculatedTrialUntil) {
-                    discountsLater += value;
+                if (value !== 0) {
+                    all.push({
+                        name: discount.name,
+                        price: -value,
+                    });
+                    if (this.calculatedTrialUntil) {
+                        discountsLater += value;
+                    }
+                    else {
+                        discountsTotal += value;
+                    }
                 }
-                else {
-                    discountsTotal += value;
-                }
-                // }
 
                 for (const registration of this.replaceRegistrations) {
                     const value = discount.getTotalFor(registration);

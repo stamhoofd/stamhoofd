@@ -157,22 +157,22 @@ class BundleDiscountCalculationGroup {
         if (!this.bundle.applyableTo(item)) {
             return null;
         }
-        let groupingCode = '';
+        let groupingCode = 'family-' + item.member.family.uuid + '-';
         let group: Group | null = null;
         let member: PlatformMember | null = null;
 
         if (this.bundle.countWholeFamily) {
             if (this.bundle.countPerGroup) {
-                groupingCode = item.group.id;
+                groupingCode += item.group.id;
                 group = item.group;
             }
             else {
-                // No grouping at all
+                // Group by family objects (for admins)
             }
         }
         else {
             member = item.member;
-            groupingCode = item.member.id;
+            groupingCode += item.member.id;
         }
         const existing = this.calculations.get(groupingCode);
         if (!existing) {
@@ -315,14 +315,16 @@ export class BundleDiscountCalculation {
     }
 
     get itemsAndRegistrations() {
-        return [...this.items.keys(), ...this.registrations.keys()];
+        // We reverse the order of the items so that the discount is applied by preference on the last added items in the cart
+        // that way, the discount is proplery visible while adding items (unless there are price differences)
+        // First items in the array = will get the discounts first if they are the same
+        return [...[...this.items.keys()].reverse(), ...this.registrations.keys()];
     }
 
     calculate() {
         // For each item and registration, calculate the price matrix
         // Price if used as first item, second item, third item
         // We'll then calculate the optimal order using the Hungarian Algorithm
-
         const arr = this.itemsAndRegistrations;
         const priceMatrix: number[][] = [];
 

@@ -271,13 +271,9 @@ const cachedTotalPrice = ref<number | null>(null);
 watch(() => [props.item.groupPrice, props.item.options, props.item.trial], () => {
     // We need to do cart level calculation, because discounts might be applied
     const clonedCheckout = checkout.value.clone();
-    // We remvove the item again and add it again so we have copy to the cloned item (small hack)
-    clonedCheckout.remove(props.item);
 
     const clone = props.item.clone();
     clonedCheckout.add(clone);
-
-    clonedCheckout.updatePrices();
 
     if (props.willStartCheckoutFlow) {
         // Show the cart breakdown instead of only the item breakdown

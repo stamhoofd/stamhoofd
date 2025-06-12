@@ -29,6 +29,7 @@ import { RecordAnswer } from './records/RecordAnswer.js';
 import { RecordCategory } from './records/RecordCategory.js';
 import { RecordSettings } from './records/RecordSettings.js';
 import { type ContinuousMembershipStatus } from './MembershipStatus.js';
+import { v4 as uuidv4 } from 'uuid';
 
 export class PlatformFamily {
     members: PlatformMember[] = [];
@@ -58,6 +59,19 @@ export class PlatformFamily {
     constructor(context: { contextOrganization?: Organization | null; platform: Platform }) {
         this.platform = context.platform;
         this.organizations = context.contextOrganization ? [context.contextOrganization] : [];
+    }
+
+    /**
+     * returns the uuid of the oldest member
+     */
+    get uuid() {
+        if (this.members.length === 0) {
+            return '';
+        }
+
+        // Sort by createdAt, so the oldest member is first
+        const sorted = this.members.sort((a, b) => a.member.createdAt.getTime() - b.member.createdAt.getTime());
+        return sorted[0].id;
     }
 
     insertOrganization(organization: Organization) {
