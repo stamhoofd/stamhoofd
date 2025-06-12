@@ -20,6 +20,9 @@
                 <p v-if="familyMember.groups.length > 0" class="style-description-small">
                     {{ familyMember.groups.map(g => g.settings.name).join(", ") }}
                 </p>
+                <p v-else class="style-description-small">
+                    {{ $t('Niet ingeschreven') }}
+                </p>
                 <template #right>
                     <span class="icon arrow-right-small gray" />
                 </template>
