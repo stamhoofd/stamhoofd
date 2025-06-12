@@ -70,12 +70,9 @@ const props = withDefaults(
         component: ComponentOptions;
         // do not change this
         member: PlatformMember;
-        // Whether the member should be saved to the API
-        doSave?: boolean;
         markReviewed?: string[];
         saveHandler?: ((navigate: NavigationActions) => Promise<void> | void) | null;
     }>(), {
-        doSave: true,
         saveText: () => $t(`bc6b2553-c28b-4e3b-aba3-4fdc2c23db6e`),
         saveHandler: null,
         markReviewed: () => [],
@@ -159,19 +156,13 @@ async function save() {
             await modifyAddress(old, updated);
         }
 
-        if (props.doSave) {
-            // Extra clone for saving, so the view doesn't change during saving
-            const saveClone = cloned.value.clone();
-            patchMemberWithReviewed(saveClone);
-            await manager.save(saveClone.family.members);
-            props.member.family.copyFromClone(saveClone.family);
-            cloned.value = saveClone;
-        }
-        else {
-            // Copy over clone
-            patchMemberWithReviewed(cloned.value);
-            props.member.family.copyFromClone(cloned.value.family);
-        }
+        // Extra clone for saving, so the view doesn't change during saving
+        const saveClone = cloned.value.clone();
+        patchMemberWithReviewed(saveClone);
+        await manager.save(saveClone.family.members);
+        props.member.family.copyFromClone(saveClone.family);
+
+        // Note: we don't yet update our local 'cloned' value. We'll do so if we ever return to this view (onActivated will update it).
 
         if (isDuplicate.value) {
             Toast.success($t('c113898b-d8ce-47ca-915d-2d069496aa88', { name: cloned.value.patchedMember.details.firstName })).show();
