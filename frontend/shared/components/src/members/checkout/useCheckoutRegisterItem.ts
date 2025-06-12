@@ -61,12 +61,11 @@ export async function loadGroupOrganization(context: SessionContext, organizatio
 // ----------------------------
 // --------- Flow 1 -----------
 
-export async function checkoutRegisterItem({ item: originalItem, admin, context, displayOptions, navigate, showGroupInformation, startCheckoutFlow }: {
+export async function checkoutRegisterItem({ item: originalItem, admin, context, displayOptions, navigate, startCheckoutFlow }: {
     item: RegisterItem;
     navigate: NavigationActions;
     context: SessionContext;
     admin?: boolean;
-    showGroupInformation?: boolean;
     displayOptions?: DisplayOptions;
     startCheckoutFlow?: boolean;
 }) {
@@ -96,7 +95,7 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
 
     // Check which steps need a review or are not complete
     const steps: EditMemberStep[] = [
-        new RegisterItemStep(item, { showGroupInformation }),
+        new RegisterItemStep(item, {}),
     ];
 
     if (!admin) {
@@ -142,9 +141,6 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
                 else {
                     Toast.success($t(`fa2ecc9e-94d0-49fb-9968-2227528ef22f`)).setIcon('basket').show();
                 }
-            }
-
-            if (showGroupInformation) {
                 await GlobalEventBus.sendEvent('selectTabByName', 'mandje');
             }
         }
@@ -155,14 +151,13 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
     await manager.saveHandler(null, navigate);
 }
 
-export async function checkoutDefaultItem({ group, member, admin, groupOrganization, context, displayOptions, navigate, showGroupInformation, startCheckoutFlow, owner }: {
+export async function checkoutDefaultItem({ group, member, admin, groupOrganization, context, displayOptions, navigate, startCheckoutFlow, owner }: {
     group: Group;
     member: PlatformMember;
     groupOrganization?: Organization;
     context: SessionContext;
     navigate: NavigationActions;
     admin?: boolean;
-    showGroupInformation?: boolean;
     displayOptions?: DisplayOptions;
     startCheckoutFlow?: boolean;
     owner?: any;
@@ -182,7 +177,6 @@ export async function checkoutDefaultItem({ group, member, admin, groupOrganizat
         displayOptions,
         admin,
         navigate,
-        showGroupInformation,
         startCheckoutFlow,
     });
 }
@@ -389,7 +383,6 @@ export async function chooseGroupForMember({ member, navigate, context, displayO
                             navigate,
                             context,
                             displayOptions: { action: 'show' },
-                            showGroupInformation: true,
                             startCheckoutFlow,
                         });
                     },

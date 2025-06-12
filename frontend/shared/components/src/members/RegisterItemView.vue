@@ -150,7 +150,6 @@ import FillRecordCategoryBox from '../records/components/FillRecordCategoryBox.v
 const props = defineProps<{
     item: RegisterItem;
     saveHandler: (newItem: RegisterItem, navigation: NavigationActions) => Promise<void> | void;
-    showGroupInformation: boolean;
 }>();
 
 const checkout = computed(() => props.item.member.family.checkout);

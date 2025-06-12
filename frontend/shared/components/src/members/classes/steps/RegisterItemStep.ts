@@ -6,11 +6,9 @@ import { EditMemberStep, MemberStepManager } from '../MemberStepManager';
 
 export class RegisterItemStep implements EditMemberStep {
     item: RegisterItem;
-    showGroupInformation: boolean;
 
-    constructor(item: RegisterItem, options?: { showGroupInformation?: boolean }) {
+    constructor(item: RegisterItem, options?: { }) {
         this.item = item;
-        this.showGroupInformation = options?.showGroupInformation ?? false;
     }
 
     getName(manager: MemberStepManager) {
@@ -23,7 +21,6 @@ export class RegisterItemStep implements EditMemberStep {
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {
         return new ComponentWithProperties(RegisterItemView, {
-            showGroupInformation: this.showGroupInformation,
             member: manager.member,
             item: this.item.clone(),
             saveHandler: async (item: RegisterItem, navigate: NavigationActions) => {
