@@ -114,6 +114,24 @@ export class RegisterCheckout {
 
     cancellationFeePercentage = 0; // per ten thousand
 
+    /**
+     * Note: only use this for temporary clones,
+     * because the register items will still have a reference to the old checkout.
+     */
+    clone() {
+        const checkout = new RegisterCheckout();
+        checkout.cart = this.cart.clone();
+        checkout.administrationFee = this.administrationFee;
+        checkout.freeContribution = this.freeContribution;
+        checkout.paymentMethod = this.paymentMethod;
+        checkout.asOrganizationId = this.asOrganizationId;
+        checkout.customer = this.customer ? this.customer.clone() : null;
+        checkout.cancellationFeePercentage = this.cancellationFeePercentage;
+        checkout.defaultOrganization = this.defaultOrganization;
+
+        return checkout;
+    }
+
     convert(): IDRegisterCheckout {
         return IDRegisterCheckout.create({
             cart: this.cart.convert(),

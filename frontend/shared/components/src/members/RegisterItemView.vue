@@ -150,6 +150,7 @@ import FillRecordCategoryBox from '../records/components/FillRecordCategoryBox.v
 const props = defineProps<{
     item: RegisterItem;
     saveHandler: (newItem: RegisterItem, navigation: NavigationActions) => Promise<void> | void;
+    willStartCheckoutFlow?: boolean;
 }>();
 
 const checkout = computed(() => props.item.member.family.checkout);
@@ -268,14 +269,21 @@ async function deleteMe() {
 const cachedPriceBreakdown = ref<PriceBreakdown | null>(null);
 watch(() => [props.item.groupPrice, props.item.options, props.item.trial], () => {
     // We need to do cart level calculation, because discounts might be applied
-    const clonedCart = checkout.value.cart.clone();
-    clonedCart.remove(props.item);
+    const clonedCheckout = checkout.value.clone();
+    // We remvove the item again and add it again so we have copy to the cloned item (small hack)
+    clonedCheckout.remove(props.item);
+
     const clone = props.item.clone();
-    clonedCart.add(clone);
+    clonedCheckout.add(clone);
 
-    clonedCart.calculatePrices();
+    clonedCheckout.updatePrices();
 
-    cachedPriceBreakdown.value = clone.getPriceBreakown(clonedCart);
+    if (props.willStartCheckoutFlow) {
+        // Show the cart breakdown instead of only the item breakdown
+        cachedPriceBreakdown.value = clonedCheckout.priceBreakown;
+    } else {
+        cachedPriceBreakdown.value = clone.getPriceBreakown(clonedCheckout.cart);
+    }
 }, { deep: true });
 
 </script>
