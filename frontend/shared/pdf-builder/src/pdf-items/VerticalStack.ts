@@ -63,6 +63,10 @@ export class VerticalStack implements PdfItem {
     }
 
     splitInEqualParts(docWrapper: PdfDocWrapper, options: PdfItemGetHeightOptions, parts: number): VerticalStack[] {
+        if (parts < 2) {
+            throw new Error('parts must be at least 2');
+        }
+
         const heights: number[] = this.items.map(item => item.getHeight(docWrapper, options));
         const totalHeight = heights.reduce((acc, height) => acc + height, 0);
         const maxHeight = Math.ceil(totalHeight / parts);

@@ -117,7 +117,7 @@ export class HorizontalGrid implements PdfItem {
                 const isCurrentLastItem = isLastBatch && isLastItemInBatch;
 
                 // maximize the use of the available height on the page by splitting the last item
-                if (isCurrentLastItem && currentColumn === 0 && itemHeight / this.columns < totalAvailableHeightOnPage) {
+                if (this.columns > 1 && isCurrentLastItem && currentColumn === 0 && itemHeight / this.columns < totalAvailableHeightOnPage) {
                     if (item instanceof VerticalStack) {
                         const itemsToDraw = item.splitInEqualParts(docWrapper, getHeightOptions, this.columns);
                         drawItems(itemsToDraw, isCurrentLastItem);
@@ -272,7 +272,7 @@ export class HorizontalGrid implements PdfItem {
                 const isCurrentLastItem = isLastBatch && isLastItemInBatch;
 
                 // maximize the use of the available height on the page by splitting the last item
-                if (isCurrentLastItem && currentColumn === 0 && itemHeight / this.columns < totalAvailableHeightOnPage) {
+                if (this.columns > 1 && isCurrentLastItem && currentColumn === 0 && itemHeight / this.columns < totalAvailableHeightOnPage) {
                     if (item instanceof VerticalStack) {
                         const itemsToDraw = item.splitInEqualParts(docWrapper, getHeightOptions, this.columns);
                         addHeightOfItems(itemsToDraw, isCurrentLastItem);
