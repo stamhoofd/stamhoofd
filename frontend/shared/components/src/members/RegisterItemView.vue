@@ -271,11 +271,11 @@ watch(() => [props.item.groupPrice, props.item.options, props.item.trial], () =>
     // We need to do cart level calculation, because discounts might be applied
     const clonedCart = checkout.value.cart.clone();
     clonedCart.remove(props.item);
-
     const clone = props.item.clone();
     clonedCart.add(clone);
 
     clonedCart.calculatePrices();
+
     cachedPriceBreakdown.value = clone.getPriceBreakown(clonedCart);
 }, { deep: true });
 

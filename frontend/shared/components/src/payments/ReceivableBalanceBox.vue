@@ -32,7 +32,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" element-name="button" class="theme-secundary" @click="createBalanceItem" v-if="false">
+                <STListItem v-if="false" :selectable="true" element-name="button" class="theme-secundary" @click="createBalanceItem">
                     <template #left>
                         <IconContainer icon="wand">
                             <template #aside>
@@ -148,7 +148,7 @@
 
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { BalancePriceBreakdown, EditBalanceItemView, EditPaymentView, ErrorBox, GlobalEventBus, GroupedBalanceList, IconContainer, LoadingBoxTransition, PaymentRow, SegmentedControl, useContext, useErrors, usePlatformFamilyManager } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { BalanceItemWithPayments, DetailedReceivableBalance, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PlatformMember, ReceivableBalance, ReceivableBalanceType } from '@stamhoofd/structures';
@@ -320,7 +320,11 @@ async function createBalanceItem() {
         },
     });
     await present({
-        components: [component],
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: component,
+            }),
+        ],
         modalDisplayStyle: 'popup',
     });
 }

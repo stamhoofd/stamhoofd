@@ -38,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper } from '@stamhoofd/structures';
 import AsyncPaymentView from '../AsyncPaymentView.vue';
 import PaymentMethodIcon from './PaymentMethodIcon.vue';
@@ -54,10 +54,10 @@ const props = withDefaults(
     },
 );
 
-const present = usePresent();
+const show = useShow();
 
 async function openPayment(payment: PaymentGeneral | Payment) {
-    await present({
+    await show({
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(AsyncPaymentView, {
@@ -79,7 +79,6 @@ async function openPayment(payment: PaymentGeneral | Payment) {
                 }),
             }),
         ],
-        modalDisplayStyle: 'popup',
     });
 }
 

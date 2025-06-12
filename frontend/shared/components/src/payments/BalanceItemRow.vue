@@ -19,7 +19,7 @@
 
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { EditBalanceItemView, GlobalEventBus, useContext } from '@stamhoofd/components';
 import { BalanceItem, BalanceItemWithPayments, GroupedBalanceItems } from '@stamhoofd/structures';
 import { computed } from 'vue';
@@ -75,7 +75,11 @@ async function editBalanceItem(balanceItem: BalanceItem) {
         },
     });
     await present({
-        components: [component],
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: component,
+            }),
+        ],
         modalDisplayStyle: 'popup',
     });
 }
