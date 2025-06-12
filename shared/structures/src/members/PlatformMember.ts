@@ -375,7 +375,7 @@ export class PlatformFamily {
         const organizationTags = new Set<string>();
 
         for (const member of this.members) {
-            for (const group of member.filterGroups({ types: [GroupType.Membership], currentPeriod: true, includePending: false })) {
+            for (const group of member.filterGroups({ types: [GroupType.Membership], currentPeriod: true, includePending: true })) {
                 groups.add(group.id);
                 if (group.defaultAgeGroupId) {
                     defaultGroupIds.add(group.defaultAgeGroupId);
@@ -852,28 +852,30 @@ export class PlatformMember implements ObjectWithRecords {
         }
 
         // Loop checkout
-        for (const item of [...this.family.checkout.cart.items, ...(filters.includePending ? this.family.pendingRegisterItems : [])]) {
-            if (item.member.id === this.id) {
-                if (filters.currentPeriod === false) {
-                    continue;
-                }
-
-                if (filters.periodId && item.group.periodId !== filters.periodId) {
-                    continue;
-                }
-
-                if (filters.canRegister !== undefined) {
-                    continue;
-                }
-
-                if (filters.organizationId !== undefined) {
-                    if (item.organization.id !== filters.organizationId) {
+        if (filters.includePending) {
+            for (const item of [...this.family.checkout.cart.items, ...this.family.pendingRegisterItems]) {
+                if (item.member.id === this.id) {
+                    if (filters.currentPeriod === false) {
                         continue;
                     }
-                }
 
-                if (!base.find(g => g.id === item.group.id)) {
-                    base.push(item.group);
+                    if (filters.periodId && item.group.periodId !== filters.periodId) {
+                        continue;
+                    }
+
+                    if (filters.canRegister !== undefined) {
+                        continue;
+                    }
+
+                    if (filters.organizationId !== undefined) {
+                        if (item.organization.id !== filters.organizationId) {
+                            continue;
+                        }
+                    }
+
+                    if (!base.find(g => g.id === item.group.id)) {
+                        base.push(item.group);
+                    }
                 }
             }
         }
