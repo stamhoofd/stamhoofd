@@ -4,7 +4,6 @@ import { SelectablePdfData } from '../SelectablePdfData';
 
 interface MembersSummarydArgs {
     members: PlatformMember[];
-    columns: number;
     selectableColumn: SelectablePdfData<PlatformMember>;
     getName: (member: PlatformMember) => string;
 }
@@ -42,7 +41,7 @@ export class MembersSummary implements PdfItem {
     }
 }
 
-function createMembersSummaryStack({ members, columns, selectableColumn, getName }: MembersSummarydArgs): (docWrapper: PdfDocWrapper) => VerticalStack {
+function createMembersSummaryStack({ members, selectableColumn, getName }: MembersSummarydArgs): (docWrapper: PdfDocWrapper) => VerticalStack {
     return (docWrapper: PdfDocWrapper) => {
         const title = new H3(selectableColumn.name, {
             spacing: {
@@ -50,7 +49,7 @@ function createMembersSummaryStack({ members, columns, selectableColumn, getName
             },
         });
 
-        const grid = createMembersHorizontalGridFactory({ members, columns, selectableColumn, getName })(docWrapper);
+        const grid = createMembersHorizontalGridFactory({ members, selectableColumn, getName })(docWrapper);
         const spacing = new Spacing(mmToPoints(5));
 
         const stackOptions: VerticalStackOptions = {
@@ -73,7 +72,7 @@ function createMembersSummaryStack({ members, columns, selectableColumn, getName
     };
 }
 
-function createMembersHorizontalGridFactory({ members, columns, selectableColumn, getName }: MembersSummarydArgs): (docWrapper: PdfDocWrapper) => HorizontalGrid | null {
+function createMembersHorizontalGridFactory({ members, selectableColumn, getName }: MembersSummarydArgs): (docWrapper: PdfDocWrapper) => HorizontalGrid | null {
     const labels = members.map(m => getName(m));
     const longestLabel = labels.reduce((a, b) => a.length > b.length ? a : b, '');
 

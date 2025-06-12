@@ -63,7 +63,6 @@ export class MembersPdfDocument {
                 .filter(c => c.enabled)
                 .map(selectableColumn => new MembersSummary({
                     members: sortedMembers,
-                    columns: 2,
                     selectableColumn,
                     getName: (o: PlatformMember) => o.patchedMember.details.name,
                 })));
