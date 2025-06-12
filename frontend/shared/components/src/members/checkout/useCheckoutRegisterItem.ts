@@ -61,13 +61,14 @@ export async function loadGroupOrganization(context: SessionContext, organizatio
 // ----------------------------
 // --------- Flow 1 -----------
 
-export async function checkoutRegisterItem({ item: originalItem, admin, context, displayOptions, navigate, startCheckoutFlow }: {
+export async function checkoutRegisterItem({ item: originalItem, admin, context, displayOptions, navigate, startCheckoutFlow, finishHandler }: {
     item: RegisterItem;
     navigate: NavigationActions;
     context: SessionContext;
     admin?: boolean;
     displayOptions?: DisplayOptions;
     startCheckoutFlow?: boolean;
+    finishHandler?: () => Promise<void> | void;
 }) {
     let item = originalItem;
 
@@ -95,7 +96,7 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
 
     // Check which steps need a review or are not complete
     const steps: EditMemberStep[] = [
-        new RegisterItemStep(item, {}),
+        new RegisterItemStep(item, { willStartCheckoutFlow: startCheckoutFlow ?? false }),
     ];
 
     if (!admin) {
@@ -146,20 +147,19 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
         }
 
         await navigate.dismiss({ force: true });
+        if (finishHandler) {
+            await finishHandler();
+        }
     }, displayOptions);
 
     await manager.saveHandler(null, navigate);
 }
 
-export async function checkoutDefaultItem({ group, member, admin, groupOrganization, context, displayOptions, navigate, startCheckoutFlow, owner }: {
+export async function getDefaultItem({ group, member, groupOrganization, context, owner }: {
     group: Group;
     member: PlatformMember;
     groupOrganization?: Organization;
     context: SessionContext;
-    navigate: NavigationActions;
-    admin?: boolean;
-    displayOptions?: DisplayOptions;
-    startCheckoutFlow?: boolean;
     owner?: any;
 }) {
     if (!groupOrganization) {
@@ -171,13 +171,33 @@ export async function checkoutDefaultItem({ group, member, admin, groupOrganizat
             return;
         }
     }
+    return RegisterItem.defaultFor(member, group, groupOrganization);
+}
+
+export async function checkoutDefaultItem({ group, member, admin, groupOrganization, context, displayOptions, navigate, startCheckoutFlow, owner, finishHandler }: {
+    group: Group;
+    member: PlatformMember;
+    groupOrganization?: Organization;
+    context: SessionContext;
+    navigate: NavigationActions;
+    admin?: boolean;
+    displayOptions?: DisplayOptions;
+    startCheckoutFlow?: boolean;
+    owner?: any;
+    finishHandler?: () => Promise<void> | void;
+}) {
+    const item = await getDefaultItem({ group, member, groupOrganization, context, owner });
+    if (!item) {
+        return;
+    }
     return await checkoutRegisterItem({
         context,
-        item: RegisterItem.defaultFor(member, group, groupOrganization),
+        item,
         displayOptions,
         admin,
         navigate,
         startCheckoutFlow,
+        finishHandler,
     });
 }
 
@@ -186,14 +206,47 @@ export function useCheckoutRegisterItem() {
     const context = useContext();
     const app = useAppContext();
 
-    return async ({ item, startCheckoutFlow, displayOptions }: { item: RegisterItem; startCheckoutFlow?: boolean; displayOptions?: DisplayOptions }) => {
+    return async ({
+        item,
+        startCheckoutFlow,
+        displayOptions,
+        customNavigate,
+        finishHandler,
+    }: {
+        item: RegisterItem;
+        startCheckoutFlow?: boolean;
+        displayOptions?: DisplayOptions;
+        customNavigate?: NavigationActions;
+        finishHandler?: () => Promise<void> | void;
+
+    }) => {
         await checkoutRegisterItem({
             item,
             admin: app === 'dashboard' || app === 'admin',
             displayOptions,
-            navigate,
             startCheckoutFlow,
             context: context.value,
+            navigate: customNavigate ?? navigate,
+            finishHandler,
+        });
+    };
+}
+
+export function useGetDefaultItem() {
+    const context = useContext();
+    const owner = useRequestOwner();
+
+    return async ({ group, member, groupOrganization }: {
+        group: Group;
+        member: PlatformMember;
+        groupOrganization?: Organization;
+    }) => {
+        return await getDefaultItem({
+            group,
+            member,
+            groupOrganization,
+            context: context.value,
+            owner,
         });
     };
 }
@@ -204,7 +257,15 @@ export function useCheckoutDefaultItem() {
     const app = useAppContext();
     const owner = useRequestOwner();
 
-    return async ({ group, member, groupOrganization, displayOptions, startCheckoutFlow, customNavigate }: { group: Group; member: PlatformMember; groupOrganization?: Organization; startCheckoutFlow?: boolean; displayOptions?: DisplayOptions; customNavigate?: NavigationActions }) => {
+    return async ({ group, member, groupOrganization, displayOptions, startCheckoutFlow, customNavigate, finishHandler }: {
+        group: Group;
+        member: PlatformMember;
+        groupOrganization?: Organization;
+        startCheckoutFlow?: boolean;
+        displayOptions?: DisplayOptions;
+        customNavigate?: NavigationActions;
+        finishHandler?: () => Promise<void> | void;
+    }) => {
         await checkoutDefaultItem({
             group,
             member,
@@ -215,6 +276,7 @@ export function useCheckoutDefaultItem() {
             context: context.value,
             startCheckoutFlow,
             owner,
+            finishHandler,
         });
     };
 }

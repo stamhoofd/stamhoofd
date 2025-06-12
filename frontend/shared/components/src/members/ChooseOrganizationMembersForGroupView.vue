@@ -67,10 +67,10 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, PermyriadInput, PriceBreakdownBox, STErrorsDefault, useErrors } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, PermyriadInput, PriceBreakdownBox, STErrorsDefault, Toast, useErrors } from '@stamhoofd/components';
 import { Group, Organization, PlatformFamily, PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
-import { startCheckout, useAddMember, useCheckoutDefaultItem, useChooseGroupForMember } from '.';
+import { startCheckout, useAddMember, useCheckoutRegisterItem, useChooseGroupForMember, useEditMember, useGetDefaultItem } from '.';
 import { useContext, useOrganization, usePlatform } from '../hooks';
 import { NavigationActions, useNavigationActions } from '../types/NavigationActions';
 import BalanceItemCartItemRow from './components/group/BalanceItemCartItemRow.vue';
@@ -104,8 +104,10 @@ const navigate = useNavigationActions();
 const errors = useErrors();
 const saving = ref(false);
 const cartLength = computed(() => props.checkout.cart.count);
-const $addMember = useAddMember();
-const checkoutDefaultItem = useCheckoutDefaultItem();
+const doAddMember = useAddMember();
+const editMember = useEditMember();
+const checkoutRegisterItem = useCheckoutRegisterItem();
+const getDefaultItem = useGetDefaultItem();
 const chooseGroupForMember = useChooseGroupForMember();
 
 const isOnlyDeleting = computed(() => props.checkout.cart.items.length === 0 && props.checkout.cart.balanceItems.length === 0 && props.checkout.cart.deleteRegistrations.length > 0);
@@ -119,7 +121,7 @@ async function addMember() {
     });
     family.checkout = props.checkout;
 
-    await $addMember(family, {
+    await doAddMember(family, {
         displayOptions: { action: 'present', modalDisplayStyle: 'popup' },
         async finishHandler(member, navigate) {
             if (!props.group) {
@@ -132,13 +134,38 @@ async function addMember() {
                 return;
             }
 
-            await checkoutDefaultItem({
+            const item = await getDefaultItem({
                 member,
                 group: props.group,
-                groupOrganization: props.groupOrganization,
-                startCheckoutFlow: false,
+            });
+
+            if (!item) {
+                // Something went wrong (toast already shown in getDefaultItem)
+                return;
+            }
+
+            if (member._oldId) {
+                Toast.warning($t(`{name} bestaat al in het systeem en werd hergebruikt in plaats van opnieuw aangemaakt.`, { name: member.patchedMember.name })).show();
+            }
+
+            // First ask the user to complete or verify the member details
+            await editMember(member, {
+                title: !member._oldId ? $t('Vul de andere gegevens aan') : $t('Kijk gegevens na'),
+                saveText: $t('Doorgaan'),
+
+                // We'll replace the previous steps, you can't go back to the previous step
                 displayOptions: { action: 'show', replace: 100, force: true },
-                customNavigate: navigate,
+                navigate,
+                finishHandler: async (navigate: NavigationActions) => {
+                    await checkoutRegisterItem({
+                        item,
+                        startCheckoutFlow: false,
+
+                        // Here you'll still be able to go back
+                        displayOptions: { action: 'show' },
+                        customNavigate: navigate,
+                    });
+                },
             });
         },
     });

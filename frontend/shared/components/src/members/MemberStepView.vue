@@ -38,7 +38,7 @@
                 </STListItem>
             </STList>
         </template>
-        <component :is="component" v-else :validator="errors.validator" :parent-error-box="errors.errorBox" :member="cloned" :will-mark-reviewed="willMarkReviewed" v-bind="$attrs" :level="1" />
+        <component :is="component" v-else :title="title" :validator="errors.validator" :parent-error-box="errors.errorBox" :member="cloned" :will-mark-reviewed="willMarkReviewed" v-bind="$attrs" :level="1" />
     </SaveView>
 </template>
 

@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <Title :title="member.patchedMember.firstName + ' ' + $t(`ee3bc635-c294-4134-9155-7a74f47dec4f`)" :level="level" />
+        <Title :title="title ?? (member.patchedMember.firstName + ' ' + $t(`ee3bc635-c294-4134-9155-7a74f47dec4f`))" :level="level" />
 
         <STErrorsDefault :error-box="parentErrorBox" />
         <EditMemberGeneralBox v-bind="$attrs" :member="member" :validator="validator" />
@@ -64,9 +64,11 @@ const props = withDefaults(
         validator: Validator;
         level?: number;
         parentErrorBox?: ErrorBox | null;
+        title?: string | null;
     }>(), {
         level: 0,
         parentErrorBox: null,
+        title: null,
     },
 );
 const auth = useAuth();

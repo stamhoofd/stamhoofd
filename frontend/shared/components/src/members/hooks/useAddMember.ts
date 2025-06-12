@@ -9,7 +9,10 @@ export function useAddMember() {
     const navigate = useNavigationActions();
     const app = useAppContext();
 
-    return async (family: PlatformFamily, options: { displayOptions: DisplayOptions; finishHandler: (member: PlatformMember, navigate: NavigationActions) => Promise<void> | void }) => {
+    return async (family: PlatformFamily, options: {
+        displayOptions: DisplayOptions;
+        finishHandler: (member: PlatformMember, navigate: NavigationActions) => Promise<void> | void;
+    }) => {
         // We clone the family, so we can cancel the new member that was added to the family
         const clonedFamily = family.clone();
         const member = reactive(clonedFamily.newMember() as any) as PlatformMember;
@@ -17,6 +20,7 @@ export function useAddMember() {
         const component = new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MemberStepView, {
                 title: $t(`45edb9d6-53a5-430e-94a4-fe8d95e05502`),
+                saveText: $t('Doorgaan'),
                 member,
                 component: markRaw(EditMemberGeneralBox),
                 saveHandler: async (navigate: NavigationActions) => {
