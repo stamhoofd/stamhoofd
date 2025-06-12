@@ -20,7 +20,7 @@ export class Token implements Encodeable {
         return new Token({
             accessToken: data.field('access_token').string,
             refreshToken: data.field('refresh_token').string,
-            accessTokenValidUntil: new Date(expiresOn ? expiresOn : new Date().getTime() + data.field('expires_in').integer * 1000),
+            accessTokenValidUntil: new Date(expiresOn ? (expiresOn * 1000) : new Date().getTime() + data.field('expires_in').integer * 1000),
         });
     }
 
