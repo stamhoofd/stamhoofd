@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
 import { Group, GroupType, Organization, PlatformFamily, PlatformMember, RegisterCheckout, RegisterItem, RegistrationWithPlatformMember } from '@stamhoofd/structures';
-import { ChooseGroupForMemberView } from '..';
+import { ChooseGroupForMemberView, loadFamilyIfNeeded } from '..';
 import { useAppContext } from '../../context/appContext';
 import { GlobalEventBus } from '../../EventBus';
 import { useContext } from '../../hooks';
@@ -78,9 +78,9 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
         item.cartError = originalItem.cartError;
     }
 
-    if (item.family._isSingle && item.groupPrice.bundleDiscounts.size > 0) {
+    if (item.groupPrice.bundleDiscounts.size > 0) {
         // Load the full family first if there are bundle discounts
-        // todo
+        await loadFamilyIfNeeded({ member: item.member, context, owner: {} }, { shouldRetry: false });
     }
 
     const member = item.member;
