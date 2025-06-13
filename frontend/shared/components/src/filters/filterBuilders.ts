@@ -196,6 +196,24 @@ export function useCheckoutInMemoryFilterBuilders() {
             }),
         ];
 
+        if (webshop.meta.checkoutMethods.length > 1) {
+            all.push(
+                new MultipleChoiceFilterBuilder({
+                    name: $t(`Afhaal/leveringsmethode`),
+                    options: webshop.meta.checkoutMethods.map((method) => {
+                        return new MultipleChoiceUIFilterOption(method.typeName + ': ' + method.name, method.id);
+                    }),
+                    wrapper: {
+                        checkoutMethod: {
+                            id: {
+                                $in: FilterWrapperMarker,
+                            },
+                        },
+                    },
+                }),
+            );
+        }
+
         // Also include complex filters
         all.push(...getFilterBuildersForRecordCategories(webshop.meta.recordCategories));
 

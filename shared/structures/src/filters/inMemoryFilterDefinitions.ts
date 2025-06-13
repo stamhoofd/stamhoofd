@@ -72,6 +72,12 @@ export const checkoutInMemoryFilterCompilers: InMemoryFilterDefinitions = {
             id: createInMemoryFilterCompiler('id'),
         }),
     }),
+    checkoutMethod: createInMemoryFilterCompiler('checkoutMethod', {
+        ...baseInMemoryFilterCompilers,
+        id: createInMemoryFilterCompiler('id'),
+        type: createInMemoryFilterCompiler('type'),
+
+    }),
     ...recordAnswersFilterCompilers,
 };
 
