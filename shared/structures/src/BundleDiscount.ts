@@ -1,13 +1,14 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { Sorter } from '@stamhoofd/utility';
+import { v4 as uuidv4 } from 'uuid';
 import { Group } from './Group.js';
 import { GroupPriceDiscount } from './GroupPriceDiscount.js';
+import { calculateHungarianAlgorithm } from './helpers/calculateHungarianAlgorithm.js';
 import { type RegisterCart } from './members/checkout/RegisterCart.js';
 import { RegisterItem } from './members/checkout/RegisterItem.js';
-import { type PlatformFamily, type PlatformMember } from './members/PlatformMember.js';
-import { v4 as uuidv4 } from 'uuid';
-import { TranslatedString } from './TranslatedString.js';
 import { RegistrationWithPlatformMember } from './members/checkout/RegistrationWithPlatformMember.js';
-import { Sorter } from '@stamhoofd/utility';
+import { type PlatformFamily, type PlatformMember } from './members/PlatformMember.js';
+import { TranslatedString } from './TranslatedString.js';
 
 export class BundleDiscount extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -384,7 +385,7 @@ export class BundleDiscountCalculation {
             priceMatrix.push(row);
         }
 
-        const solved = hungarian(priceMatrix);
+        const solved = calculateHungarianAlgorithm(priceMatrix);
 
         for (const [index, item] of arr.entries()) {
             const nth = solved[index];
@@ -398,56 +399,4 @@ export class BundleDiscountCalculation {
             }
         }
     }
-}
-/**
- * Optimized algorithm to maximize the total discount
- * Returns an array where each index corresponds to the nth discount for each item
- * @param priceMatrix A 2D array where priceMatrix[i][j] represents the discount amount for the ith item at the jth position
- */
-function hungarian(priceMatrix: number[][]): number[] {
-    // No items to process
-    if (priceMatrix.length === 0) {
-        return [];
-    }
-
-    const n = priceMatrix.length;
-    const assignment: number[] = new Array(n).fill(0);
-
-    // Pre-calculate max discounts for each item to avoid repeated calculations
-    const itemMaxDiscounts: { index: number; maxDiscount: number }[] = [];
-    for (let i = 0; i < n; i++) {
-        // Find max discount (skip position 0)
-        let maxDiscount = 0;
-        for (let j = 1; j < priceMatrix[i].length; j++) {
-            maxDiscount = Math.max(maxDiscount, priceMatrix[i][j]);
-        }
-        itemMaxDiscounts.push({ index: i, maxDiscount });
-    }
-
-    // Sort indices by their maximum potential discount (descending)
-    itemMaxDiscounts.sort((a, b) => b.maxDiscount - a.maxDiscount);
-
-    // Track assigned positions
-    const assigned = new Set<number>();
-
-    // For each item (in order of maximum discount potential)
-    for (const { index: i } of itemMaxDiscounts) {
-        let bestPos = 0;
-        let bestDiscount = priceMatrix[i][0];
-
-        // Find the best unassigned position for this item
-        for (let j = 1; j < priceMatrix[i].length; j++) {
-            if (!assigned.has(j) && priceMatrix[i][j] > bestDiscount) {
-                bestPos = j;
-                bestDiscount = priceMatrix[i][j];
-            }
-        }
-
-        assignment[i] = bestPos;
-        if (bestPos !== 0) {
-            assigned.add(bestPos);
-        }
-    }
-
-    return assignment;
 }
