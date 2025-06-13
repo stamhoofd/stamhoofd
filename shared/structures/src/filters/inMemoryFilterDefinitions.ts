@@ -126,4 +126,19 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
     timeSlotTime: createInMemoryFilterCompiler('data.timeSlot.timeIndex'),
     openBalance: createInMemoryFilterCompiler('openBalance'),
     location: createInMemoryFilterCompiler('data.locationName'),
+
+    // Other (no sorters)
+    items: createInMemoryFilterCompiler('data.cart.items', {
+        ...baseInMemoryFilterCompilers,
+        amount: createInMemoryFilterCompiler('amount'),
+        product: createInMemoryFilterCompiler('product', {
+            ...baseInMemoryFilterCompilers,
+            id: createInMemoryFilterCompiler('id'),
+        }),
+        productPrice: createInMemoryFilterCompiler('productPrice', {
+            ...baseInMemoryFilterCompilers,
+            id: createInMemoryFilterCompiler('id'),
+        }),
+    }),
+    recordAnswers: createInMemoryFilterCompiler('data.recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers)),
 };

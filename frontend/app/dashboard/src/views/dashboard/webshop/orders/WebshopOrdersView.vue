@@ -60,7 +60,7 @@ function fetchTickets() {
     props.webshopManager.fetchTickets().catch(console.error);
 }
 
-const filterBuilders: UIFilterBuilders = getWebshopOrderUIFilterBuilders(props.webshopManager.preview);
+const filterBuilders: UIFilterBuilders = getWebshopOrderUIFilterBuilders(props.webshopManager.webshop ?? props.webshopManager.preview);
 
 const organizationManager = useOrganizationManager();
 const show = useShow();

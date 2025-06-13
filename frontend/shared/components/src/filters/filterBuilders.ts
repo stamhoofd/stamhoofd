@@ -1,4 +1,4 @@
-import { AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, FilterWrapperMarker, getAuditLogTypeName, Group, LoadedPermissions, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, RecordCategory, RecordType, SetupStepType, StamhoofdFilter, User, Webshop, WebshopPreview } from '@stamhoofd/structures';
+import { AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, FilterWrapperMarker, getAuditLogTypeName, Group, LoadedPermissions, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, PrivateWebshop, RecordCategory, RecordType, SetupStepType, StamhoofdFilter, User, Webshop, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { Gender } from '../../../../../shared/structures/esm/dist/src/members/Gender';
@@ -131,91 +131,6 @@ export function useRegisterItemFilterBuilders() {
 
         // Add record categories
         all.push(...getFilterBuildersForRecordCategories(group.settings.recordCategories));
-
-        // Recursive: self referencing groups
-        all.unshift(
-            new GroupUIFilterBuilder({
-                builders: all,
-            }),
-        );
-
-        return all;
-    };
-}
-
-//
-// CHECKOUT
-//
-export function useCheckoutInMemoryFilterBuilders() {
-    return (webshop: Webshop) => {
-        const all: UIFilterBuilders = [
-            new GroupUIFilterBuilder({
-                name: $t(`Winkelmandje`),
-                description: $t('Filter op bestellingen die minstens één artikel in het winkelmandje hebben die aan deze voorwaarden voldoet'),
-                builders: [
-                    new NumberFilterBuilder({
-                        name: $t(`Aantal stuks`),
-                        type: NumberFilterFormat.Number,
-                        key: 'amount',
-                    }),
-                    new MultipleChoiceFilterBuilder({
-                        name: $t(`Artikel`),
-                        options: webshop.products.map((product) => {
-                            return new MultipleChoiceUIFilterOption(product.name, product.id);
-                        }),
-                        wrapper: {
-                            product: {
-                                id: {
-                                    $in: FilterWrapperMarker,
-                                },
-                            },
-                        },
-                    }),
-                    ...webshop.products.filter(product => product.prices.length > 1).map(product => new MultipleChoiceFilterBuilder({
-                        name: product.name + ' (' + $t('tarieven') + ')',
-                        options: product.prices.map((price) => {
-                            return new MultipleChoiceUIFilterOption(price.name, price.id);
-                        }),
-                        wrapper: {
-                            product: {
-                                id: product.id,
-                            },
-                            productPrice: {
-                                id: {
-                                    $in: FilterWrapperMarker,
-                                },
-                            },
-                        },
-                    })),
-                ],
-                wrapper: {
-                    items: {
-                        $elemMatch: FilterWrapperMarker,
-                    },
-                },
-            }),
-        ];
-
-        if (webshop.meta.checkoutMethods.length > 1) {
-            all.push(
-                new MultipleChoiceFilterBuilder({
-                    name: $t(`Afhaal/leveringsmethode`),
-                    options: webshop.meta.checkoutMethods.map((method) => {
-                        return new MultipleChoiceUIFilterOption(method.typeName + ': ' + method.name, method.id);
-                    }),
-                    wrapper: {
-                        checkoutMethod: {
-                            id: {
-                                $in: FilterWrapperMarker,
-                            },
-                        },
-                    },
-                }),
-            );
-        }
-
-        // Also include complex filters
-        all.push(...getFilterBuildersForRecordCategories(webshop.meta.recordCategories));
 
         // Recursive: self referencing groups
         all.unshift(
@@ -621,7 +536,95 @@ export function useAuditLogUIFilterBuilders() {
     return all;
 }
 
-export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
+//
+// CHECKOUT
+//
+function getCartFilterBuilder(webshop: Webshop) {
+    return new GroupUIFilterBuilder({
+        name: $t(`Winkelmandje`),
+        description: $t('Filter op bestellingen die minstens één artikel in het winkelmandje hebben die aan deze voorwaarden voldoet'),
+        builders: [
+            new NumberFilterBuilder({
+                name: $t(`Aantal stuks`),
+                type: NumberFilterFormat.Number,
+                key: 'amount',
+            }),
+            new MultipleChoiceFilterBuilder({
+                name: $t(`Artikel`),
+                options: webshop.products.map((product) => {
+                    return new MultipleChoiceUIFilterOption(product.name, product.id);
+                }),
+                wrapper: {
+                    product: {
+                        id: {
+                            $in: FilterWrapperMarker,
+                        },
+                    },
+                },
+            }),
+            ...webshop.products.filter(product => product.prices.length > 1).map(product => new MultipleChoiceFilterBuilder({
+                name: product.name + ' (' + $t('tarieven') + ')',
+                options: product.prices.map((price) => {
+                    return new MultipleChoiceUIFilterOption(price.name, price.id);
+                }),
+                wrapper: {
+                    product: {
+                        id: product.id,
+                    },
+                    productPrice: {
+                        id: {
+                            $in: FilterWrapperMarker,
+                        },
+                    },
+                },
+            })),
+        ],
+        wrapper: {
+            items: {
+                $elemMatch: FilterWrapperMarker,
+            },
+        },
+    });
+}
+export function useCheckoutInMemoryFilterBuilders() {
+    return (webshop: Webshop) => {
+        const all: UIFilterBuilders = [
+            getCartFilterBuilder(webshop),
+        ];
+
+        if (webshop.meta.checkoutMethods.length > 1) {
+            all.push(
+                new MultipleChoiceFilterBuilder({
+                    name: $t(`Afhaal/leveringsmethode`),
+                    options: webshop.meta.checkoutMethods.map((method) => {
+                        return new MultipleChoiceUIFilterOption(method.typeName + ': ' + method.name, method.id);
+                    }),
+                    wrapper: {
+                        checkoutMethod: {
+                            id: {
+                                $in: FilterWrapperMarker,
+                            },
+                        },
+                    },
+                }),
+            );
+        }
+
+        // Also include complex filters
+        all.push(...getFilterBuildersForRecordCategories(webshop.meta.recordCategories));
+
+        // Recursive: self referencing groups
+        all.unshift(
+            new GroupUIFilterBuilder({
+                builders: all,
+            }),
+        );
+
+        return all;
+    };
+}
+
+export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | WebshopPreview) {
     const builders: UIFilterBuilders = [
         new NumberFilterBuilder({
             name: '#',
@@ -734,6 +737,13 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
                 type: NumberFilterFormat.TimeMinutes,
             }));
     }
+
+    if (preview instanceof Webshop) {
+        builders.push(getCartFilterBuilder(preview));
+    }
+
+    // Also include complex filters
+    builders.push(...getFilterBuildersForRecordCategories(preview.meta.recordCategories));
 
     const groupFilter = new GroupUIFilterBuilder({ builders });
 
