@@ -316,22 +316,42 @@ export class BundleDiscountCalculation {
     }
 
     get itemsAndRegistrations() {
-        // We reverse the order of the items so that the discount is applied by preference on the last added items in the cart
-        // that way, the discount is properly visible while adding items (unless there are price differences)
-        // First items in the array = will get the discounts first if they are the same
+        // Return the items in such an order that the first ones should receive the highest discount
+        // The first ones that should receive the highest discount are:
+        // - the newest items
+        // - registrations or items that edit a registration, in order of the already applied discount
 
-        // For that reason, we also sort the registrations by a stable logic so they are always applied in the same order
-        // The order being: by preference apply it to the newest registrations, then the oldest registrations
-        // And we maintain earlier calculations, so first order by applied discount, only then by registration date
-        return [
-            ...[...this.items.keys()].reverse(),
-            ...[...this.registrations.keys()].sort((a, b) => {
-                return Sorter.stack(
-                    Sorter.byNumberValue(a.registration.discounts.get(this.bundle.id)?.amount ?? 0, b.registration.discounts.get(this.bundle.id)?.amount ?? 0),
-                    Sorter.byDateValue(a.registration.createdAt, b.registration.createdAt),
-                );
-            }),
-        ];
+        const itemsOrder = [...this.items.keys()].reverse();
+        const registrations = [...this.registrations.keys()];
+        const now = new Date();
+
+        const itemsWithSortingData = itemsOrder.map((item) => {
+            return {
+                item,
+                appliedDiscount: item.replaceRegistrations.length >= 1 ? (item.replaceRegistrations[0].registration.discounts.get(this.bundle.id)?.amount ?? 0) : 0,
+                createdAt: item.replaceRegistrations.length >= 1 ? (item.replaceRegistrations[0].registration.createdAt) : now,
+            };
+        });
+
+        const registrationsWithSortingData = registrations.map((registration) => {
+            return {
+                item: registration,
+                appliedDiscount: registration.registration.discounts.get(this.bundle.id)?.amount ?? 0,
+                createdAt: registration.registration.createdAt,
+            };
+        });
+
+        const base = [
+            ...itemsWithSortingData,
+            ...registrationsWithSortingData,
+        ].sort((a, b) => {
+            return Sorter.stack(
+                Sorter.byNumberValue(a.appliedDiscount, b.appliedDiscount),
+                Sorter.byDateValue(a.createdAt, b.createdAt),
+            );
+        });
+
+        return base.map(b => b.item);
     }
 
     calculate() {

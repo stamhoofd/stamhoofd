@@ -299,10 +299,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             let reuseRegistration: Registration | null = null;
 
             // For now don't reuse replace registrations - it has too many side effects and not a lot of added value
-            /* if (item.replaceRegistrations.length === 1) {
+            if (item.replaceRegistrations.length === 1 && item.replaceRegistrations[0].group.id === item.group.id) {
                 // Try to reuse this specific one
                 reuseRegistration = (await Registration.getByID(item.replaceRegistrations[0].registration.id)) ?? null;
-            } */
+            }
 
             let startDate = item.calculatedStartDate;
 
@@ -321,7 +321,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     return balance === 0;
                 }) ?? null;
 
-                if (reuseRegistration && reuseRegistration.startDate && reuseRegistration.startDate < startDate && reuseRegistration.startDate >= group.settings.startDate && !item.trial) {
+                if (!item.customStartDate && reuseRegistration && reuseRegistration.startDate && reuseRegistration.startDate < startDate && reuseRegistration.startDate >= group.settings.startDate && !item.trial) {
                     startDate = reuseRegistration.startDate;
                 }
             }
