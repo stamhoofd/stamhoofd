@@ -130,7 +130,7 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
      *
      * Reason is that discounts can change after you've been registered
      */
-    @field({ decoder: new MapDecoder(StringDecoder, AppliedRegistrationDiscount), ...NextVersion })
+    @field({ decoder: new MapDecoder(StringDecoder, AppliedRegistrationDiscount), version: 374 })
     discounts = new Map<string, AppliedRegistrationDiscount>();
 
     /**

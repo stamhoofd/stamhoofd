@@ -541,7 +541,7 @@ export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: new EnumDecoder(WebshopAuthType), version: 188 })
     authType: WebshopAuthType = WebshopAuthType.Disabled;
 
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 374 })
     customCode: string | null = null;
 
     get hasTickets() {

@@ -34,7 +34,7 @@ export class OrganizationRegistrationPeriodSettings extends AutoEncoder {
         return this.categories.find(c => c.id === this.rootCategoryId);
     }
 
-    @field({ decoder: new ArrayDecoder(BundleDiscount), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(BundleDiscount), version: 374 })
     bundleDiscounts: BundleDiscount[] = [];
 }
 
