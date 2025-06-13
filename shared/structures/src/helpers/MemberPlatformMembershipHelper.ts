@@ -1,5 +1,5 @@
-import { MemberPlatformMembership } from '../members/MemberPlatformMembership';
-import { ContinuousMembershipStatus, MembershipStatus } from '../members/MembershipStatus';
+import { MemberPlatformMembership } from '../members/MemberPlatformMembership.js';
+import { ContinuousMembershipStatus, MembershipStatus } from '../members/MembershipStatus.js';
 
 export class MemberPlatformMembershipHelper {
     static getStatus(memberships: MemberPlatformMembership[]) {

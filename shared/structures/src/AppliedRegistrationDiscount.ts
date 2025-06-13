@@ -1,5 +1,5 @@
 import { AutoEncoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
-import { TranslatedString } from './TranslatedString';
+import { TranslatedString } from './TranslatedString.js';
 
 export class AppliedRegistrationDiscount extends AutoEncoder {
     /**
