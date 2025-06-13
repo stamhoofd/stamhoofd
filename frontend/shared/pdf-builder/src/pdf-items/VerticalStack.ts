@@ -99,7 +99,7 @@ export class VerticalStack implements PdfItem {
             // if the total height of the first stack will exceed the max height
             if (currentHeight + itemHeight > maxHeight) {
                 stackItems.push([item]);
-                currentHeight = 0;
+                currentHeight = itemHeight;
             }
             else {
                 currentStack.push(item);
