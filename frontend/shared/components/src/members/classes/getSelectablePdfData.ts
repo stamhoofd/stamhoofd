@@ -82,6 +82,7 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
         }),
         new SelectablePdfData<PlatformMember>({
             id: 'gender',
+            enabled: false,
             name: $t(`3048ad16-fd3b-480e-b458-10365339926b`),
             getValue: ({ patchedMember: object }: PlatformMember) =>
                 formatGender(object.details.gender),
@@ -94,6 +95,7 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
         }),
         new SelectablePdfData<PlatformMember>({
             id: 'email',
+            enabled: false,
             name: $t(`7400cdce-dfb4-40e7-996b-4817385be8d8`),
             getValue: ({ patchedMember: object }: PlatformMember) =>
                 object.details.email,
@@ -133,6 +135,7 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
         }),
         returnNullIfNoAccessRight(new SelectablePdfData<PlatformMember>({
             id: 'nationalRegisterNumber',
+            enabled: false,
             name: $t(`439176a5-dd35-476b-8c65-3216560cac2f`),
             getValue: ({ patchedMember: object }: PlatformMember) => object.details.nationalRegisterNumber?.toString() ?? '',
         }), [AccessRight.MemberManageNRN]),
@@ -343,6 +346,7 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
                     id: `recordAnswers.${record.id}`,
                     name: record.name.toString(),
                     category: category.name.toString(),
+                    enabled: false,
                     description: record.description.toString(),
                     getValue: ({ patchedMember: object }: PlatformMember) => {
                         // todo: multiple values possible?
@@ -368,6 +372,7 @@ export function getSelectableGroupPdfData(groups: Group[] = []) {
                     id: `groups.${group.id}.price`,
                     name: $t(`ae21b9bf-7441-4f38-b789-58f34612b7af`),
                     category: group.settings.name.toString(),
+                    enabled: false,
                     getValue: (object: PlatformMember) => getRegistration(object)?.groupPrice.name.toString(),
                 }),
             );
@@ -379,6 +384,7 @@ export function getSelectableGroupPdfData(groups: Group[] = []) {
                     id: `groups.${group.id}.optionMenu.${menu.id}`,
                     name: menu.name,
                     category: group.settings.name.toString(),
+                    enabled: false,
                     getValue: (member: PlatformMember) => {
                         const registration = getRegistration(member);
                         if (!registration) {
@@ -405,6 +411,7 @@ export function getSelectableGroupPdfData(groups: Group[] = []) {
                             id: `groups.${group.id}.optionMenu.${menu.id}.${option.id}.amount`,
                             name: menu.name + ' → ' + option.name + ' → ' + $t('ed55e67d-1dce-46b2-8250-948c7cd616c2'),
                             category: group.settings.name.toString(),
+                            enabled: false,
                             getValue: (member: PlatformMember) => {
                                 const registration = getRegistration(member);
                                 if (!registration) {
@@ -436,6 +443,7 @@ export function getSelectableGroupPdfData(groups: Group[] = []) {
                         id: `groups.${group.id}.recordAnswers.${record.id}`,
                         name: recordCategory.name + ' → ' + record.name,
                         category: group.settings.name.toString(),
+                        enabled: false,
                         getValue: (member: PlatformMember) => {
                             const registration = getRegistration(member);
                             if (!registration) {
@@ -494,8 +502,6 @@ export function getAllSelectablePdfDataForSummary({ platform, organization, auth
     });
 
     for (const group of groups ?? []) {
-        const getRegistration = (object: PlatformMember) => object.filterRegistrations({ groupIds: [group.id] })[0] ?? null;
-
         group.settings.recordCategories.forEach((recordCategory) => {
             const categoryName = group.settings.name.toString();
             columns.push(...getSelectabelPdfDataFromRecordCatagoryForSummary({ recordCategory, categoryName,
