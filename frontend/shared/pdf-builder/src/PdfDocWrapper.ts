@@ -1,6 +1,9 @@
 import { getLastPageIndex, getLastPageNumber } from './pdf-helpers';
 import { PdfItemDrawOptions } from './PdfItem';
 
+/**
+ * Wrapper around the pdf document to make it easier to draw things on the pdf document.
+ */
 export class PdfDocWrapper {
     get safeMargins(): PDFKit.PDFPage['margins'] {
         return {

@@ -8,6 +8,9 @@ import { PdfItem } from './PdfItem';
 // polyfill
 globalThis.Buffer = Buffer;
 
+/**
+ * The PdfRenderer is used to draw pdf items on a pdf document.
+ */
 export class PdfRenderer {
     private readonly registeredFonts: Set<PdfFont> = new Set();
 
@@ -38,6 +41,13 @@ export class PdfRenderer {
         }
     }
 
+    /**
+     * Draws the pdf items on the pdf document and returns a downloadable pdf.
+     * @param docWrapper
+     * @param pdfItems
+     * @param beforeFlush
+     * @returns a downloadable pdf (wrapper around the buffer with a method to download it)
+     */
     async render(docWrapper: PdfDocWrapper, pdfItems: PdfItem[], beforeFlush?: (docWrapper: PdfDocWrapper) => void) {
         const doc = docWrapper.doc;
         const bufferPromise = this.createBuffer(doc);
@@ -68,9 +78,16 @@ export class PdfRenderer {
     }
 }
 
+/**
+ * A wrapper around a pdf buffer with a method to download the pdf.
+ */
 export class DownloadablePdf {
     constructor(private readonly buffer: Buffer) {}
 
+    /**
+     * Download the pdf
+     * @param title title of the pdf document
+     */
     async download(title: string) {
         const fileName = Formatter.slug(title) + '.pdf';
         const blob = new Blob([this.buffer], { type: 'application/pdf' });

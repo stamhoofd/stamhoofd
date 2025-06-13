@@ -4,15 +4,30 @@ import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../PdfItem
 import { VerticalStack } from './VerticalStack';
 
 export interface PdfHorizontalGridOptions {
+    /**
+     * The number of columns. If set to 'auto', the number of columns will be calculated automatically based on the width / min-width of the items.
+     */
     columns: number | 'auto';
+
+    /**
+     * Spacing between columns
+     */
     columnGap?: number;
+
+    /**
+     * Spacing between rows
+     */
     rowGap?: number;
+
+    /**
+     * Max width of the grid
+     */
     maxWidth?: number;
 }
 
 /**
- * A horizontal grid of items: draws the items in columns
- * with the specified number of columns, columnGap, rowGap and width.
+ * Draws the child items in columns from left to right with the specified number of columns, columnGap, rowGap and width.
+ * It is possible to pass a single VerticalStack: the stack will be splitted automatically. This way the vertical stack will be drawn in columns starting from the top until the end of the page, from left to right (if the end of the page is reached the item in the stack will be drawn in the next column).
  */
 export class HorizontalGrid implements PdfItem {
     // number of columns
@@ -42,11 +57,18 @@ export class HorizontalGrid implements PdfItem {
         return this.calculateAutoColumns(docWrapper, availableWidth);
     }
 
+    /**
+     * Calculate the number of columns based on the width of the items and the available width.
+     * @param docWrapper
+     * @param availableWidth
+     * @returns
+     */
     private calculateAutoColumns(docWrapper: PdfDocWrapper, availableWidth: number): number {
         let columns = 1;
         let totalItems = 0;
         let maxItemWidth = 0;
 
+        // calculate the width of the widest item and count the total number of items
         for (const item of this.items) {
             const width = item.getMinWidth ? item.getMinWidth(docWrapper) : item.getWidth(docWrapper);
             if (width === undefined) {
@@ -68,14 +90,16 @@ export class HorizontalGrid implements PdfItem {
 
         let totalWidthIfNextColumn = Math.ceil(2 * maxItemWidth + this.columnGap);
 
+        // if enough space
         while (totalWidthIfNextColumn < availableWidth) {
+            // add another column
             columns++;
+            // calculate the total width if another column would be added
             totalWidthIfNextColumn = Math.ceil(totalWidthIfNextColumn + maxItemWidth + this.columnGap);
         }
 
-        const result = Math.min(totalItems, columns);
-
-        return result;
+        // the total number of columns can't exceed the total number of items
+        return Math.min(totalItems, columns);
     }
 
     draw(docWrapper: PdfDocWrapper, options: PdfItemDrawOptions = {}): void {

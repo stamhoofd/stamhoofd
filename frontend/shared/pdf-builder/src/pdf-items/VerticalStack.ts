@@ -3,7 +3,11 @@ import { PdfFont } from '../PdfFont';
 import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../PdfItem';
 
 export interface VerticalStackOptions {
+    /**
+     * The max width of the stack
+     */
     maxWidth?: number;
+
     /**
      * Place on another page if the available height is less than this (unless the total height of the stack is less).
      */
@@ -11,10 +15,13 @@ export interface VerticalStackOptions {
 }
 
 /**
- * A group of pdf items that are drawn in a vertical stack.
- * This makes it possible to set a max width.
+ * A group of pdf items to be drawn vertically.
+ * This makes it possible to set a max width or to split the stack if necessary.
  */
 export class VerticalStack implements PdfItem {
+    /**
+     * The number of items in the stack
+     */
     get size(): number {
         return this.items.length;
     }
@@ -29,7 +36,7 @@ export class VerticalStack implements PdfItem {
 
     /**
      * Split the vertical stack in two separate vertical stacks.
-     * @param doc
+     * @param docWrapper
      * @param options
      * @param maxHeight max height of the first stack
      * @returns one or two stacks (one if the max height is not exceeded)
@@ -66,6 +73,13 @@ export class VerticalStack implements PdfItem {
         return stacks;
     }
 
+    /**
+     * Split the stack in equal parts
+     * @param docWrapper
+     * @param options
+     * @param parts the number of parts to split the stack in
+     * @returns an array of stacks of (approximately) equal height
+     */
     splitInEqualParts(docWrapper: PdfDocWrapper, options: PdfItemGetHeightOptions, parts: number): VerticalStack[] {
         if (parts < 2) {
             throw new Error('parts must be at least 2');
