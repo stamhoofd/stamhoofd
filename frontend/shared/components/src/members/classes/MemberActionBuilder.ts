@@ -608,7 +608,7 @@ export class MemberActionBuilder {
             name: $t('PDF...'),
             priority: 0,
             groupIndex: 0,
-            fetchLimitSettings: { limit: 200, createErrorMessage: (count, limit) => {
+            fetchLimitSettings: { limit: 500, createErrorMessage: (count, limit) => {
                 return $t('Je kan maximaal {limit} leden exporteren naar pdf. Er zijn {count} leden geselecteerd.', { count: Formatter.float(count), limit: Formatter.float(limit) });
             } },
             handler: async (members: PlatformMember[]) => {
