@@ -4,7 +4,7 @@
             {{ $t('Exporteren naar PDF') }}
         </h1>
 
-        <ScrollableSegmentedControl v-if="documents.size> 1" v-model="visibleDocument" :items="documents.documents">
+        <ScrollableSegmentedControl v-if="selectableDocument.size> 1" v-model="visibleDocument" :items="selectableDocument.sheets">
             <template #item="{item}">
                 <span>{{ item.name }}</span>
 
@@ -18,51 +18,33 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <!-- <STList v-if="visibleSheet.withCategoryRow || visibleSheet.columns.find(c => c.category)">
-            <STListItem element-name="label" :selectable="true">
-                <template #left>
-                    <Checkbox v-model="visibleSheet.withCategoryRow" />
-                </template>
-
-                <h3 class="style-title-list">
-                    {{ $t('5bb88d15-fd82-4d5d-8efc-43e2443d912d') }}
-                </h3>
-                <p class="style-description-small">
-                    {{ $t('cd511a0e-71cc-44bb-8107-7de1a18dab9d') }}
-                </p>
-            </STListItem>
-        </STList> -->
-
         <DataSelector :name="'pdf'" :selectable-data="visibleDocument.items" />
     </SaveView>
 </template>
 
 <script lang="ts" setup>
 import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
-import { usePop } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, ScrollableSegmentedControl, useContext, useErrors } from '@stamhoofd/components';
+import { ErrorBox, ScrollableSegmentedControl, useErrors } from '@stamhoofd/components';
 import { Storage } from '@stamhoofd/networking';
 import { PdfDocumentsFilter, PlatformMember, Version } from '@stamhoofd/structures';
 import { onMounted, ref } from 'vue';
 import DataSelector from './DataSelector.vue';
 import { MembersPdfDocument } from './members/MembersPdfDocument';
-import { PdfDocuments } from './PdfDocuments';
+import { SelectablePdfDocument } from './SelectablePdfDocument';
 
 const props = defineProps<{
     documentTitle: string;
-    documents: PdfDocuments<PlatformMember>;
+    selectableDocument: SelectablePdfDocument<PlatformMember>;
     configurationId: string; // How to store the filters for easy reuse
     items: PlatformMember[];
 }>();
 
 const exporting = ref(false);
 const errors = useErrors();
-const context = useContext();
-const pop = usePop();
 
 const STORAGE_FILTER_KEY = 'pdf-filter-' + props.configurationId;
 
-const visibleDocument = ref(props.documents.documents[0]);
+const visibleDocument = ref(props.selectableDocument.sheets[0]);
 
 onMounted(async () => {
     // Load from storage
@@ -76,7 +58,7 @@ onMounted(async () => {
 
             if (filter) {
                 console.log('Loaded filter', filter);
-                props.documents.from(filter.data);
+                props.selectableDocument.from(filter.data);
             }
         }
     }
@@ -86,7 +68,7 @@ onMounted(async () => {
 });
 
 async function saveFilter() {
-    const filter = props.documents.getFilter();
+    const filter = props.selectableDocument.getFilter();
     const encoded = new VersionBox(filter).encode({ version: Version });
 
     try {
@@ -119,12 +101,12 @@ async function startExport() {
 async function doExport() {
     // todo: refactor
     // todo: maybe make generic?
-    const memberDetailsDocument = props.documents.documents[0];
+    const memberDetailsDocument = props.selectableDocument.sheets[0];
     if (!memberDetailsDocument) {
         return;
     }
 
-    const membersSummaryDocument = props.documents.documents[1];
+    const membersSummaryDocument = props.selectableDocument.sheets[1];
     if (!membersSummaryDocument) {
         return;
     }

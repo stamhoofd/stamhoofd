@@ -1,14 +1,14 @@
 import logoUrl from '@stamhoofd/assets/images/logo/logo-horizontal.png';
 import { colorGray, DefaultText, drawPageNumbers, H1, Logo, metropolisMedium, mmToPoints, PdfDocWrapper, PdfItem, PdfRenderer, PdfTextOptions } from '@stamhoofd/frontend-pdf-builder';
 import { PlatformMember } from '@stamhoofd/structures';
-import { PdfDocument } from '../PdfDocuments';
-import { MembersDetail } from './MembersDetail';
-import { MembersSummary } from './MembersSummary';
+import { SelectablePdfSheet } from '../SelectablePdfSheet';
+import { MemberListPdfItem } from './MemberListPdfItem';
+import { MembersSummaryPdfItem } from './MembersSummaryPdfItem';
 
 const pageMargin = mmToPoints(15);
 
 export class MembersPdfDocument {
-    constructor(private readonly items: PlatformMember[], private readonly memberDetailsDocument: PdfDocument<PlatformMember>, private readonly membersSummaryDocument: PdfDocument<PlatformMember>, private readonly title: string) {
+    constructor(private readonly items: PlatformMember[], private readonly memberDetailsDocument: SelectablePdfSheet<PlatformMember>, private readonly membersSummaryDocument: SelectablePdfSheet<PlatformMember>, private readonly title: string) {
     }
 
     private async createDoc(): Promise<PDFKit.PDFDocument> {
@@ -47,11 +47,10 @@ export class MembersPdfDocument {
 
         // member details
         if (this.memberDetailsDocument.enabled) {
-            const grid = new MembersDetail({
+            const grid = new MemberListPdfItem({
                 members: sortedMembers,
                 columns: 'auto',
                 selectableColumns: this.memberDetailsDocument.items,
-                getName: (o: PlatformMember) => o.patchedMember.details.name,
                 shouldHideEmptyDetails: true,
             });
             items.push(grid);
@@ -59,13 +58,14 @@ export class MembersPdfDocument {
 
         // member summary
         if (this.membersSummaryDocument.enabled) {
-            items.push(...this.membersSummaryDocument.items
+            const summaryItems = this.membersSummaryDocument.items
                 .filter(c => c.enabled)
-                .map(selectableColumn => new MembersSummary({
+                .map(selectableColumn => new MembersSummaryPdfItem({
                     members: sortedMembers,
                     selectableColumn,
-                    getName: (o: PlatformMember) => o.patchedMember.details.name,
-                })));
+                }));
+
+            items.push(...summaryItems);
         }
 
         // render

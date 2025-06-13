@@ -5,14 +5,13 @@ import { SelectablePdfData } from '../SelectablePdfData';
 interface MembersSummarydArgs {
     members: PlatformMember[];
     selectableColumn: SelectablePdfData<PlatformMember>;
-    getName: (member: PlatformMember) => string;
 }
 
 /**
  * A vertical stack containing a title, a horizontal grid with a summary of the members (or a text if no members)
  * and spacing.
  */
-export class MembersSummary implements PdfItem {
+export class MembersSummaryPdfItem implements PdfItem {
     private readonly factory: (docWrapper: PdfDocWrapper) => VerticalStack;
 
     constructor(private readonly args: MembersSummarydArgs) {
@@ -41,7 +40,7 @@ export class MembersSummary implements PdfItem {
     }
 }
 
-function createMembersSummaryStack({ members, selectableColumn, getName }: MembersSummarydArgs): (docWrapper: PdfDocWrapper) => VerticalStack {
+function createMembersSummaryStack({ members, selectableColumn }: MembersSummarydArgs): (docWrapper: PdfDocWrapper) => VerticalStack {
     return (docWrapper: PdfDocWrapper) => {
         const title = new H3(selectableColumn.name, {
             spacing: {
@@ -49,7 +48,7 @@ function createMembersSummaryStack({ members, selectableColumn, getName }: Membe
             },
         });
 
-        const grid = createMembersHorizontalGridFactory({ members, selectableColumn, getName })(docWrapper);
+        const grid = createMembersHorizontalGridFactory({ members, selectableColumn })(docWrapper);
         const spacing = new Spacing(mmToPoints(5));
 
         const stackOptions: VerticalStackOptions = {
@@ -72,7 +71,7 @@ function createMembersSummaryStack({ members, selectableColumn, getName }: Membe
     };
 }
 
-function createMembersHorizontalGridFactory({ members, selectableColumn, getName }: MembersSummarydArgs): (docWrapper: PdfDocWrapper) => HorizontalGrid | null {
+function createMembersHorizontalGridFactory({ members, selectableColumn }: MembersSummarydArgs): (docWrapper: PdfDocWrapper) => HorizontalGrid | null {
     return (docWrapper: PdfDocWrapper) => {
         // same label width for each member
         const labelsWithValue = members.map((member) => {
@@ -82,7 +81,8 @@ function createMembersHorizontalGridFactory({ members, selectableColumn, getName
                 return null;
             }
 
-            const label = getName(member);
+            // label is member name
+            const label = member.patchedMember.details.name;
 
             return [label, value];
         }).filter(l => l !== null);

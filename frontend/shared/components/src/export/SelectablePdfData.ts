@@ -1,7 +1,7 @@
 import { Formatter } from '@stamhoofd/utility';
 import { SelectableData } from './SelectableData';
 
-export type SelectablePdfColumnValue = string | null | undefined | number | boolean | Date;
+export type SelectablePdfDataValue = string | null | undefined | number | boolean | Date;
 
 export class SelectablePdfData<T> implements SelectableData {
     enabled: boolean = true;
@@ -10,7 +10,7 @@ export class SelectablePdfData<T> implements SelectableData {
     name: string;
     description: string = '';
     category?: string | null = null;
-    getValue: (object: T) => SelectablePdfColumnValue;
+    getValue: (object: T) => SelectablePdfDataValue;
 
     constructor(data: {
         enabled?: boolean;
@@ -18,13 +18,13 @@ export class SelectablePdfData<T> implements SelectableData {
         name: string;
         description?: string;
         category?: string | null;
-        getValue: (object: T) => SelectablePdfColumnValue;
+        getValue: (object: T) => SelectablePdfDataValue;
     }) {
         Object.assign(this, data);
         this.getValue = data.getValue;
     }
 
-    static fromSelectableData<T>(data: SelectableData, getValue: (object: T) => SelectablePdfColumnValue) {
+    static fromSelectableData<T>(data: SelectableData, getValue: (object: T) => SelectablePdfDataValue) {
         return new SelectablePdfData({
             ...data,
             getValue,
@@ -39,7 +39,7 @@ export class SelectablePdfData<T> implements SelectableData {
         return SelectablePdfData.valueToStringOrNull(this.getValue(item));
     }
 
-    static valueToStringOrNull(value: SelectablePdfColumnValue): string | null {
+    static valueToStringOrNull(value: SelectablePdfDataValue): string | null {
         if (value === null || value === undefined) {
             return null;
         }
@@ -62,7 +62,7 @@ export class SelectablePdfData<T> implements SelectableData {
         }
     }
 
-    static valueToString(value: SelectablePdfColumnValue): string {
+    static valueToString(value: SelectablePdfDataValue): string {
         const valueOrNull = this.valueToStringOrNull(value);
         if (valueOrNull === null) {
             return '';
