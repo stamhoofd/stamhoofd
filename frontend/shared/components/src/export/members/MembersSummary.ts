@@ -73,25 +73,29 @@ function createMembersSummaryStack({ members, selectableColumn, getName }: Membe
 }
 
 function createMembersHorizontalGridFactory({ members, selectableColumn, getName }: MembersSummarydArgs): (docWrapper: PdfDocWrapper) => HorizontalGrid | null {
-    const labels = members.map(m => getName(m));
-    const longestLabel = labels.reduce((a, b) => a.length > b.length ? a : b, '');
-
     return (docWrapper: PdfDocWrapper) => {
         // same label width for each member
-        const minLabelWidth = LabelWithValue.widthOfLabel(docWrapper, longestLabel);
-
-        // create a single stack
-        const stackItems = members.flatMap((member) => {
+        const labelsWithValue = members.map((member) => {
             const value = selectableColumn.getStringValueOrNull(member);
 
             if (value === null) {
-                return [];
+                return null;
             }
 
+            const label = getName(member);
+
+            return [label, value];
+        }).filter(l => l !== null);
+
+        const longestLabel = labelsWithValue.map(([label]) => label).reduce((a, b) => a.length > b.length ? a : b, '');
+        const minLabelWidth = LabelWithValue.widthOfLabel(docWrapper, longestLabel);
+
+        // create a single stack
+        const stackItems = labelsWithValue.flatMap(([label, value]) => {
             // add a label and a value for the detail
             const labelWithValue = new LabelWithValue({
                 label: {
-                    text: getName(member),
+                    text: label,
                     minWidth: minLabelWidth,
                 },
                 value: {
