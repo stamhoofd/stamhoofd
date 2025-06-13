@@ -7,6 +7,7 @@ import { type PlatformFamily, type PlatformMember } from './members/PlatformMemb
 import { v4 as uuidv4 } from 'uuid';
 import { TranslatedString } from './TranslatedString.js';
 import { RegistrationWithPlatformMember } from './members/checkout/RegistrationWithPlatformMember.js';
+import { Sorter } from '@stamhoofd/utility';
 
 export class BundleDiscount extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -318,7 +319,19 @@ export class BundleDiscountCalculation {
         // We reverse the order of the items so that the discount is applied by preference on the last added items in the cart
         // that way, the discount is proplery visible while adding items (unless there are price differences)
         // First items in the array = will get the discounts first if they are the same
-        return [...[...this.items.keys()].reverse(), ...this.registrations.keys()];
+
+        // For that reason, we also sort the registrations by a stable logic so they are always applied in the same order
+        // The order being: by preference apply it to the newest registrations, then the oldest registrations
+        // And we maintain earlier calculations, so first order by applied discount, only then by registration date
+        return [
+            ...[...this.items.keys()].reverse(),
+            ...[...this.registrations.keys()].sort((a, b) => {
+                return Sorter.stack(
+                    Sorter.byNumberValue(a.registration.discounts.get(this.bundle.id)?.amount ?? 0, b.registration.discounts.get(this.bundle.id)?.amount ?? 0),
+                    Sorter.byDateValue(a.registration.createdAt, b.registration.createdAt),
+                );
+            }),
+        ];
     }
 
     calculate() {
