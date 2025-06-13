@@ -1,6 +1,6 @@
 import { SelectableColumn } from '@stamhoofd/frontend-excel-export';
 import { ContextPermissions } from '@stamhoofd/networking';
-import { AccessRight, FinancialSupportSettings, Gender, Group, GroupType, Organization, Parent, Platform, PlatformMember, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordType } from '@stamhoofd/structures';
+import { AccessRight, FinancialSupportSettings, Gender, Group, GroupType, Organization, Parent, ParentTypeHelper, Platform, PlatformMember, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { SelectablePdfData } from '../../export/SelectablePdfData';
 
@@ -256,7 +256,14 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
                     name: $t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`),
                     category,
                     enabled,
-                    getValue: (object: PlatformMember) => getParent(object)?.type,
+                    getValue: (object: PlatformMember) => {
+                        const type = getParent(object)?.type;
+                        if (type) {
+                            return ParentTypeHelper.getName(type);
+                        }
+
+                        return type;
+                    },
                 }),
                 new SelectablePdfData<PlatformMember>({
                     id: getId('firstName'),
