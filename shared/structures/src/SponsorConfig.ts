@@ -20,7 +20,7 @@ export class Sponsor extends AutoEncoder {
     banner: Image | null = null;
 
     @field({ decoder: BooleanDecoder, optional: true })
-    onTickets = false;
+    onTickets = true;
 }
 
 export class SponsorConfig extends AutoEncoder {
