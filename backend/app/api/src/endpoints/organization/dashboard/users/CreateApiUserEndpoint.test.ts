@@ -3,7 +3,7 @@ import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 
 import { testServer } from '../../../../../tests/helpers/TestServer';
 import { PatchApiUserEndpoint } from './PatchApiUserEndpoint';
-import { SHExpect, TestUtils } from '@stamhoofd/test-utils';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { ApiUser, ApiUserRateLimits, PermissionLevel, Permissions, UserMeta, UserPermissions } from '@stamhoofd/structures';
 import { CreateApiUserEndpoint } from './CreateApiUserEndpoint';
 
@@ -63,7 +63,7 @@ describe('Endpoint.CreateApiUserEndpoint', () => {
         }));
         createRequest.headers.authorization = 'Bearer ' + token.accessToken;
 
-        await expect(testServer.test(endpoint, createRequest)).rejects.toThrow(SHExpect.simpleError({
+        await expect(testServer.test(endpoint, createRequest)).rejects.toThrow(STExpect.simpleError({
             code: 'permission_denied',
         }));
     });

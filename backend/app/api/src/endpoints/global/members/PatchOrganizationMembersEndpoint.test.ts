@@ -3,7 +3,7 @@ import { PatchableArray, PatchableArrayAutoEncoder, PatchMap } from '@simonbackx
 import { Endpoint, Request } from '@simonbackx/simple-endpoints';
 import { GroupFactory, MemberFactory, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { Address, Country, EmergencyContact, MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PatchAnswers, PermissionLevel, Permissions, PermissionsResourceType, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString } from '@stamhoofd/structures';
-import { SHExpect, TestUtils } from '@stamhoofd/test-utils';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { PatchOrganizationMembersEndpoint } from './PatchOrganizationMembersEndpoint';
 
@@ -57,7 +57,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             request.headers.authorization = 'Bearer ' + token.accessToken;
             await expect(testServer.test(endpoint, request))
                 .rejects
-                .toThrow(SHExpect.errorWithCode('known_member_missing_rights'));
+                .toThrow(STExpect.errorWithCode('known_member_missing_rights'));
         });
 
         test('The security code is not a requirement for members without additional data', async () => {
@@ -217,7 +217,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request)).rejects.toThrow(SHExpect.errorWithCode('not_found'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.errorWithCode('not_found'));
         });
 
         test('An admin can edit members registered in its own organization', async () => {
@@ -493,7 +493,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request)).rejects.toThrow(SHExpect.errorWithCode('permission_denied'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
         });
 
         test('An admin without record category permission cannot set the records in that category', async () => {
@@ -562,7 +562,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request)).rejects.toThrow(SHExpect.errorWithCode('permission_denied'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
         });
 
         test('An admin can set records of the platform', async () => {
@@ -2033,7 +2033,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             await member3.refresh();
 
             // Check all contacts equal
-            const expectedParent = contact2;
+            const expectedParent = contact2.patch({ createdAt: contact1.createdAt }); // the oldest one is used
 
             expect(member1.details.emergencyContacts).toEqual([expectedParent]);
             expect(member2.details.emergencyContacts).toEqual([expectedParent]);

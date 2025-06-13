@@ -31,10 +31,7 @@ export const PaymentService = {
                         await BalanceItemPaymentService.markPaid(balanceItemPayment, organization);
                     }
 
-                    await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem));
-
-                    // Reallocate
-                    await BalanceItemService.reallocate(balanceItemPayments.map(p => p.balanceItem), organization.id);
+                    await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
                 });
                 return;
             }
@@ -58,10 +55,7 @@ export const PaymentService = {
                         await BalanceItemPaymentService.undoPaid(balanceItemPayment, organization);
                     }
 
-                    await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem));
-
-                    // Reallocate
-                    await BalanceItemService.reallocate(balanceItemPayments.map(p => p.balanceItem), organization.id);
+                    await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
                 });
             }
 
@@ -76,10 +70,7 @@ export const PaymentService = {
                         await BalanceItemPaymentService.markFailed(balanceItemPayment, organization);
                     }
 
-                    await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem));
-
-                    // Reallocate
-                    await BalanceItemService.reallocate(balanceItemPayments.map(p => p.balanceItem), organization.id);
+                    await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
                 });
             }
 
@@ -94,10 +85,7 @@ export const PaymentService = {
                         await BalanceItemPaymentService.undoFailed(balanceItemPayment, organization);
                     }
 
-                    await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem));
-
-                    // Reallocate
-                    await BalanceItemService.reallocate(balanceItemPayments.map(p => p.balanceItem), organization.id);
+                    await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
                 });
             }
         });

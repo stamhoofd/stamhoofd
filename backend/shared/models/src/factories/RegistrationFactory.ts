@@ -1,19 +1,21 @@
 import { Factory } from '@simonbackx/simple-database';
 
-import { GroupPrice } from '@stamhoofd/structures';
+import { BundleDiscount, GroupPrice } from '@stamhoofd/structures';
 import { Group } from '../models/Group';
 import { Member } from '../models/Member';
 import { Registration } from '../models/Registration';
 import { Organization } from '../models';
 import { GroupFactory } from './GroupFactory';
 
-type Options = {
+type Options = ({
     member: Member;
     group: Group;
     groupPrice?: GroupPrice;
 } | {
     member: Member;
     organization: Organization;
+}) & {
+    deactivatedAt?: Date;
 };
 
 export class RegistrationFactory extends Factory<Options, Registration> {
@@ -31,7 +33,12 @@ export class RegistrationFactory extends Factory<Options, Registration> {
         registration.registeredAt.setMilliseconds(0);
         registration.groupPrice = 'groupPrice' in this.options && this.options.groupPrice ? this.options.groupPrice : group.settings.prices[0];
 
+        registration.deactivatedAt = this.options.deactivatedAt || null;
+
         await registration.save();
+
+        // Create a balance item
+
         return registration;
     }
 }

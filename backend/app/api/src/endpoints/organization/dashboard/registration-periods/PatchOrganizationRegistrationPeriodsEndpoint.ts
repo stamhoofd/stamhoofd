@@ -58,7 +58,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Period not found',
-                    human: $t('Dit werkjaar bestaat niet of is niet gekoppeld aan jouw organisatie.'),
+                    human: $t('347463a0-1e9a-40fe-996c-d77ba13bc05b'),
                     statusCode: 404,
                 });
             }
@@ -69,7 +69,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Period not found',
-                    human: $t('Dit werkjaar bestaat niet of is niet gekoppeld aan jouw organisatie.'),
+                    human: $t('347463a0-1e9a-40fe-996c-d77ba13bc05b'),
                     statusCode: 404,
                 });
             }
@@ -78,7 +78,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 throw new SimpleError({
                     code: 'locked_period',
                     message: 'This period is locked',
-                    human: $t(`Je kan geen wijzigingen meer aanbrengen in werkjaar {2000-2001} omdat deze is afgesloten.`, { '2000-2001': period.getStructure().nameShort }),
+                    human: $t(`cc658db0-ee90-40fc-8a8c-1074a4f1f2f2`, { '2000-2001': period.getStructure().nameShort }),
                 });
             }
 
@@ -281,7 +281,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Period not found',
-                human: $t('Dit werkjaar bestaat niet of is niet gekoppeld aan jouw organisatie.'),
+                human: $t('347463a0-1e9a-40fe-996c-d77ba13bc05b'),
                 statusCode: 404,
             });
         }
@@ -290,7 +290,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             throw new SimpleError({
                 code: 'locked_period',
                 message: 'Period is locked',
-                human: $t(`Je kan geen wijzigingen meer aanbrengen in werkjaar {2000-2001} omdat deze is afgesloten.`, { '2000-2001': period.getStructure().nameShort }),
+                human: $t(`cc658db0-ee90-40fc-8a8c-1074a4f1f2f2`, { '2000-2001': period.getStructure().nameShort }),
             });
         }
 
@@ -299,7 +299,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Period start date is too far in the future',
-                human: $t('Het werkjaar dat je wilt instellen is nog niet gestart'),
+                human: $t('2655c006-55af-47e6-959c-16acdb1917dc'),
                 field: 'period',
             });
         }
@@ -309,7 +309,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Period has ended',
-                human: $t('Het werkjaar dat je wilt instellen is al afgelopen'),
+                human: $t('44ff6618-ecbf-408b-9cc1-b1479e8ba8a2'),
                 field: 'period',
             });
         }

@@ -49,7 +49,7 @@
                 </STInputBox>
 
                 <PhoneInput v-if="!member.isNew && (isPropertyEnabled('phone') || phone)" v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? $t(`e3d3b76b-e18c-4351-b5af-87186ebabe86`): $t(`17e804e0-5c41-4893-8008-89c7392e1d18`)" />
-                <EmailInput v-if="(!member.isNew || birthDay) && (isPropertyEnabled('emailAddress') || email)" v-model="email" :required="isPropertyRequired('emailAddress')" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`) + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? $t(`e3d3b76b-e18c-4351-b5af-87186ebabe86`): $t(`17e804e0-5c41-4893-8008-89c7392e1d18`)" :validator="validator">
+                <EmailInput v-if="!(member.isNew && isAdmin) && (isPropertyEnabled('emailAddress') || email) && (!isPropertyEnabled('birthDay') || birthDay)" v-model="email" :required="isPropertyRequired('emailAddress')" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`) + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? $t(`e3d3b76b-e18c-4351-b5af-87186ebabe86`): $t(`17e804e0-5c41-4893-8008-89c7392e1d18`)" :validator="validator">
                     <template #right>
                         <button :v-tooltip="$t('2797d590-7e74-4852-84aa-076f7919a2fb')" class="button icon add small gray" type="button" @click="addEmail" />
                     </template>
@@ -128,7 +128,7 @@ import TrackingYearInput from '../../../inputs/TrackingYearInput.vue';
 import { ContextMenu, ContextMenuItem } from '../../../overlays/ContextMenu';
 import { useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import Title from './Title.vue';
-import {I18nComponent} from '@stamhoofd/frontend-i18n';
+import { I18nComponent } from '@stamhoofd/frontend-i18n';
 
 defineOptions({
     inheritAttrs: false,

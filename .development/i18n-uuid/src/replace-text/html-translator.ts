@@ -327,10 +327,10 @@ export class HtmlTranslator {
         const parts = context.split(placeholder);
         
         if(parts.length !== 2) {
-            throw new Error('Invalid context: ', context);
+            throw new Error('Invalid context: ' + context);
         }
     
-        return parts;
+        return parts as [string, string];
     }
 
     private logContext(parent: Record<string, any>, record: Record<string, string>, key: string, part: string, translatedPart: string, processedParts: string, unprocessedPart: string, transformContext?: (context: HtmlTranslatorContext) => HtmlTranslatorContext) {

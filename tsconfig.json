@@ -12,6 +12,7 @@
         "sourceMap": true,
         "strictNullChecks": true,
         "declarationMap": true,
+        "noErrorTruncation": true,
         "lib": [
             "esnext",
             "dom",

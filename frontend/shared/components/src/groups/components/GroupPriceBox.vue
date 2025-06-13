@@ -37,8 +37,8 @@
 
         <div v-if="$feature('bundle-discounts')" class="container">
             <hr>
-            <h2>{{ $t('Bundelkortingen') }}</h2>
-            <p>{{ $t('Met bundelkortingen kan je korting geven op de tweede, derde, vierde... inschrijving. Een bundelkorting maak je aan en koppel je vervolgens aan één of meerdere activiteiten of inschrijvingsgroepen (of tarieven daarvan) waarop die korting geldt.') }}</p>
+            <h2>{{ $t('98237c41-e107-4997-a645-cc4c16bb5b9a') }}</h2>
+            <p>{{ $t('3ca1233b-86ba-4291-b0a2-68b0d96031dd') }}</p>
 
             <STList>
                 <STListItem v-for="bundleDiscount of period.settings.bundleDiscounts" :key="bundleDiscount.id" class="right-top" :selectable="true" element-name="label">
@@ -46,7 +46,7 @@
                         <Checkbox :model-value="getBundleDiscountSelected(bundleDiscount)" @update:model-value="setBundleDiscountSelected(bundleDiscount, $event)" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ bundleDiscount.name || $t('Naamloos') }}
+                        {{ bundleDiscount.name || $t('0a0f4ac1-1b0e-48f0-9f21-d1c77ec3f008') }}
                     </h3>
                     <p class="style-description-small">
                         {{ bundleDiscount.humanDescription }}
@@ -62,11 +62,11 @@
                     </div>
 
                     <template v-if="getBundleDiscountSelected(bundleDiscount)" #right>
-                        <button v-if="getOverrideBundleDiscountSelected(bundleDiscount)" v-tooltip="$t('Terug standaard kortingsbedragen gebruiken')" type="button" class="button text selected" @click="() => setOverrideBundleDiscountSelected(bundleDiscount, false)">
+                        <button v-if="getOverrideBundleDiscountSelected(bundleDiscount)" v-tooltip="$t('8545df6d-c416-42dc-88e6-df1eab5c41f9')" type="button" class="button text selected" @click="() => setOverrideBundleDiscountSelected(bundleDiscount, false)">
                             <span class="icon sliders" />
-                            <span>{{ $t('Afwijkend') }}</span>
+                            <span>{{ $t('eab2f8ba-1f62-4328-a0b6-9593d3b6ca15') }}</span>
                         </button>
-                        <button v-else v-tooltip="$t('Andere kortingsbedragen instellen voor deze specifieke inschrijvingen')" type="button" class="button icon sliders" @click="() => setOverrideBundleDiscountSelected(bundleDiscount, true)" />
+                        <button v-else v-tooltip="$t('534fe662-2b92-479c-bb69-2155478673ed')" type="button" class="button icon sliders" @click="() => setOverrideBundleDiscountSelected(bundleDiscount, true)" />
                     </template>
                 </STListItem>
             </STList>
@@ -74,7 +74,7 @@
             <p>
                 <button class="button text" type="button" @click="editBundleDiscounts">
                     <span class="icon edit" />
-                    <span>{{ $t('Wijzig bundelkortingen') }}</span>
+                    <span>{{ $t('1adf61de-d2d5-45bd-a322-304107173992') }}</span>
                 </button>
             </p>
         </div>

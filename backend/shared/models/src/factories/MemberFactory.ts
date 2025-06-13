@@ -146,7 +146,9 @@ export class MemberFactory extends Factory<Options, MemberWithRegistrations> {
             .setManyRelation(Member.registrations, [])
             .setManyRelation(Member.users, this.options.user ? [this.options.user] : []);
 
-        member.organizationId = organization?.id ?? null;
+        if (STAMHOOFD.userMode === 'organization') {
+            member.organizationId = organization?.id ?? null;
+        }
         member.details = memberDetails;
         await member.save();
 

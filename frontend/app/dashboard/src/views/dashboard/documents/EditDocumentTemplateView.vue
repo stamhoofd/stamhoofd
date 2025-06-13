@@ -450,6 +450,8 @@ function getLinkedFieldsChoices(field: RecordSettings) {
 function getDefaultSupportedIds() {
     return [
         'organization.name',
+        'organization.companyAddress',
+        'organization.companyName',
         'organization.companyNumber',
         'organization.address',
         'registration.price',
@@ -497,8 +499,10 @@ function autoLink() {
     const linkedInside: Set<string> = new Set();
     const globalData = getDefaultGlobalData();
     for (const field of patchedDocument.value.privateSettings.templateDefinition.fieldCategories.flatMap(c => c.getAllRecords())) {
-        if (recordAnswers.value.has(field.id) && !linkedInside.has(field.id)) {
-            continue;
+        if (isDocumentFieldEditable(field)) {
+            if (recordAnswers.value.has(field.id) && !linkedInside.has(field.id)) {
+                continue;
+            }
         }
         const d = globalData[field.id];
         if (d && d instanceof RecordAnswerDecoder.getClassForType(field.type)) {
@@ -579,6 +583,10 @@ function getDefaultGlobalData(): Record<string, RecordAnswer> {
             settings: RecordSettings.create({}), // settings will be overwritten
             value: organization.value.name,
         }),
+        'organization.companyName': RecordTextAnswer.create({
+            settings: RecordSettings.create({}),
+            value: organization.value.meta.companies[0]?.name || organization.value.name,
+        }),
         'organization.companyNumber': RecordTextAnswer.create({
             settings: RecordSettings.create({}), // settings will be overwritten
             value: organization.value.meta.companies[0]?.companyNumber ?? '',
@@ -586,6 +594,10 @@ function getDefaultGlobalData(): Record<string, RecordAnswer> {
         'organization.address': RecordAddressAnswer.create({
             settings: RecordSettings.create({}), // settings will be overwritten
             address: organization.value.address,
+        }),
+        'organization.companyAddress': RecordAddressAnswer.create({
+            settings: RecordSettings.create({}), // settings will be overwritten
+            address: organization.value.meta.companies[0]?.address ?? organization.value.address,
         }),
     };
 

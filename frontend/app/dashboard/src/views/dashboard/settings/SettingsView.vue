@@ -165,10 +165,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/discount.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Bundelkortingen') }}
+                            {{ $t('98237c41-e107-4997-a645-cc4c16bb5b9a') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Korting voor tweede of derde inschrijvingen.') }}
+                            {{ $t('86fbcc70-2118-4399-9b7c-4461b8d40369') }}
                         </p>
 
                         <template #right>
@@ -333,7 +333,7 @@
 </template>
 
 <script lang="ts" setup>
-import { BundleDiscountSettingsView, AdminsView, EditEmailTemplatesView, EmailSettingsView, GeneralSettingsView, RecordsConfigurationView, SSOSettingsView, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useMembersPackage, useOrganization, usePlatform, useSalesDisabled } from '@stamhoofd/components';
+import { AdminsView, BundleDiscountSettingsView, EditEmailTemplatesView, EmailSettingsView, GeneralSettingsView, RecordsConfigurationView, SSOSettingsView, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useMembersPackage, useOrganization, usePlatform, useSalesDisabled } from '@stamhoofd/components';
 
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
@@ -351,6 +351,8 @@ import RegistrationPaymentSettingsView from './RegistrationPaymentSettingsView.v
 import { useEditGroupsView } from './hooks/useEditGroupsView';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
+
+type ttt = FreeContributionSettingsView;
 
 enum Routes {
     General = 'algemeen',
@@ -385,22 +387,22 @@ const patchOrganizationPeriod = usePatchOrganizationPeriod();
 defineRoutes([
     {
         url: Routes.General,
-        component: GeneralSettingsView as ComponentOptions,
+        component: GeneralSettingsView,
         present: 'popup',
     },
     {
         url: Routes.Personalization,
-        component: PersonalizeSettingsView as unknown as ComponentOptions,
+        component: PersonalizeSettingsView,
         present: 'popup',
     },
     {
         url: Routes.Privacy,
-        component: PrivacySettingsView as unknown as ComponentOptions,
+        component: PrivacySettingsView,
         present: 'popup',
     },
     {
         url: Routes.PaymentAccounts,
-        component: PaymentSettingsView as unknown as ComponentOptions,
+        component: PaymentSettingsView,
         present: 'popup',
     },
     {
@@ -438,12 +440,12 @@ defineRoutes([
     {
         url: Routes.RegistrationPaymentMethods,
         present: 'popup',
-        component: RegistrationPaymentSettingsView as unknown as ComponentOptions,
+        component: RegistrationPaymentSettingsView,
     },
     {
         url: Routes.RegistrationPage,
         present: 'popup',
-        component: RegistrationPageSettingsView as unknown as ComponentOptions,
+        component: RegistrationPageSettingsView,
     },
     {
         url: Routes.RegistrationGroups,
@@ -494,27 +496,27 @@ defineRoutes([
     {
         url: Routes.RegistrationFreeContributions,
         present: 'popup',
-        component: FreeContributionSettingsView as unknown as ComponentOptions,
+        component: FreeContributionSettingsView,
     },
     {
         url: Routes.SingleSignOn,
         present: 'popup',
-        component: SSOSettingsView as unknown as ComponentOptions,
+        component: SSOSettingsView,
     },
     {
         url: Routes.Labs,
         present: 'popup',
-        component: LabsView as unknown as ComponentOptions,
+        component: LabsView,
     },
     {
         url: Routes.Premises,
         present: 'popup',
-        component: PremisesView as unknown as ComponentOptions,
+        component: PremisesView,
     },
     {
         url: Routes.BalanceNotifications,
         present: 'popup',
-        component: BalanceNotificationSettingsView as unknown as ComponentOptions,
+        component: BalanceNotificationSettingsView,
     },
 ]);
 

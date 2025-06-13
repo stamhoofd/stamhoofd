@@ -1,5 +1,5 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { Formatter, StringCompare } from '@stamhoofd/utility';
+import { Formatter } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address.js';
 import { Recipient, Replacement } from '../endpoints/EmailRequest.js';
@@ -43,21 +43,6 @@ export class MemberSummary extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     organizationId: string;
-
-    matchQuery(query: string) {
-        const parts = query.split(' ');
-        const nameParts = [...this.firstName.split(' '), ...this.lastName.split(' ')];
-
-        // Each part should at least match a namepart
-        for (const part of parts) {
-            if (!nameParts.find(p => StringCompare.contains(p, part))) {
-                return false;
-            }
-        }
-        return parts.length > 0;
-
-        // return StringCompare.contains(this.firstName, query) || StringCompare.contains(this.lastName, query)
-    }
 
     get addresses() {
         const addresses = this.parents.map(p => p.address).filter(a => a !== null) as Address[];

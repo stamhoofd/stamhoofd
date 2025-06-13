@@ -1,22 +1,19 @@
 import { Database, SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery, normalizeSQLQuery } from './SQLExpression';
+import { Formatter } from '@stamhoofd/utility';
+import { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery, joinSQLQuery, normalizeSQLQuery } from './SQLExpression';
 import { SQLAlias, SQLColumnExpression, SQLCount, SQLSelectAs, SQLSum, SQLTableExpression } from './SQLExpressions';
 import { SQLJoin } from './SQLJoin';
 import { Orderable } from './SQLOrderBy';
 import { Whereable } from './SQLWhere';
-import { Formatter } from '@stamhoofd/utility';
 
 class EmptyClass {}
 
-export function parseTable(tableOrExpressiongOrNamespace: SQLExpression | string, table?: string): SQLExpression {
-    if (table !== undefined && typeof tableOrExpressiongOrNamespace === 'string') {
-        return new SQLTableExpression(tableOrExpressiongOrNamespace, table);
-    }
-    else if (typeof tableOrExpressiongOrNamespace === 'string') {
-        return new SQLTableExpression(tableOrExpressiongOrNamespace);
+export function parseTable(tableOrExpression: SQLNamedExpression | string, asNamespace?: string): SQLNamedExpression {
+    if (typeof tableOrExpression === 'string') {
+        return new SQLTableExpression(tableOrExpression, asNamespace);
     }
     else {
-        return tableOrExpressiongOrNamespace;
+        return tableOrExpression;
     }
 }
 
@@ -34,7 +31,7 @@ export type IterableSQLSelectOptions = {
 
 export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Whereable(Orderable(EmptyClass)) implements SQLExpression {
     _columns: SQLExpression[];
-    _from: SQLExpression;
+    _from: SQLNamedExpression;
 
     _limit: number | null = null;
     _offset: number | null = null;
@@ -63,8 +60,8 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
 
     from(namespace: string, table: string): this;
     from(table: string): this;
-    from(expression: SQLExpression): this;
-    from(tableOrExpressiongOrNamespace: SQLExpression | string, table?: string): this {
+    from(expression: SQLNamedExpression): this;
+    from(tableOrExpressiongOrNamespace: SQLNamedExpression | string, table?: string): this {
         this._from = parseTable(tableOrExpressiongOrNamespace, table);
 
         return this;
@@ -102,7 +99,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         // Create a clone since we are mutating the default namespaces
         const parentOptions = options;
         options = options ? { ...options } : {};
-        options.defaultNamespace = (this._from as any).namespace ?? (this._from as any).table ?? undefined;
+        options.defaultNamespace = this._from.getName();
 
         if (parentOptions?.defaultNamespace) {
             options.parentNamespace = parentOptions.defaultNamespace;
@@ -128,8 +125,14 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
 
         // Where
         if (this._where) {
-            query.push('WHERE');
-            query.push(this._where.getSQL(options));
+            const always = this._where.isAlways;
+            if (always === false) {
+                throw new Error('Cannot use SQLSelect with a where that is not always true');
+            }
+            else if (always === null) {
+                query.push('WHERE');
+                query.push(this._where.getSQL(options));
+            }
         }
 
         if (this._groupBy.length > 0) {
@@ -156,6 +159,15 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         return joinSQLQuery(query, ' ');
     }
 
+    /**
+     * Returns true when it know all results will be included without filtering.
+     * Returns false when it knows no single result will be included.
+     * Null when it does not know.
+     */
+    get isAlways() {
+        return this._where ? this._where.isAlways : true;
+    }
+
     limit(limit: number | null, offset: number | null = null): this {
         this._limit = limit;
         this._offset = offset;
@@ -163,6 +175,10 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     }
 
     async fetch(): Promise<T[]> {
+        if (this._where && this._where.isAlways === false) {
+            return [];
+        }
+
         const { query, params } = normalizeSQLQuery(this.getSQL());
 
         // when debugging: log all queries

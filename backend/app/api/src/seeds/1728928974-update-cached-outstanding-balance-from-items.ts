@@ -1,6 +1,7 @@
 import { Migration } from '@simonbackx/simple-database';
 import { logger } from '@simonbackx/simple-logging';
 import { BalanceItem } from '@stamhoofd/models';
+import { BalanceItemService } from '../services/BalanceItemService';
 
 /**
  * This migration is required to keep '1733994455-balance-item-status-open' working
@@ -16,7 +17,7 @@ export default new Migration(async () => {
 
     await logger.setContext({ tags: ['silent-seed', 'seed'] }, async () => {
         for await (const items of BalanceItem.select().limit(1000).allBatched()) {
-            await BalanceItem.updateOutstanding(items);
+            await BalanceItemService.updatePaidAndPending(items);
 
             c += items.length;
             process.stdout.write('.');

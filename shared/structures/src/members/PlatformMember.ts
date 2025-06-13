@@ -48,9 +48,30 @@ export class PlatformFamily {
     platform: Platform;
     organizations: Organization[] = [];
 
+    /**
+     * Helper data point, to know whether we already tried loading the full family for this member.
+     *
+     * By default it is false, which is okay most of the times. Set it to true when you know you didn't really load the full family and there is a chance
+     * there are unknown members in the family.
+     */
+    _isSingle = false;
+
     constructor(context: { contextOrganization?: Organization | null; platform: Platform }) {
         this.platform = context.platform;
         this.organizations = context.contextOrganization ? [context.contextOrganization] : [];
+    }
+
+    /**
+     * returns the uuid of the oldest member
+     */
+    get uuid() {
+        if (this.members.length === 0) {
+            return '';
+        }
+
+        // Sort by createdAt, so the oldest member is first
+        const sorted = this.members.sort((a, b) => a.member.createdAt.getTime() - b.member.createdAt.getTime());
+        return sorted[0].id;
     }
 
     insertOrganization(organization: Organization) {
@@ -149,6 +170,7 @@ export class PlatformFamily {
 
         for (const member of blob.members) {
             const family = new PlatformFamily(context);
+            family._isSingle = true;
 
             for (const organization of blob.organizations) {
                 // Check if this organization is relevant to this member
@@ -166,16 +188,6 @@ export class PlatformFamily {
             memberList.push(platformMember);
         }
         return memberList;
-    }
-
-    insertSingle(member: MemberWithRegistrationsBlob): PlatformMember {
-        const platformMember = new PlatformMember({
-            member,
-            family: this,
-        });
-
-        this.members.push(platformMember);
-        return platformMember;
     }
 
     /**
@@ -377,7 +389,7 @@ export class PlatformFamily {
         const organizationTags = new Set<string>();
 
         for (const member of this.members) {
-            for (const group of member.filterGroups({ types: [GroupType.Membership], currentPeriod: true, includePending: false })) {
+            for (const group of member.filterGroups({ types: [GroupType.Membership], currentPeriod: true, includePending: true })) {
                 groups.add(group.id);
                 if (group.defaultAgeGroupId) {
                     defaultGroupIds.add(group.defaultAgeGroupId);
@@ -854,28 +866,30 @@ export class PlatformMember implements ObjectWithRecords {
         }
 
         // Loop checkout
-        for (const item of [...this.family.checkout.cart.items, ...(filters.includePending ? this.family.pendingRegisterItems : [])]) {
-            if (item.member.id === this.id) {
-                if (filters.currentPeriod === false) {
-                    continue;
-                }
-
-                if (filters.periodId && item.group.periodId !== filters.periodId) {
-                    continue;
-                }
-
-                if (filters.canRegister !== undefined) {
-                    continue;
-                }
-
-                if (filters.organizationId !== undefined) {
-                    if (item.organization.id !== filters.organizationId) {
+        if (filters.includePending) {
+            for (const item of [...this.family.checkout.cart.items, ...this.family.pendingRegisterItems]) {
+                if (item.member.id === this.id) {
+                    if (filters.currentPeriod === false) {
                         continue;
                     }
-                }
 
-                if (!base.find(g => g.id === item.group.id)) {
-                    base.push(item.group);
+                    if (filters.periodId && item.group.periodId !== filters.periodId) {
+                        continue;
+                    }
+
+                    if (filters.canRegister !== undefined) {
+                        continue;
+                    }
+
+                    if (filters.organizationId !== undefined) {
+                        if (item.organization.id !== filters.organizationId) {
+                            continue;
+                        }
+                    }
+
+                    if (!base.find(g => g.id === item.group.id)) {
+                        base.push(item.group);
+                    }
                 }
             }
         }
@@ -978,7 +992,15 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     get groups() {
-        return this.filterGroups({ currentPeriod: true, includePending: false });
+        return this.filterGroups({ currentPeriod: true, includePending: false, types: [GroupType.Membership, GroupType.WaitingList] });
+    }
+
+    get registrationDescription() {
+        const groups = this.groups;
+        if (groups.length === 0) {
+            return $t('57109b34-1238-4e62-84a0-14a81d7c2bfa');
+        }
+        return groups.map(g => g.settings.name).join(', ');
     }
 
     insertOrganization(organization: Organization) {

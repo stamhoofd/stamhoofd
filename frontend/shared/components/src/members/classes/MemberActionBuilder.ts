@@ -162,7 +162,7 @@ export class MemberActionBuilder {
 
     private getDeleteAction() {
         return [new InMemoryTableAction({
-            name: $t('Lid definitief verwijderen'),
+            name: $t('d20e1a65-6c0d-4591-9dac-1abc01b9a563'),
             destructive: true,
             priority: 1,
             groupIndex: 100,
@@ -396,7 +396,7 @@ export class MemberActionBuilder {
             priority: 9,
             groupIndex: 3,
             fetchLimitSettings: { limit: 200, createErrorMessage: (count, limit) => {
-                return $t('Je kan een sms naar maximaal {limit} leden sturen. Er zijn {count} leden geselecteerd.', { count: Formatter.float(count), limit: Formatter.float(limit) });
+                return $t('187d5767-969d-407a-a988-c3a9a831a0a8', { count: Formatter.float(count), limit: Formatter.float(limit) });
             } },
             handler: async (members: PlatformMember[]) => {
                 await this.openSms(members);

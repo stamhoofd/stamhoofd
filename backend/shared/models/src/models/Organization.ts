@@ -4,9 +4,9 @@ import { I18n } from '@stamhoofd/backend-i18n';
 import { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { QueryableModel } from '@stamhoofd/sql';
 import { Address, Country, DNSRecordStatus, EmailTemplateType, Language, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, PrivatePaymentConfiguration, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
-import { AWSError } from 'aws-sdk';
-import SES from 'aws-sdk/clients/sesv2';
-import { PromiseResult } from 'aws-sdk/lib/request';
+
+import { CreateEmailIdentityCommand, DeleteEmailIdentityCommand, GetEmailIdentityCommand, GetEmailIdentityCommandOutput, PutEmailIdentityFeedbackAttributesCommand, PutEmailIdentityMailFromAttributesCommand, SESv2Client } from '@aws-sdk/client-sesv2';
+
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueueHandler } from '@stamhoofd/queues';
@@ -480,28 +480,27 @@ export class Organization extends QueryableModel {
             return;
         }
 
-        const sesv2 = new SES();
+        const client = new SESv2Client({});
 
         // Check if mail identitiy already exists..
-        let exists = false;
-        let existing: PromiseResult<SES.GetEmailIdentityResponse, AWSError> | undefined = undefined;
         try {
-            existing = await sesv2.getEmailIdentity({
+            const cmd = new GetEmailIdentityCommand({
                 EmailIdentity: mailDomain,
-            }).promise();
-            exists = true;
+            });
+            const result = await client.send(cmd);
 
-            // Check if DKIM keys are the same
-            if (existing.VerifiedForSendingStatus === true) {
+            if (result.VerifiedForSendingStatus === true) {
                 console.log('Cant delete AWS mail idenitiy @' + this.id + ' for ' + mailDomain + ': already validated and might be in use by other organizations');
                 return;
             }
 
-            console.log('Deleting AWS mail idenitiy @' + this.id + ' for ' + mailDomain);
+            console.log('Deleting AWS mail identity @' + this.id + ' for ' + mailDomain);
 
-            await sesv2.deleteEmailIdentity({
+            const deleteCmd = new DeleteEmailIdentityCommand({
                 EmailIdentity: mailDomain,
-            }).promise();
+            });
+
+            await client.send(deleteCmd);
             console.log('Deleted AWS mail idenitiy @' + this.id + ' for ' + this.privateMeta.mailDomain);
         }
         catch (e) {
@@ -531,16 +530,18 @@ export class Organization extends QueryableModel {
             return;
         }
 
-        const sesv2 = new SES();
+        const client = new SESv2Client({});
         const expectedConfigurationSetName = Formatter.slug(STAMHOOFD.platformName + '-domains');
 
         // Check if mail identitiy already exists..
         let exists = false;
-        let existing: PromiseResult<SES.GetEmailIdentityResponse, AWSError> | undefined = undefined;
+        let existing: GetEmailIdentityCommandOutput | undefined = undefined;
         try {
-            existing = await sesv2.getEmailIdentity({
+            const cmd = new GetEmailIdentityCommand({
                 EmailIdentity: this.privateMeta.mailDomain,
-            }).promise();
+            });
+
+            existing = await client.send(cmd);
             exists = true;
 
             console.log('AWS mail idenitiy exists already: just checking the verification status in AWS @' + this.id);
@@ -560,9 +561,11 @@ export class Organization extends QueryableModel {
 
             if (existing.VerifiedForSendingStatus !== true && existing.DkimAttributes?.Status === 'FAILED') {
                 console.error('AWS failed to verify DKIM records. Triggering a forced recheck @' + this.id);
-                await sesv2.deleteEmailIdentity({
+
+                const deleteCmd = new DeleteEmailIdentityCommand({
                     EmailIdentity: this.privateMeta.mailDomain,
-                }).promise();
+                });
+                await client.send(deleteCmd);
 
                 // Recreate it immediately
                 exists = false;
@@ -575,7 +578,7 @@ export class Organization extends QueryableModel {
         if (!exists) {
             console.log('Creating email identity in AWS SES...');
 
-            const result = await sesv2.createEmailIdentity({
+            const cmd = new CreateEmailIdentityCommand({
                 EmailIdentity: this.privateMeta.mailDomain,
                 ConfigurationSetName: expectedConfigurationSetName,
                 DkimSigningAttributes: {
@@ -592,27 +595,32 @@ export class Organization extends QueryableModel {
                         Value: STAMHOOFD.environment ?? 'Unknown',
                     },
                 ],
+            });
 
-            }).promise();
+            const result = await client.send(cmd);
             this.privateMeta.mailDomainActive = result.VerifiedForSendingStatus ?? false;
 
             // Disable email forwarding of bounces and complaints
             // We handle this now with the configuration set
-            await sesv2.putEmailIdentityFeedbackAttributes({
+            const putFeedbackCmd = new PutEmailIdentityFeedbackAttributesCommand({
                 EmailIdentity: this.privateMeta.mailDomain,
                 EmailForwardingEnabled: false,
-            }).promise();
+            });
+
+            await client.send(putFeedbackCmd);
         }
 
         if (this.privateMeta.mailFromDomain && (!exists || (existing && (!existing.MailFromAttributes || existing.MailFromAttributes.MailFromDomain !== this.privateMeta.mailFromDomain)))) {
             // Also set a from domain, to fix SPF
             console.log('Setting mail from domain: ' + this.privateMeta.mailFromDomain + ' for ' + this.id);
-            const params = {
+
+            const cmd = new PutEmailIdentityMailFromAttributesCommand({
                 EmailIdentity: this.privateMeta.mailDomain,
                 BehaviorOnMxFailure: 'USE_DEFAULT_VALUE',
                 MailFromDomain: this.privateMeta.mailFromDomain,
-            };
-            await sesv2.putEmailIdentityMailFromAttributes(params).promise();
+            });
+
+            await client.send(cmd);
         }
     }
 

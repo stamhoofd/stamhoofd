@@ -1,0 +1,427 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`$lte MySQL Behaviour Comparing JSON numbers values is numberic: SQL Query for filter: {"settings.age":{"$lte":10.1}} 1`] = `
+{
+  "params": [
+    10.1,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing JSON numbers values is numberic: SQL Query for filter: {"settings.age":{"$lte":10}} 1`] = `
+{
+  "params": [
+    10,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing JSON numbers values is numberic: SQL Query for filter: {"settings.age":{"$lte":12}} 1`] = `
+{
+  "params": [
+    12,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing JSON numbers values is numberic: SQL Query for filter: {"settings.age":{"$lte":20}} 1`] = `
+{
+  "params": [
+    20,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing JSON numbers values is numberic: SQL Query for not match filter: {"settings.age":{"$lte":-9}} 1`] = `
+{
+  "params": [
+    -9,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing JSON numbers values is numberic: SQL Query for not match filter: {"settings.age":{"$lte":0}} 1`] = `
+{
+  "params": [
+    0,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing JSON numbers values is numberic: SQL Query for not match filter: {"settings.age":{"$lte":1}} 1`] = `
+{
+  "params": [
+    1,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing JSON numbers values is numberic: SQL Query for not match filter: {"settings.age":{"$lte":9}} 1`] = `
+{
+  "params": [
+    9,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing JSON string values is case sensitive: SQL Query for filter: {"settings.name":{"$lte":"ALICE"}} 1`] = `
+{
+  "params": [
+    "alice",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing JSON string values is case sensitive: SQL Query for filter: {"settings.name":{"$lte":"ALICEA"}} 1`] = `
+{
+  "params": [
+    "alicea",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing JSON string values is case sensitive: SQL Query for filter: {"settings.name":{"$lte":"Alice"}} 1`] = `
+{
+  "params": [
+    "alice",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing JSON string values is case sensitive: SQL Query for filter: {"settings.name":{"$lte":"Alicea"}} 1`] = `
+{
+  "params": [
+    "alicea",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing JSON string values is case sensitive: SQL Query for filter: {"settings.name":{"$lte":"aLice"}} 1`] = `
+{
+  "params": [
+    "alice",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing JSON string values is case sensitive: SQL Query for filter: {"settings.name":{"$lte":"alice"}} 1`] = `
+{
+  "params": [
+    "alice",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing JSON string values is case sensitive: SQL Query for filter: {"settings.name":{"$lte":"alicea"}} 1`] = `
+{
+  "params": [
+    "alicea",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing JSON string values is case sensitive: SQL Query for not match filter: {"settings.name":{"$lte":""}} 1`] = `
+{
+  "params": [
+    "",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing JSON string values is case sensitive: SQL Query for not match filter: {"settings.name":{"$lte":"Alic"}} 1`] = `
+{
+  "params": [
+    "alic",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing JSON string values is case sensitive: SQL Query for not match filter: {"settings.name":{"$lte":"a"}} 1`] = `
+{
+  "params": [
+    "a",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing JSON string values is case sensitive: SQL Query for not match filter: {"settings.name":{"$lte":"alic"}} 1`] = `
+{
+  "params": [
+    "alic",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing numbers values is numberic: SQL Query for filter: {"age":{"$lte":10.1}} 1`] = `
+{
+  "params": [
+    10.1,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`age\` <= ? OR \`test_table\`.\`age\` IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing numbers values is numberic: SQL Query for filter: {"age":{"$lte":10}} 1`] = `
+{
+  "params": [
+    10,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`age\` <= ? OR \`test_table\`.\`age\` IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing numbers values is numberic: SQL Query for filter: {"age":{"$lte":12}} 1`] = `
+{
+  "params": [
+    12,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`age\` <= ? OR \`test_table\`.\`age\` IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing numbers values is numberic: SQL Query for filter: {"age":{"$lte":20}} 1`] = `
+{
+  "params": [
+    20,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`age\` <= ? OR \`test_table\`.\`age\` IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing numbers values is numberic: SQL Query for not match filter: {"age":{"$lte":-9}} 1`] = `
+{
+  "params": [
+    -9,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`age\` <= ? OR \`test_table\`.\`age\` IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing numbers values is numberic: SQL Query for not match filter: {"age":{"$lte":0}} 1`] = `
+{
+  "params": [
+    0,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`age\` <= ? OR \`test_table\`.\`age\` IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing numbers values is numberic: SQL Query for not match filter: {"age":{"$lte":1}} 1`] = `
+{
+  "params": [
+    1,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`age\` <= ? OR \`test_table\`.\`age\` IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing numbers values is numberic: SQL Query for not match filter: {"age":{"$lte":9}} 1`] = `
+{
+  "params": [
+    9,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`age\` <= ? OR \`test_table\`.\`age\` IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing string values is case insensitive: SQL Query for filter: {"name":{"$lte":"ALICE"}} 1`] = `
+{
+  "params": [
+    "alice",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` <= ? OR \`test_table\`.\`name\` IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing string values is case insensitive: SQL Query for filter: {"name":{"$lte":"Alice"}} 1`] = `
+{
+  "params": [
+    "alice",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` <= ? OR \`test_table\`.\`name\` IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing string values is case insensitive: SQL Query for filter: {"name":{"$lte":"Alicea"}} 1`] = `
+{
+  "params": [
+    "alicea",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` <= ? OR \`test_table\`.\`name\` IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing string values is case insensitive: SQL Query for filter: {"name":{"$lte":"aLice"}} 1`] = `
+{
+  "params": [
+    "alice",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` <= ? OR \`test_table\`.\`name\` IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing string values is case insensitive: SQL Query for filter: {"name":{"$lte":"alice"}} 1`] = `
+{
+  "params": [
+    "alice",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` <= ? OR \`test_table\`.\`name\` IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing string values is case insensitive: SQL Query for filter: {"name":{"$lte":"alicea"}} 1`] = `
+{
+  "params": [
+    "alicea",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` <= ? OR \`test_table\`.\`name\` IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing string values is case insensitive: SQL Query for filter: {"name":{"$lte":"b"}} 1`] = `
+{
+  "params": [
+    "b",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` <= ? OR \`test_table\`.\`name\` IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing string values is case insensitive: SQL Query for not match filter: {"name":{"$lte":""}} 1`] = `
+{
+  "params": [
+    "",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` <= ? OR \`test_table\`.\`name\` IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing string values is case insensitive: SQL Query for not match filter: {"name":{"$lte":"Alic"}} 1`] = `
+{
+  "params": [
+    "alic",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` <= ? OR \`test_table\`.\`name\` IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing string values is case insensitive: SQL Query for not match filter: {"name":{"$lte":"a"}} 1`] = `
+{
+  "params": [
+    "a",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` <= ? OR \`test_table\`.\`name\` IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour Comparing string values is case insensitive: SQL Query for not match filter: {"name":{"$lte":"alic"}} 1`] = `
+{
+  "params": [
+    "alic",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` <= ? OR \`test_table\`.\`name\` IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour NULL values are always the smallest for JSON numbers: SQL Query for filter: {"settings.age":{"$lte":-1000}} 1`] = `
+{
+  "params": [
+    -1000,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour NULL values are always the smallest for JSON numbers: SQL Query for filter: {"settings.age":{"$lte":0}} 1`] = `
+{
+  "params": [
+    0,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour NULL values are always the smallest for JSON numbers: SQL Query for filter: {"settings.age":{"$lte":1000000}} 1`] = `
+{
+  "params": [
+    1000000,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour NULL values are always the smallest for JSON numbers: SQL Query for filter: {"settings.age":{"$lte":null}} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour NULL values are always the smallest for JSON strings: SQL Query for filter: {"settings.name":{"$lte":""}} 1`] = `
+{
+  "params": [
+    "",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour NULL values are always the smallest for JSON strings: SQL Query for filter: {"settings.name":{"$lte":"aaaa"}} 1`] = `
+{
+  "params": [
+    "aaaa",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour NULL values are always the smallest for JSON strings: SQL Query for filter: {"settings.name":{"$lte":null}} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour NULL values are always the smallest for strings: SQL Query for filter: {"name":{"$lte":""}} 1`] = `
+{
+  "params": [
+    "",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` <= ? OR \`test_table\`.\`name\` IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour NULL values are always the smallest for strings: SQL Query for filter: {"name":{"$lte":"aaaa"}} 1`] = `
+{
+  "params": [
+    "aaaa",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` <= ? OR \`test_table\`.\`name\` IS NULL",
+}
+`;
+
+exports[`$lte MySQL Behaviour NULL values are always the smallest for strings: SQL Query for filter: {"name":{"$lte":null}} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` IS NULL",
+}
+`;

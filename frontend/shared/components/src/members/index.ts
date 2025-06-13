@@ -20,9 +20,10 @@ export { default as RegisterItemCheckboxRow } from "./components/group/RegisterI
 export { default as DeleteRegistrationRow } from "./components/group/DeleteRegistrationRow.vue"
 export { default as BalanceItemCartItemRow } from "./components/group/BalanceItemCartItemRow.vue"
 
-export * from "./checkout";
-export * from "./hooks";
-export * from "./components/view";
+export * from './checkout';
+export * from './hooks';
+export * from './components/view';
+export * from './helpers';
 
-export { default as MemberIcon } from "./components/MemberIcon.vue"
-export { default as MemberCountSpan } from "./components/MemberCountSpan.vue"
+export { default as MemberCountSpan } from './components/MemberCountSpan.vue';
+export { default as MemberIcon } from './components/MemberIcon.vue';

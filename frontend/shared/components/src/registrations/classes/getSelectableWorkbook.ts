@@ -50,7 +50,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         new SelectableColumn({
             id: 'id',
             name: $t(`8daf57de-69cf-48fe-b09b-772c54473184`),
-            description: $t('Unieke identificatie van de inschrijving'),
+            description: $t('2428a4da-4d23-4ff3-9194-9dbe17134dcc'),
             enabled: false,
         }),
         new SelectableColumn({

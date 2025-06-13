@@ -1,7 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AccessRight, EventMeta, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
-import { SHExpect, TestUtils } from '@stamhoofd/test-utils';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { GetRegistrationsEndpoint } from './GetRegistrationsEndpoint';
 
@@ -152,7 +152,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
                 },
             });
             await expect(testServer.test(endpoint, request)).rejects.toThrow(
-                SHExpect.errorWithCode('permission_denied'),
+                STExpect.errorWithCode('permission_denied'),
             );
         });
 
@@ -296,7 +296,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
                 },
             });
             await expect(testServer.test(endpoint, request)).rejects.toThrow(
-                SHExpect.errorWithCode('permission_denied'),
+                STExpect.errorWithCode('permission_denied'),
             );
         });
 
@@ -426,7 +426,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
                 },
             });
             await expect(testServer.test(endpoint, request)).rejects.toThrow(
-                SHExpect.errorWithCode('permission_denied'),
+                STExpect.errorWithCode('permission_denied'),
             );
         });
 
@@ -683,7 +683,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
                 },
             });
             await expect(testServer.test(endpoint, request)).rejects.toThrow(
-                SHExpect.errorWithCode('permission_denied'),
+                STExpect.errorWithCode('permission_denied'),
             );
         });
 
@@ -758,7 +758,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
                 },
             });
             await expect(testServer.test(endpoint, request)).rejects.toThrow(
-                SHExpect.errorWithCode('permission_denied'),
+                STExpect.errorWithCode('permission_denied'),
             );
         });
 
@@ -843,7 +843,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
                 },
             });
             await expect(testServer.test(endpoint, request)).rejects.toThrow(
-                SHExpect.errorWithCode('permission_denied'),
+                STExpect.errorWithCode('permission_denied'),
             );
         });
     });

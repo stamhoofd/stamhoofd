@@ -1,14 +1,14 @@
 import { Request, Response } from '@simonbackx/simple-endpoints';
 import { GroupFactory, MemberFactory, Organization, OrganizationFactory, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AccessRight, BalanceItemWithPayments, ChargeMembersRequest, LimitedFilteredRequest, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, StamhoofdFilter, Version } from '@stamhoofd/structures';
-import { SHExpect, TestUtils } from '@stamhoofd/test-utils';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { ChargeMembersEndpoint } from '../../src/endpoints/admin/members/ChargeMembersEndpoint';
-import { GetMemberBalanceEndpoint } from '../../src/endpoints/organization/dashboard/payments/GetMemberBalanceEndpoint';
 import { testServer } from '../helpers/TestServer';
+import { GetReceivableBalanceEndpoint } from '../../src/endpoints/organization/dashboard/receivable-balances/GetReceivableBalanceEndpoint';
 
 describe('E2E.ChargeMembers', () => {
     const chargeMembersEndpoint = new ChargeMembersEndpoint();
-    const memberBalanceEndpoint = new GetMemberBalanceEndpoint();
+    const getReceivableBalanceEndpoint = new GetReceivableBalanceEndpoint();
     let period: RegistrationPeriod;
     let organization: Organization;
     let otherOrganization: Organization;
@@ -27,10 +27,10 @@ describe('E2E.ChargeMembers', () => {
         return await testServer.test(chargeMembersEndpoint, request);
     };
 
-    const getBalance = async (memberId: string, organization: Organization, token: Token): Promise<Response<BalanceItemWithPayments[]>> => {
-        const request = Request.buildJson('GET', `/v${Version}/organization/members/${memberId}/balance`, organization.getApiHost());
+    const getBalance = async (memberId: string, organization: Organization, token: Token): Promise<BalanceItemWithPayments[]> => {
+        const request = Request.buildJson('GET', `/v${Version}/receivable-balances/member/${memberId}`, organization.getApiHost());
         request.headers.authorization = 'Bearer ' + token.accessToken;
-        return await testServer.test(memberBalanceEndpoint, request);
+        return (await testServer.test(getReceivableBalanceEndpoint, request)).body.balanceItems;
     };
 
     const createUserData = async (permissions: Permissions | null | undefined, roles: PermissionRoleDetailed[]) => {
@@ -149,7 +149,7 @@ describe('E2E.ChargeMembers', () => {
 
             await expect(async () => await postCharge(filter, organization, body, token))
                 .rejects
-                .toThrow(SHExpect.errorWithCode('permission_denied'));
+                .toThrow(STExpect.errorWithCode('permission_denied'));
         }
     });
 
@@ -181,10 +181,10 @@ describe('E2E.ChargeMembers', () => {
         expect(result.body).toBeUndefined();
 
         // act and assert
-        const testBalanceResponse = (response: Response<BalanceItemWithPayments[]>) => {
+        const testBalanceResponse = (response: BalanceItemWithPayments[]) => {
             expect(response).toBeDefined();
-            expect(response.body.length).toBe(1);
-            const balanceItem1 = response.body[0];
+            expect(response.length).toBe(1);
+            const balanceItem1 = response[0];
             expect(balanceItem1.price).toEqual(12);
             expect(balanceItem1.amount).toEqual(body.amount);
             expect(balanceItem1.description).toEqual(body.description);
@@ -245,9 +245,9 @@ describe('E2E.ChargeMembers', () => {
         expect(result).toBeDefined();
         expect(result.body).toBeUndefined();
 
-        const testBalanceResponse = (response: Response<BalanceItemWithPayments[]>) => {
+        const testBalanceResponse = (response: BalanceItemWithPayments[]) => {
             expect(response).toBeDefined();
-            expect(response.body.length).toBe(0);
+            expect(response.length).toBe(0);
         };
 
         testBalanceResponse(await getBalance(member1.id, otherOrganization, otherFinancialDirectorToken));
@@ -340,8 +340,10 @@ describe('E2E.ChargeMembers', () => {
             await new RegistrationFactory({ member: member2, group }).create();
 
             const filter: StamhoofdFilter = {
-                id: {
-                    $in: [member1.id, member2.id],
+                registrations: {
+                    $elemMatch: {
+                        groupId: group.id,
+                    },
                 },
             };
 
@@ -358,16 +360,15 @@ describe('E2E.ChargeMembers', () => {
             expect(result.body).toBeUndefined();
 
             // act and assert
-            const testBalanceResponse = (response: Response<BalanceItemWithPayments[]>) => {
+            const testBalanceResponse = (response: BalanceItemWithPayments[]) => {
                 expect(response).toBeDefined();
-                expect(response.body.length).toBe(1);
-                const balanceItem1 = response.body[0];
+                expect(response.length).toBe(1);
+                const balanceItem1 = response[0];
                 expect(balanceItem1.price).toEqual(12);
-                expect(balanceItem1.amount).toEqual(body.amount);
-                expect(balanceItem1.description).toEqual(body.description);
+                expect(balanceItem1.amount).toEqual(4);
+                expect(balanceItem1.description).toEqual('test description');
                 expect(balanceItem1.organizationId).toEqual(organization.id);
-                // const dueAt = balanceItem1.dueAt!;
-                expect(balanceItem1.dueAt).toEqual(body.dueAt);
+                expect(balanceItem1.dueAt).toEqual(new Date(2023, 0, 10));
                 expect(balanceItem1.createdAt).toEqual(body.createdAt);
             };
 
@@ -408,8 +409,10 @@ describe('E2E.ChargeMembers', () => {
             await new RegistrationFactory({ member: member2, group }).create();
 
             const filter: StamhoofdFilter = {
-                id: {
-                    $in: [member1.id, member2.id],
+                registrations: {
+                    $elemMatch: {
+                        groupId: group.id,
+                    },
                 },
             };
 
@@ -423,7 +426,7 @@ describe('E2E.ChargeMembers', () => {
 
             await expect(async () => await postCharge(filter, organization, body, token))
                 .rejects
-                .toThrow(SHExpect.errorWithCode('permission_denied'));
+                .toThrow(STExpect.errorWithCode('permission_denied'));
         });
     });
 });

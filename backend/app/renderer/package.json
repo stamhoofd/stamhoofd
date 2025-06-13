@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/backend-renderer",
-    "version": "2.83.5",
+    "version": "2.84.2",
     "main": "./dist/index.js",
     "exports": {
         ".": {
@@ -28,7 +28,7 @@
         "formidable": "3.5.1",
         "luxon": "3.4.4",
         "mockdate": "^3.0.2",
-        "mysql": "^2.18.1",
+        "mysql2": "^3.14.1",
         "puppeteer": "^23.9.0"
     },
     "publishConfig": {

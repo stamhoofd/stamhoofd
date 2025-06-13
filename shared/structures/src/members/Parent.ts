@@ -3,8 +3,8 @@ import { DataValidator, Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Address } from '../addresses/Address.js';
-import { ParentType, ParentTypeHelper } from './ParentType.js';
 import { NationalRegisterNumberOptOut } from './NationalRegisterNumberOptOut.js';
+import { ParentType, ParentTypeHelper } from './ParentType.js';
 
 export class Parent extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -62,17 +62,6 @@ export class Parent extends AutoEncoder {
 
     getDiffName() {
         return this.name + ` (${ParentTypeHelper.getName(this.type)})`;
-    }
-
-    matchQuery(query: string): boolean {
-        if (
-            StringCompare.typoCount(this.firstName, query) < 2
-            || StringCompare.typoCount(this.lastName, query) < 2
-            || StringCompare.typoCount(this.name, query) < 2
-        ) {
-            return true;
-        }
-        return false;
     }
 
     getEmails() {

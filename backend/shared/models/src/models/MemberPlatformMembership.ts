@@ -366,7 +366,7 @@ export class MemberPlatformMembership extends QueryableModel {
                 balanceItem.unitPrice = this.price;
                 await balanceItem.save();
 
-                await BalanceItem.updateOutstanding([balanceItem]);
+                // await BalanceItem.updateOutstanding([balanceItem]);
             }
         }
     }

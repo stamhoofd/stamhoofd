@@ -25,8 +25,8 @@
 
         <template #right>
             <span v-if="category.containsSensitiveData" class="icon privacy gray" :v-tooltip="$t('007c7ed0-9cac-4697-8ad7-d18684608013')" />
-            <span v-if="category.externalPermissionLevel === PermissionLevel.None" v-tooltip="$t('Onzichtbaar')" class="button icon eye-off gray" />
-            <span v-if="category.externalPermissionLevel === PermissionLevel.Read" v-tooltip="$t('Niet bewerkbaar voor leden')" class="button icon no-edit gray" />
+            <span v-if="category.externalPermissionLevel === PermissionLevel.None" v-tooltip="$t('4bd1a990-6f9b-4949-90be-3f0898c4e298')" class="button icon eye-off gray" />
+            <span v-if="category.externalPermissionLevel === PermissionLevel.Read" v-tooltip="$t('c393d4d3-9cc2-4da8-a8ae-569f48412e12')" class="button icon no-edit gray" />
 
             <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />

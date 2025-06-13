@@ -50,7 +50,7 @@ export class GroupPrice extends AutoEncoder {
     /**
      * Bundle discounts that are enabled for this group price, and possible custom settings
      */
-    @field({ decoder: new MapDecoder(StringDecoder, BundleDiscountGroupPriceSettings), ...NextVersion })
+    @field({ decoder: new MapDecoder(StringDecoder, BundleDiscountGroupPriceSettings), version: 374 })
     bundleDiscounts: Map<string, BundleDiscountGroupPriceSettings> = new Map();
 
     getUsedStock(group: Group) {

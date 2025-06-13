@@ -6,11 +6,16 @@ import { EditMemberStep, MemberStepManager } from '../MemberStepManager';
 
 export class RegisterItemStep implements EditMemberStep {
     item: RegisterItem;
-    showGroupInformation: boolean;
 
-    constructor(item: RegisterItem, options?: { showGroupInformation?: boolean }) {
+    /**
+     * Indicates whether the checkout flow will start immediately after adding this item to the cart.
+     * When this is used, the full cart price breakdown will be displayed in the view (because we won't navigate to the cart after adding the item).
+     */
+    willStartCheckoutFlow = false;
+
+    constructor(item: RegisterItem, options?: { willStartCheckoutFlow }) {
         this.item = item;
-        this.showGroupInformation = options?.showGroupInformation ?? false;
+        this.willStartCheckoutFlow = options?.willStartCheckoutFlow ?? false;
     }
 
     getName(manager: MemberStepManager) {
@@ -23,9 +28,9 @@ export class RegisterItemStep implements EditMemberStep {
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {
         return new ComponentWithProperties(RegisterItemView, {
-            showGroupInformation: this.showGroupInformation,
             member: manager.member,
             item: this.item.clone(),
+            willStartCheckoutFlow: this.willStartCheckoutFlow,
             saveHandler: async (item: RegisterItem, navigate: NavigationActions) => {
                 this.item.copyFrom(item);
                 await manager.saveHandler(this, navigate);

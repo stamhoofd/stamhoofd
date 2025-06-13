@@ -32,7 +32,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" element-name="button" class="theme-secundary" @click="createBalanceItem" v-if="false">
+                <STListItem v-if="false" :selectable="true" element-name="button" class="theme-secundary" @click="createBalanceItem">
                     <template #left>
                         <IconContainer icon="wand">
                             <template #aside>
@@ -41,10 +41,10 @@
                         </IconContainer>
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Saldoverrekening') }}
+                        {{ $t('f70ecedf-608c-4330-89e6-8e0a7a5ac264') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Maak een saldoverrekening aan met een totaalprijs van 0 euro die negatieve en positieve items combineert om de openstaande rekening te vereenvoudigen.') }}
+                        {{ $t('f3f810dd-cd4b-4766-b19e-ec995c9cca77') }}
                     </p>
 
                     <template #right>
@@ -148,8 +148,8 @@
 
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { BalancePriceBreakdown, EditBalanceItemView, EditPaymentView, ErrorBox, GlobalEventBus, GroupedBalanceList, IconContainer, LoadingBoxTransition, PaymentRow, SegmentedControl, useContext, useErrors, usePlatformFamilyManager } from '@stamhoofd/components';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { BalancePriceBreakdown, EditBalanceItemView, EditPaymentView, ErrorBox, GlobalEventBus, GroupedBalanceList, IconContainer, LoadingBoxTransition, PaymentRow, SegmentedControl, useContext, useErrors, useLoadFamily, usePlatformFamilyManager } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { BalanceItemWithPayments, DetailedReceivableBalance, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PlatformMember, ReceivableBalance, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
@@ -174,6 +174,7 @@ const selectedTab = ref(props.hideSegmentedControl ? 'individual' : 'grouped') a
 const owner = useRequestOwner();
 const hasWrite = true;
 const present = usePresent();
+const loadFamily = useLoadFamily();
 
 const pendingPayments = computed(() => {
     return detailedItem.value?.payments.filter(p => p.isPending).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt)) ?? [];
@@ -227,13 +228,11 @@ GlobalEventBus.addListener(owner, 'balanceItemPatch', async () => {
     await reload();
 });
 
-const platformFamilyManager = usePlatformFamilyManager();
-
 async function reloadFamily() {
     if (!props.member) {
         return;
     }
-    await platformFamilyManager.loadFamilyMembers(props.member, { shouldRetry: false });
+    await loadFamily(props.member, { shouldRetry: false });
 }
 
 async function createPayment() {
@@ -320,7 +319,11 @@ async function createBalanceItem() {
         },
     });
     await present({
-        components: [component],
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: component,
+            }),
+        ],
         modalDisplayStyle: 'popup',
     });
 }

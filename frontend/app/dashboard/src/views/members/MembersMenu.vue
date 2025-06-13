@@ -75,7 +75,7 @@ import { GroupAvatar, MembersTableView, Toast, useAuth, useContext, useOrganizat
 import { useOrganizationManager, usePatchOrganizationPeriod, useRequestOwner } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentOptions, computed } from 'vue';
+import { computed } from 'vue';
 import { useCollapsed } from '../../hooks/useCollapsed';
 import EditCategoryGroupsView from '../dashboard/groups/EditCategoryGroupsView.vue';
 import StartNewRegistrationPeriodView from './StartNewRegistrationPeriodView.vue';
@@ -167,7 +167,7 @@ defineRoutes([
         url: 'allemaal',
         name: Routes.All,
         show: 'detail',
-        component: MembersTableView as unknown as ComponentOptions,
+        component: MembersTableView,
         paramsToProps: () => {
             return {
                 periodId: period.value.period.id,
@@ -188,7 +188,7 @@ defineRoutes([
             slug: String,
         },
         show: 'detail',
-        component: async () => ((await import('../dashboard/groups/CategoryView.vue')).default) as unknown as ComponentOptions,
+        component: async () => ((await import('../dashboard/groups/CategoryView.vue')).default),
         paramsToProps: (params: { slug: string }) => {
             const category = tree.value.getAllCategories().find(g => Formatter.slug(g.settings.name) === params.slug);
             if (!category) {
@@ -217,7 +217,7 @@ defineRoutes([
             slug: String,
         },
         show: 'detail',
-        component: async () => ((await import('../dashboard/groups/GroupOverview.vue')).default) as unknown as ComponentOptions,
+        component: async () => ((await import('../dashboard/groups/GroupOverview.vue')).default),
         paramsToProps: (params: { slug: string }) => {
             const group = tree.value.getAllGroups().find(g => Formatter.slug(g.settings.name) === params.slug);
             if (!group) {

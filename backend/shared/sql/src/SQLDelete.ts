@@ -1,7 +1,7 @@
-import { Database } from "@simonbackx/simple-database";
-import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery, normalizeSQLQuery } from "./SQLExpression";
+import { Database } from '@simonbackx/simple-database';
+import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery, normalizeSQLQuery } from './SQLExpression';
 import { SQLJoin } from './SQLJoin';
-import { SQLWhere, Whereable } from "./SQLWhere";
+import { SQLWhere, Whereable } from './SQLWhere';
 
 class EmptyClass {}
 export class SQLDelete extends Whereable(EmptyClass) implements SQLExpression {
@@ -9,7 +9,7 @@ export class SQLDelete extends Whereable(EmptyClass) implements SQLExpression {
     _joins: (InstanceType<typeof SQLJoin>)[] = [];
 
     clone(): this {
-        const c = new SQLDelete()
+        const c = new SQLDelete();
         Object.assign(c, this);
         return c as any;
     }
@@ -26,37 +26,48 @@ export class SQLDelete extends Whereable(EmptyClass) implements SQLExpression {
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         const query: SQLQuery[] = [
-            'DELETE'
-        ]
+            'DELETE',
+        ];
 
-        options = options ?? {}
+        options = options ?? {};
         options.defaultNamespace = (this._from as any).namespace ?? (this._from as any).table ?? undefined;
 
         query.push(
-            'FROM' 
-        )
+            'FROM',
+        );
 
         query.push(this._from.getSQL(options));
 
-        query.push(...this._joins.map(j => j.getSQL(options)))
+        query.push(...this._joins.map(j => j.getSQL(options)));
 
+        // Where
         if (this._where) {
-            query.push('WHERE')
-            query.push(this._where.getSQL(options))
+            const always = this._where.isAlways;
+            if (always === false) {
+                throw new Error('Cannot use SQLDelete with a where that is not always true');
+            }
+            else if (always === null) {
+                query.push('WHERE');
+                query.push(this._where.getSQL(options));
+            }
         }
 
         return joinSQLQuery(query, ' ');
     }
 
-    async delete(): Promise<{affectedRows: number}> {
-        const {query, params} = normalizeSQLQuery(this.getSQL())
+    async delete(): Promise<{ affectedRows: number }> {
+        if (this._where && this._where.isAlways === false) {
+            return { affectedRows: 0 };
+        }
+
+        const { query, params } = normalizeSQLQuery(this.getSQL());
 
         console.log(query, params);
         const [rows] = await Database.delete(query, params);
         return rows;
     }
 
-    async then(onFulfilled: (value: {affectedRows: number}) => any, onRejected: (reason: any) => any): Promise<any> {
+    async then(onFulfilled: (value: { affectedRows: number }) => any, onRejected: (reason: any) => any): Promise<any> {
         return this.delete().then(onFulfilled, onRejected);
     }
 }

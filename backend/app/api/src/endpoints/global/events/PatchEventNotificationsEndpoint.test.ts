@@ -1,9 +1,9 @@
 import { PatchableArray, PatchMap, patchObject } from '@simonbackx/simple-encoding';
 import { Endpoint, Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
-import { EmailTemplateFactory, EventFactory, EventNotification, EventNotificationFactory, EventNotificationTypeFactory, Organization, OrganizationFactory, RecordAnswerFactory, RecordCategoryFactory, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
+import { EmailTemplateFactory, EventFactory, EventNotification, EventNotificationFactory, EventNotificationTypeFactory, Organization, OrganizationFactory, Platform, RecordAnswerFactory, RecordCategoryFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
 import { AccessRight, BaseOrganization, EmailTemplateType, Event, EventNotificationStatus, EventNotification as EventNotificationStruct, Permissions, PermissionsResourceType, RecordType, ResourcePermissions } from '@stamhoofd/structures';
-import { SHExpect, TestUtils } from '@stamhoofd/test-utils';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { PatchEventNotificationsEndpoint } from './PatchEventNotificationsEndpoint';
 
@@ -150,7 +150,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'invalid_field', field: 'typeId' }),
+            STExpect.simpleError({ code: 'invalid_field', field: 'typeId' }),
         );
     });
 
@@ -175,11 +175,17 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'invalid_field', field: 'events' }),
+            STExpect.simpleError({ code: 'invalid_field', field: 'events' }),
         );
     });
 
     test('It throws when trying to create an event notification for a locked period', async () => {
+        // Clear all periods and organizations (to make sure the right locked period is used)
+        const platform = await Platform.getForEditing();
+        await platform.delete();
+        await Organization.delete();
+        await RegistrationPeriod.delete();
+
         await new RegistrationPeriodFactory({
             startDate: new Date(2050, 0, 1),
             endDate: new Date(2051, 11, 31),
@@ -209,7 +215,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             }),
         );
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'invalid_period', field: 'startDate' }),
+            STExpect.simpleError({ code: 'invalid_period', field: 'startDate' }),
         );
     });
 
@@ -237,7 +243,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'invalid_field', field: 'events' }),
+            STExpect.simpleError({ code: 'invalid_field', field: 'events' }),
         );
     });
 
@@ -268,7 +274,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             submittedBy: expect.objectContaining({ id: user.id }),
         });
 
-        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+        expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
             expect.objectContaining({
                 to: 'event-notification-reviewer@example.com',
                 subject: EmailTemplateType.EventNotificationSubmittedReviewer,
@@ -314,7 +320,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             submittedBy: expect.objectContaining({ id: user.id }),
         });
 
-        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+        expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
             expect.objectContaining({
                 to: 'event-notification-reviewer@example.com',
                 subject: EmailTemplateType.EventNotificationSubmittedReviewer,
@@ -360,7 +366,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             submittedBy: expect.objectContaining({ id: user.id }),
         });
 
-        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+        expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
             expect.objectContaining({
                 to: 'event-notification-reviewer@example.com',
                 subject: EmailTemplateType.EventNotificationSubmittedReviewer,
@@ -397,7 +403,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'permission_denied' }),
+            STExpect.simpleError({ code: 'permission_denied' }),
         );
     });
 
@@ -423,7 +429,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'permission_denied' }),
+            STExpect.simpleError({ code: 'permission_denied' }),
         );
     });
 
@@ -449,7 +455,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'permission_denied' }),
+            STExpect.simpleError({ code: 'permission_denied' }),
         );
     });
 
@@ -475,7 +481,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'permission_denied' }),
+            STExpect.simpleError({ code: 'permission_denied' }),
         );
     });
 
@@ -501,7 +507,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'permission_denied' }),
+            STExpect.simpleError({ code: 'permission_denied' }),
         );
     });
 
@@ -584,7 +590,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'permission_denied' }),
+            STExpect.simpleError({ code: 'permission_denied' }),
         );
     });
 
@@ -638,7 +644,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         });
 
         // Check mails
-        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+        expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
             expect.objectContaining({
                 to: user.email,
                 subject: EmailTemplateType.EventNotificationAccepted,
@@ -699,7 +705,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         });
 
         // Check mails
-        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+        expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
             expect.objectContaining({
                 to: user.email,
                 subject: EmailTemplateType.EventNotificationPartiallyAccepted,
@@ -761,7 +767,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         });
 
         // Check mails
-        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+        expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
             expect.objectContaining({
                 to: user.email,
                 subject: EmailTemplateType.EventNotificationRejected,
@@ -821,7 +827,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         });
 
         // Check mails
-        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([]);
+        expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([]);
     });
 
     test('An admin can edit an accepted event notification', async () => {
@@ -884,7 +890,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         });
 
         // Check mails
-        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([]);
+        expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([]);
     });
 
     test('An admin can delete an event notification', async () => {
@@ -928,7 +934,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         expect(result.body).toHaveLength(0);
 
         // Check mails
-        expect(EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([]);
+        expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([]);
 
         // Check not exists
         const model = await EventNotification.getByID(eventNotification.id);
@@ -972,7 +978,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
-            SHExpect.simpleError({ code: 'permission_denied' }),
+            STExpect.simpleError({ code: 'permission_denied' }),
         );
     });
 });

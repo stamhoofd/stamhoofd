@@ -12,7 +12,7 @@ export const fiscal = DocumentTemplateDefinition.create({
             description: TranslatedString.create($t(`2e5e2e62-1e0c-406d-96c9-f66e7c8e85bd`)),
             records: [
                 RecordSettings.create({
-                    id: 'organization.name',
+                    id: 'organization.companyName',
                     name: TranslatedString.create($t(`522fb6c5-6d4d-4d9c-94b7-3e282fb0ea1f`)),
                     required: true,
                     type: RecordType.Text,
@@ -24,7 +24,7 @@ export const fiscal = DocumentTemplateDefinition.create({
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
-                    id: 'organization.address',
+                    id: 'organization.companyAddress',
                     name: TranslatedString.create($t(`2f10996e-ea97-4345-b997-c93198c7d67f`)),
                     required: true,
                     type: RecordType.Address,

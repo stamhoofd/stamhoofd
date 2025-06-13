@@ -416,7 +416,7 @@ describe('Unit.RegisterCart', () => {
                     price: -100_00, // Reeds aangerekend
                 }),
                 {
-                    name: 'Ongedaan maken korting (Multiple family members discount)',
+                    name: '766a39be-a4af-4a04-baf0-1f064d2fed16 (Multiple family members discount)',
                     price: 10_00,
                 },
                 expect.objectContaining({
@@ -521,7 +521,7 @@ describe('Unit.RegisterCart', () => {
                 }),
                 {
                     // Side effect in registration B
-                    name: 'Ongedaan maken korting (Multiple family members discount)',
+                    name: '766a39be-a4af-4a04-baf0-1f064d2fed16 (Multiple family members discount)',
                     price: 10_00,
                 },
                 expect.objectContaining({
@@ -613,7 +613,7 @@ describe('Unit.RegisterCart', () => {
                     price: -100_00,
                 }),
                 {
-                    name: 'Ongedaan maken korting (Multiple family members discount)',
+                    name: '766a39be-a4af-4a04-baf0-1f064d2fed16 (Multiple family members discount)',
                     price: 10_00,
                 },
                 expect.objectContaining({
@@ -1536,6 +1536,53 @@ describe('Unit.RegisterCart', () => {
                 },
                 expect.objectContaining({
                     price: 50_00 + 30_00 - 10_00,
+                }),
+            ]);
+        });
+
+        test('Fixed discounts are limited to the group price', () => {
+            const { organization, groups, family, discount } = setupDiscountTest({
+                memberCount: 2,
+                groupNames: ['Group A', 'Group B'],
+                bundleDiscount: createBundleDiscount({
+                    name: 'Multiple family members discount',
+                    countWholeFamily: true,
+                    countPerGroup: false,
+                    discounts: [
+                        { value: 1000_00, type: GroupPriceDiscountType.Fixed },
+                    ],
+                }),
+            });
+            const [groupA, groupB] = groups;
+            const [memberA, memberB] = family.members;
+
+            const itemA = RegisterItem.defaultFor(memberA, groupA, organization);
+            const itemB = RegisterItem.defaultFor(memberB, groupB, organization);
+
+            // Add to a single cart
+            const checkout = family.checkout;
+            const cart = checkout.cart;
+            cart.add(itemA);
+            cart.add(itemB);
+            cart.calculatePrices();
+
+            expect(cart.bundleDiscounts).toHaveLength(1);
+            expect(cart.bundleDiscounts[0].total).toEqual(50_00);
+            expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(0);
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(50_00);
+            expect(cart.price).toEqual(50_00 + 40_00);
+            expect(checkout.totalPrice).toEqual(40_00);
+
+            expect(checkout.priceBreakown).toEqual([
+                expect.objectContaining({
+                    price: 50_00 + 40_00,
+                }),
+                {
+                    name: 'Multiple family members discount',
+                    price: -50_00,
+                },
+                expect.objectContaining({
+                    price: 40_00,
                 }),
             ]);
         });

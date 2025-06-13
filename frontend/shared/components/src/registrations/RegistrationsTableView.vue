@@ -2,7 +2,7 @@
     <LoadingViewTransition>
         <ModernTableView v-if="!loading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :estimated-rows="estimatedRows" :Route="Route" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection">
             <template #empty>
-                {{ $t('Geen inschrijvingen') }}
+                {{ $t('6b029bcd-5605-42c5-a5db-38f40ab70214') }}
             </template>
         </ModernTableView>
     </LoadingViewTransition>
@@ -56,7 +56,7 @@ const title = computed(() => {
         return props.group.settings.name.toString();
     }
 
-    return $t(`Inschrijvingen`);
+    return $t(`938926c1-cb27-427d-aabd-638c5ec1d14a`);
 });
 
 const estimatedRows = computed(() => {

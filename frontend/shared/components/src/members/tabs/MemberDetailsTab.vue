@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { useIsMobile, usePlatformFamilyManager } from '@stamhoofd/components';
+import { useIsMobile, useLoadFamily } from '@stamhoofd/components';
 import { PlatformMember } from '@stamhoofd/structures';
 import { onMounted } from 'vue';
 import { ViewMemberAccountsBox, ViewMemberEmergencyContactsBox, ViewMemberFamilyBox, ViewMemberGeneralBox, ViewMemberNotesBox, ViewMemberParentsBox, ViewMemberRecordCategoriesBox, ViewMemberRegistrationsBox, ViewMemberSecurityCodeBox, ViewMemberUnverifiedBox, ViewMemberWarningsBox } from '../components/view';
@@ -34,9 +34,9 @@ const props = defineProps<{
     member: PlatformMember;
 }>();
 
-const platformFamilyManager = usePlatformFamilyManager();
+const loadFamily = useLoadFamily();
 
 onMounted(() => {
-    platformFamilyManager.loadFamilyMembers(props.member, { shouldRetry: true }).catch(console.error);
+    loadFamily(props.member, { shouldRetry: true }).catch(console.error);
 });
 </script>

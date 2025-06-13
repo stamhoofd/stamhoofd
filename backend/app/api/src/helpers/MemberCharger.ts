@@ -1,6 +1,5 @@
 import { BalanceItem } from '@stamhoofd/models';
 import { BalanceItemType, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
-import { BalanceItemService } from '../services/BalanceItemService';
 
 export class MemberCharger {
     static async chargeMany({ chargingOrganizationId, membersToCharge, price, amount, description, dueAt, createdAt }: { chargingOrganizationId: string; membersToCharge: MemberWithRegistrationsBlob[]; price: number; amount?: number; description: string; dueAt: Date | null; createdAt: Date | null }) {
@@ -15,10 +14,6 @@ export class MemberCharger {
         }));
 
         await Promise.all(balanceItems.map(balanceItem => balanceItem.save()));
-        await BalanceItem.updateOutstanding(balanceItems);
-
-        // Reallocate
-        await BalanceItemService.reallocate(balanceItems, chargingOrganizationId);
     }
 
     private static createBalanceItem({ price, amount, description, chargingOrganizationId, memberBeingCharged, dueAt, createdAt }: { price: number; amount?: number; description: string; chargingOrganizationId: string; memberBeingCharged: MemberWithRegistrationsBlob; dueAt: Date | null; createdAt: Date | null }): BalanceItem {

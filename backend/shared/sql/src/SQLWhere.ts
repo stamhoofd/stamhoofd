@@ -1,6 +1,7 @@
 import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery, normalizeSQLQuery } from './SQLExpression';
 import { SQLArray, SQLColumnExpression, SQLDynamicExpression, SQLNull, readDynamicSQLExpression } from './SQLExpressions';
-import { SQLJoin } from './SQLJoin';
+import { SQLJoin, SQLJoinType } from './SQLJoin';
+import { SQLSelect } from './SQLSelect';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -121,6 +122,18 @@ export abstract class SQLWhere implements SQLExpression {
         return false;
     }
 
+    get isAlways(): boolean | null {
+        return null;
+    }
+
+    get isAlwaysTrue(): boolean {
+        return this.isAlways === true;
+    }
+
+    get isAlwaysFalse(): boolean {
+        return this.isAlways === false;
+    }
+
     abstract getSQL(options?: SQLExpressionOptions): SQLQuery;
     getJoins(): SQLJoin[] {
         return [];
@@ -151,12 +164,17 @@ export class SQLEmptyWhere extends SQLWhere {
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         throw new Error('Empty where');
     }
+
+    get isAlways() {
+        return true;
+    }
 }
 
 export class SQLWhereEqual extends SQLWhere {
     column: SQLExpression;
     sign = SQLWhereSign.Equal;
     value: SQLExpression;
+    nullable = false;
 
     static parseWhere(...parsed: ParseWhereArguments): SQLWhere {
         if (parsed[1] === undefined) {
@@ -199,7 +217,11 @@ export class SQLWhereEqual extends SQLWhere {
     }
 
     get isSingle(): boolean {
-        return true;
+        return this.transformed?.isSingle ?? true;
+    }
+
+    get isAlways(): boolean | null {
+        return this.transformed?.isAlways ?? null;
     }
 
     inverted(): this {
@@ -230,7 +252,55 @@ export class SQLWhereEqual extends SQLWhere {
         return this;
     }
 
+    setNullable(nullable: boolean = true): this {
+        this.nullable = nullable;
+        return this;
+    }
+
+    get transformed() {
+        if (this.value instanceof SQLNull) {
+            // We'll do some transformations to make this query work as expected.
+            // < null = always false
+            // > null = (IS NOT null)
+            // <= null = (IS null)
+            // >= null = always true
+            if (this.sign === SQLWhereSign.Less) {
+                // always false
+                return new SQLWhereOr([]);
+            }
+            if (this.sign === SQLWhereSign.Greater) {
+                // > null = (IS NOT null)
+                return new SQLWhereEqual(this.column, SQLWhereSign.NotEqual, this.value);
+            }
+            if (this.sign === SQLWhereSign.LessEqual) {
+                // (IS null)
+                return new SQLWhereEqual(this.column, SQLWhereSign.Equal, this.value);
+            }
+            if (this.sign === SQLWhereSign.GreaterEqual) {
+                // always true
+                return new SQLWhereAnd([]);
+            }
+        }
+
+        // If the expression is nullable, we'll need to do some handling to make sure the query works as expected.
+        if (this.nullable && !(this.value instanceof SQLNull)) {
+            // <: should also include null values
+            // <=: should also include null values
+            if (this.sign === SQLWhereSign.Less || this.sign === SQLWhereSign.LessEqual) {
+                return new SQLWhereOr([
+                    this.clone().setNullable(false),
+                    new SQLWhereEqual(this.column, SQLWhereSign.Equal, new SQLNull()),
+                ]);
+            }
+        }
+
+        return null;
+    }
+
     getSQL(options?: SQLExpressionOptions): SQLQuery {
+        if (this.transformed) {
+            return this.transformed.getSQL(options);
+        }
         if (this.value instanceof SQLArray) {
             if (this.sign !== SQLWhereSign.Equal && this.sign !== SQLWhereSign.NotEqual) {
                 throw new Error('Unsupported sign for array: ' + this.sign);
@@ -250,7 +320,7 @@ export class SQLWhereEqual extends SQLWhere {
 
             return joinSQLQuery([
                 this.column.getSQL(options),
-                ` IS ${(this.sign === SQLWhereSign.NotEqual) ? 'NOT ' : ''} `,
+                ` IS ${(this.sign === SQLWhereSign.NotEqual) ? 'NOT ' : ''}`,
                 this.value.getSQL(options),
             ]);
         }
@@ -275,7 +345,7 @@ export class SQLWhereLike extends SQLWhere {
     }
 
     static escape(str: string) {
-        return str.replace(/([%_])/g, '\\$1');
+        return str.replace(/([%_\\])/g, '\\$1');
     }
 
     clone(): this {
@@ -385,6 +455,24 @@ export class SQLWhereExists extends SQLWhere {
         return this;
     }
 
+    get isAlways(): boolean | null {
+        if (this.subquery instanceof SQLSelect) {
+            const value = this.subquery.isAlways;
+            if (this.notExists) {
+                if (value === true) {
+                    // If the subquery is always true, then NOT EXISTS is always false
+                    return false;
+                }
+                if (value === false) {
+                    // If the subquery is always false, then NOT EXISTS is always true
+                    return true;
+                }
+            }
+            return value;
+        }
+        return null;
+    }
+
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         return joinSQLQuery([
             `${this.notExists ? 'NOT EXISTS' : 'EXISTS'} (`,
@@ -401,22 +489,45 @@ export class SQLWhereJoin extends SQLWhere {
     join: SQLJoin;
     where: SQLWhere;
 
-    constructor(join: SQLJoin, where: SQLWhere) {
+    /**
+     * When this is true, this means we know this relation will always exist.
+     *
+     * This information will be used to optimize the query.
+     */
+    doesRelationAlwaysExist = false;
+
+    constructor(join: SQLJoin, where: SQLWhere, options?: { doesRelationAlwaysExist?: boolean }) {
         super();
         this.join = join;
         this.where = where;
+        this.doesRelationAlwaysExist = options?.doesRelationAlwaysExist ?? false;
     }
 
     get isSingle(): boolean {
         return this.where.isSingle;
     }
 
+    get isAlways(): boolean | null {
+        return this.where.isAlways;
+    }
+
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        return this.where.getSQL(options);
+        if (this.where.isAlways !== null && (this.doesRelationAlwaysExist || this.join.type === SQLJoinType.Left)) {
+            throw new Error('SQLWhereJoin: should not be included in query if result is determined');
+        }
+
+        return this.where.getSQL({
+            ...options,
+            parentNamespace: options?.defaultNamespace,
+            defaultNamespace: this.join.table.getName(),
+        });
     }
 
     getJoins(): SQLJoin[] {
-        return [this.join];
+        if (this.where.isAlways !== null && (this.doesRelationAlwaysExist || this.join.type === SQLJoinType.Left)) {
+            return [];
+        }
+        return [this.join, ...this.where.getJoins()];
     }
 }
 
@@ -429,9 +540,13 @@ export class SQLWhereAnd extends SQLWhere {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
+        if (this.isAlways === false) {
+            throw new Error('SQLWhereAnd: $and is always false and should be removed from the query');
+        }
+
         return joinSQLQuery(
-            this.children.map((c) => {
-                if (c.isSingle) {
+            this.filteredChildren.map((c) => {
+                if (c.isSingle || this.filteredChildren.length === 1) {
                     return c.getSQL(options);
                 }
                 return joinSQLQuery(['(', c.getSQL(options), ')']);
@@ -440,8 +555,38 @@ export class SQLWhereAnd extends SQLWhere {
         );
     }
 
+    get filteredChildren(): SQLWhere[] {
+        // Children that always return true should not be included in the query (because the result only depends on the other children)
+        return this.children.filter(c => c.isAlways !== true).flatMap(c => c instanceof SQLWhereAnd ? c.filteredChildren : [c]);
+    }
+
     getJoins(): SQLJoin[] {
-        return this.children.flatMap(c => c.getJoins());
+        return this.children.flatMap(c => c.getJoins()); // note: keep all joins
+    }
+
+    get isSingle(): boolean {
+        return this.filteredChildren.length === 1 && this.filteredChildren[0].isSingle;
+    }
+
+    get isAlways(): boolean | null {
+        let allTrue = true;
+        for (const c of this.children) {
+            const v = c.isAlways;
+            if (v === false) {
+                // If any child is always false, the whole AND is false
+                return false;
+            }
+            if (v === null) {
+                allTrue = false;
+            }
+        }
+
+        return allTrue ? true : null;
+    }
+
+    inverted(): SQLWhereOr {
+        // NOT (A AND B) is the same as (NOT A OR NOT B)
+        return new SQLWhereOr(this.children.map(c => new SQLWhereNot(c)));
     }
 }
 
@@ -454,9 +599,14 @@ export class SQLWhereOr extends SQLWhere {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
+        if (this.filteredChildren.length === 0) {
+            // Always false: throw an error (the parent should filter out this query)
+            throw new Error('SQLWhereOr: empty $or is always false and should be removed from the query');
+        }
+
         return joinSQLQuery(
-            this.children.map((c) => {
-                if (c.isSingle) {
+            this.filteredChildren.map((c) => {
+                if (c.isSingle || this.filteredChildren.length === 1) {
                     return c.getSQL(options);
                 }
                 return joinSQLQuery(['(', c.getSQL(options), ')']);
@@ -467,6 +617,36 @@ export class SQLWhereOr extends SQLWhere {
 
     getJoins(): SQLJoin[] {
         return this.children.flatMap(c => c.getJoins());
+    }
+
+    get filteredChildren(): SQLWhere[] {
+        // Children that always return false should not be included in the query (because the result only depends on the other children)
+        return this.children.filter(c => c.isAlways !== false).flatMap(c => c instanceof SQLWhereOr ? c.filteredChildren : [c]);
+    }
+
+    get isSingle(): boolean {
+        return this.filteredChildren.length === 1 && this.filteredChildren[0].isSingle;
+    }
+
+    get isAlways(): boolean | null {
+        let isAllFalse = true;
+        for (const c of this.children) {
+            const v = c.isAlways;
+            if (v === true) {
+                // If any child is always true, the whole OR is true
+                return true;
+            }
+            if (v === null) {
+                isAllFalse = false;
+            }
+        }
+
+        return isAllFalse ? false : null;
+    }
+
+    inverted(): SQLWhereOr {
+        // NOT (A OR B) is the same as (NOT A AND NOT B)
+        return new SQLWhereAnd(this.children.map(c => new SQLWhereNot(c)));
     }
 }
 
@@ -484,7 +664,7 @@ export class SQLWhereNot extends SQLWhere {
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         // Optimize query
-        if (this.a instanceof SQLWhereEqual) {
+        if (this.a instanceof SQLWhereEqual || this.a instanceof SQLWhereAnd || this.a instanceof SQLWhereOr || this.a instanceof SQLWhereNot) {
             return this.a.inverted().getSQL(options);
         }
 
@@ -498,5 +678,20 @@ export class SQLWhereNot extends SQLWhere {
 
     getJoins(): SQLJoin[] {
         return this.a.getJoins();
+    }
+
+    get isAlways(): boolean | null {
+        const v = this.a.isAlways;
+        if (v === true) {
+            return false;
+        }
+        if (v === false) {
+            return true;
+        }
+        return null;
+    }
+
+    inverted(): SQLWhere {
+        return this.a; // NOT NOT A is just A
     }
 }

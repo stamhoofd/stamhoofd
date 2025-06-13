@@ -32,13 +32,13 @@
             {{ validationWarning }}
         </p>
 
-        <p v-if="item.totalPrice && contextOrganization && checkout.asOrganizationId && !checkout.isAdminFromSameOrganization" class="warning-box">
+        <p v-if="cachedTotalPrice && contextOrganization && checkout.asOrganizationId && !checkout.isAdminFromSameOrganization" class="warning-box">
             {{ $t('4e758459-990f-488d-b457-d2e0f7edd9cc', {organization: contextOrganization.name}) }}
         </p>
 
         <template v-if="item.replaceRegistrations.length === 0">
-            <p v-if="item.group.settings.description" class="style-description-block" v-text="item.group.settings.description" />
-            <p v-else class="style-description-block" :v-text="$t('ea2ad051-2874-42e2-8275-aa6e8d05d66a', {member: item.member.patchedMember.firstName})" />
+            <p v-if="item.group.settings.description.toString()" class="style-description-block" v-text="item.group.settings.description.toString()" />
+            <p v-else class="style-description-block" v-text="$t('ea2ad051-2874-42e2-8275-aa6e8d05d66a', {member: item.member.patchedMember.firstName})" />
         </template>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -150,7 +150,7 @@ import FillRecordCategoryBox from '../records/components/FillRecordCategoryBox.v
 const props = defineProps<{
     item: RegisterItem;
     saveHandler: (newItem: RegisterItem, navigation: NavigationActions) => Promise<void> | void;
-    showGroupInformation: boolean;
+    willStartCheckoutFlow?: boolean;
 }>();
 
 const checkout = computed(() => props.item.member.family.checkout);
@@ -267,16 +267,22 @@ async function deleteMe() {
 }
 
 const cachedPriceBreakdown = ref<PriceBreakdown | null>(null);
+const cachedTotalPrice = ref<number | null>(null);
 watch(() => [props.item.groupPrice, props.item.options, props.item.trial], () => {
     // We need to do cart level calculation, because discounts might be applied
-    const clonedCart = checkout.value.cart.clone();
-    clonedCart.remove(props.item);
+    const clonedCheckout = checkout.value.clone();
 
     const clone = props.item.clone();
-    clonedCart.add(clone);
+    clonedCheckout.add(clone);
 
-    clonedCart.calculatePrices();
-    cachedPriceBreakdown.value = clone.getPriceBreakown(clonedCart);
+    if (props.willStartCheckoutFlow) {
+        // Show the cart breakdown instead of only the item breakdown
+        cachedPriceBreakdown.value = clonedCheckout.priceBreakown;
+    }
+    else {
+        cachedPriceBreakdown.value = clone.getPriceBreakown(clonedCheckout.cart);
+    }
+    cachedTotalPrice.value = clone.totalPrice;
 }, { deep: true });
 
 </script>

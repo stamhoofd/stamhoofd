@@ -5,6 +5,7 @@ class TestInstance {
     onceAfterEachCallbacks: AfterCallback[] = [];
     afterEachCallbacks: AfterCallback[] = [];
     beforeAllCallbacks: AfterCallback[] = [];
+    afterAllCallbacks: AfterCallback[] = [];
 
     permanentEnvironmentOverrides: Record<string, any> = {};
 
@@ -38,6 +39,10 @@ class TestInstance {
         this.beforeAllCallbacks.push(callback);
     }
 
+    addAfterAll(callback: AfterCallback) {
+        this.afterAllCallbacks.push(callback);
+    }
+
     async beforeAll() {
         for (const callback of this.beforeAllCallbacks) {
             await callback();
@@ -53,6 +58,12 @@ class TestInstance {
             await callback();
         }
         this.onceAfterEachCallbacks = [];
+    }
+
+    async afterAll() {
+        for (const callback of this.afterAllCallbacks) {
+            await callback();
+        }
     }
 
     loadEnvironment() {
@@ -86,6 +97,10 @@ class TestInstance {
             await this.afterEach();
         });
 
+        afterAll(async () => {
+            await this.afterAll();
+        });
+
         // Sometimes there is code outside the test 'describe' that needs the environment already
         this.loadEnvironment();
     }
@@ -100,7 +115,7 @@ class TestInstance {
 
 export const TestUtils = new TestInstance();
 
-export const SHExpect = {
+export const STExpect = {
     errorWithCode: (code: string) => expect.objectContaining({ code }) as jest.Constructable,
     errorWithMessage: (message: string) => expect.objectContaining({ message }) as jest.Constructable,
     simpleError: (data: {
@@ -118,5 +133,14 @@ export const SHExpect = {
             delete d.field;
         }
         return expect.objectContaining(d) as jest.Constructable;
+    },
+    simpleErrors: (data: {
+        code?: string;
+        message?: string;
+        field?: string;
+    }[]) => {
+        return expect.objectContaining({
+            errors: data.map(d => STExpect.simpleError(d)),
+        }) as jest.Constructable;
     },
 };

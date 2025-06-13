@@ -12,7 +12,7 @@ import { AsyncTableAction, Column, ComponentExposed, getPaymentsUIFilterBuilders
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { ExcelExportType, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentOptions, computed, ref, Ref } from 'vue';
+import { computed, ref, Ref } from 'vue';
 import { useSelectableWorkbook } from './getSelectableWorkbook';
 import { useMarkPaymentsPaid } from './hooks/useMarkPaymentsPaid';
 
@@ -176,7 +176,7 @@ const allColumns: Column<ObjectType, any>[] = [
 ];
 
 const Route = {
-    Component: PaymentView as unknown as ComponentOptions,
+    Component: PaymentView,
     objectKey: 'payment',
 };
 

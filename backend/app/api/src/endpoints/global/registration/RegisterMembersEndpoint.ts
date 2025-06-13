@@ -4,7 +4,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
-import { BalanceItem, BalanceItemPayment, Group, Member, MemberWithRegistrations, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, Platform, RateLimiter, Registration, User } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, CachedBalance, Group, Member, MemberWithRegistrations, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, Platform, RateLimiter, Registration, User } from '@stamhoofd/models';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItem as BalanceItemStruct, BalanceItemType, IDRegisterCheckout, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PaymentType, PermissionLevel, PlatformFamily, PlatformMember, RegisterItem, RegisterResponse, TranslatedString, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -98,6 +98,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 });
             }
         }
+
+        // Update balances before we start
+        await BalanceItemService.flushCaches(organization.id);
 
         const deleteRegistrationIds = request.body.cart.deleteRegistrationIds;
         const deleteRegistrationModels = (deleteRegistrationIds.length ? (await Registration.getByIDs(...deleteRegistrationIds)) : []).filter(r => r.organizationId === organization.id);
@@ -218,9 +221,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         // Validate the cart
         checkout.validate({ memberBalanceItems: memberBalanceItemsStructs });
 
-        // Recalculate the price
-        checkout.updatePrices();
-
         const totalPrice = checkout.totalPrice;
 
         if (totalPrice !== request.body.totalPrice) {
@@ -298,7 +298,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             let reuseRegistration: Registration | null = null;
 
-            if (item.replaceRegistrations.length === 1) {
+            // For now don't reuse replace registrations - it has too many side effects and not a lot of added value
+            if (item.replaceRegistrations.length === 1 && item.replaceRegistrations[0].group.id === item.group.id) {
                 // Try to reuse this specific one
                 reuseRegistration = (await Registration.getByID(item.replaceRegistrations[0].registration.id)) ?? null;
             }
@@ -307,9 +308,20 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             if (!reuseRegistration) {
                 // Otherwise try to reuse a registration in the same period, for the same group that has been deactived for less than 7 days since the start of the new registration
-                reuseRegistration = existingRegistrations.find(r => r.deactivatedAt !== null && r.deactivatedAt.getTime() > startDate.getTime() - 7 * 24 * 60 * 60 * 1000) ?? null;
+                const possibleReuseRegistrations = existingRegistrations.filter(r =>
+                    r.deactivatedAt !== null
+                    && r.deactivatedAt.getTime() > startDate.getTime() - 7 * 24 * 60 * 60 * 1000,
+                );
 
-                if (reuseRegistration && reuseRegistration.startDate && reuseRegistration.startDate < startDate && reuseRegistration.startDate >= group.settings.startDate && !item.trial) {
+                // Never reuse a registration that has a balance - that means they had a cancellation fee and not all balance items were canceled (we don't want to merge in that state)
+                const balances = await CachedBalance.getForObjects(possibleReuseRegistrations.map(r => r.id), null);
+
+                reuseRegistration = possibleReuseRegistrations.find((r) => {
+                    const balance = balances.filter(b => b.objectId === r.id).reduce((a, b) => a + b.amountOpen + b.amountPaid + b.amountPending, 0);
+                    return balance === 0;
+                }) ?? null;
+
+                if (!item.customStartDate && reuseRegistration && reuseRegistration.startDate && reuseRegistration.startDate < startDate && reuseRegistration.startDate >= group.settings.startDate && !item.trial) {
                     startDate = reuseRegistration.startDate;
                 }
             }
@@ -436,7 +448,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // We can alter right away since whoWillPayNow is nobody, and shouldMarkValid will always be true
             // Find all balance items of this registration and set them to Canceled
-            if (checkout.cancellationFeePercentage !== 100_00) {
+            if ((deleted ? checkout.cancellationFeePercentage : 0) !== 100_00) {
                 // Only cancel balances if we don't charge 100% cancellation fee
                 // Also - this avoid creating a new cancellation fee balance item together with canceling the registration balance item, which is more complicated
                 deletedBalanceItems.push(...(await BalanceItem.deleteForDeletedRegistration(existingRegistration.id, {
@@ -485,7 +497,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
             else {
                 balanceItem.memberId = registration.memberId;
-                balanceItem.userId = user.id;
+
+                if (!checkout.asOrganizationId) {
+                    balanceItem.userId = user.id;
+                }
             }
 
             balanceItem.status = BalanceItemStatus.Hidden;
@@ -507,7 +522,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             // Reserve registration for 30 minutes (if needed)
             const group = groups.find(g => g.id === registration.groupId);
 
-            if (group && group.settings.maxMembers !== null) {
+            if (group && group.settings.maxMembers !== null && whoWillPayNow !== 'nobody') {
                 registration.reservedUntil = new Date(new Date().getTime() + 1000 * 60 * 30);
             }
 
@@ -588,7 +603,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // Discounts
             for (const discount of checkout.cart.bundleDiscounts) {
-                const discountValue = discount.getNetTotalFor(item);
+                const discountValue = discount.getTotalFor(item);
 
                 if (discountValue !== 0) {
                     // Base price
@@ -714,6 +729,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
             else {
                 balanceItem.userId = user.id;
+
                 // Connect this to the oldest member
                 if (oldestMember) {
                     balanceItem.memberId = oldestMember.id;
@@ -728,7 +744,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         if (checkout.cart.balanceItems.length && whoWillPayNow === 'nobody') {
             throw new SimpleError({
-                code: 'invalid_data',
+                code: 'cannot_pay_balance_items',
                 message: 'Not possible to pay balance items as the organization',
                 statusCode: 400,
             });
@@ -747,6 +763,12 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     // Mark valid
                     await BalanceItemService.markPaid(balanceItem, payment, organization);
                 }
+
+                // Flush balance caches so we return an up-to-date balance
+                await BalanceItemService.flushRegistrationDiscountsCache();
+
+                // We'll need to update the returned registrations as their values will have changed by marking the registration as valid
+                await Registration.refreshAll(registrations);
             }
         }
 
@@ -768,8 +790,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 createdBalanceItems.push(balanceItem);
             }
 
-            // Make sure every price is accurate before creating a payment
-            await BalanceItem.updateOutstanding([...createdBalanceItems]);
             try {
                 const response = await this.createPayment({
                     balanceItems: mappedBalanceItems,
@@ -787,16 +807,12 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
             finally {
                 // Update cached balance items pending amount (only created balance items, because those are involved in the payment)
-                await BalanceItem.updateOutstanding(createdBalanceItems);
+                await BalanceItemService.updatePaidAndPending(createdBalanceItems);
             }
         }
         else {
             await markValidIfNeeded();
-            await BalanceItem.updateOutstanding([...createdBalanceItems]);
         }
-
-        // Reallocate
-        await BalanceItemService.reallocate([...createdBalanceItems, ...deletedBalanceItems], organization.id);
 
         // Update occupancy
         for (const group of groups) {
@@ -862,7 +878,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         if (totalPrice < 0) {
             // todo: try to make it non-negative by reducing some balance items
             throw new SimpleError({
-                code: 'empty_data',
+                code: 'negative_price',
                 message: $t(`725715e5-b0ac-43c1-adef-dd42b8907327`),
             });
         }

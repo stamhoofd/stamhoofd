@@ -65,6 +65,10 @@ export class IDRegisterCheckout extends AutoEncoder {
     @field({ decoder: IntegerDecoder, nullable: true })
     totalPrice: number | null = null;
 
+    get organizationId() {
+        return this.cart.organizationId;
+    }
+
     hydrate(context: RegisterContext) {
         const checkout = new RegisterCheckout();
         checkout.cart = this.cart.hydrate(context);
@@ -109,6 +113,24 @@ export class RegisterCheckout {
     defaultOrganization: Organization | null = null;
 
     cancellationFeePercentage = 0; // per ten thousand
+
+    /**
+     * Note: only use this for temporary clones,
+     * because the register items will still have a reference to the old checkout.
+     */
+    clone() {
+        const checkout = new RegisterCheckout();
+        checkout.cart = this.cart.clone();
+        checkout.administrationFee = this.administrationFee;
+        checkout.freeContribution = this.freeContribution;
+        checkout.paymentMethod = this.paymentMethod;
+        checkout.asOrganizationId = this.asOrganizationId;
+        checkout.customer = this.customer ? this.customer.clone() : null;
+        checkout.cancellationFeePercentage = this.cancellationFeePercentage;
+        checkout.defaultOrganization = this.defaultOrganization;
+
+        return checkout;
+    }
 
     convert(): IDRegisterCheckout {
         return IDRegisterCheckout.create({
@@ -260,10 +282,30 @@ export class RegisterCheckout {
         }
 
         this.cart.validate(this, data);
+        this.updatePrices();
 
         if (this.singleOrganization && (this.singleOrganization.meta.recordsConfiguration.freeContribution?.amounts.length ?? 0) === 0) {
             // Automatically clear free contribution if there are no options
             this.freeContribution = 0;
+        }
+
+        if (this.cancellationFeePercentage > 100_00 || this.cancellationFeePercentage < 0) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                field: 'cancellationFeePercentage',
+                message: 'Invalid cancellation fee percentage',
+            });
+        }
+
+        if (!this.isAdminFromSameOrganization) {
+            if (this.totalPrice < 0) {
+                // If the total price is negative, we cannot charge the user
+                throw new SimpleError({
+                    code: 'negative_price',
+                    message: 'Total price cannot be negative',
+                    human: $t(`e0883f65-bd4d-4faa-aba2-71d96001fe42`),
+                });
+            }
         }
     }
 
@@ -273,6 +315,7 @@ export class RegisterCheckout {
         this.cart.items = [];
         this.cart.balanceItems = [];
         this.cart.deleteRegistrations = [];
+        this.cart.bundleDiscounts = [];
         this.customer = null;
     }
 
@@ -280,21 +323,23 @@ export class RegisterCheckout {
      * Only includes 'due now' items - so excludes trials (doesn't work 100% yet with deleted registrations but this is not a problem at the moment)
      */
     get totalPrice() {
-        return Math.max(0, this.cart.price + this.administrationFee + this.freeContribution - this.bundleDiscount) - this.cart.refund + this.cart.getCancellationFees(this.cancellationFeePercentage);
+        return this.cart.price + this.administrationFee + this.freeContribution - this.bundleDiscount - this.cart.refund + this.cart.getCancellationFees(this.cancellationFeePercentage);
     }
 
     /**
      * Discounts that will be applied to items that are due now
+     * (net, so minus the already applied discounts)
      */
     get bundleDiscount() {
-        return this.cart.bundleDiscounts.map(d => d.netTotalDueNow).reduce((a, b) => a + b, 0);
+        return this.cart.bundleDiscount;
     }
 
     /**
      * Discounts that will be applied to items that are due later
+     * (net, so minus the already applied discounts)
      */
     get bundleDiscountDueLater() {
-        return this.cart.bundleDiscounts.map(d => d.netTotalDueLater).reduce((a, b) => a + b, 0);
+        return this.cart.bundleDiscountDueLater;
     }
 
     get priceBreakown(): PriceBreakdown {
@@ -308,11 +353,11 @@ export class RegisterCheckout {
                 price: this.freeContribution,
             },
             {
-                name: $t(`Reeds aangerekend`),
+                name: $t(`3a50492b-087a-4a83-a386-4d30fabbc3c2`),
                 price: -this.cart.refund,
             },
             {
-                name: $t(`Annuleringskosten`),
+                name: $t(`aaa4eb2d-cae9-4c5d-8e6a-7e1ee3709689`),
                 price: this.cart.getCancellationFees(this.cancellationFeePercentage),
             },
         ].filter(a => a.price !== 0);
@@ -323,7 +368,7 @@ export class RegisterCheckout {
             if (value !== 0) {
                 if (value < 0) {
                     all.push({
-                        name: $t('Ongedaan maken korting') + ' (' + discount.name + ')',
+                        name: $t('766a39be-a4af-4a04-baf0-1f064d2fed16') + ' (' + discount.name + ')',
                         price: -value,
                     });
                 }

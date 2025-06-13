@@ -7,7 +7,7 @@ import { DisplayOptions, NavigationActions } from '../../types/NavigationActions
 import { PaymentHandler } from '../../views/PaymentHandler';
 import { RegistrationSuccessView } from '../checkout';
 import { ViewStep, ViewStepsManager } from '../classes/ViewStepsManager';
-import { updateContextFromMembersBlob } from '../PlatformFamilyManager';
+import { updateContextFromMembersBlob } from '../';
 import { FreeContributionStep } from './steps/FreeContributionStep';
 import { PaymentCustomerStep } from './steps/PaymentCustomerStep';
 import { PaymentSelectionStep } from './steps/PaymentSelectionStep';

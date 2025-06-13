@@ -74,12 +74,20 @@ export class Document extends QueryableModel {
             name: this.data.name,
             number: this.number,
             created_at: this.createdAt,
+            organization: {
+                name: organization.name,
+                companyName: organization.meta.companies[0]?.name || organization.name,
+                companyNumber: organization.meta.companies[0]?.companyNumber || null,
+                address: organization.address,
+                companyAddress: organization.meta.companies[0]?.address ?? organization.address,
+            },
         };
         const platformLogo = Platform.shared.config.logoDocuments ?? Platform.shared.config.horizontalLogo ?? Platform.shared.config.squareLogo;
         const organizationLogo = organization.meta.horizontalLogo ?? organization.meta.squareLogo;
 
         if (organizationLogo) {
             data['organization'] = {
+                ...data['organization'],
                 logo: organizationLogo.encode({ version: Version }) ?? null,
             };
         }
@@ -147,7 +155,7 @@ export class Document extends QueryableModel {
             if (member) {
                 const organizationIds = Formatter.uniqueArray(member.registrations.map(r => r.organizationId));
                 for (const organizationId of organizationIds) {
-                    await this.updateForRegistrations(member.registrations.filter(r => r.organizationId === organizationId).map(r => r.id), organizationId);
+                    await this.updateForRegistrations(member.registrations.filter(r => r.registeredAt && r.deactivatedAt === null && r.organizationId === organizationId).map(r => r.id), organizationId);
                 }
             }
         }

@@ -5,6 +5,7 @@ export * from './src/SQLJsonExpressions';
 export * from './src/SQLWhere';
 export * from './src/SQLSelect';
 export * from './src/filters/SQLFilter';
+export { createColumnFilter, createWildcardColumnFilter, createExistsFilter, createJoinedRelationFilter, SQLModernValueType, compileToModernSQLFilter, baseModernSQLFilterCompilers, SQLModernFilterDefinitions } from './src/filters/modern/SQLModernFilter';
 export * from './src/filters/SQLSorter';
 export * from './src/SQLOrderBy';
 export * from './src/SQLInsert';

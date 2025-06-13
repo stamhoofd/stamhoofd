@@ -4,7 +4,7 @@ import { Organization, OrganizationFactory, Token, UserFactory } from '@stamhoof
 
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { ApiUser, ApiUserRateLimits, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, UserMeta, UserPermissions } from '@stamhoofd/structures';
-import { SHExpect, TestUtils } from '@stamhoofd/test-utils';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { CreateApiUserEndpoint } from '../../src/endpoints/organization/dashboard/users/CreateApiUserEndpoint';
 import { testServer } from '../helpers/TestServer';
 import { GetUserEndpoint } from '../../src/endpoints/auth/GetUserEndpoint';
@@ -76,7 +76,7 @@ describe('E2E.APIRateLimits', () => {
             }
             else {
                 await expect(promise).rejects.toThrow(
-                    SHExpect.simpleError({
+                    STExpect.simpleError({
                         code: 'rate_limit',
                     }),
                 );
@@ -110,7 +110,7 @@ describe('E2E.APIRateLimits', () => {
             }
             else {
                 await expect(promise).rejects.toThrow(
-                    SHExpect.simpleError({
+                    STExpect.simpleError({
                         code: 'rate_limit',
                     }),
                 );
@@ -144,7 +144,7 @@ describe('E2E.APIRateLimits', () => {
             }
             else {
                 await expect(promise).rejects.toThrow(
-                    SHExpect.simpleError({
+                    STExpect.simpleError({
                         code: 'rate_limit',
                     }),
                 );
@@ -178,7 +178,7 @@ describe('E2E.APIRateLimits', () => {
             }
             else {
                 await expect(promise).rejects.toThrow(
-                    SHExpect.simpleError({
+                    STExpect.simpleError({
                         code: 'rate_limit',
                     }),
                 );

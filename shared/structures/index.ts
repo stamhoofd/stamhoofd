@@ -111,7 +111,6 @@ export * from './src/endpoints/CheckMollieResponse.js';
 export * from './src/endpoints/CreateOrganization.js';
 export * from './src/endpoints/EmailRequest.js';
 export * from './src/endpoints/ForgotPasswordRequest.js';
-export * from './src/endpoints/GroupsWithOrganizations.js';
 export * from './src/endpoints/OrganizationAdmins.js';
 export * from './src/endpoints/OrganizationDomains.js';
 export * from './src/endpoints/PayableBalanceCollection.js';
@@ -215,6 +214,7 @@ export * from './src/email/EmailTemplate.js';
 
 // Filters
 export * from './src/filters/FilteredRequest.js';
+export * from './src/filters/FilterCompilers.js';
 export * from './src/filters/InMemoryFilter.js';
 export * from './src/filters/inMemoryFilterDefinitions.js';
 export * from './src/filters/InMemorySorter.js';

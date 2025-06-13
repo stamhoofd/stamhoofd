@@ -28,7 +28,7 @@
         </STInputBox>
 
         <STList>
-            <CheckboxListItem v-model="hasGroup" :label="$t('Inschrijvingen verzamelen')" :description="$t('Je kan de instellingen voor inschrijvingen (bv. prijs) wijzigen via het overzicht van de activiteit.')" />
+            <CheckboxListItem v-model="hasGroup" :label="$t('24d2a5c1-fcc6-4209-9bd1-12f4e60f6ddc')" :description="$t('c74102fe-aa0c-4602-99d3-e6510e19632a')" />
         </STList>
 
         <hr><h2>{{ $t('112b7686-dffc-4ae9-9706-e3efcd34898f') }}</h2>
@@ -77,11 +77,11 @@
         </STList>
 
         <template v-if="canSetNationalActivity && externalOrganization">
-            <hr><h2>{{ $t('Lokale activiteit') }}</h2>
-            <p>{{ $t('Deze activiteit is enkel zichtbaar voor leden die inschreven zijn bij deze #groep.') }}</p>
+            <hr><h2>{{ $t('e4d49374-df2a-4fd7-863e-4a577e285cdc') }}</h2>
+            <p>{{ $t('f675d723-b1b9-4abd-9e7c-0459c24e474b') }}</p>
 
             <STList>
-                <STListItem v-if="externalOrganization" :selectable="!organization" @click="organization ? undefined : chooseOrganizer($t('Kies een #groep'), canSelectOrganization)">
+                <STListItem v-if="externalOrganization" :selectable="!organization" @click="organization ? undefined : chooseOrganizer($t('ab00e79e-c7cb-4595-9119-4fb5ca366dd1'), canSelectOrganization)">
                     <template #left>
                         <OrganizationAvatar :organization="externalOrganization" />
                     </template>
@@ -373,7 +373,7 @@ const hasGroup = computed({
             if (patched.value.group) {
                 if (patched.value.group.settings.getUsedStock(patched.value.group)) {
                     // Not allowed
-                    Toast.error($t('Je kan inschrijvingen voor deze activiteit momenteel niet uitschakelen omdat er al inschrijvingen zijn. Verwijder die eerst.'))
+                    Toast.error($t('a7c16100-f8b3-46a2-94fa-24cc4b693f32'))
                         .show();
                     return;
                 }
@@ -489,7 +489,7 @@ const isNationalActivity = computed({
             const organizationId = props.event.organizationId || organization.value?.id;
 
             if (!organizationId) {
-                chooseOrganizer($t(`Van welke #groep is deze activiteit?`), canSelectOrganization).catch(console.error);
+                chooseOrganizer($t(`271299b8-7b44-40b8-a4ce-e345abf164cb`), canSelectOrganization).catch(console.error);
                 return;
             }
             addPatch({

@@ -1,7 +1,6 @@
 import { ArrayDecoder, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { SessionContext, Storage } from '@stamhoofd/networking';
-import { BalanceItem, DetailedPayableBalanceCollection, Document as DocumentStruct, GroupsWithOrganizations, IDRegisterCheckout, MembersBlob, Platform, PlatformFamily, Version } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { BalanceItem, DetailedPayableBalanceCollection, Document as DocumentStruct, Group, IDRegisterCheckout, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, Version } from '@stamhoofd/structures';
 import { inject, reactive, watch } from 'vue';
 
 export function useMemberManager() {
@@ -61,27 +60,28 @@ export class MemberManager {
         }, { deep: true });
     }
 
-    async loadGroupsById(groupIds: string[], skipOrganizationIds: string[] = [], { owner, shouldRetry }: { owner?: any; shouldRetry?: boolean } = {}) {
+    async loadGroups(groupIds: string[], { owner, shouldRetry }: { owner?: any; shouldRetry?: boolean } = {}) {
         if (groupIds.length === 0) {
-            return GroupsWithOrganizations.create({
-                groups: [],
-                organizations: [],
-            });
+            return [];
         }
 
         const response = await this.$context.authenticatedServer.request({
             method: 'GET',
             path: '/groups',
-            query: {
-                ids: groupIds.join(','),
-                excludeOrganizationIds: skipOrganizationIds.length ? Formatter.uniqueArray(skipOrganizationIds).join(',') : undefined,
-            },
-            decoder: GroupsWithOrganizations as Decoder<GroupsWithOrganizations>,
+            query: new LimitedFilteredRequest({
+                limit: groupIds.length,
+                filter: {
+                    id: {
+                        $in: groupIds,
+                    },
+                },
+            }),
+            decoder: new PaginatedResponseDecoder(new ArrayDecoder(Group as Decoder<Group>), LimitedFilteredRequest),
             owner,
             shouldRetry: shouldRetry ?? false,
         });
 
-        return response.data;
+        return response.data.results;
     }
 
     get storageKey() {
@@ -102,18 +102,46 @@ export class MemberManager {
 
                 const groupIds = idCheckout.groupIds;
 
-                const knownGroups = this.family.organizations.flatMap(o => o.period.groups);
-                const requestGroupIds = groupIds.filter(id => !knownGroups.some(g => g.id == id));
+                const organizationId = idCheckout.organizationId;
+                if (!organizationId) {
+                    // Can't load this checkout
+                    return;
+                }
 
-                const groupsWithOrganizations = await this.loadGroupsById(requestGroupIds, this.family.organizations.map(o => o.id), {
+                let organization = this.$context.organization ?? this.family.organizations.find(o => o.id === organizationId);
+                if (!organization) {
+                    // Load organization by id
+                    const server = this.$context.getAuthenticatedServerForOrganization(organizationId);
+                    const response = await server.request({
+                        method: 'GET',
+                        path: '/organization',
+                        decoder: Organization as Decoder<Organization>,
+                        shouldRetry: true,
+                    });
+                    organization = response.data;
+                }
+
+                if (!organization) {
+                    return;
+                }
+
+                if (organization.id !== organizationId) {
+                    // Wrong scope
+                    return;
+                }
+
+                const knownGroups = organization.period.groups;
+                const requestGroupIds = groupIds.filter(id => !knownGroups.some(g => g.id === id));
+
+                const groups = await this.loadGroups(requestGroupIds, {
                     owner: {},
                     shouldRetry: true,
                 });
 
                 const checkout = idCheckout.hydrate({
                     members: this.family.members,
-                    groups: [...knownGroups, ...groupsWithOrganizations.groups],
-                    organizations: [...this.family.organizations, ...groupsWithOrganizations.organizations],
+                    groups: [...knownGroups, ...groups],
+                    organizations: [organization],
                 });
 
                 try {

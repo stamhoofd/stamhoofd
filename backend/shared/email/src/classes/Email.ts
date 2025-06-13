@@ -533,7 +533,7 @@ class EmailStatic {
 
     getWebmasterFromEmail() {
         return {
-            name: STAMHOOFD.platformName ?? 'Stamhoofd',
+            name: Formatter.capitalizeFirstLetter(STAMHOOFD.platformName ?? 'Stamhoofd'),
             email: 'webmaster@' + (new I18n(Language.Dutch, Country.Belgium).localizedDomains.defaultTransactionalEmail()),
         };
     }
@@ -552,6 +552,7 @@ class EmailStatic {
         const mail = Object.assign(data, {
             from: this.getWebmasterFromEmail(),
             to: [this.getWebmasterToEmail()],
+            type: data.type ?? 'transactional',
         });
         this.send(mail);
     }
@@ -573,9 +574,13 @@ class EmailStatic {
         this.sendNextIfNeeded();
     }
 
-    scheduleAndWait(builder: EmailBuilder) {
-        this.currentQueue.push(builder);
-        this.sendNextIfNeeded();
+    wait() {
+        return new Promise<void>((resolve) => {
+            this.schedule(() => {
+                resolve();
+                return undefined;
+            });
+        });
     }
 }
 

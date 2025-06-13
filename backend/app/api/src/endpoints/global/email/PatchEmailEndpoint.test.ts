@@ -1,9 +1,9 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { Email, Organization, OrganizationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, User, UserFactory } from "@stamhoofd/models";
-import { EmailStatus, Email as EmailStruct, PermissionLevel, Permissions, Version } from "@stamhoofd/structures";
-import { TestUtils } from "@stamhoofd/test-utils";
-import { testServer } from "../../../../tests/helpers/TestServer";
-import { PatchEmailEndpoint } from "./PatchEmailEndpoint";
+import { Email, Organization, OrganizationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
+import { EmailStatus, Email as EmailStruct, PermissionLevel, Permissions, Version } from '@stamhoofd/structures';
+import { TestUtils } from '@stamhoofd/test-utils';
+import { testServer } from '../../../../tests/helpers/TestServer';
+import { PatchEmailEndpoint } from './PatchEmailEndpoint';
 
 const baseUrl = `/v${Version}/email`;
 
@@ -32,7 +32,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         }).create();
 
         organization = await new OrganizationFactory({ period })
-        .create();
+            .create();
 
         user = await new UserFactory({
             organization,
@@ -40,7 +40,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
                 level: PermissionLevel.Read,
             }),
         })
-        .create();
+            .create();
 
         token = await Token.createToken(user);
     });
@@ -50,7 +50,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         email.subject = 'test subject';
         email.status = EmailStatus.Draft;
         email.text = 'test email {{unsubscribeUrl}}';
-        email.html =  `<!DOCTYPE html>
+        email.html = `<!DOCTYPE html>
         <html>
 
         <head>
@@ -66,37 +66,37 @@ describe('Endpoint.PatchEmailEndpoint', () => {
 
         </html>`;
         email.json = {
-            "content": [
-              {
-                "content": [
-                  {
-                    "text": "test email",
-                    "type": "text"
-                  }
-                ],
-                "type": "paragraph"
-              }
+            content: [
+                {
+                    content: [
+                        {
+                            text: 'test email',
+                            type: 'text',
+                        },
+                    ],
+                    type: 'paragraph',
+                },
             ],
-            "type": "doc"
+            type: 'doc',
         };
         email.userId = user.id;
         email.organizationId = organization.id;
 
         await email.save();
 
-        const body = EmailStruct.create({...email, fromAddress:'test@test.be', status: EmailStatus.Sending})
+        const body = EmailStruct.create({ ...email, fromAddress: 'test@test.be', status: EmailStatus.Sending });
 
         await expect(async () => await patchEmail(body, token, organization))
-        .rejects
-        .toThrow('Missing unsubscribe button');
-    })
+            .rejects
+            .toThrow('Missing unsubscribe button');
+    });
 
     test('Should throw error if no unsubscribe button in email text', async () => {
         const email = new Email();
         email.subject = 'test subject';
         email.status = EmailStatus.Draft;
         email.text = 'test email';
-        email.html =  `<!DOCTYPE html>
+        email.html = `<!DOCTYPE html>
         <html>
 
         <head>
@@ -112,28 +112,28 @@ describe('Endpoint.PatchEmailEndpoint', () => {
 
         </html>`;
         email.json = {
-            "content": [
-              {
-                "content": [
-                  {
-                    "text": "test email",
-                    "type": "text"
-                  }
-                ],
-                "type": "paragraph"
-              }
+            content: [
+                {
+                    content: [
+                        {
+                            text: 'test email',
+                            type: 'text',
+                        },
+                    ],
+                    type: 'paragraph',
+                },
             ],
-            "type": "doc"
+            type: 'doc',
         };
         email.userId = user.id;
         email.organizationId = organization.id;
 
         await email.save();
 
-        const body = EmailStruct.create({...email, fromAddress:'test@test.be', status: EmailStatus.Sending})
+        const body = EmailStruct.create({ ...email, fromAddress: 'test@test.be', status: EmailStatus.Sending });
 
         await expect(async () => await patchEmail(body, token, organization))
-        .rejects
-        .toThrow('Missing unsubscribe button');
-    })
-})
+            .rejects
+            .toThrow('Missing unsubscribe button');
+    });
+});

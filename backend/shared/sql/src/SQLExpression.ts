@@ -25,6 +25,10 @@ export interface SQLExpression {
     getSQL(options?: SQLExpressionOptions): SQLQuery;
 }
 
+export interface SQLNamedExpression extends SQLExpression {
+    getName(): string;
+}
+
 export function isSQLExpression(obj: unknown): obj is SQLExpression {
     return typeof obj === 'object' && obj !== null && !!(obj as any).getSQL && typeof (obj as any).getSQL === 'function';
 }

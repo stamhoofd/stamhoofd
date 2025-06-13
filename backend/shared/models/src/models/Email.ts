@@ -240,7 +240,7 @@ export class Email extends QueryableModel {
         await this.save();
 
         const id = this.id;
-        return await QueueHandler.schedule('send-email', async function (this: unknown) {
+        return await QueueHandler.schedule('send-email', async function (this: unknown, { abort }) {
             let upToDate = await Email.getByID(id);
             if (!upToDate) {
                 throw new SimpleError({
@@ -291,12 +291,14 @@ export class Email extends QueryableModel {
                 replyTo = null;
             }
 
+            abort.throwIfAborted();
             upToDate.status = EmailStatus.Sending;
             upToDate.sentAt = upToDate.sentAt ?? new Date();
             await upToDate.save();
 
             // Create recipients if not yet created
             await upToDate.buildRecipients();
+            abort.throwIfAborted();
 
             // Refresh model
             upToDate = await Email.getByID(id);
@@ -343,6 +345,7 @@ export class Email extends QueryableModel {
             });
 
             while (true) {
+                abort.throwIfAborted();
                 const data = await SQL.select()
                     .from('email_recipients')
                     .where('emailId', upToDate.id)
@@ -373,7 +376,6 @@ export class Email extends QueryableModel {
                     const promise = new Promise<void>((resolve) => {
                         promiseResolve = resolve;
                     });
-                    sendingPromises.push(promise);
 
                     const virtualRecipient = recipient.getRecipient();
 
@@ -423,8 +425,9 @@ export class Email extends QueryableModel {
                             callback(error).catch(console.error);
                         },
                     });
-
+                    abort.throwIfAborted(); // do not schedule if aborted
                     EmailClass.schedule(builder);
+                    sendingPromises.push(promise);
                 }
 
                 if (sendingPromises.length > 0) {
@@ -507,7 +510,7 @@ export class Email extends QueryableModel {
 
     async buildRecipients() {
         const id = this.id;
-        await QueueHandler.schedule('email-build-recipients-' + this.id, async function () {
+        await QueueHandler.schedule('email-build-recipients-' + this.id, async function ({ abort }) {
             const upToDate = await Email.getByID(id);
 
             if (!upToDate || !upToDate.id) {
@@ -521,6 +524,8 @@ export class Email extends QueryableModel {
             if (upToDate.status === EmailStatus.Sent) {
                 return;
             }
+
+            abort.throwIfAborted();
 
             // If it is already creating -> something went wrong (e.g. server restart) and we can safely try again
 
@@ -538,6 +543,8 @@ export class Email extends QueryableModel {
                     )
                     .where(SQL.column('emailId'), upToDate.id);
 
+                abort.throwIfAborted();
+
                 for (const subfilter of upToDate.recipientFilter.filters) {
                     // Create recipients
                     const loader = Email.recipientLoaders.get(subfilter.type);
@@ -554,6 +561,7 @@ export class Email extends QueryableModel {
                     });
 
                     while (request) {
+                        abort.throwIfAborted();
                         const response = await loader.fetch(request, subfilter.subfilter);
 
                         for (const item of response.results) {

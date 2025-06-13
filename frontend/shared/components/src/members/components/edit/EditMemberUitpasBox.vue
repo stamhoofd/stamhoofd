@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <Title v-bind="$attrs" :title="isAdmin ? $t(`d70f2a7f-d8b4-4846-8dc0-a8e978765b9d`) : $t(`612b0f89-4a6e-4616-a50f-6e228daa86c3`)" />
-        <p v-if="!isAdmin" class="style-description pre-wrap" :v-text="$t('45ec384e-f7c5-4a4f-bb70-396f800f1929')" />
+        <p v-if="!isAdmin" class="style-description pre-wrap" v-text="$t('45ec384e-f7c5-4a4f-bb70-396f800f1929')" />
 
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />

@@ -224,7 +224,7 @@ export class BalanceItem extends QueryableModel {
 
                 // Refund the user
                 const cancellationFee = Math.round(item.price * options.cancellationFeePercentage / 10000);
-                if (cancellationFee > 0) {
+                if (cancellationFee !== 0) {
                     // Create a new item
                     const cancellationItem = await item.createCancellationItem(cancellationFee);
                     deletedItems.push(cancellationItem);
@@ -232,9 +232,9 @@ export class BalanceItem extends QueryableModel {
             }
         }
 
-        if (deletedItems.length) {
-            await this.updateOutstanding(deletedItems);
-        }
+        // if (deletedItems.length) {
+        //    await this.updateOutstanding(deletedItems);
+        // }
 
         return deletedItems;
     }
@@ -245,6 +245,7 @@ export class BalanceItem extends QueryableModel {
         item.memberId = this.memberId;
         item.userId = this.userId;
         item.payingOrganizationId = this.payingOrganizationId;
+        item.registrationId = this.registrationId;
 
         item.type = BalanceItemType.CancellationFee;
         item.relations = this.relations;
@@ -270,9 +271,9 @@ export class BalanceItem extends QueryableModel {
             }
         }
 
-        if (needsUpdate) {
-            await this.updateOutstanding(items);
-        }
+        // if (needsUpdate) {
+        //    await this.updateOutstanding(items);
+        // }
     }
 
     static async undoForDeletedOrders(orderIds: string[]) {
@@ -320,52 +321,6 @@ export class BalanceItem extends QueryableModel {
             items,
             ...(await this.loadPayments(items)),
         };
-    }
-
-    /**
-     * Update how many every object in the system owes or needs to be reimbursed
-     * and also updates the pricePaid/pricePending cached values in Balance items and members
-     */
-    static async updateOutstanding(items: BalanceItem[], additionalItems: { memberId: string; organizationId: string }[] = []) {
-        console.log('Update outstanding balance for', items.length, 'items');
-
-        await BalanceItem.updatePricePaid(items.map(i => i.id));
-
-        const organizationIds = Formatter.uniqueArray(items.map(p => p.organizationId));
-        for (const organizationId of organizationIds) {
-            const filteredItems = items.filter(i => i.organizationId === organizationId);
-            const filteredAdditionalItems = additionalItems.filter(i => i.organizationId === organizationId);
-
-            const memberIds = Formatter.uniqueArray(
-                [
-                    ...filteredItems.map(p => p.memberId).filter(id => id !== null),
-                    ...filteredAdditionalItems.map(i => i.memberId),
-                ],
-            );
-
-            await CachedBalance.updateForMembers(organizationId, memberIds);
-
-            let userIds = filteredItems.filter(p => p.userId !== null).map(p => p.userId!);
-
-            if (memberIds.length) {
-                // Now also include the userIds of the members
-                const userMemberIds = (await MemberUser.select().where('membersId', memberIds).fetch()).map(m => m.usersId);
-                userIds.push(...userMemberIds);
-            }
-            userIds = Formatter.uniqueArray(userIds);
-
-            await CachedBalance.updateForUsers(organizationId, userIds);
-
-            const organizationIds = Formatter.uniqueArray(filteredItems.map(p => p.payingOrganizationId).filter(id => id !== null));
-            await CachedBalance.updateForOrganizations(organizationId, organizationIds);
-
-            const registrationIds: string[] = Formatter.uniqueArray(filteredItems.map(p => p.registrationId).filter(id => id !== null));
-            await CachedBalance.updateForRegistrations(organizationId, registrationIds);
-
-            if (registrationIds.length) {
-                await Document.updateForRegistrations(registrationIds, organizationId);
-            }
-        }
     }
 
     /**

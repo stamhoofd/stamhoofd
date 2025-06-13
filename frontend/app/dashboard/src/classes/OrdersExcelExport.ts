@@ -697,7 +697,7 @@ export class OrdersExcelExport {
         const products = this.createProducts(orders);
 
         if (products) {
-            XLSX.utils.book_append_sheet(wb, products, $t('Totalen per combinatie'));
+            XLSX.utils.book_append_sheet(wb, products, $t('a2066dbc-3040-4c7d-a3f9-1f3580617542'));
         }
         XLSX.utils.book_append_sheet(wb, this.createOptions(orders), $t(`3f6039ff-e157-4762-b10d-93e2d2fe56ce`));
 

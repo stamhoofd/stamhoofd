@@ -1,7 +1,8 @@
 import { I18n } from '@stamhoofd/backend-i18n';
+import { BalanceItemService } from '../services/BalanceItemService';
 import { FileSignService } from '../services/FileSignService';
-import { Context, ContextInstance } from './Context';
 import { MemberRecordStore } from '../services/MemberRecordStore';
+import { ContextInstance } from './Context';
 
 export class GlobalHelper {
     static async load() {
@@ -9,6 +10,7 @@ export class GlobalHelper {
         this.loadGlobalTranslateFunction();
         await FileSignService.load();
         MemberRecordStore.init();
+        BalanceItemService.listen();
     }
 
     private static loadGlobalTranslateFunction() {

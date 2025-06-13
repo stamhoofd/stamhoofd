@@ -1,10 +1,11 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { Email } from '@stamhoofd/email';
-import { BalanceItemFactory, Group, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { BalanceItemCartItem, BalanceItemType, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PayconiqAccount, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, ReduceablePrice, RegisterItemOption, STPackageStatus, STPackageType, UserPermissions, Version } from '@stamhoofd/structures';
-import nock from 'nock';
+import { EmailMocker } from '@stamhoofd/email';
+import { BalanceItem, BalanceItemFactory, Group, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import { BalanceItemCartItem, BalanceItemType, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, ReduceablePrice, RegisterItemOption, STPackageStatus, STPackageType, UserPermissions, Version } from '@stamhoofd/structures';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { testServer } from '../../../../tests/helpers/TestServer';
+import { initPayconiq } from '../../../../tests/init/initPayconiq';
 import { RegisterMembersEndpoint } from './RegisterMembersEndpoint';
 
 const baseUrl = `/v${Version}/members/register`;
@@ -13,16 +14,12 @@ describe('Endpoint.RegisterMembers', () => {
     // #region global
     const endpoint = new RegisterMembersEndpoint();
     let period: RegistrationPeriod;
-
-    // #region helpers
+    let defaultPermissionLevel = PermissionLevel.None;
     const post = async (body: IDRegisterCheckout, organization: Organization, token: Token) => {
         const request = Request.buildJson('POST', baseUrl, organization.getApiHost(), body);
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test(endpoint, request);
     };
-    // #endregion
-
-    // #endregion
 
     beforeAll(async () => {
         const previousPeriod = await new RegistrationPeriodFactory({
@@ -32,28 +29,39 @@ describe('Endpoint.RegisterMembers', () => {
 
         period = await new RegistrationPeriodFactory({
             startDate: new Date(2023, 0, 1),
-            endDate: new Date(2023, 11, 31),
+            endDate: new Date(2030, 11, 31),
             previousPeriodId: previousPeriod.id,
         }).create();
     });
 
+    beforeEach(async () => {
+        TestUtils.setEnvironment('userMode', 'platform');
+    });
+
     afterEach(() => {
         jest.restoreAllMocks();
+        jest.useRealTimers();
     });
 
     const initOrganization = async (registrationPeriod: RegistrationPeriod = period) => {
-        return await new OrganizationFactory({ period: registrationPeriod })
+        const organization = await new OrganizationFactory({ period: registrationPeriod })
             .create();
+
+        const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: registrationPeriod }).create();
+
+        return { organization, organizationRegistrationPeriod };
     };
 
-    const initData = async ({ otherMemberAmount = 0, permissionLevel = PermissionLevel.Full }: { otherMemberAmount?: number; permissionLevel?: PermissionLevel } = {}) => {
-        const organization = await initOrganization(period);
+    async function initData({ otherMemberAmount = 0, permissionLevel = defaultPermissionLevel }: { otherMemberAmount?: number; permissionLevel?: PermissionLevel } = {}) {
+        const { organization, organizationRegistrationPeriod } = await initOrganization(period);
 
         const user = await new UserFactory({
             organization,
-            permissions: Permissions.create({
-                level: permissionLevel,
-            }),
+            permissions: permissionLevel !== PermissionLevel.None
+                ? Permissions.create({
+                    level: permissionLevel,
+                })
+                : null,
         })
             .create();
 
@@ -71,8 +79,8 @@ describe('Endpoint.RegisterMembers', () => {
 
         const group = await new GroupFactory({
             organization,
-            price: 25,
-            stock: 5,
+            price: 25_00,
+            stock: 500,
         })
             .create();
 
@@ -80,6 +88,7 @@ describe('Endpoint.RegisterMembers', () => {
 
         return {
             organization,
+            organizationRegistrationPeriod,
             user,
             token,
             member,
@@ -87,60 +96,15 @@ describe('Endpoint.RegisterMembers', () => {
             group,
             groupPrice,
         };
-    };
+    }
 
-    describe('Register', () => {
-        test('Should fail if cannot manage finances', async () => {
-            // #region arrange
-            const { member, group, groupPrice, organization, token } = await initData();
-            const organization2 = await initOrganization();
-
-            const registration = await new RegistrationFactory({
-                member,
-                group,
-                groupPrice,
-            }).create();
-
-            const body = IDRegisterCheckout.create({
-                cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
-                            groupPrice,
-                            organizationId: organization.id,
-                            groupId: group.id,
-                            memberId: member.id,
-                        }),
-                    ],
-                    balanceItems: [],
-                    deleteRegistrationIds: [registration.id],
-                }),
-                administrationFee: 0,
-                freeContribution: 0,
-                paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 5,
-                asOrganizationId: organization2.id,
-                customer: null,
-            });
-            // #endregion
-
-            // #region act and assert
-            await expect(async () => await post(body, organization, token))
-                .rejects
-                .toThrow('No permission to register as this organization for a different organization');
-            // #endregion
+    describe('Register as member', () => {
+        beforeEach(() => {
+            defaultPermissionLevel = PermissionLevel.None;
         });
 
         test('Should fail if demo limit reached', async () => {
-            // #region arrange
-            (STAMHOOFD.userMode as string) = 'organization';
-
-            const spySendWebmaster = jest.spyOn(Email, 'sendWebmaster').mockImplementation(() => {
-                // do nothing
-            });
-
+            TestUtils.setEnvironment('userMode', 'organization');
             const { member, group, groupPrice, organization, token, otherMembers } = await initData({ otherMemberAmount: 10 });
 
             organization.meta.packages = OrganizationPackages.create({
@@ -171,8 +135,7 @@ describe('Endpoint.RegisterMembers', () => {
                     administrationFee: 0,
                     freeContribution: 0,
                     paymentMethod: PaymentMethod.PointOfSale,
-                    totalPrice: 25,
-                    asOrganizationId: organization.id,
+                    totalPrice: 25_00,
                     customer: null,
                 });
 
@@ -198,27 +161,24 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
-                asOrganizationId: organization.id,
+                totalPrice: 25_00,
                 customer: null,
             });
-            // #endregion
-
-            // #region act and assert
-
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
-                .toThrow('Too many e-mails limited');
+                .toThrow(STExpect.simpleError({ code: 'too_many_emails_period' }));
 
-            expect(spySendWebmaster).toHaveBeenCalledOnce();
-            // #endregion
-
-            (STAMHOOFD.userMode as string) = 'platform';
+            expect(await EmailMocker.transactional.getSucceededEmails()).toEqual([
+                expect.objectContaining({
+                    to: '"Stamhoofd" <hallo@stamhoofd.be>',
+                    from: '"Ravot" <webmaster@stamhoofd.be>',
+                    subject: '[Limiet] Limiet bereikt voor aantal inschrijvingen',
+                }),
+            ]);
         });
 
-        test('Should fail if balance items changed', async () => {
-            // #region arrange
-            const { member, group, user, groupPrice, organization, token } = await initData();
+        test('Should fail if balance item deleted', async () => {
+            const { member, user, organization, token } = await initData();
 
             const balanceItem1 = await new BalanceItemFactory({
                 organizationId: organization.id,
@@ -237,17 +197,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
-                            groupPrice,
-                            organizationId: organization.id,
-                            groupId: group.id,
-                            memberId: member.id,
-                        }),
-                    ],
+                    items: [],
                     balanceItems: [
                         cartItem,
                     ],
@@ -256,23 +206,19 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 45,
+                totalPrice: 20,
                 customer: null,
             });
-            // #endregion
 
-            // #region act and assert
             await balanceItem1.delete();
 
             await expect(async () => await post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('Oeps, één of meerdere openstaande bedragen in jouw winkelmandje zijn aangepast'));
-            // #endregion
         });
 
-        test('Should fail when pay balance item as organization', async () => {
-            // #region arrange
-            const { member, group, user, groupPrice, organization, token } = await initData();
+        test('Should fail if balance item price difference', async () => {
+            const { member, user, organization, token } = await initData();
 
             const balanceItem1 = await new BalanceItemFactory({
                 organizationId: organization.id,
@@ -286,22 +232,12 @@ describe('Endpoint.RegisterMembers', () => {
 
             const cartItem = BalanceItemCartItem.create({
                 item: balanceItem1.getStructure(),
-                price: 20,
+                price: 30, // too much
             });
 
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
-                            groupPrice,
-                            organizationId: organization.id,
-                            groupId: group.id,
-                            memberId: member.id,
-                        }),
-                    ],
+                    items: [],
                     balanceItems: [
                         cartItem,
                     ],
@@ -310,17 +246,13 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 45,
-                asOrganizationId: organization.id,
+                totalPrice: 30,
                 customer: null,
             });
-            // #endregion
 
-            // #region act and assert
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('Not possible to pay balance items as the organization'));
-            // #endregion
+                .toThrow(STExpect.simpleError({ code: 'changed_price' }));
         });
 
         test('Should fail if has no write access for member', async () => {
@@ -348,7 +280,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 customer: null,
             });
             // #endregion
@@ -400,7 +332,6 @@ describe('Endpoint.RegisterMembers', () => {
         });
 
         test('Should fail if price changed', async () => {
-            // #region arrange
             const { member, group, groupPrice, organization, token } = await initData();
 
             const body = IDRegisterCheckout.create({
@@ -421,22 +352,16 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 30,
-                asOrganizationId: organization.id,
+                totalPrice: groupPrice.price.price + 5, // too much
                 customer: null,
             });
-            // #endregion
-
-            // #region act and assert
 
             await expect(async () => await post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('Oeps! De prijs is gewijzigd terwijl je aan het afrekenen was'));
-            // #endregion
+                .toThrow(STExpect.simpleError({ code: 'changed_price' }));
         });
 
         test('Should fail if member is already registered', async () => {
-            // #region arrange
             const { organization, group, groupPrice, token, member } = await initData();
 
             const body = IDRegisterCheckout.create({
@@ -459,24 +384,20 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 customer: null,
             });
-            // #endregion
 
-            // #region act and assert
             // register first time
             await post(body, organization, token);
 
             // second time should fail
             await expect(async () => await post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('Already registered'));
-            // #endregion
+                .toThrow(STExpect.simpleError({ code: 'already_registered' }));
         });
 
         test('Should fail if duplicate registration in cart', async () => {
-            // #region arrange
             const { organization, group, groupPrice, token, member } = await initData();
 
             const body = IDRegisterCheckout.create({
@@ -501,9 +422,6 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
-                    deleteRegistrationIds: [],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
@@ -511,62 +429,13 @@ describe('Endpoint.RegisterMembers', () => {
                 totalPrice: 50,
                 customer: null,
             });
-            // #endregion
 
-            // #region act and assert
             await expect(async () => await post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('duplicate_register_item'));
-            // #endregion
-        });
-
-        test('Should fail register by other organization if disabled by group', async () => {
-            // #region arrange
-            const { organization, group, groupPrice, token, member, user } = await initData();
-
-            const { organization: organization2 } = await initData();
-
-            user.permissions = UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization2.id, Permissions.create({
-                        level: PermissionLevel.Full,
-                    })],
-                ]),
-            });
-
-            await user.save();
-
-            const body = IDRegisterCheckout.create({
-                cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
-                            groupPrice,
-                            organizationId: organization.id,
-                            groupId: group.id,
-                            memberId: member.id,
-                        }),
-                    ],
-                    balanceItems: [
-                    ],
-                    deleteRegistrationIds: [],
-                }),
-                administrationFee: 0,
-                freeContribution: 0,
-                paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
-                customer: null,
-                asOrganizationId: organization2.id,
-            });
-            // #endregion
-
-            // #region act and assert
-            await expect(async () => await post(body, organization, token))
-                .rejects
-                .toThrow(new RegExp('allowRegistrationsByOrganization disabled'));
-            // #endregion
+                .toThrow(STExpect.simpleErrors([
+                    { code: 'duplicate_register_item' },
+                    { code: 'duplicate_register_item' },
+                ]));
         });
 
         test('Should fail if invalid payment', async () => {
@@ -593,7 +462,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.CreditCard,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 customer: null,
             });
             // #endregion
@@ -631,7 +500,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.Bancontact,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 cancelUrl: new URL('https://www.stamhoofd.be'),
                 customer: null,
             });
@@ -645,7 +514,6 @@ describe('Endpoint.RegisterMembers', () => {
         });
 
         test('Should fail if no cancel url for online payment', async () => {
-            // #region arrange
             const { organization, group, groupPrice, token, member } = await initData();
             organization.meta.registrationPaymentConfiguration.paymentMethods.push(PaymentMethod.Bancontact);
             await organization.save();
@@ -663,28 +531,21 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
-                    deleteRegistrationIds: [],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.Bancontact,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 redirectUrl: new URL('https://www.stamhoofd.be'),
                 customer: null,
             });
-            // #endregion
 
-            // #region act and assert
             await expect(async () => await post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('redirectUrl or cancelUrl is missing'));
-            // #endregion
         });
 
-        test('Should reserve if group has max members', async () => {
-            // #region arrange
+        test('Should not reserve for point of sale payment method if group has max members', async () => {
             const { organization, group, groupPrice, token, member } = await initData();
             group.settings.maxMembers = 5;
             await group.save();
@@ -702,50 +563,32 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
-                    deleteRegistrationIds: [],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
             });
-            // #endregion
 
-            // #region act and assert
             const response = await post(body, organization, token);
             expect(response.body.registrations.length).toBe(1);
-            expect(response.body.registrations[0].reservedUntil).not.toBeNull();
-            // #endregion
+
+            const updatedRegistration = (await Registration.getByID(response.body.registrations[0].id))!;
+            expect(updatedRegistration.registeredAt).not.toBeNull();
+            expect(updatedRegistration.reservedUntil).toBeNull();
+
+            // Check if response is up-to-date (if it fails here, data storage is okay, but returned API response is not up-to-date)
+            expect(response.body.registrations[0].registeredAt).not.toBeNull();
+            expect(response.body.registrations[0].reservedUntil).toBeNull();
         });
 
-        test('Should reuse existing registration', async () => {
-            // #region arrange
-            const { organization, group, groupPrice, token, member, user } = await initData();
-            group.settings.allowRegistrationsByOrganization = true;
-            await group.save();
-
-            user.permissions = UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization.id, Permissions.create({
-                        level: PermissionLevel.Full,
-                    })],
-                ]),
-            });
-
-            await user.save();
-
-            const group2 = await new GroupFactory({
-                organization,
-                price: 25,
-                stock: 5,
-            }).create();
-
+        test('Should reuse recently deactivated registration if it has zero balance', async () => {
+            const { organization, group, groupPrice, token, member } = await initData();
             const firstRegistration = await new RegistrationFactory({
                 member,
-                group: group2,
-                groupPrice: group2.settings.prices[0],
+                group: group,
+                groupPrice: group.settings.prices[0],
+                deactivatedAt: new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
             }).create();
 
             const body = IDRegisterCheckout.create({
@@ -753,7 +596,6 @@ describe('Endpoint.RegisterMembers', () => {
                     items: [
                         IDRegisterItem.create({
                             id: uuidv4(),
-                            replaceRegistrationIds: [firstRegistration.id],
                             options: [],
                             groupPrice,
                             organizationId: organization.id,
@@ -761,57 +603,80 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
-                    deleteRegistrationIds: [],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
-                asOrganizationId: organization.id,
+                totalPrice: 25_00,
             });
 
-            // #endregion
-
-            // #region act and assert
             const response = await post(body, organization, token);
             expect(response.body.registrations.length).toBe(1);
             expect(response.body.registrations[0].id).toEqual(firstRegistration.id);
-            // #endregion
         });
 
-        test('Should reuse recently deactivated registration', async () => {
-            // #region arrange
-            const { organization, group, groupPrice, token, member, user } = await initData();
-            group.settings.allowRegistrationsByOrganization = true;
-            await group.save();
+        test('Should not reuse existing registration if it is older than 7 days', async () => {
+            const { organization, group, groupPrice, token, member } = await initData();
 
-            user.permissions = UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization.id, Permissions.create({
-                        level: PermissionLevel.Full,
-                    })],
-                ]),
+            const firstRegistration = await new RegistrationFactory({
+                member,
+                group: group,
+                groupPrice: group.settings.prices[0],
+                deactivatedAt: new Date(new Date().getTime() - 8 * 24 * 60 * 60 * 1000), // 8 days ago
+            }).create();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25_00,
             });
 
-            await user.save();
+            const response = await post(body, organization, token);
+            expect(response.body.registrations.length).toBe(1);
+            expect(response.body.registrations[0].id).not.toEqual(firstRegistration.id);
+        });
 
+        test('Should not reuse existing registration if has a non-zero balance', async () => {
+            const { organization, group, groupPrice, token, member, user } = await initData();
             const firstRegistration = await new RegistrationFactory({
                 member,
                 group,
-                groupPrice,
+                groupPrice: group.settings.prices[0],
+                deactivatedAt: new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
             }).create();
 
-            firstRegistration.deactivatedAt = new Date();
-            await firstRegistration.save();
+            // Create a balance item for the first registration
+            const item = await new BalanceItemFactory({
+                organizationId: organization.id,
+                memberId: member.id,
+                userId: user.id,
+                type: BalanceItemType.Registration,
+                amount: 1,
+                unitPrice: group.settings.prices[0].price.price,
+                registrationId: firstRegistration.id,
+            }).create();
+
+            // Update outstanding cache
+            // await BalanceItem.updateOutstanding([item]);
 
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
                     items: [
                         IDRegisterItem.create({
                             id: uuidv4(),
-                            replaceRegistrationIds: [],
                             options: [],
                             groupPrice,
                             organizationId: organization.id,
@@ -819,24 +684,16 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
-                    deleteRegistrationIds: [],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
-                asOrganizationId: organization.id,
+                totalPrice: 25_00,
             });
 
-            // #endregion
-
-            // #region act and assert
             const response = await post(body, organization, token);
             expect(response.body.registrations.length).toBe(1);
-            expect(response.body.registrations[0].id).toEqual(firstRegistration.id);
-            // #endregion
+            expect(response.body.registrations[0].id).not.toEqual(firstRegistration.id);
         });
 
         test('Should update registered members', async () => {
@@ -862,8 +719,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
-                asOrganizationId: organization.id,
+                totalPrice: 25_00,
                 customer: null,
             });
             // #endregion
@@ -880,23 +736,9 @@ describe('Endpoint.RegisterMembers', () => {
             expect(updatedGroup!.settings.reservedMembers).toBe(0);
         });
 
-        test('Should update reserved members', async () => {
-            // #region arrange
+        test('Should set reserved members when using online payments', async () => {
             const { member, organization, token } = await initData();
-
-            organization.meta.registrationPaymentConfiguration.paymentMethods = [PaymentMethod.PointOfSale, PaymentMethod.Payconiq];
-
-            organization.privateMeta.payconiqAccounts = [PayconiqAccount.create({
-                id: uuidv4(),
-                apiKey: 'testKey',
-                merchantId: 'test',
-                profileId: 'test',
-                name: 'test',
-                iban: 'BE56587127952688', // = random IBAN
-                callbackUrl: 'https://www.example.com',
-            })];
-
-            await organization.save();
+            await initPayconiq({ organization });
 
             const group2 = await new GroupFactory({
                 organization,
@@ -912,54 +754,40 @@ describe('Endpoint.RegisterMembers', () => {
                     items: [
                         IDRegisterItem.create({
                             id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
                             groupPrice: groupPrice2,
                             organizationId: organization.id,
                             groupId: group2.id,
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [],
-                    deleteRegistrationIds: [],
                 }),
-                administrationFee: 0,
-                freeContribution: 0,
                 paymentMethod: PaymentMethod.Payconiq,
                 redirectUrl: new URL('https://www.example.com'),
                 cancelUrl: new URL('https://www.example.com'),
                 totalPrice: 15,
-                customer: null,
             });
 
-            nock('https://api.ext.payconiq.com')
-                .post('/v3/payments')
-                .reply(200, {
-                    paymentId: 'testPaymentId',
-                    _links: {
-                        checkout: {
-                            href: 'https://www.example.com',
-                        },
-                    },
-                });
-            // #endregion
-
-            // act
             const response = await post(body, organization, token);
 
-            // assert
             expect(response.body).toBeDefined();
             expect(response.body.registrations.length).toBe(1);
+            expect(response.body.paymentUrl).toMatch(/payconiq\.com/);
 
-            const updatedGroup = await Group.getByID(group2.id);
-            expect(updatedGroup!.settings.registeredMembers).toBe(0);
-            expect(updatedGroup!.settings.reservedMembers).toBe(1);
+            expect(response.body.registrations[0]).toMatchObject({
+                registeredAt: null,
+                deactivatedAt: null,
+                reservedUntil: expect.any(Date),
+            });
+
+            await group2.refresh();
+            expect(group2.settings.registeredMembers).toBe(0);
+            expect(group2.settings.reservedMembers).toBe(1);
         });
 
         test('Register for group with trial should set trial period', async () => {
             // #region arrange
             const date = new Date('2023-05-14');
-            jest.useFakeTimers().setSystemTime(date);
+            jest.useFakeTimers({ advanceTimers: true, doNotFake: ['setTimeout', 'clearTimeout', 'hrtime', 'nextTick', 'performance', 'queueMicrotask', 'setImmediate', 'clearImmediate'] }).setSystemTime(date);
 
             try {
                 const { member, group, groupPrice, organization, token } = await initData();
@@ -987,7 +815,6 @@ describe('Endpoint.RegisterMembers', () => {
                     freeContribution: 0,
                     paymentMethod: PaymentMethod.PointOfSale,
                     totalPrice: 0,
-                    asOrganizationId: organization.id,
                     customer: null,
                 });
                 // #endregion
@@ -1006,9 +833,9 @@ describe('Endpoint.RegisterMembers', () => {
                 expect(trialUntil!.getDate()).toBe(19);
             }
             finally {
-                jest.useFakeTimers().resetAllMocks();
+                jest.useRealTimers();
             }
-        });
+        }, 20_000);
 
         test('Should update group stock reservations', async () => {
             // #region arrange
@@ -1035,8 +862,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
-                asOrganizationId: organization.id,
+                totalPrice: 25_00,
                 customer: null,
             });
             // #endregion
@@ -1178,7 +1004,6 @@ describe('Endpoint.RegisterMembers', () => {
         });
 
         test('Should fail if max option exceeded', async () => {
-            // #region arrange
             const { organization, group, groupPrice, token, member } = await initData();
 
             const option1 = GroupOption.create({
@@ -1187,8 +1012,8 @@ describe('Endpoint.RegisterMembers', () => {
                 maximum: 5,
                 allowAmount: true,
                 price: ReduceablePrice.create({
-                    price: 5,
-                    reducedPrice: 3,
+                    price: 5_00,
+                    reducedPrice: 3_00,
                 }),
             });
 
@@ -1198,8 +1023,8 @@ describe('Endpoint.RegisterMembers', () => {
                 maximum: 2,
                 allowAmount: true,
                 price: ReduceablePrice.create({
-                    price: 3,
-                    reducedPrice: 1,
+                    price: 3_00,
+                    reducedPrice: 1_00,
                 }),
             });
 
@@ -1246,20 +1071,16 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 50,
+                totalPrice: 50_00,
                 customer: null,
             });
-            // #endregion
 
-            // #region act and assert
             await expect(async () => await post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('Option maximum exceeded'));
-            // #endregion
         });
 
         test('Should not fail if max option not exceeded', async () => {
-            // #region arrange
             const { organization, group, groupPrice, token, member } = await initData();
 
             const option1 = GroupOption.create({
@@ -1268,8 +1089,8 @@ describe('Endpoint.RegisterMembers', () => {
                 maximum: 5,
                 allowAmount: true,
                 price: ReduceablePrice.create({
-                    price: 5,
-                    reducedPrice: 3,
+                    price: 5_00,
+                    reducedPrice: 3_00,
                 }),
             });
 
@@ -1279,8 +1100,8 @@ describe('Endpoint.RegisterMembers', () => {
                 maximum: 5,
                 allowAmount: true,
                 price: ReduceablePrice.create({
-                    price: 3,
-                    reducedPrice: 1,
+                    price: 3_00,
+                    reducedPrice: 1_00,
                 }),
             });
 
@@ -1327,234 +1148,136 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 50,
+                totalPrice: 50_00,
                 customer: null,
             });
-            // #endregion
 
-            // #region act and assert
             const result = await post(body, organization, token);
             expect(result).toBeDefined();
-            // #endregion
+        });
+    });
+
+    describe('Register as organization', () => {
+        beforeEach(() => {
+            defaultPermissionLevel = PermissionLevel.Full;
+        });
+
+        test('Should reuse recently deactivated registration', async () => {
+            const { organization, group, groupPrice, token, member } = await initData();
+            group.settings.allowRegistrationsByOrganization = true;
+            await group.save();
+
+            const firstRegistration = await new RegistrationFactory({
+                member,
+                group,
+                groupPrice,
+            }).create();
+
+            firstRegistration.deactivatedAt = new Date();
+            await firstRegistration.save();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25_00,
+                asOrganizationId: organization.id,
+            });
+
+            const response = await post(body, organization, token);
+            expect(response.body.registrations.length).toBe(1);
+            expect(response.body.registrations[0].id).toEqual(firstRegistration.id);
+        });
+
+        test('Cannot pay balances as organization', async () => {
+            const { member, user, organization, token } = await initData();
+
+            const balanceItem1 = await new BalanceItemFactory({
+                organizationId: organization.id,
+                memberId: member.id,
+                userId: user.id,
+                payingOrganizationId: organization.id,
+                type: BalanceItemType.Registration,
+                amount: 10,
+                unitPrice: 2,
+            }).create();
+
+            const cartItem = BalanceItemCartItem.create({
+                item: balanceItem1.getStructure(),
+                price: 20,
+            });
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [],
+                    balanceItems: [
+                        cartItem,
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 20,
+                asOrganizationId: organization.id,
+                customer: null,
+            });
+
+            await expect(post(body, organization, token))
+                .rejects
+                .toThrow(STExpect.simpleError({
+                    code: 'cannot_pay_balance_items',
+                }));
         });
     });
 
     describe('Register by other organization', () => {
-        test('Should fail if disabled by group', async () => {
-            // #region arrange
-            const { organization, group, groupPrice, token, member, user } = await initData();
+        beforeEach(() => {
+            defaultPermissionLevel = PermissionLevel.Full;
+        });
 
-            const { organization: organization2 } = await initData();
+        async function initDualData(options?: Parameters<typeof initData>[0]) {
+            const base = await initData(options);
 
-            user.permissions = UserPermissions.create({
+            base.group.settings.allowRegistrationsByOrganization = true;
+            await base.group.save();
+
+            // Give the user permission for a different organization
+            const { organization: organization2 } = await initOrganization();
+            base.user.permissions = UserPermissions.create({
                 organizationPermissions: new Map([
                     [organization2.id, Permissions.create({
-                        level: PermissionLevel.Full,
+                        level: options?.permissionLevel ?? defaultPermissionLevel,
                     })],
                 ]),
             });
+            await base.user.save();
 
-            await user.save();
-
-            const body = IDRegisterCheckout.create({
-                cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
-                            groupPrice,
-                            organizationId: organization.id,
-                            groupId: group.id,
-                            memberId: member.id,
-                        }),
-                    ],
-                    balanceItems: [
-                    ],
-                    deleteRegistrationIds: [],
-                }),
-                administrationFee: 0,
-                freeContribution: 0,
-                paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
-                customer: null,
-                asOrganizationId: organization2.id,
-            });
-            // #endregion
-
-            // #region act and assert
-            await expect(async () => await post(body, organization, token))
-                .rejects
-                .toThrow(new RegExp('allowRegistrationsByOrganization disabled'));
-            // #endregion
-        });
-
-        test('Should fail if no customer', async () => {
-            // #region arrange
-            const { organization, group, groupPrice, token, member, user } = await initData();
-            group.settings.allowRegistrationsByOrganization = true;
-            await group.save();
-
-            const { organization: organization2 } = await initData();
-
-            user.permissions = UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization2.id, Permissions.create({
-                        level: PermissionLevel.Full,
-                    })],
-                ]),
-            });
-
-            await user.save();
-
-            const body = IDRegisterCheckout.create({
-                cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
-                            groupPrice,
-                            organizationId: organization.id,
-                            groupId: group.id,
-                            memberId: member.id,
-                        }),
-                    ],
-                    balanceItems: [
-                    ],
-                    deleteRegistrationIds: [],
-                }),
-                administrationFee: 0,
-                freeContribution: 0,
-                paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
-                customer: null,
-                asOrganizationId: organization2.id,
-            });
-            // #endregion
-
-            // #region act and assert
-            await expect(async () => await post(body, organization, token))
-                .rejects
-                .toThrow(new RegExp('customer is required when paying as an organization'));
-            // #endregion
-        });
-
-        test('Should fail if no company on customer', async () => {
-            // #region arrange
-            const { organization, group, groupPrice, token, member, user } = await initData();
-            group.settings.allowRegistrationsByOrganization = true;
-            await group.save();
-
-            const { organization: organization2 } = await initData();
-
-            user.permissions = UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization2.id, Permissions.create({
-                        level: PermissionLevel.Full,
-                    })],
-                ]),
-            });
-
-            await user.save();
-
-            const body = IDRegisterCheckout.create({
-                cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
-                            groupPrice,
-                            organizationId: organization.id,
-                            groupId: group.id,
-                            memberId: member.id,
-                        }),
-                    ],
-                    balanceItems: [
-                    ],
-                    deleteRegistrationIds: [],
-                }),
-                administrationFee: 0,
-                freeContribution: 0,
-                paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
-                customer: PaymentCustomer.create({
-                    company: null,
-                }),
-                asOrganizationId: organization2.id,
-            });
-            // #endregion
-
-            // #region act and assert
-            await expect(async () => await post(body, organization, token))
-                .rejects
-                .toThrow(new RegExp('customer.company is required'));
-            // #endregion
-        });
-
-        test('Should fail if company does not exist on organization', async () => {
-            // #region arrange
-            const { organization, group, groupPrice, token, member, user } = await initData();
-            group.settings.allowRegistrationsByOrganization = true;
-            await group.save();
-
-            const { organization: organization2 } = await initData();
-
-            user.permissions = UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization2.id, Permissions.create({
-                        level: PermissionLevel.Full,
-                    })],
-                ]),
-            });
-
-            await user.save();
-
-            const body = IDRegisterCheckout.create({
-                cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
-                            groupPrice,
-                            organizationId: organization.id,
-                            groupId: group.id,
-                            memberId: member.id,
-                        }),
-                    ],
-                    balanceItems: [
-                    ],
-                    deleteRegistrationIds: [],
-                }),
-                administrationFee: 0,
-                freeContribution: 0,
-                paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
-                customer: PaymentCustomer.create({
-                    company: Company.create({
-                        name: 'test company',
-                    }),
-                }),
-                asOrganizationId: organization2.id,
-            });
-            // #endregion
-
-            // #region act and assert
-            await expect(async () => await post(body, organization, token))
-                .rejects
-                .toThrow(new RegExp('Oeps, de facturatiegegevens die je probeerde te selecteren lijken niet meer te bestaan.'));
-            // #endregion
-        });
+            return {
+                ...base,
+                organization2,
+            };
+        }
 
         test('Should set paying organization id', async () => {
-            // #region arrange
-            const { organization, group, groupPrice, token, member, user } = await initData();
-            group.settings.allowRegistrationsByOrganization = true;
-            await group.save();
+            const { organization, group, groupPrice, member, token, organization2 } = await initDualData();
 
-            const { organization: organization2 } = await initData();
             const company = Company.create({
                 name: 'test company',
             });
@@ -1562,15 +1285,47 @@ describe('Endpoint.RegisterMembers', () => {
             organization2.meta.companies.push(company);
             await organization2.save();
 
-            user.permissions = UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization2.id, Permissions.create({
-                        level: PermissionLevel.Full,
-                    })],
-                ]),
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25_00,
+                customer: PaymentCustomer.create({
+                    company,
+                }),
+                asOrganizationId: organization2.id,
             });
 
-            await user.save();
+            const response = await post(body, organization, token);
+            expect(response.body.registrations.length).toBe(1);
+            expect(response.body.registrations[0].payingOrganizationId).toEqual(organization2.id);
+        });
+
+        test('Should fail if not sufficient permissions', async () => {
+            const { organization, group, groupPrice, member, token, organization2 } = await initDualData({ permissionLevel: PermissionLevel.Read });
+
+            const company = Company.create({
+                name: 'test company',
+            });
+
+            organization2.meta.companies.push(company);
+            await organization2.save();
 
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
@@ -1592,25 +1347,204 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 customer: PaymentCustomer.create({
                     company,
                 }),
                 asOrganizationId: organization2.id,
             });
-            // #endregion
 
-            // #region act and assert
-            const response = await post(body, organization, token);
-            expect(response.body.registrations.length).toBe(1);
-            expect(response.body.registrations[0].payingOrganizationId).toEqual(organization2.id);
-            // #endregion
+            await expect(async () => await post(body, organization, token))
+                .rejects
+                .toThrow(STExpect.simpleError({ code: 'forbidden' }));
+        });
+
+        test('Should fail if disabled by group', async () => {
+            const { organization, group, groupPrice, member, token, organization2 } = await initDualData();
+
+            group.settings.allowRegistrationsByOrganization = false;
+            await group.save();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25_00,
+                customer: null,
+                asOrganizationId: organization2.id,
+            });
+
+            await expect(async () => await post(body, organization, token))
+                .rejects
+                .toThrow(STExpect.simpleError({ code: 'as_organization_disabled' }));
+        });
+
+        test('Should fail if no customer', async () => {
+            const { organization, group, groupPrice, member, token, organization2 } = await initDualData();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25_00,
+                customer: null,
+                asOrganizationId: organization2.id,
+            });
+
+            await expect(async () => await post(body, organization, token))
+                .rejects
+                .toThrow(new RegExp('customer is required when paying as an organization'));
+        });
+
+        test('Deleting registrations is not allowed', async () => {
+            const { member, group, groupPrice, organization, token, organization2 } = await initDualData();
+
+            const registration = await new RegistrationFactory({
+                member,
+                group,
+                groupPrice,
+            }).create();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [],
+                    deleteRegistrationIds: [registration.id],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 5,
+                asOrganizationId: organization2.id,
+                customer: null,
+            });
+
+            await expect(async () => await post(body, organization, token))
+                .rejects
+                .toThrow(STExpect.simpleError({ code: 'forbidden' }));
+        });
+
+        test('Should fail if no company on customer', async () => {
+            const { organization, group, groupPrice, member, token, organization2 } = await initDualData();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25_00,
+                customer: PaymentCustomer.create({
+                    company: null,
+                }),
+                asOrganizationId: organization2.id,
+            });
+
+            await expect(async () => await post(body, organization, token))
+                .rejects
+                .toThrow(new RegExp('customer.company is required'));
+        });
+
+        test('Should fail if company does not exist on organization', async () => {
+            const { organization, group, groupPrice, member, token, organization2 } = await initDualData();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25_00,
+                customer: PaymentCustomer.create({
+                    company: Company.create({
+                        name: 'test company',
+                    }),
+                }),
+                asOrganizationId: organization2.id,
+            });
+
+            await expect(async () => await post(body, organization, token))
+                .rejects
+                .toThrow(new RegExp('Oeps, de facturatiegegevens die je probeerde te selecteren lijken niet meer te bestaan.'));
         });
     });
 
     describe('Replace registrations', () => {
+        beforeEach(() => {
+            defaultPermissionLevel = PermissionLevel.Full;
+        });
+
         test('Should update registered members', async () => {
-            // #region arrange
             const { organization, group: group1, groupPrice: groupPrice1, token, member } = await initData();
 
             const registration = await new RegistrationFactory({
@@ -1651,11 +1585,7 @@ describe('Endpoint.RegisterMembers', () => {
                 asOrganizationId: organization.id,
                 customer: null,
             });
-            // #endregion
 
-            // #region act and assert
-
-            // update occupancy to be sure occupancy is 1
             await group1.updateOccupancy();
             expect(group1.settings.registeredMembers).toBe(1);
 
@@ -1673,16 +1603,14 @@ describe('Endpoint.RegisterMembers', () => {
             // occupancy should go from 1 to 0 because the registration should be replaced
             expect(updatedGroup1After!.settings.registeredMembers).toBe(0);
             expect(updatedGroup1After!.settings.reservedMembers).toBe(0);
-            // #endregion
         });
 
-        test('Should set paid as organization on new registration', async () => {
-            // #region arrange
+        test('When replacing a registration, we should keep the original paying organization id', async () => {
             const { organization, group: group1, groupPrice: groupPrice1, token, member, user } = await initData();
 
             group1.settings.allowRegistrationsByOrganization = true;
             await group1.save();
-            const organization2 = await initOrganization();
+            const { organization: organization2 } = await initOrganization();
 
             user.permissions = UserPermissions.create({
                 organizationPermissions: new Map([
@@ -1726,7 +1654,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 25_00,
                 asOrganizationId: organization2.id,
                 customer: PaymentCustomer.create({
                     company,
@@ -1739,7 +1667,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             const group = await new GroupFactory({
                 organization,
-                price: 30,
+                price: 30_00,
                 stock: 5,
             }).create();
 
@@ -1764,15 +1692,13 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 30 - 25,
+                totalPrice: 30_00 - 25_00,
                 asOrganizationId: organization.id,
                 customer: PaymentCustomer.create({
                     company,
                 }),
             });
-            // #endregion
 
-            // #region act and assert
             const response = await post(body2, organization, token);
 
             expect(response.body).toBeDefined();
@@ -1780,7 +1706,6 @@ describe('Endpoint.RegisterMembers', () => {
 
             // the payingOrganizationId should equal the id of the paying organization of the replaced registration
             expect(response.body.registrations[0].payingOrganizationId).toEqual(organization2.id);
-            // #endregion
         });
 
         test('Replace registration by registration of other member should fail', async () => {
@@ -1887,6 +1812,10 @@ describe('Endpoint.RegisterMembers', () => {
     });
 
     describe('Delete registrations', () => {
+        beforeEach(() => {
+            defaultPermissionLevel = PermissionLevel.Full;
+        });
+
         test('Should update registered members', async () => {
             // #region arrange
             const { member, group: group1, groupPrice: groupPrice1, organization: organization1, token } = await initData();
@@ -1954,9 +1883,10 @@ describe('Endpoint.RegisterMembers', () => {
             // #endregion
         });
 
-        test('Should throw error if with payment', async () => {
+        test('Should throw error if deleting registrations as normal member', async () => {
             // #region arrange
             const { member, group: group1, groupPrice: groupPrice1, organization: organization1, token } = await initData();
+            await initPayconiq({ organization: organization1 });
 
             const registration = await new RegistrationFactory({
                 member,
@@ -1969,7 +1899,6 @@ describe('Endpoint.RegisterMembers', () => {
                 organization: organization1,
                 price: 30,
                 stock: 5,
-                maxMembers: 1,
             }).create();
 
             const groupPrice = group.settings.prices[0];
@@ -1998,16 +1927,8 @@ describe('Endpoint.RegisterMembers', () => {
                 totalPrice: 5,
                 customer: null,
             });
-            // #endregion
-
-            // #region act and assert
-
-            // update occupancy to be sure occupancy is 1
-            await group1.updateOccupancy();
-            expect(group1.settings.registeredMembers).toBe(1);
 
             await expect(async () => await post(body, organization1, token)).rejects.toThrow('Permission denied: you are not allowed to delete registrations');
-            // #endregion
         });
 
         test('Should deactivate registration', async () => {
@@ -2064,7 +1985,6 @@ describe('Endpoint.RegisterMembers', () => {
 
         test('Should fail if invalid cancelation fee', async () => {
             for (const cancellationFeePercentage of [10001, -1]) {
-                // #region arrange
                 const { member, group: group1, groupPrice: groupPrice1, organization, token } = await initData();
 
                 const body1 = IDRegisterCheckout.create({
@@ -2086,7 +2006,7 @@ describe('Endpoint.RegisterMembers', () => {
                     administrationFee: 0,
                     freeContribution: 0,
                     paymentMethod: PaymentMethod.PointOfSale,
-                    totalPrice: 25,
+                    totalPrice: 25_00,
                     asOrganizationId: organization.id,
                     customer: null,
                 });
@@ -2128,13 +2048,13 @@ describe('Endpoint.RegisterMembers', () => {
                     asOrganizationId: organization.id,
                     customer: null,
                 });
-                // #endregion
 
-                // #region act and assert
                 await expect(async () => await post(body2, organization, token))
                     .rejects
-                    .toThrow(new RegExp('Invalid cancellation fee percentage.'));
-            // #endregion
+                    .toThrow(STExpect.simpleError({
+                        field: 'cancellationFeePercentage',
+                        code: 'invalid_field',
+                    }));
             }
         });
 

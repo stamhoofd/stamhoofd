@@ -89,6 +89,11 @@ export class Platform extends QueryableModel {
     }
 
     static async getShared(): Promise<Readonly<Platform> & { save: never }> {
+        if (this.shared) {
+            // Skip queue if possible (performance optimization)
+            return this.shared as any;
+        }
+
         return QueueHandler.schedule('Platform.getShared', async () => {
             if (this.shared) {
                 return this.shared;
@@ -141,9 +146,7 @@ export class Platform extends QueryableModel {
             this.sharedStruct = null;
             this.sharedPrivateStruct = null;
         });
-        await QueueHandler.schedule('Platform.getShared', async () => {
-            this.shared = null;
-        });
+        this.shared = null;
     }
 
     async save() {

@@ -1,9 +1,9 @@
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules import
 import { column } from '@simonbackx/simple-database';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel } from '@stamhoofd/sql';
 import { File, Resolution, ResolutionRequest } from '@stamhoofd/structures';
-import AWS from 'aws-sdk';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -23,6 +23,23 @@ export class Image extends QueryableModel {
 
     @column({ type: 'datetime' })
     createdAt: Date = new Date();
+
+    static s3Client: S3Client | null = null;
+
+    static getS3Client(): S3Client {
+        if (!this.s3Client) {
+            this.s3Client = new S3Client({
+                forcePathStyle: false, // Configures to use subdomain/virtual calling format.
+                endpoint: 'https://' + STAMHOOFD.SPACES_ENDPOINT,
+                credentials: {
+                    accessKeyId: STAMHOOFD.SPACES_KEY,
+                    secretAccessKey: STAMHOOFD.SPACES_SECRET,
+                },
+                region: 'eu-west-1', // Not used, but required by the S3Client
+            });
+        }
+        return this.s3Client;
+    }
 
     static async create(fileContent: string | Buffer, type: string | undefined, resolutions: ResolutionRequest[], isPrivateFile: boolean = false, user: { id: string } | null = null): Promise<Image> {
         if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
@@ -81,11 +98,7 @@ export class Image extends QueryableModel {
 
         const files = await Promise.all(promises);
 
-        const s3 = new AWS.S3({
-            endpoint: STAMHOOFD.SPACES_ENDPOINT,
-            accessKeyId: STAMHOOFD.SPACES_KEY,
-            secretAccessKey: STAMHOOFD.SPACES_SECRET,
-        });
+        const client = this.getS3Client();
 
         let prefix = (STAMHOOFD.SPACES_PREFIX ?? '');
         if (prefix.length > 0) {
@@ -112,15 +125,17 @@ export class Image extends QueryableModel {
             const fileId = uuidv4();
 
             const key = prefix + image.id + '/' + fileId + (!supportsTransparency ? '.jpg' : '.png');
-            const params = {
+            const cmd = new PutObjectCommand({
                 Bucket: STAMHOOFD.SPACES_BUCKET,
                 Key: key,
                 Body: f.data,
                 ContentType: !supportsTransparency ? 'image/jpeg' : 'image/png',
                 ACL: isPrivateFile ? 'private' : 'public-read',
-            };
+            });
 
-            uploadPromises.push(s3.putObject(params).promise());
+            uploadPromises.push(
+                client.send(cmd),
+            );
 
             const _file = new File({
                 id: fileId,
@@ -153,14 +168,6 @@ export class Image extends QueryableModel {
         const fileId = uuidv4();
         const uploadExt = fileType;
         const key = prefix + (STAMHOOFD.environment ?? 'development') + '/' + image.id + '/' + fileId + '.' + uploadExt;
-        const params = {
-            Bucket: STAMHOOFD.SPACES_BUCKET,
-            Key: key,
-            Body: fileContent,
-            ContentType: type ?? 'image/jpeg',
-            ACL: 'private',
-        };
-
         image.source = new File({
             id: fileId,
             server: 'https://' + STAMHOOFD.SPACES_BUCKET + '.' + STAMHOOFD.SPACES_ENDPOINT,
@@ -169,7 +176,14 @@ export class Image extends QueryableModel {
             // Don't set private here, as we don't allow to download this file
         });
 
-        uploadPromises.push(s3.putObject(params).promise());
+        const cmd = new PutObjectCommand({
+            Bucket: STAMHOOFD.SPACES_BUCKET,
+            Key: key,
+            Body: fileContent,
+            ContentType: type ?? 'image/jpeg',
+            ACL: 'private',
+        });
+        uploadPromises.push(client.send(cmd));
 
         await Promise.all(uploadPromises);
         await image.save();

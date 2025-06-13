@@ -9,6 +9,7 @@ import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStruct
 import { Context } from '../../../../helpers/Context';
 import { receivableBalanceFilterCompilers } from '../../../../sql-filters/receivable-balances';
 import { receivableBalanceSorters } from '../../../../sql-sorters/receivable-balances';
+import { BalanceItemService } from '../../../../services/BalanceItemService';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;

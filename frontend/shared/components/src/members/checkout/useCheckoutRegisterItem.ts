@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
 import { Group, GroupType, Organization, PlatformFamily, PlatformMember, RegisterCheckout, RegisterItem, RegistrationWithPlatformMember } from '@stamhoofd/structures';
-import { ChooseGroupForMemberView } from '..';
+import { ChooseGroupForMemberView, loadFamilyIfNeeded } from '..';
 import { useAppContext } from '../../context/appContext';
 import { GlobalEventBus } from '../../EventBus';
 import { useContext } from '../../hooks';
@@ -61,14 +61,14 @@ export async function loadGroupOrganization(context: SessionContext, organizatio
 // ----------------------------
 // --------- Flow 1 -----------
 
-export async function checkoutRegisterItem({ item: originalItem, admin, context, displayOptions, navigate, showGroupInformation, startCheckoutFlow }: {
+export async function checkoutRegisterItem({ item: originalItem, admin, context, displayOptions, navigate, startCheckoutFlow, finishHandler }: {
     item: RegisterItem;
     navigate: NavigationActions;
     context: SessionContext;
     admin?: boolean;
-    showGroupInformation?: boolean;
     displayOptions?: DisplayOptions;
     startCheckoutFlow?: boolean;
+    finishHandler?: () => Promise<void> | void;
 }) {
     let item = originalItem;
 
@@ -76,6 +76,11 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
         // Should register for the waiting list
         item = RegisterItem.defaultFor(item.member, item.group.waitingList, item.organization);
         item.cartError = originalItem.cartError;
+    }
+
+    if (item.groupPrice.bundleDiscounts.size > 0) {
+        // Load the full family first if there are bundle discounts
+        await loadFamilyIfNeeded({ member: item.member, context, owner: {} }, { shouldRetry: false });
     }
 
     const member = item.member;
@@ -96,7 +101,7 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
 
     // Check which steps need a review or are not complete
     const steps: EditMemberStep[] = [
-        new RegisterItemStep(item, { showGroupInformation }),
+        new RegisterItemStep(item, { willStartCheckoutFlow: startCheckoutFlow ?? false }),
     ];
 
     if (!admin) {
@@ -142,29 +147,24 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
                 else {
                     Toast.success($t(`fa2ecc9e-94d0-49fb-9968-2227528ef22f`)).setIcon('basket').show();
                 }
-            }
-
-            if (showGroupInformation) {
                 await GlobalEventBus.sendEvent('selectTabByName', 'mandje');
             }
         }
 
         await navigate.dismiss({ force: true });
+        if (finishHandler) {
+            await finishHandler();
+        }
     }, displayOptions);
 
     await manager.saveHandler(null, navigate);
 }
 
-export async function checkoutDefaultItem({ group, member, admin, groupOrganization, context, displayOptions, navigate, showGroupInformation, startCheckoutFlow, owner }: {
+export async function getDefaultItem({ group, member, groupOrganization, context, owner }: {
     group: Group;
     member: PlatformMember;
     groupOrganization?: Organization;
     context: SessionContext;
-    navigate: NavigationActions;
-    admin?: boolean;
-    showGroupInformation?: boolean;
-    displayOptions?: DisplayOptions;
-    startCheckoutFlow?: boolean;
     owner?: any;
 }) {
     if (!groupOrganization) {
@@ -176,14 +176,33 @@ export async function checkoutDefaultItem({ group, member, admin, groupOrganizat
             return;
         }
     }
+    return RegisterItem.defaultFor(member, group, groupOrganization);
+}
+
+export async function checkoutDefaultItem({ group, member, admin, groupOrganization, context, displayOptions, navigate, startCheckoutFlow, owner, finishHandler }: {
+    group: Group;
+    member: PlatformMember;
+    groupOrganization?: Organization;
+    context: SessionContext;
+    navigate: NavigationActions;
+    admin?: boolean;
+    displayOptions?: DisplayOptions;
+    startCheckoutFlow?: boolean;
+    owner?: any;
+    finishHandler?: () => Promise<void> | void;
+}) {
+    const item = await getDefaultItem({ group, member, groupOrganization, context, owner });
+    if (!item) {
+        return;
+    }
     return await checkoutRegisterItem({
         context,
-        item: RegisterItem.defaultFor(member, group, groupOrganization),
+        item,
         displayOptions,
         admin,
         navigate,
-        showGroupInformation,
         startCheckoutFlow,
+        finishHandler,
     });
 }
 
@@ -192,14 +211,47 @@ export function useCheckoutRegisterItem() {
     const context = useContext();
     const app = useAppContext();
 
-    return async ({ item, startCheckoutFlow, displayOptions }: { item: RegisterItem; startCheckoutFlow?: boolean; displayOptions?: DisplayOptions }) => {
+    return async ({
+        item,
+        startCheckoutFlow,
+        displayOptions,
+        customNavigate,
+        finishHandler,
+    }: {
+        item: RegisterItem;
+        startCheckoutFlow?: boolean;
+        displayOptions?: DisplayOptions;
+        customNavigate?: NavigationActions;
+        finishHandler?: () => Promise<void> | void;
+
+    }) => {
         await checkoutRegisterItem({
             item,
             admin: app === 'dashboard' || app === 'admin',
             displayOptions,
-            navigate,
             startCheckoutFlow,
             context: context.value,
+            navigate: customNavigate ?? navigate,
+            finishHandler,
+        });
+    };
+}
+
+export function useGetDefaultItem() {
+    const context = useContext();
+    const owner = useRequestOwner();
+
+    return async ({ group, member, groupOrganization }: {
+        group: Group;
+        member: PlatformMember;
+        groupOrganization?: Organization;
+    }) => {
+        return await getDefaultItem({
+            group,
+            member,
+            groupOrganization,
+            context: context.value,
+            owner,
         });
     };
 }
@@ -210,7 +262,15 @@ export function useCheckoutDefaultItem() {
     const app = useAppContext();
     const owner = useRequestOwner();
 
-    return async ({ group, member, groupOrganization, displayOptions, startCheckoutFlow, customNavigate }: { group: Group; member: PlatformMember; groupOrganization?: Organization; startCheckoutFlow?: boolean; displayOptions?: DisplayOptions; customNavigate?: NavigationActions }) => {
+    return async ({ group, member, groupOrganization, displayOptions, startCheckoutFlow, customNavigate, finishHandler }: {
+        group: Group;
+        member: PlatformMember;
+        groupOrganization?: Organization;
+        startCheckoutFlow?: boolean;
+        displayOptions?: DisplayOptions;
+        customNavigate?: NavigationActions;
+        finishHandler?: () => Promise<void> | void;
+    }) => {
         await checkoutDefaultItem({
             group,
             member,
@@ -221,6 +281,7 @@ export function useCheckoutDefaultItem() {
             context: context.value,
             startCheckoutFlow,
             owner,
+            finishHandler,
         });
     };
 }
@@ -389,7 +450,6 @@ export async function chooseGroupForMember({ member, navigate, context, displayO
                             navigate,
                             context,
                             displayOptions: { action: 'show' },
-                            showGroupInformation: true,
                             startCheckoutFlow,
                         });
                     },

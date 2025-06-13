@@ -1,33 +1,181 @@
-import { BalanceItem, Order, Organization, Payment, Webshop } from '@stamhoofd/models';
-import { AuditLogSource, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderStatus, ReceivableBalanceType } from '@stamhoofd/structures';
-import { AuditLogService } from './AuditLogService';
-import { RegistrationService } from './RegistrationService';
-import { PaymentReallocationService } from './PaymentReallocationService';
+import { BalanceItem, CachedBalance, Document, MemberUser, Order, Organization, Payment, Webshop } from '@stamhoofd/models';
+import { AuditLogSource, BalanceItemStatus, BalanceItemType, OrderStatus, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { AuditLogService } from './AuditLogService';
+import { PaymentReallocationService } from './PaymentReallocationService';
+import { RegistrationService } from './RegistrationService';
+import { Model } from '@simonbackx/simple-database';
+import { GroupedThrottledQueue } from '../helpers/GroupedThrottledQueue';
+import { ThrottledQueue } from '../helpers/ThrottledQueue';
+
+const memberUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, memberIds: string[]) => {
+    await CachedBalance.updateForMembers(organizationId, memberIds);
+
+    for (const memberId of memberIds) {
+        await PaymentReallocationService.reallocate(organizationId, memberId, ReceivableBalanceType.member);
+    }
+
+    if (memberIds.length) {
+        // Now also include the userIds of the members
+        const userMemberIds = (await MemberUser.select().where('membersId', memberIds).fetch()).map(m => m.usersId);
+        userUpdateQueue.addItems(organizationId, userMemberIds);
+    }
+}, { maxDelay: 10_000 });
+
+const userUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, userIds: string[]) => {
+    await CachedBalance.updateForUsers(organizationId, userIds);
+
+    for (const userId of userIds) {
+        await PaymentReallocationService.reallocate(organizationId, userId, ReceivableBalanceType.user);
+    }
+}, { maxDelay: 10_000 });
+
+const organizationUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, organizationIds: string[]) => {
+    await CachedBalance.updateForOrganizations(organizationId, organizationIds);
+
+    for (const payingOrganizationId of organizationIds) {
+        await PaymentReallocationService.reallocate(organizationId, payingOrganizationId, ReceivableBalanceType.organization);
+    }
+}, { maxDelay: 60_000 });
+
+export const registrationUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, registrationIds: string[]) => {
+    await CachedBalance.updateForRegistrations(organizationId, registrationIds);
+    await Document.updateForRegistrations(registrationIds, organizationId);
+}, { maxDelay: 10_000 });
+
+const bundleDiscountsUpdateQueue = new ThrottledQueue(async (registrationIds: string[]) => {
+    for (const registrationId of registrationIds) {
+        await RegistrationService.updateDiscounts(registrationId);
+    }
+}, { maxDelay: 10_000 });
 
 export const BalanceItemService = {
+    listening: false,
+
+    listen() {
+        if (this.listening) {
+            return;
+        }
+        this.listening = true;
+        Model.modelEventBus.addListener(this, async (event) => {
+            if (!(event.model instanceof BalanceItem)) {
+                return;
+            }
+
+            if (event.type === 'created' || event.type === 'deleted') {
+                await this.scheduleUpdate(event.model);
+                return;
+            }
+
+            // Check changed:
+            // status, unitPrice, dueAt, amount
+            if (
+                'status' in event.changedFields
+                || 'unitPrice' in event.changedFields
+                || 'dueAt' in event.changedFields
+                || 'amount' in event.changedFields
+                || 'memberId' in event.changedFields
+                || 'userId' in event.changedFields
+                || 'payingOrganizationId' in event.changedFields
+                || 'registrationId' in event.changedFields
+            ) {
+                await this.scheduleUpdate(event.model);
+            }
+        });
+    },
+
+    /**
+     * Schedule an update for the balance item:
+     * - Updates cached outstanding balances for members, users, organizations and registrations
+     *
+     * Does not execute the update immediately, but schedules it to be run in the background.
+     */
+    async scheduleUpdate(item: BalanceItem) {
+        await this.scheduleUpdates([item]);
+
+        // Todo: optimize
+        if (item.type === BalanceItemType.RegistrationBundleDiscount) {
+            // Save the applied discount to the related registration
+            if (item.registrationId) {
+                bundleDiscountsUpdateQueue.addItem(item.registrationId);
+            }
+        }
+    },
+
+    /**
+     * Call this when a payment or payment balance items have changed.
+     * It will also call updateOutstanding automatically, so no need to call that separately again
+     */
+    async updatePaidAndPending(items: BalanceItem[]) {
+        console.log('updatePaidAndPending for', items.length, 'items');
+        await BalanceItem.updatePricePaid(items.map(i => i.id));
+        await this.scheduleUpdates(items);
+    },
+
+    /**
+     * In some situations we need immediate updates
+     */
+    async flushRegistrationDiscountsCache() {
+        await bundleDiscountsUpdateQueue.flushAndWait();
+    },
+
+    /**
+     * Make sure all the pending changes for cached balances are run
+     */
+    async flushCaches(organizationId: string) {
+        await memberUpdateQueue.flushGroupAndWait(organizationId);
+        await userUpdateQueue.flushGroupAndWait(organizationId);
+        await organizationUpdateQueue.flushGroupAndWait(organizationId);
+        await registrationUpdateQueue.flushGroupAndWait(organizationId);
+        await bundleDiscountsUpdateQueue.flushAndWait();
+    },
+
+    async flushAll() {
+        await memberUpdateQueue.flushAndWait();
+        await userUpdateQueue.flushAndWait();
+        await organizationUpdateQueue.flushAndWait();
+        await registrationUpdateQueue.flushAndWait();
+        await bundleDiscountsUpdateQueue.flushAndWait();
+    },
+
+    /**
+     * Update how many every object in the system owes or needs to be reimbursed
+     * and also updates the pricePaid/pricePending cached values in Balance items and members
+     */
+    async scheduleUpdates(items: BalanceItem[]) {
+        console.log('Schedule outstanding balance for', items.length, 'items');
+
+        for (const item of items) {
+            if (item.memberId) {
+                memberUpdateQueue.addItem(item.organizationId, item.memberId);
+            }
+
+            if (item.userId) {
+                userUpdateQueue.addItem(item.organizationId, item.userId);
+            }
+
+            if (item.payingOrganizationId) {
+                organizationUpdateQueue.addItem(item.organizationId, item.payingOrganizationId);
+            }
+
+            if (item.registrationId) {
+                registrationUpdateQueue.addItem(item.organizationId, item.registrationId);
+            }
+        }
+    },
+
     async markDue(balanceItem: BalanceItem) {
-        const reactivate: BalanceItem[] = [];
         if (balanceItem.status === BalanceItemStatus.Hidden) {
-            reactivate.push(balanceItem);
+            balanceItem.status = BalanceItemStatus.Due;
+            await balanceItem.save();
         }
 
         // status and pricePaid changes are handled inside balanceitempayment
         if (balanceItem.dependingBalanceItemId) {
             const depending = await BalanceItem.getByID(balanceItem.dependingBalanceItemId);
             if (depending && depending.status === BalanceItemStatus.Hidden) {
-                reactivate.push(depending);
-            }
-        }
-
-        if (reactivate.length > 0) {
-            await BalanceItem.reactivateItems(reactivate);
-
-            if (balanceItem.type === BalanceItemType.RegistrationBundleDiscount) {
-                // Save the applied discount to the related registration
-                if (balanceItem.registrationId) {
-                    await RegistrationService.updateDiscounts(balanceItem.registrationId);
-                }
+                depending.status = BalanceItemStatus.Due;
+                await balanceItem.save();
             }
         }
     },
@@ -38,6 +186,7 @@ export const BalanceItemService = {
         if (balanceItem.paidAt) {
             // Already ran side effects
             // If we for example deleted a related order or registration - and we still have the balance item, mark it as paid again, we don't want to reactivate the order or registration
+            await this.markUpdated(balanceItem, payment, organization);
             return;
         }
 
@@ -72,24 +221,6 @@ export const BalanceItemService = {
 
         balanceItem.paidAt = new Date();
         await balanceItem.save();
-    },
-
-    async reallocate(balanceItems: BalanceItem[], organizationId: string) {
-        const memberIds = Formatter.uniqueArray(balanceItems.map(b => b.memberId).filter(b => b !== null));
-        const payingOrganizationIds = Formatter.uniqueArray(balanceItems.map(b => b.payingOrganizationId).filter(b => b !== null));
-        const userIds = Formatter.uniqueArray(balanceItems.map(b => b.userId).filter(b => b !== null));
-
-        for (const memberId of memberIds) {
-            await PaymentReallocationService.reallocate(organizationId, memberId, ReceivableBalanceType.member);
-        }
-
-        for (const payingOrganizationId of payingOrganizationIds) {
-            await PaymentReallocationService.reallocate(organizationId, payingOrganizationId, ReceivableBalanceType.organization);
-        }
-
-        for (const userId of userIds) {
-            await PaymentReallocationService.reallocate(organizationId, userId, ReceivableBalanceType.user);
-        }
     },
 
     async markUpdated(balanceItem: BalanceItem, payment: Payment, organization: Organization) {

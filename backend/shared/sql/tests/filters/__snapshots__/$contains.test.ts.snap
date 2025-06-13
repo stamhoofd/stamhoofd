@@ -1,0 +1,478 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`$contains MySQL behaviour JSON arrays Can search for % in the array: SQL Query for filter: {"settings.names":{"$contains":"%"}} 1`] = `
+{
+  "params": [
+    "%\\%%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.names")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON arrays Can search for % in the array: SQL Query for filter: {"settings.names":{"$contains":"BAn%ana"}} 1`] = `
+{
+  "params": [
+    "%ban\\%ana%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.names")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON arrays Can search for % in the array: SQL Query for not match filter: {"settings.names":{"$contains":"%%"}} 1`] = `
+{
+  "params": [
+    "%\\%\\%%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.names")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON arrays Can search for % in the array: SQL Query for not match filter: {"settings.names":{"$contains":"BAnana"}} 1`] = `
+{
+  "params": [
+    "%banana%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.names")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON arrays Can search for backslash in the array: SQL Query for filter: {"settings.names":{"$contains":"\\\\"}} 1`] = `
+{
+  "params": [
+    "%\\\\%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.names")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON arrays Can search for backslash in the array: SQL Query for filter: {"settings.names":{"$contains":"BAn\\\\ana"}} 1`] = `
+{
+  "params": [
+    "%ban\\\\ana%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.names")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON arrays Can search for backslash in the array: SQL Query for not match filter: {"settings.names":{"$contains":"\\\\\\\\"}} 1`] = `
+{
+  "params": [
+    "%\\\\\\\\%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.names")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON arrays Can search for backslash in the array: SQL Query for not match filter: {"settings.names":{"$contains":"BAnana"}} 1`] = `
+{
+  "params": [
+    "%banana%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.names")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON arrays Can search in the array: SQL Query for filter: {"settings":{"names":{"$contains":"pple"}}} 1`] = `
+{
+  "params": [
+    "%pple%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.names")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON arrays Can search in the array: SQL Query for filter: {"settings.names":{"$contains":"BAnana"}} 1`] = `
+{
+  "params": [
+    "%banana%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.names")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON arrays Can search in the array: SQL Query for filter: {"settings.names":{"$contains":"banana"}} 1`] = `
+{
+  "params": [
+    "%banana%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.names")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON arrays Can search in the array: SQL Query for filter: {"settings.names":{"$contains":"pple"}} 1`] = `
+{
+  "params": [
+    "%pple%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.names")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON arrays Can search in the array: SQL Query for not match filter: {"settings.names":{"$contains":"chrry"}} 1`] = `
+{
+  "params": [
+    "%chrry%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.names")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON strings Can actually search for %: SQL Query for filter: {"settings.name":{"$contains":"%"}} 1`] = `
+{
+  "params": [
+    "%\\%%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON strings Can actually search for %: SQL Query for filter: {"settings.name":{"$contains":"0%"}} 1`] = `
+{
+  "params": [
+    "%0\\%%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON strings Can actually search for %: SQL Query for filter: {"settings.name":{"$contains":"50%"}} 1`] = `
+{
+  "params": [
+    "%50\\%%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON strings Can actually search for %: SQL Query for not match filter: {"settings.name":{"$contains":"%%"}} 1`] = `
+{
+  "params": [
+    "%\\%\\%%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON strings Can actually search for %: SQL Query for not match filter: {"settings.name":{"$contains":"%50"}} 1`] = `
+{
+  "params": [
+    "%\\%50%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON strings Can actually search for _: SQL Query for filter: {"settings.name":{"$contains":"_"}} 1`] = `
+{
+  "params": [
+    "%\\_%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON strings Can actually search for _: SQL Query for filter: {"settings.name":{"$contains":"_doe"}} 1`] = `
+{
+  "params": [
+    "%\\_doe%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON strings Can actually search for _: SQL Query for filter: {"settings.name":{"$contains":"john_doe"}} 1`] = `
+{
+  "params": [
+    "%john\\_doe%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON strings Can actually search for _: SQL Query for not match filter: {"settings.name":{"$contains":"__"}} 1`] = `
+{
+  "params": [
+    "%\\_\\_%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON strings Can actually search for _: SQL Query for not match filter: {"settings.name":{"$contains":"john__doe"}} 1`] = `
+{
+  "params": [
+    "%john\\_\\_doe%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON strings Can search for backslash: SQL Query for filter: {"settings.name":{"$contains":"\\\\"}} 1`] = `
+{
+  "params": [
+    "%\\\\%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON strings Can search for backslash: SQL Query for filter: {"settings.name":{"$contains":"\\\\%"}} 1`] = `
+{
+  "params": [
+    "%\\\\\\%%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON strings Can search for backslash: SQL Query for not match filter: {"settings.name":{"$contains":"\\\\%"}} 1`] = `
+{
+  "params": [
+    "%\\\\\\%%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON strings Can search for backslash: SQL Query for not match filter: {"settings.name":{"$contains":"\\\\\\\\"}} 1`] = `
+{
+  "params": [
+    "%\\\\\\\\%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON strings Can search for backslash: SQL Query for not match filter: {"settings.name":{"$contains":"\\\\_"}} 1`] = `
+{
+  "params": [
+    "%\\\\\\_%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON strings Does not return values without % when filtering for %: SQL Query for not match filter: {"settings.name":{"$contains":"%"}} 1`] = `
+{
+  "params": [
+    "%\\%%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON strings Does not return values without _ when filtering for _: SQL Query for not match filter: {"settings.name":{"$contains":"_"}} 1`] = `
+{
+  "params": [
+    "%\\_%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON strings Does not return values without _ when filtering for _: SQL Query for not match filter: {"settings.name":{"$contains":"john_"}} 1`] = `
+{
+  "params": [
+    "%john\\_%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON wildcard arrays Can search in the array: SQL Query for filter: {"settings.names":{"$contains":"BAnana"}} 1`] = `
+{
+  "params": [
+    "%banana%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].name")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON wildcard arrays Can search in the array: SQL Query for filter: {"settings.names":{"$contains":"banana"}} 1`] = `
+{
+  "params": [
+    "%banana%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].name")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON wildcard arrays Can search in the array: SQL Query for filter: {"settings.names":{"$contains":"pple"}} 1`] = `
+{
+  "params": [
+    "%pple%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].name")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON wildcard arrays Can search in the array: SQL Query for not match filter: {"settings.names":{"$contains":"chrry"}} 1`] = `
+{
+  "params": [
+    "%chrry%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].name")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$contains MySQL behaviour Native MySQL strings Can actually search for %: SQL Query for filter: {"name":{"$contains":"%"}} 1`] = `
+{
+  "params": [
+    "%\\%%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour Native MySQL strings Can actually search for %: SQL Query for filter: {"name":{"$contains":"0%"}} 1`] = `
+{
+  "params": [
+    "%0\\%%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour Native MySQL strings Can actually search for %: SQL Query for filter: {"name":{"$contains":"50%"}} 1`] = `
+{
+  "params": [
+    "%50\\%%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour Native MySQL strings Can actually search for %: SQL Query for not match filter: {"name":{"$contains":"%%"}} 1`] = `
+{
+  "params": [
+    "%\\%\\%%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour Native MySQL strings Can actually search for %: SQL Query for not match filter: {"name":{"$contains":"%50"}} 1`] = `
+{
+  "params": [
+    "%\\%50%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour Native MySQL strings Can actually search for _: SQL Query for filter: {"name":{"$contains":"_"}} 1`] = `
+{
+  "params": [
+    "%\\_%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour Native MySQL strings Can actually search for _: SQL Query for filter: {"name":{"$contains":"_doe"}} 1`] = `
+{
+  "params": [
+    "%\\_doe%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour Native MySQL strings Can actually search for _: SQL Query for filter: {"name":{"$contains":"john_doe"}} 1`] = `
+{
+  "params": [
+    "%john\\_doe%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour Native MySQL strings Can actually search for _: SQL Query for not match filter: {"name":{"$contains":"__"}} 1`] = `
+{
+  "params": [
+    "%\\_\\_%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour Native MySQL strings Can actually search for _: SQL Query for not match filter: {"name":{"$contains":"john__doe"}} 1`] = `
+{
+  "params": [
+    "%john\\_\\_doe%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour Native MySQL strings Can search for backslash: SQL Query for filter: {"name":{"$contains":"\\\\"}} 1`] = `
+{
+  "params": [
+    "%\\\\%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour Native MySQL strings Can search for backslash: SQL Query for filter: {"name":{"$contains":"\\\\%"}} 1`] = `
+{
+  "params": [
+    "%\\\\\\%%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour Native MySQL strings Can search for backslash: SQL Query for not match filter: {"name":{"$contains":"\\\\%"}} 1`] = `
+{
+  "params": [
+    "%\\\\\\%%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour Native MySQL strings Can search for backslash: SQL Query for not match filter: {"name":{"$contains":"\\\\\\\\"}} 1`] = `
+{
+  "params": [
+    "%\\\\\\\\%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour Native MySQL strings Can search for backslash: SQL Query for not match filter: {"name":{"$contains":"\\\\_"}} 1`] = `
+{
+  "params": [
+    "%\\\\\\_%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour Native MySQL strings Does not return values without % when filtering for %: SQL Query for not match filter: {"name":{"$contains":"%"}} 1`] = `
+{
+  "params": [
+    "%\\%%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour Native MySQL strings Does not return values without _ when filtering for _: SQL Query for not match filter: {"name":{"$contains":"_"}} 1`] = `
+{
+  "params": [
+    "%\\_%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour Native MySQL strings Does not return values without _ when filtering for _: SQL Query for not match filter: {"name":{"$contains":"john_"}} 1`] = `
+{
+  "params": [
+    "%john\\_%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` LIKE ?",
+}
+`;

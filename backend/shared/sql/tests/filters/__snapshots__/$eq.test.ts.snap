@@ -1,0 +1,621 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`$eq JSON Can check JSON booleans: SQL Query for filter: {"settings.enabled":0} 1`] = `
+{
+  "params": [
+    0,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans: SQL Query for filter: {"settings.enabled":1} 1`] = `
+{
+  "params": [
+    1,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans: SQL Query for filter: {"settings.enabled":false} 1`] = `
+{
+  "params": [
+    0,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans: SQL Query for filter: {"settings.enabled":null} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans: SQL Query for filter: {"settings.enabled":true} 1`] = `
+{
+  "params": [
+    1,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans: SQL Query for not match filter: {"settings.enabled":false} 1`] = `
+{
+  "params": [
+    0,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans: SQL Query for not match filter: {"settings.enabled":false} 2`] = `
+{
+  "params": [
+    0,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans: SQL Query for not match filter: {"settings.enabled":null} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans: SQL Query for not match filter: {"settings.enabled":null} 2`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans: SQL Query for not match filter: {"settings.enabled":true} 1`] = `
+{
+  "params": [
+    1,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans: SQL Query for not match filter: {"settings.enabled":true} 2`] = `
+{
+  "params": [
+    1,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+}
+`;
+
+exports[`$eq JSON Can check if a json number is null: SQL Query for filter: {"settings.age":null} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON Can check if a json string is null: SQL Query for filter: {"settings.name":null} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON Can compare JSON numbers: SQL Query for filter: {"settings.age":10} 1`] = `
+{
+  "params": [
+    10,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+}
+`;
+
+exports[`$eq JSON Can compare JSON numbers: SQL Query for filter: {"settings.age":null} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON Can compare JSON numbers: SQL Query for filter: {"settings.enabled":null} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON Can compare JSON numbers: SQL Query for not match filter: {"settings.age":0} 1`] = `
+{
+  "params": [
+    0,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+}
+`;
+
+exports[`$eq JSON Can compare JSON numbers: SQL Query for not match filter: {"settings.age":9} 1`] = `
+{
+  "params": [
+    9,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+}
+`;
+
+exports[`$eq JSON Can compare JSON numbers: SQL Query for not match filter: {"settings.age":11} 1`] = `
+{
+  "params": [
+    11,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+}
+`;
+
+exports[`$eq JSON Can compare JSON numbers: SQL Query for not match filter: {"settings.enabled":false} 1`] = `
+{
+  "params": [
+    0,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+}
+`;
+
+exports[`$eq JSON Can compare JSON numbers: SQL Query for not match filter: {"settings.enabled":true} 1`] = `
+{
+  "params": [
+    1,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+}
+`;
+
+exports[`$eq JSON Can differentiate 0 number vs json null when comparing to null: SQL Query for not match filter: {"settings.age":null} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON Can differentiate null string vs json null when comparing to null: SQL Query for not match filter: {"settings.name":null} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON Can search in a mixed array: SQL Query for filter: {"settings.randomValues":"Test"} 1`] = `
+{
+  "params": [
+    "test",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$eq JSON Can search in a mixed array: SQL Query for filter: {"settings.randomValues":"tesT"} 1`] = `
+{
+  "params": [
+    "test",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$eq JSON Can search in a mixed array: SQL Query for filter: {"settings.randomValues":0} 1`] = `
+{
+  "params": [
+    "0",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$eq JSON Can search in a mixed array: SQL Query for filter: {"settings.randomValues":true} 1`] = `
+{
+  "params": [
+    "true",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$eq JSON Can search in a mixed array: SQL Query for not match filter: {"settings.randomValues":"tes"} 1`] = `
+{
+  "params": [
+    "tes",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$eq JSON Can search in a mixed array: SQL Query for not match filter: {"settings.randomValues":1} 1`] = `
+{
+  "params": [
+    "1",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$eq JSON Can search in a mixed array: SQL Query for not match filter: {"settings.randomValues":false} 1`] = `
+{
+  "params": [
+    "false",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$eq JSON Can search null in a JSON array: SQL Query for filter: {"settings.parents[*].age":null} 1`] = `
+{
+  "params": [
+    "null",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].age"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].age") IS NULL",
+}
+`;
+
+exports[`$eq JSON Can search null in a JSON array: SQL Query for filter: {"settings.parents[*].name":null} 1`] = `
+{
+  "params": [
+    "null",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].name"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].name") IS NULL",
+}
+`;
+
+exports[`$eq JSON Can search null in a JSON array: SQL Query for not match filter: {"settings.parents[*].age":null} 1`] = `
+{
+  "params": [
+    "null",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].age"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].age") IS NULL",
+}
+`;
+
+exports[`$eq JSON Can search null in a JSON array: SQL Query for not match filter: {"settings.parents[*].name":null} 1`] = `
+{
+  "params": [
+    "null",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].name"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].name") IS NULL",
+}
+`;
+
+exports[`$eq JSON Can search numbers in a number array: SQL Query for filter: {"settings.parents[*].age":45} 1`] = `
+{
+  "params": [
+    "45",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].age"),?)",
+}
+`;
+
+exports[`$eq JSON Can search numbers in a number array: SQL Query for filter: {"settings.parents[*].age":50} 1`] = `
+{
+  "params": [
+    "50",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].age"),?)",
+}
+`;
+
+exports[`$eq JSON Can search numbers in a number array: SQL Query for not match filter: {"settings.parents[*].age":"49"} 1`] = `
+{
+  "params": [
+    "49",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].age")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$eq JSON Can search numbers in a number array: SQL Query for not match filter: {"settings.parents[*].age":"test"} 1`] = `
+{
+  "params": [
+    "test",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].age")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$eq JSON Can search numbers in a number array: SQL Query for not match filter: {"settings.parents[*].age":45.1} 1`] = `
+{
+  "params": [
+    "45.1",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].age"),?)",
+}
+`;
+
+exports[`$eq JSON Can search numbers in a number array: SQL Query for not match filter: {"settings.parents[*].age":49} 1`] = `
+{
+  "params": [
+    "49",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].age"),?)",
+}
+`;
+
+exports[`$eq JSON Can search numbers in a number array: SQL Query for not match filter: {"settings.parents[*].age":51} 1`] = `
+{
+  "params": [
+    "51",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].age"),?)",
+}
+`;
+
+exports[`$eq JSON Can search strings in a string array: SQL Query for filter: {"settings.parents[*].name":"Jane Doe"} 1`] = `
+{
+  "params": [
+    "jane doe",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].name")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$eq JSON Can search strings in a string array: SQL Query for filter: {"settings.parents[*].name":"John Doe"} 1`] = `
+{
+  "params": [
+    "john doe",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].name")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$eq JSON Can search strings in a string array: SQL Query for filter: {"settings.parents[*].name":"jane doe"} 1`] = `
+{
+  "params": [
+    "jane doe",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].name")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$eq JSON Can search strings in a string array: SQL Query for filter: {"settings.parents[*].name":"john doe"} 1`] = `
+{
+  "params": [
+    "john doe",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].name")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$eq JSON Can search strings in a string array: SQL Query for not match filter: {"settings.parents[*].name":"Jane Doe "} 1`] = `
+{
+  "params": [
+    "jane doe ",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].name")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$eq JSON Can search strings in a string array: SQL Query for not match filter: {"settings.parents[*].name":"Jane"} 1`] = `
+{
+  "params": [
+    "jane",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].name")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$eq JSON Can search strings in a string array: SQL Query for not match filter: {"settings.parents[*].name":"John"} 1`] = `
+{
+  "params": [
+    "john",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].name")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$eq JSON Can search strings in a string array: SQL Query for not match filter: {"settings.parents[*].name":"jane"} 1`] = `
+{
+  "params": [
+    "jane",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].name")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$eq JSON Can search strings in a string array: SQL Query for not match filter: {"settings.parents[*].name":"john"} 1`] = `
+{
+  "params": [
+    "john",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_SEARCH(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].name")),"one",?) IS NOT NULL",
+}
+`;
+
+exports[`$eq JSON Can search strings in a string array: SQL Query for not match filter: {"settings.parents[*].name":5} 1`] = `
+{
+  "params": [
+    "5",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].name"),?)",
+}
+`;
+
+exports[`$eq JSON Can search strings in a string array: SQL Query for not match filter: {"settings.parents[*].name":true} 1`] = `
+{
+  "params": [
+    "true",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].name"),?)",
+}
+`;
+
+exports[`$eq JSON Checking a json value for null also matches if the key does not exist: SQL Query for filter: {"settings.name":null} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON Checking a json value for null also matches if the key does not exist: SQL Query for filter: {"settings.parents[*].age":null} 1`] = `
+{
+  "params": [
+    "null",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].age"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].age") IS NULL",
+}
+`;
+
+exports[`$eq JSON Checking a json value for null also matches if the key does not exist: SQL Query for filter: {"settings.parents[*].name":null} 1`] = `
+{
+  "params": [
+    "null",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].name"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.parents[*].name") IS NULL",
+}
+`;
+
+exports[`$eq JSON JSON strings match case insensitive and whole string: SQL Query for filter: {"settings.name":"John Doe"} 1`] = `
+{
+  "params": [
+    "john doe",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) = ?",
+}
+`;
+
+exports[`$eq JSON JSON strings match case insensitive and whole string: SQL Query for filter: {"settings.name":"jOhn dOe"} 1`] = `
+{
+  "params": [
+    "john doe",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) = ?",
+}
+`;
+
+exports[`$eq JSON JSON strings match case insensitive and whole string: SQL Query for filter: {"settings.name":"john doe"} 1`] = `
+{
+  "params": [
+    "john doe",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) = ?",
+}
+`;
+
+exports[`$eq JSON JSON strings match case insensitive and whole string: SQL Query for filter: {"settings.name":{"$eq":"John Doe"}} 1`] = `
+{
+  "params": [
+    "john doe",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) = ?",
+}
+`;
+
+exports[`$eq JSON JSON strings match case insensitive and whole string: SQL Query for not match filter: {"settings.name":"Jane Doe"} 1`] = `
+{
+  "params": [
+    "jane doe",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) = ?",
+}
+`;
+
+exports[`$eq JSON JSON strings match case insensitive and whole string: SQL Query for not match filter: {"settings.name":"John"} 1`] = `
+{
+  "params": [
+    "john",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) = ?",
+}
+`;
+
+exports[`$eq JSON JSON strings match case insensitive and whole string: SQL Query for not match filter: {"settings.name":"john"} 1`] = `
+{
+  "params": [
+    "john",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) = ?",
+}
+`;
+
+exports[`$eq JSON can check if a JSON array column is null: SQL Query for filter: {"settings.randomValues":{"$eq":null}} 1`] = `
+{
+  "params": [
+    "null",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL",
+}
+`;
+
+exports[`$eq JSON can check if a JSON array column is null: SQL Query for filter: {"settings.randomValues":{"$neq":null}} 1`] = `
+{
+  "params": [
+    "null",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (NOT (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?))) AND JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NOT NULL",
+}
+`;
+
+exports[`$eq JSON can check if a JSON array column is null: SQL Query for filter: {"settings.randomValues":null} 1`] = `
+{
+  "params": [
+    "null",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL",
+}
+`;
+
+exports[`$eq JSON can check if a JSON array column is null: SQL Query for not match filter: {"settings.randomValues":{"$eq":null}} 1`] = `
+{
+  "params": [
+    "null",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL",
+}
+`;
+
+exports[`$eq JSON can check if a JSON array column is null: SQL Query for not match filter: {"settings.randomValues":{"$neq":null}} 1`] = `
+{
+  "params": [
+    "null",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (NOT (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?))) AND JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NOT NULL",
+}
+`;
+
+exports[`$eq JSON can check if a JSON array column is null: SQL Query for not match filter: {"settings.randomValues":null} 1`] = `
+{
+  "params": [
+    "null",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL",
+}
+`;
+
+exports[`$eq JSON can check if a json object column is null: SQL Query for filter: {"settings":{"$eq":null}} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$" ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON can check if a json object column is null: SQL Query for filter: {"settings":null} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$" ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON can check if a json object column is null: SQL Query for not match filter: {"settings":{"$eq":null}} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$" ERROR ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON can check if a json object column is null: SQL Query for not match filter: {"settings":null} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$" ERROR ON ERROR) IS NULL",
+}
+`;

@@ -331,7 +331,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'The period you want to set does not exist (anymore)',
-                        human: $t('De periode die je wilt instellen bestaat niet (meer)'),
+                        human: $t('a3795bf6-ed50-4aa6-9caf-33820292c159'),
                         field: 'period',
                     });
                 }
@@ -341,7 +341,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'The period you want to set does not exist (anymore)',
-                        human: $t('De periode die je wilt instellen bestaat niet (meer)'),
+                        human: $t('a3795bf6-ed50-4aa6-9caf-33820292c159'),
                         field: 'period',
                     });
                 }
@@ -350,7 +350,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'The period you want to set is already closed',
-                        human: $t('De periode die je wilt instellen is reeds afgesloten'),
+                        human: $t('b6bc2fef-71ac-43a1-b430-50945427a9e3'),
                         field: 'period',
                     });
                 }
@@ -360,7 +360,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'The period you want to set has not started yet',
-                        human: $t('Het werkjaar die je wilt instellen is nog niet gestart'),
+                        human: $t('e0fff936-3f3c-46b8-adcf-c723c33907a2'),
                         field: 'period',
                     });
                 }

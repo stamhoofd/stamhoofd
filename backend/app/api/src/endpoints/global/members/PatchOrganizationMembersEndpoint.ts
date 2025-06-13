@@ -74,22 +74,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
         const platform = await Platform.getShared();
 
-        // Cache
-        const groups: Group[] = [];
-
-        async function getGroup(id: string) {
-            const f = groups.find(g => g.id === id);
-            if (f) {
-                return f;
-            }
-            const group = await Group.getByID(id);
-            if (group) {
-                groups.push(group);
-                return group;
-            }
-            return null;
-        }
-
         const updateMembershipMemberIds = new Set<string>();
         const updateMembershipsForOrganizations = new Set<string>();
 

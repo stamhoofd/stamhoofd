@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, CachedBalance, Document, EmailTemplate, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
-import { AccessRight, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, GroupType, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordSettings, ResourcePermissions } from '@stamhoofd/structures';
+import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, GroupType, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordSettings, ResourcePermissions } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { MemberRecordStore } from '../services/MemberRecordStore';
 import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryMemberAccess';
@@ -677,13 +677,19 @@ export class AdminPermissionChecker {
         return this.canEditUserName(user);
     }
 
-    async canAccessEmailTemplate(template: EmailTemplate, level: PermissionLevel = PermissionLevel.Read) {
-        if (level === PermissionLevel.Read) {
+    async canAccessEmailTemplate(template: EmailTemplate, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
+        if (level === PermissionLevel.Read && !EmailTemplateStruct.isSavedEmail(template.type)) {
             if (template.organizationId === null) {
                 // Public templates
-                return true;
+
+                return EmailTemplateStruct.allowPlatformLevel(template.type);
             }
-            return this.canReadEmailTemplates(template.organizationId);
+
+            if (!await this.canReadEmailTemplates(template.organizationId)) {
+                return false;
+            }
+
+            return EmailTemplateStruct.allowOrganizationLevel(template.type);
         }
 
         // Note: if the template has an organizationId of null, everyone can access it, but only for reading
@@ -834,13 +840,11 @@ export class AdminPermissionChecker {
     }
 
     async canReadEmailTemplates(organizationId: string) {
-        const organizationPermissions = await this.getOrganizationPermissions(organizationId);
-
-        if (!organizationPermissions) {
+        if (!await this.hasSomeAccess(organizationId) && !this.hasSomePlatformAccess()) {
             return false;
         }
 
-        return !!this.user.permissions;
+        return true;
     }
 
     async canCreateGroupInCategory(organizationId: string, category: GroupCategory) {

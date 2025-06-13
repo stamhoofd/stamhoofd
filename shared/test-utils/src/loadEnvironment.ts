@@ -25,4 +25,13 @@ export function loadEnvironment() {
     if (!globalObject.$getCountry) {
         (globalObject as any).$getCountry = () => 'BE';
     }
+
+    // Database
+    process.env.DB_DATABASE = (STAMHOOFD as any).DB_DATABASE + '';
+    process.env.DB_HOST = (STAMHOOFD as any).DB_HOST + '';
+    process.env.DB_PASS = (STAMHOOFD as any).DB_PASS + '';
+    process.env.DB_USER = (STAMHOOFD as any).DB_USER + '';
+
+    // Database
+    process.env.DB_MULTIPLE_STATEMENTS = 'true';
 }

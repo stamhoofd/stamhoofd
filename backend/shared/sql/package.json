@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/sql",
-    "version": "2.83.5",
+    "version": "2.84.2",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "license": "UNLICENCED",
@@ -10,7 +10,8 @@
         "dist"
     ],
     "scripts": {
-        "build": "tsc -b"
+        "build": "tsc -b",
+        "test": "jest"
     },
     "publishConfig": {
         "access": "public"

@@ -45,7 +45,7 @@
                                 {{ $t('c38818cb-2337-451b-afac-69f22b700d43', {date: formatDate(membership.trialUntil, true)}) }}
                             </p>
                             <p v-else-if="membership.trialUntil" class="style-description-small">
-                                {{ $t('Proefperiode afgelopen op {date}', {date: formatDate(membership.trialUntil, true)}) }}
+                                {{ $t('892b70a8-6bba-4c41-9d82-b7db955f3aa2', {date: formatDate(membership.trialUntil, true)}) }}
                             </p>
 
                             <p v-if="membership.organizationId === platform.membershipOrganizationId" class="style-description-small">

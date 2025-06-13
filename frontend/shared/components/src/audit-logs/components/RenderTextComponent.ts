@@ -157,7 +157,7 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
         }
 
         if (obj.id) {
-            return copyable(tooltip(h('span', { class: 'style-inline-resource style-tooltip' }, obj.toString() || $t('onbekend')), 'ID: ' + obj.id), obj.id);
+            return copyable(tooltip(h('span', { class: 'style-inline-resource style-tooltip' }, obj.toString() || $t('0e21480d-5597-4337-bcee-5f4eba73fb7e')), 'ID: ' + obj.id), obj.id);
         }
         const str = obj.toString();
 

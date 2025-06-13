@@ -11,6 +11,10 @@ import { GlobalHelper } from '../src/helpers/GlobalHelper';
 import * as jose from 'jose';
 import { TestUtils } from '@stamhoofd/test-utils';
 import './toMatchMap';
+import { PayconiqMocker } from './helpers/PayconiqMocker';
+import { BalanceItemService } from '../src/services/BalanceItemService';
+import { QueueHandler } from '@stamhoofd/queues';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 // Set version of saved structures
 Column.setJSONVersion(Version);
@@ -75,6 +79,26 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+    // Call twice to also wait on items that are scheduled withing scheduled tasks
+    await BalanceItemService.flushAll();
+    await BalanceItemService.flushAll();
+    QueueHandler.abortAll(
+        new SimpleError({
+            code: 'SHUTDOWN',
+            message: 'Shutting down',
+            statusCode: 503,
+        }),
+    );
+    await QueueHandler.awaitAll();
+    QueueHandler.abortAll(
+        new SimpleError({
+            code: 'SHUTDOWN',
+            message: 'Shutting down',
+            statusCode: 503,
+        }),
+    );
+    await QueueHandler.awaitAll();
+
     // Wait for email queue etc
     while (Email.currentQueue.length > 0) {
         console.info('Emails still in queue. Waiting...');
@@ -83,5 +107,10 @@ afterAll(async () => {
     await Database.end();
 });
 
+afterEach(async () => {
+    await QueueHandler.awaitAll();
+});
+
 TestUtils.setup();
 EmailMocker.infect();
+PayconiqMocker.infect();

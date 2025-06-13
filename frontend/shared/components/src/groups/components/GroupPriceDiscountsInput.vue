@@ -59,9 +59,9 @@ function setDiscount(index: number, discount: GroupPriceDiscount) {
 
 function getTitle(index: number) {
     if (index === model.value.length - 1) {
-        return $t('Vanaf {index}e inschrijving', { index: index + 2 });
+        return $t('69783c9e-0199-4e1b-be23-35625515167d', { index: index + 2 });
     }
-    return $t('Op {index}e inschrijving', { index: index + 2 });
+    return $t('bfbdccd4-c432-4098-8980-a83ac6f6a76c', { index: index + 2 });
 }
 
 </script>

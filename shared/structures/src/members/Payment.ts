@@ -103,16 +103,6 @@ export class Payment extends AutoEncoder {
         }
     }
 
-    matchQuery(query: string): boolean {
-        const lowerQuery = query.toLowerCase();
-        if (
-            this.transferDescription && this.transferDescription.toLowerCase().includes(lowerQuery)
-        ) {
-            return true;
-        }
-        return false;
-    }
-
     getHTMLTable(): string {
         let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>`;
 

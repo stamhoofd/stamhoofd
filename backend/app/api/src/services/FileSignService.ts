@@ -1,21 +1,30 @@
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules import
+import {
+    getSignedUrl,
+} from '@aws-sdk/s3-request-presigner';
 import { DecodedRequest, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { File } from '@stamhoofd/structures';
-import AWS from 'aws-sdk';
-import * as jose from 'jose';
 import chalk from 'chalk';
+import * as jose from 'jose';
 
 /**
  * This service creates signed urls for valid files
  */
 export class FileSignService {
-    static s3 = new AWS.S3({
-        endpoint: STAMHOOFD.SPACES_ENDPOINT,
-        accessKeyId: STAMHOOFD.SPACES_KEY,
-        secretAccessKey: STAMHOOFD.SPACES_SECRET,
-    });
+    static s3: S3Client;
 
     static async load() {
+        this.s3 = new S3Client({
+            forcePathStyle: false, // Configures to use subdomain/virtual calling format.
+            endpoint: 'https://' + STAMHOOFD.SPACES_ENDPOINT,
+            credentials: {
+                accessKeyId: STAMHOOFD.SPACES_KEY,
+                secretAccessKey: STAMHOOFD.SPACES_SECRET,
+            },
+            region: 'eu-west-1', // Not used, but required by the S3Client
+        });
+
         /**
          * Note the algorithm is only used for signing. For verification the algorithm inside the public keys are used
          */
@@ -101,11 +110,11 @@ export class FileSignService {
         }
 
         try {
-            const url = await this.s3.getSignedUrlPromise('getObject', {
+            const command = new GetObjectCommand({
                 Bucket: STAMHOOFD.SPACES_BUCKET,
                 Key: file.path,
-                Expires: duration,
             });
+            const url = await getSignedUrl(this.s3, command, { expiresIn: duration });
 
             return new File({
                 ...file,

@@ -1,12 +1,14 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { Sorter } from '@stamhoofd/utility';
+import { v4 as uuidv4 } from 'uuid';
 import { Group } from './Group.js';
 import { GroupPriceDiscount } from './GroupPriceDiscount.js';
+import { calculateHungarianAlgorithm } from './helpers/calculateHungarianAlgorithm.js';
 import { type RegisterCart } from './members/checkout/RegisterCart.js';
 import { RegisterItem } from './members/checkout/RegisterItem.js';
-import { type PlatformFamily, type PlatformMember } from './members/PlatformMember.js';
-import { v4 as uuidv4 } from 'uuid';
-import { TranslatedString } from './TranslatedString.js';
 import { RegistrationWithPlatformMember } from './members/checkout/RegistrationWithPlatformMember.js';
+import { type PlatformFamily, type PlatformMember } from './members/PlatformMember.js';
+import { TranslatedString } from './TranslatedString.js';
 
 export class BundleDiscount extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -34,30 +36,34 @@ export class BundleDiscount extends AutoEncoder {
     get humanDescription() {
         if (this.countWholeFamily) {
             if (this.countPerGroup) {
-                return $t('Korting voor gezinsleden die inschrijven voor dezelfde activiteit.');
+                return $t('43c1d02d-ca64-4809-95d6-50491c712cbb');
             }
-            return $t('Korting voor gezinsleden die inschrijven voor verschillende activiteiten uit deze bundel.');
+            return $t('d098add1-c1b8-44d1-bf96-d762db3ea3cc');
         }
 
-        return $t('Korting voor leden die inschrijven voor meerdere activiteiten uit deze bundel.');
+        return $t('200b5e3d-93d1-4c1c-80be-6eb0f2f75793');
     }
 
-    get discountsText() {
-        if (this.discounts.length === 0) {
-            return '';
+    static discountsToText(discounts: GroupPriceDiscount[]) {
+        if (discounts.length === 0) {
+            return $t('d3c259e4-4f8b-4f2f-9051-a943ef41dbd2');
         }
-        return this.discounts.map((d, i) => {
-            if (i === this.discounts.length - 1) {
-                return $t('{5%} korting op de {2}e en volgende inschrijvingen', {
+        return discounts.map((d, i) => {
+            if (i === discounts.length - 1) {
+                return $t('cb8ccc1d-7ec0-4c9d-bf02-6759109324ce', {
                     '5%': d.toString(),
                     '2': i + 2,
                 });
             }
-            return $t('{5%} korting op de {2}e inschrijving', {
+            return $t('4eda3d41-73fe-4063-8036-ccbd7290deaf', {
                 '5%': d.toString(),
                 '2': i + 2,
             });
         }).join(', ');
+    }
+
+    get discountsText() {
+        return BundleDiscount.discountsToText(this.discounts);
     }
 
     calculate(cart: RegisterCart): BundleDiscountCalculationGroup {
@@ -153,22 +159,22 @@ class BundleDiscountCalculationGroup {
         if (!this.bundle.applyableTo(item)) {
             return null;
         }
-        let groupingCode = '';
+        let groupingCode = 'family-' + item.member.family.uuid + '-';
         let group: Group | null = null;
         let member: PlatformMember | null = null;
 
         if (this.bundle.countWholeFamily) {
             if (this.bundle.countPerGroup) {
-                groupingCode = item.group.id;
+                groupingCode += item.group.id;
                 group = item.group;
             }
             else {
-                // No grouping at all
+                // Group by family objects (for admins)
             }
         }
         else {
             member = item.member;
-            groupingCode = item.member.id;
+            groupingCode += item.member.id;
         }
         const existing = this.calculations.get(groupingCode);
         if (!existing) {
@@ -276,13 +282,12 @@ export class BundleDiscountCalculation {
         return this.netTotal - this.netTotalDueLater;
     }
 
-    getNetTotalFor(item: RegisterItem | RegistrationWithPlatformMember) {
+    getTotalFor(item: RegisterItem | RegistrationWithPlatformMember) {
         if (item instanceof RegisterItem) {
             return this.items.get(item) ?? 0;
         }
         else if (item instanceof RegistrationWithPlatformMember) {
-            // Calculated discount minus the already applied discount
-            return (this.registrations.get(item) ?? 0); // - (item.registration.discounts.get(this.bundle.id)?.amount ?? 0);
+            return (this.registrations.get(item) ?? 0);
         }
         return 0;
     }
@@ -312,14 +317,48 @@ export class BundleDiscountCalculation {
     }
 
     get itemsAndRegistrations() {
-        return [...this.items.keys(), ...this.registrations.keys()];
+        // Return the items in such an order that the first ones should receive the highest discount
+        // The first ones that should receive the highest discount are:
+        // - the newest items
+        // - registrations or items that edit a registration, in order of the already applied discount
+
+        const itemsOrder = [...this.items.keys()].reverse();
+        const registrations = [...this.registrations.keys()];
+        const now = new Date();
+
+        const itemsWithSortingData = itemsOrder.map((item) => {
+            return {
+                item,
+                appliedDiscount: item.replaceRegistrations.length >= 1 ? (item.replaceRegistrations[0].registration.discounts.get(this.bundle.id)?.amount ?? 0) : 0,
+                createdAt: item.replaceRegistrations.length >= 1 ? (item.replaceRegistrations[0].registration.createdAt) : now,
+            };
+        });
+
+        const registrationsWithSortingData = registrations.map((registration) => {
+            return {
+                item: registration,
+                appliedDiscount: registration.registration.discounts.get(this.bundle.id)?.amount ?? 0,
+                createdAt: registration.registration.createdAt,
+            };
+        });
+
+        const base = [
+            ...itemsWithSortingData,
+            ...registrationsWithSortingData,
+        ].sort((a, b) => {
+            return Sorter.stack(
+                Sorter.byNumberValue(a.appliedDiscount, b.appliedDiscount),
+                Sorter.byDateValue(a.createdAt, b.createdAt),
+            );
+        });
+
+        return base.map(b => b.item);
     }
 
     calculate() {
         // For each item and registration, calculate the price matrix
         // Price if used as first item, second item, third item
         // We'll then calculate the optimal order using the Hungarian Algorithm
-
         const arr = this.itemsAndRegistrations;
         const priceMatrix: number[][] = [];
 
@@ -346,7 +385,7 @@ export class BundleDiscountCalculation {
             priceMatrix.push(row);
         }
 
-        const solved = hungarian(priceMatrix);
+        const solved = calculateHungarianAlgorithm(priceMatrix);
 
         for (const [index, item] of arr.entries()) {
             const nth = solved[index];
@@ -360,56 +399,4 @@ export class BundleDiscountCalculation {
             }
         }
     }
-}
-/**
- * Optimized algorithm to maximize the total discount
- * Returns an array where each index corresponds to the nth discount for each item
- * @param priceMatrix A 2D array where priceMatrix[i][j] represents the discount amount for the ith item at the jth position
- */
-function hungarian(priceMatrix: number[][]): number[] {
-    // No items to process
-    if (priceMatrix.length === 0) {
-        return [];
-    }
-
-    const n = priceMatrix.length;
-    const assignment: number[] = new Array(n).fill(0);
-
-    // Pre-calculate max discounts for each item to avoid repeated calculations
-    const itemMaxDiscounts: { index: number; maxDiscount: number }[] = [];
-    for (let i = 0; i < n; i++) {
-        // Find max discount (skip position 0)
-        let maxDiscount = 0;
-        for (let j = 1; j < priceMatrix[i].length; j++) {
-            maxDiscount = Math.max(maxDiscount, priceMatrix[i][j]);
-        }
-        itemMaxDiscounts.push({ index: i, maxDiscount });
-    }
-
-    // Sort indices by their maximum potential discount (descending)
-    itemMaxDiscounts.sort((a, b) => b.maxDiscount - a.maxDiscount);
-
-    // Track assigned positions
-    const assigned = new Set<number>();
-
-    // For each item (in order of maximum discount potential)
-    for (const { index: i } of itemMaxDiscounts) {
-        let bestPos = 0;
-        let bestDiscount = priceMatrix[i][0];
-
-        // Find the best unassigned position for this item
-        for (let j = 1; j < priceMatrix[i].length; j++) {
-            if (!assigned.has(j) && priceMatrix[i][j] > bestDiscount) {
-                bestPos = j;
-                bestDiscount = priceMatrix[i][j];
-            }
-        }
-
-        assignment[i] = bestPos;
-        if (bestPos !== 0) {
-            assigned.add(bestPos);
-        }
-    }
-
-    return assignment;
 }

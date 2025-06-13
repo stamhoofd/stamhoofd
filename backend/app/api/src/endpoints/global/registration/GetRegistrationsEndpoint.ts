@@ -102,7 +102,7 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
                     if (groupIds.length === 0) {
                         throw Context.auth.error({
                             message: 'You must filter on a group of the organization you are trying to access',
-                            human: $t(`Je hebt geen toegangsrechten om deze inschrijvingen te bekijken`),
+                            human: $t(`94e2d4ff-9b4b-4861-ba42-341ed67b32d8`),
                         });
                     }
 

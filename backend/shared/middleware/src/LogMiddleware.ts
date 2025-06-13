@@ -11,7 +11,7 @@ function logRequestDetails(request: Request) {
         }
 
         if (json && json.clientSecret) {
-            json.clientSecret = '*******'
+            json.clientSecret = '*******';
         }
         logger.error(
             ...requestPrefix(request, 'query'),
@@ -32,7 +32,7 @@ function logRequestDetails(request: Request) {
                 }
 
                 if (json && json.clientSecret) {
-                    json.clientSecret = '*******'
+                    json.clientSecret = '*******';
                 }
 
                 logger.error(
@@ -66,36 +66,39 @@ function requestOneLiner(request: Request): (StyledText | string)[] {
 }
 
 function requestPrefix(request: Request, ...classes: string[]): (StyledText | string)[] {
-    if (!(request as any)._uniqueIndex) {
-        return [];
+    if ((request as any)._uniqueIndex === undefined) {
+        return [
+            new StyledText(`[UNKNOWN REQUEST] `).addClass('request', 'tag', ...classes),
+        ];
     }
     return [
         new StyledText(`[R${((request as any)._uniqueIndex as number).toString().padStart(4, '0')}] `).addClass('request', 'tag', ...classes),
     ];
 }
 
+function assignIndex(request: Request) {
+    if ((request as any)._uniqueIndex !== undefined) {
+        return; // Already assigned
+    }
+    (request as any)._uniqueIndex = ++requestCounter;
+    (request as any)._startTime = process.hrtime();
+}
+
 export const LogMiddleware: ResponseMiddleware & RequestMiddleware = {
     handleRequest(request: Request) {
-        (request as any)._uniqueIndex = requestCounter++;
-        (request as any)._startTime = process.hrtime();
-
-        if (request.method == 'OPTIONS') {
-            if (STAMHOOFD.environment === 'development') {
-                logger.log(
-                    ...requestPrefix(request),
-                    ...requestOneLiner(request),
-                );
-            }
-            return;
-        }
-
-        logger.log(
-            ...requestPrefix(request),
-            ...requestOneLiner(request),
-        );
+        assignIndex(request);
     },
 
     wrapRun<T>(run: () => Promise<T>, request: Request) {
+        assignIndex(request);
+
+        if (request.method !== 'OPTIONS' || STAMHOOFD.environment === 'development') {
+            logger.log(
+                ...requestPrefix(request, 'first'),
+                ...requestOneLiner(request),
+            );
+        }
+
         return logger.setContext({
             prefixes: requestPrefix(request, 'output'),
             tags: ['request', 'request-output'],
@@ -107,10 +110,13 @@ export const LogMiddleware: ResponseMiddleware & RequestMiddleware = {
         const startTime = (request as any)._startTime ?? endTime;
         const timeInMs = Math.round((endTime[0] - startTime[0]) * 1000 + (endTime[1] - startTime[1]) / 1000000);
 
+        const prefix = !error ? [] : requestPrefix(request, 'error');
+
         if (request.method !== 'OPTIONS') {
             logger.log(
-                ...requestPrefix(request, 'time'),
-                response.status + ' - Finished in ' + timeInMs + 'ms',
+                ...prefix,
+                new StyledText('HTTP ' + response.status).addClass('request', 'status-code'),
+                ' - Finished in ' + timeInMs + 'ms',
             );
         }
 
@@ -118,8 +124,10 @@ export const LogMiddleware: ResponseMiddleware & RequestMiddleware = {
             if (isSimpleError(error) || isSimpleErrors(error)) {
                 if (!error.hasCode('expired_access_token') && !error.hasCode('unknown_domain') && !error.hasCode('unknown_webshop')) {
                     logger.error(
-                        ...requestPrefix(request, 'error'),
-                        'Request with error in response ',
+                        ...prefix,
+                        'Request with error in response:',
+                    );
+                    logger.error(
                         new StyledText(error).addClass('request', 'error'),
                     );
 
@@ -128,8 +136,12 @@ export const LogMiddleware: ResponseMiddleware & RequestMiddleware = {
             }
             else {
                 logger.error(
-                    ...requestPrefix(request, 'error'),
-                    'Request with internal error ',
+                    ...prefix,
+                    'Request with internal error:',
+                );
+
+                logger.error(
+                    ...prefix,
                     new StyledText(error).addClass('request', 'error'),
                 );
 

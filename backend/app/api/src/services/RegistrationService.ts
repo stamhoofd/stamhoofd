@@ -1,11 +1,12 @@
 import { ManyToOneRelation } from '@simonbackx/simple-database';
 import { BalanceItem, Document, Group, Member, Registration } from '@stamhoofd/models';
-import { AppliedRegistrationDiscount, AuditLogSource, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, EmailTemplateType, StockReservation, TranslatedString } from '@stamhoofd/structures';
+import { AppliedRegistrationDiscount, AuditLogSource, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, EmailTemplateType, StockReservation, TranslatedString, Version } from '@stamhoofd/structures';
 import { AuditLogService } from './AuditLogService';
 import { GroupService } from './GroupService';
 import { PlatformMembershipService } from './PlatformMembershipService';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Formatter } from '@stamhoofd/utility';
+import { encodeObject, patchContainsChanges } from '@simonbackx/simple-encoding';
 
 export const RegistrationService = {
     async markValid(registrationId: string) {
@@ -60,6 +61,12 @@ export const RegistrationService = {
                     .where('status', BalanceItemStatus.Due)
                     .fetch();
 
+                let before: string | undefined;
+                if (STAMHOOFD.environment !== 'production') {
+                    // This is an expensive operation, so keep track of whether it was actually necessary so we can detect performance issues
+                    before = JSON.stringify(encodeObject(registration.discounts, { version: Version }));
+                }
+
                 // Reset registration discounts
                 registration.discounts = new Map();
 
@@ -79,9 +86,22 @@ export const RegistrationService = {
                         registration.discounts.set(discount.id, existing);
                     }
                     existing.amount += -balanceItem.price; // price is negative means it has been discounted, and we store a positive amount with the discount
+
+                    if (existing.amount === 0) {
+                        // Delete the discount
+                        registration.discounts.delete(discount.id);
+                    }
                 }
 
                 console.log('Saving updated discounts for', registrationId, registration.discounts);
+
+                if (STAMHOOFD.environment !== 'production') {
+                    const after = JSON.stringify(encodeObject(registration.discounts, { version: Version }));
+                    if (before === after) {
+                        console.warn('Unnecessary update of registration discounts', registrationId, before);
+                    }
+                }
+
                 await registration.save();
                 return true;
             });

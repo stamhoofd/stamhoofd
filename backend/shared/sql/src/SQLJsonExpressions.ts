@@ -1,18 +1,18 @@
 import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery } from './SQLExpression';
-import { SQLJSONValue, SQLSafeValue, SQLScalar, SQLScalarValue } from './SQLExpressions';
+import { SQLJSONFalse, SQLJSONNull, SQLJSONTrue, SQLSafeValue, SQLScalar, SQLScalarValue } from './SQLExpressions';
 import { SQLWhere } from './SQLWhere';
 
 export function scalarToSQLJSONExpression(s: SQLScalarValue | null): SQLExpression {
     if (s === null) {
-        return new SQLJSONValue(null);
+        return SQLJSONNull;
     }
 
     if (s === true) {
-        return new SQLJSONValue(true);
+        return SQLJSONTrue;
     }
 
     if (s === false) {
-        return new SQLJSONValue(false);
+        return SQLJSONFalse;
     }
 
     return new SQLScalar(s);
@@ -30,6 +30,39 @@ export class SQLJsonUnquote implements SQLExpression {
             'JSON_UNQUOTE(',
             this.target.getSQL(options),
             ')',
+        ]);
+    }
+}
+
+export type SQLJsonValueType = 'FLOAT' | 'DOUBLE' | 'DECIMAL' | 'SIGNED' | 'UNSIGNED' | 'DATE' | 'TIME' | 'DATETIME' | 'YEAR' | 'CHAR' | 'JSON';
+
+export class SQLJsonValue implements SQLExpression {
+    target: SQLExpression;
+    path: SQLExpression;
+    type?: SQLJsonValueType;
+
+    constructor(target: SQLExpression, type?: SQLJsonValueType, path?: SQLExpression) {
+        this.target = target;
+        this.type = type;
+
+        if (!path && target instanceof SQLJsonExtract) {
+            // If the target is a SQLJsonExtract, we can use its path directly
+            this.target = target.target;
+            this.path = target.path;
+            return;
+        }
+
+        this.path = path ?? new SQLSafeValue('$');
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            'JSON_VALUE(',
+            this.target.getSQL(options),
+            ',',
+            this.path.getSQL(options),
+            (this.type ? ' RETURNING ' + this.type + (this.type === 'CHAR' ? ' CHARACTER SET utf8mb4' : '') : ''),
+            ' ERROR ON ERROR)',
         ]);
     }
 }
@@ -52,6 +85,34 @@ export class SQLJsonExtract implements SQLExpression {
             this.target.getSQL(options),
             ',',
             this.path.getSQL(options),
+            ')',
+        ]);
+    }
+
+    /**
+     * NOTE: this has to be combined with asScalar = true! Never let user input in a query without passing it as a parameter.
+     *
+     * E.g. SQL.jsonValue(SQL.column('settings'), `$.value.prices[*].bundleDiscounts.${SQLJsonExtract.escapePathComponent(key)}`, true) (note that last true!)
+     */
+    static escapePathComponent(str: string) {
+        return '"' + str.replace(/(["\\])/g, '\\$1') + '"';
+    }
+}
+
+/**
+ * Same as target->path, JSON_EXTRACT(target, path)
+ */
+export class SQLJsonKeys implements SQLExpression {
+    target: SQLExpression;
+
+    constructor(target: SQLExpression) {
+        this.target = target;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            'JSON_KEYS(',
+            this.target.getSQL(options),
             ')',
         ]);
     }

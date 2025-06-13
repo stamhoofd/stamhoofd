@@ -129,13 +129,24 @@
                 {{ $t('f8f3a5be-624a-4d39-b401-78ad833b64dd') }}
             </Checkbox>
         </template>
+
+        <div v-if="hasFullAccess && areAdvancedWebshopSettingsEnabled" class="container">
+            <hr>
+            <h2>{{ $t('badafccc-80ac-4716-87dc-0385f4741af7') }}</h2>
+            <p v-if="!hasCustomDomain" class="info-box">
+                {{ $t('4b9e6ec2-a698-43b7-aa6e-be4b05dfd34e') }}
+            </p>
+            <STInputBox error-fields="meta.customCode" :error-box="errors.errorBox" class="max" :title="$t('239382e0-0906-4e0f-ba1a-c58574b92e78')">
+                <textarea v-model="customCode" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t('887a8ef4-989d-4dff-a565-d67fdcb95c48')" :disabled="!hasCustomDomain" />
+            </STInputBox>
+        </div>
     </SaveView>
 </template>
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { Checkbox, ColorInput, DetailedTicketView, LogoEditor, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, UploadButton, useOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
+import { Checkbox, ColorInput, DetailedTicketView, LogoEditor, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, UploadButton, useAuth, useFeatureFlag, useOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
 import { Cart, CartItem, CartReservedSeat, DarkMode, Image, Policy, PrivateWebshop, ProductType, ResolutionRequest, RichText, SponsorConfig, TicketPublic, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
@@ -151,8 +162,14 @@ const { webshop, addPatch, errors, saving, save, hasChanges } = useEditWebshop({
 const present = usePresent();
 const organization = useOrganization();
 const viewTitle = 'Webshop pagina wijzigen';
+const auth = useAuth();
+const hasFullAccess = computed(() => auth.permissions?.hasFullAccess() ?? false);
+
+const areAdvancedWebshopSettingsEnabled = useFeatureFlag()('webshop-advanced-settings');
 
 const hasTickets = computed(() => webshop.value.hasTickets);
+
+const hasCustomDomain = computed(() => webshop.value.hasCustomDomain || STAMHOOFD.environment === 'development');
 
 function addMetaPatch(patch: AutoEncoderPatchType<WebshopMetaData>) {
     addPatch(PrivateWebshop.patch({ meta: patch }));
@@ -239,6 +256,14 @@ const coverPhoto = computed({
     get: () => webshop.value.meta.coverPhoto,
     set: (coverPhoto: Image | null) => {
         const patch = WebshopMetaData.patch({ coverPhoto });
+        addPatch(PrivateWebshop.patch({ meta: patch }));
+    },
+});
+
+const customCode = computed({
+    get: () => webshop.value.meta.customCode ?? '',
+    set: (customCode: string) => {
+        const patch = WebshopMetaData.patch({ customCode });
         addPatch(PrivateWebshop.patch({ meta: patch }));
     },
 });

@@ -229,6 +229,10 @@ export class CachedBalance extends QueryableModel {
             .where('dueAt', SQLWhereSign.Greater, dueOffset)
             .groupBy(SQL.column(columnName));
 
+        if (customWhere) {
+            dueQuery.where(customWhere);
+        }
+
         const dueResult = await dueQuery.fetch();
 
         const results: [string, { amountPaid: number; amountOpen: number; amountPending: number; nextDueAt: Date | null }][] = [];
