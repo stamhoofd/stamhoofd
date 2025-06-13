@@ -36,7 +36,7 @@
 
 <script lang="ts" setup>
 import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { Checkbox, EditRecordCategoriesBox, RecordEditorSettings, RecordEditorType, STErrorsDefault, STList, STListItem, SaveView, getCheckoutUIFilterBuilders } from '@stamhoofd/components';
+import { Checkbox, EditRecordCategoriesBox, GroupUIFilterBuilder, RecordEditorSettings, RecordEditorType, STErrorsDefault, STList, STListItem, SaveView, getCheckoutUIFilterBuilders, useCheckoutInMemoryFilterBuilders } from '@stamhoofd/components';
 import { Checkout, PrivateWebshop, RecordCategory, WebshopMetaData } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { UseEditWebshopProps, useEditWebshop } from './useEditWebshop';
@@ -59,12 +59,19 @@ const phoneEnabled = computed({
     },
 });
 
+const getCheckoutFilterDefinitions = useCheckoutInMemoryFilterBuilders();
+
 const editorSettings = computed(() => {
     return new RecordEditorSettings({
         type: RecordEditorType.Webshop,
         dataPermission: false,
         filterBuilder: (_categories: RecordCategory[]) => {
-            return getCheckoutUIFilterBuilders()[0];
+            if (!props.webshopManager?.webshop) {
+                return new GroupUIFilterBuilder({
+                    builders: [],
+                });
+            }
+            return getCheckoutFilterDefinitions(props.webshopManager?.webshop)[0];
         },
         exampleValue: Checkout.create({}),
     });

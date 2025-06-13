@@ -1,4 +1,4 @@
-import { AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, FilterWrapperMarker, getAuditLogTypeName, Group, LoadedPermissions, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, RecordCategory, RecordType, SetupStepType, StamhoofdFilter, User, WebshopPreview } from '@stamhoofd/structures';
+import { AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, FilterWrapperMarker, getAuditLogTypeName, Group, LoadedPermissions, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, RecordCategory, RecordType, SetupStepType, StamhoofdFilter, User, Webshop, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { Gender } from '../../../../../shared/structures/esm/dist/src/members/Gender';
@@ -146,19 +146,69 @@ export function useRegisterItemFilterBuilders() {
 //
 // CHECKOUT
 //
+export function useCheckoutInMemoryFilterBuilders() {
+    return (webshop: Webshop) => {
+        const all: UIFilterBuilders = [
+            new GroupUIFilterBuilder({
+                name: $t(`Winkelmandje`),
+                description: $t('Filter op bestellingen die minstens één artikel in het winkelmandje hebben die aan deze voorwaarden voldoet'),
+                builders: [
+                    new NumberFilterBuilder({
+                        name: $t(`Aantal stuks`),
+                        type: NumberFilterFormat.Number,
+                        key: 'amount',
+                    }),
+                    new MultipleChoiceFilterBuilder({
+                        name: $t(`Artikel`),
+                        options: webshop.products.map((product) => {
+                            return new MultipleChoiceUIFilterOption(product.name, product.id);
+                        }),
+                        wrapper: {
+                            product: {
+                                id: {
+                                    $in: FilterWrapperMarker,
+                                },
+                            },
+                        },
+                    }),
+                    ...webshop.products.filter(product => product.prices.length > 1).map(product => new MultipleChoiceFilterBuilder({
+                        name: product.name + ' (' + $t('tarieven') + ')',
+                        options: product.prices.map((price) => {
+                            return new MultipleChoiceUIFilterOption(price.name, price.id);
+                        }),
+                        wrapper: {
+                            product: {
+                                id: product.id,
+                            },
+                            productPrice: {
+                                id: {
+                                    $in: FilterWrapperMarker,
+                                },
+                            },
+                        },
+                    })),
+                ],
+                wrapper: {
+                    items: {
+                        $elemMatch: FilterWrapperMarker,
+                    },
+                },
+            }),
+        ];
 
-// This one should match checkoutInMemoryFilterCompilers
-export const getCheckoutUIFilterBuilders: () => UIFilterBuilders = () => {
-    // todo
-    const builders: UIFilterBuilders = [];
+        // Also include complex filters
+        all.push(...getFilterBuildersForRecordCategories(webshop.meta.recordCategories));
 
-    builders.unshift(
-        new GroupUIFilterBuilder({
-            builders,
-        }));
+        // Recursive: self referencing groups
+        all.unshift(
+            new GroupUIFilterBuilder({
+                builders: all,
+            }),
+        );
 
-    return builders;
-};
+        return all;
+    };
+}
 
 // Cached outstanding balances
 

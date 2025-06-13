@@ -135,5 +135,6 @@ export function assertFilterCompareValue(val: any): StamhoofdCompareValue {
         }
     }
 
+    console.error('Invalid compare value. Expected a string, number, boolean, date or null.', val);
     throw new Error('Invalid compare value. Expected a string, number, boolean, date or null.');
 }

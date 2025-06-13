@@ -55,10 +55,14 @@ export const documentInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
 };
 
+/**
+ * These filters are used for filtering record categories/records in webshops. Try to keep it a bit limited as we'll have to support them for eternity.
+ */
 export const checkoutInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
     items: createInMemoryFilterCompiler('cart.items', {
         ...baseInMemoryFilterCompilers,
+        amount: createInMemoryFilterCompiler('amount'),
         product: createInMemoryFilterCompiler('product', {
             ...baseInMemoryFilterCompilers,
             id: createInMemoryFilterCompiler('id'),
@@ -68,6 +72,7 @@ export const checkoutInMemoryFilterCompilers: InMemoryFilterDefinitions = {
             id: createInMemoryFilterCompiler('id'),
         }),
     }),
+    ...recordAnswersFilterCompilers,
 };
 
 export const receivableBalanceObjectContactInMemoryFilterCompilers: InMemoryFilterDefinitions = {
