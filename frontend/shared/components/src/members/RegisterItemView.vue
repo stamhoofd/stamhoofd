@@ -37,8 +37,8 @@
         </p>
 
         <template v-if="item.replaceRegistrations.length === 0">
-            <p v-if="item.group.settings.description.toString()" class="style-description-block" v-text="item.group.settings.description" />
-            <p v-else class="style-description-block" :v-text="$t('ea2ad051-2874-42e2-8275-aa6e8d05d66a', {member: item.member.patchedMember.firstName})" />
+            <p v-if="item.group.settings.description.toString()" class="style-description-block" v-text="item.group.settings.description.toString()" />
+            <p v-else class="style-description-block" v-text="$t('ea2ad051-2874-42e2-8275-aa6e8d05d66a', {member: item.member.patchedMember.firstName})" />
         </template>
 
         <STErrorsDefault :error-box="errors.errorBox" />
