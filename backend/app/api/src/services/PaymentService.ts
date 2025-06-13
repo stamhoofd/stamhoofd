@@ -32,9 +32,6 @@ export const PaymentService = {
                     }
 
                     await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
-
-                    // Reallocate
-                    await BalanceItemService.reallocate(balanceItemPayments.map(p => p.balanceItem), organization.id);
                 });
                 return;
             }
@@ -59,9 +56,6 @@ export const PaymentService = {
                     }
 
                     await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
-
-                    // Reallocate
-                    await BalanceItemService.reallocate(balanceItemPayments.map(p => p.balanceItem), organization.id);
                 });
             }
 
@@ -77,9 +71,6 @@ export const PaymentService = {
                     }
 
                     await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
-
-                    // Reallocate
-                    await BalanceItemService.reallocate(balanceItemPayments.map(p => p.balanceItem), organization.id);
                 });
             }
 
@@ -95,9 +86,6 @@ export const PaymentService = {
                     }
 
                     await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
-
-                    // Reallocate
-                    await BalanceItemService.reallocate(balanceItemPayments.map(p => p.balanceItem), organization.id);
                 });
             }
         });

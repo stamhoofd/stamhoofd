@@ -814,9 +814,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             await markValidIfNeeded();
         }
 
-        // Reallocate
-        // await BalanceItemService.reallocate([...createdBalanceItems, ...deletedBalanceItems], organization.id);
-
         // Update occupancy
         for (const group of groups) {
             if (registrations.some(r => r.groupId === group.id) || deactivatedRegistrationGroupIds.some(id => id === group.id)) {

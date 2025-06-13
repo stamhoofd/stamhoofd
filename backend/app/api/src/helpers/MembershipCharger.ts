@@ -3,7 +3,6 @@ import { BalanceItem, Member, MemberPlatformMembership, Platform } from '@stamho
 import { SQL, SQLOrderBy, SQLWhereSign } from '@stamhoofd/sql';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { BalanceItemService } from '../services/BalanceItemService';
 
 export const MembershipCharger = {
     async charge() {
@@ -130,11 +129,6 @@ export const MembershipCharger = {
                 createdCount += 1;
                 createdPrice += membership.price;
             }
-
-            // await BalanceItem.updateOutstanding(createdBalanceItems);
-
-            // Reallocate
-            // await BalanceItemService.reallocate(createdBalanceItems, chargeVia);
 
             if (memberships.length < chunkSize) {
                 break;

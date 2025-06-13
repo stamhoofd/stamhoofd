@@ -11,21 +11,31 @@ import { ThrottledQueue } from '../helpers/ThrottledQueue';
 const memberUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, memberIds: string[]) => {
     await CachedBalance.updateForMembers(organizationId, memberIds);
 
+    for (const memberId of memberIds) {
+        await PaymentReallocationService.reallocate(organizationId, memberId, ReceivableBalanceType.member);
+    }
+
     if (memberIds.length) {
         // Now also include the userIds of the members
         const userMemberIds = (await MemberUser.select().where('membersId', memberIds).fetch()).map(m => m.usersId);
-        // await CachedBalance.updateForUsers(organizationId, userMemberIds);
-
         userUpdateQueue.addItems(organizationId, userMemberIds);
     }
 }, { maxDelay: 10_000 });
 
 const userUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, userIds: string[]) => {
     await CachedBalance.updateForUsers(organizationId, userIds);
+
+    for (const userId of userIds) {
+        await PaymentReallocationService.reallocate(organizationId, userId, ReceivableBalanceType.user);
+    }
 }, { maxDelay: 10_000 });
 
 const organizationUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, organizationIds: string[]) => {
     await CachedBalance.updateForOrganizations(organizationId, organizationIds);
+
+    for (const payingOrganizationId of organizationIds) {
+        await PaymentReallocationService.reallocate(organizationId, payingOrganizationId, ReceivableBalanceType.organization);
+    }
 }, { maxDelay: 60_000 });
 
 export const registrationUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, registrationIds: string[]) => {
@@ -211,24 +221,6 @@ export const BalanceItemService = {
 
         balanceItem.paidAt = new Date();
         await balanceItem.save();
-    },
-
-    async reallocate(balanceItems: BalanceItem[], organizationId: string) {
-        const memberIds = Formatter.uniqueArray(balanceItems.map(b => b.memberId).filter(b => b !== null));
-        const payingOrganizationIds = Formatter.uniqueArray(balanceItems.map(b => b.payingOrganizationId).filter(b => b !== null));
-        const userIds = Formatter.uniqueArray(balanceItems.map(b => b.userId).filter(b => b !== null));
-
-        for (const memberId of memberIds) {
-            await PaymentReallocationService.reallocate(organizationId, memberId, ReceivableBalanceType.member);
-        }
-
-        for (const payingOrganizationId of payingOrganizationIds) {
-            await PaymentReallocationService.reallocate(organizationId, payingOrganizationId, ReceivableBalanceType.organization);
-        }
-
-        for (const userId of userIds) {
-            await PaymentReallocationService.reallocate(organizationId, userId, ReceivableBalanceType.user);
-        }
     },
 
     async markUpdated(balanceItem: BalanceItem, payment: Payment, organization: Organization) {
