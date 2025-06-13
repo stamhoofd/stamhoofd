@@ -28,25 +28,13 @@
             {{ $t('86161523-8879-4092-a332-567bf55e0f52') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}</a>
         </p>
 
-        <STList v-model="categories" :draggable="true">
-            <template #item="{item: category}">
-                <RecordCategoryRow :category="category" :categories="categories" :selectable="true" :settings="editorSettings" @patch:categories="addCategoriesPatch" @edit="editCategory" />
-            </template>
-        </STList>
-
-        <p>
-            <button class="button text" type="button" @click="addCategory">
-                <span class="icon add" />
-                <span>{{ $t('9a390ab2-bb28-49dc-9837-b389f5877c53') }}</span>
-            </button>
-        </p>
+        <EditRecordCategoriesBox :categories="categories" :settings="editorSettings" @patch:categories="addCategoriesPatch" />
     </SaveView>
 </template>
 
 <script lang="ts" setup>
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { Checkbox, EditRecordCategoryView, RecordCategoryRow, RecordEditorSettings, RecordEditorType, STErrorsDefault, STList, STListItem, SaveView, getCheckoutUIFilterBuilders } from '@stamhoofd/components';
+import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { Checkbox, EditRecordCategoriesBox, RecordEditorSettings, RecordEditorType, STErrorsDefault, STList, STListItem, SaveView, getCheckoutUIFilterBuilders } from '@stamhoofd/components';
 import { Checkout, PrivateWebshop, RecordCategory, WebshopMetaData } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { UseEditWebshopProps, useEditWebshop } from './useEditWebshop';
@@ -57,18 +45,7 @@ const { webshop, addPatch, errors, saving, save, hasChanges } = useEditWebshop({
     getProps: () => props,
 });
 
-const present = usePresent();
-
-const categories = computed({
-    get: () => webshop.value.meta.recordCategories,
-    set: (recordCategories: RecordCategory[]) => {
-        addPatch(PrivateWebshop.patch({
-            meta: WebshopMetaData.patch({
-                recordCategories: recordCategories as any,
-            }),
-        }));
-    } });
-
+const categories = computed(() => webshop.value.meta.recordCategories);
 const phoneEnabled = computed({
     get: () => webshop.value.meta.phoneEnabled,
     set: (phoneEnabled: boolean) => {
@@ -90,50 +67,6 @@ const editorSettings = computed(() => {
         exampleValue: Checkout.create({}),
     });
 });
-
-function addCategory() {
-    const category = RecordCategory.create({});
-    const arr = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>;
-    arr.addPut(category);
-
-    present({
-        components: [
-            new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(EditRecordCategoryView, {
-                    categoryId: category.id,
-                    rootCategories: [...categories.value, category],
-                    settings: editorSettings.value,
-                    isNew: true,
-                    allowChildCategories: true,
-                    saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
-                        addCategoriesPatch(arr.patch(patch));
-                    },
-                }),
-            }),
-        ],
-        modalDisplayStyle: 'popup',
-    }).catch(console.error);
-}
-
-function editCategory(category: RecordCategory) {
-    present({
-        components: [
-            new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(EditRecordCategoryView, {
-                    categoryId: category.id,
-                    rootCategories: categories.value,
-                    settings: editorSettings.value,
-                    isNew: false,
-                    allowChildCategories: true,
-                    saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
-                        addCategoriesPatch(patch);
-                    },
-                }),
-            }),
-        ],
-        modalDisplayStyle: 'popup',
-    }).catch(console.error);
-}
 
 function addCategoriesPatch(patch: PatchableArrayAutoEncoder<RecordCategory>) {
     addPatch(PrivateWebshop.patch({

@@ -1,7 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, GlobalEventBus, Toast, useContext, useErrors, usePatch } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { PrivateWebshop, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { computed, readonly, Ref, ref } from 'vue';
@@ -20,7 +19,7 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
     getProps: () => UseEditWebshopProps;
 } = { getProps: () => ({}) }) {
     const errors = useErrors();
-    
+
     const context = useContext();
     const organizationManager = useOrganizationManager();
     const dismiss = useDismiss();
