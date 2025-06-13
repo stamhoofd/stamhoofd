@@ -16,14 +16,18 @@ The implementation of this method should draw something on the document. The Pdf
 Optionally a position (x and y) and a max width are passed to this method. The position determines where the item should be drawn.
 By default the item should be drawn on the current position (unless the item should have a fixed position such as a logo).
 
-## getHeight
+### getHeight
 Returns the height if the item would be drawn on the document. The return value of this function should be independent of external PdfItems such as a parent item. It can be dependent on child items.
 
-## getWidth
+### getWidth
 Returns the width if the item would be drawn on the document. The return value of this function should be independent of external PdfItems such as a parent item. It can be dependent on child items.
 
-## getFonts (optional)
+### getFonts (optional)
 Returns the fonts that should be registered before drawing the item.
+
+## Add page numbers
+Implement the callback 'beforeFlush' of the render method of the PdfRenderer class.
+Use the helper function drawPageNumbers, or implement a custom implementation.
 
 ## VerticalStack
 A group of pdf items to be drawn vertically.
