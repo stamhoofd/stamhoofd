@@ -1,5 +1,4 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { Formatter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address.js';
 import { STBillingStatus } from '../billing/STBillingStatus.js';
@@ -133,63 +132,4 @@ export class OrganizationOverview extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(new EnumDecoder(AcquisitionType)), optional: true })
     acquisitionTypes: AcquisitionType[] = [];
-
-    matchQuery(q: string) {
-        if (q === this.id) {
-            return true;
-        }
-
-        const parts = q.split(/[ -]/);
-        const name = Formatter.slug(this.name);
-        const orgParts = name.split(/[ -]/);
-
-        if (q.includes('@')) {
-            if (this.emails.some(e => e.email.toLocaleLowerCase() == q.toLocaleLowerCase())) {
-                return true;
-            }
-            if (this.admins.some(a => a.email.toLocaleLowerCase() == q.toLocaleLowerCase())) {
-                return true;
-            }
-        }
-
-        for (const [index, part] of parts.entries()) {
-            if (part.length > 1 || index >= parts.length - 1) {
-                if (index < parts.length - 1) {
-                    // Should be a full match of a word in name
-                    if (!orgParts.some(o => o.toLocaleLowerCase() == (part.toLocaleLowerCase()))) {
-                        if (
-                            StringCompare.typoCount(this.address.city, part) > 0
-                        ) {
-                            return false;
-                        }
-                    }
-                    continue;
-                }
-                if (
-                    name.toLocaleLowerCase().includes(part.toLocaleLowerCase())
-                ) {
-                    return true;
-                }
-
-                if (
-                    StringCompare.typoCount(this.address.city, part) == 0
-                ) {
-                    return true;
-                }
-            }
-        }
-
-        if (
-            StringCompare.typoCount(name, q) < 2
-        ) {
-            return true;
-        }
-
-        if (
-            StringCompare.typoCount(this.address.city, q) < 2
-        ) {
-            return true;
-        }
-        return false;
-    }
 }

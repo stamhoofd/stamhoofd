@@ -4,7 +4,6 @@ import { DataValidator, Formatter, Sorter, StringCompare } from '@stamhoofd/util
 import { Address } from '../addresses/Address.js';
 import { Replacement } from '../endpoints/EmailRequest.js';
 
-import { Country } from '../addresses/CountryDecoder.js';
 import { AuditLogReplacement } from '../AuditLogReplacement.js';
 import { Group } from '../Group.js';
 import { GroupGenderType } from '../GroupGenderType.js';
@@ -455,26 +454,6 @@ export class MemberDetails extends AutoEncoder {
 
     get shouldApplyReducedPrice(): boolean {
         return this.requiresFinancialSupport?.value ?? false;
-    }
-
-    /**
-     * @deprecated
-     */
-    matchQuery(query: string): boolean {
-        if (
-            StringCompare.typoCount(this.firstName, query) < 2
-            || StringCompare.typoCount(this.lastName, query) < 2
-            || StringCompare.typoCount(this.name, query) <= 2
-        ) {
-            return true;
-        }
-
-        for (const parent of this.parents) {
-            if (parent.matchQuery(query)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

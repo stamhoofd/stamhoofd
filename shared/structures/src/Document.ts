@@ -282,15 +282,6 @@ export class DocumentData extends AutoEncoder {
         },
     })
     fieldAnswers: Map<string, RecordAnswer> = new Map();
-
-    matchQuery(query: string) {
-        for (const answer of this.fieldAnswers.values()) {
-            if (answer.matchQuery(query)) {
-                return true;
-            }
-        }
-        return false;
-    }
 }
 
 export class Document extends AutoEncoder implements ObjectWithRecords {
@@ -311,10 +302,6 @@ export class Document extends AutoEncoder implements ObjectWithRecords {
 
     @field({ decoder: DateDecoder })
     updatedAt = new Date();
-
-    matchQuery(query: string) {
-        return this.data.matchQuery(query);
-    }
 
     @field({ decoder: StringDecoder, nullable: true })
     memberId: string | null = null;

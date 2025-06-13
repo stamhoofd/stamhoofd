@@ -79,27 +79,6 @@ export class OrderData extends Checkout {
     })
     paymentMethod: PaymentMethod = PaymentMethod.Unknown;
 
-    matchQuery(query: string): boolean {
-        const lowerQuery = query.toLowerCase();
-        if (
-            this.customer.firstName.toLowerCase().includes(lowerQuery)
-            || this.customer.lastName.toLowerCase().includes(lowerQuery)
-            || this.customer.name.toLowerCase().includes(lowerQuery)
-        ) {
-            return true;
-        }
-
-        // Search product names
-        for (const item of this.cart.items) {
-            if (
-                item.product.name.toLowerCase().includes(lowerQuery)
-            ) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     get shouldSendPaymentUpdates() {
         return (!this.timeSlot || (this.timeSlot.date.getTime() + 1000 * 60 * 60 * 24) > new Date().getTime());
     }
@@ -226,16 +205,6 @@ export class Order extends AutoEncoder {
 
     get payments() {
         return this.balanceItems.flatMap(i => i.payments.map(p => p.payment)).filter(p => p.status !== PaymentStatus.Failed).sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
-    }
-
-    matchQuery(query: string): boolean {
-        if (this.number + '' === query) {
-            return true;
-        }
-        if (this.payment?.matchQuery(query)) {
-            return true;
-        }
-        return this.data.matchQuery(query);
     }
 
     getHTMLTable(): string {

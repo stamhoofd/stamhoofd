@@ -114,10 +114,6 @@ export class RecordAnswer extends AutoEncoder {
         return false;
     }
 
-    matchQuery(query: string) {
-        return StringCompare.contains(this.stringValue, query);
-    }
-
     isReviewedAfter(answer: RecordAnswer) {
         if (this.reviewedAt && answer.reviewedAt) {
             return this.reviewedAt > answer.reviewedAt;
