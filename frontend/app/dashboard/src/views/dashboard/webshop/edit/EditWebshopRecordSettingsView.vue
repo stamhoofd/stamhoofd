@@ -7,7 +7,8 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <hr><h2>{{ $t('98d06da4-164b-4b8f-a373-3873fa99e1ab') }}</h2>
+        <hr>
+        <h2>{{ $t('98d06da4-164b-4b8f-a373-3873fa99e1ab') }}</h2>
 
         <p>{{ $t('fd68e1a7-6059-47fc-b7ad-fdfe4924a67d') }}</p>
 
@@ -22,7 +23,8 @@
             </STListItem>
         </STList>
 
-        <hr><h2>{{ $t('ec8efff4-e2cf-4755-b8fb-a47f686be173') }}</h2>
+        <hr>
+        <h2>{{ $t('ec8efff4-e2cf-4755-b8fb-a47f686be173') }}</h2>
 
         <p>
             {{ $t('86161523-8879-4092-a332-567bf55e0f52') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}</a>
