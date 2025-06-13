@@ -5,10 +5,8 @@ import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Gro
 import { Formatter } from '@stamhoofd/utility';
 import { LoadComponent } from '../../containers/AsyncComponent';
 import { EmailView, RecipientChooseOneOption } from '../../email';
-import MembersPdfExportView from '../../export/MembersPdfExportView.vue';
 import { useContext, useOrganization, usePlatform } from '../../hooks';
-import { checkoutDefaultItem, chooseOrganizationMembersForGroup, getActionsForCategory, PlatformFamilyManager, presentDeleteMembers, presentEditMember, presentEditResponsibilities, usePlatformFamilyManager } from '../../members';
-import { getPdfDocuments } from '../../members/classes/getPdfDocuments';
+import { checkoutDefaultItem, chooseOrganizationMembersForGroup, getActionsForCategory, PlatformFamilyManager, presentDeleteMembers, presentEditMember, presentEditResponsibilities, presentExportMembersToPdf, usePlatformFamilyManager } from '../../members';
 import { RegistrationsActionBuilder } from '../../members/classes/RegistrationsActionBuilder';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, TableActionSelection } from '../../tables';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
@@ -360,7 +358,7 @@ export class RegistrationActionBuilder {
                 return $t('Je kan maximaal {limit} leden exporteren naar pdf. Er zijn {count} leden geselecteerd.', { count: Formatter.float(count), limit: Formatter.float(limit) });
             } },
             handler: async (registrations: PlatformRegistration[]) => {
-                await this.exportToPdf(registrations);
+                await this.exportToPdf(registrations.map(r => r.member));
             },
         });
     }
@@ -615,29 +613,14 @@ export class RegistrationActionBuilder {
         });
     }
 
-    private async exportToPdf(registrations: PlatformRegistration[]) {
-        const documents = getPdfDocuments({ platform: this.platform, organization: this.organizations.length === 1 ? this.organizations[0] : null, groups: this.groups, auth: this.context.auth });
-
-        const group = this.groups.length === 1 ? this.groups[0] : undefined;
-
-        let documentTitle = 'Samenvatting';
-
-        if (group) {
-            documentTitle += ' ' + group.settings.name;
-        }
-
-        await this.present({
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(MembersPdfExportView, {
-                        documents,
-                        configurationId: 'registrations',
-                        items: registrations,
-                        documentTitle,
-                    }),
-                }),
-            ],
-            modalDisplayStyle: 'popup',
+    private async exportToPdf(members: PlatformMember[]) {
+        await presentExportMembersToPdf({
+            members,
+            platform: this.platform,
+            organizations: this.organizations,
+            groups: this.groups,
+            context: this.context,
+            present: this.present,
         });
     }
 }

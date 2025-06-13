@@ -619,28 +619,13 @@ export class MemberActionBuilder {
     }
 
     private async exportToPdf(members: PlatformMember[]) {
-        const documents = getPdfDocuments({ platform: this.platform, organization: this.organizations.length === 1 ? this.organizations[0] : null, groups: this.groups, auth: this.context.auth });
-
-        const group = this.groups.length === 1 ? this.groups[0] : undefined;
-
-        let documentTitle = $t('Samenvatting');
-
-        if (group) {
-            documentTitle += ' ' + group.settings.name;
-        }
-
-        await this.present({
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(MembersPdfExportView, {
-                        documents,
-                        configurationId: 'members',
-                        items: members,
-                        documentTitle,
-                    }),
-                }),
-            ],
-            modalDisplayStyle: 'popup',
+        await presentExportMembersToPdf({
+            members,
+            platform: this.platform,
+            organizations: this.organizations,
+            groups: this.groups,
+            context: this.context,
+            present: this.present,
         });
     }
 
@@ -819,5 +804,31 @@ export async function presentDeleteMembers({ members, present, platformFamilyMan
             }),
         ],
         modalDisplayStyle: 'sheet',
+    });
+}
+
+export async function presentExportMembersToPdf({ members, platform, organizations, groups, present, context }: { members: PlatformMember[]; platform: Platform; organizations: Organization[]; groups: Group[]; present: ReturnType<typeof usePresent>; context: SessionContext }) {
+    const documents = getPdfDocuments({ platform, organization: organizations.length === 1 ? organizations[0] : null, groups, auth: context.auth });
+
+    const group = groups.length === 1 ? groups[0] : undefined;
+
+    let documentTitle = $t('Samenvatting');
+
+    if (group) {
+        documentTitle += ' ' + group.settings.name;
+    }
+
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(MembersPdfExportView, {
+                    documents,
+                    configurationId: 'members',
+                    items: members,
+                    documentTitle,
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'popup',
     });
 }
