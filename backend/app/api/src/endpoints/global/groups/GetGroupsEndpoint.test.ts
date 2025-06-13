@@ -96,7 +96,7 @@ describe('Endpoint.GetGroupsEndpoint', () => {
         const { organization, token, waitingList, event, group } = await initTest();
         const result = await get({ organization, token });
         expect(result).toHaveLength(3);
-        expect(result).toIncludeAllMembers([
+        expect(result).toIncludeSameMembers([
             expect.objectContaining({
                 id: waitingList.id,
             }),
@@ -115,7 +115,7 @@ describe('Endpoint.GetGroupsEndpoint', () => {
 
         const result = await get({ token: adminToken });
         expect(result).toHaveLength(4);
-        expect(result).toIncludeAllMembers([
+        expect(result).toIncludeSameMembers([
             expect.objectContaining({
                 id: waitingList.id,
             }),
@@ -146,7 +146,7 @@ describe('Endpoint.GetGroupsEndpoint', () => {
                 id: group.id,
             },
         });
-        expect(result).toIncludeAllMembers([
+        expect(result).toIncludeSameMembers([
             expect.objectContaining({
                 id: group.id,
             }),
@@ -183,7 +183,7 @@ describe('Endpoint.GetGroupsEndpoint', () => {
                 },
             },
         });
-        expect(result).toIncludeAllMembers([
+        expect(result).toIncludeSameMembers([
             expect.objectContaining({
                 id: event.id,
             }),
@@ -225,7 +225,7 @@ describe('Endpoint.GetGroupsEndpoint', () => {
                 },
             },
         });
-        expect(result).toIncludeAllMembers([
+        expect(result).toIncludeSameMembers([
             expect.objectContaining({
                 id: event.id,
             }),
