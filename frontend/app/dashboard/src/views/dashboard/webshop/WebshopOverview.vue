@@ -419,7 +419,7 @@ import EditWebshopNotificationsView from './edit/EditWebshopNotificationsView.vu
 import EditWebshopPageView from './edit/EditWebshopPageView.vue';
 import EditWebshopPaymentMethodsView from './edit/EditWebshopPaymentMethodsView.vue';
 import EditWebshopProductsView from './edit/EditWebshopProductsView.vue';
-import EditWebshopRecordSettings from './edit/EditWebshopRecordSettings.vue';
+import EditWebshopRecordSettingsView from './edit/EditWebshopRecordSettingsView.vue';
 import WebshopOrdersView from './orders/WebshopOrdersView.vue';
 import WebshopSeatingView from './orders/WebshopSeatingView.vue';
 import WebshopStatisticsView from './statistics/WebshopStatisticsView.vue';
@@ -546,7 +546,7 @@ function editInputFields(animated = true) {
 }
 
 function editRecordSettings(animated = true) {
-    displayEditComponent(EditWebshopRecordSettings, animated);
+    displayEditComponent(EditWebshopRecordSettingsView, animated);
 }
 
 function editCheckoutMethods(animated = true) {
