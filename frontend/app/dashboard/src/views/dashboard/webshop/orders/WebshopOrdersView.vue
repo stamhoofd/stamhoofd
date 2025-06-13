@@ -42,7 +42,7 @@ useVisibilityChange(() => {
     fetchOrders();
 });
 const objectFetcher = useOrdersObjectFetcher(props.webshopManager, {
-    requiredFilter: OrderRequiredFilterHelper.getDefault(props.webshopManager.preview.id),
+    requiredFilter: OrderRequiredFilterHelper.getDefault(),
 });
 const tableObjectFetcher = useTableObjectFetcher<PrivateOrderWithTickets>(objectFetcher);
 fetchTickets();

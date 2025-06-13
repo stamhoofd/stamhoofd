@@ -147,7 +147,7 @@ export function useRegisterItemFilterBuilders() {
 // CHECKOUT
 //
 
-// This one should match memberWithRegistrationsBlobInMemoryFilterCompilers
+// This one should match checkoutInMemoryFilterCompilers
 export const getCheckoutUIFilterBuilders: () => UIFilterBuilders = () => {
     // todo
     const builders: UIFilterBuilders = [];

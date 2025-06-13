@@ -3,9 +3,10 @@ import { isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request, RequestResult } from '@simonbackx/simple-networking';
 import { EventBus, fetchAll, ObjectFetcher, Toast } from '@stamhoofd/components';
 import { OrganizationManager, SessionContext } from '@stamhoofd/networking';
-import { CountFilteredRequest, CountResponse, InMemoryFilterRunner, LimitedFilteredRequest, OrderStatus, PaginatedResponseDecoder, PermissionLevel, PrivateOrder, PrivateWebshop, SortItem, SortItemDirection, SortList, StamhoofdFilter, TicketPrivate, Version, WebshopPreview } from '@stamhoofd/structures';
+import { compileToInMemoryFilter, CountFilteredRequest, CountResponse, InMemoryFilterRunner, LimitedFilteredRequest, OrderStatus, PaginatedResponseDecoder, PermissionLevel, PrivateOrder, privateOrderFilterCompilers, PrivateWebshop, SortItem, SortItemDirection, SortList, StamhoofdFilter, TicketPrivate, Version, WebshopPreview } from '@stamhoofd/structures';
 import { toRaw } from 'vue';
-import { createCompiledFilterForPrivateOrderIndexBox, createPrivateOrderIndexBox, createPrivateOrderIndexBoxDecoder, OrderStoreDataIndex, OrderStoreGeneratedIndex, OrderStoreIndex } from './getPrivateOrderIndexes';
+import { IndexBoxDecoder } from './IndexBox';
+import { createPrivateOrderIndexBox, OrderIndexedDBDataIndex, OrderIndexedDBGeneratedIndex, OrderIndexedDBIndex } from './ordersIndexedDBSorters';
 
 class CallbackError extends Error {}
 class CompilerFilterError extends Error {}
@@ -283,23 +284,23 @@ export class WebshopManager {
                     ticketStore.createIndex('orderId', 'orderId', { unique: false });
                 }
 
-                function addOrderStoreIndexes(orderStore: IDBObjectStore) {
+                function addOrderIndexedDBIndexes(orderStore: IDBObjectStore) {
                     // typescript will show an error if an index is missing
-                    const indexes: Record<OrderStoreIndex, IDBIndexParameters & { keyPath: string | Iterable<string> }> = {
-                        [OrderStoreDataIndex.Number]: { unique: false, keyPath: 'value.number' },
-                        [OrderStoreDataIndex.CreatedAt]: { unique: false, keyPath: 'value.createdAt' },
-                        [OrderStoreDataIndex.Status]: { unique: false, keyPath: 'value.status' },
-                        [OrderStoreDataIndex.PaymentMethod]: { unique: false, keyPath: 'value.data.paymentMethod' },
-                        [OrderStoreDataIndex.CheckoutMethod]: { unique: false, keyPath: 'value.data.checkoutMethod.type' },
-                        [OrderStoreDataIndex.TimeSlotDate]: { unique: false, keyPath: 'value.data.timeSlot.date' },
-                        [OrderStoreDataIndex.ValidAt]: { unique: false, keyPath: 'value.validAt' },
-                        [OrderStoreDataIndex.Name]: { unique: false, keyPath: ['value.data.customer.firstName', 'value.data.customer.lastName'] },
-                        [OrderStoreDataIndex.Email]: { unique: false, keyPath: 'value.data.customer.email' },
-                        [OrderStoreDataIndex.Phone]: { unique: false, keyPath: 'value.data.customer.phone' },
+                    const indexes: Record<OrderIndexedDBIndex, IDBIndexParameters & { keyPath: string | Iterable<string> }> = {
+                        [OrderIndexedDBDataIndex.Number]: { unique: false, keyPath: 'value.number' },
+                        [OrderIndexedDBDataIndex.CreatedAt]: { unique: false, keyPath: 'value.createdAt' },
+                        [OrderIndexedDBDataIndex.Status]: { unique: false, keyPath: 'value.status' },
+                        [OrderIndexedDBDataIndex.PaymentMethod]: { unique: false, keyPath: 'value.data.paymentMethod' },
+                        [OrderIndexedDBDataIndex.CheckoutMethod]: { unique: false, keyPath: 'value.data.checkoutMethod.type' },
+                        [OrderIndexedDBDataIndex.TimeSlotDate]: { unique: false, keyPath: 'value.data.timeSlot.date' },
+                        [OrderIndexedDBDataIndex.ValidAt]: { unique: false, keyPath: 'value.validAt' },
+                        [OrderIndexedDBDataIndex.Name]: { unique: false, keyPath: ['value.data.customer.firstName', 'value.data.customer.lastName'] },
+                        [OrderIndexedDBDataIndex.Email]: { unique: false, keyPath: 'value.data.customer.email' },
+                        [OrderIndexedDBDataIndex.Phone]: { unique: false, keyPath: 'value.data.customer.phone' },
                         // auto generate indexes for generated indexes
-                        ...Object.fromEntries(Object.values(OrderStoreGeneratedIndex).map((index) => {
+                        ...Object.fromEntries(Object.values(OrderIndexedDBGeneratedIndex).map((index) => {
                             return [index, { unique: false, keyPath: `indexes.${index}` }];
-                        })) as Record<OrderStoreGeneratedIndex, IDBIndexParameters & { keyPath: string | Iterable<string> }>,
+                        })) as Record<OrderIndexedDBGeneratedIndex, IDBIndexParameters & { keyPath: string | Iterable<string> }>,
                     };
 
                     Object.entries(indexes).forEach(([index, options]) => {
@@ -314,7 +315,7 @@ export class WebshopManager {
                     db.createObjectStore('ticketPatches', { keyPath: 'secret' });
                     db.createObjectStore('settings', {});
 
-                    addOrderStoreIndexes(orderStore);
+                    addOrderIndexedDBIndexes(orderStore);
                     addTicketStoreIndexes(ticketStore);
                 }
                 else {
@@ -331,7 +332,7 @@ export class WebshopManager {
 
                     if (event.oldVersion < 341) {
                         const orderStore = DBOpenRequest.transaction!.objectStore('orders');
-                        addOrderStoreIndexes(orderStore);
+                        addOrderIndexedDBIndexes(orderStore);
                     }
                 }
             };
@@ -575,7 +576,7 @@ export class WebshopManager {
             callback: (data: PrivateOrder) => void;
             filter?: StamhoofdFilter;
             limit?: number;
-            sortItem?: SortItem & { key: OrderStoreIndex | 'id' };
+            sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
             networkFetch?: boolean;
         },
     ): Promise<void> {
@@ -621,7 +622,7 @@ export class WebshopManager {
 
             if (filter) {
                 try {
-                    compiledFilter = createCompiledFilterForPrivateOrderIndexBox(filter);
+                    compiledFilter = compileToInMemoryFilter(filter, privateOrderFilterCompilers);
                 }
                 catch (e: any) {
                     console.error('Compile filter failed', e);
@@ -630,7 +631,7 @@ export class WebshopManager {
                 }
             }
 
-            const decoder = createPrivateOrderIndexBoxDecoder();
+            const decoder = new IndexBoxDecoder(PrivateOrder as Decoder<PrivateOrder>);
 
             request.onsuccess = (event: any) => {
                 if (limit && matchedItemsCount >= limit) {
@@ -1260,7 +1261,7 @@ export class WebshopManager {
 
             const request = objectStore.get(id);
 
-            const decoder = createPrivateOrderIndexBoxDecoder();
+            const decoder = new IndexBoxDecoder(PrivateOrder as Decoder<PrivateOrder>); ;
 
             request.onsuccess = () => {
                 const rawOrder = request.result;

@@ -2,7 +2,7 @@ import { ObjectFetcher } from '@stamhoofd/components';
 import { assertSort, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, PrivateOrderWithTickets, SortItem, SortItemDirection, SortList, StamhoofdFilter, TicketPrivate } from '@stamhoofd/structures';
 import { parsePhoneNumber } from 'libphonenumber-js';
 import { WebshopManager } from '../WebshopManager';
-import { OrderStoreDataIndex, OrderStoreGeneratedIndex, OrderStoreIndex, orderStoreIndexValueDefinitions } from '../getPrivateOrderIndexes';
+import { OrderIndexedDBIndex, ordersIndexedDBSorters } from '../ordersIndexedDBSorters';
 
 type ObjectType = PrivateOrderWithTickets;
 
@@ -16,9 +16,6 @@ function searchToFilter(search: string | null): StamhoofdFilter | null {
 }
 
 export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> {
-    const availableIndexes: OrderStoreIndex[] = (Object.values(OrderStoreDataIndex) as OrderStoreIndex[])
-        .concat(Object.values(OrderStoreGeneratedIndex));
-
     return {
         extendSort,
         async fetch(data: LimitedFilteredRequest) {
@@ -35,15 +32,6 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 filters.unshift(data.pageFilter);
             }
 
-            for (const item of data.sort) {
-                const key = item.key;
-                const doesIndexExist = key === 'id' || availableIndexes.includes(key as OrderStoreIndex);
-                if (!doesIndexExist) {
-                    console.error(`Index ${key} for IndexedDb order store is not supported.`);
-                    throw new Error(`Index ${key} for IndexedDb order store is not supported.`);
-                }
-            }
-
             if (data.sort.length === 0) {
                 throw new Error('No sort items set');
             }
@@ -56,7 +44,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 throw new Error('No valid sort set, or id is not in the sort list');
             }
 
-            const sortItem = data.sort[0] as (SortItem & { key: OrderStoreIndex | 'id' });
+            const sortItem = data.sort[0] as (SortItem & { key: OrderIndexedDBIndex | 'id' });
             const filter = mergeFilters(filters, '$and');
 
             if (sortItem.key === 'id' && data.sort.length > 1) {
@@ -81,7 +69,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             let next: LimitedFilteredRequest | undefined = undefined;
 
             if (lastItem && arrayBuffer.length >= data.limit) {
-                const pageFilter = getSortFilter(lastItem, orderStoreIndexValueDefinitions, data.sort);
+                const pageFilter = getSortFilter(lastItem, ordersIndexedDBSorters, data.sort);
 
                 next = new LimitedFilteredRequest({
                     filter: data.filter,

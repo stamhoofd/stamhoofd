@@ -23,8 +23,9 @@ export class IndexBox<T extends EncodableObject> implements Encodeable {
 }
 
 export class IndexBoxDecoder<T extends EncodableObject> implements Decoder<T> {
-    constructor(readonly decoder: Decoder<T>) {
-    }
+    constructor(
+        public decoder: Decoder<T>,
+    ) {}
 
     decode(data: Data): T {
         // Set the version of the decoding context of "value"

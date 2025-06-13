@@ -57,6 +57,17 @@ export const documentInMemoryFilterCompilers: InMemoryFilterDefinitions = {
 
 export const checkoutInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
+    items: createInMemoryFilterCompiler('cart.items', {
+        ...baseInMemoryFilterCompilers,
+        product: createInMemoryFilterCompiler('product', {
+            ...baseInMemoryFilterCompilers,
+            id: createInMemoryFilterCompiler('id'),
+        }),
+        productPrice: createInMemoryFilterCompiler('productPrice', {
+            ...baseInMemoryFilterCompilers,
+            id: createInMemoryFilterCompiler('id'),
+        }),
+    }),
 };
 
 export const receivableBalanceObjectContactInMemoryFilterCompilers: InMemoryFilterDefinitions = {
@@ -75,4 +86,33 @@ export const organizationItemInMemoryFilterCompilers: InMemoryFilterDefinitions 
 export const eventNotificationsInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
     ...recordAnswersFilterCompilers,
+};
+
+export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
+    ...baseInMemoryFilterCompilers,
+
+    // Generic filtering
+    id: createInMemoryFilterCompiler('id'),
+    timeSlotEndTime: createInMemoryFilterCompiler('data.timeSlot.endTime'),
+    timeSlotStartTime: createInMemoryFilterCompiler('data.timeSlot.startTime'),
+
+    // The following fields are required for sorting
+    // Make sure to implement all sorters here, for proper pagination
+    createdAt: createInMemoryFilterCompiler('createdAt'),
+    number: createInMemoryFilterCompiler('number'),
+    status: createInMemoryFilterCompiler('status'),
+    paymentMethod: createInMemoryFilterCompiler('data.paymentMethod'),
+    checkoutMethod: createInMemoryFilterCompiler('data.checkoutMethod.type'),
+    timeSlotDate: createInMemoryFilterCompiler('data.timeSlot.date'),
+    validAt: createInMemoryFilterCompiler('validAt'),
+    name: createInMemoryFilterCompiler('data.customer.name'),
+    email: createInMemoryFilterCompiler('data.customer.email'),
+    phone: createInMemoryFilterCompiler('data.customer.phone'),
+
+    // generated
+    totalPrice: createInMemoryFilterCompiler('data.totalPrice'),
+    amount: createInMemoryFilterCompiler('data.amount'),
+    timeSlotTime: createInMemoryFilterCompiler('data.timeSlot.timeIndex'),
+    openBalance: createInMemoryFilterCompiler('openBalance'),
+    location: createInMemoryFilterCompiler('data.locationName'),
 };
