@@ -520,11 +520,10 @@ function getSelectabelPdfDataFromRecordCatagoryForSummary({ recordCategory, cate
         const baseName = getBaseName(record);
         const type = record.type;
 
-        // todo
-        const preferInverted = false;
-
         switch (type) {
             case RecordType.Checkbox: {
+                const preferInverted = record.warning?.inverted ?? false;
+
                 return [
                     new SelectablePdfData<PlatformMember>({
                         id: `${baseId}.checked`,
