@@ -4,7 +4,7 @@
             {{ $t('Exporteren naar PDF') }}
         </h1>
 
-        <ScrollableSegmentedControl v-model="visibleDocument" :items="selectableDocument.sheets">
+        <ScrollableSegmentedControl v-model="visibleDocument" :items="sheets">
             <template #item="{item}">
                 <span>{{ item.name }}</span>
 
@@ -72,14 +72,13 @@ const membersSummarySheet = new SelectablePdfSheet({
     }),
 });
 
+const sheets = ref([memberDetailsSheet, membersSummarySheet]);
+
 const selectableDocument = new SelectablePdfDocument({
-    sheets: [
-        memberDetailsSheet,
-        membersSummarySheet,
-    ],
+    sheets: sheets.value,
 });
 
-const visibleDocument = ref(selectableDocument.sheets[0]);
+const visibleDocument = ref(memberDetailsSheet);
 
 onMounted(async () => {
     // Load from storage
