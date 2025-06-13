@@ -317,7 +317,7 @@ export class BundleDiscountCalculation {
 
     get itemsAndRegistrations() {
         // We reverse the order of the items so that the discount is applied by preference on the last added items in the cart
-        // that way, the discount is proplery visible while adding items (unless there are price differences)
+        // that way, the discount is properly visible while adding items (unless there are price differences)
         // First items in the array = will get the discounts first if they are the same
 
         // For that reason, we also sort the registrations by a stable logic so they are always applied in the same order
