@@ -59,8 +59,8 @@ function createMembersDetailHorizontalGridFactory({ members, columns, selectable
         // create a horizontal grid containing the vertical stacks
         const grid = new HorizontalGrid(memberStacks, {
             columns,
-            columnGap: mmToPoints(10),
-            rowGap: mmToPoints(5),
+            columnGap: mmToPoints(4),
+            rowGap: mmToPoints(4),
         });
 
         return grid;
@@ -132,7 +132,7 @@ function memberDetailsVerticalStackFactory(member: PlatformMember, columns: Sele
             },
             value: {
                 text: stringValue,
-                preferredMaxHeight: mmToPoints(15),
+                preferredMaxHeight: mmToPoints(60),
             },
             gapBetween: mmToPoints(2),
             // lineGap of 1mm (for small spacing between lines of the value and label text)

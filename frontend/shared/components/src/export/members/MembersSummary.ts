@@ -97,7 +97,7 @@ function createMembersHorizontalGridFactory({ members, selectableColumn, getName
                 value: {
                     text: value,
                     defaultText: ' ',
-                    preferredMaxHeight: mmToPoints(15),
+                    preferredMaxHeight: mmToPoints(60),
                 },
                 gapBetween: mmToPoints(2),
                 // lineGap of 1mm (for small spacing between lines of the value and label text)
