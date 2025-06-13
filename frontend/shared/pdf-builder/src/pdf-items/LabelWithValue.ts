@@ -69,11 +69,11 @@ export class LabelWithValue implements PdfItem {
     }
 
     private getLabelAndValueWidth(maxWidth: number | undefined) {
-        let labelWidth = this.options.label.minWidth;
+        const labelWidth = this.options.label.minWidth;
         let valueWidth: number | undefined = undefined;
 
         if (maxWidth !== undefined) {
-            labelWidth = Math.max(labelWidth, (maxWidth - this.options.gapBetween) / 2);
+            // labelWidth = Math.max(labelWidth, (maxWidth - this.options.gapBetween) / 2);
             valueWidth = maxWidth - labelWidth - this.options.gapBetween;
         }
 
